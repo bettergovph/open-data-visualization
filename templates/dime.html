@@ -96,6 +96,7 @@
             <a href="/budget" class="text-black hover:text-gray-600 font-medium transition">Budget</a>
             <a href="/flood" class="text-black hover:text-gray-600 font-medium transition">Flood Control</a>
             <a href="/dime" class="text-black hover:text-gray-600 font-medium transition border-b-2 border-black">DIME</a>
+            <a href="/map" class="text-black hover:text-gray-600 font-medium transition">Map</a>
             <a href="/budget-flood-correlation" class="text-black hover:text-gray-600 font-medium transition">Budget-Flood</a>
             <a href="/flood-dime-correlation" class="text-black hover:text-gray-600 font-medium transition">Flood-DIME</a>
         </div>
@@ -113,6 +114,7 @@
         <a href="/budget" class="block text-black hover:text-gray-600 font-medium py-2">Budget</a>
         <a href="/flood" class="block text-black hover:text-gray-600 font-medium py-2">Flood Control</a>
         <a href="/dime" class="block text-black hover:text-gray-600 font-medium py-2 border-b-2 border-black">DIME</a>
+        <a href="/map" class="block text-black hover:text-gray-600 font-medium py-2">Map</a>
         <a href="/budget-flood-correlation" class="block text-black hover:text-gray-600 font-medium py-2">Budget-Flood</a>
         <a href="/flood-dime-correlation" class="block text-black hover:text-gray-600 font-medium py-2">Flood-DIME</a>
     </div>
@@ -136,7 +138,6 @@ function toggleMobileMenu() {
         <div class="flex border-b-2 border-gray-200 mb-4 gap-2">
             <button class="budget-tab-btn active bg-white text-blue-600 border-blue-600 border-t border-l border-r px-6 py-3 rounded-t-lg cursor-pointer font-semibold transition-all duration-300 relative -mb-0.5 z-10" data-tab="visual">📊 Visual</button>
             <button class="budget-tab-btn bg-gray-100 text-gray-600 border-gray-300 border px-6 py-3 rounded-t-lg cursor-pointer font-semibold transition-all duration-300 hover:bg-gray-200" data-tab="table">📋 Table</button>
-            <button class="budget-tab-btn bg-gray-100 text-gray-600 border-gray-300 border px-6 py-3 rounded-t-lg cursor-pointer font-semibold transition-all duration-300 hover:bg-gray-200" data-tab="map">🗺️ Map</button>
             <button class="budget-tab-btn bg-gray-100 text-gray-600 border-gray-300 border px-6 py-3 rounded-t-lg cursor-pointer font-semibold transition-all duration-300 hover:bg-gray-200" data-tab="fastest">⚡ Fastest</button>
             <button class="budget-tab-btn bg-gray-100 text-gray-600 border-gray-300 border px-6 py-3 rounded-t-lg cursor-pointer font-semibold transition-all duration-300 hover:bg-gray-200" data-tab="barangays">🏘️ Barangays</button>
         </div>
@@ -296,13 +297,6 @@ function toggleMobileMenu() {
                 </div>
             </div>
 
-            <!-- Map Tab -->
-            <div id="tab-map" class="budget-tab-panel">
-                <div style="text-align: center; padding: 3rem; color: #6c757d;">
-                    <h3>🗺️ Map View Coming Soon</h3>
-                    <p>Interactive map of DIME infrastructure projects</p>
-                </div>
-            </div>
 
             <!-- Fastest Tab -->
             <div id="tab-fastest" class="budget-tab-panel">
@@ -1913,14 +1907,14 @@ function toggleMobileMenu() {
         
         // Check for hash in URL and switch to that tab
         const hash = window.location.hash.substring(1); // Remove the # character
-        if (hash && ['visual', 'table', 'map', 'fastest', 'barangays'].includes(hash)) {
+        if (hash && ['visual', 'table', 'fastest', 'barangays'].includes(hash)) {
             switchToTab(hash, false); // Don't update hash since we're reading from it
         }
         
         // Listen for hash changes
         window.addEventListener('hashchange', function() {
             const newHash = window.location.hash.substring(1);
-            if (newHash && ['visual', 'table', 'map', 'fastest', 'barangays'].includes(newHash)) {
+            if (newHash && ['visual', 'table', 'fastest', 'barangays'].includes(newHash)) {
                 switchToTab(newHash, false);
             }
         });

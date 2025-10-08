@@ -282,6 +282,7 @@
                 <a href="/budget" class="text-black hover:text-gray-600 font-medium transition">Budget</a>
                 <a href="/flood" class="text-black hover:text-gray-600 font-medium transition">Flood Control</a>
                 <a href="/dime" class="text-black hover:text-gray-600 font-medium transition">DIME</a>
+                <a href="/map" class="text-black hover:text-gray-600 font-medium transition">Map</a>
                 <a href="/budget-flood-correlation" class="text-black hover:text-gray-600 font-medium transition">Budget-Flood</a>
                 <a href="/flood-dime-correlation" class="text-black hover:text-gray-600 font-medium transition border-b-2 border-black">Flood-DIME</a>
             </div>
@@ -299,6 +300,7 @@
             <a href="/budget" class="block text-black hover:text-gray-600 font-medium py-2">Budget</a>
             <a href="/flood" class="block text-black hover:text-gray-600 font-medium py-2">Flood Control</a>
             <a href="/dime" class="block text-black hover:text-gray-600 font-medium py-2">DIME</a>
+            <a href="/map" class="block text-black hover:text-gray-600 font-medium py-2">Map</a>
             <a href="/budget-flood-correlation" class="block text-black hover:text-gray-600 font-medium py-2">Budget-Flood</a>
             <a href="/flood-dime-correlation" class="block text-black hover:text-gray-600 font-medium py-2 border-b-2 border-black">Flood-DIME</a>
         </div>
@@ -315,21 +317,18 @@
     <div style="padding: 6rem;">
     <section class="py-8 px-4 max-w-7xl mx-auto">
         <!-- Year Filter -->
-        <div class="bg-white rounded-lg shadow-lg p-6 mb-8">
-            <div class="text-center mb-4">
-                <h2 class="text-2xl font-semibold text-gray-800 mb-4">Flood-DIME Contractor Analysis</h2>
-                <div class="inline-flex items-center gap-4">
-                    <label for="correlation-year-filter" class="font-semibold text-gray-700">Select Year:</label>
-                    <select id="correlation-year-filter" class="px-4 py-2 border-2 border-blue-600 rounded-md text-base bg-white text-gray-800">
-                        <option value="2020">2020</option>
-                        <option value="2021">2021</option>
-                        <option value="2022">2022</option>
-                        <option value="2023">2023</option>
-                        <option value="2024">2024</option>
-                        <option value="2025" selected>2025</option>
-                        <option value="all_years">All Years</option>
-                    </select>
-                </div>
+        <div class="text-center mb-8">
+            <div class="inline-flex items-center gap-4">
+                <label for="correlation-year-filter" class="font-semibold text-gray-700">Select Year:</label>
+                <select id="correlation-year-filter" class="px-4 py-2 border-2 border-blue-600 rounded-md text-base bg-white text-gray-800">
+                    <option value="2020">2020</option>
+                    <option value="2021">2021</option>
+                    <option value="2022">2022</option>
+                    <option value="2023">2023</option>
+                    <option value="2024">2024</option>
+                    <option value="2025" selected>2025</option>
+                    <option value="all_years">All Years</option>
+                </select>
             </div>
         </div>
 

@@ -64,6 +64,7 @@
             <a href="/budget" class="text-black hover:text-gray-600 font-medium transition border-b-2 border-black">Budget</a>
             <a href="/flood" class="text-black hover:text-gray-600 font-medium transition">Flood Control</a>
             <a href="/dime" class="text-black hover:text-gray-600 font-medium transition">DIME</a>
+            <a href="/map" class="text-black hover:text-gray-600 font-medium transition">Map</a>
             <a href="/budget-flood-correlation" class="text-black hover:text-gray-600 font-medium transition">Budget-Flood</a>
             <a href="/flood-dime-correlation" class="text-black hover:text-gray-600 font-medium transition">Flood-DIME</a>
         </div>
@@ -81,6 +82,7 @@
         <a href="/budget" class="block text-black hover:text-gray-600 font-medium py-2 border-b-2 border-black">Budget</a>
         <a href="/flood" class="block text-black hover:text-gray-600 font-medium py-2">Flood Control</a>
         <a href="/dime" class="block text-black hover:text-gray-600 font-medium py-2">DIME</a>
+        <a href="/map" class="block text-black hover:text-gray-600 font-medium py-2">Map</a>
         <a href="/budget-flood-correlation" class="block text-black hover:text-gray-600 font-medium py-2">Budget-Flood</a>
         <a href="/flood-dime-correlation" class="block text-black hover:text-gray-600 font-medium py-2">Flood-DIME</a>
     </div>
@@ -3795,30 +3797,27 @@ function initializeDataBrowser() {
         columnDuplicatesRowsPerPageSelect.addEventListener('change', () => {
             currentColumnDuplicatesRowsPerPage = parseInt(columnDuplicatesRowsPerPageSelect.value);
             currentColumnDuplicatesPage = 1;
-            loadAnalysisColumnDuplicatesData();
+            loadAnalysisColumnDuplicatesData(1);
         });
     }
     
     // Column duplicates pagination controls
     const columnDuplicatesPrevBtn = document.getElementById('column-duplicates-prev-page-btn');
     const columnDuplicatesNextBtn = document.getElementById('column-duplicates-next-page-btn');
-    
+
     if (columnDuplicatesPrevBtn) {
         columnDuplicatesPrevBtn.addEventListener('click', () => {
             if (currentColumnDuplicatesPage > 1) {
                 currentColumnDuplicatesPage--;
-                loadAnalysisColumnDuplicatesData();
+                loadAnalysisColumnDuplicatesData(currentColumnDuplicatesPage);
             }
         });
     }
-    
+
     if (columnDuplicatesNextBtn) {
         columnDuplicatesNextBtn.addEventListener('click', () => {
-            const totalPages = Math.ceil(totalColumnDuplicates / currentColumnDuplicatesRowsPerPage);
-            if (currentColumnDuplicatesPage < totalPages) {
-                currentColumnDuplicatesPage++;
-                loadAnalysisColumnDuplicatesData();
-            }
+            currentColumnDuplicatesPage++;
+            loadAnalysisColumnDuplicatesData(currentColumnDuplicatesPage);
         });
     }
     
@@ -4282,73 +4281,127 @@ function toggleAnalysisDuplicatesAnalysis() {
 function toggleAnalysisColumnDuplicatesAnalysis() {
     const container = document.getElementById('column-duplicates-analysis-content');
     const icon = document.getElementById('column-duplicates-toggle-icon');
-    
+
     if (container.style.display === 'none') {
         container.style.display = 'block';
         icon.textContent = '▲';
         // Load column duplicates data when expanded
-        loadAnalysisColumnDuplicatesData();
+        currentColumnDuplicatesPage = 1;
+        loadAnalysisColumnDuplicatesData(1);
     } else {
         container.style.display = 'none';
         icon.textContent = '▼';
     }
 }
 
-// Load column duplicates data
-async function loadAnalysisColumnDuplicatesData() {
+// Load column duplicates data with pagination
+async function loadAnalysisColumnDuplicatesData(page = 1) {
     try {
-        
         const resultsContainer = document.getElementById('column-duplicates-results');
         if (resultsContainer) {
             resultsContainer.innerHTML = '<div class="loading-message">Loading column duplicates analysis...</div>';
         }
-        
-        const selectedYear = document.getElementById('analysis-year-filter')?.value || '2025';
-        const response = await fetch(`${getApiBaseUrl()}/api/budget/columns/issues?year=${selectedYear}`);
+
+        // Disable pagination buttons during loading
+        const columnDuplicatesPrevBtn = document.getElementById('column-duplicates-prev-page-btn');
+        const columnDuplicatesNextBtn = document.getElementById('column-duplicates-next-page-btn');
+        if (columnDuplicatesPrevBtn) columnDuplicatesPrevBtn.disabled = true;
+        if (columnDuplicatesNextBtn) columnDuplicatesNextBtn.disabled = true;
+
+        const selectedYear = getApiYear();
+        const response = await fetch(`${getApiBaseUrl()}/api/budget/columns/issues?year=${selectedYear}&page=${page}&limit=${currentColumnDuplicatesRowsPerPage}`);
         const data = await response.json();
         
         if (data.success && data.issues && data.issues.length > 0) {
-            let html = '<div class="column-issues-list">';
-            data.issues.forEach((issue, index) => {
-                const severityColor = issue.severity === 'High' ? '#dc3545' : '#ffc107';
-                const severityIcon = issue.severity === 'High' ? '🔴' : '🟡';
-                
-                html += `
-                    <div class="column-issue-item" style="border: 1px solid #dee2e6; border-radius: 8px; padding: 1rem; margin-bottom: 1rem; background: white;">
-                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
-                            <h5 style="margin: 0; color: #0038A8;">
-                                ${severityIcon} ${issue.column_name || 'Unknown Column'}
-                            </h5>
-                            <span style="background: ${severityColor}; color: white; padding: 0.25rem 0.5rem; border-radius: 4px; font-size: 0.875rem;">
-                                ${issue.severity || 'Medium'}
-                            </span>
-                        </div>
-                        <p style="margin: 0.5rem 0; color: #333; font-weight: 500;">
-                            <strong>Description:</strong> ${escapeHtml(issue.description || 'N/A')}
-                        </p>
-                        <p style="margin: 0.5rem 0; color: #666;">
-                            <strong>Issue:</strong> ${issue.issue_type || 'Data inconsistency'}
-                        </p>
-                        <p style="margin: 0.5rem 0; color: #666;">
-                            <strong>Different IDs:</strong> <code style="background: #f8f9fa; padding: 0.25rem 0.5rem; border-radius: 4px;">${escapeHtml(issue.different_ids || 'N/A')}</code>
-                        </p>
-                        <p style="margin: 0.5rem 0 0 0; color: #999; font-size: 0.875rem;">
-                            <em>Found ${issue.id_count || 0} different IDs for the same description</em>
-                        </p>
-                    </div>
-                `;
-            });
-            html += '</div>';
-            resultsContainer.innerHTML = html;
+            displayColumnDuplicatesResults(data.issues);
+
+            // Update pagination if available
+            if (data.pagination) {
+                updateColumnDuplicatesPagination(data.pagination);
+                currentColumnDuplicatesPage = page;
+            }
         } else {
             resultsContainer.innerHTML = '<div class="no-results">No column duplicates found (all descriptions have unique IDs)</div>';
         }
+
+        // Re-enable pagination buttons after loading
+        if (columnDuplicatesPrevBtn) columnDuplicatesPrevBtn.disabled = false;
+        if (columnDuplicatesNextBtn) columnDuplicatesNextBtn.disabled = false;
         
     } catch (error) {
         const resultsContainer = document.getElementById('column-duplicates-results');
         if (resultsContainer) {
-            resultsContainer.innerHTML = '<div class="error-message">❌ Error loading column duplicates data</div>';
+            resultsContainer.innerHTML = `<div class="error-message">❌ Error loading column duplicates: ${error.message}</div>`;
         }
+
+        // Re-enable pagination buttons even on error
+        const columnDuplicatesPrevBtn = document.getElementById('column-duplicates-prev-page-btn');
+        const columnDuplicatesNextBtn = document.getElementById('column-duplicates-next-page-btn');
+        if (columnDuplicatesPrevBtn) columnDuplicatesPrevBtn.disabled = false;
+        if (columnDuplicatesNextBtn) columnDuplicatesNextBtn.disabled = false;
+    }
+}
+
+// Display column duplicates results
+function displayColumnDuplicatesResults(issues) {
+    const resultsContainer = document.getElementById('column-duplicates-results');
+    if (!resultsContainer) return;
+
+    let html = '<div class="column-issues-list">';
+    issues.forEach((issue, index) => {
+        const severityColor = issue.severity === 'High' ? '#dc3545' : '#ffc107';
+        const severityIcon = issue.severity === 'High' ? '🔴' : '🟡';
+
+        html += `
+            <div class="column-issue-item" style="border: 1px solid #dee2e6; border-radius: 8px; padding: 1rem; margin-bottom: 1rem; background: white;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+                    <h5 style="margin: 0; color: #0038A8;">
+                        ${severityIcon} ${issue.column_name || 'Unknown Column'}
+                    </h5>
+                    <span style="background: ${severityColor}; color: white; padding: 0.25rem 0.5rem; border-radius: 4px; font-size: 0.875rem;">
+                        ${issue.severity || 'Medium'}
+                    </span>
+                </div>
+                <p style="margin: 0.5rem 0; color: #333; font-weight: 500;">
+                    <strong>Description:</strong> ${escapeHtml(issue.description || 'N/A')}
+                </p>
+                <p style="margin: 0.5rem 0; color: #666;">
+                    <strong>Issue:</strong> ${issue.issue_type || 'Data inconsistency'}
+                </p>
+                <p style="margin: 0.5rem 0; color: #666;">
+                    <strong>Different IDs:</strong> <code style="background: #f8f9fa; padding: 0.25rem 0.5rem; border-radius: 4px;">${escapeHtml(issue.different_ids || 'N/A')}</code>
+                </p>
+                <p style="margin: 0.5rem 0 0 0; color: #999; font-size: 0.875rem;">
+                    <em>Found ${issue.id_count || 0} different IDs for the same description</em>
+                </p>
+            </div>
+        `;
+    });
+    html += '</div>';
+    resultsContainer.innerHTML = html;
+}
+
+// Update column duplicates pagination controls
+function updateColumnDuplicatesPagination(pagination) {
+    const paginationDiv = document.getElementById('column-duplicates-pagination');
+    const pageInfo = document.getElementById('column-duplicates-page-info');
+    const prevBtn = document.getElementById('column-duplicates-prev-page-btn');
+    const nextBtn = document.getElementById('column-duplicates-next-page-btn');
+
+    if (paginationDiv) {
+        paginationDiv.style.display = pagination.total_pages > 1 ? 'flex' : 'none';
+    }
+
+    if (pageInfo) {
+        pageInfo.textContent = `Page ${pagination.current_page} of ${pagination.total_pages}`;
+    }
+
+    if (prevBtn) {
+        prevBtn.disabled = pagination.current_page <= 1;
+    }
+
+    if (nextBtn) {
+        nextBtn.disabled = pagination.current_page >= pagination.total_pages;
     }
 }
 
@@ -5124,10 +5177,18 @@ document.addEventListener('DOMContentLoaded', function() {
     if (yearFilter) {
         yearFilter.addEventListener('change', function() {
             currentPage = 1; // Reset to first page when year changes
-            
+
+            // Sync the analysis year filter to match the main year filter
+            const analysisYearFilter = document.getElementById('analysis-year-filter');
+            if (analysisYearFilter) {
+                analysisYearFilter.value = this.value;
+                // Reload analysis overview when year changes
+                loadAnalysisOverview();
+            }
+
             // Reload data browser
             loadDataBrowser();
-            
+
             // Reload visual charts if we're on the visual tab
             const visualTab = document.getElementById('tab-visual');
             if (visualTab && visualTab.classList.contains('active')) {
@@ -5141,7 +5202,21 @@ document.addEventListener('DOMContentLoaded', function() {
     if (browserYearFilter) {
         browserYearFilter.addEventListener('change', function() {
             currentPage = 1; // Reset to first page when year changes
-            
+
+            // Sync the main year filter to match the browser year filter
+            const mainYearFilter = document.getElementById('year-filter');
+            if (mainYearFilter) {
+                mainYearFilter.value = this.value;
+            }
+
+            // Sync the analysis year filter to match the browser year filter
+            const analysisYearFilter = document.getElementById('analysis-year-filter');
+            if (analysisYearFilter) {
+                analysisYearFilter.value = this.value;
+                // Reload analysis overview when year changes
+                loadAnalysisOverview();
+            }
+
             // Reload data browser
             loadDataBrowser();
         });
@@ -5212,15 +5287,27 @@ document.addEventListener('DOMContentLoaded', function() {
     const analysisYearFilter = document.getElementById('analysis-year-filter');
     if (analysisYearFilter) {
         analysisYearFilter.addEventListener('change', async function() {
+            // Sync the main year filter to match the analysis year filter
+            const mainYearFilter = document.getElementById('year-filter');
+            if (mainYearFilter) {
+                mainYearFilter.value = this.value;
+            }
+
+            // Load analysis overview data (counts)
             await loadAnalysisOverview();
-        });
-    }
-    
-    // Add event listener for refresh analysis button
-    const refreshAnalysisBtn = document.getElementById('refresh-analysis-btn');
-    if (refreshAnalysisBtn) {
-        refreshAnalysisBtn.addEventListener('click', async function() {
-            await loadAnalysisOverview();
+
+            // Also refresh the duplicate detection results table
+            await loadAnalysisDuplicatesPage(1);
+
+            // Refresh column duplicates data when year changes
+            // Reset pagination and prepare for loading when expanded
+            currentColumnDuplicatesPage = 1;
+
+            // If the section is currently expanded, refresh the data immediately
+            const columnDuplicatesContent = document.getElementById('column-duplicates-analysis-content');
+            if (columnDuplicatesContent && columnDuplicatesContent.style.display !== 'none') {
+                await loadAnalysisColumnDuplicatesData(1);
+            }
         });
     }
     
@@ -5286,7 +5373,7 @@ async function loadAnalysisOverview() {
     
     try {
         // Get selected year from filter
-        const selectedYear = document.getElementById('analysis-year-filter')?.value || '2025';
+        const selectedYear = getApiYear();
         
         // Load available metrics
         await Promise.all([
@@ -5321,7 +5408,7 @@ async function loadExactAmountCount(year) {
 // Load duplicates with pagination
 async function loadAnalysisDuplicatesPage(page = 1) {
     try {
-        const selectedYear = document.getElementById('analysis-year-filter')?.value || '2025';
+        const selectedYear = getApiYear();
         const sortBy = document.getElementById('duplicates-sort-by')?.value || 'calculated_score';
         const sortOrder = document.getElementById('duplicates-sort-order')?.value || 'DESC';
         
@@ -5673,14 +5760,14 @@ let trendsData = null;
 // Helper function to get API base URL
 function getApiBaseUrl() {
     // Check if we're in production/staging (has kenchlightyear.com or altgovph.site in hostname)
-    if (window.location.hostname.includes('kenchlightyear.com') || 
+    if (window.location.hostname.includes('kenchlightyear.com') ||
         window.location.hostname.includes('staging.kenchlightyear.com') ||
         window.location.hostname.includes('altgovph.site') ||
         window.location.hostname.includes('10.27.79.1')) {
         return window.location.origin; // Use same origin for production/staging
     } else {
-        // Local development - use localhost:8000 for API calls
-        return 'http://localhost:8000';
+        // Local development - use the current origin for API calls
+        return window.location.origin;
     }
 }
 
@@ -6876,9 +6963,6 @@ document.addEventListener('click', function(event) {
                                     <option value="all">All Years</option>
                                 </select>
                             </div>
-                            <button id="refresh-analysis-btn" class="btn btn-primary">
-                                🔄 Refresh Analysis
-                            </button>
                         </div>
                         
                         <!-- Analysis Overview Dashboard -->

@@ -82,34 +82,34 @@ async fn altgovph_home(_req: HttpRequest) -> Result<HttpResponse, ActixError> {
     if let Some(redirect) = check_mobile_redirect_enhanced(&_req) {
         return Ok(redirect);
     }
-    
+
     // Use AltGovPH home template
     let tera = Tera::new("templates/**/*").map_err(|e| actix_web::error::ErrorInternalServerError(e))?;
     let mut context = Context::new();
-    
+
     // Add frontend environment variables first
     add_frontend_env_to_context(&mut context);
-    
+
     // AltGovPH theme for home page
     context.insert("title", "AltGovPH - Alternative Government Philippines");
     context.insert("company_name", "AltGovPH");
     context.insert("platform", "AltGovPH");
     context.insert("SITE_NAME", "AltGovPH");
     context.insert("SITE_URL", "https://altgovph.site");
-    
+
     // Override Open Graph and Twitter metadata for AltGovPH
     context.insert("og_title", "AltGovPH - Alternative Government Philippines");
     context.insert("og_description", "Promoting Data Transparency and Open Government in the Philippines");
     context.insert("og_url", "https://altgovph.site/");
     context.insert("og_image", "/static/images/gov_logo.png");
-    
+
     // Choose template based on host
     let template_name = if should_use_mobile_template(&_req) {
         "mobile/altgovph_home.html"
     } else {
         "altgovph_home.html"
     };
-    
+
     let rendered = tera.render(template_name, &context).map_err(|e| actix_web::error::ErrorInternalServerError(e))?;
     Ok(HttpResponse::Ok().content_type("text/html").body(rendered))
 }
@@ -119,39 +119,39 @@ async fn budget(_req: HttpRequest) -> Result<HttpResponse, ActixError> {
     if let Some(redirect) = check_mobile_redirect_enhanced(&_req) {
         return Ok(redirect);
     }
-    
+
     // Check for production domain blocking (block /budget and /flood on kenchlightyear.com)
     if let Some(block_response) = check_production_domain_block(&_req) {
         return Ok(block_response);
     }
-    
+
     // Use standalone budget template (no KenchLightyear branding)
     let tera = Tera::new("templates/**/*").map_err(|e| actix_web::error::ErrorInternalServerError(e))?;
     let mut context = Context::new();
-    
+
     // Add frontend environment variables first
     add_frontend_env_to_context(&mut context);
-    
+
     // AltGovPH theme for budget frontend separation (override after env vars)
     context.insert("title", "Budget Analysis - AltGovPH");
     context.insert("company_name", "AltGovPH");
     context.insert("platform", "AltGovPH");
     context.insert("SITE_NAME", "AltGovPH");
     context.insert("SITE_URL", "https://altgovph.site");
-    
+
     // Override Open Graph and Twitter metadata for AltGovPH
     context.insert("og_title", "Budget Analysis - AltGovPH");
     context.insert("og_description", "Government Data Analysis Platform for Budget and Flood Control Projects");
     context.insert("og_url", "https://altgovph.site/");
     context.insert("og_image", "/static/images/gov_logo.png");
-    
+
     // Choose template based on host
     let template_name = if should_use_mobile_template(&_req) {
         "mobile/budget.html"
     } else {
         "budget.html"
     };
-    
+
     let rendered = tera.render(template_name, &context).map_err(|e| actix_web::error::ErrorInternalServerError(e))?;
     Ok(HttpResponse::Ok().content_type("text/html").body(rendered))
 }
@@ -161,39 +161,39 @@ async fn flood(_req: HttpRequest) -> Result<HttpResponse, ActixError> {
     if let Some(redirect) = check_mobile_redirect_enhanced(&_req) {
         return Ok(redirect);
     }
-    
+
     // Check for production domain blocking (block /budget and /flood on kenchlightyear.com)
     if let Some(block_response) = check_production_domain_block(&_req) {
-        return Ok(redirect);
+        return Ok(block_response);
     }
-    
+
     // Use standalone flood template (no KenchLightyear branding)
     let tera = Tera::new("templates/**/*").map_err(|e| actix_web::error::ErrorInternalServerError(e))?;
     let mut context = Context::new();
-    
+
     // Add frontend environment variables first
     add_frontend_env_to_context(&mut context);
-    
+
     // AltGovPH theme for flood frontend separation (override after env vars)
     context.insert("title", "Flood Control Projects - AltGovPH");
     context.insert("company_name", "AltGovPH");
     context.insert("platform", "AltGovPH");
     context.insert("SITE_NAME", "AltGovPH");
     context.insert("SITE_URL", "https://altgovph.site");
-    
+
     // Override Open Graph and Twitter metadata for AltGovPH
     context.insert("og_title", "Flood Control Projects - AltGovPH");
     context.insert("og_description", "Government Data Analysis Platform for Flood Control Infrastructure Projects");
     context.insert("og_url", "https://altgovph.site/");
     context.insert("og_image", "/static/images/gov_logo.png");
-    
+
     // Choose template based on host
     let template_name = if should_use_mobile_template(&_req) {
         "mobile/flood.html"
     } else {
         "flood.html"
     };
-    
+
     let rendered = tera.render(template_name, &context).map_err(|e| actix_web::error::ErrorInternalServerError(e))?;
     Ok(HttpResponse::Ok().content_type("text/html").body(rendered))
 }
@@ -203,39 +203,39 @@ async fn dime(_req: HttpRequest) -> Result<HttpResponse, ActixError> {
     if let Some(redirect) = check_mobile_redirect_enhanced(&_req) {
         return Ok(redirect);
     }
-    
+
     // Check for production domain blocking (block /dime on kenchlightyear.com)
     if let Some(block_response) = check_production_domain_block(&_req) {
         return Ok(block_response);
     }
-    
+
     // Use standalone DIME template (no KenchLightyear branding)
     let tera = Tera::new("templates/**/*").map_err(|e| actix_web::error::ErrorInternalServerError(e))?;
     let mut context = Context::new();
-    
+
     // Add frontend environment variables first
     add_frontend_env_to_context(&mut context);
-    
+
     // AltGovPH theme for DIME frontend separation (override after env vars)
     context.insert("title", "DIME Infrastructure Projects - AltGovPH");
     context.insert("company_name", "AltGovPH");
     context.insert("platform", "AltGovPH");
     context.insert("SITE_NAME", "AltGovPH");
     context.insert("SITE_URL", "https://altgovph.site");
-    
+
     // Override Open Graph and Twitter metadata for AltGovPH
     context.insert("og_title", "DIME Infrastructure Projects - AltGovPH");
     context.insert("og_description", "Department of Infrastructure and Mega-Projects Execution - Infrastructure Projects Tracker");
     context.insert("og_url", "https://altgovph.site/");
     context.insert("og_image", "/static/images/gov_logo.png");
-    
+
     // Choose template based on host
     let template_name = if should_use_mobile_template(&_req) {
         "mobile/dime.html"
     } else {
         "dime.html"
     };
-    
+
     let rendered = tera.render(template_name, &context).map_err(|e| actix_web::error::ErrorInternalServerError(e))?;
     Ok(HttpResponse::Ok().content_type("text/html").body(rendered))
 }
@@ -245,19 +245,19 @@ async fn budget_flood_correlation(_req: HttpRequest) -> Result<HttpResponse, Act
     if let Some(redirect) = check_mobile_redirect_enhanced(&_req) {
         return Ok(redirect);
     }
-    
+
     // Check for production domain blocking (block on kenchlightyear.com)
     if let Some(block_response) = check_production_domain_block(&_req) {
         return Ok(block_response);
     }
-    
+
     // Use budget-flood correlation template
     let tera = Tera::new("templates/**/*").map_err(|e| actix_web::error::ErrorInternalServerError(e))?;
     let mut context = Context::new();
-    
+
     // Add frontend environment variables first
     add_frontend_env_to_context(&mut context);
-    
+
     // AltGovPH theme for budget-flood correlation page
     context.insert("company_name", "AltGovPH");
     context.insert("platform", "AltGovPH");
@@ -265,7 +265,7 @@ async fn budget_flood_correlation(_req: HttpRequest) -> Result<HttpResponse, Act
     context.insert("SITE_URL", "https://altgovph.site");
     context.insert("og_url", "https://altgovph.site/budget-flood-correlation");
     context.insert("og_image", "/static/images/gov_logo.png");
-    
+
     let rendered = tera.render("budget_flood_correlation.html", &context).map_err(|e| actix_web::error::ErrorInternalServerError(e))?;
     Ok(HttpResponse::Ok().content_type("text/html").body(rendered))
 }
@@ -275,30 +275,30 @@ async fn flood_dime_correlation(_req: HttpRequest) -> Result<HttpResponse, Actix
     if let Some(redirect) = check_mobile_redirect_enhanced(&_req) {
         return Ok(redirect);
     }
-    
+
     // Check for production domain blocking (block on kenchlightyear.com)
     if let Some(block_response) = check_production_domain_block(&_req) {
         return Ok(block_response);
     }
-    
+
     // Use flood-dime correlation template
     let tera = Tera::new("templates/**/*").map_err(|e| actix_web::error::ErrorInternalServerError(e))?;
     let mut context = Context::new();
-    
+
     // Add frontend environment variables first
     add_frontend_env_to_context(&mut context);
-    
+
     // AltGovPH theme for flood-dime correlation page
     context.insert("title", "Flood-DIME Correlation Analysis - AltGovPH");
     context.insert("company_name", "AltGovPH");
     context.insert("platform", "AltGovPH");
     context.insert("SITE_NAME", "AltGovPH");
     context.insert("SITE_URL", "https://altgovph.site");
-    
+
     // Override Open Graph and Twitter metadata for AltGovPH
     context.insert("og_url", "https://altgovph.site/flood-dime-correlation");
     context.insert("og_image", "/static/images/gov_logo.png");
-    
+
     let rendered = tera.render("flood_dime_correlation.html", &context).map_err(|e| actix_web::error::ErrorInternalServerError(e))?;
     Ok(HttpResponse::Ok().content_type("text/html").body(rendered))
 }
