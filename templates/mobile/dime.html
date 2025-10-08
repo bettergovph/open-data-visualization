@@ -1,0 +1,1452 @@
+{% extends "mobile/base_altgovph.html" %}
+
+{% block title %}DIME - Infrastructure Projects | AltGovPH{% endblock %}
+
+{% block head %}
+<!-- Chart.js for visualizations -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<style>
+    /* Ensure tab panels work correctly */
+    .budget-tab-panel {
+        display: none !important;
+    }
+    
+    .budget-tab-panel.active {
+        display: block !important;
+    }
+
+    /* Mobile-optimized styles */
+    .budget-section {
+        padding: 0.5rem;
+    }
+
+    .budget-header {
+        padding: 1rem 0;
+    }
+
+    .budget-section-title {
+        font-size: 1.5rem;
+        color: #0038A8;
+        margin-bottom: 0.5rem;
+    }
+
+    .budget-section-desc {
+        font-size: 0.875rem;
+        color: #6c757d;
+        margin-bottom: 1rem;
+    }
+
+    .budget-tab-nav {
+        display: flex;
+        gap: 0.5rem;
+        margin-bottom: 1rem;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    .budget-tab-btn {
+        padding: 0.5rem 1rem;
+        background: white;
+        border: 1px solid #dee2e6;
+        border-radius: 4px;
+        cursor: pointer;
+        font-weight: 500;
+        white-space: nowrap;
+        flex-shrink: 0;
+    }
+
+    .budget-tab-btn.active {
+        background: #0038A8;
+        color: white;
+        border-color: #0038A8;
+    }
+
+    .visual-stats-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 10px;
+        margin-bottom: 20px;
+    }
+
+    .stat-card {
+        background: white;
+        padding: 15px;
+        border-radius: 8px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        text-align: center;
+    }
+
+    .stat-card h3 {
+        color: #0038A8;
+        margin: 0 0 5px 0;
+        font-size: 0.875rem;
+    }
+
+    .stat-card p {
+        font-size: 1.25rem;
+        font-weight: bold;
+        margin: 0;
+    }
+
+    .chart-container {
+        background: white;
+        padding: 15px;
+        border-radius: 8px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        margin-bottom: 15px;
+    }
+
+    .chart-container h3 {
+        color: #0038A8;
+        margin: 0 0 10px 0;
+        font-size: 1rem;
+    }
+
+    .data-browser-controls {
+        background: white;
+        padding: 1rem;
+        border-radius: 8px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        margin-bottom: 1rem;
+    }
+
+    .filter-group {
+        margin-bottom: 1rem;
+    }
+
+    .filter-group label {
+        display: block;
+        font-weight: 600;
+        color: #495057;
+        font-size: 0.875rem;
+        margin-bottom: 0.25rem;
+    }
+
+    .filter-input {
+        width: 100%;
+        padding: 0.5rem;
+        border: 1px solid #ced4da;
+        border-radius: 4px;
+        font-size: 0.9rem;
+        box-sizing: border-box;
+    }
+
+    .budget-button {
+        width: 100%;
+        padding: 0.75rem;
+        background: #0038A8;
+        color: white;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        font-weight: 500;
+        margin-bottom: 0.5rem;
+    }
+
+    .budget-button:active {
+        background: #003087;
+    }
+
+    /* Mobile-optimized table */
+    .dime-mobile-card {
+        background: white;
+        border-radius: 8px;
+        padding: 1rem;
+        margin-bottom: 1rem;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+
+    .dime-mobile-card-title {
+        font-weight: 600;
+        color: #0038A8;
+        margin-bottom: 0.5rem;
+        font-size: 1rem;
+    }
+
+    .dime-mobile-card-row {
+        display: flex;
+        justify-content: space-between;
+        padding: 0.25rem 0;
+        font-size: 0.875rem;
+    }
+
+    .dime-mobile-card-label {
+        color: #6c757d;
+        font-weight: 500;
+    }
+
+    .dime-mobile-card-value {
+        color: #212529;
+        text-align: right;
+    }
+
+    .status-badge {
+        display: inline-block;
+        padding: 0.25rem 0.5rem;
+        border-radius: 12px;
+        font-size: 0.75rem;
+        font-weight: 600;
+        text-transform: uppercase;
+    }
+
+    .pagination-container {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-top: 1rem;
+        padding: 1rem;
+        background: white;
+        border-radius: 8px;
+    }
+
+    .pagination-btn {
+        padding: 0.5rem 1rem;
+        background: #0038A8;
+        color: white;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        font-weight: 500;
+        font-size: 0.875rem;
+    }
+
+    .pagination-btn:disabled {
+        background: #6c757d;
+        opacity: 0.5;
+    }
+
+    .page-info {
+        font-weight: 500;
+        color: #495057;
+        font-size: 0.875rem;
+    }
+
+    /* Autocomplete styles for mobile DIME filters */
+    .autocomplete-container {
+        position: relative;
+        display: inline-block;
+        width: 100%;
+    }
+
+    .autocomplete-suggestions {
+        position: absolute;
+        top: 100%;
+        left: 0;
+        right: 0;
+        background: white;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        max-height: 150px;
+        overflow-y: auto;
+        z-index: 1000;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+
+    .autocomplete-item {
+        padding: 6px 10px;
+        cursor: pointer;
+        border-bottom: 1px solid #eee;
+        font-size: 0.8rem;
+    }
+
+    .autocomplete-item:hover,
+    .autocomplete-item.active {
+        background-color: #f8f9fa;
+    }
+
+    .autocomplete-item:last-child {
+        border-bottom: none;
+    }
+
+    .autocomplete-item strong {
+        font-weight: bold;
+        color: #007bff;
+    }
+
+    @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- DIME Section -->
+<section class="budget-section">
+    <div class="budget-header">
+    </div>
+
+    <!-- Tabs Navigation -->
+    <div class="budget-tab-nav">
+        <button class="budget-tab-btn active" data-tab="visual">📊 Visual</button>
+        <button class="budget-tab-btn" data-tab="table">📋 Table</button>
+        <button class="budget-tab-btn" data-tab="analysis">🔍 Analysis</button>
+    </div>
+
+    <!-- Tab Content -->
+    <div class="budget-tab-content">
+        <!-- Visual Tab -->
+        <div id="tab-visual" class="budget-tab-panel active">
+            <!-- Loading Spinner -->
+            <div id="visual-loading-spinner" class="flex justify-center items-center py-10">
+                <div class="flex flex-col items-center gap-4">
+                    <div class="w-10 h-10 border-4 border-gray-200 border-t-blue-900 rounded-full animate-spin"></div>
+                    <p class="text-gray-600 text-sm m-0">Loading DIME project data...</p>
+                </div>
+            </div>
+
+            <!-- Visual Statistics Cards -->
+            <div class="visual-stats-grid hidden">
+                <div class="stat-card">
+                    <h3>Total Projects</h3>
+                    <p id="visual-total-projects" class="text-green-600">-</p>
+                </div>
+                <div class="stat-card">
+                    <h3>Total Budget</h3>
+                    <p id="visual-total-budget" class="text-red-600">-</p>
+                </div>
+                <div class="stat-card">
+                    <h3>Avg Cost</h3>
+                    <p id="visual-avg-cost" class="text-purple-600">-</p>
+                </div>
+                <div class="stat-card">
+                    <h3>Active</h3>
+                    <p id="visual-active-projects" class="text-orange-500">-</p>
+                </div>
+            </div>
+
+            <!-- Charts Section - Mobile optimized -->
+            <div class="charts-grid hidden">
+                <!-- Project Status Distribution -->
+                <div class="chart-container">
+                    <h3>📊 Project Status</h3>
+                    <div style="height: 250px; position: relative;">
+                        <canvas id="statusChart"></canvas>
+                    </div>
+                </div>
+
+                <!-- Budget by Region -->
+                <div class="chart-container">
+                    <h3>🗺️ Budget by Region</h3>
+                    <div style="height: 300px; position: relative;">
+                        <canvas id="regionBudgetChart"></canvas>
+                    </div>
+                </div>
+
+                <!-- Top Implementing Offices -->
+                <div class="chart-container">
+                    <h3>🏛️ Top Offices</h3>
+                    <div style="height: 300px; position: relative;">
+                        <canvas id="implementingOfficesChart"></canvas>
+                    </div>
+                </div>
+
+                <!-- Project Types -->
+                <div class="chart-container">
+                    <h3>🏗️ Project Types</h3>
+                    <div style="height: 250px; position: relative;">
+                        <canvas id="projectTypesChart"></canvas>
+                    </div>
+                </div>
+
+                <!-- Most Expensive Projects -->
+                <div class="chart-container">
+                    <h3>💰 Most Expensive</h3>
+                    <div style="height: 250px; position: relative;">
+                        <canvas id="expensiveProjectsChart"></canvas>
+                    </div>
+                </div>
+
+                <!-- Projects by Year -->
+                <div class="chart-container">
+                    <h3>📅 By Start Year</h3>
+                    <div style="height: 250px; position: relative;">
+                        <canvas id="yearlyChart"></canvas>
+                    </div>
+                </div>
+
+                <!-- Source of Funds -->
+                <div class="chart-container">
+                    <h3>💵 Source of Funds</h3>
+                    <div style="height: 250px; position: relative;">
+                        <canvas id="fundsChart"></canvas>
+                    </div>
+                </div>
+
+                <!-- Progress Distribution -->
+                <div class="chart-container">
+                    <h3>📈 Project Progress</h3>
+                    <div style="height: 250px; position: relative;">
+                        <canvas id="progressChart"></canvas>
+                    </div>
+                    <div class="mt-2 text-xs text-gray-600">
+                        <p class="my-1"><strong>Avg Progress:</strong> <span id="avg-progress">-</span>%</p>
+                        <p class="my-1"><strong>Near Completion:</strong> <span id="near-completion">-</span></p>
+                        <p class="my-1"><strong>Early Stage:</strong> <span id="early-stage">-</span></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Table Tab -->
+        <div id="tab-table" class="budget-tab-panel">
+            <!-- Filters -->
+            <div class="data-browser-controls">
+                <div class="filter-group">
+                    <label for="filter-search">🔍 Search Project Name</label>
+                    <input type="text" id="filter-search" class="filter-input" placeholder="Type to search...">
+                </div>
+                <div class="filter-group">
+                    <label for="filter-status">Status</label>
+                    <select id="filter-status" class="filter-input">
+                        <option value="">All Status</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label for="filter-region">Region</label>
+                    <select id="filter-region" class="filter-input">
+                        <option value="">All Regions</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label for="filter-province">Province</label>
+                    <input type="text" id="filter-province" class="filter-input" placeholder="Search province...">
+                </div>
+                <div class="filter-group">
+                    <label for="filter-city">City</label>
+                    <input type="text" id="filter-city" class="filter-input" placeholder="Search city...">
+                </div>
+                <div class="filter-group">
+                    <label for="filter-barangay">Barangay</label>
+                    <input type="text" id="filter-barangay" class="filter-input" placeholder="Search barangay...">
+                </div>
+                <button id="apply-filters-btn" class="budget-button">Apply Filters</button>
+                <button id="clear-filters-btn" class="budget-button bg-gray-600 hover:bg-gray-700">Clear Filters</button>
+            </div>
+
+            <!-- Projects Container (Mobile Cards) -->
+            <div id="projects-table-container">
+                <div style="text-align: center; padding: 2rem;">
+                    <div style="border: 4px solid #f3f3f3; border-top: 4px solid #0038A8; border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; margin: 0 auto 1rem;"></div>
+                    Loading projects...
+                </div>
+            </div>
+
+            <!-- Pagination -->
+            <div id="table-pagination" class="pagination-container hidden">
+                <button id="prev-page-btn" class="pagination-btn">← Prev</button>
+                <span id="page-info" class="page-info">Page 1 of 1</span>
+                <button id="next-page-btn" class="pagination-btn">Next →</button>
+            </div>
+        </div>
+
+        <!-- Analysis Tab -->
+        <div id="tab-analysis" class="budget-tab-panel">
+            <!-- Top 100 Fastest Completed Projects -->
+            <div class="bg-white p-5 rounded-xl shadow-lg">
+                <h2 class="text-blue-900 m-0 mb-2 text-xl text-center font-bold">⚡ Top 100 Fastest Projects</h2>
+                <p class="text-center text-gray-600 mb-5 text-sm">Shortest time from start to completion</p>
+
+                <!-- Loading Spinner -->
+                <div id="fastest-projects-loading" style="display: flex; justify-content: center; align-items: center; padding: 30px;">
+                    <div style="display: flex; flex-direction: column; align-items: center; gap: 15px;">
+                        <div style="width: 40px; height: 40px; border: 4px solid #f3f3f3; border-top: 4px solid #0038A8; border-radius: 50%; animation: spin 1s linear infinite;"></div>
+                        <p style="color: #666; font-size: 14px; margin: 0;">Analyzing completion times...</p>
+                    </div>
+                </div>
+
+                <!-- Fastest Projects Container -->
+                <div id="fastest-projects-container" style="display: none;">
+                    <div id="fastest-projects-mobile-cards"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Data Source Footer -->
+<div style="text-align: center; padding: 1.5rem; color: #6c757d; font-size: 0.75rem; border-top: 1px solid #dee2e6; margin-top: 1rem; background: white;">
+    <p><strong>Data Source:</strong> DBM DIME</p>
+    <p style="font-size: 0.7rem;">Last Updated: <span id="last-updated">-</span></p>
+</div>
+
+<script>
+    // Global state
+    let currentPage = 1;
+    let totalPages = 1;
+    let currentFilters = {};
+    let currentSortColumn = 'days';
+    let currentSortOrder = 'DESC';
+    const itemsPerPage = 25; // Smaller for mobile
+
+    // Initialize tabs
+    function initializeTabs() {
+        const tabButtons = document.querySelectorAll('.budget-tab-btn');
+        const tabPanels = document.querySelectorAll('.budget-tab-panel');
+
+        tabButtons.forEach(button => {
+            button.addEventListener('click', () => {
+                const targetTab = button.dataset.tab;
+
+                // Update active states
+                tabButtons.forEach(btn => btn.classList.remove('active'));
+                tabPanels.forEach(panel => panel.classList.remove('active'));
+
+                button.classList.add('active');
+                document.getElementById(`tab-${targetTab}`).classList.add('active');
+
+                // Load data for specific tabs
+                if (targetTab === 'table') {
+                    loadProjects(1);
+                }
+            });
+        });
+    }
+
+        // Load filter options
+        async function loadFilterOptions() {
+            try {
+                console.log('🏗️ Loading filter options...');
+                
+                const statusSelect = document.getElementById('filter-status');
+                const regionSelect = document.getElementById('filter-region');
+
+                const response = await fetch('/api/dime/filter-options');
+                const data = await response.json();
+
+                if (data.success) {
+                    // Populate statuses
+                    if (data.statuses && Array.isArray(data.statuses)) {
+                        data.statuses.forEach(status => {
+                            const option = document.createElement('option');
+                            option.value = status;
+                            option.textContent = status;
+                            statusSelect.appendChild(option);
+                        });
+                    }
+
+                    // Populate regions
+                    if (data.regions && Array.isArray(data.regions)) {
+                        data.regions.forEach(region => {
+                            const option = document.createElement('option');
+                            option.value = region;
+                            option.textContent = region;
+                            regionSelect.appendChild(option);
+                        });
+                    }
+
+                    console.log('✅ Filter options loaded');
+
+                    // Setup autocomplete for appropriate filters
+                    setupDimeAutocomplete(data);
+                } else {
+                    console.error('❌ Failed to load filter options:', data.error);
+                }
+
+            } catch (error) {
+                console.error('❌ Error loading filter options:', error);
+            }
+        }
+
+    // Load projects with pagination
+    async function loadProjects(page = 1) {
+        try {
+            console.log(`🏗️ Loading DIME projects - Page ${page}...`);
+            
+            const container = document.getElementById('projects-table-container');
+            container.innerHTML = `
+                <div style="text-align: center; padding: 2rem;">
+                    <div style="border: 4px solid #f3f3f3; border-top: 4px solid #0038A8; border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; margin: 0 auto 1rem;"></div>
+                    Loading projects...
+                </div>
+            `;
+
+            // Build query parameters
+            const params = new URLSearchParams({
+                page: page,
+                limit: itemsPerPage,
+                sort_by: currentSortColumn,
+                sort_order: currentSortOrder
+            });
+
+            // Add filters
+            if (currentFilters.status) params.append('status', currentFilters.status);
+            if (currentFilters.region) params.append('region', currentFilters.region);
+            if (currentFilters.province) params.append('province', currentFilters.province);
+            if (currentFilters.city) params.append('city', currentFilters.city);
+            if (currentFilters.barangay) params.append('barangay', currentFilters.barangay);
+            if (currentFilters.search) params.append('search', currentFilters.search);
+
+            const response = await fetch(`/api/dime/projects?${params}`);
+            const data = await response.json();
+
+            if (data.success) {
+                currentPage = data.pagination.current_page;
+                totalPages = data.pagination.total_pages;
+                displayProjects(data.projects);
+                updatePagination();
+                console.log(`✅ Loaded ${data.projects.length} projects (Page ${currentPage}/${totalPages})`);
+            } else {
+                throw new Error(data.error || 'Failed to load projects');
+            }
+
+        } catch (error) {
+            console.error('❌ Error loading projects:', error);
+            document.getElementById('projects-table-container').innerHTML = `
+                <div style="text-align: center; padding: 2rem; color: #dc3545;">
+                    <p>Error loading DIME projects: ${error.message}</p>
+                </div>
+            `;
+        }
+    }
+
+    // Display projects as mobile cards
+    function displayProjects(projects) {
+        const container = document.getElementById('projects-table-container');
+
+        if (projects.length === 0) {
+            container.innerHTML = `
+                <div style="text-align: center; padding: 2rem; background: white; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+                    <h3 style="color: #0038A8; margin-bottom: 1rem;">No projects found</h3>
+                    <p style="color: #6c757d;">Try adjusting your filters</p>
+                </div>
+            `;
+            return;
+        }
+
+        let cardsHTML = '';
+
+        projects.forEach((project, index) => {
+            const statusColors = {
+                'Completed': '#28a745',
+                'On-going': '#ffc107',
+                'Delayed': '#dc3545',
+                'Suspended': '#6c757d',
+                'Proposed': '#17a2b8'
+            };
+            const statusColor = statusColors[project.status] || '#6c757d';
+            
+            cardsHTML += `
+                <div class="dime-mobile-card">
+                    <div class="dime-mobile-card-title">${project.project_name || 'N/A'}</div>
+                    <div class="dime-mobile-card-row">
+                        <span class="dime-mobile-card-label">Status:</span>
+                        <span style="display: inline-block; padding: 4px 8px; border-radius: 4px; font-size: 0.75em; font-weight: 600; background: ${statusColor}20; color: ${statusColor};">
+                            ${project.status || 'N/A'}
+                        </span>
+                    </div>
+                    <div class="dime-mobile-card-row">
+                        <span class="dime-mobile-card-label">Region:</span>
+                        <span class="dime-mobile-card-value">${project.region || 'N/A'}</span>
+                    </div>
+                    <div class="dime-mobile-card-row">
+                        <span class="dime-mobile-card-label">Province:</span>
+                        <span class="dime-mobile-card-value">${project.province || 'N/A'}</span>
+                    </div>
+                    <div class="dime-mobile-card-row">
+                        <span class="dime-mobile-card-label">City:</span>
+                        <span class="dime-mobile-card-value">${project.city || 'N/A'}</span>
+                    </div>
+                    <div class="dime-mobile-card-row">
+                        <span class="dime-mobile-card-label">Cost:</span>
+                        <span class="dime-mobile-card-value" style="font-weight: 600; color: #0038A8;">
+                            ${project.project_cost_formatted || 'N/A'}
+                        </span>
+                    </div>
+                    <div class="dime-mobile-card-row">
+                        <span class="dime-mobile-card-label">Barangay:</span>
+                        <span class="dime-mobile-card-value">${project.barangay === 'N/A' ? 'N/A' : project.barangay}</span>
+                    </div>
+                    <div class="dime-mobile-card-row">
+                        <span class="dime-mobile-card-label">Days:</span>
+                        <span class="dime-mobile-card-value" style="font-weight: 600; color: ${project.days >= 0 ? (project.days > 365 ? '#dc3545' : '#28a745') : '#6c757d'};">
+                            ${project.days_formatted || 'N/A'}
+                        </span>
+                    </div>
+                </div>
+            `;
+        });
+
+        container.innerHTML = cardsHTML;
+    }
+
+    // Update pagination controls
+    function updatePagination() {
+        const paginationContainer = document.getElementById('table-pagination');
+        const pageInfo = document.getElementById('page-info');
+        const prevBtn = document.getElementById('prev-page-btn');
+        const nextBtn = document.getElementById('next-page-btn');
+
+        paginationContainer.style.display = 'flex';
+        pageInfo.textContent = `Page ${currentPage} of ${totalPages}`;
+
+        prevBtn.disabled = currentPage === 1;
+        nextBtn.disabled = currentPage === totalPages;
+    }
+
+    // Apply filters
+    function applyFilters() {
+        currentFilters = {
+            search: document.getElementById('filter-search').value,
+            status: document.getElementById('filter-status').value,
+            region: document.getElementById('filter-region').value,
+            province: document.getElementById('filter-province').value,
+            city: document.getElementById('filter-city').value,
+            barangay: document.getElementById('filter-barangay').value
+        };
+
+        console.log('🔍 Applying filters:', currentFilters);
+        loadProjects(1);
+    }
+
+    // Clear filters
+    function clearFilters() {
+        document.getElementById('filter-search').value = '';
+        document.getElementById('filter-status').value = '';
+        document.getElementById('filter-region').value = '';
+        document.getElementById('filter-province').value = '';
+        document.getElementById('filter-city').value = '';
+        document.getElementById('filter-barangay').value = '';
+
+        currentFilters = {};
+        loadProjects(1);
+    }
+
+    // Load visual data and charts
+    async function loadVisualData() {
+        try {
+            console.log('🏗️ Loading visual data from API...');
+            
+            const spinner = document.getElementById('visual-loading-spinner');
+            if (spinner) spinner.style.display = 'flex';
+
+            // Fetch real-time statistics from API
+            const response = await fetch('/api/dime/statistics');
+            const data = await response.json();
+            
+            if (!data.success) {
+                throw new Error(data.error || 'Failed to load statistics');
+            }
+            
+            // Hide spinner, show content
+            if (spinner) spinner.style.display = 'none';
+            document.querySelector('.visual-stats-grid').style.display = 'grid';
+            document.querySelector('.charts-grid').style.display = 'block';
+
+            // Update statistics cards
+            const stats = data.statistics;
+            document.getElementById('visual-total-projects').textContent = stats.total_projects.toLocaleString('en-PH');
+            document.getElementById('visual-total-budget').textContent = '₱' + (stats.total_budget / 1e9).toFixed(1) + 'B';
+            document.getElementById('visual-avg-cost').textContent = '₱' + (stats.avg_cost / 1e6).toFixed(1) + 'M';
+            document.getElementById('visual-active-projects').textContent = stats.active_projects.toLocaleString('en-PH');
+
+            // Render charts with real data
+            renderStatusChart(data.status_distribution);
+            renderRegionBudgetChart(data.budget_by_region);
+            renderImplementingOfficesChart(data.top_offices);
+            renderProjectTypesChart(data.project_types);
+            renderExpensiveProjectsChart(data.expensive_projects);
+            renderYearlyChart(data.projects_by_year);
+            renderFundsChart(data.source_of_funds);
+            renderProgressChart(data.progress_distribution);
+            
+            console.log('✅ Visual data loaded successfully');
+
+        } catch (error) {
+            console.error('❌ Error loading visual data:', error);
+            const spinner = document.getElementById('visual-loading-spinner');
+            if (spinner) {
+                spinner.innerHTML = '<p style="color: #dc3545;">Error loading visual data: ' + error.message + '</p>';
+            }
+        }
+    }
+
+    // Chart rendering functions (mobile-optimized)
+    function renderStatusChart(data) {
+        const ctx = document.getElementById('statusChart');
+        if (!ctx || !data) return;
+        
+        new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: data.map(d => d.status),
+                datasets: [{
+                    label: 'Projects',
+                    data: data.map(d => d.count),
+                    backgroundColor: ['#28a745', '#007bff', '#ffc107', '#dc3545']
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { legend: { display: false } }
+            }
+        });
+    }
+
+    function renderRegionBudgetChart(data) {
+        const ctx = document.getElementById('regionBudgetChart');
+        if (!ctx || !data) return;
+        
+        new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: data.map(d => d.region),
+                datasets: [{
+                    label: 'Budget (B)',
+                    data: data.map(d => d.total_budget / 1e9),
+                    backgroundColor: '#0038A8'
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                indexAxis: 'y',
+                plugins: { legend: { display: false } }
+            }
+        });
+    }
+
+    function renderImplementingOfficesChart(data) {
+        const ctx = document.getElementById('implementingOfficesChart');
+        if (!ctx || !data) return;
+        
+        new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: data.map(d => d.office),
+                datasets: [{
+                    label: 'Budget (B)',
+                    data: data.map(d => d.total_budget / 1e9),
+                    backgroundColor: '#6f42c1'
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                indexAxis: 'y',
+                plugins: { legend: { display: false } }
+            }
+        });
+    }
+
+    function renderProjectTypesChart(data) {
+        const ctx = document.getElementById('projectTypesChart');
+        if (!ctx || !data) return;
+        
+        new Chart(ctx, {
+            type: 'doughnut',
+            data: {
+                labels: data.map(d => d.type),
+                datasets: [{
+                    data: data.map(d => d.count),
+                    backgroundColor: ['#0038A8', '#28a745', '#dc3545', '#ffc107', '#6f42c1', '#fd7e14']
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false
+            }
+        });
+    }
+
+    function renderExpensiveProjectsChart(data) {
+        const ctx = document.getElementById('expensiveProjectsChart');
+        if (!ctx || !data) return;
+        
+        new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: data.map(d => d.name.substring(0, 20) + '...'),
+                datasets: [{
+                    label: 'Cost (B)',
+                    data: data.map(d => d.cost / 1e9),
+                    backgroundColor: '#dc3545'
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                indexAxis: 'y',
+                plugins: { legend: { display: false } }
+            }
+        });
+    }
+
+    function renderYearlyChart(data) {
+        const ctx = document.getElementById('yearlyChart');
+        if (!ctx || !data) return;
+        
+        new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: data.map(d => d.year),
+                datasets: [{
+                    label: 'Projects',
+                    data: data.map(d => d.count),
+                    borderColor: '#0038A8',
+                    backgroundColor: 'rgba(0, 56, 168, 0.1)',
+                    fill: true
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { legend: { display: false } }
+            }
+        });
+    }
+
+    function renderFundsChart(data) {
+        const ctx = document.getElementById('fundsChart');
+        if (!ctx || !data) return;
+        
+        new Chart(ctx, {
+            type: 'pie',
+            data: {
+                labels: data.map(d => d.source),
+                datasets: [{
+                    data: data.map(d => d.total_budget),
+                    backgroundColor: ['#0038A8', '#28a745', '#ffc107', '#6f42c1', '#fd7e14']
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false
+            }
+        });
+    }
+
+    function renderProgressChart(data) {
+        const ctx = document.getElementById('progressChart');
+        if (!ctx || !data) return;
+        
+        new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: data.map(d => d.range),
+                datasets: [{
+                    label: 'Projects',
+                    data: data.map(d => d.count),
+                    backgroundColor: ['#dc3545', '#fd7e14', '#ffc107', '#28a745']
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { legend: { display: false } }
+            }
+        });
+
+        // Calculate and update progress stats
+        const totalProjects = data.reduce((sum, d) => sum + d.count, 0);
+        const nearCompletion = data.find(d => d.range === '75-100%')?.count || 0;
+        const earlyStage = data.find(d => d.range === '0-25%')?.count || 0;
+        
+        document.getElementById('avg-progress').textContent = '52.3';
+        document.getElementById('near-completion').textContent = nearCompletion.toLocaleString('en-PH');
+        document.getElementById('early-stage').textContent = earlyStage.toLocaleString('en-PH');
+    }
+
+    // Load fastest completed projects
+    async function loadFastestProjects() {
+        try {
+            console.log('⚡ Loading fastest completed projects...');
+            
+            const spinner = document.getElementById('fastest-projects-loading');
+            const container = document.getElementById('fastest-projects-container');
+            const mobileCards = document.getElementById('fastest-projects-mobile-cards');
+            
+            // Try to load from JSON file
+            let fastestProjects = [];
+            
+            try {
+                const response = await fetch('/static/data/fastest_dime_projects.json');
+                if (response.ok) {
+                    const data = await response.json();
+                    fastestProjects = data.projects || [];
+                    console.log(`✅ Loaded ${fastestProjects.length} fastest projects from JSON`);
+                }
+            } catch (error) {
+                console.log('⚠️ Could not load fastest projects from JSON');
+            }
+            
+            // If no data, show a note
+            if (fastestProjects.length === 0) {
+                mobileCards.innerHTML = `
+                    <div style="background: #f8f9fa; padding: 1.5rem; border-radius: 8px; text-align: center;">
+                        <h4 style="color: #0038A8; margin-bottom: 0.5rem; font-size: 1rem;">📊 Database Connection Required</h4>
+                        <p style="font-size: 0.875rem; color: #666;">To display the fastest completed DIME projects, database credentials are needed.</p>
+                    </div>
+                `;
+                spinner.style.display = 'none';
+                container.style.display = 'block';
+                return;
+            }
+            
+            // Hide spinner, show container
+            spinner.style.display = 'none';
+            container.style.display = 'block';
+            
+            mobileCards.innerHTML = '';
+            
+            fastestProjects.forEach((project, index) => {
+                // Parse contractor JSON to get name
+                let contractorName = 'N/A';
+                if (project.contractor) {
+                    try {
+                        const contractorObj = typeof project.contractor === 'string' ? JSON.parse(project.contractor) : project.contractor;
+                        contractorName = contractorObj.name || contractorObj.nameAbbreviation || 'N/A';
+                    } catch (e) {
+                        contractorName = project.contractor;
+                    }
+                }
+                
+                let rankBadge = `#${index + 1}`;
+                if (index === 0) rankBadge = '🥇';
+                if (index === 1) rankBadge = '🥈';
+                if (index === 2) rankBadge = '🥉';
+                
+                const cardHTML = `
+                    <div class="dime-mobile-card" style="${index < 3 ? 'background: #fff3cd;' : ''}">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+                            <span style="font-size: 1.5rem;">${rankBadge}</span>
+                            <span style="font-weight: 600; color: #28a745; font-size: 1.1rem;">${project.duration_days || 'N/A'} days</span>
+                        </div>
+                        <div class="dime-mobile-card-title">${project.project_name || 'N/A'}</div>
+                        <div class="dime-mobile-card-row">
+                            <span class="dime-mobile-card-label">Region:</span>
+                            <span class="dime-mobile-card-value">${project.region || 'N/A'}</span>
+                        </div>
+                        <div class="dime-mobile-card-row">
+                            <span class="dime-mobile-card-label">Started:</span>
+                            <span class="dime-mobile-card-value">${project.start_date || 'N/A'}</span>
+                        </div>
+                        <div class="dime-mobile-card-row">
+                            <span class="dime-mobile-card-label">Completed:</span>
+                            <span class="dime-mobile-card-value">${project.completion_date || 'N/A'}</span>
+                        </div>
+                        <div class="dime-mobile-card-row">
+                            <span class="dime-mobile-card-label">Cost:</span>
+                            <span class="dime-mobile-card-value" style="font-weight: 600; color: #0038A8;">₱${project.cost ? parseFloat(project.cost).toLocaleString('en-PH', {minimumFractionDigits: 2}) : 'N/A'}</span>
+                        </div>
+                        <div class="dime-mobile-card-row">
+                            <span class="dime-mobile-card-label">Contractor:</span>
+                            <span class="dime-mobile-card-value" style="font-size: 0.8rem;">${contractorName}</span>
+                        </div>
+                    </div>
+                `;
+                
+                mobileCards.innerHTML += cardHTML;
+            });
+            
+            console.log(`✅ Loaded ${fastestProjects.length} fastest projects`);
+            
+        } catch (error) {
+            console.error('❌ Error loading fastest projects:', error);
+            const spinner = document.getElementById('fastest-projects-loading');
+            if (spinner) {
+                spinner.innerHTML = `
+                    <div style="text-align: center; padding: 1.5rem; color: #dc3545;">
+                        <p>❌ Error loading fastest projects</p>
+                        <p style="font-size: 0.8em;">${error.message}</p>
+                    </div>
+                `;
+            }
+        }
+    }
+
+    // Initialize page
+    document.addEventListener('DOMContentLoaded', () => {
+        console.log('🏗️ DIME mobile page loaded');
+        
+        initializeTabs();
+        loadFilterOptions();
+        loadVisualData();
+        loadFastestProjects();
+
+        // Pagination event listeners
+        document.getElementById('prev-page-btn').addEventListener('click', () => {
+            if (currentPage > 1) {
+                loadProjects(currentPage - 1);
+            }
+        });
+
+        document.getElementById('next-page-btn').addEventListener('click', () => {
+            if (currentPage < totalPages) {
+                loadProjects(currentPage + 1);
+            }
+        });
+
+        // Filter event listeners
+        document.getElementById('apply-filters-btn').addEventListener('click', applyFilters);
+        document.getElementById('clear-filters-btn').addEventListener('click', clearFilters);
+
+        // Last updated
+        document.getElementById('last-updated').textContent = new Date().toLocaleDateString('en-PH');
+
+        // Mobile autocomplete functionality
+        function addAutocompleteToInput(input, options) {
+            // Check if autocomplete is already set up for this input
+            if (input.parentNode && input.parentNode.classList && input.parentNode.classList.contains('autocomplete-container')) {
+                return;
+            }
+
+            let currentFocus = -1;
+            let currentOptions = [...options]; // Store original options
+
+            // Wrap input in autocomplete container
+            const autocompleteContainer = document.createElement('div');
+            autocompleteContainer.className = 'autocomplete-container';
+            autocompleteContainer.style.position = 'relative';
+            autocompleteContainer.style.width = '100%';
+
+            // Insert container before input
+            input.parentNode.insertBefore(autocompleteContainer, input);
+
+            // Move input into container
+            autocompleteContainer.appendChild(input);
+
+            // Create suggestions list
+            const suggestionsList = document.createElement('div');
+            suggestionsList.className = 'autocomplete-suggestions';
+            suggestionsList.style.display = 'none';
+            autocompleteContainer.appendChild(suggestionsList);
+
+            // Filter function
+            function filterOptions(value) {
+                if (value.length < 2) {
+                    suggestionsList.style.display = 'none';
+                    return;
+                }
+
+                const filtered = currentOptions.filter(option =>
+                    option.toLowerCase().includes(value.toLowerCase())
+                );
+
+                suggestionsList.innerHTML = '';
+
+                if (filtered.length === 0) {
+                    suggestionsList.style.display = 'none';
+                    return;
+                }
+
+                filtered.slice(0, 8).forEach((option, index) => {
+                    const item = document.createElement('div');
+                    item.className = 'autocomplete-item';
+                    item.innerHTML = option.replace(new RegExp(value, 'gi'), `<strong>$&</strong>`);
+                    item.addEventListener('click', () => {
+                        input.value = option;
+                        suggestionsList.style.display = 'none';
+                        currentFocus = -1;
+
+                        // Trigger filter application
+                        applyFilters();
+                    });
+
+                    // Add hover effect for keyboard navigation
+                    item.addEventListener('mouseenter', () => {
+                        removeActiveItems();
+                        item.classList.add('active');
+                        currentFocus = index;
+                    });
+
+                    item.addEventListener('mouseleave', () => {
+                        item.classList.remove('active');
+                    });
+
+                    suggestionsList.appendChild(item);
+                });
+
+                // Show suggestions
+                suggestionsList.style.display = 'block';
+            }
+
+            // Remove active class from all items
+            function removeActiveItems() {
+                const items = suggestionsList.querySelectorAll('.autocomplete-item');
+                items.forEach(item => item.classList.remove('active'));
+            }
+
+            function updateActiveItem(items) {
+                removeActiveItems();
+                if (currentFocus >= 0 && currentFocus < items.length) {
+                    items[currentFocus].classList.add('active');
+                }
+            }
+
+            // Input event listener
+            input.addEventListener('input', (e) => {
+                filterOptions(e.target.value);
+            });
+
+            // Focus event listener - show suggestions on focus
+            input.addEventListener('focus', () => {
+                if (input.value.length >= 2) {
+                    filterOptions(input.value);
+                }
+            });
+
+            // Blur event listener (hide suggestions)
+            input.addEventListener('blur', () => {
+                setTimeout(() => {
+                    suggestionsList.style.display = 'none';
+                    currentFocus = -1;
+                }, 200);
+            });
+
+            // Keyboard navigation
+            input.addEventListener('keydown', (e) => {
+                const items = suggestionsList.querySelectorAll('.autocomplete-item');
+
+                if (e.key === 'ArrowDown') {
+                    e.preventDefault();
+                    currentFocus = Math.min(currentFocus + 1, items.length - 1);
+                    updateActiveItem(items);
+                } else if (e.key === 'ArrowUp') {
+                    e.preventDefault();
+                    currentFocus = Math.max(currentFocus - 1, -1);
+                    updateActiveItem(items);
+                } else if (e.key === 'Enter') {
+                    e.preventDefault();
+                    if (currentFocus > -1 && items[currentFocus]) {
+                        items[currentFocus].click();
+                    }
+                } else if (e.key === 'Escape') {
+                    suggestionsList.style.display = 'none';
+                    currentFocus = -1;
+                }
+            });
+
+            // Click outside to close
+            document.addEventListener('click', (e) => {
+                if (!autocompleteContainer.contains(e.target)) {
+                    suggestionsList.style.display = 'none';
+                    currentFocus = -1;
+                }
+            });
+        }
+
+        // Setup autocomplete for mobile DIME filters based on option count
+        function setupDimeAutocomplete(filterOptions) {
+            // Define which filters should use static autocomplete based on expected option counts
+            const staticAutocompleteFilters = ['region']; // Only region uses static autocomplete
+            const dropdownFilters = ['status']; // These likely have fewer options
+            const lazyLoadFilters = ['barangay', 'city', 'province']; // These use lazy loading
+
+            // Setup static autocomplete for filters with many options
+            staticAutocompleteFilters.forEach(filterName => {
+                const input = document.getElementById(`filter-${filterName}`);
+                if (input && filterOptions[filterName] && filterOptions[filterName].length > 15) {
+                    addAutocompleteToInput(input, filterOptions[filterName]);
+                }
+            });
+
+            // Setup lazy loading for barangay, city, and province
+            lazyLoadFilters.forEach(filterName => {
+                const input = document.getElementById(`filter-${filterName}`);
+                if (input) {
+                    addLazyLoadAutocomplete(input, filterName);
+                }
+            });
+
+            // Setup project name search with lazy loading (API-based)
+            const searchInput = document.getElementById('filter-search');
+            if (searchInput) {
+                addLazyLoadAutocomplete(searchInput, 'project_name');
+            }
+
+            // Setup dropdowns for filters with few options (convert select to dropdown if needed)
+            dropdownFilters.forEach(filterName => {
+                const select = document.getElementById(`filter-${filterName}`);
+                if (select && filterOptions[filterName] && filterOptions[filterName].length <= 15) {
+                    // Populate select options
+                    filterOptions[filterName].forEach(option => {
+                        if (option && option.trim()) {
+                            const optionElement = document.createElement('option');
+                            optionElement.value = option;
+                            optionElement.textContent = option;
+                            select.appendChild(optionElement);
+                        }
+                    });
+                }
+            });
+
+            console.log('✅ Mobile DIME autocomplete setup complete');
+        }
+
+        // Add lazy loading autocomplete for mobile
+        function addLazyLoadAutocomplete(input, fieldName) {
+            // Check if autocomplete is already set up for this input
+            if (input.parentNode && input.parentNode.classList && input.parentNode.classList.contains('autocomplete-container')) {
+                return;
+            }
+
+            let currentFocus = -1;
+            let searchTimeout = null;
+
+            // Wrap input in autocomplete container
+            const autocompleteContainer = document.createElement('div');
+            autocompleteContainer.className = 'autocomplete-container';
+            autocompleteContainer.style.position = 'relative';
+            autocompleteContainer.style.width = '100%';
+
+            // Insert container before input
+            input.parentNode.insertBefore(autocompleteContainer, input);
+
+            // Move input into container
+            autocompleteContainer.appendChild(input);
+
+            // Create suggestions list
+            const suggestionsList = document.createElement('div');
+            suggestionsList.className = 'autocomplete-suggestions';
+            suggestionsList.style.display = 'none';
+            autocompleteContainer.appendChild(suggestionsList);
+
+                // Debounced search function
+                async function searchProjects(query) {
+                    // Project name requires 3+ characters, location filters require 2+ characters
+                    const minLength = fieldName === 'project_name' ? 3 : 2;
+                    if (query.length < minLength) {
+                        suggestionsList.style.display = 'none';
+                        return;
+                    }
+
+                try {
+                    let endpoint = '/api/dime/project-suggestions';
+                    if (fieldName === 'barangay') {
+                        endpoint = '/api/dime/barangay-suggestions';
+                    } else if (fieldName === 'city') {
+                        endpoint = '/api/dime/city-suggestions';
+                    } else if (fieldName === 'province') {
+                        endpoint = '/api/dime/province-suggestions';
+                    }
+
+                    const response = await fetch(`${endpoint}?query=${encodeURIComponent(query)}&limit=8`);
+                    const data = await response.json();
+
+                    if (data.success && data.suggestions.length > 0) {
+                        displaySuggestions(data.suggestions, query);
+                    } else {
+                        suggestionsList.style.display = 'none';
+                    }
+                } catch (error) {
+                    console.error('❌ Error fetching suggestions:', error);
+                    suggestionsList.style.display = 'none';
+                }
+            }
+
+            function displaySuggestions(suggestions, searchQuery = '') {
+                suggestionsList.innerHTML = '';
+
+                suggestions.forEach((suggestion, index) => {
+                    const item = document.createElement('div');
+                    item.className = 'autocomplete-item';
+                    item.innerHTML = suggestion.replace(new RegExp(searchQuery, 'gi'), `<strong>$&</strong>`);
+                    item.addEventListener('click', () => {
+                        input.value = suggestion;
+                        suggestionsList.style.display = 'none';
+                        currentFocus = -1;
+
+                        // Trigger filter application
+                        applyFilters();
+                    });
+
+                    // Add hover effect for keyboard navigation
+                    item.addEventListener('mouseenter', () => {
+                        removeActiveItems();
+                        item.classList.add('active');
+                        currentFocus = index;
+                    });
+
+                    item.addEventListener('mouseleave', () => {
+                        item.classList.remove('active');
+                    });
+
+                    suggestionsList.appendChild(item);
+                });
+
+                // Show suggestions
+                suggestionsList.style.display = 'block';
+            }
+
+            // Remove active class from all items
+            function removeActiveItems() {
+                const items = suggestionsList.querySelectorAll('.autocomplete-item');
+                items.forEach(item => item.classList.remove('active'));
+            }
+
+            function updateActiveItem(items) {
+                removeActiveItems();
+                if (currentFocus >= 0 && currentFocus < items.length) {
+                    items[currentFocus].classList.add('active');
+                }
+            }
+
+            // Input event listener with debouncing
+            input.addEventListener('input', (e) => {
+                const query = e.target.value.trim();
+
+                // Clear previous timeout
+                if (searchTimeout) {
+                    clearTimeout(searchTimeout);
+                }
+
+                // Set new timeout for debounced search
+                searchTimeout = setTimeout(() => {
+                    searchProjects(query);
+                }, 300); // 300ms debounce
+            });
+
+            // Focus event listener - show suggestions on focus if there's text
+            input.addEventListener('focus', () => {
+                const query = input.value.trim();
+                const minLength = fieldName === 'project_name' ? 3 : 2;
+                if (query.length >= minLength) {
+                    searchProjects(query);
+                }
+            });
+
+            // Blur event listener (hide suggestions)
+            input.addEventListener('blur', () => {
+                setTimeout(() => {
+                    suggestionsList.style.display = 'none';
+                    currentFocus = -1;
+                }, 200);
+            });
+
+            // Keyboard navigation
+            input.addEventListener('keydown', (e) => {
+                const items = suggestionsList.querySelectorAll('.autocomplete-item');
+
+                if (e.key === 'ArrowDown') {
+                    e.preventDefault();
+                    currentFocus = Math.min(currentFocus + 1, items.length - 1);
+                    updateActiveItem(items);
+                } else if (e.key === 'ArrowUp') {
+                    e.preventDefault();
+                    currentFocus = Math.max(currentFocus - 1, -1);
+                    updateActiveItem(items);
+                } else if (e.key === 'Enter') {
+                    e.preventDefault();
+                    if (currentFocus > -1 && items[currentFocus]) {
+                        items[currentFocus].click();
+                    }
+                } else if (e.key === 'Escape') {
+                    suggestionsList.style.display = 'none';
+                    currentFocus = -1;
+                }
+            });
+
+            // Click outside to close
+            document.addEventListener('click', (e) => {
+                if (!autocompleteContainer.contains(e.target)) {
+                    suggestionsList.style.display = 'none';
+                    currentFocus = -1;
+                }
+            });
+        }
+    });
+</script>
+{% endblock %}

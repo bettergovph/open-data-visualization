@@ -1,0 +1,204 @@
+{% extends "mobile/base_altgovph.html" %}
+
+{% block head %}
+<!-- AltGovPH Theme CSS -->
+<link rel="stylesheet" href="/static/css/altgovph-theme.css">
+
+<!-- AltGovPH Metadata Overrides -->
+<meta name="description" content="Government Data Analysis Platform for Flood Control Infrastructure Projects">
+<meta name="keywords" content="flood control, infrastructure, DPWH, government projects, Philippines, public works">
+<meta name="author" content="AltGovPH">
+
+<!-- AltGovPH Theme Overrides -->
+<style>
+
+    /* Apply government theme to body */
+    body {
+        background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%) !important; /* Dark blue gradient */
+        color: #333 !important;
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif !important;
+    }
+
+    /* Ensure main content area is visible and styled */
+    .main-content {
+        padding-top: 20px !important; /* Adjust if there's a fixed header */
+        min-height: calc(100vh - 40px); /* Ensure content fills screen */
+        background: rgba(255, 255, 255, 0.95);
+        border-radius: 10px;
+        margin: 20px auto;
+        max-width: 1200px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+    }
+
+    /* AltGovPH Header */
+    .altgovph-header {
+        text-align: center;
+        padding: 40px 0;
+        background: linear-gradient(135deg, #0038A8 0%, #CE1126 100%); /* Philippine flag colors */
+        color: white;
+        margin: -20px -20px 30px -20px; /* Adjust to fit container */
+        border-radius: 10px 10px 0 0;
+    }
+
+    .altgovph-header h1 {
+        margin: 0;
+        font-size: 2.5em;
+        font-weight: 700;
+        text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+    }
+
+    .altgovph-header p {
+        margin: 10px 0 0 0;
+        font-size: 1.2em;
+        opacity: 0.9;
+    }
+
+    .altgovph-logo {
+        font-size: 1.5em;
+        font-weight: 700;
+        color: white; /* Changed to white for contrast on gradient */
+        margin-bottom: 10px;
+    }
+
+    /* Style for buttons and links to match theme */
+    .button, .btn, a.cta-button {
+        background: linear-gradient(135deg, #0038A8 0%, #CE1126 100%) !important;
+        color: white !important;
+        border: none !important;
+        padding: 10px 20px !important;
+        border-radius: 5px !important;
+        text-decoration: none !important;
+        transition: transform 0.3s ease;
+    }
+
+    .button:hover, .btn:hover, a.cta-button:hover {
+        transform: scale(1.05);
+        opacity: 0.9;
+    }
+
+    /* Ensure text within the flood content is readable */
+    .flood-content p, .flood-content li {
+        color: #444;
+    }
+
+    /* Specific overrides for existing elements to ensure AltGovPH look */
+    .flood-title {
+        color: #0038A8 !important; /* Blue from Philippine flag */
+    }
+
+    .flood-subtitle {
+        color: #CE1126 !important; /* Red from Philippine flag */
+    }
+
+    .flood-card {
+        border-left: 4px solid #0038A8 !important;
+    }
+
+    /* Ensure any existing KenchLightyear specific classes are hidden */
+    .kenchlightyear-logo, .kenchlightyear-brand, .kenchlightyear-nav-item {
+        display: none !important;
+    }
+
+    /* Mobile-specific adjustments */
+    @media (max-width: 768px) {
+        .main-content {
+            margin: 10px;
+            padding: 15px;
+        }
+        
+        .altgovph-header h1 {
+            font-size: 2em;
+        }
+        
+        .feature-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="main-content">
+    <div class="altgovph-header">
+        <div class="altgovph-logo">🏛️ AltGovPH</div>
+        <h1>Flood Control Projects</h1>
+        <p>Government Infrastructure Analysis & Monitoring</p>
+    </div>
+
+    <div class="flood-content">
+        <p class="flood-subtitle">Intelligent flood control infrastructure analysis with AI-powered insights</p>
+        
+        <p class="flood-disclaimer bg-yellow-50 text-yellow-800 px-4 py-3 rounded-md my-4 text-base font-medium max-w-2xl mx-auto text-center">
+            <strong>Infrastructure Analysis:</strong> Track DPWH flood control projects across the Philippines with comprehensive data visualization and monitoring.
+        </p>
+
+        <div class="feature-grid grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 my-8">
+            <div class="feature-card flood-card bg-white p-6 rounded-lg shadow-lg hover:shadow-xl transition-all">
+                <h3 class="text-blue-900 mt-0 text-xl font-semibold mb-3">🌊 Project Tracking</h3>
+                <p class="text-gray-600 leading-relaxed">Monitor 9,855+ flood control projects across all regions with real-time status updates and completion tracking.</p>
+            </div>
+            
+            <div class="feature-card flood-card bg-white p-6 rounded-lg shadow-lg hover:shadow-xl transition-all">
+                <h3 class="text-blue-900 mt-0 text-xl font-semibold mb-3">📊 Data Visualization</h3>
+                <p class="text-gray-600 leading-relaxed">Interactive charts and maps showing project distribution, costs, and progress across provinces and regions.</p>
+            </div>
+            
+            <div class="feature-card flood-card bg-white p-6 rounded-lg shadow-lg hover:shadow-xl transition-all">
+                <h3 class="text-blue-900 mt-0 text-xl font-semibold mb-3">🔍 Advanced Search</h3>
+                <p class="text-gray-600 leading-relaxed">Powerful search and filtering capabilities to find specific projects by location, contractor, or project type.</p>
+            </div>
+            
+            <div class="feature-card flood-card bg-white p-6 rounded-lg shadow-lg hover:shadow-xl transition-all">
+                <h3 class="text-blue-900 mt-0 text-xl font-semibold mb-3">📈 Analytics</h3>
+                <p class="text-gray-600 leading-relaxed">Comprehensive analytics on project costs, timelines, and performance metrics for informed decision-making.</p>
+            </div>
+            
+            <div class="feature-card flood-card bg-white p-6 rounded-lg shadow-lg hover:shadow-xl transition-all">
+                <h3 class="text-blue-900 mt-0 text-xl font-semibold mb-3">🗺️ Geographic Analysis</h3>
+                <p class="text-gray-600 leading-relaxed">Interactive maps showing project locations with detailed information and regional analysis capabilities.</p>
+            </div>
+            
+            <div class="feature-card flood-card bg-white p-6 rounded-lg shadow-lg hover:shadow-xl transition-all">
+                <h3 class="text-blue-900 mt-0 text-xl font-semibold mb-3">📋 Export Tools</h3>
+                <p class="text-gray-600 leading-relaxed">Export project data in multiple formats for further analysis, reporting, and research purposes.</p>
+            </div>
+        </div>
+
+        <div class="cta-section text-center p-10 bg-gray-50 rounded-lg my-8">
+            <h2 class="text-blue-900 mb-4 text-2xl font-bold">Access Flood Control Analysis</h2>
+            <p class="text-gray-600 mb-6">Explore government infrastructure projects with transparency and accountability</p>
+            <a href="/api/flood/projects" class="cta-button inline-block bg-gradient-to-r from-blue-900 to-red-700 text-white px-8 py-4 no-underline rounded-md font-semibold text-lg hover:shadow-lg transition-all">🚀 Start Analysis</a>
+        </div>
+    </div>
+
+    <div class="footer text-center py-8 px-6 text-gray-600 border-t border-gray-200 mt-10">
+        <div class="logo text-2xl font-bold text-blue-900 mb-2">AltGovPH</div>
+        <p>Alternative Government Philippines - Promoting Infrastructure Transparency</p>
+        <p>© 2025 AltGovPH. Committed to Open Government Data.</p>
+    </div>
+</div>
+
+<script>
+    // Add some interactivity
+    document.addEventListener('DOMContentLoaded', function() {
+        console.log('🏛️ AltGovPH Flood Control Platform Loaded (Mobile)');
+        
+        // Add click tracking for analytics
+        document.querySelectorAll('.cta-button').forEach(button => {
+            button.addEventListener('click', function(e) {
+                console.log('🌊 Flood control analysis access initiated (Mobile)');
+            });
+        });
+        
+        // Add hover effects to feature cards
+        document.querySelectorAll('.feature-card').forEach(card => {
+            card.addEventListener('mouseenter', function() {
+                this.style.transform = 'translateY(-5px)';
+            });
+            card.addEventListener('mouseleave', function() {
+                this.style.transform = 'translateY(0)';
+            });
+        });
+    });
+</script>
+{% endblock %}

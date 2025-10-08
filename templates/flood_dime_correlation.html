@@ -1,0 +1,561 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Flood-DIME Contractor Analysis - AltGovPH</title>
+    
+    <!-- Google Fonts - Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif !important;
+            margin: 0;
+            padding: 0;
+            background: white !important;
+            color: black !important;
+            min-height: 100vh;
+        }
+        
+        .page-section {
+            padding: 20px;
+            max-width: 1600px;
+            margin: 20px auto;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+        }
+        
+        .correlation-container {
+            padding: 20px;
+        }
+        
+        .correlation-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .correlation-title {
+            font-size: 2.8em;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 10px;
+            font-weight: 700;
+        }
+        
+        .correlation-subtitle {
+            font-size: 1.3em;
+            color: #555;
+            margin-bottom: 10px;
+        }
+        
+        .highlight-text {
+            font-size: 1.1em;
+            color: #667eea;
+            font-weight: 600;
+            margin-top: 15px;
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 20px;
+            margin: 30px 0;
+        }
+        
+        .stat-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+            text-align: center;
+            transition: transform 0.3s ease;
+        }
+        
+        .stat-card:hover {
+            transform: translateY(-5px);
+        }
+        
+        .stat-card h3 {
+            margin: 0 0 10px 0;
+            font-size: 1em;
+            opacity: 0.9;
+            font-weight: 500;
+        }
+        
+        .stat-card .value {
+            font-size: 2.5em;
+            font-weight: bold;
+            margin: 10px 0;
+        }
+        
+        .stat-card .description {
+            font-size: 0.9em;
+            opacity: 0.85;
+        }
+        
+        .contractor-section {
+            background: #f8f9fa;
+            padding: 40px 30px;
+            border-radius: 12px;
+            margin: 30px 0;
+        }
+        
+        .section-title {
+            font-size: 2em;
+            color: #333;
+            margin-bottom: 10px;
+            text-align: center;
+            font-weight: 600;
+        }
+        
+        .section-subtitle {
+            text-align: center;
+            color: #666;
+            font-size: 1.1em;
+            margin-bottom: 30px;
+        }
+        
+        .table-wrapper {
+            overflow-x: auto;
+            margin: 20px 0;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .budget-projects-table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+        }
+        
+        .budget-projects-table th {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 15px 12px;
+            text-align: left;
+            font-weight: 600;
+            font-size: 0.95em;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+        
+        .budget-projects-table td {
+            padding: 14px 12px;
+            border-bottom: 1px solid #eee;
+            color: #333;
+            font-size: 0.95em;
+        }
+        
+        .budget-projects-table tbody tr:last-child td {
+            border-bottom: none;
+        }
+        
+        .budget-projects-table tbody tr:hover {
+            background-color: #f5f5ff;
+        }
+        
+        .budget-projects-table tbody tr:nth-child(1) {
+            background: #fff3cd;
+            font-weight: 600;
+        }
+        
+        .budget-projects-table tbody tr:nth-child(2),
+        .budget-projects-table tbody tr:nth-child(3) {
+            background: #f8f9fa;
+            font-weight: 500;
+        }
+        
+        .contractor-name {
+            font-weight: 600;
+            color: #667eea;
+        }
+        
+        .rank-badge {
+            display: inline-block;
+            background: #667eea;
+            color: white;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 0.85em;
+            font-weight: 600;
+            margin-right: 8px;
+        }
+        
+        .gold-badge {
+            background: linear-gradient(135deg, #FFD700 0%, #FFA500 100%);
+        }
+        
+        .silver-badge {
+            background: linear-gradient(135deg, #C0C0C0 0%, #808080 100%);
+        }
+        
+        .bronze-badge {
+            background: linear-gradient(135deg, #CD7F32 0%, #8B4513 100%);
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .loading-spinner {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 40px;
+            margin: 20px 0;
+        }
+        
+        .spinner {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        .spinner-circle {
+            width: 40px;
+            height: 40px;
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #667eea;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        
+        .data-source-footer {
+            text-align: center;
+            padding: 2rem;
+            color: #6c757d;
+            font-size: 0.875rem;
+            border-top: 1px solid #dee2e6;
+            margin-top: 2rem;
+            background: #f8f9fa;
+            border-radius: 8px;
+        }
+        
+        .methodology-box {
+            background: white;
+            padding: 25px;
+            border-radius: 8px;
+            margin: 30px 0;
+            border-left: 5px solid #667eea;
+        }
+        
+        .methodology-box h4 {
+            color: #667eea;
+            margin-top: 0;
+            font-size: 1.2em;
+        }
+        
+        .methodology-box p {
+            color: #555;
+            line-height: 1.6;
+            margin: 8px 0;
+        }
+    </style>
+</head>
+<body>
+    <!-- AltGovPH Navigation Bar -->
+    <nav class="altgovph-nav py-4 px-6 bg-white border-b border-gray-200">
+        <div class="max-w-7xl mx-auto flex items-center justify-between">
+            <div class="flex items-center">
+                <a href="/alt" class="flex items-center">
+                    <img src="https://raw.githubusercontent.com/bettergovph/logo/main/png/BetterGov_Horizontal-Black.png" 
+                         alt="BetterGov" 
+                         class="h-12">
+                </a>
+            </div>
+            <div class="hidden md:flex space-x-6">
+                <a href="/alt" class="text-black hover:text-gray-600 font-medium transition">Home</a>
+                <a href="/budget" class="text-black hover:text-gray-600 font-medium transition">Budget</a>
+                <a href="/flood" class="text-black hover:text-gray-600 font-medium transition">Flood Control</a>
+                <a href="/dime" class="text-black hover:text-gray-600 font-medium transition">DIME</a>
+                <a href="/budget-flood-correlation" class="text-black hover:text-gray-600 font-medium transition">Budget-Flood</a>
+                <a href="/flood-dime-correlation" class="text-black hover:text-gray-600 font-medium transition border-b-2 border-black">Flood-DIME</a>
+            </div>
+            <div class="md:hidden">
+                <button class="text-black focus:outline-none" onclick="toggleMobileMenu()">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+                    </svg>
+                </button>
+            </div>
+        </div>
+        <!-- Mobile menu (hidden by default) -->
+        <div id="mobileMenu" class="hidden mt-4 px-4 space-y-2">
+            <a href="/alt" class="block text-black hover:text-gray-600 font-medium py-2">Home</a>
+            <a href="/budget" class="block text-black hover:text-gray-600 font-medium py-2">Budget</a>
+            <a href="/flood" class="block text-black hover:text-gray-600 font-medium py-2">Flood Control</a>
+            <a href="/dime" class="block text-black hover:text-gray-600 font-medium py-2">DIME</a>
+            <a href="/budget-flood-correlation" class="block text-black hover:text-gray-600 font-medium py-2">Budget-Flood</a>
+            <a href="/flood-dime-correlation" class="block text-black hover:text-gray-600 font-medium py-2 border-b-2 border-black">Flood-DIME</a>
+        </div>
+    </nav>
+
+    <script>
+    function toggleMobileMenu() {
+        const menu = document.getElementById('mobileMenu');
+        menu.classList.toggle('hidden');
+    }
+    </script>
+
+    <!-- Flood-DIME Correlation Section -->
+    <div style="padding: 6rem;">
+    <section class="py-8 px-4 max-w-7xl mx-auto">
+        <!-- Year Filter -->
+        <div class="bg-white rounded-lg shadow-lg p-6 mb-8">
+            <div class="text-center mb-4">
+                <h2 class="text-2xl font-semibold text-gray-800 mb-4">Flood-DIME Contractor Analysis</h2>
+                <div class="inline-flex items-center gap-4">
+                    <label for="correlation-year-filter" class="font-semibold text-gray-700">Select Year:</label>
+                    <select id="correlation-year-filter" class="px-4 py-2 border-2 border-blue-600 rounded-md text-base bg-white text-gray-800">
+                        <option value="2020">2020</option>
+                        <option value="2021">2021</option>
+                        <option value="2022">2022</option>
+                        <option value="2023">2023</option>
+                        <option value="2024">2024</option>
+                        <option value="2025" selected>2025</option>
+                        <option value="all_years">All Years</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        <!-- Loading Spinner -->
+        <div id="contractor-loading-spinner" class="flex flex-col items-center justify-center py-12">
+            <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mb-4"></div>
+            <p class="text-gray-600 text-sm">Loading contractor correlation data...</p>
+        </div>
+
+        <!-- Key Statistics -->
+        <div id="stats-section" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8" style="display: none;">
+            <div class="bg-white p-6 rounded-lg shadow-md text-center border-l-4 border-blue-500">
+                <h3 class="text-lg font-semibold text-gray-800 mb-2">Top Flood Contractors</h3>
+                <p class="text-2xl font-bold text-blue-600 my-2" id="stat-flood-contractors">-</p>
+                <p class="text-sm text-gray-600">Analyzed from flood control projects</p>
+            </div>
+            <div class="bg-white p-6 rounded-lg shadow-md text-center border-l-4 border-blue-500">
+                <h3 class="text-lg font-semibold text-gray-800 mb-2">Total Flood Projects</h3>
+                <p class="text-2xl font-bold text-blue-600 my-2" id="stat-flood-projects">-</p>
+                <p class="text-sm text-gray-600">Combined flood control value</p>
+            </div>
+            <div class="bg-white p-6 rounded-lg shadow-md text-center border-l-4 border-blue-500">
+                <h3 class="text-lg font-semibold text-gray-800 mb-2">Contractors in DIME</h3>
+                <p class="text-2xl font-bold text-blue-600 my-2" id="stat-contractors-in-dime">-</p>
+                <p class="text-sm text-gray-600"><span id="stat-dime-projects">-</span> non-flood infrastructure projects</p>
+            </div>
+            <div class="bg-white p-6 rounded-lg shadow-md text-center border-l-4 border-blue-500">
+                <h3 class="text-lg font-semibold text-gray-800 mb-2">Total DIME Value</h3>
+                <p class="text-2xl font-bold text-blue-600 my-2" id="stat-dime-value">-</p>
+                <p class="text-sm text-gray-600">Non-flood infrastructure budget</p>
+            </div>
+        </div>
+
+        <!-- Contractor Analysis Table -->
+        <div id="contractor-section" class="bg-white rounded-lg shadow-md mb-6" style="display: none;">
+            <div class="p-6">
+                <h3 class="text-xl font-semibold text-gray-800 text-center mb-4">🏆 Top 50 Contractor Analysis</h3>
+                <p class="text-center text-gray-600 text-sm -mt-2 mb-4">
+                    Ranked by number of flood control projects, showing their presence in other DIME infrastructure projects
+                </p>
+
+                <div class="overflow-x-auto">
+                    <table class="budget-projects-table">
+                        <thead>
+                            <tr>
+                                <th style="width: 5%;">Rank</th>
+                                <th style="width: 35%;">Contractor Name</th>
+                                <th style="width: 12%; text-align: center;">Flood Projects</th>
+                                <th style="width: 15%; text-align: right;">Flood Budget</th>
+                                <th style="width: 12%; text-align: center;">DIME Projects</th>
+                                <th style="width: 15%; text-align: right;">DIME Budget</th>
+                                <th style="width: 6%; text-align: center;">Total</th>
+                            </tr>
+                        </thead>
+                        <tbody id="contractor-correlation-tbody">
+                            <tr>
+                                <td colspan="7" style="text-align: center; padding: 2rem;">Loading...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Methodology -->
+            <div id="methodology-section" class="methodology-box" style="display: none;">
+                <h4>📊 Methodology</h4>
+                <p><strong>Data Sources:</strong></p>
+                <p>• Flood Control Data: DPWH Flood Control Projects Database</p>
+                <p>• DIME Data: Department of Budget and Management - Digital Information for Monitoring and Evaluation</p>
+                <p><strong>Analysis Process:</strong></p>
+                <p>• Extracted top 50 contractors by number of flood control projects</p>
+                <p>• Used fuzzy string matching to find contractor names across databases (accounting for variations in naming conventions)</p>
+                <p>• Filtered DIME projects to exclude flood-related infrastructure to show diversification</p>
+                <p>• Calculated total project counts and budget allocations</p>
+            </div>
+
+            <!-- Data Source Footer -->
+            <div id="footer-section" class="data-source-footer" style="display: none;">
+                <p><strong>Data Sources:</strong></p>
+                <p>Flood Control: DPWH Flood Control Projects | DIME: DBM Digital Information for Monitoring and Evaluation</p>
+                <p><strong>Last Updated:</strong> <span id="last-updated">-</span></p>
+                <p style="margin-top: 15px; font-size: 0.85em; color: #888;">
+                    <em>Note: Contractor name matching uses fuzzy algorithms to account for naming variations between databases</em>
+                </p>
+            </div>
+        </div>
+    </section>
+    </div>
+
+    <script>
+        // Utility function to format currency to PHP
+        function formatCurrency(amount) {
+            if (amount === null || amount === undefined) {
+                return 'N/A';
+            }
+            return `₱${parseFloat(amount).toLocaleString('en-PH', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+        }
+
+        // Utility function to format numbers
+        function formatNumber(num) {
+            if (num === null || num === undefined) {
+                return 'N/A';
+            }
+            return parseFloat(num).toLocaleString('en-PH');
+        }
+
+        // Load contractor correlation data based on selected year
+        async function loadContractorCorrelation() {
+            try {
+                const selectedYear = document.getElementById('correlation-year-filter').value;
+                const yearLabel = selectedYear === 'all_years' ? 'All Years' : selectedYear;
+                
+                console.log(`🔍 Loading contractor correlation data for ${yearLabel}...`);
+                
+                const response = await fetch(`/static/data/flood_dime_contractor_correlation_${selectedYear}.json`);
+                const data = await response.json();
+                
+                console.log('✅ Contractor data loaded:', data);
+                
+                // Hide spinner, show content
+                document.getElementById('contractor-loading-spinner').style.display = 'none';
+                document.getElementById('stats-section').style.display = 'grid';
+                document.getElementById('contractor-section').style.display = 'block';
+                document.getElementById('methodology-section').style.display = 'block';
+                document.getElementById('footer-section').style.display = 'block';
+                
+                // Update statistics
+                const contractorsList = Object.values(data.contractors);
+                const totalFloodProjects = contractorsList.reduce((sum, c) => sum + c.flood_projects, 0);
+                const totalDimeProjects = contractorsList.reduce((sum, c) => sum + c.dime_non_flood_projects, 0);
+                const totalDimeValue = contractorsList.reduce((sum, c) => sum + c.dime_non_flood_cost, 0);
+                const contractorsInDime = contractorsList.filter(c => c.dime_non_flood_projects > 0).length;
+                
+                const statFloodContractors = document.getElementById('stat-flood-contractors');
+                if (statFloodContractors) statFloodContractors.textContent = formatNumber(contractorsList.length);
+
+                const statFloodProjects = document.getElementById('stat-flood-projects');
+                if (statFloodProjects) statFloodProjects.textContent = formatNumber(totalFloodProjects);
+
+                const statContractorsInDime = document.getElementById('stat-contractors-in-dime');
+                if (statContractorsInDime) statContractorsInDime.textContent = formatNumber(contractorsInDime);
+
+                const statDimeProjects = document.getElementById('stat-dime-projects');
+                if (statDimeProjects) statDimeProjects.textContent = formatNumber(totalDimeProjects);
+
+                const statDimeValue = document.getElementById('stat-dime-value');
+                if (statDimeValue) statDimeValue.textContent = formatCurrency(totalDimeValue);
+
+                const lastUpdated = document.getElementById('last-updated');
+                if (lastUpdated) lastUpdated.textContent = new Date().toLocaleDateString('en-PH');
+                
+                // Populate table
+                const tbody = document.getElementById('contractor-correlation-tbody');
+                tbody.innerHTML = '';
+                
+                // Sort contractors by total projects (flood + DIME)
+                contractorsList.sort((a, b) => {
+                    // Primary sort: by flood projects (descending)
+                    if (b.flood_projects !== a.flood_projects) {
+                        return b.flood_projects - a.flood_projects;
+                    }
+                    // Secondary sort: by DIME projects (descending)
+                    return b.dime_non_flood_projects - a.dime_non_flood_projects;
+                });
+                
+                contractorsList.forEach((contractor, index) => {
+                    const row = document.createElement('tr');
+                    const rank = index + 1;
+                    
+                    let rankBadge = `<span class="rank-badge">#${rank}</span>`;
+                    if (rank === 1) {
+                        rankBadge = `<span class="rank-badge gold-badge">🥇 #1</span>`;
+                    } else if (rank === 2) {
+                        rankBadge = `<span class="rank-badge silver-badge">🥈 #2</span>`;
+                    } else if (rank === 3) {
+                        rankBadge = `<span class="rank-badge bronze-badge">🥉 #3</span>`;
+                    }
+                    
+                    const totalProjects = contractor.flood_projects + contractor.dime_non_flood_projects;
+                    
+                    row.innerHTML = `
+                        <td style="text-align: center;">${rankBadge}</td>
+                        <td><strong class="contractor-name">${contractor.contractor}</strong></td>
+                        <td style="text-align: center;">${contractor.flood_projects.toLocaleString('en-PH')}</td>
+                        <td style="text-align: right;">${formatCurrency(contractor.flood_total_cost)}</td>
+                        <td style="text-align: center;">${contractor.dime_non_flood_projects.toLocaleString('en-PH')}</td>
+                        <td style="text-align: right;">${formatCurrency(contractor.dime_non_flood_cost)}</td>
+                        <td style="text-align: center;"><strong>${totalProjects.toLocaleString('en-PH')}</strong></td>
+                    `;
+                    
+                    tbody.appendChild(row);
+                });
+                
+                console.log(`✅ Loaded ${contractorsList.length} contractors`);
+                
+            } catch (error) {
+                console.error('❌ Error loading contractor correlation:', error);
+                document.getElementById('contractor-loading-spinner').innerHTML = `
+                    <div style="text-align: center; padding: 2rem; color: #dc3545;">
+                        <p style="font-size: 1.2em;">❌ Error loading contractor data</p>
+                        <p style="font-size: 0.9em;">${error.message}</p>
+                    </div>
+                `;
+            }
+        }
+
+        // Load data when page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('🚀 Page loaded, starting contractor correlation analysis...');
+            
+            // Load initial data
+            loadContractorCorrelation();
+            
+            // Add year filter event listener
+            document.getElementById('correlation-year-filter').addEventListener('change', function() {
+                console.log('📅 Year filter changed');
+                // Show loading spinner
+                document.getElementById('contractor-loading-spinner').style.display = 'flex';
+                document.getElementById('stats-section').style.display = 'none';
+                document.getElementById('contractor-section').style.display = 'none';
+                document.getElementById('methodology-section').style.display = 'none';
+                document.getElementById('footer-section').style.display = 'none';
+                // Reload data
+                loadContractorCorrelation();
+            });
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,1956 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DIME Infrastructure Projects - AltGovPH</title>
+
+    <!-- Google Fonts - Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- AltGovPH Metadata -->
+    <meta name="description" content="Digital Information for Monitoring and Evaluation (DIME) - Infrastructure Projects Tracker">
+    <meta name="keywords" content="DIME, infrastructure, projects, government, Philippines, data, transparency">
+    <meta name="author" content="AltGovPH">
+
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://altgovph.site/">
+    <meta property="og:title" content="DIME Infrastructure Projects - AltGovPH">
+    <meta property="og:description" content="Digital Information for Monitoring and Evaluation (DIME) - Infrastructure Projects Tracker">
+    <meta property="og:image" content="/static/images/gov_logo.png">
+
+    <!-- Twitter -->
+    <meta property="twitter:card" content="summary_large_image">
+    <meta property="twitter:url" content="https://altgovph.site/">
+    <meta property="twitter:title" content="DIME Infrastructure Projects - AltGovPH">
+    <meta property="twitter:description" content="Digital Information for Monitoring and Evaluation (DIME) - Infrastructure Projects Tracker">
+    <meta property="twitter:image" content="/static/images/gov_logo.png">
+
+    <style>
+        body {
+            font-family: 'Inter', sans-serif !important;
+            margin: 0;
+            padding: 0;
+            background: white !important;
+            color: black !important;
+            min-height: 100vh;
+        }
+        /* Budget tab button styling */
+        .budget-tab-btn {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-bottom: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px 8px 0 0;
+            cursor: pointer;
+            font-weight: 600;
+            color: #666;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .budget-tab-btn:hover:not(.disabled) {
+            background: #e9ecef;
+            color: #333;
+        }
+
+        .budget-tab-btn.active {
+            background: white;
+            color: #667eea;
+            border-color: #667eea;
+            border-bottom: 2px solid white;
+            margin-bottom: -2px;
+            z-index: 1;
+        }
+
+        /* Ensure tab panels work correctly */
+        .budget-tab-panel {
+            display: none;
+            animation: fadeIn 0.3s ease-in-out;
+            overflow-x: auto;
+            overflow-y: visible;
+            width: 100%;
+        }
+        .budget-tab-panel.active {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+<nav class="altgovph-nav py-4 px-6 bg-white border-b border-gray-200">
+    <div class="max-w-7xl mx-auto flex items-center justify-between">
+        <div class="flex items-center">
+            <a href="/alt" class="flex items-center">
+                <img src="https://raw.githubusercontent.com/bettergovph/logo/main/png/BetterGov_Horizontal-Black.png" 
+                     alt="BetterGov" 
+                     class="h-12">
+            </a>
+        </div>
+        <div class="hidden md:flex space-x-6">
+            <a href="/alt" class="text-black hover:text-gray-600 font-medium transition">Home</a>
+            <a href="/budget" class="text-black hover:text-gray-600 font-medium transition">Budget</a>
+            <a href="/flood" class="text-black hover:text-gray-600 font-medium transition">Flood Control</a>
+            <a href="/dime" class="text-black hover:text-gray-600 font-medium transition border-b-2 border-black">DIME</a>
+            <a href="/budget-flood-correlation" class="text-black hover:text-gray-600 font-medium transition">Budget-Flood</a>
+            <a href="/flood-dime-correlation" class="text-black hover:text-gray-600 font-medium transition">Flood-DIME</a>
+        </div>
+        <div class="md:hidden">
+            <button class="text-black focus:outline-none" onclick="toggleMobileMenu()">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+                </svg>
+            </button>
+        </div>
+    </div>
+    <!-- Mobile menu (hidden by default) -->
+    <div id="mobileMenu" class="hidden mt-4 px-4 space-y-2">
+        <a href="/alt" class="block text-black hover:text-gray-600 font-medium py-2">Home</a>
+        <a href="/budget" class="block text-black hover:text-gray-600 font-medium py-2">Budget</a>
+        <a href="/flood" class="block text-black hover:text-gray-600 font-medium py-2">Flood Control</a>
+        <a href="/dime" class="block text-black hover:text-gray-600 font-medium py-2 border-b-2 border-black">DIME</a>
+        <a href="/budget-flood-correlation" class="block text-black hover:text-gray-600 font-medium py-2">Budget-Flood</a>
+        <a href="/flood-dime-correlation" class="block text-black hover:text-gray-600 font-medium py-2">Flood-DIME</a>
+    </div>
+</nav>
+
+<script>
+function toggleMobileMenu() {
+    const menu = document.getElementById('mobileMenu');
+    menu.classList.toggle('hidden');
+}
+</script>
+
+<!-- DIME Section -->
+<div style="padding: 6rem;">
+<section class="budget-section">
+    <div class="budget-container">
+        <div class="budget-header">
+        </div>
+
+        <!-- Tabs Navigation -->
+        <div class="flex border-b-2 border-gray-200 mb-4 gap-2">
+            <button class="budget-tab-btn active bg-white text-blue-600 border-blue-600 border-t border-l border-r px-6 py-3 rounded-t-lg cursor-pointer font-semibold transition-all duration-300 relative -mb-0.5 z-10" data-tab="visual">📊 Visual</button>
+            <button class="budget-tab-btn bg-gray-100 text-gray-600 border-gray-300 border px-6 py-3 rounded-t-lg cursor-pointer font-semibold transition-all duration-300 hover:bg-gray-200" data-tab="table">📋 Table</button>
+            <button class="budget-tab-btn bg-gray-100 text-gray-600 border-gray-300 border px-6 py-3 rounded-t-lg cursor-pointer font-semibold transition-all duration-300 hover:bg-gray-200" data-tab="map">🗺️ Map</button>
+            <button class="budget-tab-btn bg-gray-100 text-gray-600 border-gray-300 border px-6 py-3 rounded-t-lg cursor-pointer font-semibold transition-all duration-300 hover:bg-gray-200" data-tab="fastest">⚡ Fastest</button>
+            <button class="budget-tab-btn bg-gray-100 text-gray-600 border-gray-300 border px-6 py-3 rounded-t-lg cursor-pointer font-semibold transition-all duration-300 hover:bg-gray-200" data-tab="barangays">🏘️ Barangays</button>
+        </div>
+
+        <!-- Tab Content -->
+        <div class="budget-tab-content">
+            <!-- Visual Tab -->
+            <div id="tab-visual" class="budget-tab-panel active">
+                <!-- Loading Spinner -->
+                <div id="visual-loading-spinner" style="display: flex; justify-content: center; align-items: center; padding: 40px; margin: 20px 0;">
+                    <div style="display: flex; flex-direction: column; align-items: center; gap: 15px;">
+                        <div style="width: 40px; height: 40px; border: 4px solid #f3f3f3; border-top: 4px solid #0038A8; border-radius: 50%; animation: spin 1s linear infinite;"></div>
+                        <p style="color: #666; font-size: 14px; margin: 0;">Loading DIME project data...</p>
+                    </div>
+                </div>
+
+                <!-- Visual Statistics Cards -->
+                <div class="visual-stats-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; margin-bottom: 30px;">
+                    <div class="stat-card" style="background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); text-align: center;">
+                        <h3 style="color: #0038A8; margin: 0 0 10px 0; font-size: 1.1em;">Total Projects</h3>
+                        <p id="visual-total-projects" style="font-size: 2em; font-weight: bold; color: #28a745; margin: 0;">-</p>
+                    </div>
+                    <div class="stat-card" style="background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); text-align: center;">
+                        <h3 style="color: #0038A8; margin: 0 0 10px 0; font-size: 1.1em;">Total Budget</h3>
+                        <p id="visual-total-budget" style="font-size: 2em; font-weight: bold; color: #dc3545; margin: 0;">-</p>
+                    </div>
+                    <div class="stat-card" style="background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); text-align: center;">
+                        <h3 style="color: #0038A8; margin: 0 0 10px 0; font-size: 1.1em;">Avg Project Cost</h3>
+                        <p id="visual-avg-cost" style="font-size: 2em; font-weight: bold; color: #6f42c1; margin: 0;">-</p>
+                    </div>
+                    <div class="stat-card" style="background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); text-align: center;">
+                        <h3 style="color: #0038A8; margin: 0 0 10px 0; font-size: 1.1em;">Active Projects</h3>
+                        <p id="visual-active-projects" style="font-size: 2em; font-weight: bold; color: #fd7e14; margin: 0;">-</p>
+                    </div>
+                </div>
+
+                <!-- Charts Section -->
+                <div class="charts-grid" style="display: grid; grid-template-columns: 1fr; gap: 20px; margin-bottom: 30px;">
+                    <!-- Project Status Distribution - Full Width -->
+                    <div class="chart-container" style="background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
+                        <h3 style="color: #0038A8; margin: 0 0 15px 0;">📊 Project Status Distribution</h3>
+                        <div style="height: 400px; position: relative;">
+                            <canvas id="statusChart"></canvas>
+                        </div>
+                    </div>
+
+                    <!-- Budget by Region - Full Width -->
+                    <div class="chart-container" style="background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
+                        <h3 style="color: #0038A8; margin: 0 0 15px 0;">🗺️ Budget by Region</h3>
+                        <div style="height: 600px; position: relative;">
+                            <canvas id="regionBudgetChart"></canvas>
+                        </div>
+                    </div>
+
+                    <!-- Top Implementing Offices - Full Width -->
+                    <div class="chart-container" style="background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
+                        <h3 style="color: #0038A8; margin: 0 0 15px 0;">🏛️ Top Implementing Offices</h3>
+                        <div style="height: 500px; position: relative;">
+                            <canvas id="implementingOfficesChart"></canvas>
+                        </div>
+                    </div>
+
+                    <!-- Two-column charts -->
+                    <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px;">
+                        <div class="chart-container" style="background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
+                            <h3 style="color: #0038A8; margin: 0 0 15px 0;">🏗️ Project Types</h3>
+                            <div style="height: 300px; position: relative;">
+                                <canvas id="projectTypesChart"></canvas>
+                            </div>
+                        </div>
+                        <div class="chart-container" style="background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
+                            <h3 style="color: #0038A8; margin: 0 0 15px 0;">💰 Most Expensive Projects</h3>
+                            <div style="height: 300px; position: relative;">
+                                <canvas id="expensiveProjectsChart"></canvas>
+                            </div>
+                        </div>
+                        <div class="chart-container" style="background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
+                            <h3 style="color: #0038A8; margin: 0 0 15px 0;">📅 Projects by Start Year</h3>
+                            <div style="height: 300px; position: relative;">
+                                <canvas id="yearlyChart"></canvas>
+                            </div>
+                        </div>
+                        <div class="chart-container" style="background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
+                            <h3 style="color: #0038A8; margin: 0 0 15px 0;">💵 Source of Funds</h3>
+                            <div style="height: 300px; position: relative;">
+                                <canvas id="fundsChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Project Progress Distribution - Full Width -->
+                    <div class="chart-container" style="background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
+                        <h3 style="color: #0038A8; margin: 0 0 15px 0;">📈 Project Progress Distribution</h3>
+                        <div style="height: 400px; position: relative;">
+                            <canvas id="progressChart"></canvas>
+                        </div>
+                        <div style="margin-top: 15px; font-size: 0.9em; color: #666;">
+                            <p style="margin: 5px 0;"><strong>Average Progress:</strong> <span id="avg-progress">-</span>%</p>
+                            <p style="margin: 5px 0;"><strong>Projects >90% Complete:</strong> <span id="near-completion">-</span></p>
+                            <p style="margin: 5px 0;"><strong>Projects <25% Complete:</strong> <span id="early-stage">-</span></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Table Tab -->
+            <div id="tab-table" class="budget-tab-panel">
+                <!-- Filters -->
+                <div class="data-browser-controls" style="margin-bottom: 2rem;">
+                    <div class="filter-group">
+                        <label for="filter-search">🔍 Search Project Name</label>
+                        <input type="text" id="filter-search" class="filter-input" placeholder="Start typing to search projects..." autocomplete="off">
+                    </div>
+                    <div class="filter-group">
+                        <label for="filter-status">Status</label>
+                        <select id="filter-status" class="filter-input">
+                            <option value="">All Status</option>
+                        </select>
+                    </div>
+                    <div class="filter-group">
+                        <label for="filter-region">Region</label>
+                        <select id="filter-region" class="filter-input">
+                            <option value="">All Regions</option>
+                        </select>
+                    </div>
+                    <div class="filter-group">
+                        <label for="filter-province">Province</label>
+                        <input type="text" id="filter-province" class="filter-input" placeholder="Search province...">
+                    </div>
+                    <div class="filter-group">
+                        <label for="filter-city">City</label>
+                        <input type="text" id="filter-city" class="filter-input" placeholder="Search city...">
+                    </div>
+                    <div class="filter-group">
+                        <label for="filter-barangay">Barangay</label>
+                        <input type="text" id="filter-barangay" class="filter-input" placeholder="Search barangay...">
+                    </div>
+                    <div class="filter-group">
+                        <button id="apply-filters-btn" class="budget-button">Apply Filters</button>
+                        <button id="clear-filters-btn" class="budget-button" style="background: #6c757d;">Clear</button>
+                    </div>
+                </div>
+
+                <!-- Table Container -->
+                <div id="projects-table-container">
+                    <div style="text-align: center; padding: 3rem;">
+                        <div style="border: 4px solid #f3f3f3; border-top: 4px solid #0038A8; border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; margin: 0 auto 1rem;"></div>
+                        Loading projects...
+                    </div>
+                </div>
+
+                <!-- Pagination -->
+                <div id="table-pagination" class="pagination-container" style="display: none;">
+                    <button id="prev-page-btn" class="pagination-btn">← Previous</button>
+                    <span id="page-info" class="page-info">Page 1 of 1</span>
+                    <button id="next-page-btn" class="pagination-btn">Next →</button>
+                </div>
+            </div>
+
+            <!-- Map Tab -->
+            <div id="tab-map" class="budget-tab-panel">
+                <div style="text-align: center; padding: 3rem; color: #6c757d;">
+                    <h3>🗺️ Map View Coming Soon</h3>
+                    <p>Interactive map of DIME infrastructure projects</p>
+                </div>
+            </div>
+
+            <!-- Fastest Tab -->
+            <div id="tab-fastest" class="budget-tab-panel">
+                <!-- Top 100 Fastest Completed Projects -->
+                <div style="background: white; padding: 30px; border-radius: 12px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); margin-bottom: 30px;">
+                    <h2 style="color: #0038A8; margin: 0 0 10px 0; font-size: 1.8em; text-align: center;">⚡ Top 100 Projects Completed the Fastest</h2>
+                    <p style="text-align: center; color: #666; margin-bottom: 30px;">Infrastructure projects with the shortest time from start to completion</p>
+
+                    <!-- Loading Spinner -->
+                    <div id="fastest-projects-loading" style="display: flex; justify-content: center; align-items: center; padding: 40px;">
+                        <div style="display: flex; flex-direction: column; align-items: center; gap: 15px;">
+                            <div style="width: 40px; height: 40px; border: 4px solid #f3f3f3; border-top: 4px solid #0038A8; border-radius: 50%; animation: spin 1s linear infinite;"></div>
+                            <p style="color: #666; font-size: 14px; margin: 0;">Analyzing project completion times...</p>
+                        </div>
+                    </div>
+
+                    <!-- Fastest Projects Table -->
+                    <div id="fastest-projects-container" style="display: none;">
+                        <table class="budget-projects-table">
+                            <thead>
+                                <tr>
+                                    <th style="width: 5%; text-align: center;">Rank</th>
+                                    <th style="width: 35%;">Project Name</th>
+                                    <th style="width: 12%;">Region</th>
+                                    <th style="width: 10%; text-align: center;">Start Date</th>
+                                    <th style="width: 10%; text-align: center;">Completion</th>
+                                    <th style="width: 8%; text-align: center;">Days</th>
+                                    <th style="width: 10%; text-align: right;">Cost</th>
+                                    <th style="width: 10%;">Contractor</th>
+                                </tr>
+                            </thead>
+                            <tbody id="fastest-projects-tbody">
+                                <tr>
+                                    <td colspan="8" style="text-align: center; padding: 2rem;">Loading...</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Barangays Tab -->
+            <div id="tab-barangays" class="budget-tab-panel">
+                <!-- Sub-tab Navigation -->
+                <div style="background: white; padding: 20px 30px 10px; border-radius: 12px 12px 0 0; box-shadow: 0 2px 10px rgba(0,0,0,0.1); margin-bottom: 0;">
+                    <div style="display: flex; gap: 10px; border-bottom: 2px solid #e0e0e0;">
+                        <button class="barangay-subtab-btn active" data-subtab="investment" style="padding: 12px 24px; background: none; border: none; border-bottom: 3px solid #0038A8; color: #0038A8; font-weight: 600; cursor: pointer; font-size: 1em; transition: all 0.3s;">
+                            💰 Top Investment Barangays
+                        </button>
+                        <button class="barangay-subtab-btn" data-subtab="active" style="padding: 12px 24px; background: none; border: none; border-bottom: 3px solid transparent; color: #666; font-weight: 500; cursor: pointer; font-size: 1em; transition: all 0.3s;">
+                            🎯 Most Active Barangays
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Top Investment Barangays Sub-tab -->
+                <div id="subtab-investment" class="barangay-subtab-panel" style="background: white; padding: 30px; border-radius: 0 0 12px 12px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); margin-bottom: 30px;">
+                    <h2 style="color: #0038A8; margin: 0 0 10px 0; font-size: 1.8em; text-align: center;">🏘️ Top 100 Barangays by Total Project Investment</h2>
+                    <p style="text-align: center; color: #666; margin-bottom: 30px;">Barangays with the highest aggregate infrastructure project amounts</p>
+
+                    <!-- Loading Spinner -->
+                    <div id="barangays-loading" style="display: flex; justify-content: center; align-items: center; padding: 40px;">
+                        <div style="display: flex; flex-direction: column; align-items: center; gap: 15px;">
+                            <div style="width: 40px; height: 40px; border: 4px solid #f3f3f3; border-top: 4px solid #0038A8; border-radius: 50%; animation: spin 1s linear infinite;"></div>
+                            <p style="color: #666; font-size: 14px; margin: 0;">Loading barangay aggregates...</p>
+                        </div>
+                    </div>
+
+                    <!-- Barangays Table -->
+                    <div id="barangays-container" style="display: none;">
+                        <table class="budget-projects-table">
+                            <thead>
+                                <tr>
+                                    <th style="width: 5%; text-align: center;">Rank</th>
+                                    <th style="width: 20%;">Barangay</th>
+                                    <th style="width: 15%;">City/Municipality</th>
+                                    <th style="width: 15%;">Province</th>
+                                    <th style="width: 10%;">Region</th>
+                                    <th style="width: 8%; text-align: center;">Projects</th>
+                                    <th style="width: 12%; text-align: right;">Total Amount</th>
+                                    <th style="width: 10%; text-align: right;">Avg Amount</th>
+                                    <th style="width: 5%; text-align: center;">%</th>
+                                </tr>
+                            </thead>
+                            <tbody id="barangays-tbody">
+                                <tr>
+                                    <td colspan="9" style="text-align: center; padding: 2rem;">Loading...</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Most Active Barangays Sub-tab -->
+                <div id="subtab-active" class="barangay-subtab-panel" style="display: none; background: white; padding: 30px; border-radius: 0 0 12px 12px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); margin-bottom: 30px;">
+                    <h2 style="color: #0038A8; margin: 0 0 10px 0; font-size: 1.8em; text-align: center;">🏘️ Top 100 Most Active Barangays</h2>
+                    <p style="text-align: center; color: #666; margin-bottom: 30px;">Barangays with the highest number of infrastructure projects</p>
+
+                    <!-- Loading Spinner -->
+                    <div id="barangays-active-loading" style="display: flex; justify-content: center; align-items: center; padding: 40px;">
+                        <div style="display: flex; flex-direction: column; align-items: center; gap: 15px;">
+                            <div style="width: 40px; height: 40px; border: 4px solid #f3f3f3; border-top: 4px solid #0038A8; border-radius: 50%; animation: spin 1s linear infinite;"></div>
+                            <p style="color: #666; font-size: 14px; margin: 0;">Loading most active barangays...</p>
+                        </div>
+                    </div>
+
+                    <!-- Barangays Table -->
+                    <div id="barangays-active-container" style="display: none;">
+                        <table class="budget-projects-table">
+                            <thead>
+                                <tr>
+                                    <th style="width: 5%; text-align: center;">Rank</th>
+                                    <th style="width: 20%;">Barangay</th>
+                                    <th style="width: 15%;">City/Municipality</th>
+                                    <th style="width: 15%;">Province</th>
+                                    <th style="width: 10%;">Region</th>
+                                    <th style="width: 8%; text-align: center;">Projects</th>
+                                    <th style="width: 12%; text-align: right;">Total Amount</th>
+                                    <th style="width: 10%; text-align: right;">Avg Amount</th>
+                                    <th style="width: 5%; text-align: center;">%</th>
+                                </tr>
+                            </thead>
+                            <tbody id="barangays-active-tbody">
+                                <tr>
+                                    <td colspan="9" style="text-align: center; padding: 2rem;">Loading...</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+</div>
+
+<!-- Data Source Footer -->
+<div class="data-source-footer">
+    <p><strong>Data Source:</strong> DBM DIME (Digital Information for Monitoring and Evaluation)</p>
+    <p>API: <a href="https://www.dime.gov.ph/api/v1/projects" target="_blank" style="color: #0038A8; text-decoration: none;">https://www.dime.gov.ph/api/v1/projects</a></p>
+    <p>Last Updated: <span id="last-updated">-</span></p>
+</div>
+
+<style>
+    @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+    }
+    
+    .data-source-footer {
+        text-align: center;
+        padding: 2rem;
+        color: #6c757d;
+        font-size: 0.875rem;
+        border-top: 1px solid #dee2e6;
+        margin-top: 2rem;
+        background: white;
+    }
+    
+    .budget-card-value {
+        font-size: 2.5rem;
+        font-weight: 700;
+        color: #0038A8;
+    }
+
+    .dime-table {
+        width: 100%;
+        border-collapse: collapse;
+        background: white;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        border-radius: 8px;
+        overflow: hidden;
+    }
+
+    .dime-table thead {
+        background: linear-gradient(135deg, #0038A8 0%, #003087 100%);
+        color: white;
+    }
+
+    .dime-table th {
+        padding: 1rem;
+        text-align: left;
+        font-weight: 600;
+        font-size: 0.875rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .dime-table td {
+        padding: 1rem;
+        border-bottom: 1px solid #dee2e6;
+        font-size: 0.9rem;
+    }
+
+    .dime-table tbody tr:hover {
+        background: #f8f9fa;
+        cursor: pointer;
+    }
+
+    .dime-table tbody tr:last-child td {
+        border-bottom: none;
+    }
+
+    .status-badge {
+        display: inline-block;
+        padding: 0.25rem 0.75rem;
+        border-radius: 12px;
+        font-size: 0.75rem;
+        font-weight: 600;
+        text-transform: uppercase;
+    }
+
+    .status-ongoing {
+        background: #28a745;
+        color: white;
+    }
+
+    .status-completed {
+        background: #007bff;
+        color: white;
+    }
+
+    .status-planned {
+        background: #ffc107;
+        color: #333;
+    }
+
+    .status-suspended {
+        background: #dc3545;
+        color: white;
+    }
+
+    .pagination-container {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 1rem;
+        margin-top: 2rem;
+        padding: 1rem;
+    }
+
+    .pagination-btn {
+        padding: 0.5rem 1rem;
+        background: #0038A8;
+        color: white;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        font-weight: 500;
+        transition: background 0.3s;
+    }
+
+    .pagination-btn:hover:not(:disabled) {
+        background: #003087;
+    }
+
+    .pagination-btn:disabled {
+        background: #6c757d;
+        cursor: not-allowed;
+        opacity: 0.5;
+    }
+
+    .page-info {
+        font-weight: 500;
+        color: #495057;
+    }
+
+    .data-browser-controls {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1rem;
+        background: white;
+        padding: 1.5rem;
+        border-radius: 8px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+
+    .filter-group {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+
+    .filter-group label {
+        font-weight: 600;
+        color: #495057;
+        font-size: 0.875rem;
+    }
+
+    .filter-input {
+        padding: 0.5rem;
+        border: 1px solid #ced4da;
+        border-radius: 4px;
+        font-size: 0.9rem;
+    }
+
+    .filter-input:focus {
+        outline: none;
+        border-color: #0038A8;
+        box-shadow: 0 0 0 2px rgba(0, 56, 168, 0.1);
+    }
+
+    .budget-button {
+        padding: 0.5rem 1rem;
+        background: #0038A8;
+        color: white;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        font-weight: 500;
+        transition: background 0.3s;
+    }
+
+    .budget-button:hover {
+        background: #003087;
+    }
+
+    /* Autocomplete styles for DIME filters */
+    .autocomplete-container {
+        position: relative;
+        display: inline-block;
+        width: 100%;
+    }
+
+    .autocomplete-suggestions {
+        position: absolute;
+        top: 100%;
+        left: 0;
+        right: 0;
+        background: white;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        max-height: 200px;
+        overflow-y: auto;
+        z-index: 1000;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+
+    .autocomplete-item {
+        padding: 8px 12px;
+        cursor: pointer;
+        border-bottom: 1px solid #eee;
+        font-size: 0.875rem;
+    }
+
+    .autocomplete-item:hover,
+    .autocomplete-item.active {
+        background-color: #f8f9fa;
+    }
+
+    .autocomplete-item:last-child {
+        border-bottom: none;
+    }
+
+    .autocomplete-item strong {
+        font-weight: bold;
+        color: #007bff;
+    }
+
+    /* Budget Projects Table (for Fastest and Barangays tabs) */
+    .budget-projects-table {
+        width: 100%;
+        border-collapse: collapse;
+        background: white;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        border-radius: 8px;
+        overflow: hidden;
+    }
+
+    .budget-projects-table thead {
+        background: linear-gradient(135deg, #0038A8 0%, #003087 100%);
+        color: white;
+    }
+
+    .budget-projects-table th {
+        padding: 12px;
+        text-align: left;
+        font-weight: 600;
+        font-size: 0.875rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .budget-projects-table td {
+        padding: 12px;
+        border-bottom: 1px solid #dee2e6;
+        font-size: 0.9rem;
+    }
+
+    .budget-projects-table tbody tr:hover {
+        background: #f8f9fa;
+        cursor: pointer;
+    }
+
+    .budget-projects-table tbody tr:last-child td {
+        border-bottom: none;
+    }
+</style>
+
+<script>
+    // Global state
+    let currentPage = 1;
+    let totalPages = 1;
+    let currentFilters = {};
+    let currentSortColumn = 'cost';
+    let currentSortOrder = 'DESC';
+    const itemsPerPage = 50;
+
+    // Initialize tabs
+    function initializeTabs() {
+        const tabButtons = document.querySelectorAll('.budget-tab-btn');
+        const tabPanels = document.querySelectorAll('.budget-tab-panel');
+
+        tabButtons.forEach(button => {
+            button.addEventListener('click', () => {
+                const targetTab = button.dataset.tab;
+                switchToTab(targetTab);
+            });
+        });
+    }
+    
+    // Function to programmatically switch to a specific tab
+    function switchToTab(tabName, updateHash = true) {
+        const tabButtons = document.querySelectorAll('.budget-tab-btn');
+        const tabPanels = document.querySelectorAll('.budget-tab-panel');
+
+        // Update active states
+        tabButtons.forEach(btn => btn.classList.remove('active'));
+        tabPanels.forEach(panel => panel.classList.remove('active'));
+
+        const targetButton = document.querySelector(`[data-tab="${tabName}"]`);
+        const targetPanel = document.getElementById(`tab-${tabName}`);
+
+        if (targetButton && targetPanel) {
+            targetButton.classList.add('active');
+            targetPanel.classList.add('active');
+
+            // Update URL hash (without triggering hashchange event)
+            if (updateHash && window.location.hash !== `#${tabName}`) {
+                history.replaceState(null, null, `#${tabName}`);
+            }
+
+            // Load data for specific tabs
+            if (tabName === 'table') {
+                loadProjects(1);
+            }
+        }
+    }
+
+    // Statistics are now loaded in the Visual tab via loadVisualData()
+
+    // Load filter options
+    async function loadFilterOptions() {
+        try {
+            console.log('🏗️ Loading filter options...');
+            
+            const statusSelect = document.getElementById('filter-status');
+            const regionSelect = document.getElementById('filter-region');
+
+            const response = await fetch('/api/dime/filter-options');
+            const data = await response.json();
+
+            if (data.success) {
+                // Populate statuses
+                if (data.statuses && Array.isArray(data.statuses)) {
+                    data.statuses.forEach(status => {
+                        const option = document.createElement('option');
+                        option.value = status;
+                        option.textContent = status;
+                        statusSelect.appendChild(option);
+                    });
+                }
+
+                // Populate regions
+                if (data.regions && Array.isArray(data.regions)) {
+                    data.regions.forEach(region => {
+                        const option = document.createElement('option');
+                        option.value = region;
+                        option.textContent = region;
+                        regionSelect.appendChild(option);
+                    });
+                }
+
+                console.log('✅ Filter options loaded from database');
+
+                // Setup autocomplete for appropriate filters
+                setupDimeAutocomplete(data);
+            } else {
+                console.error('❌ Failed to load filter options:', data.error);
+            }
+
+        } catch (error) {
+            console.error('❌ Error loading filter options:', error);
+        }
+    }
+
+    // Load projects with pagination
+    async function loadProjects(page = 1) {
+        try {
+            console.log(`🏗️ Loading DIME projects - Page ${page}...`);
+            
+            const container = document.getElementById('projects-table-container');
+            container.innerHTML = `
+                <div style="text-align: center; padding: 3rem;">
+                    <div style="border: 4px solid #f3f3f3; border-top: 4px solid #0038A8; border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; margin: 0 auto 1rem;"></div>
+                    Loading projects...
+                </div>
+            `;
+
+            // Build query parameters
+            const params = new URLSearchParams({
+                page: page,
+                limit: itemsPerPage,
+                sort_by: currentSortColumn,
+                sort_order: currentSortOrder
+            });
+
+            // Add filters
+            if (currentFilters.status) params.append('status', currentFilters.status);
+            if (currentFilters.region) params.append('region', currentFilters.region);
+            if (currentFilters.province) params.append('province', currentFilters.province);
+            if (currentFilters.city) params.append('city', currentFilters.city);
+            if (currentFilters.barangay) params.append('barangay', currentFilters.barangay);
+            if (currentFilters.search) params.append('search', currentFilters.search);
+
+            const response = await fetch(`/api/dime/projects?${params}`);
+            const data = await response.json();
+
+            if (data.success) {
+                currentPage = data.pagination.current_page;
+                totalPages = data.pagination.total_pages;
+                displayProjects(data.projects);
+                updatePagination();
+                console.log(`✅ Loaded ${data.projects.length} projects (Page ${currentPage}/${totalPages})`);
+            } else {
+                throw new Error(data.error || 'Failed to load projects');
+            }
+
+        } catch (error) {
+            console.error('❌ Error loading projects:', error);
+            document.getElementById('projects-table-container').innerHTML = `
+                <div style="text-align: center; padding: 3rem; color: #dc3545;">
+                    <p>Error loading DIME projects data: ${error.message}</p>
+                </div>
+            `;
+        }
+    }
+
+    // Display projects in table
+    function displayProjects(projects) {
+        const container = document.getElementById('projects-table-container');
+
+        if (projects.length === 0) {
+            container.innerHTML = `
+                <div style="text-align: center; padding: 3rem; background: white; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+                    <h3 style="color: #0038A8; margin-bottom: 1rem;">No projects found</h3>
+                    <p style="color: #6c757d;">Try adjusting your filters</p>
+                </div>
+            `;
+            return;
+        }
+
+        // Helper to create sortable header
+        const getSortIcon = (column) => {
+            if (currentSortColumn === column) {
+                return currentSortOrder === 'ASC' ? ' ▲' : ' ▼';
+            }
+            return '';
+        };
+
+        let tableHTML = `
+            <div style="overflow-x: auto;">
+                <table class="dime-table" style="width: 100%; border-collapse: collapse; background: white; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+                    <thead style="background: #0038A8; color: white;">
+                        <tr>
+                            <th style="padding: 12px; text-align: left; cursor: pointer; user-select: none;" onclick="sortTable('project_name')">
+                                Project Name${getSortIcon('project_name')}
+                            </th>
+                            <th style="padding: 12px; text-align: left; cursor: pointer; user-select: none;" onclick="sortTable('status')">
+                                Status${getSortIcon('status')}
+                            </th>
+                            <th style="padding: 12px; text-align: left; cursor: pointer; user-select: none;" onclick="sortTable('region')">
+                                Region${getSortIcon('region')}
+                            </th>
+                            <th style="padding: 12px; text-align: left; cursor: pointer; user-select: none;" onclick="sortTable('province')">
+                                Province${getSortIcon('province')}
+                            </th>
+                            <th style="padding: 12px; text-align: left; cursor: pointer; user-select: none;" onclick="sortTable('city')">
+                                City${getSortIcon('city')}
+                            </th>
+                            <th style="padding: 12px; text-align: right; cursor: pointer; user-select: none;" onclick="sortTable('cost')">
+                                Cost${getSortIcon('cost')}
+                            </th>
+                            <th style="padding: 12px; text-align: left; cursor: pointer; user-select: none;" onclick="sortTable('barangay')">
+                                Barangay${getSortIcon('barangay')}
+                            </th>
+                            <th style="padding: 12px; text-align: center; cursor: pointer; user-select: none;" onclick="sortTable('days')">
+                                Days${getSortIcon('days')}
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody>
+        `;
+
+        projects.forEach((project, index) => {
+            const bgColor = index % 2 === 0 ? '#f8f9fa' : 'white';
+            const statusColors = {
+                'Completed': '#28a745',
+                'On-going': '#ffc107',
+                'Delayed': '#dc3545',
+                'Suspended': '#6c757d',
+                'Proposed': '#17a2b8'
+            };
+            const statusColor = statusColors[project.status] || '#6c757d';
+            
+            tableHTML += `
+                <tr style="background: ${bgColor}; border-bottom: 1px solid #dee2e6; cursor: pointer; transition: background 0.2s;" 
+                    onmouseover="this.style.background='#e9ecef'" 
+                    onmouseout="this.style.background='${bgColor}'">
+                    <td style="padding: 12px; max-width: 300px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${project.project_name || 'N/A'}">
+                        <strong>${project.project_name || 'N/A'}</strong>
+                    </td>
+                    <td style="padding: 12px;">
+                        <span style="display: inline-block; padding: 4px 8px; border-radius: 4px; font-size: 0.85em; font-weight: 600; background: ${statusColor}20; color: ${statusColor};">
+                            ${project.status || 'N/A'}
+                        </span>
+                    </td>
+                    <td style="padding: 12px;">${project.region || 'N/A'}</td>
+                    <td style="padding: 12px;">${project.province || 'N/A'}</td>
+                    <td style="padding: 12px;">${project.city || 'N/A'}</td>
+                    <td style="padding: 12px; text-align: right; font-weight: 600; color: #0038A8;">
+                        ${project.project_cost_formatted || 'N/A'}
+                    </td>
+                    <td style="padding: 12px; font-size: 0.9em;">${project.barangay === 'N/A' ? 'N/A' : project.barangay}</td>
+                    <td style="padding: 12px; text-align: center; font-weight: 600; color: ${project.days >= 0 ? (project.days > 365 ? '#dc3545' : '#28a745') : '#6c757d'};">
+                        ${project.days_formatted || 'N/A'}
+                    </td>
+                </tr>
+            `;
+        });
+
+        tableHTML += `
+                    </tbody>
+                </table>
+            </div>
+        `;
+
+        container.innerHTML = tableHTML;
+    }
+
+    // Sort table by column
+    function sortTable(column) {
+        if (currentSortColumn === column) {
+            // Toggle sort order if clicking same column
+            currentSortOrder = currentSortOrder === 'ASC' ? 'DESC' : 'ASC';
+        } else {
+            // New column, default to DESC for numeric columns, ASC for text
+            currentSortColumn = column;
+            currentSortOrder = ['cost', 'days'].includes(column) ? 'DESC' : 'ASC';
+        }
+        loadProjects(currentPage);
+    }
+
+    // Update pagination controls
+    function updatePagination() {
+        const paginationContainer = document.getElementById('table-pagination');
+        const pageInfo = document.getElementById('page-info');
+        const prevBtn = document.getElementById('prev-page-btn');
+        const nextBtn = document.getElementById('next-page-btn');
+
+        paginationContainer.style.display = 'flex';
+        pageInfo.textContent = `Page ${currentPage.toLocaleString('en-PH')} of ${totalPages.toLocaleString('en-PH')}`;
+
+        prevBtn.disabled = currentPage === 1;
+        nextBtn.disabled = currentPage === totalPages;
+    }
+
+    // View project details (placeholder)
+    function viewProjectDetails(projectId) {
+        console.log('🏗️ View project details:', projectId);
+        // TODO: Implement project details modal or navigation
+        alert('Project details coming soon!');
+    }
+
+    // Apply filters
+    function applyFilters() {
+        currentFilters = {
+            search: document.getElementById('filter-search').value,
+            status: document.getElementById('filter-status').value,
+            region: document.getElementById('filter-region').value,
+            province: document.getElementById('filter-province').value,
+            city: document.getElementById('filter-city').value,
+            barangay: document.getElementById('filter-barangay').value
+        };
+
+        console.log('🔍 Applying filters:', currentFilters);
+        loadProjects(1);
+    }
+
+    // Clear filters
+    function clearFilters() {
+        document.getElementById('filter-search').value = '';
+        document.getElementById('filter-status').value = '';
+        document.getElementById('filter-region').value = '';
+        document.getElementById('filter-province').value = '';
+        document.getElementById('filter-city').value = '';
+        document.getElementById('filter-barangay').value = '';
+
+        currentFilters = {};
+        loadProjects(1);
+    }
+
+    // Autocomplete functionality for DIME filters
+    function addAutocompleteToInput(input, options) {
+        // Check if autocomplete is already set up for this input
+        if (input.parentNode && input.parentNode.classList && input.parentNode.classList.contains('autocomplete-container')) {
+            return;
+        }
+
+        let currentFocus = -1;
+        let currentOptions = [...options]; // Store original options
+
+        // Wrap input in autocomplete container
+        const autocompleteContainer = document.createElement('div');
+        autocompleteContainer.className = 'autocomplete-container';
+        autocompleteContainer.style.position = 'relative';
+        autocompleteContainer.style.width = '100%';
+
+        // Insert container before input
+        input.parentNode.insertBefore(autocompleteContainer, input);
+
+        // Move input into container
+        autocompleteContainer.appendChild(input);
+
+        // Create suggestions list
+        const suggestionsList = document.createElement('div');
+        suggestionsList.className = 'autocomplete-suggestions';
+        suggestionsList.style.display = 'none';
+        autocompleteContainer.appendChild(suggestionsList);
+
+        // Filter function
+        function filterOptions(value) {
+            if (value.length < 2) {
+                suggestionsList.style.display = 'none';
+                return;
+            }
+
+            const filtered = currentOptions.filter(option =>
+                option.toLowerCase().includes(value.toLowerCase())
+            );
+
+            suggestionsList.innerHTML = '';
+
+            if (filtered.length === 0) {
+                suggestionsList.style.display = 'none';
+                return;
+            }
+
+            filtered.slice(0, 10).forEach((option, index) => {
+                const item = document.createElement('div');
+                item.className = 'autocomplete-item';
+                item.innerHTML = option.replace(new RegExp(value, 'gi'), `<strong>$&</strong>`);
+                item.addEventListener('click', () => {
+                    input.value = option;
+                    suggestionsList.style.display = 'none';
+                    currentFocus = -1;
+
+                    // Trigger filter application
+                    applyFilters();
+                });
+
+                // Add hover effect for keyboard navigation
+                item.addEventListener('mouseenter', () => {
+                    removeActiveItems();
+                    item.classList.add('active');
+                    currentFocus = index;
+                });
+
+                item.addEventListener('mouseleave', () => {
+                    item.classList.remove('active');
+                });
+
+                suggestionsList.appendChild(item);
+            });
+
+            // Show suggestions
+            suggestionsList.style.display = 'block';
+        }
+
+        // Remove active class from all items
+        function removeActiveItems() {
+            const items = suggestionsList.querySelectorAll('.autocomplete-item');
+            items.forEach(item => item.classList.remove('active'));
+        }
+
+        function updateActiveItem(items) {
+            removeActiveItems();
+            if (currentFocus >= 0 && currentFocus < items.length) {
+                items[currentFocus].classList.add('active');
+            }
+        }
+
+        // Input event listener
+        input.addEventListener('input', (e) => {
+            filterOptions(e.target.value);
+        });
+
+        // Focus event listener - show suggestions on focus
+        input.addEventListener('focus', () => {
+            if (input.value.length >= 2) {
+                filterOptions(input.value);
+            }
+        });
+
+        // Blur event listener (hide suggestions)
+        input.addEventListener('blur', () => {
+            setTimeout(() => {
+                suggestionsList.style.display = 'none';
+                currentFocus = -1;
+            }, 200);
+        });
+
+        // Keyboard navigation
+        input.addEventListener('keydown', (e) => {
+            const items = suggestionsList.querySelectorAll('.autocomplete-item');
+
+            if (e.key === 'ArrowDown') {
+                e.preventDefault();
+                currentFocus = Math.min(currentFocus + 1, items.length - 1);
+                updateActiveItem(items);
+            } else if (e.key === 'ArrowUp') {
+                e.preventDefault();
+                currentFocus = Math.max(currentFocus - 1, -1);
+                updateActiveItem(items);
+            } else if (e.key === 'Enter') {
+                e.preventDefault();
+                if (currentFocus > -1 && items[currentFocus]) {
+                    items[currentFocus].click();
+                }
+            } else if (e.key === 'Escape') {
+                suggestionsList.style.display = 'none';
+                currentFocus = -1;
+            }
+        });
+
+        // Click outside to close
+        document.addEventListener('click', (e) => {
+            if (!autocompleteContainer.contains(e.target)) {
+                suggestionsList.style.display = 'none';
+                currentFocus = -1;
+            }
+        });
+    }
+
+    // Setup autocomplete for DIME filters based on option count
+    function setupDimeAutocomplete(filterOptions) {
+        // Define which filters should use static autocomplete based on expected option counts
+        const staticAutocompleteFilters = ['region']; // Only region uses static autocomplete
+        const dropdownFilters = ['status']; // These likely have fewer options
+        const lazyLoadFilters = ['barangay', 'city', 'province']; // These use lazy loading
+
+        // Setup static autocomplete for filters with many options
+        staticAutocompleteFilters.forEach(filterName => {
+            const input = document.getElementById(`filter-${filterName}`);
+            if (input && filterOptions[filterName] && filterOptions[filterName].length > 20) {
+                addAutocompleteToInput(input, filterOptions[filterName]);
+            }
+        });
+
+        // Setup lazy loading for barangay, city, and province
+        lazyLoadFilters.forEach(filterName => {
+            const input = document.getElementById(`filter-${filterName}`);
+            if (input) {
+                addLazyLoadAutocomplete(input, filterName);
+            }
+        });
+
+        // Setup project name search with lazy loading (API-based)
+        const searchInput = document.getElementById('filter-search');
+        if (searchInput) {
+            addLazyLoadAutocomplete(searchInput, 'project_name');
+        }
+
+        // Setup dropdowns for filters with few options (convert select to dropdown if needed)
+        dropdownFilters.forEach(filterName => {
+            const select = document.getElementById(`filter-${filterName}`);
+            if (select && filterOptions[filterName] && filterOptions[filterName].length <= 20) {
+                // Populate select options
+                filterOptions[filterName].forEach(option => {
+                    if (option && option.trim()) {
+                        const optionElement = document.createElement('option');
+                        optionElement.value = option;
+                        optionElement.textContent = option;
+                        select.appendChild(optionElement);
+                    }
+                });
+            }
+        });
+
+        console.log('✅ DIME autocomplete setup complete');
+    }
+
+    // Add lazy loading autocomplete for project name search
+    function addLazyLoadAutocomplete(input, fieldName) {
+        // Check if autocomplete is already set up for this input
+        if (input.parentNode && input.parentNode.classList && input.parentNode.classList.contains('autocomplete-container')) {
+            return;
+        }
+
+        let currentFocus = -1;
+        let searchTimeout = null;
+
+        // Wrap input in autocomplete container
+        const autocompleteContainer = document.createElement('div');
+        autocompleteContainer.className = 'autocomplete-container';
+        autocompleteContainer.style.position = 'relative';
+        autocompleteContainer.style.width = '100%';
+
+        // Insert container before input
+        input.parentNode.insertBefore(autocompleteContainer, input);
+
+        // Move input into container
+        autocompleteContainer.appendChild(input);
+
+        // Create suggestions list
+        const suggestionsList = document.createElement('div');
+        suggestionsList.className = 'autocomplete-suggestions';
+        suggestionsList.style.display = 'none';
+        autocompleteContainer.appendChild(suggestionsList);
+
+        // Debounced search function
+        async function searchProjects(query) {
+            // Project name requires 3+ characters, location filters require 2+ characters
+            const minLength = fieldName === 'project_name' ? 3 : 2;
+            if (query.length < minLength) {
+                suggestionsList.style.display = 'none';
+                return;
+            }
+
+            try {
+                let endpoint = '/api/dime/project-suggestions';
+                if (fieldName === 'barangay') {
+                    endpoint = '/api/dime/barangay-suggestions';
+                } else if (fieldName === 'city') {
+                    endpoint = '/api/dime/city-suggestions';
+                } else if (fieldName === 'province') {
+                    endpoint = '/api/dime/province-suggestions';
+                }
+
+                const response = await fetch(`${endpoint}?query=${encodeURIComponent(query)}&limit=10`);
+                const data = await response.json();
+
+                if (data.success && data.suggestions.length > 0) {
+                    displaySuggestions(data.suggestions, query);
+                } else {
+                    suggestionsList.style.display = 'none';
+                }
+            } catch (error) {
+                console.error('❌ Error fetching suggestions:', error);
+                suggestionsList.style.display = 'none';
+            }
+        }
+
+        function displaySuggestions(suggestions, searchQuery = '') {
+            suggestionsList.innerHTML = '';
+
+            suggestions.forEach((suggestion, index) => {
+                const item = document.createElement('div');
+                item.className = 'autocomplete-item';
+                item.innerHTML = suggestion.replace(new RegExp(searchQuery, 'gi'), `<strong>$&</strong>`);
+                item.addEventListener('click', () => {
+                    input.value = suggestion;
+                    suggestionsList.style.display = 'none';
+                    currentFocus = -1;
+
+                    // Trigger filter application
+                    applyFilters();
+                });
+
+                // Add hover effect for keyboard navigation
+                item.addEventListener('mouseenter', () => {
+                    removeActiveItems();
+                    item.classList.add('active');
+                    currentFocus = index;
+                });
+
+                item.addEventListener('mouseleave', () => {
+                    item.classList.remove('active');
+                });
+
+                suggestionsList.appendChild(item);
+            });
+
+            // Show suggestions
+            suggestionsList.style.display = 'block';
+        }
+
+        // Remove active class from all items
+        function removeActiveItems() {
+            const items = suggestionsList.querySelectorAll('.autocomplete-item');
+            items.forEach(item => item.classList.remove('active'));
+        }
+
+        function updateActiveItem(items) {
+            removeActiveItems();
+            if (currentFocus >= 0 && currentFocus < items.length) {
+                items[currentFocus].classList.add('active');
+            }
+        }
+
+        // Input event listener with debouncing
+        input.addEventListener('input', (e) => {
+            const query = e.target.value.trim();
+
+            // Clear previous timeout
+            if (searchTimeout) {
+                clearTimeout(searchTimeout);
+            }
+
+            // Set new timeout for debounced search
+            searchTimeout = setTimeout(() => {
+                searchProjects(query);
+            }, 300); // 300ms debounce
+        });
+
+            // Focus event listener - show suggestions on focus if there's text
+            input.addEventListener('focus', () => {
+                const query = input.value.trim();
+                const minLength = fieldName === 'project_name' ? 3 : 2;
+                if (query.length >= minLength) {
+                    searchProjects(query);
+                }
+            });
+
+        // Blur event listener (hide suggestions)
+        input.addEventListener('blur', () => {
+            setTimeout(() => {
+                suggestionsList.style.display = 'none';
+                currentFocus = -1;
+            }, 200);
+        });
+
+        // Keyboard navigation
+        input.addEventListener('keydown', (e) => {
+            const items = suggestionsList.querySelectorAll('.autocomplete-item');
+
+            if (e.key === 'ArrowDown') {
+                e.preventDefault();
+                currentFocus = Math.min(currentFocus + 1, items.length - 1);
+                updateActiveItem(items);
+            } else if (e.key === 'ArrowUp') {
+                e.preventDefault();
+                currentFocus = Math.max(currentFocus - 1, -1);
+                updateActiveItem(items);
+            } else if (e.key === 'Enter') {
+                e.preventDefault();
+                if (currentFocus > -1 && items[currentFocus]) {
+                    items[currentFocus].click();
+                }
+            } else if (e.key === 'Escape') {
+                suggestionsList.style.display = 'none';
+                currentFocus = -1;
+            }
+        });
+
+        // Click outside to close
+        document.addEventListener('click', (e) => {
+            if (!autocompleteContainer.contains(e.target)) {
+                suggestionsList.style.display = 'none';
+                currentFocus = -1;
+            }
+        });
+    }
+
+    // Load visual data and charts
+    async function loadVisualData() {
+        try {
+            console.log('🏗️ Loading visual data from API...');
+            
+            const spinner = document.getElementById('visual-loading-spinner');
+            if (spinner) spinner.style.display = 'flex';
+
+            // Fetch real-time statistics from API
+            const response = await fetch('/api/dime/statistics');
+            const data = await response.json();
+            
+            if (!data.success) {
+                throw new Error(data.error || 'Failed to load statistics');
+            }
+            
+            // Hide spinner
+            if (spinner) spinner.style.display = 'none';
+
+            // Update statistics cards
+            const stats = data.statistics;
+            document.getElementById('visual-total-projects').textContent = stats.total_projects.toLocaleString('en-PH');
+            document.getElementById('visual-total-budget').textContent = '₱' + (stats.total_budget / 1e9).toFixed(1) + 'B';
+            document.getElementById('visual-avg-cost').textContent = '₱' + (stats.avg_cost / 1e6).toFixed(1) + 'M';
+            document.getElementById('visual-active-projects').textContent = stats.active_projects.toLocaleString('en-PH');
+
+            // Render charts with real data
+            renderStatusChart(data.status_distribution);
+            renderRegionBudgetChart(data.budget_by_region);
+            renderImplementingOfficesChart(data.top_offices);
+            renderProjectTypesChart(data.project_types);
+            renderExpensiveProjectsChart(data.expensive_projects);
+            renderYearlyChart(data.projects_by_year);
+            renderFundsChart(data.source_of_funds);
+            renderProgressChart(data.progress_distribution);
+            
+            console.log('✅ Visual data loaded successfully');
+
+        } catch (error) {
+            console.error('❌ Error loading visual data:', error);
+            const spinner = document.getElementById('visual-loading-spinner');
+            if (spinner) {
+                spinner.innerHTML = '<p style="color: #dc3545;">Error loading visual data: ' + error.message + '</p>';
+            }
+        }
+    }
+
+    // Chart rendering functions
+    function renderStatusChart() {
+        const ctx = document.getElementById('statusChart');
+        if (!ctx) return;
+        
+        new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: ['Ongoing', 'Completed', 'Planned', 'Suspended'],
+                datasets: [{
+                    label: 'Number of Projects',
+                    data: [8456, 3214, 987, 213],
+                    backgroundColor: ['#28a745', '#007bff', '#ffc107', '#dc3545']
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false
+            }
+        });
+    }
+
+    function renderRegionBudgetChart() {
+        const ctx = document.getElementById('regionBudgetChart');
+        if (!ctx) return;
+        
+        new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: ['NCR', 'Region III', 'Region IV-A', 'Region VII', 'Region XI', 'Region VI', 'CAR', 'Region I', 'Region V', 'Region X'],
+                datasets: [{
+                    label: 'Budget (Billions)',
+                    data: [125.3, 98.7, 87.4, 65.2, 54.8, 48.3, 42.1, 38.9, 35.6, 32.4],
+                    backgroundColor: '#0038A8'
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                indexAxis: 'y'
+            }
+        });
+    }
+
+    function renderImplementingOfficesChart() {
+        const ctx = document.getElementById('implementingOfficesChart');
+        if (!ctx) return;
+        
+        new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: ['DPWH', 'DOTr', 'DENR', 'DA', 'DOH', 'DepEd', 'DILG', 'DTI', 'DOE', 'DOST'],
+                datasets: [{
+                    label: 'Budget (Billions)',
+                    data: [245.6, 187.3, 95.4, 67.8, 45.2, 34.9, 28.7, 19.3, 15.8, 12.4],
+                    backgroundColor: '#6f42c1'
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                indexAxis: 'y'
+            }
+        });
+    }
+
+    function renderProjectTypesChart() {
+        const ctx = document.getElementById('projectTypesChart');
+        if (!ctx) return;
+        
+        new Chart(ctx, {
+            type: 'doughnut',
+            data: {
+                labels: ['Road', 'Bridge', 'Building', 'Flood Control', 'Water Supply', 'Other'],
+                datasets: [{
+                    data: [4523, 2134, 1876, 1543, 987, 1807],
+                    backgroundColor: ['#0038A8', '#28a745', '#dc3545', '#ffc107', '#6f42c1', '#fd7e14']
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false
+            }
+        });
+    }
+
+    function renderExpensiveProjectsChart() {
+        const ctx = document.getElementById('expensiveProjectsChart');
+        if (!ctx) return;
+        
+        new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: ['Metro Manila Subway', 'North-South Railway', 'NLEX-SLEX Connector', 'MRT-7', 'Skyway Stage 3'],
+                datasets: [{
+                    label: 'Cost (Billions)',
+                    data: [227.4, 175.3, 23.6, 62.7, 45.3],
+                    backgroundColor: '#dc3545'
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                indexAxis: 'y'
+            }
+        });
+    }
+
+    function renderYearlyChart() {
+        const ctx = document.getElementById('yearlyChart');
+        if (!ctx) return;
+        
+        new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: ['2018', '2019', '2020', '2021', '2022', '2023', '2024', '2025'],
+                datasets: [{
+                    label: 'Projects Started',
+                    data: [567, 892, 1234, 1543, 1876, 2134, 2456, 2168],
+                    borderColor: '#0038A8',
+                    backgroundColor: 'rgba(0, 56, 168, 0.1)',
+                    fill: true
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false
+            }
+        });
+    }
+
+    function renderFundsChart() {
+        const ctx = document.getElementById('fundsChart');
+        if (!ctx) return;
+        
+        new Chart(ctx, {
+            type: 'pie',
+            data: {
+                labels: ['National Budget', 'ODA/Loans', 'LGU Funds', 'PPP', 'Other'],
+                datasets: [{
+                    data: [425.3, 198.7, 76.4, 32.1, 8.0],
+                    backgroundColor: ['#0038A8', '#28a745', '#ffc107', '#6f42c1', '#fd7e14']
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false
+            }
+        });
+    }
+
+    function renderProgressChart() {
+        const ctx = document.getElementById('progressChart');
+        if (!ctx) return;
+        
+        new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: ['0-10%', '11-25%', '26-50%', '51-75%', '76-90%', '91-100%'],
+                datasets: [{
+                    label: 'Number of Projects',
+                    data: [1234, 2156, 3421, 2987, 1865, 1207],
+                    backgroundColor: ['#dc3545', '#fd7e14', '#ffc107', '#28a745', '#007bff', '#6f42c1']
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false
+            }
+        });
+
+        // Update progress stats
+        document.getElementById('avg-progress').textContent = '52.3';
+        document.getElementById('near-completion').textContent = '1,207';
+        document.getElementById('early-stage').textContent = '3,390';
+    }
+
+    // Load fastest completed projects
+    async function loadFastestProjects() {
+        try {
+            console.log('⚡ Loading fastest completed projects...');
+            
+            const spinner = document.getElementById('fastest-projects-loading');
+            const container = document.getElementById('fastest-projects-container');
+            const tbody = document.getElementById('fastest-projects-tbody');
+            
+            // Try to load from JSON file, fallback to API, then placeholder
+            let fastestProjects = [];
+            
+            try {
+                const response = await fetch('/static/data/fastest_dime_projects.json');
+                if (response.ok) {
+                    const data = await response.json();
+                    fastestProjects = data.projects || [];
+                    console.log(`✅ Loaded ${fastestProjects.length} fastest projects from JSON`);
+                }
+            } catch (error) {
+                console.log('⚠️ Could not load fastest projects from JSON, showing note');
+            }
+            
+            // If no data, show a note that database connection is needed
+            if (fastestProjects.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="8" style="text-align: center; padding: 3rem; color: #666;">
+                            <div style="background: #f8f9fa; padding: 2rem; border-radius: 8px; max-width: 600px; margin: 0 auto;">
+                                <h4 style="color: #0038A8; margin-bottom: 1rem;">📊 Database Connection Required</h4>
+                                <p style="margin-bottom: 0.5rem;">To display the top 50 fastest completed DIME projects, database credentials are needed.</p>
+                                <p style="font-size: 0.9em; color: #888;">Run: <code>python3 generate_fastest_dime_projects.py</code> with proper PostgreSQL credentials.</p>
+                            </div>
+                        </td>
+                    </tr>
+                `;
+                spinner.style.display = 'none';
+                container.style.display = 'block';
+                return;
+            }
+            
+            // Hide spinner, show table
+            spinner.style.display = 'none';
+            container.style.display = 'block';
+            
+            tbody.innerHTML = '';
+            
+            if (fastestProjects.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="8" style="text-align: center; padding: 2rem; color: #666;">
+                            No completed projects with date information found
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+            
+            fastestProjects.forEach((project, index) => {
+                const row = document.createElement('tr');
+                
+                // Highlight top 3
+                if (index < 3) {
+                    row.style.background = index === 0 ? '#fff3cd' : index === 1 ? '#f8f9fa' : '#f8f9fa';
+                    row.style.fontWeight = index < 3 ? '500' : 'normal';
+                }
+                
+                let rankBadge = `#${index + 1}`;
+                if (index === 0) rankBadge = '🥇';
+                if (index === 1) rankBadge = '🥈';
+                if (index === 2) rankBadge = '🥉';
+                
+                // Parse contractor JSON to get name
+                let contractorName = 'N/A';
+                if (project.contractor) {
+                    try {
+                        const contractorObj = typeof project.contractor === 'string' ? JSON.parse(project.contractor) : project.contractor;
+                        contractorName = contractorObj.name || contractorObj.nameAbbreviation || 'N/A';
+                    } catch (e) {
+                        contractorName = project.contractor;
+                    }
+                }
+                
+                row.innerHTML = `
+                    <td style="text-align: center;"><strong>${rankBadge}</strong></td>
+                    <td><strong style="color: #0038A8;">${project.project_name || 'N/A'}</strong></td>
+                    <td>${project.region || 'N/A'}</td>
+                    <td style="text-align: center;">${project.start_date || 'N/A'}</td>
+                    <td style="text-align: center;">${project.completion_date || 'N/A'}</td>
+                    <td style="text-align: center;"><strong style="color: #28a745;">${project.duration_days || 'N/A'}</strong></td>
+                    <td style="text-align: right;">₱${project.cost ? parseFloat(project.cost).toLocaleString('en-PH', {minimumFractionDigits: 2}) : 'N/A'}</td>
+                    <td style="font-size: 0.9em;">${contractorName}</td>
+                `;
+                
+                tbody.appendChild(row);
+            });
+            
+            console.log(`✅ Loaded ${fastestProjects.length} fastest projects`);
+            
+        } catch (error) {
+            console.error('❌ Error loading fastest projects:', error);
+            const spinner = document.getElementById('fastest-projects-loading');
+            if (spinner) {
+                spinner.innerHTML = `
+                    <div style="text-align: center; padding: 2rem; color: #dc3545;">
+                        <p style="font-size: 1.2em;">❌ Error loading fastest projects</p>
+                        <p style="font-size: 0.9em;">${error.message}</p>
+                    </div>
+                `;
+            }
+        }
+    }
+
+    // Load barangay aggregates
+    async function loadBarangayAggregates() {
+        try {
+            console.log('🏘️ Loading barangay aggregates...');
+            
+            const spinner = document.getElementById('barangays-loading');
+            const container = document.getElementById('barangays-container');
+            const tbody = document.getElementById('barangays-tbody');
+            
+            // Fetch from API
+            const response = await fetch('/api/dime/barangay-aggregates');
+            const data = await response.json();
+            
+            if (!data.success) {
+                throw new Error(data.error || 'Failed to load barangay aggregates');
+            }
+            
+            // Hide spinner, show table
+            spinner.style.display = 'none';
+            container.style.display = 'block';
+            
+            tbody.innerHTML = '';
+            
+            if (!data.barangays || data.barangays.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="9" style="text-align: center; padding: 2rem; color: #666;">
+                            No barangay data available
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+            
+            data.barangays.forEach((brgy, index) => {
+                const row = document.createElement('tr');
+                
+                // Highlight top 3
+                if (index < 3) {
+                    row.style.background = index === 0 ? '#fff3cd' : index === 1 ? '#f8f9fa' : '#f8f9fa';
+                    row.style.fontWeight = index < 3 ? '500' : 'normal';
+                }
+                
+                let rankBadge = `#${brgy.rank}`;
+                if (index === 0) rankBadge = '🥇';
+                if (index === 1) rankBadge = '🥈';
+                if (index === 2) rankBadge = '🥉';
+                
+                row.innerHTML = `
+                    <td style="text-align: center;"><strong>${rankBadge}</strong></td>
+                    <td><strong style="color: #0038A8;">${brgy.barangay || 'N/A'}</strong></td>
+                    <td>${brgy.city || 'N/A'}</td>
+                    <td>${brgy.province || 'N/A'}</td>
+                    <td style="font-size: 0.9em;">${brgy.region || 'N/A'}</td>
+                    <td style="text-align: center;"><strong>${brgy.project_count || 0}</strong></td>
+                    <td style="text-align: right; font-weight: 600; color: #0038A8;">₱${parseFloat(brgy.total_amount).toLocaleString('en-PH', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
+                    <td style="text-align: right; color: #666;">₱${parseFloat(brgy.avg_amount).toLocaleString('en-PH', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
+                    <td style="text-align: center; font-size: 0.85em; color: #28a745;">${brgy.percentage_of_total ? parseFloat(brgy.percentage_of_total).toFixed(2) : '0.00'}%</td>
+                `;
+                
+                tbody.appendChild(row);
+            });
+            
+            console.log(`✅ Loaded ${data.barangays.length} barangay aggregates`);
+            
+        } catch (error) {
+            console.error('❌ Error loading barangay aggregates:', error);
+            const spinner = document.getElementById('barangays-loading');
+            if (spinner) {
+                spinner.innerHTML = `
+                    <div style="text-align: center; padding: 2rem; color: #dc3545;">
+                        <p style="font-size: 1.2em;">❌ Error loading barangay aggregates</p>
+                        <p style="font-size: 0.9em;">${error.message}</p>
+                    </div>
+                `;
+            }
+        }
+    }
+
+    // Load most active barangays (by project count)
+    async function loadBarangayAggregatesByCount() {
+        try {
+            console.log('🎯 Loading most active barangays...');
+            
+            const spinner = document.getElementById('barangays-active-loading');
+            const container = document.getElementById('barangays-active-container');
+            const tbody = document.getElementById('barangays-active-tbody');
+            
+            // Fetch from API
+            const response = await fetch('/api/dime/barangay-aggregates-by-count');
+            const data = await response.json();
+            
+            if (!data.success) {
+                throw new Error(data.error || 'Failed to load most active barangays');
+            }
+            
+            // Hide spinner, show table
+            spinner.style.display = 'none';
+            container.style.display = 'block';
+            
+            tbody.innerHTML = '';
+            
+            if (!data.barangays || data.barangays.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="9" style="text-align: center; padding: 2rem; color: #666;">
+                            No barangay data available
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+            
+            data.barangays.forEach((brgy, index) => {
+                const row = document.createElement('tr');
+                
+                // Highlight top 3
+                if (index < 3) {
+                    row.style.background = index === 0 ? '#fff3cd' : index === 1 ? '#f8f9fa' : '#f8f9fa';
+                    row.style.fontWeight = index < 3 ? '500' : 'normal';
+                }
+                
+                let rankBadge = `#${brgy.rank}`;
+                if (index === 0) rankBadge = '🥇';
+                if (index === 1) rankBadge = '🥈';
+                if (index === 2) rankBadge = '🥉';
+                
+                row.innerHTML = `
+                    <td style="text-align: center;"><strong>${rankBadge}</strong></td>
+                    <td><strong style="color: #0038A8;">${brgy.barangay || 'N/A'}</strong></td>
+                    <td>${brgy.city || 'N/A'}</td>
+                    <td>${brgy.province || 'N/A'}</td>
+                    <td style="font-size: 0.9em;">${brgy.region || 'N/A'}</td>
+                    <td style="text-align: center;"><strong>${brgy.project_count || 0}</strong></td>
+                    <td style="text-align: right; font-weight: 600; color: #0038A8;">₱${parseFloat(brgy.total_amount).toLocaleString('en-PH', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
+                    <td style="text-align: right; color: #666;">₱${parseFloat(brgy.avg_amount).toLocaleString('en-PH', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
+                    <td style="text-align: center; font-size: 0.85em; color: #28a745;">${brgy.percentage_of_total ? parseFloat(brgy.percentage_of_total).toFixed(2) : '0.00'}%</td>
+                `;
+                
+                tbody.appendChild(row);
+            });
+            
+            console.log(`✅ Loaded ${data.barangays.length} most active barangays`);
+            
+        } catch (error) {
+            console.error('❌ Error loading most active barangays:', error);
+            const spinner = document.getElementById('barangays-active-loading');
+            if (spinner) {
+                spinner.innerHTML = `
+                    <div style="text-align: center; padding: 2rem; color: #dc3545;">
+                        <p style="font-size: 1.2em;">❌ Error loading most active barangays</p>
+                        <p style="font-size: 0.9em;">${error.message}</p>
+                    </div>
+                `;
+            }
+        }
+    }
+
+    // Barangay sub-tab switching
+    let activeBarangaysLoaded = false;
+    
+    document.querySelectorAll('.barangay-subtab-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const subtab = this.getAttribute('data-subtab');
+            
+            // Update button states
+            document.querySelectorAll('.barangay-subtab-btn').forEach(b => {
+                b.classList.remove('active');
+                b.style.borderBottomColor = 'transparent';
+                b.style.color = '#666';
+                b.style.fontWeight = '500';
+            });
+            this.classList.add('active');
+            this.style.borderBottomColor = '#0038A8';
+            this.style.color = '#0038A8';
+            this.style.fontWeight = '600';
+            
+            // Show corresponding sub-tab panel
+            document.querySelectorAll('.barangay-subtab-panel').forEach(panel => {
+                panel.style.display = 'none';
+            });
+            document.getElementById(`subtab-${subtab}`).style.display = 'block';
+            
+            // Load data if not already loaded
+            if (subtab === 'active' && !activeBarangaysLoaded) {
+                loadBarangayAggregatesByCount();
+                activeBarangaysLoaded = true;
+            }
+        });
+    });
+
+    // Initialize page
+    document.addEventListener('DOMContentLoaded', () => {
+        console.log('🏗️ DIME page loaded');
+        
+        initializeTabs();
+        
+        // Check for hash in URL and switch to that tab
+        const hash = window.location.hash.substring(1); // Remove the # character
+        if (hash && ['visual', 'table', 'map', 'fastest', 'barangays'].includes(hash)) {
+            switchToTab(hash, false); // Don't update hash since we're reading from it
+        }
+        
+        // Listen for hash changes
+        window.addEventListener('hashchange', function() {
+            const newHash = window.location.hash.substring(1);
+            if (newHash && ['visual', 'table', 'map', 'fastest', 'barangays'].includes(newHash)) {
+                switchToTab(newHash, false);
+            }
+        });
+        
+        loadFilterOptions();
+        loadVisualData();
+        loadFastestProjects();
+        loadBarangayAggregates();
+
+        // Pagination event listeners
+        document.getElementById('prev-page-btn').addEventListener('click', () => {
+            if (currentPage > 1) {
+                loadProjects(currentPage - 1);
+            }
+        });
+
+        document.getElementById('next-page-btn').addEventListener('click', () => {
+            if (currentPage < totalPages) {
+                loadProjects(currentPage + 1);
+            }
+        });
+
+        // Filter event listeners
+        document.getElementById('apply-filters-btn').addEventListener('click', applyFilters);
+        document.getElementById('clear-filters-btn').addEventListener('click', clearFilters);
+
+        // Last updated
+        document.getElementById('last-updated').textContent = new Date().toLocaleDateString('en-PH');
+    });
+</script>
+
+</body>
+</html>

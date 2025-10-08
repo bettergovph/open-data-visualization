@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ title | default(value="AltGovPH - Government Data Platform") }}</title>
+    <meta name="description" content="Government Data Analysis Platform for Budget and Flood Control Projects">
+    <meta name="keywords" content="government data, budget analysis, flood control, public data, transparency">
+    <meta name="author" content="AltGovPH">
+    
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://altgovph.site/">
+    <meta property="og:title" content="{{ title | default(value='AltGovPH - Government Data Platform') }}">
+    <meta property="og:description" content="Government Data Analysis Platform for Budget and Flood Control Projects">
+    <meta property="og:image" content="/static/images/gov_logo.png">
+    
+    <!-- Twitter -->
+    <meta property="twitter:card" content="summary_large_image">
+    <meta property="twitter:url" content="https://altgovph.site/">
+    <meta property="twitter:title" content="{{ title | default(value='AltGovPH - Government Data Platform') }}">
+    <meta property="twitter:description" content="Government Data Analysis Platform for Budget and Flood Control Projects">
+    <meta property="twitter:image" content="/static/images/gov_logo.png">
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Chart.js -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+    
+    <!-- AltGovPH CSS -->
+    <link rel="stylesheet" href="/static/css/altgovph-theme.css">
+    
+    {% block head %}{% endblock %}
+</head>
+<body>
+    <header class="altgovph-header">
+        <div class="altgovph-container">
+            <a href="/" class="altgovph-logo-link">
+                <img src="/static/images/gov_logo.png" alt="AltGovPH" class="altgovph-logo-img">
+                <span class="altgovph-site-name">AltGovPH</span>
+            </a>
+            <nav class="altgovph-nav-menu">
+                <a href="/budget">Budget</a>
+                <a href="/flood">Flood Control</a>
+                <a href="/dime">DIME</a>
+                <a href="/about">About</a>
+            </nav>
+        </div>
+    </header>
+    
+    <main class="altgovph-main">
+        {% block content %}{% endblock %}
+    </main>
+    
+    <footer class="altgovph-footer">
+        <div class="altgovph-container">
+            <p>&copy; 2025 AltGovPH. All Rights Reserved.</p>
+            <p>Powered by KenchLightyear</p>
+        </div>
+    </footer>
+    
+    {% block scripts %}{% endblock %}
+</body>
+</html>

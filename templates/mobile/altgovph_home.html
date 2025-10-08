@@ -1,0 +1,145 @@
+{% extends "mobile/base_altgovph.html" %}
+
+{% block head %}
+<!-- Google Fonts - Inter -->
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+<!-- Tailwind CSS CDN -->
+<script src="https://cdn.tailwindcss.com"></script>
+
+<!-- Custom styling - Override ALL base styles -->
+<style>
+    /* Reset and override base.html styles */
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+    }
+    body {
+        font-family: 'Inter', sans-serif !important;
+        background-color: white !important;
+        color: black !important;
+        margin: 0 !important;
+        padding: 0 !important;
+    }
+    /* Hide main navbar from base.html */
+    nav.navbar,
+    nav.mobile-navbar,
+    header.navbar,
+    header { 
+        display: none !important; 
+    }
+    /* Ensure our BetterGov nav is visible */
+    nav:not(.navbar):not(.mobile-navbar) {
+        display: block !important;
+    }
+    /* Hide footer from base.html - we'll add our own */
+    footer.footer,
+    footer.mobile-footer {
+        display: none !important;
+    }
+    /* Override any gradients or backgrounds */
+    section, main, div {
+        background: transparent !important;
+    }
+</style>
+
+<!-- AltGovPH Metadata Overrides -->
+<meta name="description" content="AltGovPH - Alternative Government Philippines - Promoting Data Transparency and Open Government">
+<meta name="keywords" content="government data, transparency, Philippines, budget analysis, flood control, public data, open government">
+<meta name="author" content="AltGovPH">
+
+<!-- Open Graph / Facebook -->
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://altgovph.site/">
+<meta property="og:title" content="AltGovPH - Alternative Government Philippines">
+<meta property="og:description" content="Promoting Data Transparency and Open Government in the Philippines">
+<meta property="og:image" content="/static/images/gov_logo.png">
+
+<!-- Twitter -->
+<meta property="twitter:card" content="summary_large_image">
+<meta property="twitter:url" content="https://altgovph.site/">
+<meta property="twitter:title" content="AltGovPH - Alternative Government Philippines">
+<meta property="twitter:description" content="Promoting Data Transparency and Open Government in the Philippines">
+<meta property="twitter:image" content="/static/images/gov_logo.png">
+{% endblock %}
+
+{% block content %}
+<!-- Mobile Navigation - Blends with hero, no borders or background -->
+<nav class="py-3 px-4 bg-white">
+    <div class="flex items-center justify-between">
+        <div class="flex items-center">
+            <a href="/alt" class="flex items-center">
+                <img src="https://raw.githubusercontent.com/bettergovph/logo/main/png/BetterGov_Horizontal-Black.png" 
+                     alt="BetterGov" 
+                     class="h-8">
+            </a>
+        </div>
+        <div class="md:hidden">
+            <button class="text-black focus:outline-none" onclick="toggleMobileMenu()">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+                </svg>
+            </button>
+        </div>
+    </div>
+    <!-- Mobile menu (hidden by default) -->
+    <div id="mobileMenu" class="hidden mt-4 space-y-2">
+        <a href="/alt" class="block text-black hover:text-gray-600 font-medium py-2">Home</a>
+        <a href="/budget" class="block text-black hover:text-gray-600 font-medium py-2">Budget</a>
+        <a href="/flood" class="block text-black hover:text-gray-600 font-medium py-2">Flood Control</a>
+        <a href="/dime" class="block text-black hover:text-gray-600 font-medium py-2">DIME</a>
+        <a href="/budget-flood-correlation" class="block text-black hover:text-gray-600 font-medium py-2">Budget-Flood</a>
+        <a href="/flood-dime-correlation" class="block text-black hover:text-gray-600 font-medium py-2">Flood-DIME</a>
+    </div>
+</nav>
+
+<script>
+function toggleMobileMenu() {
+    const menu = document.getElementById('mobileMenu');
+    menu.classList.toggle('hidden');
+}
+</script>
+
+
+<!-- Feature Cards -->
+<section class="bg-gray-50 py-8 px-4">
+    <div class="space-y-4">
+        <!-- Budget Card -->
+        <div class="bg-white rounded-lg shadow-md p-4">
+            <h3 class="text-xl font-semibold text-black mb-2">💰 Budget</h3>
+            <p class="text-gray-600 text-sm mb-3">AI-powered analysis of Government Appropriations Act (GAA) data.</p>
+            <a href="/budget" class="inline-block bg-black text-white px-4 py-2 rounded-lg text-sm">Explore Budget Data</a>
+        </div>
+        
+        <!-- Flood Control Card -->
+        <div class="bg-white rounded-lg shadow-md p-4">
+            <h3 class="text-xl font-semibold text-black mb-2">🌊 Flood Control</h3>
+            <p class="text-gray-600 text-sm mb-3">Track DPWH flood control infrastructure projects across the Philippines.</p>
+            <a href="/flood" class="inline-block bg-black text-white px-4 py-2 rounded-lg text-sm">View Projects</a>
+        </div>
+
+        <!-- DIME Card -->
+        <div class="bg-white rounded-lg shadow-md p-4">
+            <h3 class="text-xl font-semibold text-black mb-2">🏗️ DIME Infrastructure</h3>
+            <p class="text-gray-600 text-sm mb-3">Track 12,870+ major infrastructure projects worth ₱740B+ nationwide.</p>
+            <a href="/dime" class="inline-block bg-black text-white px-4 py-2 rounded-lg text-sm">View DIME</a>
+        </div>
+        
+        <!-- Budget-Flood Correlation Card -->
+        <div class="bg-white rounded-lg shadow-md p-4">
+            <h3 class="text-xl font-semibold text-black mb-2">📊 Budget-Flood</h3>
+            <p class="text-gray-600 text-sm mb-3">Data analysis connecting budget items with flood control projects.</p>
+            <a href="/budget-flood-correlation" class="inline-block bg-black text-white px-4 py-2 rounded-lg text-sm">View Analysis</a>
+        </div>
+
+        <!-- Flood-DIME Correlation Card -->
+        <div class="bg-white rounded-lg shadow-md p-4">
+            <h3 class="text-xl font-semibold text-black mb-2">🔗 Flood-DIME</h3>
+            <p class="text-gray-600 text-sm mb-3">Analyze overlap between flood control and DIME projects.</p>
+            <a href="/flood-dime-correlation" class="inline-block bg-black text-white px-4 py-2 rounded-lg text-sm">View Analysis</a>
+        </div>
+    </div>
+</section>
+
+{% endblock %}

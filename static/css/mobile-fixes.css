@@ -1,0 +1,1062 @@
+
+/* Mobile responsiveness fixes */
+
+/* Ensure minimum touch target size */
+button, a, input, select, textarea {
+    min-height: 44px;
+    min-width: 44px;
+}
+
+/* Fix horizontal scrolling */
+body {
+    overflow-x: hidden;
+    max-width: 100vw;
+}
+
+/* Ensure text is readable on mobile */
+body, p, h1, h2, h3, h4, h5, h6, span, div {
+    font-size: max(12px, 1rem);
+}
+
+/* Fix navigation for mobile */
+@media (max-width: 768px) {
+    .nav-link {
+        display: block;
+        padding: 10px;
+        min-height: 44px;
+        line-height: 24px;
+    }
+    
+    /* Fix hamburger menu */
+    .navbar-toggler {
+        min-width: 44px;
+        min-height: 44px;
+    }
+    
+    /* Ensure forms are mobile-friendly */
+    form {
+        padding: 15px;
+    }
+    
+    input, select, textarea {
+        width: 100%;
+        max-width: 100%;
+        box-sizing: border-box;
+    }
+    
+    /* Fix button spacing */
+    button {
+        margin: 5px;
+        padding: 10px 15px;
+    }
+}
+
+/* Fix FontAwesome icons */
+.fas, .far, .fab {
+    display: inline-block;
+    width: auto;
+    height: auto;
+    min-width: 1em;
+    min-height: 1em;
+}
+
+/* Fix zero-dimension elements */
+.nav-link, .btn, .form-control {
+    min-width: 1px;
+    min-height: 1px;
+}
+
+/* Error states */
+.error {
+    border-color: #dc3545 !important;
+    box-shadow: 0 0 0 0.2rem rgba(220, 53, 69, 0.25) !important;
+}
+
+/* Loading states */
+.loading {
+    opacity: 0.6;
+    pointer-events: none;
+}
+
+/* Let JavaScript control visibility - don't override with CSS */
+.auth-only, .admin-only, .tester-only {
+    /* Remove !important to allow JS to override */
+}
+
+.unauth-only {
+    /* Remove !important to allow JS to override */
+}
+
+/* Fix logout button alignment and color */
+#nav-login-item {
+    display: flex !important;
+    align-items: center !important;
+    gap: 0.5rem !important;
+}
+
+#nav-login-item .nav-link,
+#nav-username,
+#mobile-nav-username,
+#logout {
+    color: #ffffff !important; /* Explicit white color */
+    display: inline-block !important;
+}
+
+/* Extra specific rules to override any conflicts */
+#nav-username,
+#nav-username.nav-link,
+#nav-username.nav-link.nav-username,
+#mobile-nav-username,
+#mobile-nav-username.nav-link,
+#mobile-nav-username.nav-link.nav-username {
+    color: #ffffff !important;
+}
+
+#logout,
+#logout.nav-link,
+#logout.nav-link.auth-only {
+    color: #ffffff !important;
+}
+
+#nav-login-item .auth-only {
+    margin-left: 0 !important; /* Remove margin since we use flex gap */
+}
+
+/* Let JavaScript control login link visibility - don't force hide */
+.hero-buttons .btn-primary.unauth-only {
+    /* Default styling for hero buttons */
+}
+
+/* AGGRESSIVE BACKUP: CSS rules to hide login when authenticated (mobile) */
+body.authenticated #nav-login-link,
+.authenticated #nav-login-link {
+    display: none !important;
+    visibility: hidden !important;
+    opacity: 0 !important;
+    pointer-events: none !important;
+}
+
+/* Show login when unauthenticated (mobile) */
+body.unauthenticated #nav-login-link,
+.unauthenticated #nav-login-link,
+body:not(.authenticated) #nav-login-link {
+    display: inline-block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    pointer-events: auto !important;
+}
+
+/* Show hero login when unauthenticated (mobile) */
+body.unauthenticated .hero-buttons .btn-primary.unauth-only,
+.unauthenticated .hero-buttons .btn-primary.unauth-only,
+body:not(.authenticated) .hero-buttons .btn-primary.unauth-only {
+    display: inline-block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    pointer-events: auto !important;
+}
+
+/* Let JavaScript handle login link visibility */
+
+/* Fix mobile navigation menu */
+.nav-menu {
+    position: fixed;
+    left: -100%; /* Hidden off-screen by default */
+    top: 60px;
+    width: 280px; /* Fixed width instead of full width */
+    height: auto; /* Let content determine height */
+    background: rgba(255, 255, 255, 0.98); /* Solid background, not translucent */
+    transition: left 0.3s ease;
+    z-index: 999;
+    box-shadow: -2px 0 10px rgba(0,0,0,0.2); /* Subtle shadow instead of backdrop-filter */
+}
+
+/* NUCLEAR OPTION: Force ALL mobile navigation text to be dark - This will override EVERYTHING */
+@media (max-width: 768px) {
+    /* Target every possible element that could be a navigation link */
+    .nav-link,
+    .nav-menu .nav-link,
+    .nav-menu.active .nav-link,
+    .nav-menu.show .nav-link,
+    .navbar .nav-link,
+    .navbar .nav-menu .nav-link,
+    .navbar .nav-menu.active .nav-link,
+    .navbar .nav-menu.show .nav-link,
+    body .nav-link,
+    body .nav-menu .nav-link,
+    body .nav-menu.active .nav-link,
+    body .nav-menu.show .nav-link,
+    body .navbar .nav-link,
+    body .navbar .nav-menu .nav-link,
+    body .navbar .nav-menu.active .nav-link,
+    body .navbar .nav-menu.show .nav-link,
+    html .nav-link,
+    html .nav-menu .nav-link,
+    html .nav-menu.active .nav-link,
+    html .nav-menu.show .nav-link,
+    html body .nav-link,
+    html body .nav-menu .nav-link,
+    html body .nav-menu.active .nav-link,
+    html body .nav-menu.show .nav-link,
+    html body .navbar .nav-link,
+    html body .navbar .nav-menu .nav-link,
+    html body .navbar .nav-menu.active .nav-link,
+    html body .navbar .nav-menu.show .nav-link {
+        color: #333333 !important; /* FORCE dark text - this will override everything */
+        text-decoration: none !important;
+        opacity: 1 !important;
+        visibility: visible !important;
+    }
+
+    /* Target every possible dropdown link */
+    .dropdown-menu li a,
+    .nav-menu .dropdown-menu li a,
+    .nav-menu.active .dropdown-menu li a,
+    .nav-menu.show .dropdown-menu li a,
+    .navbar .dropdown-menu li a,
+    .navbar .nav-menu .dropdown-menu li a,
+    .navbar .nav-menu.active .dropdown-menu li a,
+    .navbar .nav-menu.show .dropdown-menu li a,
+    body .dropdown-menu li a,
+    body .nav-menu .dropdown-menu li a,
+    body .nav-menu.active .dropdown-menu li a,
+    body .nav-menu.show .dropdown-menu li a,
+    body .navbar .dropdown-menu li a,
+    body .navbar .nav-menu .dropdown-menu li a,
+    body .navbar .nav-menu.active .dropdown-menu li a,
+    body .navbar .nav-menu.show .dropdown-menu li a,
+    html .dropdown-menu li a,
+    html .nav-menu .dropdown-menu li a,
+    html .nav-menu.active .dropdown-menu li a,
+    html .nav-menu.show .dropdown-menu li a,
+    html body .dropdown-menu li a,
+    html body .nav-menu .dropdown-menu li a,
+    html body .nav-menu.active .dropdown-menu li a,
+    html body .nav-menu.show .dropdown-menu li a,
+    html body .navbar .dropdown-menu li a,
+    html body .navbar .nav-menu .dropdown-menu li a,
+    html body .navbar .nav-menu.active .dropdown-menu li a,
+    html body .navbar .nav-menu.show .dropdown-menu li a {
+        color: #333333 !important; /* FORCE dark text - this will override everything */
+        text-decoration: none !important;
+        opacity: 1 !important;
+        visibility: visible !important;
+    }
+}
+
+/* CRITICAL FIX: Force mobile navigation menu text colors - Maximum specificity */
+@media (max-width: 768px) {
+    /* Target ALL possible navigation link combinations with maximum specificity */
+    .navbar .nav-menu .nav-link,
+    .navbar .nav-menu.active .nav-link,
+    .navbar .nav-menu.show .nav-link,
+    body .navbar .nav-menu .nav-link,
+    body .navbar .nav-menu.active .nav-link,
+    body .navbar .nav-menu.show .nav-link,
+    html body .navbar .nav-menu .nav-link,
+    html body .navbar .nav-menu.active .nav-link,
+    html body .navbar .nav-menu.show .nav-link,
+    html body .navbar .nav-menu .nav-link,
+    html body .navbar .nav-menu.active .nav-link,
+    html body .navbar .nav-menu.show .nav-link {
+        color: #333333 !important; /* FORCE dark text on white background */
+        text-decoration: none !important;
+        font-weight: 500 !important;
+        padding: 0.75rem 1rem !important;
+        display: block !important;
+        transition: background-color 0.2s ease !important;
+        opacity: 1 !important;
+        visibility: visible !important;
+    }
+
+    /* Target ALL possible hover states with maximum specificity */
+    .navbar .nav-menu .nav-link:hover,
+    .navbar .nav-menu.active .nav-link:hover,
+    .navbar .nav-menu.show .nav-link:hover,
+    body .navbar .nav-menu .nav-link:hover,
+    body .navbar .nav-menu.active .nav-link:hover,
+    body .navbar .nav-menu.show .nav-link:hover,
+    html body .navbar .nav-menu .nav-link:hover,
+    html body .navbar .nav-menu.active .nav-link:hover,
+    html body .navbar .nav-menu.show .nav-link:hover,
+    html body .navbar .nav-menu .nav-link:hover,
+    html body .navbar .nav-menu.active .nav-link:hover,
+    html body .navbar .nav-menu.show .nav-link:hover {
+        color: #333333 !important;
+        background: rgba(102, 126, 234, 0.1) !important;
+    }
+
+    /* Target ALL possible dropdown menu combinations with maximum specificity */
+    .navbar .nav-menu .dropdown-menu li a,
+    .navbar .nav-menu.active .dropdown-menu li a,
+    .navbar .nav-menu.show .dropdown-menu li a,
+    body .navbar .nav-menu .dropdown-menu li a,
+    body .navbar .nav-menu.active .dropdown-menu li a,
+    body .navbar .nav-menu.show .dropdown-menu li a,
+    html body .navbar .nav-menu .dropdown-menu li a,
+    html body .navbar .nav-menu.active .dropdown-menu li a,
+    html body .navbar .nav-menu.show .dropdown-menu li a,
+    html body .navbar .nav-menu .dropdown-menu li a,
+    html body .navbar .nav-menu.active .dropdown-menu li a,
+    html body .navbar .nav-menu.show .dropdown-menu li a {
+        color: #333333 !important; /* FORCE dark text on white background */
+        text-decoration: none !important;
+        padding: 0.75rem 1.5rem !important;
+        display: block !important;
+        transition: background-color 0.2s ease !important;
+        font-weight: 400 !important;
+        opacity: 1 !important;
+        visibility: visible !important;
+    }
+
+    /* Target ALL possible dropdown hover states with maximum specificity */
+    .navbar .nav-menu .dropdown-menu li a:hover,
+    .navbar .nav-menu.active .dropdown-menu li a:hover,
+    .navbar .nav-menu.show .dropdown-menu li a:hover,
+    body .navbar .nav-menu .dropdown-menu li a:hover,
+    body .navbar .nav-menu.active .dropdown-menu li a:hover,
+    body .navbar .nav-menu.show .dropdown-menu li a:hover,
+    html body .navbar .nav-menu .dropdown-menu li a:hover,
+    html body .navbar .nav-menu.active .dropdown-menu li a:hover,
+    html body .navbar .nav-menu.show .dropdown-menu li a:hover,
+    html body .navbar .nav-menu .dropdown-menu li a:hover,
+    html body .navbar .nav-menu.active .dropdown-menu li a:hover,
+    html body .navbar .nav-menu.show .dropdown-menu li a:hover {
+        color: #333333 !important;
+        background: rgba(102, 126, 234, 0.1) !important;
+    }
+}
+
+.nav-menu.active {
+    left: 0;
+    display: block; /* Show when active */
+    pointer-events: auto; /* Ensure menu items are clickable */
+    z-index: 1001; /* Higher than overlay */
+}
+
+/* Fix mobile menu overlay */
+.menu-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 998;
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.3s ease;
+    display: none; /* Ensure completely hidden by default */
+}
+
+.menu-overlay.active {
+    opacity: 1;
+    visibility: visible;
+    display: block; /* Show when active */
+    pointer-events: auto; /* Allow clicks to pass through to menu items */
+}
+
+/* Ensure proper mobile touch targets */
+.nav-link, .btn, .dropdown-menu li a {
+    min-height: 44px;
+    min-width: 44px;
+    display: flex;
+    align-items: center;
+    padding: 12px;
+}
+
+/* Fix mobile dropdown menus */
+.dropdown-menu {
+    position: static;
+    background: rgba(255, 255, 255, 0.95);
+    border-radius: 0;
+    box-shadow: none;
+    display: none;
+    width: 100%;
+}
+
+.dropdown.active .dropdown-menu {
+    display: block;
+}
+
+/* Fix mobile form elements */
+input[type="text"],
+input[type="email"],
+input[type="password"],
+textarea,
+select {
+    font-size: 16px; /* Prevents zoom on iOS */
+    padding: 12px;
+    border-radius: 8px;
+    border: 1px solid #ddd;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+/* Fix mobile images */
+img {
+    max-width: 100%;
+    height: auto;
+    display: block;
+}
+
+/* Fix mobile tables */
+table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+table td, table th {
+    padding: 8px;
+    text-align: left;
+}
+
+/* Fix mobile video/iframe elements */
+video, iframe {
+    max-width: 100%;
+    height: auto;
+}
+
+/* Ensure proper contrast for accessibility */
+.nav-link,
+.btn,
+.form-control {
+    font-weight: 500;
+}
+
+/* Fix mobile scrolling issues */
+html, body {
+    overflow-x: hidden;
+    width: 100%;
+}
+
+/* Fix mobile viewport height issues */
+.hero {
+    height: 400px; /* Fixed height for rotating image */
+    height: 400px;
+}
+
+/* Fix mobile flexbox issues */
+.flex-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+}
+
+.flex-item {
+    flex: 1;
+    min-width: 250px;
+}
+
+/* Fix mobile grid issues */
+.grid-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1rem;
+}
+
+/* Ensure mobile buttons are properly sized */
+.btn-primary, .btn-secondary, .btn {
+    min-height: 44px;
+    padding: 12px 24px;
+    font-size: 16px;
+    border-radius: 8px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+}
+
+/* Fix mobile modal dialogs */
+.modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 1000;
+    display: none; /* Hidden by default */
+    align-items: center;
+    justify-content: center;
+}
+
+.modal.show {
+    display: flex; /* Show when active */
+}
+
+.modal-content {
+    background: white;
+    border-radius: 12px;
+    width: 90%;
+    max-width: 500px;
+    max-height: 80vh;
+    overflow-y: auto;
+    margin: 20px;
+}
+
+/* Fix mobile card layouts */
+.card, .dashboard-card {
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    margin-bottom: 1rem;
+    overflow: hidden;
+}
+
+/* Ensure proper mobile spacing */
+.section {
+    padding: 2rem 0;
+}
+
+.container {
+    padding: 0 1rem;
+}
+
+/* Fix mobile text sizing */
+@media (max-width: 480px) {
+    h1 { font-size: 1.75rem; }
+    h2 { font-size: 1.5rem; }
+    h3 { font-size: 1.25rem; }
+    p { font-size: 1rem; }
+}
+
+/* Fix mobile navigation spacing */
+@media (max-width: 768px) {
+    .navbar {
+        padding: 0.5rem 1rem;
+    }
+
+    .nav-container {
+        padding: 0.5rem;
+        min-height: 50px;
+    }
+
+    .nav-logo-img {
+        height: 40px !important;
+        max-height: 40px !important;
+    }
+}
+
+/* Comprehensive mobile responsive fixes */
+
+/* Mobile-first breakpoints */
+@media (max-width: 480px) {
+    /* Extra small screens */
+    body {
+        font-size: 14px;
+    }
+
+    h1 { font-size: 1.5rem; }
+    h2 { font-size: 1.25rem; }
+    h3 { font-size: 1.125rem; }
+    h4 { font-size: 1rem; }
+    p { font-size: 0.875rem; }
+
+    .container {
+        padding: 0 0.75rem;
+    }
+
+    .dashboard-card {
+        padding: 1rem;
+        margin-bottom: 1rem;
+    }
+
+    .card-header {
+        padding-bottom: 0.75rem;
+    }
+
+    .card-icon {
+        width: 40px;
+        height: 40px;
+        font-size: 1.25rem;
+    }
+
+    .card-title {
+        font-size: 1.25rem;
+    }
+}
+
+@media (max-width: 576px) {
+    /* Small screens */
+    .nav-toggle {
+        padding: 0.5rem;
+    }
+
+    .nav-menu {
+        padding: 1rem;
+    }
+
+    .nav-list {
+        gap: 0.5rem;
+    }
+
+    .nav-item {
+        margin-bottom: 0.25rem;
+    }
+
+    .dropdown-menu {
+        padding: 0.5rem 0;
+    }
+
+    .dropdown-menu li {
+        padding: 0.5rem 1rem;
+    }
+}
+
+@media (max-width: 768px) {
+    /* Tablets and small desktops */
+    .dashboard-section {
+        padding: 4rem 0 2rem 0;
+    }
+
+    .dashboard-container {
+        padding: 0 1rem;
+    }
+
+    .dashboard-title {
+        font-size: 2.5rem;
+    }
+
+    .dashboard-subtitle {
+        font-size: 1.1rem;
+    }
+
+    .stats-grid {
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1rem;
+    }
+
+    .user-item {
+        padding: 0.75rem;
+    }
+
+    .user-info {
+        gap: 0.75rem;
+    }
+
+    .user-avatar {
+        width: 35px;
+        height: 35px;
+        font-size: 0.75rem;
+    }
+
+    .user-details h4 {
+        font-size: 0.9rem;
+    }
+
+    .user-details p {
+        font-size: 0.8rem;
+    }
+
+    .tier-badge {
+        padding: 0.2rem 0.6rem;
+        font-size: 0.75rem;
+    }
+
+    .action-buttons {
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+
+    .upgrade-btn {
+        padding: 0.4rem 0.8rem;
+        font-size: 0.8rem;
+    }
+}
+
+@media (max-width: 992px) {
+    /* Large tablets */
+    .dashboard-card {
+        padding: 1.5rem;
+    }
+
+    .system-management-grid {
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    }
+
+    .system-btn {
+        padding: 1rem;
+        min-height: 100px;
+    }
+
+    .btn-icon {
+        font-size: 1.5rem;
+    }
+
+    .btn-text {
+        font-size: 0.9rem;
+    }
+}
+
+@media (max-width: 1200px) {
+    /* Large screens */
+    .dashboard-container {
+        max-width: 100%;
+        padding: 0 1.5rem;
+    }
+}
+
+/* Fix mobile viewport issues */
+html {
+    -webkit-text-size-adjust: 100%;
+    -ms-text-size-adjust: 100%;
+}
+
+/* Fix mobile scrolling and touch */
+html, body {
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior: none;
+}
+
+/* Fix mobile input zoom */
+@media screen and (max-width: 767px) {
+    input[type="text"],
+    input[type="email"],
+    input[type="password"],
+    input[type="tel"],
+    input[type="number"],
+    input[type="search"],
+    textarea,
+    select {
+        font-size: 16px !important;
+    }
+}
+
+/* Fix mobile button and link sizes */
+@media (max-width: 768px) {
+    button, .btn, a.btn, input[type="submit"], input[type="button"] {
+        min-height: 44px;
+        min-width: 44px;
+        padding: 12px 16px;
+        font-size: 16px;
+    }
+}
+
+/* Fix mobile table overflow */
+@media (max-width: 768px) {
+    table {
+        font-size: 0.875rem;
+    }
+
+    table th, table td {
+        padding: 0.5rem;
+        white-space: nowrap;
+    }
+
+    .table-responsive {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+}
+
+/* Fix mobile modal dialogs */
+@media (max-width: 768px) {
+    .modal-content {
+        margin: 1rem;
+        max-height: 80vh;
+        overflow-y: auto;
+    }
+
+    .modal-header {
+        padding: 1rem;
+    }
+
+    .modal-body {
+        padding: 1rem;
+    }
+}
+
+/* Fix mobile navigation menu */
+@media (max-width: 768px) {
+    .nav-menu {
+        position: fixed;
+        top: 0;
+        left: -100%;
+        width: 280px;
+        height: 100vh;
+        background: rgba(255, 255, 255, 0.98);
+        backdrop-filter: blur(10px);
+        transition: left 0.3s ease;
+        z-index: 1000;
+        padding: 4rem 1rem 1rem 1rem;
+        overflow-y: auto;
+        box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
+    }
+
+    .nav-menu.active {
+        left: 0;
+    }
+
+    .nav-menu .nav-list {
+        flex-direction: column;
+        gap: 0;
+    }
+
+    .nav-menu .nav-item {
+        margin-bottom: 0.5rem;
+    }
+
+/* Additional mobile navigation fix with ultra-specific selectors */
+@media (max-width: 768px) {
+    .navbar .nav-menu .nav-link,
+    .navbar .nav-menu.active .nav-link,
+    body .navbar .nav-menu .nav-link,
+    body .navbar .nav-menu.active .nav-link,
+    html body .navbar .nav-menu .nav-link,
+    html body .navbar .nav-menu.active .nav-link {
+        color: #333333 !important; /* Dark text on white background */
+        padding: 0.75rem 1rem;
+        border-radius: 8px;
+        transition: background-color 0.2s ease;
+        text-decoration: none !important;
+        font-weight: 500 !important;
+        display: block !important;
+    }
+
+    .navbar .nav-menu .nav-link:hover,
+    .navbar .nav-menu.active .nav-link:hover,
+    body .navbar .nav-menu .nav-link:hover,
+    body .navbar .nav-menu.active .nav-link:hover,
+    html body .navbar .nav-menu .nav-link:hover,
+    html body .navbar .nav-menu.active .nav-link:hover {
+        color: #333333 !important;
+        background: rgba(102, 126, 234, 0.1);
+    }
+}
+
+/* Fix mobile dropdown menus */
+@media (max-width: 768px) {
+    .dropdown-menu {
+        position: static !important;
+        display: none;
+        background: rgba(255, 255, 255, 0.98) !important; /* Override mobile.css dark background */
+        border-radius: 8px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        margin-top: 0.5rem;
+        border: 1px solid rgba(0,0,0,0.1) !important;
+        padding: 0.5rem 0;
+    }
+
+    .dropdown.active .dropdown-menu {
+        display: block;
+    }
+
+    .dropdown-menu li {
+        padding: 0;
+    }
+
+    .navbar .nav-menu .dropdown-menu li a,
+    .navbar .nav-menu.active .dropdown-menu li a,
+    body .navbar .nav-menu .dropdown-menu li a,
+    body .navbar .nav-menu.active .dropdown-menu li a,
+    html body .navbar .nav-menu .dropdown-menu li a,
+    html body .navbar .nav-menu.active .dropdown-menu li a {
+        padding: 0.75rem 1.5rem;
+        display: block;
+        color: #333333 !important; /* Dark text on white background */
+        text-decoration: none !important;
+        transition: background-color 0.2s ease;
+        font-weight: 400 !important;
+    }
+
+    .navbar .nav-menu .dropdown-menu li a:hover,
+    .navbar .nav-menu.active .dropdown-menu li a:hover,
+    body .navbar .nav-menu .dropdown-menu li a:hover,
+    body .navbar .nav-menu.active .dropdown-menu li a:hover,
+    html body .navbar .nav-menu .dropdown-menu li a:hover,
+    html body .navbar .nav-menu.active .dropdown-menu li a:hover {
+        color: #333333 !important;
+        background: rgba(102, 126, 234, 0.1);
+    }
+}
+
+/* Fix mobile footer */
+@media (max-width: 768px) {
+    .footer {
+        padding: 2rem 0;
+    }
+
+    .footer-container {
+        padding: 0 1rem;
+    }
+
+    .footer-section {
+        margin-bottom: 2rem;
+    }
+
+    .footer-bottom {
+        flex-direction: column;
+        gap: 1rem;
+        text-align: center;
+    }
+
+    .footer-social {
+        justify-content: center;
+    }
+
+    .footer-social a {
+        margin: 0 0.5rem;
+    }
+}
+
+/* Fix mobile dashboard cards */
+@media (max-width: 768px) {
+    .dashboard-card {
+        border-radius: 16px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        overflow: hidden;
+    }
+
+    .card-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 1rem;
+    }
+
+    .card-icon {
+        align-self: flex-start;
+    }
+
+    .card-title {
+        margin: 0;
+        font-size: 1.25rem;
+    }
+}
+
+/* Fix mobile form elements */
+@media (max-width: 768px) {
+    form {
+        padding: 1rem 0;
+    }
+
+    .form-group {
+        margin-bottom: 1rem;
+    }
+
+    label {
+        display: block;
+        margin-bottom: 0.5rem;
+        font-weight: 500;
+    }
+
+    input, textarea, select {
+        width: 100%;
+        padding: 0.75rem;
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        font-size: 16px;
+        box-sizing: border-box;
+    }
+
+    textarea {
+        min-height: 100px;
+        resize: vertical;
+    }
+}
+
+/* Fix mobile grid layouts */
+@media (max-width: 768px) {
+    .stats-grid,
+    .system-management-grid,
+    .system-info-grid,
+    .service-status-grid {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+    }
+
+    .performance-charts {
+        grid-template-columns: 1fr;
+    }
+
+    .chart-container {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* Fix mobile spacing */
+@media (max-width: 768px) {
+    .section {
+        padding: 3rem 0;
+    }
+
+    .hero {
+        padding: 0;
+    }
+
+    .container {
+        padding: 0 1rem;
+    }
+}
+
+/* Ensure mobile accessibility */
+@media (max-width: 768px) {
+    .btn:focus,
+    .nav-link:focus,
+    input:focus,
+    textarea:focus,
+    select:focus {
+        outline: 3px solid #667eea;
+        outline-offset: 2px;
+    }
+
+    .sr-only {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        padding: 0;
+        margin: -1px;
+        overflow: hidden;
+        clip: rect(0, 0, 0, 0);
+        white-space: nowrap;
+        border: 0;
+    }
+}
+
+/* ULTIMATE DROPDOWN FIX: Override mobile.css dropdown styling with maximum specificity */
+@media (max-width: 768px) {
+    /* Override mobile.css dropdown background */
+    .nav-menu .dropdown-menu,
+    .nav-menu.active .dropdown-menu,
+    .nav-menu.show .dropdown-menu,
+    body .nav-menu .dropdown-menu,
+    body .nav-menu.active .dropdown-menu,
+    body .nav-menu.show .dropdown-menu,
+    html body .nav-menu .dropdown-menu,
+    html body .nav-menu.active .dropdown-menu,
+    html body .nav-menu.show .dropdown-menu {
+        background: rgba(255, 255, 255, 0.98) !important; /* White background */
+        border: 1px solid rgba(0,0,0,0.1) !important;
+        border-radius: 8px !important;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15) !important;
+    }
+    
+    /* Override mobile.css dropdown text color */
+    .nav-menu .dropdown-menu li a,
+    .nav-menu.active .dropdown-menu li a,
+    .nav-menu.show .dropdown-menu li a,
+    body .nav-menu .dropdown-menu li a,
+    body .nav-menu.active .dropdown-menu li a,
+    body .nav-menu.show .dropdown-menu li a,
+    html body .nav-menu .dropdown-menu li a,
+    html body .nav-menu.active .dropdown-menu li a,
+    html body .nav-menu.show .dropdown-menu li a {
+        color: #333333 !important; /* Dark text */
+        background: transparent !important;
+        padding: 0.75rem 1rem !important;
+        border-bottom: 1px solid rgba(0,0,0,0.1) !important;
+    }
+    
+    /* Override mobile.css dropdown hover */
+    .nav-menu .dropdown-menu li a:hover,
+    .nav-menu.active .dropdown-menu li a:hover,
+    .nav-menu.show .dropdown-menu li a:hover,
+    body .nav-menu .dropdown-menu li a:hover,
+    body .nav-menu.active .dropdown-menu li a:hover,
+    body .nav-menu.show .dropdown-menu li a:hover,
+    html body .nav-menu .dropdown-menu li a:hover,
+    html body .nav-menu.active .dropdown-menu li a:hover,
+    html body .nav-menu.show .dropdown-menu li a:hover {
+        color: #333333 !important; /* Dark text on hover */
+        background: rgba(0, 0, 0, 0.05) !important; /* Light gray background */
+    }
+}

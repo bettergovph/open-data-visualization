@@ -1,0 +1,520 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ title | default(value=SITE_NAME) }}</title>
+    <meta name="description" content="Accelerate to the Cloud, Cloud-Native, CICD, DevOps, X as Code, Affordable Technology Services, Applied Enterprise Security">
+    <meta name="keywords" content="affordable, enterprise, technology, open source, nodejs, rest, linux, nagios, java, j2ee, spring, maven, mariadb, android, aws, azure, opencart, python, api, mongodb, mysql, openshift">
+    <meta name="author" content="KenchLightyear">
+    
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://kenchlightyear.com/">
+    <meta property="og:title" content="{{ title | default(value=SITE_NAME) }}">
+    <meta property="og:description" content="We are a technology company that specializes in Enterprise Open Source applications. We have experience in various industry making us familiar with the common denominator.">
+    <meta property="og:image" content="/static/images/kl.png">
+    
+    <!-- Twitter -->
+    <meta property="twitter:card" content="summary_large_image">
+    <meta property="twitter:url" content="https://kenchlightyear.com/">
+    <meta property="twitter:title" content="{{ title | default(value=SITE_NAME) }}">
+    <meta property="twitter:description" content="We are a technology company that specializes in Enterprise Open Source applications.">
+    <meta property="twitter:image" content="/static/images/kl.png">
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Chart.js -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+    
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="/static/css/style.css">
+    
+    {% block head %}{% endblock %}
+    <link rel="stylesheet" href="/static/css/mobile-fixes.css">
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="nav-logo-group">
+                <a href="/" class="nav-logo-link">
+                    <img src="/static/images/kl.png" alt="KenchLightyear" class="nav-logo-img">
+                </a>
+                <!-- Removed redundant nav-home-text link -->
+            </div>
+            <div class="nav-menu" id="nav-menu">
+                <ul class="nav-list">
+                    <li class="nav-item" id="nav-login-item">
+                        <a id="nav-username" class="nav-link nav-username" href="/profile" style="display:none;"></a>
+                        <span id="logout" class="nav-link auth-only" data-testid="logout" style="display:none; margin-left: 0.5rem; cursor:pointer;">Logout</span>
+                        <a href="/login" id="nav-login-link" class="nav-link unauth-only" style="display: inline-block;">Login</a>
+                    </li>
+                    <li class="nav-item dropdown">
+                        <a href="/products" class="nav-link">Products <i class="fas fa-chevron-down"></i></a>
+                        <ul class="dropdown-menu">
+                            <li><a href="/ezqd">EZ-QDAid</a></li>
+                            <li><a href="/aiops">AIOps</a></li>
+                            <li><a href="/ailog">AILog</a></li>
+                            <li><a href="/aiwiki">AIWiki</a></li>
+                        </ul>
+                    </li>
+                    <li class="nav-item dropdown">
+                        <a href="/services" class="nav-link">Services <i class="fas fa-chevron-down"></i></a>
+                        <ul class="dropdown-menu">
+                            <li><a href="/services#cloud-infra">Cloud & Infrastructure Engineering</a></li>
+                            <li><a href="/services#devops">DevOps & Automation</a></li>
+                            <li><a href="/services#support-consulting">Enterprise Support & Consulting</a></li>
+                            <li><a href="/services#security-compliance">Security & Compliance</a></li>
+                            <li><a href="/services#app-integration-open-source">Application Integration & Open Source</a></li>
+                        </ul>
+                    </li>
+                    <li class="nav-item">
+                        <a href="/about" class="nav-link">About</a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="/blog" class="nav-link">Blog</a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="/contact" class="nav-link">Contact</a>
+                    </li>
+                    <li class="nav-item dropdown" id="secret-menu-item" style="display: none;">
+                        <a href="#" class="nav-link">Secret ⚡ <i class="fas fa-chevron-down"></i></a>
+                        <ul class="dropdown-menu">
+                            <li><a href="/voucher">Voucher</a></li>
+                            <li><a href="/highlight">Highlight</a></li>
+                            <li><a href="/pro">Pro</a></li>
+                            <li><a href="/piso">Piso WiFi</a></li>
+                            <li><a href="/people">People Budget Analysis</a></li>
+                            <li><a href="/budget">Budget</a></li>
+                            <li><a href="/api/docs">API Docs</a></li>
+                        </ul>
+                    </li>
+
+                </ul>
+            </div>
+            <div class="nav-toggle" id="nav-toggle">
+                <span class="bar"></span>
+                <span class="bar"></span>
+                <span class="bar"></span>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main>
+        {% block content %}{% endblock %}
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="footer-container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h3>KenchLightyear.</h3>
+                    <p>KenchLightyear is an AI-first technology company on a mission to make powerful AI tools accessible, affordable, and practical. While AI is at the heart of what we do, we also specialize in Kubernetes—leveraging innovations like K8sGPT—and bring modern AIOps practices to automate and streamline infrastructure and application management. Backed by deep industry expertise, we deliver enterprise-grade results—without the enterprise-level costs.</p>
+                    <p><a href="/services">Learn More</a></p>
+                </div>
+                <div class="footer-section" style="text-align:right;">
+                    <h4>Quick Links</h4>
+                    <ul>
+                        <li><a href="/tiers" title="Learn about our user tiers">Tiers</a></li>
+                        <li><a href="/fun_facts" title="Interesting facts about our technology">Fun Facts</a></li>
+                        <li><a href="/privacy" title="Read our privacy practices">Privacy</a></li>
+                        <li><a href="/data_policy" title="How we handle your data">Data Policy</a></li>
+                        <li><a href="/legal" title="Legal information and notices">Legal</a></li>
+                        <li><a href="/tos" title="Terms of Service">TOS</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="footer-bottom" style="justify-content:center;flex-direction:column;gap:1.5rem;">
+                <div class="footer-copyright" style="text-align:center;font-size:0.85rem;color:#888;">
+                    <p>&copy; 2017 Kench Lightyear. All Rights Reserved.</p>
+                    <p>&copy; 2025 AIOps, AILog, and AIWiki. All Rights Reserved.</p>
+                    <p>All logos are Copyright of their respective owners.</p>
+                </div>
+                <div class="footer-social">
+                                    <a href="https://www.youtube.com/@joebertj/streams" title="YouTube Streams" target="_blank" rel="noopener noreferrer"><i class="fab fa-youtube"></i></a>
+                <a href="https://github.com/joebertj" title="GitHub Profile" target="_blank" rel="noopener noreferrer"><i class="fab fa-github"></i></a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Back to Top Button -->
+    <button id="back-to-top" class="back-to-top">
+        <i class="fas fa-arrow-up"></i>
+    </button>
+
+    <!-- JavaScript -->
+    <script src="/static/js/oauth-config.js"></script>
+    <script src="/static/js/auth-unified.js"></script>
+    
+    <!-- Load appropriate JS based on device type -->
+    <script>
+        // Detect if device is mobile
+        function isMobileDevice() {
+            return window.innerWidth <= 768 || /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+        }
+        
+        // Load appropriate JavaScript file
+        if (isMobileDevice()) {
+            console.log('🔍 Loading mobile.js for mobile device');
+            const mobileScript = document.createElement('script');
+            mobileScript.src = '/static/js/mobile.js?v=3';
+            mobileScript.async = true;
+            document.head.appendChild(mobileScript);
+        } else {
+            console.log('🔍 Loading main.js for desktop device');
+            const desktopScript = document.createElement('script');
+            desktopScript.src = '/static/js/main.js?v=3';
+            desktopScript.async = true;
+            document.head.appendChild(desktopScript);
+        }
+    </script>
+    
+    {% block scripts %}{% endblock %}
+
+    <!-- GDPR Cookie Consent Banner -->
+    <div id="cookie-consent-banner" style="display:none; position:fixed; bottom:0; left:0; width:100%; background:#222; color:#fff; padding:16px 10px; z-index:9999; text-align:center; font-size:1rem;">
+        This website uses cookies for authentication and to ensure you get the best experience. Authentication cookies are essential for accessing our services. <a href="/privacy" style="color:#ffd700; text-decoration:underline;">Learn more</a>.
+        <button id="accept-cookies-btn" style="margin-left:16px; background:#ffd700; color:#222; border:none; padding:8px 18px; border-radius:4px; font-weight:bold; cursor:pointer;">Accept</button>
+        <button id="refuse-cookies-btn" style="margin-left:8px; background:#444; color:#fff; border:none; padding:8px 18px; border-radius:4px; font-weight:bold; cursor:pointer;">Refuse</button>
+    </div>
+    <script>
+    // Simple GDPR cookie consent logic
+    function setCookie(name, value, days) {
+        var expires = "";
+        if (days) {
+            var date = new Date();
+            date.setTime(date.getTime() + (days*24*60*60*1000));
+            expires = "; expires=" + date.toUTCString();
+        }
+        document.cookie = name + "=" + (value || "")  + expires + "; path=/";
+    }
+    function getCookie(name) {
+        var nameEQ = name + "=";
+        var ca = document.cookie.split(';');
+        for(var i=0;i < ca.length;i++) {
+            var c = ca[i];
+            while (c.charAt(0)==' ') c = c.substring(1,c.length);
+            if (c.indexOf(nameEQ) == 0) return c.substring(nameEQ.length,c.length);
+        }
+        return null;
+    }
+
+    // Simple authentication check function
+    function checkAuthStatus() {
+        console.log('🔍 Checking authentication status...');
+        
+        // Check for authentication cookies
+        console.log('🔍 All cookies:', document.cookie);
+        var hasAuthCookie = document.cookie.includes('auth_basic_email') || 
+                           document.cookie.includes('auth_token') || 
+                           document.cookie.includes('auth_token_fallback') ||
+                           document.cookie.includes('session');
+        console.log('🔍 Has auth cookie:', hasAuthCookie);
+        console.log('🔍 Cookie checks:', {
+            auth_basic_email: document.cookie.includes('auth_basic_email'),
+            auth_token: document.cookie.includes('auth_token'),
+            auth_token_fallback: document.cookie.includes('auth_token_fallback'),
+            session: document.cookie.includes('session')
+        });
+        
+        // Target ALL elements with these IDs (both desktop and mobile)
+        var logoutElements = document.querySelectorAll('#logout');
+        var navUsernameElements = document.querySelectorAll('#nav-username, #mobile-nav-username');
+        var loginElements = document.querySelectorAll('#nav-login-link');
+        
+        // FALLBACK: If no visible cookies, check API directly (cookies might be HttpOnly)
+        if (!hasAuthCookie) {
+            console.log('🔍 No visible auth cookies, checking API directly...');
+            fetch('/api/auth/me-cookie', { credentials: 'include' })
+                .then(response => {
+                    console.log('🔍 API auth check status:', response.status);
+                    if (response.ok) {
+                        return response.json();
+                    }
+                    throw new Error('Not authenticated');
+                })
+                .then(data => {
+                    console.log('🔍 API auth check success:', data);
+                    if (data.user && data.user.email) {
+                        console.log('🔍 User authenticated via API - updating navigation');
+                        // User is authenticated, show logout and username
+                        document.body.classList.add('authenticated');
+                        document.body.classList.remove('unauthenticated');
+                        
+                        // Set username
+                        const userName = data.user.name || data.user.email.split('@')[0];
+                        navUsernameElements.forEach(el => {
+                            if (el) {
+                                el.textContent = 'Hi ' + userName;
+                                el.style.setProperty('display', 'inline-block', 'important');
+                                el.style.setProperty('visibility', 'visible', 'important');
+                                console.log('🔍 API: Set username text:', el.textContent);
+                            }
+                        });
+                        
+                        // Show logout, hide login
+                        logoutElements.forEach(el => { 
+                            if (el) {
+                                el.style.setProperty('display', 'inline-block', 'important');
+                                el.style.setProperty('visibility', 'visible', 'important');
+                                el.style.setProperty('opacity', '1', 'important');
+                                console.log('🔍 API: Shown logout element:', el.id);
+                            }
+                        });
+                        loginElements.forEach(el => { 
+                            if (el) {
+                                el.style.setProperty('display', 'none', 'important');
+                                el.style.setProperty('visibility', 'hidden', 'important');
+                                el.style.setProperty('opacity', '0', 'important');
+                                console.log('🔍 API: Hidden login element:', el.id);
+                            }
+                        });
+                        
+                        // Show admin and tester elements if applicable
+                        if (data.user.is_admin) {
+                            console.log('🔍 API: User is admin, showing admin elements');
+                            const adminElements = document.querySelectorAll('.admin-only');
+                            adminElements.forEach(el => {
+                                if (el) {
+                                    el.style.setProperty('display', 'inline-block', 'important');
+                                    el.style.setProperty('visibility', 'visible', 'important');
+                                    el.style.setProperty('opacity', '1', 'important');
+                                    console.log('🔍 API: Shown admin element:', el.id || el.className);
+                                }
+                            });
+                            
+                            // IMMEDIATELY show secret menu for admin users
+                            console.log('🔍 API: Admin detected - showing secret menu');
+                            const secretMenuElements = document.querySelectorAll('#secret-menu-item, #mobile-secret-menu-item');
+                            console.log('🔍 API: Found secret menu elements:', secretMenuElements.length);
+                            secretMenuElements.forEach(el => {
+                                if (el) {
+                                    el.style.setProperty('display', 'block', 'important');
+                                    el.style.setProperty('visibility', 'visible', 'important');
+                                    el.style.setProperty('opacity', '1', 'important');
+                                    console.log('🔍 API: Shown secret menu element for admin:', el.id);
+                                }
+                            });
+                        }
+                        
+                        if (data.user.is_admin) {
+                            console.log('🔍 API: User is admin, showing admin elements');
+                            const testerElements = document.querySelectorAll('.tester-only');
+                            testerElements.forEach(el => {
+                                if (el) {
+                                    el.style.setProperty('display', 'inline-block', 'important');
+                                    el.style.setProperty('visibility', 'visible', 'important');
+                                    el.style.setProperty('opacity', '1', 'important');
+                                    console.log('🔍 API: Shown tester element:', el.id || el.className);
+                                }
+                            });
+                            
+                            // IMMEDIATELY show secret menu for tester users (if not already shown)
+                            console.log('🔍 API: Tester detected - ensuring secret menu is shown');
+                            const secretMenuElements = document.querySelectorAll('#secret-menu-item, #mobile-secret-menu-item');
+                            console.log('🔍 API: Found secret menu elements for tester:', secretMenuElements.length);
+                            secretMenuElements.forEach(el => {
+                                if (el) {
+                                    el.style.setProperty('display', 'block', 'important');
+                                    el.style.setProperty('visibility', 'visible', 'important');
+                                    el.style.setProperty('opacity', '1', 'important');
+                                    console.log('🔍 API: Shown secret menu element for tester:', el.id);
+                                }
+                            });
+                        }
+                        
+                        return; // Exit early, we're done
+                    }
+                })
+                .catch(err => {
+                    console.log('🔍 API auth check failed:', err);
+                    // Continue with unauthenticated logic below
+                    updateForUnauthenticated();
+                });
+            return; // Exit early, let API check handle it
+        }
+        
+        // Function to handle unauthenticated state
+        function updateForUnauthenticated() {
+            console.log('🔍 User is NOT authenticated - showing login, hiding logout');
+            document.body.classList.add('unauthenticated');
+            document.body.classList.remove('authenticated');
+            console.log('🔍 Body classes set:', document.body.className);
+            
+            // Show login, hide logout and username with !important override
+            logoutElements.forEach(el => { 
+                if (el) {
+                    el.style.setProperty('display', 'none', 'important');
+                    el.style.setProperty('visibility', 'hidden', 'important');
+                    el.style.setProperty('opacity', '0', 'important');
+                    console.log('🔍 FORCE Hidden logout element:', el.id, 'display:', el.style.display);
+                }
+            });
+            navUsernameElements.forEach(el => { 
+                if (el) {
+                    el.style.setProperty('display', 'none', 'important');
+                    el.style.setProperty('visibility', 'hidden', 'important');
+                    console.log('🔍 FORCE Hidden username element:', el.id, 'display:', el.style.display);
+                }
+            });
+            loginElements.forEach(el => { 
+                if (el) {
+                    el.style.setProperty('display', 'inline-block', 'important');
+                    el.style.setProperty('visibility', 'visible', 'important');
+                    el.style.setProperty('opacity', '1', 'important');
+                    console.log('🔍 FORCE Shown login element:', el.id, 'display:', el.style.display);
+                }
+            });
+        }
+        
+        if (hasAuthCookie) {
+            console.log('🔍 User is authenticated - showing logout, hiding login');
+            // Set body classes for CSS rules
+            document.body.classList.add('authenticated');
+            document.body.classList.remove('unauthenticated');
+            console.log('🔍 Body classes set:', document.body.className);
+            
+            // Fetch user info to display name
+            fetch('/api/auth/me-cookie', { credentials: 'include' })
+                .then(response => response.json())
+                .then(data => {
+                    console.log('🔍 User data:', data);
+                    if (data.user && data.user.name) {
+                        navUsernameElements.forEach(el => {
+                            if (el) {
+                                el.textContent = 'Hi ' + data.user.name;
+                                console.log('🔍 Set username text:', el.textContent);
+                            }
+                        });
+                    } else if (data.user && data.user.email) {
+                        // Fallback to email if no name
+                        const emailName = data.user.email.split('@')[0];
+                        navUsernameElements.forEach(el => {
+                            if (el) {
+                                el.textContent = 'Hi ' + emailName;
+                                console.log('🔍 Set username text from email:', el.textContent);
+                            }
+                        });
+                    }
+                })
+                .catch(err => {
+                    console.log('🔍 Could not fetch user info:', err);
+                    navUsernameElements.forEach(el => {
+                        if (el) {
+                            el.textContent = 'Hi User';
+                        }
+                    });
+                });
+            
+            // Show logout and username, hide login with !important override
+            logoutElements.forEach(el => { 
+                if (el) {
+                    el.style.setProperty('display', 'inline-block', 'important');
+                    el.style.setProperty('visibility', 'visible', 'important');
+                    el.style.setProperty('opacity', '1', 'important');
+                    console.log('🔍 FORCE Shown logout element:', el.id, 'display:', el.style.display);
+                }
+            });
+            navUsernameElements.forEach(el => { 
+                if (el) {
+                    el.style.setProperty('display', 'inline-block', 'important');
+                    el.style.setProperty('visibility', 'visible', 'important');
+                    console.log('🔍 FORCE Shown username element:', el.id, 'display:', el.style.display);
+                }
+            });
+            loginElements.forEach(el => { 
+                if (el) {
+                    el.style.setProperty('display', 'none', 'important');
+                    el.style.setProperty('visibility', 'hidden', 'important');
+                    el.style.setProperty('opacity', '0', 'important');
+                    console.log('🔍 FORCE Hidden login element:', el.id, 'display:', el.style.display);
+                }
+            });
+        } else {
+            updateForUnauthenticated();
+        }
+    }
+
+    // Simple authentication check - no more complex logic
+    function aggressiveAuthCheck() {
+        console.log('🔍 Running simple auth check...');
+        checkAuthStatus();
+    }
+    
+    // CRITICAL: Run authentication check immediately when script loads
+    console.log('🔍 Base template script loaded - running immediate auth check');
+    checkAuthStatus();
+    
+    // Also run when DOM is ready
+    document.addEventListener('DOMContentLoaded', function() {
+        console.log('🔍 DOM ready - running auth check again');
+        checkAuthStatus();
+    });
+
+    // Run immediately (before DOMContentLoaded) - but only if main.js hasn't set up auth yet
+    // Check if main.js has already handled authentication
+    if (!window.mainJsAuthHandled) {
+        console.log('🔍 Base template: main.js not ready, running initial auth check');
+        aggressiveAuthCheck();
+    } else {
+        console.log('🔍 Base template: main.js already handled auth, skipping initial check');
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+        // Only run aggressive auth check if main.js hasn't handled authentication yet
+        if (!window.mainJsAuthHandled) {
+            console.log('🔍 Base template: main.js not ready, running DOM auth check');
+            aggressiveAuthCheck();
+        } else {
+            console.log('🔍 Base template: main.js already handled auth, skipping DOM check');
+        }
+
+        // Don't run multiple aggressive checks - let main.js handle the authentication state
+        // The base template should only provide fallback authentication, not override main.js
+
+        // GDPR cookie consent logic
+        var consent = getCookie('cookie_consent');
+        if (!consent) {
+            document.getElementById('cookie-consent-banner').style.display = 'block';
+        }
+        document.getElementById('accept-cookies-btn').onclick = function() {
+            setCookie('cookie_consent', 'accepted', 365);
+            document.getElementById('cookie-consent-banner').style.display = 'none';
+        };
+        document.getElementById('refuse-cookies-btn').onclick = function() {
+            setCookie('cookie_consent', 'refused', 365);
+            document.getElementById('cookie-consent-banner').style.display = 'none';
+        };
+
+        // Set login link with redirect parameter
+        var loginLink = document.getElementById('nav-login-link');
+        if (loginLink) {
+            var currentPath = window.location.pathname;
+            // Only add redirect for pages that require authentication
+            // Exclude public pages and special pages like piso
+            if (currentPath !== '/' && currentPath !== '/login' && currentPath !== '/signup' && currentPath !== '/change-password' && currentPath !== '/about' &&
+                currentPath !== '/contact' && currentPath !== '/blog' && currentPath !== '/services' &&
+                currentPath !== '/products' && currentPath !== '/privacy' && currentPath !== '/tos' &&
+                currentPath !== '/legal' && currentPath !== '/data_policy' && currentPath !== '/tiers' &&
+                currentPath !== '/fun_facts' && currentPath !== '/piso' && currentPath !== '/captive') {
+                loginLink.href = '/login?redirect=' + encodeURIComponent(currentPath);
+                console.log('🔍 Set login redirect to:', currentPath);
+            } else {
+                console.log('🔍 No redirect set for:', currentPath);
+            }
+        }
+
+        // Note: checkAuthStatus() is now called from main.js
+    });
+    </script>
+    <script src="/static/js/error-handling.js"></script>
+</body>
+</html> 
