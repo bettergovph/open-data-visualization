@@ -93,10 +93,12 @@
         </div>
         <div class="hidden md:flex space-x-6">
             <a href="/alt" class="text-black hover:text-gray-600 font-medium transition">Home</a>
+            <a href="/nep" class="text-black hover:text-gray-600 font-medium transition">NEP</a>
             <a href="/budget" class="text-black hover:text-gray-600 font-medium transition">Budget</a>
             <a href="/flood" class="text-black hover:text-gray-600 font-medium transition">Flood Control</a>
             <a href="/dime" class="text-black hover:text-gray-600 font-medium transition border-b-2 border-black">DIME</a>
             <a href="/map" class="text-black hover:text-gray-600 font-medium transition">Map</a>
+            <a href="/budget-nep-correlation" class="text-black hover:text-gray-600 font-medium transition">NEP-Budget</a>
             <a href="/budget-flood-correlation" class="text-black hover:text-gray-600 font-medium transition">Budget-Flood</a>
             <a href="/flood-dime-correlation" class="text-black hover:text-gray-600 font-medium transition">Flood-DIME</a>
         </div>
@@ -111,10 +113,12 @@
     <!-- Mobile menu (hidden by default) -->
     <div id="mobileMenu" class="hidden mt-4 px-4 space-y-2">
         <a href="/alt" class="block text-black hover:text-gray-600 font-medium py-2">Home</a>
+        <a href="/nep" class="block text-black hover:text-gray-600 font-medium py-2">NEP</a>
         <a href="/budget" class="block text-black hover:text-gray-600 font-medium py-2">Budget</a>
         <a href="/flood" class="block text-black hover:text-gray-600 font-medium py-2">Flood Control</a>
         <a href="/dime" class="block text-black hover:text-gray-600 font-medium py-2 border-b-2 border-black">DIME</a>
         <a href="/map" class="block text-black hover:text-gray-600 font-medium py-2">Map</a>
+        <a href="/budget-nep-correlation" class="block text-black hover:text-gray-600 font-medium py-2">NEP-Budget</a>
         <a href="/budget-flood-correlation" class="block text-black hover:text-gray-600 font-medium py-2">Budget-Flood</a>
         <a href="/flood-dime-correlation" class="block text-black hover:text-gray-600 font-medium py-2">Flood-DIME</a>
     </div>
@@ -438,6 +442,7 @@ function toggleMobileMenu() {
     <p><strong>Data Source:</strong> DBM DIME (Digital Information for Monitoring and Evaluation)</p>
     <p>API: <a href="https://www.dime.gov.ph/api/v1/projects" target="_blank" style="color: #0038A8; text-decoration: none;">https://www.dime.gov.ph/api/v1/projects</a></p>
     <p>Last Updated: <span id="last-updated">-</span></p>
+    <p class="github-footnote text-center text-gray-600 text-sm mt-2">@<a href="https://github.com/joebertj" target="_blank" rel="noopener noreferrer">https://github.com/joebertj</a></p>
 </div>
 
 <style>
@@ -1419,18 +1424,48 @@ function toggleMobileMenu() {
     }
 
     // Chart rendering functions
-    function renderStatusChart() {
+    function renderStatusChart(statusData) {
         const ctx = document.getElementById('statusChart');
         if (!ctx) return;
-        
+
+        // Process the actual data from API
+        let labels = [];
+        let data = [];
+        let backgroundColors = [];
+
+        // Define color mapping for statuses
+        const statusColors = {
+            'Completed': '#28a745',      // Green
+            'Ongoing': '#ffc107',        // Yellow
+            'Incomplete': '#dc3545',     // Red
+            'Not Yet Started': '#17a2b8', // Teal
+            'Suspended': '#6c757d'       // Gray
+        };
+
+        if (statusData && Array.isArray(statusData)) {
+            // Sort by count descending and take top statuses
+            const sortedData = statusData.sort((a, b) => b.count - a.count);
+
+            sortedData.forEach(item => {
+                labels.push(item.status);
+                data.push(item.count);
+                backgroundColors.push(statusColors[item.status] || '#999999');
+            });
+        } else {
+            // Fallback to sample data if no real data
+            labels = ['Completed', 'Not Yet Started', 'Ongoing', 'Incomplete'];
+            data = [10121, 1991, 465, 293];
+            backgroundColors = ['#28a745', '#17a2b8', '#ffc107', '#dc3545'];
+        }
+
         new Chart(ctx, {
             type: 'bar',
             data: {
-                labels: ['Ongoing', 'Completed', 'Planned', 'Suspended'],
+                labels: labels,
                 datasets: [{
                     label: 'Number of Projects',
-                    data: [8456, 3214, 987, 213],
-                    backgroundColor: ['#28a745', '#007bff', '#ffc107', '#dc3545']
+                    data: data,
+                    backgroundColor: backgroundColors
                 }]
             },
             options: {

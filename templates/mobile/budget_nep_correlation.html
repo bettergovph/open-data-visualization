@@ -1,0 +1,50 @@
+{% extends "mobile/base_altgovph.html" %}
+
+{% block head %}
+<!-- AltGovPH Mobile Theme CSS -->
+<link rel="stylesheet" href="/static/css/altgovph-mobile.css">
+{% endblock %}
+
+{% block content %}
+<!-- Mobile Budget-NEP Correlation Section -->
+<section class="mobile-budget-section">
+    <div class="mobile-budget-container">
+        <div class="mobile-budget-header">
+            <div class="mobile-desktop-notice bg-blue-50 text-blue-700 p-4 rounded-md mb-4 text-center border-l-4 border-blue-500">
+                <i class="fas fa-desktop mr-2"></i>
+                <strong>For the best experience, this feature is optimized for desktop viewing</strong>
+            </div>
+        </div>
+
+        <div class="mobile-nep-content">
+
+            <!-- Mobile Database Comparison -->
+            <div class="mobile-nep-data-browser">
+                <h3 class="mobile-nep-section-title">🚨 Database Schema Discovery</h3>
+                <p class="mobile-nep-section-desc">Critical finding: Budget & NEP databases do NOT match 1-to-1</p>
+
+                <div class="bg-red-50 border-l-4 border-red-400 p-4 mb-4">
+                    <h4 class="font-bold text-red-800 mb-2">Key Differences:</h4>
+                    <ul class="text-sm text-red-700 space-y-1">
+                        <li>• Budget: 24 columns, 2017-2025 coverage</li>
+                        <li>• NEP: 16 columns, 2020-2026 coverage</li>
+                        <li>• Column names: amt vs amount, dsc vs description</li>
+                        <li>• Data types: bigint vs varchar for codes</li>
+                    </ul>
+                </div>
+
+                <div class="bg-green-50 border-l-4 border-green-400 p-4">
+                    <h4 class="font-bold text-green-800 mb-2">Successful Integration:</h4>
+                    <ul class="text-sm text-green-700 space-y-1">
+                        <li>• Adapted queries handle column differences</li>
+                        <li>• Same API endpoints serve both databases</li>
+                        <li>• Identical user interface experience</li>
+                        <li>• Transparent database switching</li>
+                    </ul>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</section>
+{% endblock %}

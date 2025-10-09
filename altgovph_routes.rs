@@ -240,6 +240,88 @@ async fn dime(_req: HttpRequest) -> Result<HttpResponse, ActixError> {
     Ok(HttpResponse::Ok().content_type("text/html").body(rendered))
 }
 
+async fn nep(_req: HttpRequest) -> Result<HttpResponse, ActixError> {
+    // Check for mobile redirect
+    if let Some(redirect) = check_mobile_redirect_enhanced(&_req) {
+        return Ok(redirect);
+    }
+
+    // Check for production domain blocking (block /nep on kenchlightyear.com)
+    if let Some(block_response) = check_production_domain_block(&_req) {
+        return Ok(block_response);
+    }
+
+    // Use standalone NEP template (no KenchLightyear branding)
+    let tera = Tera::new("templates/**/*").map_err(|e| actix_web::error::ErrorInternalServerError(e))?;
+    let mut context = Context::new();
+
+    // Add frontend environment variables first
+    add_frontend_env_to_context(&mut context);
+
+    // AltGovPH theme for NEP frontend separation (override after env vars)
+    context.insert("title", "NEP Analysis - AltGovPH");
+    context.insert("company_name", "AltGovPH");
+    context.insert("platform", "AltGovPH");
+    context.insert("SITE_NAME", "AltGovPH");
+    context.insert("SITE_URL", "https://altgovph.site");
+
+    // Override Open Graph and Twitter metadata for AltGovPH
+    context.insert("og_title", "NEP Analysis - AltGovPH");
+    context.insert("og_description", "Government Data Analysis Platform for National Expenditure Program Projects");
+    context.insert("og_url", "https://altgovph.site/nep");
+    context.insert("og_image", "/static/images/gov_logo.png");
+
+    // Choose template based on host
+    let template_name = if should_use_mobile_template(&_req) {
+        "mobile/nep.html"
+    } else {
+        "nep.html"
+    };
+
+    let rendered = tera.render(template_name, &context).map_err(|e| actix_web::error::ErrorInternalServerError(e))?;
+    Ok(HttpResponse::Ok().content_type("text/html").body(rendered))
+}
+
+async fn budget_nep_correlation(_req: HttpRequest) -> Result<HttpResponse, ActixError> {
+    // Check for mobile redirect
+    if let Some(redirect) = check_mobile_redirect_enhanced(&_req) {
+        return Ok(redirect);
+    }
+
+    // Check for production domain blocking (block on kenchlightyear.com)
+    if let Some(block_response) = check_production_domain_block(&_req) {
+        return Ok(block_response);
+    }
+
+    // Use budget-nep correlation template
+    let tera = Tera::new("templates/**/*").map_err(|e| actix_web::error::ErrorInternalServerError(e))?;
+    let mut context = Context::new();
+
+    // Add frontend environment variables first
+    add_frontend_env_to_context(&mut context);
+
+    // AltGovPH theme for budget-nep correlation page
+    context.insert("title", "NEP-Budget Correlation Analysis - AltGovPH");
+    context.insert("company_name", "AltGovPH");
+    context.insert("platform", "AltGovPH");
+    context.insert("SITE_NAME", "AltGovPH");
+    context.insert("SITE_URL", "https://altgovph.site");
+
+    // Override Open Graph and Twitter metadata for AltGovPH
+    context.insert("og_url", "https://altgovph.site/budget-nep-correlation");
+    context.insert("og_image", "/static/images/gov_logo.png");
+
+    // Choose template based on host
+    let template_name = if should_use_mobile_template(&_req) {
+        "mobile/budget_nep_correlation.html"
+    } else {
+        "budget_nep_correlation.html"
+    };
+
+    let rendered = tera.render(template_name, &context).map_err(|e| actix_web::error::ErrorInternalServerError(e))?;
+    Ok(HttpResponse::Ok().content_type("text/html").body(rendered))
+}
+
 async fn budget_flood_correlation(_req: HttpRequest) -> Result<HttpResponse, ActixError> {
     // Check for mobile redirect
     if let Some(redirect) = check_mobile_redirect_enhanced(&_req) {
@@ -312,6 +394,8 @@ App::new()
     .service(web::resource("/budget").to(budget))
     .service(web::resource("/flood").to(flood))
     .service(web::resource("/dime").to(dime))
+    .service(web::resource("/nep").to(nep))
     .service(web::resource("/budget-flood-correlation").to(budget_flood_correlation))
+    .service(web::resource("/budget-nep-correlation").to(budget_nep_correlation))
     .service(web::resource("/flood-dime-correlation").to(flood_dime_correlation))
 */

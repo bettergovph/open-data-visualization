@@ -86,10 +86,12 @@
         </div>
         <div class="hidden md:flex space-x-6">
             <a href="/alt" class="text-black hover:text-gray-600 font-medium transition">Home</a>
+            <a href="/nep" class="text-black hover:text-gray-600 font-medium transition">NEP</a>
             <a href="/budget" class="text-black hover:text-gray-600 font-medium transition">Budget</a>
             <a href="/flood" class="text-black hover:text-gray-600 font-medium transition">Flood Control</a>
             <a href="/dime" class="text-black hover:text-gray-600 font-medium transition">DIME</a>
             <a href="/map" class="text-black hover:text-gray-600 font-medium transition">Map</a>
+            <a href="/budget-nep-correlation" class="text-black hover:text-gray-600 font-medium transition">NEP-Budget</a>
             <a href="/budget-flood-correlation" class="text-black hover:text-gray-600 font-medium transition">Budget-Flood</a>
             <a href="/flood-dime-correlation" class="text-black hover:text-gray-600 font-medium transition">Flood-DIME</a>
         </div>
@@ -104,10 +106,12 @@
     <!-- Mobile menu (hidden by default) -->
     <div id="mobileMenu" class="hidden mt-4 px-4 space-y-2">
         <a href="/alt" class="block text-black hover:text-gray-600 font-medium py-2">Home</a>
+        <a href="/nep" class="block text-black hover:text-gray-600 font-medium py-2">NEP</a>
         <a href="/budget" class="block text-black hover:text-gray-600 font-medium py-2">Budget</a>
         <a href="/flood" class="block text-black hover:text-gray-600 font-medium py-2">Flood Control</a>
         <a href="/dime" class="block text-black hover:text-gray-600 font-medium py-2">DIME</a>
         <a href="/map" class="block text-black hover:text-gray-600 font-medium py-2">Map</a>
+        <a href="/budget-nep-correlation" class="block text-black hover:text-gray-600 font-medium py-2">NEP-Budget</a>
         <a href="/budget-flood-correlation" class="block text-black hover:text-gray-600 font-medium py-2">Budget-Flood</a>
         <a href="/flood-dime-correlation" class="block text-black hover:text-gray-600 font-medium py-2">Flood-DIME</a>
     </div>
@@ -119,13 +123,20 @@
 <section class="bg-gray-50 py-16 px-6">
     <div class="max-w-7xl mx-auto">
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            <!-- NEP Card -->
+            <div class="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition">
+                <h3 class="text-2xl font-semibold text-black mb-3">📈 NEP</h3>
+                <p class="text-gray-600 mb-4">National Expenditure Program analysis with detailed budget tracking, expenditure monitoring, and financial transparency insights.</p>
+                <a href="/nep" class="inline-block bg-black text-white px-6 py-2 rounded-lg hover:bg-gray-800 transition">Explore NEP Data</a>
+            </div>
+
             <!-- Budget Card -->
             <div class="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition">
                 <h3 class="text-2xl font-semibold text-black mb-3">💰 Budget</h3>
                 <p class="text-gray-600 mb-4">AI-powered analysis of Government Appropriations Act (GAA) data with intelligent insights, duplicate detection, and trend analysis.</p>
                 <a href="/budget" class="inline-block bg-black text-white px-6 py-2 rounded-lg hover:bg-gray-800 transition">Explore Budget Data</a>
             </div>
-            
+
             <!-- Flood Control Card -->
             <div class="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition">
                 <h3 class="text-2xl font-semibold text-black mb-3">🌊 Flood Control Projects</h3>
@@ -145,6 +156,13 @@
                 <h3 class="text-2xl font-semibold text-black mb-3">🗺️ Interactive Map</h3>
                 <p class="text-gray-600 mb-4">Explore flood control projects geographically across the Philippines with an interactive map interface.</p>
                 <a href="/map" class="inline-block bg-black text-white px-6 py-2 rounded-lg hover:bg-gray-800 transition">View Interactive Map</a>
+            </div>
+
+            <!-- NEP-Budget Correlation Card -->
+            <div class="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition">
+                <h3 class="text-2xl font-semibold text-black mb-3">🚨 NEP-Budget Correlation</h3>
+                <p class="text-gray-600 mb-4">Critical analysis revealing fundamental database schema differences between Budget and NEP systems despite unified interface.</p>
+                <a href="/budget-nep-correlation" class="inline-block bg-black text-white px-6 py-2 rounded-lg hover:bg-gray-800 transition">View Schema Analysis</a>
             </div>
 
             <!-- Budget-Flood Correlation Card -->
@@ -171,5 +189,12 @@ function toggleMobileMenu() {
     menu.classList.toggle('hidden');
 }
 </script>
+
+<!-- Footer -->
+<footer class="altgovph-footer">
+    <div class="altgovph-container">
+        <p class="github-footnote text-center text-gray-600 text-sm mt-2">@<a href="https://github.com/joebertj" target="_blank" rel="noopener noreferrer">https://github.com/joebertj</a></p>
+    </div>
+</footer>
 
 {% endblock %}

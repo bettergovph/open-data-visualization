@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Budget Analysis - AltGovPH</title>
+    <title>NEP Analysis - AltGovPH</title>
 
     <!-- Google Fonts - Inter -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -19,22 +19,22 @@
     <meta http-equiv="Expires" content="-1">
 
     <!-- AltGovPH Metadata -->
-    <meta name="description" content="Budget Analysis - Government Data Analysis Platform">
-    <meta name="keywords" content="government data, budget analysis, flood control, public data, transparency">
+    <meta name="description" content="NEP Analysis - Government Data Analysis Platform">
+    <meta name="keywords" content="government data, nep analysis, flood control, public data, transparency">
     <meta name="author" content="AltGovPH">
 
     <!-- Open Graph / Facebook -->
     <meta property="og:type" content="website">
     <meta property="og:url" content="https://altgovph.site/">
-    <meta property="og:title" content="Budget - AltGovPH">
-    <meta property="og:description" content="Government Data Analysis Platform for Budget and Flood Control Projects">
+    <meta property="og:title" content="NEP - AltGovPH">
+    <meta property="og:description" content="Government Data Analysis Platform for NEP Projects">
     <meta property="og:image" content="/static/images/gov_logo.png">
 
     <!-- Twitter -->
     <meta property="twitter:card" content="summary_large_image">
     <meta property="twitter:url" content="https://altgovph.site/">
-    <meta property="twitter:title" content="Budget - AltGovPH">
-    <meta property="twitter:description" content="Government Data Analysis Platform for Budget and Flood Control Projects">
+    <meta property="twitter:title" content="NEP - AltGovPH">
+    <meta property="twitter:description" content="Government Data Analysis Platform for NEP Projects">
     <meta property="twitter:image" content="/static/images/gov_logo.png">
 
     <style>
@@ -61,8 +61,8 @@
         </div>
         <div class="hidden md:flex space-x-6">
             <a href="/alt" class="text-black hover:text-gray-600 font-medium transition">Home</a>
-            <a href="/nep" class="text-black hover:text-gray-600 font-medium transition">NEP</a>
-            <a href="/budget" class="text-black hover:text-gray-600 font-medium transition border-b-2 border-black">Budget</a>
+            <a href="/nep" class="text-black hover:text-gray-600 font-medium transition border-b-2 border-black">NEP</a>
+            <a href="/budget" class="text-black hover:text-gray-600 font-medium transition">Budget</a>
             <a href="/flood" class="text-black hover:text-gray-600 font-medium transition">Flood Control</a>
             <a href="/dime" class="text-black hover:text-gray-600 font-medium transition">DIME</a>
             <a href="/map" class="text-black hover:text-gray-600 font-medium transition">Map</a>
@@ -81,8 +81,8 @@
     <!-- Mobile menu (hidden by default) -->
     <div id="mobileMenu" class="hidden mt-4 px-4 space-y-2">
         <a href="/alt" class="block text-black hover:text-gray-600 font-medium py-2">Home</a>
-        <a href="/nep" class="block text-black hover:text-gray-600 font-medium py-2">NEP</a>
-        <a href="/budget" class="block text-black hover:text-gray-600 font-medium py-2 border-b-2 border-black">Budget</a>
+        <a href="/nep" class="block text-black hover:text-gray-600 font-medium py-2 border-b-2 border-black">NEP</a>
+        <a href="/budget" class="block text-black hover:text-gray-600 font-medium py-2">Budget</a>
         <a href="/flood" class="block text-black hover:text-gray-600 font-medium py-2">Flood Control</a>
         <a href="/dime" class="block text-black hover:text-gray-600 font-medium py-2">DIME</a>
         <a href="/map" class="block text-black hover:text-gray-600 font-medium py-2">Map</a>
@@ -99,7 +99,7 @@ function toggleMobileMenu() {
 }
 </script>
 
-<!-- Budget Section -->
+<!-- NEP Section -->
 <div style="padding: 6rem;">
 <section class="budget-section">
     <div class="budget-container">
@@ -112,8 +112,6 @@ function toggleMobileMenu() {
                 <div class="budget-tab-nav">
                     <a href="#visual" class="budget-tab-btn active" data-tab="visual">📊 Visual</a>
                     <a href="#browser" class="budget-tab-btn" data-tab="browser">📋 Data Browser</a>
-                    <a href="#analysis" class="budget-tab-btn" data-tab="analysis">🔍 Analysis</a>
-                    <a href="#trends" class="budget-tab-btn" data-tab="trends">📈 Trends</a>
                 </div>
                 
                 <div class="budget-tab-content">
@@ -134,6 +132,7 @@ function toggleMobileMenu() {
                         <div class="year-filter-container" style="margin-bottom: 20px; text-align: right;">
                             <label for="year-filter" style="font-weight: bold; color: #333; margin-right: 10px;">Year:</label>
                             <select id="year-filter" style="padding: 8px 12px; border: 2px solid #ddd; border-radius: 6px; font-size: 14px; background: white; color: #333; cursor: pointer;">
+                                <option value="2026">2026</option>
                                 <option value="2025">2025</option>
                                 <option value="2024">2024</option>
                                 <option value="2023">2023</option>
@@ -205,7 +204,8 @@ function toggleMobileMenu() {
                             <label for="browser-year-filter">Year:</label>
                             <select id="browser-year-filter" class="year-select">
                                 <option value="all">All Years</option>
-                                <option value="2025" selected>2025</option>
+                                <option value="2026" selected>2026</option>
+                                <option value="2025">2025</option>
                                 <option value="2024">2024</option>
                                 <option value="2023">2023</option>
                                 <option value="2022">2022</option>
@@ -293,7 +293,7 @@ function toggleMobileMenu() {
                         <div class="sort-controls">
                             <label for="sort-select">Sort by:</label>
                             <select id="sort-select">
-                                <option value="amt">Amount (Highest First)</option>
+                                <option value="amount">Amount (Highest First)</option>
                                 <option value="department">Department</option>
                                 <option value="agency">Agency</option>
                                 <option value="dsc">Description</option>
@@ -2578,7 +2578,7 @@ async function loadDuplicateDetails(year, type, index) {
     
     try {
         // Make API call to get duplicate line details
-        const response = await fetch(`${getApiBaseUrl()}/api/budget/duplicate-details`, {
+        const response = await fetch(`${getApiBaseUrl()}/api/budget/nep/duplicate-details`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -2723,7 +2723,7 @@ function displayBudgetAnalysisResult(result) {
                             <strong>Description:</strong> ${dup.description || 'N/A'}
                         </div>
                         <div class="duplicate-field">
-                            <strong>Amount:</strong> ₱${((dup.amount || 0) * 1000).toLocaleString('en-US')}
+                            <strong>Amount:</strong> ₱${(dup.amount || 0).toLocaleString('en-US')}
                         </div>
                         <div class="duplicate-field">
                             <strong>Duplicate Count:</strong> ${dup.duplicate_count || 0} times
@@ -2794,7 +2794,7 @@ function displayTopDuplicates(duplicates) {
                     </div>
                     <div class="top-item-field">
                         <div class="top-item-field-label">Amount</div>
-                        <div class="top-item-field-value">₱${(amount * 1000).toLocaleString('en-US')}</div>
+                        <div class="top-item-field-value">₱${amount.toLocaleString('en-US')}</div>
                     </div>
                 </div>
             </div>
@@ -2870,25 +2870,30 @@ function loadVisualCharts() {
     }, 100);
 }
 
-async function loadVisualStatistics(year = null) {
+async function loadVisualStatistics() {
     try {
-        // Use year-specific stats if provided, otherwise get all-year stats
-        let url = `${getApiBaseUrl()}/api/budget/overview/stats`;
-        if (year && year !== 'all') {
-            url += `?year=${year}`;
-        }
+        // Get selected year from the year filter
+        const yearFilter = document.getElementById('year-filter');
+        const selectedYear = yearFilter ? yearFilter.value : null;
 
-        console.log(`📊 [Frontend] Loading visual statistics for year: ${year || 'all'}`);
+        // Build URL with year parameter if a specific year is selected
+        let url = `${getApiBaseUrl()}/api/budget/nep/overview/stats`;
+        if (selectedYear && selectedYear !== 'all') {
+            url += `?year=${selectedYear}`;
+        }
 
         const response = await fetch(url);
         const result = await response.json();
         
         if (result.success && result.stats) {
             const stats = result.stats;
-            
+
+            // Apply *1000 for 2020-2025, no multiplication for 2026
+            const multiplier = (selectedYear && selectedYear >= 2020 && selectedYear <= 2025) ? 1000 : 1;
+
             // Update all statistics cards from the materialized view
             document.getElementById('total-budget-items').textContent = stats.total_items?.toLocaleString('en-US') || '0';
-            document.getElementById('total-budget-value').textContent = `₱${((stats.total_value || 0) * 1000).toLocaleString('en-US')}`;
+            document.getElementById('total-budget-value').textContent = `₱${((stats.total_value || 0) * multiplier).toLocaleString('en-US')}`;
             document.getElementById('total-departments').textContent = stats.unique_departments?.toLocaleString('en-US') || '0';
             document.getElementById('unique-agencies').textContent = stats.unique_agencies?.toLocaleString('en-US') || '0';
             
@@ -2920,7 +2925,7 @@ async function loadVisualStatistics(year = null) {
 async function loadDepartmentsChart() {
     try {
         const apiYear = getApiYear();
-        const response = await fetch(`/api/budget/departments?year=${apiYear}&limit=8`);
+        const response = await fetch(`/api/budget/nep/departments?year=${apiYear}&limit=8`);
         const result = await response.json();
         
         if (result.success && result.data) {
@@ -2943,12 +2948,15 @@ async function loadDepartmentsChart() {
             
             const ctx = canvas.getContext('2d');
             
+            // Apply *1000 for 2020-2025, no multiplication for 2026
+            const multiplier = (apiYear >= 2020 && apiYear <= 2025) ? 1000 : 1;
+
             new Chart(ctx, {
                 type: 'doughnut',
                 data: {
                     labels: departments.map(d => d.department_description || 'Unknown'),
                     datasets: [{
-                        data: departments.map(d => (d.total_amount || 0) * 1000),
+                        data: departments.map(d => (d.total_amount || 0) * multiplier),
                         backgroundColor: [
                             '#0038A8', '#CE1126', '#28a745', '#ffc107',
                             '#dc3545', '#6f42c1', '#fd7e14', '#20c997'
@@ -2981,7 +2989,7 @@ async function loadDepartmentsChart() {
 async function loadAgenciesChart() {
     try {
         const apiYear = getApiYear();
-        const response = await fetch(`/api/budget/agencies?year=${apiYear}&limit=10`);
+        const response = await fetch(`/api/budget/nep/agencies?year=${apiYear}&limit=10`);
         const result = await response.json();
         
         if (result.success && result.data) {
@@ -2998,14 +3006,17 @@ async function loadAgenciesChart() {
             }
             
             const ctx = canvas.getContext('2d');
-            
+
+            // Apply *1000 for 2020-2025, no multiplication for 2026
+            const multiplier = (apiYear >= 2020 && apiYear <= 2025) ? 1000 : 1;
+
             new Chart(ctx, {
                 type: 'bar',
                 data: {
                     labels: agencies.map(a => a.uacs_agy_dsc || 'Unknown'),
                     datasets: [{
                         label: 'Budget Amount (₱)',
-                        data: agencies.map(a => (a.total_amount || 0) * 1000),
+                        data: agencies.map(a => (a.total_amount || 0) * multiplier),
                         backgroundColor: 'rgba(0, 56, 168, 0.8)',
                         borderColor: 'rgba(0, 56, 168, 1)',
                         borderWidth: 1
@@ -3049,7 +3060,7 @@ async function loadAgenciesChart() {
 async function loadExpenseCategoriesChart() {
     try {
         const apiYear = getApiYear();
-        const response = await fetch(`/api/budget/expense-categories?year=${apiYear}&limit=8`);
+        const response = await fetch(`/api/budget/nep/expense-categories?year=${apiYear}&limit=8`);
         const result = await response.json();
         
         if (result.success && result.data) {
@@ -3066,14 +3077,17 @@ async function loadExpenseCategoriesChart() {
             }
             
             const ctx = canvas.getContext('2d');
-            
+
+            // Apply *1000 for 2020-2025, no multiplication for 2026
+            const multiplier = (apiYear >= 2020 && apiYear <= 2025) ? 1000 : 1;
+
             new Chart(ctx, {
                 type: 'bar',
                 data: {
                     labels: categories.map(c => c.uacs_exp_dsc || 'Unknown'),
                     datasets: [{
                         label: 'Budget Amount (₱)',
-                        data: categories.map(c => (c.total_amount || 0) * 1000),
+                        data: categories.map(c => (c.total_amount || 0) * multiplier),
                         backgroundColor: 'rgba(206, 17, 38, 0.8)',
                         borderColor: 'rgba(206, 17, 38, 1)',
                         borderWidth: 1
@@ -3116,7 +3130,7 @@ async function loadExpenseCategoriesChart() {
 async function loadRegionsChart() {
     try {
         const apiYear = getApiYear();
-        const response = await fetch(`/api/budget/regions?year=${apiYear}&limit=8`);
+        const response = await fetch(`/api/budget/nep/regions?year=${apiYear}&limit=8`);
         const result = await response.json();
         
         if (result.success && result.data) {
@@ -3133,13 +3147,16 @@ async function loadRegionsChart() {
             }
             
             const ctx = canvas.getContext('2d');
-            
+
+            // Apply *1000 for 2020-2025, no multiplication for 2026
+            const multiplier = (apiYear >= 2020 && apiYear <= 2025) ? 1000 : 1;
+
             new Chart(ctx, {
                 type: 'pie',
                 data: {
                     labels: regions.map(r => `Region ${r.uacs_reg_id}` || 'Unknown'),
                     datasets: [{
-                        data: regions.map(r => (r.total_amount || 0) * 1000),
+                        data: regions.map(r => (r.total_amount || 0) * multiplier),
                         backgroundColor: [
                             '#0038A8', '#CE1126', '#28a745', '#ffc107',
                             '#dc3545', '#6f42c1', '#fd7e14', '#20c997'
@@ -3185,8 +3202,8 @@ async function loadBudgetColumns() {
         
         // Load columns for both years in parallel
         const [response2024, response2025] = await Promise.all([
-            fetch(`${getApiBaseUrl()}/api/budget/columns?year=2024`),
-            fetch(`${getApiBaseUrl()}/api/budget/columns?year=2025`)
+            fetch(`${getApiBaseUrl()}/api/budget/nep/columns?year=2024`),
+            fetch(`${getApiBaseUrl()}/api/budget/nep/columns?year=2025`)
         ]);
         
         
@@ -3249,11 +3266,11 @@ async function loadFloodControlAmount() {
             year: '2025',
             page: '1',
             limit: '1',
-            sort_by: 'amt',
+            sort_by: 'amount',
             sort_order: 'DESC'
         });
         
-        const response = await fetch(`/api/budget/data-browser?${params.toString()}`);
+        const response = await fetch(`/api/budget/nep/data-browser?${params.toString()}`);
         
         if (response.ok) {
             const result = await response.json();
@@ -3347,9 +3364,12 @@ function showSampleRowsError(message) {
 
 
 // Function to display flood control amount (using same table style as sample rows)
-function displayFloodControlAmount(rows) {
+function displayFloodControlAmount(rows, year = '2025') {
     const container = document.getElementById('flood-control-container');
     if (!container) return;
+
+    // Apply *1000 for 2020-2025, no multiplication for 2026
+    const multiplier = (year && year >= 2020 && year <= 2025) ? 1000 : 1;
 
     if (rows && rows.length > 0) {
         // Get all unique column names from all rows
@@ -3382,9 +3402,9 @@ function displayFloodControlAmount(rows) {
                     <td class="row-number">${index + 1}</td>
                     ${columns.map(col => {
                         let value = row[col] || '';
-                        // Format amount columns with US-style number formatting (multiply by 1000 for GAA convention)
-                        if (col.toLowerCase().includes('amt') && value && !isNaN(value)) {
-                            value = `₱${(parseFloat(value) * 1000).toLocaleString('en-US')}`;
+                        // Format amount columns with US-style number formatting (apply year-based multiplier)
+                        if (col.toLowerCase().includes('amount') && value && !isNaN(value)) {
+                            value = `₱${(parseFloat(value) * multiplier).toLocaleString('en-US')}`;
                         }
                         // Truncate long text
                         if (typeof value === 'string' && value.length > 50) {
@@ -3461,7 +3481,7 @@ function showFloodControlError(message) {
 
 // Data Browser Functions
 let currentPage = 1;
-let currentSortBy = 'amt';
+let currentSortBy = 'amount';
 let currentSortOrder = 'DESC';
 let currentFilters = {};
 
@@ -3489,13 +3509,18 @@ function getApiYear() {
 // Helper function to get Data Browser API year (allows 'all' for cross-year queries)
 function getDataBrowserApiYear() {
     // Use the Data Browser tab's year filter
-    const selectedYear = document.getElementById('browser-year-filter')?.value || '2025';
+    const selectedYear = document.getElementById('browser-year-filter')?.value || '2026';
     return selectedYear; // Allow 'all' to be passed through
 }
 
 // Function to programmatically switch to a specific tab
 function switchToTab(tabName, updateHash = true) {
-    
+
+    // Prevent switching to disabled analysis and trends tabs
+    if (tabName === 'analysis' || tabName === 'trends') {
+        return;
+    }
+
     // Remove active class from all buttons and panels
     const tabButtons = document.querySelectorAll('.budget-tab-btn');
     const tabPanels = document.querySelectorAll('.budget-tab-panel');
@@ -3565,12 +3590,12 @@ async function loadDataBrowser() {
             }
         });
         
-        const response = await fetch(`/api/budget/data-browser?${params.toString()}`);
+        const response = await fetch(`/api/budget/nep/data-browser?${params.toString()}`);
         
         if (response.ok) {
             const result = await response.json();
             if (result.success) {
-                displayDataBrowser(result);
+                displayDataBrowser(result, apiYear);
             } else {
                 showDataBrowserError(result.error || 'Failed to load data');
             }
@@ -3584,16 +3609,19 @@ async function loadDataBrowser() {
 }
 
 // Display data browser results
-function displayDataBrowser(data) {
+function displayDataBrowser(data, apiYear = null) {
     const container = document.getElementById('data-browser-container');
     if (!container) return;
+
+    // Apply *1000 for 2020-2025, no multiplication for 2026
+    const multiplier = (apiYear && apiYear >= 2020 && apiYear <= 2025) ? 1000 : 1;
 
     if (data.rows && data.rows.length > 0) {
         // Get all unique column names from the first row to build dynamic headers
         const allColumns = Object.keys(data.rows[0]);
         
-        // Exclude year, department, and agency columns
-        const excludedColumns = ['year', 'department', 'agency'];
+        // Exclude unwanted columns and allow agency/department/division columns
+        const excludedColumns = ['year', 'budget_type', 'fiscal_year', 'funding_conversion_type', 'updated_at'];
         const filteredColumns = allColumns.filter(col => !excludedColumns.includes(col));
         
         // Only show text columns and amt column - exclude all other numeric columns
@@ -3609,20 +3637,23 @@ function displayDataBrowser(data) {
             col.toLowerCase().includes('amount')
         );
         
-        // Exclude all numeric columns (codes, IDs, etc.) except amt and geolocation columns
+        // Exclude all numeric columns (codes, IDs, etc.) except amt, geolocation, and agency/dept/div columns
         const excludedPatterns = [
-            'cd', 'id', 'sorder', 'fundcd', 'operunit', 'prexc', 'uacs_dpt_cd', 
-            'uacs_agy_cd', 'uacs_exp_cd', 'uacs_sobj_cd', 'department', 'agency', 
+            'cd', 'id', 'sorder', 'fundcd', 'operunit', 'prexc',
+            'uacs_exp_cd', 'uacs_sobj_cd',
             'uacs_oper_dsc'
         ];
         
-        // Special handling for geolocation columns - include them even though they're numeric
-        const geolocationColumns = ['uacs_reg_id', 'uacs_div_dsc'];
+        // Special handling for geolocation and division columns - include them even though they're numeric
+        const geolocationColumns = ['uacs_reg_id', 'uacs_div_dsc', 'uacs_div_cd'];
         
-        const otherColumns = filteredColumns.filter(col => 
-            !textColumns.includes(col) && 
+        const otherColumns = filteredColumns.filter(col =>
+            !textColumns.includes(col) &&
             !amtColumns.includes(col) &&
-            !excludedPatterns.some(pattern => col.toLowerCase().includes(pattern))
+            (!excludedPatterns.some(pattern => col.toLowerCase().includes(pattern)) ||
+             col.toLowerCase().includes('agy') ||
+             col.toLowerCase().includes('dpt') ||
+             col.toLowerCase().includes('div'))
         );
         
         // Add geolocation columns to otherColumns (they're numeric but important for display)
@@ -3658,8 +3689,8 @@ function displayDataBrowser(data) {
                         // Determine cell class based on column name
                         if (col.toLowerCase().includes('amt') || col.toLowerCase().includes('amount')) {
                             cellClass = 'amount-cell';
-                            // Format amount with US-style number formatting (multiply by 1000 for GAA convention)
-                            value = `₱${(parseFloat(value) * 1000).toLocaleString('en-US')}`;
+                            // Format amount with US-style number formatting (apply year-based multiplier)
+                            value = `₱${(parseFloat(value) * multiplier).toLocaleString('en-US')}`;
                         } else if (col.toLowerCase().includes('cd') || col.toLowerCase().includes('id') || col.toLowerCase().includes('year')) {
                             cellClass = 'code-cell';
                         } else if (col === 'dsc') {
@@ -3927,7 +3958,7 @@ async function loadFilterOptions() {
     console.log('🔍 [Data Browser] loadFilterOptions() called');
     try {
         const apiYear = getDataBrowserApiYear();
-        const apiUrl = `/api/budget/text-filters?year=${apiYear}`;
+        const apiUrl = `/api/budget/nep/text-filters?year=${apiYear}`;
         console.log('🔍 [Data Browser] API Year:', apiYear);
         console.log('🔍 [Data Browser] Full API URL:', apiUrl);
         console.log('🔍 [Data Browser] Fetching filter options...');
@@ -4263,7 +4294,6 @@ function toggleColumnAnalysis() {
         // Load data when expanded (with small delay to ensure DOM is ready)
         setTimeout(() => {
             loadColumnsData();
-            loadColumnMapping();
         }, 100);
     } else {
         container.style.display = 'none';
@@ -4320,7 +4350,7 @@ async function loadAnalysisColumnDuplicatesData(page = 1) {
         if (columnDuplicatesNextBtn) columnDuplicatesNextBtn.disabled = true;
 
         const selectedYear = getApiYear();
-        const response = await fetch(`${getApiBaseUrl()}/api/budget/columns/issues?year=${selectedYear}&page=${page}&limit=${currentColumnDuplicatesRowsPerPage}`);
+        const response = await fetch(`${getApiBaseUrl()}/api/budget/nep/columns/issues?year=${selectedYear}&page=${page}&limit=${currentColumnDuplicatesRowsPerPage}`);
         const data = await response.json();
         
         if (data.success && data.issues && data.issues.length > 0) {
@@ -4416,191 +4446,87 @@ function updateColumnDuplicatesPagination(pagination) {
     }
 }
 
-// Load columns data with differences highlighting
+// Load NEP columns data by category
 async function loadColumnsData() {
-    
-    const years = [2020, 2021, 2022, 2023, 2024, 2025];
+
+    const categories = [
+        { id: 'agency', name: 'Agency & Department Structure', pattern: 'agy|dpt|department' },
+        { id: 'category', name: 'Environmental Categories', pattern: 'env|category|type' },
+        { id: 'geographic', name: 'Geographic & Regional Data', pattern: 'region|location|geo' },
+        { id: 'budget', name: 'Budget & Financial Data', pattern: 'amt|budget|cost|fund' }
+    ];
+
     const containers = {};
     const counts = {};
-    
+
     // Get all container and count elements
-    for (const year of years) {
-        containers[year] = document.getElementById(`${year}-columns-list`);
-        counts[year] = document.getElementById(`${year}-row-count`);
-        
-        if (!containers[year] || !counts[year]) {
-            console.warn(`Missing container or count element for year ${year}`);
+    for (const category of categories) {
+        containers[category.id] = document.getElementById(`${category.id}-columns-list`);
+        counts[category.id] = document.getElementById(`${category.id}-count`);
+
+        if (!containers[category.id] || !counts[category.id]) {
+            console.warn(`Missing container or count element for ${category.name}`);
             continue;
         }
-        
+
         // Show loading state
-        containers[year].innerHTML = `<div class="loading-spinner">📊 Loading ${year} columns...</div>`;
-        counts[year].textContent = 'Loading...';
+        containers[category.id].innerHTML = `<div class="loading-spinner">📊 Loading ${category.name}...</div>`;
+        counts[category.id].textContent = 'Loading...';
     }
-    
+
     try {
-        // Load column differences first
-        const differencesResponse = await fetch(`${getApiBaseUrl()}/api/budget/columns/differences`);
-        const differencesResult = await differencesResponse.json();
-        
-        let differences = {};
-        if (differencesResult.success && differencesResult.differences) {
-            differencesResult.differences.forEach(diff => {
-                differences[diff.column_name] = diff;
+        // Load NEP column data
+        const response = await fetch(`${getApiBaseUrl()}/api/budget/nep/columns`);
+        const result = await response.json();
+
+        if (result.success && result.columns) {
+            // Group columns by category
+            const categoryColumns = {};
+
+            categories.forEach(cat => {
+                categoryColumns[cat.id] = result.columns.filter(col => {
+                    const colName = typeof col === 'string' ? col : col.name || col.column_name;
+                    return new RegExp(cat.pattern, 'i').test(colName);
+                });
             });
-        }
-        
-        // Load columns for each year
-        for (const year of years) {
-            if (!containers[year] || !counts[year]) continue;
-            
-            try {
-                const response = await fetch(`${getApiBaseUrl()}/api/budget/columns?year=${year}`);
-                const result = await response.json();
-                
-                if (result.success && result.columns) {
-                    counts[year].textContent = result.count || result.row_count || 'Unknown';
-                    containers[year].innerHTML = result.columns.map(col => {
+
+            // Display columns for each category
+            for (const category of categories) {
+                if (!containers[category.id] || !counts[category.id]) continue;
+
+                const columns = categoryColumns[category.id] || [];
+                counts[category.id].textContent = columns.length;
+
+                if (columns.length > 0) {
+                    containers[category.id].innerHTML = columns.map(col => {
                         const colName = typeof col === 'string' ? col : col.name || col.column_name;
                         const colDesc = typeof col === 'object' ? (col.description || col.data_type || '') : '';
-                        const diff = differences[colName];
-                        const highlightClass = diff ? 'column-different' : 'column-normal';
-                        const diffIndicator = diff ? ` <span class="diff-indicator">⚠️ ${diff.status_description}</span>` : '';
-                        return `<div class="column-item ${highlightClass}" style="padding: 0.2rem 0; border-bottom: 1px solid #eee;">
-                            <strong>${colName}</strong>${colDesc ? ` - ${colDesc}` : ''}${diffIndicator}
+                        return `<div class="column-item" style="padding: 0.2rem 0; border-bottom: 1px solid #eee;">
+                            <strong>${colName}</strong>${colDesc ? ` - ${colDesc}` : ''}
                         </div>`;
                     }).join('');
                 } else {
-                    containers[year].innerHTML = `<div style="color: #dc3545;">❌ Error loading ${year} columns</div>`;
+                    containers[category.id].innerHTML = `<div style="color: #6c757d;">ℹ️ No ${category.name.toLowerCase()} columns found</div>`;
                 }
-            } catch (error) {
-                console.error(`Error loading ${year} columns:`, error);
-                containers[year].innerHTML = `<div style="color: #dc3545;">❌ Error loading ${year} columns</div>`;
+            }
+        } else {
+            for (const category of categories) {
+                if (containers[category.id]) {
+                    containers[category.id].innerHTML = '<div style="color: #dc3545;">❌ Error loading columns data</div>';
+                }
             }
         }
-        
+
     } catch (error) {
         console.error('Error in loadColumnsData:', error);
-        for (const year of years) {
-            if (containers[year]) {
-                containers[year].innerHTML = '<div style="color: #dc3545;">❌ Error loading columns data</div>';
+        for (const category of categories) {
+            if (containers[category.id]) {
+                containers[category.id].innerHTML = '<div style="color: #dc3545;">❌ Error loading columns data</div>';
             }
         }
     }
 }
 
-
-// Load 2020-2021 column mapping
-async function loadColumnMapping() {
-    try {
-        const summaryCard = document.getElementById('mapping-summary-card');
-        const tableBody = document.getElementById('mapping-table-body');
-        
-        if (!summaryCard || !tableBody) {
-            console.warn('Column mapping elements not found');
-            return;
-        }
-        
-        // Show loading state
-        summaryCard.innerHTML = '<div class="loading-message">Loading mapping summary...</div>';
-        tableBody.innerHTML = '<tr><td colspan="7" style="padding: 2rem; text-align: center;"><div class="loading-message">Loading mapping data...</div></td></tr>';
-        
-        const response = await fetch(`${getApiBaseUrl()}/api/budget/column-mapping`);
-        const data = await response.json();
-        
-        if (data.success && data.mappings && data.summary) {
-            // Display summary
-            const summary = data.summary;
-            summaryCard.innerHTML = `
-                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem;">
-                    <div>
-                        <div style="font-size: 1.5rem; font-weight: bold; color: #0038A8;">${summary.total_columns}</div>
-                        <div style="color: #666; font-size: 0.875rem;">Total Columns</div>
-                    </div>
-                    <div>
-                        <div style="font-size: 1.5rem; font-weight: bold; color: #28a745;">${summary.converted_columns}</div>
-                        <div style="color: #666; font-size: 0.875rem;">Converted to Numeric</div>
-                    </div>
-                    <div>
-                        <div style="font-size: 1.5rem; font-weight: bold; color: #CE1126;">${summary.avg_certainty_score}%</div>
-                        <div style="color: #666; font-size: 0.875rem;">Avg Certainty Score</div>
-                    </div>
-                    <div>
-                        <div style="font-size: 0.9rem; font-weight: bold; color: #0038A8;">${summary.data_stats}</div>
-                        <div style="color: #666; font-size: 0.875rem;">Data Statistics</div>
-                    </div>
-                </div>
-                <div style="margin-top: 1rem; padding-top: 1rem; border-top: 1px solid #dee2e6;">
-                    <p style="margin: 0.5rem 0; color: #333; font-size: 0.875rem;">
-                        <strong>Discovery Method:</strong> ${summary.discovery_method}
-                    </p>
-                    <p style="margin: 0.5rem 0; color: #28a745; font-size: 0.875rem;">
-                        <strong>✅ ${summary.validation_status}</strong>
-                    </p>
-                </div>
-            `;
-            
-            // Display mapping table
-            let tableHtml = '';
-            data.mappings.forEach((mapping, index) => {
-                const statusColor = mapping.status.includes('Converted') ? '#28a745' : 
-                                  mapping.status.includes('Kept') ? '#ffc107' : '#17a2b8';
-                const statusIcon = mapping.status.includes('Converted') ? '✅' : 
-                                 mapping.status.includes('Kept') ? '⚠️' : 'ℹ️';
-                
-                tableHtml += `
-                    <tr style="background: ${index % 2 === 0 ? '#f8f9fa' : 'white'};">
-                        <td style="padding: 0.75rem; border: 1px solid #dee2e6; text-align: center;">${mapping.mapping_id}</td>
-                        <td style="padding: 0.75rem; border: 1px solid #dee2e6;">
-                            <code style="background: #f8f9fa; padding: 0.25rem 0.5rem; border-radius: 4px; color: #dc3545;">
-                                ${mapping.original_column}
-                            </code>
-                        </td>
-                        <td style="padding: 0.75rem; border: 1px solid #dee2e6;">
-                            <code style="background: #e3f2fd; padding: 0.25rem 0.5rem; border-radius: 4px; color: #0038A8; font-weight: bold;">
-                                ${mapping.mapped_column}
-                            </code>
-                        </td>
-                        <td style="padding: 0.75rem; border: 1px solid #dee2e6;">
-                            <span style="background: #f0f0f0; padding: 0.25rem 0.5rem; border-radius: 4px; font-size: 0.8rem;">
-                                ${mapping.data_type}
-                            </span>
-                        </td>
-                        <td style="padding: 0.75rem; border: 1px solid #dee2e6; text-align: center;">
-                            <span style="background: #28a745; color: white; padding: 0.25rem 0.75rem; border-radius: 12px; font-weight: bold;">
-                                ${mapping.certainty_score}%
-                            </span>
-                        </td>
-                        <td style="padding: 0.75rem; border: 1px solid #dee2e6;">
-                            <span style="color: ${statusColor};">${statusIcon} ${mapping.status}</span>
-                        </td>
-                        <td style="padding: 0.75rem; border: 1px solid #dee2e6; font-size: 0.875rem; color: #666;">
-                            ${mapping.evidence}
-                        </td>
-                    </tr>
-                `;
-            });
-            
-            tableBody.innerHTML = tableHtml;
-            
-            console.log(`✅ Loaded ${data.mappings.length} column mappings`);
-        } else {
-            summaryCard.innerHTML = '<div style="color: #dc3545;">❌ Error loading mapping summary</div>';
-            tableBody.innerHTML = '<tr><td colspan="7" style="padding: 2rem; text-align: center; color: #dc3545;">❌ Error loading mapping data</td></tr>';
-        }
-        
-    } catch (error) {
-        console.error('Error loading column mapping:', error);
-        const summaryCard = document.getElementById('mapping-summary-card');
-        const tableBody = document.getElementById('mapping-table-body');
-        if (summaryCard) {
-            summaryCard.innerHTML = '<div style="color: #dc3545;">❌ Error loading mapping summary</div>';
-        }
-        if (tableBody) {
-            tableBody.innerHTML = '<tr><td colspan="7" style="padding: 2rem; text-align: center; color: #dc3545;">❌ Error loading mapping data</td></tr>';
-        }
-    }
-}
 
 // Load column-level duplicates analysis
 
@@ -4614,7 +4540,7 @@ async function loadColumnDuplicatesWithFocus(focusValues) {
         const apiYear = getApiYear();
         
         const focusValuesJson = encodeURIComponent(JSON.stringify(focusValues));
-        const response = await fetch(`/api/budget/column-duplicates?year=${apiYear}&limit=20&focus_values=${focusValuesJson}`);
+        const response = await fetch(`/api/budget/nep/column-duplicates?year=${apiYear}&limit=20&focus_values=${focusValuesJson}`);
         const result = await response.json();
         
         if (result.success) {
@@ -4853,7 +4779,7 @@ async function loadAnomalies() {
     
     try {
         const anomalyType = typeSelect.value;
-        const response = await fetch(`/api/budget/anomalies?anomaly_type=${anomalyType}`);
+        const response = await fetch(`/api/budget/nep/anomalies?anomaly_type=${anomalyType}`);
         const result = await response.json();
         
         if (result.success) {
@@ -4963,7 +4889,7 @@ async function loadDepartmentTrends() {
         console.log('✅ [Trends] Container found:', container);
         container.innerHTML = '<div class="loading-message">⏳ Loading department trends...</div>';
         
-        const apiUrl = `${getApiBaseUrl()}/api/budget/department-trends`;
+        const apiUrl = `${getApiBaseUrl()}/api/budget/nep/department-trends`;
         console.log('🔍 [Trends] Fetching from:', apiUrl);
         
         const response = await fetch(apiUrl);
@@ -5168,14 +5094,14 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Check for hash in URL and switch to that tab
     const hash = window.location.hash.substring(1); // Remove the # character
-    if (hash && ['visual', 'browser', 'analysis', 'trends'].includes(hash)) {
+    if (hash && ['visual', 'browser'].includes(hash)) {
         switchToTab(hash, false); // Don't update hash since we're reading from it
     }
-    
+
     // Listen for hash changes
     window.addEventListener('hashchange', function() {
         const newHash = window.location.hash.substring(1);
-        if (newHash && ['visual', 'browser', 'analysis', 'trends'].includes(newHash)) {
+        if (newHash && ['visual', 'browser'].includes(newHash)) {
             switchToTab(newHash, false);
         }
     });
@@ -5196,6 +5122,9 @@ document.addEventListener('DOMContentLoaded', function() {
                 // Reload analysis overview when year changes
                 loadAnalysisOverview();
             }
+
+            // Reload dashboard statistics when year changes
+            loadVisualStatistics(this.value);
 
             // Reload data browser
             loadDataBrowser();
@@ -5236,17 +5165,6 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
     
-    // Add event listener for main year filter
-    const mainYearFilter = document.getElementById('year-filter');
-    if (mainYearFilter) {
-        mainYearFilter.addEventListener('change', function() {
-            console.log(`📅 [BUDGET] Main year filter changed to: ${this.value}`);
-
-            // Reload dashboard statistics when year changes
-            loadVisualStatistics(this.value);
-        });
-    }
-
     // Add year selector event listener
     const yearSelect = document.getElementById('year-select');
     if (yearSelect) {
@@ -5418,7 +5336,7 @@ async function loadAnalysisOverview() {
 // Load exact amount count for overview (using existing anomalies endpoint as placeholder)
 async function loadExactAmountCount(year) {
     try {
-        const response = await fetch(`/api/budget/anomalies/count?year=${year}`);
+        const response = await fetch(`/api/budget/nep/anomalies/count?year=${year}`);
         const data = await response.json();
         
         const countElement = document.getElementById('exact-amount-count');
@@ -5826,7 +5744,7 @@ function displayTrendsSummary(data) {
             </div>
             <div class="summary-card">
                 <h4>💰 Amount at Risk</h4>
-                <div class="value">₱${(summary.total_amount_at_risk * 1000 / 1000000).toFixed(1)}M</div>
+                <div class="value">₱${(summary.total_amount_at_risk / 1000000).toFixed(1)}M</div>
                 <div class="label">${summary.risk_percentage_of_budget.toFixed(2)}% of budget</div>
             </div>
             <div class="summary-card">
@@ -5847,17 +5765,17 @@ function displayTrendsSummary(data) {
             </div>
             <div class="summary-card">
                 <h4>💰 2023 Duplicate Amount</h4>
-                <div class="value">₱${(summary.potential_duplicate_amount_2023 * 1000 / 1000000).toFixed(1)}M</div>
+                <div class="value">₱${(summary.potential_duplicate_amount_2023 / 1000000).toFixed(1)}M</div>
                 <div class="label">${summary.duplicate_percentage_2023.toFixed(1)}% of total budget</div>
             </div>
             <div class="summary-card">
                 <h4>💰 2024 Duplicate Amount</h4>
-                <div class="value">₱${(summary.potential_duplicate_amount_2024 * 1000 / 1000000).toFixed(1)}M</div>
+                <div class="value">₱${(summary.potential_duplicate_amount_2024 / 1000000).toFixed(1)}M</div>
                 <div class="label">${summary.duplicate_percentage_2024.toFixed(1)}% of total budget</div>
             </div>
             <div class="summary-card">
                 <h4>💰 2025 Duplicate Amount</h4>
-                <div class="value">₱${(summary.potential_duplicate_amount_2025 * 1000 / 1000000).toFixed(1)}M</div>
+                <div class="value">₱${(summary.potential_duplicate_amount_2025 / 1000000).toFixed(1)}M</div>
                 <div class="label">${summary.duplicate_percentage_2025.toFixed(1)}% of total budget</div>
             </div>
         `;
@@ -6157,12 +6075,12 @@ function displaySpendingTrends(trendsData) {
         const dept2024 = data2024.find(d => d.department === dept);
         const dept2025 = data2025.find(d => d.department === dept);
         
-        const amount2020 = dept2020 ? parseFloat(dept2020.total_amount) * 1000 : 0;
-        const amount2021 = dept2021 ? parseFloat(dept2021.total_amount) * 1000 : 0;
-        const amount2022 = dept2022 ? parseFloat(dept2022.total_amount) * 1000 : 0;
-        const amount2023 = dept2023 ? parseFloat(dept2023.total_amount) * 1000 : 0;
-        const amount2024 = dept2024 ? parseFloat(dept2024.total_amount) * 1000 : 0;
-        const amount2025 = dept2025 ? parseFloat(dept2025.total_amount) * 1000 : 0;
+        const amount2020 = dept2020 ? parseFloat(dept2020.total_amount) : 0;
+        const amount2021 = dept2021 ? parseFloat(dept2021.total_amount) : 0;
+        const amount2022 = dept2022 ? parseFloat(dept2022.total_amount) : 0;
+        const amount2023 = dept2023 ? parseFloat(dept2023.total_amount) : 0;
+        const amount2024 = dept2024 ? parseFloat(dept2024.total_amount) : 0;
+        const amount2025 = dept2025 ? parseFloat(dept2025.total_amount) : 0;
         
         // Calculate year-over-year percentage changes and overall 2020 to 2025 change
         let change2020to2021 = 0;
@@ -6973,7 +6891,7 @@ document.addEventListener('click', function(event) {
                     </div>
                     
                     <!-- Analysis Tab -->
-                    <div id="tab-analysis" class="budget-tab-panel">
+                    <div id="tab-analysis" class="budget-tab-panel" style="display: none;">
                         <h3 class="budget-section-title">🔍 AI-Powered Budget Analysis</h3>
                         <p class="budget-section-desc">Advanced analysis with intelligent duplicate detection and anomaly identification</p>
                         
@@ -6982,6 +6900,7 @@ document.addEventListener('click', function(event) {
                             <div class="year-filter-group">
                                 <label for="analysis-year-filter" class="filter-label">📅 Analysis Year:</label>
                                 <select id="analysis-year-filter" class="year-select">
+                                    <option value="2026">2026</option>
                                     <option value="2025">2025</option>
                                     <option value="2024">2024</option>
                                     <option value="2023">2023</option>
@@ -7045,107 +6964,49 @@ document.addEventListener('click', function(event) {
                                 <div id="columns-analysis-content" class="analysis-content" style="display: none;">
                                     <div class="column-comparison">
                                         <div class="comparison-grid">
-                                            <!-- 2020 Budget Data -->
-                                            <div class="year-column">
-                                                <h5>📅 2020 Budget Data</h5>
+                                            <!-- NEP Data Overview -->
+                                            <div class="nep-column">
+                                                <h5>🏛️ Agency & Department Structure</h5>
                                                 <div class="column-info">
-                                                    <span id="2020-row-count" class="row-count">Loading...</span> rows
+                                                    <span id="agency-count" class="row-count">Loading...</span> agencies
                                                 </div>
-                                                <div id="2020-columns-list" class="columns-list">
-                                                    <div class="loading-message">Loading columns...</div>
+                                                <div id="agency-columns-list" class="columns-list">
+                                                    <div class="loading-message">Loading agency columns...</div>
                                                 </div>
                                             </div>
-                        
-                                            <!-- 2021 Budget Data -->
-                                            <div class="year-column">
-                                                <h5>📅 2021 Budget Data</h5>
+
+                                            <!-- Project Categories -->
+                                            <div class="nep-column">
+                                                <h5>🌿 Environmental Categories</h5>
                                                 <div class="column-info">
-                                                    <span id="2021-row-count" class="row-count">Loading...</span> rows
+                                                    <span id="category-count" class="row-count">Loading...</span> categories
                                                 </div>
-                                                <div id="2021-columns-list" class="columns-list">
-                                                    <div class="loading-message">Loading columns...</div>
+                                                <div id="category-columns-list" class="columns-list">
+                                                    <div class="loading-message">Loading category columns...</div>
                                                 </div>
                                             </div>
-                        
-                                            <!-- 2022 Budget Data -->
-                                            <div class="year-column">
-                                                <h5>📅 2022 Budget Data</h5>
+
+                                            <!-- Geographic Distribution -->
+                                            <div class="nep-column">
+                                                <h5>📍 Geographic & Regional Data</h5>
                                                 <div class="column-info">
-                                                    <span id="2022-row-count" class="row-count">Loading...</span> rows
+                                                    <span id="geographic-count" class="row-count">Loading...</span> regions
                                                 </div>
-                                                <div id="2022-columns-list" class="columns-list">
-                                                    <div class="loading-message">Loading columns...</div>
+                                                <div id="geographic-columns-list" class="columns-list">
+                                                    <div class="loading-message">Loading geographic columns...</div>
                                                 </div>
                                             </div>
-                        
-                                            <!-- 2023 Budget Data -->
-                                            <div class="year-column">
-                                                <h5>📅 2023 Budget Data</h5>
+
+                                            <!-- Budget & Financial -->
+                                            <div class="nep-column">
+                                                <h5>💰 Budget & Financial Data</h5>
                                                 <div class="column-info">
-                                                    <span id="2023-row-count" class="row-count">Loading...</span> rows
+                                                    <span id="budget-count" class="row-count">Loading...</span> budget columns
                                                 </div>
-                                                <div id="2023-columns-list" class="columns-list">
-                                                    <div class="loading-message">Loading columns...</div>
+                                                <div id="budget-columns-list" class="columns-list">
+                                                    <div class="loading-message">Loading budget columns...</div>
                                                 </div>
                                             </div>
-                        
-                                            <!-- 2024 Budget Data -->
-                                            <div class="year-column">
-                                                <h5>📅 2024 Budget Data</h5>
-                                                <div class="column-info">
-                                                    <span id="2024-row-count" class="row-count">Loading...</span> rows
-                                                </div>
-                                                <div id="2024-columns-list" class="columns-list">
-                                                    <div class="loading-message">Loading columns...</div>
-                                                </div>
-                                            </div>
-                                    
-                                            <!-- 2025 Budget Data -->
-                                            <div class="year-column">
-                                                <h5>📅 2025 Budget Data</h5>
-                                                <div class="column-info">
-                                                    <span id="2025-row-count" class="row-count">Loading...</span> rows
-                                                </div>
-                                                <div id="2025-columns-list" class="columns-list">
-                                                    <div class="loading-message">Loading columns...</div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    
-                                    <!-- 2020-2021 Column Mapping Analysis -->
-                                    <div class="column-mapping-section" style="margin-top: 2rem; padding: 1.5rem; background: white; border-radius: 8px; border: 2px solid #0038A8;">
-                                        <h5 style="color: #0038A8; margin-bottom: 1rem;">
-                                            🔍 2020-2021 Column Mapping Analysis (100% Certainty)
-                                        </h5>
-                                        
-                                        <!-- Summary Card -->
-                                        <div id="mapping-summary-card" style="background: #e3f2fd; padding: 1rem; border-radius: 6px; margin-bottom: 1.5rem;">
-                                            <div class="loading-message">Loading mapping summary...</div>
-                                        </div>
-                                        
-                                        <!-- Mapping Table -->
-                                        <div style="overflow-x: auto;">
-                                            <table id="column-mapping-table" style="width: 100%; border-collapse: collapse; font-size: 0.9rem;">
-                                                <thead style="background: #0038A8; color: white;">
-                                                    <tr>
-                                                        <th style="padding: 0.75rem; text-align: left; border: 1px solid #dee2e6;">#</th>
-                                                        <th style="padding: 0.75rem; text-align: left; border: 1px solid #dee2e6;">Original Column</th>
-                                                        <th style="padding: 0.75rem; text-align: left; border: 1px solid #dee2e6;">Mapped Column</th>
-                                                        <th style="padding: 0.75rem; text-align: left; border: 1px solid #dee2e6;">Data Type</th>
-                                                        <th style="padding: 0.75rem; text-align: center; border: 1px solid #dee2e6;">Certainty</th>
-                                                        <th style="padding: 0.75rem; text-align: left; border: 1px solid #dee2e6;">Status</th>
-                                                        <th style="padding: 0.75rem; text-align: left; border: 1px solid #dee2e6;">Evidence</th>
-                                                    </tr>
-                                                </thead>
-                                                <tbody id="mapping-table-body">
-                                                    <tr>
-                                                        <td colspan="7" style="padding: 2rem; text-align: center;">
-                                                            <div class="loading-message">Loading column mapping data...</div>
-                                                        </td>
-                                                    </tr>
-                                                </tbody>
-                                            </table>
                                         </div>
                                     </div>
                                 </div>
@@ -7176,7 +7037,7 @@ document.addEventListener('click', function(event) {
                     </div>
                     
                     <!-- Trends Tab -->
-                    <div id="tab-trends" class="budget-tab-panel">
+                    <div id="tab-trends" class="budget-tab-panel" style="display: none;">
                         <h3 class="budget-section-title">📈 Budget Trends Analysis</h3>
                         <p class="budget-section-desc">Cross-year analysis of potential duplications and spending trends</p>
                         

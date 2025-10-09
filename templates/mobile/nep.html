@@ -1,0 +1,143 @@
+{% extends "mobile/base_altgovph.html" %}
+
+{% block head %}
+<!-- AltGovPH Mobile Theme CSS -->
+<link rel="stylesheet" href="/static/css/altgovph-mobile.css">
+{% endblock %}
+
+{% block content %}
+<!-- Mobile NEP Section -->
+<section class="mobile-nep-section">
+    <div class="mobile-nep-container">
+        <div class="mobile-nep-header">
+            <div class="mobile-desktop-notice bg-blue-50 text-blue-700 p-4 rounded-md mb-4 text-center border-l-4 border-blue-500">
+                <i class="fas fa-desktop mr-2"></i>
+                <strong>For the best experience, this feature is optimized for desktop viewing</strong>
+            </div>
+        </div>
+
+        <div class="mobile-nep-content">
+
+            <!-- Mobile NEP Data Browser -->
+            <div class="mobile-nep-data-browser">
+                <h3 class="mobile-nep-section-title">📊 NEP Data Browser</h3>
+                <p class="mobile-nep-section-desc">Browse and sort NEP data with pagination</p>
+                
+                <div class="mobile-data-browser-controls">
+                    <!-- Mobile Filters -->
+                    <div class="mobile-filters-row">
+                        <div class="mobile-filter-group">
+                            <label for="mobile-filter-uacs_dpt_dsc">Dept Description:</label>
+                            <input type="text" id="mobile-filter-uacs_dpt_dsc" placeholder="Filter by dept description...">
+                    </div>
+                        <div class="mobile-filter-group">
+                            <label for="mobile-filter-uacs_agy_dsc">Agency Description:</label>
+                            <input type="text" id="mobile-filter-uacs_agy_dsc" placeholder="Filter by agency description...">
+                                </div>
+                            </div>
+                            
+                    <div class="mobile-filters-row">
+                        <div class="mobile-filter-group">
+                            <label for="mobile-filter-dsc">Description:</label>
+                            <input type="text" id="mobile-filter-dsc" placeholder="Filter by description...">
+                                        </div>
+                        <div class="mobile-filter-group">
+                            <label for="mobile-filter-amt-min">Amount Min (₱):</label>
+                            <input type="number" id="mobile-filter-amt-min" placeholder="Min amount...">
+                                </div>
+                            </div>
+                            
+                    <div class="mobile-filter-actions">
+                        <button id="mobile-apply-filters-btn" class="mobile-btn mobile-btn-primary">Apply Filters</button>
+                        <button id="mobile-clear-filters-btn" class="mobile-btn mobile-btn-secondary">Clear All</button>
+                            </div>
+                            
+                    <!-- Mobile Sort and Pagination -->
+                    <div class="mobile-browser-controls-row">
+                        <div class="mobile-sort-controls">
+                            <label for="mobile-sort-select">Sort by:</label>
+                            <select id="mobile-sort-select">
+                                <option value="amt">Amount (Highest First)</option>
+                                <option value="department">Department</option>
+                                <option value="agency">Agency</option>
+                                <option value="dsc">Description</option>
+                            </select>
+                            <button id="mobile-sort-order-btn" class="mobile-sort-order-btn" data-order="DESC">↓</button>
+                                        </div>
+                        <div class="mobile-pagination-controls">
+                            <button id="mobile-prev-page-btn" class="mobile-page-btn" disabled>← Previous</button>
+                            <span id="mobile-page-info">Page 1 of 1</span>
+                            <button id="mobile-next-page-btn" class="mobile-page-btn" disabled>Next →</button>
+                                </div>
+                            </div>
+                        </div>
+                        
+                <div id="mobile-data-browser-container" class="mobile-data-browser-container">
+                    <div class="mobile-loading-spinner">Loading budget data...</div>
+                            </div>
+                        </div>
+
+            <!-- Mobile Potential Duplicates Card -->
+            <div class="mobile-budget-duplicates">
+                <div class="mobile-collapsible-header" onclick="toggleMobileDuplicates()">
+                    <h3 class="mobile-budget-section-title">🔍 Potential Duplicates</h3>
+                    <span class="mobile-collapse-icon" id="mobile-duplicates-collapse-icon">▼</span>
+                    </div>
+                <p class="mobile-budget-section-desc">Find potential duplicate budget entries with scoring</p>
+                
+                <div id="mobile-duplicates-container" class="mobile-duplicates-container hidden">
+                    <div class="mobile-duplicates-controls">
+                        <div class="mobile-duplicates-filter-group">
+                            <label for="mobile-duplicates-rows-per-page">Show:</label>
+                            <select id="mobile-duplicates-rows-per-page">
+                                <option value="5" selected>5 rows</option>
+                                <option value="10">10 rows</option>
+                                <option value="15">15 rows</option>
+                            </select>
+                    </div>
+                        
+                        <div class="mobile-duplicates-filter-group">
+                            <label for="mobile-duplicates-sort-by">Sort by:</label>
+                            <select id="mobile-duplicates-sort-by">
+                                <option value="calculated_score" selected>Score</option>
+                                <option value="max_amount">Amount</option>
+                                <option value="duplicate_count">Count</option>
+                            </select>
+                        </div>
+                        
+                        <div class="mobile-duplicates-pagination-controls">
+                            <button id="mobile-duplicates-prev-page-btn" class="mobile-page-btn" disabled>← Previous</button>
+                            <span id="mobile-duplicates-page-info">Page 1 of 1</span>
+                            <button id="mobile-duplicates-next-page-btn" class="mobile-page-btn" disabled>Next →</button>
+                        </div>
+        </div>
+                    
+                    <div id="mobile-duplicates-results" class="mobile-duplicates-results">
+                        <div class="mobile-loading-spinner">Loading potential duplicates...</div>
+            </div>
+                </div>
+                    </div>
+
+
+            <!-- Mobile Budget Columns Card -->
+            <div class="mobile-budget-columns">
+                <div class="mobile-collapsible-header" onclick="toggleMobileColumns()">
+                    <h3 class="mobile-budget-section-title">📊 Available Columns</h3>
+                    <span class="mobile-collapse-icon" id="mobile-columns-collapse-icon">▼</span>
+                </div>
+                <p class="mobile-budget-section-desc">All column names and field types in the budget data</p>
+                
+                <div id="mobile-columns-container" class="mobile-columns-container hidden">
+                    <div class="mobile-column-card">
+                        <div class="mobile-column-header">
+                            <div class="mobile-column-name">Loading columns...</div>
+                            <div class="mobile-column-type">Loading...</div>
+                </div>
+                        <div class="mobile-column-description">Click to load column information...</div>
+                    </div>
+                </div>
+            </div>
+                </div>
+            </div>
+</section>
+{% endblock %}

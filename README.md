@@ -20,8 +20,12 @@ This directory contains the frontend components copied from the AltGovPH section
 - **Templates**: `dime.html`, `mobile/dime.html`
 - **Functionality**: Digital Information for Monitoring and Evaluation - Track 12,870+ major infrastructure projects worth ₱740B+ nationwide
 
+### /nep (NEP Analysis)
+- **Templates**: `nep.html`, `mobile/nep.html`
+- **Functionality**: National Expenditure Program analysis with AI-powered insights, duplicate detection, and comprehensive budget tracking
+
 ### Correlation Analysis
-- **Templates**: `budget_flood_correlation.html`, `flood_dime_correlation.html`
+- **Templates**: `budget_flood_correlation.html`, `budget_nep_correlation.html`, `mobile/budget_nep_correlation.html`, `flood_dime_correlation.html`
 - **Functionality**: Data science analysis connecting different datasets for transparency
 
 ## Files Copied:
@@ -38,7 +42,11 @@ This directory contains the frontend components copied from the AltGovPH section
 - `templates/mobile/flood.html` - Mobile flood control projects page
 - `templates/dime.html` - DIME infrastructure projects page template
 - `templates/mobile/dime.html` - Mobile DIME infrastructure projects page
+- `templates/nep.html` - NEP analysis page template
+- `templates/mobile/nep.html` - Mobile NEP analysis page
 - `templates/budget_flood_correlation.html` - Budget-flood correlation analysis
+- `templates/budget_nep_correlation.html` - Budget-NEP correlation analysis
+- `templates/mobile/budget_nep_correlation.html` - Mobile budget-NEP correlation analysis
 - `templates/flood_dime_correlation.html` - Flood-DIME correlation analysis
 
 ### CSS Stylesheets

@@ -1,0 +1,858 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NEP-Budget Correlation Analysis - AltGovPH</title>
+    
+    <!-- Google Fonts - Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif !important;
+            margin: 0;
+            padding: 0;
+            background: white !important;
+            color: black !important;
+            min-height: 100vh;
+        }
+        
+        .page-section {
+            padding: 20px;
+            max-width: 1600px;
+            margin: 20px auto;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+        }
+        
+        .correlation-container {
+            padding: 20px;
+        }
+        
+        .correlation-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .correlation-title {
+            font-size: 2.8em;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 10px;
+            font-weight: 700;
+        }
+        
+        .correlation-subtitle {
+            font-size: 1.3em;
+            color: #555;
+            margin-bottom: 10px;
+        }
+        
+        .highlight-text {
+            font-size: 1.1em;
+            color: #667eea;
+            font-weight: 600;
+            margin-top: 15px;
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 20px;
+            margin: 30px 0;
+        }
+        
+        .stat-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+            text-align: center;
+            transition: transform 0.3s ease;
+        }
+        
+        .stat-card:hover {
+            transform: translateY(-5px);
+        }
+        
+        .stat-card h3 {
+            margin: 0 0 10px 0;
+            font-size: 1em;
+            opacity: 0.9;
+            font-weight: 500;
+        }
+        
+        .stat-card .value {
+            font-size: 2.5em;
+            font-weight: bold;
+            margin: 10px 0;
+        }
+        
+        .stat-card .description {
+            font-size: 0.9em;
+            opacity: 0.85;
+        }
+        
+        .contractor-section {
+            background: #f8f9fa;
+            padding: 40px 30px;
+            border-radius: 12px;
+            margin: 30px 0;
+        }
+        
+        .section-title {
+            font-size: 2em;
+            color: #333;
+            margin-bottom: 10px;
+            text-align: center;
+            font-weight: 600;
+        }
+        
+        .section-subtitle {
+            text-align: center;
+            color: #666;
+            font-size: 1.1em;
+            margin-bottom: 30px;
+        }
+        
+        .table-wrapper {
+            overflow-x: auto;
+            margin: 20px 0;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .budget-projects-table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+        }
+        
+        .budget-projects-table th {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 15px 12px;
+            text-align: left;
+            font-weight: 600;
+            font-size: 0.95em;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+        
+        .budget-projects-table td {
+            padding: 14px 12px;
+            border-bottom: 1px solid #eee;
+            color: #333;
+            font-size: 0.95em;
+        }
+        
+        .budget-projects-table tbody tr:last-child td {
+            border-bottom: none;
+        }
+        
+        .budget-projects-table tbody tr:hover {
+            background-color: #f5f5ff;
+        }
+        
+        .budget-projects-table tbody tr:nth-child(1) {
+            background: #fff3cd;
+            font-weight: 600;
+        }
+        
+        .budget-projects-table tbody tr:nth-child(2),
+        .budget-projects-table tbody tr:nth-child(3) {
+            background: #f8f9fa;
+            font-weight: 500;
+        }
+        
+        .contractor-name {
+            font-weight: 600;
+            color: #667eea;
+        }
+        
+        .rank-badge {
+            display: inline-block;
+            background: #667eea;
+            color: white;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 0.85em;
+            font-weight: 600;
+            margin-right: 8px;
+        }
+        
+        .gold-badge {
+            background: linear-gradient(135deg, #FFD700 0%, #FFA500 100%);
+        }
+        
+        .silver-badge {
+            background: linear-gradient(135deg, #C0C0C0 0%, #808080 100%);
+        }
+        
+        .bronze-badge {
+            background: linear-gradient(135deg, #CD7F32 0%, #8B4513 100%);
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .loading-spinner {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 40px;
+            margin: 20px 0;
+        }
+        
+        .spinner {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        .spinner-circle {
+            width: 40px;
+            height: 40px;
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #667eea;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        
+        .data-source-footer {
+            text-align: center;
+            padding: 2rem;
+            color: #6c757d;
+            font-size: 0.875rem;
+            border-top: 1px solid #dee2e6;
+            margin-top: 2rem;
+            background: #f8f9fa;
+            border-radius: 8px;
+        }
+        
+        .methodology-box {
+            background: white;
+            padding: 25px;
+            border-radius: 8px;
+            margin: 30px 0;
+            border-left: 5px solid #667eea;
+        }
+        
+        .methodology-box h4 {
+            color: #667eea;
+            margin-top: 0;
+            font-size: 1.2em;
+        }
+        
+        .methodology-box p {
+            color: #555;
+            line-height: 1.6;
+            margin: 8px 0;
+        }
+    </style>
+</head>
+<body>
+    <!-- AltGovPH Navigation Bar -->
+    <nav class="altgovph-nav py-4 px-6 bg-white border-b border-gray-200">
+        <div class="max-w-7xl mx-auto flex items-center justify-between">
+            <div class="flex items-center">
+                <a href="/alt" class="flex items-center">
+                    <img src="https://raw.githubusercontent.com/bettergovph/logo/main/png/BetterGov_Horizontal-Black.png" 
+                         alt="BetterGov" 
+                         class="h-12">
+                </a>
+            </div>
+            <div class="hidden md:flex space-x-6">
+                <a href="/alt" class="text-black hover:text-gray-600 font-medium transition">Home</a>
+                <a href="/budget" class="text-black hover:text-gray-600 font-medium transition">Budget</a>
+                <a href="/nep" class="text-black hover:text-gray-600 font-medium transition">NEP</a>
+                <a href="/flood" class="text-black hover:text-gray-600 font-medium transition">Flood Control</a>
+                <a href="/dime" class="text-black hover:text-gray-600 font-medium transition">DIME</a>
+                <a href="/map" class="text-black hover:text-gray-600 font-medium transition">Map</a>
+                <a href="/budget-nep-correlation" class="text-black hover:text-gray-600 font-medium transition border-b-2 border-black">NEP-Budget</a>
+                <a href="/budget-flood-correlation" class="text-black hover:text-gray-600 font-medium transition">Budget-Flood</a>
+                <a href="/flood-dime-correlation" class="text-black hover:text-gray-600 font-medium transition">Flood-DIME</a>
+            </div>
+            <div class="md:hidden">
+                <button class="text-black focus:outline-none" onclick="toggleMobileMenu()">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+                    </svg>
+                </button>
+            </div>
+        </div>
+        <!-- Mobile menu (hidden by default) -->
+        <div id="mobileMenu" class="hidden mt-4 px-4 space-y-2">
+            <a href="/alt" class="block text-black hover:text-gray-600 font-medium py-2">Home</a>
+            <a href="/budget" class="block text-black hover:text-gray-600 font-medium py-2">Budget</a>
+            <a href="/nep" class="block text-black hover:text-gray-600 font-medium py-2">NEP</a>
+            <a href="/flood" class="block text-black hover:text-gray-600 font-medium py-2">Flood Control</a>
+            <a href="/dime" class="block text-black hover:text-gray-600 font-medium py-2">DIME</a>
+            <a href="/map" class="block text-black hover:text-gray-600 font-medium py-2">Map</a>
+            <a href="/budget-nep-correlation" class="block text-black hover:text-gray-600 font-medium py-2 border-b-2 border-black">NEP-Budget</a>
+            <a href="/budget-flood-correlation" class="block text-black hover:text-gray-600 font-medium py-2">Budget-Flood</a>
+            <a href="/flood-dime-correlation" class="block text-black hover:text-gray-600 font-medium py-2">Flood-DIME</a>
+        </div>
+    </nav>
+
+    <script>
+    function toggleMobileMenu() {
+        const menu = document.getElementById('mobileMenu');
+        menu.classList.toggle('hidden');
+    }
+
+    // Global chart instance to prevent canvas reuse errors
+    let budgetNepChart = null;
+
+    // Budget vs NEP Comparison Chart
+    async function loadBudgetNepChart() {
+        try {
+            console.log('📊 Loading Budget vs NEP comparison chart...');
+
+            // Fetch data from both databases for overlapping years (2020-2025)
+            const response = await fetch('/api/budget/analysis/comparison-chart');
+            const chartData = await response.json();
+
+            if (!response.ok || !chartData.years) {
+                throw new Error('Failed to fetch comparison data');
+            }
+
+            const budgetData = chartData.budget_amounts;
+            const nepData = chartData.nep_amounts;
+            const years = chartData.years.map(year => year.toString());
+
+            // Destroy existing chart if it exists
+            if (budgetNepChart) {
+                budgetNepChart.destroy();
+                console.log('🗑️ Destroyed existing chart');
+            }
+
+            // Create the chart
+            const ctx = document.getElementById('budgetNepChart').getContext('2d');
+
+            budgetNepChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: years,
+                    datasets: [
+                        {
+                            label: 'NEP Database',
+                            data: nepData,
+                            backgroundColor: 'rgba(16, 185, 129, 0.8)', // Green
+                            borderColor: 'rgba(16, 185, 129, 1)',
+                            borderWidth: 1,
+                            borderRadius: 4,
+                            borderSkipped: false,
+                        },
+                        {
+                            label: 'Budget Database',
+                            data: budgetData,
+                            backgroundColor: 'rgba(59, 130, 246, 0.8)', // Blue
+                            borderColor: 'rgba(59, 130, 246, 1)',
+                            borderWidth: 1,
+                            borderRadius: 4,
+                            borderSkipped: false,
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: 'Budget vs NEP Annual Expenditures (₱)',
+                            font: {
+                                size: 16,
+                                weight: 'bold'
+                            },
+                            padding: 20
+                        },
+                        legend: {
+                            display: true,
+                            position: 'top',
+                            labels: {
+                                usePointStyle: true,
+                                padding: 20,
+                                font: {
+                                    size: 12
+                                }
+                            }
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    let label = context.dataset.label || '';
+                                    if (label) {
+                                        label += ': ';
+                                    }
+                                    label += new Intl.NumberFormat('en-PH', {
+                                        style: 'currency',
+                                        currency: 'PHP',
+                                        minimumFractionDigits: 0,
+                                        maximumFractionDigits: 0,
+                                    }).format(context.parsed.y);
+                                    return label;
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            title: {
+                                display: true,
+                                text: 'Fiscal Year',
+                                font: {
+                                    size: 14,
+                                    weight: 'bold'
+                                }
+                            },
+                            grid: {
+                                display: false
+                            }
+                        },
+                        y: {
+                            title: {
+                                display: true,
+                                text: 'Total Expenditure (₱)',
+                                font: {
+                                    size: 14,
+                                    weight: 'bold'
+                                }
+                            },
+                            beginAtZero: true,
+                            ticks: {
+                                callback: function(value) {
+                                    return new Intl.NumberFormat('en-PH', {
+                                        style: 'currency',
+                                        currency: 'PHP',
+                                        notation: 'compact',
+                                        minimumFractionDigits: 0,
+                                        maximumFractionDigits: 1,
+                                    }).format(value);
+                                }
+                            },
+                            grid: {
+                                color: 'rgba(0, 0, 0, 0.1)'
+                            }
+                        }
+                    },
+                    elements: {
+                        bar: {
+                            borderRadius: 4,
+                        }
+                    },
+                    animation: {
+                        duration: 1000,
+                        easing: 'easeInOutQuart'
+                    }
+                }
+            });
+
+            console.log('✅ Budget vs NEP chart loaded successfully');
+
+        } catch (error) {
+            console.error('❌ Error loading Budget vs NEP chart:', error);
+
+            // Show error message on chart canvas
+            const ctx = document.getElementById('budgetNepChart').getContext('2d');
+            ctx.font = '16px Inter';
+            ctx.fillStyle = '#666';
+            ctx.textAlign = 'center';
+            ctx.fillText('Error loading chart data', ctx.canvas.width / 2, ctx.canvas.height / 2);
+        }
+    }
+
+    // Cleanup chart when page unloads
+    window.addEventListener('beforeunload', function() {
+        if (budgetNepChart) {
+            budgetNepChart.destroy();
+            console.log('🧹 Cleaned up chart on page unload');
+        }
+    });
+
+    // Load chart when page loads
+    document.addEventListener('DOMContentLoaded', function() {
+        loadBudgetNepChart();
+    });
+    </script>
+
+    <!-- NEP-Budget Correlation Section -->
+    <div style="padding: 6rem;">
+    <section class="py-8 px-4 max-w-7xl mx-auto">
+
+        <!-- Budget vs NEP Comparison Chart -->
+        <div class="bg-white rounded-lg shadow-lg p-8 mb-8">
+            <h2 class="text-3xl font-bold text-gray-800 mb-6 text-center">📊 Budget vs NEP: Annual Expenditure Comparison</h2>
+            <div class="mb-4 text-center">
+                <p class="text-gray-600">Side-by-side comparison of total expenditures across overlapping years</p>
+            </div>
+            <div class="w-full">
+                <canvas id="budgetNepChart" width="800" height="400"></canvas>
+            </div>
+            <div class="mt-4 text-sm text-gray-500 text-center">
+                <p><strong>Data Sources:</strong> budget_analysis database (2017-2025) vs nep database (2020-2026)</p>
+                <p><strong>Note:</strong> Only overlapping years (2020-2025) are shown for direct comparison</p>
+                <p><strong>Live Data:</strong> Chart updates automatically with real database values</p>
+            </div>
+        </div>
+
+        <!-- Database Schema Comparison -->
+        <div class="bg-white rounded-lg shadow-lg p-8 mb-8 border-l-4 border-red-500">
+            <h2 class="text-3xl font-bold text-gray-800 mb-6 text-center">🚨 Critical Database Discovery</h2>
+            <div class="text-center mb-6">
+                <span class="inline-block bg-red-100 text-red-800 text-lg font-semibold px-4 py-2 rounded-full">
+                    Budget & NEP Databases Do NOT Match 1-to-1
+                </span>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+                <!-- Budget Database -->
+                <div class="bg-blue-50 p-6 rounded-lg border-2 border-blue-200">
+                    <h3 class="text-xl font-bold text-blue-800 mb-4 text-center">📊 Budget Database</h3>
+                    <div class="space-y-3">
+                        <div class="flex justify-between">
+                            <span class="font-medium">Tables:</span>
+                            <span class="font-mono bg-blue-100 px-2 py-1 rounded">budget_2017 to budget_2025</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="font-medium">Columns:</span>
+                            <span class="font-mono bg-blue-100 px-2 py-1 rounded">24 per table</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="font-medium">Amount Column:</span>
+                            <span class="font-mono bg-blue-100 px-2 py-1 rounded">amt (numeric)</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="font-medium">Description:</span>
+                            <span class="font-mono bg-blue-100 px-2 py-1 rounded">dsc (text)</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="font-medium">UACS Codes:</span>
+                            <span class="font-mono bg-blue-100 px-2 py-1 rounded">bigint fields</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- NEP Database -->
+                <div class="bg-green-50 p-6 rounded-lg border-2 border-green-200">
+                    <h3 class="text-xl font-bold text-green-800 mb-4 text-center">📈 NEP Database</h3>
+                    <div class="space-y-3">
+                        <div class="flex justify-between">
+                            <span class="font-medium">Tables:</span>
+                            <span class="font-mono bg-green-100 px-2 py-1 rounded">budget_2020 to budget_2026</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="font-medium">Columns:</span>
+                            <span class="font-mono bg-green-100 px-2 py-1 rounded">16 per table</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="font-medium">Amount Column:</span>
+                            <span class="font-mono bg-green-100 px-2 py-1 rounded">amount (numeric)</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="font-medium">Description:</span>
+                            <span class="font-mono bg-green-100 px-2 py-1 rounded">description (text)</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="font-medium">UACS Codes:</span>
+                            <span class="font-mono bg-green-100 px-2 py-1 rounded">varchar fields</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-yellow-50 border-l-4 border-yellow-400 p-4">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0">
+                        ⚠️
+                    </div>
+                    <div class="ml-3">
+                        <p class="text-sm text-yellow-700">
+                            <strong>Impact:</strong> Despite schema differences, the NEP integration is successful because adapted queries handle the column mapping differences transparently.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Correlation Analysis -->
+        <div class="bg-white rounded-lg shadow-lg p-8 mb-8">
+            <h2 class="text-2xl font-bold text-gray-800 mb-6 text-center">🔍 NEP-Budget Database Correlation Analysis</h2>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                <div class="bg-gradient-to-br from-blue-500 to-blue-600 text-white p-6 rounded-lg text-center">
+                    <h3 class="text-lg font-semibold mb-2">Table Overlap</h3>
+                    <p class="text-3xl font-bold mb-2">6 Years</p>
+                    <p class="text-sm opacity-90">2020-2025 shared between databases</p>
+                </div>
+                <div class="bg-gradient-to-br from-green-500 to-green-600 text-white p-6 rounded-lg text-center">
+                    <h3 class="text-lg font-semibold mb-2">Schema Difference</h3>
+                    <p class="text-3xl font-bold mb-2">8 Columns</p>
+                    <p class="text-sm opacity-90">Budget: 24 cols, NEP: 16 cols</p>
+                </div>
+                <div class="bg-gradient-to-br from-purple-500 to-purple-600 text-white p-6 rounded-lg text-center">
+                    <h3 class="text-lg font-semibold mb-2">Data Types</h3>
+                    <p class="text-3xl font-bold mb-2">Adapted</p>
+                    <p class="text-sm opacity-90">bigint → varchar for UACS codes</p>
+                </div>
+            </div>
+
+            <!-- Key Differences Table -->
+            <div class="overflow-x-auto">
+                <h3 class="text-xl font-semibold text-gray-800 mb-4">📋 Detailed Column Mapping</h3>
+                <table class="min-w-full bg-white border border-gray-300">
+                    <thead class="bg-gray-50">
+                        <tr>
+                            <th class="px-4 py-2 border-b text-left font-semibold">Aspect</th>
+                            <th class="px-4 py-2 border-b text-left font-semibold">Budget Database</th>
+                            <th class="px-4 py-2 border-b text-left font-semibold">NEP Database</th>
+                            <th class="px-4 py-2 border-b text-left font-semibold">Adaptation</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-gray-200">
+                        <tr>
+                            <td class="px-4 py-2 font-medium">Primary Key</td>
+                            <td class="px-4 py-2"><code>id</code> (integer)</td>
+                            <td class="px-4 py-2"><code>id</code> (integer)</td>
+                            <td class="px-4 py-2 text-green-600">✓ Identical</td>
+                        </tr>
+                        <tr class="bg-gray-50">
+                            <td class="px-4 py-2 font-medium">Amount Field</td>
+                            <td class="px-4 py-2"><code>amt</code> (numeric)</td>
+                            <td class="px-4 py-2"><code>amount</code> (numeric)</td>
+                            <td class="px-4 py-2 text-blue-600">→ Column name change</td>
+                        </tr>
+                        <tr>
+                            <td class="px-4 py-2 font-medium">Description</td>
+                            <td class="px-4 py-2"><code>dsc</code> (text)</td>
+                            <td class="px-4 py-2"><code>description</code> (text)</td>
+                            <td class="px-4 py-2 text-blue-600">→ Column name change</td>
+                        </tr>
+                        <tr class="bg-gray-50">
+                            <td class="px-4 py-2 font-medium">Fiscal Year</td>
+                            <td class="px-4 py-2"><code>year</code> (integer)</td>
+                            <td class="px-4 py-2"><code>fiscal_year</code> (varchar)</td>
+                            <td class="px-4 py-2 text-orange-600">→ Name + type change</td>
+                        </tr>
+                        <tr>
+                            <td class="px-4 py-2 font-medium">Department Code</td>
+                            <td class="px-4 py-2"><code>department</code> (bigint)</td>
+                            <td class="px-4 py-2"><code>org_uacs_code</code> (varchar)</td>
+                            <td class="px-4 py-2 text-orange-600">→ Name + type change</td>
+                        </tr>
+                        <tr class="bg-gray-50">
+                            <td class="px-4 py-2 font-medium">Agency Code</td>
+                            <td class="px-4 py-2"><code>agency</code> (bigint)</td>
+                            <td class="px-4 py-2"><code>region_code</code> (varchar)</td>
+                            <td class="px-4 py-2 text-orange-600">→ Name + type change</td>
+                        </tr>
+                        <tr>
+                            <td class="px-4 py-2 font-medium">Sort Order</td>
+                            <td class="px-4 py-2"><code>sorder</code> (bigint)</td>
+                            <td class="px-4 py-2"><code>sort_order</code> (bigint)</td>
+                            <td class="px-4 py-2 text-blue-600">→ Column name change</td>
+                        </tr>
+                        <tr class="bg-gray-50">
+                            <td class="px-4 py-2 font-medium">Total Columns</td>
+                            <td class="px-4 py-2 font-bold text-blue-600">24 columns</td>
+                            <td class="px-4 py-2 font-bold text-green-600">16 columns</td>
+                            <td class="px-4 py-2 text-red-600">→ Schema reduction</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Integration Success -->
+        <div class="bg-white rounded-lg shadow-lg p-8 mb-8 border-l-4 border-green-500">
+            <h2 class="text-2xl font-bold text-gray-800 mb-6 text-center">✅ Successful Integration Despite Differences</h2>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="space-y-4">
+                    <h3 class="text-lg font-semibold text-gray-800">🔧 Technical Adaptations</h3>
+                    <ul class="space-y-2 text-gray-600">
+                        <li class="flex items-start">
+                            <span class="text-green-500 mr-2">✓</span>
+                            <span>Query column name mapping (<code>amt</code> → <code>amount</code>)</span>
+                        </li>
+                        <li class="flex items-start">
+                            <span class="text-green-500 mr-2">✓</span>
+                            <span>WHERE condition adjustments for nullable fields</span>
+                        </li>
+                        <li class="flex items-start">
+                            <span class="text-green-500 mr-2">✓</span>
+                            <span>Unified API endpoints serve both databases</span>
+                        </li>
+                        <li class="flex items-start">
+                            <span class="text-green-500 mr-2">✓</span>
+                            <span>Identical frontend interface for different backends</span>
+                        </li>
+                    </ul>
+                </div>
+
+                <div class="space-y-4">
+                    <h3 class="text-lg font-semibold text-gray-800">📊 User Experience</h3>
+                    <ul class="space-y-2 text-gray-600">
+                        <li class="flex items-start">
+                            <span class="text-green-500 mr-2">✓</span>
+                            <span>Seamless navigation between Budget and NEP</span>
+                        </li>
+                        <li class="flex items-start">
+                            <span class="text-green-500 mr-2">✓</span>
+                            <span>Identical data browsing and filtering</span>
+                        </li>
+                        <li class="flex items-start">
+                            <span class="text-green-500 mr-2">✓</span>
+                            <span>Same visualization and analysis tools</span>
+                        </li>
+                        <li class="flex items-start">
+                            <span class="text-green-500 mr-2">✓</span>
+                            <span>Transparent database differences to users</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Data Statistics -->
+        <div class="bg-white rounded-lg shadow-lg p-8">
+            <h2 class="text-2xl font-bold text-gray-800 mb-6 text-center">📈 Current Data Statistics</h2>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <!-- Budget Stats -->
+                <div class="bg-blue-50 p-6 rounded-lg">
+                    <h3 class="text-xl font-bold text-blue-800 mb-4 text-center">💰 Budget Database (2017-2025)</h3>
+                    <div class="space-y-3">
+                        <div class="flex justify-between">
+                            <span class="font-medium">Coverage:</span>
+                            <span class="font-semibold">9 fiscal years</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="font-medium">Schema:</span>
+                            <span class="font-semibold">24 columns each</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="font-medium">Detail Level:</span>
+                            <span class="font-semibold">High (UACS breakdowns)</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="font-medium">Data Types:</span>
+                            <span class="font-semibold">bigint for codes</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- NEP Stats -->
+                <div class="bg-green-50 p-6 rounded-lg">
+                    <h3 class="text-xl font-bold text-green-800 mb-4 text-center">📈 NEP Database (2020-2026)</h3>
+                    <div class="space-y-3">
+                        <div class="flex justify-between">
+                            <span class="font-medium">Coverage:</span>
+                            <span class="font-semibold">7 fiscal years</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="font-medium">Schema:</span>
+                            <span class="font-semibold">16 columns each</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="font-medium">Detail Level:</span>
+                            <span class="font-semibold">Medium (simplified)</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="font-medium">Data Types:</span>
+                            <span class="font-semibold">varchar for codes</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="mt-6 text-center">
+                <p class="text-gray-600">
+                    <strong>Conclusion:</strong> Despite fundamental schema differences, the NEP integration provides
+                    users with the same powerful analysis capabilities through transparent query adaptations.
+                </p>
+            </div>
+        </div>
+
+        <!-- Contractor Analysis Table -->
+        <div id="contractor-section" class="bg-white rounded-lg shadow-md mb-6" style="display: none;">
+            <div class="p-6">
+                <h3 class="text-xl font-semibold text-gray-800 text-center mb-4">🏆 Top 50 Contractor Analysis</h3>
+                <p class="text-center text-gray-600 text-sm -mt-2 mb-4">
+                    Ranked by number of flood control projects, showing their presence in other DIME infrastructure projects
+                </p>
+
+                <div class="overflow-x-auto">
+                    <table class="budget-projects-table">
+                        <thead>
+                            <tr>
+                                <th style="width: 5%;">Rank</th>
+                                <th style="width: 35%;">Contractor Name</th>
+                                <th style="width: 12%; text-align: center;">Flood Projects</th>
+                                <th style="width: 15%; text-align: right;">Flood Budget</th>
+                                <th style="width: 12%; text-align: center;">DIME Projects</th>
+                                <th style="width: 15%; text-align: right;">DIME Budget</th>
+                                <th style="width: 6%; text-align: center;">Total</th>
+                            </tr>
+                        </thead>
+                        <tbody id="contractor-correlation-tbody">
+                            <tr>
+                                <td colspan="7" style="text-align: center; padding: 2rem;">Loading...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Methodology -->
+            <div id="methodology-section" class="methodology-box" style="display: none;">
+                <h4>📊 Methodology</h4>
+                <p><strong>Data Sources:</strong></p>
+                <p>• Flood Control Data: DPWH Flood Control Projects Database</p>
+                <p>• DIME Data: Department of Budget and Management - Digital Information for Monitoring and Evaluation</p>
+                <p><strong>Analysis Process:</strong></p>
+                <p>• Extracted top 50 contractors by number of flood control projects</p>
+                <p>• Used fuzzy string matching to find contractor names across databases (accounting for variations in naming conventions)</p>
+                <p>• Filtered DIME projects to exclude flood-related infrastructure to show diversification</p>
+                <p>• Calculated total project counts and budget allocations</p>
+            </div>
+
+            <!-- Data Source Footer -->
+            <div id="footer-section" class="data-source-footer" style="display: none;">
+                <p><strong>Data Sources:</strong></p>
+                <p>Flood Control: DPWH Flood Control Projects | DIME: DBM Digital Information for Monitoring and Evaluation</p>
+                <p><strong>Last Updated:</strong> <span id="last-updated">-</span></p>
+                <p style="margin-top: 15px; font-size: 0.85em; color: #888;">
+                    <em>Note: Contractor name matching uses fuzzy algorithms to account for naming variations between databases</em>
+                </p>
+                <p class="github-footnote text-center text-gray-600 text-sm mt-2">@<a href="https://github.com/joebertj" target="_blank" rel="noopener noreferrer">https://github.com/joebertj</a></p>
+            </div>
+        </div>
+    </section>
+    </div>
+
+    <script>
+        // Load chart when page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            loadBudgetNepChart();
+        });
+    </script>
+
+</body>
+</html>
