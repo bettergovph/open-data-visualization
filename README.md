@@ -1,10 +1,10 @@
-# Open Data Visualization - AltGovPH Frontend
+# Open Data Visualization - BetterGovPH Frontend
 
-This directory contains the frontend components copied from the AltGovPH section of the kenchlightyear_web project.
+This directory contains the frontend components copied from the BetterGovPH section of the kenchlightyear_web project.
 
 ## Routes and Functionality
 
-### /alt (AltGovPH Homepage)
+### /alt (BetterGovPH Homepage)
 - **Templates**: `altgovph_home.html`, `mobile/altgovph_home.html`
 - **Functionality**: Landing page with navigation to all data sections
 
@@ -31,11 +31,11 @@ This directory contains the frontend components copied from the AltGovPH section
 ## Files Copied:
 
 ### Templates
-- `templates/altgovph_home.html` - Main AltGovPH homepage template
-- `templates/mobile/altgovph_home.html` - Mobile version of the AltGovPH homepage
-- `templates/base_altgovph.html` - Base template for AltGovPH desktop pages
-- `templates/mobile/base_altgovph.html` - Base template for AltGovPH mobile pages
-- `templates/base.html` - Main base template that AltGovPH templates extend
+- `templates/altgovph_home.html` - Main BetterGovPH homepage template
+- `templates/mobile/altgovph_home.html` - Mobile version of the BetterGovPH homepage
+- `templates/base_altgovph.html` - Base template for BetterGovPH desktop pages
+- `templates/mobile/base_altgovph.html` - Base template for BetterGovPH mobile pages
+- `templates/base.html` - Main base template that BetterGovPH templates extend
 - `templates/budget.html` - Budget analysis page template
 - `templates/mobile/budget.html` - Mobile budget analysis page
 - `templates/flood.html` - Flood control projects page template
@@ -50,9 +50,9 @@ This directory contains the frontend components copied from the AltGovPH section
 - `templates/flood_dime_correlation.html` - Flood-DIME correlation analysis
 
 ### CSS Stylesheets
-- `static/css/altgovph-theme.css` - AltGovPH desktop theme styles
-- `static/css/altgovph-mobile.css` - Mobile-specific AltGovPH styles
-- `static/css/altgovph-shared.css` - Shared AltGovPH styles
+- `static/css/altgovph-theme.css` - BetterGovPH desktop theme styles
+- `static/css/altgovph-mobile.css` - Mobile-specific BetterGovPH styles
+- `static/css/altgovph-shared.css` - Shared BetterGovPH styles
 - `static/css/style.css` - Main site styles (referenced by base.html)
 - `static/css/mobile-fixes.css` - Mobile fixes (referenced by base.html)
 - `static/css/mobile-budget.css` - Mobile budget-specific styles
@@ -80,7 +80,7 @@ This directory contains the frontend components copied from the AltGovPH section
 
 ### Rust Route Definitions
 - `altgovph_routes.rs` - Complete route handlers extracted from main.rs
-  - Contains route functions for all AltGovPH pages
+  - Contains route functions for all BetterGovPH pages
   - Includes helper functions for mobile redirects and domain blocking
   - Example route registration code included as comments
 

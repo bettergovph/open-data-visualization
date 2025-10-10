@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>DIME Infrastructure Projects - AltGovPH</title>
+    <title>DIME Infrastructure Projects - BetterGovPH</title>
 
     <!-- Google Fonts - Inter -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -12,22 +12,22 @@
     <script src="https://cdn.tailwindcss.com"></script>
 
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <!-- AltGovPH Metadata -->
+    <!-- BetterGovPH Metadata -->
     <meta name="description" content="Digital Information for Monitoring and Evaluation (DIME) - Infrastructure Projects Tracker">
     <meta name="keywords" content="DIME, infrastructure, projects, government, Philippines, data, transparency">
-    <meta name="author" content="AltGovPH">
+    <meta name="author" content="BetterGovPH">
 
     <!-- Open Graph / Facebook -->
     <meta property="og:type" content="website">
-    <meta property="og:url" content="https://altgovph.site/">
-    <meta property="og:title" content="DIME Infrastructure Projects - AltGovPH">
+    <meta property="og:url" content="{{ og_url | default(value='https://visualizations.bettergov.ph/') }}">
+    <meta property="og:title" content="DIME Infrastructure Projects - BetterGovPH">
     <meta property="og:description" content="Digital Information for Monitoring and Evaluation (DIME) - Infrastructure Projects Tracker">
     <meta property="og:image" content="/static/images/gov_logo.png">
 
     <!-- Twitter -->
     <meta property="twitter:card" content="summary_large_image">
-    <meta property="twitter:url" content="https://altgovph.site/">
-    <meta property="twitter:title" content="DIME Infrastructure Projects - AltGovPH">
+    <meta property="twitter:url" content="https://visualizations.bettergov.ph/">
+    <meta property="twitter:title" content="DIME Infrastructure Projects - BetterGovPH">
     <meta property="twitter:description" content="Digital Information for Monitoring and Evaluation (DIME) - Infrastructure Projects Tracker">
     <meta property="twitter:image" content="/static/images/gov_logo.png">
 
@@ -86,9 +86,10 @@
     <div class="max-w-7xl mx-auto flex items-center justify-between">
         <div class="flex items-center">
             <a href="/alt" class="flex items-center">
-                <img src="https://raw.githubusercontent.com/bettergovph/logo/main/png/BetterGov_Horizontal-Black.png" 
-                     alt="BetterGov" 
-                     class="h-12">
+                <img src="https://raw.githubusercontent.com/bettergovph/logo/main/png/BetterGov_Horizontal-Black.png"
+                     alt="BetterGov.ph"
+                     class="h-12 mr-3">
+                <span class="text-xl font-bold text-black">Data Visualizations</span>
             </a>
         </div>
         <div class="hidden md:flex space-x-6">

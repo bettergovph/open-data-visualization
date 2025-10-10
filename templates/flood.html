@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Flood Control Projects - AltGovPH</title>
+    <title>Flood Control Projects - BetterGovPH</title>
 
     <!-- Google Fonts - Inter -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -17,22 +17,22 @@
     <!-- Leaflet for maps -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-    <!-- AltGovPH Metadata -->
+    <!-- BetterGovPH Metadata -->
     <meta name="description" content="Flood Control Infrastructure Projects - Government Data Analysis Platform">
     <meta name="keywords" content="flood control, infrastructure, DPWH, government projects, Philippines, public works">
-    <meta name="author" content="AltGovPH">
+    <meta name="author" content="BetterGovPH">
 
     <!-- Open Graph / Facebook -->
     <meta property="og:type" content="website">
-    <meta property="og:url" content="https://altgovph.site/">
-    <meta property="og:title" content="Flood Control Projects - AltGovPH">
+    <meta property="og:url" content="{{ og_url | default(value='https://visualizations.bettergov.ph/') }}">
+    <meta property="og:title" content="Flood Control Projects - BetterGovPH">
     <meta property="og:description" content="Government Data Analysis Platform for Flood Control Infrastructure Projects">
     <meta property="og:image" content="/static/images/gov_logo.png">
 
     <!-- Twitter -->
     <meta property="twitter:card" content="summary_large_image">
-    <meta property="twitter:url" content="https://altgovph.site/">
-    <meta property="twitter:title" content="Flood Control Projects - AltGovPH">
+    <meta property="twitter:url" content="https://visualizations.bettergov.ph/">
+    <meta property="twitter:title" content="Flood Control Projects - BetterGovPH">
     <meta property="twitter:description" content="Government Data Analysis Platform for Flood Control Infrastructure Projects">
     <meta property="twitter:image" content="/static/images/gov_logo.png">
 
@@ -193,7 +193,7 @@
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2) !important;
 }
 
-/* Override any KenchLightyear colors */
+/* BetterGovPH theme colors */
 h1, h2, h3, h4, h5, h6 {
     color: #0038A8 !important;
 }
@@ -236,15 +236,22 @@ h1, h2, h3, h4, h5, h6 {
     text-decoration: none;
 }
 
-/* Style buttons with Philippine flag colors (excluding tab buttons) */
+/* Style buttons with consistent blue theme (excluding tab buttons) */
 .btn, button:not(.budget-tab-btn) {
-    background: linear-gradient(135deg, #0038A8 0%, #CE1126 100%) !important;
+    background: #2563eb !important; /* bg-blue-600 */
     color: white !important;
     border: none !important;
+    border-radius: 4px !important;
+    padding: 8px 16px !important;
+    cursor: pointer !important;
+    font-size: 14px !important;
+    transition: all 0.2s ease !important;
 }
 
 .btn:hover, button:not(.budget-tab-btn):hover {
-    background: linear-gradient(135deg, #002a7a 0%, #a00e1f 100%) !important;
+    background: #1d4ed8 !important; /* hover:bg-blue-700 */
+    transform: translateY(-1px) !important;
+    box-shadow: 0 2px 8px rgba(37, 99, 235, 0.3) !important;
 }
 
 /* Tab content visibility */
@@ -271,27 +278,28 @@ h1, h2, h3, h4, h5, h6 {
 
 <!-- Open Graph / Facebook -->
 <meta property="og:type" content="website">
-<meta property="og:url" content="https://altgovph.site/">
-<meta property="og:title" content="Flood Control Projects - AltGovPH">
+<meta property="og:url" content="{{ og_url | default(value='https://visualizations.bettergov.ph/') }}">
+<meta property="og:title" content="Flood Control Projects - BetterGovPH">
 <meta property="og:description" content="Government Data Analysis Platform for Flood Control Infrastructure Projects">
 <meta property="og:image" content="/static/images/gov_logo.png">
 
 <!-- Twitter -->
 <meta property="twitter:card" content="summary_large_image">
-<meta property="twitter:url" content="https://altgovph.site/">
-<meta property="twitter:title" content="Flood Control Projects - AltGovPH">
+<meta property="twitter:url" content="https://visualizations.bettergov.ph/">
+<meta property="twitter:title" content="Flood Control Projects - BetterGovPH">
 <meta property="twitter:description" content="Government Data Analysis Platform for Flood Control Infrastructure Projects">
 <meta property="twitter:image" content="/static/images/gov_logo.png">
 </head>
 <body>
-<!-- AltGovPH Navigation Bar -->
+<!-- BetterGovPH Navigation Bar -->
 <nav class="altgovph-nav py-4 px-6 bg-white border-b border-gray-200">
     <div class="max-w-7xl mx-auto flex items-center justify-between">
         <div class="flex items-center">
             <a href="/alt" class="flex items-center">
-                <img src="https://raw.githubusercontent.com/bettergovph/logo/main/png/BetterGov_Horizontal-Black.png" 
-                     alt="BetterGov" 
-                     class="h-12">
+                <img src="https://raw.githubusercontent.com/bettergovph/logo/main/png/BetterGov_Horizontal-Black.png"
+                     alt="BetterGov.ph"
+                     class="h-12 mr-3">
+                <span class="text-xl font-bold text-black">Data Visualizations</span>
             </a>
         </div>
         <div class="hidden md:flex space-x-6">
@@ -859,7 +867,7 @@ function toggleMobileMenu() {
         }
 
         async init() {
-        console.log('🏛️ AltGovPH Flood Control Platform Loaded');
+        console.log('🏛️ BetterGovPH Flood Control Platform Loaded');
         
             // Load initial data
             await this.loadStatistics();

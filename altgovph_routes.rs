@@ -1,5 +1,5 @@
-// AltGovPH Routes - Extracted from main.rs
-// Contains only the route handlers for AltGovPH data visualization pages
+// BetterGovPH Routes - Extracted from main.rs
+// Contains only the route handlers for BetterGovPH data visualization pages
 
 use actix_web::{HttpResponse, HttpRequest, Result, error::Error as ActixError, web};
 use tera::{Tera, Context};
@@ -13,7 +13,7 @@ pub fn add_frontend_env_to_context(context: &mut tera::Context) {
     // Simplified version for this extraction
     let mut env_vars = HashMap::new();
     env_vars.insert("SITE_URL".to_string(), "https://altgovph.site".to_string());
-    env_vars.insert("SITE_NAME".to_string(), "AltGovPH".to_string());
+    env_vars.insert("SITE_NAME".to_string(), "BetterGovPH".to_string());
 
     for (key, value) in env_vars {
         context.insert(key, &value);
@@ -83,22 +83,22 @@ async fn altgovph_home(_req: HttpRequest) -> Result<HttpResponse, ActixError> {
         return Ok(redirect);
     }
 
-    // Use AltGovPH home template
+    // Use BetterGovPH home template
     let tera = Tera::new("templates/**/*").map_err(|e| actix_web::error::ErrorInternalServerError(e))?;
     let mut context = Context::new();
 
     // Add frontend environment variables first
     add_frontend_env_to_context(&mut context);
 
-    // AltGovPH theme for home page
-    context.insert("title", "AltGovPH - Alternative Government Philippines");
-    context.insert("company_name", "AltGovPH");
-    context.insert("platform", "AltGovPH");
-    context.insert("SITE_NAME", "AltGovPH");
+    // BetterGovPH theme for home page
+    context.insert("title", "BetterGovPH");
+    context.insert("company_name", "BetterGovPH");
+    context.insert("platform", "BetterGovPH");
+    context.insert("SITE_NAME", "BetterGovPH");
     context.insert("SITE_URL", "https://altgovph.site");
 
-    // Override Open Graph and Twitter metadata for AltGovPH
-    context.insert("og_title", "AltGovPH - Alternative Government Philippines");
+    // Override Open Graph and Twitter metadata for BetterGovPH
+    context.insert("og_title", "BetterGovPH");
     context.insert("og_description", "Promoting Data Transparency and Open Government in the Philippines");
     context.insert("og_url", "https://altgovph.site/");
     context.insert("og_image", "/static/images/gov_logo.png");
@@ -132,15 +132,15 @@ async fn budget(_req: HttpRequest) -> Result<HttpResponse, ActixError> {
     // Add frontend environment variables first
     add_frontend_env_to_context(&mut context);
 
-    // AltGovPH theme for budget frontend separation (override after env vars)
-    context.insert("title", "Budget Analysis - AltGovPH");
-    context.insert("company_name", "AltGovPH");
-    context.insert("platform", "AltGovPH");
-    context.insert("SITE_NAME", "AltGovPH");
+    // BetterGovPH theme for budget frontend separation (override after env vars)
+    context.insert("title", "Budget Analysis - BetterGovPH");
+    context.insert("company_name", "BetterGovPH");
+    context.insert("platform", "BetterGovPH");
+    context.insert("SITE_NAME", "BetterGovPH");
     context.insert("SITE_URL", "https://altgovph.site");
 
-    // Override Open Graph and Twitter metadata for AltGovPH
-    context.insert("og_title", "Budget Analysis - AltGovPH");
+    // Override Open Graph and Twitter metadata for BetterGovPH
+    context.insert("og_title", "Budget Analysis - BetterGovPH");
     context.insert("og_description", "Government Data Analysis Platform for Budget and Flood Control Projects");
     context.insert("og_url", "https://altgovph.site/");
     context.insert("og_image", "/static/images/gov_logo.png");
@@ -174,15 +174,15 @@ async fn flood(_req: HttpRequest) -> Result<HttpResponse, ActixError> {
     // Add frontend environment variables first
     add_frontend_env_to_context(&mut context);
 
-    // AltGovPH theme for flood frontend separation (override after env vars)
-    context.insert("title", "Flood Control Projects - AltGovPH");
-    context.insert("company_name", "AltGovPH");
-    context.insert("platform", "AltGovPH");
-    context.insert("SITE_NAME", "AltGovPH");
+    // BetterGovPH theme for flood frontend separation (override after env vars)
+    context.insert("title", "Flood Control Projects - BetterGovPH");
+    context.insert("company_name", "BetterGovPH");
+    context.insert("platform", "BetterGovPH");
+    context.insert("SITE_NAME", "BetterGovPH");
     context.insert("SITE_URL", "https://altgovph.site");
 
-    // Override Open Graph and Twitter metadata for AltGovPH
-    context.insert("og_title", "Flood Control Projects - AltGovPH");
+    // Override Open Graph and Twitter metadata for BetterGovPH
+    context.insert("og_title", "Flood Control Projects - BetterGovPH");
     context.insert("og_description", "Government Data Analysis Platform for Flood Control Infrastructure Projects");
     context.insert("og_url", "https://altgovph.site/");
     context.insert("og_image", "/static/images/gov_logo.png");
@@ -216,15 +216,15 @@ async fn dime(_req: HttpRequest) -> Result<HttpResponse, ActixError> {
     // Add frontend environment variables first
     add_frontend_env_to_context(&mut context);
 
-    // AltGovPH theme for DIME frontend separation (override after env vars)
-    context.insert("title", "DIME Infrastructure Projects - AltGovPH");
-    context.insert("company_name", "AltGovPH");
-    context.insert("platform", "AltGovPH");
-    context.insert("SITE_NAME", "AltGovPH");
+    // BetterGovPH theme for DIME frontend separation (override after env vars)
+    context.insert("title", "DIME Infrastructure Projects - BetterGovPH");
+    context.insert("company_name", "BetterGovPH");
+    context.insert("platform", "BetterGovPH");
+    context.insert("SITE_NAME", "BetterGovPH");
     context.insert("SITE_URL", "https://altgovph.site");
 
-    // Override Open Graph and Twitter metadata for AltGovPH
-    context.insert("og_title", "DIME Infrastructure Projects - AltGovPH");
+    // Override Open Graph and Twitter metadata for BetterGovPH
+    context.insert("og_title", "DIME Infrastructure Projects - BetterGovPH");
     context.insert("og_description", "Department of Infrastructure and Mega-Projects Execution - Infrastructure Projects Tracker");
     context.insert("og_url", "https://altgovph.site/");
     context.insert("og_image", "/static/images/gov_logo.png");
@@ -258,15 +258,15 @@ async fn nep(_req: HttpRequest) -> Result<HttpResponse, ActixError> {
     // Add frontend environment variables first
     add_frontend_env_to_context(&mut context);
 
-    // AltGovPH theme for NEP frontend separation (override after env vars)
-    context.insert("title", "NEP Analysis - AltGovPH");
-    context.insert("company_name", "AltGovPH");
-    context.insert("platform", "AltGovPH");
-    context.insert("SITE_NAME", "AltGovPH");
+    // BetterGovPH theme for NEP frontend separation (override after env vars)
+    context.insert("title", "NEP Analysis - BetterGovPH");
+    context.insert("company_name", "BetterGovPH");
+    context.insert("platform", "BetterGovPH");
+    context.insert("SITE_NAME", "BetterGovPH");
     context.insert("SITE_URL", "https://altgovph.site");
 
-    // Override Open Graph and Twitter metadata for AltGovPH
-    context.insert("og_title", "NEP Analysis - AltGovPH");
+    // Override Open Graph and Twitter metadata for BetterGovPH
+    context.insert("og_title", "NEP Analysis - BetterGovPH");
     context.insert("og_description", "Government Data Analysis Platform for National Expenditure Program Projects");
     context.insert("og_url", "https://altgovph.site/nep");
     context.insert("og_image", "/static/images/gov_logo.png");
@@ -300,14 +300,14 @@ async fn budget_nep_correlation(_req: HttpRequest) -> Result<HttpResponse, Actix
     // Add frontend environment variables first
     add_frontend_env_to_context(&mut context);
 
-    // AltGovPH theme for budget-nep correlation page
-    context.insert("title", "NEP-Budget Correlation Analysis - AltGovPH");
-    context.insert("company_name", "AltGovPH");
-    context.insert("platform", "AltGovPH");
-    context.insert("SITE_NAME", "AltGovPH");
+    // BetterGovPH theme for budget-nep correlation page
+    context.insert("title", "NEP-Budget Correlation Analysis - BetterGovPH");
+    context.insert("company_name", "BetterGovPH");
+    context.insert("platform", "BetterGovPH");
+    context.insert("SITE_NAME", "BetterGovPH");
     context.insert("SITE_URL", "https://altgovph.site");
 
-    // Override Open Graph and Twitter metadata for AltGovPH
+    // Override Open Graph and Twitter metadata for BetterGovPH
     context.insert("og_url", "https://altgovph.site/budget-nep-correlation");
     context.insert("og_image", "/static/images/gov_logo.png");
 
@@ -340,10 +340,10 @@ async fn budget_flood_correlation(_req: HttpRequest) -> Result<HttpResponse, Act
     // Add frontend environment variables first
     add_frontend_env_to_context(&mut context);
 
-    // AltGovPH theme for budget-flood correlation page
-    context.insert("company_name", "AltGovPH");
-    context.insert("platform", "AltGovPH");
-    context.insert("SITE_NAME", "AltGovPH");
+    // BetterGovPH theme for budget-flood correlation page
+    context.insert("company_name", "BetterGovPH");
+    context.insert("platform", "BetterGovPH");
+    context.insert("SITE_NAME", "BetterGovPH");
     context.insert("SITE_URL", "https://altgovph.site");
     context.insert("og_url", "https://altgovph.site/budget-flood-correlation");
     context.insert("og_image", "/static/images/gov_logo.png");
@@ -370,14 +370,14 @@ async fn flood_dime_correlation(_req: HttpRequest) -> Result<HttpResponse, Actix
     // Add frontend environment variables first
     add_frontend_env_to_context(&mut context);
 
-    // AltGovPH theme for flood-dime correlation page
-    context.insert("title", "Flood-DIME Correlation Analysis - AltGovPH");
-    context.insert("company_name", "AltGovPH");
-    context.insert("platform", "AltGovPH");
-    context.insert("SITE_NAME", "AltGovPH");
+    // BetterGovPH theme for flood-dime correlation page
+    context.insert("title", "Flood-DIME Correlation Analysis - BetterGovPH");
+    context.insert("company_name", "BetterGovPH");
+    context.insert("platform", "BetterGovPH");
+    context.insert("SITE_NAME", "BetterGovPH");
     context.insert("SITE_URL", "https://altgovph.site");
 
-    // Override Open Graph and Twitter metadata for AltGovPH
+    // Override Open Graph and Twitter metadata for BetterGovPH
     context.insert("og_url", "https://altgovph.site/flood-dime-correlation");
     context.insert("og_image", "/static/images/gov_logo.png");
 

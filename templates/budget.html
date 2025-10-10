@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Budget Analysis - AltGovPH</title>
+    <title>Budget Analysis - BetterGovPH</title>
 
     <!-- Google Fonts - Inter -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -18,22 +18,22 @@
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="-1">
 
-    <!-- AltGovPH Metadata -->
+    <!-- BetterGovPH Metadata -->
     <meta name="description" content="Budget Analysis - Government Data Analysis Platform">
     <meta name="keywords" content="government data, budget analysis, flood control, public data, transparency">
-    <meta name="author" content="AltGovPH">
+    <meta name="author" content="BetterGovPH">
 
     <!-- Open Graph / Facebook -->
     <meta property="og:type" content="website">
-    <meta property="og:url" content="https://altgovph.site/">
-    <meta property="og:title" content="Budget - AltGovPH">
+    <meta property="og:url" content="{{ og_url | default(value='https://visualizations.bettergov.ph/') }}">
+    <meta property="og:title" content="Budget - BetterGovPH">
     <meta property="og:description" content="Government Data Analysis Platform for Budget and Flood Control Projects">
     <meta property="og:image" content="/static/images/gov_logo.png">
 
     <!-- Twitter -->
     <meta property="twitter:card" content="summary_large_image">
-    <meta property="twitter:url" content="https://altgovph.site/">
-    <meta property="twitter:title" content="Budget - AltGovPH">
+    <meta property="twitter:url" content="https://visualizations.bettergov.ph/">
+    <meta property="twitter:title" content="Budget - BetterGovPH">
     <meta property="twitter:description" content="Government Data Analysis Platform for Budget and Flood Control Projects">
     <meta property="twitter:image" content="/static/images/gov_logo.png">
 
@@ -54,9 +54,10 @@
     <div class="max-w-7xl mx-auto flex items-center justify-between">
         <div class="flex items-center">
             <a href="/alt" class="flex items-center">
-                <img src="https://raw.githubusercontent.com/bettergovph/logo/main/png/BetterGov_Horizontal-Black.png" 
-                     alt="BetterGov" 
-                     class="h-12">
+                <img src="https://raw.githubusercontent.com/bettergovph/logo/main/png/BetterGov_Horizontal-Black.png"
+                     alt="BetterGov.ph"
+                     class="h-12 mr-3">
+                <span class="text-xl font-bold text-black">Data Visualizations</span>
             </a>
         </div>
         <div class="hidden md:flex space-x-6">
@@ -650,7 +651,7 @@ function toggleMobileMenu() {
 }
 
 .btn {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: #2563eb !important; /* bg-blue-600 */
     color: white;
     border: none;
     padding: 1rem 2rem;
@@ -662,15 +663,16 @@ function toggleMobileMenu() {
 }
 
 .btn:hover {
+    background: #1d4ed8 !important; /* hover:bg-blue-700 */
     transform: translateY(-2px);
-    box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+    box-shadow: 0 5px 15px rgba(37, 99, 235, 0.4);
 }
 
 .btn:disabled {
     opacity: 0.6;
     cursor: not-allowed;
     transform: none;
-    background: #ccc !important;
+    background: #93c5fd !important; /* disabled blue */
     color: #666 !important;
     box-shadow: none !important;
 }
@@ -1777,12 +1779,107 @@ function toggleMobileMenu() {
     color: #0038A8;
 }
 
+/* Mobile Trends Padding Fixes */
+@media (max-width: 768px) {
+    .trends-dashboard {
+        padding: 1rem 0.5rem;
+    }
+
+    .trends-summary-cards {
+        flex-direction: column;
+        gap: 0.75rem;
+    }
+
+    .trends-summary-cards .metric-card {
+        padding: 1rem;
+    }
+
+    .trends-section {
+        margin-top: 1rem;
+        padding: 1rem;
+    }
+
+    .trends-results {
+        padding: 0.75rem;
+    }
+
+    .budget-trends-section {
+        margin: 1rem 0.5rem;
+        padding: 1rem;
+    }
+
+    .trends-summary {
+        grid-template-columns: 1fr;
+        gap: 0.75rem;
+        margin-bottom: 1rem;
+    }
+
+    .trends-summary .summary-card {
+        padding: 1rem;
+        margin-bottom: 0.5rem;
+    }
+
+    .department-trend-item {
+        padding: 1rem 0.75rem;
+        margin-bottom: 0.75rem;
+    }
+
+    .spending-trend-item {
+        padding: 0.75rem;
+        margin-bottom: 0.75rem;
+    }
+}
+
+/* Extra small mobile devices */
+@media (max-width: 480px) {
+    .trends-dashboard {
+        padding: 0.75rem 0.25rem;
+    }
+
+    .trends-section {
+        padding: 0.75rem;
+        margin-top: 0.75rem;
+    }
+
+    .trends-results {
+        padding: 0.5rem;
+    }
+
+    .budget-trends-section {
+        margin: 0.75rem 0.25rem;
+        padding: 0.75rem;
+    }
+
+    .trends-summary-cards .metric-card {
+        padding: 0.75rem;
+    }
+
+    .trends-summary .summary-card {
+        padding: 0.75rem;
+    }
+
+    .department-trend-item {
+        padding: 0.75rem 0.5rem;
+        margin-bottom: 0.5rem;
+    }
+
+    .spending-trend-item {
+        padding: 0.5rem;
+        margin-bottom: 0.5rem;
+    }
+
+    .duplicate-item {
+        padding: 1rem 0.75rem;
+        margin-bottom: 0.75rem;
+    }
+}
+
 /* Responsive Design */
 @media (max-width: 768px) {
     .dashboard-grid {
         grid-template-columns: 1fr;
     }
-    
+
     .analysis-controls {
         flex-direction: column;
         gap: 0.5rem;
@@ -5790,7 +5887,7 @@ function getApiBaseUrl() {
     // Check if we're in production/staging (has kenchlightyear.com or altgovph.site in hostname)
     if (window.location.hostname.includes('kenchlightyear.com') ||
         window.location.hostname.includes('staging.kenchlightyear.com') ||
-        window.location.hostname.includes('altgovph.site') ||
+        window.location.hostname.includes('visualizations.bettergov.ph') ||
         window.location.hostname.includes('10.27.79.1')) {
         return window.location.origin; // Use same origin for production/staging
     } else {

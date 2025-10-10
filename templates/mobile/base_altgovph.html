@@ -3,30 +3,30 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>{{ title | default(value="AltGovPH - Government Data Platform") }}</title>
+    <title>{{ title | default(value="BetterGovPH - Government Data Platform") }}</title>
     <meta name="description" content="Government Data Analysis Platform for Budget and Flood Control Projects">
     <meta name="keywords" content="government data, budget analysis, flood control, public data, transparency">
-    <meta name="author" content="AltGovPH">
+    <meta name="author" content="BetterGovPH">
     
     <!-- Mobile-specific meta tags -->
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
-    <meta name="apple-mobile-web-app-title" content="AltGovPH">
+    <meta name="apple-mobile-web-app-title" content="BetterGovPH">
     <meta name="theme-color" content="#0038A8">
     <meta name="msapplication-TileColor" content="#0038A8">
     
     <!-- Open Graph / Facebook -->
     <meta property="og:type" content="website">
-    <meta property="og:url" content="https://www.altgovph.site/">
-    <meta property="og:title" content="{{ title | default(value='AltGovPH - Government Data Platform') }}">
+    <meta property="og:url" content="{{ og_url | default(value='https://visualizations.bettergov.ph/') }}">
+    <meta property="og:title" content="{{ title | default(value='BetterGovPH - Government Data Platform') }}">
     <meta property="og:description" content="Government Data Analysis Platform for Budget and Flood Control Projects">
     <meta property="og:image" content="/static/images/gov_logo.png">
     
     <!-- Twitter -->
     <meta property="twitter:card" content="summary_large_image">
     <meta property="twitter:url" content="https://www.altgovph.site/">
-    <meta property="twitter:title" content="{{ title | default(value='AltGovPH - Government Data Platform') }}">
+    <meta property="twitter:title" content="{{ title | default(value='BetterGovPH - Government Data Platform') }}">
     <meta property="twitter:description" content="Government Data Analysis Platform for Budget and Flood Control Projects">
     <meta property="twitter:image" content="/static/images/gov_logo.png">
     
@@ -36,7 +36,7 @@
     <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
-    <!-- AltGovPH Mobile CSS -->
+    <!-- BetterGovPH Mobile CSS -->
     <link rel="stylesheet" href="/static/css/altgovph-mobile.css">
     
     {% block head %}{% endblock %}
@@ -45,8 +45,8 @@
     <header class="altgovph-mobile-header">
         <div class="altgovph-mobile-container">
             <a href="/" class="altgovph-mobile-logo-link">
-                <img src="/static/images/gov_logo.png" alt="AltGovPH" class="altgovph-mobile-logo-img">
-                <span class="altgovph-mobile-site-name">AltGovPH</span>
+                <img src="/static/images/gov_logo.png" alt="BetterGov.ph" class="altgovph-mobile-logo-img">
+                <span class="altgovph-mobile-site-name">Data Visualizations</span>
             </a>
             <nav class="altgovph-mobile-nav-menu">
                 <a href="/alt">Home</a>
@@ -68,8 +68,8 @@
     
     <footer class="altgovph-mobile-footer">
         <div class="altgovph-mobile-container">
-            <p>&copy; 2025 AltGovPH. All Rights Reserved.</p>
-            <p>Powered by KenchLightyear</p>
+            <p>&copy; 2025 BetterGovPH. All Rights Reserved.</p>
+            <p>Powered by BetterGovPH</p>
         </div>
     </footer>
     

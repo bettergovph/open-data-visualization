@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>NEP Analysis - AltGovPH</title>
+    <title>NEP Analysis - BetterGovPH</title>
 
     <!-- Google Fonts - Inter -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -18,22 +18,22 @@
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="-1">
 
-    <!-- AltGovPH Metadata -->
+    <!-- BetterGovPH Metadata -->
     <meta name="description" content="NEP Analysis - Government Data Analysis Platform">
     <meta name="keywords" content="government data, nep analysis, flood control, public data, transparency">
-    <meta name="author" content="AltGovPH">
+    <meta name="author" content="BetterGovPH">
 
     <!-- Open Graph / Facebook -->
     <meta property="og:type" content="website">
-    <meta property="og:url" content="https://altgovph.site/">
-    <meta property="og:title" content="NEP - AltGovPH">
+    <meta property="og:url" content="{{ og_url | default(value='https://visualizations.bettergov.ph/') }}">
+    <meta property="og:title" content="NEP - BetterGovPH">
     <meta property="og:description" content="Government Data Analysis Platform for NEP Projects">
     <meta property="og:image" content="/static/images/gov_logo.png">
 
     <!-- Twitter -->
     <meta property="twitter:card" content="summary_large_image">
-    <meta property="twitter:url" content="https://altgovph.site/">
-    <meta property="twitter:title" content="NEP - AltGovPH">
+    <meta property="twitter:url" content="https://visualizations.bettergov.ph/">
+    <meta property="twitter:title" content="NEP - BetterGovPH">
     <meta property="twitter:description" content="Government Data Analysis Platform for NEP Projects">
     <meta property="twitter:image" content="/static/images/gov_logo.png">
 
@@ -54,9 +54,10 @@
     <div class="max-w-7xl mx-auto flex items-center justify-between">
         <div class="flex items-center">
             <a href="/alt" class="flex items-center">
-                <img src="https://raw.githubusercontent.com/bettergovph/logo/main/png/BetterGov_Horizontal-Black.png" 
-                     alt="BetterGov" 
-                     class="h-12">
+                <img src="https://raw.githubusercontent.com/bettergovph/logo/main/png/BetterGov_Horizontal-Black.png"
+                     alt="BetterGov.ph"
+                     class="h-12 mr-3">
+                <span class="text-xl font-bold text-black">Data Visualizations</span>
             </a>
         </div>
         <div class="hidden md:flex space-x-6">
@@ -650,7 +651,7 @@ function toggleMobileMenu() {
 }
 
 .btn {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: #2563eb !important; /* bg-blue-600 */
     color: white;
     border: none;
     padding: 1rem 2rem;
@@ -662,15 +663,16 @@ function toggleMobileMenu() {
 }
 
 .btn:hover {
+    background: #1d4ed8 !important; /* hover:bg-blue-700 */
     transform: translateY(-2px);
-    box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+    box-shadow: 0 5px 15px rgba(37, 99, 235, 0.4);
 }
 
 .btn:disabled {
     opacity: 0.6;
     cursor: not-allowed;
     transform: none;
-    background: #ccc !important;
+    background: #93c5fd !important; /* disabled blue */
     color: #666 !important;
     box-shadow: none !important;
 }
@@ -2888,8 +2890,8 @@ async function loadVisualStatistics() {
         if (result.success && result.stats) {
             const stats = result.stats;
 
-            // Apply *1000 for 2020-2025, no multiplication for 2026
-            const multiplier = (selectedYear && selectedYear >= 2020 && selectedYear <= 2025) ? 1000 : 1;
+            // Apply *1000 for 2020-2026 (all years in thousands)
+            const multiplier = (selectedYear && selectedYear >= 2020 && selectedYear <= 2026) ? 1000 : 1;
 
             // Update all statistics cards from the materialized view
             document.getElementById('total-budget-items').textContent = stats.total_items?.toLocaleString('en-US') || '0';
@@ -2948,8 +2950,8 @@ async function loadDepartmentsChart() {
             
             const ctx = canvas.getContext('2d');
             
-            // Apply *1000 for 2020-2025, no multiplication for 2026
-            const multiplier = (apiYear >= 2020 && apiYear <= 2025) ? 1000 : 1;
+            // Apply *1000 for 2020-2026 (all years in thousands)
+            const multiplier = (apiYear >= 2020 && apiYear <= 2026) ? 1000 : 1;
 
             new Chart(ctx, {
                 type: 'doughnut',
@@ -3007,8 +3009,8 @@ async function loadAgenciesChart() {
             
             const ctx = canvas.getContext('2d');
 
-            // Apply *1000 for 2020-2025, no multiplication for 2026
-            const multiplier = (apiYear >= 2020 && apiYear <= 2025) ? 1000 : 1;
+            // Apply *1000 for 2020-2026 (all years in thousands)
+            const multiplier = (apiYear >= 2020 && apiYear <= 2026) ? 1000 : 1;
 
             new Chart(ctx, {
                 type: 'bar',
@@ -3078,8 +3080,8 @@ async function loadExpenseCategoriesChart() {
             
             const ctx = canvas.getContext('2d');
 
-            // Apply *1000 for 2020-2025, no multiplication for 2026
-            const multiplier = (apiYear >= 2020 && apiYear <= 2025) ? 1000 : 1;
+            // Apply *1000 for 2020-2026 (all years in thousands)
+            const multiplier = (apiYear >= 2020 && apiYear <= 2026) ? 1000 : 1;
 
             new Chart(ctx, {
                 type: 'bar',
@@ -3148,8 +3150,8 @@ async function loadRegionsChart() {
             
             const ctx = canvas.getContext('2d');
 
-            // Apply *1000 for 2020-2025, no multiplication for 2026
-            const multiplier = (apiYear >= 2020 && apiYear <= 2025) ? 1000 : 1;
+            // Apply *1000 for 2020-2026 (all years in thousands)
+            const multiplier = (apiYear >= 2020 && apiYear <= 2026) ? 1000 : 1;
 
             new Chart(ctx, {
                 type: 'pie',
@@ -3368,8 +3370,8 @@ function displayFloodControlAmount(rows, year = '2025') {
     const container = document.getElementById('flood-control-container');
     if (!container) return;
 
-    // Apply *1000 for 2020-2025, no multiplication for 2026
-    const multiplier = (year && year >= 2020 && year <= 2025) ? 1000 : 1;
+    // Apply *1000 for 2020-2026 (all years in thousands)
+    const multiplier = (year && year >= 2020 && year <= 2026) ? 1000 : 1;
 
     if (rows && rows.length > 0) {
         // Get all unique column names from all rows
@@ -3613,8 +3615,8 @@ function displayDataBrowser(data, apiYear = null) {
     const container = document.getElementById('data-browser-container');
     if (!container) return;
 
-    // Apply *1000 for 2020-2025, no multiplication for 2026
-    const multiplier = (apiYear && apiYear >= 2020 && apiYear <= 2025) ? 1000 : 1;
+    // Apply *1000 for 2020-2026 (all years in thousands)
+    const multiplier = (apiYear && apiYear >= 2020 && apiYear <= 2026) ? 1000 : 1;
 
     if (data.rows && data.rows.length > 0) {
         // Get all unique column names from the first row to build dynamic headers
@@ -5708,7 +5710,7 @@ function getApiBaseUrl() {
     // Check if we're in production/staging (has kenchlightyear.com or altgovph.site in hostname)
     if (window.location.hostname.includes('kenchlightyear.com') ||
         window.location.hostname.includes('staging.kenchlightyear.com') ||
-        window.location.hostname.includes('altgovph.site') ||
+        window.location.hostname.includes('visualizations.bettergov.ph') ||
         window.location.hostname.includes('10.27.79.1')) {
         return window.location.origin; // Use same origin for production/staging
     } else {
