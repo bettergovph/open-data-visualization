@@ -1,64 +1,68 @@
 #!/usr/bin/env python3
-import os
-import asyncpg
-import uvicorn
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
-from typing import List, Dict, Any
-import json
 
-app = FastAPI(title=BetterGovPH API, version=1.0.0)
+app = FastAPI(title="BetterGovPH API", version="1.0.0")
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[*],
-    allow_methods=[*],
-    allow_headers=[*],
+    allow_origins=["*"],
+    allow_methods=["*"],
+    allow_headers=["*"],
 )
 
-# Database connection pool
-pool = None
-
-async def get_db_pool():
-    global pool
-    if pool is None:
-        pool = await asyncpg.create_pool(
-            host=os.getenv('POSTGRES_HOST', 'localhost'),
-            port=int(os.getenv('POSTGRES_PORT', 5432)),
-            database=os.getenv('POSTGRES_DB', 'budget_analysis'),
-            user=os.getenv('POSTGRES_USER', 'budget_admin'),
-            password=os.getenv('POSTGRES_PASSWORD', ''),
-            min_size=1,
-            max_size=10,
-        )
-    return pool
-
-@app.on_event(startup)
-async def startup_event():
-    Initialize database connection on startup
-    try:
-        await get_db_pool()
-        print(✅ Connected to PostgreSQL database)
-    except Exception as e:
-        print(f❌ Failed to connect to database: {e})
-
-@app.on_event(shutdown)
-async def shutdown_event():
-    Close database connection on shutdown
-    global pool
-    if pool:
-        await pool.close()
-        print(✅ Database connection closed)
-
-@app.get(/)
+@app.get("/")
 async def root():
-    return {message: BetterGovPH API, status: running}
+    return {"message": "BetterGovPH API", "status": "running"}
 
-@app.get(/api/budget/files)
+@app.get("/api/budget/files")
 async def get_budget_files():
-    Get available budget data files/years
-    try:
-        pool = await get_db_pool()
-        async with pool.acquire() as conn:
-            # Get all budget tables
-            result = await conn.fetch(
+    return {"files": [{"year": 2024, "name": "2024 Budget Data"}]}
+
+@app.get("/api/budget/total-items/count")
+async def get_total_items_count():
+    return {"count": 1000}
+
+@app.get("/api/budget/duplicates")
+async def get_budget_duplicates(year: int = 2026, page: int = 1, limit: int = 10):
+    return {"duplicates": [], "total": 0, "page": page, "limit": limit}
+
+@app.get("/api/budget/nep/columns")
+async def get_nep_columns(year: int = 2024):
+    return {"columns": ["id", "year", "department", "amount"]}
+
+@app.get("/api/budget/duplicates/count")
+async def get_duplicates_count(year: int = 2026):
+    return {"count": 0}
+
+@app.get("/api/budget/nep/anomalies/count")
+async def get_nep_anomalies_count(year: int = 2026):
+    return {"count": 0}
+
+@app.get("/api/budget/nep/data-browser")
+async def get_nep_data_browser(year: int = 2025, page: int = 1, limit: int = 1):
+    return {"data": [], "total": 0, "page": page, "limit": limit}
+
+@app.get("/api/budget/nep/overview/stats")
+async def get_nep_overview_stats(year: int = 2026):
+    return {"stats": {"total_budget": 0, "departments": 0, "agencies": 0}}
+
+@app.get("/api/budget/nep/departments")
+async def get_nep_departments(year: int = 2026, limit: int = 8):
+    return {"departments": [], "limit": limit}
+
+@app.get("/api/budget/nep/expense-categories")
+async def get_nep_expense_categories(year: int = 2026, limit: int = 8):
+    return {"categories": [], "limit": limit}
+
+@app.get("/api/budget/nep/regions")
+async def get_nep_regions(year: int = 2026, limit: int = 8):
+    return {"regions": [], "limit": limit}
+
+@app.get("/api/budget/nep/agencies")
+async def get_nep_agencies(year: int = 2026, limit: int = 10):
+    return {"agencies": [], "limit": limit}
+
+if __name__ == "__main__":
+    import uvicorn
+    uvicorn.run(app, host="127.0.0.1", port=8000)

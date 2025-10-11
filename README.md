@@ -6,13 +6,13 @@ This project contains the **BetterGovPH Data Visualizations** platform - a compr
 
 ✅ **FULLY ISOLATED** from kenchlightyear business platform  
 ✅ **RUNNING** on dedicated server (10.27.79.7)  
-✅ **PRODUCTION READY** for   
-✅ **TEST ACCESS** available at   
+✅ **PRODUCTION READY** for visualizations.bettergov.ph  
+✅ **TEST ACCESS** available at altgovph.site  
 
 ## Domains
 
-- **Production**: 
-- **Test/Transition**: 
+- **Production**: https://visualizations.bettergov.ph
+- **Test/Transition**: https://altgovph.site
 
 ## Architecture
 
@@ -23,77 +23,77 @@ This project contains the **BetterGovPH Data Visualizations** platform - a compr
 - **Mobile Support**: Responsive design with dedicated mobile templates
 
 ### Backend (Python/FastAPI) 
-- **Server**: 192.168.2.122:8000 (currently being fixed)
+- **Server**: 192.168.2.122:8000
 - **Framework**: FastAPI with async PostgreSQL
 - **Database**: Government budget and infrastructure data
-- **Status**: Syntax errors resolved, database connection in progress
+- **Status**: Mock API responses (database integration pending)
 
 ### Reverse Proxy (Nginx)
 - **Ports**: 80/443
-- **SSL**: Let's Encrypt certificates
+- **SSL**: Lets Encrypt certificates
 - **Load Balancing**: API requests proxied to FastAPI backend
 
 ## Routes and Functionality
 
 ### / (Homepage)
-- **Templates**: , 
+- **Templates**: visualizations_home.html, mobile/visualizations_home.html
 - **Functionality**: Landing page with navigation to all data sections
 
 ### /budget (Budget Analysis)
-- **Templates**: , 
+- **Templates**: budget.html, mobile/budget.html
 - **Functionality**: AI-powered analysis of Government Appropriations Act (GAA) data
 - **Features**: Intelligent insights, duplicate detection, trend analysis
 
 ### /flood (Flood Control Projects)
-- **Templates**: , 
+- **Templates**: flood.html, mobile/flood.html
 - **Functionality**: Comprehensive tracking of DPWH flood control infrastructure
 - **Features**: Nationwide project mapping and analysis
 
 ### /dime (DIME Infrastructure)
-- **Templates**: , 
+- **Templates**: dime.html, mobile/dime.html
 - **Functionality**: Digital Information for Monitoring and Evaluation
 - **Features**: 12,870+ major infrastructure projects worth ₱740B+
 
 ### /nep (NEP Analysis)
-- **Templates**: , 
+- **Templates**: nep.html, mobile/nep.html
 - **Functionality**: National Expenditure Program analysis
 - **Features**: AI-powered insights, duplicate detection, budget tracking
 
 ### /map (Interactive Map)
-- **Templates**: , 
+- **Templates**: map.html, mobile/map.html
 - **Functionality**: Interactive geographical visualization
 - **Features**: Flood control projects and infrastructure mapping
 
 ### /about (About Page)
-- **Templates**: , 
+- **Templates**: about.html, mobile/about.html
 - **Functionality**: Project information and advocacy focus
 
 ### Correlation Analysis
-- **Budget-NEP**: 
-- **Budget-Flood**: 
-- **Flood-DIME**: 
+- **Budget-NEP**: /budget-nep-correlation
+- **Budget-Flood**: /budget-flood-correlation
+- **Flood-DIME**: /flood-dime-correlation
 - **Templates**: Individual correlation analysis pages
 - **Functionality**: Data science connections between datasets
 
 ## File Structure
 
 ### Templates
--  - Main homepage
--  - Base template for desktop pages
--  - Legacy base template
--  - Mobile-optimized versions of all templates
+- visualizations_home.html - Main homepage
+- base_visualizations.html - Base template for desktop pages
+- base.html - Legacy base template
+- mobile/ - Mobile-optimized versions of all templates
 
 ### Static Assets
--  - Stylesheets (altgovph-theme.css, mobile styles)
--  - JavaScript functionality
--  - Logos and assets
--  - JSON datasets for visualizations
+- static/css/ - Stylesheets (altgovph-theme.css, mobile styles)
+- static/js/ - JavaScript functionality
+- static/images/ - Logos and assets
+- static/data/ - JSON datasets for visualizations
 
 ### Source Code
--  - Actix-Web frontend application
--  - FastAPI backend (under development)
--  - Rust dependencies
--  - Python dependencies
+- src/main.rs - Actix-Web frontend application
+- visualization.py - FastAPI backend (mock responses)
+- Cargo.toml - Rust dependencies
+- requirements.txt - Python dependencies
 
 ## Development Status
 
@@ -107,7 +107,7 @@ This project contains the **BetterGovPH Data Visualizations** platform - a compr
 - Navigation fixes (removed /alt references)
 
 ### 🔄 In Progress
-- FastAPI backend service (syntax errors resolved)
+- FastAPI backend service (mock responses working)
 - PostgreSQL database integration
 - API endpoint testing
 - Production deployment verification
@@ -122,14 +122,14 @@ This project contains the **BetterGovPH Data Visualizations** platform - a compr
 ## Deployment
 
 ### Server: 10.27.79.7
-- **Frontend**:  (systemd)
-- **Backend**:  (systemd) 
+- **Frontend**: visualization.service (systemd)
+- **Backend**: visualization_api.service (systemd) 
 - **Proxy**: Nginx with SSL termination
 
 ### Environment
--  - Application configuration
--  - Python virtual environment
--  - Rust build artifacts
+- .env - Application configuration
+- venv/ - Python virtual environment (gitignored)
+- target/ - Rust build artifacts
 
 ## Notes
 
@@ -142,7 +142,7 @@ This project contains the **BetterGovPH Data Visualizations** platform - a compr
 ## Testing
 
 Access the application at:
-- Test: 
-- Production: 
+- Test: https://altgovph.site
+- Production: https://visualizations.bettergov.ph
 
 All 11 major pages and correlation analyses should load successfully.
