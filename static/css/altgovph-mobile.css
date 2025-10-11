@@ -95,10 +95,20 @@ body {
     min-height: 56px;
 }
 
-.altgovph-mobile-logo-link {
+.altgovph-mobile-logo-section {
     display: flex;
     align-items: center;
     gap: var(--altgovph-spacing-xs);
+}
+
+.altgovph-mobile-logo-link {
+    text-decoration: none;
+    color: var(--altgovph-primary);
+    font-weight: 600;
+    font-size: var(--altgovph-font-size-base);
+}
+
+.altgovph-mobile-site-name-link {
     text-decoration: none;
     color: var(--altgovph-primary);
     font-weight: 600;

@@ -93,10 +93,20 @@ body {
     min-height: 64px;
 }
 
-.altgovph-logo-link {
+.altgovph-logo-section {
     display: flex;
     align-items: center;
     gap: var(--altgovph-spacing-sm);
+}
+
+.altgovph-logo-link {
+    text-decoration: none;
+    color: var(--altgovph-primary);
+    font-weight: 600;
+    font-size: var(--altgovph-font-size-lg);
+}
+
+.altgovph-site-name-link {
     text-decoration: none;
     color: var(--altgovph-primary);
     font-weight: 600;
