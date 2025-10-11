@@ -1,0 +1,587 @@
+{% extends "base.html" %}
+
+{% block content %}
+<script>
+// Geo-location override for testers: always show default about page
+(async function() {
+    try {
+        const resp = await fetch('/api/auth/me-cookie', { credentials: 'include' });
+        if (resp.ok) {
+            const data = await resp.json();
+            if (data.user && data.user.tier === -1) {
+                // Set a flag to prevent any geo-detection logic from running
+                window.TESTER_GEO_OVERRIDE = true;
+            }
+        }
+    } catch (e) {
+        // Ignore errors
+    }
+})();
+</script>
+<style>
+/* About page specific styles */
+.about-section {
+    padding: 4rem 0;
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    min-height: 100vh;
+}
+
+.about-content {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: 4rem;
+    align-items: start;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.about-text h2 {
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin-bottom: 2rem;
+    background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.about-text h3 {
+    font-size: 1.8rem;
+    font-weight: 600;
+    margin: 2rem 0 1rem 0;
+    color: var(--primary-color);
+}
+
+.about-text p {
+    color: #666;
+    line-height: 1.7;
+    margin-bottom: 1.5rem;
+    font-size: 1.1rem;
+}
+
+.about-text ul {
+    margin: 1.5rem 0;
+    padding-left: 1.5rem;
+}
+
+.about-text li {
+    margin-bottom: 0.8rem;
+    line-height: 1.6;
+    color: #666;
+}
+
+.about-image {
+    text-align: center;
+    position: sticky;
+    top: 2rem;
+}
+
+.about-image img {
+    width: 300px;
+    height: 300px;
+    border-radius: 20px;
+    object-fit: cover;
+    box-shadow: 0 15px 35px rgba(0,0,0,0.1);
+    border: 4px solid white;
+    transition: all 0.3s ease;
+}
+
+.about-image:hover img {
+    transform: translateY(-5px);
+    box-shadow: 0 20px 40px rgba(0,0,0,0.15);
+}
+
+.image-caption {
+    margin-top: 1.5rem;
+    text-align: center;
+}
+
+.image-caption h4 {
+    font-size: 1.3rem;
+    font-weight: 600;
+    color: var(--primary-color);
+    margin-bottom: 0.5rem;
+}
+
+.image-caption p {
+    color: #666;
+    font-size: 1rem;
+    margin: 0;
+}
+
+.values-section {
+    padding: 4rem 0;
+    background: white;
+}
+
+.values-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 2rem;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.value-card {
+    background: white;
+    border-radius: 20px;
+    padding: 2.5rem;
+    text-align: center;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+    border: 1px solid rgba(255,255,255,0.2);
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.value-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, var(--primary-color), var(--secondary-color), #667eea, #764ba2);
+}
+
+.value-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 20px 40px rgba(0,0,0,0.15);
+}
+
+.value-icon {
+    width: 80px;
+    height: 80px;
+    background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 1.5rem;
+    transition: all 0.3s ease;
+}
+
+.value-card:hover .value-icon {
+    transform: scale(1.1);
+}
+
+.value-icon i {
+    font-size: 2rem;
+    color: white;
+}
+
+.value-card h3 {
+    font-size: 1.5rem;
+    font-weight: 600;
+    margin-bottom: 1rem;
+    color: #333;
+}
+
+.value-card p {
+    color: #666;
+    line-height: 1.6;
+    font-size: 1rem;
+}
+
+.team-section {
+    padding: 4rem 0;
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+}
+
+.team-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 2rem;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.team-card {
+    background: white;
+    border-radius: 20px;
+    padding: 2.5rem;
+    text-align: center;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+    border: 1px solid rgba(255,255,255,0.2);
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.team-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, var(--primary-color), var(--secondary-color), #667eea, #764ba2);
+}
+
+.team-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 20px 40px rgba(0,0,0,0.15);
+}
+
+.team-image {
+    width: 150px;
+    height: 150px;
+    border-radius: 50%;
+    object-fit: cover;
+    margin: 0 auto 1.5rem;
+    border: 4px solid var(--primary-color);
+    transition: all 0.3s ease;
+}
+
+.team-card:hover .team-image {
+    transform: scale(1.05);
+}
+
+.team-card h3 {
+    font-size: 1.5rem;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+    color: #333;
+}
+
+.team-card p {
+    color: var(--primary-color);
+    font-weight: 600;
+    margin-bottom: 1rem;
+}
+
+.team-card .bio {
+    color: #666;
+    line-height: 1.6;
+    font-size: 1rem;
+}
+
+@media (max-width: 768px) {
+    .about-content {
+        grid-template-columns: 1fr;
+        gap: 2rem;
+        padding: 0 1rem;
+    }
+    
+    .about-text h2 {
+        font-size: 2rem;
+    }
+    
+    .about-image {
+        position: static;
+    }
+    
+    .about-image img {
+        width: 250px;
+        height: 250px;
+    }
+    
+    .values-grid,
+    .team-grid {
+        grid-template-columns: 1fr;
+        padding: 0 1rem;
+    }
+    
+    .value-card,
+    .team-card {
+        padding: 2rem 1.5rem;
+    }
+}
+</style>
+
+<!-- Page Header -->
+<section class="page-header">
+    <div class="container">
+        <div class="page-header-content">
+            <h1 class="page-title">About Us</h1>
+            <p class="page-subtitle">Learn more about our mission and team</p>
+        </div>
+    </div>
+</section>
+
+<!-- About Section -->
+<section class="about-section">
+    <div class="container">
+        <div class="about-content">
+            <div class="about-text">
+                <h2>Our Story</h2>
+                <p>KenchLightyear is now an AI-first company, leveraging advanced artificial intelligence to drive business transformation. While AI is our primary focus, we continue to support Kubernetes environments—including tools like k8sgpt—and implement modern GitOps practices for reliable, automated infrastructure and application management. Our experience across industries ensures we deliver technology that helps every company stay competitive and future-ready.</p>
+                
+                <p>The biggest challenge for growing companies is cost, and developing companies don't yet have the luxury to spend large amounts upfront. We are here to provide you with the most affordable services that are at par, if not better, with what is being used by Enterprise companies.</p>
+                
+                <h3>Our Mission</h3>
+                <p>To democratize AI-driven technology solutions, making them accessible and affordable for businesses of all sizes. We believe every company deserves world-class AI and cloud-native infrastructure, with the reliability and automation of GitOps, without the enterprise price tag.</p>
+                <p>We specialize in helping US businesses outsource their IT operations—covering everything from cloud migration and security to ongoing support—so you can focus on growth while we handle your technology needs.</p>
+                <p>While we are AI-first, we are equally capable of delivering traditional IT solutions and support for clients who need it.</p>
+                
+                <h3>Our Approach</h3>
+                <p>We combine deep AI and cloud expertise with a practical understanding of business needs. Our approach focuses on:</p>
+                <ul>
+                    <li><strong>AI-First Solutions:</strong> Harnessing artificial intelligence for smarter, faster outcomes</li>
+                    <li><strong>Kubernetes & GitOps:</strong> Supporting modern cloud-native and automated operations</li>
+                    <li><strong>Open Source Excellence:</strong> Leveraging proven open source solutions</li>
+                    <li><strong>Security First:</strong> Building security into every solution</li>
+                    <li><strong>Knowledge Transfer:</strong> Empowering your team for sustainable success</li>
+                </ul>
+            </div>
+            
+            <div class="about-image">
+                <img src="/static/images/jubernetes.png" alt="Jubernetes Lightyear - Founder">
+                <div class="image-caption">
+                    <h4>Jubernetes Lightyear</h4>
+                    <p>Founder & Lead Technology Consultant</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Values Section -->
+<section class="values-section">
+    <div class="container">
+        <div class="section-header">
+            <span class="section-subtitle">Our Values</span>
+            <h2 class="section-title">What Drives Us</h2>
+        </div>
+        
+        <div class="values-grid">
+            <div class="value-card">
+                <div class="value-icon">
+                    <i class="fas fa-rocket"></i>
+                </div>
+                <h3>Innovation</h3>
+                <p>We stay at the forefront of technology trends and continuously explore new solutions to solve complex business challenges.</p>
+            </div>
+            
+            <div class="value-card">
+                <div class="value-icon">
+                    <i class="fas fa-handshake"></i>
+                </div>
+                <h3>Partnership</h3>
+                <p>We view our relationship with clients as a true partnership, working together to achieve shared goals and long-term success.</p>
+            </div>
+            
+            <div class="value-card">
+                <div class="value-icon">
+                    <i class="fas fa-shield-alt"></i>
+                </div>
+                <h3>Reliability</h3>
+                <p>We build robust, scalable solutions that you can depend on, with comprehensive monitoring and support to ensure uptime.</p>
+            </div>
+            
+            <div class="value-card">
+                <div class="value-icon">
+                    <i class="fas fa-graduation-cap"></i>
+                </div>
+                <h3>Education</h3>
+                <p>We believe in empowering your team through knowledge transfer, training, and ongoing support to ensure sustainable success.</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Team Section -->
+<section class="team-section">
+    <div class="container">
+        <div class="section-header">
+            <span class="section-subtitle">Meet Our Team</span>
+            <h2 class="section-title">The Experts Behind KenchLightyear</h2>
+        </div>
+        
+        <div class="team-grid">
+            <div class="team-card">
+                <img src="/static/images/kirsten.png" alt="Kirsten Lightyear" class="team-image">
+                <div class="team-info">
+                    <h3>Kirsten Lightyear</h3>
+                    <div class="position">President & CEO</div>
+                    <p>Kirsten leads KenchLightyear's strategic vision and business operations, driving our mission to democratize AI-driven technology solutions. With extensive experience in business leadership and technology strategy, she ensures we deliver exceptional value to our clients while maintaining our commitment to innovation and excellence.</p>
+                    <div class="team-expertise">
+                        <span class="expertise-tag">Business Strategy</span>
+                        <span class="expertise-tag">Leadership</span>
+                        <span class="expertise-tag">Technology Vision</span>
+                        <span class="expertise-tag">Client Relations</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="team-card">
+                <img src="/static/images/jubernetes.png" alt="Jubernetes Lightyear" class="team-image">
+                <div class="team-info">
+                    <h3>Jubernetes Lightyear</h3>
+                    <div class="position">Founder & Lead Technology Consultant</div>
+                    <p>With over 15 years of experience in enterprise technology, Jubernetes specializes in cloud migration, DevOps practices, and open source solutions. He has helped numerous organizations transform their technology infrastructure while maintaining cost efficiency.</p>
+                    <div class="team-expertise">
+                        <span class="expertise-tag">Cloud Migration</span>
+                        <span class="expertise-tag">DevOps</span>
+                        <span class="expertise-tag">Open Source</span>
+                        <span class="expertise-tag">Kubernetes</span>
+                    </div>
+                </div>
+            </div>
+            
+
+        </div>
+    </div>
+</section>
+
+<!-- Experience Section -->
+<section class="experience-section">
+    <div class="container">
+        <div class="section-header">
+            <span class="section-subtitle">Our Experience</span>
+            <h2 class="section-title">Industries We Serve</h2>
+        </div>
+        
+        <div class="experience-grid">
+            <div class="experience-card">
+                <div class="experience-icon">
+                    <i class="fas fa-university"></i>
+                </div>
+                <h3>Financial Services</h3>
+                <p>Secure, compliant technology solutions for banks, credit unions, and financial institutions.</p>
+            </div>
+            
+            <div class="experience-card">
+                <div class="experience-icon">
+                    <i class="fas fa-hospital"></i>
+                </div>
+                <h3>Healthcare</h3>
+                <p>HIPAA-compliant infrastructure and applications for healthcare providers and organizations.</p>
+            </div>
+            
+            <div class="experience-card">
+                <div class="experience-icon">
+                    <i class="fas fa-shopping-cart"></i>
+                </div>
+                <h3>E-commerce</h3>
+                <p>Scalable e-commerce platforms and payment processing solutions for online businesses.</p>
+            </div>
+            
+            <div class="experience-card">
+                <div class="experience-icon">
+                    <i class="fas fa-industry"></i>
+                </div>
+                <h3>Manufacturing</h3>
+                <p>Industrial automation and supply chain management systems for manufacturing companies.</p>
+            </div>
+            
+            <div class="experience-card">
+                <div class="experience-icon">
+                    <i class="fas fa-graduation-cap"></i>
+                </div>
+                <h3>Education</h3>
+                <p>Learning management systems and educational technology solutions for schools and universities.</p>
+            </div>
+            
+            <div class="experience-card">
+                <div class="experience-icon">
+                    <i class="fas fa-building"></i>
+                </div>
+                <h3>Real Estate</h3>
+                <p>Property management systems and customer relationship platforms for real estate companies.</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Technology Stack -->
+<section class="tech-stack-section">
+    <div class="container">
+        <div class="section-header">
+            <span class="section-subtitle">Our Technology Stack</span>
+            <h2 class="section-title">Tools & Technologies We Use</h2>
+        </div>
+        
+        <div class="tech-stack-grid">
+            <div class="tech-category">
+                <h3>☁️ Cloud Platforms</h3>
+                <div class="tech-items">
+                    <span class="tech-item">AWS</span>
+                    <span class="tech-item">Azure</span>
+                    <span class="tech-item">Google Cloud Platform</span>
+                    <span class="tech-item">Alibaba Cloud</span>
+                    <span class="tech-item">Oracle Cloud</span>
+                    <span class="tech-item">Cloudflare Workers</span>
+                </div>
+            </div>
+            
+            <div class="tech-category">
+                <h3>📦 Containers & Orchestration</h3>
+                <div class="tech-items">
+                    <span class="tech-item">Docker</span>
+                    <span class="tech-item">Kubernetes</span>
+                    <span class="tech-item">K3s</span>
+                    <span class="tech-item">Jenkins X</span>
+                    <span class="tech-item">Argo CD</span>
+                    <span class="tech-item">Flux</span>
+                    <span class="tech-item">Istio</span>
+                    <span class="tech-item">Linkerd</span>
+                </div>
+            </div>
+            
+            <div class="tech-category">
+                <h3>🛠️ Infrastructure as Code</h3>
+                <div class="tech-items">
+                    <span class="tech-item">Terraform</span>
+                    <span class="tech-item">Pulumi</span>
+                    <span class="tech-item">Ansible</span>
+                    <span class="tech-item">Puppet</span>
+                    <span class="tech-item">Crossplane</span>
+                </div>
+            </div>
+            
+            <div class="tech-category">
+                <h3>📊 Monitoring & Observability</h3>
+                <div class="tech-items">
+                    <span class="tech-item">Prometheus</span>
+                    <span class="tech-item">Grafana</span>
+                    <span class="tech-item">OpenTelemetry</span>
+                    <span class="tech-item">ELK Stack</span>
+                    <span class="tech-item">Loki</span>
+                    <span class="tech-item">Jaeger</span>
+                    <span class="tech-item">Datadog</span>
+                </div>
+            </div>
+            
+            <div class="tech-category">
+                <h3>🗄️ Databases</h3>
+                <div class="tech-items">
+                    <span class="tech-item">PostgreSQL</span>
+                    <span class="tech-item">MySQL</span>
+                    <span class="tech-item">MongoDB</span>
+                    <span class="tech-item">Redis</span>
+                    <span class="tech-item">TimescaleDB</span>
+                    <span class="tech-item">ClickHouse</span>
+                </div>
+            </div>
+            
+            <div class="tech-category">
+                <h3>🧠 Programming Languages</h3>
+                <div class="tech-items">
+                    <span class="tech-item">Python</span>
+                    <span class="tech-item">JavaScript</span>
+                    <span class="tech-item">Node.js</span>
+                    <span class="tech-item">Go</span>
+                    <span class="tech-item">Java</span>
+                    <span class="tech-item">TypeScript</span>
+                    <span class="tech-item">Rust</span>
+                    <span class="tech-item">Deno</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Call to Action -->
+<section class="cta-section">
+    <div class="container">
+        <div class="cta-content">
+            <h2>Ready to Work With Us?</h2>
+            <p>Let's discuss how we can help transform your technology infrastructure and accelerate your business growth.</p>
+            <div class="cta-buttons">
+                <!-- Removed broken internal links: Get In Touch, View Our Services -->
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %} 

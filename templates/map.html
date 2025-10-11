@@ -1,0 +1,870 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interactive Map - DIME Project Status Distribution - BetterGovPH</title>
+    <meta name="description" content="Interactive map showing flood control projects by DIME status (Completed, Ongoing, Incomplete, Suspended, Not Yet Started) across the Philippines. Circle size represents project cost.">
+
+    <!-- Google Fonts - Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <!-- D3.js for network visualizations -->
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+
+    <!-- Leaflet for maps -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+    <!-- BetterGovPH Metadata -->
+    <meta name="description" content="Interactive Map - Government Data Analysis Platform">
+    <meta name="keywords" content="flood control, infrastructure, DPWH, government projects, Philippines, interactive map">
+    <meta name="author" content="BetterGovPH">
+
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="{{ og_url | default(value='https://visualizations.bettergov.ph/map') }}">
+    <meta property="og:title" content="Interactive Map - BetterGovPH">
+    <meta property="og:description" content="Interactive map of flood control projects and infrastructure across the Philippines">
+    <meta property="og:image" content="/static/images/gov_logo.png">
+
+    <!-- Twitter -->
+    <meta property="twitter:card" content="summary_large_image">
+    <meta property="twitter:url" content="https://visualizations.bettergov.ph/map">
+    <meta property="twitter:title" content="Interactive Map - BetterGovPH">
+    <meta property="twitter:description" content="Interactive map of flood control projects and infrastructure across the Philippines">
+    <meta property="twitter:image" content="/static/images/gov_logo.png">
+</head>
+<body>
+<!-- Navigation - Blends with hero, no borders or background -->
+<nav class="altgovph-nav py-4 px-6 bg-white border-b border-gray-200">
+    <div class="max-w-7xl mx-auto flex items-center justify-between">
+        <div class="flex items-center">
+            <a href="/alt" class="flex items-center">
+                <img src="https://raw.githubusercontent.com/bettergovph/logo/main/png/BetterGov_Horizontal-Black.png"
+                     alt="BetterGov.ph"
+                     class="h-12 mr-3">
+                <span class="text-xl font-bold text-black">Data Visualizations</span>
+            </a>
+        </div>
+        <div class="hidden md:flex space-x-6">
+            <a href="/alt" class="text-black hover:text-gray-600 font-medium transition">Home</a>
+            <a href="/nep" class="text-black hover:text-gray-600 font-medium transition">NEP</a>
+            <a href="/budget" class="text-black hover:text-gray-600 font-medium transition">Budget</a>
+            <a href="/flood" class="text-black hover:text-gray-600 font-medium transition">Flood Control</a>
+            <a href="/dime" class="text-black hover:text-gray-600 font-medium transition">DIME</a>
+            <a href="/map" class="text-black hover:text-gray-600 font-medium transition border-b-2 border-black">Map</a>
+            <a href="/budget-nep-correlation" class="text-black hover:text-gray-600 font-medium transition">NEP-Budget</a>
+            <a href="/budget-flood-correlation" class="text-black hover:text-gray-600 font-medium transition">Budget-Flood</a>
+            <a href="/flood-dime-correlation" class="text-black hover:text-gray-600 font-medium transition">Flood-DIME</a>
+        </div>
+        <div class="md:hidden">
+            <button class="text-black focus:outline-none" onclick="toggleMobileMenu()">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+                </svg>
+            </button>
+        </div>
+    </div>
+    <!-- Mobile menu (hidden by default) -->
+    <div id="mobileMenu" class="hidden mt-4 px-4 space-y-2">
+        <a href="/alt" class="block text-black hover:text-gray-600 font-medium py-2">Home</a>
+        <a href="/nep" class="block text-black hover:text-gray-600 font-medium py-2">NEP</a>
+        <a href="/budget" class="block text-black hover:text-gray-600 font-medium py-2">Budget</a>
+        <a href="/flood" class="block text-black hover:text-gray-600 font-medium py-2">Flood Control</a>
+        <a href="/dime" class="block text-black hover:text-gray-600 font-medium py-2">DIME</a>
+        <a href="/map" class="block text-black hover:text-gray-600 font-medium py-2 border-b-2 border-black">Map</a>
+        <a href="/budget-nep-correlation" class="block text-black hover:text-gray-600 font-medium py-2">NEP-Budget</a>
+        <a href="/budget-flood-correlation" class="block text-black hover:text-gray-600 font-medium py-2">Budget-Flood</a>
+        <a href="/flood-dime-correlation" class="block text-black hover:text-gray-600 font-medium py-2">Flood-DIME</a>
+    </div>
+</nav>
+
+<!-- Map Section -->
+<section class="bg-gray-50 py-16 px-6">
+    <div class="max-w-7xl mx-auto">
+        <div class="bg-white rounded-lg shadow-md p-6">
+            <div class="flex justify-between items-center mb-4">
+                <div>
+                    <h2 class="text-2xl font-semibold text-black">🗺️ Interactive Map</h2>
+                    <p class="text-sm text-gray-600 mt-1">📊 Circles colored by DIME project status • Size represents cost</p>
+                </div>
+                <div class="flex gap-3">
+                    <button id="refresh-map-data" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition">
+                        🔄 Refresh Map
+                    </button>
+                </div>
+            </div>
+
+            <!-- Map Instructions -->
+            <div class="bg-blue-50 p-4 rounded-lg mb-4 border-l-4 border-blue-500">
+                <div class="text-sm text-blue-800 font-medium">
+                    💡 <strong>Tip:</strong> Click on a region directly on the map to explore projects in that specific areas.
+                </div>
+            </div>
+
+            <!-- DIME Status Legend -->
+            <div class="bg-gray-50 p-4 rounded-lg mb-4 border border-gray-200">
+                <div class="text-sm font-medium text-gray-700 mb-2">📊 Flood data integrated with DIME Project Status Legend</div>
+                <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-2 text-xs">
+                    <div class="flex items-center gap-2">
+                        <div class="w-3 h-3 rounded-full bg-[#28a745]"></div>
+                        <span>Completed</span>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <div class="w-3 h-3 rounded-full bg-[#ffc107]"></div>
+                        <span>Ongoing</span>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <div class="w-3 h-3 rounded-full bg-[#dc3545]"></div>
+                        <span>Incomplete</span>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <div class="w-3 h-3 rounded-full bg-[#6c757d]"></div>
+                        <span>Suspended</span>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <div class="w-3 h-3 rounded-full bg-[#17a2b8]"></div>
+                        <span>Not Yet Started</span>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <div class="w-3 h-3 rounded-full bg-black"></div>
+                        <span>No DIME Match</span>
+                    </div>
+                </div>
+                <div class="text-xs text-gray-500 mt-2">
+                    Circle size represents project cost (larger = higher cost)<br>
+                    <em>Black circles: Projects without DIME status integration</em>
+                </div>
+            </div>
+
+            <div id="map" class="w-full h-96 rounded-lg border border-gray-300 mb-6" style="height: 600px;"></div>
+
+            <!-- Show All Button (Advanced Feature) -->
+            <details class="border border-gray-200 rounded-lg p-4 bg-gray-50">
+                <summary class="cursor-pointer text-sm text-gray-600 font-medium">Advanced: Load all projects</summary>
+                <div class="mt-3 pt-3 border-t border-gray-200">
+                    <p class="text-sm text-red-600 mb-3">
+                        ⚠️ Warning: Loading all 9,855 projects may overwhelm your browser and cause it to freeze. Only use this on powerful devices.
+                    </p>
+                    <button id="show-all-map" class="bg-gray-600 text-white px-4 py-2 rounded-lg text-sm hover:bg-gray-700 transition">
+                        Load All Projects
+                    </button>
+                </div>
+            </details>
+        </div>
+    </div>
+</section>
+
+<script>
+function toggleMobileMenu() {
+    const menu = document.getElementById('mobileMenu');
+    menu.classList.toggle('hidden');
+}
+</script>
+
+<script>
+// Copy of flood page map implementation - simplified for standalone map page
+
+// Global map variables
+let mapInstance = null;
+let mapMarkers = [];
+let loadedProjects = [];
+let globalOffset = 0;
+let isLoadingMore = false;
+let progressiveInterval = null;
+let progressiveLoadingStarted = false;
+let progressiveLoadingCancelled = false;
+let regionProgressiveLoadingCancelled = false;
+let showAllMode = false;
+let initialLoadDone = false;
+let isLoading = false;
+let regionMapping = null;
+let regionGeoJSONLayer = null;
+let regionData = null;
+let currentZoomLevel = 6;
+
+// Map status display
+function updateMapStatus(message) {
+    console.log(`🗺️ ${message}`);
+}
+
+// Update circle sizes when zoom changes
+function updateCircleSizes() {
+    mapMarkers.forEach((marker, index) => {
+        if (marker && loadedProjects[index]) {
+            const project = loadedProjects[index];
+            const cost = project.ContractCost;
+            const newRadius = calculateCircleRadius(cost, currentZoomLevel);
+
+            // Update the circle radius
+            marker.setRadius(newRadius);
+        }
+    });
+    console.log(`🔍 Updated circle sizes for zoom level ${currentZoomLevel}`);
+}
+
+// Initialize the map
+function initializeMap() {
+    const mapContainer = document.getElementById('map');
+    if (mapContainer) {
+        // Ensure container is visible and has dimensions
+        if (mapContainer.offsetWidth === 0 || mapContainer.offsetHeight === 0) {
+            console.warn('Map container has no dimensions, retrying in 100ms...');
+            setTimeout(initializeMap, 100);
+            return;
+        }
+
+        // Initialize Leaflet map centered on Philippines with optimal view for wider container
+        mapInstance = L.map('map', {
+            preferCanvas: false,
+            renderer: L.canvas()
+        }).setView([12.2, 121.8], 6.2);
+
+        // Add OpenStreetMap tiles with proper configuration for better loading
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '© OpenStreetMap contributors',
+            maxZoom: 19,
+            minZoom: 3,
+            subdomains: ['a', 'b', 'c'],
+            tileSize: 256,
+            zoomOffset: 0,
+            crossOrigin: true,
+            bounds: [[4.5, 116], [21, 127]], // Philippines bounds
+            maxBounds: [[4.5, 116], [21, 127]] // Restrict panning to Philippines area
+        }).addTo(mapInstance);
+
+        // Set map bounds to fit Philippines properly in larger container
+        mapInstance.fitBounds([[4.5, 116], [21, 127]], {
+            padding: [30, 30],
+            maxZoom: 6.5
+        });
+
+        // Add error handling for tile loading
+        mapInstance.on('tileerror', function(e) {
+            console.warn('Tile loading error:', e);
+        });
+
+        // Add zoom event handler to update circle sizes
+        mapInstance.on('zoomend', function() {
+            currentZoomLevel = mapInstance.getZoom();
+            updateCircleSizes();
+        });
+
+        // Show initial state
+        updateMapStatus('Map initialized. Loading initial data...');
+
+        // Force map to resize and invalidate size
+        setTimeout(() => {
+            if (mapInstance) {
+                mapInstance.invalidateSize();
+                console.log('✅ Map invalidated and resized');
+            }
+        }, 100);
+
+        // Add region click functionality with accurate boundaries
+        addRegionClickFunctionality();
+
+        // Load initial map data (10 projects with progressive loading)
+        loadInitialMapData();
+
+        // Set up Show All button event listener
+        const showAllMap = document.getElementById('show-all-map');
+        if (showAllMap) {
+            showAllMap.addEventListener('click', window.loadAllProjects);
+            console.log('✅ Show All button event listener attached');
+        } else {
+            console.error('❌ Show All button not found');
+        }
+    }
+}
+
+// Add region click functionality with accurate boundaries (copied from flood.html)
+async function addRegionClickFunctionality() {
+    if (!mapInstance) return;
+
+    try {
+        // Load region mapping data
+        const mappingResponse = await fetch('/static/data/region-mapping.json');
+        if (mappingResponse.ok) {
+            const mappingData = await mappingResponse.json();
+            regionMapping = mappingData.regionMapping;
+            console.log('📍 Region mapping loaded:', regionMapping);
+        }
+
+        // Load accurate GeoJSON boundaries
+        const geoJsonResponse = await fetch('/static/data/philippines-regions.json');
+        if (geoJsonResponse.ok) {
+            const geoJsonData = await geoJsonResponse.json();
+
+            // Add GeoJSON layer with accurate boundaries
+            regionGeoJSONLayer = L.geoJSON(geoJsonData, {
+                style: {
+                    color: '#0038A8',
+                    weight: 2,
+                    opacity: 0.8,
+                    fillColor: '#0038A8',
+                    fillOpacity: 0.1
+                },
+                onEachFeature: function(feature, layer) {
+                    const regionName = feature.properties.name;
+                    const meilisearchRegion = regionMapping[regionName] || regionName;
+
+                    // Bind tooltip
+                    layer.bindTooltip(`Click ${regionName}`, {
+                        permanent: false,
+                        direction: 'center',
+                        className: 'region-tooltip'
+                    });
+
+                    // Add click handler
+                    layer.on('click', function(e) {
+                        console.log(`🗺️ Region clicked: ${regionName} (${meilisearchRegion})`);
+                        loadRegionProjects(meilisearchRegion);
+                    });
+
+                    // Add hover effects
+                    layer.on('mouseover', function(e) {
+                        this.setStyle({
+                            fillOpacity: 0.3,
+                            weight: 3
+                        });
+                    });
+
+                    layer.on('mouseout', function(e) {
+                        this.setStyle({
+                            fillOpacity: 0.1,
+                            weight: 2
+                        });
+                    });
+                }
+            }).addTo(mapInstance);
+
+            console.log('✅ Accurate region boundaries loaded');
+        } else {
+            console.error('Failed to load GeoJSON data');
+        }
+    } catch (error) {
+        console.error('Error loading region data:', error);
+    }
+}
+
+// Load region projects when a region is clicked
+async function loadRegionProjects(regionName) {
+    console.log(`🗺️ Loading projects for region: ${regionName}`);
+
+    // Cancel global progressive loading when region is clicked
+    progressiveLoadingCancelled = true;
+
+    // Update status
+    updateMapStatus(`Loading projects for ${regionName}...`);
+
+    // Clear existing markers
+    mapMarkers.forEach(marker => mapInstance.removeLayer(marker));
+    mapMarkers = [];
+
+    // Stop any existing progressive loading
+    if (progressiveInterval) {
+        clearInterval(progressiveInterval);
+        progressiveInterval = null;
+    }
+
+    // Reset progressive loading state
+    progressiveLoadingStarted = false;
+    progressiveLoadingCancelled = false;
+    regionProgressiveLoadingCancelled = false;
+    globalOffset = 0;
+    isLoadingMore = false;
+    loadedProjects = [];
+
+    try {
+        // Load initial batch of 100 projects for the region
+        const response = await fetch(`/api/flood/projects?region=${encodeURIComponent(regionName)}&limit=100&offset=0`);
+        if (response.ok) {
+            const data = await response.json();
+            const projects = data.projects || [];
+
+            console.log(`✅ Loaded initial ${projects.length} projects for ${regionName}`);
+            loadedProjects = projects;
+
+            // Add markers for initial projects
+            processProjects(projects);
+
+            // Load region totals for progressive loading
+            if (!regionData) {
+                try {
+                    const mappingResponse = await fetch('/static/data/region-mapping.json');
+                    if (mappingResponse.ok) {
+                        regionData = await mappingResponse.json();
+                        console.log('🗺️ Region data loaded:', regionData);
+                    }
+                } catch (error) {
+                    console.error('Failed to load region mapping:', error);
+                }
+            }
+
+            // Start progressive loading if we got a full batch and there are more
+            const regionTotalHits = regionData?.regionTotals?.[regionName] || data.totalHits || 1000;
+            const regionTotalPages = Math.ceil(regionTotalHits / 100);
+
+            console.log(`🗺️ Region ${regionName}: ${projects.length} loaded, ${regionTotalHits} total, ${regionTotalPages} pages`);
+
+            if (projects.length === 100 && regionTotalPages > 1 && regionTotalHits > 100 && !progressiveLoadingStarted) {
+                console.log(`🗺️ Starting progressive loading for ${regionName}`);
+                startRegionProgressiveLoading(regionName, regionTotalPages, regionTotalHits);
+            }
+
+        } else {
+            throw new Error(`API returned ${response.status}`);
+        }
+    } catch (error) {
+        console.error('❌ Failed to load region projects:', error);
+        updateMapStatus('Error loading region projects');
+    }
+}
+
+// Start region-specific progressive loading
+function startRegionProgressiveLoading(regionName, totalPages, totalHits) {
+    if (progressiveLoadingStarted) return;
+
+    progressiveLoadingStarted = true;
+    let regionPage = 2; // Start from page 2 (since we already have page 1)
+
+    const loadMoreRegion = async () => {
+        console.log(`🗺️ loadMoreRegion called for ${regionName}: page ${regionPage}/${totalPages}, isLoadingMore: ${isLoadingMore}, regionProgressiveLoadingCancelled: ${regionProgressiveLoadingCancelled}`);
+
+        if (isLoadingMore || regionProgressiveLoadingCancelled) {
+            console.log(`🗺️ loadMoreRegion early return: isLoadingMore=${isLoadingMore}, regionProgressiveLoadingCancelled=${regionProgressiveLoadingCancelled}`);
+            return;
+        }
+
+        console.log(`🗺️ Starting loadMoreRegion with regionPage=${regionPage}`);
+        setIsLoadingMore(true);
+
+        try {
+            const response = await fetch(`/api/flood/projects?region=${encodeURIComponent(regionName)}&limit=100&offset=${(regionPage - 1) * 100}`);
+            const data = await response.json();
+            const newProjects = data.projects || [];
+
+            console.log(`🗺️ Loading page ${regionPage}/${totalPages} for ${regionName}: ${newProjects.length} projects, total loaded: ${loadedProjects.length}/${totalHits}`);
+
+            // Use JSON totals as source of truth, not API response
+            if (regionPage >= totalPages || loadedProjects.length >= totalHits) {
+                // Reached region limits, stopping progressive loading
+                console.log(`🗺️ Stopping progressive loading for ${regionName}: page ${regionPage}/${totalPages}, loaded ${loadedProjects.length}/${totalHits}`);
+                updateMapStatus(`${loadedProjects.length} projects loaded for ${regionName} (complete)`);
+            } else if (regionPage === totalPages) {
+                // Special handling for last page - might have fewer than 100 items
+                loadedProjects = [...loadedProjects, ...newProjects];
+                await processProjects(newProjects);
+                console.log(`🗺️ Last page loaded for ${regionName}: ${loadedProjects.length} total`);
+                updateMapStatus(`${loadedProjects.length} projects loaded for ${regionName} (complete)`);
+            } else {
+                loadedProjects = [...loadedProjects, ...newProjects];
+                await processProjects(newProjects);
+                regionPage += 1; // Move to next page sequentially
+
+                console.log(`🗺️ Continuing progressive loading for ${regionName}: next page ${regionPage}`);
+                // Schedule next load (with minimal delay)
+                console.log(`🗺️ Scheduling next region loadMoreRegion call...`);
+                setIsLoadingMore(false); // Reset flag before recursive call
+                setTimeout(() => {
+                    if (!regionProgressiveLoadingCancelled) {
+                        loadMoreRegion();
+                    }
+                }, 50); // Minimal delay to prevent interference
+                return; // Exit early to avoid finally block
+            }
+        } catch (error) {
+            console.error('❌ Error loading more region projects:', error);
+        } finally {
+            setIsLoadingMore(false);
+        }
+    };
+
+    // Start the first progressive load
+    setTimeout(() => {
+        if (!regionProgressiveLoadingCancelled) {
+            loadMoreRegion();
+        }
+    }, 1000); // 1 second delay before starting progressive loading
+}
+
+// Helper function to set loading state
+function setIsLoadingMore(loading) {
+    isLoadingMore = loading;
+}
+
+// Load initial map data (copied exactly from working flood.html)
+async function loadInitialMapData() {
+    if (initialLoadDone || isLoading) return;
+
+    isLoading = true;
+    initialLoadDone = true;
+
+    try {
+        console.log('🔍 Loading initial map data...');
+        const response = await fetch('/api/flood/projects?limit=10&offset=0');
+        if (response.ok) {
+            const data = await response.json();
+            const projects = data.projects || [];
+
+            console.log(`✅ Loaded initial ${projects.length} projects`);
+            loadedProjects = projects;
+
+            // Add markers for initial projects
+            await processProjects(projects);
+
+            updateMapStatus(`Map initialized with ${projects.length} projects. Loading more automatically...`);
+
+            // Start progressive loading after initial load (instant)
+            startProgressiveLoading();
+
+        } else {
+            throw new Error(`API returned ${response.status}`);
+        }
+    } catch (error) {
+        console.error('❌ Failed to load initial map data:', error);
+        updateMapStatus('Loading initial map data...');
+    } finally {
+        isLoading = false;
+    }
+}
+
+// Calculate circle radius based on project cost with zoom scaling
+function calculateCircleRadius(cost, zoomLevel = 6) {
+    if (!cost || isNaN(parseFloat(cost))) {
+        return 2000; // Default radius for projects without cost data (increased for visibility)
+    }
+
+    const numericCost = parseFloat(cost);
+
+    // Base radius calculation (meters at zoom level 6) - Increased for better visibility
+    const minRadius = 500;
+    const maxRadius = 10000;
+    const minCost = 10000; // ₱10,000 minimum for scaling
+    const maxCost = 1000000000; // ₱1 billion maximum for scaling
+
+    // Clamp cost to reasonable bounds
+    const clampedCost = Math.max(minCost, Math.min(maxCost, numericCost));
+
+    // Logarithmic scaling: log(cost) mapped to radius range
+    const logMin = Math.log(minCost);
+    const logMax = Math.log(maxCost);
+    const logCost = Math.log(clampedCost);
+
+    const baseRadius = minRadius + ((logCost - logMin) / (logMax - logMin)) * (maxRadius - minRadius);
+
+    // Scale radius based on zoom level to maintain visibility
+    // At zoom 6: base radius, higher zoom = smaller circles, lower zoom = much larger circles when zoomed out
+    const zoomFactor = Math.pow(0.6, zoomLevel - 6); // More aggressive exponential scaling for bigger circles
+
+    return Math.round(baseRadius * zoomFactor);
+}
+
+// Get project status from DIME data by MeiliSearch ID
+async function getProjectStatusFromDIME(floodProject) {
+    try {
+        // Use the GlobalID from MeiliSearch to find DIME status
+        const meiliId = floodProject.GlobalID;
+        if (!meiliId) {
+            console.warn('No GlobalID found for project:', floodProject.ProjectDescription);
+            return getWorkTypeColor(floodProject.TypeofWork);
+        }
+
+        const response = await fetch(`/api/dime/projects/${meiliId}/status`);
+        if (!response.ok) {
+            if (response.status === 404) {
+                // No DIME match found, use fallback
+                return getWorkTypeColor(floodProject.TypeofWork);
+            }
+            throw new Error(`DIME API error: ${response.status}`);
+        }
+
+        const dimeData = await response.json();
+
+        if (dimeData.status) {
+            return getStatusColor(dimeData.status);
+        } else {
+            // No status in DIME, use fallback
+            return getWorkTypeColor(floodProject.TypeofWork);
+        }
+
+    } catch (error) {
+        console.warn('Error fetching DIME status for project:', floodProject.ProjectDescription, error);
+        // Fallback to type of work
+        return getWorkTypeColor(floodProject.TypeofWork);
+    }
+}
+
+// Get color based on DIME project status
+function getStatusColor(status) {
+    const statusColors = {
+        'Completed': '#28a745',    // Green
+        'Ongoing': '#ffc107',      // Yellow/Amber (matches database)
+        'Incomplete': '#dc3545',   // Red (matches database)
+        'Not Yet Started': '#17a2b8', // Teal/Blue (matches database)
+        'Suspended': '#6c757d'     // Gray
+    };
+
+    return statusColors[status] || '#000000'; // Black for unknown status
+}
+
+// Fallback: Get color based on project type of work
+function getWorkTypeColor(typeofWork) {
+    // Use black for all fallback cases (no DIME status available)
+    return '#000000'; // Black
+}
+
+// Process projects and add to map
+async function processProjects(projects) {
+    for (const project of projects) {
+        if (project.Latitude && project.Longitude) {
+            const lat = parseFloat(project.Latitude);
+            const lng = parseFloat(project.Longitude);
+
+            if (!isNaN(lat) && !isNaN(lng)) {
+                // Calculate circle properties based on cost, color based on DIME status
+                const cost = project.ContractCost;
+                const radius = calculateCircleRadius(cost, currentZoomLevel);
+                const color = await getProjectStatusFromDIME(project);
+
+                // Create circle marker instead of pin marker
+                const circle = L.circle([lat, lng], {
+                    color: color,
+                    fillColor: color,
+                    fillOpacity: 0.6,
+                    weight: 2,
+                    radius: radius
+                });
+
+                // Create popup content
+                const costDisplay = cost ? `₱${parseFloat(cost).toLocaleString()}` : 'N/A';
+                const radiusKm = (radius / 1000).toFixed(1);
+                const statusBadge = project.TypeofWork ?
+                    `<span style="display: inline-block; padding: 2px 6px; border-radius: 3px; font-size: 0.8em; font-weight: 600; background: ${color}20; color: ${color}; border: 1px solid ${color}40;">${project.TypeofWork}</span>` :
+                    '<span style="color: #999;">Unknown Status</span>';
+
+                const popupContent = `
+                    <div style="max-width: 300px; font-family: Arial, sans-serif;">
+                        <h4 style="margin: 0 0 8px 0; color: ${color};">${project.ProjectDescription || 'Unnamed Project'}</h4>
+                        <div style="font-size: 0.9em; margin-bottom: 8px;">
+                            <strong>Location:</strong> ${project.Municipality || 'Unknown'}, ${project.Province || 'Unknown'}
+                        </div>
+                        <div style="font-size: 0.9em; margin-bottom: 8px;">
+                            <strong>Status:</strong> ${statusBadge}
+                        </div>
+                        <div style="font-size: 0.9em; margin-bottom: 8px;">
+                            <strong>Cost:</strong> ${costDisplay}
+                        </div>
+                        <div style="font-size: 0.8em; margin-bottom: 8px; color: #666;">
+                            <strong>Circle Diameter:</strong> ${radiusKm} km
+                        </div>
+                        <div style="font-size: 0.8em; color: #666;">
+                            <strong>Contractor:</strong> ${project.Contractor || 'Unknown'}
+                        </div>
+                    </div>
+                `;
+
+                circle.bindPopup(popupContent);
+                circle.addTo(mapInstance);
+                mapMarkers.push(circle);
+            }
+        }
+    }
+
+    updateMapStatus(`Loaded ${mapMarkers.length} projects`);
+}
+
+// Progressive loading function
+async function loadMoreProjects() {
+    if (isLoadingMore || progressiveLoadingCancelled) return;
+
+    isLoadingMore = true;
+    try {
+        const response = await fetch(`/api/flood/projects?limit=100&offset=${globalOffset}`);
+        if (!response.ok) {
+            throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+        }
+
+        const data = await response.json();
+        const projects = data.projects || [];
+
+        if (projects.length === 0) {
+            updateMapStatus('All projects loaded');
+            clearInterval(progressiveInterval);
+            progressiveInterval = null;
+            return;
+        }
+
+        await processProjects(projects);
+        globalOffset += projects.length;
+
+    } catch (error) {
+        console.error('❌ Error loading more projects:', error);
+        clearInterval(progressiveInterval);
+        progressiveInterval = null;
+    } finally {
+        isLoadingMore = false;
+    }
+}
+
+// Load all projects (advanced feature)
+// Must be defined BEFORE initializeMap() so it exists when event listener is attached
+window.loadAllProjects = async function loadAllProjects() {
+    console.log(`🗺️ Loading all projects (Show All)`);
+
+    // Show warning confirmation
+    const confirmed = confirm(
+        '⚠️ WARNING: Loading all 9,855 projects may:\n' +
+        '• Overwhelm your browser and cause it to freeze\n' +
+        '• Consume significant memory and CPU resources\n' +
+        '• Take several minutes to complete\n' +
+        '• Make your device unresponsive\n\n' +
+        'Continue anyway?'
+    );
+
+    if (!confirmed) return;
+
+    // Cancel any existing progressive loading (both initial page load and region loading)
+    progressiveLoadingCancelled = true;
+    regionProgressiveLoadingCancelled = true;
+    showAllMode = true; // Activate "Show All" mode to prevent initial page load from interfering
+
+    // Wait a moment to ensure any in-flight requests complete
+    await new Promise(resolve => setTimeout(resolve, 100));
+
+    // Update status
+    updateMapStatus(`Loading all projects...`);
+
+    // Clear existing markers
+    mapMarkers.forEach(marker => mapInstance.removeLayer(marker));
+    mapMarkers = [];
+
+    // Stop any existing progressive loading
+    if (progressiveInterval) {
+        clearInterval(progressiveInterval);
+        progressiveInterval = null;
+    }
+
+    // Reset progressive loading state for "Show All" loading
+    progressiveLoadingStarted = false;
+    globalOffset = 0;
+    isLoadingMore = false;
+    loadedProjects = [];
+
+    // Reset cancellation flag now that we've successfully cancelled initial page load
+    // This allows "Show All" progressive loading to proceed
+    progressiveLoadingCancelled = false;
+    // Keep region cancellation flag true since we're loading all projects (not region-specific)
+
+    try {
+        // Load initial batch of 100 projects (all projects, no region filter)
+        const response = await fetch('/api/flood/projects?limit=100&offset=0');
+        if (!response.ok) {
+            throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+        }
+
+        const data = await response.json();
+        const projects = data.projects || [];
+        await processProjects(projects);
+
+        // Continue loading all projects progressively
+        let offset = projects.length;
+        while (true) {
+            const response = await fetch(`/api/flood/projects?limit=500&offset=${offset}`);
+            if (!response.ok) break;
+
+            const batchData = await response.json();
+            const batch = batchData.projects || [];
+
+            if (batch.length === 0) break;
+
+            await processProjects(batch);
+            offset += batch.length;
+
+            // Allow UI to update every 500 projects
+            if (offset % 500 === 0) {
+                await new Promise(resolve => setTimeout(resolve, 10));
+            }
+        }
+
+        updateMapStatus(`All ${mapMarkers.length} projects loaded successfully!`);
+
+    } catch (error) {
+        console.error('❌ Error loading all projects:', error);
+        updateMapStatus('Error loading all projects: ' + error.message);
+    }
+}
+
+// Start progressive loading
+function startProgressiveLoading() {
+    if (progressiveLoadingStarted) return;
+
+    progressiveLoadingStarted = true;
+    progressiveLoadingCancelled = false;
+
+    // Load more projects every 2 seconds
+    progressiveInterval = setInterval(() => {
+        if (!showAllMode && !progressiveLoadingCancelled) {
+            loadMoreProjects();
+        }
+    }, 2000);
+}
+
+// Refresh map data
+function refreshMapData() {
+    console.log('🔄 Refreshing map data...');
+
+    // Clear existing markers
+    mapMarkers.forEach(marker => mapInstance.removeLayer(marker));
+    mapMarkers = [];
+
+    // Reset loading state
+    globalOffset = 0;
+    loadedProjects = [];
+    progressiveLoadingStarted = false;
+    progressiveLoadingCancelled = false;
+    showAllMode = false;
+
+    // Stop any existing progressive loading
+    if (progressiveInterval) {
+        clearInterval(progressiveInterval);
+        progressiveInterval = null;
+    }
+
+    // Reload initial projects
+    loadInitialProjects();
+}
+
+// Initialize everything when DOM is ready
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('🔍 DOM loaded, initializing map page...');
+    initializeMap();
+
+    // Setup event listeners
+    const refreshBtn = document.getElementById('refresh-map-data');
+    if (refreshBtn) {
+        refreshBtn.addEventListener('click', refreshMapData);
+    }
+
+    const showAllBtn = document.getElementById('show-all-map');
+    if (showAllBtn) {
+        showAllBtn.addEventListener('click', window.loadAllProjects);
+    }
+});
+</script>
+
+<!-- GitHub Footer -->
+<div class="github-footer text-center py-5">
+    <p class="github-footnote text-gray-600 text-sm">@<a href="https://github.com/joebertj" target="_blank" rel="noopener noreferrer">https://github.com/joebertj</a></p>
+</div>
+
+</body>
+</html>

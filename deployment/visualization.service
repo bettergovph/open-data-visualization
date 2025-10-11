@@ -1,0 +1,23 @@
+[Unit]
+Description=KenchLightyear Web Application
+After=network.target
+
+[Service]
+Type=simple
+User=joebert
+WorkingDirectory=/home/joebert/open-data-visualization
+ExecStart=/home/joebert/open-data-visualization/target/release/open-data-visualization
+EnvironmentFile=/home/joebert/open-data-visualization/.env
+Restart=always
+RestartSec=10
+StandardOutput=journal
+StandardError=journal
+
+# Security settings
+# NoNewPrivileges=true
+# PrivateTmp=true
+# ProtectSystem=strict
+ReadWritePaths=/home/joebert/open-data-visualization /tmp
+
+[Install]
+WantedBy=multi-user.target

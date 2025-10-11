@@ -1,0 +1,14 @@
+# /etc/systemd/system/ai_api.service
+
+[Unit]
+Description=AI FastAPI (Uvicorn)
+After=network.target
+
+[Service]
+User=joebert
+WorkingDirectory=/home/joebert/open-data-visualization
+ExecStart=/bin/bash -c '/home/joebert/kenchlightyear_web/venv/bin/uvicorn visualization:app --host  192.168.2.122 --port 8000 --workers 1 --loop asyncio --access-log --log-level info'
+Restart=always
+
+[Install]
+WantedBy=multi-user.target
