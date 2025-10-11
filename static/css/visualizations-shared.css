@@ -18,7 +18,7 @@ body {
 
 /* Ensure navbar is flush to top */
 body > nav:first-child,
-.altgovph-navbar {
+.visualizations-navbar {
     margin-top: 0 !important;
     padding-top: 0 !important;
 }
@@ -36,7 +36,7 @@ html, body {
 }
 
 /* Remove any space before the navbar specifically */
-nav.altgovph-navbar {
+nav.visualizations-navbar {
     position: relative;
     top: 0 !important;
     margin-top: 0 !important;
@@ -93,7 +93,7 @@ body > nav:first-child {
 }
 
 /* BetterGovPH Navigation Bar */
-.altgovph-navbar {
+.visualizations-navbar {
     background: linear-gradient(135deg, #0038A8 0%, #CE1126 100%);
     color: white;
     padding: 15px 20px;
@@ -103,19 +103,19 @@ body > nav:first-child {
     box-shadow: 0 2px 10px rgba(0,0,0,0.2);
 }
 
-.altgovph-navbar h1 {
+.visualizations-navbar h1 {
     margin: 0;
     font-size: 24px;
     font-weight: bold;
 }
 
-.altgovph-navbar .nav-links {
+.visualizations-navbar .nav-links {
     display: flex;
     gap: 20px;
     align-items: center;
 }
 
-.altgovph-navbar .nav-links a {
+.visualizations-navbar .nav-links a {
     color: white;
     text-decoration: none;
     padding: 8px 16px;
@@ -124,11 +124,11 @@ body > nav:first-child {
     font-weight: 500;
 }
 
-.altgovph-navbar .nav-links a:hover {
+.visualizations-navbar .nav-links a:hover {
     background-color: rgba(255, 255, 255, 0.2);
 }
 
-.altgovph-navbar .nav-links a.active {
+.visualizations-navbar .nav-links a.active {
     background-color: rgba(255, 255, 255, 0.3);
     font-weight: bold;
 }
@@ -383,13 +383,13 @@ body > nav:first-child {
 
 /* Responsive Design */
 @media (max-width: 768px) {
-    .altgovph-navbar {
+    .visualizations-navbar {
         flex-direction: column;
         gap: 10px;
         padding: 10px;
     }
     
-    .altgovph-navbar .nav-links {
+    .visualizations-navbar .nav-links {
         flex-wrap: wrap;
         justify-content: center;
         gap: 10px;

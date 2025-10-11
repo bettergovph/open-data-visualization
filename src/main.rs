@@ -48,7 +48,7 @@ async fn altgovph_home(_req: HttpRequest) -> Result<HttpResponse, ActixError> {
     context.insert("SITE_NAME", "BetterGovPH Data Visualizations");
     context.insert("SITE_URL", "https://visualizations.bettergov.ph");
     
-    let template_name = "altgovph_home.html";
+    let template_name = "visualizations_home.html";
     
     let rendered = tera.render(template_name, &context).map_err(|e| actix_web::error::ErrorInternalServerError(e))?;
     Ok(HttpResponse::Ok().content_type("text/html").body(rendered))

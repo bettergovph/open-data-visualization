@@ -1,8 +1,8 @@
-{% extends "mobile/base_altgovph.html" %}
+{% extends "mobile/base_visualizations.html" %}
 
 {% block head %}
 <!-- BetterGovPH Theme CSS -->
-<link rel="stylesheet" href="/static/css/altgovph-theme.css">
+<link rel="stylesheet" href="/static/css/visualizations-theme.css">
 
 <!-- BetterGovPH Metadata Overrides -->
 <meta name="description" content="Government Data Analysis Platform for Flood Control Infrastructure Projects">
@@ -31,7 +31,7 @@
     }
 
     /* BetterGovPH Header */
-    .altgovph-header {
+    .visualizations-header {
         text-align: center;
         padding: 40px 0;
         background: linear-gradient(135deg, #0038A8 0%, #CE1126 100%); /* Philippine flag colors */
@@ -40,14 +40,14 @@
         border-radius: 10px 10px 0 0;
     }
 
-    .altgovph-header h1 {
+    .visualizations-header h1 {
         margin: 0;
         font-size: 2.5em;
         font-weight: 700;
         text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
     }
 
-    .altgovph-header p {
+    .visualizations-header p {
         margin: 10px 0 0 0;
         font-size: 1.2em;
         opacity: 0.9;
@@ -95,7 +95,7 @@
     }
 
     /* BetterGovPH specific mobile overrides */
-    .altgovph-logo, .altgovph-brand, .altgovph-nav-item {
+    .altgovph-logo, .altgovph-brand, .visualizations-nav-item {
         display: none !important;
     }
 
@@ -106,7 +106,7 @@
             padding: 15px;
         }
         
-        .altgovph-header h1 {
+        .visualizations-header h1 {
             font-size: 2em;
         }
         
@@ -119,7 +119,7 @@
 
 {% block content %}
 <div class="main-content">
-    <div class="altgovph-header">
+    <div class="visualizations-header">
         <div class="altgovph-logo">🏛️ BetterGovPH</div>
         <h1>Flood Control Projects</h1>
         <p>Government Infrastructure Analysis & Monitoring</p>
