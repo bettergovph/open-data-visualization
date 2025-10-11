@@ -10,7 +10,7 @@ use std::collections::HashMap;
 // Function: add_frontend_env_to_context
 fn add_frontend_env_to_context(context: &mut tera::Context) {
     let mut env_vars = HashMap::new();
-    env_vars.insert("SITE_URL".to_string(), "https://visualizations.bettergov.ph".to_string());
+    env_vars.insert("SITE_URL".to_string(), "https://altgovph.site".to_string());
     env_vars.insert("SITE_NAME".to_string(), "BetterGovPH Data Visualizations".to_string());
     
     for (key, value) in env_vars {
@@ -46,7 +46,7 @@ async fn altgovph_home(_req: HttpRequest) -> Result<HttpResponse, ActixError> {
     context.insert("company_name", "BetterGovPH");
     context.insert("platform", "BetterGovPH");
     context.insert("SITE_NAME", "BetterGovPH Data Visualizations");
-    context.insert("SITE_URL", "https://visualizations.bettergov.ph");
+    context.insert("SITE_URL", "https://altgovph.site");
     
     let template_name = "altgovph_home.html";
     
@@ -65,7 +65,7 @@ async fn budget(_req: HttpRequest) -> Result<HttpResponse, ActixError> {
     context.insert("company_name", "BetterGovPH");
     context.insert("platform", "BetterGovPH");
     context.insert("SITE_NAME", "BetterGovPH Data Visualizations");
-    context.insert("SITE_URL", "https://visualizations.bettergov.ph");
+    context.insert("SITE_URL", "https://altgovph.site");
     
     let template_name = "budget.html";
     
@@ -84,7 +84,7 @@ async fn flood(_req: HttpRequest) -> Result<HttpResponse, ActixError> {
     context.insert("company_name", "BetterGovPH");
     context.insert("platform", "BetterGovPH");
     context.insert("SITE_NAME", "BetterGovPH Data Visualizations");
-    context.insert("SITE_URL", "https://visualizations.bettergov.ph");
+    context.insert("SITE_URL", "https://altgovph.site");
     
     let template_name = "flood.html";
     
@@ -103,7 +103,7 @@ async fn dime(_req: HttpRequest) -> Result<HttpResponse, ActixError> {
     context.insert("company_name", "BetterGovPH");
     context.insert("platform", "BetterGovPH");
     context.insert("SITE_NAME", "BetterGovPH Data Visualizations");
-    context.insert("SITE_URL", "https://visualizations.bettergov.ph");
+    context.insert("SITE_URL", "https://altgovph.site");
     
     let template_name = "dime.html";
     
@@ -122,7 +122,7 @@ async fn nep(_req: HttpRequest) -> Result<HttpResponse, ActixError> {
     context.insert("company_name", "BetterGovPH");
     context.insert("platform", "BetterGovPH");
     context.insert("SITE_NAME", "BetterGovPH Data Visualizations");
-    context.insert("SITE_URL", "https://visualizations.bettergov.ph");
+    context.insert("SITE_URL", "https://altgovph.site");
 
     let template_name = "nep.html";
 
@@ -141,7 +141,7 @@ async fn map(_req: HttpRequest) -> Result<HttpResponse, ActixError> {
     context.insert("company_name", "BetterGovPH");
     context.insert("platform", "BetterGovPH");
     context.insert("SITE_NAME", "BetterGovPH Data Visualizations");
-    context.insert("SITE_URL", "https://visualizations.bettergov.ph");
+    context.insert("SITE_URL", "https://altgovph.site");
 
     let template_name = "map.html";
 
@@ -160,7 +160,7 @@ async fn about(_req: HttpRequest) -> Result<HttpResponse, ActixError> {
     context.insert("company_name", "BetterGovPH");
     context.insert("platform", "BetterGovPH");
     context.insert("SITE_NAME", "BetterGovPH Data Visualizations");
-    context.insert("SITE_URL", "https://visualizations.bettergov.ph");
+    context.insert("SITE_URL", "https://altgovph.site");
 
     let template_name = "about.html";
 
@@ -179,7 +179,7 @@ async fn budget_nep_correlation(_req: HttpRequest) -> Result<HttpResponse, Actix
     context.insert("company_name", "BetterGovPH");
     context.insert("platform", "BetterGovPH");
     context.insert("SITE_NAME", "BetterGovPH Data Visualizations");
-    context.insert("SITE_URL", "https://visualizations.bettergov.ph");
+    context.insert("SITE_URL", "https://altgovph.site");
 
     let template_name = "budget_nep_correlation.html";
 
@@ -198,7 +198,7 @@ async fn budget_flood_correlation(_req: HttpRequest) -> Result<HttpResponse, Act
     context.insert("company_name", "BetterGovPH");
     context.insert("platform", "BetterGovPH");
     context.insert("SITE_NAME", "BetterGovPH Data Visualizations");
-    context.insert("SITE_URL", "https://visualizations.bettergov.ph");
+    context.insert("SITE_URL", "https://altgovph.site");
 
     let template_name = "budget_flood_correlation.html";
 
@@ -217,7 +217,7 @@ async fn flood_dime_correlation(_req: HttpRequest) -> Result<HttpResponse, Actix
     context.insert("company_name", "BetterGovPH");
     context.insert("platform", "BetterGovPH");
     context.insert("SITE_NAME", "BetterGovPH Data Visualizations");
-    context.insert("SITE_URL", "https://visualizations.bettergov.ph");
+    context.insert("SITE_URL", "https://altgovph.site");
 
     let template_name = "flood_dime_correlation.html";
 
@@ -243,7 +243,7 @@ async fn main() -> std::io::Result<()> {
             .service(web::resource("/budget-flood-correlation").to(budget_flood_correlation))
             .service(web::resource("/flood-dime-correlation").to(flood_dime_correlation))
     })
-    .bind("192.168.2.122:8888")?
+    .bind("127.0.0.1:8888")?
     .run()
     .await
 }

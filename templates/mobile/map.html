@@ -1,0 +1,446 @@
+{% extends "mobile/base_altgovph.html" %}
+
+{% block head %}
+<!-- Google Fonts - Inter -->
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+<!-- Tailwind CSS CDN -->
+<script src="https://cdn.tailwindcss.com"></script>
+
+<!-- Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<!-- D3.js for network visualizations -->
+<script src="https://d3js.org/d3.v7.min.js"></script>
+
+<!-- Leaflet for maps -->
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+<!-- BetterGovPH Metadata Overrides -->
+<meta name="description" content="Interactive Map - Government Data Analysis Platform">
+<meta name="keywords" content="flood control, infrastructure, DPWH, government projects, Philippines, interactive map">
+<meta name="author" content="BetterGovPH">
+
+<!-- Open Graph / Facebook -->
+<meta property="og:type" content="website">
+    <meta property="og:url" content="{{ og_url | default(value='https://visualizations.bettergov.ph/map') }}">
+<meta property="og:title" content="Interactive Map - BetterGovPH">
+<meta property="og:description" content="Interactive map of flood control projects and infrastructure across the Philippines">
+<meta property="og:image" content="/static/images/gov_logo.png">
+
+<!-- Twitter -->
+<meta property="twitter:card" content="summary_large_image">
+<meta property="twitter:url" content="https://visualizations.bettergov.ph/map">
+<meta property="twitter:title" content="Interactive Map - BetterGovPH">
+<meta property="twitter:description" content="Interactive map of flood control projects and infrastructure across the Philippines">
+<meta property="twitter:image" content="/static/images/gov_logo.png">
+
+{% endblock %}
+
+{% block content %}
+<!-- Mobile Navigation - Blends with hero, no borders or background -->
+<nav class="py-3 px-4 bg-white">
+    <div class="flex items-center justify-between">
+        <div class="flex items-center">
+            <a href="/alt" class="flex items-center">
+                <img src="https://raw.githubusercontent.com/bettergovph/logo/main/png/BetterGov_Horizontal-Black.png"
+                     alt="BetterGov"
+                     class="h-8">
+            </a>
+        </div>
+        <div class="md:hidden">
+            <button class="text-black focus:outline-none" onclick="toggleMobileMenu()">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+                </svg>
+            </button>
+        </div>
+    </div>
+    <!-- Mobile menu (hidden by default) -->
+    <div id="mobileMenu" class="hidden mt-4 space-y-2">
+        <a href="/alt" class="block text-black hover:text-gray-600 font-medium py-2">Home</a>
+        <a href="/budget" class="block text-black hover:text-gray-600 font-medium py-2">Budget</a>
+        <a href="/flood" class="block text-black hover:text-gray-600 font-medium py-2">Flood Control</a>
+        <a href="/dime" class="block text-black hover:text-gray-600 font-medium py-2">DIME</a>
+        <a href="/map" class="block text-black hover:text-gray-600 font-medium py-2">Map</a>
+        <a href="/budget-flood-correlation" class="block text-black hover:text-gray-600 font-medium py-2">Budget-Flood</a>
+        <a href="/flood-dime-correlation" class="block text-black hover:text-gray-600 font-medium py-2">Flood-DIME</a>
+    </div>
+</nav>
+
+<script>
+function toggleMobileMenu() {
+    const menu = document.getElementById('mobileMenu');
+    menu.classList.toggle('hidden');
+}
+</script>
+
+<!-- Map Section -->
+<section class="bg-gray-50 py-4 px-4">
+    <div class="bg-white rounded-lg shadow-md p-4">
+        <div class="flex justify-between items-center mb-3">
+            <h2 class="text-xl font-semibold text-black">🗺️ Interactive Map</h2>
+            <div class="flex gap-2">
+                <button id="refresh-map-data" class="bg-blue-600 text-white px-3 py-1 rounded-lg text-sm hover:bg-blue-700 transition">
+                    🔄 Refresh
+                </button>
+            </div>
+        </div>
+
+        <!-- Map Instructions -->
+        <div class="bg-blue-50 p-3 rounded-lg mb-3 border-l-4 border-blue-500">
+            <div class="text-xs text-blue-800 font-medium">
+                💡 <strong>Tip:</strong> Click on a region directly on the map to explore projects in that specific areas.
+            </div>
+        </div>
+
+        <div id="map" class="w-full rounded-lg border border-gray-300 mb-4" style="height: 400px;"></div>
+
+        <!-- Show All Button (Advanced Feature) -->
+        <details class="border border-gray-200 rounded-lg p-3 bg-gray-50">
+            <summary class="cursor-pointer text-xs text-gray-600 font-medium">Advanced: Load all projects</summary>
+            <div class="mt-2 pt-2 border-t border-gray-200">
+                <p class="text-xs text-red-600 mb-2">
+                    ⚠️ Warning: Loading all 9,855 projects may overwhelm your browser and cause it to freeze. Only use this on powerful devices.
+                </p>
+                <button id="show-all-map" class="bg-gray-600 text-white px-3 py-1 rounded-lg text-xs hover:bg-gray-700 transition">
+                    Load All Projects
+                </button>
+            </div>
+        </details>
+    </div>
+</section>
+
+<script>
+// Copy of flood page map implementation - simplified for mobile standalone map page
+
+// Global map variables
+let mapInstance = null;
+let mapMarkers = [];
+let loadedProjects = [];
+let globalOffset = 0;
+let isLoadingMore = false;
+let progressiveInterval = null;
+let progressiveLoadingStarted = false;
+let progressiveLoadingCancelled = false;
+let regionProgressiveLoadingCancelled = false;
+let showAllMode = false;
+let initialLoadDone = false;
+let isLoading = false;
+
+// Map status display
+function updateMapStatus(message) {
+    console.log(`🗺️ ${message}`);
+}
+
+// Initialize the map
+function initializeMap() {
+    const mapContainer = document.getElementById('map');
+    if (mapContainer) {
+        // Ensure container is visible and has dimensions
+        if (mapContainer.offsetWidth === 0 || mapContainer.offsetHeight === 0) {
+            console.warn('Map container has no dimensions, retrying in 100ms...');
+            setTimeout(initializeMap, 100);
+            return;
+        }
+
+        // Initialize Leaflet map centered on Philippines with optimal view for mobile
+        mapInstance = L.map('map', {
+            preferCanvas: false,
+            renderer: L.canvas()
+        }).setView([12.2, 121.8], 5.5);
+
+        // Add OpenStreetMap tiles with proper configuration for better loading
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '© OpenStreetMap contributors',
+            maxZoom: 19,
+            minZoom: 3,
+            subdomains: ['a', 'b', 'c'],
+            tileSize: 256,
+            zoomOffset: 0,
+            crossOrigin: true,
+            bounds: [[4.5, 116], [21, 127]], // Philippines bounds
+            maxBounds: [[4.5, 116], [21, 127]] // Restrict panning to Philippines area
+        }).addTo(mapInstance);
+
+        // Set map bounds to fit Philippines properly in mobile container
+        mapInstance.fitBounds([[4.5, 116], [21, 127]], {
+            padding: [10, 10],
+            maxZoom: 6
+        });
+
+        // Add error handling for tile loading
+        mapInstance.on('tileerror', function(e) {
+            console.warn('Tile loading error:', e);
+        });
+
+        // Show initial state
+        updateMapStatus('Map initialized. Loading initial data...');
+
+        // Force map to resize and invalidate size
+        setTimeout(() => {
+            if (mapInstance) {
+                mapInstance.invalidateSize();
+                console.log('✅ Map invalidated and resized');
+            }
+        }, 100);
+
+        // Load initial map data (10 projects with progressive loading)
+        loadInitialMapData();
+    }
+}
+
+// Load initial map data (copied exactly from working flood.html)
+async function loadInitialMapData() {
+    if (initialLoadDone || isLoading) return;
+
+    isLoading = true;
+    initialLoadDone = true;
+
+    try {
+        console.log('🔍 Loading initial map data...');
+        const response = await fetch('/api/flood/projects?limit=10&offset=0');
+        if (response.ok) {
+            const data = await response.json();
+            const projects = data.projects || [];
+
+            console.log(`✅ Loaded initial ${projects.length} projects`);
+            loadedProjects = projects;
+
+            // Add markers for initial projects
+            processProjects(projects);
+
+            updateMapStatus(`Map initialized with ${projects.length} projects. Loading more automatically...`);
+
+            // Start progressive loading after initial load (instant)
+            startProgressiveLoading();
+
+        } else {
+            throw new Error(`API returned ${response.status}`);
+        }
+    } catch (error) {
+        console.error('❌ Failed to load initial map data:', error);
+        updateMapStatus('Loading initial map data...');
+    } finally {
+        isLoading = false;
+    }
+}
+
+// Process projects and add to map
+function processProjects(projects) {
+    projects.forEach(project => {
+        if (project.Latitude && project.Longitude) {
+            const lat = parseFloat(project.Latitude);
+            const lng = parseFloat(project.Longitude);
+
+            if (!isNaN(lat) && !isNaN(lng)) {
+                // Create marker
+                const marker = L.marker([lat, lng]);
+
+                // Create popup content (smaller for mobile)
+                const popupContent = `
+                    <div style="max-width: 250px; font-family: Arial, sans-serif; font-size: 12px;">
+                        <h4 style="margin: 0 0 6px 0; color: #0038A8; font-size: 14px;">${project.project_title || 'Unnamed Project'}</h4>
+                        <div style="font-size: 11px; margin-bottom: 4px;">
+                            <strong>Location:</strong> ${project.municipality || 'Unknown'}, ${project.province || 'Unknown'}
+                        </div>
+                        <div style="font-size: 11px; margin-bottom: 4px;">
+                            <strong>Cost:</strong> ₱${project.contract_cost ? parseFloat(project.contract_cost).toLocaleString() : 'N/A'}
+                        </div>
+                        <div style="font-size: 11px; margin-bottom: 4px;">
+                            <strong>Status:</strong> ${project.status || 'Unknown'}
+                        </div>
+                        <div style="font-size: 10px; color: #666;">
+                            <strong>Contractor:</strong> ${project.contractor || 'Unknown'}
+                        </div>
+                    </div>
+                `;
+
+                marker.bindPopup(popupContent);
+                marker.addTo(mapInstance);
+                mapMarkers.push(marker);
+            }
+        }
+    });
+
+    updateMapStatus(`Loaded ${mapMarkers.length} projects`);
+}
+
+// Progressive loading function
+async function loadMoreProjects() {
+    if (isLoadingMore || progressiveLoadingCancelled) return;
+
+    isLoadingMore = true;
+    try {
+        const response = await fetch(`/api/flood/projects?limit=50&offset=${globalOffset}`);
+        if (!response.ok) {
+            throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+        }
+
+        const data = await response.json();
+        const projects = data.projects || [];
+
+        if (projects.length === 0) {
+            updateMapStatus('All projects loaded');
+            clearInterval(progressiveInterval);
+            progressiveInterval = null;
+            return;
+        }
+
+        processProjects(projects);
+        globalOffset += projects.length;
+
+    } catch (error) {
+        console.error('❌ Error loading more projects:', error);
+        clearInterval(progressiveInterval);
+        progressiveInterval = null;
+    } finally {
+        isLoadingMore = false;
+    }
+}
+
+// Start progressive loading
+function startProgressiveLoading() {
+    if (progressiveLoadingStarted) return;
+
+    progressiveLoadingStarted = true;
+    progressiveLoadingCancelled = false;
+
+    // Load more projects every 3 seconds (slower for mobile)
+    progressiveInterval = setInterval(() => {
+        if (!showAllMode && !progressiveLoadingCancelled) {
+            loadMoreProjects();
+        }
+    }, 3000);
+}
+
+// Load all projects (advanced feature)
+async function loadAllProjects() {
+    console.log(`🗺️ Loading all projects (Show All)`);
+
+    // Show warning confirmation
+    const confirmed = confirm(
+        '⚠️ WARNING: Loading all 9,855 projects may:\n' +
+        '• Overwhelm your browser and cause it to freeze\n' +
+        '• Consume significant memory and CPU resources\n' +
+        '• Take several minutes to complete\n' +
+        '• Make your device unresponsive\n\n' +
+        'Continue anyway?'
+    );
+
+    if (!confirmed) return;
+
+    // Cancel any existing progressive loading
+    progressiveLoadingCancelled = true;
+    regionProgressiveLoadingCancelled = true;
+    showAllMode = true;
+
+    // Wait a moment to ensure any in-flight requests complete
+    await new Promise(resolve => setTimeout(resolve, 100));
+
+    // Update status
+    updateMapStatus(`Loading all projects...`);
+
+    // Clear existing markers
+    mapMarkers.forEach(marker => mapInstance.removeLayer(marker));
+    mapMarkers = [];
+
+    // Stop any existing progressive loading
+    if (progressiveInterval) {
+        clearInterval(progressiveInterval);
+        progressiveInterval = null;
+    }
+
+    // Reset progressive loading state for "Show All" loading
+    progressiveLoadingStarted = false;
+    globalOffset = 0;
+    isLoadingMore = false;
+    loadedProjects = [];
+
+    // Reset cancellation flag
+    progressiveLoadingCancelled = false;
+
+    try {
+        // Load initial batch of 100 projects
+        const response = await fetch('/api/flood/projects?limit=100&offset=0');
+        if (!response.ok) {
+            throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+        }
+
+        const data = await response.json();
+        const projects = data.projects || [];
+        processProjects(projects);
+
+        // Continue loading all projects progressively
+        let offset = projects.length;
+        while (true) {
+            const response = await fetch(`/api/flood/projects?limit=200&offset=${offset}`);
+            if (!response.ok) break;
+
+            const batchData = await response.json();
+            const batch = batchData.projects || [];
+
+            if (batch.length === 0) break;
+
+            processProjects(batch);
+            offset += batch.length;
+
+            // Allow UI to update every 200 projects
+            if (offset % 200 === 0) {
+                await new Promise(resolve => setTimeout(resolve, 10));
+            }
+        }
+
+        updateMapStatus(`All ${mapMarkers.length} projects loaded successfully!`);
+
+    } catch (error) {
+        console.error('❌ Error loading all projects:', error);
+        updateMapStatus('Error loading all projects: ' + error.message);
+    }
+}
+
+// Refresh map data
+function refreshMapData() {
+    console.log('🔄 Refreshing map data...');
+
+    // Clear existing markers
+    mapMarkers.forEach(marker => mapInstance.removeLayer(marker));
+    mapMarkers = [];
+
+    // Reset loading state
+    globalOffset = 0;
+    loadedProjects = [];
+    progressiveLoadingStarted = false;
+    progressiveLoadingCancelled = false;
+    showAllMode = false;
+
+    // Stop any existing progressive loading
+    if (progressiveInterval) {
+        clearInterval(progressiveInterval);
+        progressiveInterval = null;
+    }
+
+    // Reload initial projects
+    loadInitialProjects();
+}
+
+// Initialize everything when DOM is ready
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('🔍 DOM loaded, initializing mobile map page...');
+    initializeMap();
+
+    // Setup event listeners
+    const refreshBtn = document.getElementById('refresh-map-data');
+    if (refreshBtn) {
+        refreshBtn.addEventListener('click', refreshMapData);
+    }
+
+    const showAllBtn = document.getElementById('show-all-map');
+    if (showAllBtn) {
+        showAllBtn.addEventListener('click', loadAllProjects);
+    }
+});
+</script>
+
+{% endblock %}
