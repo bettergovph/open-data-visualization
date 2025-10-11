@@ -5,14 +5,16 @@ This project contains the **BetterGovPH Data Visualizations** platform - a compr
 ## Project Status
 
 ✅ **FULLY ISOLATED** from kenchlightyear business platform  
-✅ **RUNNING** on dedicated server (10.27.79.7)  
-✅ **PRODUCTION READY** for visualizations.bettergov.ph  
-✅ **TEST ACCESS** available at altgovph.site  
+✅ **PRODUCTION READY** for `visualizations.bettergov.ph`  
+✅ **CLEANED** - all altgovph references removed  
+✅ **SERVICES RUNNING** - Actix-Web frontend + FastAPI backend  
+✅ **SSL CONFIGURED** - Lets Encrypt certificates  
+✅ **MOBILE RESPONSIVE** - dedicated mobile templates  
 
 ## Domains
 
-- **Production**: https://visualizations.bettergov.ph
-- **Test/Transition**: https://altgovph.site
+- **Production**: `https://visualizations.bettergov.ph`
+- **Test**: `https://altgovph.site` (internal testing only)
 
 ## Architecture
 
@@ -20,6 +22,7 @@ This project contains the **BetterGovPH Data Visualizations** platform - a compr
 - **Server**: 192.168.2.122:8888
 - **Framework**: Actix-Web with Tera templating
 - **Routes**: 11 major pages + correlation analysis
+- **Templates**: Clean visualizations-* CSS classes
 - **Mobile Support**: Responsive design with dedicated mobile templates
 
 ### Backend (Python/FastAPI) 
@@ -31,83 +34,86 @@ This project contains the **BetterGovPH Data Visualizations** platform - a compr
 ### Reverse Proxy (Nginx)
 - **Ports**: 80/443
 - **SSL**: Lets Encrypt certificates
+- **Config**: `/etc/nginx/conf.d/visualizations_nginx.conf`
 - **Load Balancing**: API requests proxied to FastAPI backend
 
 ## Routes and Functionality
 
 ### / (Homepage)
-- **Templates**: visualizations_home.html, mobile/visualizations_home.html
+- **Templates**: `visualizations_home.html`, `mobile/visualizations_home.html`
 - **Functionality**: Landing page with navigation to all data sections
+- **Navigation**: Logo → bettergov.ph, "Data Visualizations" → /
 
 ### /budget (Budget Analysis)
-- **Templates**: budget.html, mobile/budget.html
+- **Templates**: `budget.html`, `mobile/budget.html`
 - **Functionality**: AI-powered analysis of Government Appropriations Act (GAA) data
 - **Features**: Intelligent insights, duplicate detection, trend analysis
 
 ### /flood (Flood Control Projects)
-- **Templates**: flood.html, mobile/flood.html
+- **Templates**: `flood.html`, `mobile/flood.html`
 - **Functionality**: Comprehensive tracking of DPWH flood control infrastructure
 - **Features**: Nationwide project mapping and analysis
 
 ### /dime (DIME Infrastructure)
-- **Templates**: dime.html, mobile/dime.html
+- **Templates**: `dime.html`, `mobile/dime.html`
 - **Functionality**: Digital Information for Monitoring and Evaluation
 - **Features**: 12,870+ major infrastructure projects worth ₱740B+
 
 ### /nep (NEP Analysis)
-- **Templates**: nep.html, mobile/nep.html
+- **Templates**: `nep.html`, `mobile/nep.html`
 - **Functionality**: National Expenditure Program analysis
 - **Features**: AI-powered insights, duplicate detection, budget tracking
 
 ### /map (Interactive Map)
-- **Templates**: map.html, mobile/map.html
+- **Templates**: `map.html`, `mobile/map.html`
 - **Functionality**: Interactive geographical visualization
 - **Features**: Flood control projects and infrastructure mapping
 
 ### /about (About Page)
-- **Templates**: about.html, mobile/about.html
+- **Templates**: `about.html`, `mobile/about.html`
 - **Functionality**: Project information and advocacy focus
 
 ### Correlation Analysis
-- **Budget-NEP**: /budget-nep-correlation
-- **Budget-Flood**: /budget-flood-correlation
-- **Flood-DIME**: /flood-dime-correlation
+- **Budget-NEP**: `/budget-nep-correlation`
+- **Budget-Flood**: `/budget-flood-correlation`
+- **Flood-DIME**: `/flood-dime-correlation`
 - **Templates**: Individual correlation analysis pages
 - **Functionality**: Data science connections between datasets
 
 ## File Structure
 
 ### Templates
-- visualizations_home.html - Main homepage
-- base_visualizations.html - Base template for desktop pages
-- base.html - Legacy base template
-- mobile/ - Mobile-optimized versions of all templates
+- `visualizations_home.html` - Main homepage
+- `base_visualizations.html` - Base template for desktop pages
+- `mobile/` - Mobile-optimized versions of all templates
+- **CSS Classes**: All use `visualizations-*` prefix (no altgovph references)
 
 ### Static Assets
-- static/css/ - Stylesheets (altgovph-theme.css, mobile styles)
-- static/js/ - JavaScript functionality
-- static/images/ - Logos and assets
-- static/data/ - JSON datasets for visualizations
+- `static/css/visualizations-*.css` - Renamed CSS files
+- `static/js/` - JavaScript functionality
+- `static/images/` - Logos and assets
+- `static/data/` - JSON datasets for visualizations
 
 ### Source Code
-- src/main.rs - Actix-Web frontend application
-- visualization.py - FastAPI backend (mock responses)
-- Cargo.toml - Rust dependencies
-- requirements.txt - Python dependencies
+- `src/main.rs` - Actix-Web frontend application
+- `visualization.py` - FastAPI backend (mock responses)
+- `Cargo.toml` - Rust dependencies
+- `requirements.txt` - Python dependencies
 
 ## Development Status
 
 ### ✅ Completed
 - Complete isolation from kenchlightyear platform
-- All routes functional (11 pages)
-- Mobile responsive design
-- SSL certificate configuration
-- Domain routing (both test and production)
+- All routes functional (11 pages + correlations)
+- Mobile responsive design with clean CSS
+- SSL certificate configuration for both domains
+- Domain routing (production + test)
+- **Complete altgovph cleanup** - no references in code/filenames
 - Template cleanup (removed business content)
-- Navigation fixes (removed /alt references)
+- Navigation fixes (logo → bettergov.ph, text → /)
 
 ### 🔄 In Progress
-- FastAPI backend service (mock responses working)
+- FastAPI backend service (syntax errors resolved)
 - PostgreSQL database integration
 - API endpoint testing
 - Production deployment verification
@@ -122,14 +128,14 @@ This project contains the **BetterGovPH Data Visualizations** platform - a compr
 ## Deployment
 
 ### Server: 10.27.79.7
-- **Frontend**: visualization.service (systemd)
-- **Backend**: visualization_api.service (systemd) 
+- **Frontend**: `visualization.service` (systemd)
+- **Backend**: `visualization_api.service` (systemd) 
 - **Proxy**: Nginx with SSL termination
 
 ### Environment
-- .env - Application configuration
-- venv/ - Python virtual environment (gitignored)
-- target/ - Rust build artifacts
+- `.env` - Application configuration (SITE_URL = visualizations.bettergov.ph)
+- `venv/` - Python virtual environment (gitignored)
+- `target/` - Rust build artifacts
 
 ## Notes
 
@@ -137,12 +143,13 @@ This project contains the **BetterGovPH Data Visualizations** platform - a compr
 - **Advocacy Focus**: Removed all business/marketing content
 - **Open Data Mission**: Transparency and accessibility for citizens
 - **Mobile First**: Responsive design across all devices
+- **Clean Codebase**: No altgovph references in filenames, CSS classes, or content
 - **API Ready**: FastAPI backend prepared for data endpoints
 
 ## Testing
 
 Access the application at:
-- Test: https://altgovph.site
-- Production: https://visualizations.bettergov.ph
+- Production: `https://visualizations.bettergov.ph`
+- Test: `https://altgovph.site`
 
-All 11 major pages and correlation analyses should load successfully.
+All 11 major pages load successfully with proper navigation (logo → bettergov.ph, "Data Visualizations" → /).
