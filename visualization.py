@@ -366,6 +366,94 @@ async def budget_column_mapping_api():
     except Exception as e:
         return JSONResponse({"success": False, "error": str(e)})
 
+@app.get("/api/budget/analysis/comparison-chart")
+async def budget_analysis_comparison_chart_api():
+    """Get data for Budget vs NEP comparison chart - no authentication required"""
+    try:
+        print(f"📊 [API] DEBUG: Fetching Budget vs NEP comparison data")
+
+        # Direct database queries to get yearly totals
+        import asyncpg
+
+        # Connect to budget_analysis database
+        budget_conn = await asyncpg.connect(
+            host=os.getenv('POSTGRES_HOST', 'localhost'),
+            port=int(os.getenv('POSTGRES_PORT', 5432)),
+            user=os.getenv('POSTGRES_USER', 'budget_admin'),
+            password=os.getenv('POSTGRES_PASSWORD', ''),
+            database='budget_analysis'
+        )
+
+        # Connect to nep database
+        nep_conn = await asyncpg.connect(
+            host=os.getenv('POSTGRES_HOST', 'localhost'),
+            port=int(os.getenv('POSTGRES_PORT', 5432)),
+            user=os.getenv('POSTGRES_USER', 'budget_admin'),
+            password=os.getenv('POSTGRES_PASSWORD', ''),
+            database='nep'
+        )
+
+        try:
+            # Years to compare (overlapping years)
+            years = [2020, 2021, 2022, 2023, 2024, 2025]
+            budget_amounts = []
+            nep_amounts = []
+
+            for year in years:
+                # Get budget data for this year
+                budget_table = f"budget_{year}"
+                try:
+                    budget_result = await budget_conn.fetchrow(f"""
+                        SELECT COALESCE(SUM(amt), 0) as total_amount
+                        FROM {budget_table}
+                        WHERE amt IS NOT NULL AND amt > 0
+                    """)
+                    budget_amount = float(budget_result['total_amount']) if budget_result else 0
+                except Exception as e:
+                    print(f"⚠️ [API] DEBUG: Error fetching budget data for {year}: {e}")
+                    budget_amount = 0
+
+                # Get NEP data for this year
+                nep_table = f"budget_{year}"
+                try:
+                    nep_result = await nep_conn.fetchrow(f"""
+                        SELECT COALESCE(SUM(amount), 0) as total_amount
+                        FROM {nep_table}
+                        WHERE amount IS NOT NULL AND amount > 0
+                    """)
+                    nep_amount = float(nep_result['total_amount']) if nep_result else 0
+                except Exception as e:
+                    print(f"⚠️ [API] DEBUG: Error fetching NEP data for {year}: {e}")
+                    nep_amount = 0
+
+                budget_amounts.append(budget_amount)
+                nep_amounts.append(nep_amount)
+
+                print(f"📊 [API] DEBUG: Year {year} - Budget: ₱{budget_amount:,.0f}, NEP: ₱{nep_amount:,.0f}")
+
+            chart_data = {
+                "years": years,
+                "budget_amounts": budget_amounts,
+                "nep_amounts": nep_amounts
+            }
+
+            print(f"📊 [API] DEBUG: Comparison chart data prepared: {len(chart_data['years'])} years")
+            return JSONResponse(chart_data)
+
+        finally:
+            await budget_conn.close()
+            await nep_conn.close()
+
+    except Exception as e:
+        print(f"💥 [API] ERROR: Failed to fetch comparison chart data: {e}")
+        return JSONResponse({
+            "success": False,
+            "error": str(e),
+            "years": [],
+            "budget_amounts": [],
+            "nep_amounts": []
+        })
+
 # ============================================================================
 # Flood Control API Endpoints (MeiliSearch)
 # ============================================================================
