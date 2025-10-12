@@ -3,6 +3,9 @@ from fastapi import FastAPI, HTTPException, Query
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 import os
+from dotenv import load_dotenv
+
+load_dotenv()
 from budget_client import (
     get_budget_overview_stats,
     get_budget_departments,
