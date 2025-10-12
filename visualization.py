@@ -341,6 +341,25 @@ async def budget_column_mapping_api():
         return JSONResponse({"success": False, "error": str(e)})
 
 # ============================================================================
+# Flood Control API Endpoints (MeiliSearch)
+# ============================================================================
+
+@app.get("/api/flood/projects")
+async def flood_projects_api(limit: int = 10, offset: int = 0, query: str = "", filters: str = None):
+    """Get flood control projects from MeiliSearch - no authentication required"""
+    try:
+        from flood_client import FloodControlClient
+        client = FloodControlClient()
+        projects, metadata = await client.search_projects(query=query, filters=filters, limit=limit, offset=offset)
+        return JSONResponse({
+            "success": True,
+            "projects": [proj.__dict__ for proj in projects],
+            "metadata": metadata
+        })
+    except Exception as e:
+        return JSONResponse({"success": False, "error": str(e), "projects": []})
+
+# ============================================================================
 # DIME Infrastructure API Endpoints
 # ============================================================================
 
