@@ -70,13 +70,7 @@
         {% block content %}{% endblock %}
     </main>
     
-    <footer class="visualizations-mobile-footer">
-        <div class="visualizations-mobile-container">
-            <p>@<a href="https://github.com/bettergovph/open-data-visualization" target="_blank" rel="noopener noreferrer">https://github.com/bettergovph/open-data-visualization</a></p>
-            <p>Maintainer: @<a href="https://github.com/joebertj" target="_blank" rel="noopener noreferrer">https://github.com/joebertj</a></p>
-            <p>For: BetterGov.PH</p>
-        </div>
-    </footer>
+    {% include "mobile/footer.html" %}
     
     {% block scripts %}{% endblock %}
 </body>
