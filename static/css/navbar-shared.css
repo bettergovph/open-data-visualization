@@ -1,0 +1,353 @@
+/* Shared Navbar Styles - Common between Desktop and Mobile */
+
+/* Extended Color Variables */
+:root {
+    /* Status Colors */
+    --success-color: #28a745;
+    --error-color: #dc3545;
+    --warning-color: #ffc107;
+    --info-color: #17a2b8;
+    
+    /* Payment Gateway Colors */
+    --paypal-color: #0070ba;
+    --paypal-hover: #1546a0;
+    --xendit-color: #6366f1;
+    --xendit-hover: #4f46e5;
+    --mollie-color: #c73e1d;
+    --mollie-hover: #a8321a;
+    
+    /* Tier Colors */
+    --core-color: #6c757d;
+    --pro-color: #007bff;
+    --omega-color: #28a745;
+    --admin-color: #ffd700;
+    
+    /* Gradient Backgrounds */
+    --success-gradient: linear-gradient(135deg, var(--success-color), #20c997);
+    --error-gradient: linear-gradient(135deg, var(--error-color), #c82333);
+    --warning-gradient: linear-gradient(135deg, var(--warning-color), #e0a800);
+    --info-gradient: linear-gradient(135deg, var(--info-color), #138496);
+    
+    /* Payment Gradients */
+    --paypal-gradient: linear-gradient(135deg, var(--paypal-color), var(--paypal-hover));
+    --xendit-gradient: linear-gradient(135deg, var(--xendit-color), var(--xendit-hover));
+    --mollie-gradient: linear-gradient(135deg, var(--mollie-color), var(--mollie-hover));
+    
+    /* Tier Gradients */
+    --pro-gradient: linear-gradient(45deg, #9c27b0, #e91e63);
+    --omega-gradient: linear-gradient(45deg, #ff6b6b, #ee5a52);
+    --admin-gradient: linear-gradient(45deg, var(--admin-color), #ffa500);
+}
+
+/* Base navbar structure - shared properties */
+.navbar {
+    position: fixed;
+    top: 0;
+    width: 100%;
+    background: var(--primary-color) !important;
+    box-shadow: var(--shadow);
+    z-index: 1000;
+    transition: var(--transition);
+    pointer-events: auto !important;
+    overflow: visible !important;
+}
+
+/* Base nav container - shared properties */
+.nav-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    max-width: 100%;
+    margin: 0 auto;
+    pointer-events: auto;
+    position: relative;
+}
+
+/* Shared logo group styles */
+.nav-logo-group {
+    display: flex;
+    align-items: center;
+    position: relative;
+}
+
+.nav-logo-link {
+    display: flex;
+    align-items: center;
+    text-decoration: none;
+    color: inherit;
+}
+
+.nav-logo-img {
+    transition: var(--transition);
+    object-fit: contain;
+}
+
+/* Shared nav menu base styles */
+.nav-menu {
+    display: flex;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    transition: var(--transition);
+}
+
+.nav-item {
+    position: relative;
+}
+
+.nav-link {
+    display: flex;
+    align-items: center;
+    text-decoration: none;
+    color: #ffffff;
+    font-weight: 500;
+    transition: var(--transition);
+    cursor: pointer;
+}
+
+.nav-link:hover {
+    color: var(--secondary-color);
+}
+
+/* Shared dropdown styles */
+.dropdown {
+    position: relative;
+}
+
+.dropdown-menu {
+    position: absolute;
+    top: 100%;
+    right: 0;
+    background: var(--primary-color);
+    border-radius: var(--border-radius);
+    box-shadow: var(--shadow);
+    min-width: 200px;
+    z-index: 1001;
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(-10px);
+    transition: all 0.3s ease;
+}
+
+.dropdown:hover .dropdown-menu,
+.dropdown-menu:hover {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+}
+
+.dropdown-item,
+.dropdown-menu li a {
+    display: block;
+    padding: 0.75rem 1rem;
+    color: #ffffff !important;
+    text-decoration: none;
+    transition: var(--transition);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.dropdown-item:last-child,
+.dropdown-menu li:last-child a {
+    border-bottom: none;
+}
+
+.dropdown-item:hover,
+.dropdown-menu li a:hover {
+    background: rgba(255, 255, 255, 0.1) !important;
+    color: var(--secondary-color) !important;
+}
+
+/* Shared toggle button base (mobile hamburger) */
+.nav-toggle {
+    display: none;
+    flex-direction: column;
+    cursor: pointer;
+    background: none;
+    border: none;
+    padding: 0.5rem;
+    z-index: 1002;
+    position: relative;
+}
+
+.bar {
+    width: 25px;
+    height: 3px;
+    background: #ffffff;
+    margin: 3px 0;
+    transition: var(--transition);
+    border-radius: 2px;
+}
+
+/* Shared responsive behavior */
+@media (max-width: 767px) {
+    .nav-toggle {
+        display: flex;
+    }
+    
+    .nav-menu {
+        position: fixed;
+        left: -100%;
+        top: 40px;
+        flex-direction: column;
+        background: var(--primary-color);
+        width: var(--menu-width, 280px);
+        height: calc(100vh - 40px);
+        text-align: center;
+        transition: 0.3s;
+        box-shadow: var(--shadow);
+        overflow-y: auto;
+        padding: 1rem 0;
+    }
+    
+    .nav-menu.active {
+        left: 0;
+    }
+    
+    .nav-item {
+        margin: 0;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    
+    .nav-link {
+        padding: 1rem;
+        width: 100%;
+        justify-content: center;
+    }
+    
+    .dropdown-menu {
+        position: static;
+        opacity: 1;
+        visibility: visible;
+        transform: none;
+        box-shadow: none;
+        background: rgba(255, 255, 255, 0.1);
+        margin-top: 0;
+    }
+    
+    .dropdown-item,
+    .dropdown-menu li a {
+        padding-left: 2rem;
+        color: #ffffff !important;
+    }
+}
+
+/* Shared animation states */
+.nav-toggle.active .bar:nth-child(1) {
+    transform: rotate(-45deg) translate(-5px, 6px);
+}
+
+.nav-toggle.active .bar:nth-child(2) {
+    opacity: 0;
+}
+
+.nav-toggle.active .bar:nth-child(3) {
+    transform: rotate(45deg) translate(-5px, -6px);
+}
+
+/* Shared brand color consistency */
+.navbar,
+.nav-menu,
+.dropdown-menu {
+    background: var(--primary-color) !important;
+}
+
+.nav-link,
+.dropdown-item,
+.dropdown-menu li a {
+    color: #ffffff !important;
+}
+
+.nav-link:hover,
+.dropdown-item:hover,
+.dropdown-menu li a:hover {
+    color: var(--secondary-color) !important;
+}
+
+/* Utility Classes - Display Control */
+.hidden { 
+    display: none !important; 
+}
+
+.visible { 
+    display: block !important; 
+}
+
+.flex-visible { 
+    display: flex !important; 
+}
+
+.inline-visible { 
+    display: inline !important; 
+}
+
+.inline-block-visible {
+    display: inline-block !important;
+}
+
+/* Utility Classes - Status Colors */
+.text-success { color: var(--success-color) !important; }
+.text-error { color: var(--error-color) !important; }
+.text-warning { color: var(--warning-color) !important; }
+.text-info { color: var(--info-color) !important; }
+
+.bg-success { background-color: var(--success-color) !important; }
+.bg-error { background-color: var(--error-color) !important; }
+.bg-warning { background-color: var(--warning-color) !important; }
+.bg-info { background-color: var(--info-color) !important; }
+
+/* Utility Classes - Payment Styles */
+.btn-paypal { 
+    background: var(--paypal-gradient) !important;
+    color: white !important;
+    border: none !important;
+}
+
+.btn-xendit { 
+    background: var(--xendit-gradient) !important;
+    color: white !important;
+    border: none !important;
+}
+
+.btn-mollie { 
+    background: var(--mollie-gradient) !important;
+    color: white !important;
+    border: none !important;
+}
+
+/* Utility Classes - Tier Styles */
+.tier-core { 
+    background-color: var(--core-color) !important;
+    color: white !important;
+}
+
+.tier-pro { 
+    background: var(--pro-gradient) !important;
+    color: white !important;
+}
+
+.tier-omega { 
+    background: var(--omega-gradient) !important;
+    color: white !important;
+}
+
+.tier-admin { 
+    background: var(--admin-gradient) !important;
+    color: #333 !important;
+}
+
+/* Utility Classes - Common Spacing */
+.mt-1 { margin-top: 0.25rem !important; }
+.mt-2 { margin-top: 0.5rem !important; }
+.mt-3 { margin-top: 1rem !important; }
+.mb-1 { margin-bottom: 0.25rem !important; }
+.mb-2 { margin-bottom: 0.5rem !important; }
+.mb-3 { margin-bottom: 1rem !important; }
+
+.p-1 { padding: 0.25rem !important; }
+.p-2 { padding: 0.5rem !important; }
+.p-3 { padding: 1rem !important; }
+
+/* Utility Classes - Text Alignment */
+.text-center { text-align: center !important; }
+.text-left { text-align: left !important; }
+.text-right { text-align: right !important; }

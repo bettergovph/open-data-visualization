@@ -1512,7 +1512,6 @@ img {
 }
 
 /* Optimize large images for web performance */
-img[src*="kl.png"],
 .nav-logo-img,
 .logo-image {
     max-width: 200px;
@@ -1569,7 +1568,6 @@ img[src*="kirsten.png"] {
 
 /* Optimize for mobile */
 @media (max-width: 768px) {
-    img[src*="kl.png"],
     .nav-logo-img {
         max-width: 150px;
         max-height: 120px;
