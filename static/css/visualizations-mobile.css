@@ -177,7 +177,7 @@ body {
     background: var(--white);
     border-radius: var(--radius-lg);
     box-shadow: var(--shadow-md);
-    margin: var(--spacing-xs);
+    margin: var(--spacing-xs) 0; /* Vertical margin only to maximize horizontal space */
     overflow: hidden;
 }
 
