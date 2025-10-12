@@ -75,7 +75,15 @@ fi
 
 log "✅ Working directory verified"
 
-# Step 2: Build Rust application
+# Step 2: Pull latest changes from git
+log "📥 Step 2: Pulling latest changes from git..."
+if ! git pull; then
+    error "Git pull failed"
+    exit 1
+fi
+log "✅ Git pull completed"
+
+# Step 3: Build Rust application
 log "🔨 Step 2: Building Rust application..."
 if ! cargo build --release; then
     error "Rust build failed"
@@ -83,18 +91,18 @@ if ! cargo build --release; then
 fi
 log "✅ Rust application built successfully"
 
-# Step 3: Install Python dependencies
-log "🐍 Step 3: Installing Python dependencies..."
+# Step 4: Install Python dependencies
+log "🐍 Step 4: Installing Python dependencies..."
 pip install -r requirements.txt
 log "✅ Python dependencies installed"
 
-# Step 4: Reload systemd daemon
-log "🔄 Step 4: Reloading systemd daemon..."
+# Step 5: Reload systemd daemon
+log "🔄 Step 5: Reloading systemd daemon..."
 sudo systemctl daemon-reload
 log "✅ Systemd daemon reloaded"
 
-# Step 5: Restart services
-log "⚙️ Step 5: Restarting services..."
+# Step 6: Restart services
+log "⚙️ Step 6: Restarting services..."
 
 # Stop services first
 log "🛑 Stopping visualization.service..."
@@ -123,8 +131,8 @@ else
     exit 1
 fi
 
-# Step 6: Verify services are running
-log "🔍 Step 6: Verifying services..."
+# Step 7: Verify services are running
+log "🔍 Step 7: Verifying services..."
 sleep 3
 
 if sudo systemctl is-active --quiet visualization.service; then
@@ -141,8 +149,8 @@ else
     exit 1
 fi
 
-# Step 7: Test API endpoints (basic health check)
-log "🩺 Step 7: Running basic health checks..."
+# Step 8: Test API endpoints (basic health check)
+log "🩺 Step 8: Running basic health checks..."
 
 # Test Rust frontend
 if curl -s -f http://localhost:8888/ > /dev/null; then
