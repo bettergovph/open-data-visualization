@@ -19,7 +19,7 @@ load_dotenv()
 DB_CONFIG = {
     'host': os.getenv('POSTGRES_HOST', 'localhost'),
     'port': int(os.getenv('POSTGRES_PORT', 5432)),
-    'database': os.getenv('POSTGRES_DB', 'budget_analysis'),
+    'database': os.getenv('POSTGRES_DB', 'budget_analysis').split(',')[0],  # Use first database from comma-separated list
     'user': os.getenv('POSTGRES_USER', 'postgres'),
     'password': os.getenv('POSTGRES_PASSWORD', 'password')
 }
