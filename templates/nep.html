@@ -2897,7 +2897,7 @@ async function loadNEPYearOverYearChart() {
         if (!ctx) return;
         
         const years = result.data.map(d => d.year);
-        const amounts = result.data.map(d => d.total_amount); // Keep in original peso amounts
+        const amounts = result.data.map(d => d.total_amount * 1000); // Database stores in thousands
         
         new Chart(ctx, {
             type: 'line',
@@ -2985,7 +2985,7 @@ async function loadNEPTopProgramsChart(year = '2025') {
             const desc = p.description;
             return desc.length > 40 ? desc.substring(0, 40) + '...' : desc;
         });
-        const amounts = result.programs.map(p => p.total_amount); // Keep in original peso amounts
+        const amounts = result.programs.map(p => p.total_amount * 1000); // Database stores in thousands
         
         topProgramsChartInstance = new Chart(ctx, {
             type: 'bar',
