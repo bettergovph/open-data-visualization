@@ -5188,41 +5188,17 @@ document.addEventListener('DOMContentLoaded', function() {
         .then(() => {
             return loadAnalysisDuplicatesPage(1);
         })
-        .then(() => {
-            // Load visual charts after all other data is loaded
-            loadVisualCharts();
-        })
-        .catch((duplicatesError) => {
-        })
         .catch((error) => {
-            
-            // Fallback: Load cards anyway even if documents fail, but still sequentially
-            return loadBudgetColumns()
-                .then(() => {
-                    return loadFloodControlAmount();
-                })
-                .then(() => {
-                    return loadDataBrowser();
-                })
-                .then(() => {
-                    return loadAnalysisDuplicatesPage(1);
-                })
-                .then(() => {
-                    // Load visual charts after fallback loading
-                    loadVisualCharts();
-                })
-                .catch((cardError) => {
-                });
+            console.error('❌ Error loading data:', error);
+        })
+        .finally(() => {
+            // Always load visual charts after data loading completes or fails
+            console.log('🚀 [BUDGET] Loading visual charts...');
+            loadVisualCharts();
         });
     
     console.log('🚀 [BUDGET] About to initialize tabs...');
     initializeTabs();
-    
-    // Load visual charts immediately since visual tab is active by default
-    setTimeout(() => {
-        console.log('🚀 [BUDGET] Loading visual charts...');
-        loadVisualCharts();
-    }, 500);
     
     // Load analysis overview data
     loadAnalysisOverview();
