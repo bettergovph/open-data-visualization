@@ -17,7 +17,7 @@ To manually update summary statistics:
 
 ```bash
 cd /home/joebert/open-data-visualization
-python3 generate_summary_stats.py
+python3 utils/generate_summary_stats.py
 ```
 
 Or using the convenience script:

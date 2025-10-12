@@ -9,7 +9,7 @@ cd /home/joebert/open-data-visualization
 source venv/bin/activate
 
 # Run the stats generation script
-python3 generate_summary_stats.py
+python3 utils/generate_summary_stats.py
 
 echo "✅ Summary statistics updated at $(date)"
 
