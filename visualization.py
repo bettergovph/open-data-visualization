@@ -344,20 +344,266 @@ async def budget_column_mapping_api():
 # Flood Control API Endpoints (MeiliSearch)
 # ============================================================================
 
-@app.get("/api/flood/projects")
-async def flood_projects_api(limit: int = 10, offset: int = 0, query: str = "", filters: str = None):
-    """Get flood control projects from MeiliSearch - no authentication required"""
+from flood_client import FloodControlClient, FloodControlProject, build_filter_string
+
+# Create global flood client instance
+_flood_client = None
+
+def get_flood_client():
+    """Get or create flood client instance"""
+    global _flood_client
+    if _flood_client is None:
+        _flood_client = FloodControlClient()
+    return _flood_client
+
+@app.get("/api/flood/health")
+async def flood_health_check():
+    """Check if flood control API is healthy - no authentication required"""
     try:
-        from flood_client import FloodControlClient
-        client = FloodControlClient()
-        projects, metadata = await client.search_projects(query=query, filters=filters, limit=limit, offset=offset)
+        client = get_flood_client()
+        is_healthy = await client.health_check()
         return JSONResponse({
-            "success": True,
-            "projects": [proj.__dict__ for proj in projects],
-            "metadata": metadata
+            "status": "healthy" if is_healthy else "unhealthy",
+            "timestamp": datetime.now().isoformat(),
+            "meilisearch_connected": is_healthy
         })
     except Exception as e:
+        return JSONResponse({"success": False, "error": str(e)}, status_code=500)
+
+@app.get("/api/flood/projects")
+async def flood_projects_api(
+    q: str = Query(default="", description="Search query"),
+    region: str = Query(default=None, description="Filter by region"),
+    province: str = Query(default=None, description="Filter by province"),
+    year: str = Query(default=None, description="Filter by infrastructure year"),
+    type_of_work: str = Query(default=None, description="Filter by type of work"),
+    contractor: str = Query(default=None, description="Filter by contractor"),
+    district_office: str = Query(default=None, description="Filter by district engineering office"),
+    legislative_district: str = Query(default=None, description="Filter by legislative district"),
+    limit: int = Query(default=20, ge=1, le=1000, description="Number of results"),
+    offset: int = Query(default=0, ge=0, description="Number to skip")
+):
+    """Search flood control projects with optional filters - no authentication required"""
+    try:
+        client = get_flood_client()
+        
+        # Build filters dictionary
+        filters = {}
+        if region:
+            filters["Region"] = region
+        if province:
+            filters["Province"] = province
+        if year:
+            filters["InfraYear"] = year
+        if type_of_work:
+            filters["TypeofWork"] = type_of_work
+        if contractor:
+            filters["Contractor"] = contractor
+        if district_office:
+            filters["DistrictEngineeringOffice"] = district_office
+        if legislative_district:
+            filters["LegislativeDistrict"] = legislative_district
+        
+        # Build filter string for MeiliSearch
+        filter_string = build_filter_string(filters) if filters else None
+        
+        # Search projects
+        projects, metadata = await client.search_projects(
+            query=q,
+            filters=filter_string,
+            limit=limit,
+            offset=offset
+        )
+        
+        # Convert projects to dictionaries
+        project_dicts = [
+            {
+                "GlobalID": proj.GlobalID,
+                "ProjectDescription": proj.ProjectDescription,
+                "InfraYear": proj.InfraYear,
+                "Region": proj.Region,
+                "Province": proj.Province,
+                "Municipality": proj.Municipality,
+                "TypeofWork": proj.TypeofWork,
+                "Contractor": proj.Contractor,
+                "ContractCost": proj.ContractCost,
+                "DistrictEngineeringOffice": proj.DistrictEngineeringOffice,
+                "LegislativeDistrict": proj.LegislativeDistrict,
+                "ContractID": proj.ContractID,
+                "ProjectID": proj.ProjectID,
+                "Latitude": proj.Latitude,
+                "Longitude": proj.Longitude
+            }
+            for proj in projects
+        ]
+        
+        return JSONResponse({
+            "success": True,
+            "projects": project_dicts,
+            "totalHits": metadata.get("totalHits", 0),
+            "processingTimeMs": metadata.get("processingTimeMs", 0),
+            "query": metadata.get("query", ""),
+            "facetsDistribution": metadata.get("facetsDistribution", {})
+        })
+        
+    except Exception as e:
         return JSONResponse({"success": False, "error": str(e), "projects": []})
+
+@app.get("/api/flood/projects/{project_id}")
+async def flood_project_by_id(project_id: str):
+    """Get a specific flood control project by GlobalID - no authentication required"""
+    try:
+        client = get_flood_client()
+        project = await client.get_project_by_id(project_id)
+        
+        if not project:
+            return JSONResponse({"success": False, "error": "Project not found"}, status_code=404)
+        
+        return JSONResponse({
+            "success": True,
+            "project": {
+                "GlobalID": project.GlobalID,
+                "ProjectDescription": project.ProjectDescription,
+                "InfraYear": project.InfraYear,
+                "Region": project.Region,
+                "Province": project.Province,
+                "Municipality": project.Municipality,
+                "TypeofWork": project.TypeofWork,
+                "Contractor": project.Contractor,
+                "ContractCost": project.ContractCost,
+                "DistrictEngineeringOffice": project.DistrictEngineeringOffice,
+                "LegislativeDistrict": project.LegislativeDistrict,
+                "ContractID": project.ContractID,
+                "ProjectID": project.ProjectID,
+                "Latitude": project.Latitude,
+                "Longitude": project.Longitude
+            }
+        })
+        
+    except Exception as e:
+        return JSONResponse({"success": False, "error": str(e)}, status_code=500)
+
+@app.get("/api/flood/statistics")
+async def flood_statistics_api(
+    region: str = Query(default=None, description="Filter by region"),
+    province: str = Query(default=None, description="Filter by province"),
+    year: str = Query(default=None, description="Filter by infrastructure year"),
+    type_of_work: str = Query(default=None, description="Filter by type of work"),
+    contractor: str = Query(default=None, description="Filter by contractor"),
+    district_office: str = Query(default=None, description="Filter by district engineering office"),
+    legislative_district: str = Query(default=None, description="Filter by legislative district")
+):
+    """Get comprehensive statistics for flood control projects - no authentication required"""
+    try:
+        client = get_flood_client()
+        
+        # Build filters dictionary
+        filters = {}
+        if region:
+            filters["Region"] = region
+        if province:
+            filters["Province"] = province
+        if year:
+            filters["InfraYear"] = year
+        if type_of_work:
+            filters["TypeofWork"] = type_of_work
+        if contractor:
+            filters["Contractor"] = contractor
+        if district_office:
+            filters["DistrictEngineeringOffice"] = district_office
+        if legislative_district:
+            filters["LegislativeDistrict"] = legislative_district
+        
+        filter_string = build_filter_string(filters) if filters else None
+        stats = await client.get_statistics(filter_string)
+        
+        return JSONResponse({
+            "success": True,
+            "totalProjects": stats.totalProjects,
+            "totalCost": stats.totalCost,
+            "uniqueContractors": stats.uniqueContractors,
+            "regions": stats.regions,
+            "years": stats.years,
+            "typesOfWork": stats.typesOfWork,
+            "topContractors": stats.topContractors
+        })
+        
+    except Exception as e:
+        return JSONResponse({"success": False, "error": str(e)})
+
+@app.get("/api/flood/lookup/regions")
+async def flood_regions_lookup():
+    """Get list of all regions - no authentication required"""
+    try:
+        client = get_flood_client()
+        regions = await client.get_facets("Region")
+        return JSONResponse({
+            "success": True,
+            "regions": list(regions.keys()),
+            "counts": regions
+        })
+    except Exception as e:
+        return JSONResponse({"success": False, "error": str(e)})
+
+@app.get("/api/flood/lookup/provinces")
+async def flood_provinces_lookup(region: str = Query(default=None, description="Filter by region")):
+    """Get list of provinces, optionally filtered by region - no authentication required"""
+    try:
+        client = get_flood_client()
+        filters = {"Region": region} if region else None
+        filter_string = build_filter_string(filters) if filters else None
+        
+        provinces = await client.get_facets("Province", filter_string)
+        return JSONResponse({
+            "success": True,
+            "provinces": list(provinces.keys()),
+            "counts": provinces
+        })
+    except Exception as e:
+        return JSONResponse({"success": False, "error": str(e)})
+
+@app.get("/api/flood/lookup/years")
+async def flood_years_lookup():
+    """Get list of all infrastructure years - no authentication required"""
+    try:
+        client = get_flood_client()
+        years = await client.get_facets("InfraYear")
+        return JSONResponse({
+            "success": True,
+            "years": list(years.keys()),
+            "counts": years
+        })
+    except Exception as e:
+        return JSONResponse({"success": False, "error": str(e)})
+
+@app.get("/api/flood/lookup/types-of-work")
+async def flood_types_of_work_lookup():
+    """Get list of all types of work - no authentication required"""
+    try:
+        client = get_flood_client()
+        types = await client.get_facets("TypeofWork")
+        return JSONResponse({
+            "success": True,
+            "types_of_work": list(types.keys()),
+            "counts": types
+        })
+    except Exception as e:
+        return JSONResponse({"success": False, "error": str(e)})
+
+@app.get("/api/flood/lookup/contractors")
+async def flood_contractors_lookup():
+    """Get list of all contractors - no authentication required"""
+    try:
+        client = get_flood_client()
+        contractors = await client.get_facets("Contractor")
+        return JSONResponse({
+            "success": True,
+            "contractors": list(contractors.keys()) if contractors else [],
+            "counts": contractors if contractors else {},
+            "total": len(contractors) if contractors else 0
+        })
+    except Exception as e:
+        return JSONResponse({"success": False, "error": str(e)})
 
 # ============================================================================
 # DIME Infrastructure API Endpoints
