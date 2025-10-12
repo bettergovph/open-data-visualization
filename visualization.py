@@ -300,5 +300,45 @@ async def budget_department_trends_api():
     except Exception as e:
         return JSONResponse({"success": False, "error": str(e), "departments": []})
 
+@app.get("/api/budget/columns/issues")
+async def budget_columns_issues_api(year: str = "2025", page: int = 1, limit: int = 10):
+    """Get budget column issues for a specific year with pagination - no authentication required"""
+    try:
+        from budget_postgres_client import get_budget_columns_issues, get_budget_column_issues_count
+        result = await get_budget_columns_issues(year, limit, (page - 1) * limit)
+        count_result = await get_budget_column_issues_count(year)
+        total_items = count_result.get("count", 0) if count_result.get("success") else 0
+        total_pages = max(1, (total_items + limit - 1) // limit)
+        if result.get("success"):
+            result["pagination"] = {
+                "current_page": page,
+                "total_pages": total_pages,
+                "total_items": total_items,
+                "limit": limit
+            }
+        return JSONResponse(result)
+    except Exception as e:
+        return JSONResponse({"success": False, "error": str(e), "issues": []})
+
+@app.get("/api/budget/columns/differences")
+async def budget_columns_differences_api():
+    """Get column differences between years - no authentication required"""
+    try:
+        from budget_postgres_client import get_budget_columns_differences
+        result = await get_budget_columns_differences()
+        return JSONResponse(result)
+    except Exception as e:
+        return JSONResponse({"success": False, "error": str(e), "differences": []})
+
+@app.get("/api/budget/column-mapping")
+async def budget_column_mapping_api():
+    """Get 2020-2021 column mapping information - no authentication required"""
+    try:
+        from budget_postgres_client import get_column_mapping_2020_2021
+        result = await get_column_mapping_2020_2021()
+        return JSONResponse(result)
+    except Exception as e:
+        return JSONResponse({"success": False, "error": str(e)})
+
 if __name__ == "__main__":
     uvicorn.run(app, host="127.0.0.1", port=8000)
