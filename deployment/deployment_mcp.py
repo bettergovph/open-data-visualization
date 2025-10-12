@@ -699,15 +699,9 @@ class DeploymentMCPServer:
             # Define test endpoints for BetterGovPH visualization API
             test_endpoints = [
                 {"path": "/", "name": "API Root", "expected_status": [200]},
-                {"path": "/api/budget/total-items/count", "name": "Budget Total Count", "expected_status": [200]},
-                {"path": "/api/budget/duplicates", "name": "Budget Duplicates", "expected_status": [200]},
-                {"path": "/api/budget/duplicates/count", "name": "Budget Duplicates Count", "expected_status": [200]},
-                {"path": "/api/budget/overview/stats", "name": "Budget Overview Stats", "expected_status": [200]},
-                {"path": "/api/budget/departments", "name": "Budget Departments", "expected_status": [200]},
-                {"path": "/api/budget/agencies", "name": "Budget Agencies", "expected_status": [200]},
-                {"path": "/api/nep/overview/stats", "name": "NEP Overview Stats", "expected_status": [200]},
-                {"path": "/api/nep/departments", "name": "NEP Departments", "expected_status": [200]},
-                {"path": "/api/nep/agencies", "name": "NEP Agencies", "expected_status": [200]},
+                {"path": "/api/budget/analysis/comparison-chart", "name": "Budget vs NEP Chart", "expected_status": [200]},
+                {"path": "/api/flood/health", "name": "Flood Health Check", "expected_status": [200]},
+                {"path": "/api/dime/statistics", "name": "DIME Statistics", "expected_status": [200]},
             ]
 
             results = {
