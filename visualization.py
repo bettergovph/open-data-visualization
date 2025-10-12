@@ -15,18 +15,18 @@ from budget_client import (
     get_budget_duplicates_count,
     get_budget_total_items_count
 )
-from nep_client import (
-    get_nep_overview_stats,
-    get_nep_departments,
-    get_nep_agencies,
-    get_nep_expense_categories,
-    get_nep_regions,
-    get_nep_data_browser,
-    get_nep_columns,
-    get_nep_duplicates,
-    get_nep_duplicates_count,
-    get_nep_anomalies_count,
-    get_nep_total_items_count
+from nep_postgres_client import (
+    get_budget_overview_stats as get_nep_overview_stats,
+    get_budget_departments as get_nep_departments,
+    get_budget_agencies as get_nep_agencies,
+    get_budget_expense_categories as get_nep_expense_categories,
+    get_budget_regions as get_nep_regions,
+    get_budget_data_browser as get_nep_data_browser,
+    get_budget_columns as get_nep_columns,
+    get_budget_scored_duplicates as get_nep_duplicates,
+    get_budget_duplicates_count as get_nep_duplicates_count,
+    get_budget_anomalies_count as get_nep_anomalies_count,
+    get_budget_total_items_count as get_nep_total_items_count
 )
 
 app = FastAPI(title="BetterGovPH API", version="1.0.0")
