@@ -340,5 +340,124 @@ async def budget_column_mapping_api():
     except Exception as e:
         return JSONResponse({"success": False, "error": str(e)})
 
+# ============================================================================
+# DIME Infrastructure API Endpoints
+# ============================================================================
+
+from dime_client import (
+    get_dime_statistics,
+    get_dime_filter_options,
+    get_dime_barangay_aggregates,
+    get_dime_barangay_aggregates_by_count,
+    get_dime_projects,
+    get_dime_suggestions
+)
+
+@app.get("/api/dime/statistics")
+async def dime_statistics_api():
+    """Get DIME infrastructure project statistics - no authentication required"""
+    try:
+        result = await get_dime_statistics()
+        return JSONResponse(result)
+    except Exception as e:
+        return JSONResponse({"success": False, "error": str(e)})
+
+@app.get("/api/dime/filter-options")
+async def dime_filter_options_api():
+    """Get DIME filter options - no authentication required"""
+    try:
+        result = await get_dime_filter_options()
+        return JSONResponse(result)
+    except Exception as e:
+        return JSONResponse({"success": False, "error": str(e)})
+
+@app.get("/api/dime/barangay-aggregates")
+async def dime_barangay_aggregates_api():
+    """Get DIME barangay aggregates (by total amount) - no authentication required"""
+    try:
+        result = await get_dime_barangay_aggregates()
+        return JSONResponse(result)
+    except Exception as e:
+        return JSONResponse({"success": False, "error": str(e)})
+
+@app.get("/api/dime/barangay-aggregates-by-count")
+async def dime_barangay_aggregates_by_count_api():
+    """Get DIME barangay aggregates (by project count) - no authentication required"""
+    try:
+        result = await get_dime_barangay_aggregates_by_count()
+        return JSONResponse(result)
+    except Exception as e:
+        return JSONResponse({"success": False, "error": str(e)})
+
+@app.get("/api/dime/projects")
+async def dime_projects_api(
+    page: int = 1,
+    limit: int = 50,
+    sort_by: str = "project_name",
+    sort_order: str = "ASC",
+    status: str = None,
+    region: str = None,
+    province: str = None,
+    city: str = None,
+    barangay: str = None,
+    search: str = None
+):
+    """Get DIME projects with pagination and filtering - no authentication required"""
+    try:
+        filters = {}
+        if status:
+            filters['status'] = status
+        if region:
+            filters['region'] = region
+        if province:
+            filters['province'] = province
+        if city:
+            filters['city'] = city
+        if barangay:
+            filters['barangay'] = barangay
+        if search:
+            filters['search'] = search
+        
+        result = await get_dime_projects(page, limit, sort_by, sort_order, filters)
+        return JSONResponse(result)
+    except Exception as e:
+        return JSONResponse({"success": False, "error": str(e)})
+
+@app.get("/api/dime/project-suggestions")
+async def dime_project_suggestions_api(query: str, limit: int = 10):
+    """Get DIME project name suggestions for autocomplete - no authentication required"""
+    try:
+        result = await get_dime_suggestions('project_name', query, limit)
+        return JSONResponse(result)
+    except Exception as e:
+        return JSONResponse({"success": False, "error": str(e)})
+
+@app.get("/api/dime/barangay-suggestions")
+async def dime_barangay_suggestions_api(query: str, limit: int = 10):
+    """Get DIME barangay suggestions for autocomplete - no authentication required"""
+    try:
+        result = await get_dime_suggestions('barangay', query, limit)
+        return JSONResponse(result)
+    except Exception as e:
+        return JSONResponse({"success": False, "error": str(e)})
+
+@app.get("/api/dime/city-suggestions")
+async def dime_city_suggestions_api(query: str, limit: int = 10):
+    """Get DIME city suggestions for autocomplete - no authentication required"""
+    try:
+        result = await get_dime_suggestions('city', query, limit)
+        return JSONResponse(result)
+    except Exception as e:
+        return JSONResponse({"success": False, "error": str(e)})
+
+@app.get("/api/dime/province-suggestions")
+async def dime_province_suggestions_api(query: str, limit: int = 10):
+    """Get DIME province suggestions for autocomplete - no authentication required"""
+    try:
+        result = await get_dime_suggestions('province', query, limit)
+        return JSONResponse(result)
+    except Exception as e:
+        return JSONResponse({"success": False, "error": str(e)})
+
 if __name__ == "__main__":
     uvicorn.run(app, host="127.0.0.1", port=8000)
