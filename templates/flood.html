@@ -442,17 +442,6 @@ function toggleMobileMenu() {
                 
             </div>
             
-            <!-- Page-specific footer content -->
-            <footer class="visualizations-footer">
-                <div class="visualizations-container">
-                    <p><strong>📊 Source:</strong> Department of Public Works and Highways (DPWH) Flood Control Information System</p>
-                    <p><strong>📈 Total Projects:</strong> 9,855 flood control projects nationwide</p>
-                    <p><strong>📅 Data Range:</strong> 2016-2024 infrastructure projects</p>
-                </div>
-            </footer>
-            
-            {% include "footer.html" %}
-            
                     <div id="table-tab" class="budget-tab-panel">
                 <!-- Table view with real data -->
                 <div style="background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
@@ -6438,6 +6427,17 @@ function setupNetworkControls() {
     renderNetworkGraph(networkData);
 }
 </script>
+
+<!-- Page-specific footer content -->
+<footer class="visualizations-footer">
+    <div class="visualizations-container">
+        <p><strong>📊 Source:</strong> Department of Public Works and Highways (DPWH) Flood Control Information System</p>
+        <p><strong>📈 Total Projects:</strong> 9,855 flood control projects nationwide</p>
+        <p><strong>📅 Data Range:</strong> 2016-2024 infrastructure projects</p>
+    </div>
+</footer>
+
+{% include "footer.html" %}
 
 </body>
 </html>
