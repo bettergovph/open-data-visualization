@@ -656,7 +656,7 @@ async def dime_barangay_aggregates_by_count_api():
 
 @app.get("/api/dime/projects/{project_id}/status")
 async def dime_project_status_api(project_id: str):
-    """Get DIME project status by ID - no authentication required"""
+    """Get DIME project status by MeiliSearch ID - no authentication required"""
     try:
         import asyncpg
         conn = await asyncpg.connect(
@@ -667,9 +667,9 @@ async def dime_project_status_api(project_id: str):
             database=os.getenv('POSTGRES_DB_DIME', 'dime')
         )
         
-        # Query project by meili_id (the GlobalID from flood projects)
+        # Query project by meilisearch_id (the GlobalID from flood projects)
         project = await conn.fetchrow(
-            "SELECT status, project_name FROM projects WHERE meili_id = $1",
+            "SELECT status, project_name FROM projects WHERE meilisearch_id = $1",
             project_id
         )
         await conn.close()
