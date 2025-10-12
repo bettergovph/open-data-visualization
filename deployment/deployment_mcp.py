@@ -1070,7 +1070,7 @@ async def deploy_visualization(
         # Connect
         mcp = DeploymentMCP()
         connect_result = await mcp.handle_request(
-            {"method": "connect", "params": {"host": host, "username": username}}
+            {"method": "connect_to_server", "params": {"host": host, "username": username}}
         )
 
         if not connect_result["success"]:
