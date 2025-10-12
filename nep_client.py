@@ -3911,3 +3911,101 @@ async def get_nep_total_items_count(year: str = "2025"):
         traceback.print_exc()
         return {"success": False, "error": str(e)}
 
+
+async def get_nep_year_over_year():
+    """Get NEP total budget for each year"""
+    try:
+        print(f"🔍 [NEP] Getting year-over-year data")
+        
+        conn = await get_db_connection()
+        if not conn:
+            return {"success": False, "error": "Database connection failed"}
+        
+        years = [2020, 2021, 2022, 2023, 2024, 2025, 2026]
+        result_data = []
+        
+        for year in years:
+            table_name = f"budget_{year}"
+            try:
+                query = f"""
+                    SELECT 
+                        '{year}' as year,
+                        COUNT(*) as total_items,
+                        COALESCE(SUM(amount), 0) as total_amount
+                    FROM {table_name}
+                    WHERE amount > 0
+                """
+                result = await conn.fetchrow(query)
+                if result:
+                    result_data.append({
+                        "year": str(year),
+                        "total_items": result['total_items'],
+                        "total_amount": float(result['total_amount'])
+                    })
+            except Exception as e:
+                print(f"⚠️ [NEP] Error for year {year}: {e}")
+                continue
+        
+        await conn.close()
+        
+        return {
+            "success": True,
+            "data": result_data
+        }
+        
+    except Exception as e:
+        print(f"💥 [NEP] Error in get_nep_year_over_year: {e}")
+        return {"success": False, "error": str(e)}
+
+
+async def get_nep_top_programs(year: str = "2025", limit: int = 10):
+    """Get top NEP programs by budget amount"""
+    try:
+        print(f"🔍 [NEP] Getting top {limit} programs for {year}")
+        
+        conn = await get_db_connection()
+        if not conn:
+            return {"success": False, "error": "Database connection failed"}
+        
+        # Validate year
+        if not year.isdigit() or len(year) != 4:
+            await conn.close()
+            return {"success": False, "error": "Invalid year format"}
+        
+        table_name = f"budget_{year}"
+        
+        query = f"""
+            SELECT 
+                description,
+                SUM(amount) as total_amount,
+                COUNT(*) as item_count
+            FROM {table_name}
+            WHERE description IS NOT NULL 
+                AND description != ''
+                AND amount > 0
+            GROUP BY description
+            ORDER BY total_amount DESC
+            LIMIT $1
+        """
+        
+        results = await conn.fetch(query, limit)
+        await conn.close()
+        
+        programs = []
+        for row in results:
+            programs.append({
+                "description": row['description'],
+                "total_amount": float(row['total_amount']),
+                "item_count": row['item_count']
+            })
+        
+        return {
+            "success": True,
+            "year": year,
+            "programs": programs
+        }
+        
+    except Exception as e:
+        print(f"💥 [NEP] Error in get_nep_top_programs: {e}")
+        return {"success": False, "error": str(e)}
+

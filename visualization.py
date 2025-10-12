@@ -190,6 +190,26 @@ async def nep_data_browser_api(year: str = "2025", page: int = 1, limit: int = 1
     except Exception as e:
         return JSONResponse({"success": False, "error": str(e)})
 
+@app.get("/api/budget/nep/year-over-year")
+async def nep_year_over_year_api():
+    """Get NEP year-over-year data - no authentication required"""
+    try:
+        from nep_client import get_nep_year_over_year
+        result = await get_nep_year_over_year()
+        return JSONResponse(result)
+    except Exception as e:
+        return JSONResponse({"success": False, "error": str(e)})
+
+@app.get("/api/budget/nep/top-programs")
+async def nep_top_programs_api(year: str = "2025", limit: int = 10):
+    """Get top NEP programs - no authentication required"""
+    try:
+        from nep_client import get_nep_top_programs
+        result = await get_nep_top_programs(year, limit)
+        return JSONResponse(result)
+    except Exception as e:
+        return JSONResponse({"success": False, "error": str(e)})
+
 @app.get("/api/budget/nep/overview/stats")
 async def nep_overview_stats_api(year: str = Query("2026", description="Year to filter by")):
     """Get NEP overview statistics - no authentication required"""
