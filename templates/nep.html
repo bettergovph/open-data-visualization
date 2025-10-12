@@ -2897,14 +2897,14 @@ async function loadNEPYearOverYearChart() {
         if (!ctx) return;
         
         const years = result.data.map(d => d.year);
-        const amounts = result.data.map(d => d.total_amount / 1000000000); // Convert to billions
+        const amounts = result.data.map(d => d.total_amount); // Keep in original peso amounts
         
         new Chart(ctx, {
             type: 'line',
             data: {
                 labels: years,
                 datasets: [{
-                    label: 'NEP Budget (₱ Billions)',
+                    label: 'NEP Budget (₱)',
                     data: amounts,
                     borderColor: '#0038A8',
                     backgroundColor: 'rgba(0, 56, 168, 0.1)',
@@ -2927,7 +2927,13 @@ async function loadNEPYearOverYearChart() {
                     tooltip: {
                         callbacks: {
                             label: function(context) {
-                                return `₱${context.parsed.y.toFixed(2)}B`;
+                                const value = context.parsed.y;
+                                if (value >= 1000000000) {
+                                    return `₱${(value / 1000000000).toFixed(2)}B`;
+                                } else if (value >= 1000000) {
+                                    return `₱${(value / 1000000).toFixed(2)}M`;
+                                }
+                                return `₱${value.toLocaleString('en-PH')}`;
                             }
                         }
                     }
@@ -2937,7 +2943,12 @@ async function loadNEPYearOverYearChart() {
                         beginAtZero: true,
                         ticks: {
                             callback: function(value) {
-                                return '₱' + value.toFixed(1) + 'B';
+                                if (value >= 1000000000) {
+                                    return '₱' + (value / 1000000000).toFixed(1) + 'B';
+                                } else if (value >= 1000000) {
+                                    return '₱' + (value / 1000000).toFixed(1) + 'M';
+                                }
+                                return '₱' + (value / 1000).toFixed(0) + 'K';
                             }
                         }
                     }
@@ -2974,14 +2985,14 @@ async function loadNEPTopProgramsChart(year = '2025') {
             const desc = p.description;
             return desc.length > 40 ? desc.substring(0, 40) + '...' : desc;
         });
-        const amounts = result.programs.map(p => p.total_amount / 1000); // Convert to thousands
+        const amounts = result.programs.map(p => p.total_amount); // Keep in original peso amounts
         
         topProgramsChartInstance = new Chart(ctx, {
             type: 'bar',
             data: {
                 labels: labels,
                 datasets: [{
-                    label: 'Budget (₱ Thousands)',
+                    label: 'Budget (₱)',
                     data: amounts,
                     backgroundColor: '#0038A8',
                     borderColor: '#002d80',
@@ -3004,7 +3015,13 @@ async function loadNEPTopProgramsChart(year = '2025') {
                                 return result.programs[index].description;
                             },
                             label: function(context) {
-                                return `Budget: ₱${(context.parsed.x * 1000).toLocaleString('en-PH', {maximumFractionDigits: 0})}`;
+                                const value = context.parsed.x;
+                                if (value >= 1000000000) {
+                                    return `Budget: ₱${(value / 1000000000).toFixed(2)}B`;
+                                } else if (value >= 1000000) {
+                                    return `Budget: ₱${(value / 1000000).toFixed(2)}M`;
+                                }
+                                return `Budget: ₱${value.toLocaleString('en-PH')}`;
                             }
                         }
                     }
