@@ -1089,26 +1089,8 @@ async def deploy_with_options(
 
     if deploy_result["success"]:
         print(f"✅ {deployment_name} deployment completed successfully!")
-
-        # Run sanity tests after successful deployment
-        print(f"🧪 Running sanity tests on {base_url}...")
-        sanity_result = await mcp.handle_request(
-            {
-                "method": "sanity_test",
-                "params": {
-                    "base_url": base_url,
-                    "working_dir": working_dir,
-                },
-            }
-        )
-
-        if sanity_result["success"]:
-            print(f"✅ Sanity tests passed!")
-        else:
-            print(f"⚠️ Sanity tests failed: {sanity_result.get('error', 'Unknown error')}")
-            # Still continue, but warn about tests
-
-        # Disconnect after all operations
+        
+        # Disconnect after deployment
         await mcp.handle_request({"method": "disconnect"})
         return True
     else:

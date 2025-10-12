@@ -42,29 +42,7 @@
     {% block head %}{% endblock %}
 </head>
 <body>
-    <header class="visualizations-mobile-header">
-        <div class="visualizations-mobile-container">
-            <div class="visualizations-mobile-logo-section">
-                <a href="https://bettergov.ph" class="visualizations-mobile-logo-link">
-                    <img src="/static/images/gov_logo.png" alt="BetterGov.ph" class="visualizations-mobile-logo-img">
-                </a>
-                <a href="/" class="visualizations-mobile-site-name-link">
-                    <span class="visualizations-mobile-site-name">Data Visualizations</span>
-                </a>
-            </div>
-            <nav class="visualizations-mobile-nav-menu">
-                <a href="/">Home</a>
-                <a href="/nep">NEP</a>
-                <a href="/budget">Budget</a>
-                <a href="/flood">Flood</a>
-                <a href="/dime">DIME</a>
-                <a href="/map">Map</a>
-                <a href="/budget-nep-correlation">NEP-Budget</a>
-                <a href="/budget-flood-correlation">Budget-Flood</a>
-                <a href="/flood-dime-correlation">Flood-DIME</a>
-            </nav>
-        </div>
-    </header>
+    {% include "mobile/navbar.html" %}
     
     <main class="visualizations-mobile-main">
         {% block content %}{% endblock %}

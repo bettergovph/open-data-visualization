@@ -37,24 +37,7 @@
     {% block head %}{% endblock %}
 </head>
 <body>
-    <header class="visualizations-header">
-        <div class="visualizations-container">
-            <div class="visualizations-logo-section">
-                <a href="https://bettergov.ph" class="visualizations-logo-link">
-                    <img src="/static/images/gov_logo.png" alt="BetterGov.ph" class="visualizations-logo-img">
-                </a>
-                <a href="/" class="visualizations-site-name-link">
-                    <span class="visualizations-site-name">Data Visualizations</span>
-                </a>
-            </div>
-            <nav class="visualizations-nav-menu">
-                <a href="/budget">Budget</a>
-                <a href="/flood">Flood Control</a>
-                <a href="/dime">DIME</a>
-                <a href="/about">About</a>
-            </nav>
-        </div>
-    </header>
+    {% include "navbar.html" %}
     
     <main class="visualizations-main">
         {% block content %}{% endblock %}
