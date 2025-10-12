@@ -50,102 +50,17 @@ The script queries the following databases and generates summary stats:
    - Data source information
    - Date range
 
-## Automatic Regeneration Options
+## Regeneration Strategy
 
-### Option 1: Systemd Timer
+**Decision: Manual regeneration only**
 
-Create a systemd timer to run the update script periodically:
+Since data imports happen infrequently (weekly, monthly, or even yearly), automatic periodic updates are not necessary. Summary statistics should be regenerated manually when:
 
-**Service file**: `/etc/systemd/system/update-summary-stats.service`
-```ini
-[Unit]
-Description=Update BetterGovPH Summary Statistics
-After=network.target postgresql.service
+1. New data is imported into any database
+2. Significant changes are made to existing data
+3. Footer statistics appear outdated
 
-[Service]
-Type=oneshot
-User=joebert
-WorkingDirectory=/home/joebert/open-data-visualization
-ExecStart=/home/joebert/open-data-visualization/deployment/update_summary_stats.sh
-StandardOutput=journal
-StandardError=journal
-```
-
-**Timer file**: `/etc/systemd/system/update-summary-stats.timer`
-```ini
-[Unit]
-Description=Update Summary Statistics Daily
-
-[Timer]
-OnCalendar=daily
-OnBootSec=5min
-Persistent=true
-
-[Install]
-WantedBy=timers.target
-```
-
-Enable and start:
-```bash
-sudo systemctl enable update-summary-stats.timer
-sudo systemctl start update-summary-stats.timer
-```
-
-### Option 2: Cron Job
-
-Add to crontab (not recommended, prefer systemd timer):
-
-```bash
-# Update summary stats daily at 3 AM
-0 3 * * * /home/joebert/open-data-visualization/deployment/update_summary_stats.sh >> /home/joebert/open-data-visualization/logs/summary_stats.log 2>&1
-```
-
-### Option 3: Application Startup
-
-Run the update script as part of the application startup in `restart.sh`:
-
-```bash
-# Add after git pull, before building
-echo "📊 Updating summary statistics..."
-./deployment/update_summary_stats.sh
-```
-
-### Option 4: Post-Deploy Hook
-
-Add to `deployment_mcp.py` as a post-deployment step to regenerate stats after successful deployment.
-
-### Option 5: GitHub Actions
-
-Create a workflow that runs periodically and commits updated JSON files:
-
-```yaml
-name: Update Summary Stats
-on:
-  schedule:
-    - cron: '0 3 * * *'  # Daily at 3 AM UTC
-  workflow_dispatch:  # Allow manual trigger
-
-jobs:
-  update-stats:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
-      - name: Set up Python
-        uses: actions/setup-python@v4
-        with:
-          python-version: '3.12'
-      - name: Install dependencies
-        run: pip install -r requirements.txt
-      - name: Generate summary stats
-        run: python3 generate_summary_stats.py
-      - name: Commit and push if changed
-        run: |
-          git config user.name "GitHub Actions"
-          git config user.email "actions@github.com"
-          git add static/data/*_summary.json
-          git diff --staged --quiet || git commit -m "Update summary statistics"
-          git push
-```
+**No automatic scheduling is implemented.** This avoids unnecessary resource usage for data that rarely changes.
 
 ## When to Update
 
@@ -169,11 +84,11 @@ The `generate_summary_stats.py` script requires:
 
 ## Current Status
 
-- ✅ Script created: `generate_summary_stats.py`
+- ✅ Script created: `utils/generate_summary_stats.py`
 - ✅ Convenience script: `deployment/update_summary_stats.sh`
 - ✅ Templates updated to load from JSON files
 - ✅ Fallback values in templates if JSON load fails
-- ⏸️ Automatic regeneration: **NOT YET IMPLEMENTED** - waiting for decision on proper tool
+- ❌ Automatic regeneration: **NOT IMPLEMENTED** - manual updates only, run after data imports
 
 ## Notes
 
