@@ -299,7 +299,7 @@ async def get_dime_projects(
         query = f"""
             SELECT 
                 id, project_code, project_name, status, cost, region, province, city, barangay,
-                date_started, date_completed, implementing_office, contractors
+                date_started, implementing_office, contractors
             FROM projects
             WHERE {where_clause}
             ORDER BY {sort_by} {sort_order}
@@ -322,7 +322,6 @@ async def get_dime_projects(
                 "city": row['city'],
                 "barangay": row['barangay'],
                 "date_started": row['date_started'].isoformat() if row['date_started'] else None,
-                "date_completed": row['date_completed'].isoformat() if row['date_completed'] else None,
                 "implementing_office": row['implementing_office'],
                 "contractors": row['contractors']
             })
