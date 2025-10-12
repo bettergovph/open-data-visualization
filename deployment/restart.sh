@@ -87,7 +87,7 @@ fi
 log "✅ Git pull completed"
 
 # Step 3: Build Rust application
-log "🔨 Step 2: Building Rust application..."
+log "🔨 Step 3: Building Rust application..."
 if ! cargo build --release; then
     error "Rust build failed"
     exit 1

@@ -1162,30 +1162,10 @@ if __name__ == "__main__":
         default="https://visualizations.bettergov.ph",
         help="Base URL for sanity testing (default: https://visualizations.bettergov.ph)",
     )
-    parser.add_argument(
-        "--action",
-        choices=["deploy", "test", "sanity", "visualization"],
-        default="deploy",
-        help="Action to perform",
-    )
-
     args = parser.parse_args()
 
-    if args.action == "deploy":
-        success = asyncio.run(
-            deploy_with_options(host=args.host, username=args.user, working_dir=args.dir, fast=args.fast, force=args.force, base_url=args.base_url, no_precheck=args.no_precheck)
-        )
-        exit(0 if success else 1)
-    elif args.action == "sanity":
-        success = asyncio.run(
-            run_sanity_test(host=args.host, username=args.user, working_dir=args.dir, base_url=args.base_url)
-        )
-        exit(0 if success else 1)
-    elif args.action == "visualization":
-        success = asyncio.run(
-            deploy_visualization(host=args.host, username=args.user, working_dir=args.dir)
-        )
-        exit(0 if success else 1)
-    else:
-        # Original test mode
-        asyncio.run(main())
+    # Default action is deploy
+    success = asyncio.run(
+        deploy_with_options(host=args.host, username=args.user, working_dir=args.dir, fast=args.fast, force=args.force, base_url=args.base_url, no_precheck=args.no_precheck)
+    )
+    exit(0 if success else 1)
