@@ -173,8 +173,10 @@ body {
 .github-footer p,
 .data-source-footer p {
     margin-bottom: var(--spacing-sm);
-    font-size: 0.75rem !important;
+    font-size: 0.65rem !important;
     text-align: center !important;
+    display: block !important;
+    width: 100% !important;
 }
 
 .visualizations-footer p:last-child,
