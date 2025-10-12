@@ -525,6 +525,9 @@ async function loadInitialMapData() {
             // Add markers for initial projects
             await processProjects(projects);
 
+            // Set offset to 1000 to start skipping
+            globalOffset = 1000;
+
             updateMapStatus(`Map initialized with ${projects.length} projects. Loading more automatically...`);
 
             // Start progressive loading (skips 1000 at a time for efficiency)
