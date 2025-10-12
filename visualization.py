@@ -11,7 +11,7 @@ from budget_client import (
     get_budget_regions,
     get_budget_files,
     get_budget_columns,
-    get_budget_duplicates,
+    get_budget_scored_duplicates,
     get_budget_duplicates_count,
     get_budget_total_items_count,
     get_nep_overview_stats,
@@ -62,7 +62,7 @@ async def budget_total_items_count_api():
 async def budget_duplicates_api(year: str = "2026", page: int = 1, limit: int = 10):
     """Get budget duplicates - no authentication required"""
     try:
-        result = await get_budget_duplicates(year, page, limit)
+        result = await get_budget_scored_duplicates(year, limit, (page - 1) * limit)
         return JSONResponse(result)
     except Exception as e:
         return JSONResponse({"success": False, "error": str(e)})
