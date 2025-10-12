@@ -231,13 +231,19 @@ async function loadInitialMapData() {
 }
 
 // Process projects and add to map
-function processProjects(projects) {
-    projects.forEach(project => {
+async function processProjects(projects) {
+    for (let i = 0; i < projects.length; i++) {
+        const project = projects[i];
         if (project.Latitude && project.Longitude) {
             const lat = parseFloat(project.Latitude);
             const lng = parseFloat(project.Longitude);
 
             if (!isNaN(lat) && !isNaN(lng)) {
+                // Add small delay every 10 projects to prevent overwhelming backend
+                if (i > 0 && i % 10 === 0) {
+                    await new Promise(resolve => setTimeout(resolve, 100));
+                }
+                
                 // Create marker
                 const marker = L.marker([lat, lng]);
 
@@ -265,7 +271,7 @@ function processProjects(projects) {
                 mapMarkers.push(marker);
             }
         }
-    });
+    }
 
     updateMapStatus(`Loaded ${mapMarkers.length} projects`);
 }
