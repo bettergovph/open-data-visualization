@@ -290,5 +290,15 @@ async def budget_agencies_api(year: str = "2025", limit: int = 10):
     except Exception as e:
         return JSONResponse({"success": False, "error": str(e)})
 
+@app.get("/api/budget/department-trends")
+async def budget_department_trends_api():
+    """Get department spending trends for 2020-2025 with percent changes - no authentication required"""
+    try:
+        from budget_postgres_client import get_budget_department_trends
+        result = await get_budget_department_trends()
+        return JSONResponse(result)
+    except Exception as e:
+        return JSONResponse({"success": False, "error": str(e), "departments": []})
+
 if __name__ == "__main__":
     uvicorn.run(app, host="127.0.0.1", port=8000)
