@@ -491,7 +491,9 @@ class DeploymentMCPServer:
             api_healthy = api_check["success"]
 
             logger.info("✅ BetterGovPH deployment completed successfully!")
-            logger.info("🌐 Frontend: http://localhost:8888"            logger.info("🔌 API: http://localhost:8000"            logger.info("📊 Production: https://visualizations.bettergov.ph"
+            logger.info("🌐 Frontend: http://localhost:8888")
+            logger.info("🔌 API: http://localhost:8000")
+            logger.info("📊 Production: https://visualizations.bettergov.ph")
             return {
                 "success": True,
                 "message": "BetterGovPH Visualization deployment completed successfully",
