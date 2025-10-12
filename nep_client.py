@@ -3327,3 +3327,587 @@ async def get_budget_data_browser_all_years(years: list, page: int = 1, limit: i
         traceback.print_exc()
         return {"success": False, "error": str(e)}
 
+
+# NEP-specific functions for the visualization API
+# These are adapted from the budget functions but query NEP tables
+
+async def get_nep_overview_stats(year: str = None):
+    """Get NEP overview statistics"""
+    try:
+        print(f"🔍 [PostgreSQL] Getting NEP overview stats for {year if year else 'all years'}")
+
+        conn = await get_db_connection()
+        if not conn:
+            return {"success": False, "error": "Database connection failed"}
+
+        if year:
+            # Validate year format
+            if not year.isdigit() or len(year) != 4:
+                await conn.close()
+                return {"success": False, "error": "Invalid year format"}
+
+            table_name = f"nep_{year}"
+
+            # Get overview stats for specific year
+            overview_query = f"""
+            SELECT
+                COUNT(*) as total_records,
+                COUNT(DISTINCT department) as departments_count,
+                COUNT(DISTINCT agency) as agencies_count,
+                SUM(amount) as total_amount
+            FROM {table_name}
+            """
+
+            result = await conn.fetchrow(overview_query)
+            await conn.close()
+
+            if result:
+                return {
+                    "year": year,
+                    "total_records": result['total_records'],
+                    "departments_count": result['departments_count'],
+                    "agencies_count": result['agencies_count'],
+                    "total_amount": float(result['total_amount'] or 0)
+                }
+            else:
+                return {"success": False, "error": f"No data found for year {year}"}
+        else:
+            # Get overview stats across all years
+            overview_query = """
+            SELECT
+                COUNT(*) as total_records,
+                COUNT(DISTINCT department) as departments_count,
+                COUNT(DISTINCT agency) as agencies_count,
+                SUM(amount) as total_amount
+            FROM nep_data
+            """
+
+            result = await conn.fetchrow(overview_query)
+            await conn.close()
+
+            if result:
+                return {
+                    "total_records": result['total_records'],
+                    "departments_count": result['departments_count'],
+                    "agencies_count": result['agencies_count'],
+                    "total_amount": float(result['total_amount'] or 0)
+                }
+            else:
+                return {"success": False, "error": "No NEP data found"}
+
+    except Exception as e:
+        print(f"💥 [PostgreSQL] Error in get_nep_overview_stats: {e}")
+        import traceback
+        traceback.print_exc()
+        return {"success": False, "error": str(e)}
+
+
+async def get_nep_departments(year: str = "2025", limit: int = 10):
+    """Get NEP departments with amounts for charts"""
+    try:
+        print(f"🔍 [PostgreSQL] Getting NEP departments for {year}")
+
+        conn = await get_db_connection()
+        if not conn:
+            return {"success": False, "error": "Database connection failed"}
+
+        # Validate year format
+        if not year.isdigit() or len(year) != 4:
+            await conn.close()
+            return {"success": False, "error": "Invalid year format"}
+
+        table_name = f"nep_{year}"
+
+        # Get departments with total amounts
+        departments_query = f"""
+        SELECT
+            department as department_description,
+            COUNT(*) as project_count,
+            SUM(amount) as total_amount
+        FROM {table_name}
+        WHERE department IS NOT NULL AND department != ''
+        GROUP BY department
+        ORDER BY total_amount DESC
+        LIMIT $1
+        """
+
+        results = await conn.fetch(departments_query, limit)
+        await conn.close()
+
+        departments = []
+        for row in results:
+            departments.append({
+                "department": row['department_description'],
+                "project_count": row['project_count'],
+                "total_amount": float(row['total_amount'] or 0)
+            })
+
+        print(f"✅ [PostgreSQL] Retrieved {len(departments)} NEP departments")
+        return {"departments": departments}
+
+    except Exception as e:
+        print(f"💥 [PostgreSQL] Error in get_nep_departments: {e}")
+        import traceback
+        traceback.print_exc()
+        return {"success": False, "error": str(e)}
+
+
+async def get_nep_agencies(year: str = "2025", limit: int = 10):
+    """Get NEP agencies with amounts for charts"""
+    try:
+        print(f"🔍 [PostgreSQL] Getting NEP agencies for {year}")
+
+        conn = await get_db_connection()
+        if not conn:
+            return {"success": False, "error": "Database connection failed"}
+
+        # Validate year format
+        if not year.isdigit() or len(year) != 4:
+            await conn.close()
+            return {"success": False, "error": "Invalid year format"}
+
+        table_name = f"nep_{year}"
+
+        # Get agencies with total amounts
+        agencies_query = f"""
+        SELECT
+            agency as agency_description,
+            COUNT(*) as project_count,
+            SUM(amount) as total_amount
+        FROM {table_name}
+        WHERE agency IS NOT NULL AND agency != ''
+        GROUP BY agency
+        ORDER BY total_amount DESC
+        LIMIT $1
+        """
+
+        results = await conn.fetch(agencies_query, limit)
+        await conn.close()
+
+        agencies = []
+        for row in results:
+            agencies.append({
+                "agency": row['agency_description'],
+                "project_count": row['project_count'],
+                "total_amount": float(row['total_amount'] or 0)
+            })
+
+        print(f"✅ [PostgreSQL] Retrieved {len(agencies)} NEP agencies")
+        return {"agencies": agencies}
+
+    except Exception as e:
+        print(f"💥 [PostgreSQL] Error in get_nep_agencies: {e}")
+        import traceback
+        traceback.print_exc()
+        return {"success": False, "error": str(e)}
+
+
+async def get_nep_expense_categories(year: str = "2025", limit: int = 10):
+    """Get NEP expense categories with amounts for charts"""
+    try:
+        print(f"🔍 [PostgreSQL] Getting NEP expense categories for {year}")
+
+        conn = await get_db_connection()
+        if not conn:
+            return {"success": False, "error": "Database connection failed"}
+
+        # Validate year format
+        if not year.isdigit() or len(year) != 4:
+            await conn.close()
+            return {"success": False, "error": "Invalid year format"}
+
+        table_name = f"nep_{year}"
+
+        # Get expense categories with total amounts
+        categories_query = f"""
+        SELECT
+            expense_category as category_description,
+            COUNT(*) as project_count,
+            SUM(amount) as total_amount
+        FROM {table_name}
+        WHERE expense_category IS NOT NULL AND expense_category != ''
+        GROUP BY expense_category
+        ORDER BY total_amount DESC
+        LIMIT $1
+        """
+
+        results = await conn.fetch(categories_query, limit)
+        await conn.close()
+
+        categories = []
+        for row in results:
+            categories.append({
+                "category": row['category_description'],
+                "project_count": row['project_count'],
+                "total_amount": float(row['total_amount'] or 0)
+            })
+
+        print(f"✅ [PostgreSQL] Retrieved {len(categories)} NEP expense categories")
+        return {"categories": categories}
+
+    except Exception as e:
+        print(f"💥 [PostgreSQL] Error in get_nep_expense_categories: {e}")
+        import traceback
+        traceback.print_exc()
+        return {"success": False, "error": str(e)}
+
+
+async def get_nep_regions(year: str = "2025", limit: int = 10):
+    """Get NEP regions with amounts for charts"""
+    try:
+        print(f"🔍 [PostgreSQL] Getting NEP regions for {year}")
+
+        conn = await get_db_connection()
+        if not conn:
+            return {"success": False, "error": "Database connection failed"}
+
+        # Validate year format
+        if not year.isdigit() or len(year) != 4:
+            await conn.close()
+            return {"success": False, "error": "Invalid year format"}
+
+        table_name = f"nep_{year}"
+
+        # Get regions with total amounts
+        regions_query = f"""
+        SELECT
+            region as region_description,
+            COUNT(*) as project_count,
+            SUM(amount) as total_amount
+        FROM {table_name}
+        WHERE region IS NOT NULL AND region != ''
+        GROUP BY region
+        ORDER BY total_amount DESC
+        LIMIT $1
+        """
+
+        results = await conn.fetch(regions_query, limit)
+        await conn.close()
+
+        regions = []
+        for row in results:
+            regions.append({
+                "region": row['region_description'],
+                "project_count": row['project_count'],
+                "total_amount": float(row['total_amount'] or 0)
+            })
+
+        print(f"✅ [PostgreSQL] Retrieved {len(regions)} NEP regions")
+        return {"regions": regions}
+
+    except Exception as e:
+        print(f"💥 [PostgreSQL] Error in get_nep_regions: {e}")
+        import traceback
+        traceback.print_exc()
+        return {"success": False, "error": str(e)}
+
+
+async def get_nep_data_browser(year: str = "2025", page: int = 1, limit: int = 50, sort_by: str = "amount", sort_order: str = "DESC", filters: dict = None):
+    """Get NEP data browser with pagination and filtering"""
+    try:
+        print(f"🔍 [PostgreSQL] Getting NEP data browser for {year}, page {page}, limit {limit}")
+
+        conn = await get_db_connection()
+        if not conn:
+            return {"success": False, "error": "Database connection failed"}
+
+        # Validate year format
+        if not year.isdigit() or len(year) != 4:
+            await conn.close()
+            return {"success": False, "error": "Invalid year format"}
+
+        table_name = f"nep_{year}"
+
+        # Calculate offset
+        offset = (page - 1) * limit
+
+        # Build WHERE clause from filters
+        where_conditions = []
+        params = []
+        param_count = 0
+
+        if filters:
+            for key, value in filters.items():
+                if value and str(value).strip():
+                    param_count += 1
+                    if key in ['department', 'agency', 'region', 'expense_category']:
+                        where_conditions.append(f"{key} ILIKE ${param_count}")
+                        params.append(f"%{value}%")
+                    elif key in ['amount']:
+                        # For amount, assume it's a minimum value
+                        try:
+                            amount_val = float(value)
+                            param_count += 1
+                            where_conditions.append(f"{key} >= ${param_count}")
+                            params.append(amount_val)
+                        except ValueError:
+                            continue
+
+        where_clause = " AND ".join(where_conditions) if where_conditions else "1=1"
+
+        # Validate sort_by column (basic security)
+        allowed_sort_columns = ['amount', 'department', 'agency', 'region', 'expense_category', 'project_title']
+        if sort_by not in allowed_sort_columns:
+            sort_by = 'amount'
+
+        # Validate sort_order
+        if sort_order.upper() not in ['ASC', 'DESC']:
+            sort_order = 'DESC'
+
+        # Get total count for pagination
+        count_query = f"SELECT COUNT(*) FROM {table_name} WHERE {where_clause}"
+        total_result = await conn.fetchval(count_query, *params)
+        total_count = total_result or 0
+
+        # Get paginated data
+        data_query = f"""
+        SELECT
+            id,
+            department,
+            agency,
+            region,
+            expense_category,
+            project_title,
+            amount
+        FROM {table_name}
+        WHERE {where_clause}
+        ORDER BY {sort_by} {sort_order}
+        LIMIT ${len(params) + 1} OFFSET ${len(params) + 2}
+        """
+
+        params.extend([limit, offset])
+        results = await conn.fetch(data_query, *params)
+        await conn.close()
+
+        # Convert to list of dicts
+        data = []
+        for row in results:
+            data.append({
+                "id": row['id'],
+                "department": row['department'],
+                "agency": row['agency'],
+                "region": row['region'],
+                "expense_category": row['expense_category'],
+                "project_title": row['project_title'],
+                "amount": float(row['amount'] or 0)
+            })
+
+        print(f"✅ [PostgreSQL] Retrieved {len(data)} NEP rows, total: {total_count}")
+        return {
+            "data": data,
+            "pagination": {
+                "page": page,
+                "limit": limit,
+                "total": total_count,
+                "pages": (total_count + limit - 1) // limit
+            }
+        }
+
+    except Exception as e:
+        print(f"💥 [PostgreSQL] Error in get_nep_data_browser: {e}")
+        import traceback
+        traceback.print_exc()
+        return {"success": False, "error": str(e)}
+
+
+async def get_nep_columns(year: str = "2025"):
+    """Get NEP table column information"""
+    try:
+        print(f"🔍 [PostgreSQL] Getting NEP columns for {year}")
+
+        conn = await get_db_connection()
+        if not conn:
+            return {"success": False, "error": "Database connection failed"}
+
+        # Validate year format
+        if not year.isdigit() or len(year) != 4:
+            await conn.close()
+            return {"success": False, "error": "Invalid year format"}
+
+        table_name = f"nep_{year}"
+
+        # Get column information
+        columns_query = f"""
+        SELECT
+            column_name,
+            data_type,
+            is_nullable,
+            column_default
+        FROM information_schema.columns
+        WHERE table_name = $1
+        AND table_schema = 'public'
+        ORDER BY ordinal_position
+        """
+
+        results = await conn.fetch(columns_query, table_name)
+        await conn.close()
+
+        columns = []
+        for row in results:
+            columns.append({
+                "name": row['column_name'],
+                "type": row['data_type'],
+                "nullable": row['is_nullable'] == 'YES',
+                "default": row['column_default']
+            })
+
+        print(f"✅ [PostgreSQL] Retrieved {len(columns)} NEP columns")
+        return {"columns": columns}
+
+    except Exception as e:
+        print(f"💥 [PostgreSQL] Error in get_nep_columns: {e}")
+        import traceback
+        traceback.print_exc()
+        return {"success": False, "error": str(e)}
+
+
+async def get_nep_duplicates(year: str = "2025", page: int = 1, limit: int = 10):
+    """Get NEP potential duplicates"""
+    try:
+        print(f"🔍 [PostgreSQL] Getting NEP duplicates for {year}")
+
+        conn = await get_db_connection()
+        if not conn:
+            return {"success": False, "error": "Database connection failed"}
+
+        # Validate year format
+        if not year.isdigit() or len(year) != 4:
+            await conn.close()
+            return {"success": False, "error": "Invalid year format"}
+
+        table_name = f"nep_{year}"
+
+        # Calculate offset
+        offset = (page - 1) * limit
+
+        # Simple duplicate detection based on project title and amount
+        duplicates_query = f"""
+        SELECT
+            project_title,
+            amount,
+            COUNT(*) as duplicate_count,
+            array_agg(id) as ids,
+            array_agg(department) as departments,
+            array_agg(agency) as agencies
+        FROM {table_name}
+        WHERE project_title IS NOT NULL AND project_title != ''
+        GROUP BY project_title, amount
+        HAVING COUNT(*) > 1
+        ORDER BY duplicate_count DESC, amount DESC
+        LIMIT $1 OFFSET $2
+        """
+
+        results = await conn.fetch(duplicates_query, limit, offset)
+        await conn.close()
+
+        duplicates = []
+        for row in results:
+            duplicates.append({
+                "project_title": row['project_title'],
+                "amount": float(row['amount'] or 0),
+                "duplicate_count": row['duplicate_count'],
+                "ids": row['ids'],
+                "departments": row['departments'],
+                "agencies": row['agencies']
+            })
+
+        print(f"✅ [PostgreSQL] Retrieved {len(duplicates)} NEP duplicate groups")
+        return {"duplicates": duplicates}
+
+    except Exception as e:
+        print(f"💥 [PostgreSQL] Error in get_nep_duplicates: {e}")
+        import traceback
+        traceback.print_exc()
+        return {"success": False, "error": str(e)}
+
+
+async def get_nep_duplicates_count(year: str = "2025"):
+    """Get NEP duplicates count"""
+    try:
+        print(f"🔍 [PostgreSQL] Getting NEP duplicates count for {year}")
+
+        conn = await get_db_connection()
+        if not conn:
+            return {"success": False, "error": "Database connection failed"}
+
+        # Validate year format
+        if not year.isdigit() or len(year) != 4:
+            await conn.close()
+            return {"success": False, "error": "Invalid year format"}
+
+        table_name = f"nep_{year}"
+
+        # Count duplicate groups
+        count_query = f"""
+        SELECT COUNT(*) as duplicate_groups_count
+        FROM (
+            SELECT project_title, amount
+            FROM {table_name}
+            WHERE project_title IS NOT NULL AND project_title != ''
+            GROUP BY project_title, amount
+            HAVING COUNT(*) > 1
+        ) duplicates
+        """
+
+        result = await conn.fetchrow(count_query)
+        await conn.close()
+
+        count = result['duplicate_groups_count'] if result else 0
+
+        print(f"✅ [PostgreSQL] Found {count} NEP duplicate groups")
+        return {"count": count}
+
+    except Exception as e:
+        print(f"💥 [PostgreSQL] Error in get_nep_duplicates_count: {e}")
+        import traceback
+        traceback.print_exc()
+        return {"success": False, "error": str(e)}
+
+
+async def get_nep_anomalies_count(year: str = "2025"):
+    """Get NEP anomalies count (placeholder - implement based on business rules)"""
+    try:
+        print(f"🔍 [PostgreSQL] Getting NEP anomalies count for {year}")
+
+        # For now, return a placeholder - implement actual anomaly detection logic
+        return {"count": 0, "message": "NEP anomalies detection not yet implemented"}
+
+    except Exception as e:
+        print(f"💥 [PostgreSQL] Error in get_nep_anomalies_count: {e}")
+        import traceback
+        traceback.print_exc()
+        return {"success": False, "error": str(e)}
+
+
+async def get_nep_total_items_count(year: str = "2025"):
+    """Get NEP total items count"""
+    try:
+        print(f"🔍 [PostgreSQL] Getting NEP total items count for {year}")
+
+        conn = await get_db_connection()
+        if not conn:
+            return {"success": False, "error": "Database connection failed"}
+
+        # Validate year format
+        if not year.isdigit() or len(year) != 4:
+            await conn.close()
+            return {"success": False, "error": "Invalid year format"}
+
+        table_name = f"nep_{year}"
+
+        # Get total count
+        count_query = f"SELECT COUNT(*) FROM {table_name}"
+        result = await conn.fetchrow(count_query)
+        await conn.close()
+
+        count = result['count'] if result else 0
+
+        print(f"✅ [PostgreSQL] NEP total items count: {count}")
+        return {"count": count}
+
+    except Exception as e:
+        print(f"💥 [PostgreSQL] Error in get_nep_total_items_count: {e}")
+        import traceback
+        traceback.print_exc()
+        return {"success": False, "error": str(e)}
+

@@ -3141,6 +3141,21 @@ async def get_column_mapping_2020_2021():
         return {"success": False, "error": str(e)}
 
 
+async def get_budget_files():
+    """Get list of uploaded budget files (placeholder - implement file tracking)"""
+    try:
+        print("🔍 [PostgreSQL] Getting budget files list")
+
+        # For now, return a placeholder - implement actual file tracking logic
+        return {"files": [], "message": "Budget files tracking not yet implemented"}
+
+    except Exception as e:
+        print(f"💥 [PostgreSQL] Error in get_budget_files: {e}")
+        import traceback
+        traceback.print_exc()
+        return {"success": False, "error": str(e)}
+
+
 async def get_budget_data_browser_all_years(years: list, page: int = 1, limit: int = 50, sort_by: str = "amt", sort_order: str = "DESC", filters: dict = None):
     """Get paginated budget data across all years with sorting and column filtering"""
     try:

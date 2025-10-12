@@ -9,23 +9,63 @@ from budget_client import (
     get_budget_agencies,
     get_budget_expense_categories,
     get_budget_regions,
-    get_budget_files,
     get_budget_columns,
-    get_budget_duplicates,
     get_budget_duplicates_count,
-    get_budget_total_items_count,
-    get_nep_overview_stats,
-    get_nep_departments,
-    get_nep_agencies,
-    get_nep_expense_categories,
-    get_nep_regions,
-    get_nep_data_browser,
-    get_nep_columns,
-    get_nep_duplicates,
-    get_nep_duplicates_count,
-    get_nep_anomalies_count,
-    get_nep_total_items_count
+    get_budget_total_items_count
 )
+
+# Stub functions for missing imports - will be implemented as data becomes available
+async def get_budget_files():
+    """Placeholder - list uploaded Budget documents"""
+    return {"files": [], "message": "Budget files API not yet implemented"}
+
+async def get_budget_duplicates(year: str = "2025", page: int = 1, limit: int = 50):
+    """Placeholder - budget duplicates"""
+    return {"duplicates": [], "message": "Budget duplicates not yet implemented"}
+
+async def get_nep_overview_stats():
+    """Placeholder - NEP overview statistics"""
+    return {"total_records": 0, "message": "NEP overview stats not yet implemented"}
+
+async def get_nep_departments():
+    """Placeholder - NEP departments"""
+    return {"departments": [], "message": "NEP departments not yet implemented"}
+
+async def get_nep_agencies():
+    """Placeholder - NEP agencies"""
+    return {"agencies": [], "message": "NEP agencies not yet implemented"}
+
+async def get_nep_expense_categories():
+    """Placeholder - NEP expense categories"""
+    return {"categories": [], "message": "NEP expense categories not yet implemented"}
+
+async def get_nep_regions():
+    """Placeholder - NEP regions"""
+    return {"regions": [], "message": "NEP regions not yet implemented"}
+
+async def get_nep_data_browser():
+    """Placeholder - NEP data browser"""
+    return {"data": [], "message": "NEP data browser not yet implemented"}
+
+async def get_nep_columns():
+    """Placeholder - NEP columns"""
+    return {"columns": [], "message": "NEP columns not yet implemented"}
+
+async def get_nep_duplicates():
+    """Placeholder - NEP duplicates"""
+    return {"duplicates": [], "message": "NEP duplicates not yet implemented"}
+
+async def get_nep_duplicates_count():
+    """Placeholder - NEP duplicates count"""
+    return {"count": 0, "message": "NEP duplicates count not yet implemented"}
+
+async def get_nep_anomalies_count():
+    """Placeholder - NEP anomalies count"""
+    return {"count": 0, "message": "NEP anomalies count not yet implemented"}
+
+async def get_nep_total_items_count():
+    """Placeholder - NEP total items count"""
+    return {"count": 0, "message": "NEP total items count not yet implemented"}
 
 app = FastAPI(title="BetterGovPH API", version="1.0.0")
 
