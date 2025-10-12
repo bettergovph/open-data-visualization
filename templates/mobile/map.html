@@ -267,13 +267,14 @@ function processProjects(projects) {
     updateMapStatus(`Loaded ${mapMarkers.length} projects`);
 }
 
-// Progressive loading function
+// Progressive loading function - loads in chunks, skipping 1000 at a time
 async function loadMoreProjects() {
     if (isLoadingMore || progressiveLoadingCancelled) return;
 
     isLoadingMore = true;
     try {
-        const response = await fetch(`/api/flood/projects?limit=50&offset=${globalOffset}`);
+        // Skip 1000 at a time for efficient loading
+        const response = await fetch(`/api/flood/projects?limit=100&offset=${globalOffset}`);
         if (!response.ok) {
             throw new Error(`HTTP ${response.status}: ${response.statusText}`);
         }
@@ -289,7 +290,7 @@ async function loadMoreProjects() {
         }
 
         processProjects(projects);
-        globalOffset += projects.length;
+        globalOffset += 1000; // Skip 1000 at a time instead of loading sequentially
 
     } catch (error) {
         console.error('❌ Error loading more projects:', error);
