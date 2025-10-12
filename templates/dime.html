@@ -444,11 +444,28 @@ function toggleMobileMenu() {
 <!-- Page-specific footer content -->
 <footer class="visualizations-footer">
     <div class="visualizations-container">
-        <p><strong>📊 Source:</strong> DBM DIME (Digital Information for Monitoring and Evaluation)</p>
-        <p><strong>📈 Total Projects:</strong> 12,870+ infrastructure projects</p>
-        <p><strong>📅 Data Range:</strong> Government infrastructure projects</p>
+        <p><strong>📊 Source:</strong> <span id="dime-source">Loading...</span></p>
+        <p><strong>📈 Total Projects:</strong> <span id="dime-total">Loading...</span> infrastructure projects</p>
+        <p><strong>📅 Data Range:</strong> <span id="dime-range">Loading...</span></p>
     </div>
 </footer>
+
+<script>
+// Load DIME summary stats
+fetch('/static/data/dime_summary.json')
+    .then(response => response.json())
+    .then(data => {
+        document.getElementById('dime-source').textContent = data.source;
+        document.getElementById('dime-total').textContent = data.total_projects.toLocaleString('en-PH') + '+';
+        document.getElementById('dime-range').textContent = data.data_range;
+    })
+    .catch(error => {
+        console.error('Error loading DIME summary:', error);
+        document.getElementById('dime-source').textContent = 'DBM DIME (Digital Information for Monitoring and Evaluation)';
+        document.getElementById('dime-total').textContent = '12,870+';
+        document.getElementById('dime-range').textContent = 'Government infrastructure projects';
+    });
+</script>
 
 {% include "footer.html" %}
 

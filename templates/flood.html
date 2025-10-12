@@ -6431,11 +6431,28 @@ function setupNetworkControls() {
 <!-- Page-specific footer content -->
 <footer class="visualizations-footer">
     <div class="visualizations-container">
-        <p><strong>📊 Source:</strong> Department of Public Works and Highways (DPWH) Flood Control Information System</p>
-        <p><strong>📈 Total Projects:</strong> 9,855 flood control projects nationwide</p>
-        <p><strong>📅 Data Range:</strong> 2016-2024 infrastructure projects</p>
+        <p><strong>📊 Source:</strong> <span id="flood-source">Loading...</span></p>
+        <p><strong>📈 Total Projects:</strong> <span id="flood-total">Loading...</span> flood control projects nationwide</p>
+        <p><strong>📅 Data Range:</strong> <span id="flood-range">Loading...</span> infrastructure projects</p>
     </div>
 </footer>
+
+<script>
+// Load flood summary stats
+fetch('/static/data/flood_summary.json')
+    .then(response => response.json())
+    .then(data => {
+        document.getElementById('flood-source').textContent = data.source;
+        document.getElementById('flood-total').textContent = data.total_projects.toLocaleString('en-PH');
+        document.getElementById('flood-range').textContent = data.data_range;
+    })
+    .catch(error => {
+        console.error('Error loading flood summary:', error);
+        document.getElementById('flood-source').textContent = 'Department of Public Works and Highways (DPWH) Flood Control Information System';
+        document.getElementById('flood-total').textContent = '9,855';
+        document.getElementById('flood-range').textContent = '2016-2024';
+    });
+</script>
 
 {% include "footer.html" %}
 

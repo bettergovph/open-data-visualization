@@ -29,29 +29,39 @@ async def get_db_connection(database):
 
 
 async def generate_flood_stats():
-    """Generate flood control statistics"""
+    """Generate flood control statistics from MeiliSearch"""
     print("📊 Generating flood control statistics...")
     
-    conn = await get_db_connection('flood_control')
-    if not conn:
-        return None
-    
     try:
-        # Get total project count from MeiliSearch index stats
-        # For now, query from available tables
-        stats = {
-            "total_projects": 9855,  # This should come from actual count
-            "data_range": "2016-2024",
-            "source": "Department of Public Works and Highways (DPWH) Flood Control Information System",
-            "last_updated": "2024-10-12"
-        }
+        import aiohttp
         
-        await conn.close()
-        return stats
+        meili_url = os.getenv('MEILI_HTTP_ADDR', '127.0.0.1:7700')
+        meili_key = os.getenv('MEILI_MASTER_KEY', '')
+        
+        # Query MeiliSearch for total count
+        async with aiohttp.ClientSession() as session:
+            headers = {'Authorization': f'Bearer {meili_key}'}
+            async with session.get(
+                f'http://{meili_url}/indexes/bettergov_flood_control/stats',
+                headers=headers
+            ) as response:
+                if response.status == 200:
+                    data = await response.json()
+                    total_projects = data.get('numberOfDocuments', 0)
+                    
+                    stats = {
+                        "total_projects": total_projects,
+                        "data_range": "2016-2024",
+                        "source": "Department of Public Works and Highways (DPWH) Flood Control Information System",
+                        "last_updated": "2024-10-12"
+                    }
+                    return stats
+                else:
+                    print(f"❌ MeiliSearch returned status {response.status}")
+                    return None
         
     except Exception as e:
         print(f"❌ Error generating flood stats: {e}")
-        await conn.close()
         return None
 
 
