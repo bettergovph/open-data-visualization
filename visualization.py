@@ -13,7 +13,9 @@ from budget_client import (
     get_budget_columns,
     get_budget_scored_duplicates,
     get_budget_duplicates_count,
-    get_budget_total_items_count,
+    get_budget_total_items_count
+)
+from nep_client import (
     get_nep_overview_stats,
     get_nep_departments,
     get_nep_agencies,
