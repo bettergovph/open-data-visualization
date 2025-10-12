@@ -2985,7 +2985,7 @@ async function loadNEPTopProgramsChart(year = '2025') {
             const desc = p.description;
             return desc.length > 40 ? desc.substring(0, 40) + '...' : desc;
         });
-        const amounts = result.programs.map(p => p.total_amount * 1000); // Database stores in thousands
+        const amounts = result.programs.map(p => p.total_amount); // Already in correct peso amounts
         
         topProgramsChartInstance = new Chart(ctx, {
             type: 'bar',
