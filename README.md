@@ -28,8 +28,28 @@ This project contains the **BetterGovPH Data Visualizations** platform - a compr
 ### Backend (Python/FastAPI) 
 - **Server**: 192.168.2.122:8000
 - **Framework**: FastAPI with async PostgreSQL
-- **Database**: Government budget and infrastructure data
-- **Status**: Mock API responses (database integration pending)
+- **Databases**: 
+  - `budget_analysis` - Budget data (2017-2025)
+  - `nep` - NEP data (2020-2026)
+  - `dime` - DIME infrastructure projects
+- **Status**: Fully operational with real government data
+
+## Setup
+
+### Environment Configuration
+
+**IMPORTANT**: Before running the application, you must configure your environment:
+
+```bash
+# Copy the example environment file
+cp visualization.env .env
+
+# Edit .env and update with your actual credentials
+# - POSTGRES_PASSWORD: Your database password
+# - Other secrets as needed
+```
+
+The `.env` file is gitignored to protect your credentials.
 
 ### Reverse Proxy (Nginx)
 - **Ports**: 80/443
