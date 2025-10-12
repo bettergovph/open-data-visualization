@@ -295,6 +295,10 @@ async def get_dime_projects(
         total_items = await conn.fetchval(count_query, *params)
         total_pages = max(1, (total_items + limit - 1) // limit)
         
+        # Validate and fix sort column if needed
+        if sort_by == 'implementing_office':
+            sort_by = 'implementing_offices'
+        
         # Get projects
         query = f"""
             SELECT 
