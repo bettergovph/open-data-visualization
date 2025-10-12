@@ -81,6 +81,71 @@ async def budget_duplicates_count_api(year: str = "2026"):
     except Exception as e:
         return JSONResponse({"success": False, "error": str(e)})
 
+@app.get("/api/budget/anomalies/count")
+async def budget_anomalies_count_api(year: str = "2025"):
+    """Get count of budget anomalies for a specific year - no authentication required"""
+    try:
+        from budget_postgres_client import get_budget_anomalies_count
+        result = await get_budget_anomalies_count(year)
+        return JSONResponse(result)
+    except Exception as e:
+        return JSONResponse({"success": False, "error": str(e)})
+
+@app.get("/api/budget/data-browser")
+async def budget_data_browser_api(
+    year: str = "2025",
+    page: int = 1,
+    limit: int = 50,
+    sort_by: str = "amt",
+    sort_order: str = "DESC",
+    department: str = None,
+    uacs_dpt_dsc: str = None,
+    agency: str = None,
+    uacs_agy_dsc: str = None,
+    dsc: str = None,
+    uacs_fundsubcat_dsc: str = None,
+    uacs_exp_dsc: str = None,
+    uacs_sobj_dsc: str = None,
+    uacs_div_dsc: str = None,
+    uacs_reg_id: str = None,
+    amt_min: float = None,
+    amt_max: float = None,
+):
+    """Get paginated budget data browser from PostgreSQL with filtering - no authentication required"""
+    try:
+        # Build filters dictionary
+        filters = {}
+        if department:
+            filters['department'] = department
+        if uacs_dpt_dsc:
+            filters['uacs_dpt_dsc'] = uacs_dpt_dsc
+        if agency:
+            filters['agency'] = agency
+        if uacs_agy_dsc:
+            filters['uacs_agy_dsc'] = uacs_agy_dsc
+        if dsc:
+            filters['dsc'] = dsc
+        if uacs_fundsubcat_dsc:
+            filters['uacs_fundsubcat_dsc'] = uacs_fundsubcat_dsc
+        if uacs_exp_dsc:
+            filters['uacs_exp_dsc'] = uacs_exp_dsc
+        if uacs_sobj_dsc:
+            filters['uacs_sobj_dsc'] = uacs_sobj_dsc
+        if uacs_div_dsc:
+            filters['uacs_div_dsc'] = uacs_div_dsc
+        if uacs_reg_id:
+            filters['uacs_reg_id'] = uacs_reg_id
+        if amt_min is not None:
+            filters['amt_min'] = amt_min
+        if amt_max is not None:
+            filters['amt_max'] = amt_max
+
+        from budget_postgres_client import get_budget_data_browser
+        result = await get_budget_data_browser(year, page, limit, sort_by, sort_order, filters)
+        return JSONResponse(result)
+    except Exception as e:
+        return JSONResponse({"success": False, "error": str(e)})
+
 @app.get("/api/budget/nep/anomalies/count")
 async def nep_anomalies_count_api(year: str = "2026"):
     """Get NEP anomalies count - no authentication required"""
