@@ -2279,7 +2279,7 @@ async def get_budget_total_items_count():
             port=int(os.getenv('POSTGRES_PORT', 5432)),
             user=os.getenv('POSTGRES_USER', 'joebert'),
             password=os.getenv('POSTGRES_PASSWORD', ''),
-            database=os.getenv('POSTGRES_DB', 'kenchlightyear_web')
+            database=os.getenv('POSTGRES_DB', 'bettergov_visualizations')
         )
         
         try:
@@ -2375,7 +2375,7 @@ async def get_budget_overview_stats(year: str = None):
             port=int(os.getenv('POSTGRES_PORT', 5432)),
             user=os.getenv('POSTGRES_USER', 'joebert'),
             password=os.getenv('POSTGRES_PASSWORD', ''),
-            database=os.getenv('POSTGRES_DB', 'kenchlightyear_web')
+            database=os.getenv('POSTGRES_DB', 'bettergov_visualizations')
         )
 
         try:

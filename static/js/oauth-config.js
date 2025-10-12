@@ -10,8 +10,8 @@ window.OAUTH_CONFIG = {
     FACEBOOK_APP_ID: '517796238632278',
     
     // Site Configuration
-    SITE_NAME: 'KenchLightyear',
-    SITE_URL: 'https://www.kenchlightyear.com',
+    SITE_NAME: 'BetterGovPH Data Visualizations',
+    SITE_URL: 'https://altgovph.site',
     
     // Feature Flags
     ENABLE_GOOGLE_LOGIN: true,

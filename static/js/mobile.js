@@ -1,4 +1,4 @@
-// Mobile-First JavaScript for www.kenchlightyear.com
+// Mobile-First JavaScript for BetterGovPH Data Visualizations
 document.addEventListener('DOMContentLoaded', function() {
     // Use touchstart for better mobile responsiveness
     const toggleEvent = 'ontouchstart' in window ? 'touchstart' : 'click';

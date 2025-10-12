@@ -2,36 +2,11 @@
 
 use actix_web::{App, HttpServer, HttpResponse, HttpRequest, Result, error::Error as ActixError, web};
 use actix_files as fs;
+use actix_cors::Cors;
 use tera::{Tera, Context};
-use std::collections::HashMap;
 
-// Helper functions
-
-// Function: add_frontend_env_to_context
-fn add_frontend_env_to_context(context: &mut tera::Context) {
-    let mut env_vars = HashMap::new();
-    env_vars.insert("SITE_URL".to_string(), "https://altgovph.site".to_string());
-    env_vars.insert("SITE_NAME".to_string(), "BetterGovPH Data Visualizations".to_string());
-    
-    for (key, value) in env_vars {
-        context.insert(&key, &value);
-    }
-}
-
-// Function: should_use_mobile_template
-fn should_use_mobile_template(_req: &HttpRequest) -> bool {
-    false  // Disabled for this standalone app
-}
-
-// Function: check_mobile_redirect_enhanced
-fn check_mobile_redirect_enhanced(_req: &HttpRequest) -> Option<actix_web::HttpResponse> {
-    None  // Disabled for this standalone app
-}
-
-// Function: check_production_domain_block
-fn check_production_domain_block(_req: &HttpRequest) -> Option<actix_web::HttpResponse> {
-    None  // Disabled for this standalone app
-}
+mod utils;
+use utils::*;
 
 // Route handlers
 
@@ -227,10 +202,19 @@ async fn flood_dime_correlation(_req: HttpRequest) -> Result<HttpResponse, Actix
 
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
+    // Initialize logging
+    env_logger::init();
+
     println!("🚀 Starting BetterGovPH Open Data Visualization Server");
-    
+
     HttpServer::new(|| {
+        let cors = Cors::default()
+            .allow_any_origin()
+            .allow_any_method()
+            .allow_any_header();
+
         App::new()
+            .wrap(cors)
             .service(fs::Files::new("/static", "./static/"))
             .service(web::resource("/").to(altgovph_home))
             .service(web::resource("/budget").to(budget))
