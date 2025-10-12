@@ -11,7 +11,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
 
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="/static/js/chart.js"></script>
     <!-- D3.js for network visualizations -->
     <script src="https://d3js.org/d3.v7.min.js"></script>
     <!-- Leaflet for maps -->
@@ -2540,11 +2540,11 @@ function toggleMobileMenu() {
                 if (!isNaN(lat) && !isNaN(lng) && lat !== 0 && lng !== 0) {
                     const marker = L.marker([lat, lng], {
                         icon: L.icon({
-                            iconUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon.png',
+                            iconUrl: '/static/images/leaflet/marker-icon.png',
                             iconSize: [25, 41],
                             iconAnchor: [12, 41],
                             popupAnchor: [1, -34],
-                            shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
+                            shadowUrl: '/static/images/leaflet/marker-shadow.png',
                             shadowSize: [41, 41]
                         })
                     }).addTo(mapInstance)
@@ -2579,11 +2579,11 @@ function toggleMobileMenu() {
                     
                     const marker = L.marker([adjustedLat, adjustedLng], {
                         icon: L.icon({
-                            iconUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon.png',
+                            iconUrl: '/static/images/leaflet/marker-icon.png',
                             iconSize: [25, 41],
                             iconAnchor: [12, 41],
                             popupAnchor: [1, -34],
-                            shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
+                            shadowUrl: '/static/images/leaflet/marker-shadow.png',
                             shadowSize: [41, 41]
                         })
                     }).addTo(mapInstance)
