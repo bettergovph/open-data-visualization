@@ -205,8 +205,7 @@ function toggleMobileMenu() {
                             <label for="browser-year-filter">Year:</label>
                             <select id="browser-year-filter" class="year-select">
                                 <option value="all">All Years</option>
-                                <option value="2026" selected>2026</option>
-                                <option value="2025">2025</option>
+                                <option value="2025" selected>2025</option>
                                 <option value="2024">2024</option>
                                 <option value="2023">2023</option>
                                 <option value="2022">2022</option>
@@ -3511,7 +3510,7 @@ function getApiYear() {
 // Helper function to get Data Browser API year (allows 'all' for cross-year queries)
 function getDataBrowserApiYear() {
     // Use the Data Browser tab's year filter
-    const selectedYear = document.getElementById('browser-year-filter')?.value || '2026';
+    const selectedYear = document.getElementById('browser-year-filter')?.value || '2025';
     return selectedYear; // Allow 'all' to be passed through
 }
 
