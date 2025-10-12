@@ -95,6 +95,9 @@
                     <p class="text-sm text-gray-600 mt-1">📊 Circles colored by DIME project status • Size represents cost</p>
                 </div>
                 <div class="flex gap-3">
+                    <button id="show-all-map" class="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition">
+                        📍 Load All Projects
+                    </button>
                     <button id="refresh-map-data" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition">
                         🔄 Refresh Map
                     </button>
@@ -520,10 +523,9 @@ async function loadInitialMapData() {
             // Add markers for initial projects
             await processProjects(projects);
 
-            updateMapStatus(`Map initialized with ${projects.length} projects. Loading more automatically...`);
+            updateMapStatus(`Map initialized with ${projects.length} projects. Click "Load All Projects" to load more.`);
 
-            // Start progressive loading after initial load (instant)
-            startProgressiveLoading();
+            // Don't auto-start progressive loading - user must click button
 
         } else {
             throw new Error(`API returned ${response.status}`);
