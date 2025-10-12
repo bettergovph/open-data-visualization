@@ -84,14 +84,14 @@ body {
 .visualizations-mobile-container {
     max-width: 100%;
     margin: 0 auto;
-    padding: 0 var(--spacing-xs);
+    padding: 0; /* Maximize space */
 }
 
 .visualizations-mobile-header .visualizations-mobile-container {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: var(--spacing-xs) var(--spacing-sm);
+    padding: 0; /* Maximize space */
     min-height: 56px;
 }
 
@@ -182,7 +182,7 @@ body {
 }
 
 .mobile-budget-container {
-    padding: var(--spacing-sm);
+    padding: 0; /* Maximize space */
 }
 
 .mobile-budget-header {
