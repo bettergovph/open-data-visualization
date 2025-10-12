@@ -575,38 +575,54 @@ function calculateCircleRadius(cost, zoomLevel = 6) {
     return Math.round(baseRadius * zoomFactor);
 }
 
+// Cache for DIME status lookups to reduce API calls
+const dimeStatusCache = new Map();
+
 // Get project status from DIME data by MeiliSearch ID
 async function getProjectStatusFromDIME(floodProject) {
     try {
         // Use the GlobalID from MeiliSearch to find DIME status
         const meiliId = floodProject.GlobalID;
         if (!meiliId) {
-            console.warn('No GlobalID found for project:', floodProject.ProjectDescription);
             return getWorkTypeColor(floodProject.TypeofWork);
+        }
+
+        // Check cache first
+        if (dimeStatusCache.has(meiliId)) {
+            return dimeStatusCache.get(meiliId);
         }
 
         const response = await fetch(`/api/dime/projects/${meiliId}/status`);
         if (!response.ok) {
-            if (response.status === 404) {
-                // No DIME match found, use fallback
-                return getWorkTypeColor(floodProject.TypeofWork);
+            if (response.status === 404 || response.status === 502) {
+                // No DIME match found or backend overloaded, use fallback
+                const fallbackColor = getWorkTypeColor(floodProject.TypeofWork);
+                dimeStatusCache.set(meiliId, fallbackColor);
+                return fallbackColor;
             }
             throw new Error(`DIME API error: ${response.status}`);
         }
 
         const dimeData = await response.json();
 
-        if (dimeData.status) {
-            return getStatusColor(dimeData.status);
+        if (dimeData.success && dimeData.status) {
+            const color = getStatusColor(dimeData.status);
+            dimeStatusCache.set(meiliId, color);
+            return color;
         } else {
             // No status in DIME, use fallback
-            return getWorkTypeColor(floodProject.TypeofWork);
+            const fallbackColor = getWorkTypeColor(floodProject.TypeofWork);
+            dimeStatusCache.set(meiliId, fallbackColor);
+            return fallbackColor;
         }
 
     } catch (error) {
-        console.warn('Error fetching DIME status for project:', floodProject.ProjectDescription, error);
-        // Fallback to type of work
-        return getWorkTypeColor(floodProject.TypeofWork);
+        // Fallback to black on any error (silent fail)
+        const fallbackColor = '#000000';
+        if (floodProject.GlobalID) {
+            dimeStatusCache.set(floodProject.GlobalID, fallbackColor);
+        }
+        return fallbackColor;
     }
 }
 
