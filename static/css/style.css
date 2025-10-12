@@ -321,7 +321,15 @@ a:hover {
     height: 35px; /* Desktop height */
 }
 
-/* Desktop logo image - using Tailwind classes (h-12, etc.) */
+/* Desktop logo image overrides */
+.nav-logo-img {
+    height: 35px !important; /* Desktop size */
+    width: auto !important;
+    max-height: 35px !important;
+    max-width: 120px !important;
+    position: static;
+    transform: none;
+}
 
 .nav-menu {
     position: fixed;
@@ -925,7 +933,11 @@ section {
         height: 40px;
     }
     
-    /* .nav-logo-img - using Tailwind */
+    .nav-logo-img {
+        height: 40px !important;
+        max-height: 40px !important;
+        max-width: 120px !important;
+    }
     
     .nav-menu {
         position: static;
@@ -1073,7 +1085,15 @@ section {
         height: 45px;
     }
     
-    /* .nav-logo-img - using Tailwind classes */
+    .nav-logo-img {
+        height: 45px !important;
+        max-height: 35px !important;
+        max-width: 120px !important;
+        position: static;
+        transform: none;
+        z-index: 2;
+        pointer-events: auto;
+    }
     
     .nav-menu {
         top: 50px;
@@ -1145,7 +1165,11 @@ section {
         height: 50px;
     }
     
-    /* .nav-logo-img - using Tailwind classes */
+    .nav-logo-img {
+        height: 40px !important;
+        max-height: 50px !important;
+        max-width: 100px !important;
+    }
     
     /* Ensure touch targets are at least 44px */
     .nav-link,
@@ -1220,7 +1244,10 @@ section {
 
 /* High DPI displays */
 @media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
-    /* .nav-logo-img - using Tailwind classes */
+    .nav-logo-img {
+        image-rendering: -webkit-optimize-contrast;
+        image-rendering: crisp-edges;
+    }
 }
 
 /* Reduced motion for accessibility */
@@ -1485,6 +1512,7 @@ img {
 }
 
 /* Optimize large images for web performance */
+.nav-logo-img,
 .logo-image {
     max-width: 200px;
     max-height: 160px;
@@ -1540,7 +1568,10 @@ img[src*="kirsten.png"] {
 
 /* Optimize for mobile */
 @media (max-width: 768px) {
-    /* .nav-logo-img - using Tailwind classes */
+    .nav-logo-img {
+        max-width: 150px;
+        max-height: 120px;
+    }
 
     img[src*="jubernetes.png"],
     img[src*="kirsten.png"] {
