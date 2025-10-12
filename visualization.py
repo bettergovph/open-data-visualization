@@ -654,6 +654,37 @@ async def dime_barangay_aggregates_by_count_api():
     except Exception as e:
         return JSONResponse({"success": False, "error": str(e)})
 
+@app.get("/api/dime/projects/{project_id}/status")
+async def dime_project_status_api(project_id: str):
+    """Get DIME project status by ID - no authentication required"""
+    try:
+        import asyncpg
+        conn = await asyncpg.connect(
+            host=os.getenv('POSTGRES_HOST', 'localhost'),
+            port=int(os.getenv('POSTGRES_PORT', 5432)),
+            user=os.getenv('POSTGRES_USER', 'budget_admin'),
+            password=os.getenv('POSTGRES_PASSWORD', ''),
+            database=os.getenv('POSTGRES_DB_DIME', 'dime')
+        )
+        
+        # Query project by meili_id (the GlobalID from flood projects)
+        project = await conn.fetchrow(
+            "SELECT status, project_name FROM projects WHERE meili_id = $1",
+            project_id
+        )
+        await conn.close()
+        
+        if project:
+            return JSONResponse({
+                "success": True,
+                "status": project['status'],
+                "project_name": project['project_name']
+            })
+        else:
+            return JSONResponse({"success": False, "error": "Project not found"})
+    except Exception as e:
+        return JSONResponse({"success": False, "error": str(e)})
+
 @app.get("/api/dime/projects")
 async def dime_projects_api(
     page: int = 1,
