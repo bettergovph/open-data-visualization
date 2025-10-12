@@ -3775,8 +3775,8 @@ function getDataBrowserApiYear() {
 // Function to programmatically switch to a specific tab
 function switchToTab(tabName, updateHash = true) {
 
-    // Prevent switching to disabled analysis and trends tabs
-    if (tabName === 'analysis' || tabName === 'trends') {
+    // Prevent switching to disabled trends tab
+    if (tabName === 'trends') {
         return;
     }
 
@@ -3806,7 +3806,8 @@ function switchToTab(tabName, updateHash = true) {
         } else if (tabName === 'browser') {
             loadDataBrowser();
         } else if (tabName === 'analysis') {
-            // Analysis tab data is loaded when sections are expanded
+            // Load NEP 2026 Analysis charts
+            setTimeout(loadAnalysisCharts, 100);
         } else if (tabName === 'trends') {
             // Load trends data when tab is activated (v2.0 - 2025-01-05)
             loadDepartmentTrends();
@@ -7690,17 +7691,6 @@ document.addEventListener('click', function(event) {
             console.error('❌ Error loading analysis charts:', error);
         }
     }
-    
-    // Load charts when analysis tab is clicked
-    document.addEventListener('DOMContentLoaded', function() {
-        const analysisTab = document.querySelector('[data-tab="analysis"]');
-        if (analysisTab) {
-            analysisTab.addEventListener('click', function() {
-                // Delay chart loading slightly to ensure tab is visible
-                setTimeout(loadAnalysisCharts, 100);
-            });
-        }
-    });
     </script>
     
     {% include "footer.html" %}
