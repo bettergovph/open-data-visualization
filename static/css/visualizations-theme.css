@@ -2,56 +2,56 @@
 
 :root {
     /* BetterGovPH Color Palette - Philippine Flag Colors */
-    --altgovph-primary: #0038A8;      /* Philippine Flag Blue */
-    --altgovph-secondary: #CE1126;    /* Philippine Flag Red */
-    --altgovph-accent: #FCD116;       /* Philippine Flag Yellow/Gold */
-    --altgovph-success: #4CAF50;      /* Success Green */
-    --altgovph-warning: #FF9800;      /* Warning Orange */
-    --altgovph-error: #F44336;        /* Error Red */
+    --primary-color: #0038A8;         /* Philippine Flag Blue */
+    --secondary-color: #CE1126;       /* Philippine Flag Red */
+    --accent-color: #FCD116;          /* Philippine Flag Yellow/Gold */
+    --success-color: #4CAF50;         /* Success Green */
+    --warning-color: #FF9800;         /* Warning Orange */
+    --error-color: #F44336;           /* Error Red */
     
     /* Neutral Colors */
-    --altgovph-white: #FFFFFF;
-    --altgovph-gray-50: #FAFAFA;
-    --altgovph-gray-100: #F5F5F5;
-    --altgovph-gray-200: #EEEEEE;
-    --altgovph-gray-300: #E0E0E0;
-    --altgovph-gray-400: #BDBDBD;
-    --altgovph-gray-500: #9E9E9E;
-    --altgovph-gray-600: #757575;
-    --altgovph-gray-700: #616161;
-    --altgovph-gray-800: #424242;
-    --altgovph-gray-900: #212121;
+    --white: #FFFFFF;
+    --gray-50: #FAFAFA;
+    --gray-100: #F5F5F5;
+    --gray-200: #EEEEEE;
+    --gray-300: #E0E0E0;
+    --gray-400: #BDBDBD;
+    --gray-500: #9E9E9E;
+    --gray-600: #757575;
+    --gray-700: #616161;
+    --gray-800: #424242;
+    --gray-900: #212121;
     
     /* Typography */
-    --altgovph-font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-    --altgovph-font-size-xs: 0.75rem;
-    --altgovph-font-size-sm: 0.875rem;
-    --altgovph-font-size-base: 1rem;
-    --altgovph-font-size-lg: 1.125rem;
-    --altgovph-font-size-xl: 1.25rem;
-    --altgovph-font-size-2xl: 1.5rem;
-    --altgovph-font-size-3xl: 1.875rem;
-    --altgovph-font-size-4xl: 2.25rem;
+    --font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    --font-size-xs: 0.75rem;
+    --font-size-sm: 0.875rem;
+    --font-size-base: 1rem;
+    --font-size-lg: 1.125rem;
+    --font-size-xl: 1.25rem;
+    --font-size-2xl: 1.5rem;
+    --font-size-3xl: 1.875rem;
+    --font-size-4xl: 2.25rem;
     
     /* Spacing */
-    --altgovph-spacing-xs: 0.25rem;
-    --altgovph-spacing-sm: 0.5rem;
-    --altgovph-spacing-md: 1rem;
-    --altgovph-spacing-lg: 1.5rem;
-    --altgovph-spacing-xl: 2rem;
-    --altgovph-spacing-2xl: 3rem;
+    --spacing-xs: 0.25rem;
+    --spacing-sm: 0.5rem;
+    --spacing-md: 1rem;
+    --spacing-lg: 1.5rem;
+    --spacing-xl: 2rem;
+    --spacing-2xl: 3rem;
     
     /* Border Radius */
-    --altgovph-radius-sm: 0.25rem;
-    --altgovph-radius-md: 0.5rem;
-    --altgovph-radius-lg: 0.75rem;
-    --altgovph-radius-xl: 1rem;
+    --radius-sm: 0.25rem;
+    --radius-md: 0.5rem;
+    --radius-lg: 0.75rem;
+    --radius-xl: 1rem;
     
     /* Shadows */
-    --altgovph-shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
-    --altgovph-shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-    --altgovph-shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
-    --altgovph-shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+    --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+    --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+    --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
 }
 
 /* Reset and Base Styles */
@@ -62,18 +62,18 @@
 }
 
 body {
-    font-family: var(--altgovph-font-family);
-    font-size: var(--altgovph-font-size-base);
+    font-family: var(--font-family);
+    font-size: var(--font-size-base);
     line-height: 1.6;
-    color: var(--altgovph-gray-900);
-    background-color: var(--altgovph-gray-50);
+    color: var(--gray-900);
+    background-color: var(--gray-50);
 }
 
 /* Header Styles */
 .visualizations-header {
-    background: var(--altgovph-white);
-    border-bottom: 1px solid var(--altgovph-gray-200);
-    box-shadow: var(--altgovph-shadow-sm);
+    background: var(--white);
+    border-bottom: 1px solid var(--gray-200);
+    box-shadow: var(--shadow-sm);
     position: sticky;
     top: 0;
     z-index: 1000;
@@ -82,173 +82,173 @@ body {
 .visualizations-container {
     max-width: 1200px;
     margin: 0 auto;
-    padding: 0 var(--altgovph-spacing-lg);
+    padding: 0 var(--spacing-lg);
 }
 
 .visualizations-header .visualizations-container {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: var(--altgovph-spacing-md) var(--altgovph-spacing-lg);
+    padding: var(--spacing-md) var(--spacing-lg);
     min-height: 64px;
 }
 
 .visualizations-logo-section {
     display: flex;
     align-items: center;
-    gap: var(--altgovph-spacing-sm);
+    gap: var(--spacing-sm);
 }
 
 .visualizations-logo-link {
     text-decoration: none;
-    color: var(--altgovph-primary);
+    color: var(--primary);
     font-weight: 600;
-    font-size: var(--altgovph-font-size-lg);
+    font-size: var(--font-size-lg);
 }
 
 .visualizations-site-name-link {
     text-decoration: none;
-    color: var(--altgovph-primary);
+    color: var(--primary);
     font-weight: 600;
-    font-size: var(--altgovph-font-size-lg);
+    font-size: var(--font-size-lg);
 }
 
 .visualizations-logo-img {
     width: 40px;
     height: 40px;
-    border-radius: var(--altgovph-radius-md);
+    border-radius: var(--radius-md);
 }
 
 .visualizations-site-name {
     font-weight: 700;
-    color: var(--altgovph-primary);
+    color: var(--primary);
 }
 
 .visualizations-nav-menu {
     display: flex;
-    gap: var(--altgovph-spacing-xl);
+    gap: var(--spacing-xl);
     align-items: center;
 }
 
 .visualizations-nav-menu a {
-    color: var(--altgovph-gray-700);
+    color: var(--gray-700);
     text-decoration: none;
     font-weight: 500;
-    padding: var(--altgovph-spacing-sm) var(--altgovph-spacing-md);
-    border-radius: var(--altgovph-radius-md);
+    padding: var(--spacing-sm) var(--spacing-md);
+    border-radius: var(--radius-md);
     transition: all 0.2s ease;
 }
 
 .visualizations-nav-menu a:hover {
-    color: var(--altgovph-primary);
-    background-color: var(--altgovph-gray-100);
+    color: var(--primary);
+    background-color: var(--gray-100);
 }
 
 /* Main Content */
 .visualizations-main {
     min-height: calc(100vh - 64px - 80px);
-    padding: var(--altgovph-spacing-xl) 0;
+    padding: var(--spacing-xl) 0;
 }
 
 /* Footer Styles */
 .visualizations-footer {
-    background: var(--altgovph-gray-800);
-    color: var(--altgovph-gray-300);
-    padding: var(--altgovph-spacing-xl) 0;
+    background: var(--gray-800);
+    color: var(--gray-300);
+    padding: var(--spacing-xl) 0;
     text-align: center;
 }
 
 .visualizations-footer p {
-    margin-bottom: var(--altgovph-spacing-sm);
+    margin-bottom: var(--spacing-sm);
 }
 
 .visualizations-footer p:last-child {
     margin-bottom: 0;
-    font-size: var(--altgovph-font-size-sm);
-    color: var(--altgovph-gray-400);
+    font-size: var(--font-size-sm);
+    color: var(--gray-400);
 }
 
 /* Budget Section Styles */
 .budget-section {
-    background: var(--altgovph-white);
-    border-radius: var(--altgovph-radius-lg);
-    box-shadow: var(--altgovph-shadow-md);
-    margin: var(--altgovph-spacing-lg);
+    background: var(--white);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-md);
+    margin: var(--spacing-lg);
     overflow: hidden;
 }
 
 .budget-container {
-    padding: var(--altgovph-spacing-2xl);
+    padding: var(--spacing-2xl);
 }
 
 .budget-header {
     text-align: center;
-    margin-bottom: var(--altgovph-spacing-2xl);
-    padding-bottom: var(--altgovph-spacing-xl);
-    border-bottom: 1px solid var(--altgovph-gray-200);
+    margin-bottom: var(--spacing-2xl);
+    padding-bottom: var(--spacing-xl);
+    border-bottom: 1px solid var(--gray-200);
 }
 
 .budget-title {
-    font-size: var(--altgovph-font-size-4xl);
+    font-size: var(--font-size-4xl);
     font-weight: 700;
-    color: var(--altgovph-primary);
-    margin-bottom: var(--altgovph-spacing-md);
+    color: var(--primary);
+    margin-bottom: var(--spacing-md);
 }
 
 .budget-subtitle {
-    font-size: var(--altgovph-font-size-lg);
-    color: var(--altgovph-gray-600);
-    margin-bottom: var(--altgovph-spacing-lg);
+    font-size: var(--font-size-lg);
+    color: var(--gray-600);
+    margin-bottom: var(--spacing-lg);
 }
 
 .budget-section-title {
-    font-size: var(--altgovph-font-size-2xl);
+    font-size: var(--font-size-2xl);
     font-weight: 600;
-    color: var(--altgovph-primary);
-    margin-bottom: var(--altgovph-spacing-lg);
+    color: var(--primary);
+    margin-bottom: var(--spacing-lg);
     display: flex;
     align-items: center;
-    gap: var(--altgovph-spacing-sm);
+    gap: var(--spacing-sm);
 }
 
 .budget-section-desc {
-    color: var(--altgovph-gray-600);
-    margin-bottom: var(--altgovph-spacing-xl);
-    font-size: var(--altgovph-font-size-base);
+    color: var(--gray-600);
+    margin-bottom: var(--spacing-xl);
+    font-size: var(--font-size-base);
 }
 
 /* Responsive Design */
 @media (max-width: 768px) {
     .visualizations-header .visualizations-container {
         flex-direction: column;
-        gap: var(--altgovph-spacing-md);
-        padding: var(--altgovph-spacing-md);
+        gap: var(--spacing-md);
+        padding: var(--spacing-md);
     }
     
     .visualizations-nav-menu {
-        gap: var(--altgovph-spacing-lg);
+        gap: var(--spacing-lg);
     }
     
     .budget-container {
-        padding: var(--altgovph-spacing-lg);
+        padding: var(--spacing-lg);
     }
     
     .budget-title {
-        font-size: var(--altgovph-font-size-3xl);
+        font-size: var(--font-size-3xl);
     }
 }
 
 @media (max-width: 480px) {
     .visualizations-nav-menu {
         flex-direction: column;
-        gap: var(--altgovph-spacing-sm);
+        gap: var(--spacing-sm);
     }
     
     .budget-container {
-        padding: var(--altgovph-spacing-md);
+        padding: var(--spacing-md);
     }
     
     .budget-title {
-        font-size: var(--altgovph-font-size-2xl);
+        font-size: var(--font-size-2xl);
     }
 }

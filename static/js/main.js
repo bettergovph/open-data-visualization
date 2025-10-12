@@ -1,17 +1,7 @@
 window.ENV = {
     SITE_NAME: 'BetterGovPH Data Visualizations',
     SITE_URL: 'https://visualizations.bettergov.ph',
-    GOOGLE_CLIENT_ID: '968796729348-h4e3inns6bqpv6bkhf4fcaob8rrv1c82.apps.googleusercontent.com',
-    FACEBOOK_APP_ID: '517796238632278',
-    PAYPAL_CLIENT_ID: 'ATrwsIxZ8bVeWiMSbfbx-X2r9UFXc6mvPgoHsGKKtCafmfnOCDZOIcHLB6B1zpacXoOvJtDjP1eN3lfw',
-    ENABLE_GOOGLE_LOGIN: true,
-    ENABLE_FACEBOOK_LOGIN: true,
-    ENABLE_PAYPAL_UPGRADE: true,
-    GOOGLE_ANALYTICS_ID: 'your_ga_id_here',
-    YOUTUBE_URL: 'https://www.youtube.com/@joebertj/streams',
-    GITHUB_URL: 'https://github.com/joebertj',
     CONTACT_EMAIL: 'info@bettergov.ph',
-    CONTACT_PHONE: '+1-555-123-4567',
     NODE_ENV: 'production',
 };
 
