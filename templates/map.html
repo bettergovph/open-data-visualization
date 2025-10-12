@@ -525,9 +525,10 @@ async function loadInitialMapData() {
             // Add markers for initial projects
             await processProjects(projects);
 
-            updateMapStatus(`Map initialized with ${projects.length} projects. Click "Load All Projects" to load more.`);
+            updateMapStatus(`Map initialized with ${projects.length} projects. Loading more automatically...`);
 
-            // Don't auto-start progressive loading - user must click button
+            // Start progressive loading (skips 1000 at a time for efficiency)
+            startProgressiveLoading();
 
         } else {
             throw new Error(`API returned ${response.status}`);
@@ -685,12 +686,13 @@ async function processProjects(projects) {
     updateMapStatus(`Loaded ${mapMarkers.length} projects`);
 }
 
-// Progressive loading function
+// Progressive loading function - loads in chunks, skipping 1000 at a time
 async function loadMoreProjects() {
     if (isLoadingMore || progressiveLoadingCancelled) return;
 
     isLoadingMore = true;
     try {
+        // Skip 1000 at a time for efficient loading
         const response = await fetch(`/api/flood/projects?limit=100&offset=${globalOffset}`);
         if (!response.ok) {
             throw new Error(`HTTP ${response.status}: ${response.statusText}`);
@@ -707,7 +709,7 @@ async function loadMoreProjects() {
         }
 
         await processProjects(projects);
-        globalOffset += projects.length;
+        globalOffset += 1000; // Skip 1000 at a time instead of loading sequentially
 
     } catch (error) {
         console.error('❌ Error loading more projects:', error);

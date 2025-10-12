@@ -211,9 +211,10 @@ async function loadInitialMapData() {
             // Add markers for initial projects
             processProjects(projects);
 
-            updateMapStatus(`Map initialized with ${projects.length} projects. Click "Load All Projects" to load more.`);
+            updateMapStatus(`Map initialized with ${projects.length} projects. Loading more automatically...`);
 
-            // Don't auto-start progressive loading - user must click button
+            // Start progressive loading (skips 1000 at a time for efficiency)
+            startProgressiveLoading();
 
         } else {
             throw new Error(`API returned ${response.status}`);
