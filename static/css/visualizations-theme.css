@@ -150,9 +150,11 @@ body {
     padding: var(--spacing-xl) 0;
 }
 
-/* Footer Styles */
+/* Footer Styles - Unified for all footer types */
 .visualizations-footer,
-.bettergov-footer {
+.bettergov-footer,
+.github-footer,
+.data-source-footer {
     background: var(--gray-800);
     color: var(--gray-300);
     padding: var(--spacing-xl) 0;
@@ -160,26 +162,34 @@ body {
 }
 
 .visualizations-footer p,
-.bettergov-footer p {
+.bettergov-footer p,
+.github-footer p,
+.data-source-footer p {
     margin-bottom: var(--spacing-sm);
     font-size: 0.9rem;
 }
 
 .visualizations-footer p:last-child,
-.bettergov-footer p:last-child {
+.bettergov-footer p:last-child,
+.github-footer p:last-child,
+.data-source-footer p:last-child {
     margin-bottom: 0;
     font-size: var(--font-size-sm);
     color: var(--gray-400);
 }
 
 .visualizations-footer a,
-.bettergov-footer a {
+.bettergov-footer a,
+.github-footer a,
+.data-source-footer a {
     color: var(--primary-color);
     text-decoration: none;
 }
 
 .visualizations-footer a:hover,
-.bettergov-footer a:hover {
+.bettergov-footer a:hover,
+.github-footer a:hover,
+.data-source-footer a:hover {
     text-decoration: underline;
 }
 

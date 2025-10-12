@@ -153,31 +153,41 @@ body {
     padding: var(--spacing-md) 0;
 }
 
-/* Mobile Footer Styles */
-.visualizations-mobile-footer {
+/* Mobile Footer Styles - Unified for all footer types */
+.visualizations-mobile-footer,
+.github-footer,
+.data-source-footer {
     background: var(--gray-800);
     color: var(--gray-300);
     padding: var(--spacing-lg) 0;
     text-align: center;
 }
 
-.visualizations-mobile-footer p {
+.visualizations-mobile-footer p,
+.github-footer p,
+.data-source-footer p {
     margin-bottom: var(--spacing-xs);
     font-size: 0.85rem;
 }
 
-.visualizations-mobile-footer p:last-child {
+.visualizations-mobile-footer p:last-child,
+.github-footer p:last-child,
+.data-source-footer p:last-child {
     margin-bottom: 0;
     font-size: 0.75rem;
     color: var(--gray-400);
 }
 
-.visualizations-mobile-footer a {
+.visualizations-mobile-footer a,
+.github-footer a,
+.data-source-footer a {
     color: var(--primary-color);
     text-decoration: none;
 }
 
-.visualizations-mobile-footer a:hover {
+.visualizations-mobile-footer a:hover,
+.github-footer a:hover,
+.data-source-footer a:hover {
     text-decoration: underline;
 }
 
