@@ -5884,11 +5884,9 @@ let trendsData = null;
 
 // Helper function to get API base URL
 function getApiBaseUrl() {
-    // Check if we're in production/staging (has BetterGov domains)
+    // Check if we're in production (has BetterGov domains)
     if (window.location.hostname.includes('visualizations.bettergov.ph') ||
-        window.location.hostname.includes('altgovph.site') ||
-        window.location.hostname.includes('10.27.79.7') ||
-        window.location.hostname.includes('10.27.79.1')) {
+        window.location.hostname.includes('10.27.79.7')) {
         return window.location.origin; // Use same origin for production/staging
     } else {
         // Local development - use the current origin for API calls

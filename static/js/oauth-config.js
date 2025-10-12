@@ -11,7 +11,7 @@ window.OAUTH_CONFIG = {
     
     // Site Configuration
     SITE_NAME: 'BetterGovPH Data Visualizations',
-    SITE_URL: 'https://altgovph.site',
+    SITE_URL: 'https://visualizations.bettergov.ph',
     
     // Feature Flags
     ENABLE_GOOGLE_LOGIN: true,

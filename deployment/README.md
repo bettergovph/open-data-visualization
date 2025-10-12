@@ -1,10 +1,14 @@
 # BetterGovPH Data Visualizations - Deployment Guide
 
+## Overview
+
+BetterGovPH Open Data Visualizations is an independent data visualization platform focused on Philippine government budget, infrastructure, and flood control projects. This repository is completely independent from kenchlightyear_web.
+
 ## Systemd Services
 
 The application consists of two services:
 
-1. **visualization.service** - Rust ActixWeb frontend (port 8889)
+1. **visualization.service** - Rust ActixWeb frontend (port 8888)
 2. **visualization_api.service** - Python FastAPI backend (port 8000)
 
 ### Installation

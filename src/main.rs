@@ -11,7 +11,7 @@ use utils::*;
 // Route handlers
 
 // BetterGovPH Homepage
-async fn altgovph_home(_req: HttpRequest) -> Result<HttpResponse, ActixError> {
+async fn home(_req: HttpRequest) -> Result<HttpResponse, ActixError> {
     let tera = Tera::new("templates/**/*").map_err(|e| actix_web::error::ErrorInternalServerError(e))?;
     let mut context = Context::new();
     
@@ -21,7 +21,7 @@ async fn altgovph_home(_req: HttpRequest) -> Result<HttpResponse, ActixError> {
     context.insert("company_name", "BetterGovPH");
     context.insert("platform", "BetterGovPH");
     context.insert("SITE_NAME", "BetterGovPH Data Visualizations");
-    context.insert("SITE_URL", "https://altgovph.site");
+    context.insert("SITE_URL", "https://visualizations.bettergov.ph");
     
     let template_name = "visualizations_home.html";
     
@@ -40,7 +40,7 @@ async fn budget(_req: HttpRequest) -> Result<HttpResponse, ActixError> {
     context.insert("company_name", "BetterGovPH");
     context.insert("platform", "BetterGovPH");
     context.insert("SITE_NAME", "BetterGovPH Data Visualizations");
-    context.insert("SITE_URL", "https://altgovph.site");
+    context.insert("SITE_URL", "https://visualizations.bettergov.ph");
     
     let template_name = "budget.html";
     
@@ -59,7 +59,7 @@ async fn flood(_req: HttpRequest) -> Result<HttpResponse, ActixError> {
     context.insert("company_name", "BetterGovPH");
     context.insert("platform", "BetterGovPH");
     context.insert("SITE_NAME", "BetterGovPH Data Visualizations");
-    context.insert("SITE_URL", "https://altgovph.site");
+    context.insert("SITE_URL", "https://visualizations.bettergov.ph");
     
     let template_name = "flood.html";
     
@@ -78,7 +78,7 @@ async fn dime(_req: HttpRequest) -> Result<HttpResponse, ActixError> {
     context.insert("company_name", "BetterGovPH");
     context.insert("platform", "BetterGovPH");
     context.insert("SITE_NAME", "BetterGovPH Data Visualizations");
-    context.insert("SITE_URL", "https://altgovph.site");
+    context.insert("SITE_URL", "https://visualizations.bettergov.ph");
     
     let template_name = "dime.html";
     
@@ -97,7 +97,7 @@ async fn nep(_req: HttpRequest) -> Result<HttpResponse, ActixError> {
     context.insert("company_name", "BetterGovPH");
     context.insert("platform", "BetterGovPH");
     context.insert("SITE_NAME", "BetterGovPH Data Visualizations");
-    context.insert("SITE_URL", "https://altgovph.site");
+    context.insert("SITE_URL", "https://visualizations.bettergov.ph");
 
     let template_name = "nep.html";
 
@@ -116,7 +116,7 @@ async fn map(_req: HttpRequest) -> Result<HttpResponse, ActixError> {
     context.insert("company_name", "BetterGovPH");
     context.insert("platform", "BetterGovPH");
     context.insert("SITE_NAME", "BetterGovPH Data Visualizations");
-    context.insert("SITE_URL", "https://altgovph.site");
+    context.insert("SITE_URL", "https://visualizations.bettergov.ph");
 
     let template_name = "map.html";
 
@@ -135,7 +135,7 @@ async fn about(_req: HttpRequest) -> Result<HttpResponse, ActixError> {
     context.insert("company_name", "BetterGovPH");
     context.insert("platform", "BetterGovPH");
     context.insert("SITE_NAME", "BetterGovPH Data Visualizations");
-    context.insert("SITE_URL", "https://altgovph.site");
+    context.insert("SITE_URL", "https://visualizations.bettergov.ph");
 
     let template_name = "about.html";
 
@@ -154,7 +154,7 @@ async fn budget_nep_correlation(_req: HttpRequest) -> Result<HttpResponse, Actix
     context.insert("company_name", "BetterGovPH");
     context.insert("platform", "BetterGovPH");
     context.insert("SITE_NAME", "BetterGovPH Data Visualizations");
-    context.insert("SITE_URL", "https://altgovph.site");
+    context.insert("SITE_URL", "https://visualizations.bettergov.ph");
 
     let template_name = "budget_nep_correlation.html";
 
@@ -173,7 +173,7 @@ async fn budget_flood_correlation(_req: HttpRequest) -> Result<HttpResponse, Act
     context.insert("company_name", "BetterGovPH");
     context.insert("platform", "BetterGovPH");
     context.insert("SITE_NAME", "BetterGovPH Data Visualizations");
-    context.insert("SITE_URL", "https://altgovph.site");
+    context.insert("SITE_URL", "https://visualizations.bettergov.ph");
 
     let template_name = "budget_flood_correlation.html";
 
@@ -192,7 +192,7 @@ async fn flood_dime_correlation(_req: HttpRequest) -> Result<HttpResponse, Actix
     context.insert("company_name", "BetterGovPH");
     context.insert("platform", "BetterGovPH");
     context.insert("SITE_NAME", "BetterGovPH Data Visualizations");
-    context.insert("SITE_URL", "https://altgovph.site");
+    context.insert("SITE_URL", "https://visualizations.bettergov.ph");
 
     let template_name = "flood_dime_correlation.html";
 
@@ -216,7 +216,7 @@ async fn main() -> std::io::Result<()> {
         App::new()
             .wrap(cors)
             .service(fs::Files::new("/static", "./static/"))
-            .service(web::resource("/").to(altgovph_home))
+            .service(web::resource("/").to(home))
             .service(web::resource("/budget").to(budget))
             .service(web::resource("/flood").to(flood))
             .service(web::resource("/dime").to(dime))

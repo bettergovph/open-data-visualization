@@ -8,7 +8,7 @@ pub fn load_frontend_env() -> HashMap<String, String> {
 
     // Default values for BetterGovPH
     env_vars.insert("SITE_NAME".to_string(), "BetterGovPH Data Visualizations".to_string());
-    env_vars.insert("SITE_URL".to_string(), "https://altgovph.site".to_string());
+    env_vars.insert("SITE_URL".to_string(), "https://visualizations.bettergov.ph".to_string());
 
     // Add other environment variables as needed
     env_vars.insert("GOOGLE_CLIENT_ID".to_string(), std::env::var("GOOGLE_CLIENT_ID").unwrap_or_default());
