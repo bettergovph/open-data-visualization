@@ -64,18 +64,44 @@ async def budget_total_items_count_api():
         return JSONResponse({"success": False, "error": str(e)})
 
 @app.get("/api/budget/duplicates")
-async def budget_duplicates_api(year: str = "2026", page: int = 1, limit: int = 10):
-    """Get budget duplicates - no authentication required"""
+async def budget_duplicates_api(year: str = "2025", page: int = 1, limit: int = 10, sort_by: str = "calculated_score", sort_order: str = "DESC"):
+    """Get potential budget duplicates using 9-column matching system with pagination - no authentication required"""
     try:
-        result = await get_budget_scored_duplicates(year, limit, (page - 1) * limit)
-        return JSONResponse(result)
+        from budget_postgres_client import get_budget_scored_duplicates, get_budget_duplicates_total_count, convert_decimals
+        
+        # Calculate offset for pagination
+        offset = (page - 1) * limit
+        
+        # Fetch paginated duplicates
+        duplicates = await get_budget_scored_duplicates(year, limit, offset, sort_by, sort_order)
+        
+        # Get total count for pagination
+        total_items_result = await get_budget_duplicates_total_count(year)
+        total_items = total_items_result.get("count", 0)
+        total_pages = max(1, (total_items + limit - 1) // limit)
+        
+        # Ensure all data is JSON serializable
+        converted_duplicates = convert_decimals(duplicates)
+        
+        response_data = {
+            "success": True,
+            "duplicates": converted_duplicates,
+            "total_items": total_items,
+            "total_pages": total_pages,
+            "current_page": page,
+            "limit": limit,
+            "year": year
+        }
+        
+        return JSONResponse(response_data)
     except Exception as e:
         return JSONResponse({"success": False, "error": str(e)})
 
 @app.get("/api/budget/duplicates/count")
-async def budget_duplicates_count_api(year: str = "2026"):
+async def budget_duplicates_count_api(year: str = "2025"):
     """Get budget duplicates count - no authentication required"""
     try:
+        from budget_postgres_client import get_budget_duplicates_count
         result = await get_budget_duplicates_count(year)
         return JSONResponse(result)
     except Exception as e:
