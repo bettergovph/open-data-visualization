@@ -276,15 +276,6 @@ function initializeMap() {
 
         // Load initial map data (10 projects with progressive loading)
         loadInitialMapData();
-
-        // Set up Show All button event listener
-        const showAllMap = document.getElementById('show-all-map');
-        if (showAllMap) {
-            showAllMap.addEventListener('click', window.loadAllProjects);
-            console.log('✅ Show All button event listener attached');
-        } else {
-            console.error('❌ Show All button not found');
-        }
     }
 }
 
