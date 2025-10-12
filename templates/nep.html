@@ -168,29 +168,17 @@ function toggleMobileMenu() {
                         </div>
                         
                         <!-- Charts Section -->
-                        <div class="charts-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(400px, 1fr)); gap: 20px; margin-bottom: 30px;">
-                            <!-- Department Chart -->
+                        <div class="charts-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(500px, 1fr)); gap: 20px; margin-bottom: 30px;">
+                            <!-- Year-over-Year Chart -->
                             <div class="chart-container" style="background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
-                                <h3 style="color: #0038A8; margin: 0 0 15px 0;">🏛️ Budget by Department</h3>
-                                <canvas id="departmentsChart" width="400" height="300"></canvas>
+                                <h3 style="color: #0038A8; margin: 0 0 15px 0;">📈 NEP Budget Trend (2020-2026)</h3>
+                                <canvas id="yearOverYearChart" width="600" height="400"></canvas>
                             </div>
                             
-                            <!-- Expense Chart -->
+                            <!-- Top Programs Chart -->
                             <div class="chart-container" style="background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
-                                <h3 style="color: #0038A8; margin: 0 0 15px 0;">💰 Expense Categories</h3>
-                                <canvas id="expenseCategoriesChart" width="400" height="300"></canvas>
-                            </div>
-                            
-                            <!-- Region Chart -->
-                            <div class="chart-container" style="background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
-                                <h3 style="color: #0038A8; margin: 0 0 15px 0;">🗺️ Budget by Region</h3>
-                                <canvas id="regionsChart" width="400" height="300"></canvas>
-                            </div>
-                            
-                            <!-- Combined Overview Chart -->
-                            <div class="chart-container" style="background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); grid-column: 1 / -1;">
-                                <h3 style="color: #0038A8; margin: 0 0 15px 0;">📊 Top Agencies by Budget</h3>
-                                <canvas id="agenciesChart" width="1200" height="400"></canvas>
+                                <h3 style="color: #0038A8; margin: 0 0 15px 0;">🎯 Top 10 Programs by Budget (2025)</h3>
+                                <canvas id="topProgramsChart" width="600" height="400"></canvas>
                             </div>
                         </div>
                         
@@ -2862,16 +2850,149 @@ function loadVisualCharts() {
     
     // Load charts with a small delay to ensure DOM is ready
     setTimeout(() => {
-        loadDepartmentsChart();
-        loadExpenseCategoriesChart();
-        loadRegionsChart();
-        loadAgenciesChart();
+        loadNEPYearOverYearChart();
+        loadNEPTopProgramsChart();
         
         // Hide loading spinner after charts are loaded
         if (spinner) {
             spinner.style.display = 'none';
         }
     }, 100);
+}
+
+async function loadNEPYearOverYearChart() {
+    try {
+        const response = await fetch(`${getApiBaseUrl()}/api/budget/nep/year-over-year`);
+        const result = await response.json();
+        
+        if (!result.success || !result.data) {
+            console.error('Failed to load year-over-year data');
+            return;
+        }
+        
+        const ctx = document.getElementById('yearOverYearChart');
+        if (!ctx) return;
+        
+        const years = result.data.map(d => d.year);
+        const amounts = result.data.map(d => d.total_amount / 1000000000); // Convert to billions
+        
+        new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: years,
+                datasets: [{
+                    label: 'NEP Budget (₱ Billions)',
+                    data: amounts,
+                    borderColor: '#0038A8',
+                    backgroundColor: 'rgba(0, 56, 168, 0.1)',
+                    borderWidth: 3,
+                    fill: true,
+                    tension: 0.4,
+                    pointRadius: 5,
+                    pointHoverRadius: 7
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        display: true,
+                        position: 'top'
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                return `₱${context.parsed.y.toFixed(2)}B`;
+                            }
+                        }
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            callback: function(value) {
+                                return '₱' + value.toFixed(1) + 'B';
+                            }
+                        }
+                    }
+                }
+            }
+        });
+        
+    } catch (error) {
+        console.error('Error loading year-over-year chart:', error);
+    }
+}
+
+async function loadNEPTopProgramsChart() {
+    try {
+        const response = await fetch(`${getApiBaseUrl()}/api/budget/nep/top-programs?year=2025&limit=10`);
+        const result = await response.json();
+        
+        if (!result.success || !result.programs) {
+            console.error('Failed to load top programs data');
+            return;
+        }
+        
+        const ctx = document.getElementById('topProgramsChart');
+        if (!ctx) return;
+        
+        const labels = result.programs.map(p => {
+            const desc = p.description;
+            return desc.length > 40 ? desc.substring(0, 40) + '...' : desc;
+        });
+        const amounts = result.programs.map(p => p.total_amount / 1000000000); // Convert to billions
+        
+        new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: 'Budget (₱ Billions)',
+                    data: amounts,
+                    backgroundColor: '#0038A8',
+                    borderColor: '#002d80',
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                indexAxis: 'y',
+                plugins: {
+                    legend: {
+                        display: false
+                    },
+                    tooltip: {
+                        callbacks: {
+                            title: function(context) {
+                                const index = context[0].dataIndex;
+                                return result.programs[index].description;
+                            },
+                            label: function(context) {
+                                return `Budget: ₱${context.parsed.x.toFixed(2)}B`;
+                            }
+                        }
+                    }
+                },
+                scales: {
+                    x: {
+                        beginAtZero: true,
+                        ticks: {
+                            callback: function(value) {
+                                return '₱' + value.toFixed(1) + 'B';
+                            }
+                        }
+                    }
+                }
+            }
+        });
+        
+    } catch (error) {
+        console.error('Error loading top programs chart:', error);
+    }
 }
 
 async function loadVisualStatistics() {
