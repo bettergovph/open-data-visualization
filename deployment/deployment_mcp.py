@@ -137,10 +137,10 @@ class DeploymentMCPServer:
                     "allowed_operation": "run_restart",
                 }
 
-        # Only allow restart script execution (Linux production - use restart.sh)
+        # Only allow restart script execution (Linux production - use deployment/restart.sh)
         safe_commands = {
-            "run_restart": "./restart.sh",
-            "run_restart_force": "./restart.sh --force",
+            "run_restart": "./deployment/restart.sh",
+            "run_restart_force": "./deployment/restart.sh --force",
         }
 
         # Map intent to actual command
@@ -426,7 +426,7 @@ class DeploymentMCPServer:
 
             # Use local project directory for pre-check (not remote working directory)
             local_project_dir = "/home/joebert/open-data-visualization"
-            precheck_script = os.path.join(local_project_dir, "pre_push_check.sh")
+            precheck_script = os.path.join(local_project_dir, "deployment", "pre_push_check.sh")
             if not os.path.exists(precheck_script):
                 return {
                     "success": False,
@@ -442,7 +442,7 @@ class DeploymentMCPServer:
                 logger.info(f"📁 Git working directory: {git_work_dir}")
 
                 result = subprocess.run(
-                    [f"{git_work_dir}/pre_push_check.sh"],
+                    [f"{git_work_dir}/deployment/pre_push_check.sh"],
                     capture_output=True,
                     text=True,
                     cwd=git_work_dir,

@@ -96,7 +96,7 @@ log "✅ Nginx configuration present"
 
 # Check 7: Verify .env.example exists (but not .env)
 log "🔐 Checking environment configuration..."
-if [ ! -f "visualization.env" ]; then
+if [ ! -f "altgovph.env" ]; then
     warning "Environment template not found"
 else
     log "✅ Environment template present"
