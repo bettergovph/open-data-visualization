@@ -368,144 +368,42 @@ class DeploymentMCPServer:
         working_dir: str = "/home/joebert/open-data-visualization",
         force_restart: bool = False,
     ) -> Dict[str, Any]:
-        """Deploy BetterGovPH Open Data Visualization - integrated deployment with all steps"""
+        """Deploy BetterGovPH Open Data Visualization - uses integrated restart.sh for reliability"""
         try:
             logger.info("🚀 Starting BetterGovPH Visualization deployment...")
 
-            # Step 1: Verify working directory structure
-            logger.info("📁 Step 1: Verifying project structure...")
-            check_commands = [
-                f"test -f {working_dir}/Cargo.toml",
-                f"test -f {working_dir}/visualization.py",
-                f"test -d {working_dir}/venv",
-            ]
+            # Use the proven restart.sh script for deployment
+            # This ensures all steps are executed correctly on the remote server
+            restart_command = "./restart.sh"
+            if force_restart:
+                restart_command += " --force"
 
-            for cmd in check_commands:
-                result = await self.execute_command("check_structure", working_dir, cmd)
-                if not result["success"]:
-                    return {
-                        "success": False,
-                        "error": f"Project structure check failed: {cmd}",
-                        "step": "structure_check",
-                        "command": cmd,
-                    }
+            logger.info(f"⚙️ Executing deployment: {restart_command}")
 
-            logger.info("✅ Project structure verified")
+            result = await self.execute_command("deploy_visualization", working_dir, restart_command)
 
-            # Step 2: Activate virtual environment and install dependencies
-            logger.info("🐍 Step 2: Installing Python dependencies...")
-            python_commands = [
-                "source venv/bin/activate",
-                "pip install -r requirements.txt",
-            ]
-
-            for cmd in python_commands:
-                result = await self.execute_command("python_setup", working_dir, cmd)
-                if not result["success"]:
-                    logger.warning(f"⚠️ Python setup command failed: {cmd}")
-                    # Continue anyway as venv might already be set up
-
-            logger.info("✅ Python dependencies installed")
-
-            # Step 3: Build Rust application
-            logger.info("🔨 Step 3: Building Rust application...")
-            build_result = await self.execute_command("rust_build", working_dir, "cargo build --release")
-            if not build_result["success"]:
+            if result["success"]:
+                logger.info("✅ BetterGovPH Visualization deployment completed successfully!")
+                return {
+                    "success": True,
+                    "message": "BetterGovPH Visualization deployment completed successfully",
+                    "command": restart_command,
+                    "output": result["output"],
+                    "production_url": "https://visualizations.bettergov.ph",
+                    "deployment_time": datetime.now().isoformat(),
+                    "working_dir": working_dir,
+                }
+            else:
+                logger.error("❌ BetterGovPH deployment failed")
                 return {
                     "success": False,
-                    "error": "Rust build failed",
-                    "step": "rust_build",
-                    "build_output": build_result["output"],
-                    "build_error": build_result["error"],
+                    "error": "Deployment command failed",
+                    "command": restart_command,
+                    "output": result["output"],
+                    "error_output": result["error"],
+                    "step": "deployment_failed",
+                    "working_dir": working_dir,
                 }
-
-            logger.info("✅ Rust application built successfully")
-
-            # Step 4: Reload systemd daemon
-            logger.info("🔄 Step 4: Reloading systemd daemon...")
-            reload_result = await self.execute_command("systemd_reload", working_dir, "sudo systemctl daemon-reload")
-            if not reload_result["success"]:
-                return {
-                    "success": False,
-                    "error": "Systemd reload failed",
-                    "step": "systemd_reload",
-                }
-
-            logger.info("✅ Systemd daemon reloaded")
-
-            # Step 5: Restart services
-            logger.info("⚙️ Step 5: Restarting services...")
-
-            # Stop services first
-            services_to_restart = ["visualization.service", "visualization_api.service"]
-
-            for service in services_to_restart:
-                logger.info(f"🛑 Stopping {service}...")
-                stop_result = await self.execute_command("service_stop", working_dir, f"sudo systemctl stop {service}")
-                # Don't fail if stop fails (service might not be running)
-
-            # Wait a moment
-            await asyncio.sleep(2)
-
-            # Start services
-            for service in services_to_restart:
-                logger.info(f"▶️ Starting {service}...")
-                start_result = await self.execute_command("service_start", working_dir, f"sudo systemctl start {service}")
-                if not start_result["success"]:
-                    return {
-                        "success": False,
-                        "error": f"Failed to start {service}",
-                        "step": "service_start",
-                        "service": service,
-                        "start_output": start_result["output"],
-                        "start_error": start_result["error"],
-                    }
-
-            logger.info("✅ Services started successfully")
-
-            # Step 6: Verify services are running
-            logger.info("🔍 Step 6: Verifying services...")
-            await asyncio.sleep(3)
-
-            for service in services_to_restart:
-                status_result = await self.execute_command("service_status", working_dir, f"sudo systemctl is-active --quiet {service}")
-                if not status_result["success"]:
-                    return {
-                        "success": False,
-                        "error": f"Service {service} is not running",
-                        "step": "service_verification",
-                        "service": service,
-                    }
-
-            logger.info("✅ All services are running")
-
-            # Step 7: Basic health checks
-            logger.info("🩺 Step 7: Running health checks...")
-
-            # Test frontend (Rust/Actix)
-            frontend_check = await self.execute_command("health_check", working_dir, "curl -s -f http://localhost:8888/ > /dev/null")
-            frontend_healthy = frontend_check["success"]
-
-            # Test API (Python/FastAPI)
-            api_check = await self.execute_command("health_check", working_dir, "curl -s -f http://localhost:8000/ > /dev/null")
-            api_healthy = api_check["success"]
-
-            logger.info("✅ BetterGovPH deployment completed successfully!")
-            logger.info("🌐 Frontend: http://localhost:8888")
-            logger.info("🔌 API: http://localhost:8000")
-            logger.info("📊 Production: https://visualizations.bettergov.ph")
-            return {
-                "success": True,
-                "message": "BetterGovPH Visualization deployment completed successfully",
-                "services": services_to_restart,
-                "health_checks": {
-                    "frontend": "healthy" if frontend_healthy else "starting",
-                    "api": "healthy" if api_healthy else "starting",
-                },
-                "production_url": "https://visualizations.bettergov.ph",
-                "deployment_time": datetime.now().isoformat(),
-                "working_dir": working_dir,
-            }
 
         except Exception as e:
             logger.error(f"❌ BetterGovPH deployment failed: {e}")
