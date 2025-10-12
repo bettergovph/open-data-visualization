@@ -84,14 +84,14 @@ body {
 .visualizations-mobile-container {
     max-width: 100%;
     margin: 0 auto;
-    padding: 0 var(--spacing-md);
+    padding: 0 var(--spacing-xs);
 }
 
 .visualizations-mobile-header .visualizations-mobile-container {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: var(--spacing-sm) var(--spacing-md);
+    padding: var(--spacing-xs) var(--spacing-sm);
     min-height: 56px;
 }
 
@@ -177,12 +177,12 @@ body {
     background: var(--white);
     border-radius: var(--radius-lg);
     box-shadow: var(--shadow-md);
-    margin: var(--spacing-md);
+    margin: var(--spacing-xs);
     overflow: hidden;
 }
 
 .mobile-budget-container {
-    padding: var(--spacing-lg);
+    padding: var(--spacing-sm);
 }
 
 .mobile-budget-header {
