@@ -211,12 +211,13 @@ async function loadInitialMapData() {
             // Add markers for initial projects
             processProjects(projects);
 
-            // Set offset to 1000 for when user clicks "Load All Projects"
+            // Set offset to 1000 to start skipping
             globalOffset = 1000;
 
-            updateMapStatus(`Map initialized with ${projects.length} projects. Click "Load All Projects" to load more.`);
+            updateMapStatus(`Map initialized with ${projects.length} projects. Loading more with 1000-skip...`);
 
-            // Don't auto-start progressive loading - user must click button
+            // Auto-start progressive loading with 1000-skip
+            startProgressiveLoading();
 
         } else {
             throw new Error(`API returned ${response.status}`);
