@@ -209,7 +209,7 @@ async function loadInitialMapData() {
             loadedProjects = projects;
 
             // Add markers for initial projects
-            processProjects(projects);
+            await processProjects(projects);
 
             // Set offset to 1000 to start skipping
             globalOffset = 1000;
@@ -292,7 +292,7 @@ async function loadMoreProjects() {
             return;
         }
 
-        processProjects(projects);
+        await processProjects(projects);
         globalOffset += 1000; // Skip 1000 at a time instead of loading sequentially
 
     } catch (error) {
