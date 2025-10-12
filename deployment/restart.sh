@@ -77,6 +77,9 @@ log "✅ Working directory verified"
 
 # Step 2: Pull latest changes from git
 log "📥 Step 2: Pulling latest changes from git..."
+# Stash any local changes first
+git stash
+# Pull latest changes
 if ! git pull; then
     error "Git pull failed"
     exit 1
