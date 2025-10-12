@@ -7,8 +7,8 @@ This project contains the **BetterGovPH Data Visualizations** platform - a compr
 ✅ **FULLY ISOLATED** from kenchlightyear business platform  
 ✅ **PRODUCTION READY** for `visualizations.bettergov.ph`  
 ✅ **CLEANED** - all altgovph references removed  
-✅ **SERVICES RUNNING** - Actix-Web frontend + FastAPI backend  
-✅ **SSL CONFIGURED** - Lets Encrypt certificates  
+✅ **SERVICES RUNNING** - Actix-Web frontend + FastAPI backend
+✅ **SSL CONFIGURED** - Let's Encrypt certificates
 ✅ **MOBILE RESPONSIVE** - dedicated mobile templates  
 
 ## Domains
@@ -33,7 +33,7 @@ This project contains the **BetterGovPH Data Visualizations** platform - a compr
 
 ### Reverse Proxy (Nginx)
 - **Ports**: 80/443
-- **SSL**: Lets Encrypt certificates
+- **SSL**: Let's Encrypt certificates
 - **Config**: `/etc/nginx/conf.d/visualizations_nginx.conf`
 - **Load Balancing**: API requests proxied to FastAPI backend
 

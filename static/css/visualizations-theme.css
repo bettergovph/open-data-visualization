@@ -1,4 +1,4 @@
-/* BetterGovPH Mobile Theme - Philippine Flag Colors */
+/* BetterGovPH Government Data Platform Theme - Philippine Flag Colors */
 
 :root {
     /* BetterGovPH Color Palette - Philippine Flag Colors */
@@ -67,12 +67,10 @@ body {
     line-height: 1.6;
     color: var(--altgovph-gray-900);
     background-color: var(--altgovph-gray-50);
-    -webkit-text-size-adjust: 100%;
-    -webkit-tap-highlight-color: transparent;
 }
 
-/* Mobile Header Styles */
-.altgovph-mobile-header {
+/* Header Styles */
+.visualizations-header {
     background: var(--altgovph-white);
     border-bottom: 1px solid var(--altgovph-gray-200);
     box-shadow: var(--altgovph-shadow-sm);
@@ -81,206 +79,176 @@ body {
     z-index: 1000;
 }
 
-.altgovph-mobile-container {
-    max-width: 100%;
+.visualizations-container {
+    max-width: 1200px;
     margin: 0 auto;
-    padding: 0 var(--altgovph-spacing-md);
+    padding: 0 var(--altgovph-spacing-lg);
 }
 
-.altgovph-mobile-header .altgovph-mobile-container {
+.visualizations-header .visualizations-container {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: var(--altgovph-spacing-sm) var(--altgovph-spacing-md);
-    min-height: 56px;
+    padding: var(--altgovph-spacing-md) var(--altgovph-spacing-lg);
+    min-height: 64px;
 }
 
-.altgovph-mobile-logo-section {
+.visualizations-logo-section {
     display: flex;
     align-items: center;
-    gap: var(--altgovph-spacing-xs);
+    gap: var(--altgovph-spacing-sm);
 }
 
-.altgovph-mobile-logo-link {
+.visualizations-logo-link {
     text-decoration: none;
     color: var(--altgovph-primary);
     font-weight: 600;
-    font-size: var(--altgovph-font-size-base);
+    font-size: var(--altgovph-font-size-lg);
 }
 
-.altgovph-mobile-site-name-link {
+.visualizations-site-name-link {
     text-decoration: none;
     color: var(--altgovph-primary);
     font-weight: 600;
-    font-size: var(--altgovph-font-size-base);
+    font-size: var(--altgovph-font-size-lg);
 }
 
-.altgovph-mobile-logo-img {
-    width: 32px;
-    height: 32px;
-    border-radius: var(--altgovph-radius-sm);
+.visualizations-logo-img {
+    width: 40px;
+    height: 40px;
+    border-radius: var(--altgovph-radius-md);
 }
 
-.altgovph-mobile-site-name {
+.visualizations-site-name {
     font-weight: 700;
     color: var(--altgovph-primary);
 }
 
-.altgovph-mobile-nav-menu {
+.visualizations-nav-menu {
     display: flex;
-    gap: var(--altgovph-spacing-md);
+    gap: var(--altgovph-spacing-xl);
     align-items: center;
 }
 
-.altgovph-mobile-nav-menu a {
+.visualizations-nav-menu a {
     color: var(--altgovph-gray-700);
     text-decoration: none;
     font-weight: 500;
-    padding: var(--altgovph-spacing-xs) var(--altgovph-spacing-sm);
-    border-radius: var(--altgovph-radius-sm);
+    padding: var(--altgovph-spacing-sm) var(--altgovph-spacing-md);
+    border-radius: var(--altgovph-radius-md);
     transition: all 0.2s ease;
-    font-size: var(--altgovph-font-size-sm);
 }
 
-.altgovph-mobile-nav-menu a:hover {
+.visualizations-nav-menu a:hover {
     color: var(--altgovph-primary);
     background-color: var(--altgovph-gray-100);
 }
 
-/* Mobile Main Content */
-.altgovph-mobile-main {
-    min-height: calc(100vh - 56px - 60px);
-    padding: var(--altgovph-spacing-md) 0;
+/* Main Content */
+.visualizations-main {
+    min-height: calc(100vh - 64px - 80px);
+    padding: var(--altgovph-spacing-xl) 0;
 }
 
-/* Mobile Footer Styles */
-.altgovph-mobile-footer {
+/* Footer Styles */
+.visualizations-footer {
     background: var(--altgovph-gray-800);
     color: var(--altgovph-gray-300);
-    padding: var(--altgovph-spacing-lg) 0;
+    padding: var(--altgovph-spacing-xl) 0;
     text-align: center;
 }
 
-.altgovph-mobile-footer p {
-    margin-bottom: var(--altgovph-spacing-xs);
-    font-size: var(--altgovph-font-size-sm);
-}
-
-.altgovph-mobile-footer p:last-child {
-    margin-bottom: 0;
-    font-size: var(--altgovph-font-size-xs);
-    color: var(--altgovph-gray-400);
-}
-
-/* Mobile Budget Section Styles */
-.mobile-budget-section {
-    background: var(--altgovph-white);
-    border-radius: var(--altgovph-radius-lg);
-    box-shadow: var(--altgovph-shadow-md);
-    margin: var(--altgovph-spacing-md);
-    overflow: hidden;
-}
-
-.mobile-budget-container {
-    padding: var(--altgovph-spacing-lg);
-}
-
-.mobile-budget-header {
-    text-align: center;
-    margin-bottom: var(--altgovph-spacing-lg);
-    padding-bottom: var(--altgovph-spacing-lg);
-    border-bottom: 1px solid var(--altgovph-gray-200);
-}
-
-.mobile-budget-title {
-    font-size: var(--altgovph-font-size-2xl);
-    font-weight: 700;
-    color: var(--altgovph-primary);
+.visualizations-footer p {
     margin-bottom: var(--altgovph-spacing-sm);
 }
 
-.mobile-budget-subtitle {
-    font-size: var(--altgovph-font-size-base);
-    color: var(--altgovph-gray-600);
-    margin-bottom: var(--altgovph-spacing-md);
+.visualizations-footer p:last-child {
+    margin-bottom: 0;
+    font-size: var(--altgovph-font-size-sm);
+    color: var(--altgovph-gray-400);
 }
 
-.mobile-budget-section-title {
-    font-size: var(--altgovph-font-size-lg);
-    font-weight: 600;
+/* Budget Section Styles */
+.budget-section {
+    background: var(--altgovph-white);
+    border-radius: var(--altgovph-radius-lg);
+    box-shadow: var(--altgovph-shadow-md);
+    margin: var(--altgovph-spacing-lg);
+    overflow: hidden;
+}
+
+.budget-container {
+    padding: var(--altgovph-spacing-2xl);
+}
+
+.budget-header {
+    text-align: center;
+    margin-bottom: var(--altgovph-spacing-2xl);
+    padding-bottom: var(--altgovph-spacing-xl);
+    border-bottom: 1px solid var(--altgovph-gray-200);
+}
+
+.budget-title {
+    font-size: var(--altgovph-font-size-4xl);
+    font-weight: 700;
     color: var(--altgovph-primary);
     margin-bottom: var(--altgovph-spacing-md);
-    display: flex;
-    align-items: center;
-    gap: var(--altgovph-spacing-xs);
 }
 
-.mobile-budget-section-desc {
+.budget-subtitle {
+    font-size: var(--altgovph-font-size-lg);
     color: var(--altgovph-gray-600);
     margin-bottom: var(--altgovph-spacing-lg);
-    font-size: var(--altgovph-font-size-sm);
 }
 
-/* Mobile Responsive Design */
-@media (max-width: 480px) {
-    .altgovph-mobile-header .altgovph-mobile-container {
+.budget-section-title {
+    font-size: var(--altgovph-font-size-2xl);
+    font-weight: 600;
+    color: var(--altgovph-primary);
+    margin-bottom: var(--altgovph-spacing-lg);
+    display: flex;
+    align-items: center;
+    gap: var(--altgovph-spacing-sm);
+}
+
+.budget-section-desc {
+    color: var(--altgovph-gray-600);
+    margin-bottom: var(--altgovph-spacing-xl);
+    font-size: var(--altgovph-font-size-base);
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .visualizations-header .visualizations-container {
         flex-direction: column;
-        gap: var(--altgovph-spacing-xs);
-        padding: var(--altgovph-spacing-xs);
-        min-height: 48px;
-    }
-    
-    .altgovph-mobile-nav-menu {
-        gap: var(--altgovph-spacing-sm);
-    }
-    
-    .altgovph-mobile-nav-menu a {
-        font-size: var(--altgovph-font-size-xs);
-        padding: var(--altgovph-spacing-xs);
-    }
-    
-    .mobile-budget-container {
+        gap: var(--altgovph-spacing-md);
         padding: var(--altgovph-spacing-md);
     }
     
-    .mobile-budget-title {
-        font-size: var(--altgovph-font-size-xl);
+    .visualizations-nav-menu {
+        gap: var(--altgovph-spacing-lg);
+    }
+    
+    .budget-container {
+        padding: var(--altgovph-spacing-lg);
+    }
+    
+    .budget-title {
+        font-size: var(--altgovph-font-size-3xl);
     }
 }
 
-@media (max-width: 360px) {
-    .altgovph-mobile-logo-img {
-        width: 28px;
-        height: 28px;
+@media (max-width: 480px) {
+    .visualizations-nav-menu {
+        flex-direction: column;
+        gap: var(--altgovph-spacing-sm);
     }
     
-    .altgovph-mobile-site-name {
-        font-size: var(--altgovph-font-size-sm);
+    .budget-container {
+        padding: var(--altgovph-spacing-md);
     }
     
-    .altgovph-mobile-nav-menu {
-        flex-wrap: wrap;
-        justify-content: center;
-    }
-    
-    .mobile-budget-title {
-        font-size: var(--altgovph-font-size-lg);
-    }
-}
-
-/* Landscape orientation adjustments */
-@media (max-height: 500px) and (orientation: landscape) {
-    .altgovph-mobile-header .altgovph-mobile-container {
-        min-height: 40px;
-        padding: var(--altgovph-spacing-xs);
-    }
-    
-    .altgovph-mobile-main {
-        min-height: calc(100vh - 40px - 40px);
-        padding: var(--altgovph-spacing-xs) 0;
-    }
-    
-    .mobile-budget-container {
-        padding: var(--altgovph-spacing-sm);
+    .budget-title {
+        font-size: var(--altgovph-font-size-2xl);
     }
 }
