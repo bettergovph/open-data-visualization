@@ -166,6 +166,45 @@ The `.env` file is gitignored to protect your credentials.
 - **Clean Codebase**: Independent and focused on BetterGov mission
 - **API Ready**: FastAPI backend prepared for data endpoints
 
+## Summary Statistics Management
+
+### Overview
+
+Summary statistics are stored in JSON files under `static/data/` to avoid hardcoding values in frontend templates.
+
+**Files:**
+- `static/data/budget_summary.json` - Budget analysis statistics
+- `static/data/nep_summary.json` - NEP statistics  
+- `static/data/dime_summary.json` - DIME infrastructure statistics
+- `static/data/flood_summary.json` - Flood control statistics
+
+### When to Update
+
+⚠️ **IMPORTANT**: After importing new data into any database, regenerate summary statistics:
+
+```bash
+./deployment/update_summary_stats.sh
+```
+
+Or directly:
+
+```bash
+python3 utils/generate_summary_stats.py
+```
+
+Then commit and deploy:
+
+```bash
+git add static/data/*_summary.json
+git commit -m "Update summary statistics after data import"
+git push
+python3 deployment/deployment_mcp.py
+```
+
+### Strategy
+
+**Manual regeneration only** - no automatic scheduling. Data imports happen infrequently (weekly/monthly/yearly), so periodic updates would waste resources.
+
 ## Testing
 
 Access the application at:
