@@ -160,7 +160,13 @@ body {
     background: var(--gray-800);
     color: var(--gray-300);
     padding: var(--spacing-lg) 0;
-    text-align: center;
+    text-align: center !important;
+}
+
+.visualizations-mobile-footer .visualizations-mobile-container,
+.github-footer .visualizations-mobile-container,
+.data-source-footer .visualizations-mobile-container {
+    text-align: center !important;
 }
 
 .visualizations-mobile-footer p,

@@ -158,7 +158,14 @@ body {
     background: var(--gray-800);
     color: var(--gray-300);
     padding: var(--spacing-xl) 0;
-    text-align: center;
+    text-align: center !important;
+}
+
+.visualizations-footer .visualizations-container,
+.bettergov-footer .visualizations-container,
+.github-footer .visualizations-container,
+.data-source-footer .visualizations-container {
+    text-align: center !important;
 }
 
 .visualizations-footer p,
