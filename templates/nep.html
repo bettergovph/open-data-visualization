@@ -7384,11 +7384,27 @@ document.addEventListener('click', function(event) {
     <!-- Page-specific footer content -->
     <footer class="visualizations-footer">
         <div class="visualizations-container">
-            <p><strong>📊 Source:</strong> Department of Budget and Management (DBM) General Appropriations Act (GAA)</p>
+            <p><strong>📊 Source:</strong> <span id="nep-source">Loading...</span></p>
             <p><strong>📈 Total Budget Items:</strong> <span id="total-budget-items-count">Loading...</span> budget line items nationwide</p>
-            <p><strong>📅 Data Range:</strong> 2020-2025 government budget allocations</p>
+            <p><strong>📅 Data Range:</strong> <span id="nep-range">Loading...</span> government budget allocations</p>
         </div>
     </footer>
+    
+    <script>
+    // Load NEP summary stats
+    fetch('/static/data/nep_summary.json')
+        .then(response => response.json())
+        .then(data => {
+            document.getElementById('nep-source').textContent = data.source;
+            document.getElementById('nep-range').textContent = data.data_range;
+            // total-budget-items-count is already loaded by existing API call
+        })
+        .catch(error => {
+            console.error('Error loading NEP summary:', error);
+            document.getElementById('nep-source').textContent = 'Department of Budget and Management (DBM) General Appropriations Act (GAA)';
+            document.getElementById('nep-range').textContent = '2020-2025';
+        });
+    </script>
     
     {% include "footer.html" %}
 </section>
