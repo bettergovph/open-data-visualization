@@ -2976,10 +2976,15 @@ async function loadNEPYearOverYearChart() {
         const ctx = document.getElementById('yearOverYearChart');
         if (!ctx) return;
         
+        // Destroy existing chart if it exists
+        if (yearOverYearChartInstance) {
+            yearOverYearChartInstance.destroy();
+        }
+        
         const years = result.data.map(d => d.year);
         const amounts = result.data.map(d => d.total_amount * 1000); // Database stores in thousands
         
-        new Chart(ctx, {
+        yearOverYearChartInstance = new Chart(ctx, {
             type: 'line',
             data: {
                 labels: years,
@@ -3041,6 +3046,7 @@ async function loadNEPYearOverYearChart() {
     }
 }
 
+let yearOverYearChartInstance = null;
 let topProgramsChartInstance = null;
 
 async function loadNEPTopProgramsChart(year = '2025') {
