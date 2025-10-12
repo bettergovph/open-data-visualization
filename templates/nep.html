@@ -179,8 +179,19 @@ function toggleMobileMenu() {
                             
                             <!-- Top Programs Chart -->
                             <div class="chart-container" style="background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); height: 400px;">
-                                <h3 style="color: #0038A8; margin: 0 0 15px 0;">🎯 Top 10 Programs by Budget (2025)</h3>
-                                <div style="height: calc(100% - 35px); position: relative;">
+                                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                                    <h3 style="color: #0038A8; margin: 0;">🎯 Top 10 Programs by Budget</h3>
+                                    <select id="topProgramsYear" style="padding: 5px 10px; border: 1px solid #ccc; border-radius: 4px; font-size: 0.9em;">
+                                        <option value="2020">2020</option>
+                                        <option value="2021">2021</option>
+                                        <option value="2022">2022</option>
+                                        <option value="2023">2023</option>
+                                        <option value="2024">2024</option>
+                                        <option value="2025" selected>2025</option>
+                                        <option value="2026">2026</option>
+                                    </select>
+                                </div>
+                                <div style="height: calc(100% - 50px); position: relative;">
                                     <canvas id="topProgramsChart"></canvas>
                                 </div>
                             </div>
@@ -2857,6 +2868,14 @@ function loadVisualCharts() {
         loadNEPYearOverYearChart();
         loadNEPTopProgramsChart();
         
+        // Add year selector event listener for top programs
+        const topProgramsYearSelect = document.getElementById('topProgramsYear');
+        if (topProgramsYearSelect) {
+            topProgramsYearSelect.addEventListener('change', function() {
+                loadNEPTopProgramsChart(this.value);
+            });
+        }
+        
         // Hide loading spinner after charts are loaded
         if (spinner) {
             spinner.style.display = 'none';
@@ -2931,9 +2950,11 @@ async function loadNEPYearOverYearChart() {
     }
 }
 
-async function loadNEPTopProgramsChart() {
+let topProgramsChartInstance = null;
+
+async function loadNEPTopProgramsChart(year = '2025') {
     try {
-        const response = await fetch(`${getApiBaseUrl()}/api/budget/nep/top-programs?year=2025&limit=10`);
+        const response = await fetch(`${getApiBaseUrl()}/api/budget/nep/top-programs?year=${year}&limit=10`);
         const result = await response.json();
         
         if (!result.success || !result.programs) {
@@ -2944,18 +2965,23 @@ async function loadNEPTopProgramsChart() {
         const ctx = document.getElementById('topProgramsChart');
         if (!ctx) return;
         
+        // Destroy existing chart instance
+        if (topProgramsChartInstance) {
+            topProgramsChartInstance.destroy();
+        }
+        
         const labels = result.programs.map(p => {
             const desc = p.description;
             return desc.length > 40 ? desc.substring(0, 40) + '...' : desc;
         });
-        const amounts = result.programs.map(p => p.total_amount / 1000000000); // Convert to billions
+        const amounts = result.programs.map(p => p.total_amount / 1000); // Convert to thousands
         
-        new Chart(ctx, {
+        topProgramsChartInstance = new Chart(ctx, {
             type: 'bar',
             data: {
                 labels: labels,
                 datasets: [{
-                    label: 'Budget (₱ Billions)',
+                    label: 'Budget (₱ Thousands)',
                     data: amounts,
                     backgroundColor: '#0038A8',
                     borderColor: '#002d80',
@@ -2978,7 +3004,7 @@ async function loadNEPTopProgramsChart() {
                                 return result.programs[index].description;
                             },
                             label: function(context) {
-                                return `Budget: ₱${context.parsed.x.toFixed(2)}B`;
+                                return `Budget: ₱${(context.parsed.x * 1000).toLocaleString('en-PH', {maximumFractionDigits: 0})}`;
                             }
                         }
                     }
@@ -2988,7 +3014,12 @@ async function loadNEPTopProgramsChart() {
                         beginAtZero: true,
                         ticks: {
                             callback: function(value) {
-                                return '₱' + value.toFixed(1) + 'B';
+                                if (value >= 1000000) {
+                                    return '₱' + (value / 1000000).toFixed(1) + 'B';
+                                } else if (value >= 1000) {
+                                    return '₱' + (value / 1000).toFixed(1) + 'M';
+                                }
+                                return '₱' + value.toFixed(0) + 'K';
                             }
                         }
                     }
