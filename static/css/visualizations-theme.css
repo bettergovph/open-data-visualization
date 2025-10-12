@@ -151,21 +151,36 @@ body {
 }
 
 /* Footer Styles */
-.visualizations-footer {
+.visualizations-footer,
+.bettergov-footer {
     background: var(--gray-800);
     color: var(--gray-300);
     padding: var(--spacing-xl) 0;
     text-align: center;
 }
 
-.visualizations-footer p {
+.visualizations-footer p,
+.bettergov-footer p {
     margin-bottom: var(--spacing-sm);
+    font-size: 0.9rem;
 }
 
-.visualizations-footer p:last-child {
+.visualizations-footer p:last-child,
+.bettergov-footer p:last-child {
     margin-bottom: 0;
     font-size: var(--font-size-sm);
     color: var(--gray-400);
+}
+
+.visualizations-footer a,
+.bettergov-footer a {
+    color: var(--primary-color);
+    text-decoration: none;
+}
+
+.visualizations-footer a:hover,
+.bettergov-footer a:hover {
+    text-decoration: underline;
 }
 
 /* Budget Section Styles */

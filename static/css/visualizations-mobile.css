@@ -163,13 +163,22 @@ body {
 
 .visualizations-mobile-footer p {
     margin-bottom: var(--spacing-xs);
-    font-size: var(--font-size-sm);
+    font-size: 0.85rem;
 }
 
 .visualizations-mobile-footer p:last-child {
     margin-bottom: 0;
-    font-size: var(--font-size-xs);
+    font-size: 0.75rem;
     color: var(--gray-400);
+}
+
+.visualizations-mobile-footer a {
+    color: var(--primary-color);
+    text-decoration: none;
+}
+
+.visualizations-mobile-footer a:hover {
+    text-decoration: underline;
 }
 
 /* Mobile Budget Section Styles */
