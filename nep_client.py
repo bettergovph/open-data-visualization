@@ -2316,7 +2316,7 @@ async def get_budget_total_items_count_fallback():
         port=int(os.getenv('POSTGRES_PORT', 5432)),
         user=os.getenv('POSTGRES_USER', 'joebert'),
         password=os.getenv('POSTGRES_PASSWORD', ''),
-        database=os.getenv('POSTGRES_DB', 'kenchlightyear_web')
+        database=os.getenv('POSTGRES_DB', 'budget_analysis')
     )
     
     try:
