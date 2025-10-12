@@ -282,10 +282,18 @@ async def get_dime_projects(
         
         where_clause = " AND ".join(where_conditions) if where_conditions else "TRUE"
         
-        # Validate sort column
-        valid_columns = ['project_name', 'cost', 'status', 'region', 'date_started']
-        if sort_by not in valid_columns:
-            sort_by = 'project_name'
+        # Validate and map sort column
+        column_mapping = {
+            'project_name': 'project_name',
+            'cost': 'cost',
+            'status': 'status',
+            'region': 'region',
+            'date_started': 'date_started',
+            'implementing_office': 'implementing_offices'  # Map singular to plural
+        }
+        
+        # Use mapping or default to project_name
+        sort_by = column_mapping.get(sort_by, 'project_name')
         
         # Validate sort order
         sort_order = sort_order.upper() if sort_order.upper() in ['ASC', 'DESC'] else 'ASC'
@@ -294,10 +302,6 @@ async def get_dime_projects(
         count_query = f"SELECT COUNT(*) FROM projects WHERE {where_clause}"
         total_items = await conn.fetchval(count_query, *params)
         total_pages = max(1, (total_items + limit - 1) // limit)
-        
-        # Validate and fix sort column if needed
-        if sort_by == 'implementing_office':
-            sort_by = 'implementing_offices'
         
         # Get projects
         query = f"""
