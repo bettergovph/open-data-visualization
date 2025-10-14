@@ -6672,13 +6672,20 @@ function displayProximityTable() {
         const sameDescription = p1.ProjectDescription === p2.ProjectDescription;
         const sameLocation = (p1.Latitude === p2.Latitude && p1.Longitude === p2.Longitude);
         
-        // Check for suspicious zero patterns in amount
+        // Check for suspicious zero patterns in amount (simplified)
         const amountStr = match.cost.toString();
-        const trailingZeros = (amountStr.match(/\.?0+$/) || [''])[0].length - (amountStr.includes('.') ? 1 : 0);
+        // Remove decimal point and count trailing zeros from the end
+        const noDecimal = amountStr.replace('.', '');
+        const trailingZeros = (noDecimal.match(/0+$/) || [''])[0].length;
+
         let zeroSuspicionBonus = 0;
+        let zeroReason = '';
 
         if (trailingZeros >= 7) {
             zeroSuspicionBonus = 1; // +1 suspicion for 7+ zeros
+            zeroReason = `Amount ends with ${trailingZeros} consecutive zeros - suspicious rounding`;
+        } else if (trailingZeros >= 6) {
+            zeroReason = `Amount ends with ${trailingZeros} consecutive zeros - suspicious rounding`;
         }
 
         // Build red flag tags first
