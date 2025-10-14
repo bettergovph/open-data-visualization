@@ -6701,28 +6701,31 @@ function displayProximityTable() {
         // Calculate suspicion level
         let suspicionLevel = 0;
         let suspicionReasons = [];
-        
+
+        // Check if amount has centavos (decimal places)
+        const hasCentavos = (match.cost % 1 !== 0);
+
         // Check for phase indicators
         const phasePattern = /phase\s*(i{1,3}|iv|v|vi{0,3}|\d+|one|two|three|four|five)/i;
         const hasPhase1 = phasePattern.test(p1.ProjectDescription || '');
         const hasPhase2 = phasePattern.test(p2.ProjectDescription || '');
         const bothHavePhases = hasPhase1 && hasPhase2;
-        
+
         // Check for upstream/downstream indicators
         const streamPattern = /(upstream|downstream)/i;
         const hasStream1 = streamPattern.test(p1.ProjectDescription || '');
         const hasStream2 = streamPattern.test(p2.ProjectDescription || '');
         const bothHaveStreams = hasStream1 && hasStream2;
-        
+
         // Check for left/right side indicators
         const sidePattern = /(left\s+(side|bank)|right\s+(side|bank))/i;
         const hasSide1 = sidePattern.test(p1.ProjectDescription || '');
         const hasSide2 = sidePattern.test(p2.ProjectDescription || '');
         const bothHaveSides = hasSide1 && hasSide2;
-        
+
         // Combined multi-component check
         const isMultiComponent = bothHavePhases || bothHaveStreams || bothHaveSides;
-        
+
         // Count actual differences
         let differenceCount = 0;
         if (!sameDescription) differenceCount++;
