@@ -359,6 +359,7 @@ function toggleMobileMenu() {
                 <div class="flex border-b-2 border-gray-200 mb-4 gap-2">
                     <a href="#visual" class="budget-tab-btn active bg-white text-blue-600 border-blue-600 border-t border-l border-r px-6 py-3 rounded-t-lg cursor-pointer font-semibold transition-all duration-300 relative -mb-0.5 z-10" data-tab="visual">📊 Visual</a>
                     <a href="#table" class="budget-tab-btn bg-gray-100 text-gray-600 border-gray-300 border px-6 py-3 rounded-t-lg cursor-pointer font-semibold transition-all duration-300 hover:bg-gray-200" data-tab="table">📋 Table</a>
+                    <a href="#proximity" class="budget-tab-btn bg-gray-100 text-gray-600 border-gray-300 border px-6 py-3 rounded-t-lg cursor-pointer font-semibold transition-all duration-300 hover:bg-gray-200" data-tab="proximity">📍 Proximity</a>
                     <a href="#contractors" class="budget-tab-btn bg-gray-100 text-gray-600 border-gray-300 border px-6 py-3 rounded-t-lg cursor-pointer font-semibold transition-all duration-300 hover:bg-gray-200" data-tab="contractors">👥 Contractors</a>
                     <a href="#contractors-web" class="budget-tab-btn bg-gray-100 text-gray-600 border-gray-300 border px-6 py-3 rounded-t-lg cursor-pointer font-semibold transition-all duration-300 hover:bg-gray-200" data-tab="contractors-web">🕸️ Contractors Web</a>
                     <a href="#sec" class="budget-tab-btn bg-gray-100 text-gray-600 border-gray-300 border px-6 py-3 rounded-t-lg cursor-pointer font-semibold transition-all duration-300 hover:bg-gray-200" data-tab="sec">🏛️ SEC</a>
@@ -586,6 +587,61 @@ function toggleMobileMenu() {
                     </p>
                 </div>
             </div>
+            
+                    <!-- Proximity Analysis Tab -->
+                    <div id="proximity-tab" class="budget-tab-panel">
+                        <div style="background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
+                            <h3 style="color: #0038A8; margin: 0 0 20px 0;">📍 Proximity Analysis: Same Amount Projects</h3>
+                            <p style="color: #666; margin: 0 0 20px 0;">Projects with identical contract amounts located within 1km of each other. This may indicate multi-phase projects, related infrastructure, or data quality issues worth investigating.</p>
+                            
+                            <!-- Summary Statistics -->
+                            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 20px;">
+                                <div class="stat-card" style="background: #f8f9fa; padding: 15px; border-radius: 8px; text-align: center;">
+                                    <h4 style="color: #0038A8; margin: 0 0 5px 0; font-size: 1.2em;">Total Pairs Found</h4>
+                                    <p id="proximity-total-pairs" style="font-size: 2em; font-weight: bold; color: #dc3545; margin: 0;">Loading...</p>
+                                </div>
+                                <div class="stat-card" style="background: #f8f9fa; padding: 15px; border-radius: 8px; text-align: center;">
+                                    <h4 style="color: #0038A8; margin: 0 0 5px 0; font-size: 1.2em;">Exact Location Pairs</h4>
+                                    <p id="proximity-zero-distance" style="font-size: 2em; font-weight: bold; color: #28a745; margin: 0;">Loading...</p>
+                                </div>
+                                <div class="stat-card" style="background: #f8f9fa; padding: 15px; border-radius: 8px; text-align: center;">
+                                    <h4 style="color: #0038A8; margin: 0 0 5px 0; font-size: 1.2em;">Avg Distance</h4>
+                                    <p id="proximity-avg-distance" style="font-size: 2em; font-weight: bold; color: #17a2b8; margin: 0;">Loading...</p>
+                                </div>
+                            </div>
+
+                            <!-- Proximity Table -->
+                            <div class="table-responsive" style="overflow-x: auto;">
+                                <table id="proximity-table" style="width: 100%; border-collapse: collapse; margin-top: 10px;">
+                                    <thead>
+                                        <tr style="background: #0038A8; color: white;">
+                                            <th style="padding: 12px; text-align: left; border: 1px solid #ddd;">#</th>
+                                            <th style="padding: 12px; text-align: left; border: 1px solid #ddd;">Distance (km)</th>
+                                            <th style="padding: 12px; text-align: left; border: 1px solid #ddd;">Contract Cost</th>
+                                            <th style="padding: 12px; text-align: left; border: 1px solid #ddd;">Project 1</th>
+                                            <th style="padding: 12px; text-align: left; border: 1px solid #ddd;">Location 1</th>
+                                            <th style="padding: 12px; text-align: left; border: 1px solid #ddd;">Project 2</th>
+                                            <th style="padding: 12px; text-align: left; border: 1px solid #ddd;">Location 2</th>
+                                            <th style="padding: 12px; text-align: left; border: 1px solid #ddd;">Contractor Match</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="proximity-table-body">
+                                        <tr>
+                                            <td colspan="8" style="padding: 20px; text-align: center; color: #666;">
+                                                Loading proximity data...
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                            
+                            <div id="proximity-pagination" style="display: flex; justify-content: center; align-items: center; gap: 10px; margin-top: 20px;">
+                                <button id="proximity-prev" style="background: #6c757d; color: white; border: none; padding: 8px 16px; border-radius: 4px; cursor: pointer;" disabled>← Previous</button>
+                                <span id="proximity-page-info" style="color: #666;"></span>
+                                <button id="proximity-next" style="background: #6c757d; color: white; border: none; padding: 8px 16px; border-radius: 4px; cursor: pointer;" disabled>Next →</button>
+                            </div>
+                        </div>
+                    </div>
             
                     <div id="contractors-tab" class="budget-tab-panel">
                 <!-- Contractors Analysis -->
@@ -5835,6 +5891,11 @@ function switchTab(tabName, updateHash = true) {
             console.log('🏛️ SEC tab activated - loading SEC data');
             loadSecData();
             break;
+        case 'proximity':
+            // Load proximity data if needed
+            console.log('📍 Proximity tab activated - loading proximity data');
+            loadProximityData();
+            break;
     }
 }
 
@@ -5848,7 +5909,7 @@ document.addEventListener('DOMContentLoaded', function() {
     // Handle URL hash on page load
     function loadTabFromHash() {
         const hash = window.location.hash.substring(1); // Remove the #
-        const validTabs = ['visual', 'table', 'contractors', 'contractors-web', 'sec'];
+        const validTabs = ['visual', 'table', 'proximity', 'contractors', 'contractors-web', 'sec'];
         
         if (hash && validTabs.includes(hash)) {
             switchTab(hash, false); // Don't update hash since we're loading from it
@@ -6452,6 +6513,181 @@ fetch('/static/data/flood_summary.json')
         document.getElementById('flood-total').textContent = '9,855';
         document.getElementById('flood-range').textContent = '2016-2024';
     });
+
+// Proximity Analysis
+let proximityData = [];
+let proximityCurrentPage = 0;
+const proximityPageSize = 50;
+
+async function loadProximityData() {
+    try {
+        console.log('📍 Loading proximity analysis data...');
+        
+        const response = await fetch('/static/data/flood_same_amount_proximity_results.json');
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        
+        const data = await response.json();
+        console.log('✅ Proximity data loaded:', data.total_matches, 'matches');
+        
+        // Filter to only include 0-1km and sort by distance ascending, then amount descending
+        proximityData = data.matches
+            .filter(m => m.distance_km <= 1.0)
+            .sort((a, b) => {
+                // First sort by distance (ascending - closest first)
+                if (a.distance_km !== b.distance_km) {
+                    return a.distance_km - b.distance_km;
+                }
+                // Then by amount (descending - highest first)
+                return b.cost - a.cost;
+            });
+        
+        console.log('📊 Filtered to 0-1km:', proximityData.length, 'pairs');
+        
+        // Update statistics
+        updateProximityStatistics();
+        
+        // Display first page
+        displayProximityTable();
+        
+    } catch (error) {
+        console.error('❌ Error loading proximity data:', error);
+        document.getElementById('proximity-table-body').innerHTML = `
+            <tr>
+                <td colspan="8" style="padding: 20px; text-align: center; color: #dc3545;">
+                    ❌ Error loading proximity data. Please try again later.
+                </td>
+            </tr>
+        `;
+    }
+}
+
+function updateProximityStatistics() {
+    const totalPairs = proximityData.length;
+    const zeroDist = proximityData.filter(m => m.distance_km === 0).length;
+    const avgDist = totalPairs > 0 
+        ? (proximityData.reduce((sum, m) => sum + m.distance_km, 0) / totalPairs).toFixed(3)
+        : '0.000';
+    
+    document.getElementById('proximity-total-pairs').textContent = totalPairs.toLocaleString('en-PH');
+    document.getElementById('proximity-zero-distance').textContent = zeroDist.toLocaleString('en-PH');
+    document.getElementById('proximity-avg-distance').textContent = avgDist + ' km';
+}
+
+function displayProximityTable() {
+    const startIdx = proximityCurrentPage * proximityPageSize;
+    const endIdx = Math.min(startIdx + proximityPageSize, proximityData.length);
+    const pageData = proximityData.slice(startIdx, endIdx);
+    
+    const tbody = document.getElementById('proximity-table-body');
+    
+    if (pageData.length === 0) {
+        tbody.innerHTML = `
+            <tr>
+                <td colspan="8" style="padding: 20px; text-align: center; color: #666;">
+                    No proximity matches found within 0-1km.
+                </td>
+            </tr>
+        `;
+        return;
+    }
+    
+    tbody.innerHTML = pageData.map((match, idx) => {
+        const globalIdx = startIdx + idx + 1;
+        const p1 = match.project1;
+        const p2 = match.project2;
+        
+        const sameContractor = p1.Contractor === p2.Contractor;
+        const contractorMatch = sameContractor 
+            ? '<span style="color: #28a745; font-weight: bold;">✓ Same</span>'
+            : '<span style="color: #dc3545;">✗ Different</span>';
+        
+        const rowColor = match.distance_km === 0 ? '#fff3cd' : 'white';
+        
+        return `
+            <tr style="background: ${rowColor}; border-bottom: 1px solid #ddd;">
+                <td style="padding: 12px; border: 1px solid #ddd;">${globalIdx}</td>
+                <td style="padding: 12px; border: 1px solid #ddd; font-weight: bold;">
+                    ${match.distance_km.toFixed(3)} km
+                </td>
+                <td style="padding: 12px; border: 1px solid #ddd; color: #dc3545; font-weight: bold;">
+                    ₱${match.cost.toLocaleString('en-PH', {minimumFractionDigits: 2, maximumFractionDigits: 2})}
+                </td>
+                <td style="padding: 12px; border: 1px solid #ddd;">
+                    <strong>${p1.ProjectDescription ? p1.ProjectDescription.substring(0, 80) : 'N/A'}...</strong><br>
+                    <small style="color: #666;">Year: ${p1.Year || 'N/A'} | ${p1.Contractor || 'N/A'}</small><br>
+                    <small style="color: #999;">ID: ${p1.GlobalID}</small>
+                </td>
+                <td style="padding: 12px; border: 1px solid #ddd;">
+                    <small>${p1.Municipality || 'N/A'}, ${p1.Province || 'N/A'}</small><br>
+                    <small style="color: #666;">${match.lat1.toFixed(6)}, ${match.lon1.toFixed(6)}</small>
+                </td>
+                <td style="padding: 12px; border: 1px solid #ddd;">
+                    <strong>${p2.ProjectDescription ? p2.ProjectDescription.substring(0, 80) : 'N/A'}...</strong><br>
+                    <small style="color: #666;">Year: ${p2.Year || 'N/A'} | ${p2.Contractor || 'N/A'}</small><br>
+                    <small style="color: #999;">ID: ${p2.GlobalID}</small>
+                </td>
+                <td style="padding: 12px; border: 1px solid #ddd;">
+                    <small>${p2.Municipality || 'N/A'}, ${p2.Province || 'N/A'}</small><br>
+                    <small style="color: #666;">${match.lat2.toFixed(6)}, ${match.lon2.toFixed(6)}</small>
+                </td>
+                <td style="padding: 12px; border: 1px solid #ddd; text-align: center;">
+                    ${contractorMatch}
+                </td>
+            </tr>
+        `;
+    }).join('');
+    
+    // Update pagination
+    updateProximityPagination();
+}
+
+function updateProximityPagination() {
+    const totalPages = Math.ceil(proximityData.length / proximityPageSize);
+    const pageInfo = document.getElementById('proximity-page-info');
+    const prevBtn = document.getElementById('proximity-prev');
+    const nextBtn = document.getElementById('proximity-next');
+    
+    pageInfo.textContent = `Page ${proximityCurrentPage + 1} of ${totalPages} (${proximityData.length} total pairs)`;
+    
+    prevBtn.disabled = proximityCurrentPage === 0;
+    nextBtn.disabled = proximityCurrentPage >= totalPages - 1;
+    
+    prevBtn.style.opacity = prevBtn.disabled ? '0.5' : '1';
+    nextBtn.style.opacity = nextBtn.disabled ? '0.5' : '1';
+    prevBtn.style.cursor = prevBtn.disabled ? 'not-allowed' : 'pointer';
+    nextBtn.style.cursor = nextBtn.disabled ? 'not-allowed' : 'pointer';
+}
+
+// Add pagination button listeners
+document.addEventListener('DOMContentLoaded', function() {
+    const proximityPrev = document.getElementById('proximity-prev');
+    const proximityNext = document.getElementById('proximity-next');
+    
+    if (proximityPrev) {
+        proximityPrev.addEventListener('click', function() {
+            if (proximityCurrentPage > 0) {
+                proximityCurrentPage--;
+                displayProximityTable();
+                // Scroll to top of table
+                document.getElementById('proximity-table').scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
+        });
+    }
+    
+    if (proximityNext) {
+        proximityNext.addEventListener('click', function() {
+            const totalPages = Math.ceil(proximityData.length / proximityPageSize);
+            if (proximityCurrentPage < totalPages - 1) {
+                proximityCurrentPage++;
+                displayProximityTable();
+                // Scroll to top of table
+                document.getElementById('proximity-table').scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
+        });
+    }
+});
 </script>
 
 {% include "footer.html" %}
