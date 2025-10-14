@@ -593,23 +593,46 @@ function toggleMobileMenu() {
                         <div style="background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
                             <h3 style="color: #0038A8; margin: 0 0 20px 0;">📍 Proximity Analysis: Same Amount, Close Location</h3>
                             <p style="color: #666; margin: 0 0 20px 0;">
-                                Projects with <strong>identical contract amounts</strong> located within 1km of each other. 
+                                Projects with <strong>identical contract amounts</strong> located within 1km of each other.
                                 Each pair has the exact same cost and is geographically close, which may warrant investigation.
                             </p>
+
+                            <!-- Legend -->
+                            <div style="background: #f8f9fa; padding: 15px; border-radius: 8px; margin-bottom: 20px; border-left: 4px solid #0038A8;">
+                                <h4 style="color: #0038A8; margin: 0 0 12px 0; font-size: 1.1em;">🎯 Badge Legend</h4>
+                                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 8px;">
+                                    <div><span style="background: #dc3545; color: white; padding: 2px 6px; border-radius: 3px; font-size: 0.8em;">💀 CRITICAL</span> - Impossible patterns</div>
+                                    <div><span style="background: #fd7e14; color: white; padding: 2px 6px; border-radius: 3px; font-size: 0.8em;">🔥 HIGH</span> - Strong suspicion</div>
+                                    <div><span style="background: #ffc107; color: #000; padding: 2px 6px; border-radius: 3px; font-size: 0.8em;">⚠️ MEDIUM</span> - Needs investigation</div>
+                                    <div><span style="background: #17a2b8; color: white; padding: 2px 6px; border-radius: 3px; font-size: 0.8em;">Diff Desc</span> - Different descriptions</div>
+                                    <div><span style="background: #dc3545; color: white; padding: 2px 6px; border-radius: 3px; font-size: 0.8em;">Diff Contractor</span> - Different contractors</div>
+                                    <div><span style="background: #ffc107; color: #000; padding: 2px 6px; border-radius: 3px; font-size: 0.8em;">Diff Year</span> - Different years</div>
+                                    <div><span style="background: #28a745; color: white; padding: 2px 6px; border-radius: 3px; font-size: 0.8em;">Same Contractor</span> - Same contractor</div>
+                                    <div><span style="background: #6c757d; color: white; padding: 2px 6px; border-radius: 3px; font-size: 0.8em;">Same Year</span> - Same year</div>
+                                    <div><span style="background: #dc3545; color: white; padding: 2px 6px; border-radius: 3px; font-size: 0.8em;">Exact Coords</span> - Exact same coordinates</div>
+                                    <div><span style="background: #8b5cf6; color: white; padding: 2px 6px; border-radius: 3px; font-size: 0.8em;">6 Zeros</span> - 6 consecutive zeros</div>
+                                    <div><span style="background: #8b5cf6; color: white; padding: 2px 6px; border-radius: 3px; font-size: 0.8em;">7+ Zeros</span> - 7+ consecutive zeros</div>
+                                    <div><span style="background: #6610f2; color: white; padding: 2px 6px; border-radius: 3px; font-size: 0.8em;">Multi-Phase</span> - Multi-phase project</div>
+                                    <div><span style="background: #6610f2; color: white; padding: 2px 6px; border-radius: 3px; font-size: 0.8em;">Up/Downstream</span> - Upstream/downstream</div>
+                                    <div><span style="background: #6610f2; color: white; padding: 2px 6px; border-radius: 3px; font-size: 0.8em;">Left/Right</span> - Left/right banks</div>
+                                </div>
+                            </div>
                             <div style="background: #ffe6e6; padding: 12px; border-radius: 6px; border-left: 4px solid #dc3545; margin-bottom: 20px;">
                                 <strong>🚨 Suspicion Levels:</strong> Each pair is automatically scored based on how suspicious the pattern is:
                                 <ul style="margin: 8px 0 0 20px;">
-                                    <li><strong style="color: #dc3545;">VERY HIGH (Red):</strong>
+                                    <li><strong style="color: #dc3545;">💀 CRITICAL (Red):</strong>
                                         <ul style="margin: 4px 0 0 20px;">
                                             <li>Same amount <strong>to the centavo</strong> (e.g., ₱48,512,932.29) across <strong>different years</strong> - virtually impossible as material prices/inflation change yearly</li>
                                             <li>Only year differs with everything else identical - strong indicator of copy-paste error</li>
                                             <li><strong>Perfectly round amounts</strong> (₱96,500,000.00) at exact same location - highly suspicious template/placeholder</li>
+                                            <li>Amounts ending with <strong>7+ consecutive zeros</strong> (₱96,500,000.0000000) - extremely suspicious rounding</li>
                                         </ul>
                                     </li>
-                                    <li><strong style="color: #fd7e14;">HIGH (Orange):</strong>
+                                    <li><strong style="color: #fd7e14;">🔥 HIGH (Orange):</strong>
                                         <ul style="margin: 4px 0 0 20px;">
                                             <li>Same amount to the centavo at exact coordinates, same year</li>
                                             <li>Identical project description, contractor, and location - likely duplicate entry</li>
+                                            <li>Amounts ending with 6 consecutive zeros - suspicious rounding pattern</li>
                                         </ul>
                                     </li>
                                     <li><strong style="color: #ffc107;">MEDIUM (Yellow):</strong> Same exact location (0km) but with some differences - requires investigation</li>
@@ -636,6 +659,7 @@ function toggleMobileMenu() {
                                     <ul style="margin: 4px 0 0 20px;">
                                         <li>Identical amounts to the centavo across different years = highly suspicious copy-paste</li>
                                         <li>Perfectly round amounts (₱96,500,000.00) at exact same location = highly suspicious template/placeholder</li>
+                                        <li>Amounts ending with 6+ zeros (₱96,500,000.000000) = suspicious rounding patterns</li>
                                         <li>The ONLY legitimate round amounts would be budget templates, not actual project costs</li>
                                     </ul>
                                 </div>
@@ -6648,6 +6672,15 @@ function displayProximityTable() {
         const sameDescription = p1.ProjectDescription === p2.ProjectDescription;
         const sameLocation = (p1.Latitude === p2.Latitude && p1.Longitude === p2.Longitude);
         
+        // Check for suspicious zero patterns in amount
+        const amountStr = match.cost.toString();
+        const trailingZeros = (amountStr.match(/\.?0+$/) || [''])[0].length - (amountStr.includes('.') ? 1 : 0);
+        let zeroSuspicionBonus = 0;
+
+        if (trailingZeros >= 7) {
+            zeroSuspicionBonus = 1; // +1 suspicion for 7+ zeros
+        }
+
         // Build red flag tags first
         let redFlags = [];
         if (!sameDescription) redFlags.push('<span style="background: #17a2b8; color: white; padding: 2px 6px; border-radius: 3px; font-size: 0.75em;">Diff Desc</span>');
@@ -6656,6 +6689,7 @@ function displayProximityTable() {
         if (!sameYear) redFlags.push('<span style="background: #ffc107; color: #000; padding: 2px 6px; border-radius: 3px; font-size: 0.75em;">Diff Year</span>');
         else redFlags.push('<span style="background: #6c757d; color: white; padding: 2px 6px; border-radius: 3px; font-size: 0.75em;">Same Year</span>');
         if (sameLocation) redFlags.push('<span style="background: #dc3545; color: white; padding: 2px 6px; border-radius: 3px; font-size: 0.75em;">Exact Coords</span>');
+        if (trailingZeros >= 6) redFlags.push(`<span style="background: #8b5cf6; color: white; padding: 2px 6px; border-radius: 3px; font-size: 0.75em;">${trailingZeros} Zeros</span>`);
         
         // Calculate suspicion level
         let suspicionLevel = 0;
@@ -6728,6 +6762,12 @@ function displayProximityTable() {
                 suspicionReasons[suspicionReasons.length - 1] += ` (multi-component: ${componentType}, but identical amounts still suspicious)`;
             }
         }
+
+        // Apply zero pattern suspicion bonus
+        if (zeroSuspicionBonus > 0) {
+            suspicionLevel = Math.min(3, suspicionLevel + zeroSuspicionBonus);
+            suspicionReasons.push(zeroReason);
+        }
         // HIGH suspicion: Identical project at same location
         else if (match.distance_km === 0 && sameContractor && sameDescription) {
             suspicionLevel = 2; // HIGH - likely duplicate
@@ -6753,14 +6793,14 @@ function displayProximityTable() {
             redFlags.push('<span style="background: #6610f2; color: white; padding: 2px 6px; border-radius: 3px; font-size: 0.75em;">Left/Right</span>');
         }
         
-        // Suspicion badge
+        // Suspicion badge with horror emojis
         let suspicionBadge = '';
         if (suspicionLevel === 3) {
-            suspicionBadge = '<div style="background: #dc3545; color: white; padding: 4px 8px; border-radius: 4px; font-weight: bold; margin-bottom: 4px; font-size: 0.85em;">🚨 VERY HIGH SUSPICION</div>';
+            suspicionBadge = '<div style="background: #dc3545; color: white; padding: 4px 8px; border-radius: 4px; font-weight: bold; margin-bottom: 4px; font-size: 0.85em;">💀 CRITICAL SUSPICION</div>';
         } else if (suspicionLevel === 2) {
-            suspicionBadge = '<div style="background: #fd7e14; color: white; padding: 4px 8px; border-radius: 4px; font-weight: bold; margin-bottom: 4px; font-size: 0.85em;">⚠️ HIGH SUSPICION</div>';
+            suspicionBadge = '<div style="background: #fd7e14; color: white; padding: 4px 8px; border-radius: 4px; font-weight: bold; margin-bottom: 4px; font-size: 0.85em;">🔥 HIGH SUSPICION</div>';
         } else if (suspicionLevel === 1) {
-            suspicionBadge = '<div style="background: #ffc107; color: #000; padding: 4px 8px; border-radius: 4px; font-weight: bold; margin-bottom: 4px; font-size: 0.85em;">⚡ MEDIUM SUSPICION</div>';
+            suspicionBadge = '<div style="background: #ffc107; color: #000; padding: 4px 8px; border-radius: 4px; font-weight: bold; margin-bottom: 4px; font-size: 0.85em;">⚠️ MEDIUM SUSPICION</div>';
         }
         
         const rowColor = suspicionLevel === 3 ? '#ffe6e6' : (suspicionLevel === 2 ? '#fff4e6' : (match.distance_km === 0 ? '#fff3cd' : 'white'));
