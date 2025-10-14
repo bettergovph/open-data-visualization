@@ -591,21 +591,34 @@ function toggleMobileMenu() {
                     <!-- Proximity Analysis Tab -->
                     <div id="proximity-tab" class="budget-tab-panel">
                         <div style="background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
-                            <h3 style="color: #0038A8; margin: 0 0 20px 0;">📍 Proximity Analysis: Different Projects, Same Amount</h3>
+                            <h3 style="color: #0038A8; margin: 0 0 20px 0;">📍 Proximity Analysis: Same Amount, Close Location</h3>
                             <p style="color: #666; margin: 0 0 20px 0;">
-                                <strong>Genuinely different projects</strong> with identical contract amounts located within 1km of each other. 
-                                Multi-year tracking entries (same project in different years) have been excluded to focus on truly interesting patterns: 
-                                multiple distinct projects with the same budget in close proximity.
+                                Projects with <strong>identical contract amounts</strong> located within 1km of each other. 
+                                Each pair has the exact same cost and is geographically close, which may warrant investigation.
                             </p>
-                            <div style="background: #fff3cd; padding: 12px; border-radius: 6px; border-left: 4px solid #ffc107; margin-bottom: 20px;">
-                                <strong>⚠️ Note:</strong> These are NOT duplicate entries. Each pair represents different projects (different descriptions, contractors, or components) 
-                                that happen to have identical budgets and are geographically close. This may indicate:
+                            <div style="background: #ffe6e6; padding: 12px; border-radius: 6px; border-left: 4px solid #dc3545; margin-bottom: 20px;">
+                                <strong>🚨 Suspicion Levels:</strong> Each pair is automatically scored based on how suspicious the pattern is:
                                 <ul style="margin: 8px 0 0 20px;">
-                                    <li>Multi-component infrastructure (e.g., left/right bank of same river)</li>
-                                    <li>Related projects awarded in same bidding</li>
-                                    <li>Standard budget allocations for similar work</li>
-                                    <li>Worth investigating for procurement patterns</li>
+                                    <li><strong style="color: #dc3545;">VERY HIGH (Red):</strong> 
+                                        <ul style="margin: 4px 0 0 20px;">
+                                            <li>Same amount <strong>to the centavo</strong> (e.g., ₱48,512,932.29) across <strong>different years</strong> - virtually impossible as material prices/inflation change yearly</li>
+                                            <li>Only year differs with everything else identical - strong indicator of copy-paste error</li>
+                                        </ul>
+                                    </li>
+                                    <li><strong style="color: #fd7e14;">HIGH (Orange):</strong> Identical project description, contractor, and location - likely duplicate entry</li>
+                                    <li><strong style="color: #ffc107;">MEDIUM (Yellow):</strong> Same exact location (0km) but with some differences - requires investigation</li>
+                                    <li><strong style="color: #6c757d;">Low (White):</strong> Close proximity but clear differences in project details</li>
                                 </ul>
+                                <div style="margin-top: 12px; padding-top: 12px; border-top: 1px solid #ddd;">
+                                    <strong>💡 Critical Insight:</strong> If a project was unprogrammed/unfunded and carried over to the next year, the contract amount MUST change due to:
+                                    <ul style="margin: 4px 0 0 20px;">
+                                        <li>Inflation adjustments</li>
+                                        <li>Material price changes</li>
+                                        <li>Labor cost adjustments</li>
+                                        <li>Updated cost estimates</li>
+                                    </ul>
+                                    <strong>Therefore:</strong> Identical amounts to the centavo across different years = highly suspicious copy-paste. Round amounts (₱96,500,000.00) in same year may be legitimate standard budgets.
+                                </div>
                             </div>
                             
                             <!-- Summary Statistics -->
@@ -6545,41 +6558,19 @@ async function loadProximityData() {
         const data = await response.json();
         console.log('✅ Proximity data loaded:', data.total_matches, 'matches');
         
-        // Filter to only include 0-1km
-        let filtered = data.matches.filter(m => m.distance_km <= 1.0);
+        // Filter to only include 0-1km and sort by distance ascending, then amount descending
+        proximityData = data.matches
+            .filter(m => m.distance_km <= 1.0)
+            .sort((a, b) => {
+                // First sort by distance (ascending - closest first)
+                if (a.distance_km !== b.distance_km) {
+                    return a.distance_km - b.distance_km;
+                }
+                // Then by amount (descending - highest first)
+                return b.cost - a.cost;
+            });
         
-        // Exclude multi-year tracking (same project, different years only)
-        proximityData = filtered.filter(match => {
-            const p1 = match.project1;
-            const p2 = match.project2;
-            
-            // Check if it's multi-year tracking
-            const sameDescription = (p1.ProjectDescription === p2.ProjectDescription);
-            const sameContractor = (p1.Contractor === p2.Contractor);
-            const sameLocation = (p1.Latitude === p2.Latitude && p1.Longitude === p2.Longitude);
-            const sameMunicipality = (p1.Municipality === p2.Municipality);
-            const sameProvince = (p1.Province === p2.Province);
-            const differentYear = (p1.Year !== p2.Year);
-            
-            // Exclude if it's multi-year tracking (same everything except year)
-            const isMultiYearTracking = sameDescription && sameContractor && sameLocation && 
-                                        sameMunicipality && sameProvince && differentYear;
-            
-            return !isMultiYearTracking;
-        });
-        
-        // Sort by distance ascending, then amount descending
-        proximityData.sort((a, b) => {
-            // First sort by distance (ascending - closest first)
-            if (a.distance_km !== b.distance_km) {
-                return a.distance_km - b.distance_km;
-            }
-            // Then by amount (descending - highest first)
-            return b.cost - a.cost;
-        });
-        
-        console.log('📊 Filtered to 0-1km:', filtered.length, 'pairs');
-        console.log('📊 Excluded multi-year tracking, showing:', proximityData.length, 'genuinely different projects');
+        console.log('📊 Filtered to 0-1km:', proximityData.length, 'pairs');
         
         // Update statistics
         updateProximityStatistics();
@@ -6638,6 +6629,45 @@ function displayProximityTable() {
         const sameContractor = p1.Contractor === p2.Contractor;
         const sameYear = p1.Year === p2.Year;
         const sameDescription = p1.ProjectDescription === p2.ProjectDescription;
+        const sameLocation = (p1.Latitude === p2.Latitude && p1.Longitude === p2.Longitude);
+        
+        // Calculate suspicion level
+        let suspicionLevel = 0;
+        let suspicionReasons = [];
+        
+        // Count actual differences
+        let differenceCount = 0;
+        if (!sameDescription) differenceCount++;
+        if (!sameContractor) differenceCount++;
+        if (!sameYear) differenceCount++;
+        
+        // VERY HIGH suspicion: Same amount to the centavo across different years
+        // This is virtually impossible - if project was carried over, price would change due to inflation/material costs
+        const hasCentavos = (match.cost % 1 !== 0); // Has decimal places
+        if (hasCentavos && !sameYear && sameLocation && match.distance_km === 0) {
+            suspicionLevel = 3; // VERY HIGH
+            suspicionReasons.push('Same amount to the centavo across different years - impossible without copy-paste (material prices change)');
+        }
+        // VERY HIGH suspicion: Only year is different, everything else identical
+        else if (differenceCount === 1 && !sameYear && sameDescription && sameContractor && sameLocation) {
+            suspicionLevel = 3;
+            suspicionReasons.push('Only year differs with identical amount - likely duplicate entry (prices should change year-to-year)');
+        }
+        // HIGH suspicion: Same amount to the centavo at exact same coordinates, same year
+        else if (hasCentavos && sameLocation && match.distance_km === 0 && sameYear) {
+            suspicionLevel = 2;
+            suspicionReasons.push('Same amount to the centavo at exact coordinates, same year');
+        }
+        // HIGH suspicion: Identical project at same location
+        else if (match.distance_km === 0 && sameContractor && sameDescription) {
+            suspicionLevel = 2; // HIGH - likely duplicate
+            suspicionReasons.push('Identical project at same location');
+        }
+        // MEDIUM: Same location but with differences
+        else if (match.distance_km === 0) {
+            suspicionLevel = 1; // MEDIUM
+            suspicionReasons.push('Same location, examine differences');
+        }
         
         const contractorMatch = sameContractor 
             ? '<span style="color: #28a745; font-weight: bold;">✓ Same</span>'
@@ -6649,7 +6679,17 @@ function displayProximityTable() {
         if (!sameContractor) diffTags.push('<span style="background: #dc3545; color: white; padding: 2px 6px; border-radius: 3px; font-size: 0.8em;">Different Contractor</span>');
         if (!sameYear) diffTags.push('<span style="background: #ffc107; color: #000; padding: 2px 6px; border-radius: 3px; font-size: 0.8em;">Different Year</span>');
         
-        const rowColor = match.distance_km === 0 ? '#fff3cd' : 'white';
+        // Suspicion badge
+        let suspicionBadge = '';
+        if (suspicionLevel === 3) {
+            suspicionBadge = '<div style="background: #dc3545; color: white; padding: 4px 8px; border-radius: 4px; font-weight: bold; margin-bottom: 4px; font-size: 0.85em;">🚨 VERY HIGH SUSPICION</div>';
+        } else if (suspicionLevel === 2) {
+            suspicionBadge = '<div style="background: #fd7e14; color: white; padding: 4px 8px; border-radius: 4px; font-weight: bold; margin-bottom: 4px; font-size: 0.85em;">⚠️ HIGH SUSPICION</div>';
+        } else if (suspicionLevel === 1) {
+            suspicionBadge = '<div style="background: #ffc107; color: #000; padding: 4px 8px; border-radius: 4px; font-weight: bold; margin-bottom: 4px; font-size: 0.85em;">⚡ MEDIUM SUSPICION</div>';
+        }
+        
+        const rowColor = suspicionLevel === 3 ? '#ffe6e6' : (suspicionLevel === 2 ? '#fff4e6' : (match.distance_km === 0 ? '#fff3cd' : 'white'));
         
         // Get coordinates from project objects
         const lat1 = p1.Latitude || 0;
@@ -6664,12 +6704,14 @@ function displayProximityTable() {
                     ${match.distance_km.toFixed(3)} km
                 </td>
                 <td style="padding: 12px; border: 1px solid #ddd;">
+                    ${suspicionBadge}
                     <div style="color: #dc3545; font-weight: bold; margin-bottom: 6px;">
                         ₱${match.cost.toLocaleString('en-PH', {minimumFractionDigits: 2, maximumFractionDigits: 2})}
                     </div>
                     <div style="display: flex; gap: 4px; flex-wrap: wrap;">
                         ${diffTags.join(' ')}
                     </div>
+                    ${suspicionReasons.length > 0 ? '<div style="font-size: 0.75em; color: #666; margin-top: 4px; font-style: italic;">' + suspicionReasons.join('; ') + '</div>' : ''}
                 </td>
                 <td style="padding: 12px; border: 1px solid #ddd;">
                     <strong>${p1.ProjectDescription ? p1.ProjectDescription.substring(0, 80) : 'N/A'}...</strong><br>
