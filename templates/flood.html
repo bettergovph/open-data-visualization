@@ -6716,7 +6716,7 @@ function displayProximityTable() {
                 <td style="padding: 12px; border: 1px solid #ddd;">
                     <strong>${p1.ProjectDescription ? p1.ProjectDescription.substring(0, 80) : 'N/A'}...</strong><br>
                     <small style="color: #666;">Year: ${p1.Year || 'N/A'} | ${p1.Contractor || 'N/A'}</small><br>
-                    <small style="color: #999;">ID: ${p1.GlobalID}</small>
+                    ${p1.ContractID ? '<small style="color: #999;">Contract ID: ' + p1.ContractID + '</small>' : ''}
                 </td>
                 <td style="padding: 12px; border: 1px solid #ddd;">
                     <small>${p1.Municipality || 'N/A'}, ${p1.Province || 'N/A'}</small><br>
@@ -6725,7 +6725,7 @@ function displayProximityTable() {
                 <td style="padding: 12px; border: 1px solid #ddd;">
                     <strong>${p2.ProjectDescription ? p2.ProjectDescription.substring(0, 80) : 'N/A'}...</strong><br>
                     <small style="color: #666;">Year: ${p2.Year || 'N/A'} | ${p2.Contractor || 'N/A'}</small><br>
-                    <small style="color: #999;">ID: ${p2.GlobalID}</small>
+                    ${p2.ContractID ? '<small style="color: #999;">Contract ID: ' + p2.ContractID + '</small>' : ''}
                 </td>
                 <td style="padding: 12px; border: 1px solid #ddd;">
                     <small>${p2.Municipality || 'N/A'}, ${p2.Province || 'N/A'}</small><br>
