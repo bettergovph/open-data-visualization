@@ -610,8 +610,13 @@ function toggleMobileMenu() {
                                     <li><strong style="color: #6c757d;">Low (White):</strong> Close proximity but clear differences in project details</li>
                                 </ul>
                                 <div style="margin-top: 8px; padding: 8px; background: #e7f3ff; border-radius: 4px;">
-                                    <strong>🔵 Multi-Phase Detection:</strong> If "Phase" is detected in both descriptions, suspicion is lowered by one level (e.g., VERY HIGH → HIGH). 
-                                    However, identical amounts across phases remain suspicious as each phase should have different scope/costs.
+                                    <strong>🔵 Multi-Component Detection:</strong> Suspicion is lowered by one level (e.g., VERY HIGH → HIGH) if detected:
+                                    <ul style="margin: 4px 0 0 20px;">
+                                        <li><strong>Multi-Phase:</strong> "Phase I", "Phase 2", etc. in both descriptions</li>
+                                        <li><strong>Up/Downstream:</strong> "Upstream" or "Downstream" in both descriptions</li>
+                                        <li><strong>Left/Right:</strong> "Left bank/side" or "Right bank/side" in both descriptions</li>
+                                    </ul>
+                                    <strong>Important:</strong> Even for legitimate multi-component projects, identical amounts remain suspicious as each component should have different scope/costs.
                                 </div>
                                 <div style="margin-top: 12px; padding-top: 12px; border-top: 1px solid #ddd;">
                                     <strong>💡 Critical Insight:</strong> If a project was unprogrammed/unfunded and carried over to the next year, the contract amount MUST change due to:
@@ -6651,11 +6656,32 @@ function displayProximityTable() {
         const hasPhase2 = phasePattern.test(p2.ProjectDescription || '');
         const bothHavePhases = hasPhase1 && hasPhase2;
         
+        // Check for upstream/downstream indicators
+        const streamPattern = /(upstream|downstream)/i;
+        const hasStream1 = streamPattern.test(p1.ProjectDescription || '');
+        const hasStream2 = streamPattern.test(p2.ProjectDescription || '');
+        const bothHaveStreams = hasStream1 && hasStream2;
+        
+        // Check for left/right side indicators
+        const sidePattern = /(left\s+(side|bank)|right\s+(side|bank))/i;
+        const hasSide1 = sidePattern.test(p1.ProjectDescription || '');
+        const hasSide2 = sidePattern.test(p2.ProjectDescription || '');
+        const bothHaveSides = hasSide1 && hasSide2;
+        
+        // Combined multi-component check
+        const isMultiComponent = bothHavePhases || bothHaveStreams || bothHaveSides;
+        
         // Count actual differences
         let differenceCount = 0;
         if (!sameDescription) differenceCount++;
         if (!sameContractor) differenceCount++;
         if (!sameYear) differenceCount++;
+        
+        // Build multi-component label for suspicion reasons
+        let componentType = '';
+        if (bothHavePhases) componentType = 'phases';
+        else if (bothHaveStreams) componentType = 'upstream/downstream';
+        else if (bothHaveSides) componentType = 'left/right sides';
         
         // VERY HIGH suspicion: Same amount to the centavo across different years
         // This is virtually impossible - if project was carried over, price would change due to inflation/material costs
@@ -6663,27 +6689,27 @@ function displayProximityTable() {
         if (hasCentavos && !sameYear && sameLocation && match.distance_km === 0) {
             suspicionLevel = 3; // VERY HIGH
             suspicionReasons.push('Same amount to the centavo across different years - impossible without copy-paste (material prices change)');
-            if (bothHavePhases) {
-                suspicionLevel = 2; // Lower to HIGH if phases detected
-                suspicionReasons[suspicionReasons.length - 1] += ' (phases detected, but amount should still differ)';
+            if (isMultiComponent) {
+                suspicionLevel = 2; // Lower to HIGH if multi-component detected
+                suspicionReasons[suspicionReasons.length - 1] += ` (${componentType} detected, but amount should still differ)`;
             }
         }
         // VERY HIGH suspicion: Only year is different, everything else identical
         else if (differenceCount === 1 && !sameYear && sameDescription && sameContractor && sameLocation) {
             suspicionLevel = 3;
             suspicionReasons.push('Only year differs with identical amount - likely duplicate entry (prices should change year-to-year)');
-            if (bothHavePhases) {
+            if (isMultiComponent) {
                 suspicionLevel = 2; // Lower to HIGH
-                suspicionReasons[suspicionReasons.length - 1] += ' (phases detected, but amount should still differ)';
+                suspicionReasons[suspicionReasons.length - 1] += ` (${componentType} detected, but amount should still differ)`;
             }
         }
         // HIGH suspicion: Same amount to the centavo at exact same coordinates, same year
         else if (hasCentavos && sameLocation && match.distance_km === 0 && sameYear) {
             suspicionLevel = 2;
             suspicionReasons.push('Same amount to the centavo at exact coordinates, same year');
-            if (bothHavePhases) {
+            if (isMultiComponent) {
                 suspicionLevel = 1; // Lower to MEDIUM
-                suspicionReasons[suspicionReasons.length - 1] += ' (multi-phase project likely)';
+                suspicionReasons[suspicionReasons.length - 1] += ` (multi-component: ${componentType}, but identical amounts unusual)`;
             }
         }
         // HIGH suspicion: Identical project at same location
@@ -6695,14 +6721,20 @@ function displayProximityTable() {
         else if (match.distance_km === 0) {
             suspicionLevel = 1; // MEDIUM
             suspicionReasons.push('Same location, examine differences');
-            if (bothHavePhases) {
-                suspicionReasons[suspicionReasons.length - 1] += ' (multi-phase project)';
+            if (isMultiComponent) {
+                suspicionReasons[suspicionReasons.length - 1] += ` (multi-component: ${componentType})`;
             }
         }
         
-        // Add phase indicator to red flags
+        // Add multi-component indicators to red flags
         if (bothHavePhases) {
             redFlags.push('<span style="background: #6610f2; color: white; padding: 2px 6px; border-radius: 3px; font-size: 0.75em;">Multi-Phase</span>');
+        }
+        if (bothHaveStreams) {
+            redFlags.push('<span style="background: #6610f2; color: white; padding: 2px 6px; border-radius: 3px; font-size: 0.75em;">Up/Downstream</span>');
+        }
+        if (bothHaveSides) {
+            redFlags.push('<span style="background: #6610f2; color: white; padding: 2px 6px; border-radius: 3px; font-size: 0.75em;">Left/Right</span>');
         }
         
         // Suspicion badge
