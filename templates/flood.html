@@ -609,6 +609,10 @@ function toggleMobileMenu() {
                                     <li><strong style="color: #ffc107;">MEDIUM (Yellow):</strong> Same exact location (0km) but with some differences - requires investigation</li>
                                     <li><strong style="color: #6c757d;">Low (White):</strong> Close proximity but clear differences in project details</li>
                                 </ul>
+                                <div style="margin-top: 8px; padding: 8px; background: #e7f3ff; border-radius: 4px;">
+                                    <strong>🔵 Multi-Phase Detection:</strong> If "Phase" is detected in both descriptions, suspicion is lowered by one level (e.g., VERY HIGH → HIGH). 
+                                    However, identical amounts across phases remain suspicious as each phase should have different scope/costs.
+                                </div>
                                 <div style="margin-top: 12px; padding-top: 12px; border-top: 1px solid #ddd;">
                                     <strong>💡 Critical Insight:</strong> If a project was unprogrammed/unfunded and carried over to the next year, the contract amount MUST change due to:
                                     <ul style="margin: 4px 0 0 20px;">
@@ -6628,9 +6632,24 @@ function displayProximityTable() {
         const sameDescription = p1.ProjectDescription === p2.ProjectDescription;
         const sameLocation = (p1.Latitude === p2.Latitude && p1.Longitude === p2.Longitude);
         
+        // Build red flag tags first
+        let redFlags = [];
+        if (!sameDescription) redFlags.push('<span style="background: #17a2b8; color: white; padding: 2px 6px; border-radius: 3px; font-size: 0.75em;">Diff Desc</span>');
+        if (!sameContractor) redFlags.push('<span style="background: #dc3545; color: white; padding: 2px 6px; border-radius: 3px; font-size: 0.75em;">Diff Contractor</span>');
+        else redFlags.push('<span style="background: #28a745; color: white; padding: 2px 6px; border-radius: 3px; font-size: 0.75em;">Same Contractor</span>');
+        if (!sameYear) redFlags.push('<span style="background: #ffc107; color: #000; padding: 2px 6px; border-radius: 3px; font-size: 0.75em;">Diff Year</span>');
+        else redFlags.push('<span style="background: #6c757d; color: white; padding: 2px 6px; border-radius: 3px; font-size: 0.75em;">Same Year</span>');
+        if (sameLocation) redFlags.push('<span style="background: #dc3545; color: white; padding: 2px 6px; border-radius: 3px; font-size: 0.75em;">Exact Coords</span>');
+        
         // Calculate suspicion level
         let suspicionLevel = 0;
         let suspicionReasons = [];
+        
+        // Check for phase indicators
+        const phasePattern = /phase\s*(i{1,3}|iv|v|vi{0,3}|\d+|one|two|three|four|five)/i;
+        const hasPhase1 = phasePattern.test(p1.ProjectDescription || '');
+        const hasPhase2 = phasePattern.test(p2.ProjectDescription || '');
+        const bothHavePhases = hasPhase1 && hasPhase2;
         
         // Count actual differences
         let differenceCount = 0;
@@ -6644,16 +6663,28 @@ function displayProximityTable() {
         if (hasCentavos && !sameYear && sameLocation && match.distance_km === 0) {
             suspicionLevel = 3; // VERY HIGH
             suspicionReasons.push('Same amount to the centavo across different years - impossible without copy-paste (material prices change)');
+            if (bothHavePhases) {
+                suspicionLevel = 2; // Lower to HIGH if phases detected
+                suspicionReasons[suspicionReasons.length - 1] += ' (phases detected, but amount should still differ)';
+            }
         }
         // VERY HIGH suspicion: Only year is different, everything else identical
         else if (differenceCount === 1 && !sameYear && sameDescription && sameContractor && sameLocation) {
             suspicionLevel = 3;
             suspicionReasons.push('Only year differs with identical amount - likely duplicate entry (prices should change year-to-year)');
+            if (bothHavePhases) {
+                suspicionLevel = 2; // Lower to HIGH
+                suspicionReasons[suspicionReasons.length - 1] += ' (phases detected, but amount should still differ)';
+            }
         }
         // HIGH suspicion: Same amount to the centavo at exact same coordinates, same year
         else if (hasCentavos && sameLocation && match.distance_km === 0 && sameYear) {
             suspicionLevel = 2;
             suspicionReasons.push('Same amount to the centavo at exact coordinates, same year');
+            if (bothHavePhases) {
+                suspicionLevel = 1; // Lower to MEDIUM
+                suspicionReasons[suspicionReasons.length - 1] += ' (multi-phase project likely)';
+            }
         }
         // HIGH suspicion: Identical project at same location
         else if (match.distance_km === 0 && sameContractor && sameDescription) {
@@ -6664,16 +6695,15 @@ function displayProximityTable() {
         else if (match.distance_km === 0) {
             suspicionLevel = 1; // MEDIUM
             suspicionReasons.push('Same location, examine differences');
+            if (bothHavePhases) {
+                suspicionReasons[suspicionReasons.length - 1] += ' (multi-phase project)';
+            }
         }
         
-        // Build red flag tags
-        let redFlags = [];
-        if (!sameDescription) redFlags.push('<span style="background: #17a2b8; color: white; padding: 2px 6px; border-radius: 3px; font-size: 0.75em;">Diff Desc</span>');
-        if (!sameContractor) redFlags.push('<span style="background: #dc3545; color: white; padding: 2px 6px; border-radius: 3px; font-size: 0.75em;">Diff Contractor</span>');
-        else redFlags.push('<span style="background: #28a745; color: white; padding: 2px 6px; border-radius: 3px; font-size: 0.75em;">Same Contractor</span>');
-        if (!sameYear) redFlags.push('<span style="background: #ffc107; color: #000; padding: 2px 6px; border-radius: 3px; font-size: 0.75em;">Diff Year</span>');
-        else redFlags.push('<span style="background: #6c757d; color: white; padding: 2px 6px; border-radius: 3px; font-size: 0.75em;">Same Year</span>');
-        if (sameLocation) redFlags.push('<span style="background: #dc3545; color: white; padding: 2px 6px; border-radius: 3px; font-size: 0.75em;">Exact Coords</span>');
+        // Add phase indicator to red flags
+        if (bothHavePhases) {
+            redFlags.push('<span style="background: #6610f2; color: white; padding: 2px 6px; border-radius: 3px; font-size: 0.75em;">Multi-Phase</span>');
+        }
         
         // Suspicion badge
         let suspicionBadge = '';
