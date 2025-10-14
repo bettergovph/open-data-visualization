@@ -591,8 +591,22 @@ function toggleMobileMenu() {
                     <!-- Proximity Analysis Tab -->
                     <div id="proximity-tab" class="budget-tab-panel">
                         <div style="background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
-                            <h3 style="color: #0038A8; margin: 0 0 20px 0;">📍 Proximity Analysis: Same Amount Projects</h3>
-                            <p style="color: #666; margin: 0 0 20px 0;">Projects with identical contract amounts located within 1km of each other. This may indicate multi-phase projects, related infrastructure, or data quality issues worth investigating.</p>
+                            <h3 style="color: #0038A8; margin: 0 0 20px 0;">📍 Proximity Analysis: Different Projects, Same Amount</h3>
+                            <p style="color: #666; margin: 0 0 20px 0;">
+                                <strong>Genuinely different projects</strong> with identical contract amounts located within 1km of each other. 
+                                Multi-year tracking entries (same project in different years) have been excluded to focus on truly interesting patterns: 
+                                multiple distinct projects with the same budget in close proximity.
+                            </p>
+                            <div style="background: #fff3cd; padding: 12px; border-radius: 6px; border-left: 4px solid #ffc107; margin-bottom: 20px;">
+                                <strong>⚠️ Note:</strong> These are NOT duplicate entries. Each pair represents different projects (different descriptions, contractors, or components) 
+                                that happen to have identical budgets and are geographically close. This may indicate:
+                                <ul style="margin: 8px 0 0 20px;">
+                                    <li>Multi-component infrastructure (e.g., left/right bank of same river)</li>
+                                    <li>Related projects awarded in same bidding</li>
+                                    <li>Standard budget allocations for similar work</li>
+                                    <li>Worth investigating for procurement patterns</li>
+                                </ul>
+                            </div>
                             
                             <!-- Summary Statistics -->
                             <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 20px;">
@@ -6531,19 +6545,41 @@ async function loadProximityData() {
         const data = await response.json();
         console.log('✅ Proximity data loaded:', data.total_matches, 'matches');
         
-        // Filter to only include 0-1km and sort by distance ascending, then amount descending
-        proximityData = data.matches
-            .filter(m => m.distance_km <= 1.0)
-            .sort((a, b) => {
-                // First sort by distance (ascending - closest first)
-                if (a.distance_km !== b.distance_km) {
-                    return a.distance_km - b.distance_km;
-                }
-                // Then by amount (descending - highest first)
-                return b.cost - a.cost;
-            });
+        // Filter to only include 0-1km
+        let filtered = data.matches.filter(m => m.distance_km <= 1.0);
         
-        console.log('📊 Filtered to 0-1km:', proximityData.length, 'pairs');
+        // Exclude multi-year tracking (same project, different years only)
+        proximityData = filtered.filter(match => {
+            const p1 = match.project1;
+            const p2 = match.project2;
+            
+            // Check if it's multi-year tracking
+            const sameDescription = (p1.ProjectDescription === p2.ProjectDescription);
+            const sameContractor = (p1.Contractor === p2.Contractor);
+            const sameLocation = (p1.Latitude === p2.Latitude && p1.Longitude === p2.Longitude);
+            const sameMunicipality = (p1.Municipality === p2.Municipality);
+            const sameProvince = (p1.Province === p2.Province);
+            const differentYear = (p1.Year !== p2.Year);
+            
+            // Exclude if it's multi-year tracking (same everything except year)
+            const isMultiYearTracking = sameDescription && sameContractor && sameLocation && 
+                                        sameMunicipality && sameProvince && differentYear;
+            
+            return !isMultiYearTracking;
+        });
+        
+        // Sort by distance ascending, then amount descending
+        proximityData.sort((a, b) => {
+            // First sort by distance (ascending - closest first)
+            if (a.distance_km !== b.distance_km) {
+                return a.distance_km - b.distance_km;
+            }
+            // Then by amount (descending - highest first)
+            return b.cost - a.cost;
+        });
+        
+        console.log('📊 Filtered to 0-1km:', filtered.length, 'pairs');
+        console.log('📊 Excluded multi-year tracking, showing:', proximityData.length, 'genuinely different projects');
         
         // Update statistics
         updateProximityStatistics();
@@ -6598,10 +6634,20 @@ function displayProximityTable() {
         const p1 = match.project1;
         const p2 = match.project2;
         
+        // Check differences
         const sameContractor = p1.Contractor === p2.Contractor;
+        const sameYear = p1.Year === p2.Year;
+        const sameDescription = p1.ProjectDescription === p2.ProjectDescription;
+        
         const contractorMatch = sameContractor 
             ? '<span style="color: #28a745; font-weight: bold;">✓ Same</span>'
             : '<span style="color: #dc3545;">✗ Different</span>';
+        
+        // Build difference tags
+        let diffTags = [];
+        if (!sameDescription) diffTags.push('<span style="background: #17a2b8; color: white; padding: 2px 6px; border-radius: 3px; font-size: 0.8em;">Different Desc</span>');
+        if (!sameContractor) diffTags.push('<span style="background: #dc3545; color: white; padding: 2px 6px; border-radius: 3px; font-size: 0.8em;">Different Contractor</span>');
+        if (!sameYear) diffTags.push('<span style="background: #ffc107; color: #000; padding: 2px 6px; border-radius: 3px; font-size: 0.8em;">Different Year</span>');
         
         const rowColor = match.distance_km === 0 ? '#fff3cd' : 'white';
         
@@ -6617,8 +6663,13 @@ function displayProximityTable() {
                 <td style="padding: 12px; border: 1px solid #ddd; font-weight: bold;">
                     ${match.distance_km.toFixed(3)} km
                 </td>
-                <td style="padding: 12px; border: 1px solid #ddd; color: #dc3545; font-weight: bold;">
-                    ₱${match.cost.toLocaleString('en-PH', {minimumFractionDigits: 2, maximumFractionDigits: 2})}
+                <td style="padding: 12px; border: 1px solid #ddd;">
+                    <div style="color: #dc3545; font-weight: bold; margin-bottom: 6px;">
+                        ₱${match.cost.toLocaleString('en-PH', {minimumFractionDigits: 2, maximumFractionDigits: 2})}
+                    </div>
+                    <div style="display: flex; gap: 4px; flex-wrap: wrap;">
+                        ${diffTags.join(' ')}
+                    </div>
                 </td>
                 <td style="padding: 12px; border: 1px solid #ddd;">
                     <strong>${p1.ProjectDescription ? p1.ProjectDescription.substring(0, 80) : 'N/A'}...</strong><br>
