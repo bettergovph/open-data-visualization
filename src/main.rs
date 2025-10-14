@@ -202,10 +202,23 @@ async fn flood_dime_correlation(_req: HttpRequest) -> Result<HttpResponse, Actix
 
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
+    // Load environment variables from .env file
+    dotenv::dotenv().ok();
+    
     // Initialize logging
     env_logger::init();
 
+    // Read server configuration from environment
+    let host = std::env::var("SERVER_HOST").unwrap_or_else(|_| "127.0.0.1".to_string());
+    let port = std::env::var("SERVER_PORT")
+        .unwrap_or_else(|_| "8889".to_string())
+        .parse::<u16>()
+        .unwrap_or(8889);
+    
+    let bind_address = format!("{}:{}", host, port);
+
     println!("🚀 Starting BetterGovPH Open Data Visualization Server");
+    println!("📡 Listening on {}", bind_address);
 
     HttpServer::new(|| {
         let cors = Cors::default()
@@ -227,7 +240,7 @@ async fn main() -> std::io::Result<()> {
             .service(web::resource("/budget-flood-correlation").to(budget_flood_correlation))
             .service(web::resource("/flood-dime-correlation").to(flood_dime_correlation))
     })
-    .bind("127.0.0.1:8888")?
+    .bind(&bind_address)?
     .run()
     .await
 }
