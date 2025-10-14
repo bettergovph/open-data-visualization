@@ -114,7 +114,7 @@
 
             <!-- DIME Status Legend -->
             <div class="bg-gray-50 p-4 rounded-lg mb-4 border border-gray-200">
-                <div class="text-sm font-medium text-gray-700 mb-2">📊 Flood Control + DIME Status + PhilGEPS Contracts Legend</div>
+                <div class="text-sm font-medium text-gray-700 mb-2">📊 DIME Status Legend (with PhilGEPS Contracts)</div>
                 <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-2 text-xs">
                     <div class="flex items-center gap-2">
                         <div class="w-3 h-3 rounded-full bg-[#28a745]"></div>
@@ -144,17 +144,6 @@
                 <div class="text-xs text-gray-500 mt-2">
                     Circle size represents project cost (larger = higher cost)<br>
                     <em>Black circles: Projects without DIME status integration</em>
-                </div>
-            </div>
-
-            <!-- Data Sources -->
-            <div class="bg-blue-50 p-4 rounded-lg mb-4 border-l-4 border-blue-500">
-                <div class="text-sm font-medium text-blue-900 mb-2">📚 Data Sources</div>
-                <div class="text-xs text-blue-800 space-y-1">
-                    <div>🏗️ <strong>Flood Control Projects:</strong> <a href="https://sumbongsapangulo.ph/flood-control-map/" target="_blank" rel="noopener noreferrer" class="underline hover:text-blue-600">Sumbong sa Pangulo Flood Control Map</a></div>
-                    <div>📊 <strong>DIME Infrastructure Status:</strong> DPWH Development Impact & Effectiveness Monitoring</div>
-                    <div>📋 <strong>PhilGEPS Contracts:</strong> <a href="https://github.com/gabconcepcionph/dpwh-contracts-dashboard" target="_blank" rel="noopener noreferrer" class="underline hover:text-blue-600">@gabconcepcionph/dpwh-contracts-dashboard</a></div>
-                    <div>💰 <strong>Budget Data (GAA & NEP):</strong> <a href="https://github.com/bettergovph/open-budget-data" target="_blank" rel="noopener noreferrer" class="underline hover:text-blue-600">@bettergovph/open-budget-data</a></div>
                 </div>
             </div>
 
@@ -969,7 +958,13 @@ document.addEventListener('DOMContentLoaded', function() {
 <!-- Page-specific footer content -->
 <footer class="visualizations-footer">
     <div class="visualizations-container">
-        <p><strong>📊 Source:</strong> <span id="map-source">Loading...</span></p>
+        <p><strong>📊 Sources:</strong></p>
+        <ul style="list-style: none; padding-left: 1rem; margin: 0.5rem 0;">
+            <li>• Flood Control: <a href="https://sumbongsapangulo.ph/flood-control-map/" target="_blank" rel="noopener noreferrer" style="text-decoration: underline;">Sumbong sa Pangulo</a></li>
+            <li>• DIME: Department of Budget and Management - Digital Information for Monitoring and Evaluation</li>
+            <li>• PhilGEPS: <a href="https://github.com/gabconcepcionph/dpwh-contracts-dashboard" target="_blank" rel="noopener noreferrer" style="text-decoration: underline;">@gabconcepcionph/dpwh-contracts-dashboard</a></li>
+            <li>• Budget (GAA & NEP): <a href="https://github.com/bettergovph/open-budget-data" target="_blank" rel="noopener noreferrer" style="text-decoration: underline;">@bettergovph/open-budget-data</a></li>
+        </ul>
         <p><strong>📈 Total Projects:</strong> <span id="map-total">Loading...</span> flood control projects nationwide</p>
         <p><strong>📅 Data Range:</strong> <span id="map-range">Loading...</span> infrastructure projects</p>
     </div>
