@@ -819,6 +819,59 @@ async def dime_project_status_api(project_id: str):
     except Exception as e:
         return JSONResponse({"success": False, "error": str(e)})
 
+@app.get("/api/philgeps/contracts/{meilisearch_id}")
+async def philgeps_contracts_api(meilisearch_id: str):
+    """Get PhilGEPS contracts by MeiliSearch ID - no authentication required"""
+    try:
+        import asyncpg
+        conn = await asyncpg.connect(
+            host=os.getenv('POSTGRES_HOST', 'localhost'),
+            port=int(os.getenv('POSTGRES_PORT', 5432)),
+            user=os.getenv('POSTGRES_USER', 'budget_admin'),
+            password=os.getenv('POSTGRES_PASSWORD', ''),
+            database=os.getenv('POSTGRES_DB_PHILGEPS', 'philgeps')
+        )
+        
+        # Query contracts by meilisearch_id (the GlobalID from flood projects)
+        contracts = await conn.fetch(
+            """SELECT reference_id, contract_no, award_title, notice_title,
+                      awardee_name, organization_name, area_of_delivery,
+                      business_category, contract_amount, award_date, award_status
+               FROM contracts 
+               WHERE meilisearch_id = $1
+               ORDER BY contract_amount DESC
+               LIMIT 10""",
+            meilisearch_id
+        )
+        await conn.close()
+        
+        if contracts:
+            contracts_list = []
+            for contract in contracts:
+                contracts_list.append({
+                    "reference_id": contract['reference_id'],
+                    "contract_no": contract['contract_no'],
+                    "award_title": contract['award_title'],
+                    "notice_title": contract['notice_title'],
+                    "awardee_name": contract['awardee_name'],
+                    "organization_name": contract['organization_name'],
+                    "area_of_delivery": contract['area_of_delivery'],
+                    "business_category": contract['business_category'],
+                    "contract_amount": float(contract['contract_amount']) if contract['contract_amount'] else 0,
+                    "award_date": contract['award_date'].isoformat() if contract['award_date'] else None,
+                    "award_status": contract['award_status']
+                })
+            
+            return JSONResponse({
+                "success": True,
+                "count": len(contracts_list),
+                "contracts": contracts_list
+            })
+        else:
+            return JSONResponse({"success": False, "error": "No contracts found"})
+    except Exception as e:
+        return JSONResponse({"success": False, "error": str(e)})
+
 @app.get("/api/dime/projects")
 async def dime_projects_api(
     page: int = 1,

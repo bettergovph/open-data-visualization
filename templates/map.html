@@ -671,27 +671,101 @@ async function processProjects(projects) {
                     '<span style="color: #999;">Unknown Status</span>';
 
                 const popupContent = `
-                    <div style="max-width: 300px; font-family: Arial, sans-serif;">
-                        <h4 style="margin: 0 0 8px 0; color: ${color};">${project.ProjectDescription || 'Unnamed Project'}</h4>
-                        <div style="font-size: 0.9em; margin-bottom: 8px;">
+                    <div style="min-width: 400px; max-width: 500px; font-family: Arial, sans-serif;">
+                        <h4 style="margin: 0 0 10px 0; color: ${color}; font-size: 1.1em;">${project.ProjectDescription || 'Unnamed Project'}</h4>
+                        <div style="font-size: 0.95em; margin-bottom: 10px;">
                             <strong>Location:</strong> ${project.Municipality || 'Unknown'}, ${project.Province || 'Unknown'}
                         </div>
-                        <div style="font-size: 0.9em; margin-bottom: 8px;">
+                        <div style="font-size: 0.95em; margin-bottom: 10px;">
                             <strong>Status:</strong> ${statusBadge}
                         </div>
-                        <div style="font-size: 0.9em; margin-bottom: 8px;">
+                        <div style="font-size: 0.95em; margin-bottom: 10px;">
                             <strong>Cost:</strong> ${costDisplay}
                         </div>
-                        <div style="font-size: 0.8em; margin-bottom: 8px; color: #666;">
-                            <strong>Circle Diameter:</strong> ${radiusKm} km
-                        </div>
-                        <div style="font-size: 0.8em; color: #666;">
+                        <div style="font-size: 0.9em; margin-bottom: 10px; color: #666;">
                             <strong>Contractor:</strong> ${project.Contractor || 'Unknown'}
+                        </div>
+                        <div id="philgeps-contracts-${project.GlobalID}" style="margin-top: 12px; padding-top: 12px; border-top: 1px solid #e0e0e0;">
+                            <div style="font-size: 0.85em; color: #666; font-style: italic;">
+                                Loading PhilGEPS contracts...
+                            </div>
                         </div>
                     </div>
                 `;
 
                 circle.bindPopup(popupContent);
+                
+                // Fetch PhilGEPS contracts when popup opens
+                circle.on('popupopen', async function() {
+                    const philgepsContainer = document.getElementById(`philgeps-contracts-${project.GlobalID}`);
+                    if (!philgepsContainer) return;
+                    
+                    try {
+                        const response = await fetch(`/api/philgeps/contracts/${project.GlobalID}`);
+                        if (!response.ok) {
+                            throw new Error('Failed to fetch contracts');
+                        }
+                        
+                        const data = await response.json();
+                        
+                        if (data.success && data.contracts && data.contracts.length > 0) {
+                            let contractsHtml = `
+                                <div style="font-size: 0.9em; color: #0038A8; font-weight: 600; margin-bottom: 8px;">
+                                    📋 PhilGEPS Contracts (${data.count})
+                                </div>
+                            `;
+                            
+                            // Show up to 3 contracts
+                            const displayContracts = data.contracts.slice(0, 3);
+                            displayContracts.forEach((contract, idx) => {
+                                const amount = contract.contract_amount ? `₱${parseFloat(contract.contract_amount).toLocaleString('en-PH', {minimumFractionDigits: 2, maximumFractionDigits: 2})}` : 'N/A';
+                                const contractNo = contract.contract_no || contract.reference_id || 'N/A';
+                                const awardee = contract.awardee_name || 'Unknown';
+                                const org = contract.organization_name || 'Unknown';
+                                
+                                contractsHtml += `
+                                    <div style="font-size: 0.85em; padding: 8px; background: #f8f9fa; border-radius: 4px; margin-bottom: 6px;">
+                                        <div style="font-weight: 600; color: #0038A8; margin-bottom: 4px;">
+                                            Contract: ${contractNo}
+                                        </div>
+                                        <div style="color: #666; margin-bottom: 3px; font-size: 0.95em;">
+                                            <strong>Awardee:</strong> ${awardee}
+                                        </div>
+                                        <div style="color: #666; margin-bottom: 4px; font-size: 0.95em;">
+                                            <strong>Agency:</strong> ${org}
+                                        </div>
+                                        <div style="color: #28a745; font-weight: 600; font-size: 1em;">
+                                            ${amount}
+                                        </div>
+                                    </div>
+                                `;
+                            });
+                            
+                            if (data.count > 3) {
+                                contractsHtml += `
+                                    <div style="font-size: 0.8em; color: #666; font-style: italic; margin-top: 6px;">
+                                        + ${data.count - 3} more contract(s)
+                                    </div>
+                                `;
+                            }
+                            
+                            philgepsContainer.innerHTML = contractsHtml;
+                        } else {
+                            philgepsContainer.innerHTML = `
+                                <div style="font-size: 0.8em; color: #999; font-style: italic;">
+                                    No PhilGEPS contracts linked
+                                </div>
+                            `;
+                        }
+                    } catch (error) {
+                        console.error('Error fetching PhilGEPS contracts:', error);
+                        philgepsContainer.innerHTML = `
+                            <div style="font-size: 0.75em; color: #999; font-style: italic;">
+                                PhilGEPS data unavailable
+                            </div>
+                        `;
+                    }
+                });
                 circle.addTo(mapInstance);
                 mapMarkers.push(circle);
             }

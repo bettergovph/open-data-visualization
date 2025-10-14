@@ -56,27 +56,29 @@ def normalize_location(location: str) -> str:
     return location
 
 def location_match_score(philgeps_area: str, meili_province: str, meili_region: str) -> float:
-    """Calculate location match score (0-1)"""
+    """Calculate location match score (0-1) - STRICT matching only"""
     if not philgeps_area:
         return 0.0
     
     philgeps_normalized = normalize_location(philgeps_area)
-    
-    # Check province match
     province_normalized = normalize_location(meili_province or "")
-    if province_normalized and philgeps_normalized in province_normalized or province_normalized in philgeps_normalized:
-        return 1.0
     
-    # Check region match (weaker)
-    region_normalized = normalize_location(meili_region or "")
-    if region_normalized and philgeps_normalized in region_normalized or region_normalized in philgeps_normalized:
-        return 0.7
+    # STRICT: Province name must be contained (one in the other)
+    if province_normalized and len(province_normalized) > 3:
+        if philgeps_normalized in province_normalized or province_normalized in philgeps_normalized:
+            return 1.0
     
-    # Use sequence matching for fuzzy comparison
-    province_similarity = SequenceMatcher(None, philgeps_normalized, province_normalized).ratio()
-    region_similarity = SequenceMatcher(None, philgeps_normalized, region_normalized).ratio()
+    # STRICT: Exact string matching with high threshold
+    if province_normalized:
+        province_similarity = SequenceMatcher(None, philgeps_normalized, province_normalized).ratio()
+        # Require at least 80% similarity for province
+        if province_similarity >= 0.8:
+            return province_similarity
     
-    return max(province_similarity, region_similarity * 0.7)
+    # NO fuzzy region matching - too risky
+    # Region matching removed to prevent cross-province matches
+    
+    return 0.0  # If province doesn't match well enough, score is 0
 
 def amount_match_score(amount1: float, amount2: float, tolerance_percent: float = 5.0) -> float:
     """
@@ -125,16 +127,20 @@ def calculate_match_confidence(location_score: float, amount_score: float, contr
     Calculate overall match confidence score (0-100)
     
     Weights:
-    - Location: 40%
-    - Amount: 50%
+    - Location: 50% (INCREASED - more important)
+    - Amount: 40% (DECREASED)
     - Contractor: 10% (optional)
     """
-    # If amount doesn't match well, it's likely not a match
+    # STRICT: Location must match well
+    if location_score < 0.8:
+        return 0.0  # No match if location doesn't match
+    
+    # STRICT: Amount must match reasonably well
     if amount_score < 0.8:
         return 0.0
     
-    # Calculate weighted score
-    confidence = (location_score * 0.4) + (amount_score * 0.5) + (contractor_score * 0.1)
+    # Calculate weighted score with location priority
+    confidence = (location_score * 0.5) + (amount_score * 0.4) + (contractor_score * 0.1)
     
     return round(confidence * 100, 2)
 
@@ -259,7 +265,7 @@ async def match_philgeps_to_meilisearch():
                         contractor_score
                     )
                     
-                    if confidence >= 70:  # Minimum 70% confidence
+                    if confidence >= 85:  # STRICT: Minimum 85% confidence (was 70%)
                         candidates.append({
                             'project': project,
                             'confidence': confidence,

@@ -3,6 +3,10 @@ Analyze PhilGEPS CSV data to find complementary fields for MeiliSearch
 """
 import csv
 import asyncio
+import sys
+import os
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
 from flood_client import FloodControlClient
 from collections import defaultdict
 
@@ -11,7 +15,7 @@ async def main():
     print("=" * 80)
     
     # Read CSV sample
-    csv_file = "/home/joebert/open-data-visualization/database/contracts_export_flood_control_data.csv"
+    csv_file = os.path.join(os.path.dirname(os.path.dirname(__file__)), "database/contracts_export_flood_control_data.csv")
     
     print("\n📄 PhilGEPS CSV Fields:")
     print("-" * 80)
@@ -75,11 +79,6 @@ async def main():
     print("💡 COMPLEMENTARY DATA IN CSV (Not in MeiliSearch):")
     print("=" * 80)
     
-    meili_concept_fields = {
-        'contractor', 'contract_cost', 'description', 'year', 'region',
-        'province', 'municipality', 'type_of_work', 'district', 'id'
-    }
-    
     complementary = {
         'reference_id': 'PhilGEPS unique reference ID',
         'contract_no': '⭐ Official contract number (MeiliSearch lacks this!)',
@@ -97,36 +96,6 @@ async def main():
         print(f"  • {field:25s} - {description}")
     
     print("\n" + "=" * 80)
-    print("🔗 POTENTIAL MATCHING/LINKING STRATEGIES:")
-    print("=" * 80)
-    print("""
-1. BY CONTRACTOR NAME:
-   - CSV: 'awardee_name' 
-   - MeiliSearch: 'Contractor'
-   - Could link contracts to infrastructure projects by company
-
-2. BY LOCATION:
-   - CSV: 'area_of_delivery' 
-   - MeiliSearch: 'Region', 'Province', 'Municipality'
-   - Could match projects in same geographic area
-
-3. BY AMOUNT/COST:
-   - CSV: 'contract_amount'
-   - MeiliSearch: 'ContractCost'
-   - Could find matching projects by similar amounts
-
-4. BY TIME PERIOD:
-   - CSV: 'award_date'
-   - MeiliSearch: 'InfraYear'
-   - Could correlate procurement timing with project execution
-
-5. BY PROJECT DESCRIPTION:
-   - CSV: 'award_title' / 'notice_title'
-   - MeiliSearch: 'ProjectDescription'
-   - Text similarity matching could link related records
-""")
-    
-    print("\n" + "=" * 80)
     print("💎 HIGH-VALUE COMPLEMENTARY FIELDS:")
     print("=" * 80)
     
@@ -137,37 +106,22 @@ TOP FIELDS TO ADD FROM CSV:
    - Official contract number
    - Essential for procurement tracking
    - Legal reference for audits
-   - MeiliSearch only has 'ContractID' (may be different)
 
 2. ⭐ organization_name  
    - Which government office awarded the contract
-   - MeiliSearch has 'DistrictEngineeringOffice' but may differ
    - Shows procurement authority
 
 3. ⭐ award_date
    - Exact date contract was awarded
-   - MeiliSearch only has 'InfraYear' (year only)
    - Critical for timeline analysis
 
 4. ⭐ award_status
    - active/completed/cancelled/suspended
-   - MeiliSearch doesn't track project status
    - Essential for monitoring
 
 5. ⭐ business_category
    - Construction Projects vs Hardware vs Materials
    - Helps differentiate contract types
-   - MeiliSearch has 'TypeofWork' but different categorization
-
-6. ⭐ reference_id
-   - PhilGEPS tracking number
-   - Links to source procurement system
-   - Audit trail
-
-7. ⭐ notice_title
-   - Original procurement notice
-   - May have more details than award_title
-   - Preserves procurement history
 """)
     
     # Analyze data statistics

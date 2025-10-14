@@ -3,8 +3,11 @@ Quick script to check MeiliSearch flood control data and compare with CSV
 """
 import asyncio
 import csv
-from flood_client import FloodControlClient
+import sys
 import os
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
+from flood_client import FloodControlClient
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -44,7 +47,7 @@ async def main():
     
     # Check CSV file
     print("📄 Checking CSV file...")
-    csv_file = "/home/joebert/open-data-visualization/database/contracts_export_flood_control_data.csv"
+    csv_file = os.path.join(os.path.dirname(os.path.dirname(__file__)), "database/contracts_export_flood_control_data.csv")
     
     try:
         with open(csv_file, 'r', encoding='utf-8') as f:
