@@ -6605,6 +6605,12 @@ function displayProximityTable() {
         
         const rowColor = match.distance_km === 0 ? '#fff3cd' : 'white';
         
+        // Get coordinates from project objects
+        const lat1 = p1.Latitude || 0;
+        const lon1 = p1.Longitude || 0;
+        const lat2 = p2.Latitude || 0;
+        const lon2 = p2.Longitude || 0;
+        
         return `
             <tr style="background: ${rowColor}; border-bottom: 1px solid #ddd;">
                 <td style="padding: 12px; border: 1px solid #ddd;">${globalIdx}</td>
@@ -6621,7 +6627,7 @@ function displayProximityTable() {
                 </td>
                 <td style="padding: 12px; border: 1px solid #ddd;">
                     <small>${p1.Municipality || 'N/A'}, ${p1.Province || 'N/A'}</small><br>
-                    <small style="color: #666;">${match.lat1.toFixed(6)}, ${match.lon1.toFixed(6)}</small>
+                    <small style="color: #666;">${lat1.toFixed(6)}, ${lon1.toFixed(6)}</small>
                 </td>
                 <td style="padding: 12px; border: 1px solid #ddd;">
                     <strong>${p2.ProjectDescription ? p2.ProjectDescription.substring(0, 80) : 'N/A'}...</strong><br>
@@ -6630,7 +6636,7 @@ function displayProximityTable() {
                 </td>
                 <td style="padding: 12px; border: 1px solid #ddd;">
                     <small>${p2.Municipality || 'N/A'}, ${p2.Province || 'N/A'}</small><br>
-                    <small style="color: #666;">${match.lat2.toFixed(6)}, ${match.lon2.toFixed(6)}</small>
+                    <small style="color: #666;">${lat2.toFixed(6)}, ${lon2.toFixed(6)}</small>
                 </td>
                 <td style="padding: 12px; border: 1px solid #ddd; text-align: center;">
                     ${contractorMatch}
