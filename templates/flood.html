@@ -622,8 +622,8 @@ function toggleMobileMenu() {
                                 <ul style="margin: 8px 0 0 20px;">
                                     <li><strong style="color: #dc3545;">💀 CRITICAL (Red):</strong>
                                         <ul style="margin: 4px 0 0 20px;">
-                                            <li>Same amount <strong>to the centavo</strong> (e.g., ₱48,512,932.29) across <strong>different years</strong> - virtually impossible as material prices/inflation change yearly</li>
                                             <li>Only year differs with everything else identical - strong indicator of copy-paste error</li>
+                                            <li>Same amount <strong>to the centavo</strong> across <strong>different years</strong> - virtually impossible as material prices/inflation change yearly</li>
                                             <li><strong>Perfectly round amounts</strong> (₱96,500,000.00) at exact same location - highly suspicious template/placeholder</li>
                                             <li>Amounts ending with <strong>7+ consecutive zeros</strong> (₱96,500,000.0000000) - extremely suspicious rounding</li>
                                         </ul>
@@ -6735,23 +6735,22 @@ function displayProximityTable() {
         else if (bothHaveStreams) componentType = 'upstream/downstream';
         else if (bothHaveSides) componentType = 'left/right sides';
         
-        // VERY HIGH suspicion: Same amount to the centavo across different years
+        // VERY HIGH suspicion: Only year is different, everything else identical
         // This is virtually impossible - if project was carried over, price would change due to inflation/material costs
-        const hasCentavos = (match.cost % 1 !== 0); // Has decimal places
-        if (hasCentavos && !sameYear && sameLocation && match.distance_km === 0) {
+        if (differenceCount === 1 && !sameYear && sameDescription && sameContractor && sameLocation) {
+            suspicionLevel = 3; // VERY HIGH
+            suspicionReasons.push('Only year differs with identical amount - likely duplicate entry (prices should change year-to-year)');
+            if (isMultiComponent) {
+                suspicionLevel = 2; // Lower to HIGH
+                suspicionReasons[suspicionReasons.length - 1] += ` (${componentType} detected, but amount should still differ)`;
+            }
+        }
+        // VERY HIGH suspicion: Same amount to the centavo across different years (but not identical projects)
+        else if (hasCentavos && !sameYear && sameLocation && match.distance_km === 0) {
             suspicionLevel = 3; // VERY HIGH
             suspicionReasons.push('Same amount to the centavo across different years - impossible without copy-paste (material prices change)');
             if (isMultiComponent) {
                 suspicionLevel = 2; // Lower to HIGH if multi-component detected
-                suspicionReasons[suspicionReasons.length - 1] += ` (${componentType} detected, but amount should still differ)`;
-            }
-        }
-        // VERY HIGH suspicion: Only year is different, everything else identical
-        else if (differenceCount === 1 && !sameYear && sameDescription && sameContractor && sameLocation) {
-            suspicionLevel = 3;
-            suspicionReasons.push('Only year differs with identical amount - likely duplicate entry (prices should change year-to-year)');
-            if (isMultiComponent) {
-                suspicionLevel = 2; // Lower to HIGH
                 suspicionReasons[suspicionReasons.length - 1] += ` (${componentType} detected, but amount should still differ)`;
             }
         }
