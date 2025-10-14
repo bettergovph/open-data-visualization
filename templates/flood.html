@@ -599,13 +599,19 @@ function toggleMobileMenu() {
                             <div style="background: #ffe6e6; padding: 12px; border-radius: 6px; border-left: 4px solid #dc3545; margin-bottom: 20px;">
                                 <strong>🚨 Suspicion Levels:</strong> Each pair is automatically scored based on how suspicious the pattern is:
                                 <ul style="margin: 8px 0 0 20px;">
-                                    <li><strong style="color: #dc3545;">VERY HIGH (Red):</strong> 
+                                    <li><strong style="color: #dc3545;">VERY HIGH (Red):</strong>
                                         <ul style="margin: 4px 0 0 20px;">
                                             <li>Same amount <strong>to the centavo</strong> (e.g., ₱48,512,932.29) across <strong>different years</strong> - virtually impossible as material prices/inflation change yearly</li>
                                             <li>Only year differs with everything else identical - strong indicator of copy-paste error</li>
+                                            <li><strong>Perfectly round amounts</strong> (₱96,500,000.00) at exact same location - highly suspicious template/placeholder</li>
                                         </ul>
                                     </li>
-                                    <li><strong style="color: #fd7e14;">HIGH (Orange):</strong> Identical project description, contractor, and location - likely duplicate entry</li>
+                                    <li><strong style="color: #fd7e14;">HIGH (Orange):</strong>
+                                        <ul style="margin: 4px 0 0 20px;">
+                                            <li>Same amount to the centavo at exact coordinates, same year</li>
+                                            <li>Identical project description, contractor, and location - likely duplicate entry</li>
+                                        </ul>
+                                    </li>
                                     <li><strong style="color: #ffc107;">MEDIUM (Yellow):</strong> Same exact location (0km) but with some differences - requires investigation</li>
                                     <li><strong style="color: #6c757d;">Low (White):</strong> Close proximity but clear differences in project details</li>
                                 </ul>
@@ -619,14 +625,19 @@ function toggleMobileMenu() {
                                     <strong>Important:</strong> Even for legitimate multi-component projects, identical amounts remain suspicious as each component should have different scope/costs.
                                 </div>
                                 <div style="margin-top: 12px; padding-top: 12px; border-top: 1px solid #ddd;">
-                                    <strong>💡 Critical Insight:</strong> If a project was unprogrammed/unfunded and carried over to the next year, the contract amount MUST change due to:
+                                    <strong>💡 Critical Insight:</strong> A properly scoped construction project should ALWAYS have centavos due to:
                                     <ul style="margin: 4px 0 0 20px;">
-                                        <li>Inflation adjustments</li>
-                                        <li>Material price changes</li>
-                                        <li>Labor cost adjustments</li>
-                                        <li>Updated cost estimates</li>
+                                        <li>Material costs that don't divide evenly</li>
+                                        <li>Labor calculations with time fractions</li>
+                                        <li>Tax calculations creating decimals</li>
+                                        <li>Engineering estimates with precision</li>
                                     </ul>
-                                    <strong>Therefore:</strong> Identical amounts to the centavo across different years = highly suspicious copy-paste. Round amounts (₱96,500,000.00) in same year may be legitimate standard budgets.
+                                    <strong>Therefore:</strong>
+                                    <ul style="margin: 4px 0 0 20px;">
+                                        <li>Identical amounts to the centavo across different years = highly suspicious copy-paste</li>
+                                        <li>Perfectly round amounts (₱96,500,000.00) at exact same location = highly suspicious template/placeholder</li>
+                                        <li>The ONLY legitimate round amounts would be budget templates, not actual project costs</li>
+                                    </ul>
                                 </div>
                             </div>
                             
@@ -6703,13 +6714,18 @@ function displayProximityTable() {
                 suspicionReasons[suspicionReasons.length - 1] += ` (${componentType} detected, but amount should still differ)`;
             }
         }
-        // HIGH suspicion: Same amount to the centavo at exact same coordinates, same year
-        else if (hasCentavos && sameLocation && match.distance_km === 0 && sameYear) {
-            suspicionLevel = 2;
-            suspicionReasons.push('Same amount to the centavo at exact coordinates, same year');
+        // HIGH suspicion: Same amount at exact same coordinates, same year
+        else if (sameLocation && match.distance_km === 0 && sameYear) {
+            if (hasCentavos) {
+                suspicionLevel = 2; // HIGH - has centavos but same at exact location
+                suspicionReasons.push('Same amount to the centavo at exact coordinates, same year');
+            } else {
+                suspicionLevel = 3; // VERY HIGH - perfectly round amount at exact same location
+                suspicionReasons.push('Perfectly round amount (₱96,500,000.00) at exact coordinates, same year - highly suspicious');
+            }
             if (isMultiComponent) {
-                suspicionLevel = 1; // Lower to MEDIUM
-                suspicionReasons[suspicionReasons.length - 1] += ` (multi-component: ${componentType}, but identical amounts unusual)`;
+                suspicionLevel = Math.max(1, suspicionLevel - 1); // Lower by 1 level for multi-component
+                suspicionReasons[suspicionReasons.length - 1] += ` (multi-component: ${componentType}, but identical amounts still suspicious)`;
             }
         }
         // HIGH suspicion: Identical project at same location
