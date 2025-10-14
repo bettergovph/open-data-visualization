@@ -7467,7 +7467,7 @@ document.addEventListener('click', function(event) {
     <!-- Page-specific footer content -->
     <footer class="visualizations-footer">
         <div class="visualizations-container">
-            <p><strong>📊 Source:</strong> <span id="budget-source">Loading...</span></p>
+            <p><strong>📊 Source:</strong> <a href="https://github.com/bettergovph/open-budget-data" target="_blank" rel="noopener noreferrer" style="text-decoration: underline;">@bettergovph/open-budget-data</a> (GAA - General Appropriations Act)</p>
             <p><strong>📈 Total Budget Items:</strong> <span id="total-budget-items-count">Loading...</span> budget line items nationwide</p>
             <p><strong>📅 Data Range:</strong> <span id="budget-range">Loading...</span> government budget allocations</p>
         </div>
@@ -7478,14 +7478,14 @@ document.addEventListener('click', function(event) {
     fetch('/static/data/budget_summary.json')
         .then(response => response.json())
         .then(data => {
-            document.getElementById('budget-source').textContent = data.source;
-            document.getElementById('budget-range').textContent = data.data_range;
+            const rangeEl = document.getElementById('budget-range');
+            if (rangeEl) rangeEl.textContent = data.data_range;
             // total-budget-items-count is already loaded by existing API call
         })
         .catch(error => {
             console.error('Error loading budget summary:', error);
-            document.getElementById('budget-source').textContent = 'Department of Budget and Management (DBM) General Appropriations Act (GAA)';
-            document.getElementById('budget-range').textContent = '2020-2025';
+            const rangeEl = document.getElementById('budget-range');
+            if (rangeEl) rangeEl.textContent = '2017-2025';
         });
     </script>
     
