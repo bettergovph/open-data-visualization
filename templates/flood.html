@@ -6746,7 +6746,7 @@ function displayProximityTable() {
             }
         }
         // VERY HIGH suspicion: Same amount to the centavo across different years (but not identical projects)
-        else if (hasCentavos && !sameYear && sameLocation && match.distance_km === 0) {
+        else if (hasCentavos && !sameYear && sameLocation && match.distance_km === 0 && !(sameDescription && sameContractor)) {
             suspicionLevel = 3; // VERY HIGH
             suspicionReasons.push('Same amount to the centavo across different years - impossible without copy-paste (material prices change)');
             if (isMultiComponent) {
