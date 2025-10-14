@@ -975,15 +975,17 @@ document.addEventListener('DOMContentLoaded', function() {
 fetch('/static/data/flood_summary.json')
     .then(response => response.json())
     .then(data => {
-        document.getElementById('map-source').textContent = data.source;
-        document.getElementById('map-total').textContent = data.total_projects.toLocaleString('en-PH');
-        document.getElementById('map-range').textContent = data.data_range;
+        const totalEl = document.getElementById('map-total');
+        const rangeEl = document.getElementById('map-range');
+        if (totalEl) totalEl.textContent = data.total_projects.toLocaleString('en-PH');
+        if (rangeEl) rangeEl.textContent = data.data_range;
     })
     .catch(error => {
         console.error('Error loading flood summary:', error);
-        document.getElementById('map-source').textContent = 'Department of Public Works and Highways (DPWH) Flood Control Projects';
-        document.getElementById('map-total').textContent = '9,855';
-        document.getElementById('map-range').textContent = '2016-2024';
+        const totalEl = document.getElementById('map-total');
+        const rangeEl = document.getElementById('map-range');
+        if (totalEl) totalEl.textContent = '9,855';
+        if (rangeEl) rangeEl.textContent = '2016-2024';
     });
 </script>
 
