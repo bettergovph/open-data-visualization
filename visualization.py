@@ -936,6 +936,72 @@ async def get_sec_contractors():
     except Exception as e:
         return JSONResponse({"success": False, "error": str(e)})
 
+@app.get("/api/contractors/venn")
+async def get_contractors_venn():
+    """Get Venn diagram data for contractor sources (flood, dime, philgeps)"""
+    try:
+        import asyncpg
+        conn = await asyncpg.connect(
+            host=os.getenv('POSTGRES_HOST', 'localhost'),
+            port=int(os.getenv('POSTGRES_PORT', 5432)),
+            user=os.getenv('POSTGRES_USER', 'budget_admin'),
+            password=os.getenv('POSTGRES_PASSWORD', ''),
+            database=os.getenv('POSTGRES_DB_PHILGEPS', 'philgeps')
+        )
+        
+        # Get all contractors with their sources
+        contractors = await conn.fetch(
+            """SELECT contractor_name, source 
+               FROM contractors 
+               WHERE source IS NOT NULL AND source != 'unknown'"""
+        )
+        
+        await conn.close()
+        
+        # Build sets for each source
+        flood_set = set()
+        dime_set = set()
+        philgeps_set = set()
+        
+        for row in contractors:
+            name = row['contractor_name']
+            sources = row['source'].lower() if row['source'] else ''
+            
+            if 'flood' in sources:
+                flood_set.add(name)
+            if 'dime' in sources:
+                dime_set.add(name)
+            if 'philgeps' in sources:
+                philgeps_set.add(name)
+        
+        # Calculate overlaps
+        flood_only = flood_set - dime_set - philgeps_set
+        dime_only = dime_set - flood_set - philgeps_set
+        philgeps_only = philgeps_set - flood_set - dime_set
+        
+        flood_dime = (flood_set & dime_set) - philgeps_set
+        flood_philgeps = (flood_set & philgeps_set) - dime_set
+        dime_philgeps = (dime_set & philgeps_set) - flood_set
+        
+        all_three = flood_set & dime_set & philgeps_set
+        
+        return JSONResponse({
+            "success": True,
+            "flood_only": len(flood_only),
+            "dime_only": len(dime_only),
+            "philgeps_only": len(philgeps_only),
+            "flood_dime": len(flood_dime),
+            "flood_philgeps": len(flood_philgeps),
+            "dime_philgeps": len(dime_philgeps),
+            "all_three": len(all_three),
+            "flood_total": len(flood_set),
+            "dime_total": len(dime_set),
+            "philgeps_total": len(philgeps_set),
+            "total_unique": len(flood_set | dime_set | philgeps_set)
+        })
+    except Exception as e:
+        return JSONResponse({"success": False, "error": str(e)})
+
 @app.get("/api/dime/projects")
 async def dime_projects_api(
     page: int = 1,

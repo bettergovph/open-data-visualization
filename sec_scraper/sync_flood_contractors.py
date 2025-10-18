@@ -17,6 +17,32 @@ import requests
 load_dotenv()
 
 
+def is_valid_contractor_name(name: str) -> bool:
+    """Check if name is valid - not a generic single common word"""
+    if not name:
+        return False
+    
+    # Common generic words that are invalid as standalone contractor names
+    COMMON_WORDS = {
+        'SUPPLY', 'SUPPLIES', 'CONSTRUCTION', 'BUILDERS', 'BUILDER', 'TRADING', 
+        'ENTERPRISE', 'ENTERPRISES', 'INC', 'CORP', 'CORPORATION', 'CO', 'COMPANY', 
+        'LTD', 'LIMITED', 'THE', 'AND', 'FOR', 'OF', 'GENERAL', 'SERVICES', 
+        'DEVELOPMENT', 'CONTRACTOR', 'CONTRACTORS', 'ENGINEERING', 'DESIGN', 
+        'MAINTENANCE', 'BUILD', 'CONST', 'MERCHANDISE'
+    }
+    
+    # If multi-word, it's valid
+    words = name.split()
+    if len(words) > 1:
+        return True
+    
+    # Single word - check if it's a common word
+    if name.upper() in COMMON_WORDS:
+        return False
+    
+    # Single word but not common - could be proper name or acronym (even short like "ABC") - keep it
+    return True
+
 def is_joint_venture(name: str) -> bool:
     """Check if contractor name represents a joint venture
     
@@ -33,7 +59,12 @@ def is_joint_venture(name: str) -> bool:
 def extract_former_names(name: str) -> Dict[str, any]:
     """
     Extract both current and former names from a contractor name
-    E.g., "Company ABC (formerly Company XYZ)" -> {"current": "Company ABC", "former": ["Company XYZ"]}
+    
+    Handles:
+    - Complete: "NEW (FORMERLY: OLD)"
+    - Incomplete: "NEW (FORMERLY" or "NEW (FORMERLY: OLD" (missing closing paren)
+    - No parens: "NEW FORMERLY: OLD"
+    
     Returns dict with current name and list of former names
     """
     result = {
@@ -41,31 +72,36 @@ def extract_former_names(name: str) -> Dict[str, any]:
         'former': []
     }
     
-    # Extract content in parentheses (often contains former names)
+    # Pattern 1: Check for FORMERLY/FORMER/FOR with or without complete parentheses
+    # Matches: "NAME (FORMERLY..." or "NAME FORMERLY:" or "NAME FOR:" or "NAME FOR ..."
+    formerly_match = re.search(r'^(.+?)\s*\(?\s*\b(FORMERLY|FORMER|FOR|PREVIOUSLY|PREV)\b[\s:]*(.*)$', name, re.IGNORECASE)
+    
+    if formerly_match:
+        current = formerly_match.group(1).strip()
+        old_name_part = formerly_match.group(3).strip()
+        
+        # Remove trailing/leading punctuation and closing paren if present
+        old_name_part = re.sub(r'^\s*[:;,\s]+', '', old_name_part)
+        old_name_part = re.sub(r'\)?\s*$', '', old_name_part).strip()
+        
+        result['current'] = current
+        
+        # Keep all valid old names (even truncated) - SEC will find full name
+        if old_name_part and is_valid_contractor_name(old_name_part):
+            result['former'].append(old_name_part)
+        
+        return result
+    
+    # Pattern 2: Normal parentheses (no FORMERLY keyword)
     parentheses_pattern = r'\((.*?)\)'
     matches = re.findall(parentheses_pattern, name)
     
-    # Clean the main name (remove parentheses content)
-    main_name = re.sub(parentheses_pattern, '', name).strip()
-    if main_name and len(main_name) > 3:
-        result['current'] = main_name
+    if matches:
+        # Clean the main name (remove parentheses content)
+        main_name = re.sub(parentheses_pattern, '', name).strip()
+        result['current'] = main_name if main_name and len(main_name) > 3 else name.strip()
     else:
         result['current'] = name.strip()
-    
-    # Process parentheses content for former names
-    for match in matches:
-        match_lower = match.lower()
-        
-        # Check if it contains "formerly" or similar indicators
-        if 'formerly' in match_lower or 'former' in match_lower or 'now' in match_lower:
-            # Remove "formerly", "former", "now", etc.
-            cleaned = re.sub(r'\b(?:formerly|former|now|known\s+as)\b', '', match, flags=re.IGNORECASE).strip()
-            
-            # Clean up punctuation
-            cleaned = re.sub(r'^[:\-,\s]+', '', cleaned).strip()
-            
-            if cleaned and len(cleaned) > 3:
-                result['former'].append(cleaned)
     
     return result
 
@@ -100,7 +136,8 @@ def split_joint_venture(name: str) -> List[Dict[str, any]]:
             # Remove any parenthetical content
             cleaned = re.sub(r'\s*\([^)]*\)', '', cleaned).strip()
             
-            if cleaned and len(cleaned) > 10:  # Minimum 10 chars
+            # Keep all valid names (reject generic single words like "SUPPLY", "BUILD")
+            if cleaned and is_valid_contractor_name(cleaned):
                 individual_contractors.append({
                     'name': cleaned,
                     'former_names': []
@@ -112,14 +149,22 @@ def split_joint_venture(name: str) -> List[Dict[str, any]]:
             'former_names': []
         })
     
-    # Process former names as separate entries
+    # Process former names as separate entries (already validated in extract_former_names)
     for former_name in former_names:
-        individual_contractors.append({
-            'name': former_name,
-            'former_names': []
-        })
+        if is_valid_contractor_name(former_name):
+            individual_contractors.append({
+                'name': former_name,
+                'former_names': []
+            })
     
-    return individual_contractors if individual_contractors else [{'name': name.strip(), 'former_names': []}]
+    # If we found FORMERLY or / but couldn't extract valid names, return empty (don't add unsplit)
+    # Only return original if there were NO split indicators
+    if individual_contractors:
+        return individual_contractors
+    elif '/' in name or re.search(r'\b(FORMERLY|FORMER|FOR|PREVIOUSLY|PREV)\b', name, re.IGNORECASE) or '(' in name:
+        return []  # Had indicators but couldn't split - skip it
+    else:
+        return [{'name': name.strip(), 'former_names': []}]  # Clean name, add it
 
 
 def normalize_contractor_name(name: str) -> str:

@@ -188,6 +188,45 @@ function toggleMobileMenu() {
                         </div>
                     </div>
 
+                    <!-- Venn Diagram: Data Sources -->
+                    <div class="chart-container" style="background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); margin-bottom: 20px;">
+                        <h3 style="color: #0038A8; margin: 0 0 15px 0;">🔵🟢🟡 Contractor Data Sources Distribution</h3>
+                        <p style="color: #666; margin: 0 0 20px 0;">Venn diagram showing overlap between Flood Control, DIME, and PhilGEPS contractor databases</p>
+                        <div style="max-width: 800px; margin: 0 auto;">
+                            <canvas id="vennDiagram" width="800" height="500"></canvas>
+                        </div>
+                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; margin-top: 20px; font-size: 0.9em;">
+                            <div style="background: #e3f2fd; padding: 10px; border-radius: 4px; text-align: center;">
+                                <strong style="color: #1976d2;">🔵 Flood Only</strong><br>
+                                <span id="venn-flood-only" style="font-size: 1.5em; font-weight: bold; color: #1976d2;">-</span>
+                            </div>
+                            <div style="background: #e8f5e9; padding: 10px; border-radius: 4px; text-align: center;">
+                                <strong style="color: #388e3c;">🟢 DIME Only</strong><br>
+                                <span id="venn-dime-only" style="font-size: 1.5em; font-weight: bold; color: #388e3c;">-</span>
+                            </div>
+                            <div style="background: #fff9c4; padding: 10px; border-radius: 4px; text-align: center;">
+                                <strong style="color: #f57c00;">🟡 PhilGEPS Only</strong><br>
+                                <span id="venn-philgeps-only" style="font-size: 1.5em; font-weight: bold; color: #f57c00;">-</span>
+                            </div>
+                            <div style="background: #f3e5f5; padding: 10px; border-radius: 4px; text-align: center;">
+                                <strong style="color: #7b1fa2;">🔵🟢 Flood + DIME</strong><br>
+                                <span id="venn-flood-dime" style="font-size: 1.5em; font-weight: bold; color: #7b1fa2;">-</span>
+                            </div>
+                            <div style="background: #fce4ec; padding: 10px; border-radius: 4px; text-align: center;">
+                                <strong style="color: #c2185b;">🔵🟡 Flood + PhilGEPS</strong><br>
+                                <span id="venn-flood-philgeps" style="font-size: 1.5em; font-weight: bold; color: #c2185b;">-</span>
+                            </div>
+                            <div style="background: #e0f2f1; padding: 10px; border-radius: 4px; text-align: center;">
+                                <strong style="color: #00796b;">🟢🟡 DIME + PhilGEPS</strong><br>
+                                <span id="venn-dime-philgeps" style="font-size: 1.5em; font-weight: bold; color: #00796b;">-</span>
+                            </div>
+                            <div style="background: #ede7f6; padding: 10px; border-radius: 4px; text-align: center;">
+                                <strong style="color: #512da8;">🔵🟢🟡 All Three</strong><br>
+                                <span id="venn-all-three" style="font-size: 1.5em; font-weight: bold; color: #512da8;">-</span>
+                            </div>
+                        </div>
+                    </div>
+
                     <!-- Top Contractors Chart -->
                     <div class="chart-container" style="background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); margin-bottom: 20px;">
                         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
@@ -845,8 +884,136 @@ function hideContractorHoverTooltip() {
     }
 }
 
+// Load and draw Venn diagram
+async function loadVennDiagram() {
+    try {
+        const response = await fetch('/api/contractors/venn');
+        const data = await response.json();
+        
+        if (!data.success) {
+            console.error('Failed to load Venn diagram data');
+            return;
+        }
+        
+        // Update the stat boxes
+        document.getElementById('venn-flood-only').textContent = data.flood_only.toLocaleString();
+        document.getElementById('venn-dime-only').textContent = data.dime_only.toLocaleString();
+        document.getElementById('venn-philgeps-only').textContent = data.philgeps_only.toLocaleString();
+        document.getElementById('venn-flood-dime').textContent = data.flood_dime.toLocaleString();
+        document.getElementById('venn-flood-philgeps').textContent = data.flood_philgeps.toLocaleString();
+        document.getElementById('venn-dime-philgeps').textContent = data.dime_philgeps.toLocaleString();
+        document.getElementById('venn-all-three').textContent = data.all_three.toLocaleString();
+        
+        // Draw the Venn diagram on canvas
+        drawVennDiagram(data);
+    } catch (error) {
+        console.error('Error loading Venn diagram:', error);
+    }
+}
+
+function drawVennDiagram(data) {
+    const canvas = document.getElementById('vennDiagram');
+    if (!canvas) return;
+    
+    const ctx = canvas.getContext('2d');
+    const width = canvas.width;
+    const height = canvas.height;
+    
+    // Clear canvas
+    ctx.clearRect(0, 0, width, height);
+    
+    // Circle parameters (3 overlapping circles)
+    const radius = 150;
+    const centerY = height / 2;
+    const offsetX = 80;
+    
+    const floodCenter = { x: width / 2 - offsetX, y: centerY - 40 };
+    const dimeCenter = { x: width / 2 + offsetX, y: centerY - 40 };
+    const philgepsCenter = { x: width / 2, y: centerY + 60 };
+    
+    // Draw circles with transparency
+    ctx.globalAlpha = 0.3;
+    
+    // Flood circle (blue)
+    ctx.beginPath();
+    ctx.arc(floodCenter.x, floodCenter.y, radius, 0, 2 * Math.PI);
+    ctx.fillStyle = '#2196F3';
+    ctx.fill();
+    
+    // DIME circle (green)
+    ctx.beginPath();
+    ctx.arc(dimeCenter.x, dimeCenter.y, radius, 0, 2 * Math.PI);
+    ctx.fillStyle = '#4CAF50';
+    ctx.fill();
+    
+    // PhilGEPS circle (yellow/orange)
+    ctx.beginPath();
+    ctx.arc(philgepsCenter.x, philgepsCenter.y, radius, 0, 2 * Math.PI);
+    ctx.fillStyle = '#FF9800';
+    ctx.fill();
+    
+    // Reset alpha for text
+    ctx.globalAlpha = 1.0;
+    
+    // Draw labels
+    ctx.font = 'bold 16px Inter';
+    ctx.textAlign = 'center';
+    
+    // Flood label
+    ctx.fillStyle = '#1976D2';
+    ctx.fillText('🔵 Flood', floodCenter.x - 60, floodCenter.y - radius - 10);
+    ctx.font = '14px Inter';
+    ctx.fillText(data.flood_total.toLocaleString(), floodCenter.x - 60, floodCenter.y - radius + 10);
+    
+    // DIME label
+    ctx.font = 'bold 16px Inter';
+    ctx.fillStyle = '#388E3C';
+    ctx.fillText('🟢 DIME', dimeCenter.x + 60, dimeCenter.y - radius - 10);
+    ctx.font = '14px Inter';
+    ctx.fillText(data.dime_total.toLocaleString(), dimeCenter.x + 60, dimeCenter.y - radius + 10);
+    
+    // PhilGEPS label
+    ctx.font = 'bold 16px Inter';
+    ctx.fillStyle = '#F57C00';
+    ctx.fillText('🟡 PhilGEPS', philgepsCenter.x, philgepsCenter.y + radius + 20);
+    ctx.font = '14px Inter';
+    ctx.fillText(data.philgeps_total.toLocaleString(), philgepsCenter.x, philgepsCenter.y + radius + 40);
+    
+    // Draw numbers in overlap regions
+    ctx.font = 'bold 18px Inter';
+    
+    // Flood only (left)
+    ctx.fillStyle = '#1976D2';
+    ctx.fillText(data.flood_only, floodCenter.x - 80, floodCenter.y);
+    
+    // DIME only (right)
+    ctx.fillStyle = '#388E3C';
+    ctx.fillText(data.dime_only, dimeCenter.x + 80, dimeCenter.y);
+    
+    // PhilGEPS only (bottom)
+    ctx.fillStyle = '#F57C00';
+    ctx.fillText(data.philgeps_only, philgepsCenter.x, philgepsCenter.y + 80);
+    
+    // Flood + DIME (top middle)
+    ctx.fillStyle = '#7B1FA2';
+    ctx.fillText(data.flood_dime, width / 2, centerY - 60);
+    
+    // Flood + PhilGEPS (bottom left)
+    ctx.fillStyle = '#C2185B';
+    ctx.fillText(data.flood_philgeps, floodCenter.x - 20, philgepsCenter.y - 20);
+    
+    // DIME + PhilGEPS (bottom right)
+    ctx.fillStyle = '#00796B';
+    ctx.fillText(data.dime_philgeps, dimeCenter.x + 20, philgepsCenter.y - 20);
+    
+    // All three (center)
+    ctx.fillStyle = '#512DA8';
+    ctx.fillText(data.all_three, width / 2, centerY + 10);
+}
+
 // Load on page load
 loadContractors();
+loadVennDiagram();
 </script>
 
 {% include "footer.html" %}
