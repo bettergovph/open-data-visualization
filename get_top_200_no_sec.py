@@ -13,9 +13,10 @@ import re
 load_dotenv('.env')
 
 def clean_for_ahk(name):
-    """Minimal cleaning for AHK - only remove symbols that break search"""
-    # Only remove problematic symbols, keep the name as-is otherwise
-    cleaned = re.sub(r'[.,\'"]+', '', name)
+    """Clean for AHK search - remove symbols that cause search issues"""
+    # Remove all symbols that cause issues in SEC search
+    # Remove: . , ' " & ( ) / :
+    cleaned = re.sub(r'[.,\'\"&()/:]+', ' ', name)
     cleaned = re.sub(r'\s+', ' ', cleaned).strip()
     return cleaned
 
