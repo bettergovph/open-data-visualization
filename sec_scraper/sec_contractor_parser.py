@@ -312,7 +312,7 @@ class SECContractorParser:
         print("🚀 Starting JV-aware SEC contractor data processing...")
 
         # Find all SEC result files
-        sec_files = glob.glob('database/sec_results/*.txt')
+        sec_files = glob.glob('sec_scraper/sec_results/*.txt')
 
         print(f"📁 Found {len(sec_files)} SEC result files")
 
