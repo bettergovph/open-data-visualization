@@ -299,24 +299,24 @@
                 const topCoords = toCanvasCoords(lng, skewerTop);
                 const bottomCoords = toCanvasCoords(lng, skewerBottom);
                 
-                // Draw skewer line (thick red solid vertical line)
+                // Draw skewer line (thinner red solid vertical line)
                 ctx.strokeStyle = '#dc2626';
-                ctx.lineWidth = 6;
+                ctx.lineWidth = 3;
                 ctx.beginPath();
                 ctx.moveTo(topCoords.x, topCoords.y);
                 ctx.lineTo(bottomCoords.x, bottomCoords.y);
                 ctx.stroke();
                 
-                // Draw project circles (smaller)
+                // Draw project circles (even smaller to avoid overlap)
                 projects.forEach((project, pidx) => {
                     const coords = toCanvasCoords(project.lng, project.lat);
                     
-                    // Circle (like meat on kebab) - smaller radius
+                    // Circle (like meat on kebab) - tiny radius
                     ctx.fillStyle = '#3b82f6';
                     ctx.strokeStyle = '#1e3a8a';
-                    ctx.lineWidth = 2;
+                    ctx.lineWidth = 1.5;
                     ctx.beginPath();
-                    ctx.arc(coords.x, coords.y, 6, 0, 2 * Math.PI);
+                    ctx.arc(coords.x, coords.y, 3, 0, 2 * Math.PI);
                     ctx.fill();
                     ctx.stroke();
                 });
