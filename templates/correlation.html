@@ -1,17 +1,71 @@
-{% extends "base_visualizations.html" %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Data Correlations - BetterGovPH</title>
 
-{% block title %}Data Correlations - BetterGovPH{% endblock %}
+    <!-- Google Fonts - Inter -->
+    <!-- Tailwind CSS -->
+    <link rel="stylesheet" href="/static/css/tailwind.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
-{% block content %}
+    <!-- BetterGovPH Metadata -->
+    <meta name="description" content="Data Correlation Analysis - Government Data Analysis Platform">
+    <meta name="keywords" content="data correlation, government data, budget analysis, transparency, Philippines">
+    <meta name="author" content="BetterGovPH">
+
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://visualizations.bettergov.ph/correlation">
+    <meta property="og:title" content="Data Correlations - BetterGovPH">
+    <meta property="og:description" content="Connecting datasets to reveal insights and verify government data consistency">
+    <meta property="og:image" content="/static/images/gov_logo.png">
+
+    <!-- Twitter -->
+    <meta property="twitter:card" content="summary_large_image">
+    <meta property="twitter:url" content="https://visualizations.bettergov.ph/correlation">
+    <meta property="twitter:title" content="Data Correlations - BetterGovPH">
+    <meta property="twitter:description" content="Connecting datasets to reveal insights and verify government data consistency">
+    <meta property="twitter:image" content="/static/images/gov_logo.png">
+
+    <style>
+        body {
+            font-family: 'Inter', sans-serif !important;
+            margin: 0;
+            padding: 0;
+            background: white !important;
+            color: black !important;
+            min-height: 100vh;
+        }
+
+        /* Mobile responsiveness */
+        @media (max-width: 768px) {
+            .correlation-title {
+                font-size: 2rem;
+            }
+            
+            .correlation-subtitle {
+                font-size: 1rem;
+            }
+            
+            .correlation-grid {
+                grid-template-columns: 1fr !important;
+            }
+        }
+    </style>
+</head>
+<body>
 
 <!-- Navigation -->
 <nav class="visualizations-nav py-4 px-6 bg-white border-b border-gray-200">
     <div class="max-w-7xl mx-auto flex items-center justify-between">
         <div class="flex items-center">
             <a href="https://bettergov.ph" class="flex items-center">
-                <img src="https://raw.githubusercontent.com/bettergovph/logo/main/png/BetterGov_Horizontal-Black.png" 
-                     alt="BetterGov.ph" 
-                     class="h-8 mr-3">
+                <img src="https://raw.githubusercontent.com/bettergovph/logo/main/png/BetterGov_Horizontal-Black.png"
+                     alt="BetterGov.ph"
+                     class="h-12 mr-3">
+                
             </a>
             <a href="/" class="text-xl font-bold text-black hover:text-gray-600">Data Visualizations</a>
         </div>
@@ -40,7 +94,7 @@
             </button>
         </div>
     </div>
-    <!-- Mobile menu -->
+    <!-- Mobile menu (hidden by default) -->
     <div id="mobileMenu" class="hidden mt-4 px-4 space-y-2">
         <a href="/" class="block text-black hover:text-gray-600 font-medium py-2">Home</a>
         <a href="/nep" class="block text-black hover:text-gray-600 font-medium py-2">NEP</a>
@@ -57,65 +111,69 @@
 </nav>
 
 <!-- Hero Section -->
-<section class="bg-gradient-to-r from-purple-600 to-purple-800 text-white py-16 px-6">
-    <div class="max-w-7xl mx-auto">
-        <h1 class="text-4xl font-bold mb-4">🔗 Data Correlation Analysis</h1>
-        <p class="text-xl opacity-90">Connecting datasets to reveal insights and verify government data consistency</p>
+<div style="background: linear-gradient(135deg, #7c3aed 0%, #6d28d9 100%); padding: 60px 24px; text-align: center;">
+    <div style="max-width: 1200px; margin: 0 auto;">
+        <h1 class="correlation-title" style="font-size: 3rem; font-weight: 700; color: white; margin-bottom: 16px;">
+            🔗 Data Correlation Analysis
+        </h1>
+        <p class="correlation-subtitle" style="font-size: 1.25rem; color: rgba(255, 255, 255, 0.9); max-width: 800px; margin: 0 auto;">
+            Connecting datasets to reveal insights and verify government data consistency
+        </p>
     </div>
-</section>
+</div>
 
 <!-- Correlation Cards -->
-<section class="bg-gray-50 py-16 px-6">
-    <div class="max-w-7xl mx-auto">
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+<div style="background: #f9fafb; padding: 60px 24px;">
+    <div style="max-width: 1200px; margin: 0 auto;">
+        <div class="correlation-grid" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 32px;">
             
             <!-- NEP-Budget Correlation Card -->
-            <div class="bg-white rounded-lg shadow-md p-8 hover:shadow-lg transition">
-                <div class="text-5xl mb-4">🚨</div>
-                <h3 class="text-2xl font-semibold text-black mb-3">NEP-Budget Correlation</h3>
-                <p class="text-gray-600 mb-6">Critical analysis revealing fundamental database schema differences between Budget and NEP systems despite unified interface.</p>
-                <div class="mb-4">
-                    <span class="inline-block bg-red-100 text-red-800 px-3 py-1 rounded-full text-sm font-medium">Critical Finding</span>
+            <div style="background: white; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); padding: 32px; transition: box-shadow 0.3s;">
+                <div style="font-size: 3rem; margin-bottom: 16px;">🚨</div>
+                <h3 style="font-size: 1.5rem; font-weight: 600; color: black; margin-bottom: 12px;">NEP-Budget Correlation</h3>
+                <p style="color: #6b7280; margin-bottom: 24px; line-height: 1.6;">Critical analysis revealing fundamental database schema differences between Budget and NEP systems despite unified interface.</p>
+                <div style="margin-bottom: 16px;">
+                    <span style="display: inline-block; background: #fee2e2; color: #991b1b; padding: 6px 12px; border-radius: 9999px; font-size: 0.875rem; font-weight: 500;">Critical Finding</span>
                 </div>
-                <a href="/budget-nep-correlation" class="inline-block bg-black text-white px-6 py-2 rounded-lg hover:bg-gray-800 transition">View Schema Analysis →</a>
+                <a href="/budget-nep-correlation" style="display: inline-block; background: black; color: white; padding: 10px 24px; border-radius: 8px; text-decoration: none; transition: background 0.3s;">View Schema Analysis →</a>
             </div>
 
             <!-- Budget-Flood Correlation Card -->
-            <div class="bg-white rounded-lg shadow-md p-8 hover:shadow-lg transition">
-                <div class="text-5xl mb-4">📊</div>
-                <h3 class="text-2xl font-semibold text-black mb-3">Budget-Flood Correlation</h3>
-                <p class="text-gray-600 mb-6">Data science analysis connecting budget line items with actual flood control projects for financial transparency and accountability.</p>
-                <div class="mb-4">
-                    <span class="inline-block bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm font-medium">Budget Tracking</span>
+            <div style="background: white; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); padding: 32px; transition: box-shadow 0.3s;">
+                <div style="font-size: 3rem; margin-bottom: 16px;">📊</div>
+                <h3 style="font-size: 1.5rem; font-weight: 600; color: black; margin-bottom: 12px;">Budget-Flood Correlation</h3>
+                <p style="color: #6b7280; margin-bottom: 24px; line-height: 1.6;">Data science analysis connecting budget line items with actual flood control projects for financial transparency and accountability.</p>
+                <div style="margin-bottom: 16px;">
+                    <span style="display: inline-block; background: #dbeafe; color: #1e40af; padding: 6px 12px; border-radius: 9999px; font-size: 0.875rem; font-weight: 500;">Budget Tracking</span>
                 </div>
-                <a href="/budget-flood-correlation" class="inline-block bg-black text-white px-6 py-2 rounded-lg hover:bg-gray-800 transition">View Analysis →</a>
+                <a href="/budget-flood-correlation" style="display: inline-block; background: black; color: white; padding: 10px 24px; border-radius: 8px; text-decoration: none; transition: background 0.3s;">View Analysis →</a>
             </div>
 
             <!-- Flood-DIME Correlation Card -->
-            <div class="bg-white rounded-lg shadow-md p-8 hover:shadow-lg transition">
-                <div class="text-5xl mb-4">🔗</div>
-                <h3 class="text-2xl font-semibold text-black mb-3">Flood-DIME Correlation</h3>
-                <p class="text-gray-600 mb-6">Analyze the overlap between flood control and DIME infrastructure projects to track implementation and progress across regions.</p>
-                <div class="mb-4">
-                    <span class="inline-block bg-green-100 text-green-800 px-3 py-1 rounded-full text-sm font-medium">Project Matching</span>
+            <div style="background: white; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); padding: 32px; transition: box-shadow 0.3s;">
+                <div style="font-size: 3rem; margin-bottom: 16px;">🔗</div>
+                <h3 style="font-size: 1.5rem; font-weight: 600; color: black; margin-bottom: 12px;">Flood-DIME Correlation</h3>
+                <p style="color: #6b7280; margin-bottom: 24px; line-height: 1.6;">Analyze the overlap between flood control and DIME infrastructure projects to track implementation and progress across regions.</p>
+                <div style="margin-bottom: 16px;">
+                    <span style="display: inline-block; background: #dcfce7; color: #166534; padding: 6px 12px; border-radius: 9999px; font-size: 0.875rem; font-weight: 500;">Project Matching</span>
                 </div>
-                <a href="/flood-dime-correlation" class="inline-block bg-black text-white px-6 py-2 rounded-lg hover:bg-gray-800 transition">View Correlation →</a>
+                <a href="/flood-dime-correlation" style="display: inline-block; background: black; color: white; padding: 10px 24px; border-radius: 8px; text-decoration: none; transition: background 0.3s;">View Correlation →</a>
             </div>
 
         </div>
 
         <!-- Why Correlation Matters -->
-        <div class="bg-white rounded-lg shadow-md p-8 mt-8">
-            <h2 class="text-2xl font-semibold text-black mb-4">💡 Why Data Correlation Matters</h2>
-            <p class="text-gray-700 leading-relaxed mb-4">
+        <div style="background: white; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); padding: 32px; margin-top: 32px;">
+            <h2 style="font-size: 1.5rem; font-weight: 600; color: black; margin-bottom: 16px;">💡 Why Data Correlation Matters</h2>
+            <p style="color: #374151; line-height: 1.7; margin-bottom: 16px;">
                 Data correlation is the process of connecting related information across different government databases to verify consistency, detect discrepancies, and ensure transparency. By cross-referencing multiple data sources, we can identify anomalies, track project progress, and hold government accountable for public spending.
             </p>
-            <p class="text-gray-700 leading-relaxed">
+            <p style="color: #374151; line-height: 1.7; margin: 0;">
                 Each correlation analysis reveals unique insights about how government data systems interact, where gaps exist, and how funds are allocated versus actual project implementation. This transparency is essential for good governance and public trust.
             </p>
         </div>
     </div>
-</section>
+</div>
 
 <script>
 function toggleMobileMenu() {
@@ -126,5 +184,5 @@ function toggleMobileMenu() {
 
 {% include "footer.html" %}
 
-{% endblock %}
-
+</body>
+</html>

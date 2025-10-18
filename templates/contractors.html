@@ -1,17 +1,100 @@
-{% extends "base_visualizations.html" %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SEC Contractors - BetterGovPH</title>
 
-{% block title %}SEC Contractors - BetterGovPH{% endblock %}
+    <!-- Google Fonts - Inter -->
+    <!-- Tailwind CSS -->
+    <link rel="stylesheet" href="/static/css/tailwind.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
-{% block content %}
+    <!-- BetterGovPH Metadata -->
+    <meta name="description" content="SEC Contractors Database - Government Data Analysis Platform">
+    <meta name="keywords" content="SEC, contractors, verification, government projects, Philippines, transparency">
+    <meta name="author" content="BetterGovPH">
+
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://visualizations.bettergov.ph/contractors">
+    <meta property="og:title" content="SEC Contractors - BetterGovPH">
+    <meta property="og:description" content="Verify contractor legitimacy through Securities and Exchange Commission registration data">
+    <meta property="og:image" content="/static/images/gov_logo.png">
+
+    <!-- Twitter -->
+    <meta property="twitter:card" content="summary_large_image">
+    <meta property="twitter:url" content="https://visualizations.bettergov.ph/contractors">
+    <meta property="twitter:title" content="SEC Contractors - BetterGovPH">
+    <meta property="twitter:description" content="Verify contractor legitimacy through Securities and Exchange Commission registration data">
+    <meta property="twitter:image" content="/static/images/gov_logo.png">
+
+    <style>
+        body {
+            font-family: 'Inter', sans-serif !important;
+            margin: 0;
+            padding: 0;
+            background: white !important;
+            color: black !important;
+            min-height: 100vh;
+        }
+
+        /* Mobile responsiveness */
+        @media (max-width: 768px) {
+            .contractor-title {
+                font-size: 2rem;
+            }
+            
+            .contractor-subtitle {
+                font-size: 1rem;
+            }
+            
+            .statistics-grid {
+                grid-template-columns: 1fr !important;
+                gap: 15px !important;
+            }
+            
+            /* Table responsiveness */
+            .table-responsive {
+                overflow-x: auto;
+                -webkit-overflow-scrolling: touch;
+            }
+            
+            table {
+                min-width: 600px;
+            }
+        }
+
+        /* Pulsing animation for suspicious contractors */
+        @keyframes pulse-warning {
+            0%, 100% { 
+                background-color: #fff3cd; 
+                border-color: #ffeaa7;
+                transform: scale(1);
+            }
+            50% { 
+                background-color: #ffd93d; 
+                border-color: #ffb700;
+                transform: scale(1.05);
+            }
+        }
+
+        .pulse-warning {
+            animation: pulse-warning 2s ease-in-out infinite;
+        }
+    </style>
+</head>
+<body>
 
 <!-- Navigation -->
 <nav class="visualizations-nav py-4 px-6 bg-white border-b border-gray-200">
     <div class="max-w-7xl mx-auto flex items-center justify-between">
         <div class="flex items-center">
             <a href="https://bettergov.ph" class="flex items-center">
-                <img src="https://raw.githubusercontent.com/bettergovph/logo/main/png/BetterGov_Horizontal-Black.png" 
-                     alt="BetterGov.ph" 
-                     class="h-8 mr-3">
+                <img src="https://raw.githubusercontent.com/bettergovph/logo/main/png/BetterGov_Horizontal-Black.png"
+                     alt="BetterGov.ph"
+                     class="h-12 mr-3">
+                
             </a>
             <a href="/" class="text-xl font-bold text-black hover:text-gray-600">Data Visualizations</a>
         </div>
@@ -40,7 +123,7 @@
             </button>
         </div>
     </div>
-    <!-- Mobile menu -->
+    <!-- Mobile menu (hidden by default) -->
     <div id="mobileMenu" class="hidden mt-4 px-4 space-y-2">
         <a href="/" class="block text-black hover:text-gray-600 font-medium py-2">Home</a>
         <a href="/nep" class="block text-black hover:text-gray-600 font-medium py-2">NEP</a>
@@ -57,63 +140,67 @@
 </nav>
 
 <!-- Hero Section -->
-<section class="bg-gradient-to-r from-blue-600 to-blue-800 text-white py-16 px-6">
-    <div class="max-w-7xl mx-auto">
-        <h1 class="text-4xl font-bold mb-4">🏛️ SEC Contractors Database</h1>
-        <p class="text-xl opacity-90">Verify contractor legitimacy through Securities and Exchange Commission registration data</p>
+<div style="background: linear-gradient(135deg, #1e3a8a 0%, #1e40af 100%); padding: 60px 24px; text-align: center;">
+    <div style="max-width: 1200px; margin: 0 auto;">
+        <h1 class="contractor-title" style="font-size: 3rem; font-weight: 700; color: white; margin-bottom: 16px;">
+            🏛️ SEC Contractors Database
+        </h1>
+        <p class="contractor-subtitle" style="font-size: 1.25rem; color: rgba(255, 255, 255, 0.9); max-width: 800px; margin: 0 auto;">
+            Verify contractor legitimacy through Securities and Exchange Commission registration data
+        </p>
     </div>
-</section>
+</div>
 
 <!-- Main Content -->
-<section class="bg-gray-50 py-16 px-6">
-    <div class="max-w-7xl mx-auto">
+<div style="background: #f9fafb; padding: 60px 24px;">
+    <div style="max-width: 1400px; margin: 0 auto;">
         
         <!-- SEC Statistics -->
-        <div class="bg-white rounded-lg shadow-md p-6 mb-8">
-            <h2 class="text-2xl font-semibold text-black mb-6">📊 SEC Data Overview</h2>
+        <div style="background: white; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); padding: 32px; margin-bottom: 32px;">
+            <h2 style="font-size: 1.5rem; font-weight: 600; color: black; margin-bottom: 24px;">📊 SEC Data Overview</h2>
             
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                <div class="bg-gray-50 p-6 rounded-lg text-center">
-                    <h3 class="text-gray-600 text-sm font-medium mb-2">Total Contractors</h3>
-                    <p id="total-contractors" class="text-4xl font-bold text-blue-600">Loading...</p>
-                    <p class="text-xs text-gray-500 mt-1">In system</p>
+            <div class="statistics-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 24px;">
+                <div style="background: #f9fafb; padding: 24px; border-radius: 8px; text-align: center;">
+                    <h3 style="color: #6b7280; font-size: 0.875rem; font-weight: 500; margin-bottom: 8px;">Total Contractors</h3>
+                    <p id="total-contractors" style="font-size: 2.5rem; font-weight: 700; color: #2563eb; margin: 0;">Loading...</p>
+                    <p style="font-size: 0.75rem; color: #6b7280; margin: 4px 0 0 0;">In system</p>
                 </div>
-                <div class="bg-gray-50 p-6 rounded-lg text-center">
-                    <h3 class="text-gray-600 text-sm font-medium mb-2">Processed</h3>
-                    <p id="processed-contractors" class="text-4xl font-bold text-cyan-600">Loading...</p>
-                    <p class="text-xs text-gray-500 mt-1">From scraping</p>
+                <div style="background: #f9fafb; padding: 24px; border-radius: 8px; text-align: center;">
+                    <h3 style="color: #6b7280; font-size: 0.875rem; font-weight: 500; margin-bottom: 8px;">Processed</h3>
+                    <p id="processed-contractors" style="font-size: 2.5rem; font-weight: 700; color: #06b6d4; margin: 0;">Loading...</p>
+                    <p style="font-size: 0.75rem; color: #6b7280; margin: 4px 0 0 0;">From scraping</p>
                 </div>
-                <div class="bg-green-50 p-6 rounded-lg text-center border-2 border-green-200">
-                    <h3 class="text-green-700 text-sm font-medium mb-2">✅ With SEC Data</h3>
-                    <p id="with-sec" class="text-4xl font-bold text-green-600">Loading...</p>
-                    <p class="text-xs text-green-600 mt-1">Verified</p>
+                <div style="background: #f0fdf4; padding: 24px; border-radius: 8px; text-align: center; border: 2px solid #bbf7d0;">
+                    <h3 style="color: #15803d; font-size: 0.875rem; font-weight: 500; margin-bottom: 8px;">✅ With SEC Data</h3>
+                    <p id="with-sec" style="font-size: 2.5rem; font-weight: 700; color: #16a34a; margin: 0;">Loading...</p>
+                    <p style="font-size: 0.75rem; color: #16a34a; margin: 4px 0 0 0;">Verified</p>
                 </div>
-                <div class="bg-yellow-50 p-6 rounded-lg text-center border-2 border-yellow-300">
-                    <h3 class="text-yellow-700 text-sm font-medium mb-2">⚠️ NO SEC Results</h3>
-                    <p id="suspicious" class="text-4xl font-bold text-yellow-700">Loading...</p>
-                    <p class="text-xs text-yellow-700 mt-1">Suspicious</p>
+                <div style="background: #fefce8; padding: 24px; border-radius: 8px; text-align: center; border: 2px solid #fde047;">
+                    <h3 style="color: #854d0e; font-size: 0.875rem; font-weight: 500; margin-bottom: 8px;">⚠️ NO SEC Results</h3>
+                    <p id="suspicious" style="font-size: 2.5rem; font-weight: 700; color: #ca8a04; margin: 0;">Loading...</p>
+                    <p style="font-size: 0.75rem; color: #ca8a04; margin: 4px 0 0 0;">Suspicious</p>
                 </div>
             </div>
         </div>
 
         <!-- Contractor Table -->
-        <div class="bg-white rounded-lg shadow-md p-6">
-            <h2 class="text-2xl font-semibold text-black mb-6">📋 Contractor Database</h2>
+        <div style="background: white; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); padding: 32px;">
+            <h2 style="font-size: 1.5rem; font-weight: 600; color: black; margin-bottom: 24px;">📋 Contractor Database</h2>
             
-            <div class="overflow-x-auto">
-                <table class="min-w-full divide-y divide-gray-200">
-                    <thead class="bg-gray-50">
+            <div class="table-responsive" style="overflow-x: auto;">
+                <table style="min-width: 100%; border-collapse: collapse;">
+                    <thead style="background: #f9fafb;">
                         <tr>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">#</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Contractor Name</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">SEC Number</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Address</th>
+                            <th style="padding: 12px 16px; text-align: left; font-size: 0.75rem; font-weight: 500; color: #6b7280; text-transform: uppercase; letter-spacing: 0.05em; border-bottom: 1px solid #e5e7eb;">#</th>
+                            <th style="padding: 12px 16px; text-align: left; font-size: 0.75rem; font-weight: 500; color: #6b7280; text-transform: uppercase; letter-spacing: 0.05em; border-bottom: 1px solid #e5e7eb;">Contractor Name</th>
+                            <th style="padding: 12px 16px; text-align: left; font-size: 0.75rem; font-weight: 500; color: #6b7280; text-transform: uppercase; letter-spacing: 0.05em; border-bottom: 1px solid #e5e7eb;">SEC Number</th>
+                            <th style="padding: 12px 16px; text-align: left; font-size: 0.75rem; font-weight: 500; color: #6b7280; text-transform: uppercase; letter-spacing: 0.05em; border-bottom: 1px solid #e5e7eb;">Status</th>
+                            <th style="padding: 12px 16px; text-align: left; font-size: 0.75rem; font-weight: 500; color: #6b7280; text-transform: uppercase; letter-spacing: 0.05em; border-bottom: 1px solid #e5e7eb;">Address</th>
                         </tr>
                     </thead>
-                    <tbody id="contractors-table" class="bg-white divide-y divide-gray-200">
+                    <tbody id="contractors-table" style="background: white;">
                         <tr>
-                            <td colspan="5" class="px-6 py-4 text-center text-gray-500">Loading contractors...</td>
+                            <td colspan="5" style="padding: 24px; text-align: center; color: #6b7280;">Loading contractors...</td>
                         </tr>
                     </tbody>
                 </table>
@@ -121,7 +208,7 @@
         </div>
 
     </div>
-</section>
+</div>
 
 <script>
 function toggleMobileMenu() {
@@ -149,22 +236,27 @@ async function loadContractors() {
         
         contractors.forEach((contractor, index) => {
             const row = document.createElement('tr');
-            row.className = contractor.status === 'NO_SEC_RESULTS' ? 'bg-yellow-50' : '';
+            row.style.borderBottom = '1px solid #e5e7eb';
+            if (contractor.status === 'NO_SEC_RESULTS') {
+                row.style.background = '#fefce8';
+            }
             
             const secNumber = contractor.sec_number || '-';
             const status = contractor.status || 'Unknown';
-            const address = contractor.registered_address || '-';
+            const address = contractor.registered_address || contractor.address || '-';
             
-            const statusBadge = contractor.sec_number ? 
-                `<span class="px-2 py-1 bg-green-100 text-green-800 text-xs rounded-full">✅ Verified</span>` :
-                `<span class="px-2 py-1 bg-yellow-100 text-yellow-800 text-xs rounded-full">⚠️ Suspicious</span>`;
+            const statusBadge = contractor.sec_number && contractor.sec_number.trim() !== '' ? 
+                `<span style="padding: 4px 12px; background: #dcfce7; color: #166534; font-size: 0.75rem; border-radius: 9999px; font-weight: 600;">✅ Verified</span>` :
+                contractor.status === 'NO_SEC_RESULTS' ?
+                `<span class="pulse-warning" style="padding: 4px 12px; background: #fff3cd; color: #854d0e; font-size: 0.75rem; border-radius: 9999px; font-weight: 600; border: 1px solid #fde047;">⚠️ Suspicious</span>` :
+                `<span style="padding: 4px 12px; background: #fee2e2; color: #991b1b; font-size: 0.75rem; border-radius: 9999px; font-weight: 600;">❌ Missing</span>`;
             
             row.innerHTML = `
-                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${index + 1}</td>
-                <td class="px-6 py-4 text-sm font-medium text-gray-900">${contractor.original_contractor_name || contractor.company_name}</td>
-                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${secNumber}</td>
-                <td class="px-6 py-4 whitespace-nowrap text-sm">${statusBadge}</td>
-                <td class="px-6 py-4 text-sm text-gray-600">${address.substring(0, 100)}${address.length > 100 ? '...' : ''}</td>
+                <td style="padding: 16px; font-size: 0.875rem; color: #111827; white-space: nowrap;">${index + 1}</td>
+                <td style="padding: 16px; font-size: 0.875rem; font-weight: 500; color: #111827;">${contractor.original_contractor_name || contractor.company_name || contractor.contractor_name}</td>
+                <td style="padding: 16px; font-size: 0.875rem; color: #111827; white-space: nowrap;">${secNumber}</td>
+                <td style="padding: 16px; font-size: 0.875rem;">${statusBadge}</td>
+                <td style="padding: 16px; font-size: 0.875rem; color: #6b7280;">${address.substring(0, 100)}${address.length > 100 ? '...' : ''}</td>
             `;
             
             tbody.appendChild(row);
@@ -176,6 +268,14 @@ async function loadContractors() {
         document.getElementById('processed-contractors').textContent = 'Error';
         document.getElementById('with-sec').textContent = 'Error';
         document.getElementById('suspicious').textContent = 'Error';
+        
+        document.getElementById('contractors-table').innerHTML = `
+            <tr>
+                <td colspan="5" style="padding: 24px; text-align: center; color: #dc2626;">
+                    ❌ Error loading contractor data. Please try again later.
+                </td>
+            </tr>
+        `;
     }
 }
 
@@ -185,5 +285,5 @@ loadContractors();
 
 {% include "footer.html" %}
 
-{% endblock %}
-
+</body>
+</html>

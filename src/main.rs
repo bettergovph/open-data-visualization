@@ -124,24 +124,6 @@ async fn map(_req: HttpRequest) -> Result<HttpResponse, ActixError> {
     Ok(HttpResponse::Ok().content_type("text/html").body(rendered))
 }
 
-// About Page
-async fn about(_req: HttpRequest) -> Result<HttpResponse, ActixError> {
-    let tera = Tera::new("templates/**/*").map_err(|e| actix_web::error::ErrorInternalServerError(e))?;
-    let mut context = Context::new();
-
-    add_frontend_env_to_context(&mut context);
-
-    context.insert("title", "About - BetterGovPH");
-    context.insert("company_name", "BetterGovPH");
-    context.insert("platform", "BetterGovPH");
-    context.insert("SITE_NAME", "BetterGovPH Data Visualizations");
-    context.insert("SITE_URL", "https://visualizations.bettergov.ph");
-
-    let template_name = "about.html";
-
-    let rendered = tera.render(template_name, &context).map_err(|e| actix_web::error::ErrorInternalServerError(e))?;
-    Ok(HttpResponse::Ok().content_type("text/html").body(rendered))
-}
 
 // Budget-NEP Correlation Page
 async fn budget_nep_correlation(_req: HttpRequest) -> Result<HttpResponse, ActixError> {
@@ -275,7 +257,6 @@ async fn main() -> std::io::Result<()> {
             .service(web::resource("/map").to(map))
             .service(web::resource("/contractors").to(contractors))
             .service(web::resource("/correlation").to(correlation))
-            .service(web::resource("/about").to(about))
             .service(web::resource("/budget-nep-correlation").to(budget_nep_correlation))
             .service(web::resource("/budget-flood-correlation").to(budget_flood_correlation))
             .service(web::resource("/flood-dime-correlation").to(flood_dime_correlation))
