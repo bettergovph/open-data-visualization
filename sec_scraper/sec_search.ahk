@@ -44,6 +44,7 @@ Loop, % contractors.MaxIndex() {
     Send, {Space}
     Sleep, 8000
 
+    Clipboard := ""
     Send, ^a
     Sleep, 100
     Send, ^c
@@ -51,9 +52,10 @@ Loop, % contractors.MaxIndex() {
 
     FileCreateDir, sec_results
     FileAppend, %Clipboard%, %resultFile%
+    Clipboard := ""
 
-    Process, Close, msedge.exe
-    Sleep, 500
+    Send, !{F4}
+    Sleep, 1000
 }
 
 ExitApp
