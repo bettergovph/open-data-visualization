@@ -278,14 +278,6 @@ function toggleMobileMenu() {
                                 <!-- Contractors without SEC data will be populated here -->
                             </div>
                         </div>
-
-                        <!-- DPWH & SEC Data Information -->
-                        <div style="background: #e9ecef; padding: 15px; border-radius: 6px; margin-top: 20px; font-size: 0.9em; color: #495057;">
-                            <p style="color: #666; font-size: 0.9em; margin: 0;">
-                                <strong>Source:</strong> Securities and Exchange Commission (SEC) Philippines, PostgreSQL Database<br>
-                                <strong>Data Range:</strong> Contractors from government infrastructure projects
-                            </p>
-                        </div>
                     </div>
                 </div>
 
@@ -295,6 +287,15 @@ function toggleMobileMenu() {
     </div>
 </section>
 </div>
+
+<!-- Page-specific footer content -->
+<footer class="visualizations-footer">
+    <div class="visualizations-container">
+        <p><strong>📊 Source:</strong> Securities and Exchange Commission (SEC) Philippines</p>
+        <p><strong>📈 Total Contractors:</strong> <span id="footer-total">Loading...</span> contractors in system</p>
+        <p><strong>✅ Verified:</strong> <span id="footer-verified">Loading...</span> with SEC registration data</p>
+    </div>
+</footer>
 
 <script>
 // Global data
@@ -360,6 +361,10 @@ async function loadContractors() {
         document.getElementById('sec-processed-count').textContent = (summary.total_contractors || 0).toLocaleString();
         document.getElementById('total-sec-count').textContent = (summary.with_sec_data || 0).toLocaleString();
         document.getElementById('suspicious-sec-count').textContent = (summary.suspicious_no_results || 0).toLocaleString();
+        
+        // Update footer statistics
+        document.getElementById('footer-total').textContent = (summary.total_contractors || 0).toLocaleString();
+        document.getElementById('footer-verified').textContent = (summary.with_sec_data || 0).toLocaleString();
         
         // Load contractors without SEC for SEC tab
         loadContractorsWithoutSec();
