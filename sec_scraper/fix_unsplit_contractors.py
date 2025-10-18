@@ -21,15 +21,17 @@ def split_contractor(name):
     """Split contractor name into new and former names"""
     results = []
     
-    # Pattern 1: "NEW NAME (FORMERLY OLD NAME)" or "NEW NAME (FORMERLY: OLD NAME)"
-    match = re.search(r'^(.+?)\s*\(\s*(?:FORMERLY|FORMER|PREVIOUSLY|PREV)[\s:]+(.+?)\s*\)(.*)$', name, re.IGNORECASE)
+    # Pattern 1: "NEW NAME (FORMERLY OLD NAME)" - extract both, remove parentheses
+    match = re.search(r'^(.+?)\s*\(\s*(?:FORMERLY|FORMER|PREVIOUSLY|PREV)[\s:]*(.+?)\s*\)(.*)$', name, re.IGNORECASE)
     if match:
         new_name = (match.group(1) + ' ' + match.group(3)).strip()
         old_name = match.group(2).strip()
+        # Clean old name further
+        old_name = re.sub(r'^[:.\s]+', '', old_name)
         
-        if new_name and len(new_name) > 5:
+        if new_name and len(new_name) > 10:
             results.append(new_name)
-        if old_name and len(old_name) > 5:
+        if old_name and len(old_name) > 10:
             results.append(old_name)
         
         return results
@@ -40,9 +42,9 @@ def split_contractor(name):
         new_name = match.group(1).strip()
         old_name = match.group(2).strip()
         
-        if new_name and len(new_name) > 5:
+        if new_name and len(new_name) > 10:
             results.append(new_name)
-        if old_name and len(old_name) > 5:
+        if old_name and len(old_name) > 10:
             results.append(old_name)
         
         return results
@@ -55,7 +57,7 @@ def split_contractor(name):
             # Remove any parenthetical content
             part = re.sub(r'\s*\([^)]*\)', '', part)
             part = part.strip()
-            if part and len(part) > 5:
+            if part and len(part) > 10:
                 results.append(part)
         
         return results
@@ -117,6 +119,7 @@ async def main():
             # This contractor needs to be split
             print(f"🔧 Splitting ID {contractor_id}: {name[:70]}")
             
+            added_any = False
             for split_name in split_names:
                 # Check if this name already exists
                 existing = await conn.fetchval(
@@ -133,9 +136,10 @@ async def main():
                         VALUES ($1, $2, $3)
                     ''', split_name, source, contractor_id)
                     print(f"   ➕ Added: {split_name[:60]}")
+                    added_any = True
             
-            # Delete original unsplit entry (only if it has no SEC data)
-            if not sec_number:
+            # Delete original unsplit entry (only if we added new ones AND it has no SEC data)
+            if added_any and not sec_number:
                 # First, update any contractors that reference this as former_id
                 await conn.execute('''
                     UPDATE contractors 
@@ -147,8 +151,10 @@ async def main():
                 await conn.execute('DELETE FROM contractors WHERE id = $1', contractor_id)
                 print(f"   🗑️ Deleted original unsplit entry")
                 split_count += 1
-            else:
+            elif sec_number:
                 print(f"   ⚠️ Kept original (has SEC data)")
+            else:
+                print(f"   ℹ️  Kept original (no new entries added)")
         
         elif not is_valid_name(name):
             # Invalid name - delete if no SEC data
