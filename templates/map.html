@@ -24,6 +24,26 @@
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
+    <!-- Custom Popup Styles -->
+    <style>
+        /* Override Leaflet's default max-width */
+        .leaflet-popup {
+            max-width: none !important;
+        }
+        .leaflet-popup-content-wrapper {
+            max-width: none !important;
+            width: auto !important;
+            overflow: visible !important;
+        }
+        .leaflet-popup-content {
+            max-width: none !important;
+            min-width: 1050px !important;
+            width: 1050px !important;
+            margin: 13px 19px !important;
+            overflow: visible !important;
+        }
+    </style>
+
     <!-- BetterGovPH Metadata -->
     <meta name="description" content="Interactive Map - Government Data Analysis Platform">
     <meta name="keywords" content="flood control, infrastructure, DPWH, government projects, Philippines, interactive map">
@@ -698,7 +718,12 @@ async function processProjects(projects) {
                     </div>
                 `;
 
-                circle.bindPopup(popupContent);
+                circle.bindPopup(popupContent, {
+                    maxWidth: 9999,
+                    minWidth: 1050,
+                    autoPan: true,
+                    keepInView: true
+                });
                 
                 // Fetch PhilGEPS contracts when popup opens
                 circle.on('popupopen', async function() {
