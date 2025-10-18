@@ -26,7 +26,8 @@ Loop, Parse, match1, `"
         contractors.Push(cleaned)
 }
 
-MsgBox, Parsed %contractors.MaxIndex()% contractors. Starting...
+totalCount := contractors.MaxIndex()
+MsgBox, Parsed %totalCount% contractors. Starting...
 
 Loop, % contractors.MaxIndex() {
     contractorName := contractors[A_Index]
