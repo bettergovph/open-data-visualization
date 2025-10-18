@@ -245,11 +245,29 @@
                 const minProjectLat = projects[0].lat;
                 const maxProjectLat = projects[projects.length - 1].lat;
                 const latRange = maxProjectLat - minProjectLat;
+                const distanceKm = alignment.distanceKm;
                 
-                // Extend skewer line above and below projects
-                // For long distances: minimal extension (0.1x)
-                // For short distances: larger extension (1.5x with minimum 0.5°)
-                const extension = latRange > 1.0 ? latRange * 0.1 : Math.max(latRange * 1.5, 0.5);
+                // Scale circle size and extension based on distance
+                let circleRadius, extension;
+                
+                if (distanceKm > 200) {
+                    // Very long skewer: big circles, minimal extension
+                    circleRadius = 16;
+                    extension = latRange * 0.1;
+                } else if (distanceKm > 100) {
+                    // Long skewer: medium-large circles, small extension
+                    circleRadius = 12;
+                    extension = latRange * 0.2;
+                } else if (distanceKm > 50) {
+                    // Medium skewer: medium circles, medium extension
+                    circleRadius = 8;
+                    extension = latRange * 0.5;
+                } else {
+                    // Short skewer: small circles, long extension
+                    circleRadius = 4;
+                    extension = Math.max(latRange * 2, 0.5);
+                }
+                
                 const skewerTop = maxProjectLat + extension;
                 const skewerBottom = minProjectLat - extension;
                 
@@ -264,16 +282,16 @@
                 ctx.lineTo(bottomCoords.x, bottomCoords.y);
                 ctx.stroke();
                 
-                // Draw project circles (bigger and more visible)
+                // Draw project circles (size varies by distance)
                 projects.forEach((project, pidx) => {
                     const coords = toCanvasCoords(project.lng, project.lat);
                     
-                    // Circle (like meat on kebab) - tripled size
+                    // Circle (like meat on kebab) - size based on distance
                     ctx.fillStyle = '#3b82f6';
                     ctx.strokeStyle = '#1e3a8a';
                     ctx.lineWidth = 2;
                     ctx.beginPath();
-                    ctx.arc(coords.x, coords.y, 12, 0, 2 * Math.PI);
+                    ctx.arc(coords.x, coords.y, circleRadius, 0, 2 * Math.PI);
                     ctx.fill();
                     ctx.stroke();
                 });
