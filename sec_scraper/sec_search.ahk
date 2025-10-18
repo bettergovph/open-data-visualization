@@ -55,29 +55,29 @@ Loop, % contractors.MaxIndex() {
     }
 
     WinMaximize
-    Sleep, 5000
+    Sleep, 5000  ; Initial page load - keep long
 
     ; Navigate to search field
     Click, 1, 1
-    Sleep, 1000
+    Sleep, 100
     Loop, 9 {
         Send, {Tab}
-        Sleep, 300
+        Sleep, 50
     }
 
     ; Perform search
     Send, %contractorName%
-    Sleep, 1000
+    Sleep, 100
     Send, {Tab}
-    Sleep, 300
+    Sleep, 50
     Send, {Space}
-    Sleep, 8000
+    Sleep, 8000  ; Wait for search results - keep long
 
     ; Copy results
     Send, ^a
-    Sleep, 500
+    Sleep, 100
     Send, ^c
-    Sleep, 500
+    Sleep, 200
 
     ; Save to file
     FileCreateDir, sec_results
@@ -85,7 +85,7 @@ Loop, % contractors.MaxIndex() {
 
     ; Close browser
     WinClose, ahk_class Chrome_WidgetWin_1
-    Sleep, 2000
+    Sleep, 500
 
     TrayTip, Done, %contractorName% (%A_Index%/%contractors.MaxIndex()), 2
 }
