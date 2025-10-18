@@ -20,7 +20,10 @@ def is_joint_venture(contractor_name):
     return '/' in contractor_name or ' & ' in contractor_name or ' AND ' in contractor_name.upper()
 
 def split_joint_venture(contractor_name):
-    """Split JV contractor names into individual contractors"""
+    """Split JV contractor names into individual contractors
+    
+    Only split on clear JV indicators (/), NOT on & or AND which are part of company names
+    """
     if not contractor_name:
         return []
     
@@ -28,24 +31,23 @@ def split_joint_venture(contractor_name):
     base_name = re.sub(r'\s*\([^)]*formerly[^)]*\)', '', contractor_name, flags=re.IGNORECASE)
     base_name = re.sub(r'\s*\([^)]*former[^)]*\)', '', base_name, flags=re.IGNORECASE)
     
-    # Split by JV indicators
+    # ONLY split on / (forward slash) as clear JV indicator
+    # Do NOT split on & or AND as they are part of company names like "ABC & SONS CONSTRUCTION"
     if '/' in base_name:
         parts = base_name.split('/')
-    elif ' & ' in base_name:
-        parts = base_name.split(' & ')
-    elif ' AND ' in base_name.upper():
-        parts = re.split(r'\s+AND\s+', base_name, flags=re.IGNORECASE)
     else:
+        # Not a JV, return as-is
         parts = [base_name]
     
     # Clean each part
     cleaned = []
     for part in parts:
         part = part.strip()
-        # Remove trailing symbols
-        part = re.sub(r'[.,&\'"]+$', '', part)
-        part = re.sub(r'^[.,&\'"]+', '', part)
-        if part and len(part) > 3:
+        # Remove trailing symbols only
+        part = re.sub(r'[.,\'"]+$', '', part)
+        part = re.sub(r'^[.,\'"]+', '', part)
+        # Filter out single words or very short names (likely extraction errors)
+        if part and len(part) > 10:  # Minimum 10 chars for valid company name
             cleaned.append(part)
     
     return cleaned
