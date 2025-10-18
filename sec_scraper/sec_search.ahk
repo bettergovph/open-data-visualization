@@ -2,7 +2,7 @@
 SendMode Input
 SetWorkingDir %A_ScriptDir%
 
-FileRead, contractorData, contractor_list_top100_no_sec.txt
+FileRead, contractorData, contractor_list_top200_no_sec.txt
 if ErrorLevel
     ExitApp
 
@@ -63,21 +63,21 @@ Loop, % contractors.MaxIndex() {
     Send, {Shift Down}{Tab}{Shift Up}
     Sleep, 100
 
-    count := count + 1
-    
-    if (count = 5) {
-        WinClose, ahk_class Chrome_WidgetWin_1
-        Sleep, 2000
-        Run msedge.exe --new-window https://checkwithsec.sec.gov.ph/check-with-sec/index
-        Sleep, 7000
-        Click, 1, 1
-        Sleep, 200
-        Loop, 9 {
-            Send, {Tab}
-            Sleep, 50
-        }
-        count := 0
-    }
+           count := count + 1
+           
+           if (count = 10) {
+               WinClose, ahk_class Chrome_WidgetWin_1
+               Sleep, 2000
+               Run msedge.exe --new-window https://checkwithsec.sec.gov.ph/check-with-sec/index
+               Sleep, 7000
+               Click, 1, 1
+               Sleep, 200
+               Loop, 9 {
+                   Send, {Tab}
+                   Sleep, 50
+               }
+               count := 0
+           }
 }
 
 WinClose, ahk_class Chrome_WidgetWin_1
