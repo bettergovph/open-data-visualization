@@ -204,22 +204,37 @@ async def get_flood_contractors() -> Set[str]:
     """
     print("📊 Connecting to MeiliSearch flood control index...")
     
-    meilisearch_host = os.getenv('MEILISEARCH_HOST', 'localhost')
-    meilisearch_port = os.getenv('MEILISEARCH_PORT', '7700')
+    # Parse MEILI_HTTP_ADDR (format: "127.0.0.1:7700")
+    meili_addr = os.getenv('MEILI_HTTP_ADDR', 'localhost:7700')
+    if ':' in meili_addr:
+        meilisearch_host, meilisearch_port = meili_addr.split(':')
+    else:
+        meilisearch_host = 'localhost'
+        meilisearch_port = '7700'
+    
+    meilisearch_key = os.getenv('MEILI_MASTER_KEY', '')
     
     try:
         # Fetch all documents from MeiliSearch
-        url = f"http://{meilisearch_host}:{meilisearch_port}/indexes/flood_control/documents"
+        url = f"http://{meilisearch_host}:{meilisearch_port}/indexes/bettergov_flood_control/documents"
+        
+        headers = {}
+        if meilisearch_key:
+            headers['Authorization'] = f'Bearer {meilisearch_key}'
         
         all_projects = []
         offset = 0
         limit = 1000
         
         while True:
-            response = requests.get(f"{url}?offset={offset}&limit={limit}")
+            response = requests.get(f"{url}?offset={offset}&limit={limit}", headers=headers)
             if not response.ok:
                 print(f"⚠️  MeiliSearch request failed: {response.status_code}")
-                break
+                print(f"   Trying without authentication...")
+                response = requests.get(f"{url}?offset={offset}&limit={limit}")
+                if not response.ok:
+                    print(f"❌ Failed: {response.status_code}")
+                    break
             
             data = response.json()
             results = data.get('results', [])
@@ -425,54 +440,57 @@ async def insert_new_contractors(new_contractors: List[str]):
     )
     
     try:
-        # Ensure unique constraint exists on contractor_name
-        try:
-            await conn.execute(
-                """
-                ALTER TABLE contractors 
-                ADD CONSTRAINT contractors_contractor_name_key UNIQUE (contractor_name)
-                """
-            )
-            print("✅ Added unique constraint on contractor_name")
-        except Exception as e:
-            if "already exists" in str(e):
-                print("✅ Unique constraint on contractor_name already exists")
-            else:
-                print(f"⚠️  Could not add unique constraint: {e}")
-        
         # Insert contractors in batch
         inserted = 0
         updated = 0
+        errors = 0
         for contractor_name in new_contractors:
             try:
-                result = await conn.execute(
+                # Try to insert, if already exists then update source
+                existing_id = await conn.fetchval(
                     """
-                    INSERT INTO contractors (contractor_name, source)
-                    VALUES ($1, $2)
-                    ON CONFLICT (contractor_name) DO UPDATE
-                    SET source = CASE 
-                        WHEN contractors.source = 'unknown' OR contractors.source IS NULL 
-                        THEN $2 
-                        WHEN contractors.source NOT LIKE '%' || $2 || '%'
-                        THEN contractors.source || ', ' || $2
-                        ELSE contractors.source
-                    END
+                    SELECT id FROM contractors WHERE contractor_name = $1
                     """,
-                    contractor_name,
-                    'flood'
+                    contractor_name
                 )
-                # Check if row was actually inserted
-                if result == "INSERT 0 1":
-                    inserted += 1
-                else:
+                
+                if existing_id:
+                    # Update source if not already present
+                    await conn.execute(
+                        """
+                        UPDATE contractors
+                        SET source = CASE 
+                            WHEN source IS NULL OR source = 'unknown' THEN $2
+                            WHEN source NOT LIKE '%' || $2 || '%' THEN source || ', ' || $2
+                            ELSE source
+                        END
+                        WHERE id = $1
+                        """,
+                        existing_id,
+                        'flood'
+                    )
                     updated += 1
+                else:
+                    # Insert new contractor
+                    await conn.execute(
+                        """
+                        INSERT INTO contractors (contractor_name, source)
+                        VALUES ($1, $2)
+                        """,
+                        contractor_name,
+                        'flood'
+                    )
+                    inserted += 1
                     
                 if (inserted + updated) % 100 == 0:
                     print(f"   Progress: {inserted} inserted, {updated} updated, {inserted + updated}/{len(new_contractors)} processed...")
             except Exception as e:
-                print(f"⚠️  Error inserting '{contractor_name}': {e}")
+                print(f"⚠️  Error processing '{contractor_name}': {e}")
+                errors += 1
         
         print(f"✅ Successfully inserted {inserted} new contractors, updated {updated} existing")
+        if errors > 0:
+            print(f"⚠️  {errors} errors encountered")
         print(f"   Note: Source field updated to track 'flood' origin")
         
     finally:

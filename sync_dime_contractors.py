@@ -213,15 +213,13 @@ async def get_dime_contractors() -> Set[str]:
     
     try:
         # Get all contractors from DIME projects
-        # The contractors field is a JSON array, so we need to extract the name from each object
+        # The contractors field is a text array
         rows = await conn.fetch(
             """
-            SELECT DISTINCT 
-                jsonb_array_elements(contractors)->>'name' as contractor_name
+            SELECT DISTINCT unnest(contractors) as contractor_name
             FROM projects
             WHERE contractors IS NOT NULL 
-                AND contractors != 'null'
-                AND jsonb_array_length(contractors) > 0
+                AND array_length(contractors, 1) > 0
             """
         )
         
@@ -249,7 +247,8 @@ async def get_dime_contractors() -> Set[str]:
             if has_former:
                 former_name_count += 1
             
-            for contractor in individual_contractors:
+            for contractor_data in individual_contractors:
+                contractor = contractor_data['name']
                 if contractor and contractor.strip():
                     all_contractors.add(contractor.strip())
         
@@ -412,53 +411,57 @@ async def insert_new_contractors(new_contractors: List[str]):
     )
     
     try:
-        # Ensure unique constraint exists on contractor_name
-        try:
-            await conn.execute(
-                """
-                ALTER TABLE contractors 
-                ADD CONSTRAINT contractors_contractor_name_key UNIQUE (contractor_name)
-                """
-            )
-            print("✅ Added unique constraint on contractor_name")
-        except Exception as e:
-            if "already exists" in str(e):
-                print("✅ Unique constraint on contractor_name already exists")
-            else:
-                print(f"⚠️  Could not add unique constraint: {e}")
-        
         # Insert contractors in batch
         inserted = 0
-        skipped = 0
+        updated = 0
+        errors = 0
         for contractor_name in new_contractors:
             try:
-                result = await conn.execute(
+                # Try to insert, if already exists then update source
+                existing_id = await conn.fetchval(
                     """
-                    INSERT INTO contractors (contractor_name, source)
-                    VALUES ($1, $2)
-                    ON CONFLICT (contractor_name) DO UPDATE
-                    SET source = CASE 
-                        WHEN contractors.source = 'unknown' OR contractors.source IS NULL 
-                        THEN $2 
-                        ELSE contractors.source || ', ' || $2
-                    END
+                    SELECT id FROM contractors WHERE contractor_name = $1
                     """,
-                    contractor_name,
-                    'dime'
+                    contractor_name
                 )
-                # Check if row was actually inserted
-                if result == "INSERT 0 1":
-                    inserted += 1
+                
+                if existing_id:
+                    # Update source if not already present
+                    await conn.execute(
+                        """
+                        UPDATE contractors
+                        SET source = CASE 
+                            WHEN source IS NULL OR source = 'unknown' THEN $2
+                            WHEN source NOT LIKE '%' || $2 || '%' THEN source || ', ' || $2
+                            ELSE source
+                        END
+                        WHERE id = $1
+                        """,
+                        existing_id,
+                        'dime'
+                    )
+                    updated += 1
                 else:
-                    skipped += 1
+                    # Insert new contractor
+                    await conn.execute(
+                        """
+                        INSERT INTO contractors (contractor_name, source)
+                        VALUES ($1, $2)
+                        """,
+                        contractor_name,
+                        'dime'
+                    )
+                    inserted += 1
                     
-                if (inserted + skipped) % 100 == 0:
-                    print(f"   Progress: {inserted} inserted, {skipped} skipped, {inserted + skipped}/{len(new_contractors)} processed...")
+                if (inserted + updated) % 100 == 0:
+                    print(f"   Progress: {inserted} inserted, {updated} updated, {inserted + updated}/{len(new_contractors)} processed...")
             except Exception as e:
-                print(f"⚠️  Error inserting '{contractor_name}': {e}")
-                skipped += 1
+                print(f"⚠️  Error processing '{contractor_name}': {e}")
+                errors += 1
         
-        print(f"✅ Successfully inserted {inserted} new contractors ({skipped} skipped/duplicates)")
+        print(f"✅ Successfully inserted {inserted} new contractors, updated {updated} existing")
+        if errors > 0:
+            print(f"⚠️  {errors} errors encountered")
         print(f"   Note: Source field updated to track 'dime' origin")
         
     finally:
