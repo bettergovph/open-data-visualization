@@ -107,8 +107,8 @@ for lng, projects in longitude_groups.items():
                     'count': len(projects)
                 })
 
-# Sort by distance (longest skewers first)
-all_alignments.sort(key=lambda x: x['distance_km'], reverse=True)
+# Sort by project count first (more meat), then by distance (longer skewers)
+all_alignments.sort(key=lambda x: (x['count'], x['distance_km']), reverse=True)
 
 print(f"🔍 Found {len(all_alignments)} NEW vertical alignments (excluding Metro Manila range)")
 print(f"    Showing top 20:\n")
