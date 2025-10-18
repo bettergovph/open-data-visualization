@@ -500,13 +500,16 @@ async function loadContractorProjectCounts() {
 // Render contractors chart
 function renderContractorsChart() {
     const ctx = document.getElementById('contractorsChart');
-    if (!ctx || !allContractorsByProject.length) return;
+    if (!ctx || !allContractorsByProject.length) {
+        console.log('⚠️ Cannot render chart - missing context or no data');
+        return;
+    }
     
     const start = currentChartPage * chartPageSize;
     const end = start + chartPageSize;
     const contractors = allContractorsByProject.slice(start, end);
     
-    if (window.contractorsChart) {
+    if (window.contractorsChart && typeof window.contractorsChart.destroy === 'function') {
         window.contractorsChart.destroy();
     }
     
