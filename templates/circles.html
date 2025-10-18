@@ -311,12 +311,12 @@
                 projects.forEach((project, pidx) => {
                     const coords = toCanvasCoords(project.lng, project.lat);
                     
-                    // Circle (like meat on kebab) - very small radius
+                    // Circle (like meat on kebab) - tiny radius
                     ctx.fillStyle = '#3b82f6';
                     ctx.strokeStyle = '#1e3a8a';
-                    ctx.lineWidth = 1;
+                    ctx.lineWidth = 0.5;
                     ctx.beginPath();
-                    ctx.arc(coords.x, coords.y, 2, 0, 2 * Math.PI);
+                    ctx.arc(coords.x, coords.y, 1.5, 0, 2 * Math.PI);
                     ctx.fill();
                     ctx.stroke();
                 });
