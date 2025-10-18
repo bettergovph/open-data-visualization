@@ -93,9 +93,15 @@
             <a href="/flood" class="text-black hover:text-gray-600 font-medium transition">Flood Control</a>
             <a href="/dime" class="text-black hover:text-gray-600 font-medium transition">DIME</a>
             <a href="/map" class="text-black hover:text-gray-600 font-medium transition">Map</a>
-            <a href="/budget-nep-correlation" class="text-black hover:text-gray-600 font-medium transition">NEP-Budget</a>
-            <a href="/budget-flood-correlation" class="text-black hover:text-gray-600 font-medium transition">Budget-Flood</a>
-            <a href="/flood-dime-correlation" class="text-black hover:text-gray-600 font-medium transition">Flood-DIME</a>
+            <a href="/contractors" class="text-black hover:text-gray-600 font-medium transition">Contractors</a>
+            <div class="relative group">
+                <a href="/correlation" class="text-black hover:text-gray-600 font-medium transition">Correlation ▾</a>
+                <div class="absolute hidden group-hover:block bg-white shadow-lg rounded-md mt-2 py-2 w-48 z-50">
+                    <a href="/budget-nep-correlation" class="block px-4 py-2 text-black hover:bg-gray-100">NEP-Budget</a>
+                    <a href="/budget-flood-correlation" class="block px-4 py-2 text-black hover:bg-gray-100">Budget-Flood</a>
+                    <a href="/flood-dime-correlation" class="block px-4 py-2 text-black hover:bg-gray-100">Flood-DIME</a>
+                </div>
+            </div>
         </div>
         <div class="md:hidden">
             <button class="text-black focus:outline-none" onclick="toggleMobileMenu()">
@@ -113,9 +119,11 @@
         <a href="/flood" class="block text-black hover:text-gray-600 font-medium py-2">Flood Control</a>
         <a href="/dime" class="block text-black hover:text-gray-600 font-medium py-2">DIME</a>
         <a href="/map" class="block text-black hover:text-gray-600 font-medium py-2">Map</a>
-        <a href="/budget-nep-correlation" class="block text-black hover:text-gray-600 font-medium py-2">NEP-Budget</a>
-        <a href="/budget-flood-correlation" class="block text-black hover:text-gray-600 font-medium py-2">Budget-Flood</a>
-        <a href="/flood-dime-correlation" class="block text-black hover:text-gray-600 font-medium py-2">Flood-DIME</a>
+        <a href="/contractors" class="block text-black hover:text-gray-600 font-medium py-2">Contractors</a>
+        <a href="/correlation" class="block text-black hover:text-gray-600 font-medium py-2">Correlation</a>
+        <a href="/budget-nep-correlation" class="block text-black hover:text-gray-600 font-medium py-2 pl-4">→ NEP-Budget</a>
+        <a href="/budget-flood-correlation" class="block text-black hover:text-gray-600 font-medium py-2 pl-4">→ Budget-Flood</a>
+        <a href="/flood-dime-correlation" class="block text-black hover:text-gray-600 font-medium py-2 pl-4">→ Flood-DIME</a>
     </div>
 </nav>
 
@@ -160,25 +168,18 @@
                 <a href="/map" class="inline-block bg-black text-white px-6 py-2 rounded-lg hover:bg-gray-800 transition">View Interactive Map</a>
             </div>
 
-            <!-- NEP-Budget Correlation Card -->
+            <!-- Contractors Card -->
             <div class="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition">
-                <h3 class="text-2xl font-semibold text-black mb-3">🚨 NEP-Budget Correlation</h3>
-                <p class="text-gray-600 mb-4">Critical analysis revealing fundamental database schema differences between Budget and NEP systems despite unified interface.</p>
-                <a href="/budget-nep-correlation" class="inline-block bg-black text-white px-6 py-2 rounded-lg hover:bg-gray-800 transition">View Schema Analysis</a>
+                <h3 class="text-2xl font-semibold text-black mb-3">🏛️ SEC Contractors</h3>
+                <p class="text-gray-600 mb-4">Verify contractor legitimacy through Securities and Exchange Commission registration data with 152 verified contractors.</p>
+                <a href="/contractors" class="inline-block bg-black text-white px-6 py-2 rounded-lg hover:bg-gray-800 transition">View Contractors Database</a>
             </div>
 
-            <!-- Budget-Flood Correlation Card -->
+            <!-- Correlation Card -->
             <div class="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition">
-                <h3 class="text-2xl font-semibold text-black mb-3">📊 Budget-Flood Correlation</h3>
-                <p class="text-gray-600 mb-4">Data science analysis connecting budget line items with actual flood control projects for transparency.</p>
-                <a href="/budget-flood-correlation" class="inline-block bg-black text-white px-6 py-2 rounded-lg hover:bg-gray-800 transition">View Correlation Analysis</a>
-            </div>
-
-            <!-- Flood-DIME Correlation Card -->
-            <div class="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition">
-                <h3 class="text-2xl font-semibold text-black mb-3">🔗 Flood-DIME Correlation</h3>
-                <p class="text-gray-600 mb-4">Analyze the overlap between flood control and DIME infrastructure projects across regions.</p>
-                <a href="/flood-dime-correlation" class="inline-block bg-black text-white px-6 py-2 rounded-lg hover:bg-gray-800 transition">View Correlation Analysis</a>
+                <h3 class="text-2xl font-semibold text-black mb-3">🔗 Data Correlations</h3>
+                <p class="text-gray-600 mb-4">Cross-reference datasets to verify consistency, detect discrepancies, and ensure transparency across government systems.</p>
+                <a href="/correlation" class="inline-block bg-black text-white px-6 py-2 rounded-lg hover:bg-gray-800 transition">View Correlations</a>
             </div>
         </div>
     </div>

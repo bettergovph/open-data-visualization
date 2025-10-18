@@ -1,0 +1,130 @@
+{% extends "base_visualizations.html" %}
+
+{% block title %}Data Correlations - BetterGovPH{% endblock %}
+
+{% block content %}
+
+<!-- Navigation -->
+<nav class="visualizations-nav py-4 px-6 bg-white border-b border-gray-200">
+    <div class="max-w-7xl mx-auto flex items-center justify-between">
+        <div class="flex items-center">
+            <a href="https://bettergov.ph" class="flex items-center">
+                <img src="https://raw.githubusercontent.com/bettergovph/logo/main/png/BetterGov_Horizontal-Black.png" 
+                     alt="BetterGov.ph" 
+                     class="h-12 mr-3">
+            </a>
+            <a href="/" class="text-xl font-bold text-black hover:text-gray-600">Data Visualizations</a>
+        </div>
+        <div class="hidden md:flex space-x-6">
+            <a href="/" class="text-black hover:text-gray-600 font-medium transition">Home</a>
+            <a href="/nep" class="text-black hover:text-gray-600 font-medium transition">NEP</a>
+            <a href="/budget" class="text-black hover:text-gray-600 font-medium transition">Budget</a>
+            <a href="/flood" class="text-black hover:text-gray-600 font-medium transition">Flood Control</a>
+            <a href="/dime" class="text-black hover:text-gray-600 font-medium transition">DIME</a>
+            <a href="/map" class="text-black hover:text-gray-600 font-medium transition">Map</a>
+            <a href="/contractors" class="text-black hover:text-gray-600 font-medium transition">Contractors</a>
+            <div class="relative group">
+                <a href="/correlation" class="text-black hover:text-gray-600 font-medium transition border-b-2 border-black">Correlation ▾</a>
+                <div class="absolute hidden group-hover:block bg-white shadow-lg rounded-md mt-2 py-2 w-48">
+                    <a href="/budget-nep-correlation" class="block px-4 py-2 text-black hover:bg-gray-100">NEP-Budget</a>
+                    <a href="/budget-flood-correlation" class="block px-4 py-2 text-black hover:bg-gray-100">Budget-Flood</a>
+                    <a href="/flood-dime-correlation" class="block px-4 py-2 text-black hover:bg-gray-100">Flood-DIME</a>
+                </div>
+            </div>
+        </div>
+        <div class="md:hidden">
+            <button class="text-black focus:outline-none" onclick="toggleMobileMenu()">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+                </svg>
+            </button>
+        </div>
+    </div>
+    <!-- Mobile menu -->
+    <div id="mobileMenu" class="hidden mt-4 px-4 space-y-2">
+        <a href="/" class="block text-black hover:text-gray-600 font-medium py-2">Home</a>
+        <a href="/nep" class="block text-black hover:text-gray-600 font-medium py-2">NEP</a>
+        <a href="/budget" class="block text-black hover:text-gray-600 font-medium py-2">Budget</a>
+        <a href="/flood" class="block text-black hover:text-gray-600 font-medium py-2">Flood Control</a>
+        <a href="/dime" class="block text-black hover:text-gray-600 font-medium py-2">DIME</a>
+        <a href="/map" class="block text-black hover:text-gray-600 font-medium py-2">Map</a>
+        <a href="/contractors" class="block text-black hover:text-gray-600 font-medium py-2">Contractors</a>
+        <a href="/correlation" class="block text-black hover:text-gray-600 font-medium py-2 border-b-2 border-black">Correlation</a>
+        <a href="/budget-nep-correlation" class="block text-black hover:text-gray-600 font-medium py-2 pl-4">→ NEP-Budget</a>
+        <a href="/budget-flood-correlation" class="block text-black hover:text-gray-600 font-medium py-2 pl-4">→ Budget-Flood</a>
+        <a href="/flood-dime-correlation" class="block text-black hover:text-gray-600 font-medium py-2 pl-4">→ Flood-DIME</a>
+    </div>
+</nav>
+
+<!-- Hero Section -->
+<section class="bg-gradient-to-r from-purple-600 to-purple-800 text-white py-16 px-6">
+    <div class="max-w-7xl mx-auto">
+        <h1 class="text-4xl font-bold mb-4">🔗 Data Correlation Analysis</h1>
+        <p class="text-xl opacity-90">Connecting datasets to reveal insights and verify government data consistency</p>
+    </div>
+</section>
+
+<!-- Correlation Cards -->
+<section class="bg-gray-50 py-16 px-6">
+    <div class="max-w-7xl mx-auto">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+            
+            <!-- NEP-Budget Correlation Card -->
+            <div class="bg-white rounded-lg shadow-md p-8 hover:shadow-lg transition">
+                <div class="text-5xl mb-4">🚨</div>
+                <h3 class="text-2xl font-semibold text-black mb-3">NEP-Budget Correlation</h3>
+                <p class="text-gray-600 mb-6">Critical analysis revealing fundamental database schema differences between Budget and NEP systems despite unified interface.</p>
+                <div class="mb-4">
+                    <span class="inline-block bg-red-100 text-red-800 px-3 py-1 rounded-full text-sm font-medium">Critical Finding</span>
+                </div>
+                <a href="/budget-nep-correlation" class="inline-block bg-black text-white px-6 py-2 rounded-lg hover:bg-gray-800 transition">View Schema Analysis →</a>
+            </div>
+
+            <!-- Budget-Flood Correlation Card -->
+            <div class="bg-white rounded-lg shadow-md p-8 hover:shadow-lg transition">
+                <div class="text-5xl mb-4">📊</div>
+                <h3 class="text-2xl font-semibold text-black mb-3">Budget-Flood Correlation</h3>
+                <p class="text-gray-600 mb-6">Data science analysis connecting budget line items with actual flood control projects for financial transparency and accountability.</p>
+                <div class="mb-4">
+                    <span class="inline-block bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm font-medium">Budget Tracking</span>
+                </div>
+                <a href="/budget-flood-correlation" class="inline-block bg-black text-white px-6 py-2 rounded-lg hover:bg-gray-800 transition">View Analysis →</a>
+            </div>
+
+            <!-- Flood-DIME Correlation Card -->
+            <div class="bg-white rounded-lg shadow-md p-8 hover:shadow-lg transition">
+                <div class="text-5xl mb-4">🔗</div>
+                <h3 class="text-2xl font-semibold text-black mb-3">Flood-DIME Correlation</h3>
+                <p class="text-gray-600 mb-6">Analyze the overlap between flood control and DIME infrastructure projects to track implementation and progress across regions.</p>
+                <div class="mb-4">
+                    <span class="inline-block bg-green-100 text-green-800 px-3 py-1 rounded-full text-sm font-medium">Project Matching</span>
+                </div>
+                <a href="/flood-dime-correlation" class="inline-block bg-black text-white px-6 py-2 rounded-lg hover:bg-gray-800 transition">View Correlation →</a>
+            </div>
+
+        </div>
+
+        <!-- Why Correlation Matters -->
+        <div class="bg-white rounded-lg shadow-md p-8 mt-8">
+            <h2 class="text-2xl font-semibold text-black mb-4">💡 Why Data Correlation Matters</h2>
+            <p class="text-gray-700 leading-relaxed mb-4">
+                Data correlation is the process of connecting related information across different government databases to verify consistency, detect discrepancies, and ensure transparency. By cross-referencing multiple data sources, we can identify anomalies, track project progress, and hold government accountable for public spending.
+            </p>
+            <p class="text-gray-700 leading-relaxed">
+                Each correlation analysis reveals unique insights about how government data systems interact, where gaps exist, and how funds are allocated versus actual project implementation. This transparency is essential for good governance and public trust.
+            </p>
+        </div>
+    </div>
+</section>
+
+<script>
+function toggleMobileMenu() {
+    const menu = document.getElementById('mobileMenu');
+    menu.classList.toggle('hidden');
+}
+</script>
+
+{% include "footer.html" %}
+
+{% endblock %}
+
