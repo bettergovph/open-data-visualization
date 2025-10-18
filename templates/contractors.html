@@ -923,13 +923,13 @@ function drawVennDiagram(data) {
     ctx.clearRect(0, 0, width, height);
     
     // Circle parameters (3 overlapping circles)
-    const radius = 150;
+    const radius = 140;
     const centerY = height / 2;
-    const offsetX = 80;
+    const offsetX = 90;
     
-    const floodCenter = { x: width / 2 - offsetX, y: centerY - 40 };
-    const dimeCenter = { x: width / 2 + offsetX, y: centerY - 40 };
-    const philgepsCenter = { x: width / 2, y: centerY + 60 };
+    const floodCenter = { x: width / 2 - offsetX, y: centerY - 50 };
+    const dimeCenter = { x: width / 2 + offsetX, y: centerY - 50 };
+    const philgepsCenter = { x: width / 2, y: centerY + 80 };
     
     // Draw circles with transparency
     ctx.globalAlpha = 0.3;
