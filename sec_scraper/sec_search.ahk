@@ -1,4 +1,5 @@
 #NoEnv
+#Persistent
 SendMode Input
 SetWorkingDir %A_ScriptDir%
 
@@ -66,8 +67,8 @@ Loop, % contractors.MaxIndex() {
     processedCount++
     
     if (Mod(processedCount, 5) = 0) {
-        Send, !{F4}
-        Sleep, 1000
+        WinClose, ahk_class Chrome_WidgetWin_1
+        Sleep, 2000
         Run msedge.exe --new-window https://checkwithsec.sec.gov.ph/check-with-sec/index
         Sleep, 7000
         Click, 1, 1
@@ -79,5 +80,6 @@ Loop, % contractors.MaxIndex() {
     }
 }
 
-Send, !{F4}
+WinClose, ahk_class Chrome_WidgetWin_1
+Sleep, 1000
 ExitApp
