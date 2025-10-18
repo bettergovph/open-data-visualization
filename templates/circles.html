@@ -246,32 +246,33 @@
                 const maxProjectLat = projects[projects.length - 1].lat;
                 const latRange = maxProjectLat - minProjectLat;
                 
-                // Extend skewer line above and below projects (much shorter extension)
-                const extension = latRange * 0.5;
+                // Extend skewer line above and below projects
+                // Use minimum extension for skewers with close projects
+                const extension = Math.max(latRange * 1.5, 0.5);
                 const skewerTop = maxProjectLat + extension;
                 const skewerBottom = minProjectLat - extension;
                 
                 const topCoords = toCanvasCoords(lng, skewerTop);
                 const bottomCoords = toCanvasCoords(lng, skewerBottom);
                 
-                // Draw skewer line (very thin red solid vertical line)
+                // Draw skewer line (red solid vertical line)
                 ctx.strokeStyle = '#dc2626';
-                ctx.lineWidth = 1.5;
+                ctx.lineWidth = 2;
                 ctx.beginPath();
                 ctx.moveTo(topCoords.x, topCoords.y);
                 ctx.lineTo(bottomCoords.x, bottomCoords.y);
                 ctx.stroke();
                 
-                // Draw project circles (very small)
+                // Draw project circles (bigger and more visible)
                 projects.forEach((project, pidx) => {
                     const coords = toCanvasCoords(project.lng, project.lat);
                     
-                    // Circle (like meat on kebab) - just right
+                    // Circle (like meat on kebab) - bigger for visibility
                     ctx.fillStyle = '#3b82f6';
                     ctx.strokeStyle = '#1e3a8a';
-                    ctx.lineWidth = 0.6;
+                    ctx.lineWidth = 1.5;
                     ctx.beginPath();
-                    ctx.arc(coords.x, coords.y, 2.2, 0, 2 * Math.PI);
+                    ctx.arc(coords.x, coords.y, 4, 0, 2 * Math.PI);
                     ctx.fill();
                     ctx.stroke();
                 });
