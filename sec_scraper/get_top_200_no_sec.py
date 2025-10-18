@@ -13,16 +13,14 @@ import re
 load_dotenv('.env')
 
 def clean_for_ahk(name):
-    """Clean for AHK search - remove symbols and FORMERLY text"""
-    # First, remove all symbols
+    """Clean for AHK search - ONLY remove symbols for SEC frontend compatibility
+    
+    Do NOT fix database issues here - that's the sync scripts' job
+    This function only makes names SEC-search-friendly
+    """
+    # Remove symbols that cause issues in SEC search frontend
+    # Remove: . , ' " & ( ) / :
     cleaned = re.sub(r'[.,\'\"&()/:]+', ' ', name)
-    cleaned = re.sub(r'\s+', ' ', cleaned).strip()
-    
-    # Then remove FORMERLY/FORMER text (now without parentheses)
-    cleaned = re.sub(r'\s+\b(FORMERLY|FORMER|PREVIOUSLY|PREV)\b.*$', '', cleaned, flags=re.IGNORECASE)
-    # Also remove standalone FOR pattern
-    cleaned = re.sub(r'\s+\bFOR\b\s+.*$', '', cleaned, flags=re.IGNORECASE)
-    
     cleaned = re.sub(r'\s+', ' ', cleaned).strip()
     return cleaned
 
