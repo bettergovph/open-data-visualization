@@ -77,9 +77,9 @@
             <a href="/dime" class="text-black hover:text-gray-600 font-medium transition">DIME</a>
             <a href="/map" class="text-black hover:text-gray-600 font-medium transition">Map</a>
             <a href="/contractors" class="text-black hover:text-gray-600 font-medium transition">Contractors</a>
-            <div class="relative group">
+            <div class="relative" onmouseenter="this.querySelector('.dropdown-menu').classList.remove('hidden')" onmouseleave="this.querySelector('.dropdown-menu').classList.add('hidden')">
                 <a href="/correlation" class="text-black hover:text-gray-600 font-medium transition border-b-2 border-black">Correlation ▾</a>
-                <div class="absolute hidden group-hover:block bg-white shadow-lg rounded-md mt-2 py-2 w-48 z-50">
+                <div class="dropdown-menu absolute hidden bg-white shadow-lg rounded-md mt-2 py-2 w-48" style="z-index: 50;">
                     <a href="/budget-nep-correlation" class="block px-4 py-2 text-black hover:bg-gray-100">NEP-Budget</a>
                     <a href="/budget-flood-correlation" class="block px-4 py-2 text-black hover:bg-gray-100">Budget-Flood</a>
                     <a href="/flood-dime-correlation" class="block px-4 py-2 text-black hover:bg-gray-100">Flood-DIME</a>
@@ -110,20 +110,16 @@
     </div>
 </nav>
 
-<!-- Hero Section -->
-<div style="background: linear-gradient(135deg, #7c3aed 0%, #6d28d9 100%); padding: 60px 24px; text-align: center;">
-    <div style="max-width: 1200px; margin: 0 auto;">
-        <h1 class="correlation-title" style="font-size: 3rem; font-weight: 700; color: white; margin-bottom: 16px;">
-            🔗 Data Correlation Analysis
-        </h1>
-        <p class="correlation-subtitle" style="font-size: 1.25rem; color: rgba(255, 255, 255, 0.9); max-width: 800px; margin: 0 auto;">
-            Connecting datasets to reveal insights and verify government data consistency
-        </p>
-    </div>
-</div>
+<script>
+function toggleMobileMenu() {
+    const menu = document.getElementById('mobileMenu');
+    menu.classList.toggle('hidden');
+}
+</script>
 
-<!-- Correlation Cards -->
-<div style="background: #f9fafb; padding: 60px 24px;">
+<!-- Main Content -->
+<div style="padding: 6rem;">
+<section>
     <div style="max-width: 1200px; margin: 0 auto;">
         <div class="correlation-grid" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 32px;">
             
@@ -175,12 +171,9 @@
     </div>
 </div>
 
-<script>
-function toggleMobileMenu() {
-    const menu = document.getElementById('mobileMenu');
-    menu.classList.toggle('hidden');
-}
-</script>
+    </div>
+</section>
+</div>
 
 {% include "footer.html" %}
 

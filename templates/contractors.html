@@ -106,9 +106,9 @@
             <a href="/dime" class="text-black hover:text-gray-600 font-medium transition">DIME</a>
             <a href="/map" class="text-black hover:text-gray-600 font-medium transition">Map</a>
             <a href="/contractors" class="text-black hover:text-gray-600 font-medium transition border-b-2 border-black">Contractors</a>
-            <div class="relative group">
+            <div class="relative" onmouseenter="this.querySelector('.dropdown-menu').classList.remove('hidden')" onmouseleave="this.querySelector('.dropdown-menu').classList.add('hidden')">
                 <a href="/correlation" class="text-black hover:text-gray-600 font-medium transition">Correlation ▾</a>
-                <div class="absolute hidden group-hover:block bg-white shadow-lg rounded-md mt-2 py-2 w-48 z-50">
+                <div class="dropdown-menu absolute hidden bg-white shadow-lg rounded-md mt-2 py-2 w-48" style="z-index: 50;">
                     <a href="/budget-nep-correlation" class="block px-4 py-2 text-black hover:bg-gray-100">NEP-Budget</a>
                     <a href="/budget-flood-correlation" class="block px-4 py-2 text-black hover:bg-gray-100">Budget-Flood</a>
                     <a href="/flood-dime-correlation" class="block px-4 py-2 text-black hover:bg-gray-100">Flood-DIME</a>
