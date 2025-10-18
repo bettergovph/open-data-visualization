@@ -375,7 +375,6 @@ function toggleMobileMenu() {
                     <a href="#proximity" class="budget-tab-btn bg-gray-100 text-gray-600 border-gray-300 border px-6 py-3 rounded-t-lg cursor-pointer font-semibold transition-all duration-300 hover:bg-gray-200" data-tab="proximity">📍 Proximity</a>
                     <a href="#contractors" class="budget-tab-btn bg-gray-100 text-gray-600 border-gray-300 border px-6 py-3 rounded-t-lg cursor-pointer font-semibold transition-all duration-300 hover:bg-gray-200" data-tab="contractors">👥 Contractors</a>
                     <a href="#contractors-web" class="budget-tab-btn bg-gray-100 text-gray-600 border-gray-300 border px-6 py-3 rounded-t-lg cursor-pointer font-semibold transition-all duration-300 hover:bg-gray-200" data-tab="contractors-web">🕸️ Contractors Web</a>
-                    <a href="#sec" class="budget-tab-btn bg-gray-100 text-gray-600 border-gray-300 border px-6 py-3 rounded-t-lg cursor-pointer font-semibold transition-all duration-300 hover:bg-gray-200" data-tab="sec">🏛️ SEC</a>
                 </div>
                 <div class="budget-tab-content">
             
@@ -920,54 +919,6 @@ function toggleMobileMenu() {
                 </div>
             </div>
             
-                    <div id="sec-tab" class="budget-tab-panel">
-                <!-- SEC Data Analysis -->
-                <div style="background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
-                    <h3 style="color: #0038A8; margin: 0 0 20px 0;">🏛️ SEC Data Analysis</h3>
-                    <p style="color: #666; margin: 0 0 20px 0;">Analyze contractor SEC registration data and identify contractors without SEC information</p>
-                    
-                    <!-- SEC Statistics -->
-                    <div class="sec-stats" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 20px;">
-                        <div class="stat-card" style="background: #f8f9fa; padding: 15px; border-radius: 8px; text-align: center;">
-                            <h4 style="color: #0038A8; margin: 0 0 5px 0; font-size: 1.1em;">Total Contractors</h4>
-                            <p id="sec-total-contractors-count" style="font-size: 2em; font-weight: bold; color: #007bff; margin: 0;">Loading...</p>
-                            <p style="font-size: 0.7em; color: #6c757d; margin: 5px 0 0 0;">In system</p>
-                        </div>
-                        <div class="stat-card" style="background: #f8f9fa; padding: 15px; border-radius: 8px; text-align: center;">
-                            <h4 style="color: #0038A8; margin: 0 0 5px 0; font-size: 1.1em;">Processed</h4>
-                            <p id="sec-processed-count" style="font-size: 2em; font-weight: bold; color: #17a2b8; margin: 0;">Loading...</p>
-                            <p style="font-size: 0.7em; color: #6c757d; margin: 5px 0 0 0;">From 79 scraped</p>
-                        </div>
-                        <div class="stat-card" style="background: #d4edda; padding: 15px; border-radius: 8px; text-align: center; border: 2px solid #c3e6cb;">
-                            <h4 style="color: #155724; margin: 0 0 5px 0; font-size: 1.1em;">✅ With SEC Data</h4>
-                            <p id="total-sec-count" style="font-size: 2em; font-weight: bold; color: #28a745; margin: 0;">Loading...</p>
-                            <p style="font-size: 0.7em; color: #155724; margin: 5px 0 0 0;">Verified</p>
-                        </div>
-                        <div class="stat-card" style="background: #fff3cd; padding: 15px; border-radius: 8px; text-align: center; border: 2px solid #ffeaa7;">
-                            <h4 style="color: #856404; margin: 0 0 5px 0; font-size: 1.1em;">⚠️ NO SEC Results</h4>
-                            <p id="suspicious-sec-count" style="font-size: 2em; font-weight: bold; color: #856404; margin: 0;">Loading...</p>
-                            <p style="font-size: 0.7em; color: #856404; margin: 5px 0 0 0;">Suspicious</p>
-                        </div>
-                    </div>
-
-                    <!-- Contractors Without SEC Data -->
-                    <div class="chart-container" style="background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); margin-bottom: 20px;">
-                        <h3 style="color: #dc3545; margin: 0 0 15px 0;">⚠️ Contractors Without SEC Data</h3>
-                        <div id="contractorsWithoutSec" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 15px;">
-                            <!-- Contractors without SEC data will be populated here -->
-                        </div>
-                    </div>
-
-                    <!-- DPWH & SEC Data Information -->
-                    <div style="background: #e9ecef; padding: 15px; border-radius: 6px; margin-top: 20px; font-size: 0.9em; color: #495057;">
-                        <p style="color: #666; font-size: 0.9em; margin: 0;">
-                            <strong>Source:</strong> Department of Public Works and Highways (DPWH) Flood Control Information System, Securities and Exchange Commission (SEC) Philippines<br>
-                            <strong>Total Projects:</strong> 9,855 flood control projects nationwide<br>
-                            <strong>Data Range:</strong> 2016-2024 infrastructure projects
-                        </p>
-                    </div>
-                </div>
-            </div>
                 </div>
             </div>
 
