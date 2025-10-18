@@ -60,15 +60,15 @@
 
         <!-- Map Visualization -->
         <div class="bg-white rounded-lg shadow-md p-6 mb-8">
-            <h2 class="text-2xl font-bold text-gray-800 mb-4">🗺️ Skewer Visualization (Metro Manila)</h2>
+            <h2 class="text-2xl font-bold text-gray-800 mb-4">🗺️ Skewer Visualization</h2>
             <p class="text-gray-600 mb-4">
-                Red vertical lines show projects impossibly aligned on the same longitude
+                Thick red vertical lines are "skewers" with blue circles representing projects impossibly aligned on the same longitude
             </p>
             <canvas id="map" class="skewer-canvas w-full" width="1200" height="800"></canvas>
             <div class="mt-4 text-sm text-gray-600 space-y-1">
-                <p><span class="inline-block w-4 h-0.5 bg-red-500 mr-2"></span> Red vertical lines = "Skewers" (same longitude)</p>
-                <p><span class="inline-block w-3 h-3 rounded-full bg-blue-500 mr-2"></span> Blue circles = Project locations</p>
-                <p>📏 Longer skewers = More impossible (projects further apart with same longitude)</p>
+                <p><span class="inline-block w-1 h-6 bg-red-600 mr-2"></span> Thick red lines = "Skewers" extending above/below projects (same longitude)</p>
+                <p><span class="inline-block w-3 h-3 rounded-full bg-blue-500 mr-2"></span> Large blue circles = Project locations (like meat on kebab)</p>
+                <p>🍢 The skewer extends 3x the project range to show the vertical alignment clearly</p>
             </div>
         </div>
 
@@ -166,11 +166,11 @@
             const canvas = document.getElementById('map');
             const ctx = canvas.getContext('2d');
             
-            // Metro Manila bounds (approx)
-            const minLat = 14.3;
-            const maxLat = 14.9;
-            const minLng = 120.9;
-            const maxLng = 121.2;
+            // Philippines bounds (whole country)
+            const minLat = 4.5;   // Southern tip
+            const maxLat = 21.0;  // Northern tip
+            const minLng = 116.0; // Western edge
+            const maxLng = 127.0; // Eastern edge
             
             const width = canvas.width;
             const height = canvas.height;
@@ -206,42 +206,51 @@
                 const projects = alignment.projects.sort((a, b) => a.lat - b.lat);
                 const x = scaleX(alignment.longitude);
                 
-                // Draw skewer line (red vertical)
-                ctx.strokeStyle = '#ef4444';
-                ctx.lineWidth = 3;
-                ctx.setLineDash([10, 5]);
-                ctx.beginPath();
-                ctx.moveTo(x, scaleY(projects[0].lat));
-                ctx.lineTo(x, scaleY(projects[projects.length - 1].lat));
-                ctx.stroke();
-                ctx.setLineDash([]);
+                const minProjectLat = projects[0].lat;
+                const maxProjectLat = projects[projects.length - 1].lat;
+                const latRange = maxProjectLat - minProjectLat;
                 
-                // Draw project circles
+                // Extend skewer line above and below projects (3x the range of projects)
+                const extension = latRange * 3;
+                const skewerTop = Math.min(maxLat, maxProjectLat + extension);
+                const skewerBottom = Math.max(minLat, minProjectLat - extension);
+                
+                // Draw skewer line (thick red solid vertical line)
+                ctx.strokeStyle = '#dc2626';
+                ctx.lineWidth = 6;
+                ctx.beginPath();
+                ctx.moveTo(x, scaleY(skewerBottom));
+                ctx.lineTo(x, scaleY(skewerTop));
+                ctx.stroke();
+                
+                // Draw project circles (larger)
                 projects.forEach((project, pidx) => {
                     const y = scaleY(project.lat);
                     
-                    // Circle
+                    // Circle (like meat on kebab)
                     ctx.fillStyle = '#3b82f6';
-                    ctx.strokeStyle = '#1e40af';
-                    ctx.lineWidth = 2;
+                    ctx.strokeStyle = '#1e3a8a';
+                    ctx.lineWidth = 3;
                     ctx.beginPath();
-                    ctx.arc(x, y, 6, 0, 2 * Math.PI);
+                    ctx.arc(x, y, 12, 0, 2 * Math.PI);
                     ctx.fill();
                     ctx.stroke();
                 });
                 
-                // Label
-                ctx.fillStyle = '#374151';
-                ctx.font = 'bold 12px Arial';
+                // Label at top
+                ctx.fillStyle = '#dc2626';
+                ctx.font = 'bold 14px Arial';
                 ctx.textAlign = 'center';
-                ctx.fillText(`#${idx + 1}: ${alignment.distanceKm}km`, x, padding - 30);
+                ctx.fillText(`#${idx + 1}`, x, scaleY(skewerTop) - 10);
+                ctx.font = '12px Arial';
+                ctx.fillText(`${alignment.distanceKm}km`, x, scaleY(skewerTop) - 25);
             });
             
             // Draw axes labels
             ctx.fillStyle = '#6b7280';
             ctx.font = '14px Arial';
             ctx.textAlign = 'center';
-            ctx.fillText('Metro Manila - Longitude →', width / 2, height - 20);
+            ctx.fillText('Philippines - Longitude →', width / 2, height - 20);
             
             ctx.save();
             ctx.translate(20, height / 2);
@@ -251,9 +260,9 @@
             
             // Title
             ctx.fillStyle = '#111827';
-            ctx.font = 'bold 18px Arial';
+            ctx.font = 'bold 20px Arial';
             ctx.textAlign = 'center';
-            ctx.fillText('Metro Manila Coordinate Skewers', width / 2, 30);
+            ctx.fillText('Philippines Coordinate Skewers (Metro Manila Region)', width / 2, 30);
         }
 
         // Render alignments list
