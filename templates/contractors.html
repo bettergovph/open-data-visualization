@@ -282,11 +282,23 @@ function toggleMobileMenu() {
                             </div>
                         </div>
 
-                        <!-- Contractors Without SEC Data -->
+                        <!-- Suspicious Contractors -->
                         <div class="chart-container" style="background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); margin-bottom: 20px;">
-                            <h3 style="color: #dc3545; margin: 0 0 15px 0;">⚠️ Contractors Without SEC Data</h3>
+                            <h3 style="color: #dc3545; margin: 0 0 15px 0;">⚠️ Suspicious Contractors (NO SEC Results)</h3>
+                            
+                            <!-- Pagination controls -->
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+                                <div style="color: #666; font-size: 0.9em;">
+                                    Showing <span id="sec-page-info">0</span> of <span id="sec-total">0</span> suspicious contractors
+                                </div>
+                                <div style="display: flex; gap: 10px;">
+                                    <button id="sec-prev" style="background: #6c757d; color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer;" disabled>← Previous</button>
+                                    <button id="sec-next" style="background: #6c757d; color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer;" disabled>Next →</button>
+                                </div>
+                            </div>
+                            
                             <div id="contractorsWithoutSec" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 15px;">
-                                <!-- Contractors without SEC data will be populated here -->
+                                <!-- Suspicious contractors will be populated here -->
                             </div>
                         </div>
                     </div>
@@ -314,10 +326,13 @@ function toggleMobileMenu() {
 let allContractors = [];
 let filteredContractors = [];
 let allContractorsByProject = [];
+let suspiciousContractors = [];
 let currentChartPage = 0;
 let currentTablePage = 0;
+let currentSecPage = 0;
 const chartPageSize = 50;
 const tablePageSize = 10;
+const secPageSize = 20;
 
 // Tab switching
 function switchTab(tabName) {
@@ -399,18 +414,25 @@ async function loadContractors() {
     }
 }
 
-// Load contractors without SEC data for SEC tab
+// Load suspicious contractors for SEC tab
 function loadContractorsWithoutSec() {
-    const container = document.getElementById('contractorsWithoutSec');
-    const contractorsWithoutSec = allContractors.filter(c => !c.sec_number || c.sec_number.trim() === '');
+    // Filter only suspicious contractors (NO_SEC_RESULTS status)
+    suspiciousContractors = allContractors.filter(c => c.status === 'NO_SEC_RESULTS');
     
-    // Limit to first 20 for display
-    const displayLimit = 20;
-    const contractorsToShow = contractorsWithoutSec.slice(0, displayLimit);
+    // Render first page
+    renderSuspiciousContractors();
+}
+
+// Render suspicious contractors with pagination
+function renderSuspiciousContractors() {
+    const container = document.getElementById('contractorsWithoutSec');
+    const start = currentSecPage * secPageSize;
+    const end = start + secPageSize;
+    const contractorsToShow = suspiciousContractors.slice(start, end);
     
     container.innerHTML = '';
     
-    if (contractorsToShow.length === 0) {
+    if (suspiciousContractors.length === 0) {
         container.innerHTML = `
             <div style="
                 background: #d4edda;
@@ -419,42 +441,39 @@ function loadContractorsWithoutSec() {
                 padding: 20px;
                 text-align: center;
                 grid-column: 1 / -1;">
-                <strong>✅ All contractors have SEC data!</strong>
+                <strong>✅ No suspicious contractors found!</strong>
             </div>
         `;
-    } else {
-        contractorsToShow.forEach(contractor => {
-            const contractorCard = document.createElement('div');
-            contractorCard.style.cssText = 'background: #fff3cd; border: 2px solid #ffc107; border-radius: 8px; padding: 15px;';
-            
-            const isNO_SEC_RESULTS = contractor.status === 'NO_SEC_RESULTS';
-            
-            contractorCard.innerHTML = `
-                <div style="font-weight: bold; color: #856404; margin-bottom: 8px; font-size: 1.1em;">
-                    ${contractor.contractor_name}
-                </div>
-                ${isNO_SEC_RESULTS ? `
-                    <div style="color: #721c24; background: #f8d7da; padding: 8px; border-radius: 4px; margin-bottom: 8px; font-size: 0.9em; border: 1px solid #f5c6cb;">
-                        <strong>⚠️ NO SEC RESULTS - SUSPICIOUS</strong><br>
-                        <span style="font-size: 0.85em;">This contractor was searched in the SEC database but yielded zero results.</span>
-                    </div>
-                ` : `
-                    <div style="color: #856404; font-size: 0.9em;">
-                        ⚠️ SEC information not yet available
-                    </div>
-                `}
-            `;
-            
-            container.appendChild(contractorCard);
-        });
-        
-        if (contractorsWithoutSec.length > displayLimit) {
-            const moreInfo = document.createElement('div');
-            moreInfo.style.cssText = 'background: #e9ecef; border-radius: 8px; padding: 15px; text-align: center; grid-column: 1 / -1;';
-            moreInfo.innerHTML = `<em>Showing first ${displayLimit} of ${contractorsWithoutSec.length} contractors without SEC data</em>`;
-            container.appendChild(moreInfo);
-        }
+        document.getElementById('sec-page-info').textContent = '0';
+        document.getElementById('sec-total').textContent = '0';
+        document.getElementById('sec-prev').disabled = true;
+        document.getElementById('sec-next').disabled = true;
+        return;
     }
+    
+    contractorsToShow.forEach(contractor => {
+        const contractorCard = document.createElement('div');
+        contractorCard.style.cssText = 'background: #fff3cd; border: 2px solid #ffc107; border-radius: 8px; padding: 15px;';
+        
+        contractorCard.innerHTML = `
+            <div style="font-weight: bold; color: #856404; margin-bottom: 8px; font-size: 1.1em;">
+                ${contractor.contractor_name}
+            </div>
+            <div style="color: #721c24; background: #f8d7da; padding: 8px; border-radius: 4px; font-size: 0.9em; border: 1px solid #f5c6cb;">
+                <strong>⚠️ NO SEC RESULTS - SUSPICIOUS</strong><br>
+                <span style="font-size: 0.85em;">This contractor was searched in the SEC database but yielded zero results.</span>
+            </div>
+        `;
+        
+        container.appendChild(contractorCard);
+    });
+    
+    // Update pagination
+    const totalPages = Math.ceil(suspiciousContractors.length / secPageSize);
+    document.getElementById('sec-page-info').textContent = `${start + 1}-${Math.min(end, suspiciousContractors.length)}`;
+    document.getElementById('sec-total').textContent = suspiciousContractors.length;
+    document.getElementById('sec-prev').disabled = currentSecPage === 0;
+    document.getElementById('sec-next').disabled = currentSecPage >= totalPages - 1;
 }
 
 // Load contractor project counts from flood data
@@ -633,10 +652,26 @@ document.getElementById('table-prev').addEventListener('click', function() {
 });
 
 document.getElementById('table-next').addEventListener('click', function() {
-    const totalPages = Math.ceil(allContractors.length / tablePageSize);
+    const totalPages = Math.ceil(filteredContractors.length / tablePageSize);
     if (currentTablePage < totalPages - 1) {
         currentTablePage++;
         renderContractorsTable();
+    }
+});
+
+// Pagination for SEC tab
+document.getElementById('sec-prev').addEventListener('click', function() {
+    if (currentSecPage > 0) {
+        currentSecPage--;
+        renderSuspiciousContractors();
+    }
+});
+
+document.getElementById('sec-next').addEventListener('click', function() {
+    const totalPages = Math.ceil(suspiciousContractors.length / secPageSize);
+    if (currentSecPage < totalPages - 1) {
+        currentSecPage++;
+        renderSuspiciousContractors();
     }
 });
 
