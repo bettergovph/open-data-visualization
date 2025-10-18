@@ -882,7 +882,7 @@ async def get_sec_contractors():
             port=int(os.getenv('POSTGRES_PORT', 5432)),
             user=os.getenv('POSTGRES_USER', 'budget_admin'),
             password=os.getenv('POSTGRES_PASSWORD', ''),
-            database=os.getenv('POSTGRES_DB_PHILGEPS', 'philgeps')
+            database=os.getenv('POSTGRES_DB_SEC', 'sec')
         )
         
         # Query all contractors
@@ -929,7 +929,7 @@ async def get_sec_contractors():
                 "suspicious_no_results": stats['suspicious_no_results'],
                 "last_updated": "database",
                 "processing_batch": "database_generated",
-                "source": "PostgreSQL philgeps.contractors table"
+                "source": "PostgreSQL sec.contractors table"
             },
             "contractors": contractors_list
         })
@@ -946,7 +946,7 @@ async def get_contractors_venn():
             port=int(os.getenv('POSTGRES_PORT', 5432)),
             user=os.getenv('POSTGRES_USER', 'budget_admin'),
             password=os.getenv('POSTGRES_PASSWORD', ''),
-            database=os.getenv('POSTGRES_DB_PHILGEPS', 'philgeps')
+            database=os.getenv('POSTGRES_DB_SEC', 'sec')
         )
         
         # Get all contractors with their sources
