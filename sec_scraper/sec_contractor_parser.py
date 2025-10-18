@@ -96,11 +96,13 @@ class SECContractorParser:
                 # Use UPSERT to handle both insert and update
                 # Store ALL companies from search results (even if multiple matches)
                 # Do NOT store search_term - only exact SEC data
+                # On conflict: OVERWRITE with latest data from SEC
                 await conn.execute('''
                     INSERT INTO contractors (contractor_name, sec_number, date_registered, status, address)
                     VALUES ($1, $2, $3, $4, $5)
                     ON CONFLICT (contractor_name, sec_number) DO UPDATE
-                    SET date_registered = EXCLUDED.date_registered,
+                    SET contractor_name = EXCLUDED.contractor_name,
+                        date_registered = EXCLUDED.date_registered,
                         status = EXCLUDED.status,
                         address = EXCLUDED.address,
                         updated_at = CURRENT_TIMESTAMP
