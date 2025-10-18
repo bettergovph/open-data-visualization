@@ -427,13 +427,20 @@ Frontend display
 
 ## Files
 
-### Scripts
-- `database/sec_search.ahk` - AHK automation for SEC website
-- `sec_contractor_parser.py` - Parser for SEC result files
-- `generate_sec_json.py` - Database to JSON generator
+### Directory Structure
 
-### Data
-- `database/sec_results/*.txt` - Raw SEC search results
+All SEC-related files are organized in the `sec_scraper/` directory:
+
+```
+sec_scraper/
+├── sec_search.ahk              # AHK automation for SEC website
+├── sec_contractor_parser.py    # Parser for SEC result files
+├── generate_sec_json.py        # Database to JSON generator
+├── sec_results/                # Raw SEC search results (text files)
+└── README.md                   # Quick start guide
+```
+
+### Generated Files
 - `static/sec_contractors_database.json` - Generated JSON for frontend
 
 ### Database
