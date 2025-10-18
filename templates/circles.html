@@ -246,8 +246,44 @@
         }
         
         function drawSkewersOnMap(ctx, toCanvasCoords) {
-            // Draw skewers and projects
-            alignmentData.forEach((alignment, idx) => {
+            // Filter skewers to avoid latitude overlap
+            // Sort by number of projects (more meat = priority)
+            const sortedAlignments = [...alignmentData].sort((a, b) => b.projectCount - a.projectCount);
+            
+            const selectedSkewers = [];
+            const usedLatRanges = [];
+            
+            // Check if latitude ranges overlap
+            const rangesOverlap = (range1, range2) => {
+                return !(range1.max < range2.min || range2.max < range1.min);
+            };
+            
+            sortedAlignments.forEach(alignment => {
+                const projects = alignment.projects.sort((a, b) => a.lat - b.lat);
+                const minLat = projects[0].lat;
+                const maxLat = projects[projects.length - 1].lat;
+                const latRange = maxLat - minLat;
+                
+                // Include extension in overlap check
+                const extension = latRange * 3;
+                const newRange = {
+                    min: minLat - extension,
+                    max: maxLat + extension
+                };
+                
+                // Check if this range overlaps with any already selected
+                const overlaps = usedLatRanges.some(range => rangesOverlap(range, newRange));
+                
+                if (!overlaps) {
+                    selectedSkewers.push(alignment);
+                    usedLatRanges.push(newRange);
+                }
+            });
+            
+            console.log(`Selected ${selectedSkewers.length} skewers out of ${alignmentData.length} (no latitude overlap)`);
+            
+            // Draw selected skewers
+            selectedSkewers.forEach((alignment, idx) => {
                 const projects = alignment.projects.sort((a, b) => a.lat - b.lat);
                 const lng = alignment.longitude;
                 
@@ -271,16 +307,16 @@
                 ctx.lineTo(bottomCoords.x, bottomCoords.y);
                 ctx.stroke();
                 
-                // Draw project circles (larger)
+                // Draw project circles (smaller)
                 projects.forEach((project, pidx) => {
                     const coords = toCanvasCoords(project.lng, project.lat);
                     
-                    // Circle (like meat on kebab)
+                    // Circle (like meat on kebab) - smaller radius
                     ctx.fillStyle = '#3b82f6';
                     ctx.strokeStyle = '#1e3a8a';
-                    ctx.lineWidth = 3;
+                    ctx.lineWidth = 2;
                     ctx.beginPath();
-                    ctx.arc(coords.x, coords.y, 12, 0, 2 * Math.PI);
+                    ctx.arc(coords.x, coords.y, 6, 0, 2 * Math.PI);
                     ctx.fill();
                     ctx.stroke();
                 });
@@ -289,7 +325,7 @@
                 ctx.fillStyle = '#dc2626';
                 ctx.font = 'bold 14px Arial';
                 ctx.textAlign = 'center';
-                ctx.fillText(`#${idx + 1}`, topCoords.x, topCoords.y - 10);
+                ctx.fillText(`${alignment.projectCount} projects`, topCoords.x, topCoords.y - 10);
                 ctx.font = '12px Arial';
                 ctx.fillText(`${alignment.distanceKm}km`, topCoords.x, topCoords.y - 25);
             });
