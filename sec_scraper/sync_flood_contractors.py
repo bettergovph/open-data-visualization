@@ -18,26 +18,16 @@ load_dotenv()
 
 
 def is_joint_venture(name: str) -> bool:
-    """Check if contractor name represents a joint venture"""
+    """Check if contractor name represents a joint venture
+    
+    ONLY check for / (forward slash) as JV indicator
+    Do NOT use & or AND as they are part of company names
+    """
     if not name:
         return False
     
-    # Common JV indicators
-    jv_indicators = [
-        '/',           # E.g., "Company A / Company B"
-        ' JV ',        # E.g., "Company A JV Company B"
-        '-JV-',        # E.g., "Company A-JV-Company B"
-        ' AND ',       # E.g., "Company A AND Company B" (when both are companies)
-        ' & ',         # E.g., "Company A & Company B"
-    ]
-    
-    name_upper = name.upper()
-    
-    for indicator in jv_indicators:
-        if indicator in name_upper:
-            return True
-    
-    return False
+    # ONLY use / as JV indicator
+    return '/' in name
 
 
 def extract_former_names(name: str) -> Dict[str, any]:
@@ -99,39 +89,22 @@ def split_joint_venture(name: str) -> List[Dict[str, any]]:
     
     # Process current name
     if current_name and is_joint_venture(current_name):
-        # Split JV into individual contractors
-        parts = []
-        
-        # Try splitting by '/'
-        if '/' in current_name:
-            parts = current_name.split('/')
-        # Try splitting by ' JV '
-        elif ' JV ' in current_name.upper():
-            parts = re.split(r'\s+JV\s+', current_name, flags=re.IGNORECASE)
-        # Try splitting by '-JV-'
-        elif '-JV-' in current_name.upper():
-            parts = re.split(r'-JV-', current_name, flags=re.IGNORECASE)
-        # Try splitting by ' AND ' or ' & '
-        elif ' AND ' in current_name.upper() or ' & ' in current_name:
-            parts = re.split(r'\s+(?:AND|&)\s+', current_name, flags=re.IGNORECASE)
+        # Split JV into individual contractors (ONLY on /)
+        parts = current_name.split('/')
         
         # Clean up each part and add as individual contractor
-        if parts:
-            for part in parts:
-                cleaned = part.strip()
-                # Remove "JOINT VENTURE" text if present
-                cleaned = re.sub(r'\b(?:JOINT\s+VENTURE|JV)\b', '', cleaned, flags=re.IGNORECASE).strip()
-                
-                if cleaned and len(cleaned) > 3:
-                    individual_contractors.append({
-                        'name': cleaned,
-                        'former_names': []
-                    })
-        else:
-            individual_contractors.append({
-                'name': current_name,
-                'former_names': []
-            })
+        for part in parts:
+            cleaned = part.strip()
+            # Remove "JOINT VENTURE" text if present
+            cleaned = re.sub(r'\b(?:JOINT\s+VENTURE|JV)\b', '', cleaned, flags=re.IGNORECASE).strip()
+            # Remove any parenthetical content
+            cleaned = re.sub(r'\s*\([^)]*\)', '', cleaned).strip()
+            
+            if cleaned and len(cleaned) > 10:  # Minimum 10 chars
+                individual_contractors.append({
+                    'name': cleaned,
+                    'former_names': []
+                })
     elif current_name:
         # Single contractor (not JV)
         individual_contractors.append({
