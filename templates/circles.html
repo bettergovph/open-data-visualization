@@ -181,12 +181,62 @@
             const scaleY = (lat) => height - padding - ((lat - minLat) / (maxLat - minLat)) * (height - 2 * padding);
             
             // Clear canvas
-            ctx.fillStyle = '#ffffff';
+            ctx.fillStyle = '#f0f9ff';  // Light blue background (ocean)
             ctx.fillRect(0, 0, width, height);
             
-            // Draw grid
-            ctx.strokeStyle = '#e5e7eb';
+            // Draw simplified Philippines outline
+            ctx.fillStyle = '#d1fae5';  // Light green (land)
+            ctx.strokeStyle = '#059669';  // Dark green border
+            ctx.lineWidth = 2;
+            
+            // Luzon (main northern island)
+            ctx.beginPath();
+            ctx.moveTo(scaleX(120.2), scaleY(18.5));
+            ctx.lineTo(scaleX(121.0), scaleY(20.0));
+            ctx.lineTo(scaleX(122.0), scaleY(18.5));
+            ctx.lineTo(scaleX(122.5), scaleY(16.5));
+            ctx.lineTo(scaleX(122.0), scaleY(14.5));
+            ctx.lineTo(scaleX(121.5), scaleY(14.0));
+            ctx.lineTo(scaleX(120.5), scaleY(14.5));
+            ctx.lineTo(scaleX(119.8), scaleY(16.0));
+            ctx.lineTo(scaleX(120.2), scaleY(18.5));
+            ctx.closePath();
+            ctx.fill();
+            ctx.stroke();
+            
+            // Visayas (middle islands - simplified)
+            ctx.beginPath();
+            ctx.arc(scaleX(123.5), scaleY(10.5), 30, 0, 2 * Math.PI);
+            ctx.fill();
+            ctx.stroke();
+            
+            ctx.beginPath();
+            ctx.arc(scaleX(124.5), scaleY(11.5), 25, 0, 2 * Math.PI);
+            ctx.fill();
+            ctx.stroke();
+            
+            // Mindanao (southern island)
+            ctx.beginPath();
+            ctx.arc(scaleX(124.5), scaleY(7.5), 60, 0, 2 * Math.PI);
+            ctx.fill();
+            ctx.stroke();
+            
+            // Palawan (western island)
+            ctx.beginPath();
+            ctx.moveTo(scaleX(118.5), scaleY(11.0));
+            ctx.lineTo(scaleX(119.0), scaleY(12.5));
+            ctx.lineTo(scaleX(118.8), scaleY(9.0));
+            ctx.lineTo(scaleX(117.5), scaleY(8.0));
+            ctx.lineTo(scaleX(118.0), scaleY(10.5));
+            ctx.lineTo(scaleX(118.5), scaleY(11.0));
+            ctx.closePath();
+            ctx.fill();
+            ctx.stroke();
+            
+            // Draw light grid over map
+            ctx.strokeStyle = '#cbd5e1';
             ctx.lineWidth = 1;
+            ctx.globalAlpha = 0.3;
             for (let i = 0; i <= 10; i++) {
                 const x = padding + (i / 10) * (width - 2 * padding);
                 ctx.beginPath();
@@ -200,6 +250,7 @@
                 ctx.lineTo(width - padding, y);
                 ctx.stroke();
             }
+            ctx.globalAlpha = 1.0;
             
             // Draw skewers and projects
             alignmentData.forEach((alignment, idx) => {
