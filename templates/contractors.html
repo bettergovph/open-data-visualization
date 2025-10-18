@@ -139,20 +139,16 @@
     </div>
 </nav>
 
-<!-- Hero Section -->
-<div style="background: white; padding: 60px 24px; border-bottom: 1px solid #e5e7eb;">
-    <div style="max-width: 1200px; margin: 0 auto;">
-        <h1 class="contractor-title" style="font-size: 3rem; font-weight: 700; color: black; margin-bottom: 16px;">
-            🏛️ SEC Contractors Database
-        </h1>
-        <p class="contractor-subtitle" style="font-size: 1.25rem; color: #6b7280; max-width: 800px; margin: 0 auto;">
-            Verify contractor legitimacy through Securities and Exchange Commission registration data
-        </p>
-    </div>
-</div>
+<script>
+function toggleMobileMenu() {
+    const menu = document.getElementById('mobileMenu');
+    menu.classList.toggle('hidden');
+}
+</script>
 
 <!-- Main Content -->
-<div style="background: #f9fafb; padding: 60px 24px;">
+<div style="padding: 6rem;">
+<section>
     <div style="max-width: 1400px; margin: 0 auto;">
         
         <!-- SEC Statistics -->
@@ -207,15 +203,10 @@
             </div>
         </div>
 
-    </div>
+        </div>
 </div>
 
 <script>
-function toggleMobileMenu() {
-    const menu = document.getElementById('mobileMenu');
-    menu.classList.toggle('hidden');
-}
-
 // Load SEC data
 async function loadContractors() {
     try {
@@ -282,6 +273,10 @@ async function loadContractors() {
 // Load on page load
 loadContractors();
 </script>
+
+    </div>
+</section>
+</div>
 
 {% include "footer.html" %}
 
