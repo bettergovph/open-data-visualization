@@ -83,37 +83,19 @@ class SECContractorParser:
 
         try:
             for contractor in contractors:
-                # Check if contractor already exists
-                existing = await conn.fetchrow(
-                    'SELECT id FROM contractors WHERE contractor_name = $1',
-                    contractor['contractor_name']
-                )
-
-                if existing:
-                    # Update existing contractor
-                    await conn.execute('''
-                        UPDATE contractors
-                        SET sec_number = $2, date_registered = $3, status = $4,
-                            address = $5, updated_at = CURRENT_TIMESTAMP
-                        WHERE contractor_name = $1
-                    ''', contractor['contractor_name'], contractor['sec_number'],
-                         contractor['date_registered'], contractor['status'],
-                         contractor['address'])
-                    print(f"✅ Updated: {contractor['contractor_name']}")
-                else:
-                    # Insert new contractor
-                    await conn.execute('''
-                        INSERT INTO contractors (contractor_name, sec_number, date_registered, status, address)
-                        VALUES ($1, $2, $3, $4, $5)
-                        ON CONFLICT (contractor_name, sec_number) DO UPDATE
-                        SET date_registered = EXCLUDED.date_registered,
-                            status = EXCLUDED.status,
-                            address = EXCLUDED.address,
-                            updated_at = CURRENT_TIMESTAMP
-                    ''', contractor['contractor_name'], contractor['sec_number'],
-                         contractor['date_registered'], contractor['status'],
-                         contractor['address'])
-                    print(f"➕ Added: {contractor['contractor_name']}")
+                # Use UPSERT to handle both insert and update
+                await conn.execute('''
+                    INSERT INTO contractors (contractor_name, sec_number, date_registered, status, address)
+                    VALUES ($1, $2, $3, $4, $5)
+                    ON CONFLICT (contractor_name, sec_number) DO UPDATE
+                    SET date_registered = EXCLUDED.date_registered,
+                        status = EXCLUDED.status,
+                        address = EXCLUDED.address,
+                        updated_at = CURRENT_TIMESTAMP
+                ''', contractor['contractor_name'], contractor['sec_number'],
+                     contractor['date_registered'], contractor['status'],
+                     contractor['address'])
+                print(f"✅ Processed: {contractor['contractor_name']}")
 
         finally:
             await conn.close()
