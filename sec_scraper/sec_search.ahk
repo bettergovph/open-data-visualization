@@ -41,18 +41,14 @@ Loop, % contractors.MaxIndex() {
     contractorName := contractors[A_Index]
     resultFile := "sec_results\" . StrReplace(contractorName, " ", "_") . ".txt"
 
-    if FileExist(resultFile) {
-        TrayTip, Skipped, %contractorName% (already exists), 1
+    if FileExist(resultFile)
         continue
-    }
 
     ; Open browser for this contractor
     Run msedge.exe --new-window https://checkwithsec.sec.gov.ph/check-with-sec/index
     WinWaitActive, ahk_class Chrome_WidgetWin_1, , 10
-    if ErrorLevel {
-        TrayTip, Error, Failed to open browser for %contractorName%, 3
+    if ErrorLevel
         continue
-    }
 
     WinMaximize
     Sleep, 5000  ; Initial page load - keep long
@@ -86,12 +82,6 @@ Loop, % contractors.MaxIndex() {
     ; Close browser
     WinClose, ahk_class Chrome_WidgetWin_1
     Sleep, 500
-
-    ; Show progress
-    currentIndex := A_Index
-    totalCount := contractors.MaxIndex()
-    TrayTip, Done, %contractorName% - %currentIndex% of %totalCount%, 2
 }
 
-TrayTip, Complete, All contractors processed!, 5
 ExitApp
