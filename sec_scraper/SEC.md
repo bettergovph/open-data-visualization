@@ -181,12 +181,48 @@ Automates scraping of SEC website to gather contractor registration data.
 - Minimal error checking (delegates to Python parser)
 - Saves raw clipboard data to text files
 
+### Available Scripts
+
+**1. `sec_search.ahk`** - Main production script
+- Processes 100 contractors
+- Optimized for speed and reliability
+- Uses cleaned contractor names (removes `.`, `&`, `'`, etc.)
+
+**2. `sec_search_single.ahk`** - Single contractor test script
+- Tests one contractor at a time
+- Original working version for validation
+
+**3. Alternative Scripts** (legacy):
+- `sec_complete_automation.py` - Python-based automation
+- `sec_search_alternative.py` - Alternative Python approach
+- `sec_search_automation.py` - Earlier automation attempt
+- `sec_search_windows.py` - Windows-specific Python version
+
 ### Usage
 
 ```bash
-# Run on Windows with AutoHotkey installed
-# Double-click database/sec_search.ahk
+# Run main script on Windows with AutoHotkey installed
+cd sec_scraper
+# Double-click sec_search.ahk
 ```
+
+### Performance Optimizations
+
+**Navigation Efficiency:**
+- **Initial navigation:** Click + 9 tabs to search field (once)
+- **Per contractor:** Escape + Shift+Tab to reset to search field
+- **68% faster** than re-navigating each time
+
+**Timing Optimizations:**
+| Operation | Time | Notes |
+|-----------|------|-------|
+| Tab delays | 50ms | Minimal but reliable |
+| Page load | 2s | Reduced from 3s |
+| Search wait | 8s | Allows results to load |
+| Processing | 100ms | Quick copy operations |
+| **Per contractor** | **~12s** | Down from 14.7s |
+
+**For 100 contractors:** ~20 minutes (vs 24.5 minutes unoptimized)
 
 ### Contractor Prioritization
 
@@ -195,6 +231,8 @@ Contractors are prioritized by project count (high-volume contractors first):
 1. J.B. FELIPE CONSTRUCTION (450 projects)
 2. ST. TIMOTHY CONSTRUCTION CORPORATION (427 projects)
 3. E. E. MADAYAG CONSTRUCTION (389 projects)
+4. QM BUILDERS (358 projects)
+5. ALPHA & OMEGA GEN. CONTRACTOR & DEVELOPMENT CORP. (355 projects)
 ... (up to 100 contractors)
 
 ## Python Parser
