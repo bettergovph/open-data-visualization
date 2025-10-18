@@ -32,10 +32,10 @@
         <div class="bg-red-50 border-l-4 border-red-500 rounded-lg p-6 mb-8">
             <h2 class="text-2xl font-bold text-red-800 mb-3">⚠️ Data Quality Issue Detected</h2>
             <p class="text-red-700 text-lg mb-2">
-                Multiple projects separated by <strong>20+ kilometers</strong> share the <strong>EXACT same longitude</strong>.
+                Multiple projects separated by <strong>up to 708 kilometers</strong> share the <strong>EXACT same longitude</strong>.
             </p>
             <p class="text-red-600">
-                These projects are "skewered" on the same vertical line like meat on a kebab stick - geometrically impossible without coordinate errors.
+                These projects are "skewered" on the same vertical line like meat on a kebab stick - spanning from Zamboanga to Marinduque, geometrically impossible without coordinate errors.
             </p>
         </div>
 
@@ -43,17 +43,17 @@
         <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
             <div class="bg-white rounded-lg shadow-md p-6">
                 <div class="text-4xl mb-2">🎯</div>
-                <div class="text-3xl font-bold text-blue-600" id="total-alignments">4</div>
+                <div class="text-3xl font-bold text-blue-600" id="total-alignments">10</div>
                 <div class="text-gray-600">Vertical Alignments</div>
             </div>
             <div class="bg-white rounded-lg shadow-md p-6">
                 <div class="text-4xl mb-2">📏</div>
-                <div class="text-3xl font-bold text-orange-600" id="max-distance">23.2</div>
+                <div class="text-3xl font-bold text-orange-600" id="max-distance">708</div>
                 <div class="text-gray-600">Max Distance (km)</div>
             </div>
             <div class="bg-white rounded-lg shadow-md p-6">
                 <div class="text-4xl mb-2">🔴</div>
-                <div class="text-3xl font-bold text-red-600" id="affected-projects">12</div>
+                <div class="text-3xl font-bold text-red-600" id="affected-projects">21</div>
                 <div class="text-gray-600">Affected Projects</div>
             </div>
         </div>
@@ -121,44 +121,47 @@
 
     <script>
         const alignmentData = [
-            {
-                longitude: 121.00206,
-                projectCount: 4,
-                distanceKm: 23.2,
-                projects: [
-                    { lat: 14.394145, lng: 121.00206, city: 'LAS PIÑAS', name: 'Flood Control Structure at Zapote River' },
-                    { lat: 14.494381, lng: 121.00206, city: 'PARAÑAQUE', name: 'Flood Mitigation Structure (Booster Pump)' },
-                    { lat: 14.603156, lng: 121.00206, city: 'MANILA', name: 'Additional Booster Pump along Estero de Valencia' },
-                    { lat: 14.603226, lng: 121.00206, city: 'MANILA', name: 'Automatic Trash Screen Rake' }
-                ]
-            },
-            {
-                longitude: 121.04407,
-                projectCount: 2,
-                distanceKm: 20.9,
-                projects: [
-                    { lat: 14.581363, lng: 121.04407, city: 'PASIG', name: 'Bank Improvement Pasig-Marikina River' },
-                    { lat: 14.769820, lng: 121.04407, city: 'CALOOCAN', name: 'Flood Control Wall along Various Creeks' }
-                ]
-            },
-            {
-                longitude: 120.99407,
-                projectCount: 2,
-                distanceKm: 18.1,
-                projects: [
-                    { lat: 14.418242, lng: 120.99407, city: 'LAS PIÑAS', name: 'Road and Drainage System Brgy. Talon 5' },
-                    { lat: 14.581097, lng: 120.99407, city: 'MANILA', name: 'Pumping Station Apacible Street' }
-                ]
-            },
-            {
-                longitude: 121.01234,
-                projectCount: 2,
-                distanceKm: 16.8,
-                projects: [
-                    { lat: 14.530916, lng: 121.01234, city: 'PASAY', name: 'Slope Protection Maricaban Creek' },
-                    { lat: 14.682543, lng: 121.01234, city: 'CALOOCAN', name: 'Flood Control Wall Barangay 163' }
-                ]
-            }
+            { longitude: 121.90806, projectCount: 2, distanceKm: 708.0, projects: [
+                { lat: 7.101111111, lng: 121.9080556, city: 'ZAMBOANGA CITY', name: 'Construction of Flood Mitigation Structure, Barangay Labuan' },
+                { lat: 13.479208, lng: 121.908064, city: 'MOGPOG (MARINDUQUE)', name: 'Construction of Flood Control Structure along Mogpog River' },
+            ]},
+            { longitude: 124.14895, projectCount: 2, distanceKm: 654.1, projects: [
+                { lat: 7.864048, lng: 124.148948, city: 'BACOLOD-KALAWI', name: 'Construction of Flood (Slope Protection) Bacolod Kalawi Section' },
+                { lat: 13.756505, lng: 124.148948, city: 'CARAMORAN (CATANDUANES)', name: 'Construction of Obi River Flood Control Structure System' },
+            ]},
+            { longitude: 122.00944, projectCount: 2, distanceKm: 589.9, projects: [
+                { lat: 6.929306, lng: 122.009436, city: 'ZAMBOANGA CITY', name: 'Construction of Shoreline Protection at Sinunuc Section' },
+                { lat: 12.243333, lng: 122.009444, city: 'LOOC, ROMBLON', name: 'Construction of Seawall at Poblacion' },
+            ]},
+            { longitude: 124.585, projectCount: 3, distanceKm: 499.8, projects: [
+                { lat: 6.622222222, lng: 124.585, city: 'ISULAN (SULTAN KUDARAT)', name: 'Construction of Flood Control Structure, Ala River' },
+                { lat: 8.1505556, lng: 124.585, city: 'TALAKAG (BUKIDNON)', name: 'Construction of Flood Control Structure along CDO City' },
+                { lat: 11.124643, lng: 124.585002, city: 'KANANGA (LEYTE)', name: 'Construction of Bao Flood Control (Downstream)' },
+            ]},
+            { longitude: 123.00818, projectCount: 2, distanceKm: 425.5, projects: [
+                { lat: 10.24562, lng: 123.00818, city: 'ISABELA (NEGROS OCCIDENTAL)', name: 'Construction of Binalbagan River Bank Slope Protection' },
+                { lat: 14.07856111, lng: 123.0081806, city: 'BASUD (CAMARINES NORTE)', name: 'Construction of Flood Mitigation Structure along Malagonot River' },
+            ]},
+            { longitude: 121.01483, projectCount: 2, distanceKm: 422.8, projects: [
+                { lat: 14.7349131786108, lng: 121.014831381282, city: 'CALOOCAN CITY', name: 'Construction of Drainage System, Union Workers, Barangay 167' },
+                { lat: 18.54417, lng: 121.01483, city: 'SANTA PRAXEDES (CAGAYAN)', name: 'Construction of River Control Structure along Sitio Surngot' },
+            ]},
+            { longitude: 123.3234, projectCount: 2, distanceKm: 418.5, projects: [
+                { lat: 9.64769, lng: 123.323401, city: 'MALABUYOC (CEBU)', name: 'Construction of Revetment Wall, Phase 2, Barangay Uno' },
+                { lat: 13.4183, lng: 123.3234, city: 'NABUA (CAMARINES SUR)', name: 'Rehabilitation of Bicol River Basin Flood Control Structure' },
+            ]},
+            { longitude: 120.76099, projectCount: 2, distanceKm: 397.0, projects: [
+                { lat: 14.818283, lng: 120.760985, city: 'HAGONOY (BULACAN)', name: 'Construction of Revetment at Sta. Elena - San Pedro along Angat River' },
+                { lat: 18.395268, lng: 120.760986, city: 'VINTAR (ILOCOS NORTE)', name: 'Construction of Flood Mitigating Facilities along Bacarra-Vintar River' },
+            ]},
+            { longitude: 122.95141, projectCount: 2, distanceKm: 365.8, projects: [
+                { lat: 10.8496629, lng: 122.9514145, city: 'SILAY CITY (NEGROS OCCIDENTAL)', name: 'Construction of Flood Mitigation Structure, Silay City' },
+                { lat: 14.144894, lng: 122.951413, city: 'TALISAY (CAMARINES NORTE)', name: 'Construction of Flood Control Structure, Brgy. San Nicolas' },
+            ]},
+            { longitude: 120.61286, projectCount: 2, distanceKm: 344.4, projects: [
+                { lat: 15.173196, lng: 120.61286, city: 'ANGELES CITY (PAMPANGA)', name: 'Construction of Slope Protection along Pulung Cacutud Creek' },
+                { lat: 18.275643, lng: 120.612862, city: 'BACARRA (ILOCOS NORTE)', name: 'Construction of Flood Control Structure, Barangay Teppang' },
+            ]},
         ];
 
         // Draw map with skewers
