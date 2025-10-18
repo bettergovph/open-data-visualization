@@ -872,6 +872,70 @@ async def philgeps_contracts_api(meilisearch_id: str):
     except Exception as e:
         return JSONResponse({"success": False, "error": str(e)})
 
+@app.get("/api/contractors/sec")
+async def get_sec_contractors():
+    """Get all SEC contractors from PostgreSQL - no authentication required"""
+    try:
+        import asyncpg
+        conn = await asyncpg.connect(
+            host=os.getenv('POSTGRES_HOST', 'localhost'),
+            port=int(os.getenv('POSTGRES_PORT', 5432)),
+            user=os.getenv('POSTGRES_USER', 'budget_admin'),
+            password=os.getenv('POSTGRES_PASSWORD', ''),
+            database=os.getenv('POSTGRES_DB_PHILGEPS', 'philgeps')
+        )
+        
+        # Query all contractors
+        contractors = await conn.fetch(
+            """SELECT contractor_name, sec_number, date_registered, status, address, 
+                      created_at, updated_at, project_count
+               FROM contractors 
+               ORDER BY contractor_name"""
+        )
+        
+        # Get summary stats
+        stats = await conn.fetchrow(
+            """SELECT 
+                COUNT(*) as total_contractors,
+                COUNT(CASE WHEN sec_number IS NOT NULL AND sec_number != '' THEN 1 END) as with_sec_data,
+                COUNT(CASE WHEN sec_number IS NULL OR sec_number = '' THEN 1 END) as without_sec_data,
+                COUNT(CASE WHEN status = 'NO_SEC_RESULTS' THEN 1 END) as suspicious_no_results
+               FROM contractors"""
+        )
+        
+        await conn.close()
+        
+        contractors_list = []
+        for contractor in contractors:
+            contractors_list.append({
+                "contractor_name": contractor['contractor_name'],
+                "company_name": contractor['contractor_name'],  # For compatibility
+                "original_contractor_name": contractor['contractor_name'],  # For compatibility
+                "sec_number": contractor['sec_number'],
+                "date_registered": contractor['date_registered'].isoformat() if contractor['date_registered'] else None,
+                "status": contractor['status'] or "",
+                "address": contractor['address'],
+                "registered_address": contractor['address'],  # For compatibility
+                "created_at": contractor['created_at'].isoformat() if contractor['created_at'] else None,
+                "updated_at": contractor['updated_at'].isoformat() if contractor['updated_at'] else None,
+                "project_count": contractor['project_count'] or 0
+            })
+        
+        return JSONResponse({
+            "summary": {
+                "total_contractors": stats['total_contractors'],
+                "with_sec_data": stats['with_sec_data'],
+                "without_sec_data": stats['without_sec_data'],
+                "suspicious_no_results": stats['suspicious_no_results'],
+                "last_updated": "database",
+                "processing_batch": "database_generated",
+                "source": "PostgreSQL philgeps.contractors table"
+            },
+            "contractors": contractors_list
+        })
+    except Exception as e:
+        return JSONResponse({"success": False, "error": str(e)})
+
 @app.get("/api/dime/projects")
 async def dime_projects_api(
     page: int = 1,

@@ -158,6 +158,7 @@ function toggleMobileMenu() {
             <div class="flex border-b-2 border-gray-200 mb-4 gap-2">
                 <a href="#visual" class="budget-tab-btn active bg-white text-blue-600 border-blue-600 border-t border-l border-r px-6 py-3 rounded-t-lg cursor-pointer font-semibold transition-all duration-300 relative -mb-0.5 z-10" data-tab="visual">📊 Visual</a>
                 <a href="#table" class="budget-tab-btn bg-gray-100 text-gray-600 border-gray-300 border px-6 py-3 rounded-t-lg cursor-pointer font-semibold transition-all duration-300 hover:bg-gray-200" data-tab="table">📋 Table</a>
+                <a href="#sec" class="budget-tab-btn bg-gray-100 text-gray-600 border-gray-300 border px-6 py-3 rounded-t-lg cursor-pointer font-semibold transition-all duration-300 hover:bg-gray-200" data-tab="sec">🏛️ SEC</a>
             </div>
             <div class="budget-tab-content">
 
@@ -239,6 +240,55 @@ function toggleMobileMenu() {
                     </div>
                 </div>
 
+                <!-- SEC TAB -->
+                <div id="sec-tab" class="budget-tab-panel">
+                    <!-- SEC Data Analysis -->
+                    <div style="background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
+                        <h3 style="color: #0038A8; margin: 0 0 20px 0;">🏛️ SEC Data Analysis</h3>
+                        <p style="color: #666; margin: 0 0 20px 0;">Analyze contractor SEC registration data and identify contractors without SEC information</p>
+                        
+                        <!-- SEC Statistics -->
+                        <div class="sec-stats" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 20px;">
+                            <div class="stat-card" style="background: #f8f9fa; padding: 15px; border-radius: 8px; text-align: center;">
+                                <h4 style="color: #0038A8; margin: 0 0 5px 0; font-size: 1.1em;">Total Contractors</h4>
+                                <p id="sec-total-contractors-count" style="font-size: 2em; font-weight: bold; color: #007bff; margin: 0;">Loading...</p>
+                                <p style="font-size: 0.7em; color: #6c757d; margin: 5px 0 0 0;">In system</p>
+                            </div>
+                            <div class="stat-card" style="background: #f8f9fa; padding: 15px; border-radius: 8px; text-align: center;">
+                                <h4 style="color: #0038A8; margin: 0 0 5px 0; font-size: 1.1em;">Processed</h4>
+                                <p id="sec-processed-count" style="font-size: 2em; font-weight: bold; color: #17a2b8; margin: 0;">Loading...</p>
+                                <p style="font-size: 0.7em; color: #6c757d; margin: 5px 0 0 0;">From database</p>
+                            </div>
+                            <div class="stat-card" style="background: #d4edda; padding: 15px; border-radius: 8px; text-align: center; border: 2px solid #c3e6cb;">
+                                <h4 style="color: #155724; margin: 0 0 5px 0; font-size: 1.1em;">✅ With SEC Data</h4>
+                                <p id="total-sec-count" style="font-size: 2em; font-weight: bold; color: #28a745; margin: 0;">Loading...</p>
+                                <p style="font-size: 0.7em; color: #155724; margin: 5px 0 0 0;">Verified</p>
+                            </div>
+                            <div class="stat-card" style="background: #fff3cd; padding: 15px; border-radius: 8px; text-align: center; border: 2px solid #ffeaa7;">
+                                <h4 style="color: #856404; margin: 0 0 5px 0; font-size: 1.1em;">⚠️ NO SEC Results</h4>
+                                <p id="suspicious-sec-count" style="font-size: 2em; font-weight: bold; color: #856404; margin: 0;">Loading...</p>
+                                <p style="font-size: 0.7em; color: #856404; margin: 5px 0 0 0;">Suspicious</p>
+                            </div>
+                        </div>
+
+                        <!-- Contractors Without SEC Data -->
+                        <div class="chart-container" style="background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); margin-bottom: 20px;">
+                            <h3 style="color: #dc3545; margin: 0 0 15px 0;">⚠️ Contractors Without SEC Data</h3>
+                            <div id="contractorsWithoutSec" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 15px;">
+                                <!-- Contractors without SEC data will be populated here -->
+                            </div>
+                        </div>
+
+                        <!-- DPWH & SEC Data Information -->
+                        <div style="background: #e9ecef; padding: 15px; border-radius: 6px; margin-top: 20px; font-size: 0.9em; color: #495057;">
+                            <p style="color: #666; font-size: 0.9em; margin: 0;">
+                                <strong>Source:</strong> Securities and Exchange Commission (SEC) Philippines, PostgreSQL Database<br>
+                                <strong>Data Range:</strong> Contractors from government infrastructure projects
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
             </div>
         </div>
 
@@ -292,17 +342,27 @@ document.addEventListener('DOMContentLoaded', function() {
 // Load and process contractors data
 async function loadContractors() {
     try {
-        const response = await fetch('/static/sec_contractors_database.json');
+        // Use PostgreSQL API endpoint
+        const response = await fetch('http://172.30.147.217:8001/api/contractors/sec');
         const data = await response.json();
         
         allContractors = data.contractors || [];
         
-        // Update statistics
+        // Update statistics (Visual tab)
         const summary = data.summary || {};
         document.getElementById('total-contractors').textContent = (summary.total_contractors || 0).toLocaleString();
         document.getElementById('processed-contractors').textContent = (summary.total_contractors || 0).toLocaleString();
         document.getElementById('with-sec').textContent = (summary.with_sec_data || 0).toLocaleString();
         document.getElementById('suspicious').textContent = (summary.suspicious_no_results || 0).toLocaleString();
+        
+        // Update SEC tab statistics
+        document.getElementById('sec-total-contractors-count').textContent = (summary.total_contractors || 0).toLocaleString();
+        document.getElementById('sec-processed-count').textContent = (summary.total_contractors || 0).toLocaleString();
+        document.getElementById('total-sec-count').textContent = (summary.with_sec_data || 0).toLocaleString();
+        document.getElementById('suspicious-sec-count').textContent = (summary.suspicious_no_results || 0).toLocaleString();
+        
+        // Load contractors without SEC for SEC tab
+        loadContractorsWithoutSec();
         
         // Count projects per contractor from flood data
         await loadContractorProjectCounts();
@@ -317,6 +377,64 @@ async function loadContractors() {
         document.getElementById('processed-contractors').textContent = 'Error';
         document.getElementById('with-sec').textContent = 'Error';
         document.getElementById('suspicious').textContent = 'Error';
+    }
+}
+
+// Load contractors without SEC data for SEC tab
+function loadContractorsWithoutSec() {
+    const container = document.getElementById('contractorsWithoutSec');
+    const contractorsWithoutSec = allContractors.filter(c => !c.sec_number || c.sec_number.trim() === '');
+    
+    // Limit to first 20 for display
+    const displayLimit = 20;
+    const contractorsToShow = contractorsWithoutSec.slice(0, displayLimit);
+    
+    container.innerHTML = '';
+    
+    if (contractorsToShow.length === 0) {
+        container.innerHTML = `
+            <div style="
+                background: #d4edda;
+                border: 2px solid #28a745;
+                border-radius: 8px;
+                padding: 20px;
+                text-align: center;
+                grid-column: 1 / -1;">
+                <strong>✅ All contractors have SEC data!</strong>
+            </div>
+        `;
+    } else {
+        contractorsToShow.forEach(contractor => {
+            const contractorCard = document.createElement('div');
+            contractorCard.style.cssText = 'background: #fff3cd; border: 2px solid #ffc107; border-radius: 8px; padding: 15px;';
+            
+            const isNO_SEC_RESULTS = contractor.status === 'NO_SEC_RESULTS';
+            
+            contractorCard.innerHTML = `
+                <div style="font-weight: bold; color: #856404; margin-bottom: 8px; font-size: 1.1em;">
+                    ${contractor.contractor_name}
+                </div>
+                ${isNO_SEC_RESULTS ? `
+                    <div style="color: #721c24; background: #f8d7da; padding: 8px; border-radius: 4px; margin-bottom: 8px; font-size: 0.9em; border: 1px solid #f5c6cb;">
+                        <strong>⚠️ NO SEC RESULTS - SUSPICIOUS</strong><br>
+                        <span style="font-size: 0.85em;">This contractor was searched in the SEC database but yielded zero results.</span>
+                    </div>
+                ` : `
+                    <div style="color: #856404; font-size: 0.9em;">
+                        ⚠️ SEC information not yet available
+                    </div>
+                `}
+            `;
+            
+            container.appendChild(contractorCard);
+        });
+        
+        if (contractorsWithoutSec.length > displayLimit) {
+            const moreInfo = document.createElement('div');
+            moreInfo.style.cssText = 'background: #e9ecef; border-radius: 8px; padding: 15px; text-align: center; grid-column: 1 / -1;';
+            moreInfo.innerHTML = `<em>Showing first ${displayLimit} of ${contractorsWithoutSec.length} contractors without SEC data</em>`;
+            container.appendChild(moreInfo);
+        }
     }
 }
 
