@@ -28,10 +28,6 @@ Loop, % contractors.MaxIndex() {
         continue
 
     Run msedge.exe --new-window https://checkwithsec.sec.gov.ph/check-with-sec/index
-    WinWaitActive, ahk_class Chrome_WidgetWin_1, , 10
-    if ErrorLevel
-        continue
-
     Sleep, 5000
 
     Click, 1, 1
@@ -56,7 +52,7 @@ Loop, % contractors.MaxIndex() {
     FileCreateDir, sec_results
     FileAppend, %Clipboard%, %resultFile%
 
-    WinClose, ahk_class Chrome_WidgetWin_1
+    Process, Close, msedge.exe
     Sleep, 500
 }
 
