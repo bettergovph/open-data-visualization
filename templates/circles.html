@@ -232,41 +232,10 @@
         }
         
         function drawSkewersOnMap(ctx, toCanvasCoords) {
-            // Filter skewers to avoid latitude overlap
-            // Sort by number of projects (more meat = priority)
-            const sortedAlignments = [...alignmentData].sort((a, b) => b.projectCount - a.projectCount);
+            // Draw all skewers (no filtering)
+            const selectedSkewers = alignmentData;
             
-            const selectedSkewers = [];
-            const usedLatRanges = [];
-            
-            // Check if latitude ranges overlap
-            const rangesOverlap = (range1, range2) => {
-                return !(range1.max < range2.min || range2.max < range1.min);
-            };
-            
-            sortedAlignments.forEach(alignment => {
-                const projects = alignment.projects.sort((a, b) => a.lat - b.lat);
-                const minLat = projects[0].lat;
-                const maxLat = projects[projects.length - 1].lat;
-                const latRange = maxLat - minLat;
-                
-                // Include extension in overlap check
-                const extension = latRange * 3;
-                const newRange = {
-                    min: minLat - extension,
-                    max: maxLat + extension
-                };
-                
-                // Check if this range overlaps with any already selected
-                const overlaps = usedLatRanges.some(range => rangesOverlap(range, newRange));
-                
-                if (!overlaps) {
-                    selectedSkewers.push(alignment);
-                    usedLatRanges.push(newRange);
-                }
-            });
-            
-            console.log(`Selected ${selectedSkewers.length} skewers out of ${alignmentData.length} (no latitude overlap)`);
+            console.log(`Drawing ${selectedSkewers.length} skewers`);
             
             // Draw selected skewers
             selectedSkewers.forEach((alignment, idx) => {
