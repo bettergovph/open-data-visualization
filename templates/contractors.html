@@ -10,6 +10,8 @@
     <link rel="stylesheet" href="/static/css/tailwind.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
+    <script src="/static/js/chart.js"></script>
+
     <!-- BetterGovPH Metadata -->
     <meta name="description" content="SEC Contractors Database - Government Data Analysis Platform">
     <meta name="keywords" content="SEC, contractors, verification, government projects, Philippines, transparency">
@@ -39,22 +41,22 @@
             min-height: 100vh;
         }
 
+        /* Tab styles */
+        .budget-tab-panel {
+            display: none;
+        }
+        
+        .budget-tab-panel.active {
+            display: block;
+        }
+
         /* Mobile responsiveness */
         @media (max-width: 768px) {
-            .contractor-title {
-                font-size: 2rem;
-            }
-            
-            .contractor-subtitle {
-                font-size: 1rem;
-            }
-            
             .statistics-grid {
                 grid-template-columns: 1fr !important;
                 gap: 15px !important;
             }
             
-            /* Table responsiveness */
             .table-responsive {
                 overflow-x: auto;
                 -webkit-overflow-scrolling: touch;
@@ -151,67 +153,149 @@ function toggleMobileMenu() {
 <section>
     <div style="max-width: 1400px; margin: 0 auto;">
         
-        <!-- SEC Statistics -->
-        <div style="background: white; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); padding: 32px; margin-bottom: 32px;">
-            <h2 style="font-size: 1.5rem; font-weight: 600; color: black; margin-bottom: 24px;">📊 SEC Data Overview</h2>
-            
-            <div class="statistics-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 24px;">
-                <div style="background: #f9fafb; padding: 24px; border-radius: 8px; text-align: center;">
-                    <h3 style="color: #6b7280; font-size: 0.875rem; font-weight: 500; margin-bottom: 8px;">Total Contractors</h3>
-                    <p id="total-contractors" style="font-size: 2.5rem; font-weight: 700; color: #2563eb; margin: 0;">Loading...</p>
-                    <p style="font-size: 0.75rem; color: #6b7280; margin: 4px 0 0 0;">In system</p>
+        <!-- Tabs -->
+        <div class="budget-tabs">
+            <div class="flex border-b-2 border-gray-200 mb-4 gap-2">
+                <a href="#visual" class="budget-tab-btn active bg-white text-blue-600 border-blue-600 border-t border-l border-r px-6 py-3 rounded-t-lg cursor-pointer font-semibold transition-all duration-300 relative -mb-0.5 z-10" data-tab="visual">📊 Visual</a>
+                <a href="#table" class="budget-tab-btn bg-gray-100 text-gray-600 border-gray-300 border px-6 py-3 rounded-t-lg cursor-pointer font-semibold transition-all duration-300 hover:bg-gray-200" data-tab="table">📋 Table</a>
+            </div>
+            <div class="budget-tab-content">
+
+                <!-- VISUAL TAB -->
+                <div id="visual-tab" class="budget-tab-panel active">
+                    <!-- SEC Statistics -->
+                    <div class="statistics-grid grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5 mb-8">
+                        <div class="stat-card bg-white p-5 rounded-lg shadow-lg text-center">
+                            <h3 class="text-gray-600 m-0 mb-2 text-sm font-medium">Total Contractors</h3>
+                            <p id="total-contractors" class="text-4xl font-bold text-blue-600 m-0">Loading...</p>
+                            <p class="text-xs text-gray-500 mt-1">In system</p>
+                        </div>
+                        <div class="stat-card bg-white p-5 rounded-lg shadow-lg text-center">
+                            <h3 class="text-gray-600 m-0 mb-2 text-sm font-medium">Processed</h3>
+                            <p id="processed-contractors" class="text-4xl font-bold text-cyan-600 m-0">Loading...</p>
+                            <p class="text-xs text-gray-500 mt-1">From scraping</p>
+                        </div>
+                        <div class="stat-card bg-green-50 p-5 rounded-lg shadow-lg text-center border-2 border-green-200">
+                            <h3 class="text-green-700 m-0 mb-2 text-sm font-medium">✅ With SEC Data</h3>
+                            <p id="with-sec" class="text-4xl font-bold text-green-600 m-0">Loading...</p>
+                            <p class="text-xs text-green-600 mt-1">Verified</p>
+                        </div>
+                        <div class="stat-card bg-yellow-50 p-5 rounded-lg shadow-lg text-center border-2 border-yellow-300">
+                            <h3 class="text-yellow-700 m-0 mb-2 text-sm font-medium">⚠️ NO SEC Results</h3>
+                            <p id="suspicious" class="text-4xl font-bold text-yellow-700 m-0">Loading...</p>
+                            <p class="text-xs text-yellow-700 mt-1">Suspicious</p>
+                        </div>
+                    </div>
+
+                    <!-- Top Contractors Chart -->
+                    <div class="chart-container" style="background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); margin-bottom: 20px;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                            <h3 style="color: #0038A8; margin: 0;">Top Contractors by Project Count</h3>
+                            <div style="display: flex; gap: 10px; align-items: center;">
+                                <span id="contractors-page-info" style="color: #666; font-size: 0.9em;"></span>
+                                <button id="contractors-prev" style="background: #6c757d; color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-size: 0.8em;" disabled>← Previous</button>
+                                <button id="contractors-next" style="background: #6c757d; color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-size: 0.8em;" disabled>Next →</button>
+                            </div>
+                        </div>
+                        <canvas id="contractorsChart" width="800" height="600"></canvas>
+                    </div>
                 </div>
-                <div style="background: #f9fafb; padding: 24px; border-radius: 8px; text-align: center;">
-                    <h3 style="color: #6b7280; font-size: 0.875rem; font-weight: 500; margin-bottom: 8px;">Processed</h3>
-                    <p id="processed-contractors" style="font-size: 2.5rem; font-weight: 700; color: #06b6d4; margin: 0;">Loading...</p>
-                    <p style="font-size: 0.75rem; color: #6b7280; margin: 4px 0 0 0;">From scraping</p>
+
+                <!-- TABLE TAB -->
+                <div id="table-tab" class="budget-tab-panel">
+                    <!-- Contractor Table -->
+                    <div style="background: white; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); padding: 32px;">
+                        <h2 style="font-size: 1.5rem; font-weight: 600; color: black; margin-bottom: 24px;">📋 Contractor Database</h2>
+                        
+                        <!-- Pagination controls -->
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+                            <div style="color: #666; font-size: 0.9em;">
+                                Showing <span id="table-page-info">0</span> of <span id="table-total">0</span> contractors
+                            </div>
+                            <div style="display: flex; gap: 10px;">
+                                <button id="table-prev" style="background: #6c757d; color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer;" disabled>← Previous</button>
+                                <button id="table-next" style="background: #6c757d; color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer;" disabled>Next →</button>
+                            </div>
+                        </div>
+
+                        <div class="table-responsive" style="overflow-x: auto;">
+                            <table style="min-width: 100%; border-collapse: collapse;">
+                                <thead style="background: #f9fafb;">
+                                    <tr>
+                                        <th style="padding: 12px 16px; text-align: left; font-size: 0.75rem; font-weight: 500; color: #6b7280; text-transform: uppercase; letter-spacing: 0.05em; border-bottom: 1px solid #e5e7eb;">#</th>
+                                        <th style="padding: 12px 16px; text-align: left; font-size: 0.75rem; font-weight: 500; color: #6b7280; text-transform: uppercase; letter-spacing: 0.05em; border-bottom: 1px solid #e5e7eb;">Contractor Name</th>
+                                        <th style="padding: 12px 16px; text-align: left; font-size: 0.75rem; font-weight: 500; color: #6b7280; text-transform: uppercase; letter-spacing: 0.05em; border-bottom: 1px solid #e5e7eb;">SEC Number</th>
+                                        <th style="padding: 12px 16px; text-align: left; font-size: 0.75rem; font-weight: 500; color: #6b7280; text-transform: uppercase; letter-spacing: 0.05em; border-bottom: 1px solid #e5e7eb;">Status</th>
+                                        <th style="padding: 12px 16px; text-align: left; font-size: 0.75rem; font-weight: 500; color: #6b7280; text-transform: uppercase; letter-spacing: 0.05em; border-bottom: 1px solid #e5e7eb;">Address</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="contractors-table" style="background: white;">
+                                    <tr>
+                                        <td colspan="5" style="padding: 24px; text-align: center; color: #6b7280;">Loading contractors...</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
                 </div>
-                <div style="background: #f0fdf4; padding: 24px; border-radius: 8px; text-align: center; border: 2px solid #bbf7d0;">
-                    <h3 style="color: #15803d; font-size: 0.875rem; font-weight: 500; margin-bottom: 8px;">✅ With SEC Data</h3>
-                    <p id="with-sec" style="font-size: 2.5rem; font-weight: 700; color: #16a34a; margin: 0;">Loading...</p>
-                    <p style="font-size: 0.75rem; color: #16a34a; margin: 4px 0 0 0;">Verified</p>
-                </div>
-                <div style="background: #fefce8; padding: 24px; border-radius: 8px; text-align: center; border: 2px solid #fde047;">
-                    <h3 style="color: #854d0e; font-size: 0.875rem; font-weight: 500; margin-bottom: 8px;">⚠️ NO SEC Results</h3>
-                    <p id="suspicious" style="font-size: 2.5rem; font-weight: 700; color: #ca8a04; margin: 0;">Loading...</p>
-                    <p style="font-size: 0.75rem; color: #ca8a04; margin: 4px 0 0 0;">Suspicious</p>
-                </div>
+
             </div>
         </div>
 
-        <!-- Contractor Table -->
-        <div style="background: white; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); padding: 32px;">
-            <h2 style="font-size: 1.5rem; font-weight: 600; color: black; margin-bottom: 24px;">📋 Contractor Database</h2>
-            
-            <div class="table-responsive" style="overflow-x: auto;">
-                <table style="min-width: 100%; border-collapse: collapse;">
-                    <thead style="background: #f9fafb;">
-                        <tr>
-                            <th style="padding: 12px 16px; text-align: left; font-size: 0.75rem; font-weight: 500; color: #6b7280; text-transform: uppercase; letter-spacing: 0.05em; border-bottom: 1px solid #e5e7eb;">#</th>
-                            <th style="padding: 12px 16px; text-align: left; font-size: 0.75rem; font-weight: 500; color: #6b7280; text-transform: uppercase; letter-spacing: 0.05em; border-bottom: 1px solid #e5e7eb;">Contractor Name</th>
-                            <th style="padding: 12px 16px; text-align: left; font-size: 0.75rem; font-weight: 500; color: #6b7280; text-transform: uppercase; letter-spacing: 0.05em; border-bottom: 1px solid #e5e7eb;">SEC Number</th>
-                            <th style="padding: 12px 16px; text-align: left; font-size: 0.75rem; font-weight: 500; color: #6b7280; text-transform: uppercase; letter-spacing: 0.05em; border-bottom: 1px solid #e5e7eb;">Status</th>
-                            <th style="padding: 12px 16px; text-align: left; font-size: 0.75rem; font-weight: 500; color: #6b7280; text-transform: uppercase; letter-spacing: 0.05em; border-bottom: 1px solid #e5e7eb;">Address</th>
-                        </tr>
-                    </thead>
-                    <tbody id="contractors-table" style="background: white;">
-                        <tr>
-                            <td colspan="5" style="padding: 24px; text-align: center; color: #6b7280;">Loading contractors...</td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
-        </div>
-
-        </div>
+    </div>
+</section>
 </div>
 
 <script>
-// Load SEC data
+// Global data
+let allContractors = [];
+let allContractorsByProject = [];
+let currentChartPage = 0;
+let currentTablePage = 0;
+const chartPageSize = 50;
+const tablePageSize = 50;
+
+// Tab switching
+function switchTab(tabName) {
+    document.querySelectorAll('.budget-tab-btn').forEach(tab => {
+        tab.classList.remove('active', 'bg-white', 'text-blue-600', 'border-blue-600', 'border-t', 'border-l', 'border-r', '-mb-0.5', 'z-10');
+        tab.classList.add('bg-gray-100', 'text-gray-600', 'border-gray-300');
+    });
+    document.querySelectorAll('.budget-tab-panel').forEach(content => {
+        content.classList.remove('active');
+    });
+
+    const activeTab = document.querySelector(`[data-tab="${tabName}"]`);
+    if (activeTab) {
+        activeTab.classList.add('active', 'bg-white', 'text-blue-600', 'border-blue-600', 'border-t', 'border-l', 'border-r', '-mb-0.5', 'z-10');
+        activeTab.classList.remove('bg-gray-100', 'text-gray-600', 'border-gray-300');
+    }
+    
+    const activeContent = document.getElementById(`${tabName}-tab`);
+    if (activeContent) {
+        activeContent.classList.add('active');
+    }
+}
+
+// Initialize tabs
+document.addEventListener('DOMContentLoaded', function() {
+    const tabs = document.querySelectorAll('.budget-tab-btn');
+    tabs.forEach(tab => {
+        tab.addEventListener('click', (e) => {
+            e.preventDefault();
+            const targetTab = tab.getAttribute('data-tab');
+            switchTab(targetTab);
+        });
+    });
+});
+
+// Load and process contractors data
 async function loadContractors() {
     try {
         const response = await fetch('/static/sec_contractors_database.json');
         const data = await response.json();
+        
+        allContractors = data.contractors || [];
         
         // Update statistics
         const summary = data.summary || {};
@@ -220,38 +304,12 @@ async function loadContractors() {
         document.getElementById('with-sec').textContent = (summary.with_sec_data || 0).toLocaleString();
         document.getElementById('suspicious').textContent = (summary.suspicious_no_results || 0).toLocaleString();
         
-        // Render contractors table
-        const contractors = data.contractors || [];
-        const tbody = document.getElementById('contractors-table');
-        tbody.innerHTML = '';
+        // Count projects per contractor from flood data
+        await loadContractorProjectCounts();
         
-        contractors.forEach((contractor, index) => {
-            const row = document.createElement('tr');
-            row.style.borderBottom = '1px solid #e5e7eb';
-            if (contractor.status === 'NO_SEC_RESULTS') {
-                row.style.background = '#fefce8';
-            }
-            
-            const secNumber = contractor.sec_number || '-';
-            const status = contractor.status || 'Unknown';
-            const address = contractor.registered_address || contractor.address || '-';
-            
-            const statusBadge = contractor.sec_number && contractor.sec_number.trim() !== '' ? 
-                `<span style="padding: 4px 12px; background: #dcfce7; color: #166534; font-size: 0.75rem; border-radius: 9999px; font-weight: 600;">✅ Verified</span>` :
-                contractor.status === 'NO_SEC_RESULTS' ?
-                `<span class="pulse-warning" style="padding: 4px 12px; background: #fff3cd; color: #854d0e; font-size: 0.75rem; border-radius: 9999px; font-weight: 600; border: 1px solid #fde047;">⚠️ Suspicious</span>` :
-                `<span style="padding: 4px 12px; background: #fee2e2; color: #991b1b; font-size: 0.75rem; border-radius: 9999px; font-weight: 600;">❌ Missing</span>`;
-            
-            row.innerHTML = `
-                <td style="padding: 16px; font-size: 0.875rem; color: #111827; white-space: nowrap;">${index + 1}</td>
-                <td style="padding: 16px; font-size: 0.875rem; font-weight: 500; color: #111827;">${contractor.original_contractor_name || contractor.company_name || contractor.contractor_name}</td>
-                <td style="padding: 16px; font-size: 0.875rem; color: #111827; white-space: nowrap;">${secNumber}</td>
-                <td style="padding: 16px; font-size: 0.875rem;">${statusBadge}</td>
-                <td style="padding: 16px; font-size: 0.875rem; color: #6b7280;">${address.substring(0, 100)}${address.length > 100 ? '...' : ''}</td>
-            `;
-            
-            tbody.appendChild(row);
-        });
+        // Render chart and table
+        renderContractorsChart();
+        renderContractorsTable();
         
     } catch (error) {
         console.error('Error loading contractors:', error);
@@ -259,24 +317,171 @@ async function loadContractors() {
         document.getElementById('processed-contractors').textContent = 'Error';
         document.getElementById('with-sec').textContent = 'Error';
         document.getElementById('suspicious').textContent = 'Error';
-        
-        document.getElementById('contractors-table').innerHTML = `
-            <tr>
-                <td colspan="5" style="padding: 24px; text-align: center; color: #dc2626;">
-                    ❌ Error loading contractor data. Please try again later.
-                </td>
-            </tr>
-        `;
     }
 }
+
+// Load contractor project counts from flood data
+async function loadContractorProjectCounts() {
+    try {
+        const response = await fetch('http://172.30.147.217:7700/indexes/flood_control/documents?limit=10000');
+        const data = await response.json();
+        const projects = data.results || [];
+        
+        const contractorCounts = {};
+        projects.forEach(project => {
+            if (project.Contractor) {
+                contractorCounts[project.Contractor] = (contractorCounts[project.Contractor] || 0) + 1;
+            }
+        });
+        
+        allContractorsByProject = Object.entries(contractorCounts)
+            .map(([contractor, count]) => ({ contractor, count }))
+            .sort((a, b) => b.count - a.count);
+            
+    } catch (error) {
+        console.error('Error loading contractor project counts:', error);
+        allContractorsByProject = [];
+    }
+}
+
+// Render contractors chart
+function renderContractorsChart() {
+    const ctx = document.getElementById('contractorsChart');
+    if (!ctx || !allContractorsByProject.length) return;
+    
+    const start = currentChartPage * chartPageSize;
+    const end = start + chartPageSize;
+    const contractors = allContractorsByProject.slice(start, end);
+    
+    if (window.contractorsChart) {
+        window.contractorsChart.destroy();
+    }
+    
+    window.contractorsChart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: contractors.map(item => item.contractor.length > 40 ? item.contractor.substring(0, 40) + '...' : item.contractor),
+            datasets: [{
+                label: 'Project Count',
+                data: contractors.map(item => item.count),
+                backgroundColor: '#0038A8',
+                borderColor: '#CE1126',
+                borderWidth: 1
+            }]
+        },
+        options: {
+            indexAxis: 'y',
+            responsive: true,
+            maintainAspectRatio: true,
+            aspectRatio: 1.5,
+            plugins: {
+                legend: {
+                    display: false
+                }
+            },
+            scales: {
+                x: {
+                    beginAtZero: true,
+                    ticks: {
+                        precision: 0
+                    }
+                },
+                y: {
+                    display: true,
+                    ticks: {
+                        maxTicksLimit: 50
+                    }
+                }
+            }
+        }
+    });
+    
+    // Update pagination info and buttons
+    const totalPages = Math.ceil(allContractorsByProject.length / chartPageSize);
+    document.getElementById('contractors-page-info').textContent = `Page ${currentChartPage + 1} of ${totalPages}`;
+    document.getElementById('contractors-prev').disabled = currentChartPage === 0;
+    document.getElementById('contractors-next').disabled = currentChartPage >= totalPages - 1;
+}
+
+// Render contractors table
+function renderContractorsTable() {
+    const tbody = document.getElementById('contractors-table');
+    const start = currentTablePage * tablePageSize;
+    const end = start + tablePageSize;
+    const contractors = allContractors.slice(start, end);
+    
+    tbody.innerHTML = '';
+    
+    contractors.forEach((contractor, index) => {
+        const row = document.createElement('tr');
+        row.style.borderBottom = '1px solid #e5e7eb';
+        if (contractor.status === 'NO_SEC_RESULTS') {
+            row.style.background = '#fefce8';
+        }
+        
+        const secNumber = contractor.sec_number || '-';
+        const address = contractor.registered_address || contractor.address || '-';
+        
+        const statusBadge = contractor.sec_number && contractor.sec_number.trim() !== '' ? 
+            `<span style="padding: 4px 12px; background: #dcfce7; color: #166534; font-size: 0.75rem; border-radius: 9999px; font-weight: 600;">✅ Verified</span>` :
+            contractor.status === 'NO_SEC_RESULTS' ?
+            `<span class="pulse-warning" style="padding: 4px 12px; background: #fff3cd; color: #854d0e; font-size: 0.75rem; border-radius: 9999px; font-weight: 600; border: 1px solid #fde047;">⚠️ Suspicious</span>` :
+            `<span style="padding: 4px 12px; background: #fee2e2; color: #991b1b; font-size: 0.75rem; border-radius: 9999px; font-weight: 600;">❌ Missing</span>`;
+        
+        row.innerHTML = `
+            <td style="padding: 16px; font-size: 0.875rem; color: #111827; white-space: nowrap;">${start + index + 1}</td>
+            <td style="padding: 16px; font-size: 0.875rem; font-weight: 500; color: #111827;">${contractor.original_contractor_name || contractor.company_name || contractor.contractor_name}</td>
+            <td style="padding: 16px; font-size: 0.875rem; color: #111827; white-space: nowrap;">${secNumber}</td>
+            <td style="padding: 16px; font-size: 0.875rem;">${statusBadge}</td>
+            <td style="padding: 16px; font-size: 0.875rem; color: #6b7280;">${address.substring(0, 100)}${address.length > 100 ? '...' : ''}</td>
+        `;
+        
+        tbody.appendChild(row);
+    });
+    
+    // Update pagination
+    const totalPages = Math.ceil(allContractors.length / tablePageSize);
+    document.getElementById('table-page-info').textContent = `${start + 1}-${Math.min(end, allContractors.length)}`;
+    document.getElementById('table-total').textContent = allContractors.length;
+    document.getElementById('table-prev').disabled = currentTablePage === 0;
+    document.getElementById('table-next').disabled = currentTablePage >= totalPages - 1;
+}
+
+// Pagination for chart
+document.getElementById('contractors-prev').addEventListener('click', function() {
+    if (currentChartPage > 0) {
+        currentChartPage--;
+        renderContractorsChart();
+    }
+});
+
+document.getElementById('contractors-next').addEventListener('click', function() {
+    const totalPages = Math.ceil(allContractorsByProject.length / chartPageSize);
+    if (currentChartPage < totalPages - 1) {
+        currentChartPage++;
+        renderContractorsChart();
+    }
+});
+
+// Pagination for table
+document.getElementById('table-prev').addEventListener('click', function() {
+    if (currentTablePage > 0) {
+        currentTablePage--;
+        renderContractorsTable();
+    }
+});
+
+document.getElementById('table-next').addEventListener('click', function() {
+    const totalPages = Math.ceil(allContractors.length / tablePageSize);
+    if (currentTablePage < totalPages - 1) {
+        currentTablePage++;
+        renderContractorsTable();
+    }
+});
 
 // Load on page load
 loadContractors();
 </script>
-
-    </div>
-</section>
-</div>
 
 {% include "footer.html" %}
 
