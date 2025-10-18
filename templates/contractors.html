@@ -343,7 +343,7 @@ document.addEventListener('DOMContentLoaded', function() {
 async function loadContractors() {
     try {
         // Use PostgreSQL API endpoint
-        const response = await fetch('http://172.30.147.217:8001/api/contractors/sec');
+        const response = await fetch('/api/contractors/sec');
         const data = await response.json();
         
         allContractors = data.contractors || [];
@@ -441,16 +441,11 @@ function loadContractorsWithoutSec() {
 // Load contractor project counts from flood data
 async function loadContractorProjectCounts() {
     try {
-        const response = await fetch('http://172.30.147.217:7700/indexes/flood_control/documents?limit=10000');
+        const response = await fetch('/api/flood/statistics');
         const data = await response.json();
-        const projects = data.results || [];
         
-        const contractorCounts = {};
-        projects.forEach(project => {
-            if (project.Contractor) {
-                contractorCounts[project.Contractor] = (contractorCounts[project.Contractor] || 0) + 1;
-            }
-        });
+        // Use contractor data from the statistics API
+        const contractorCounts = data.contractorDistribution || {};
         
         allContractorsByProject = Object.entries(contractorCounts)
             .map(([contractor, count]) => ({ contractor, count }))
