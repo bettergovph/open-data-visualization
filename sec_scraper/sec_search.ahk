@@ -87,7 +87,10 @@ Loop, % contractors.MaxIndex() {
     WinClose, ahk_class Chrome_WidgetWin_1
     Sleep, 500
 
-    TrayTip, Done, %contractorName% (%A_Index%/%contractors.MaxIndex()), 2
+    ; Show progress
+    currentIndex := A_Index
+    totalCount := contractors.MaxIndex()
+    TrayTip, Done, %contractorName% - %currentIndex% of %totalCount%, 2
 }
 
 TrayTip, Complete, All contractors processed!, 5
