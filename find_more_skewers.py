@@ -55,7 +55,7 @@ existing_ranges = [
     (14.394145, 14.603226),  # Lng 121.00206: 23.2km
 ]
 
-# Group by longitude (round to 5 decimals)
+# Group by EXACT longitude (no rounding)
 longitude_groups = defaultdict(list)
 for project in all_projects:
     lng = None
@@ -69,8 +69,8 @@ for project in all_projects:
         lat = project.get('Latitude')
     
     if lng is not None and lat is not None:
-        lng_rounded = round(lng, 5)
-        longitude_groups[lng_rounded].append({
+        # Use exact longitude (no rounding)
+        longitude_groups[lng].append({
             'lng': lng,
             'lat': lat,
             'project': project
