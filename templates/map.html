@@ -671,8 +671,8 @@ async function processProjects(projects) {
                     '<span style="color: #999;">Unknown Status</span>';
 
                 const popupContent = `
-                    <div style="min-width: 480px; max-width: 550px; font-family: Arial, sans-serif;">
-                        <h4 style="margin: 0 0 10px 0; color: ${color}; font-size: 1.1em;">${project.ProjectDescription || 'Unnamed Project'}</h4>
+                    <div style="min-width: 600px; max-width: 650px; font-family: Arial, sans-serif; overflow: visible;">
+                        <h4 style="margin: 0 0 10px 0; color: ${color}; font-size: 1.1em; word-wrap: break-word;">${project.ProjectDescription || 'Unnamed Project'}</h4>
                         <div style="font-size: 0.95em; margin-bottom: 10px;">
                             <strong>Location:</strong> ${project.Municipality || 'Unknown'}, ${project.Province || 'Unknown'}
                         </div>
@@ -682,7 +682,7 @@ async function processProjects(projects) {
                         <div style="font-size: 0.95em; margin-bottom: 10px;">
                             <strong>Cost:</strong> ${costDisplay}
                         </div>
-                        <div style="font-size: 0.9em; margin-bottom: 10px; color: #666;">
+                        <div style="font-size: 0.9em; margin-bottom: 10px; color: #666; word-wrap: break-word;">
                             <strong>Contractor:</strong> ${project.Contractor || 'Unknown'}
                         </div>
                         <div id="philgeps-contracts-${project.GlobalID}" style="margin-top: 12px; padding-top: 12px; border-top: 1px solid #e0e0e0;">
@@ -729,14 +729,14 @@ async function processProjects(projects) {
                                 const org = contract.organization_name || 'Unknown';
                                 
                                 contractsHtml += `
-                                    <div style="font-size: 0.85em; padding: 8px; background: #f8f9fa; border-radius: 4px; margin-bottom: 6px;">
-                                        <div style="font-weight: 600; color: #0038A8; margin-bottom: 4px;">
+                                    <div style="font-size: 0.85em; padding: 8px; background: transparent; border-left: 3px solid #0038A8; margin-bottom: 6px; word-wrap: break-word;">
+                                        <div style="font-weight: 600; color: #0038A8; margin-bottom: 4px; word-wrap: break-word;">
                                             Contract: ${contractNo}
                                         </div>
-                                        <div style="color: #666; margin-bottom: 3px; font-size: 0.95em;">
+                                        <div style="color: #666; margin-bottom: 3px; font-size: 0.95em; word-wrap: break-word;">
                                             <strong>Awardee:</strong> ${awardee}
                                         </div>
-                                        <div style="color: #666; margin-bottom: 4px; font-size: 0.95em;">
+                                        <div style="color: #666; margin-bottom: 4px; font-size: 0.95em; word-wrap: break-word;">
                                             <strong>Agency:</strong> ${org}
                                         </div>
                                         <div style="color: #28a745; font-weight: 600; font-size: 1em;">
@@ -813,7 +813,7 @@ async function processProjects(projects) {
                                 <div style="font-size: 0.9em; color: #0038A8; font-weight: 600; margin-bottom: 8px;">
                                     🏛️ SEC Registration
                                 </div>
-                                <div style="font-size: 0.85em; padding: 8px; background: #d4edda; border-radius: 4px; border: 1px solid #c3e6cb;">
+                                <div style="font-size: 0.85em; padding: 8px; background: transparent; border-left: 3px solid #28a745; word-wrap: break-word;">
                                     <div style="margin-bottom: 4px;">
                                         <strong style="color: #155724;">SEC Number:</strong> <span style="color: #155724; font-weight: 600;">${matchingContractor.sec_number}</span>
                                     </div>
@@ -825,7 +825,7 @@ async function processProjects(projects) {
                                         <strong>Registered:</strong> ${matchingContractor.date_registered}
                                     </div>
                                     ` : ''}
-                                    <div style="color: #666; font-size: 0.9em;">
+                                    <div style="color: #666; font-size: 0.9em; word-wrap: break-word;">
                                         <strong>Address:</strong> ${address}
                                     </div>
                                 </div>
@@ -836,11 +836,11 @@ async function processProjects(projects) {
                                 <div style="font-size: 0.9em; color: #856404; font-weight: 600; margin-bottom: 8px;">
                                     🏛️ SEC Registration
                                 </div>
-                                <div style="font-size: 0.85em; padding: 8px; background: #fff3cd; border-radius: 4px; border: 2px solid #ffeaa7;">
+                                <div style="font-size: 0.85em; padding: 8px; background: transparent; border-left: 3px solid #ffc107; word-wrap: break-word;">
                                     <div style="font-weight: 600; color: #856404; margin-bottom: 6px;">
                                         ⚠️ NO SEC RESULTS - SUSPICIOUS
                                     </div>
-                                    <div style="color: #856404; font-size: 0.9em; line-height: 1.4;">
+                                    <div style="color: #856404; font-size: 0.9em; line-height: 1.4; word-wrap: break-word;">
                                         This contractor was searched in the SEC database but yielded <strong>zero results</strong>. 
                                         Government contractors should be SEC-registered.
                                     </div>
