@@ -6,7 +6,7 @@ SetWorkingDir %A_ScriptDir%
 ; Processes 1000 contractors, saves raw results for Python parser
 
 ; Read contractor list from file
-FileRead, contractorData, contractor_list_1000.txt
+FileRead, contractorData, contractor_list_top100_no_sec.txt
 if ErrorLevel {
     MsgBox, 16, Error, Failed to read contractor_list_1000.txt
     ExitApp
@@ -58,6 +58,10 @@ Loop, % contractors.MaxIndex() {
 
     if FileExist(resultFile)
         continue
+
+    ; Reset mouse to top-left corner to prevent scrolling issues
+    MouseMove, 1, 1
+    Sleep, 300
 
     Send, ^a
     Sleep, 200

@@ -105,6 +105,11 @@ class SECContractorParser:
                     await conn.execute('''
                         INSERT INTO contractors (contractor_name, sec_number, date_registered, status, address)
                         VALUES ($1, $2, $3, $4, $5)
+                        ON CONFLICT (contractor_name, sec_number) DO UPDATE
+                        SET date_registered = EXCLUDED.date_registered,
+                            status = EXCLUDED.status,
+                            address = EXCLUDED.address,
+                            updated_at = CURRENT_TIMESTAMP
                     ''', contractor['contractor_name'], contractor['sec_number'],
                          contractor['date_registered'], contractor['status'],
                          contractor['address'])
