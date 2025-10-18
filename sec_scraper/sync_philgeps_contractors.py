@@ -84,55 +84,26 @@ async def main():
         await conn.close()
         return
     
-    # Check for fuzzy duplicates
-    print(f"🔍 Checking for duplicates using fuzzy matching...")
-    truly_new = []
-    duplicates = []
-    
-    for i, new_contractor in enumerate(new_contractors):
-        if (i + 1) % 100 == 0:
-            print(f"   Progress: {i+1}/{len(new_contractors)} contractors checked...")
-        
-        # Check if fuzzy match exists
-        is_duplicate = False
-        for existing in existing_set:
-            if fuzzy_match(new_contractor, existing):
-                duplicates.append((new_contractor, existing))
-                is_duplicate = True
-                break
-        
-        if not is_duplicate:
-            truly_new.append(new_contractor)
-    
-    print(f"✅ Found {len(truly_new)} unique contractors, {len(duplicates)} duplicates\n")
-    
-    if duplicates and len(duplicates) <= 20:
-        print(f"📋 Duplicate examples:")
-        for new, existing in duplicates:
-            print(f"   ❌ '{new}' → matches existing '{existing}'")
-        print()
+    # Skip fuzzy matching - just insert new contractors (exact match already done)
+    print(f"📊 Skipping fuzzy matching for performance")
+    print(f"✅ Found {len(new_contractors)} new contractors to insert\n")
     
     # Insert new contractors
-    if truly_new:
-        print(f"📝 Inserting {len(truly_new)} new contractors...")
+    if new_contractors:
+        print(f"📝 Inserting {len(new_contractors)} new contractors...")
         
         inserted = 0
-        for contractor_name in truly_new:
+        for contractor_name in new_contractors:
             try:
+                # Simple insert (no conflict check since we already filtered exact duplicates)
                 await conn.execute('''
                     INSERT INTO contractors (contractor_name, source)
                     VALUES ($1, $2)
-                    ON CONFLICT (contractor_name) DO UPDATE
-                    SET source = CASE 
-                        WHEN contractors.source IS NULL OR contractors.source = 'unknown' THEN $2
-                        WHEN contractors.source NOT LIKE '%' || $2 || '%' THEN contractors.source || ', ' || $2
-                        ELSE contractors.source
-                    END
                 ''', contractor_name, 'philgeps')
                 inserted += 1
                 
                 if inserted % 100 == 0:
-                    print(f"   Progress: {inserted}/{len(truly_new)}...")
+                    print(f"   Progress: {inserted}/{len(new_contractors)}...")
             except Exception as e:
                 print(f"⚠️  Error inserting '{contractor_name}': {e}")
         
