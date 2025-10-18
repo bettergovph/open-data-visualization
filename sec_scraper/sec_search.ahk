@@ -3,12 +3,13 @@ SendMode Input
 SetWorkingDir %A_ScriptDir%
 
 ; SEC Search Script - Simple version
-; Processes 1000 contractors, saves raw results for Python parser
+; Processes top 100 contractors without SEC data
+; Saves raw results for Python parser
 
 ; Read contractor list from file
 FileRead, contractorData, contractor_list_top100_no_sec.txt
 if ErrorLevel {
-    MsgBox, 16, Error, Failed to read contractor_list_1000.txt
+    MsgBox, 16, Error, Failed to read contractor_list_top100_no_sec.txt
     ExitApp
 }
 

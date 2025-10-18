@@ -40,10 +40,6 @@ class SECContractorParser:
         with open(file_path, 'r', encoding=encoding or 'utf-8', errors='ignore') as f:
             content = f.read()
 
-        # Extract search term from filename (what was searched)
-        filename = os.path.basename(file_path)
-        search_term = filename.replace('.txt', '').replace('_', ' ').strip()
-
         # Pattern to match company details
         company_pattern = r'COMPANY DETAILS\nCompany Name\n(.*?)\n\nSEC Number\n(.*?)\n\nDate Registered\n(.*?)\n\nStatus\n(.*?)\n\nAddress\n(.*?)\n\nSECONDARY LICENSE DETAILS'
 
@@ -71,8 +67,7 @@ class SECContractorParser:
                 pass
 
             companies.append({
-                'contractor_name': company_name,  # Store exact SEC name
-                'search_term': search_term,  # Store what was searched
+                'contractor_name': company_name,  # Exact name from SEC database
                 'sec_number': sec_number,
                 'date_registered': date_obj,
                 'status': status,
@@ -87,30 +82,31 @@ class SECContractorParser:
         
         Stores all companies returned from a search, even if multiple results.
         Each unique combination of (contractor_name, sec_number) is stored.
-        search_term is NOT stored for SEC data - only the exact SEC name.
+        Only exact SEC data is stored - no search terms.
         """
         conn = await asyncpg.connect(**self.db_config)
 
         try:
             for contractor in contractors:
-                # Use UPSERT to handle both insert and update
-                # Store ALL companies from search results (even if multiple matches)
-                # Do NOT store search_term - only exact SEC data
-                # On conflict: OVERWRITE with latest data from SEC
+                # Delete any existing entry with this SEC number (drops old search terms)
+                # Then insert the new entry with exact SEC name
+                deleted = await conn.fetchval('''
+                    DELETE FROM contractors 
+                    WHERE sec_number = $1
+                    RETURNING contractor_name
+                ''', contractor['sec_number'])
+                
+                if deleted:
+                    print(f"🗑️ Dropped old entry: {deleted} (same SEC number)")
+                
+                # Insert the new entry with exact SEC data
                 await conn.execute('''
                     INSERT INTO contractors (contractor_name, sec_number, date_registered, status, address)
                     VALUES ($1, $2, $3, $4, $5)
-                    ON CONFLICT (contractor_name, sec_number) DO UPDATE
-                    SET contractor_name = EXCLUDED.contractor_name,
-                        date_registered = EXCLUDED.date_registered,
-                        status = EXCLUDED.status,
-                        address = EXCLUDED.address,
-                        updated_at = CURRENT_TIMESTAMP
                 ''', contractor['contractor_name'], contractor['sec_number'],
                      contractor['date_registered'], contractor['status'],
                      contractor['address'])
-                search_info = f" (searched: {contractor['search_term']})" if contractor.get('search_term') else ""
-                print(f"✅ Processed: {contractor['contractor_name']}{search_info}")
+                print(f"✅ Processed: {contractor['contractor_name']}")
 
         finally:
             await conn.close()
