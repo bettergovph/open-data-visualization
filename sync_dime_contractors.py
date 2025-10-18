@@ -334,8 +334,8 @@ def find_duplicates_with_fuzzy_match(new_contractors: Set[str], existing_contrac
     return unique_contractors, duplicates
 
 
-async def add_former_id_column():
-    """Add former_id column to contractors table if it doesn't exist"""
+async def add_missing_columns():
+    """Add missing columns to contractors table if they don't exist"""
     print("🔧 Checking contractors table schema...")
     
     conn = await asyncpg.connect(
@@ -348,7 +348,7 @@ async def add_former_id_column():
     
     try:
         # Check if former_id column exists
-        column_exists = await conn.fetchval(
+        former_id_exists = await conn.fetchval(
             """
             SELECT EXISTS (
                 SELECT 1 FROM information_schema.columns 
@@ -358,16 +358,38 @@ async def add_former_id_column():
             """
         )
         
-        if not column_exists:
+        if not former_id_exists:
             await conn.execute(
                 """
                 ALTER TABLE contractors 
                 ADD COLUMN former_id INTEGER REFERENCES contractors(id)
                 """
             )
-            print("✅ Added former_id column to contractors table")
+            print("✅ Added former_id column")
         else:
             print("✅ former_id column already exists")
+        
+        # Check if source column exists
+        source_exists = await conn.fetchval(
+            """
+            SELECT EXISTS (
+                SELECT 1 FROM information_schema.columns 
+                WHERE table_name = 'contractors' 
+                AND column_name = 'source'
+            )
+            """
+        )
+        
+        if not source_exists:
+            await conn.execute(
+                """
+                ALTER TABLE contractors 
+                ADD COLUMN source TEXT DEFAULT 'unknown'
+                """
+            )
+            print("✅ Added source column")
+        else:
+            print("✅ source column already exists")
             
     finally:
         await conn.close()
@@ -412,11 +434,17 @@ async def insert_new_contractors(new_contractors: List[str]):
             try:
                 result = await conn.execute(
                     """
-                    INSERT INTO contractors (contractor_name)
-                    VALUES ($1)
-                    ON CONFLICT (contractor_name) DO NOTHING
+                    INSERT INTO contractors (contractor_name, source)
+                    VALUES ($1, $2)
+                    ON CONFLICT (contractor_name) DO UPDATE
+                    SET source = CASE 
+                        WHEN contractors.source = 'unknown' OR contractors.source IS NULL 
+                        THEN $2 
+                        ELSE contractors.source || ', ' || $2
+                    END
                     """,
-                    contractor_name
+                    contractor_name,
+                    'dime'
                 )
                 # Check if row was actually inserted
                 if result == "INSERT 0 1":
@@ -431,17 +459,22 @@ async def insert_new_contractors(new_contractors: List[str]):
                 skipped += 1
         
         print(f"✅ Successfully inserted {inserted} new contractors ({skipped} skipped/duplicates)")
+        print(f"   Note: Source field updated to track 'dime' origin")
         
     finally:
         await conn.close()
 
 
 async def main():
-    print("🚀 Starting DIME to PhilGEPS contractors sync...")
+    print("🚀 Starting DIME contractors sync...")
+    print("📌 Unified contractors database: philgeps.contractors")
+    print("   - Contains contractors from: DIME, PhilGEPS, SEC")
+    print("   - JV contractors split into individual companies")
+    print("   - Former names tracked separately")
     print()
     
-    # Add former_id column if it doesn't exist
-    await add_former_id_column()
+    # Add missing columns if they don't exist
+    await add_missing_columns()
     print()
     
     # Get contractors from DIME
