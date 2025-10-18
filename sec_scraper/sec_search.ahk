@@ -2,13 +2,19 @@
 SendMode Input
 SetWorkingDir %A_ScriptDir%
 
+MsgBox, Script started
+
 FileRead, contractorData, contractor_list_top100_no_sec.txt
-if ErrorLevel
+if ErrorLevel {
+    MsgBox, Failed to read file
     ExitApp
+}
 
 RegExMatch(contractorData, "contractors := \[(.*)\]", match)
-if (!match)
+if (!match) {
+    MsgBox, Failed to parse
     ExitApp
+}
 
 contractors := []
 Loop, Parse, match1, `"
@@ -19,6 +25,8 @@ Loop, Parse, match1, `"
     if (cleaned != "" && StrLen(cleaned) > 5)
         contractors.Push(cleaned)
 }
+
+MsgBox, Parsed %contractors.MaxIndex()% contractors. Starting...
 
 Loop, % contractors.MaxIndex() {
     contractorName := contractors[A_Index]
