@@ -46,6 +46,7 @@ async def generate_sec_json():
         contractors_list = []
         contractors_with_sec = 0
         contractors_without_sec = 0
+        contractors_suspicious = 0  # Searched but yielded NO results
 
         for contractor in contractors:
             # Convert to dict
@@ -65,18 +66,22 @@ async def generate_sec_json():
 
             contractors_list.append(contractor_dict)
 
-            # Count contractors with/without SEC data
+            # Count contractors by category
             if contractor['sec_number'] and contractor['sec_number'].strip():
                 contractors_with_sec += 1
             else:
                 contractors_without_sec += 1
+                # Check if this is suspicious (searched but no results)
+                if contractor['status'] == 'NO_SEC_RESULTS':
+                    contractors_suspicious += 1
 
         # Build complete JSON structure
         output = {
             'summary': {
                 'total_contractors': len(contractors),
-                'contractors_with_sec_data': contractors_with_sec,
-                'contractors_with_zero_results': contractors_without_sec,
+                'with_sec_data': contractors_with_sec,
+                'without_sec_data': contractors_without_sec,
+                'suspicious_no_results': contractors_suspicious,
                 'last_updated': datetime.now().isoformat(),
                 'processing_batch': 'database_generated',
                 'source': 'PostgreSQL philgeps.contractors table'
@@ -93,6 +98,7 @@ async def generate_sec_json():
         print(f"   • Total contractors: {len(contractors)}")
         print(f"   • With SEC data: {contractors_with_sec}")
         print(f"   • Without SEC data: {contractors_without_sec}")
+        print(f"   • ⚠️ Suspicious (NO SEC RESULTS): {contractors_suspicious}")
 
     finally:
         await conn.close()

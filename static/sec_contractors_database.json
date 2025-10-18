@@ -1,9 +1,10 @@
 {
   "summary": {
-    "total_contractors": 23,
-    "contractors_with_sec_data": 23,
-    "contractors_with_zero_results": 0,
-    "last_updated": "2025-10-18T16:59:03.971619",
+    "total_contractors": 49,
+    "with_sec_data": 36,
+    "without_sec_data": 13,
+    "suspicious_no_results": 13,
+    "last_updated": "2025-10-18T17:23:38.578311",
     "processing_batch": "database_generated",
     "source": "PostgreSQL philgeps.contractors table"
   },
@@ -19,7 +20,7 @@
       "reportorial_submissions": "",
       "source": "database",
       "processed_at": "2025-10-18T15:19:34.210236",
-      "updated_at": "2025-10-18T16:58:48.831507"
+      "updated_at": "2025-10-18T17:20:57.892255"
     },
     {
       "original_contractor_name": "\"TOWA CONSTRUCTION AND DEVELOPMENT CORPORATION\"",
@@ -32,7 +33,7 @@
       "reportorial_submissions": "",
       "source": "database",
       "processed_at": "2025-10-18T15:19:34.212897",
-      "updated_at": "2025-10-18T16:58:48.832886"
+      "updated_at": "2025-10-18T17:20:57.894088"
     },
     {
       "original_contractor_name": "\"V.P. MANCAO CONSTRUCTION AND COMPANY, INC.\"",
@@ -45,7 +46,7 @@
       "reportorial_submissions": "",
       "source": "database",
       "processed_at": "2025-10-18T15:19:34.215877",
-      "updated_at": "2025-10-18T16:58:48.834739"
+      "updated_at": "2025-10-18T17:20:57.895699"
     },
     {
       "original_contractor_name": "'94 BUILDERS CONSTRUCTION AND SUPPLY CORP.",
@@ -58,7 +59,7 @@
       "reportorial_submissions": "",
       "source": "database",
       "processed_at": "2025-10-18T15:19:34.218575",
-      "updated_at": "2025-10-18T16:58:48.836045"
+      "updated_at": "2025-10-18T17:20:57.897678"
     },
     {
       "original_contractor_name": "(A.D) ANNO DOMINI CONSTRUCTION AND DEVELOPMENT CORP.",
@@ -71,7 +72,7 @@
       "reportorial_submissions": "",
       "source": "database",
       "processed_at": "2025-10-18T15:19:34.220630",
-      "updated_at": "2025-10-18T16:58:48.837831"
+      "updated_at": "2025-10-18T17:20:57.899056"
     },
     {
       "original_contractor_name": "0213 CONSTRUCTION AND SUPPLIES OPC",
@@ -84,7 +85,7 @@
       "reportorial_submissions": "",
       "source": "database",
       "processed_at": "2025-10-18T15:19:34.223553",
-      "updated_at": "2025-10-18T16:58:48.839234"
+      "updated_at": "2025-10-18T17:20:57.900997"
     },
     {
       "original_contractor_name": "12-30.CONSTRUCTION AND DEVELOPMENT Corporation",
@@ -97,7 +98,7 @@
       "reportorial_submissions": "",
       "source": "database",
       "processed_at": "2025-10-18T15:19:34.200675",
-      "updated_at": "2025-10-18T16:58:48.824404"
+      "updated_at": "2025-10-18T17:20:57.884039"
     },
     {
       "original_contractor_name": "1FC DIZON CORP.",
@@ -110,7 +111,20 @@
       "reportorial_submissions": "",
       "source": "database",
       "processed_at": "2025-10-18T15:19:34.198643",
-      "updated_at": "2025-10-18T16:58:48.779649"
+      "updated_at": "2025-10-18T17:20:57.830135"
+    },
+    {
+      "original_contractor_name": "1FC DIZON CORP.",
+      "company_name": "1FC DIZON CORP.",
+      "sec_number": "",
+      "status": "NO_SEC_RESULTS",
+      "date_registered": "",
+      "registered_address": "",
+      "secondary_license_details": "No records of secondary licenses were found.",
+      "reportorial_submissions": "",
+      "source": "database",
+      "processed_at": "2025-10-18T17:21:58.462628",
+      "updated_at": "2025-10-18T17:21:58.462628"
     },
     {
       "original_contractor_name": "1HB CONSTRUCTION Corp.",
@@ -123,7 +137,59 @@
       "reportorial_submissions": "",
       "source": "database",
       "processed_at": "2025-10-18T15:19:34.191558",
-      "updated_at": "2025-10-18T16:58:48.774613"
+      "updated_at": "2025-10-18T17:20:57.818431"
+    },
+    {
+      "original_contractor_name": "A.C. RIVERO DEVELOPMENT CORPORATION",
+      "company_name": "A.C. RIVERO DEVELOPMENT CORPORATION",
+      "sec_number": "AS92001908",
+      "status": "Registered",
+      "date_registered": "",
+      "registered_address": "2929 BURGOS EXT BACOLOD CITY , NEGROS OCCIDENTAL, REGION VI (WESTERN VISAYAS)",
+      "secondary_license_details": "No records of secondary licenses were found.",
+      "reportorial_submissions": "",
+      "source": "database",
+      "processed_at": "2025-10-18T17:20:42.883492",
+      "updated_at": "2025-10-18T17:20:57.811691"
+    },
+    {
+      "original_contractor_name": "A.D. GONZALES JR. CONSTRUCTION",
+      "company_name": "A.D. GONZALES JR. CONSTRUCTION",
+      "sec_number": "",
+      "status": "NO_SEC_RESULTS",
+      "date_registered": "",
+      "registered_address": "",
+      "secondary_license_details": "No records of secondary licenses were found.",
+      "reportorial_submissions": "",
+      "source": "database",
+      "processed_at": "2025-10-18T17:21:58.469103",
+      "updated_at": "2025-10-18T17:21:58.469103"
+    },
+    {
+      "original_contractor_name": "A.D. PENDON CONSTRUCTION",
+      "company_name": "A.D. PENDON CONSTRUCTION",
+      "sec_number": "",
+      "status": "NO_SEC_RESULTS",
+      "date_registered": "",
+      "registered_address": "",
+      "secondary_license_details": "No records of secondary licenses were found.",
+      "reportorial_submissions": "",
+      "source": "database",
+      "processed_at": "2025-10-18T17:21:58.470432",
+      "updated_at": "2025-10-18T17:21:58.470432"
+    },
+    {
+      "original_contractor_name": "ALPHA & OMEGA GEN. CONTRACTOR & DEVELOPMENT CORP.",
+      "company_name": "ALPHA & OMEGA GEN. CONTRACTOR & DEVELOPMENT CORP.",
+      "sec_number": "",
+      "status": "NO_SEC_RESULTS",
+      "date_registered": "",
+      "registered_address": "",
+      "secondary_license_details": "No records of secondary licenses were found.",
+      "reportorial_submissions": "",
+      "source": "database",
+      "processed_at": "2025-10-18T17:21:58.466916",
+      "updated_at": "2025-10-18T17:21:58.466916"
     },
     {
       "original_contractor_name": "ALPHA & OMEGA GEN. CONTRACTOR & DEVELOPMENT CORP.",
@@ -136,7 +202,20 @@
       "reportorial_submissions": "",
       "source": "database",
       "processed_at": "2025-10-18T16:39:07.476334",
-      "updated_at": "2025-10-18T16:58:48.782769"
+      "updated_at": "2025-10-18T17:20:57.833554"
+    },
+    {
+      "original_contractor_name": "ARMANDO U. KHONG HUN AND ST. GERRARD CONSTRUCTION, LTD. CO.",
+      "company_name": "ARMANDO U. KHONG HUN AND ST. GERRARD CONSTRUCTION, LTD. CO.",
+      "sec_number": "PL201419885",
+      "status": "Registered",
+      "date_registered": "",
+      "registered_address": "CY SY BLDG 156 , LIBERTAD ST , CALOOCAN CITY, THIRD DISTRICT, NATIONAL CAPITAL REGION (NCR)",
+      "secondary_license_details": "No records of secondary licenses were found.",
+      "reportorial_submissions": "",
+      "source": "database",
+      "processed_at": "2025-10-18T17:20:42.893697",
+      "updated_at": "2025-10-18T17:20:57.821845"
     },
     {
       "original_contractor_name": "CENTERWAYS CONSTRUCTION AND DEVELOPMENT INC.",
@@ -149,7 +228,59 @@
       "reportorial_submissions": "",
       "source": "database",
       "processed_at": "2025-10-18T16:58:35.873723",
-      "updated_at": "2025-10-18T16:58:48.769478"
+      "updated_at": "2025-10-18T17:20:57.809546"
+    },
+    {
+      "original_contractor_name": "EQUI-PARCO CONSTRUCTION COMPANY",
+      "company_name": "EQUI-PARCO CONSTRUCTION COMPANY",
+      "sec_number": "PG200307029",
+      "status": "Registered",
+      "date_registered": "",
+      "registered_address": "purok 3, ambangan ambago, , BUTUAN CITY (Capital), AGUSAN DEL NORTE, REGION XIII (Caraga)",
+      "secondary_license_details": "No records of secondary licenses were found.",
+      "reportorial_submissions": "",
+      "source": "database",
+      "processed_at": "2025-10-18T17:20:42.876752",
+      "updated_at": "2025-10-18T17:20:57.805531"
+    },
+    {
+      "original_contractor_name": "FFJJ CONSTRUCTION CORP. DOING BUSINESS UNDER THE NAME AND STYLE OF FFJJ RASUL RICHY CONSTRUCTION",
+      "company_name": "FFJJ CONSTRUCTION CORP. DOING BUSINESS UNDER THE NAME AND STYLE OF FFJJ RASUL RICHY CONSTRUCTION",
+      "sec_number": "CS201719070",
+      "status": "Registered",
+      "date_registered": "",
+      "registered_address": "NO. 12 2ND BATCH, BLK XI, NOTRE DAME VILLAGE , CITY OF COTABATO, MAGUINDANAO DEL SUR, BANGSAMORO AUTONOMOUS REGION IN MUSLIM MINDANAO (BARMM), 9600",
+      "secondary_license_details": "No records of secondary licenses were found.",
+      "reportorial_submissions": "",
+      "source": "database",
+      "processed_at": "2025-10-18T17:20:42.983162",
+      "updated_at": "2025-10-18T17:20:57.905999"
+    },
+    {
+      "original_contractor_name": "FIRST NORTHWAY DEVELOPMENT AND CONSTRUCTION CORPORATION",
+      "company_name": "FIRST NORTHWAY DEVELOPMENT AND CONSTRUCTION CORPORATION",
+      "sec_number": "0000150635",
+      "status": "Registered",
+      "date_registered": "",
+      "registered_address": "NATIONAL HIGHWAY , CITY OF CANDON, ILOCOS SUR, REGION I (ILOCOS REGION)",
+      "secondary_license_details": "No records of secondary licenses were found.",
+      "reportorial_submissions": "",
+      "source": "database",
+      "processed_at": "2025-10-18T17:20:42.878248",
+      "updated_at": "2025-10-18T17:20:57.807898"
+    },
+    {
+      "original_contractor_name": "FIT CONSTRUCTION",
+      "company_name": "FIT CONSTRUCTION",
+      "sec_number": "",
+      "status": "NO_SEC_RESULTS",
+      "date_registered": "",
+      "registered_address": "",
+      "secondary_license_details": "No records of secondary licenses were found.",
+      "reportorial_submissions": "",
+      "source": "database",
+      "processed_at": "2025-10-18T17:21:58.472284",
+      "updated_at": "2025-10-18T17:21:58.472284"
     },
     {
       "original_contractor_name": "FLORDES CONSTRUCTION AND TRADING CORP.",
@@ -162,7 +293,7 @@
       "reportorial_submissions": "",
       "source": "database",
       "processed_at": "2025-10-18T16:58:35.880460",
-      "updated_at": "2025-10-18T16:58:48.773212"
+      "updated_at": "2025-10-18T17:20:57.815001"
     },
     {
       "original_contractor_name": "FRAMECON BUILDERS/JMK BUILDERS CONSTRUCTION (JV) CO.",
@@ -175,7 +306,20 @@
       "reportorial_submissions": "",
       "source": "database",
       "processed_at": "2025-10-18T16:58:35.954145",
-      "updated_at": "2025-10-18T16:58:48.841147"
+      "updated_at": "2025-10-18T17:20:57.902589"
+    },
+    {
+      "original_contractor_name": "IBC INTERNATIONAL BUILDERS CORPORATION doing business under the name and style of GT Plaza Mall; and GT Town Center",
+      "company_name": "IBC INTERNATIONAL BUILDERS CORPORATION doing business under the name and style of GT Plaza Mall; and GT Town Center",
+      "sec_number": "0000125382",
+      "status": "Registered",
+      "date_registered": "",
+      "registered_address": "ILOILO CITY , ILOILO, REGION VI (WESTERN VISAYAS)",
+      "secondary_license_details": "No records of secondary licenses were found.",
+      "reportorial_submissions": "",
+      "source": "database",
+      "processed_at": "2025-10-18T17:20:42.920771",
+      "updated_at": "2025-10-18T17:20:57.843824"
     },
     {
       "original_contractor_name": "J. B. FELIPE CONSTRUCTION CORPORATION",
@@ -188,7 +332,20 @@
       "reportorial_submissions": "",
       "source": "database",
       "processed_at": "2025-10-18T16:03:55.677354",
-      "updated_at": "2025-10-18T16:58:48.787368"
+      "updated_at": "2025-10-18T17:20:57.840492"
+    },
+    {
+      "original_contractor_name": "JAGONBUILD CONSTRUCTION CORP.",
+      "company_name": "JAGONBUILD CONSTRUCTION CORP.",
+      "sec_number": "CS201206065",
+      "status": "Registered",
+      "date_registered": "",
+      "registered_address": "141 , GOV F HALILI AVE , BULACAN, REGION III (CENTRAL LUZON)",
+      "secondary_license_details": "No records of secondary licenses were found.",
+      "reportorial_submissions": "",
+      "source": "database",
+      "processed_at": "2025-10-18T17:20:42.888279",
+      "updated_at": "2025-10-18T17:20:57.816479"
     },
     {
       "original_contractor_name": "KIT UBIADAS CONSTRUCTION CORPORATION",
@@ -201,7 +358,7 @@
       "reportorial_submissions": "",
       "source": "database",
       "processed_at": "2025-10-18T16:58:35.899720",
-      "updated_at": "2025-10-18T16:58:48.790520"
+      "updated_at": "2025-10-18T17:20:57.845785"
     },
     {
       "original_contractor_name": "L.R. TIQUI BUILDERS INC.",
@@ -214,7 +371,7 @@
       "reportorial_submissions": "",
       "source": "database",
       "processed_at": "2025-10-18T16:58:35.888915",
-      "updated_at": "2025-10-18T16:58:48.781002"
+      "updated_at": "2025-10-18T17:20:57.832126"
     },
     {
       "original_contractor_name": "M.G. Samidan Construction and Development Corporation",
@@ -227,7 +384,7 @@
       "reportorial_submissions": "",
       "source": "database",
       "processed_at": "2025-10-18T16:58:35.898030",
-      "updated_at": "2025-10-18T16:58:48.789242"
+      "updated_at": "2025-10-18T17:20:57.842384"
     },
     {
       "original_contractor_name": "MBAJRJC4 CONSTRUCTION AND TRADING CORPORATION",
@@ -240,7 +397,46 @@
       "reportorial_submissions": "",
       "source": "database",
       "processed_at": "2025-10-18T15:19:34.203352",
-      "updated_at": "2025-10-18T16:58:48.826190"
+      "updated_at": "2025-10-18T17:20:57.886052"
+    },
+    {
+      "original_contractor_name": "NORTHERN BUILDERS CONSTRUCTION CORPORATION",
+      "company_name": "NORTHERN BUILDERS CONSTRUCTION CORPORATION",
+      "sec_number": "2023070107233-03",
+      "status": "Registered",
+      "date_registered": "",
+      "registered_address": "KM. 131 CARLOS P. ROMULO HIGHWAY , Baras-baras, CITY OF TARLAC (Capital), TARLAC, REGION III (CENTRAL LUZON), 2300",
+      "secondary_license_details": "No records of secondary licenses were found.",
+      "reportorial_submissions": "",
+      "source": "database",
+      "processed_at": "2025-10-18T17:20:42.870538",
+      "updated_at": "2025-10-18T17:20:57.798049"
+    },
+    {
+      "original_contractor_name": "NORTHERN BUILDERS INC.",
+      "company_name": "NORTHERN BUILDERS INC.",
+      "sec_number": "0000074505",
+      "status": "Revoked",
+      "date_registered": "",
+      "registered_address": "TARLAC TARLAC , TARLAC, REGION III (CENTRAL LUZON)",
+      "secondary_license_details": "No records of secondary licenses were found.",
+      "reportorial_submissions": "",
+      "source": "database",
+      "processed_at": "2025-10-18T17:20:42.874682",
+      "updated_at": "2025-10-18T17:20:57.803799"
+    },
+    {
+      "original_contractor_name": "QM BUILDERS",
+      "company_name": "QM BUILDERS",
+      "sec_number": "",
+      "status": "NO_SEC_RESULTS",
+      "date_registered": "",
+      "registered_address": "",
+      "secondary_license_details": "No records of secondary licenses were found.",
+      "reportorial_submissions": "",
+      "source": "database",
+      "processed_at": "2025-10-18T17:21:58.473586",
+      "updated_at": "2025-10-18T17:21:58.473586"
     },
     {
       "original_contractor_name": "R. Rivera Construction and Services OPC",
@@ -253,7 +449,72 @@
       "reportorial_submissions": "",
       "source": "database",
       "processed_at": "2025-10-18T15:19:34.204928",
-      "updated_at": "2025-10-18T16:58:48.828244"
+      "updated_at": "2025-10-18T17:20:57.887430"
+    },
+    {
+      "original_contractor_name": "REMAR CONSTRUCTION",
+      "company_name": "REMAR CONSTRUCTION",
+      "sec_number": "",
+      "status": "NO_SEC_RESULTS",
+      "date_registered": "",
+      "registered_address": "",
+      "secondary_license_details": "No records of secondary licenses were found.",
+      "reportorial_submissions": "",
+      "source": "database",
+      "processed_at": "2025-10-18T17:21:58.475392",
+      "updated_at": "2025-10-18T17:21:58.475392"
+    },
+    {
+      "original_contractor_name": "ROSBILL CONSTRUCTION AND SUPPLY",
+      "company_name": "ROSBILL CONSTRUCTION AND SUPPLY",
+      "sec_number": "",
+      "status": "NO_SEC_RESULTS",
+      "date_registered": "",
+      "registered_address": "",
+      "secondary_license_details": "No records of secondary licenses were found.",
+      "reportorial_submissions": "",
+      "source": "database",
+      "processed_at": "2025-10-18T17:21:58.476688",
+      "updated_at": "2025-10-18T17:21:58.476688"
+    },
+    {
+      "original_contractor_name": "ROYAL CROWN MONARCH CONSTRUCTION",
+      "company_name": "ROYAL CROWN MONARCH CONSTRUCTION",
+      "sec_number": "",
+      "status": "NO_SEC_RESULTS",
+      "date_registered": "",
+      "registered_address": "",
+      "secondary_license_details": "No records of secondary licenses were found.",
+      "reportorial_submissions": "",
+      "source": "database",
+      "processed_at": "2025-10-18T17:21:58.478433",
+      "updated_at": "2025-10-18T17:21:58.478433"
+    },
+    {
+      "original_contractor_name": "ST. GERRARD CONSTRUCTION AND R.G. FLORENTINO CONSTRUCTION & TRADING COMPANY",
+      "company_name": "ST. GERRARD CONSTRUCTION AND R.G. FLORENTINO CONSTRUCTION & TRADING COMPANY",
+      "sec_number": "PG201420430",
+      "status": "Registered",
+      "date_registered": "",
+      "registered_address": "VILLAMOR ST., , ROMBLON (Capital), ROMBLON, REGION IV-B (MIMAROPA)",
+      "secondary_license_details": "No records of secondary licenses were found.",
+      "reportorial_submissions": "",
+      "source": "database",
+      "processed_at": "2025-10-18T17:20:42.895231",
+      "updated_at": "2025-10-18T17:20:57.823268"
+    },
+    {
+      "original_contractor_name": "ST. GERRARD CONSTRUCTION GEN. CONTRACTOR & DEVELOPMENT CORP.",
+      "company_name": "ST. GERRARD CONSTRUCTION GEN. CONTRACTOR & DEVELOPMENT CORP.",
+      "sec_number": "CS201522644",
+      "status": "Registered",
+      "date_registered": "",
+      "registered_address": "0792 , F. MANALO COR J PUEBLO , CITY OF PASIG, SECOND DISTRICT, NATIONAL CAPITAL REGION (NCR)",
+      "secondary_license_details": "No records of secondary licenses were found.",
+      "reportorial_submissions": "",
+      "source": "database",
+      "processed_at": "2025-10-18T17:20:42.897307",
+      "updated_at": "2025-10-18T17:20:57.825249"
     },
     {
       "original_contractor_name": "ST. TIMOTHY CONSTRUCTION CORPORATION",
@@ -266,7 +527,33 @@
       "reportorial_submissions": "",
       "source": "database",
       "processed_at": "2025-10-18T16:03:55.673744",
-      "updated_at": "2025-10-18T16:58:48.777777"
+      "updated_at": "2025-10-18T17:20:57.828581"
+    },
+    {
+      "original_contractor_name": "STO. CRISTO CONSTRUCTION",
+      "company_name": "STO. CRISTO CONSTRUCTION",
+      "sec_number": "",
+      "status": "NO_SEC_RESULTS",
+      "date_registered": "",
+      "registered_address": "",
+      "secondary_license_details": "No records of secondary licenses were found.",
+      "reportorial_submissions": "",
+      "source": "database",
+      "processed_at": "2025-10-18T17:21:58.479740",
+      "updated_at": "2025-10-18T17:21:58.479740"
+    },
+    {
+      "original_contractor_name": "SUNWEST CONSTRUCTION",
+      "company_name": "SUNWEST CONSTRUCTION",
+      "sec_number": "",
+      "status": "NO_SEC_RESULTS",
+      "date_registered": "",
+      "registered_address": "",
+      "secondary_license_details": "No records of secondary licenses were found.",
+      "reportorial_submissions": "",
+      "source": "database",
+      "processed_at": "2025-10-18T17:21:58.481459",
+      "updated_at": "2025-10-18T17:21:58.481459"
     },
     {
       "original_contractor_name": "TRIPLE 8 CONST. & SUPPLY INC.",
@@ -279,7 +566,7 @@
       "reportorial_submissions": "",
       "source": "database",
       "processed_at": "2025-10-18T16:58:35.892501",
-      "updated_at": "2025-10-18T16:58:48.784163"
+      "updated_at": "2025-10-18T17:20:57.835547"
     },
     {
       "original_contractor_name": "UNITED FRAMECON BUILDERS CORPORATION",
@@ -292,7 +579,46 @@
       "reportorial_submissions": "",
       "source": "database",
       "processed_at": "2025-10-18T16:58:35.956344",
-      "updated_at": "2025-10-18T16:58:48.842443"
+      "updated_at": "2025-10-18T17:20:57.904440"
+    },
+    {
+      "original_contractor_name": "VCD CONSTRUCTION, INC.",
+      "company_name": "VCD CONSTRUCTION, INC.",
+      "sec_number": "CS201401307",
+      "status": "Registered",
+      "date_registered": "",
+      "registered_address": "san guillermo national hway , ILOCOS NORTE, REGION I (ILOCOS REGION)",
+      "secondary_license_details": "No records of secondary licenses were found.",
+      "reportorial_submissions": "",
+      "source": "database",
+      "processed_at": "2025-10-18T17:20:42.911395",
+      "updated_at": "2025-10-18T17:20:57.839019"
+    },
+    {
+      "original_contractor_name": "VILLAR GENERAL CONSTRUCTION",
+      "company_name": "VILLAR GENERAL CONSTRUCTION",
+      "sec_number": "",
+      "status": "NO_SEC_RESULTS",
+      "date_registered": "",
+      "registered_address": "",
+      "secondary_license_details": "No records of secondary licenses were found.",
+      "reportorial_submissions": "",
+      "source": "database",
+      "processed_at": "2025-10-18T17:21:58.482685",
+      "updated_at": "2025-10-18T17:21:58.482685"
+    },
+    {
+      "original_contractor_name": "VILLAR GENERAL CONSTRUCTION & SUPPLIES",
+      "company_name": "VILLAR GENERAL CONSTRUCTION & SUPPLIES",
+      "sec_number": "",
+      "status": "NO_SEC_RESULTS",
+      "date_registered": "",
+      "registered_address": "",
+      "secondary_license_details": "No records of secondary licenses were found.",
+      "reportorial_submissions": "",
+      "source": "database",
+      "processed_at": "2025-10-18T17:21:58.484384",
+      "updated_at": "2025-10-18T17:21:58.484384"
     },
     {
       "original_contractor_name": "VONTREX CONSTRUCTION AND SERVICES OPC",
@@ -305,7 +631,20 @@
       "reportorial_submissions": "",
       "source": "database",
       "processed_at": "2025-10-18T15:19:34.207609",
-      "updated_at": "2025-10-18T16:58:48.829642"
+      "updated_at": "2025-10-18T17:20:57.890680"
+    },
+    {
+      "original_contractor_name": "WAWAO BUILDERS CORPORATION",
+      "company_name": "WAWAO BUILDERS CORPORATION",
+      "sec_number": "2025040198133-04",
+      "status": "Registered",
+      "date_registered": "",
+      "registered_address": "RIZAL ST. , Barangay 1 (Pob.), SAN JOSE, OCCIDENTAL MINDORO, REGION IV-B (MIMAROPA), 5100",
+      "secondary_license_details": "No records of secondary licenses were found.",
+      "reportorial_submissions": "",
+      "source": "database",
+      "processed_at": "2025-10-18T17:20:42.891674",
+      "updated_at": "2025-10-18T17:20:57.819903"
     }
   ]
 }

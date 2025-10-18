@@ -206,6 +206,19 @@ h1, h2, h3, h4, h5, h6 {
     100% { transform: rotate(360deg); }
 }
 
+@keyframes pulse-warning {
+    0%, 100% { 
+        background-color: #fff3cd; 
+        border-color: #ffeaa7;
+        transform: scale(1);
+    }
+    50% { 
+        background-color: #ffd93d; 
+        border-color: #ffb700;
+        transform: scale(1.05);
+    }
+}
+
 /* Budget tab button styling */
 .budget-tab-btn {
     text-decoration: none;
@@ -914,21 +927,26 @@ function toggleMobileMenu() {
                     <p style="color: #666; margin: 0 0 20px 0;">Analyze contractor SEC registration data and identify contractors without SEC information</p>
                     
                     <!-- SEC Statistics -->
-                    <div class="sec-stats" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 20px;">
+                    <div class="sec-stats" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 15px; margin-bottom: 20px;">
                         <div class="stat-card" style="background: #f8f9fa; padding: 15px; border-radius: 8px; text-align: center;">
-                            <h4 style="color: #0038A8; margin: 0 0 5px 0; font-size: 1.2em;">Total Contractors</h4>
+                            <h4 style="color: #0038A8; margin: 0 0 5px 0; font-size: 1.1em;">Total Contractors</h4>
                             <p id="sec-total-contractors-count" style="font-size: 2em; font-weight: bold; color: #007bff; margin: 0;">Loading...</p>
                         </div>
                         <div class="stat-card" style="background: #f8f9fa; padding: 15px; border-radius: 8px; text-align: center;">
-                            <h4 style="color: #0038A8; margin: 0 0 5px 0; font-size: 1.2em;">Total SEC Records</h4>
+                            <h4 style="color: #0038A8; margin: 0 0 5px 0; font-size: 1.1em;">With SEC Data</h4>
                             <p id="total-sec-count" style="font-size: 2em; font-weight: bold; color: #28a745; margin: 0;">Loading...</p>
                         </div>
                         <div class="stat-card" style="background: #f8f9fa; padding: 15px; border-radius: 8px; text-align: center;">
-                            <h4 style="color: #0038A8; margin: 0 0 5px 0; font-size: 1.2em;">Without SEC Data</h4>
+                            <h4 style="color: #0038A8; margin: 0 0 5px 0; font-size: 1.1em;">Without SEC Data</h4>
                             <p id="without-sec-count" style="font-size: 2em; font-weight: bold; color: #dc3545; margin: 0;">Loading...</p>
                         </div>
+                        <div class="stat-card" style="background: #fff3cd; padding: 15px; border-radius: 8px; text-align: center; border: 2px solid #ffeaa7;">
+                            <h4 style="color: #856404; margin: 0 0 5px 0; font-size: 1.1em;">⚠️ Suspicious</h4>
+                            <p id="suspicious-sec-count" style="font-size: 2em; font-weight: bold; color: #856404; margin: 0;">Loading...</p>
+                            <p style="font-size: 0.7em; color: #856404; margin: 5px 0 0 0;">No SEC Results</p>
+                        </div>
                         <div class="stat-card" style="background: #f8f9fa; padding: 15px; border-radius: 8px; text-align: center;">
-                            <h4 style="color: #0038A8; margin: 0 0 5px 0; font-size: 1.2em;">Coverage Rate</h4>
+                            <h4 style="color: #0038A8; margin: 0 0 5px 0; font-size: 1.1em;">Coverage Rate</h4>
                             <p id="sec-coverage-rate" style="font-size: 2em; font-weight: bold; color: #ffc107; margin: 0;">Loading...</p>
                         </div>
                     </div>
@@ -3226,6 +3244,9 @@ function getContractorSecStatusSync(contractorName) {
         if (matchingContractor.sec_number && matchingContractor.sec_number.trim() !== '') {
             console.log('✅ Has SEC data:', matchingContractor.sec_number);
             return '<span style="padding: 4px 8px; border-radius: 4px; font-size: 0.8em; font-weight: 600; color: #155724; background-color: #d4edda; border: 1px solid #c3e6cb;">✅ Has SEC</span>';
+        } else if (matchingContractor.status === 'NO_SEC_RESULTS') {
+            console.log('⚠️ Contractor searched but yielded NO SEC results - SUSPICIOUS');
+            return '<span style="padding: 4px 8px; border-radius: 4px; font-size: 0.8em; font-weight: 600; color: #856404; background-color: #fff3cd; border: 1px solid #ffeaa7; animation: pulse-warning 2s ease-in-out infinite;">⚠️ NO SEC RESULTS</span>';
         } else {
             console.log('❌ No SEC data found for processed contractor');
             return '<span style="padding: 4px 8px; border-radius: 4px; font-size: 0.8em; font-weight: 600; color: #721c24; background-color: #f8d7da; border: 1px solid #f5c6cb;">❌ Missing</span>';
@@ -5456,20 +5477,50 @@ async function loadSecModalData(contractorName) {
             );
             
             if (isProcessedButMissing) {
-                // This contractor was processed but has no SEC data - it's confirmed missing
-                contentDiv.innerHTML = `
-                    <div style="text-align: center; padding: 40px;">
-                        <div style="font-size: 48px; margin-bottom: 15px;">❌</div>
-                        <h3 style="color: #dc3545; margin: 0 0 10px 0;">Confirmed Missing SEC Data</h3>
-                        <p style="color: #666; margin: 0 0 15px 0;">
-                            Contractor: <strong>${escapeHtml(contractorName)}</strong>
-                        </p>
-                        <p style="color: #666; font-size: 0.9em;">
-                            This contractor was processed but no SEC registration data was found. 
-                            This contractor may not be registered with the SEC.
-                        </p>
-                    </div>
-                `;
+                // Check if this is a "NO_SEC_RESULTS" case (searched but yielded no results - SUSPICIOUS)
+                const isSuspicious = matchingContractor && matchingContractor.status === 'NO_SEC_RESULTS';
+                
+                if (isSuspicious) {
+                    // This contractor was searched in SEC website but yielded NO results - highly suspicious
+                    contentDiv.innerHTML = `
+                        <div style="text-align: center; padding: 40px; background: linear-gradient(135deg, #fff3cd 0%, #ffeaa7 100%); border-radius: 8px; border: 2px solid #ffb700;">
+                            <div style="font-size: 48px; margin-bottom: 15px; animation: pulse-warning 2s ease-in-out infinite;">⚠️</div>
+                            <h3 style="color: #856404; margin: 0 0 10px 0;">⚠️ NO SEC RESULTS - SUSPICIOUS</h3>
+                            <p style="color: #666; margin: 0 0 15px 0;">
+                                Contractor: <strong>${escapeHtml(contractorName)}</strong>
+                            </p>
+                            <p style="color: #856404; font-size: 0.95em; margin-bottom: 15px; font-weight: 600;">
+                                This contractor was searched in the SEC database but yielded <strong>NO RESULTS</strong>.
+                            </p>
+                            <div style="background: white; padding: 15px; border-radius: 6px; margin-top: 15px; text-align: left;">
+                                <p style="color: #666; font-size: 0.9em; margin: 0 0 10px 0;">
+                                    <strong>Why is this suspicious?</strong>
+                                </p>
+                                <ul style="color: #666; font-size: 0.9em; margin: 0; padding-left: 20px;">
+                                    <li>The contractor was actively searched in the official SEC database</li>
+                                    <li>The search returned zero results, indicating no SEC registration</li>
+                                    <li>Contractors handling government projects should be SEC-registered</li>
+                                    <li>This may indicate use of unregistered entities or name discrepancies</li>
+                                </ul>
+                            </div>
+                        </div>
+                    `;
+                } else {
+                    // This contractor was processed but has no SEC data - it's confirmed missing
+                    contentDiv.innerHTML = `
+                        <div style="text-align: center; padding: 40px;">
+                            <div style="font-size: 48px; margin-bottom: 15px;">❌</div>
+                            <h3 style="color: #dc3545; margin: 0 0 10px 0;">Confirmed Missing SEC Data</h3>
+                            <p style="color: #666; margin: 0 0 15px 0;">
+                                Contractor: <strong>${escapeHtml(contractorName)}</strong>
+                            </p>
+                            <p style="color: #666; font-size: 0.9em;">
+                                This contractor was processed but no SEC registration data was found. 
+                                This contractor may not be registered with the SEC.
+                            </p>
+                        </div>
+                    `;
+                }
             } else {
                 // This contractor hasn't been processed yet - it's unprocessed
                 contentDiv.innerHTML = `
@@ -5781,14 +5832,16 @@ async function loadSecData() {
             
             // Use corrected summary data from SEC database
             const summary = secData.summary || {};
-            const withSecData = summary.contractors_with_sec_data || 0;
-            const withoutSecData = summary.contractors_with_zero_results || 0;
+            const withSecData = summary.with_sec_data || 0;
+            const withoutSecData = summary.without_sec_data || 0;
+            const suspiciousContractors = summary.suspicious_no_results || 0;
             const totalProcessedContractors = summary.total_contractors || 0;
             
             console.log('📊 SEC stats from database:', { 
                 totalProcessedContractors, 
                 withSecData, 
                 withoutSecData,
+                suspiciousContractors,
                 secDatabaseSize: secData.contractors.length 
             });
             
@@ -5820,13 +5873,15 @@ async function loadSecData() {
                 totalSystemContractors, 
                 totalProcessedContractors,
                 withSecData, 
-                withoutSecData, 
+                withoutSecData,
+                suspiciousContractors,
                 coverageRate
             });
             
             document.getElementById('sec-total-contractors-count').textContent = totalSystemContractors.toLocaleString('en-PH');
             document.getElementById('total-sec-count').textContent = withSecData.toLocaleString('en-PH');
             document.getElementById('without-sec-count').textContent = withoutSecData.toLocaleString('en-PH');
+            document.getElementById('suspicious-sec-count').textContent = suspiciousContractors.toLocaleString('en-PH');
             document.getElementById('sec-coverage-rate').textContent = coverageRate + '%';
             
                     console.log('✅ SEC statistics updated');
@@ -5841,6 +5896,7 @@ async function loadSecData() {
                     document.getElementById('sec-total-contractors-count').textContent = 'File Not Found';
                     document.getElementById('total-sec-count').textContent = 'File Not Found';
                     document.getElementById('without-sec-count').textContent = 'File Not Found';
+                    document.getElementById('suspicious-sec-count').textContent = 'File Not Found';
                     document.getElementById('sec-coverage-rate').textContent = 'File Not Found';
                 }
     } catch (error) {
@@ -5848,6 +5904,7 @@ async function loadSecData() {
         document.getElementById('sec-total-contractors-count').textContent = 'Load Error';
         document.getElementById('total-sec-count').textContent = 'Load Error';
         document.getElementById('without-sec-count').textContent = 'Load Error';
+        document.getElementById('suspicious-sec-count').textContent = 'Load Error';
         document.getElementById('sec-coverage-rate').textContent = 'Load Error';
     }
 }

@@ -3,9 +3,36 @@ SendMode Input
 SetWorkingDir %A_ScriptDir%
 
 ; SEC Search Script - Simple version
-; Processes 10 contractors, saves raw results for Python parser
+; Processes 1000 contractors, saves raw results for Python parser
 
-#Include contractor_list_1000.txt
+; Read contractor list from file
+FileRead, contractorData, contractor_list_1000.txt
+if ErrorLevel {
+    MsgBox, 16, Error, Failed to read contractor_list_1000.txt
+    ExitApp
+}
+
+; Parse the contractor array from file
+; Extract the array content between [ and ]
+RegExMatch(contractorData, "contractors := \[(.*)\]", match)
+if (!match) {
+    MsgBox, 16, Error, Failed to parse contractor list
+    ExitApp
+}
+
+; Build contractors array
+contractors := []
+arrayContent := match1
+
+; Split by quotes and extract contractor names
+Loop, Parse, arrayContent, `"
+{
+    cleaned := Trim(A_LoopField)
+    cleaned := StrReplace(cleaned, ",", "")
+    cleaned := Trim(cleaned)
+    if (cleaned != "" && StrLen(cleaned) > 5)
+        contractors.Push(cleaned)
+}
 
 ; Open browser
 Run msedge.exe --new-window https://checkwithsec.sec.gov.ph/check-with-sec/index
