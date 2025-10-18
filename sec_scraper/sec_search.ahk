@@ -2,7 +2,7 @@
 SendMode Input
 SetWorkingDir %A_ScriptDir%
 
-FileRead, contractorData, contractor_list_top200_no_sec.txt
+FileRead, contractorData, contractor_list_flood_overnight.txt
 if ErrorLevel
     ExitApp
 

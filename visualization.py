@@ -949,55 +949,46 @@ async def get_contractors_venn():
             database=os.getenv('POSTGRES_DB_SEC', 'sec')
         )
         
-        # Get all contractors with their sources
-        contractors = await conn.fetch(
-            """SELECT contractor_name, source 
-               FROM contractors 
-               WHERE source IS NOT NULL AND source != 'unknown'"""
+        # Get source distribution using boolean columns
+        stats = await conn.fetchrow(
+            """SELECT 
+                COUNT(*) FILTER (WHERE has_flood AND NOT has_dime AND NOT has_philgeps) as flood_only,
+                COUNT(*) FILTER (WHERE has_dime AND NOT has_flood AND NOT has_philgeps) as dime_only,
+                COUNT(*) FILTER (WHERE has_philgeps AND NOT has_flood AND NOT has_dime) as philgeps_only,
+                COUNT(*) FILTER (WHERE has_flood AND has_dime AND NOT has_philgeps) as flood_dime,
+                COUNT(*) FILTER (WHERE has_flood AND has_philgeps AND NOT has_dime) as flood_philgeps,
+                COUNT(*) FILTER (WHERE has_dime AND has_philgeps AND NOT has_flood) as dime_philgeps,
+                COUNT(*) FILTER (WHERE has_flood AND has_dime AND has_philgeps) as all_three,
+                COUNT(*) FILTER (WHERE has_flood) as total_flood,
+                COUNT(*) FILTER (WHERE has_dime) as total_dime,
+                COUNT(*) FILTER (WHERE has_philgeps) as total_philgeps,
+                COUNT(*) as total_unique
+               FROM contractors"""
         )
         
         await conn.close()
         
-        # Build sets for each source
-        flood_set = set()
-        dime_set = set()
-        philgeps_set = set()
-        
-        for row in contractors:
-            name = row['contractor_name']
-            sources = row['source'].lower() if row['source'] else ''
-            
-            if 'flood' in sources:
-                flood_set.add(name)
-            if 'dime' in sources:
-                dime_set.add(name)
-            if 'philgeps' in sources:
-                philgeps_set.add(name)
-        
-        # Calculate overlaps
-        flood_only = flood_set - dime_set - philgeps_set
-        dime_only = dime_set - flood_set - philgeps_set
-        philgeps_only = philgeps_set - flood_set - dime_set
-        
-        flood_dime = (flood_set & dime_set) - philgeps_set
-        flood_philgeps = (flood_set & philgeps_set) - dime_set
-        dime_philgeps = (dime_set & philgeps_set) - flood_set
-        
-        all_three = flood_set & dime_set & philgeps_set
+        flood_only = stats['flood_only']
+        dime_only = stats['dime_only']
+        philgeps_only = stats['philgeps_only']
+        flood_dime = stats['flood_dime']
+        flood_philgeps = stats['flood_philgeps']
+        dime_philgeps = stats['dime_philgeps']
+        all_three = stats['all_three']
         
         return JSONResponse({
             "success": True,
-            "flood_only": len(flood_only),
-            "dime_only": len(dime_only),
-            "philgeps_only": len(philgeps_only),
-            "flood_dime": len(flood_dime),
-            "flood_philgeps": len(flood_philgeps),
-            "dime_philgeps": len(dime_philgeps),
-            "all_three": len(all_three),
-            "flood_total": len(flood_set),
-            "dime_total": len(dime_set),
-            "philgeps_total": len(philgeps_set),
-            "total_unique": len(flood_set | dime_set | philgeps_set)
+            "flood_only": flood_only,
+            "dime_only": dime_only,
+            "philgeps_only": philgeps_only,
+            "flood_dime": flood_dime,
+            "flood_philgeps": flood_philgeps,
+            "dime_philgeps": dime_philgeps,
+            "all_three": all_three,
+            "flood_total": stats['total_flood'],
+            "dime_total": stats['total_dime'],
+            "philgeps_total": stats['total_philgeps'],
+            "total_unique": stats['total_unique']
         })
     except Exception as e:
         return JSONResponse({"success": False, "error": str(e)})
