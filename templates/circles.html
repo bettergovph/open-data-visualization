@@ -247,8 +247,9 @@
                 const latRange = maxProjectLat - minProjectLat;
                 
                 // Extend skewer line above and below projects
-                // Use minimum extension for skewers with close projects
-                const extension = Math.max(latRange * 1.5, 0.5);
+                // For long distances: minimal extension (0.1x)
+                // For short distances: larger extension (1.5x with minimum 0.5°)
+                const extension = latRange > 1.0 ? latRange * 0.1 : Math.max(latRange * 1.5, 0.5);
                 const skewerTop = maxProjectLat + extension;
                 const skewerBottom = minProjectLat - extension;
                 
