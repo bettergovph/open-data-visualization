@@ -40,6 +40,10 @@ class SECContractorParser:
         with open(file_path, 'r', encoding=encoding or 'utf-8', errors='ignore') as f:
             content = f.read()
 
+        # Extract search term from filename (what was searched)
+        filename = os.path.basename(file_path)
+        search_term = filename.replace('.txt', '').replace('_', ' ').strip()
+
         # Pattern to match company details
         company_pattern = r'COMPANY DETAILS\nCompany Name\n(.*?)\n\nSEC Number\n(.*?)\n\nDate Registered\n(.*?)\n\nStatus\n(.*?)\n\nAddress\n(.*?)\n\nSECONDARY LICENSE DETAILS'
 
@@ -47,7 +51,7 @@ class SECContractorParser:
         matches = re.findall(company_pattern, content, re.DOTALL)
 
         for match in matches:
-            company_name = match[0].strip()
+            company_name = match[0].strip()  # Exact name from SEC database
             sec_number = match[1].strip()
             date_registered = match[2].strip()
             status = match[3].strip()
@@ -67,7 +71,8 @@ class SECContractorParser:
                 pass
 
             companies.append({
-                'contractor_name': company_name,
+                'contractor_name': company_name,  # Store exact SEC name
+                'search_term': search_term,  # Store what was searched
                 'sec_number': sec_number,
                 'date_registered': date_obj,
                 'status': status,
@@ -78,12 +83,19 @@ class SECContractorParser:
         return companies
 
     async def update_contractors_table(self, contractors: List[Dict[str, Any]]):
-        """Update the contractors table with SEC data"""
+        """Update the contractors table with SEC data
+        
+        Stores all companies returned from a search, even if multiple results.
+        Each unique combination of (contractor_name, sec_number) is stored.
+        search_term is NOT stored for SEC data - only the exact SEC name.
+        """
         conn = await asyncpg.connect(**self.db_config)
 
         try:
             for contractor in contractors:
                 # Use UPSERT to handle both insert and update
+                # Store ALL companies from search results (even if multiple matches)
+                # Do NOT store search_term - only exact SEC data
                 await conn.execute('''
                     INSERT INTO contractors (contractor_name, sec_number, date_registered, status, address)
                     VALUES ($1, $2, $3, $4, $5)
@@ -95,7 +107,8 @@ class SECContractorParser:
                 ''', contractor['contractor_name'], contractor['sec_number'],
                      contractor['date_registered'], contractor['status'],
                      contractor['address'])
-                print(f"✅ Processed: {contractor['contractor_name']}")
+                search_info = f" (searched: {contractor['search_term']})" if contractor.get('search_term') else ""
+                print(f"✅ Processed: {contractor['contractor_name']}{search_info}")
 
         finally:
             await conn.close()
