@@ -28,10 +28,10 @@ Loop, % contractors.MaxIndex() {
         continue
 
     Run msedge.exe --new-window https://checkwithsec.sec.gov.ph/check-with-sec/index
-    Sleep, 5000
+    Sleep, 7000
 
     Click, 1, 1
-    Sleep, 100
+    Sleep, 200
     Loop, 9 {
         Send, {Tab}
         Sleep, 50
