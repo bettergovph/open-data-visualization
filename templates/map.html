@@ -83,9 +83,15 @@
             <a href="/flood" class="text-black hover:text-gray-600 font-medium transition">Flood Control</a>
             <a href="/dime" class="text-black hover:text-gray-600 font-medium transition">DIME</a>
             <a href="/map" class="text-black hover:text-gray-600 font-medium transition border-b-2 border-black">Map</a>
-            <a href="/budget-nep-correlation" class="text-black hover:text-gray-600 font-medium transition">NEP-Budget</a>
-            <a href="/budget-flood-correlation" class="text-black hover:text-gray-600 font-medium transition">Budget-Flood</a>
-            <a href="/flood-dime-correlation" class="text-black hover:text-gray-600 font-medium transition">Flood-DIME</a>
+            <a href="/contractors" class="text-black hover:text-gray-600 font-medium transition">Contractors</a>
+            <div class="relative group">
+                <a href="/correlation" class="text-black hover:text-gray-600 font-medium transition">Correlation ▾</a>
+                <div class="absolute hidden group-hover:block bg-white shadow-lg rounded-md mt-2 py-2 w-48 z-50">
+                    <a href="/budget-nep-correlation" class="block px-4 py-2 text-black hover:bg-gray-100">NEP-Budget</a>
+                    <a href="/budget-flood-correlation" class="block px-4 py-2 text-black hover:bg-gray-100">Budget-Flood</a>
+                    <a href="/flood-dime-correlation" class="block px-4 py-2 text-black hover:bg-gray-100">Flood-DIME</a>
+                </div>
+            </div>
         </div>
         <div class="md:hidden">
             <button class="text-black focus:outline-none" onclick="toggleMobileMenu()">
@@ -103,9 +109,11 @@
         <a href="/flood" class="block text-black hover:text-gray-600 font-medium py-2">Flood Control</a>
         <a href="/dime" class="block text-black hover:text-gray-600 font-medium py-2">DIME</a>
         <a href="/map" class="block text-black hover:text-gray-600 font-medium py-2 border-b-2 border-black">Map</a>
-        <a href="/budget-nep-correlation" class="block text-black hover:text-gray-600 font-medium py-2">NEP-Budget</a>
-        <a href="/budget-flood-correlation" class="block text-black hover:text-gray-600 font-medium py-2">Budget-Flood</a>
-        <a href="/flood-dime-correlation" class="block text-black hover:text-gray-600 font-medium py-2">Flood-DIME</a>
+        <a href="/contractors" class="block text-black hover:text-gray-600 font-medium py-2">Contractors</a>
+        <a href="/correlation" class="block text-black hover:text-gray-600 font-medium py-2">Correlation</a>
+        <a href="/budget-nep-correlation" class="block text-black hover:text-gray-600 font-medium py-2 pl-4">→ NEP-Budget</a>
+        <a href="/budget-flood-correlation" class="block text-black hover:text-gray-600 font-medium py-2 pl-4">→ Budget-Flood</a>
+        <a href="/flood-dime-correlation" class="block text-black hover:text-gray-600 font-medium py-2 pl-4">→ Flood-DIME</a>
     </div>
 </nav>
 
