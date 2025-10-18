@@ -162,128 +162,125 @@
         ];
 
         // Draw map with skewers
-        function drawSkewerMap() {
+        async function drawSkewerMap() {
             const canvas = document.getElementById('map');
             const ctx = canvas.getContext('2d');
-            
-            // Philippines bounds (whole country)
-            const minLat = 4.5;   // Southern tip
-            const maxLat = 21.0;  // Northern tip
-            const minLng = 116.0; // Western edge
-            const maxLng = 127.0; // Eastern edge
-            
             const width = canvas.width;
             const height = canvas.height;
-            const padding = 60;
             
-            // Scale functions
-            const scaleX = (lng) => padding + ((lng - minLng) / (maxLng - minLng)) * (width - 2 * padding);
-            const scaleY = (lat) => height - padding - ((lat - minLat) / (maxLat - minLat)) * (height - 2 * padding);
-            
-            // Clear canvas
-            ctx.fillStyle = '#f0f9ff';  // Light blue background (ocean)
-            ctx.fillRect(0, 0, width, height);
-            
-            // Draw simplified Philippines outline
-            ctx.fillStyle = '#d1fae5';  // Light green (land)
-            ctx.strokeStyle = '#059669';  // Dark green border
-            ctx.lineWidth = 2;
-            
-            // Luzon (main northern island)
-            ctx.beginPath();
-            ctx.moveTo(scaleX(120.2), scaleY(18.5));
-            ctx.lineTo(scaleX(121.0), scaleY(20.0));
-            ctx.lineTo(scaleX(122.0), scaleY(18.5));
-            ctx.lineTo(scaleX(122.5), scaleY(16.5));
-            ctx.lineTo(scaleX(122.0), scaleY(14.5));
-            ctx.lineTo(scaleX(121.5), scaleY(14.0));
-            ctx.lineTo(scaleX(120.5), scaleY(14.5));
-            ctx.lineTo(scaleX(119.8), scaleY(16.0));
-            ctx.lineTo(scaleX(120.2), scaleY(18.5));
-            ctx.closePath();
-            ctx.fill();
-            ctx.stroke();
-            
-            // Visayas (middle islands - simplified)
-            ctx.beginPath();
-            ctx.arc(scaleX(123.5), scaleY(10.5), 30, 0, 2 * Math.PI);
-            ctx.fill();
-            ctx.stroke();
-            
-            ctx.beginPath();
-            ctx.arc(scaleX(124.5), scaleY(11.5), 25, 0, 2 * Math.PI);
-            ctx.fill();
-            ctx.stroke();
-            
-            // Mindanao (southern island)
-            ctx.beginPath();
-            ctx.arc(scaleX(124.5), scaleY(7.5), 60, 0, 2 * Math.PI);
-            ctx.fill();
-            ctx.stroke();
-            
-            // Palawan (western island)
-            ctx.beginPath();
-            ctx.moveTo(scaleX(118.5), scaleY(11.0));
-            ctx.lineTo(scaleX(119.0), scaleY(12.5));
-            ctx.lineTo(scaleX(118.8), scaleY(9.0));
-            ctx.lineTo(scaleX(117.5), scaleY(8.0));
-            ctx.lineTo(scaleX(118.0), scaleY(10.5));
-            ctx.lineTo(scaleX(118.5), scaleY(11.0));
-            ctx.closePath();
-            ctx.fill();
-            ctx.stroke();
-            
-            // Draw light grid over map
-            ctx.strokeStyle = '#cbd5e1';
-            ctx.lineWidth = 1;
-            ctx.globalAlpha = 0.3;
-            for (let i = 0; i <= 10; i++) {
-                const x = padding + (i / 10) * (width - 2 * padding);
-                ctx.beginPath();
-                ctx.moveTo(x, padding);
-                ctx.lineTo(x, height - padding);
-                ctx.stroke();
+            // Load Philippine GeoJSON
+            try {
+                const response = await fetch('/static/data/philippines-regions.json');
+                const geoJsonData = await response.json();
                 
-                const y = padding + (i / 10) * (height - 2 * padding);
-                ctx.beginPath();
-                ctx.moveTo(padding, y);
-                ctx.lineTo(width - padding, y);
-                ctx.stroke();
+                // Calculate bounds
+                let minLat = Infinity, maxLat = -Infinity;
+                let minLng = Infinity, maxLng = -Infinity;
+                
+                geoJsonData.features.forEach(feature => {
+                    if (feature.geometry.type === 'MultiPolygon') {
+                        feature.geometry.coordinates.forEach(polygon => {
+                            polygon.forEach(ring => {
+                                ring.forEach(coord => {
+                                    const [lng, lat] = coord;
+                                    minLat = Math.min(minLat, lat);
+                                    maxLat = Math.max(maxLat, lat);
+                                    minLng = Math.min(minLng, lng);
+                                    maxLng = Math.max(maxLng, lng);
+                                });
+                            });
+                        });
+                    }
+                });
+                
+                // Calculate scale
+                const scaleX = (width - 80) / (maxLng - minLng);
+                const scaleY = (height - 80) / (maxLat - minLat);
+                const scale = Math.min(scaleX, scaleY);
+                const offsetX = (width - (maxLng - minLng) * scale) / 2 - minLng * scale;
+                const offsetY = (height - (maxLat - minLat) * scale) / 2 - minLat * scale;
+                
+                const toCanvasCoords = (lng, lat) => ({
+                    x: lng * scale + offsetX,
+                    y: height - (lat * scale + offsetY)
+                });
+                
+                // Clear and draw background
+                ctx.fillStyle = '#f0f9ff';
+                ctx.fillRect(0, 0, width, height);
+                
+                // Draw Philippines map
+                geoJsonData.features.forEach(feature => {
+                    if (feature.geometry.type === 'MultiPolygon') {
+                        feature.geometry.coordinates.forEach(polygon => {
+                            polygon.forEach(ring => {
+                                ctx.beginPath();
+                                ring.forEach((coord, i) => {
+                                    const {x, y} = toCanvasCoords(coord[0], coord[1]);
+                                    if (i === 0) ctx.moveTo(x, y);
+                                    else ctx.lineTo(x, y);
+                                });
+                                ctx.closePath();
+                                ctx.fillStyle = '#d1fae5';
+                                ctx.fill();
+                                ctx.strokeStyle = '#059669';
+                                ctx.lineWidth = 1;
+                                ctx.stroke();
+                            });
+                        });
+                    }
+                });
+                
+                // Draw skewers
+                drawSkewersOnMap(ctx, toCanvasCoords);
+                
+            } catch (error) {
+                console.error('Error loading Philippines map:', error);
+                ctx.fillStyle = '#fee2e2';
+                ctx.fillRect(0, 0, width, height);
+                ctx.fillStyle = '#dc2626';
+                ctx.font = '20px Arial';
+                ctx.textAlign = 'center';
+                ctx.fillText('Error loading map', width/2, height/2);
             }
-            ctx.globalAlpha = 1.0;
-            
+        }
+        
+        function drawSkewersOnMap(ctx, toCanvasCoords) {
             // Draw skewers and projects
             alignmentData.forEach((alignment, idx) => {
                 const projects = alignment.projects.sort((a, b) => a.lat - b.lat);
-                const x = scaleX(alignment.longitude);
+                const lng = alignment.longitude;
                 
                 const minProjectLat = projects[0].lat;
                 const maxProjectLat = projects[projects.length - 1].lat;
                 const latRange = maxProjectLat - minProjectLat;
                 
-                // Extend skewer line above and below projects (3x the range of projects)
+                // Extend skewer line above and below projects
                 const extension = latRange * 3;
-                const skewerTop = Math.min(maxLat, maxProjectLat + extension);
-                const skewerBottom = Math.max(minLat, minProjectLat - extension);
+                const skewerTop = maxProjectLat + extension;
+                const skewerBottom = minProjectLat - extension;
+                
+                const topCoords = toCanvasCoords(lng, skewerTop);
+                const bottomCoords = toCanvasCoords(lng, skewerBottom);
                 
                 // Draw skewer line (thick red solid vertical line)
                 ctx.strokeStyle = '#dc2626';
                 ctx.lineWidth = 6;
                 ctx.beginPath();
-                ctx.moveTo(x, scaleY(skewerBottom));
-                ctx.lineTo(x, scaleY(skewerTop));
+                ctx.moveTo(topCoords.x, topCoords.y);
+                ctx.lineTo(bottomCoords.x, bottomCoords.y);
                 ctx.stroke();
                 
                 // Draw project circles (larger)
                 projects.forEach((project, pidx) => {
-                    const y = scaleY(project.lat);
+                    const coords = toCanvasCoords(project.lng, project.lat);
                     
                     // Circle (like meat on kebab)
                     ctx.fillStyle = '#3b82f6';
                     ctx.strokeStyle = '#1e3a8a';
                     ctx.lineWidth = 3;
                     ctx.beginPath();
-                    ctx.arc(x, y, 12, 0, 2 * Math.PI);
+                    ctx.arc(coords.x, coords.y, 12, 0, 2 * Math.PI);
                     ctx.fill();
                     ctx.stroke();
                 });
@@ -292,28 +289,10 @@
                 ctx.fillStyle = '#dc2626';
                 ctx.font = 'bold 14px Arial';
                 ctx.textAlign = 'center';
-                ctx.fillText(`#${idx + 1}`, x, scaleY(skewerTop) - 10);
+                ctx.fillText(`#${idx + 1}`, topCoords.x, topCoords.y - 10);
                 ctx.font = '12px Arial';
-                ctx.fillText(`${alignment.distanceKm}km`, x, scaleY(skewerTop) - 25);
+                ctx.fillText(`${alignment.distanceKm}km`, topCoords.x, topCoords.y - 25);
             });
-            
-            // Draw axes labels
-            ctx.fillStyle = '#6b7280';
-            ctx.font = '14px Arial';
-            ctx.textAlign = 'center';
-            ctx.fillText('Philippines - Longitude →', width / 2, height - 20);
-            
-            ctx.save();
-            ctx.translate(20, height / 2);
-            ctx.rotate(-Math.PI / 2);
-            ctx.fillText('← Latitude', 0, 0);
-            ctx.restore();
-            
-            // Title
-            ctx.fillStyle = '#111827';
-            ctx.font = 'bold 20px Arial';
-            ctx.textAlign = 'center';
-            ctx.fillText('Philippines Coordinate Skewers (Metro Manila Region)', width / 2, 30);
         }
 
         // Render alignments list
