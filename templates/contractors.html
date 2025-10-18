@@ -208,6 +208,17 @@ function toggleMobileMenu() {
                     <div style="background: white; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); padding: 32px;">
                         <h2 style="font-size: 1.5rem; font-weight: 600; color: black; margin-bottom: 24px;">📋 Contractor Database</h2>
                         
+                        <!-- Search filter -->
+                        <div style="margin-bottom: 20px;">
+                            <input 
+                                type="text" 
+                                id="contractor-search" 
+                                placeholder="Search contractor name..." 
+                                style="width: 100%; padding: 10px; border: 1px solid #d1d5db; border-radius: 4px; font-size: 0.9em;"
+                                onkeyup="filterContractors()"
+                            />
+                        </div>
+                        
                         <!-- Pagination controls -->
                         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
                             <div style="color: #666; font-size: 0.9em;">
@@ -301,11 +312,12 @@ function toggleMobileMenu() {
 <script>
 // Global data
 let allContractors = [];
+let filteredContractors = [];
 let allContractorsByProject = [];
 let currentChartPage = 0;
 let currentTablePage = 0;
 const chartPageSize = 50;
-const tablePageSize = 50;
+const tablePageSize = 10;
 
 // Tab switching
 function switchTab(tabName) {
@@ -349,6 +361,7 @@ async function loadContractors() {
         const data = await response.json();
         
         allContractors = data.contractors || [];
+        filteredContractors = allContractors;  // Initialize filtered list
         
         // Update statistics (Visual tab)
         const summary = data.summary || {};
@@ -522,14 +535,41 @@ function renderContractorsChart() {
     document.getElementById('contractors-next').disabled = currentChartPage >= totalPages - 1;
 }
 
+// Filter contractors by search input
+function filterContractors() {
+    const searchInput = document.getElementById('contractor-search').value.toLowerCase();
+    
+    if (!searchInput) {
+        filteredContractors = allContractors;
+    } else {
+        filteredContractors = allContractors.filter(contractor => {
+            const name = (contractor.original_contractor_name || contractor.company_name || contractor.contractor_name || '').toLowerCase();
+            return name.includes(searchInput);
+        });
+    }
+    
+    // Reset to first page when filtering
+    currentTablePage = 0;
+    renderContractorsTable();
+}
+
 // Render contractors table
 function renderContractorsTable() {
     const tbody = document.getElementById('contractors-table');
     const start = currentTablePage * tablePageSize;
     const end = start + tablePageSize;
-    const contractors = allContractors.slice(start, end);
+    const contractors = filteredContractors.slice(start, end);
     
     tbody.innerHTML = '';
+    
+    if (contractors.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="5" style="padding: 24px; text-align: center; color: #6b7280;">No contractors found</td></tr>';
+        document.getElementById('table-page-info').textContent = '0';
+        document.getElementById('table-total').textContent = filteredContractors.length;
+        document.getElementById('table-prev').disabled = true;
+        document.getElementById('table-next').disabled = true;
+        return;
+    }
     
     contractors.forEach((contractor, index) => {
         const row = document.createElement('tr');
@@ -559,9 +599,9 @@ function renderContractorsTable() {
     });
     
     // Update pagination
-    const totalPages = Math.ceil(allContractors.length / tablePageSize);
-    document.getElementById('table-page-info').textContent = `${start + 1}-${Math.min(end, allContractors.length)}`;
-    document.getElementById('table-total').textContent = allContractors.length;
+    const totalPages = Math.ceil(filteredContractors.length / tablePageSize);
+    document.getElementById('table-page-info').textContent = `${start + 1}-${Math.min(end, filteredContractors.length)}`;
+    document.getElementById('table-total').textContent = filteredContractors.length;
     document.getElementById('table-prev').disabled = currentTablePage === 0;
     document.getElementById('table-next').disabled = currentTablePage >= totalPages - 1;
 }
