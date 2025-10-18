@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
-Sync contractors from DIME database to philgeps.contractors table
-Extracts all unique contractors from DIME projects and inserts them into philgeps.contractors
+Sync contractors from MeiliSearch (flood control data) to philgeps.contractors table
+Extracts all unique contractors from flood projects and inserts them into philgeps.contractors
 Uses fuzzy matching to avoid duplicates
 """
 
@@ -12,6 +12,7 @@ from dotenv import load_dotenv
 from typing import List, Dict, Set
 from difflib import SequenceMatcher
 import re
+import requests
 
 load_dotenv()
 
@@ -196,44 +197,54 @@ def fuzzy_match(name1: str, name2: str, threshold: float = 0.85) -> bool:
     
     return ratio >= threshold
 
-async def get_dime_contractors() -> Set[str]:
+async def get_flood_contractors() -> Set[str]:
     """
-    Extract all unique contractors from DIME database
+    Extract all unique contractors from MeiliSearch flood control data
     Splits JV contractors and extracts former names
     """
-    print("📊 Connecting to DIME database...")
+    print("📊 Connecting to MeiliSearch flood control index...")
     
-    conn = await asyncpg.connect(
-        host=os.getenv('POSTGRES_HOST', 'localhost'),
-        port=int(os.getenv('POSTGRES_PORT', 5432)),
-        user=os.getenv('POSTGRES_USER', 'budget_admin'),
-        password=os.getenv('POSTGRES_PASSWORD', ''),
-        database=os.getenv('POSTGRES_DB_DIME', 'dime')
-    )
+    meilisearch_host = os.getenv('MEILISEARCH_HOST', 'localhost')
+    meilisearch_port = os.getenv('MEILISEARCH_PORT', '7700')
     
     try:
-        # Get all contractors from DIME projects
-        # The contractors field is a JSON array, so we need to extract the name from each object
-        rows = await conn.fetch(
-            """
-            SELECT DISTINCT 
-                jsonb_array_elements(contractors)->>'name' as contractor_name
-            FROM projects
-            WHERE contractors IS NOT NULL 
-                AND contractors != 'null'
-                AND jsonb_array_length(contractors) > 0
-            """
-        )
+        # Fetch all documents from MeiliSearch
+        url = f"http://{meilisearch_host}:{meilisearch_port}/indexes/flood_control/documents"
         
-        print(f"✅ Found {len(rows)} contractor entries in DIME database")
+        all_projects = []
+        offset = 0
+        limit = 1000
         
-        # Split JVs and extract former names
+        while True:
+            response = requests.get(f"{url}?offset={offset}&limit={limit}")
+            if not response.ok:
+                print(f"⚠️  MeiliSearch request failed: {response.status_code}")
+                break
+            
+            data = response.json()
+            results = data.get('results', [])
+            
+            if not results:
+                break
+            
+            all_projects.extend(results)
+            offset += len(results)
+            
+            print(f"   Fetched {offset} projects...")
+            
+            # Stop if we've got all results
+            if len(results) < limit:
+                break
+        
+        print(f"✅ Found {len(all_projects)} flood control projects")
+        
+        # Extract contractors
         all_contractors = set()
         jv_count = 0
         former_name_count = 0
         
-        for row in rows:
-            contractor_name = row['contractor_name']
+        for project in all_projects:
+            contractor_name = project.get('Contractor')
             if not contractor_name or not contractor_name.strip():
                 continue
             
@@ -249,7 +260,8 @@ async def get_dime_contractors() -> Set[str]:
             if has_former:
                 former_name_count += 1
             
-            for contractor in individual_contractors:
+            for contractor_data in individual_contractors:
+                contractor = contractor_data['name']
                 if contractor and contractor.strip():
                     all_contractors.add(contractor.strip())
         
@@ -258,8 +270,9 @@ async def get_dime_contractors() -> Set[str]:
         print(f"✅ Total unique individual contractors: {len(all_contractors)}")
         return all_contractors
         
-    finally:
-        await conn.close()
+    except Exception as e:
+        print(f"❌ Error fetching from MeiliSearch: {e}")
+        return set()
 
 
 async def get_existing_contractors() -> List[str]:
@@ -429,7 +442,7 @@ async def insert_new_contractors(new_contractors: List[str]):
         
         # Insert contractors in batch
         inserted = 0
-        skipped = 0
+        updated = 0
         for contractor_name in new_contractors:
             try:
                 result = await conn.execute(
@@ -440,33 +453,34 @@ async def insert_new_contractors(new_contractors: List[str]):
                     SET source = CASE 
                         WHEN contractors.source = 'unknown' OR contractors.source IS NULL 
                         THEN $2 
-                        ELSE contractors.source || ', ' || $2
+                        WHEN contractors.source NOT LIKE '%' || $2 || '%'
+                        THEN contractors.source || ', ' || $2
+                        ELSE contractors.source
                     END
                     """,
                     contractor_name,
-                    'dime'
+                    'flood'
                 )
                 # Check if row was actually inserted
                 if result == "INSERT 0 1":
                     inserted += 1
                 else:
-                    skipped += 1
+                    updated += 1
                     
-                if (inserted + skipped) % 100 == 0:
-                    print(f"   Progress: {inserted} inserted, {skipped} skipped, {inserted + skipped}/{len(new_contractors)} processed...")
+                if (inserted + updated) % 100 == 0:
+                    print(f"   Progress: {inserted} inserted, {updated} updated, {inserted + updated}/{len(new_contractors)} processed...")
             except Exception as e:
                 print(f"⚠️  Error inserting '{contractor_name}': {e}")
-                skipped += 1
         
-        print(f"✅ Successfully inserted {inserted} new contractors ({skipped} skipped/duplicates)")
-        print(f"   Note: Source field updated to track 'dime' origin")
+        print(f"✅ Successfully inserted {inserted} new contractors, updated {updated} existing")
+        print(f"   Note: Source field updated to track 'flood' origin")
         
     finally:
         await conn.close()
 
 
 async def main():
-    print("🚀 Starting DIME contractors sync...")
+    print("🚀 Starting Flood (MeiliSearch) contractors sync...")
     print("📌 Unified contractors database: philgeps.contractors")
     print("   - Data sources: DIME, PhilGEPS, Flood (MeiliSearch)")
     print("   - SEC is verification tool (not a source)")
@@ -478,19 +492,19 @@ async def main():
     await add_missing_columns()
     print()
     
-    # Get contractors from DIME
-    dime_contractors = await get_dime_contractors()
+    # Get contractors from Flood (MeiliSearch)
+    flood_contractors = await get_flood_contractors()
     
     # Get existing contractors from philgeps
     existing_contractors = await get_existing_contractors()
     
-    # Find contractors that are in DIME but not in philgeps (exact match)
+    # Find contractors that are in Flood but not in philgeps (exact match)
     existing_set = set(existing_contractors)
-    potential_new = dime_contractors - existing_set
+    potential_new = flood_contractors - existing_set
     
     print()
     print(f"📊 Initial counts:")
-    print(f"   DIME contractors: {len(dime_contractors)}")
+    print(f"   Flood contractors: {len(flood_contractors)}")
     print(f"   Existing in philgeps: {len(existing_contractors)}")
     print(f"   Potential new (exact match): {len(potential_new)}")
     print()
