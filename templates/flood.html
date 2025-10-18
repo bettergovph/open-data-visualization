@@ -5722,7 +5722,7 @@ async function loadContractorsWithoutSec() {
         
         // Use summary data for accurate count
         const summary = secData.summary || {};
-        const withoutSecCount = summary.contractors_with_zero_results || 0;
+        const withoutSecCount = summary.without_sec_data || 0;
         
         // Get contractors without SEC data for display
         // Show all contractors without SEC data, but limit to a reasonable number for display
@@ -6628,9 +6628,13 @@ function setupNetworkControls() {
 fetch('/static/data/flood_summary.json')
     .then(response => response.json())
     .then(data => {
-        document.getElementById('flood-source').textContent = data.source;
-        document.getElementById('flood-total').textContent = data.total_projects.toLocaleString('en-PH');
-        document.getElementById('flood-range').textContent = data.data_range;
+        const sourceEl = document.getElementById('flood-source');
+        const totalEl = document.getElementById('flood-total');
+        const rangeEl = document.getElementById('flood-range');
+        
+        if (sourceEl) sourceEl.textContent = data.source;
+        if (totalEl) totalEl.textContent = data.total_projects.toLocaleString('en-PH');
+        if (rangeEl) rangeEl.textContent = data.data_range;
     })
     .catch(error => {
         console.error('Error loading flood summary:', error);
