@@ -2,7 +2,8 @@
 SendMode Input
 SetWorkingDir %A_ScriptDir%
 
-; SEC Search Script - Simple version
+; SEC Search Script - Browser restart approach
+; Closes and reopens browser for each contractor (slower but more reliable)
 ; Processes top 100 contractors without SEC data
 ; Saves raw results for Python parser
 
@@ -35,37 +36,36 @@ Loop, Parse, arrayContent, `"
         contractors.Push(cleaned)
 }
 
-; Open browser
-Run msedge.exe --new-window https://checkwithsec.sec.gov.ph/check-with-sec/index
-WinWaitActive, ahk_class Chrome_WidgetWin_1, , 10
-if ErrorLevel
-    ExitApp
-
-WinMaximize
-Sleep, 5000
-
-; Navigate to search field once at start
-Click, 1, 1
-Sleep, 1000
-Loop, 9 {
-    Send, {Tab}
-    Sleep, 300
-}
-
 ; Process each contractor
 Loop, % contractors.MaxIndex() {
     contractorName := contractors[A_Index]
     resultFile := "sec_results\" . StrReplace(contractorName, " ", "_") . ".txt"
 
-    if FileExist(resultFile)
+    if FileExist(resultFile) {
+        TrayTip, Skipped, %contractorName% (already exists), 1
         continue
+    }
 
-    ; Reset mouse to top-left corner to prevent scrolling issues
-    MouseMove, 1, 1
-    Sleep, 300
+    ; Open browser for this contractor
+    Run msedge.exe --new-window https://checkwithsec.sec.gov.ph/check-with-sec/index
+    WinWaitActive, ahk_class Chrome_WidgetWin_1, , 10
+    if ErrorLevel {
+        TrayTip, Error, Failed to open browser for %contractorName%, 3
+        continue
+    }
 
-    Send, ^a
-    Sleep, 200
+    WinMaximize
+    Sleep, 5000
+
+    ; Navigate to search field
+    Click, 1, 1
+    Sleep, 1000
+    Loop, 9 {
+        Send, {Tab}
+        Sleep, 300
+    }
+
+    ; Perform search
     Send, %contractorName%
     Sleep, 1000
     Send, {Tab}
@@ -73,21 +73,22 @@ Loop, % contractors.MaxIndex() {
     Send, {Space}
     Sleep, 8000
 
+    ; Copy results
     Send, ^a
     Sleep, 500
     Send, ^c
     Sleep, 500
 
+    ; Save to file
     FileCreateDir, sec_results
     FileAppend, %Clipboard%, %resultFile%
 
-    Send, {Escape}
-    Sleep, 200
-    Send, {Shift Down}{Tab}{Shift Up}
-    Sleep, 300
+    ; Close browser
+    WinClose, ahk_class Chrome_WidgetWin_1
+    Sleep, 2000
 
-    TrayTip, Done, %contractorName%, 2
+    TrayTip, Done, %contractorName% (%A_Index%/%contractors.MaxIndex()), 2
 }
 
-WinClose, ahk_class Chrome_WidgetWin_1
+TrayTip, Complete, All contractors processed!, 5
 ExitApp
