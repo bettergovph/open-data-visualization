@@ -463,12 +463,14 @@ async function loadContractorProjectCounts() {
         const response = await fetch('/api/flood/statistics');
         const data = await response.json();
         
-        // Use contractor data from the statistics API
-        const contractorCounts = data.contractorDistribution || {};
+        // Use topContractors from the statistics API
+        const topContractors = data.topContractors || {};
         
-        allContractorsByProject = Object.entries(contractorCounts)
+        allContractorsByProject = Object.entries(topContractors)
             .map(([contractor, count]) => ({ contractor, count }))
             .sort((a, b) => b.count - a.count);
+        
+        console.log('✅ Loaded contractor project counts:', allContractorsByProject.length, 'contractors');
             
     } catch (error) {
         console.error('Error loading contractor project counts:', error);
