@@ -552,6 +552,50 @@ function renderContractorsChart() {
         }
     });
     
+    // Add hover and click functionality
+    ctx.onmousemove = function(event) {
+        const rect = ctx.getBoundingClientRect();
+        const x = event.clientX - rect.left;
+        const y = event.clientY - rect.top;
+        
+        const chartArea = window.contractorsChart.chartArea;
+        const barHeight = (chartArea.bottom - chartArea.top) / contractors.length;
+        const hoveredBarIndex = Math.floor((y - chartArea.top) / barHeight);
+        
+        if (hoveredBarIndex >= 0 && hoveredBarIndex < contractors.length) {
+            const contractorName = contractors[hoveredBarIndex].contractor;
+            showContractorHoverTooltip(event, contractorName);
+        } else {
+            hideContractorHoverTooltip();
+        }
+    };
+    
+    ctx.onmouseleave = function() {
+        hideContractorHoverTooltip();
+    };
+    
+    ctx.onclick = function(event) {
+        const rect = ctx.getBoundingClientRect();
+        const x = event.clientX - rect.left;
+        const y = event.clientY - rect.top;
+        
+        const chartArea = window.contractorsChart.chartArea;
+        const barHeight = (chartArea.bottom - chartArea.top) / contractors.length;
+        const clickedBarIndex = Math.floor((y - chartArea.top) / barHeight);
+        
+        if (clickedBarIndex >= 0 && clickedBarIndex < contractors.length) {
+            const contractorName = contractors[clickedBarIndex].contractor;
+            console.log('🔍 Visual contractor clicked:', contractorName);
+            
+            // Switch to table tab and filter by this contractor
+            switchTab('table');
+            document.getElementById('contractor-search').value = contractorName;
+            filterContractors();
+        }
+    };
+    
+    ctx.style.cursor = 'pointer';
+    
     // Update pagination info and buttons
     const totalPages = Math.ceil(allContractorsByProject.length / chartPageSize);
     document.getElementById('contractors-page-info').textContent = `Page ${currentChartPage + 1} of ${totalPages}`;
@@ -677,6 +721,129 @@ document.getElementById('sec-next').addEventListener('click', function() {
         renderSuspiciousContractors();
     }
 });
+
+// Show contractor hover tooltip
+function showContractorHoverTooltip(event, contractorName) {
+    // Remove existing tooltip
+    hideContractorHoverTooltip();
+    
+    // Find contractor data for tooltip
+    let contractor = null;
+    if (allContractors && allContractors.length > 0) {
+        // Try exact match first
+        contractor = allContractors.find(c => {
+            const names = [
+                c.contractor_name?.toLowerCase(),
+                c.company_name?.toLowerCase(),
+                c.original_contractor_name?.toLowerCase()
+            ];
+            const searchName = contractorName.toLowerCase();
+            return names.some(n => n === searchName);
+        });
+        
+        // Fallback to fuzzy matching
+        if (!contractor) {
+            contractor = allContractors.find(c => {
+                const originalName = c.original_contractor_name?.toLowerCase() || c.contractor_name?.toLowerCase() || '';
+                const companyName = c.company_name?.toLowerCase() || '';
+                const searchName = contractorName.toLowerCase();
+                
+                // Try partial matches
+                if (originalName.includes(searchName) || companyName.includes(searchName)) {
+                    return true;
+                }
+                
+                // Try reverse match (search name contains database name)
+                if (searchName.includes(originalName) || searchName.includes(companyName)) {
+                    return true;
+                }
+                
+                // Try matching just the main part (before parentheses)
+                const mainPart = searchName.split('(')[0].trim();
+                if (originalName.includes(mainPart) || companyName.includes(mainPart)) {
+                    return true;
+                }
+                
+                return false;
+            });
+        }
+    }
+    
+    // Create tooltip HTML with actual SEC data
+    const tooltipHTML = `
+        <div id="contractor-hover-tooltip" style="
+            position: fixed;
+            background: white;
+            border: 2px solid #0038A8;
+            border-radius: 8px;
+            padding: 15px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            z-index: 1000;
+            max-width: 300px;
+            font-size: 14px;
+            pointer-events: none;
+        ">
+            <div style="color: #0038A8; font-weight: bold; margin-bottom: 8px;">
+                🏢 ${contractorName}
+            </div>
+            ${contractor && contractor.sec_number ? `
+                <div style="color: #666; margin-bottom: 5px;">
+                    <strong>Company Name:</strong> ${contractor.company_name || contractor.contractor_name || 'N/A'}
+                </div>
+                <div style="color: #666; margin-bottom: 5px;">
+                    <strong>SEC Number:</strong> ${contractor.sec_number || 'N/A'}
+                </div>
+                <div style="color: #666; margin-bottom: 5px;">
+                    <strong>Date Registered:</strong> ${contractor.date_registered || 'N/A'}
+                </div>
+                <div style="color: #666; margin-bottom: 5px;">
+                    <strong>Address:</strong> ${contractor.address ? contractor.address.substring(0, 100) + '...' : 'N/A'}
+                </div>
+            ` : contractor && contractor.status === 'NO_SEC_RESULTS' ? `
+                <div style="color: #856404; margin-bottom: 5px;">
+                    <strong>Status:</strong> <span style="color: #856404;">⚠️ NO SEC RESULTS - SUSPICIOUS</span>
+                </div>
+                <div style="color: #666; margin-bottom: 5px; font-size: 12px;">
+                    This contractor was searched in the SEC database but yielded zero results.
+                </div>
+            ` : `
+                <div style="color: #dc3545; margin-bottom: 5px;">
+                    <strong>SEC Number:</strong> <span style="color: #dc3545;">Not yet processed</span>
+                </div>
+                <div style="color: #666; margin-bottom: 5px; font-size: 12px;">
+                    SEC data not yet available for this contractor
+                </div>
+            `}
+            <div style="color: #666; font-size: 12px; margin-top: 8px;">
+                💡 Click bar for full details
+            </div>
+        </div>
+    `;
+    
+    // Add tooltip to page
+    document.body.insertAdjacentHTML('beforeend', tooltipHTML);
+    
+    // Position tooltip near mouse cursor
+    const tooltip = document.getElementById('contractor-hover-tooltip');
+    const rect = tooltip.getBoundingClientRect();
+    const x = event.clientX + 10;
+    const y = event.clientY - rect.height - 10;
+    
+    // Adjust if tooltip would go off screen
+    const adjustedX = x + rect.width > window.innerWidth ? event.clientX - rect.width - 10 : x;
+    const adjustedY = y < 0 ? event.clientY + 10 : y;
+    
+    tooltip.style.left = adjustedX + 'px';
+    tooltip.style.top = adjustedY + 'px';
+}
+
+// Hide contractor hover tooltip
+function hideContractorHoverTooltip() {
+    const tooltip = document.getElementById('contractor-hover-tooltip');
+    if (tooltip) {
+        tooltip.remove();
+    }
+}
 
 // Load on page load
 loadContractors();
