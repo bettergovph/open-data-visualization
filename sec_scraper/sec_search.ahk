@@ -1,5 +1,4 @@
 #NoEnv
-#Persistent
 SendMode Input
 SetWorkingDir %A_ScriptDir%
 
@@ -31,7 +30,7 @@ Loop, 9 {
     Sleep, 50
 }
 
-processedCount := 0
+count := 0
 
 Loop, % contractors.MaxIndex() {
     contractorName := contractors[A_Index]
@@ -64,9 +63,10 @@ Loop, % contractors.MaxIndex() {
     Send, {Shift Down}{Tab}{Shift Up}
     Sleep, 100
 
-    processedCount++
+    count := count + 1
+    remainder := Mod(count, 5)
     
-    if (Mod(processedCount, 5) = 0) {
+    if (remainder = 0) {
         WinClose, ahk_class Chrome_WidgetWin_1
         Sleep, 2000
         Run msedge.exe --new-window https://checkwithsec.sec.gov.ph/check-with-sec/index
@@ -81,5 +81,4 @@ Loop, % contractors.MaxIndex() {
 }
 
 WinClose, ahk_class Chrome_WidgetWin_1
-Sleep, 1000
 ExitApp
