@@ -60,6 +60,9 @@ async def main():
                 cleaned = cleaned.rstrip('. /')  # Remove trailing dots, spaces, slashes
                 # Remove incomplete FORMERLY/FOR patterns at the end
                 cleaned = re.sub(r'\s*\(?\s*(FOR\.?|FORMERLY?\.?|PREV\.?)\s*$', '', cleaned, flags=re.IGNORECASE).strip()
+                # Remove ALL trailing periods (standardize names to shortest form)
+                while cleaned.endswith('.'):
+                    cleaned = cleaned[:-1].strip()
                 if cleaned and is_valid_contractor_name(cleaned):  # Revalidate after cleaning
                     all_individual_contractors.add(cleaned)
     

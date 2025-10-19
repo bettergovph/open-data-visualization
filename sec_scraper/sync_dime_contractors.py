@@ -321,6 +321,9 @@ async def get_dime_contractors() -> Set[str]:
                     cleaned = cleaned.rstrip('. /')  # Remove trailing dots, spaces, slashes
                     # Remove incomplete FORMERLY/FOR patterns at the end
                     cleaned = re.sub(r'\s*\(?\s*(FOR\.?|FORMERLY?\.?|PREV\.?)\s*$', '', cleaned, flags=re.IGNORECASE).strip()
+                    # Remove ALL trailing periods (standardize names)
+                    while cleaned.endswith('.'):
+                        cleaned = cleaned[:-1].strip()
                     if cleaned:  # Only add if something remains after cleaning
                         all_contractors.add(cleaned)
         
