@@ -5348,51 +5348,67 @@ async function loadSecModalData(contractorName) {
                 }
                 
                 // Strategy 4: Partial match (contractor name contains original name) - prioritize SEC data
+                // Only match if the contained string is significant (>= 10 chars)
                 if (!matchingContractor) {
-                    const partialMatches = contractors.filter(c => 
-                        c.original_contractor_name && 
-                        normalizedContractorName.includes(normalizeContractorName(c.original_contractor_name))
-                    );
+                    const partialMatches = contractors.filter(c => {
+                        if (!c.original_contractor_name) return false;
+                        const normalizedOriginal = normalizeContractorName(c.original_contractor_name);
+                        // Only match if original name is significant length and contained in search name
+                        return normalizedOriginal.length >= 10 && 
+                               normalizedContractorName.includes(normalizedOriginal);
+                    });
                     matchingContractor = partialMatches.find(c => c.sec_number && c.sec_number.trim() !== '') || partialMatches[0];
                 }
                 
                 // Strategy 5: Reverse partial match (original name contains contractor name) - prioritize SEC data
+                // Only match if the search string is significant (>= 10 chars)
                 if (!matchingContractor) {
-                    const reverseMatches = contractors.filter(c => 
-                        c.original_contractor_name && 
-                        normalizeContractorName(c.original_contractor_name).includes(normalizedContractorName)
-                    );
+                    const reverseMatches = contractors.filter(c => {
+                        if (!c.original_contractor_name) return false;
+                        const normalizedOriginal = normalizeContractorName(c.original_contractor_name);
+                        // Only match if search name is significant length and contained in original name
+                        return normalizedContractorName.length >= 10 && 
+                               normalizedOriginal.includes(normalizedContractorName);
+                    });
                     matchingContractor = reverseMatches.find(c => c.sec_number && c.sec_number.trim() !== '') || reverseMatches[0];
                 }
                 
                 // Strategy 6: Company name partial match - prioritize SEC data
+                // Only match if strings are significant (>= 10 chars)
                 if (!matchingContractor) {
-                    const companyPartialMatches = contractors.filter(c => 
-                        c.company_name && 
-                        (normalizedContractorName.includes(normalizeContractorName(c.company_name)) ||
-                         normalizeContractorName(c.company_name).includes(normalizedContractorName))
-                    );
+                    const companyPartialMatches = contractors.filter(c => {
+                        if (!c.company_name) return false;
+                        const normalizedCompany = normalizeContractorName(c.company_name);
+                        // Only match if both strings are significant length
+                        return (normalizedCompany.length >= 10 && normalizedContractorName.length >= 10) &&
+                               (normalizedContractorName.includes(normalizedCompany) ||
+                                normalizedCompany.includes(normalizedContractorName));
+                    });
                     matchingContractor = companyPartialMatches.find(c => c.sec_number && c.sec_number.trim() !== '') || companyPartialMatches[0];
                 }
                 
                 // Strategy 7: Word-based matching (check if key words match) - prioritize SEC data
+                // Require ALL significant words to match, not just a subset
                 if (!matchingContractor) {
-                    const contractorWords = normalizedContractorName.split(' ').filter(w => w.length > 2);
-                    const wordMatches = contractors.filter(c => {
-                        if (!c.original_contractor_name && !c.company_name) return false;
-                        
-                        const secWords = normalizeContractorName(c.original_contractor_name || c.company_name).split(' ').filter(w => w.length > 2);
-                        
-                        // Check if at least 3 key words match
-                        const matchingWords = contractorWords.filter(word => 
-                            secWords.some(secWord => 
-                                secWord.includes(word) || word.includes(secWord)
-                            )
-                        );
-                        
-                        return matchingWords.length >= Math.min(3, contractorWords.length - 1);
-                    });
-                    matchingContractor = wordMatches.find(c => c.sec_number && c.sec_number.trim() !== '') || wordMatches[0];
+                    const contractorWords = normalizedContractorName.split(' ').filter(w => w.length > 3);
+                    // Need at least 2 significant words to use word matching
+                    if (contractorWords.length >= 2) {
+                        const wordMatches = contractors.filter(c => {
+                            if (!c.original_contractor_name && !c.company_name) return false;
+                            
+                            const secWords = normalizeContractorName(c.original_contractor_name || c.company_name).split(' ').filter(w => w.length > 3);
+                            
+                            // Check exact word matches (not substring matches)
+                            const matchingWords = contractorWords.filter(word => 
+                                secWords.some(secWord => secWord === word)
+                            );
+                            
+                            // Require at least 80% of contractor words to match exactly
+                            const requiredMatches = Math.ceil(contractorWords.length * 0.8);
+                            return matchingWords.length >= requiredMatches && matchingWords.length >= 2;
+                        });
+                        matchingContractor = wordMatches.find(c => c.sec_number && c.sec_number.trim() !== '') || wordMatches[0];
+                    }
                 }
         
         console.log('🔍 SEC search result for', contractorName, ':', matchingContractor);
@@ -5545,52 +5561,28 @@ function showContractorHoverTooltip(event, contractorName) {
             );
         }
         
-        // Fallback to fuzzy matching
+        // Fallback to fuzzy matching with stricter rules
         if (!contractor) {
+            const normalizedSearch = normalizeContractorName(contractorName);
+            
             contractor = contractorDatabase.contractors.find(c => {
-                const originalName = c.original_contractor_name?.toLowerCase() || '';
-                const companyName = c.company_name?.toLowerCase() || '';
-                const searchName = contractorName.toLowerCase();
+                const originalName = normalizeContractorName(c.original_contractor_name || '');
+                const companyName = normalizeContractorName(c.company_name || '');
                 
                 // Try exact match first
-                if (originalName === searchName || companyName === searchName) {
+                if (originalName === normalizedSearch || companyName === normalizedSearch) {
                     return true;
                 }
                 
-                // Try partial matches
-                if (originalName.includes(searchName) || companyName.includes(searchName)) {
-                    return true;
-                }
-                
-                // Try reverse match (search name contains database name)
-                if (searchName.includes(originalName) || searchName.includes(companyName)) {
-                    return true;
-                }
-                
-                // Try matching just the main part (before parentheses)
-                const mainPart = searchName.split('(')[0].trim();
-                if (originalName.includes(mainPart) || companyName.includes(mainPart)) {
-                    return true;
-                }
-                
-                // Try matching against original_contractor_name more aggressively
-                if (originalName && originalName !== 'n/a' && originalName !== '') {
-                    // Try exact match with original name
-                    if (originalName === searchName) {
+                // Try partial matches only if strings are significant length (>= 10 chars)
+                if (originalName.length >= 10 && normalizedSearch.length >= 10) {
+                    if (originalName.includes(normalizedSearch) || normalizedSearch.includes(originalName)) {
                         return true;
                     }
-                    
-                    // Try partial match with original name
-                    if (originalName.includes(searchName) || searchName.includes(originalName)) {
-                        return true;
-                    }
-                    
-                    // Try matching main parts
-                    const originalMainPart = originalName.split('(')[0].trim();
-                    const searchMainPart = searchName.split('(')[0].trim();
-                    if (originalMainPart === searchMainPart || 
-                        originalMainPart.includes(searchMainPart) || 
-                        searchMainPart.includes(originalMainPart)) {
+                }
+                
+                if (companyName.length >= 10 && normalizedSearch.length >= 10) {
+                    if (companyName.includes(normalizedSearch) || normalizedSearch.includes(companyName)) {
                         return true;
                     }
                 }
