@@ -369,7 +369,7 @@ let suspiciousContractors = [];
 let currentChartPage = 0;
 let currentTablePage = 0;
 let currentSecPage = 0;
-const chartPageSize = 20;  // Show 20 contractors per page
+const chartPageSize = 25;  // Show 25 contractors per page
 const tablePageSize = 10;
 const secPageSize = 20;
 
@@ -527,9 +527,9 @@ async function loadContractorProjectCounts() {
         allContractorsByProject = Object.entries(topContractors)
             .map(([contractor, count]) => ({ contractor, count }))
             .sort((a, b) => b.count - a.count)
-            .slice(0, 50);  // Limit to top 50 contractors
+            .slice(0, 100);  // Limit to top 100 contractors
         
-        console.log('✅ Loaded contractor project counts:', allContractorsByProject.length, 'contractors (top 50)');
+        console.log('✅ Loaded contractor project counts:', allContractorsByProject.length, 'contractors (top 100)');
             
     } catch (error) {
         console.error('Error loading contractor project counts:', error);
