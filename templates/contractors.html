@@ -612,21 +612,20 @@ function renderSuspiciousContractors() {
     document.getElementById('sec-next').disabled = currentSecPage >= totalPages - 1;
 }
 
-// Load contractor project counts from flood data
+// Load contractor project counts from sec database
 async function loadContractorProjectCounts() {
     try {
-        const response = await fetch('/api/flood/statistics');
+        const response = await fetch('/api/contractors/top?limit=100');
         const data = await response.json();
         
-        // Use topContractors from the statistics API
-        const topContractors = data.topContractors || {};
+        if (!data.success) {
+            throw new Error('Failed to load contractor data');
+        }
         
-        allContractorsByProject = Object.entries(topContractors)
-            .map(([contractor, count]) => ({ contractor, count }))
-            .sort((a, b) => b.count - a.count)
-            .slice(0, 100);  // Limit to top 100 contractors
+        // Use contractors from the sec database API
+        allContractorsByProject = data.contractors || [];
         
-        console.log('✅ Loaded contractor project counts:', allContractorsByProject.length, 'contractors (top 100)');
+        console.log('✅ Loaded contractor project counts from sec.contractors:', allContractorsByProject.length, 'contractors (top 100)');
             
     } catch (error) {
         console.error('Error loading contractor project counts:', error);

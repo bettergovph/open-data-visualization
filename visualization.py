@@ -997,6 +997,52 @@ async def get_sec_contractors():
     except Exception as e:
         return JSONResponse({"success": False, "error": str(e)})
 
+@app.get("/api/contractors/top")
+async def get_top_contractors(limit: int = 100):
+    """Get top contractors by project count from sec database"""
+    try:
+        import asyncpg
+        conn = await asyncpg.connect(
+            host=os.getenv('POSTGRES_HOST', 'localhost'),
+            port=int(os.getenv('POSTGRES_PORT', 5432)),
+            user=os.getenv('POSTGRES_USER', 'budget_admin'),
+            password=os.getenv('POSTGRES_PASSWORD', ''),
+            database=os.getenv('POSTGRES_DB_SEC', 'sec')
+        )
+        
+        # Get top contractors by project count
+        contractors = await conn.fetch(
+            """SELECT contractor_name, project_count, sec_number, status,
+                      has_flood, has_dime, has_philgeps
+               FROM contractors
+               WHERE project_count IS NOT NULL AND project_count > 0
+               ORDER BY project_count DESC
+               LIMIT $1""",
+            limit
+        )
+        
+        await conn.close()
+        
+        contractors_list = []
+        for c in contractors:
+            contractors_list.append({
+                'contractor': c['contractor_name'],
+                'count': c['project_count'] or 0,
+                'sec_number': c['sec_number'],
+                'status': c['status'],
+                'has_flood': c['has_flood'],
+                'has_dime': c['has_dime'],
+                'has_philgeps': c['has_philgeps']
+            })
+        
+        return JSONResponse({
+            "success": True,
+            "contractors": contractors_list,
+            "count": len(contractors_list)
+        })
+    except Exception as e:
+        return JSONResponse({"success": False, "error": str(e)})
+
 @app.get("/api/contractors/venn")
 async def get_contractors_venn():
     """Get Venn diagram data for contractor sources (flood, dime, philgeps)"""
