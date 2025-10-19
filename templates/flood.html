@@ -5032,8 +5032,8 @@ let contractorMapping = null;
 // Load contractor database and mapping
 async function loadContractorDatabase() {
     try {
-        // Load SEC database
-        const dbResponse = await fetch('/static/sec_contractors_database.json');
+        // Load SEC database (with cache busting)
+        const dbResponse = await fetch(`/static/sec_contractors_database.json?v=${Date.now()}`);
         if (dbResponse.ok) {
             contractorDatabase = await dbResponse.json();
             console.log('✅ Contractor database loaded:', contractorDatabase.summary);
@@ -5300,8 +5300,8 @@ async function loadSecModalData(contractorName) {
     const contentDiv = document.getElementById('sec-modal-content');
     
     try {
-        // Load SEC database
-        const response = await fetch('/static/sec_contractors_database.json');
+        // Load SEC database (with cache busting)
+        const response = await fetch(`/static/sec_contractors_database.json?v=${Date.now()}`);
         if (!response.ok) {
             throw new Error('Failed to load SEC database');
         }
@@ -5674,8 +5674,8 @@ async function loadContractorsWithoutSec() {
     if (!container) return;
     
     try {
-        // Load SEC database to get contractors without SEC data
-        const response = await fetch('/static/sec_contractors_database.json');
+        // Load SEC database to get contractors without SEC data (with cache busting)
+        const response = await fetch(`/static/sec_contractors_database.json?v=${Date.now()}`);
         if (!response.ok) {
             throw new Error('Failed to load SEC database');
         }
@@ -5782,8 +5782,8 @@ async function loadSecData() {
     console.log('🏛️ Loading SEC data...');
     
     try {
-        // Get SEC data from SEC database first
-        const secResponse = await fetch('/static/sec_contractors_database.json');
+        // Get SEC data from SEC database first (with cache busting)
+        const secResponse = await fetch(`/static/sec_contractors_database.json?v=${Date.now()}`);
         console.log('🔍 SEC database response status:', secResponse.status, secResponse.statusText);
         
         if (secResponse.ok) {
