@@ -1112,38 +1112,48 @@ async def search_contractor_projects(contractor_name: str):
                 port=int(os.getenv('POSTGRES_PORT', 5432)),
                 user=os.getenv('POSTGRES_USER', 'budget_admin'),
                 password=os.getenv('POSTGRES_PASSWORD', ''),
-                database='dime'
+                database=os.getenv('POSTGRES_DB_DIME', 'dime')
             )
             
+            # DIME contractors is an array field, so we need to check if ANY element matches
             dime_results = await dime_conn.fetch(
-                """SELECT project_title, contractor, total_amount, 
-                          region, province, city, status
-                   FROM dime_projects 
-                   WHERE contractor ILIKE $1
-                   ORDER BY total_amount DESC""",
+                """SELECT project_name, contractors, cost, 
+                          province, city, status
+                   FROM projects 
+                   WHERE EXISTS (
+                       SELECT 1 FROM unnest(contractors) AS c 
+                       WHERE c ILIKE $1
+                   )
+                   ORDER BY cost DESC""",
                 search_pattern
             )
             
             dime_stats = await dime_conn.fetchrow(
                 """SELECT COUNT(*) as count,
-                          COALESCE(SUM(total_amount), 0) as total,
-                          COALESCE(AVG(total_amount), 0) as average,
-                          COALESCE(MIN(total_amount), 0) as minimum,
-                          COALESCE(MAX(total_amount), 0) as maximum
-                   FROM dime_projects 
-                   WHERE contractor ILIKE $1""",
+                          COALESCE(SUM(cost), 0) as total,
+                          COALESCE(AVG(cost), 0) as average,
+                          COALESCE(MIN(cost), 0) as minimum,
+                          COALESCE(MAX(cost), 0) as maximum
+                   FROM projects 
+                   WHERE EXISTS (
+                       SELECT 1 FROM unnest(contractors) AS c 
+                       WHERE c ILIKE $1
+                   )""",
                 search_pattern
             )
             
             dime_count = dime_stats['count']
-            dime_total = float(dime_stats['total'])
+            dime_total = float(dime_stats['total']) if dime_stats['total'] else 0
             
             for proj in dime_results:
+                # Find the matching contractor from the array
+                matching_contractor = ', '.join(proj['contractors']) if proj['contractors'] else 'N/A'
+                
                 dime_projects.append({
-                    "title": proj['project_title'],
-                    "contractor": proj['contractor'],
-                    "amount": float(proj['total_amount']),
-                    "region": proj['region'],
+                    "title": proj['project_name'],
+                    "contractor": matching_contractor,
+                    "amount": float(proj['cost']) if proj['cost'] else 0,
+                    "region": 'N/A',  # Region not in this table structure
                     "province": proj['province'],
                     "city": proj['city'],
                     "status": proj['status']
@@ -1163,14 +1173,14 @@ async def search_contractor_projects(contractor_name: str):
                 port=int(os.getenv('POSTGRES_PORT', 5432)),
                 user=os.getenv('POSTGRES_USER', 'budget_admin'),
                 password=os.getenv('POSTGRES_PASSWORD', ''),
-                database='philgeps'
+                database=os.getenv('POSTGRES_DB_PHILGEPS', 'philgeps')
             )
             
             philgeps_results = await philgeps_conn.fetch(
-                """SELECT reference_number, description, awardee, contract_amount, 
-                          procurement_mode, procuring_entity, award_date, status
-                   FROM philgeps_awards 
-                   WHERE awardee ILIKE $1
+                """SELECT reference_id, notice_title, awardee_name, contract_amount, 
+                          business_category, organization_name, award_date, award_status
+                   FROM contracts 
+                   WHERE awardee_name ILIKE $1
                    ORDER BY contract_amount DESC
                    LIMIT 100""",
                 search_pattern
@@ -1182,24 +1192,24 @@ async def search_contractor_projects(contractor_name: str):
                           COALESCE(AVG(contract_amount), 0) as average,
                           COALESCE(MIN(contract_amount), 0) as minimum,
                           COALESCE(MAX(contract_amount), 0) as maximum
-                   FROM philgeps_awards 
-                   WHERE awardee ILIKE $1""",
+                   FROM contracts 
+                   WHERE awardee_name ILIKE $1""",
                 search_pattern
             )
             
             philgeps_count = philgeps_stats['count']
-            philgeps_total = float(philgeps_stats['total'])
+            philgeps_total = float(philgeps_stats['total']) if philgeps_stats['total'] else 0
             
             for proj in philgeps_results:
                 philgeps_projects.append({
-                    "reference": proj['reference_number'],
-                    "description": proj['description'],
-                    "awardee": proj['awardee'],
-                    "amount": float(proj['contract_amount']),
-                    "procurement_mode": proj['procurement_mode'],
-                    "procuring_entity": proj['procuring_entity'],
+                    "reference": proj['reference_id'],
+                    "description": proj['notice_title'],
+                    "awardee": proj['awardee_name'],
+                    "amount": float(proj['contract_amount']) if proj['contract_amount'] else 0,
+                    "procurement_mode": proj['business_category'],
+                    "procuring_entity": proj['organization_name'],
                     "award_date": proj['award_date'].isoformat() if proj['award_date'] else None,
-                    "status": proj['status']
+                    "status": proj['award_status']
                 })
             
             await philgeps_conn.close()
