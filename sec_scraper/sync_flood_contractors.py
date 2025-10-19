@@ -20,29 +20,45 @@ load_dotenv()
 
 
 def is_valid_contractor_name(name: str) -> bool:
-    """Check if name is valid - not a generic single common word"""
+    """Check if name is valid - not a generic single common word or common two-word phrase"""
     if not name:
         return False
     
-    # Common generic words that are invalid as standalone contractor names
-    COMMON_WORDS = {
+    # Strip and check
+    name = name.strip()
+    if len(name) < 2:
+        return False
+    
+    # Invalid exact matches (common generic names)
+    INVALID_NAMES = {
         'SUPPLY', 'SUPPLIES', 'CONSTRUCTION', 'BUILDERS', 'BUILDER', 'TRADING', 
         'ENTERPRISE', 'ENTERPRISES', 'INC', 'CORP', 'CORPORATION', 'CO', 'COMPANY', 
         'LTD', 'LIMITED', 'THE', 'AND', 'FOR', 'OF', 'GENERAL', 'SERVICES', 
         'DEVELOPMENT', 'CONTRACTOR', 'CONTRACTORS', 'ENGINEERING', 'DESIGN', 
-        'MAINTENANCE', 'BUILD', 'CONST', 'MERCHANDISE'
+        'MAINTENANCE', 'BUILD', 'CONST', 'MERCHANDISE', 'NO DATA AVAILABLE',
+        'CONSTRUCTION SUPPLIES', 'CONSTRUCTION SERVICES', 'GENERAL SERVICES',
+        'GENERAL CONSTRUCTION', 'GENERAL MERCHANDISE', 'TRADING CONSTRUCTION',
+        'BUILDERS CONSTRUCTION', 'CONSTRUCTION DEVELOPMENT', 'CONSTRUCTION TRADING'
     }
     
-    # If multi-word, it's valid
-    words = name.split()
-    if len(words) > 1:
-        return True
+    # Check if exact match to invalid name
+    if name.upper() in INVALID_NAMES:
+        return False
     
     # Single word - check if it's a common word
-    if name.upper() in COMMON_WORDS:
+    words = name.split()
+    if len(words) == 1 and name.upper() in INVALID_NAMES:
+        return False
+    
+    # Two words - check if it's a common phrase
+    if len(words) == 2 and ' '.join([w.upper() for w in words]) in INVALID_NAMES:
         return False
     
     # Single word but not common - could be proper name or acronym (even short like "ABC") - keep it
+    if len(words) == 1:
+        return True
+    
+    # Multi-word with at least one non-generic word - valid
     return True
 
 def is_joint_venture(name: str) -> bool:

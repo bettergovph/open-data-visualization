@@ -162,6 +162,28 @@ async def main():
     # For each raw contractor name, clean it and match to sec.contractors
     contractor_project_map = {}  # sec.contractor_name -> total_projects
     
+    # Use exact matching only - no fuzzy/partial matching
+    # Build a mapping of normalized names for faster lookup
+    sec_name_map = {}  # normalized_name -> actual_sec_name
+    for sec_contractor in sec_contractors:
+        sec_name = sec_contractor['contractor_name']
+        normalized = sec_name.upper().strip()
+        
+        # Create multiple variations for matching
+        variations = [
+            normalized,  # Exact as-is
+            normalized.replace('.', ''),  # Without dots
+            normalized.replace(',', ''),  # Without commas
+            normalized.replace('.', '').replace(',', ''),  # Without dots and commas
+        ]
+        
+        for var in variations:
+            if var and len(var) > 3:  # Only store if significant
+                sec_name_map[var] = sec_name
+    
+    matched_count = 0
+    unmatched_count = 0
+    
     for raw_name, count in project_counts.items():
         # Split if JV
         individual_contractors = split_joint_venture(raw_name)
@@ -173,27 +195,34 @@ async def main():
             if not cleaned or not is_valid_contractor_name(cleaned):
                 continue
             
-            # Find matching sec contractor
-            matched = None
-            normalized_search = normalize_contractor_name(cleaned)
+            # Normalize for exact matching
+            normalized_search = cleaned.upper().strip()
             
-            for sec_contractor in sec_contractors:
-                sec_name = sec_contractor['contractor_name']
-                normalized_sec = normalize_contractor_name(sec_name)
-                
-                # Exact match or very close match
-                if normalized_sec == normalized_search:
-                    matched = sec_name
+            # Try exact variations
+            matched = None
+            search_variations = [
+                normalized_search,
+                normalized_search.replace('.', ''),
+                normalized_search.replace(',', ''),
+                normalized_search.replace('.', '').replace(',', ''),
+            ]
+            
+            for var in search_variations:
+                if var in sec_name_map:
+                    matched = sec_name_map[var]
+                    matched_count += 1
                     break
-                
-                # Partial match for longer names
-                if len(normalized_sec) >= 10 and len(normalized_search) >= 10:
-                    if normalized_sec in normalized_search or normalized_search in normalized_sec:
-                        matched = sec_name
-                        break
+            
+            if not matched:
+                unmatched_count += 1
+                if unmatched_count <= 10:  # Show first 10 unmatched
+                    print(f"   ⚠ No match: '{cleaned}'")
             
             if matched:
                 contractor_project_map[matched] = contractor_project_map.get(matched, 0) + count
+    
+    print(f"   ✅ Matched {matched_count} raw names to {len(contractor_project_map)} unique contractors")
+    print(f"   ⚠ Unmatched: {unmatched_count} raw names")
     
     print(f"   ✅ Matched {len(contractor_project_map)} contractors with project counts")
     
