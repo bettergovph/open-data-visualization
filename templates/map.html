@@ -458,6 +458,9 @@ async function loadRegionProjects(regionName) {
                 console.log(`🗺️ Starting progressive loading for ${regionName}`);
                 startRegionProgressiveLoading(regionName, regionTotalPages, regionTotalHits);
             }
+            
+            // Also load DIME triangles for this region
+            loadDimeTrianglesForRegion(regionName);
 
         } else {
             throw new Error(`API returned ${response.status}`);
@@ -1152,6 +1155,201 @@ async function loadDimeOnlyProjects() {
         console.error('Error loading DIME-only projects:', error);
     } finally {
         isDimeLoading = false;
+    }
+}
+
+// Load DIME triangles for a specific region
+async function loadDimeTrianglesForRegion(regionName) {
+    try {
+        console.log(`🔺 Loading DIME triangles for ${regionName}...`);
+        
+        // Fetch all DIME-only projects
+        const response = await fetch('/api/dime/projects/dime-only');
+        const data = await response.json();
+        
+        if (!data.success || !data.projects) {
+            console.error('Failed to load DIME-only projects');
+            return;
+        }
+        
+        // Filter by region (match province or region field)
+        const regionProjects = data.projects.filter(p => {
+            // Region name might match province or be part of project location
+            return p.province && p.province.toLowerCase().includes(regionName.toLowerCase()) ||
+                   p.city && p.city.toLowerCase().includes(regionName.toLowerCase());
+        });
+        
+        console.log(`✅ Found ${regionProjects.length} DIME projects in ${regionName}`);
+        
+        // Process each project as triangle
+        for (const project of regionProjects) {
+            if (project.latitude && project.longitude) {
+                const lat = parseFloat(project.latitude);
+                const lng = parseFloat(project.longitude);
+                
+                if (!isNaN(lat) && !isNaN(lng)) {
+                    const color = getStatusColor(project.status);
+                    const cost = project.cost || 0;
+                    const radius = calculateCircleRadius(cost, currentZoomLevel);
+                    
+                    const size = radius / 1000 * 100;
+                    const triangle = L.polygon([
+                        [lat + size/111000, lng],
+                        [lat - size/111000, lng - size/111000],
+                        [lat - size/111000, lng + size/111000]
+                    ], {
+                        color: color,
+                        fillColor: color,
+                        fillOpacity: 0.6,
+                        weight: 2
+                    });
+                    
+                    // Parse contractors
+                    let contractorsList = 'Unknown';
+                    if (project.contractors && project.contractors.length > 0) {
+                        try {
+                            const contractorNames = project.contractors.map(c => {
+                                if (typeof c === 'string') {
+                                    const parsed = JSON.parse(c);
+                                    return parsed.name || 'Unknown';
+                                }
+                                return c.name || 'Unknown';
+                            });
+                            contractorsList = contractorNames.join(', ');
+                        } catch (e) {
+                            contractorsList = project.contractors.join(', ');
+                        }
+                    }
+                    
+                    const costDisplay = cost ? `₱${parseFloat(cost).toLocaleString('en-PH', {minimumFractionDigits: 2, maximumFractionDigits: 2})}` : 'N/A';
+                    const dimeProjectId = `dime-${project.id}`;
+                    
+                    const popupContent = `
+                        <div style="width: 900px; font-family: Arial, sans-serif; overflow-wrap: break-word; word-wrap: break-word;">
+                            <h4 style="margin: 0 0 10px 0; color: ${color}; font-size: 1.1em; overflow-wrap: break-word; word-wrap: break-word;">
+                                🔺 ${project.project_name || 'Unnamed Project'}
+                            </h4>
+                            <div style="font-size: 0.95em; margin-bottom: 10px; overflow-wrap: break-word;">
+                                <strong>Location:</strong> ${project.city || 'Unknown'}, ${project.province || 'Unknown'}
+                            </div>
+                            <div style="font-size: 0.95em; margin-bottom: 10px;">
+                                <strong>Status:</strong> <span style="display: inline-block; padding: 2px 6px; border-radius: 3px; font-size: 0.8em; font-weight: 600; background: ${color}20; color: ${color}; border: 1px solid ${color}40;">${project.status || 'Unknown'}</span>
+                            </div>
+                            <div style="font-size: 0.95em; margin-bottom: 10px;">
+                                <strong>Cost:</strong> ${costDisplay}
+                            </div>
+                            <div style="font-size: 0.9em; margin-bottom: 10px; color: #666; overflow-wrap: break-word; word-wrap: break-word;">
+                                <strong>Contractor(s):</strong> ${contractorsList}
+                            </div>
+                            <div style="font-size: 0.85em; padding: 8px; background: #e3f2fd; border-left: 3px solid #2196f3; margin-top: 10px; overflow-wrap: break-word;">
+                                <strong style="color: #1976d2;">🔺 DIME-only Project</strong><br>
+                                <span style="color: #666;">This project appears in DIME database but not in Flood Control data</span>
+                            </div>
+                            <div id="philgeps-contracts-${dimeProjectId}" style="margin-top: 12px; padding-top: 12px; border-top: 1px solid #e0e0e0; overflow-wrap: break-word; word-wrap: break-word;">
+                                <div style="font-size: 0.85em; color: #666; font-style: italic;">
+                                    PhilGEPS data not available for DIME-only projects
+                                </div>
+                            </div>
+                            <div id="sec-info-${dimeProjectId}" style="margin-top: 12px; padding-top: 12px; border-top: 1px solid #e0e0e0; overflow-wrap: break-word; word-wrap: break-word;">
+                                <div style="font-size: 0.85em; color: #666; font-style: italic;">
+                                    Loading SEC info...
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                    
+                    triangle.bindPopup(popupContent, {
+                        maxWidth: 950,
+                        className: 'custom-popup'
+                    });
+                    
+                    // Load SEC info on popup open (same as global DIME triangles)
+                    triangle.on('popupopen', async () => {
+                        const secContainer = document.getElementById(`sec-info-${dimeProjectId}`);
+                        if (secContainer && contractorsList !== 'Unknown') {
+                            try {
+                                const secResponse = await fetch('/static/sec_contractors_database.json');
+                                if (!secResponse.ok) throw new Error('Failed to load SEC database');
+                                
+                                const secData = await secResponse.json();
+                                const contractors = secData.contractors || [];
+                                
+                                const normalizeContractorName = (name) => {
+                                    if (!name) return '';
+                                    return name.toUpperCase()
+                                        .replace(/[^A-Z0-9]/g, '')
+                                        .replace(/CORP(ORATION)?/g, '')
+                                        .replace(/INC(ORPORATED)?/g, '')
+                                        .replace(/LTD(LIMITED)?/g, '')
+                                        .replace(/CO(MPANY)?/g, '');
+                                };
+                                
+                                const normalizedContractorName = normalizeContractorName(contractorsList.split(',')[0].trim());
+                                
+                                let matchingContractor = contractors.find(c => 
+                                    normalizeContractorName(c.original_contractor_name || c.company_name) === normalizedContractorName
+                                );
+                                
+                                if (matchingContractor && matchingContractor.sec_number) {
+                                    secContainer.innerHTML = `
+                                        <div style="font-size: 0.9em; color: #0038A8; font-weight: 600; margin-bottom: 8px;">
+                                            🏛️ SEC Registration
+                                        </div>
+                                        <div style="font-size: 0.85em; padding: 8px; background: transparent; border-left: 3px solid #28a745; overflow-wrap: break-word; word-wrap: break-word; max-width: 100%;">
+                                            <div style="font-weight: 600; margin-bottom: 6px; overflow-wrap: break-word; word-wrap: break-word;">
+                                                ${matchingContractor.company_name || matchingContractor.original_contractor_name}
+                                            </div>
+                                            <div style="color: #666; font-size: 0.9em; line-height: 1.4; overflow-wrap: break-word; word-wrap: break-word;">
+                                                <strong>SEC Number:</strong> ${matchingContractor.sec_number}<br>
+                                                <strong>Status:</strong> ${matchingContractor.status || 'N/A'}<br>
+                                                ${matchingContractor.date_registered ? '<strong>Registered:</strong> ' + matchingContractor.date_registered + '<br>' : ''}
+                                                ${matchingContractor.registered_address ? '<strong>Address:</strong> ' + matchingContractor.registered_address : ''}
+                                            </div>
+                                        </div>
+                                    `;
+                                } else if (matchingContractor && matchingContractor.status === 'NO_SEC_RESULTS') {
+                                    secContainer.innerHTML = `
+                                        <div style="font-size: 0.9em; color: #856404; font-weight: 600; margin-bottom: 8px;">
+                                            🏛️ SEC Registration
+                                        </div>
+                                        <div style="font-size: 0.85em; padding: 8px; background: transparent; border-left: 3px solid #ffc107; overflow-wrap: break-word; word-wrap: break-word; max-width: 100%;">
+                                            <div style="font-weight: 600; color: #856404; margin-bottom: 6px;">
+                                                ⚠️ NO SEC RESULTS - SUSPICIOUS
+                                            </div>
+                                            <div style="color: #856404; font-size: 0.9em; line-height: 1.4; overflow-wrap: break-word; word-wrap: break-word;">
+                                                This contractor was searched in the SEC database but yielded <strong>zero results</strong>. 
+                                                Government contractors should be SEC-registered.
+                                            </div>
+                                        </div>
+                                    `;
+                                } else {
+                                    secContainer.innerHTML = `
+                                        <div style="font-size: 0.8em; color: #999; font-style: italic;">
+                                            SEC info not yet processed for this contractor
+                                        </div>
+                                    `;
+                                }
+                            } catch (error) {
+                                console.error('Error fetching SEC info:', error);
+                                secContainer.innerHTML = `
+                                    <div style="font-size: 0.75em; color: #999; font-style: italic;">
+                                        SEC data unavailable
+                                    </div>
+                                `;
+                            }
+                        }
+                    });
+                    
+                    triangle.addTo(mapInstance);
+                    mapMarkers.push(triangle);
+                }
+            }
+        }
+        
+        console.log(`✅ Added ${regionProjects.length} DIME triangles for ${regionName}`);
+        
+    } catch (error) {
+        console.error(`Error loading DIME triangles for ${regionName}:`, error);
     }
 }
 
