@@ -10,6 +10,8 @@ import os
 from dotenv import load_dotenv
 from difflib import SequenceMatcher
 import requests
+from sync_flood_contractors import parse_json_contractor_name, split_joint_venture, is_valid_contractor_name
+import re
 
 load_dotenv('.env')
 
@@ -60,8 +62,24 @@ def fuzzy_match(name1, name2, threshold=0.90):
     ratio = SequenceMatcher(None, norm1, norm2).ratio()
     return ratio >= threshold
 
+def clean_contractor_name(name):
+    """Apply all cleaning logic: JSON parsing, leading/trailing cleanup, incomplete FORMERLY removal"""
+    if not name:
+        return ""
+    
+    # Parse JSON if present
+    cleaned = parse_json_contractor_name(name)
+    # Clean leading/trailing junk
+    cleaned = cleaned.strip()
+    cleaned = cleaned.lstrip('. /')  # Remove leading dots, spaces, slashes
+    cleaned = cleaned.rstrip('. /')  # Remove trailing dots, spaces, slashes
+    # Remove incomplete FORMERLY/FOR patterns at the end
+    cleaned = re.sub(r'\s*\(?\s*(FOR\.?|FORMERLY?\.?|PREV\.?)\s*$', '', cleaned, flags=re.IGNORECASE).strip()
+    return cleaned
+
+
 async def get_flood_contractors():
-    """Get all contractors from MeiliSearch flood control data"""
+    """Get all contractors from MeiliSearch flood control data (with splitting and cleaning)"""
     print("📊 Fetching contractors from Flood Control (MeiliSearch)...")
     
     meili_addr = os.getenv('MEILI_HTTP_ADDR', 'localhost:7700')
@@ -97,18 +115,27 @@ async def get_flood_contractors():
         for project in results:
             contractor_name = project.get('Contractor')
             if contractor_name and contractor_name.strip():
-                all_contractors.add(contractor_name.strip())
+                # Split JV and extract former names
+                individual_contractors = split_joint_venture(contractor_name)
+                
+                for contractor_data in individual_contractors:
+                    contractor = contractor_data['name']
+                    if contractor and contractor.strip():
+                        # Apply cleaning
+                        cleaned = clean_contractor_name(contractor)
+                        if cleaned and is_valid_contractor_name(cleaned):
+                            all_contractors.add(cleaned)
         
         offset += len(results)
         
         if len(results) < limit:
             break
     
-    print(f"✅ Found {len(all_contractors)} unique contractors in Flood")
+    print(f"✅ Found {len(all_contractors)} unique contractors in Flood (after splitting & cleaning)")
     return all_contractors
 
 async def get_dime_contractors():
-    """Get all contractors from DIME database"""
+    """Get all contractors from DIME database (with splitting and cleaning)"""
     print("📊 Fetching contractors from DIME database...")
     
     conn = await asyncpg.connect(
@@ -132,13 +159,22 @@ async def get_dime_contractors():
     for row in contractors_raw:
         contractor_name = row['contractor_name']
         if contractor_name and contractor_name.strip():
-            all_contractors.add(contractor_name.strip())
+            # Split JV and extract former names
+            individual_contractors = split_joint_venture(contractor_name)
+            
+            for contractor_data in individual_contractors:
+                contractor = contractor_data['name']
+                if contractor and contractor.strip():
+                    # Apply cleaning
+                    cleaned = clean_contractor_name(contractor)
+                    if cleaned and is_valid_contractor_name(cleaned):
+                        all_contractors.add(cleaned)
     
-    print(f"✅ Found {len(all_contractors)} unique contractors in DIME")
+    print(f"✅ Found {len(all_contractors)} unique contractors in DIME (after splitting & cleaning)")
     return all_contractors
 
 async def get_philgeps_contractors():
-    """Get all contractors from PhilGEPS contracts"""
+    """Get all contractors from PhilGEPS contracts (with splitting and cleaning)"""
     print("📊 Fetching contractors from PhilGEPS contracts...")
     
     conn = await asyncpg.connect(
@@ -162,15 +198,25 @@ async def get_philgeps_contractors():
     for row in contractors_raw:
         contractor_name = row['awardee_name']
         if contractor_name and contractor_name.strip():
-            all_contractors.add(contractor_name.strip())
+            # Split JV and extract former names
+            individual_contractors = split_joint_venture(contractor_name)
+            
+            for contractor_data in individual_contractors:
+                contractor = contractor_data['name']
+                if contractor and contractor.strip():
+                    # Apply cleaning
+                    cleaned = clean_contractor_name(contractor)
+                    if cleaned and is_valid_contractor_name(cleaned):
+                        all_contractors.add(cleaned)
     
-    print(f"✅ Found {len(all_contractors)} unique contractors in PhilGEPS")
+    print(f"✅ Found {len(all_contractors)} unique contractors in PhilGEPS (after splitting & cleaning)")
     return all_contractors
 
 async def main():
     print("🚀 Starting comprehensive source sync to SEC database...\n")
+    print("📌 Extracting from raw sources with proper cleaning, JSON parsing, and JV splitting\n")
     
-    # Fetch contractors from all sources
+    # Fetch contractors from all raw sources with proper cleaning
     flood_contractors = await get_flood_contractors()
     dime_contractors = await get_dime_contractors()
     philgeps_contractors = await get_philgeps_contractors()
