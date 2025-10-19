@@ -52,9 +52,12 @@ async def main():
         for contractor_data in individual_contractors:
             contractor = contractor_data['name']
             if contractor and contractor.strip() and is_valid_contractor_name(contractor):
-                # Clean leading dots, spaces, and other junk
+                # Clean leading/trailing junk
                 cleaned = contractor.strip()
-                cleaned = cleaned.lstrip('. ')  # Remove leading dots and spaces
+                cleaned = cleaned.lstrip('. /')  # Remove leading dots, spaces, slashes
+                cleaned = cleaned.rstrip('. /')  # Remove trailing dots, spaces, slashes
+                # Remove incomplete FORMERLY/FOR patterns at the end
+                cleaned = re.sub(r'\s*\(?\s*(FOR\.?|FORMERLY?\.?|PREV\.?)\s*$', '', cleaned, flags=re.IGNORECASE).strip()
                 if cleaned and is_valid_contractor_name(cleaned):  # Revalidate after cleaning
                     all_individual_contractors.add(cleaned)
     

@@ -280,9 +280,12 @@ async def get_dime_contractors() -> Set[str]:
             for contractor_data in individual_contractors:
                 contractor = contractor_data['name']
                 if contractor and contractor.strip():
-                    # Clean leading dots, spaces, and other junk
+                    # Clean leading/trailing junk
                     cleaned = contractor.strip()
-                    cleaned = cleaned.lstrip('. ')  # Remove leading dots and spaces
+                    cleaned = cleaned.lstrip('. /')  # Remove leading dots, spaces, slashes
+                    cleaned = cleaned.rstrip('. /')  # Remove trailing dots, spaces, slashes
+                    # Remove incomplete FORMERLY/FOR patterns at the end
+                    cleaned = re.sub(r'\s*\(?\s*(FOR\.?|FORMERLY?\.?|PREV\.?)\s*$', '', cleaned, flags=re.IGNORECASE).strip()
                     if cleaned:  # Only add if something remains after cleaning
                         all_contractors.add(cleaned)
         
