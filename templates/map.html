@@ -1208,11 +1208,12 @@ async function loadDimeTrianglesForRegion(regionName) {
             return;
         }
         
-        // Filter by region (match province or region field)
+        // Filter by region (match region field or province)
         const regionProjects = data.projects.filter(p => {
-            // Region name might match province or be part of project location
-            return p.province && p.province.toLowerCase().includes(regionName.toLowerCase()) ||
-                   p.city && p.city.toLowerCase().includes(regionName.toLowerCase());
+            // Match by region field first, then province, then city
+            return (p.region && p.region.toLowerCase() === regionName.toLowerCase()) ||
+                   (p.province && p.province.toLowerCase().includes(regionName.toLowerCase())) ||
+                   (p.city && p.city.toLowerCase().includes(regionName.toLowerCase()));
         });
         
         console.log(`✅ Found ${regionProjects.length} DIME projects in ${regionName}`);

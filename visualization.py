@@ -804,7 +804,7 @@ async def get_dime_only_projects():
         # Get DIME projects that are NOT in flood (no meilisearch_id)
         projects = await conn.fetch('''
             SELECT id, project_name, description, latitude, longitude, 
-                   status, city, province, contractors, cost,
+                   status, city, province, region, contractors, cost,
                    date_started, contract_completion_date, actual_date_started
             FROM projects
             WHERE (meilisearch_id IS NULL OR meilisearch_id = '')
@@ -833,6 +833,7 @@ async def get_dime_only_projects():
                 'status': p['status'],
                 'city': p['city'],
                 'province': p['province'],
+                'region': p['region'],
                 'contractors': p['contractors'],
                 'cost': float(p['cost']) if p['cost'] else None,
                 'year': year,
