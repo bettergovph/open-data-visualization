@@ -860,6 +860,32 @@ document.getElementById('sec-next').addEventListener('click', function() {
 });
 
 // Show contractor hover tooltip
+// Normalize contractor name for better matching
+function normalizeContractorName(name) {
+    if (!name) return '';
+    
+    let normalized = name.toUpperCase();
+    
+    // Remove common punctuation and extra spaces
+    normalized = normalized.replace(/\./g, ' ');
+    normalized = normalized.replace(/,/g, ' ');
+    normalized = normalized.replace(/-/g, ' ');
+    normalized = normalized.replace(/&/g, 'AND');
+    normalized = normalized.replace(/'/g, '');
+    normalized = normalized.replace(/"/g, '');
+    
+    // Remove common suffixes for better matching
+    const suffixesToRemove = [
+        'CORPORATION', 'CORP', 'INC', 'INCORPORATED', 'CO', 'COMPANY',
+        'LTD', 'LIMITED', 'ENTERPRISES', 'ENTERPRISE'
+    ];
+    
+    let words = normalized.split(/\s+/).filter(w => w.length > 0);
+    words = words.filter(w => !suffixesToRemove.includes(w));
+    
+    return words.join(' ').trim();
+}
+
 function showContractorHoverTooltip(event, contractorName) {
     // Remove existing tooltip
     hideContractorHoverTooltip();
@@ -867,37 +893,30 @@ function showContractorHoverTooltip(event, contractorName) {
     // Find contractor data for tooltip
     let contractor = null;
     if (allContractors && allContractors.length > 0) {
-        // Try exact match first
+        const normalizedSearch = normalizeContractorName(contractorName);
+        
+        // Try exact match with normalization
         contractor = allContractors.find(c => {
             const names = [
-                c.contractor_name?.toLowerCase(),
-                c.company_name?.toLowerCase(),
-                c.original_contractor_name?.toLowerCase()
+                normalizeContractorName(c.contractor_name),
+                normalizeContractorName(c.company_name),
+                normalizeContractorName(c.original_contractor_name)
             ];
-            const searchName = contractorName.toLowerCase();
-            return names.some(n => n === searchName);
+            return names.some(n => n === normalizedSearch);
         });
         
-        // Fallback to fuzzy matching
-        if (!contractor) {
+        // Fallback to partial matching with normalized names (strict - only if >= 10 chars)
+        if (!contractor && normalizedSearch.length >= 10) {
             contractor = allContractors.find(c => {
-                const originalName = c.original_contractor_name?.toLowerCase() || c.contractor_name?.toLowerCase() || '';
-                const companyName = c.company_name?.toLowerCase() || '';
-                const searchName = contractorName.toLowerCase();
+                const originalName = normalizeContractorName(c.original_contractor_name || c.contractor_name || '');
+                const companyName = normalizeContractorName(c.company_name || '');
                 
-                // Try partial matches
-                if (originalName.includes(searchName) || companyName.includes(searchName)) {
+                // Require significant overlap
+                if (originalName.length >= 10 && (originalName.includes(normalizedSearch) || normalizedSearch.includes(originalName))) {
                     return true;
                 }
                 
-                // Try reverse match (search name contains database name)
-                if (searchName.includes(originalName) || searchName.includes(companyName)) {
-                    return true;
-                }
-                
-                // Try matching just the main part (before parentheses)
-                const mainPart = searchName.split('(')[0].trim();
-                if (originalName.includes(mainPart) || companyName.includes(mainPart)) {
+                if (companyName.length >= 10 && (companyName.includes(normalizedSearch) || normalizedSearch.includes(companyName))) {
                     return true;
                 }
                 
