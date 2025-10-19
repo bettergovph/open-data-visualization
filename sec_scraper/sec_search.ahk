@@ -45,7 +45,7 @@ Loop, % contractors.MaxIndex() {
     Send, {Tab}
     Sleep, 50
     Send, {Space}
-    Sleep, 8000
+    Sleep, 12000
 
     Clipboard := ""
     Send, ^a
