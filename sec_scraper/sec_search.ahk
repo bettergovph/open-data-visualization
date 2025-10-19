@@ -2,23 +2,9 @@
 SendMode Input
 SetWorkingDir %A_ScriptDir%
 
-FileRead, contractorData, contractor_list_flood_overnight.txt
-if ErrorLevel
-    ExitApp
-
-RegExMatch(contractorData, "contractors := \[(.*)\]", match)
-if (!match)
-    ExitApp
-
 contractors := []
-Loop, Parse, match1, `"
-{
-    cleaned := Trim(A_LoopField)
-    cleaned := StrReplace(cleaned, ",", "")
-    cleaned := Trim(cleaned)
-    if (cleaned != "" && StrLen(cleaned) > 5)
-        contractors.Push(cleaned)
-}
+contractors.Push("LEGACY CONSTRUCTION CORPORATION")
+contractors.Push("QM BUILDERS")
 
 Run msedge.exe --new-window https://checkwithsec.sec.gov.ph/check-with-sec/index
 Sleep, 7000
