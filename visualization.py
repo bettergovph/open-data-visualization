@@ -804,7 +804,8 @@ async def get_dime_only_projects():
         # Get DIME projects that are NOT in flood (no meilisearch_id)
         projects = await conn.fetch('''
             SELECT id, project_name, description, latitude, longitude, 
-                   status, city, province, contractors, cost
+                   status, city, province, contractors, cost,
+                   date_started, contract_completion_date, actual_date_started
             FROM projects
             WHERE (meilisearch_id IS NULL OR meilisearch_id = '')
               AND latitude IS NOT NULL AND longitude IS NOT NULL
@@ -815,6 +816,14 @@ async def get_dime_only_projects():
         
         projects_list = []
         for p in projects:
+            # Extract year from any available date field
+            year = None
+            for date_field in ['date_started', 'actual_date_started', 'contract_completion_date']:
+                if p.get(date_field):
+                    year = p[date_field].year if hasattr(p[date_field], 'year') else None
+                    if year:
+                        break
+            
             projects_list.append({
                 'id': p['id'],
                 'project_name': p['project_name'],
@@ -825,7 +834,10 @@ async def get_dime_only_projects():
                 'city': p['city'],
                 'province': p['province'],
                 'contractors': p['contractors'],
-                'cost': float(p['cost']) if p['cost'] else None
+                'cost': float(p['cost']) if p['cost'] else None,
+                'year': year,
+                'date_started': p['date_started'].isoformat() if p.get('date_started') else None,
+                'contract_completion_date': p['contract_completion_date'].isoformat() if p.get('contract_completion_date') else None
             })
         
         return JSONResponse({

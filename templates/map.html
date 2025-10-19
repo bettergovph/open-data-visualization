@@ -721,6 +721,13 @@ async function processProjects(projects) {
                     `<span style="display: inline-block; padding: 2px 6px; border-radius: 3px; font-size: 0.8em; font-weight: 600; background: ${color}20; color: ${color}; border: 1px solid ${color}40;">${project.TypeofWork}</span>` :
                     '<span style="color: #999;">Unknown Status</span>';
 
+                // Format infrastructure year
+                const yearDisplay = project.InfraYear ? `
+                    <div style="font-size: 0.9em; margin-bottom: 10px; color: #666;">
+                        <strong>Year:</strong> ${project.InfraYear}
+                    </div>
+                ` : '';
+                
                 const popupContent = `
                     <div style="width: 900px; font-family: Arial, sans-serif; overflow-wrap: break-word; word-wrap: break-word;">
                         <h4 style="margin: 0 0 10px 0; color: ${color}; font-size: 1.1em; overflow-wrap: break-word; word-wrap: break-word;">${project.ProjectDescription || 'Unnamed Project'}</h4>
@@ -730,6 +737,7 @@ async function processProjects(projects) {
                         <div style="font-size: 0.95em; margin-bottom: 10px;">
                             <strong>Status:</strong> ${statusBadge}
                         </div>
+                        ${yearDisplay}
                         <div style="font-size: 0.95em; margin-bottom: 10px;">
                             <strong>Cost:</strong> ${costDisplay}
                         </div>
@@ -784,11 +792,21 @@ async function processProjects(projects) {
                                 const awardee = contract.awardee_name || 'Unknown';
                                 const org = contract.organization_name || 'Unknown';
                                 
+                                // Format award date
+                                let awardDateDisplay = '';
+                                if (contract.award_date) {
+                                    const date = new Date(contract.award_date);
+                                    awardDateDisplay = `<div style="color: #666; margin-bottom: 3px; font-size: 0.9em;">
+                                        <strong>Awarded:</strong> ${date.toLocaleDateString('en-PH', {year: 'numeric', month: 'short', day: 'numeric'})}
+                                    </div>`;
+                                }
+                                
                                 contractsHtml += `
                                     <div style="font-size: 0.85em; padding: 8px; background: transparent; border-left: 3px solid #0038A8; margin-bottom: 6px; overflow-wrap: break-word; word-wrap: break-word; max-width: 100%;">
                                         <div style="font-weight: 600; color: #0038A8; margin-bottom: 4px; overflow-wrap: break-word; word-wrap: break-word;">
                                             Contract: ${contractNo}
                                         </div>
+                                        ${awardDateDisplay}
                                         <div style="color: #666; margin-bottom: 3px; font-size: 0.95em; overflow-wrap: break-word; word-wrap: break-word;">
                                             <strong>Awardee:</strong> ${awardee}
                                         </div>
@@ -1001,6 +1019,23 @@ async function loadDimeOnlyProjects() {
                             contractorsList = project.contractors.join(', ');
                         }
                     }
+                    
+                    // Format year/date display for DIME
+                    let dateDisplay = '';
+                    if (project.year) {
+                        dateDisplay = `
+                            <div style="font-size: 0.9em; margin-bottom: 10px; color: #666;">
+                                <strong>Year:</strong> ${project.year}
+                            </div>
+                        `;
+                    } else if (project.contract_completion_date) {
+                        const compDate = new Date(project.contract_completion_date);
+                        dateDisplay = `
+                            <div style="font-size: 0.9em; margin-bottom: 10px; color: #666;">
+                                <strong>Target Completion:</strong> ${compDate.toLocaleDateString('en-PH', {year: 'numeric', month: 'short'})}
+                            </div>
+                        `;
+                    }
                         
                         const dimeProjectId = `dime-${project.id}`;
                         
@@ -1015,6 +1050,7 @@ async function loadDimeOnlyProjects() {
                                 <div style="font-size: 0.95em; margin-bottom: 10px;">
                                     <strong>Status:</strong> <span style="display: inline-block; padding: 2px 6px; border-radius: 3px; font-size: 0.8em; font-weight: 600; background: ${color}20; color: ${color}; border: 1px solid ${color}40;">${project.status || 'Unknown'}</span>
                                 </div>
+                                ${dateDisplay}
                                 <div style="font-size: 0.95em; margin-bottom: 10px;">
                                     <strong>Cost:</strong> ${costDisplay}
                                 </div>
@@ -1222,6 +1258,24 @@ async function loadDimeTrianglesForRegion(regionName) {
                     }
                     
                     const costDisplay = cost ? `₱${parseFloat(cost).toLocaleString('en-PH', {minimumFractionDigits: 2, maximumFractionDigits: 2})}` : 'N/A';
+                    
+                    // Format year/date display for DIME (region view)
+                    let dateDisplayRegion = '';
+                    if (project.year) {
+                        dateDisplayRegion = `
+                            <div style="font-size: 0.9em; margin-bottom: 10px; color: #666;">
+                                <strong>Year:</strong> ${project.year}
+                            </div>
+                        `;
+                    } else if (project.contract_completion_date) {
+                        const compDate = new Date(project.contract_completion_date);
+                        dateDisplayRegion = `
+                            <div style="font-size: 0.9em; margin-bottom: 10px; color: #666;">
+                                <strong>Target Completion:</strong> ${compDate.toLocaleDateString('en-PH', {year: 'numeric', month: 'short'})}
+                            </div>
+                        `;
+                    }
+                    
                     const dimeProjectId = `dime-${project.id}`;
                     
                     const popupContent = `
@@ -1235,6 +1289,7 @@ async function loadDimeTrianglesForRegion(regionName) {
                             <div style="font-size: 0.95em; margin-bottom: 10px;">
                                 <strong>Status:</strong> <span style="display: inline-block; padding: 2px 6px; border-radius: 3px; font-size: 0.8em; font-weight: 600; background: ${color}20; color: ${color}; border: 1px solid ${color}40;">${project.status || 'Unknown'}</span>
                             </div>
+                            ${dateDisplayRegion}
                             <div style="font-size: 0.95em; margin-bottom: 10px;">
                                 <strong>Cost:</strong> ${costDisplay}
                             </div>
