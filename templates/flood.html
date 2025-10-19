@@ -3739,8 +3739,58 @@ function getContractorSecStatusSync(contractorName) {
         // Use the new render function
         renderVisualContractorsChart();
     }
+
+    // Most Expensive Projects Chart - will be populated from table data
+    // This will be called after table data is loaded
+
+    // Most Expensive Projects Chart
+    const expensiveProjectsCtx = document.getElementById('expensiveProjectsChart');
+    if (expensiveProjectsCtx && data.mostExpensiveProjects) {
+        // Take top 10 most expensive projects
+        const expensiveProjects = data.mostExpensiveProjects.slice(0, 10);
+        
+        new Chart(expensiveProjectsCtx, {
+            type: 'bar',
+            data: {
+                labels: expensiveProjects.map(project => 
+                    project.ProjectDescription.length > 30 ? 
+                    project.ProjectDescription.substring(0, 30) + '...' : 
+                    project.ProjectDescription
+                ),
+                datasets: [{
+                    label: 'Contract Cost (₱)',
+                    data: expensiveProjects.map(project => project.ContractCost),
+                    backgroundColor: '#dc3545',
+                    borderColor: '#c82333',
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: {
+                        display: false
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            callback: function(value) {
+                                return '₱' + (value / 1000000).toFixed(1) + 'M';
+                            }
+                        }
+                    }
+                }
+            }
+        });
+    }
     
-    // Function to update visual contractors pagination
+    // Contractor Distribution Chart
+    createContractorDistributionChart();
+    }
+    
+    // Function to update visual contractors pagination (global scope)
     function updateVisualContractorsPagination() {
         const pageInfo = document.getElementById('visual-contractors-page-info');
         const prevBtn = document.getElementById('visual-contractors-prev');
@@ -3778,7 +3828,7 @@ function getContractorSecStatusSync(contractorName) {
         }
     }
     
-    // Function to change visual contractors page
+    // Function to change visual contractors page (global scope)
     function changeVisualContractorPage(direction) {
         const totalPages = Math.ceil(allVisualContractors.length / visualContractorPageSize);
         const newPage = Math.max(0, Math.min(totalPages - 1, currentVisualContractorPage + direction));
@@ -3796,7 +3846,7 @@ function getContractorSecStatusSync(contractorName) {
         }
     }
     
-    // Function to render visual contractors chart (extracted from main chart logic)
+    // Function to render visual contractors chart (global scope)
     function renderVisualContractorsChart() {
         const contractorsCtx = document.getElementById('contractorsChart');
         if (!contractorsCtx || !allVisualContractors.length) return;
@@ -3902,56 +3952,6 @@ function getContractorSecStatusSync(contractorName) {
         
         // Make chart cursor pointer
         contractorsCtx.style.cursor = 'pointer';
-    }
-
-    // Most Expensive Projects Chart - will be populated from table data
-    // This will be called after table data is loaded
-
-    // Most Expensive Projects Chart
-    const expensiveProjectsCtx = document.getElementById('expensiveProjectsChart');
-    if (expensiveProjectsCtx && data.mostExpensiveProjects) {
-        // Take top 10 most expensive projects
-        const expensiveProjects = data.mostExpensiveProjects.slice(0, 10);
-        
-        new Chart(expensiveProjectsCtx, {
-            type: 'bar',
-            data: {
-                labels: expensiveProjects.map(project => 
-                    project.ProjectDescription.length > 30 ? 
-                    project.ProjectDescription.substring(0, 30) + '...' : 
-                    project.ProjectDescription
-                ),
-                datasets: [{
-                    label: 'Contract Cost (₱)',
-                    data: expensiveProjects.map(project => project.ContractCost),
-                    backgroundColor: '#dc3545',
-                    borderColor: '#c82333',
-                    borderWidth: 1
-                }]
-            },
-            options: {
-                responsive: true,
-                plugins: {
-                    legend: {
-                        display: false
-                    }
-                },
-                scales: {
-                    y: {
-                        beginAtZero: true,
-                        ticks: {
-                            callback: function(value) {
-                                return '₱' + (value / 1000000).toFixed(1) + 'M';
-                            }
-                        }
-                    }
-                }
-            }
-        });
-    }
-    
-    // Contractor Distribution Chart
-    createContractorDistributionChart();
     }
     
     async function createContractorDistributionChart() {
@@ -5841,10 +5841,15 @@ async function loadSecData() {
                 coverageRate
             });
             
-            document.getElementById('sec-total-contractors-count').textContent = totalSystemContractors.toLocaleString('en-PH');
-            document.getElementById('sec-processed-count').textContent = totalProcessedContractors.toLocaleString('en-PH');
-            document.getElementById('total-sec-count').textContent = withSecData.toLocaleString('en-PH');
-            document.getElementById('suspicious-sec-count').textContent = suspiciousContractors.toLocaleString('en-PH');
+            const secTotalEl = document.getElementById('sec-total-contractors-count');
+            const secProcessedEl = document.getElementById('sec-processed-count');
+            const totalSecEl = document.getElementById('total-sec-count');
+            const suspiciousSecEl = document.getElementById('suspicious-sec-count');
+            
+            if (secTotalEl) secTotalEl.textContent = totalSystemContractors.toLocaleString('en-PH');
+            if (secProcessedEl) secProcessedEl.textContent = totalProcessedContractors.toLocaleString('en-PH');
+            if (totalSecEl) totalSecEl.textContent = withSecData.toLocaleString('en-PH');
+            if (suspiciousSecEl) suspiciousSecEl.textContent = suspiciousContractors.toLocaleString('en-PH');
             
                     console.log('✅ SEC statistics updated');
                     
@@ -5855,17 +5860,27 @@ async function loadSecData() {
                     }
                 } else {
                     console.error('❌ Failed to load SEC database - Status:', secResponse.status, secResponse.statusText);
-                    document.getElementById('sec-total-contractors-count').textContent = 'File Not Found';
-                    document.getElementById('sec-processed-count').textContent = 'File Not Found';
-                    document.getElementById('total-sec-count').textContent = 'File Not Found';
-                    document.getElementById('suspicious-sec-count').textContent = 'File Not Found';
+                    const secTotalEl = document.getElementById('sec-total-contractors-count');
+                    const secProcessedEl = document.getElementById('sec-processed-count');
+                    const totalSecEl = document.getElementById('total-sec-count');
+                    const suspiciousSecEl = document.getElementById('suspicious-sec-count');
+                    
+                    if (secTotalEl) secTotalEl.textContent = 'File Not Found';
+                    if (secProcessedEl) secProcessedEl.textContent = 'File Not Found';
+                    if (totalSecEl) totalSecEl.textContent = 'File Not Found';
+                    if (suspiciousSecEl) suspiciousSecEl.textContent = 'File Not Found';
                 }
     } catch (error) {
         console.error('❌ Error loading SEC data:', error);
-        document.getElementById('sec-total-contractors-count').textContent = 'Load Error';
-        document.getElementById('sec-processed-count').textContent = 'Load Error';
-        document.getElementById('total-sec-count').textContent = 'Load Error';
-        document.getElementById('suspicious-sec-count').textContent = 'Load Error';
+        const secTotalEl = document.getElementById('sec-total-contractors-count');
+        const secProcessedEl = document.getElementById('sec-processed-count');
+        const totalSecEl = document.getElementById('total-sec-count');
+        const suspiciousSecEl = document.getElementById('suspicious-sec-count');
+        
+        if (secTotalEl) secTotalEl.textContent = 'Load Error';
+        if (secProcessedEl) secProcessedEl.textContent = 'Load Error';
+        if (totalSecEl) totalSecEl.textContent = 'Load Error';
+        if (suspiciousSecEl) suspiciousSecEl.textContent = 'Load Error';
     }
 }
 
