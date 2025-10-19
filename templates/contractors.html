@@ -892,20 +892,32 @@ function showContractorHoverTooltip(event, contractorName) {
     // Find contractor data for tooltip
     let contractor = null;
     if (allContractors && allContractors.length > 0) {
-        const normalizedSearch = normalizeContractorName(contractorName);
-        
-        // Try exact match with normalization
+        // First try exact string match (case-insensitive)
+        const searchLower = contractorName.toLowerCase();
         contractor = allContractors.find(c => {
-            const names = [
-                normalizeContractorName(c.contractor_name),
-                normalizeContractorName(c.company_name),
-                normalizeContractorName(c.original_contractor_name)
-            ];
-            return names.some(n => n === normalizedSearch);
+            return (c.contractor_name && c.contractor_name.toLowerCase() === searchLower) ||
+                   (c.company_name && c.company_name.toLowerCase() === searchLower) ||
+                   (c.original_contractor_name && c.original_contractor_name.toLowerCase() === searchLower);
         });
         
+        // If no exact match, try normalized matching
+        if (!contractor) {
+            const normalizedSearch = normalizeContractorName(contractorName);
+            
+            contractor = allContractors.find(c => {
+                const names = [
+                    normalizeContractorName(c.contractor_name),
+                    normalizeContractorName(c.company_name),
+                    normalizeContractorName(c.original_contractor_name)
+                ];
+                return names.some(n => n === normalizedSearch);
+            });
+        }
+        
         // Fallback to partial matching with normalized names (strict - only if >= 10 chars)
-        if (!contractor && normalizedSearch.length >= 10) {
+        if (!contractor && normalizeContractorName(contractorName).length >= 10) {
+            const normalizedSearch = normalizeContractorName(contractorName);
+            
             contractor = allContractors.find(c => {
                 const originalName = normalizeContractorName(c.original_contractor_name || c.contractor_name || '');
                 const companyName = normalizeContractorName(c.company_name || '');
