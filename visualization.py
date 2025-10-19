@@ -1063,54 +1063,42 @@ async def search_contractor_projects(contractor_name: str):
         # Search pattern for fuzzy matching
         search_pattern = f"%{contractor_name}%"
         
-        # Connect to flood database
+        # Search flood database using MeiliSearch
         flood_projects = []
         flood_total = 0
         flood_count = 0
         try:
-            flood_conn = await asyncpg.connect(
-                host=os.getenv('POSTGRES_HOST', 'localhost'),
-                port=int(os.getenv('POSTGRES_PORT', 5432)),
-                user=os.getenv('POSTGRES_USER', 'budget_admin'),
-                password=os.getenv('POSTGRES_PASSWORD', ''),
-                database='flood'
+            flood_client = get_flood_client()
+            # Search for contractor in flood control
+            flood_results = await flood_client.search_projects(
+                q=contractor_name,
+                contractor=None,  # Don't use filter, use full-text search
+                limit=1000
             )
             
-            flood_results = await flood_conn.fetch(
-                """SELECT "ProjectDescription", "Contractor", "ContractCost", 
-                          "InfraYear", "Region", "Province", "TypeofWork"
-                   FROM flood_control 
-                   WHERE "Contractor" ILIKE $1
-                   ORDER BY "ContractCost" DESC""",
-                search_pattern
-            )
-            
-            flood_stats = await flood_conn.fetchrow(
-                """SELECT COUNT(*) as count, 
-                          COALESCE(SUM("ContractCost"), 0) as total,
-                          COALESCE(AVG("ContractCost"), 0) as average,
-                          COALESCE(MIN("ContractCost"), 0) as minimum,
-                          COALESCE(MAX("ContractCost"), 0) as maximum
-                   FROM flood_control 
-                   WHERE "Contractor" ILIKE $1""",
-                search_pattern
-            )
-            
-            flood_count = flood_stats['count']
-            flood_total = float(flood_stats['total'])
-            
-            for proj in flood_results:
-                flood_projects.append({
-                    "description": proj['ProjectDescription'],
-                    "contractor": proj['Contractor'],
-                    "amount": float(proj['ContractCost']),
-                    "year": proj['InfraYear'],
-                    "region": proj['Region'],
-                    "province": proj['Province'],
-                    "type": proj['TypeofWork']
-                })
-            
-            await flood_conn.close()
+            if flood_results and 'hits' in flood_results:
+                # Filter results where contractor name contains the search term
+                filtered_hits = [
+                    hit for hit in flood_results['hits']
+                    if contractor_name.lower() in hit.get('Contractor', '').lower()
+                ]
+                
+                flood_count = len(filtered_hits)
+                flood_total = sum(float(hit.get('ContractCost', 0)) for hit in filtered_hits)
+                
+                # Sort by contract cost descending
+                sorted_hits = sorted(filtered_hits, key=lambda x: float(x.get('ContractCost', 0)), reverse=True)
+                
+                for proj in sorted_hits:
+                    flood_projects.append({
+                        "description": proj.get('ProjectDescription', ''),
+                        "contractor": proj.get('Contractor', ''),
+                        "amount": float(proj.get('ContractCost', 0)),
+                        "year": proj.get('InfraYear', ''),
+                        "region": proj.get('Region', ''),
+                        "province": proj.get('Province', ''),
+                        "type": proj.get('TypeofWork', '')
+                    })
         except Exception as e:
             print(f"Error querying flood database: {e}")
         
