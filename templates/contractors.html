@@ -84,6 +84,12 @@
         .pulse-warning {
             animation: pulse-warning 2s ease-in-out infinite;
         }
+
+        /* Spinning loader animation */
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
     </style>
 </head>
 <body>
@@ -159,6 +165,7 @@ function toggleMobileMenu() {
                 <a href="#visual" class="budget-tab-btn active bg-white text-blue-600 border-blue-600 border-t border-l border-r px-6 py-3 rounded-t-lg cursor-pointer font-semibold transition-all duration-300 relative -mb-0.5 z-10" data-tab="visual">📊 Visual</a>
                 <a href="#table" class="budget-tab-btn bg-gray-100 text-gray-600 border-gray-300 border px-6 py-3 rounded-t-lg cursor-pointer font-semibold transition-all duration-300 hover:bg-gray-200" data-tab="table">📋 Table</a>
                 <a href="#sec" class="budget-tab-btn bg-gray-100 text-gray-600 border-gray-300 border px-6 py-3 rounded-t-lg cursor-pointer font-semibold transition-all duration-300 hover:bg-gray-200" data-tab="sec">🏛️ SEC</a>
+                <a href="#projects-search" class="budget-tab-btn bg-gray-100 text-gray-600 border-gray-300 border px-6 py-3 rounded-t-lg cursor-pointer font-semibold transition-all duration-300 hover:bg-gray-200" data-tab="projects-search">🔍 Projects Search</a>
             </div>
             <div class="budget-tab-content">
 
@@ -339,6 +346,42 @@ function toggleMobileMenu() {
                             <div id="contractorsWithoutSec" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 15px;">
                                 <!-- Suspicious contractors will be populated here -->
                             </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- PROJECTS SEARCH TAB -->
+                <div id="projects-search-tab" class="budget-tab-panel">
+                    <div style="background: white; padding: 30px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
+                        <h3 style="color: #0038A8; margin: 0 0 10px 0;">🔍 Search Contractor Projects</h3>
+                        <p style="color: #666; margin: 0 0 25px 0;">
+                            Search for any contractor and view all their projects across Flood Control, DIME, and PhilGEPS databases
+                        </p>
+                        
+                        <!-- Search Input with Autocomplete -->
+                        <div style="margin-bottom: 30px; position: relative;">
+                            <input 
+                                type="text" 
+                                id="project-search-input" 
+                                placeholder="Type contractor name... (e.g., CLTG, D.M. Consunji, etc.)" 
+                                style="width: 100%; padding: 15px 20px; border: 2px solid #0038A8; border-radius: 8px; font-size: 1.1em; box-shadow: 0 2px 4px rgba(0,0,0,0.1);"
+                                autocomplete="off"
+                            />
+                            <div id="project-search-autocomplete" style="position: absolute; top: 100%; left: 0; right: 0; background: white; border: 2px solid #0038A8; border-top: none; border-radius: 0 0 8px 8px; max-height: 300px; overflow-y: auto; display: none; z-index: 1000; box-shadow: 0 4px 6px rgba(0,0,0,0.1);"></div>
+                        </div>
+                        
+                        <button 
+                            id="search-projects-btn" 
+                            style="background: #0038A8; color: white; border: none; padding: 12px 30px; border-radius: 6px; font-size: 1em; font-weight: 600; cursor: pointer; transition: all 0.3s;"
+                            onmouseover="this.style.background='#002870'"
+                            onmouseout="this.style.background='#0038A8'"
+                        >
+                            🔍 Search Projects
+                        </button>
+                        
+                        <!-- Results Container -->
+                        <div id="projects-search-results" style="margin-top: 30px;">
+                            <!-- Results will be populated here -->
                         </div>
                     </div>
                 </div>
@@ -1011,6 +1054,281 @@ function drawVennDiagram(data) {
     ctx.fillStyle = '#512DA8';
     ctx.fillText(data.all_three, width / 2, centerY + 10);
 }
+
+// Projects Search Functionality
+let projectSearchContractors = [];
+
+// Setup autocomplete for project search
+function setupProjectSearchAutocomplete() {
+    const searchInput = document.getElementById('project-search-input');
+    const autocompleteDiv = document.getElementById('project-search-autocomplete');
+    
+    searchInput.addEventListener('input', function() {
+        const query = this.value.toLowerCase().trim();
+        
+        if (query.length < 2) {
+            autocompleteDiv.style.display = 'none';
+            return;
+        }
+        
+        // Filter contractors
+        const matches = projectSearchContractors
+            .filter(c => c.contractor_name.toLowerCase().includes(query))
+            .slice(0, 10);
+        
+        if (matches.length === 0) {
+            autocompleteDiv.style.display = 'none';
+            return;
+        }
+        
+        // Display suggestions
+        autocompleteDiv.innerHTML = matches.map(contractor => `
+            <div class="autocomplete-item" 
+                 style="padding: 12px 20px; cursor: pointer; border-bottom: 1px solid #e5e7eb; transition: all 0.2s;"
+                 onmouseover="this.style.background='#f3f4f6'"
+                 onmouseout="this.style.background='white'"
+                 onclick="selectProjectSearchContractor('${contractor.contractor_name.replace(/'/g, "\\'")}')">
+                <strong>${contractor.contractor_name}</strong>
+                ${contractor.sec_number ? `<span style="color: #16a34a; margin-left: 10px;">✅ SEC: ${contractor.sec_number}</span>` : ''}
+            </div>
+        `).join('');
+        
+        autocompleteDiv.style.display = 'block';
+    });
+    
+    // Hide autocomplete when clicking outside
+    document.addEventListener('click', function(e) {
+        if (!searchInput.contains(e.target) && !autocompleteDiv.contains(e.target)) {
+            autocompleteDiv.style.display = 'none';
+        }
+    });
+}
+
+function selectProjectSearchContractor(name) {
+    const searchInput = document.getElementById('project-search-input');
+    const autocompleteDiv = document.getElementById('project-search-autocomplete');
+    
+    searchInput.value = name;
+    autocompleteDiv.style.display = 'none';
+    
+    // Auto-search
+    searchContractorProjects();
+}
+
+async function searchContractorProjects() {
+    const searchInput = document.getElementById('project-search-input');
+    const resultsDiv = document.getElementById('projects-search-results');
+    const contractorName = searchInput.value.trim();
+    
+    if (!contractorName) {
+        resultsDiv.innerHTML = '<p style="color: #dc3545; padding: 20px; text-align: center;">⚠️ Please enter a contractor name</p>';
+        return;
+    }
+    
+    // Show loading
+    resultsDiv.innerHTML = `
+        <div style="text-align: center; padding: 40px;">
+            <div style="border: 4px solid #f3f3f3; border-top: 4px solid #0038A8; border-radius: 50%; width: 50px; height: 50px; animation: spin 1s linear infinite; margin: 0 auto 20px;"></div>
+            <p style="color: #666; font-size: 1.1em;">Searching for <strong>${contractorName}</strong> across all databases...</p>
+        </div>
+    `;
+    
+    try {
+        const response = await fetch(`/api/contractors/projects/${encodeURIComponent(contractorName)}`);
+        const data = await response.json();
+        
+        if (!data.success) {
+            resultsDiv.innerHTML = `<p style="color: #dc3545; padding: 20px; text-align: center;">❌ Error: ${data.error}</p>`;
+            return;
+        }
+        
+        // Display results
+        displayProjectSearchResults(data);
+    } catch (error) {
+        resultsDiv.innerHTML = `<p style="color: #dc3545; padding: 20px; text-align: center;">❌ Error loading data: ${error.message}</p>`;
+    }
+}
+
+function displayProjectSearchResults(data) {
+    const resultsDiv = document.getElementById('projects-search-results');
+    const summary = data.summary;
+    const projects = data.projects;
+    
+    let html = `
+        <div style="background: linear-gradient(135deg, #0038A8 0%, #002870 100%); color: white; padding: 30px; border-radius: 8px; margin-bottom: 30px;">
+            <h2 style="margin: 0 0 20px 0; font-size: 1.8em;">📊 ${data.contractor_name}</h2>
+            
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; margin-bottom: 20px;">
+                <div style="background: rgba(255,255,255,0.1); padding: 15px; border-radius: 6px; text-align: center;">
+                    <div style="font-size: 2em; font-weight: bold;">${summary.total_projects}</div>
+                    <div style="font-size: 0.9em; opacity: 0.9;">Total Projects</div>
+                </div>
+                <div style="background: rgba(255,255,255,0.1); padding: 15px; border-radius: 6px; text-align: center;">
+                    <div style="font-size: 1.5em; font-weight: bold;">₱${summary.total_value.toLocaleString('en-PH', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</div>
+                    <div style="font-size: 0.9em; opacity: 0.9;">Total Value</div>
+                    <div style="font-size: 0.8em; opacity: 0.7; margin-top: 5px;">≈ ₱${(summary.total_value / 1000000).toFixed(2)} Million</div>
+                </div>
+            </div>
+            
+            <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; padding-top: 20px; border-top: 1px solid rgba(255,255,255,0.2);">
+                <div>
+                    <div style="font-size: 1.3em; font-weight: bold;">🔵 Flood Control</div>
+                    <div style="font-size: 0.9em; opacity: 0.9;">${summary.flood.count} projects</div>
+                    <div style="font-size: 0.85em; opacity: 0.8;">₱${summary.flood.total.toLocaleString('en-PH')}</div>
+                </div>
+                <div>
+                    <div style="font-size: 1.3em; font-weight: bold;">🟢 DIME</div>
+                    <div style="font-size: 0.9em; opacity: 0.9;">${summary.dime.count} projects</div>
+                    <div style="font-size: 0.85em; opacity: 0.8;">₱${summary.dime.total.toLocaleString('en-PH')}</div>
+                </div>
+                <div>
+                    <div style="font-size: 1.3em; font-weight: bold;">🟡 PhilGEPS</div>
+                    <div style="font-size: 0.9em; opacity: 0.9;">${summary.philgeps.count} projects</div>
+                    <div style="font-size: 0.85em; opacity: 0.8;">₱${summary.philgeps.total.toLocaleString('en-PH')}</div>
+                </div>
+            </div>
+        </div>
+    `;
+    
+    // Flood Control Projects
+    if (projects.flood && projects.flood.length > 0) {
+        html += `
+            <div style="background: white; padding: 25px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); margin-bottom: 25px; border-left: 5px solid #1976D2;">
+                <h3 style="color: #1976D2; margin: 0 0 20px 0; font-size: 1.4em;">🔵 Flood Control Projects (${projects.flood.length})</h3>
+                <div style="overflow-x: auto;">
+                    <table style="width: 100%; border-collapse: collapse;">
+                        <thead>
+                            <tr style="background: #f3f4f6; border-bottom: 2px solid #1976D2;">
+                                <th style="padding: 12px; text-align: left; font-weight: 600;">#</th>
+                                <th style="padding: 12px; text-align: left; font-weight: 600;">Project Description</th>
+                                <th style="padding: 12px; text-align: left; font-weight: 600;">Amount</th>
+                                <th style="padding: 12px; text-align: left; font-weight: 600;">Year</th>
+                                <th style="padding: 12px; text-align: left; font-weight: 600;">Region</th>
+                                <th style="padding: 12px; text-align: left; font-weight: 600;">Type</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${projects.flood.map((proj, idx) => `
+                                <tr style="border-bottom: 1px solid #e5e7eb;">
+                                    <td style="padding: 12px;">${idx + 1}</td>
+                                    <td style="padding: 12px;">${proj.description}</td>
+                                    <td style="padding: 12px; font-weight: 600; color: #1976D2;">₱${proj.amount.toLocaleString('en-PH')}</td>
+                                    <td style="padding: 12px;">${proj.year || 'N/A'}</td>
+                                    <td style="padding: 12px;">${proj.region || 'N/A'}</td>
+                                    <td style="padding: 12px; font-size: 0.9em;">${proj.type || 'N/A'}</td>
+                                </tr>
+                            `).join('')}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        `;
+    }
+    
+    // DIME Projects
+    if (projects.dime && projects.dime.length > 0) {
+        html += `
+            <div style="background: white; padding: 25px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); margin-bottom: 25px; border-left: 5px solid #388E3C;">
+                <h3 style="color: #388E3C; margin: 0 0 20px 0; font-size: 1.4em;">🟢 DIME Projects (${projects.dime.length})</h3>
+                <div style="overflow-x: auto;">
+                    <table style="width: 100%; border-collapse: collapse;">
+                        <thead>
+                            <tr style="background: #f3f4f6; border-bottom: 2px solid #388E3C;">
+                                <th style="padding: 12px; text-align: left; font-weight: 600;">#</th>
+                                <th style="padding: 12px; text-align: left; font-weight: 600;">Project Title</th>
+                                <th style="padding: 12px; text-align: left; font-weight: 600;">Amount</th>
+                                <th style="padding: 12px; text-align: left; font-weight: 600;">Region</th>
+                                <th style="padding: 12px; text-align: left; font-weight: 600;">Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${projects.dime.map((proj, idx) => `
+                                <tr style="border-bottom: 1px solid #e5e7eb;">
+                                    <td style="padding: 12px;">${idx + 1}</td>
+                                    <td style="padding: 12px;">${proj.title}</td>
+                                    <td style="padding: 12px; font-weight: 600; color: #388E3C;">₱${proj.amount.toLocaleString('en-PH')}</td>
+                                    <td style="padding: 12px;">${proj.region || 'N/A'}</td>
+                                    <td style="padding: 12px;">${proj.status || 'N/A'}</td>
+                                </tr>
+                            `).join('')}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        `;
+    }
+    
+    // PhilGEPS Projects
+    if (projects.philgeps && projects.philgeps.length > 0) {
+        html += `
+            <div style="background: white; padding: 25px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); margin-bottom: 25px; border-left: 5px solid #F57C00;">
+                <h3 style="color: #F57C00; margin: 0 0 20px 0; font-size: 1.4em;">🟡 PhilGEPS Projects (${projects.philgeps.length})</h3>
+                <div style="overflow-x: auto;">
+                    <table style="width: 100%; border-collapse: collapse;">
+                        <thead>
+                            <tr style="background: #f3f4f6; border-bottom: 2px solid #F57C00;">
+                                <th style="padding: 12px; text-align: left; font-weight: 600;">#</th>
+                                <th style="padding: 12px; text-align: left; font-weight: 600;">Reference</th>
+                                <th style="padding: 12px; text-align: left; font-weight: 600;">Description</th>
+                                <th style="padding: 12px; text-align: left; font-weight: 600;">Amount</th>
+                                <th style="padding: 12px; text-align: left; font-weight: 600;">Procuring Entity</th>
+                                <th style="padding: 12px; text-align: left; font-weight: 600;">Award Date</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${projects.philgeps.map((proj, idx) => `
+                                <tr style="border-bottom: 1px solid #e5e7eb;">
+                                    <td style="padding: 12px;">${idx + 1}</td>
+                                    <td style="padding: 12px; font-weight: 600;">${proj.reference}</td>
+                                    <td style="padding: 12px;">${proj.description}</td>
+                                    <td style="padding: 12px; font-weight: 600; color: #F57C00;">₱${proj.amount.toLocaleString('en-PH')}</td>
+                                    <td style="padding: 12px; font-size: 0.9em;">${proj.procuring_entity || 'N/A'}</td>
+                                    <td style="padding: 12px;">${proj.award_date ? new Date(proj.award_date).toLocaleDateString('en-PH') : 'N/A'}</td>
+                                </tr>
+                            `).join('')}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        `;
+    }
+    
+    // No projects found
+    if (summary.total_projects === 0) {
+        html = `
+            <div style="background: #fff3cd; border: 2px solid #ffc107; border-radius: 8px; padding: 30px; text-align: center;">
+                <h3 style="color: #856404; margin: 0 0 10px 0;">⚠️ No Projects Found</h3>
+                <p style="color: #856404; margin: 0;">No projects found for <strong>${data.contractor_name}</strong> in any database.</p>
+                <p style="color: #856404; margin: 10px 0 0 0; font-size: 0.9em;">Try searching with a different contractor name or check the spelling.</p>
+            </div>
+        `;
+    }
+    
+    resultsDiv.innerHTML = html;
+}
+
+// Event listeners for project search
+document.addEventListener('DOMContentLoaded', function() {
+    // Wait for contractors to load
+    setTimeout(() => {
+        projectSearchContractors = allContractors;
+        setupProjectSearchAutocomplete();
+    }, 1000);
+    
+    const searchBtn = document.getElementById('search-projects-btn');
+    if (searchBtn) {
+        searchBtn.addEventListener('click', searchContractorProjects);
+    }
+    
+    const searchInput = document.getElementById('project-search-input');
+    if (searchInput) {
+        searchInput.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                searchContractorProjects();
+            }
+        });
+    }
+});
 
 // Load on page load
 loadContractors();

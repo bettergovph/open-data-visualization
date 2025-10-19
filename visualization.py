@@ -1054,6 +1054,202 @@ async def get_contractors_venn():
     except Exception as e:
         return JSONResponse({"success": False, "error": str(e)})
 
+@app.get("/api/contractors/projects/{contractor_name}")
+async def search_contractor_projects(contractor_name: str):
+    """Search for contractor projects across Flood, DIME, and PhilGEPS databases"""
+    try:
+        import asyncpg
+        
+        # Search pattern for fuzzy matching
+        search_pattern = f"%{contractor_name}%"
+        
+        # Connect to flood database
+        flood_projects = []
+        flood_total = 0
+        flood_count = 0
+        try:
+            flood_conn = await asyncpg.connect(
+                host=os.getenv('POSTGRES_HOST', 'localhost'),
+                port=int(os.getenv('POSTGRES_PORT', 5432)),
+                user=os.getenv('POSTGRES_USER', 'budget_admin'),
+                password=os.getenv('POSTGRES_PASSWORD', ''),
+                database='flood'
+            )
+            
+            flood_results = await flood_conn.fetch(
+                """SELECT "ProjectDescription", "Contractor", "ContractCost", 
+                          "InfraYear", "Region", "Province", "TypeofWork"
+                   FROM flood_control 
+                   WHERE "Contractor" ILIKE $1
+                   ORDER BY "ContractCost" DESC""",
+                search_pattern
+            )
+            
+            flood_stats = await flood_conn.fetchrow(
+                """SELECT COUNT(*) as count, 
+                          COALESCE(SUM("ContractCost"), 0) as total,
+                          COALESCE(AVG("ContractCost"), 0) as average,
+                          COALESCE(MIN("ContractCost"), 0) as minimum,
+                          COALESCE(MAX("ContractCost"), 0) as maximum
+                   FROM flood_control 
+                   WHERE "Contractor" ILIKE $1""",
+                search_pattern
+            )
+            
+            flood_count = flood_stats['count']
+            flood_total = float(flood_stats['total'])
+            
+            for proj in flood_results:
+                flood_projects.append({
+                    "description": proj['ProjectDescription'],
+                    "contractor": proj['Contractor'],
+                    "amount": float(proj['ContractCost']),
+                    "year": proj['InfraYear'],
+                    "region": proj['Region'],
+                    "province": proj['Province'],
+                    "type": proj['TypeofWork']
+                })
+            
+            await flood_conn.close()
+        except Exception as e:
+            print(f"Error querying flood database: {e}")
+        
+        # Connect to DIME database
+        dime_projects = []
+        dime_total = 0
+        dime_count = 0
+        try:
+            dime_conn = await asyncpg.connect(
+                host=os.getenv('POSTGRES_HOST', 'localhost'),
+                port=int(os.getenv('POSTGRES_PORT', 5432)),
+                user=os.getenv('POSTGRES_USER', 'budget_admin'),
+                password=os.getenv('POSTGRES_PASSWORD', ''),
+                database='dime'
+            )
+            
+            dime_results = await dime_conn.fetch(
+                """SELECT project_title, contractor, total_amount, 
+                          region, province, city, status
+                   FROM dime_projects 
+                   WHERE contractor ILIKE $1
+                   ORDER BY total_amount DESC""",
+                search_pattern
+            )
+            
+            dime_stats = await dime_conn.fetchrow(
+                """SELECT COUNT(*) as count,
+                          COALESCE(SUM(total_amount), 0) as total,
+                          COALESCE(AVG(total_amount), 0) as average,
+                          COALESCE(MIN(total_amount), 0) as minimum,
+                          COALESCE(MAX(total_amount), 0) as maximum
+                   FROM dime_projects 
+                   WHERE contractor ILIKE $1""",
+                search_pattern
+            )
+            
+            dime_count = dime_stats['count']
+            dime_total = float(dime_stats['total'])
+            
+            for proj in dime_results:
+                dime_projects.append({
+                    "title": proj['project_title'],
+                    "contractor": proj['contractor'],
+                    "amount": float(proj['total_amount']),
+                    "region": proj['region'],
+                    "province": proj['province'],
+                    "city": proj['city'],
+                    "status": proj['status']
+                })
+            
+            await dime_conn.close()
+        except Exception as e:
+            print(f"Error querying DIME database: {e}")
+        
+        # Connect to PhilGEPS database
+        philgeps_projects = []
+        philgeps_total = 0
+        philgeps_count = 0
+        try:
+            philgeps_conn = await asyncpg.connect(
+                host=os.getenv('POSTGRES_HOST', 'localhost'),
+                port=int(os.getenv('POSTGRES_PORT', 5432)),
+                user=os.getenv('POSTGRES_USER', 'budget_admin'),
+                password=os.getenv('POSTGRES_PASSWORD', ''),
+                database='philgeps'
+            )
+            
+            philgeps_results = await philgeps_conn.fetch(
+                """SELECT reference_number, description, awardee, contract_amount, 
+                          procurement_mode, procuring_entity, award_date, status
+                   FROM philgeps_awards 
+                   WHERE awardee ILIKE $1
+                   ORDER BY contract_amount DESC
+                   LIMIT 100""",
+                search_pattern
+            )
+            
+            philgeps_stats = await philgeps_conn.fetchrow(
+                """SELECT COUNT(*) as count,
+                          COALESCE(SUM(contract_amount), 0) as total,
+                          COALESCE(AVG(contract_amount), 0) as average,
+                          COALESCE(MIN(contract_amount), 0) as minimum,
+                          COALESCE(MAX(contract_amount), 0) as maximum
+                   FROM philgeps_awards 
+                   WHERE awardee ILIKE $1""",
+                search_pattern
+            )
+            
+            philgeps_count = philgeps_stats['count']
+            philgeps_total = float(philgeps_stats['total'])
+            
+            for proj in philgeps_results:
+                philgeps_projects.append({
+                    "reference": proj['reference_number'],
+                    "description": proj['description'],
+                    "awardee": proj['awardee'],
+                    "amount": float(proj['contract_amount']),
+                    "procurement_mode": proj['procurement_mode'],
+                    "procuring_entity": proj['procuring_entity'],
+                    "award_date": proj['award_date'].isoformat() if proj['award_date'] else None,
+                    "status": proj['status']
+                })
+            
+            await philgeps_conn.close()
+        except Exception as e:
+            print(f"Error querying PhilGEPS database: {e}")
+        
+        # Calculate grand totals
+        grand_total = flood_total + dime_total + philgeps_total
+        grand_count = flood_count + dime_count + philgeps_count
+        
+        return JSONResponse({
+            "success": True,
+            "contractor_name": contractor_name,
+            "summary": {
+                "total_projects": grand_count,
+                "total_value": grand_total,
+                "flood": {
+                    "count": flood_count,
+                    "total": flood_total
+                },
+                "dime": {
+                    "count": dime_count,
+                    "total": dime_total
+                },
+                "philgeps": {
+                    "count": philgeps_count,
+                    "total": philgeps_total
+                }
+            },
+            "projects": {
+                "flood": flood_projects,
+                "dime": dime_projects,
+                "philgeps": philgeps_projects
+            }
+        })
+    except Exception as e:
+        return JSONResponse({"success": False, "error": str(e)})
+
 @app.get("/api/dime/projects")
 async def dime_projects_api(
     page: int = 1,
