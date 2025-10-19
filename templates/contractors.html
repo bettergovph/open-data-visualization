@@ -1111,6 +1111,11 @@ function drawVennDiagram(data) {
 
 // Projects Search Functionality
 let projectSearchContractors = [];
+let currentFloodPage = 0;
+let currentDimePage = 0;
+let currentPhilgepsPage = 0;
+const projectsPerPage = 5;
+let cachedSearchResults = null;
 
 // Setup autocomplete for project search
 function setupProjectSearchAutocomplete() {
@@ -1179,6 +1184,11 @@ async function searchContractorProjects() {
         return;
     }
     
+    // Reset pagination
+    currentFloodPage = 0;
+    currentDimePage = 0;
+    currentPhilgepsPage = 0;
+    
     // Show loading
     resultsDiv.innerHTML = `
         <div style="text-align: center; padding: 40px;">
@@ -1196,11 +1206,32 @@ async function searchContractorProjects() {
             return;
         }
         
+        // Cache results for pagination
+        cachedSearchResults = data;
+        
         // Display results
         displayProjectSearchResults(data);
     } catch (error) {
         resultsDiv.innerHTML = `<p style="color: #dc3545; padding: 20px; text-align: center;">❌ Error loading data: ${error.message}</p>`;
     }
+}
+
+function changeFloodPage(direction) {
+    const totalPages = Math.ceil(cachedSearchResults.projects.flood.length / projectsPerPage);
+    currentFloodPage = Math.max(0, Math.min(totalPages - 1, currentFloodPage + direction));
+    displayProjectSearchResults(cachedSearchResults);
+}
+
+function changeDimePage(direction) {
+    const totalPages = Math.ceil(cachedSearchResults.projects.dime.length / projectsPerPage);
+    currentDimePage = Math.max(0, Math.min(totalPages - 1, currentDimePage + direction));
+    displayProjectSearchResults(cachedSearchResults);
+}
+
+function changePhilgepsPage(direction) {
+    const totalPages = Math.ceil(cachedSearchResults.projects.philgeps.length / projectsPerPage);
+    currentPhilgepsPage = Math.max(0, Math.min(totalPages - 1, currentPhilgepsPage + direction));
+    displayProjectSearchResults(cachedSearchResults);
 }
 
 function displayProjectSearchResults(data) {
@@ -1296,9 +1327,21 @@ function displayProjectSearchResults(data) {
     
     // Flood Control Projects
     if (projects.flood && projects.flood.length > 0) {
+        const floodStart = currentFloodPage * projectsPerPage;
+        const floodEnd = floodStart + projectsPerPage;
+        const floodPaginated = projects.flood.slice(floodStart, floodEnd);
+        const floodTotalPages = Math.ceil(projects.flood.length / projectsPerPage);
+        
         html += `
             <div style="background: white; padding: 25px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); margin-bottom: 25px; border-left: 5px solid #1976D2;">
-                <h3 style="color: #1976D2; margin: 0 0 20px 0; font-size: 1.4em;">🔵 Flood Control Projects (${projects.flood.length})</h3>
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                    <h3 style="color: #1976D2; margin: 0; font-size: 1.4em;">🔵 Flood Control Projects (${projects.flood.length})</h3>
+                    <div style="display: flex; gap: 10px; align-items: center;">
+                        <span style="color: #666; font-size: 0.9em;">Page ${currentFloodPage + 1} of ${floodTotalPages}</span>
+                        <button onclick="changeFloodPage(-1)" style="background: ${currentFloodPage === 0 ? '#dee2e6' : '#1976D2'}; color: ${currentFloodPage === 0 ? '#6c757d' : 'white'}; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-size: 0.85em;" ${currentFloodPage === 0 ? 'disabled' : ''}>← Prev</button>
+                        <button onclick="changeFloodPage(1)" style="background: ${currentFloodPage >= floodTotalPages - 1 ? '#dee2e6' : '#1976D2'}; color: ${currentFloodPage >= floodTotalPages - 1 ? '#6c757d' : 'white'}; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-size: 0.85em;" ${currentFloodPage >= floodTotalPages - 1 ? 'disabled' : ''}>Next →</button>
+                    </div>
+                </div>
                 <div style="overflow-x: auto;">
                     <table style="width: 100%; border-collapse: collapse;">
                         <thead>
@@ -1313,9 +1356,9 @@ function displayProjectSearchResults(data) {
                             </tr>
                         </thead>
                         <tbody>
-                            ${projects.flood.map((proj, idx) => `
+                            ${floodPaginated.map((proj, idx) => `
                                 <tr style="border-bottom: 1px solid #e5e7eb;">
-                                    <td style="padding: 12px;">${idx + 1}</td>
+                                    <td style="padding: 12px;">${floodStart + idx + 1}</td>
                                     <td style="padding: 12px;">${proj.description}</td>
                                     <td style="padding: 12px; font-size: 0.85em; color: #666;">${proj.contractor_raw || proj.contractor}</td>
                                     <td style="padding: 12px; font-weight: 600; color: #1976D2;">₱${proj.amount.toLocaleString('en-PH')}</td>
@@ -1333,9 +1376,21 @@ function displayProjectSearchResults(data) {
     
     // DIME Projects
     if (projects.dime && projects.dime.length > 0) {
+        const dimeStart = currentDimePage * projectsPerPage;
+        const dimeEnd = dimeStart + projectsPerPage;
+        const dimePaginated = projects.dime.slice(dimeStart, dimeEnd);
+        const dimeTotalPages = Math.ceil(projects.dime.length / projectsPerPage);
+        
         html += `
             <div style="background: white; padding: 25px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); margin-bottom: 25px; border-left: 5px solid #388E3C;">
-                <h3 style="color: #388E3C; margin: 0 0 20px 0; font-size: 1.4em;">🟢 DIME Projects (${projects.dime.length})</h3>
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                    <h3 style="color: #388E3C; margin: 0; font-size: 1.4em;">🟢 DIME Projects (${projects.dime.length})</h3>
+                    <div style="display: flex; gap: 10px; align-items: center;">
+                        <span style="color: #666; font-size: 0.9em;">Page ${currentDimePage + 1} of ${dimeTotalPages}</span>
+                        <button onclick="changeDimePage(-1)" style="background: ${currentDimePage === 0 ? '#dee2e6' : '#388E3C'}; color: ${currentDimePage === 0 ? '#6c757d' : 'white'}; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-size: 0.85em;" ${currentDimePage === 0 ? 'disabled' : ''}>← Prev</button>
+                        <button onclick="changeDimePage(1)" style="background: ${currentDimePage >= dimeTotalPages - 1 ? '#dee2e6' : '#388E3C'}; color: ${currentDimePage >= dimeTotalPages - 1 ? '#6c757d' : 'white'}; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-size: 0.85em;" ${currentDimePage >= dimeTotalPages - 1 ? 'disabled' : ''}>Next →</button>
+                    </div>
+                </div>
                 <div style="overflow-x: auto;">
                     <table style="width: 100%; border-collapse: collapse;">
                         <thead>
@@ -1349,9 +1404,9 @@ function displayProjectSearchResults(data) {
                             </tr>
                         </thead>
                         <tbody>
-                            ${projects.dime.map((proj, idx) => `
+                            ${dimePaginated.map((proj, idx) => `
                                 <tr style="border-bottom: 1px solid #e5e7eb;">
-                                    <td style="padding: 12px;">${idx + 1}</td>
+                                    <td style="padding: 12px;">${dimeStart + idx + 1}</td>
                                     <td style="padding: 12px;">${proj.title}</td>
                                     <td style="padding: 12px; font-size: 0.85em; color: #666;">${proj.contractor_raw || proj.contractor}</td>
                                     <td style="padding: 12px; font-weight: 600; color: #388E3C;">₱${proj.amount.toLocaleString('en-PH')}</td>
@@ -1368,9 +1423,21 @@ function displayProjectSearchResults(data) {
     
     // PhilGEPS Projects
     if (projects.philgeps && projects.philgeps.length > 0) {
+        const philgepsStart = currentPhilgepsPage * projectsPerPage;
+        const philgepsEnd = philgepsStart + projectsPerPage;
+        const philgepsPaginated = projects.philgeps.slice(philgepsStart, philgepsEnd);
+        const philgepsTotalPages = Math.ceil(projects.philgeps.length / projectsPerPage);
+        
         html += `
             <div style="background: white; padding: 25px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); margin-bottom: 25px; border-left: 5px solid #F57C00;">
-                <h3 style="color: #F57C00; margin: 0 0 20px 0; font-size: 1.4em;">🟡 PhilGEPS Projects (${projects.philgeps.length})</h3>
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                    <h3 style="color: #F57C00; margin: 0; font-size: 1.4em;">🟡 PhilGEPS Projects (${projects.philgeps.length})</h3>
+                    <div style="display: flex; gap: 10px; align-items: center;">
+                        <span style="color: #666; font-size: 0.9em;">Page ${currentPhilgepsPage + 1} of ${philgepsTotalPages}</span>
+                        <button onclick="changePhilgepsPage(-1)" style="background: ${currentPhilgepsPage === 0 ? '#dee2e6' : '#F57C00'}; color: ${currentPhilgepsPage === 0 ? '#6c757d' : 'white'}; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-size: 0.85em;" ${currentPhilgepsPage === 0 ? 'disabled' : ''}>← Prev</button>
+                        <button onclick="changePhilgepsPage(1)" style="background: ${currentPhilgepsPage >= philgepsTotalPages - 1 ? '#dee2e6' : '#F57C00'}; color: ${currentPhilgepsPage >= philgepsTotalPages - 1 ? '#6c757d' : 'white'}; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-size: 0.85em;" ${currentPhilgepsPage >= philgepsTotalPages - 1 ? 'disabled' : ''}>Next →</button>
+                    </div>
+                </div>
                 <div style="overflow-x: auto;">
                     <table style="width: 100%; border-collapse: collapse;">
                         <thead>
@@ -1385,9 +1452,9 @@ function displayProjectSearchResults(data) {
                             </tr>
                         </thead>
                         <tbody>
-                            ${projects.philgeps.map((proj, idx) => `
+                            ${philgepsPaginated.map((proj, idx) => `
                                 <tr style="border-bottom: 1px solid #e5e7eb;">
-                                    <td style="padding: 12px;">${idx + 1}</td>
+                                    <td style="padding: 12px;">${philgepsStart + idx + 1}</td>
                                     <td style="padding: 12px; font-weight: 600;">${proj.reference}</td>
                                     <td style="padding: 12px;">${proj.description}</td>
                                     <td style="padding: 12px; font-size: 0.85em; color: #666;">${proj.awardee_raw || proj.awardee}</td>
