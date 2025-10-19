@@ -1228,16 +1228,64 @@ async def search_contractor_projects(contractor_name: str):
         except Exception as e:
             print(f"Error querying PhilGEPS database: {e}")
         
-        # Calculate grand totals
-        grand_total = flood_total + dime_total + philgeps_total
-        grand_count = flood_count + dime_count + philgeps_count
+        # Deduplicate projects across databases
+        # Create a set to track unique projects (by description + amount)
+        seen_projects = set()
+        unique_projects = []
+        unique_total = 0
+        
+        # Helper function to create a project signature
+        def create_signature(description, amount):
+            # Normalize description and round amount to avoid floating point issues
+            desc = description.lower().strip()[:100]  # First 100 chars
+            amt = round(float(amount), 2)
+            return f"{desc}|{amt}"
+        
+        # Process all projects and deduplicate
+        all_sources = [
+            ("flood", flood_projects),
+            ("dime", dime_projects),
+            ("philgeps", philgeps_projects)
+        ]
+        
+        for source, projects in all_sources:
+            for proj in projects:
+                if source == "flood":
+                    sig = create_signature(proj.get("description", ""), proj.get("amount", 0))
+                    desc = proj.get("description", "")
+                elif source == "dime":
+                    sig = create_signature(proj.get("title", ""), proj.get("amount", 0))
+                    desc = proj.get("title", "")
+                else:  # philgeps
+                    sig = create_signature(proj.get("description", ""), proj.get("amount", 0))
+                    desc = proj.get("description", "")
+                
+                if sig not in seen_projects:
+                    seen_projects.add(sig)
+                    unique_projects.append({
+                        "source": source,
+                        "description": desc,
+                        "amount": proj.get("amount", 0)
+                    })
+                    unique_total += proj.get("amount", 0)
+        
+        # Calculate overlap statistics
+        total_raw = flood_count + dime_count + philgeps_count
+        unique_count = len(unique_projects)
+        duplicate_count = total_raw - unique_count
+        
+        # Simple sum (inflated - for reference)
+        simple_total = flood_total + dime_total + philgeps_total
         
         return JSONResponse({
             "success": True,
             "contractor_name": contractor_name,
             "summary": {
-                "total_projects": grand_count,
-                "total_value": grand_total,
+                "total_projects": unique_count,  # Deduplicated count
+                "total_value": unique_total,  # Deduplicated value
+                "raw_total_projects": total_raw,  # Raw sum before deduplication
+                "raw_total_value": simple_total,  # Raw sum before deduplication
+                "duplicate_count": duplicate_count,  # How many duplicates found
                 "flood": {
                     "count": flood_count,
                     "total": flood_total
