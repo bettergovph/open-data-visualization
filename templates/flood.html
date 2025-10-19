@@ -3725,14 +3725,15 @@ function getContractorSecStatusSync(contractorName) {
                 contractor: contractor, 
                 count: count
             }))
-            .sort((a, b) => b.count - a.count);
+            .sort((a, b) => b.count - a.count)
+            .slice(0, 100);  // Limit to top 100 contractors
         
         // Get contractors for current page
         const start = currentVisualContractorPage * visualContractorPageSize;
         const end = start + visualContractorPageSize;
         const contractorsArray = allVisualContractors.slice(start, end);
         
-        console.log(`📊 Contractors chart: ${contractorsArray.length} contractors to display`);
+        console.log(`📊 Contractors chart: ${contractorsArray.length} contractors to display (top ${allVisualContractors.length} of all contractors)`);
         console.log('📊 Top 5 contractors:', contractorsArray.slice(0, 5).map(c => `${c.contractor} (${c.count})`));
         
         // Use the new render function
