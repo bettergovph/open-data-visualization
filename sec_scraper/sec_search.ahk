@@ -4,7 +4,7 @@ SetWorkingDir %A_ScriptDir%
 
 ; Read contractors from file
 contractors := []
-FileRead, fileContent, contractor_list_top1000.txt
+FileRead, fileContent, contractor_list_top1400.txt
 if ErrorLevel
 {
     MsgBox, Cannot read contractor list file
@@ -64,7 +64,7 @@ Loop, % contractors.MaxIndex() {
 
            count := count + 1
            
-           if (count = 10) {
+           if (count = 20) {
                WinClose, ahk_class Chrome_WidgetWin_1
                Sleep, 2000
                Run msedge.exe --new-window https://checkwithsec.sec.gov.ph/check-with-sec/index
