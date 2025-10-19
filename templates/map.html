@@ -946,38 +946,44 @@ async function processProjects(projects) {
     updateMapStatus(`Loaded ${mapMarkers.length} projects`);
 }
 
-// Load and display DIME-only projects as squares (with progressive loading)
+// Load and display DIME-only projects as squares (skip first 1000, like circles)
 let dimeProjectsLoaded = [];
-let dimeOffset = 0;
 let isDimeLoading = false;
+let allDimeProjectsCache = null;
 
-async function loadDimeOnlyProjects() {
+async function loadDimeOnlyProjects(skipFirst1000 = true) {
     if (isDimeLoading) return;
     
     isDimeLoading = true;
     
     try {
-        console.log('🔲 Loading DIME-only projects progressively...');
-        
-        // Load in batches of 500
-        while (dimeOffset < 2500) { // Load up to 2500 DIME projects
+        // Fetch all DIME projects once and cache
+        if (!allDimeProjectsCache) {
             const response = await fetch(`/api/dime/projects/dime-only`);
             const data = await response.json();
             
             if (!data.success || !data.projects) {
                 console.error('Failed to load DIME-only projects');
-                break;
+                isDimeLoading = false;
+                return;
             }
             
-            const allDimeProjects = data.projects;
+            allDimeProjectsCache = data.projects;
+            console.log(`📊 Total DIME projects: ${allDimeProjectsCache.length}`);
+        }
+        
+        // Determine starting point based on skip parameter
+        const startOffset = skipFirst1000 ? 1000 : 0;
+        console.log(`🔲 Loading DIME squares${skipFirst1000 ? ' (skipping first 1000)' : ' (all)'}...`);
+        
+        // Process in batches of 200 for smooth loading
+        const batchSize = 200;
+        for (let offset = startOffset; offset < allDimeProjectsCache.length; offset += batchSize) {
+            const batch = allDimeProjectsCache.slice(offset, offset + batchSize);
             
-            // Get batch
-            const batch = allDimeProjects.slice(dimeOffset, dimeOffset + 500);
-            if (batch.length === 0) break;
-            
-            console.log(`🔲 Loading DIME batch: ${dimeOffset} to ${dimeOffset + batch.length}`);
-            
-            for (const project of batch) {
+            console.log(`🔲 Loading DIME batch: ${offset} to ${offset + batch.length}`);
+        
+        for (const project of batch) {
                 if (project.latitude && project.longitude) {
                     const lat = parseFloat(project.latitude);
                     const lng = parseFloat(project.longitude);
@@ -1174,18 +1180,15 @@ async function loadDimeOnlyProjects() {
             }
             
             dimeProjectsLoaded = [...dimeProjectsLoaded, ...batch];
-            dimeOffset += batch.length;
             
-            console.log(`✅ Loaded ${dimeProjectsLoaded.length} DIME squares so far`);
+            console.log(`✅ Loaded ${dimeProjectsLoaded.length}/${allDimeProjects.length} DIME squares`);
             updateMapStatus(`Loaded ${mapMarkers.length} total markers (${loadedProjects.length} circles + ${dimeProjectsLoaded.length} squares)`);
             
-            // Small delay between batches
-            await new Promise(resolve => setTimeout(resolve, 500));
-            
-            if (batch.length < 500) break; // No more data
+            // Small delay between batches to keep UI responsive
+            await new Promise(resolve => setTimeout(resolve, 300));
         }
         
-        console.log(`✅ DIME-only loading complete: ${dimeProjectsLoaded.length} squares`);
+        console.log(`✅ All DIME squares loaded: ${dimeProjectsLoaded.length} total`);
         
     } catch (error) {
         console.error('Error loading DIME-only projects:', error);
@@ -1487,6 +1490,11 @@ window.loadAllProjects = async function loadAllProjects() {
     globalOffset = 0;
     isLoadingMore = false;
     loadedProjects = [];
+    
+    // Reset DIME loading state
+    dimeProjectsLoaded = [];
+    isDimeLoading = false;
+    allDimeProjectsCache = null; // Clear cache to force reload from 0
 
     // Reset cancellation flag now that we've successfully cancelled initial page load
     // This allows "Show All" progressive loading to proceed
@@ -1524,7 +1532,12 @@ window.loadAllProjects = async function loadAllProjects() {
             }
         }
 
-        updateMapStatus(`All ${mapMarkers.length} projects loaded successfully!`);
+        updateMapStatus(`Loaded ${mapMarkers.length} flood circles. Loading DIME squares...`);
+        
+        // Also load ALL DIME squares (from 0, not skipping)
+        await loadDimeOnlyProjects(false); // false = don't skip first 1000
+        
+        updateMapStatus(`All projects loaded: ${mapMarkers.length} markers (circles + squares)`);
 
     } catch (error) {
         console.error('❌ Error loading all projects:', error);
