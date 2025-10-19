@@ -153,8 +153,8 @@
                             <span><strong>Circles:</strong> Flood Control projects</span>
                         </div>
                         <div class="flex items-center gap-2">
-                            <div style="width: 0; height: 0; border-left: 8px solid transparent; border-right: 8px solid transparent; border-bottom: 14px solid #6366f1;"></div>
-                            <span><strong>Triangles:</strong> DIME-only projects</span>
+                            <div class="w-4 h-4 bg-indigo-500 border-2 border-indigo-700"></div>
+                            <span><strong>Squares:</strong> DIME-only projects</span>
                         </div>
                     </div>
                 </div>
@@ -459,8 +459,8 @@ async function loadRegionProjects(regionName) {
                 startRegionProgressiveLoading(regionName, regionTotalPages, regionTotalHits);
             }
             
-            // Also load DIME triangles for this region
-            loadDimeTrianglesForRegion(regionName);
+            // Also load DIME squares for this region
+            loadDimeSquaresForRegion(regionName);
 
         } else {
             throw new Error(`API returned ${response.status}`);
@@ -946,7 +946,7 @@ async function processProjects(projects) {
     updateMapStatus(`Loaded ${mapMarkers.length} projects`);
 }
 
-// Load and display DIME-only projects as triangles (with progressive loading)
+// Load and display DIME-only projects as squares (with progressive loading)
 let dimeProjectsLoaded = [];
 let dimeOffset = 0;
 let isDimeLoading = false;
@@ -957,7 +957,7 @@ async function loadDimeOnlyProjects() {
     isDimeLoading = true;
     
     try {
-        console.log('🔺 Loading DIME-only projects progressively...');
+        console.log('🔲 Loading DIME-only projects progressively...');
         
         // Load in batches of 500
         while (dimeOffset < 2500) { // Load up to 2500 DIME projects
@@ -975,7 +975,7 @@ async function loadDimeOnlyProjects() {
             const batch = allDimeProjects.slice(dimeOffset, dimeOffset + 500);
             if (batch.length === 0) break;
             
-            console.log(`🔺 Loading DIME batch: ${dimeOffset} to ${dimeOffset + batch.length}`);
+            console.log(`🔲 Loading DIME batch: ${dimeOffset} to ${dimeOffset + batch.length}`);
             
             for (const project of batch) {
                 if (project.latitude && project.longitude) {
@@ -987,12 +987,12 @@ async function loadDimeOnlyProjects() {
                         const cost = project.cost || 0;
                         const radius = calculateCircleRadius(cost, currentZoomLevel);
                         
-                        // Create triangle marker
-                        const size = radius / 1000 * 100;
-                        const triangle = L.polygon([
-                            [lat + size/111000, lng],
-                            [lat - size/111000, lng - size/111000],
-                            [lat - size/111000, lng + size/111000]
+                        // Create square marker
+                        // Use half the radius for square size (in degrees)
+                        const halfSize = (radius / 2) / 111000; // Convert meters to degrees
+                        const square = L.rectangle([
+                            [lat - halfSize, lng - halfSize],  // Southwest corner
+                            [lat + halfSize, lng + halfSize]   // Northeast corner
                         ], {
                             color: color,
                             fillColor: color,
@@ -1042,7 +1042,7 @@ async function loadDimeOnlyProjects() {
                         const popupContent = `
                             <div style="width: 900px; font-family: Arial, sans-serif; overflow-wrap: break-word; word-wrap: break-word;">
                                 <h4 style="margin: 0 0 10px 0; color: ${color}; font-size: 1.1em; overflow-wrap: break-word; word-wrap: break-word;">
-                                    🔺 ${project.project_name || 'Unnamed Project'}
+                                    🔲 ${project.project_name || 'Unnamed Project'}
                                 </h4>
                                 <div style="font-size: 0.95em; margin-bottom: 10px; overflow-wrap: break-word;">
                                     <strong>Location:</strong> ${project.city || 'Unknown'}, ${project.province || 'Unknown'}
@@ -1058,7 +1058,7 @@ async function loadDimeOnlyProjects() {
                                     <strong>Contractor(s):</strong> ${contractorsList}
                                 </div>
                                 <div style="font-size: 0.85em; padding: 8px; background: #e3f2fd; border-left: 3px solid #2196f3; margin-top: 10px; overflow-wrap: break-word;">
-                                    <strong style="color: #1976d2;">🔺 DIME-only Project</strong><br>
+                                    <strong style="color: #1976d2;">🔲 DIME-only Project</strong><br>
                                     <span style="color: #666;">This project appears in DIME database but not in Flood Control data</span>
                                 </div>
                                 <div id="philgeps-contracts-${dimeProjectId}" style="margin-top: 12px; padding-top: 12px; border-top: 1px solid #e0e0e0; overflow-wrap: break-word; word-wrap: break-word;">
@@ -1074,13 +1074,13 @@ async function loadDimeOnlyProjects() {
                             </div>
                         `;
                         
-                        triangle.bindPopup(popupContent, {
+                        square.bindPopup(popupContent, {
                             maxWidth: 950,
                             className: 'custom-popup'
                         });
                         
                         // Load PhilGEPS and SEC data when popup opens
-                        triangle.on('popupopen', async () => {
+                        square.on('popupopen', async () => {
                             // Try to find matching PhilGEPS contracts by contractor name
                             const philgepsContainer = document.getElementById(`philgeps-contracts-${dimeProjectId}`);
                             if (philgepsContainer) {
@@ -1167,8 +1167,8 @@ async function loadDimeOnlyProjects() {
                             }
                         });
                         
-                        triangle.addTo(mapInstance);
-                        mapMarkers.push(triangle);
+                        square.addTo(mapInstance);
+                        mapMarkers.push(square);
                     }
                 }
             }
@@ -1176,8 +1176,8 @@ async function loadDimeOnlyProjects() {
             dimeProjectsLoaded = [...dimeProjectsLoaded, ...batch];
             dimeOffset += batch.length;
             
-            console.log(`✅ Loaded ${dimeProjectsLoaded.length} DIME triangles so far`);
-            updateMapStatus(`Loaded ${mapMarkers.length} total markers (${loadedProjects.length} circles + ${dimeProjectsLoaded.length} triangles)`);
+            console.log(`✅ Loaded ${dimeProjectsLoaded.length} DIME squares so far`);
+            updateMapStatus(`Loaded ${mapMarkers.length} total markers (${loadedProjects.length} circles + ${dimeProjectsLoaded.length} squares)`);
             
             // Small delay between batches
             await new Promise(resolve => setTimeout(resolve, 500));
@@ -1185,7 +1185,7 @@ async function loadDimeOnlyProjects() {
             if (batch.length < 500) break; // No more data
         }
         
-        console.log(`✅ DIME-only loading complete: ${dimeProjectsLoaded.length} triangles`);
+        console.log(`✅ DIME-only loading complete: ${dimeProjectsLoaded.length} squares`);
         
     } catch (error) {
         console.error('Error loading DIME-only projects:', error);
@@ -1194,10 +1194,10 @@ async function loadDimeOnlyProjects() {
     }
 }
 
-// Load DIME triangles for a specific region
-async function loadDimeTrianglesForRegion(regionName) {
+// Load DIME squares for a specific region
+async function loadDimeSquaresForRegion(regionName) {
     try {
-        console.log(`🔺 Loading DIME triangles for ${regionName}...`);
+        console.log(`🔲 Loading DIME squares for ${regionName}...`);
         
         // Fetch all DIME-only projects
         const response = await fetch('/api/dime/projects/dime-only');
@@ -1229,11 +1229,12 @@ async function loadDimeTrianglesForRegion(regionName) {
                     const cost = project.cost || 0;
                     const radius = calculateCircleRadius(cost, currentZoomLevel);
                     
-                    const size = radius / 1000 * 100;
-                    const triangle = L.polygon([
-                        [lat + size/111000, lng],
-                        [lat - size/111000, lng - size/111000],
-                        [lat - size/111000, lng + size/111000]
+                    // Create square marker
+                    // Use half the radius for square size (in degrees)
+                    const halfSize = (radius / 2) / 111000; // Convert meters to degrees
+                    const square = L.rectangle([
+                        [lat - halfSize, lng - halfSize],  // Southwest corner
+                        [lat + halfSize, lng + halfSize]   // Northeast corner
                     ], {
                         color: color,
                         fillColor: color,
@@ -1298,7 +1299,7 @@ async function loadDimeTrianglesForRegion(regionName) {
                                 <strong>Contractor(s):</strong> ${contractorsList}
                             </div>
                             <div style="font-size: 0.85em; padding: 8px; background: #e3f2fd; border-left: 3px solid #2196f3; margin-top: 10px; overflow-wrap: break-word;">
-                                <strong style="color: #1976d2;">🔺 DIME-only Project</strong><br>
+                                <strong style="color: #1976d2;">🔲 DIME-only Project</strong><br>
                                 <span style="color: #666;">This project appears in DIME database but not in Flood Control data</span>
                             </div>
                             <div id="philgeps-contracts-${dimeProjectId}" style="margin-top: 12px; padding-top: 12px; border-top: 1px solid #e0e0e0; overflow-wrap: break-word; word-wrap: break-word;">
@@ -1314,13 +1315,13 @@ async function loadDimeTrianglesForRegion(regionName) {
                         </div>
                     `;
                     
-                    triangle.bindPopup(popupContent, {
+                    square.bindPopup(popupContent, {
                         maxWidth: 950,
                         className: 'custom-popup'
                     });
                     
-                    // Load SEC info on popup open (same as global DIME triangles)
-                    triangle.on('popupopen', async () => {
+                    // Load SEC info on popup open (same as global DIME squares)
+                    square.on('popupopen', async () => {
                         const secContainer = document.getElementById(`sec-info-${dimeProjectId}`);
                         if (secContainer && contractorsList !== 'Unknown') {
                             try {
@@ -1396,13 +1397,13 @@ async function loadDimeTrianglesForRegion(regionName) {
                         }
                     });
                     
-                    triangle.addTo(mapInstance);
-                    mapMarkers.push(triangle);
+                    square.addTo(mapInstance);
+                    mapMarkers.push(square);
                 }
             }
         }
         
-        console.log(`✅ Added ${regionProjects.length} DIME triangles for ${regionName}`);
+        console.log(`✅ Added ${regionProjects.length} DIME squares for ${regionName}`);
         
     } catch (error) {
         console.error(`Error loading DIME triangles for ${regionName}:`, error);
