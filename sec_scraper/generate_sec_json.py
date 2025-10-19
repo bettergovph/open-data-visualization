@@ -17,17 +17,17 @@ async def generate_sec_json():
     """Generate SEC contractors JSON from PostgreSQL database"""
     print("🚀 Generating SEC contractors JSON from database...")
 
-    # Connect to database
+    # Connect to SEC database
     conn = await asyncpg.connect(
         host=os.getenv('POSTGRES_HOST', 'localhost'),
         port=int(os.getenv('POSTGRES_PORT', 5432)),
         user=os.getenv('POSTGRES_USER', 'budget_admin'),
         password=os.getenv('POSTGRES_PASSWORD', ''),
-        database='philgeps'
+        database='sec'
     )
 
     try:
-        # Get all contractors from database
+        # Get all contractors from SEC database
         contractors = await conn.fetch('''
             SELECT 
                 contractor_name,
@@ -37,7 +37,8 @@ async def generate_sec_json():
                 address,
                 secondary_licenses,
                 created_at,
-                updated_at
+                updated_at,
+                project_count
             FROM contractors
             ORDER BY contractor_name
         ''')
@@ -84,7 +85,7 @@ async def generate_sec_json():
                 'suspicious_no_results': contractors_suspicious,
                 'last_updated': datetime.now().isoformat(),
                 'processing_batch': 'database_generated',
-                'source': 'PostgreSQL philgeps.contractors table'
+                'source': 'PostgreSQL sec.contractors table'
             },
             'contractors': contractors_list
         }

@@ -199,7 +199,10 @@
                 <summary class="cursor-pointer text-sm text-gray-600 font-medium">Advanced: Load all projects</summary>
                 <div class="mt-3 pt-3 border-t border-gray-200">
                     <p class="text-sm text-red-600 mb-3">
-                        ⚠️ Warning: Loading all 9,855 projects may overwhelm your browser and cause it to freeze. Only use this on powerful devices.
+                        ⚠️ Warning: Loading all 9,855 Flood Control projects plus DIME-only squares may overwhelm your browser and cause it to freeze. Only use this on powerful devices.
+                    </p>
+                    <p class="text-sm text-gray-600 mb-3">
+                        💡 By default, the map loads 10 projects initially, then progressively loads more. DIME-only squares load 10 initially, then 10 per batch.
                     </p>
                     <button id="show-all-map" class="bg-gray-600 text-white px-4 py-2 rounded-lg text-sm hover:bg-gray-700 transition">
                         Load All Projects
@@ -946,9 +949,9 @@ async function processProjects(projects) {
     updateMapStatus(`Loaded ${mapMarkers.length} projects`);
 }
 
-// Load and display DIME-only projects as squares (with 1000-skip pattern)
+// Load and display DIME-only projects as squares (progressive loading: 10 initial, then 10 per batch)
 let dimeProjectsLoaded = [];
-let dimeGlobalOffset = 1000; // Start at 1000 like circles
+let dimeGlobalOffset = 0; // Start at 0 to load first 10 initially
 let isDimeLoading = false;
 let allDimeProjectsCache = null;
 
@@ -1151,7 +1154,7 @@ async function processDimeBatch(batch) {
             }
 }
 
-// Initial DIME load (with 1000-skip)
+// Initial DIME load (load first 10 squares)
 async function loadDimeOnlyProjects() {
     try {
         // Fetch and cache all DIME projects
@@ -1165,20 +1168,20 @@ async function loadDimeOnlyProjects() {
             }
             
             allDimeProjectsCache = data.projects;
-            console.log(`📊 Cached ${allDimeProjectsCache.length} DIME projects`);
+            console.log(`📊 Cached ${allDimeProjectsCache.length} DIME-only projects (squares)`);
         }
         
-        // Load first batch from offset 1000 (skip first 1000 like circles)
-        const batch = allDimeProjectsCache.slice(dimeGlobalOffset, dimeGlobalOffset + 100);
-        console.log(`🔲 Loading initial DIME batch: ${dimeGlobalOffset} to ${dimeGlobalOffset + batch.length}`);
+        // Load first 10 squares
+        const initialBatch = allDimeProjectsCache.slice(0, 10);
+        console.log(`🔲 Loading initial 10 DIME squares: ${initialBatch.length} loaded`);
         
-        await processDimeBatch(batch);
-        dimeProjectsLoaded = [...dimeProjectsLoaded, ...batch];
-        dimeGlobalOffset += 1000; // Skip 1000 for next iteration
+        await processDimeBatch(initialBatch);
+        dimeProjectsLoaded = [...dimeProjectsLoaded, ...initialBatch];
+        dimeGlobalOffset = 10; // Next batch starts at 10
         
         updateMapStatus(`Loaded ${mapMarkers.length} total markers (${loadedProjects.length} circles + ${dimeProjectsLoaded.length} squares)`);
         
-        // Continue loading progressively
+        // Continue loading progressively (10 per batch)
         startDimeProgressiveLoading();
         
     } catch (error) {
@@ -1186,25 +1189,26 @@ async function loadDimeOnlyProjects() {
     }
 }
 
-// Progressive DIME loading (skip 1000 each time)
+// Progressive DIME loading (load 10 per batch)
 async function loadMoreDimeProjects() {
     if (isDimeLoading || !allDimeProjectsCache || dimeGlobalOffset >= allDimeProjectsCache.length) return;
     
     isDimeLoading = true;
     
     try {
-        const batch = allDimeProjectsCache.slice(dimeGlobalOffset, dimeGlobalOffset + 100);
+        // Load next 10 squares
+        const batch = allDimeProjectsCache.slice(dimeGlobalOffset, dimeGlobalOffset + 10);
         
         if (batch.length === 0) {
-            console.log('✅ All DIME squares loaded');
+            console.log(`✅ All ${allDimeProjectsCache.length} DIME squares loaded`);
             return;
         }
         
-        console.log(`🔲 Loading more DIME: offset ${dimeGlobalOffset}, ${batch.length} squares`);
+        console.log(`🔲 Loading more DIME: offset ${dimeGlobalOffset}, ${batch.length} squares (total loaded: ${dimeProjectsLoaded.length + batch.length}/${allDimeProjectsCache.length})`);
         
         await processDimeBatch(batch);
         dimeProjectsLoaded = [...dimeProjectsLoaded, ...batch];
-        dimeGlobalOffset += 1000; // Skip 1000 for next batch
+        dimeGlobalOffset += 10; // Move to next batch of 10
         
         updateMapStatus(`Loaded ${mapMarkers.length} total markers (${loadedProjects.length} circles + ${dimeProjectsLoaded.length} squares)`);
         
