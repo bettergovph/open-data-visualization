@@ -1069,17 +1069,26 @@ async def search_contractor_projects(contractor_name: str):
         flood_count = 0
         try:
             flood_client = get_flood_client()
-            # Search for contractor in flood control
-            flood_results = await flood_client.search_projects(
-                q=contractor_name,
-                contractor=None,  # Don't use filter, use full-text search
-                limit=1000
+            # Search for contractor in flood control using the query parameter
+            # MeiliSearch will search across all fields including Contractor
+            flood_response = await flood_client._make_request(
+                f"indexes/{flood_client.index_name}/search",
+                "POST",
+                data={
+                    "q": contractor_name,
+                    "limit": 10000,  # Get all matches
+                    "attributesToRetrieve": [
+                        "ProjectDescription", "Contractor", "ContractCost",
+                        "InfraYear", "Region", "Province", "TypeofWork"
+                    ]
+                }
             )
             
-            if flood_results and 'hits' in flood_results:
+            if flood_response and 'hits' in flood_response:
                 # Filter results where contractor name contains the search term
+                # (MeiliSearch's full-text search might return partial matches)
                 filtered_hits = [
-                    hit for hit in flood_results['hits']
+                    hit for hit in flood_response['hits']
                     if contractor_name.lower() in hit.get('Contractor', '').lower()
                 ]
                 
@@ -1093,6 +1102,7 @@ async def search_contractor_projects(contractor_name: str):
                     flood_projects.append({
                         "description": proj.get('ProjectDescription', ''),
                         "contractor": proj.get('Contractor', ''),
+                        "contractor_raw": proj.get('Contractor', ''),  # Raw name from database
                         "amount": float(proj.get('ContractCost', 0)),
                         "year": proj.get('InfraYear', ''),
                         "region": proj.get('Region', ''),
@@ -1152,6 +1162,7 @@ async def search_contractor_projects(contractor_name: str):
                 dime_projects.append({
                     "title": proj['project_name'],
                     "contractor": matching_contractor,
+                    "contractor_raw": matching_contractor,  # Raw name from database
                     "amount": float(proj['cost']) if proj['cost'] else 0,
                     "region": 'N/A',  # Region not in this table structure
                     "province": proj['province'],
@@ -1205,6 +1216,7 @@ async def search_contractor_projects(contractor_name: str):
                     "reference": proj['reference_id'],
                     "description": proj['notice_title'],
                     "awardee": proj['awardee_name'],
+                    "awardee_raw": proj['awardee_name'],  # Raw name from database
                     "amount": float(proj['contract_amount']) if proj['contract_amount'] else 0,
                     "procurement_mode": proj['business_category'],
                     "procuring_entity": proj['organization_name'],

@@ -1201,6 +1201,7 @@ function displayProjectSearchResults(data) {
                             <tr style="background: #f3f4f6; border-bottom: 2px solid #1976D2;">
                                 <th style="padding: 12px; text-align: left; font-weight: 600;">#</th>
                                 <th style="padding: 12px; text-align: left; font-weight: 600;">Project Description</th>
+                                <th style="padding: 12px; text-align: left; font-weight: 600;">Contractor (DB)</th>
                                 <th style="padding: 12px; text-align: left; font-weight: 600;">Amount</th>
                                 <th style="padding: 12px; text-align: left; font-weight: 600;">Year</th>
                                 <th style="padding: 12px; text-align: left; font-weight: 600;">Region</th>
@@ -1212,6 +1213,7 @@ function displayProjectSearchResults(data) {
                                 <tr style="border-bottom: 1px solid #e5e7eb;">
                                     <td style="padding: 12px;">${idx + 1}</td>
                                     <td style="padding: 12px;">${proj.description}</td>
+                                    <td style="padding: 12px; font-size: 0.85em; color: #666;">${proj.contractor_raw || proj.contractor}</td>
                                     <td style="padding: 12px; font-weight: 600; color: #1976D2;">₱${proj.amount.toLocaleString('en-PH')}</td>
                                     <td style="padding: 12px;">${proj.year || 'N/A'}</td>
                                     <td style="padding: 12px;">${proj.region || 'N/A'}</td>
@@ -1236,8 +1238,9 @@ function displayProjectSearchResults(data) {
                             <tr style="background: #f3f4f6; border-bottom: 2px solid #388E3C;">
                                 <th style="padding: 12px; text-align: left; font-weight: 600;">#</th>
                                 <th style="padding: 12px; text-align: left; font-weight: 600;">Project Title</th>
+                                <th style="padding: 12px; text-align: left; font-weight: 600;">Contractor (DB)</th>
                                 <th style="padding: 12px; text-align: left; font-weight: 600;">Amount</th>
-                                <th style="padding: 12px; text-align: left; font-weight: 600;">Region</th>
+                                <th style="padding: 12px; text-align: left; font-weight: 600;">Province</th>
                                 <th style="padding: 12px; text-align: left; font-weight: 600;">Status</th>
                             </tr>
                         </thead>
@@ -1246,8 +1249,9 @@ function displayProjectSearchResults(data) {
                                 <tr style="border-bottom: 1px solid #e5e7eb;">
                                     <td style="padding: 12px;">${idx + 1}</td>
                                     <td style="padding: 12px;">${proj.title}</td>
+                                    <td style="padding: 12px; font-size: 0.85em; color: #666;">${proj.contractor_raw || proj.contractor}</td>
                                     <td style="padding: 12px; font-weight: 600; color: #388E3C;">₱${proj.amount.toLocaleString('en-PH')}</td>
-                                    <td style="padding: 12px;">${proj.region || 'N/A'}</td>
+                                    <td style="padding: 12px;">${proj.province || 'N/A'}</td>
                                     <td style="padding: 12px;">${proj.status || 'N/A'}</td>
                                 </tr>
                             `).join('')}
@@ -1270,6 +1274,7 @@ function displayProjectSearchResults(data) {
                                 <th style="padding: 12px; text-align: left; font-weight: 600;">#</th>
                                 <th style="padding: 12px; text-align: left; font-weight: 600;">Reference</th>
                                 <th style="padding: 12px; text-align: left; font-weight: 600;">Description</th>
+                                <th style="padding: 12px; text-align: left; font-weight: 600;">Awardee (DB)</th>
                                 <th style="padding: 12px; text-align: left; font-weight: 600;">Amount</th>
                                 <th style="padding: 12px; text-align: left; font-weight: 600;">Procuring Entity</th>
                                 <th style="padding: 12px; text-align: left; font-weight: 600;">Award Date</th>
@@ -1281,6 +1286,7 @@ function displayProjectSearchResults(data) {
                                     <td style="padding: 12px;">${idx + 1}</td>
                                     <td style="padding: 12px; font-weight: 600;">${proj.reference}</td>
                                     <td style="padding: 12px;">${proj.description}</td>
+                                    <td style="padding: 12px; font-size: 0.85em; color: #666;">${proj.awardee_raw || proj.awardee}</td>
                                     <td style="padding: 12px; font-weight: 600; color: #F57C00;">₱${proj.amount.toLocaleString('en-PH')}</td>
                                     <td style="padding: 12px; font-size: 0.9em;">${proj.procuring_entity || 'N/A'}</td>
                                     <td style="padding: 12px;">${proj.award_date ? new Date(proj.award_date).toLocaleDateString('en-PH') : 'N/A'}</td>
