@@ -1,0 +1,66 @@
+🚀 Starting Flood (MeiliSearch) contractors sync...
+📌 Unified contractors database: philgeps.contractors
+   - Data sources: DIME, PhilGEPS, Flood (MeiliSearch)
+   - SEC is verification tool (not a source)
+   - JV contractors split into individual companies
+   - Former names tracked separately
+
+🔧 Checking contractors table schema...
+✅ Added former_id column
+✅ source column already exists
+
+📊 Connecting to MeiliSearch flood control index...
+   Fetched 1000 projects...
+   Fetched 2000 projects...
+   Fetched 3000 projects...
+   Fetched 4000 projects...
+   Fetched 5000 projects...
+   Fetched 6000 projects...
+   Fetched 7000 projects...
+   Fetched 8000 projects...
+   Fetched 9000 projects...
+   Fetched 9855 projects...
+✅ Found 9855 flood control projects
+   - JV entries split: 1347
+   - Former names extracted: 2187
+✅ Total unique individual contractors: 2289
+📊 Connecting to PhilGEPS database...
+✅ Found 2304 existing contractors in philgeps.contractors table
+
+📊 Initial counts:
+   Flood contractors: 2289
+   Existing in philgeps: 2304
+   Potential new (exact match): 494
+
+🔍 Checking for duplicates using fuzzy matching (5 threads)...
+   Progress: 100/494 contractors checked...
+   Progress: 200/494 contractors checked...
+   Progress: 300/494 contractors checked...
+   Progress: 400/494 contractors checked...
+✅ Found 1 unique contractors, 493 duplicates
+
+📊 After fuzzy matching:
+   Unique contractors to insert: 1
+   Duplicates detected: 493
+
+📋 Duplicate examples (first 10):
+   ❌ '1 BEATUS BUILDERS CORP' → matches existing '1 BEATUS BUILDERS CORP.'
+   ❌ '120 OVER CONSTRUCTION CO' → matches existing '120 OVER CONSTRUCTION CO.'
+   ❌ '1C4M BUILDERS INC' → matches existing '1C4M BUILDERS INC.'
+   ❌ '1FC DIZON CORP' → matches existing '1FC DIZON CORP.'
+   ❌ '1HB CONSTRUCTION CORP' → matches existing 'MGB CONSTRUCTION & TRADING'
+   ❌ '22 PRIME CONSTRUCTION AND REALTY DEVELOPMENT INC' → matches existing '22 PRIME CONSTRUCTION AND REALTY DEVELOPMENT INC.'
+   ❌ '3 K'S INDUSTRIAL MAINTENANCE AND SERVICES, INC' → matches existing '3 K'S INDUSTRIAL MAINTENANCE AND SERVICES, INC.'
+   ❌ '3-SIDES BUILDERS & TRADING CORP' → matches existing '3-SIDES BUILDERS & TRADING CORP.'
+   ❌ '3AMR CONSTRUCTION SERVICES INC' → matches existing 'ALRO CONSTRUCTION & DEVELOPMENT CORP.'
+   ❌ '4 DOUBLERS TRADING & CONTRACTOR INC' → matches existing '4 DOUBLERS TRADING & CONTRACTOR INC.'
+   ... and 483 more duplicates
+
+📋 Preview of unique contractors to insert (first 10):
+   ✅ RUSMEN BUILDERS & DEVELOPMENT CORPORATION
+
+📝 Inserting 1 new contractors...
+✅ Successfully inserted 1 new contractors, updated 0 existing
+   Note: Source field updated to track 'flood' origin
+
+✅ Sync completed!

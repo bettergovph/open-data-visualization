@@ -14,7 +14,7 @@ import sys
 sys.path.insert(0, os.path.dirname(__file__))
 
 # Import split logic - we'll inline it here for simplicity
-from sync_flood_contractors import is_valid_contractor_name, split_joint_venture, normalize_contractor_name, fuzzy_match
+from sync_flood_contractors import is_valid_contractor_name, split_joint_venture, normalize_contractor_name, fuzzy_match, parse_json_contractor_name
 
 load_dotenv('.env')
 
@@ -52,8 +52,10 @@ async def main():
         for contractor_data in individual_contractors:
             contractor = contractor_data['name']
             if contractor and contractor.strip() and is_valid_contractor_name(contractor):
+                # Parse JSON if present
+                cleaned = parse_json_contractor_name(contractor)
                 # Clean leading/trailing junk
-                cleaned = contractor.strip()
+                cleaned = cleaned.strip()
                 cleaned = cleaned.lstrip('. /')  # Remove leading dots, spaces, slashes
                 cleaned = cleaned.rstrip('. /')  # Remove trailing dots, spaces, slashes
                 # Remove incomplete FORMERLY/FOR patterns at the end

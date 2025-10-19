@@ -178,10 +178,43 @@ def split_joint_venture(name: str) -> List[Dict[str, any]]:
         return [{'name': name.strip(), 'former_names': []}]  # Clean name, add it
 
 
+def parse_json_contractor_name(name: str) -> str:
+    """Parse contractor name if it's a JSON object or fragment"""
+    if not name:
+        return ""
+    
+    # Check if it looks like JSON
+    if '{' in name or '"name"' in name or 'logoUrl' in name:
+        try:
+            # Try to parse as complete JSON
+            import json
+            data = json.loads(name)
+            if isinstance(data, dict) and 'name' in data:
+                return data['name']
+        except:
+            pass
+        
+        # Try to extract from JSON fragment patterns
+        # Pattern: {"id": 123, "name": "CONTRACTOR NAME", ...
+        match = re.search(r'"name"\s*:\s*"([^"]+)"', name)
+        if match:
+            return match.group(1)
+        
+        # Pattern: {"id": 123, "name": "CONTRACTOR NAME (no closing quote/brace)
+        match = re.search(r'"name"\s*:\s*"([^"]+)$', name)
+        if match:
+            return match.group(1)
+    
+    return name
+
+
 def normalize_contractor_name(name: str) -> str:
     """Normalize contractor name for fuzzy matching"""
     if not name:
         return ""
+    
+    # First, parse JSON if present
+    name = parse_json_contractor_name(name)
     
     # Convert to uppercase
     normalized = name.upper()
@@ -280,8 +313,10 @@ async def get_dime_contractors() -> Set[str]:
             for contractor_data in individual_contractors:
                 contractor = contractor_data['name']
                 if contractor and contractor.strip():
+                    # Parse JSON if present
+                    cleaned = parse_json_contractor_name(contractor)
                     # Clean leading/trailing junk
-                    cleaned = contractor.strip()
+                    cleaned = cleaned.strip()
                     cleaned = cleaned.lstrip('. /')  # Remove leading dots, spaces, slashes
                     cleaned = cleaned.rstrip('. /')  # Remove trailing dots, spaces, slashes
                     # Remove incomplete FORMERLY/FOR patterns at the end
