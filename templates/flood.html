@@ -5398,6 +5398,12 @@ async function loadSecModalData(contractorName) {
         console.log('🔍 SEC search result for', contractorName, ':', matchingContractor);
         
         if (matchingContractor && matchingContractor.sec_number && matchingContractor.sec_number.trim() !== '') {
+            // Update modal header with SEC company name
+            const modalHeader = document.querySelector('#sec-modal h2');
+            if (modalHeader) {
+                modalHeader.textContent = `🏛️ ${matchingContractor.company_name || contractorName}`;
+            }
+            
             // Show SEC data
             contentDiv.innerHTML = `
                 <div style="margin-bottom: 15px;">
@@ -5435,6 +5441,12 @@ async function loadSecModalData(contractorName) {
             );
             
             if (isProcessedButMissing) {
+                // Update modal header with company name if available
+                const modalHeader = document.querySelector('#sec-modal h2');
+                if (modalHeader && matchingContractor && matchingContractor.company_name) {
+                    modalHeader.textContent = `🏛️ ${matchingContractor.company_name}`;
+                }
+                
                 // Check if this is a "NO_SEC_RESULTS" case (searched but yielded no results - SUSPICIOUS)
                 const isSuspicious = matchingContractor && matchingContractor.status === 'NO_SEC_RESULTS';
                 
@@ -5445,7 +5457,7 @@ async function loadSecModalData(contractorName) {
                             <div style="font-size: 48px; margin-bottom: 15px; animation: pulse-warning 2s ease-in-out infinite;">⚠️</div>
                             <h3 style="color: #856404; margin: 0 0 10px 0;">⚠️ NO SEC RESULTS - SUSPICIOUS</h3>
                             <p style="color: #666; margin: 0 0 15px 0;">
-                                Contractor: <strong>${escapeHtml(contractorName)}</strong>
+                                Contractor: <strong>${escapeHtml(matchingContractor ? (matchingContractor.company_name || contractorName) : contractorName)}</strong>
                             </p>
                             <p style="color: #856404; font-size: 0.95em; margin-bottom: 15px; font-weight: 600;">
                                 This contractor was searched in the SEC database but yielded <strong>NO RESULTS</strong>.
@@ -5470,7 +5482,7 @@ async function loadSecModalData(contractorName) {
                             <div style="font-size: 48px; margin-bottom: 15px;">❌</div>
                             <h3 style="color: #dc3545; margin: 0 0 10px 0;">Confirmed Missing SEC Data</h3>
                             <p style="color: #666; margin: 0 0 15px 0;">
-                                Contractor: <strong>${escapeHtml(contractorName)}</strong>
+                                Contractor: <strong>${escapeHtml(matchingContractor ? (matchingContractor.company_name || contractorName) : contractorName)}</strong>
                             </p>
                             <p style="color: #666; font-size: 0.9em;">
                                 This contractor was processed but no SEC registration data was found. 
@@ -5603,7 +5615,7 @@ function showContractorHoverTooltip(event, contractorName) {
             pointer-events: none;
         ">
             <div style="color: #0038A8; font-weight: bold; margin-bottom: 8px;">
-                🏢 ${contractorName}
+                🏢 ${contractor ? (contractor.company_name || contractorName) : contractorName}
             </div>
             ${contractor ? `
                 <div style="color: #666; margin-bottom: 5px;">
