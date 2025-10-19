@@ -142,7 +142,25 @@
 
             <!-- DIME Status Legend -->
             <div class="bg-gray-50 p-4 rounded-lg mb-4 border border-gray-200">
-                <div class="text-sm font-medium text-gray-700 mb-2">📊 DIME Status Legend (with PhilGEPS Contracts & SEC Registration)</div>
+                <div class="text-sm font-medium text-gray-700 mb-2">📊 Map Legend (with PhilGEPS Contracts & SEC Registration)</div>
+                
+                <!-- Shape Legend -->
+                <div class="mb-3 pb-3 border-b border-gray-300">
+                    <div class="text-xs font-semibold text-gray-600 mb-2">Project Source:</div>
+                    <div class="grid grid-cols-2 gap-2 text-xs">
+                        <div class="flex items-center gap-2">
+                            <div class="w-4 h-4 rounded-full bg-gray-400 border-2 border-gray-600"></div>
+                            <span><strong>Circles:</strong> Flood Control projects</span>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <div style="width: 0; height: 0; border-left: 8px solid transparent; border-right: 8px solid transparent; border-bottom: 14px solid #6366f1;"></div>
+                            <span><strong>Triangles:</strong> DIME-only projects</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Status Colors -->
+                <div class="text-xs font-semibold text-gray-600 mb-2">DIME Status Colors:</div>
                 <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-2 text-xs">
                     <div class="flex items-center gap-2">
                         <div class="w-3 h-3 rounded-full bg-[#28a745]"></div>
@@ -170,8 +188,7 @@
                     </div>
                 </div>
                 <div class="text-xs text-gray-500 mt-2">
-                    Circle size represents project cost (larger = higher cost)<br>
-                    <em>Black circles: Projects without DIME status integration</em>
+                    Size represents project cost (larger = higher cost)
                 </div>
             </div>
 
@@ -550,6 +567,9 @@ async function loadInitialMapData() {
 
             // Auto-start progressive loading with 1000-skip
             startProgressiveLoading();
+            
+            // Load DIME-only projects as triangles
+            setTimeout(() => loadDimeOnlyProjects(), 1000);
 
         } else {
             throw new Error(`API returned ${response.status}`);
@@ -903,6 +923,96 @@ async function processProjects(projects) {
     }
 
     updateMapStatus(`Loaded ${mapMarkers.length} projects`);
+}
+
+// Load and display DIME-only projects as triangles
+async function loadDimeOnlyProjects() {
+    try {
+        console.log('🔺 Loading DIME-only projects...');
+        const response = await fetch('/api/dime/projects/dime-only');
+        const data = await response.json();
+        
+        if (!data.success || !data.projects) {
+            console.error('Failed to load DIME-only projects');
+            return;
+        }
+        
+        const dimeProjects = data.projects;
+        console.log(`✅ Found ${dimeProjects.length} DIME-only projects`);
+        
+        for (const project of dimeProjects) {
+            if (project.latitude && project.longitude) {
+                const lat = parseFloat(project.latitude);
+                const lng = parseFloat(project.longitude);
+                
+                if (!isNaN(lat) && !isNaN(lng)) {
+                    // Get color based on status
+                    const color = getStatusColor(project.status);
+                    
+                    // Calculate size based on cost
+                    const cost = project.cost || 0;
+                    const radius = calculateCircleRadius(cost, currentZoomLevel);
+                    
+                    // Create triangle marker using Leaflet polygon
+                    const size = radius / 1000 * 100; // Convert to map units
+                    const triangle = L.polygon([
+                        [lat + size/111000, lng],  // Top point
+                        [lat - size/111000, lng - size/111000],  // Bottom left
+                        [lat - size/111000, lng + size/111000]   // Bottom right
+                    ], {
+                        color: color,
+                        fillColor: color,
+                        fillOpacity: 0.6,
+                        weight: 2
+                    });
+                    
+                    // Create popup content
+                    const costDisplay = cost ? `₱${parseFloat(cost).toLocaleString('en-PH', {minimumFractionDigits: 2, maximumFractionDigits: 2})}` : 'N/A';
+                    const contractorsList = project.contractors && project.contractors.length > 0 
+                        ? project.contractors.join(', ') 
+                        : 'Unknown';
+                    
+                    const popupContent = `
+                        <div style="width: 900px; font-family: Arial, sans-serif; overflow-wrap: break-word; word-wrap: break-word;">
+                            <h4 style="margin: 0 0 10px 0; color: ${color}; font-size: 1.1em; overflow-wrap: break-word; word-wrap: break-word;">
+                                🔺 ${project.project_name || 'Unnamed Project'}
+                            </h4>
+                            <div style="font-size: 0.95em; margin-bottom: 10px; overflow-wrap: break-word;">
+                                <strong>Location:</strong> ${project.city || 'Unknown'}, ${project.province || 'Unknown'}
+                            </div>
+                            <div style="font-size: 0.95em; margin-bottom: 10px;">
+                                <strong>Status:</strong> <span style="display: inline-block; padding: 2px 6px; border-radius: 3px; font-size: 0.8em; font-weight: 600; background: ${color}20; color: ${color}; border: 1px solid ${color}40;">${project.status || 'Unknown'}</span>
+                            </div>
+                            <div style="font-size: 0.95em; margin-bottom: 10px;">
+                                <strong>Cost:</strong> ${costDisplay}
+                            </div>
+                            <div style="font-size: 0.9em; margin-bottom: 10px; color: #666; overflow-wrap: break-word; word-wrap: break-word;">
+                                <strong>Contractor(s):</strong> ${contractorsList}
+                            </div>
+                            <div style="font-size: 0.85em; padding: 8px; background: #e3f2fd; border-left: 3px solid #2196f3; margin-top: 10px; overflow-wrap: break-word;">
+                                <strong style="color: #1976d2;">🔺 DIME-only Project</strong><br>
+                                <span style="color: #666;">This project appears in DIME database but not in Flood Control data</span>
+                            </div>
+                        </div>
+                    `;
+                    
+                    triangle.bindPopup(popupContent, {
+                        maxWidth: 950,
+                        className: 'custom-popup'
+                    });
+                    
+                    triangle.addTo(mapInstance);
+                    mapMarkers.push(triangle);
+                }
+            }
+        }
+        
+        console.log(`✅ Added ${dimeProjects.length} DIME-only triangles to map`);
+        updateMapStatus(`Loaded ${mapMarkers.length} total markers (circles + triangles)`);
+        
+    } catch (error) {
+        console.error('Error loading DIME-only projects:', error);
+    }
 }
 
 // Progressive loading function - loads in chunks, skipping 1000 at a time

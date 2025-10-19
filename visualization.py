@@ -788,6 +788,54 @@ async def dime_barangay_aggregates_by_count_api():
     except Exception as e:
         return JSONResponse({"success": False, "error": str(e)})
 
+@app.get("/api/dime/projects/dime-only")
+async def get_dime_only_projects():
+    """Get DIME-only projects (not in flood) for map display"""
+    try:
+        import asyncpg
+        conn = await asyncpg.connect(
+            host=os.getenv('POSTGRES_HOST', 'localhost'),
+            port=int(os.getenv('POSTGRES_PORT', 5432)),
+            user=os.getenv('POSTGRES_USER', 'budget_admin'),
+            password=os.getenv('POSTGRES_PASSWORD', ''),
+            database=os.getenv('POSTGRES_DB_DIME', 'dime')
+        )
+        
+        # Get DIME projects that are NOT in flood (no meilisearch_id)
+        projects = await conn.fetch('''
+            SELECT id, project_name, description, latitude, longitude, 
+                   status, city, province, contractors, cost
+            FROM projects
+            WHERE (meilisearch_id IS NULL OR meilisearch_id = '')
+              AND latitude IS NOT NULL AND longitude IS NOT NULL
+              AND latitude != 0 AND longitude != 0
+        ''')
+        
+        await conn.close()
+        
+        projects_list = []
+        for p in projects:
+            projects_list.append({
+                'id': p['id'],
+                'project_name': p['project_name'],
+                'description': p['description'],
+                'latitude': float(p['latitude']) if p['latitude'] else None,
+                'longitude': float(p['longitude']) if p['longitude'] else None,
+                'status': p['status'],
+                'city': p['city'],
+                'province': p['province'],
+                'contractors': p['contractors'],
+                'cost': float(p['cost']) if p['cost'] else None
+            })
+        
+        return JSONResponse({
+            "success": True,
+            "projects": projects_list,
+            "count": len(projects_list)
+        })
+    except Exception as e:
+        return JSONResponse({"success": False, "error": str(e)})
+
 @app.get("/api/dime/projects/{project_id}/status")
 async def dime_project_status_api(project_id: str):
     """Get DIME project status by MeiliSearch ID - no authentication required"""
