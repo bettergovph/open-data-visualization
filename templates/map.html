@@ -999,6 +999,8 @@ async function loadDimeOnlyProjects() {
                         }
                     }
                         
+                        const dimeProjectId = `dime-${project.id}`;
+                        
                         const popupContent = `
                             <div style="width: 900px; font-family: Arial, sans-serif; overflow-wrap: break-word; word-wrap: break-word;">
                                 <h4 style="margin: 0 0 10px 0; color: ${color}; font-size: 1.1em; overflow-wrap: break-word; word-wrap: break-word;">
@@ -1020,12 +1022,110 @@ async function loadDimeOnlyProjects() {
                                     <strong style="color: #1976d2;">🔺 DIME-only Project</strong><br>
                                     <span style="color: #666;">This project appears in DIME database but not in Flood Control data</span>
                                 </div>
+                                <div id="philgeps-contracts-${dimeProjectId}" style="margin-top: 12px; padding-top: 12px; border-top: 1px solid #e0e0e0; overflow-wrap: break-word; word-wrap: break-word;">
+                                    <div style="font-size: 0.85em; color: #666; font-style: italic;">
+                                        Loading PhilGEPS contracts...
+                                    </div>
+                                </div>
+                                <div id="sec-info-${dimeProjectId}" style="margin-top: 12px; padding-top: 12px; border-top: 1px solid #e0e0e0; overflow-wrap: break-word; word-wrap: break-word;">
+                                    <div style="font-size: 0.85em; color: #666; font-style: italic;">
+                                        Loading SEC info...
+                                    </div>
+                                </div>
                             </div>
                         `;
                         
                         triangle.bindPopup(popupContent, {
                             maxWidth: 950,
                             className: 'custom-popup'
+                        });
+                        
+                        // Load PhilGEPS and SEC data when popup opens
+                        triangle.on('popupopen', async () => {
+                            // Try to find matching PhilGEPS contracts by contractor name
+                            const philgepsContainer = document.getElementById(`philgeps-contracts-${dimeProjectId}`);
+                            if (philgepsContainer) {
+                                philgepsContainer.innerHTML = `
+                                    <div style="font-size: 0.8em; color: #999; font-style: italic;">
+                                        PhilGEPS matching by contractor name (DIME project)
+                                    </div>
+                                `;
+                            }
+                            
+                            // Load SEC info for contractors
+                            const secContainer = document.getElementById(`sec-info-${dimeProjectId}`);
+                            if (secContainer && contractorsList !== 'Unknown') {
+                                try {
+                                    const secResponse = await fetch('/static/sec_contractors_database.json');
+                                    if (!secResponse.ok) throw new Error('Failed to load SEC database');
+                                    
+                                    const secData = await secResponse.json();
+                                    const contractors = secData.contractors || [];
+                                    
+                                    const normalizeContractorName = (name) => {
+                                        if (!name) return '';
+                                        return name.toUpperCase()
+                                            .replace(/[^A-Z0-9]/g, '')
+                                            .replace(/CORP(ORATION)?/g, '')
+                                            .replace(/INC(ORPORATED)?/g, '')
+                                            .replace(/LTD(LIMITED)?/g, '')
+                                            .replace(/CO(MPANY)?/g, '');
+                                    };
+                                    
+                                    const normalizedContractorName = normalizeContractorName(contractorsList.split(',')[0].trim());
+                                    
+                                    let matchingContractor = contractors.find(c => 
+                                        normalizeContractorName(c.original_contractor_name || c.company_name) === normalizedContractorName
+                                    );
+                                    
+                                    if (matchingContractor && matchingContractor.sec_number) {
+                                        secContainer.innerHTML = `
+                                            <div style="font-size: 0.9em; color: #0038A8; font-weight: 600; margin-bottom: 8px;">
+                                                🏛️ SEC Registration
+                                            </div>
+                                            <div style="font-size: 0.85em; padding: 8px; background: transparent; border-left: 3px solid #28a745; overflow-wrap: break-word; word-wrap: break-word; max-width: 100%;">
+                                                <div style="font-weight: 600; margin-bottom: 6px; overflow-wrap: break-word; word-wrap: break-word;">
+                                                    ${matchingContractor.company_name || matchingContractor.original_contractor_name}
+                                                </div>
+                                                <div style="color: #666; font-size: 0.9em; line-height: 1.4; overflow-wrap: break-word; word-wrap: break-word;">
+                                                    <strong>SEC Number:</strong> ${matchingContractor.sec_number}<br>
+                                                    <strong>Status:</strong> ${matchingContractor.status || 'N/A'}<br>
+                                                    ${matchingContractor.date_registered ? '<strong>Registered:</strong> ' + matchingContractor.date_registered + '<br>' : ''}
+                                                    ${matchingContractor.registered_address ? '<strong>Address:</strong> ' + matchingContractor.registered_address : ''}
+                                                </div>
+                                            </div>
+                                        `;
+                                    } else if (matchingContractor && matchingContractor.status === 'NO_SEC_RESULTS') {
+                                        secContainer.innerHTML = `
+                                            <div style="font-size: 0.9em; color: #856404; font-weight: 600; margin-bottom: 8px;">
+                                                🏛️ SEC Registration
+                                            </div>
+                                            <div style="font-size: 0.85em; padding: 8px; background: transparent; border-left: 3px solid #ffc107; overflow-wrap: break-word; word-wrap: break-word; max-width: 100%;">
+                                                <div style="font-weight: 600; color: #856404; margin-bottom: 6px;">
+                                                    ⚠️ NO SEC RESULTS - SUSPICIOUS
+                                                </div>
+                                                <div style="color: #856404; font-size: 0.9em; line-height: 1.4; overflow-wrap: break-word; word-wrap: break-word;">
+                                                    This contractor was searched in the SEC database but yielded <strong>zero results</strong>. 
+                                                    Government contractors should be SEC-registered.
+                                                </div>
+                                            </div>
+                                        `;
+                                    } else {
+                                        secContainer.innerHTML = `
+                                            <div style="font-size: 0.8em; color: #999; font-style: italic;">
+                                                SEC info not yet processed for this contractor
+                                            </div>
+                                        `;
+                                    }
+                                } catch (error) {
+                                    console.error('Error fetching SEC info:', error);
+                                    secContainer.innerHTML = `
+                                        <div style="font-size: 0.75em; color: #999; font-style: italic;">
+                                            SEC data unavailable
+                                        </div>
+                                    `;
+                                }
+                            }
                         });
                         
                         triangle.addTo(mapInstance);
