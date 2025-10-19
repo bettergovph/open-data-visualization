@@ -12,6 +12,8 @@ from dotenv import load_dotenv
 from typing import List, Dict, Set
 from difflib import SequenceMatcher
 import re
+from concurrent.futures import ThreadPoolExecutor
+import threading
 
 load_dotenv()
 
@@ -278,7 +280,11 @@ async def get_dime_contractors() -> Set[str]:
             for contractor_data in individual_contractors:
                 contractor = contractor_data['name']
                 if contractor and contractor.strip():
-                    all_contractors.add(contractor.strip())
+                    # Clean leading dots, spaces, and other junk
+                    cleaned = contractor.strip()
+                    cleaned = cleaned.lstrip('. ')  # Remove leading dots and spaces
+                    if cleaned:  # Only add if something remains after cleaning
+                        all_contractors.add(cleaned)
         
         print(f"   - JV entries split: {jv_count}")
         print(f"   - Former names extracted: {former_name_count}")
@@ -318,43 +324,66 @@ async def get_existing_contractors() -> List[str]:
         await conn.close()
 
 
+def check_contractor_duplicates(args):
+    """Check a single contractor against existing contractors (thread worker)"""
+    new_contractor, existing_contractors, unique_so_far = args
+    
+    # Check against existing contractors
+    for existing_contractor in existing_contractors:
+        if fuzzy_match(new_contractor, existing_contractor):
+            return (new_contractor, 'duplicate', existing_contractor)
+    
+    # Check against already unique contractors in this batch
+    for unique_contractor in unique_so_far:
+        if fuzzy_match(new_contractor, unique_contractor):
+            return (new_contractor, 'duplicate', unique_contractor)
+    
+    return (new_contractor, 'unique', None)
+
+
 def find_duplicates_with_fuzzy_match(new_contractors: Set[str], existing_contractors: List[str]) -> tuple:
     """
     Find new contractors that are not duplicates of existing ones
-    Uses fuzzy matching to detect similar names
+    Uses fuzzy matching with 5 threads to detect similar names
     Returns (unique_contractors, duplicates_found)
     """
-    print("🔍 Checking for duplicates using fuzzy matching...")
+    print("🔍 Checking for duplicates using fuzzy matching (5 threads)...")
     
     unique_contractors = []
     duplicates = []
+    lock = threading.Lock()
     
     total = len(new_contractors)
     processed = 0
+    sorted_contractors = sorted(new_contractors)
     
-    for new_contractor in sorted(new_contractors):
-        processed += 1
-        if processed % 100 == 0:
-            print(f"   Progress: {processed}/{total} contractors checked...")
+    # Use ThreadPoolExecutor with 5 threads
+    with ThreadPoolExecutor(max_workers=5) as executor:
+        # Process contractors in batches
+        futures = []
         
-        # Check against existing contractors
-        is_duplicate = False
-        for existing_contractor in existing_contractors:
-            if fuzzy_match(new_contractor, existing_contractor):
-                duplicates.append((new_contractor, existing_contractor))
-                is_duplicate = True
-                break
+        for new_contractor in sorted_contractors:
+            # Create a copy of unique_contractors for this check
+            with lock:
+                unique_so_far = unique_contractors.copy()
+            
+            future = executor.submit(check_contractor_duplicates, 
+                                   (new_contractor, existing_contractors, unique_so_far))
+            futures.append(future)
         
-        # Also check against already unique contractors in this batch
-        if not is_duplicate:
-            for unique_contractor in unique_contractors:
-                if fuzzy_match(new_contractor, unique_contractor):
-                    duplicates.append((new_contractor, unique_contractor))
-                    is_duplicate = True
-                    break
-        
-        if not is_duplicate:
-            unique_contractors.append(new_contractor)
+        # Collect results
+        for future in futures:
+            contractor_name, status, match = future.result()
+            
+            with lock:
+                processed += 1
+                if processed % 100 == 0:
+                    print(f"   Progress: {processed}/{total} contractors checked...")
+                
+                if status == 'unique':
+                    unique_contractors.append(contractor_name)
+                else:
+                    duplicates.append((contractor_name, match))
     
     print(f"✅ Found {len(unique_contractors)} unique contractors, {len(duplicates)} duplicates")
     

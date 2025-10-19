@@ -52,7 +52,11 @@ async def main():
         for contractor_data in individual_contractors:
             contractor = contractor_data['name']
             if contractor and contractor.strip() and is_valid_contractor_name(contractor):
-                all_individual_contractors.add(contractor.strip())
+                # Clean leading dots, spaces, and other junk
+                cleaned = contractor.strip()
+                cleaned = cleaned.lstrip('. ')  # Remove leading dots and spaces
+                if cleaned and is_valid_contractor_name(cleaned):  # Revalidate after cleaning
+                    all_individual_contractors.add(cleaned)
     
     print(f"✅ Total unique individual contractors after splitting: {len(all_individual_contractors)}")
     
