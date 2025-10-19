@@ -2,9 +2,22 @@
 SendMode Input
 SetWorkingDir %A_ScriptDir%
 
+; Read contractors from file
 contractors := []
-contractors.Push("LEGACY CONSTRUCTION CORPORATION")
-contractors.Push("QM BUILDERS")
+FileRead, fileContent, contractor_list_top1000.txt
+if ErrorLevel
+{
+    MsgBox, Cannot read contractor list file
+    ExitApp
+}
+
+; Parse each line as a contractor name
+Loop, Parse, fileContent, `n, `r
+{
+    cleaned := Trim(A_LoopField)
+    if (cleaned != "" && StrLen(cleaned) > 2)
+        contractors.Push(cleaned)
+}
 
 Run msedge.exe --new-window https://checkwithsec.sec.gov.ph/check-with-sec/index
 Sleep, 7000
