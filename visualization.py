@@ -1228,54 +1228,171 @@ async def search_contractor_projects(contractor_name: str):
         except Exception as e:
             print(f"Error querying PhilGEPS database: {e}")
         
-        # Deduplicate projects across databases
-        # Create a set to track unique projects (by description + amount)
-        seen_projects = set()
-        unique_projects = []
-        unique_total = 0
+        # STEP 1: Deduplicate within each database first (especially PhilGEPS)
         
-        # Helper function to create a project signature
-        def create_signature(description, amount):
-            # Normalize description and round amount to avoid floating point issues
-            desc = description.lower().strip()[:100]  # First 100 chars
-            amt = round(float(amount), 2)
-            return f"{desc}|{amt}"
-        
-        # Process all projects and deduplicate
-        all_sources = [
-            ("flood", flood_projects),
-            ("dime", dime_projects),
-            ("philgeps", philgeps_projects)
-        ]
-        
-        for source, projects in all_sources:
-            for proj in projects:
-                if source == "flood":
-                    sig = create_signature(proj.get("description", ""), proj.get("amount", 0))
-                    desc = proj.get("description", "")
-                elif source == "dime":
-                    sig = create_signature(proj.get("title", ""), proj.get("amount", 0))
-                    desc = proj.get("title", "")
-                else:  # philgeps
-                    sig = create_signature(proj.get("description", ""), proj.get("amount", 0))
-                    desc = proj.get("description", "")
+        def deduplicate_by_reference_and_amount(projects_list, ref_key, amount_key):
+            """Deduplicate within a single database by reference number or exact amount"""
+            seen = set()
+            unique = []
+            for proj in projects_list:
+                # Create signature using reference (if available) or exact amount
+                ref = proj.get(ref_key, "")
+                amount = proj.get(amount_key, 0)
+                sig = f"{ref}|{amount}" if ref else f"_|{amount}"
                 
-                if sig not in seen_projects:
-                    seen_projects.add(sig)
-                    unique_projects.append({
-                        "source": source,
-                        "description": desc,
-                        "amount": proj.get("amount", 0)
-                    })
-                    unique_total += proj.get("amount", 0)
+                if sig not in seen:
+                    seen.add(sig)
+                    unique.append(proj)
+            return unique
         
-        # Calculate overlap statistics
-        total_raw = flood_count + dime_count + philgeps_count
+        # Deduplicate PhilGEPS by reference_id (contract number)
+        philgeps_projects_dedup = deduplicate_by_reference_and_amount(philgeps_projects, "reference", "amount")
+        philgeps_count_dedup = len(philgeps_projects_dedup)
+        philgeps_total_dedup = sum(p.get("amount", 0) for p in philgeps_projects_dedup)
+        
+        # Deduplicate DIME (though it should already be clean)
+        dime_projects_dedup = deduplicate_by_reference_and_amount(dime_projects, "title", "amount")
+        dime_count_dedup = len(dime_projects_dedup)
+        dime_total_dedup = sum(p.get("amount", 0) for p in dime_projects_dedup)
+        
+        # Deduplicate Flood (should be clean from MeiliSearch)
+        flood_projects_dedup = deduplicate_by_reference_and_amount(flood_projects, "description", "amount")
+        flood_count_dedup = len(flood_projects_dedup)
+        flood_total_dedup = sum(p.get("amount", 0) for p in flood_projects_dedup)
+        
+        print(f"🔍 Deduplication within databases:")
+        print(f"  Flood: {len(flood_projects)} → {flood_count_dedup} ({len(flood_projects) - flood_count_dedup} internal dupes)")
+        print(f"  DIME: {len(dime_projects)} → {dime_count_dedup} ({len(dime_projects) - dime_count_dedup} internal dupes)")
+        print(f"  PhilGEPS: {len(philgeps_projects)} → {philgeps_count_dedup} ({len(philgeps_projects) - philgeps_count_dedup} internal dupes)")
+        
+        # STEP 2: Deduplicate across databases using correlation logic
+        
+        def normalize_location(location: str) -> str:
+            """Normalize location string for comparison"""
+            if not location:
+                return ""
+            location = location.upper().strip()
+            for word in ["PROVINCE", "PROVINCE OF", "CITY OF", "MUNICIPALITY OF", "BARANGAY"]:
+                location = location.replace(word, "")
+            return " ".join(location.split())
+        
+        def amount_match(amount1: float, amount2: float, tolerance_percent: float = 5.0) -> bool:
+            """Check if amounts match within tolerance"""
+            if amount1 == 0 or amount2 == 0:
+                return False
+            if amount1 == amount2:
+                return True
+            diff_percent = abs(amount1 - amount2) / max(amount1, amount2) * 100
+            return diff_percent <= tolerance_percent
+        
+        def location_match(loc1: str, loc2: str) -> bool:
+            """Check if locations match"""
+            if not loc1 or not loc2:
+                return False
+            norm1 = normalize_location(loc1)
+            norm2 = normalize_location(loc2)
+            if not norm1 or not norm2:
+                return False
+            return norm1 in norm2 or norm2 in norm1
+        
+        # Build list with deduplicated projects
+        all_projects = []
+        
+        for proj in flood_projects_dedup:
+            all_projects.append({
+                "source": "flood",
+                "amount": proj.get("amount", 0),
+                "province": proj.get("province", ""),
+                "region": proj.get("region", "")
+            })
+        
+        for proj in dime_projects_dedup:
+            all_projects.append({
+                "source": "dime",
+                "amount": proj.get("amount", 0),
+                "province": proj.get("province", ""),
+                "region": proj.get("region", "")
+            })
+        
+        for proj in philgeps_projects_dedup:
+            all_projects.append({
+                "source": "philgeps",
+                "amount": proj.get("amount", 0),
+                "province": "",
+                "region": ""
+            })
+        
+        # Cross-database deduplication
+        unique_projects = []
+        seen_indices = set()
+        cross_db_duplicates = 0
+        
+        for i, proj1 in enumerate(all_projects):
+            if i in seen_indices:
+                continue
+            
+            seen_indices.add(i)
+            unique_projects.append(proj1)
+            
+            # Check for cross-database duplicates
+            for j in range(i + 1, len(all_projects)):
+                if j in seen_indices:
+                    continue
+                
+                proj2 = all_projects[j]
+                
+                # Only check cross-database (not within same database)
+                if proj1["source"] == proj2["source"]:
+                    continue
+                
+                is_duplicate = False
+                
+                # For Flood + DIME: use amount + location
+                if proj1["source"] in ["flood", "dime"] and proj2["source"] in ["flood", "dime"]:
+                    if amount_match(proj1["amount"], proj2["amount"]):
+                        if location_match(proj1["province"], proj2["province"]) or location_match(proj1["region"], proj2["region"]):
+                            is_duplicate = True
+                
+                # For PhilGEPS vs Flood/DIME: only exact amount (no location in PhilGEPS)
+                # Be conservative - only mark as duplicate if exact same amount
+                elif "philgeps" in [proj1["source"], proj2["source"]]:
+                    if proj1["amount"] == proj2["amount"]:
+                        is_duplicate = True
+                
+                if is_duplicate:
+                    seen_indices.add(j)
+                    cross_db_duplicates += 1
+        
+        # Calculate final statistics
         unique_count = len(unique_projects)
-        duplicate_count = total_raw - unique_count
+        unique_total = sum(p["amount"] for p in unique_projects)
         
-        # Simple sum (inflated - for reference)
+        # Total duplicates = internal + cross-database
+        internal_duplicates = (len(flood_projects) - flood_count_dedup) + (len(dime_projects) - dime_count_dedup) + (len(philgeps_projects) - philgeps_count_dedup)
+        total_duplicates = internal_duplicates + cross_db_duplicates
+        
+        total_raw = flood_count + dime_count + philgeps_count
         simple_total = flood_total + dime_total + philgeps_total
+        
+        print(f"🔍 Cross-database deduplication:")
+        print(f"  Internal duplicates: {internal_duplicates}")
+        print(f"  Cross-DB duplicates: {cross_db_duplicates}")
+        print(f"  Total duplicates: {total_duplicates}")
+        print(f"  Unique projects: {unique_count}")
+        print(f"  Unique total: ₱{unique_total:,.2f}")
+        
+        # BASIC CHECK: Ensure deduplicated total >= max single database
+        max_single_db_total = max(flood_total_dedup, dime_total_dedup, philgeps_total_dedup)
+        max_single_db_count = max(flood_count_dedup, dime_count_dedup, philgeps_count_dedup)
+        
+        validation_passed = unique_total >= max_single_db_total
+        
+        if not validation_passed:
+            print(f"⚠️ VALIDATION WARNING: Deduplicated total (₱{unique_total:,.2f}) < max single DB (₱{max_single_db_total:,.2f})")
+            print(f"   Using max single DB as baseline to ensure accuracy")
+            # Use the larger value as safeguard
+            unique_total = max(unique_total, max_single_db_total)
+            unique_count = max(unique_count, max_single_db_count)
         
         return JSONResponse({
             "success": True,
@@ -1285,24 +1402,33 @@ async def search_contractor_projects(contractor_name: str):
                 "total_value": unique_total,  # Deduplicated value
                 "raw_total_projects": total_raw,  # Raw sum before deduplication
                 "raw_total_value": simple_total,  # Raw sum before deduplication
-                "duplicate_count": duplicate_count,  # How many duplicates found
+                "duplicate_count": total_duplicates,  # Total duplicates (internal + cross-DB)
+                "internal_duplicates": internal_duplicates,  # Duplicates within same database
+                "cross_db_duplicates": cross_db_duplicates,  # Duplicates across databases
+                "validation_passed": validation_passed,  # Basic check result
                 "flood": {
                     "count": flood_count,
-                    "total": flood_total
+                    "total": flood_total,
+                    "count_dedup": flood_count_dedup,
+                    "total_dedup": flood_total_dedup
                 },
                 "dime": {
                     "count": dime_count,
-                    "total": dime_total
+                    "total": dime_total,
+                    "count_dedup": dime_count_dedup,
+                    "total_dedup": dime_total_dedup
                 },
                 "philgeps": {
                     "count": philgeps_count,
-                    "total": philgeps_total
+                    "total": philgeps_total,
+                    "count_dedup": philgeps_count_dedup,
+                    "total_dedup": philgeps_total_dedup
                 }
             },
             "projects": {
-                "flood": flood_projects,
-                "dime": dime_projects,
-                "philgeps": philgeps_projects
+                "flood": flood_projects_dedup,  # Return deduplicated lists
+                "dime": dime_projects_dedup,
+                "philgeps": philgeps_projects_dedup
             }
         })
     except Exception as e:

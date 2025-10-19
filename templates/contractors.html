@@ -354,16 +354,70 @@ function toggleMobileMenu() {
                 <div id="projects-search-tab" class="budget-tab-panel">
                     <div style="background: white; padding: 30px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
                         <h3 style="color: #0038A8; margin: 0 0 10px 0;">🔍 Search Contractor Projects</h3>
-                        <p style="color: #666; margin: 0 0 25px 0;">
+                        <p style="color: #666; margin: 0 0 20px 0;">
                             Search for any contractor and view all their projects across Flood Control, DIME, and PhilGEPS databases
                         </p>
+                        
+                        <!-- Data Quality Warning -->
+                        <div style="background: #fff3cd; border: 2px solid #ffc107; border-radius: 6px; padding: 15px; margin-bottom: 25px;">
+                            <div style="color: #856404; font-weight: 600; margin-bottom: 8px;">⚠️ Data Quality Notice</div>
+                            <div style="color: #856404; font-size: 0.9em; line-height: 1.5;">
+                                <strong>Source databases may contain errors and duplicates.</strong> We perform best-effort deduplication and validation, but cannot guarantee 100% accuracy due to:
+                                <ul style="margin: 8px 0 0 20px; padding: 0;">
+                                    <li>Duplicate contract entries in source databases</li>
+                                    <li>Same project appearing in multiple databases (Flood/DIME/PhilGEPS overlap)</li>
+                                    <li>PhilGEPS lacks location data, limiting cross-matching accuracy</li>
+                                    <li>Inconsistent contractor name formatting across databases</li>
+                                </ul>
+                                <div style="margin-top: 8px; font-weight: 600;">
+                                    ✅ Basic Check: Deduplicated total ≥ any single database total
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Quick Suggestions -->
+                        <div style="margin-bottom: 15px;">
+                            <div style="color: #666; font-size: 0.9em; margin-bottom: 8px;">Quick Search:</div>
+                            <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+                                <button onclick="document.getElementById('project-search-input').value='timothy'; searchContractorProjects();" 
+                                        style="background: #e3f2fd; color: #1976d2; border: 1px solid #1976d2; padding: 8px 16px; border-radius: 20px; cursor: pointer; font-size: 0.85em; transition: all 0.2s;" 
+                                        onmouseover="this.style.background='#1976d2'; this.style.color='white';" 
+                                        onmouseout="this.style.background='#e3f2fd'; this.style.color='#1976d2';">
+                                    ST. Timothy
+                                </button>
+                                <button onclick="document.getElementById('project-search-input').value='gerrard'; searchContractorProjects();" 
+                                        style="background: #e8f5e9; color: #388e3c; border: 1px solid #388e3c; padding: 8px 16px; border-radius: 20px; cursor: pointer; font-size: 0.85em; transition: all 0.2s;" 
+                                        onmouseover="this.style.background='#388e3c'; this.style.color='white';" 
+                                        onmouseout="this.style.background='#e8f5e9'; this.style.color='#388e3c';">
+                                    Gerrard
+                                </button>
+                                <button onclick="document.getElementById('project-search-input').value='cltg'; searchContractorProjects();" 
+                                        style="background: #fff3e0; color: #f57c00; border: 1px solid #f57c00; padding: 8px 16px; border-radius: 20px; cursor: pointer; font-size: 0.85em; transition: all 0.2s;" 
+                                        onmouseover="this.style.background='#f57c00'; this.style.color='white';" 
+                                        onmouseout="this.style.background='#fff3e0'; this.style.color='#f57c00';">
+                                    CLTG
+                                </button>
+                                <button onclick="document.getElementById('project-search-input').value='sunwest'; searchContractorProjects();" 
+                                        style="background: #fce4ec; color: #c2185b; border: 1px solid #c2185b; padding: 8px 16px; border-radius: 20px; cursor: pointer; font-size: 0.85em; transition: all 0.2s;" 
+                                        onmouseover="this.style.background='#c2185b'; this.style.color='white';" 
+                                        onmouseout="this.style.background='#fce4ec'; this.style.color='#c2185b';">
+                                    Sunwest
+                                </button>
+                                <button onclick="document.getElementById('project-search-input').value='centerways'; searchContractorProjects();" 
+                                        style="background: #f3e5f5; color: #7b1fa2; border: 1px solid #7b1fa2; padding: 8px 16px; border-radius: 20px; cursor: pointer; font-size: 0.85em; transition: all 0.2s;" 
+                                        onmouseover="this.style.background='#7b1fa2'; this.style.color='white';" 
+                                        onmouseout="this.style.background='#f3e5f5'; this.style.color='#7b1fa2';">
+                                    Centerways
+                                </button>
+                            </div>
+                        </div>
                         
                         <!-- Search Input with Autocomplete -->
                         <div style="margin-bottom: 30px; position: relative;">
                             <input 
                                 type="text" 
                                 id="project-search-input" 
-                                placeholder="Type contractor name... (e.g., CLTG, D.M. Consunji, etc.)" 
+                                placeholder="Type contractor name or use quick search above..." 
                                 style="width: 100%; padding: 15px 20px; border: 2px solid #0038A8; border-radius: 8px; font-size: 1.1em; box-shadow: 0 2px 4px rgba(0,0,0,0.1);"
                                 autocomplete="off"
                             />
@@ -1154,7 +1208,29 @@ function displayProjectSearchResults(data) {
     const summary = data.summary;
     const projects = data.projects;
     
+    // Basic validation check: deduplicated total should be >= any single database
+    const maxSingleDB = Math.max(summary.flood.total_dedup, summary.dime.total_dedup, summary.philgeps.total_dedup);
+    const hasValidationError = summary.total_value < maxSingleDB;
+    
+    if (hasValidationError) {
+        console.error('❌ VALIDATION ERROR: Deduplicated total is less than a single database!');
+        console.error('  Deduplicated:', summary.total_value);
+        console.error('  Flood:', summary.flood.total_dedup);
+        console.error('  DIME:', summary.dime.total_dedup);
+        console.error('  PhilGEPS:', summary.philgeps.total_dedup);
+    }
+    
     let html = `
+        ${hasValidationError ? `
+        <div style="background: #f8d7da; border: 2px solid #dc3545; border-radius: 8px; padding: 20px; margin-bottom: 20px;">
+            <h4 style="color: #721c24; margin: 0 0 10px 0;">🚨 Data Quality Alert</h4>
+            <p style="color: #721c24; margin: 0; line-height: 1.6;">
+                <strong>Validation Error Detected:</strong> The deduplicated total (₱${summary.total_value.toLocaleString('en-PH')}) is less than 
+                PhilGEPS total (₱${summary.philgeps.total_dedup.toLocaleString('en-PH')}). This indicates our deduplication algorithm may be too aggressive 
+                or there are data quality issues. <strong>Using PhilGEPS total as minimum baseline.</strong>
+            </p>
+        </div>
+        ` : ''}
         <div style="background: linear-gradient(135deg, #0038A8 0%, #002870 100%); color: white; padding: 30px; border-radius: 8px; margin-bottom: 30px;">
             <h2 style="margin: 0 0 20px 0; font-size: 1.8em;">📊 ${data.contractor_name}</h2>
             
@@ -1172,27 +1248,47 @@ function displayProjectSearchResults(data) {
             </div>
             
             ${summary.duplicate_count > 0 ? `
-            <div style="background: rgba(255,255,255,0.15); padding: 12px; border-radius: 6px; margin-bottom: 20px; font-size: 0.85em;">
-                <strong>📌 Note:</strong> ${summary.duplicate_count} duplicate project${summary.duplicate_count > 1 ? 's' : ''} found across databases (same project appearing in multiple databases). 
-                Totals above are deduplicated. Raw total would be ${summary.raw_total_projects} projects worth ₱${summary.raw_total_value.toLocaleString('en-PH')}.
+            <div style="background: rgba(255,255,255,0.15); padding: 15px; border-radius: 6px; margin-bottom: 20px; font-size: 0.85em;">
+                <strong>📌 Deduplication Report:</strong><br>
+                <div style="margin-top: 8px; line-height: 1.6;">
+                    • <strong>Raw Total:</strong> ${summary.raw_total_projects} projects worth ₱${summary.raw_total_value.toLocaleString('en-PH')}<br>
+                    • <strong>Internal Duplicates:</strong> ${summary.internal_duplicates} (same contract appearing multiple times in same database)<br>
+                    • <strong>Cross-Database Duplicates:</strong> ${summary.cross_db_duplicates} (same project in multiple databases)<br>
+                    • <strong>Unique Total:</strong> ${summary.total_projects} projects worth ₱${summary.total_value.toLocaleString('en-PH')}<br>
+                    • <strong>Validation:</strong> ${summary.validation_passed ? '✅ PASSED - Total ≥ all individual databases' : '⚠️ ADJUSTED - Used max database as baseline'}
+                </div>
+                <div style="margin-top: 10px; padding-top: 10px; border-top: 1px solid rgba(255,255,255,0.2); font-size: 0.8em; opacity: 0.9;">
+                    <strong>ℹ️ Deduplication Method:</strong> We perform best-effort deduplication using:
+                    <ul style="margin: 5px 0 0 20px; padding: 0;">
+                        <li><strong>Within each database:</strong> Contract reference numbers + exact amounts</li>
+                        <li><strong>Flood ↔ DIME:</strong> Amount match (±5%) + Location match (province/region)</li>
+                        <li><strong>PhilGEPS ↔ Others:</strong> Exact amount match only (PhilGEPS lacks location data)</li>
+                    </ul>
+                    <div style="margin-top: 8px; opacity: 0.85;">
+                        <strong>⚠️ Limitation:</strong> Working with dirty data. Some duplicates may be missed or false positives may occur.
+                    </div>
+                </div>
             </div>
             ` : ''}
             
             <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; padding-top: 20px; border-top: 1px solid rgba(255,255,255,0.2);">
                 <div>
                     <div style="font-size: 1.3em; font-weight: bold;">🔵 Flood Control</div>
-                    <div style="font-size: 0.9em; opacity: 0.9;">${summary.flood.count} projects</div>
-                    <div style="font-size: 0.85em; opacity: 0.8;">₱${summary.flood.total.toLocaleString('en-PH')}</div>
+                    <div style="font-size: 0.9em; opacity: 0.9;">${summary.flood.count_dedup} unique</div>
+                    ${summary.flood.count !== summary.flood.count_dedup ? `<div style="font-size: 0.75em; opacity: 0.7;">(${summary.flood.count} raw, ${summary.flood.count - summary.flood.count_dedup} dupes)</div>` : ''}
+                    <div style="font-size: 0.85em; opacity: 0.8;">₱${summary.flood.total_dedup.toLocaleString('en-PH')}</div>
                 </div>
                 <div>
                     <div style="font-size: 1.3em; font-weight: bold;">🟢 DIME</div>
-                    <div style="font-size: 0.9em; opacity: 0.9;">${summary.dime.count} projects</div>
-                    <div style="font-size: 0.85em; opacity: 0.8;">₱${summary.dime.total.toLocaleString('en-PH')}</div>
+                    <div style="font-size: 0.9em; opacity: 0.9;">${summary.dime.count_dedup} unique</div>
+                    ${summary.dime.count !== summary.dime.count_dedup ? `<div style="font-size: 0.75em; opacity: 0.7;">(${summary.dime.count} raw, ${summary.dime.count - summary.dime.count_dedup} dupes)</div>` : ''}
+                    <div style="font-size: 0.85em; opacity: 0.8;">₱${summary.dime.total_dedup.toLocaleString('en-PH')}</div>
                 </div>
                 <div>
                     <div style="font-size: 1.3em; font-weight: bold;">🟡 PhilGEPS</div>
-                    <div style="font-size: 0.9em; opacity: 0.9;">${summary.philgeps.count} projects</div>
-                    <div style="font-size: 0.85em; opacity: 0.8;">₱${summary.philgeps.total.toLocaleString('en-PH')}</div>
+                    <div style="font-size: 0.9em; opacity: 0.9;">${summary.philgeps.count_dedup} unique</div>
+                    ${summary.philgeps.count !== summary.philgeps.count_dedup ? `<div style="font-size: 0.75em; opacity: 0.7;">(${summary.philgeps.count} raw, ${summary.philgeps.count - summary.philgeps.count_dedup} dupes)</div>` : ''}
+                    <div style="font-size: 0.85em; opacity: 0.8;">₱${summary.philgeps.total_dedup.toLocaleString('en-PH')}</div>
                 </div>
             </div>
         </div>
