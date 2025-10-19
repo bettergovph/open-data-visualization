@@ -588,14 +588,14 @@ async function loadInitialMapData() {
 // Calculate circle radius based on project cost with zoom scaling
 function calculateCircleRadius(cost, zoomLevel = 6) {
     if (!cost || isNaN(parseFloat(cost))) {
-        return 2000; // Default radius for projects without cost data (increased for visibility)
+        return 1000; // Default radius for projects without cost data (decreased)
     }
 
     const numericCost = parseFloat(cost);
 
-    // Base radius calculation (meters at zoom level 6) - Increased for better visibility
-    const minRadius = 500;
-    const maxRadius = 10000;
+    // Base radius calculation (meters at zoom level 6) - Decreased for cleaner map
+    const minRadius = 300;
+    const maxRadius = 6000;
     const minCost = 10000; // ₱10,000 minimum for scaling
     const maxCost = 1000000000; // ₱1 billion maximum for scaling
 
@@ -955,68 +955,68 @@ let allDimeProjectsCache = null;
 // Helper function to process a batch of DIME projects as squares
 async function processDimeBatch(batch) {
     for (const project of batch) {
-                if (project.latitude && project.longitude) {
-                    const lat = parseFloat(project.latitude);
-                    const lng = parseFloat(project.longitude);
-                    
-                    if (!isNaN(lat) && !isNaN(lng)) {
-                        const color = getStatusColor(project.status);
-                        const cost = project.cost || 0;
-                        const radius = calculateCircleRadius(cost, currentZoomLevel);
-                        
-                        // Create square marker
-                        // Use half the radius for square size (in degrees)
-                        const halfSize = (radius / 2) / 111000; // Convert meters to degrees
-                        const square = L.rectangle([
-                            [lat - halfSize, lng - halfSize],  // Southwest corner
-                            [lat + halfSize, lng + halfSize]   // Northeast corner
-                        ], {
-                            color: color,
-                            fillColor: color,
-                            fillOpacity: 0.6,
-                            weight: 2
+        if (project.latitude && project.longitude) {
+            const lat = parseFloat(project.latitude);
+            const lng = parseFloat(project.longitude);
+            
+            if (!isNaN(lat) && !isNaN(lng)) {
+                const color = getStatusColor(project.status);
+                const cost = project.cost || 0;
+                const radius = calculateCircleRadius(cost, currentZoomLevel);
+                
+                // Create square marker
+                // Use smaller fraction of radius for square size (in degrees)
+                const halfSize = (radius / 2.5) / 111000; // Convert meters to degrees, smaller than circles
+                const square = L.rectangle([
+                    [lat - halfSize, lng - halfSize],  // Southwest corner
+                    [lat + halfSize, lng + halfSize]   // Northeast corner
+                ], {
+                    color: color,
+                    fillColor: color,
+                    fillOpacity: 0.6,
+                    weight: 2
+                });
+                
+                const costDisplay = cost ? `₱${parseFloat(cost).toLocaleString('en-PH', {minimumFractionDigits: 2, maximumFractionDigits: 2})}` : 'N/A';
+                
+                // Parse contractors from JSON array
+                let contractorsList = 'Unknown';
+                if (project.contractors && project.contractors.length > 0) {
+                    try {
+                        const contractorNames = project.contractors.map(c => {
+                            if (typeof c === 'string') {
+                                // Parse JSON string
+                                const parsed = JSON.parse(c);
+                                return parsed.name || 'Unknown';
+                            }
+                            return c.name || 'Unknown';
                         });
-                        
-                    const costDisplay = cost ? `₱${parseFloat(cost).toLocaleString('en-PH', {minimumFractionDigits: 2, maximumFractionDigits: 2})}` : 'N/A';
-                    
-                    // Parse contractors from JSON array
-                    let contractorsList = 'Unknown';
-                    if (project.contractors && project.contractors.length > 0) {
-                        try {
-                            const contractorNames = project.contractors.map(c => {
-                                if (typeof c === 'string') {
-                                    // Parse JSON string
-                                    const parsed = JSON.parse(c);
-                                    return parsed.name || 'Unknown';
-                                }
-                                return c.name || 'Unknown';
-                            });
-                            contractorsList = contractorNames.join(', ');
-                        } catch (e) {
-                            contractorsList = project.contractors.join(', ');
-                        }
+                        contractorsList = contractorNames.join(', ');
+                    } catch (e) {
+                        contractorsList = project.contractors.join(', ');
                     }
-                    
-                    // Format year/date display for DIME
-                    let dateDisplay = '';
-                    if (project.year) {
-                        dateDisplay = `
-                            <div style="font-size: 0.9em; margin-bottom: 10px; color: #666;">
-                                <strong>Year:</strong> ${project.year}
-                            </div>
-                        `;
-                    } else if (project.contract_completion_date) {
-                        const compDate = new Date(project.contract_completion_date);
-                        dateDisplay = `
-                            <div style="font-size: 0.9em; margin-bottom: 10px; color: #666;">
-                                <strong>Target Completion:</strong> ${compDate.toLocaleDateString('en-PH', {year: 'numeric', month: 'short'})}
-                            </div>
-                        `;
-                    }
-                        
-                        const dimeProjectId = `dime-${project.id}`;
-                        
-                        const popupContent = `
+                }
+                
+                // Format year/date display for DIME
+                let dateDisplay = '';
+                if (project.year) {
+                    dateDisplay = `
+                        <div style="font-size: 0.9em; margin-bottom: 10px; color: #666;">
+                            <strong>Year:</strong> ${project.year}
+                        </div>
+                    `;
+                } else if (project.contract_completion_date) {
+                    const compDate = new Date(project.contract_completion_date);
+                    dateDisplay = `
+                        <div style="font-size: 0.9em; margin-bottom: 10px; color: #666;">
+                            <strong>Target Completion:</strong> ${compDate.toLocaleDateString('en-PH', {year: 'numeric', month: 'short'})}
+                        </div>
+                    `;
+                }
+                
+                const dimeProjectId = `dime-${project.id}`;
+                
+                const popupContent = `
                             <div style="width: 900px; font-family: Arial, sans-serif; overflow-wrap: break-word; word-wrap: break-word;">
                                 <h4 style="margin: 0 0 10px 0; color: ${color}; font-size: 1.1em; overflow-wrap: break-word; word-wrap: break-word;">
                                     🔲 ${project.project_name || 'Unnamed Project'}
@@ -1148,8 +1148,6 @@ async function processDimeBatch(batch) {
                         mapMarkers.push(square);
                     }
                 }
-            }
-            
             }
 }
 
@@ -1298,8 +1296,8 @@ async function loadDimeSquaresForRegion(regionName) {
                     const radius = calculateCircleRadius(cost, currentZoomLevel);
                     
                     // Create square marker
-                    // Use half the radius for square size (in degrees)
-                    const halfSize = (radius / 2) / 111000; // Convert meters to degrees
+                    // Use smaller fraction of radius for square size (in degrees)
+                    const halfSize = (radius / 2.5) / 111000; // Convert meters to degrees, smaller than circles
                     const square = L.rectangle([
                         [lat - halfSize, lng - halfSize],  // Southwest corner
                         [lat + halfSize, lng + halfSize]   // Northeast corner
