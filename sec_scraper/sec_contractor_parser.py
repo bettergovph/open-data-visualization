@@ -23,7 +23,7 @@ class SECContractorParser:
             'port': int(os.getenv('POSTGRES_PORT', 5432)),
             'user': os.getenv('POSTGRES_USER', 'budget_admin'),
             'password': os.getenv('POSTGRES_PASSWORD', ''),
-            'database': 'philgeps'
+            'database': 'sec'
         }
 
     def detect_encoding(self, file_path: str) -> str:
@@ -80,33 +80,65 @@ class SECContractorParser:
     async def update_contractors_table(self, contractors: List[Dict[str, Any]]):
         """Update the contractors table with SEC data
         
-        Stores all companies returned from a search, even if multiple results.
-        Each unique combination of (contractor_name, sec_number) is stored.
-        Only exact SEC data is stored - no search terms.
+        Finds matching contractors by fuzzy name matching and updates their SEC data.
         """
         conn = await asyncpg.connect(**self.db_config)
 
         try:
             for contractor in contractors:
-                # Delete any existing entry with this SEC number (drops old search terms)
-                # Then insert the new entry with exact SEC name
-                deleted = await conn.fetchval('''
-                    DELETE FROM contractors 
+                sec_name = contractor['contractor_name']
+                sec_number = contractor['sec_number']
+                
+                # Try exact match first on SEC number (if contractor was already processed)
+                existing = await conn.fetchrow('''
+                    SELECT id, contractor_name 
+                    FROM contractors 
                     WHERE sec_number = $1
-                    RETURNING contractor_name
-                ''', contractor['sec_number'])
+                ''', sec_number)
                 
-                if deleted:
-                    print(f"🗑️ Dropped old entry: {deleted} (same SEC number)")
+                if existing:
+                    # Update existing entry
+                    await conn.execute('''
+                        UPDATE contractors
+                        SET date_registered = $1, status = $2, address = $3, 
+                            updated_at = CURRENT_TIMESTAMP
+                        WHERE sec_number = $4
+                    ''', contractor['date_registered'], contractor['status'],
+                         contractor['address'], sec_number)
+                    print(f"✅ Updated: {existing['contractor_name']}")
+                    continue
                 
-                # Insert the new entry with exact SEC data
-                await conn.execute('''
-                    INSERT INTO contractors (contractor_name, sec_number, date_registered, status, address)
-                    VALUES ($1, $2, $3, $4, $5)
-                ''', contractor['contractor_name'], contractor['sec_number'],
-                     contractor['date_registered'], contractor['status'],
-                     contractor['address'])
-                print(f"✅ Processed: {contractor['contractor_name']}")
+                # Find contractor by fuzzy name matching
+                all_contractors = await conn.fetch('''
+                    SELECT id, contractor_name 
+                    FROM contractors 
+                    WHERE sec_number IS NULL OR sec_number = ''
+                ''')
+                
+                best_match = None
+                best_ratio = 0.0
+                
+                for db_contractor in all_contractors:
+                    db_name = db_contractor['contractor_name']
+                    ratio = self.calculate_similarity(sec_name, db_name)
+                    
+                    if ratio > best_ratio and ratio >= 0.85:  # 85% similarity threshold
+                        best_ratio = ratio
+                        best_match = db_contractor
+                
+                if best_match:
+                    # Update the matched contractor with SEC data
+                    await conn.execute('''
+                        UPDATE contractors
+                        SET sec_number = $1, date_registered = $2, status = $3, 
+                            address = $4, updated_at = CURRENT_TIMESTAMP
+                        WHERE id = $5
+                    ''', sec_number, contractor['date_registered'], contractor['status'],
+                         contractor['address'], best_match['id'])
+                    print(f"✅ Matched & Updated: {best_match['contractor_name']} → {sec_name} ({best_ratio:.2%})")
+                else:
+                    # No match found - skip (we only update existing contractors in SEC db)
+                    print(f"⚠️  No match found for: {sec_name} (skipping)")
 
         finally:
             await conn.close()
