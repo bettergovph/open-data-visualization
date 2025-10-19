@@ -979,10 +979,25 @@ async function loadDimeOnlyProjects() {
                             weight: 2
                         });
                         
-                        const costDisplay = cost ? `₱${parseFloat(cost).toLocaleString('en-PH', {minimumFractionDigits: 2, maximumFractionDigits: 2})}` : 'N/A';
-                        const contractorsList = project.contractors && project.contractors.length > 0 
-                            ? project.contractors.join(', ') 
-                            : 'Unknown';
+                    const costDisplay = cost ? `₱${parseFloat(cost).toLocaleString('en-PH', {minimumFractionDigits: 2, maximumFractionDigits: 2})}` : 'N/A';
+                    
+                    // Parse contractors from JSON array
+                    let contractorsList = 'Unknown';
+                    if (project.contractors && project.contractors.length > 0) {
+                        try {
+                            const contractorNames = project.contractors.map(c => {
+                                if (typeof c === 'string') {
+                                    // Parse JSON string
+                                    const parsed = JSON.parse(c);
+                                    return parsed.name || 'Unknown';
+                                }
+                                return c.name || 'Unknown';
+                            });
+                            contractorsList = contractorNames.join(', ');
+                        } catch (e) {
+                            contractorsList = project.contractors.join(', ');
+                        }
+                    }
                         
                         const popupContent = `
                             <div style="width: 900px; font-family: Arial, sans-serif; overflow-wrap: break-word; word-wrap: break-word;">
