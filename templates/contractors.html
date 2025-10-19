@@ -892,12 +892,21 @@ function showContractorHoverTooltip(event, contractorName) {
     // Find contractor data for tooltip
     let contractor = null;
     if (allContractors && allContractors.length > 0) {
-        // First try exact string match (case-insensitive)
-        const searchLower = contractorName.toLowerCase();
+        // First try exact string match (case-insensitive, with/without trailing period)
+        const searchLower = contractorName.toLowerCase().trim();
+        const searchNoDot = searchLower.replace(/\.$/, ''); // Remove trailing period
+        
         contractor = allContractors.find(c => {
-            return (c.contractor_name && c.contractor_name.toLowerCase() === searchLower) ||
-                   (c.company_name && c.company_name.toLowerCase() === searchLower) ||
-                   (c.original_contractor_name && c.original_contractor_name.toLowerCase() === searchLower);
+            const names = [
+                c.contractor_name?.toLowerCase().trim(),
+                c.company_name?.toLowerCase().trim(),
+                c.original_contractor_name?.toLowerCase().trim()
+            ];
+            const namesNoDot = names.map(n => n ? n.replace(/\.$/, '') : '');
+            
+            return names.includes(searchLower) || 
+                   names.includes(searchNoDot) ||
+                   namesNoDot.includes(searchNoDot);
         });
         
         // If no exact match, try normalized matching
