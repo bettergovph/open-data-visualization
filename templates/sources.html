@@ -1,122 +1,98 @@
-{% extends "base.html" %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Data Sources - BetterGovPH</title>
 
-{% block head %}
-<!-- Google Fonts - Inter -->
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="/static/css/tailwind.css">
+    <!-- Google Fonts - Inter -->
+    <!-- Tailwind CSS -->
+    <link rel="stylesheet" href="/static/css/tailwind.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
-<!-- Custom styling - Override ALL base styles -->
-<style>
-    /* Reset and override base.html styles */
-    * {
-        margin: 0;
-        padding: 0;
-        box-sizing: border-box;
-    }
-    body {
-        font-family: 'Inter', sans-serif !important;
-        background-color: white !important;
-        color: black !important;
-        margin: 0 !important;
-        padding: 0 !important;
-    }
-    /* Hide main navbar from base.html */
-    nav.navbar,
-    header.navbar,
-    header { 
-        display: none !important; 
-    }
-    /* Ensure our BetterGov nav is visible with maximum specificity */
-    html body nav.visualizations-nav,
-    html body main nav.visualizations-nav,
-    body nav.visualizations-nav,
-    nav.visualizations-nav {
-        display: flex !important;
-        position: relative !important;
-        z-index: 10000 !important;
-        background: white !important;
-        visibility: visible !important;
-        opacity: 1 !important;
-        height: auto !important;
-        min-height: 60px !important;
-        width: 100% !important;
-    }
-    /* Hide footer from base.html - we'll add our own */
-    footer.footer {
-        display: none !important;
-    }
-    
-    .source-section {
-        background: white;
-        border-radius: 12px;
-        padding: 2rem;
-        margin-bottom: 2rem;
-        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-    }
-    
-    .source-section h3 {
-        font-size: 1.5rem;
-        font-weight: 600;
-        margin-bottom: 1rem;
-        color: #1f2937;
-    }
-    
-    .source-list {
-        list-style: none;
-        padding-left: 0;
-        margin: 1rem 0;
-    }
-    
-    .source-list li {
-        padding: 0.5rem 0;
-        border-bottom: 1px solid #f3f4f6;
-    }
-    
-    .source-list li:last-child {
-        border-bottom: none;
-    }
-    
-    .source-link {
-        color: #2563eb;
-        text-decoration: underline;
-        transition: color 0.2s;
-    }
-    
-    .source-link:hover {
-        color: #1d4ed8;
-    }
-</style>
+    <!-- BetterGovPH Metadata -->
+    <meta name="description" content="Data Sources - BetterGovPH Open Data Visualization Platform">
+    <meta name="keywords" content="data sources, government data, Philippines, transparency">
+    <meta name="author" content="BetterGovPH">
 
-<!-- BetterGovPH Metadata -->
-<meta name="description" content="Data Sources - BetterGovPH Open Data Visualization Platform">
-<meta name="keywords" content="data sources, government data, Philippines, transparency">
-<meta name="author" content="BetterGovPH">
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://visualizations.bettergov.ph/sources">
+    <meta property="og:title" content="Data Sources - BetterGovPH">
+    <meta property="og:description" content="Comprehensive list of data sources used in BetterGovPH visualizations">
+    <meta property="og:image" content="/static/images/gov_logo.png">
 
-<!-- Open Graph / Facebook -->
-<meta property="og:type" content="website">
-<meta property="og:url" content="{{ SITE_URL }}/sources">
-<meta property="og:title" content="Data Sources - BetterGovPH">
-<meta property="og:description" content="Comprehensive list of data sources used in BetterGovPH visualizations">
-<meta property="og:image" content="/static/images/gov_logo.png">
+    <!-- Twitter -->
+    <meta property="twitter:card" content="summary_large_image">
+    <meta property="twitter:url" content="https://visualizations.bettergov.ph/sources">
+    <meta property="twitter:title" content="Data Sources - BetterGovPH">
+    <meta property="twitter:description" content="Comprehensive list of data sources used in BetterGovPH visualizations">
+    <meta property="twitter:image" content="/static/images/gov_logo.png">
 
-<!-- Twitter -->
-<meta property="twitter:card" content="summary_large_image">
-<meta property="twitter:url" content="https://visualizations.bettergov.ph/sources">
-<meta property="twitter:title" content="Data Sources - BetterGovPH">
-<meta property="twitter:description" content="Comprehensive list of data sources used in BetterGovPH visualizations">
-<meta property="twitter:image" content="/static/images/gov_logo.png">
-{% endblock %}
+    <style>
+        body {
+            font-family: 'Inter', sans-serif !important;
+            margin: 0;
+            padding: 0;
+            background: white !important;
+            color: black !important;
+            min-height: 100vh;
+        }
+        
+        .source-section {
+            background: white;
+            border-radius: 12px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        
+        .source-section h3 {
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            color: #1f2937;
+        }
+        
+        .source-list {
+            list-style: none;
+            padding-left: 0;
+            margin: 1rem 0;
+        }
+        
+        .source-list li {
+            padding: 0.5rem 0;
+            border-bottom: 1px solid #f3f4f6;
+        }
+        
+        .source-list li:last-child {
+            border-bottom: none;
+        }
+        
+        .source-link {
+            color: #2563eb;
+            text-decoration: underline;
+            transition: color 0.2s;
+        }
+        
+        .source-link:hover {
+            color: #1d4ed8;
+        }
+    </style>
+</head>
+<body>
 
-{% block content %}
 <!-- Navigation -->
 <nav class="visualizations-nav py-4 px-6 bg-white border-b border-gray-200">
     <div class="max-w-7xl mx-auto flex items-center justify-between">
         <div class="flex items-center">
-            <a href="/" class="flex items-center">
-                <img src="https://raw.githubusercontent.com/bettergovph/logo/main/png/BetterGov_Horizontal-Black.png" 
-                     alt="BetterGov" 
-                     class="h-12">
+            <a href="https://bettergov.ph" class="flex items-center">
+                <img src="https://raw.githubusercontent.com/bettergovph/logo/main/png/BetterGov_Horizontal-Black.png"
+                     alt="BetterGov.ph"
+                     class="h-12 mr-3">
+                
             </a>
+            <a href="/" class="text-xl font-bold text-black hover:text-gray-600">Data Visualizations</a>
         </div>
         <div class="hidden md:flex space-x-6">
             <a href="/" class="text-black hover:text-gray-600 font-medium transition">Home</a>
@@ -126,15 +102,15 @@
             <a href="/dime" class="text-black hover:text-gray-600 font-medium transition">DIME</a>
             <a href="/map" class="text-black hover:text-gray-600 font-medium transition">Map</a>
             <a href="/contractors" class="text-black hover:text-gray-600 font-medium transition">Contractors</a>
-            <div class="relative group">
+            <div class="relative" onmouseenter="this.querySelector('.dropdown-menu').classList.remove('hidden')" onmouseleave="this.querySelector('.dropdown-menu').classList.add('hidden')">
                 <a href="/correlation" class="text-black hover:text-gray-600 font-medium transition">Correlation ▾</a>
-                <div class="absolute hidden group-hover:block bg-white shadow-lg rounded-md mt-0 py-2 w-48 z-50">
+                <div class="dropdown-menu absolute hidden bg-white shadow-lg rounded-md mt-0 py-2 w-48" style="z-index: 50;">
                     <a href="/budget-nep-correlation" class="block px-4 py-2 text-black" style="border-radius: 4px; margin: 2px 4px; transition: all 0.2s;" onmouseover="this.style.background='#dbeafe'; this.style.color='#2563eb';" onmouseout="this.style.background='transparent'; this.style.color='black';">NEP-Budget</a>
                     <a href="/budget-flood-correlation" class="block px-4 py-2 text-black" style="border-radius: 4px; margin: 2px 4px; transition: all 0.2s;" onmouseover="this.style.background='#dbeafe'; this.style.color='#2563eb';" onmouseout="this.style.background='transparent'; this.style.color='black';">Budget-Flood</a>
                     <a href="/flood-dime-correlation" class="block px-4 py-2 text-black" style="border-radius: 4px; margin: 2px 4px; transition: all 0.2s;" onmouseover="this.style.background='#dbeafe'; this.style.color='#2563eb';" onmouseout="this.style.background='transparent'; this.style.color='black';">Flood-DIME</a>
                 </div>
             </div>
-            <a href="/sources" class="text-black hover:text-gray-600 font-medium transition">Sources</a>
+            <a href="/sources" class="text-black hover:text-gray-600 font-medium transition border-b-2 border-black">Sources</a>
         </div>
         <div class="md:hidden">
             <button class="text-black focus:outline-none" onclick="toggleMobileMenu()">
@@ -157,9 +133,16 @@
         <a href="/budget-nep-correlation" class="block text-black hover:text-gray-600 font-medium py-2 pl-4">→ NEP-Budget</a>
         <a href="/budget-flood-correlation" class="block text-black hover:text-gray-600 font-medium py-2 pl-4">→ Budget-Flood</a>
         <a href="/flood-dime-correlation" class="block text-black hover:text-gray-600 font-medium py-2 pl-4">→ Flood-DIME</a>
-        <a href="/sources" class="block text-black hover:text-gray-600 font-medium py-2">Sources</a>
+        <a href="/sources" class="block text-black hover:text-gray-600 font-medium py-2 border-b-2 border-black">Sources</a>
     </div>
 </nav>
+
+<script>
+function toggleMobileMenu() {
+    const menu = document.getElementById('mobileMenu');
+    menu.classList.toggle('hidden');
+}
+</script>
 
 <!-- Main Content -->
 <div class="bg-gray-50 min-h-screen py-16 px-6">
@@ -282,5 +265,5 @@ function toggleMobileMenu() {
 }
 </script>
 
-{% endblock %}
-
+</body>
+</html>
