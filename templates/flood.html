@@ -333,8 +333,6 @@ h1, h2, h3, h4, h5, h6 {
                     <a href="/budget-flood-correlation" class="block px-4 py-2 text-black" style="border-radius: 4px; margin: 2px 4px; transition: all 0.2s;" onmouseover="this.style.background='#dbeafe'; this.style.color='#2563eb';" onmouseout="this.style.background='transparent'; this.style.color='black';">Budget-Flood</a>
                     <a href="/flood-dime-correlation" class="block px-4 py-2 text-black" style="border-radius: 4px; margin: 2px 4px; transition: all 0.2s;" onmouseover="this.style.background='#dbeafe'; this.style.color='#2563eb';" onmouseout="this.style.background='transparent'; this.style.color='black';">Flood-DIME</a>
                 </div>
-        <a href="/sources" class="block text-black hover:text-gray-600 font-medium py-2">Sources</a>
-    </div>
             </div>
             <a href="/sources" class="text-black hover:text-gray-600 font-medium transition">Sources</a>
         </div>
@@ -6591,16 +6589,6 @@ function setupNetworkControls() {
     renderNetworkGraph(networkData);
 }
 </script>
-
-<!-- Page-specific footer content -->
-<footer class="visualizations-footer">
-    <div class="visualizations-container">
-        <p><strong>📊 Source:</strong> <a href="https://sumbongsapangulo.ph/flood-control-map/" target="_blank" rel="noopener noreferrer" style="text-decoration: underline;">Sumbong sa Pangulo - Flood Control Map</a></p>
-        <p><strong>👥 Contractors:</strong> Only contractors with flood control projects (subset of all government contractors)</p>
-        <p><strong>📈 Total Projects:</strong> <span id="flood-total">Loading...</span> flood control projects nationwide</p>
-        <p><strong>📅 Data Range:</strong> <span id="flood-range">Loading...</span> infrastructure projects</p>
-    </div>
-</footer>
 
 <script>
 // Load flood summary stats
