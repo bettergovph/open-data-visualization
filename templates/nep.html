@@ -2938,13 +2938,17 @@ function loadVisualCharts() {
         spinner.style.display = 'flex';
     }
     
+    // Get selected year from year filter
+    const yearFilter = document.getElementById('year-filter');
+    const selectedYear = yearFilter ? yearFilter.value : '2025';
+    
     // Load statistics first
     loadVisualStatistics();
     
     // Load charts with a small delay to ensure DOM is ready
     setTimeout(() => {
         loadNEPYearOverYearChart();
-        loadNEPTopProgramsChart();
+        loadNEPTopProgramsChart(selectedYear);
         
         // Hide loading spinner after charts are loaded
         if (spinner) {
