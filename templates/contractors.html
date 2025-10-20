@@ -507,14 +507,16 @@ async function loadContractors() {
         
         // Update statistics (Visual tab)
         const summary = data.summary || {};
+        const processedCount = (summary.with_sec_data || 0) + (summary.suspicious_no_results || 0);
+        
         document.getElementById('total-contractors').textContent = (summary.total_contractors || 0).toLocaleString();
-        document.getElementById('processed-contractors').textContent = (summary.total_contractors || 0).toLocaleString();
+        document.getElementById('processed-contractors').textContent = processedCount.toLocaleString();
         document.getElementById('with-sec').textContent = (summary.with_sec_data || 0).toLocaleString();
         document.getElementById('suspicious').textContent = (summary.suspicious_no_results || 0).toLocaleString();
         
         // Update SEC tab statistics
         document.getElementById('sec-total-contractors-count').textContent = (summary.total_contractors || 0).toLocaleString();
-        document.getElementById('sec-processed-count').textContent = (summary.total_contractors || 0).toLocaleString();
+        document.getElementById('sec-processed-count').textContent = processedCount.toLocaleString();
         document.getElementById('total-sec-count').textContent = (summary.with_sec_data || 0).toLocaleString();
         document.getElementById('suspicious-sec-count').textContent = (summary.suspicious_no_results || 0).toLocaleString();
         
