@@ -1,0 +1,296 @@
+{% extends "base.html" %}
+
+{% block head %}
+<!-- Google Fonts - Inter -->
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/static/css/tailwind.css">
+
+<!-- Custom styling - Override ALL base styles -->
+<style>
+    /* Reset and override base.html styles */
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+    }
+    body {
+        font-family: 'Inter', sans-serif !important;
+        background-color: white !important;
+        color: black !important;
+        margin: 0 !important;
+        padding: 0 !important;
+    }
+    /* Hide main navbar from base.html */
+    nav.navbar,
+    header.navbar,
+    header { 
+        display: none !important; 
+    }
+    /* Ensure our BetterGov nav is visible with maximum specificity */
+    html body nav.visualizations-nav,
+    html body main nav.visualizations-nav,
+    body nav.visualizations-nav,
+    nav.visualizations-nav {
+        display: flex !important;
+        position: relative !important;
+        z-index: 10000 !important;
+        background: white !important;
+        visibility: visible !important;
+        opacity: 1 !important;
+        height: auto !important;
+        min-height: 60px !important;
+        width: 100% !important;
+    }
+    /* Hide footer from base.html - we'll add our own */
+    footer.footer {
+        display: none !important;
+    }
+    
+    .source-section {
+        background: white;
+        border-radius: 12px;
+        padding: 2rem;
+        margin-bottom: 2rem;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+    
+    .source-section h3 {
+        font-size: 1.5rem;
+        font-weight: 600;
+        margin-bottom: 1rem;
+        color: #1f2937;
+    }
+    
+    .source-list {
+        list-style: none;
+        padding-left: 0;
+        margin: 1rem 0;
+    }
+    
+    .source-list li {
+        padding: 0.5rem 0;
+        border-bottom: 1px solid #f3f4f6;
+    }
+    
+    .source-list li:last-child {
+        border-bottom: none;
+    }
+    
+    .source-link {
+        color: #2563eb;
+        text-decoration: underline;
+        transition: color 0.2s;
+    }
+    
+    .source-link:hover {
+        color: #1d4ed8;
+    }
+</style>
+
+<!-- BetterGovPH Metadata -->
+<meta name="description" content="Data Sources - BetterGovPH Open Data Visualization Platform">
+<meta name="keywords" content="data sources, government data, Philippines, transparency">
+<meta name="author" content="BetterGovPH">
+
+<!-- Open Graph / Facebook -->
+<meta property="og:type" content="website">
+<meta property="og:url" content="{{ SITE_URL }}/sources">
+<meta property="og:title" content="Data Sources - BetterGovPH">
+<meta property="og:description" content="Comprehensive list of data sources used in BetterGovPH visualizations">
+<meta property="og:image" content="/static/images/gov_logo.png">
+
+<!-- Twitter -->
+<meta property="twitter:card" content="summary_large_image">
+<meta property="twitter:url" content="https://visualizations.bettergov.ph/sources">
+<meta property="twitter:title" content="Data Sources - BetterGovPH">
+<meta property="twitter:description" content="Comprehensive list of data sources used in BetterGovPH visualizations">
+<meta property="twitter:image" content="/static/images/gov_logo.png">
+{% endblock %}
+
+{% block content %}
+<!-- Navigation -->
+<nav class="visualizations-nav py-4 px-6 bg-white border-b border-gray-200">
+    <div class="max-w-7xl mx-auto flex items-center justify-between">
+        <div class="flex items-center">
+            <a href="/" class="flex items-center">
+                <img src="https://raw.githubusercontent.com/bettergovph/logo/main/png/BetterGov_Horizontal-Black.png" 
+                     alt="BetterGov" 
+                     class="h-12">
+            </a>
+        </div>
+        <div class="hidden md:flex space-x-6">
+            <a href="/" class="text-black hover:text-gray-600 font-medium transition">Home</a>
+            <a href="/nep" class="text-black hover:text-gray-600 font-medium transition">NEP</a>
+            <a href="/budget" class="text-black hover:text-gray-600 font-medium transition">Budget</a>
+            <a href="/flood" class="text-black hover:text-gray-600 font-medium transition">Flood Control</a>
+            <a href="/dime" class="text-black hover:text-gray-600 font-medium transition">DIME</a>
+            <a href="/map" class="text-black hover:text-gray-600 font-medium transition">Map</a>
+            <a href="/contractors" class="text-black hover:text-gray-600 font-medium transition">Contractors</a>
+            <div class="relative group">
+                <a href="/correlation" class="text-black hover:text-gray-600 font-medium transition">Correlation ▾</a>
+                <div class="absolute hidden group-hover:block bg-white shadow-lg rounded-md mt-2 py-2 w-48 z-50">
+                    <a href="/budget-nep-correlation" class="block px-4 py-2 text-black" style="border-radius: 4px; margin: 2px 4px; transition: all 0.2s;" onmouseover="this.style.background='#dbeafe'; this.style.color='#2563eb';" onmouseout="this.style.background='transparent'; this.style.color='black';">NEP-Budget</a>
+                    <a href="/budget-flood-correlation" class="block px-4 py-2 text-black" style="border-radius: 4px; margin: 2px 4px; transition: all 0.2s;" onmouseover="this.style.background='#dbeafe'; this.style.color='#2563eb';" onmouseout="this.style.background='transparent'; this.style.color='black';">Budget-Flood</a>
+                    <a href="/flood-dime-correlation" class="block px-4 py-2 text-black" style="border-radius: 4px; margin: 2px 4px; transition: all 0.2s;" onmouseover="this.style.background='#dbeafe'; this.style.color='#2563eb';" onmouseout="this.style.background='transparent'; this.style.color='black';">Flood-DIME</a>
+                </div>
+            </div>
+            <a href="/sources" class="text-black hover:text-gray-600 font-medium transition">Sources</a>
+        </div>
+        <div class="md:hidden">
+            <button class="text-black focus:outline-none" onclick="toggleMobileMenu()">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+                </svg>
+            </button>
+        </div>
+    </div>
+    <!-- Mobile menu (hidden by default) -->
+    <div id="mobileMenu" class="hidden mt-4 px-4 space-y-2">
+        <a href="/" class="block text-black hover:text-gray-600 font-medium py-2">Home</a>
+        <a href="/nep" class="block text-black hover:text-gray-600 font-medium py-2">NEP</a>
+        <a href="/budget" class="block text-black hover:text-gray-600 font-medium py-2">Budget</a>
+        <a href="/flood" class="block text-black hover:text-gray-600 font-medium py-2">Flood Control</a>
+        <a href="/dime" class="block text-black hover:text-gray-600 font-medium py-2">DIME</a>
+        <a href="/map" class="block text-black hover:text-gray-600 font-medium py-2">Map</a>
+        <a href="/contractors" class="block text-black hover:text-gray-600 font-medium py-2">Contractors</a>
+        <a href="/correlation" class="block text-black hover:text-gray-600 font-medium py-2">Correlation</a>
+        <a href="/budget-nep-correlation" class="block text-black hover:text-gray-600 font-medium py-2 pl-4">→ NEP-Budget</a>
+        <a href="/budget-flood-correlation" class="block text-black hover:text-gray-600 font-medium py-2 pl-4">→ Budget-Flood</a>
+        <a href="/flood-dime-correlation" class="block text-black hover:text-gray-600 font-medium py-2 pl-4">→ Flood-DIME</a>
+        <a href="/sources" class="block text-black hover:text-gray-600 font-medium py-2">Sources</a>
+    </div>
+</nav>
+
+<!-- Main Content -->
+<div class="bg-gray-50 min-h-screen py-16 px-6">
+    <div class="max-w-7xl mx-auto">
+        <!-- Header -->
+        <div class="text-center mb-12">
+            <h1 class="text-4xl font-bold text-black mb-4">📊 Data Sources</h1>
+            <p class="text-xl text-gray-600">Comprehensive list of all data sources used in BetterGovPH visualizations</p>
+        </div>
+
+        <!-- Primary Data Sources -->
+        <div class="source-section">
+            <h3>🏛️ Primary Government Data Sources</h3>
+            <ul class="source-list">
+                <li>
+                    <strong>Budget Data (GAA - General Appropriations Act):</strong><br>
+                    <a href="https://github.com/bettergovph/open-budget-data" target="_blank" rel="noopener noreferrer" class="source-link">@bettergovph/open-budget-data</a><br>
+                    <a href="https://budget.bettergov.ph/2025/index.html" target="_blank" rel="noopener noreferrer" class="source-link">Open Budget by BetterGov.ph</a><br>
+                    <span class="text-gray-600">Used in: Budget Analysis, Budget-NEP Correlation, Budget-Flood Correlation</span>
+                </li>
+                <li>
+                    <strong>National Expenditure Program (NEP):</strong><br>
+                    <a href="https://github.com/bettergovph/open-budget-data" target="_blank" rel="noopener noreferrer" class="source-link">@bettergovph/open-budget-data</a><br>
+                    <a href="https://budget.bettergov.ph/2025/index.html" target="_blank" rel="noopener noreferrer" class="source-link">Open Budget by BetterGov.ph</a><br>
+                    <span class="text-gray-600">Used in: NEP Analysis, Budget-NEP Correlation</span>
+                </li>
+                <li>
+                    <strong>Flood Control Projects:</strong><br>
+                    <a href="https://sumbongsapangulo.ph/flood-control-map/" target="_blank" rel="noopener noreferrer" class="source-link">Sumbong sa Pangulo - Flood Control Map</a><br>
+                    <a href="https://bettergov.ph/flood-control-projects/map" target="_blank" rel="noopener noreferrer" class="source-link">BetterGov.ph - Flood Control Projects Map</a><br>
+                    <span class="text-gray-600">Used in: Flood Control Analysis, Interactive Map, Budget-Flood Correlation, Flood-DIME Correlation</span>
+                </li>
+                <li>
+                    <strong>DIME (Digital Information for Monitoring and Evaluation):</strong><br>
+                    <a href="https://www.dime.gov.ph/" target="_blank" rel="noopener noreferrer" class="source-link">Department of Budget and Management</a><br>
+                    <span class="text-gray-600">Used in: DIME Infrastructure Analysis, Interactive Map, Flood-DIME Correlation</span>
+                </li>
+                <li>
+                    <strong>PhilGEPS Contract Data:</strong><br>
+                    <a href="https://github.com/gabconcepcionph/dpwh-contracts-dashboard" target="_blank" rel="noopener noreferrer" class="source-link">@gabconcepcionph/dpwh-contracts-dashboard</a><br>
+                    <a href="https://github.com/csiiiv/philgeps-awards-dashboard" target="_blank" rel="noopener noreferrer" class="source-link">@csiiiv/philgeps-awards-dashboard</a><br>
+                    <span class="text-gray-600">Used in: Interactive Map, Contractor Verification</span><br>
+                    <span class="text-gray-600 text-sm">Comprehensive transparency dashboard providing access to Philippine government procurement data from 2013-2025</span>
+                </li>
+                <li>
+                    <strong>SEC (Securities and Exchange Commission):</strong><br>
+                    <a href="https://checkwithsec.sec.gov.ph/check-with-sec/index" target="_blank" rel="noopener noreferrer" class="source-link">SEC Philippines - Check with SEC</a><br>
+                    <span class="text-gray-600">Used in: SEC Contractors Database, Interactive Map</span>
+                </li>
+            </ul>
+        </div>
+
+        <!-- Data Coverage -->
+        <div class="source-section">
+            <h3>📅 Data Coverage & Range</h3>
+            <ul class="source-list">
+                <li><strong>Budget Data (GAA):</strong> 2020-2025 government budget allocations</li>
+                <li><strong>NEP Data:</strong> 2020-2025 expenditure programs</li>
+                <li><strong>Flood Control Projects:</strong> Multi-year DPWH infrastructure projects</li>
+                <li><strong>DIME Projects:</strong> 2016-2026 infrastructure monitoring data</li>
+                <li><strong>Contractor Data:</strong> Active SEC-registered contractors with government projects</li>
+            </ul>
+        </div>
+
+        <!-- Dataset Statistics -->
+        <div class="source-section">
+            <h3>📈 Dataset Statistics</h3>
+            <ul class="source-list">
+                <li><strong>Budget Line Items:</strong> Comprehensive nationwide budget allocations</li>
+                <li><strong>NEP Items:</strong> Detailed expenditure program entries</li>
+                <li><strong>Flood Control Projects:</strong> DPWH flood control infrastructure nationwide</li>
+                <li><strong>DIME Projects:</strong> 12,870+ major infrastructure projects worth ₱740B+</li>
+                <li><strong>SEC Contractors:</strong> 981+ verified contractors with SEC registration data</li>
+            </ul>
+        </div>
+
+        <!-- Methodology -->
+        <div class="source-section">
+            <h3>🔬 Methodology & Processing</h3>
+            <p class="text-gray-700 mb-4">All data undergoes rigorous processing to ensure accuracy and usability:</p>
+            <ul class="source-list">
+                <li><strong>Data Cleaning:</strong> Removal of duplicates, standardization of formats, and validation of entries</li>
+                <li><strong>Fuzzy Matching:</strong> Advanced string matching algorithms to correlate contractor names across different datasets</li>
+                <li><strong>Geolocation:</strong> Coordinate validation and mapping for spatial analysis</li>
+                <li><strong>SEC Verification:</strong> Automated scraping and verification of contractor registrations</li>
+                <li><strong>Correlation Analysis:</strong> Cross-referencing datasets to identify patterns and ensure consistency</li>
+            </ul>
+        </div>
+
+        <!-- Open Source -->
+        <div class="source-section">
+            <h3>💻 Open Source & Transparency</h3>
+            <p class="text-gray-700 mb-4">All source code and data processing scripts are publicly available:</p>
+            <ul class="source-list">
+                <li>
+                    <strong>Main Repository:</strong><br>
+                    <a href="https://github.com/bettergovph/open-data-visualization" target="_blank" rel="noopener noreferrer" class="source-link">@bettergovph/open-data-visualization</a>
+                </li>
+                <li>
+                    <strong>Maintainer:</strong><br>
+                    <a href="https://github.com/joebertj" target="_blank" rel="noopener noreferrer" class="source-link">@joebertj</a>
+                </li>
+            </ul>
+        </div>
+
+        <!-- Contact & Contributions -->
+        <div class="source-section">
+            <h3>🤝 Contact & Contributions</h3>
+            <p class="text-gray-700 mb-4">We welcome contributions, corrections, and suggestions to improve data quality and transparency.</p>
+            <p class="text-gray-700">For questions about data sources or to report issues, please visit our GitHub repository or contact the maintainers.</p>
+        </div>
+    </div>
+</div>
+
+<script>
+function toggleMobileMenu() {
+    const menu = document.getElementById('mobileMenu');
+    menu.classList.toggle('hidden');
+}
+</script>
+
+<!-- Page-specific footer content -->
+<footer class="visualizations-footer">
+    <div class="visualizations-container">
+        <p><strong>📊 Source:</strong> BetterGovPH Open Data Visualization Platform</p>
+        <p><strong>📈 Total Datasets:</strong> Budget, NEP, Flood Control, DIME, SEC, and PhilGEPS</p>
+        <p><strong>📅 Data Range:</strong> 2016-2026 government data</p>
+    </div>
+</footer>
+
+{% include "footer.html" %}
+
+{% endblock %}
+

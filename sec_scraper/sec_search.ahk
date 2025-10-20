@@ -4,7 +4,7 @@ SetWorkingDir %A_ScriptDir%
 
 ; Read contractors from file
 contractors := []
-FileRead, fileContent, contractor_list_top1400.txt
+FileRead, fileContent, contractor_list_top2000_unprocessed.txt
 if ErrorLevel
 {
     MsgBox, Cannot read contractor list file
