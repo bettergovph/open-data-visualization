@@ -12,6 +12,7 @@ import glob
 import datetime
 from typing import List, Dict, Any
 from dotenv import load_dotenv
+from concurrent.futures import ThreadPoolExecutor
 from difflib import SequenceMatcher
 
 load_dotenv()
@@ -24,6 +25,13 @@ class SECContractorParser:
             'user': os.getenv('POSTGRES_USER', 'budget_admin'),
             'password': os.getenv('POSTGRES_PASSWORD', ''),
             'database': 'sec'
+        }
+        self.philgeps_db_config = {
+            'host': os.getenv('POSTGRES_HOST', 'localhost'),
+            'port': int(os.getenv('POSTGRES_PORT', 5432)),
+            'user': os.getenv('POSTGRES_USER', 'budget_admin'),
+            'password': os.getenv('POSTGRES_PASSWORD', ''),
+            'database': 'philgeps'
         }
 
     def detect_encoding(self, file_path: str) -> str:
@@ -144,10 +152,19 @@ class SECContractorParser:
             await conn.close()
 
     def calculate_similarity(self, str1: str, str2: str) -> float:
-        """Calculate similarity ratio between two strings using SequenceMatcher"""
+        """Calculate similarity using SequenceMatcher (better for variations)"""
         if not str1 or not str2:
             return 0.0
-        return SequenceMatcher(None, str1.lower(), str2.lower()).ratio()
+        
+        s1 = str1.lower()
+        s2 = str2.lower()
+        
+        # Exact match = 1.0 (fast path)
+        if s1 == s2:
+            return 1.0
+        
+        # Use SequenceMatcher for variations (transpositions, insertions, deletions)
+        return SequenceMatcher(None, s1, s2).ratio()
 
     def normalize_contractor_name(self, name: str) -> str:
         """Normalize contractor name for better matching"""
@@ -210,8 +227,8 @@ class SECContractorParser:
             return all_projects
 
     async def populate_project_contractors(self, flood_projects):
-        """Populate project_contractors table with JV data"""
-        conn = await asyncpg.connect(**self.db_config)
+        """Populate project_contractors table with JV data in philgeps database"""
+        conn = await asyncpg.connect(**self.philgeps_db_config)
 
         try:
             print(f"📋 Processing {len(flood_projects)} flood projects for JV data...")
@@ -257,7 +274,10 @@ class SECContractorParser:
 
     async def correlate_with_existing_contracts(self):
         """Correlate SEC data with existing contractors using JV-aware matching"""
-        conn = await asyncpg.connect(**self.db_config)
+        # Connect to philgeps for project_contractors table
+        philgeps_conn = await asyncpg.connect(**self.philgeps_db_config)
+        # Connect to sec for contractors table
+        sec_conn = await asyncpg.connect(**self.db_config)
 
         try:
             # Load flood projects with JV data
@@ -265,77 +285,138 @@ class SECContractorParser:
             flood_projects = await self.load_flood_projects_with_jv()
             print(f"📋 Loaded {len(flood_projects)} flood projects")
 
-            # Populate project_contractors table
+            # Populate project_contractors table (in philgeps database)
             await self.populate_project_contractors(flood_projects)
 
-            # Get all contractors from project_contractors table (includes JV data)
-            project_contractors = await conn.fetch(
+            # Get all contractors from project_contractors table (from philgeps database)
+            project_contractors = await philgeps_conn.fetch(
                 'SELECT DISTINCT contractor_name FROM project_contractors WHERE contractor_name IS NOT NULL'
             )
 
             print(f"📋 Found {len(project_contractors)} unique contractors in JV data")
 
-            # Get all contractors from our SEC contractors table
-            sec_contractors = await conn.fetch(
+            # Get all contractors from our SEC contractors table (from sec database)
+            sec_contractors = await sec_conn.fetch(
                 'SELECT contractor_name, sec_number, status FROM contractors WHERE sec_number IS NOT NULL'
             )
 
             print(f"📋 Found {len(sec_contractors)} contractors in SEC contractors table")
 
-            # JV-aware fuzzy matching
-            matches = 0
-            strict_matches = 0
-            fuzzy_matches = 0
+            # Build fast lookup dictionary with normalized names
+            print("🔧 Building SEC contractor lookup index...")
+            sec_lookup = {}  # normalized name -> list of SEC contractors
+            sec_list = []    # all SEC contractors with normalized names
+            
+            for sec_contractor in sec_contractors:
+                normalized = self.normalize_contractor_name(sec_contractor['contractor_name'])
+                # Convert Record to dict and add normalized field
+                sec_dict = {
+                    'contractor_name': sec_contractor['contractor_name'],
+                    'sec_number': sec_contractor['sec_number'],
+                    'status': sec_contractor['status'],
+                    'normalized': normalized
+                }
+                sec_list.append(sec_dict)
+                
+                if normalized not in sec_lookup:
+                    sec_lookup[normalized] = []
+                sec_lookup[normalized].append(sec_dict)
+            
+            print(f"📋 Indexed {len(sec_lookup)} unique normalized SEC contractor names")
+
+            # Matching with Score >= 0.966 threshold
+            # Only accept high-confidence matches (score >= 0.966)
+            valid_matches = []
+            MATCH_THRESHOLD = 0.966
+            
+            # Statistics buckets for analysis
+            score_buckets = {
+                1.00: [],
+                0.99: [],
+                0.98: [],
+                0.97: [],
+                0.96: [],
+                0.95: [],
+                0.94: []
+            }
 
             for project_contractor in project_contractors:
-                contractor_name = self.normalize_contractor_name(project_contractor['contractor_name'])
+                normalized = self.normalize_contractor_name(project_contractor['contractor_name'])
+                
+                # Try exact match first (O(1) lookup)
+                if normalized in sec_lookup:
+                    sec_contractor = sec_lookup[normalized][0]
+                    score_buckets[1.00].append((project_contractor['contractor_name'], 
+                                               sec_contractor['contractor_name'], 
+                                               sec_contractor['sec_number'], 
+                                               1.0))
+                    continue
+                
+                # Calculate similarity with all SEC contractors
                 best_match = None
                 best_score = 0.0
-                best_sec_contractor = None
+                
+                for sec_contractor in sec_list:
+                    score = self.calculate_similarity(normalized, sec_contractor['normalized'])
+                    if score > best_score:
+                        best_score = score
+                        best_match = sec_contractor
+                
+                # Categorize by score threshold for statistics
+                if best_match and best_score >= 0.94:
+                    # Find which bucket this belongs to
+                    for threshold in sorted(score_buckets.keys(), reverse=True):
+                        if best_score >= threshold:
+                            score_buckets[threshold].append((project_contractor['contractor_name'],
+                                                            best_match['contractor_name'],
+                                                            best_match['sec_number'],
+                                                            best_score))
+                            break
+                    
+                    # Add to valid matches if >= threshold
+                    if best_score >= MATCH_THRESHOLD:
+                        valid_matches.append((project_contractor['contractor_name'],
+                                            best_match['contractor_name'],
+                                            best_match['sec_number'],
+                                            best_score))
 
-                for sec_contractor in sec_contractors:
-                    sec_name = self.normalize_contractor_name(sec_contractor['contractor_name'])
-
-                    # Strategy 1: Exact match after normalization
-                    if contractor_name == sec_name:
-                        best_score = 1.0
-                        best_match = "EXACT"
-                        best_sec_contractor = sec_contractor
-                        break
-
-                    # Strategy 2: High similarity ratio (> 0.9)
-                    similarity = self.calculate_similarity(contractor_name, sec_name)
-                    if similarity > 0.9 and similarity > best_score:
-                        best_score = similarity
-                        best_match = f"FUZZY_{similarity:.3f}"
-                        best_sec_contractor = sec_contractor
-
-                    # Strategy 3: Substring matching with high overlap
-                    elif similarity > 0.8 and len(set(contractor_name.split()) & set(sec_name.split())) >= 2:
-                        if similarity > best_score:
-                            best_score = similarity
-                            best_match = f"SUBSTRING_{similarity:.3f}"
-                            best_sec_contractor = sec_contractor
-
-                if best_sec_contractor:
-                    if best_score >= 0.9:
-                        strict_matches += 1
-                        match_type = "STRICT"
-                    else:
-                        fuzzy_matches += 1
-                        match_type = "FUZZY"
-
-                    print(f"🔗 {match_type} JV-Match: '{project_contractor['contractor_name']}' -> '{best_sec_contractor['contractor_name']}' (Score: {best_score:.3f}, SEC: {best_sec_contractor['sec_number']})")
-                    matches += 1
-
-            print("\n📊 JV-Aware Correlation Results:")
-            print(f"   • Total matches: {matches}")
-            print(f"   • Strict matches (≥90%): {strict_matches}")
-            print(f"   • Fuzzy matches (<90%): {fuzzy_matches}")
-            print(f"   • Match rate: {matches/len(project_contractors)*100:.1f}%")
+            # Print statistics to console (captured by shell redirection)
+            print("\n📊 Score Distribution Statistics:")
+            print("=" * 80)
+            print(f"Total project contractors: {len(project_contractors):,}")
+            print(f"Total SEC contractors: {len(sec_contractors):,}")
+            print()
+            
+            cumulative = 0
+            for threshold in sorted(score_buckets.keys(), reverse=True):
+                count = len(score_buckets[threshold])
+                cumulative += count
+                pct = (cumulative / len(project_contractors)) * 100
+                print(f"Score ≥ {threshold:.2f}: {count:4d} matches (Cumulative: {cumulative:4d}, {pct:5.2f}%)")
+            
+            print(f"\n✅ Valid matches accepted (Score ≥ {MATCH_THRESHOLD}):")
+            print(f"   Total: {len(valid_matches)} matches ({len(valid_matches)/len(project_contractors)*100:.2f}%)")
+            
+            # Print sample matches for each threshold
+            print("\n📋 Sample Matches by Threshold:")
+            print("=" * 80)
+            
+            for threshold in sorted(score_buckets.keys(), reverse=True):
+                matches = score_buckets[threshold]
+                if matches:
+                    print(f"\n🎯 Score ≥ {threshold:.2f} ({len(matches)} matches):")
+                    for proj_name, sec_name, sec_num, score in matches[:10]:
+                        print(f"   {score:.3f}: '{proj_name}' → '{sec_name}' (SEC: {sec_num})")
 
         finally:
-            await conn.close()
+            await philgeps_conn.close()
+            await sec_conn.close()
+
+    def parse_file_wrapper(self, file_path: str) -> tuple:
+        """Wrapper for parse_sec_file to work with ThreadPoolExecutor"""
+        filename = os.path.basename(file_path)
+        companies = self.parse_sec_file(file_path)
+        return (filename, companies)
 
     async def run(self):
         """Main execution function"""
@@ -345,15 +426,19 @@ class SECContractorParser:
         sec_files = glob.glob('sec_scraper/sec_results/*.txt')
 
         print(f"📁 Found {len(sec_files)} SEC result files")
+        print(f"🧵 Using 11 threads for parallel parsing...")
 
         all_companies = []
 
-        # Parse all SEC files
-        for file_path in sec_files:
-            print(f"📖 Processing: {os.path.basename(file_path)}")
-            companies = self.parse_sec_file(file_path)
-            all_companies.extend(companies)
-            print(f"   Found {len(companies)} companies")
+        # Parse all SEC files in parallel using 11 threads
+        with ThreadPoolExecutor(max_workers=11) as executor:
+            results = list(executor.map(self.parse_file_wrapper, sec_files))
+        
+        # Collect results
+        for filename, companies in results:
+            if companies:
+                print(f"📖 Processed: {filename} - Found {len(companies)} companies")
+                all_companies.extend(companies)
 
         print(f"\n📊 Total companies parsed: {len(all_companies)}")
 

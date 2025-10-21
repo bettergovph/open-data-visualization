@@ -509,16 +509,16 @@ async function loadContractors() {
         const summary = data.summary || {};
         const processedCount = (summary.with_sec_data || 0) + (summary.suspicious_no_results || 0);
         
-        document.getElementById('total-contractors').textContent = (summary.total_contractors || 0).toLocaleString();
-        document.getElementById('processed-contractors').textContent = processedCount.toLocaleString();
-        document.getElementById('with-sec').textContent = (summary.with_sec_data || 0).toLocaleString();
-        document.getElementById('suspicious').textContent = (summary.suspicious_no_results || 0).toLocaleString();
+        document.getElementById('total-contractors').textContent = (summary.total_contractors || 0).toLocaleString('en-PH');
+        document.getElementById('processed-contractors').textContent = processedCount.toLocaleString('en-PH');
+        document.getElementById('with-sec').textContent = (summary.with_sec_data || 0).toLocaleString('en-PH');
+        document.getElementById('suspicious').textContent = (summary.suspicious_no_results || 0).toLocaleString('en-PH');
         
         // Update SEC tab statistics
-        document.getElementById('sec-total-contractors-count').textContent = (summary.total_contractors || 0).toLocaleString();
-        document.getElementById('sec-processed-count').textContent = processedCount.toLocaleString();
-        document.getElementById('total-sec-count').textContent = (summary.with_sec_data || 0).toLocaleString();
-        document.getElementById('suspicious-sec-count').textContent = (summary.suspicious_no_results || 0).toLocaleString();
+        document.getElementById('sec-total-contractors-count').textContent = (summary.total_contractors || 0).toLocaleString('en-PH');
+        document.getElementById('sec-processed-count').textContent = processedCount.toLocaleString('en-PH');
+        document.getElementById('total-sec-count').textContent = (summary.with_sec_data || 0).toLocaleString('en-PH');
+        document.getElementById('suspicious-sec-count').textContent = (summary.suspicious_no_results || 0).toLocaleString('en-PH');
         
         // Load contractors without SEC for SEC tab
         loadContractorsWithoutSec();
@@ -1022,13 +1022,13 @@ async function loadVennDiagram() {
         }
         
         // Update the stat boxes
-        document.getElementById('venn-flood-only').textContent = data.flood_only.toLocaleString();
-        document.getElementById('venn-dime-only').textContent = data.dime_only.toLocaleString();
-        document.getElementById('venn-philgeps-only').textContent = data.philgeps_only.toLocaleString();
-        document.getElementById('venn-flood-dime').textContent = data.flood_dime.toLocaleString();
-        document.getElementById('venn-flood-philgeps').textContent = data.flood_philgeps.toLocaleString();
-        document.getElementById('venn-dime-philgeps').textContent = data.dime_philgeps.toLocaleString();
-        document.getElementById('venn-all-three').textContent = data.all_three.toLocaleString();
+        document.getElementById('venn-flood-only').textContent = data.flood_only.toLocaleString('en-PH');
+        document.getElementById('venn-dime-only').textContent = data.dime_only.toLocaleString('en-PH');
+        document.getElementById('venn-philgeps-only').textContent = data.philgeps_only.toLocaleString('en-PH');
+        document.getElementById('venn-flood-dime').textContent = data.flood_dime.toLocaleString('en-PH');
+        document.getElementById('venn-flood-philgeps').textContent = data.flood_philgeps.toLocaleString('en-PH');
+        document.getElementById('venn-dime-philgeps').textContent = data.dime_philgeps.toLocaleString('en-PH');
+        document.getElementById('venn-all-three').textContent = data.all_three.toLocaleString('en-PH');
         
         // Draw the Venn diagram on canvas
         drawVennDiagram(data);
@@ -1089,21 +1089,21 @@ function drawVennDiagram(data) {
     ctx.fillStyle = '#1976D2';
     ctx.fillText('🔵 Flood', floodCenter.x - 60, floodCenter.y - radius - 10);
     ctx.font = '14px Inter';
-    ctx.fillText(data.flood_total.toLocaleString(), floodCenter.x - 60, floodCenter.y - radius + 10);
+    ctx.fillText(data.flood_total.toLocaleString('en-PH'), floodCenter.x - 60, floodCenter.y - radius + 10);
     
     // DIME label
     ctx.font = 'bold 16px Inter';
     ctx.fillStyle = '#388E3C';
     ctx.fillText('🟢 DIME', dimeCenter.x + 60, dimeCenter.y - radius - 10);
     ctx.font = '14px Inter';
-    ctx.fillText(data.dime_total.toLocaleString(), dimeCenter.x + 60, dimeCenter.y - radius + 10);
+    ctx.fillText(data.dime_total.toLocaleString('en-PH'), dimeCenter.x + 60, dimeCenter.y - radius + 10);
     
     // PhilGEPS label
     ctx.font = 'bold 16px Inter';
     ctx.fillStyle = '#F57C00';
     ctx.fillText('🟡 PhilGEPS', philgepsCenter.x, philgepsCenter.y + radius + 20);
     ctx.font = '14px Inter';
-    ctx.fillText(data.philgeps_total.toLocaleString(), philgepsCenter.x, philgepsCenter.y + radius + 40);
+    ctx.fillText(data.philgeps_total.toLocaleString('en-PH'), philgepsCenter.x, philgepsCenter.y + radius + 40);
     
     // Draw numbers in overlap regions
     ctx.font = 'bold 18px Inter';

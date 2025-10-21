@@ -3297,8 +3297,8 @@ function getContractorSecStatusSync(contractorName) {
         tableBody.innerHTML = html;
 
         // Update pagination info
-        contractorsShowing.textContent = Math.min(end, totalContractors).toLocaleString();
-        contractorsTotal.textContent = totalContractors.toLocaleString();
+        contractorsShowing.textContent = Math.min(end, totalContractors).toLocaleString('en-PH');
+        contractorsTotal.textContent = totalContractors.toLocaleString('en-PH');
         contractorsPageInfo.textContent = `Page ${currentContractorPage + 1} of ${totalPages || 1}`;
 
         contractorsPrev.disabled = currentContractorPage === 0;
@@ -6484,8 +6484,8 @@ function updateJVStatistics(jointVentures, networkData) {
     const totalValue = jointVentures.reduce((sum, jv) => sum + (parseFloat(jv.ContractCost) || 0), 0);
     const avgValue = totalJVs > 0 ? totalValue / totalJVs : 0;
     
-    document.getElementById('jv-total-count').textContent = totalJVs.toLocaleString();
-    document.getElementById('jv-companies-count').textContent = uniqueCompanies.toLocaleString();
+    document.getElementById('jv-total-count').textContent = totalJVs.toLocaleString('en-PH');
+    document.getElementById('jv-companies-count').textContent = uniqueCompanies.toLocaleString('en-PH');
     document.getElementById('jv-total-value').textContent = '₱' + (totalValue / 1e9).toFixed(2) + 'B';
     document.getElementById('jv-avg-value').textContent = '₱' + (avgValue / 1e6).toFixed(2) + 'M';
 }
