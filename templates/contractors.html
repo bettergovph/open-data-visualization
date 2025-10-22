@@ -738,7 +738,7 @@ function populateHiddenProjectsTable(projects) {
                 ${primaryContractor}
             </td>
             <td style="padding: 12px; text-align: right; font-weight: bold; color: #dc3545;">
-                ₱${(project.cost / 1000000).toFixed(2)}M
+                ₱${(project.cost * 1000).toLocaleString('en-PH')}
             </td>
             <td style="padding: 12px; font-size: 0.9em; color: #666;">
                 ${location}
