@@ -3155,10 +3155,9 @@ async function loadAgenciesChart() {
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
-                    indexAxis: 'y',
                     layout: {
                         padding: {
-                            right: 20
+                            top: 20
                         }
                     },
                     plugins: {
@@ -3168,6 +3167,17 @@ async function loadAgenciesChart() {
                     },
                     scales: {
                         x: {
+                            ticks: {
+                                maxRotation: 45,
+                                minRotation: 45,
+                                font: { size: 10 },
+                                callback: function(value, index, ticks) {
+                                    const label = this.getLabelForValue(value);
+                                    return label.length > 25 ? label.substring(0, 25) + '...' : label;
+                                }
+                            }
+                        },
+                        y: {
                             beginAtZero: true,
                             ticks: {
                                 callback: function(value) {
@@ -3179,17 +3189,6 @@ async function loadAgenciesChart() {
                                         return '₱' + (value / 1000).toFixed(1) + 'K';
                                     }
                                     return '₱' + value.toLocaleString();
-                                }
-                            }
-                        },
-                        y: {
-                            ticks: {
-                                maxRotation: 0,
-                                minRotation: 0,
-                                font: { size: 11 },
-                                callback: function(value, index, ticks) {
-                                    const label = this.getLabelForValue(value);
-                                    return label.length > 40 ? label.substring(0, 40) + '...' : label;
                                 }
                             }
                         }
@@ -3205,7 +3204,7 @@ async function loadAgenciesChart() {
 async function loadExpenseCategoriesChart() {
     try {
         const apiYear = getApiYear();
-        const response = await fetch(`/api/budget/expense-categories?year=${apiYear}&limit=25`);
+        const response = await fetch(`/api/budget/expense-categories?year=${apiYear}&limit=50`);
         const result = await response.json();
         
         if (result.success && result.data) {
