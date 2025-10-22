@@ -3155,9 +3155,10 @@ async function loadAgenciesChart() {
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
+                    indexAxis: 'y',
                     layout: {
                         padding: {
-                            top: 20
+                            right: 20
                         }
                     },
                     plugins: {
@@ -3167,17 +3168,6 @@ async function loadAgenciesChart() {
                     },
                     scales: {
                         x: {
-                            ticks: {
-                                maxRotation: 45,
-                                minRotation: 45,
-                                font: { size: 10 },
-                                callback: function(value, index, ticks) {
-                                    const label = this.getLabelForValue(value);
-                                    return label.length > 25 ? label.substring(0, 25) + '...' : label;
-                                }
-                            }
-                        },
-                        y: {
                             beginAtZero: true,
                             ticks: {
                                 callback: function(value) {
@@ -3189,6 +3179,17 @@ async function loadAgenciesChart() {
                                         return '₱' + (value / 1000).toFixed(1) + 'K';
                                     }
                                     return '₱' + value.toLocaleString();
+                                }
+                            }
+                        },
+                        y: {
+                            ticks: {
+                                maxRotation: 0,
+                                minRotation: 0,
+                                font: { size: 11 },
+                                callback: function(value, index, ticks) {
+                                    const label = this.getLabelForValue(value);
+                                    return label.length > 40 ? label.substring(0, 40) + '...' : label;
                                 }
                             }
                         }
@@ -3237,10 +3238,9 @@ async function loadExpenseCategoriesChart() {
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
-                    indexAxis: 'y',
                     layout: {
                         padding: {
-                            right: 20
+                            top: 20
                         }
                     },
                     plugins: {
@@ -3250,6 +3250,17 @@ async function loadExpenseCategoriesChart() {
                     },
                     scales: {
                         x: {
+                            ticks: {
+                                maxRotation: 45,
+                                minRotation: 45,
+                                font: { size: 10 },
+                                callback: function(value, index, ticks) {
+                                    const label = this.getLabelForValue(value);
+                                    return label.length > 20 ? label.substring(0, 20) + '...' : label;
+                                }
+                            }
+                        },
+                        y: {
                             beginAtZero: true,
                             ticks: {
                                 callback: function(value) {
@@ -3261,17 +3272,6 @@ async function loadExpenseCategoriesChart() {
                                         return '₱' + (value / 1000).toFixed(1) + 'K';
                                     }
                                     return '₱' + value.toLocaleString();
-                                }
-                            }
-                        },
-                        y: {
-                            ticks: {
-                                maxRotation: 0,
-                                minRotation: 0,
-                                font: { size: 11 },
-                                callback: function(value, index, ticks) {
-                                    const label = this.getLabelForValue(value);
-                                    return label.length > 35 ? label.substring(0, 35) + '...' : label;
                                 }
                             }
                         }
