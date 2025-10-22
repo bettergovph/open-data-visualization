@@ -444,9 +444,14 @@ function toggleMobileMenu() {
 
                 <!-- HIDDEN FLOOD CONTROL TAB -->
                 <div id="hidden-flood-tab" class="budget-tab-panel">
-                    <div style="background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
-                        <h3 style="color: #0038A8; margin: 0 0 20px 0;">🔍 Hidden Flood Control Projects</h3>
-                        <p style="color: #666; margin: 0 0 20px 0;">Projects that mention flood control but are not visible in the Meilisearch database. These represent potentially omitted data from the flood control source.</p>
+                        <div style="background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
+                            <h3 style="color: #0038A8; margin: 0 0 20px 0;">🔍 Hidden Flood Control Projects</h3>
+                            <p style="color: #666; margin: 0 0 20px 0;">
+                                This tab reveals flood-related projects that exist in the DIME database but are not indexed in the Meilisearch flood database. 
+                                It identifies contractors from PhilGEPS who work on flood control projects, showing potential data gaps and transparency issues 
+                                in the official flood control database. The analysis helps uncover hidden infrastructure projects and contractor patterns 
+                                that may not be visible through standard flood control data sources.
+                            </p>
                         
                         <!-- Hidden Flood Statistics -->
                         <div class="hidden-flood-stats" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 20px;">

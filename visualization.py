@@ -1686,97 +1686,50 @@ async def hidden_flood_projects_api(limit: int = 100):
 
 @app.get("/api/flood/hidden-contractors")
 async def hidden_flood_contractors_api(limit: int = 20):
-    """Get top contractors from hidden flood projects - no authentication required"""
+    """Get top contractors from PhilGEPS with flood-related projects - no authentication required"""
     try:
         import asyncpg
         
-        # Connect to DIME database
-        dime_conn = await asyncpg.connect(
+        # Connect to PhilGEPS database to get contractors with flood projects
+        philgeps_conn = await asyncpg.connect(
             host=os.getenv('POSTGRES_HOST', 'localhost'),
             port=int(os.getenv('POSTGRES_PORT', 5432)),
             user=os.getenv('POSTGRES_USER', 'budget_admin'),
             password=os.getenv('POSTGRES_PASSWORD', ''),
-            database=os.getenv('POSTGRES_DB_DIME', 'dime')
+            database=os.getenv('POSTGRES_DB_PHILGEPS', 'philgeps')
         )
         
-        # First, let's check if there are any hidden flood projects at all
-        hidden_projects_count = await dime_conn.fetchval("""
-            SELECT COUNT(*) 
-            FROM projects 
-            WHERE (meilisearch_id IS NULL OR meilisearch_id = '')
+        # Get top contractors from PhilGEPS with flood-related projects
+        contractors = await philgeps_conn.fetch(f"""
+            SELECT 
+                awardee_name as contractor_name,
+                COUNT(*) as project_count,
+                SUM(contract_amount) as total_value,
+                AVG(contract_amount) as avg_value,
+                MAX(contract_amount) as max_value,
+                MIN(contract_amount) as min_value,
+                array_agg(DISTINCT area_of_delivery) as areas,
+                array_agg(DISTINCT business_category) as categories
+            FROM contracts 
+            WHERE awardee_name IS NOT NULL 
+              AND awardee_name != ''
               AND (
-                  LOWER(project_name) LIKE '%flood%' 
-                  OR LOWER(description) LIKE '%flood%'
-                  OR LOWER(project_name) LIKE '%drainage%'
-                  OR LOWER(description) LIKE '%drainage%'
-                  OR LOWER(project_name) LIKE '%canal%'
-                  OR LOWER(description) LIKE '%canal%'
-                  OR LOWER(project_name) LIKE '%water%'
-                  OR LOWER(description) LIKE '%water%'
+                  LOWER(award_title) LIKE '%flood%' 
+                  OR LOWER(notice_title) LIKE '%flood%'
+                  OR LOWER(award_title) LIKE '%drainage%'
+                  OR LOWER(notice_title) LIKE '%drainage%'
+                  OR LOWER(award_title) LIKE '%canal%'
+                  OR LOWER(notice_title) LIKE '%canal%'
+                  OR LOWER(award_title) LIKE '%water%'
+                  OR LOWER(notice_title) LIKE '%water%'
               )
-        """)
-        
-        # Check how many of those have contractors
-        projects_with_contractors = await dime_conn.fetchval("""
-            SELECT COUNT(*) 
-            FROM projects 
-            WHERE (meilisearch_id IS NULL OR meilisearch_id = '')
-              AND (
-                  LOWER(project_name) LIKE '%flood%' 
-                  OR LOWER(description) LIKE '%flood%'
-                  OR LOWER(project_name) LIKE '%drainage%'
-                  OR LOWER(description) LIKE '%drainage%'
-                  OR LOWER(project_name) LIKE '%canal%'
-                  OR LOWER(description) LIKE '%canal%'
-                  OR LOWER(project_name) LIKE '%water%'
-                  OR LOWER(description) LIKE '%water%'
-              )
-              AND contractors IS NOT NULL 
-              AND array_length(contractors, 1) > 0
-        """)
-        
-        print(f"🔍 Debug: Found {hidden_projects_count} hidden flood projects, {projects_with_contractors} with contractors")
-        
-        # Get top contractors from hidden flood projects
-        # We need to unnest the contractors array and aggregate
-        contractors = await dime_conn.fetch(f"""
-            WITH hidden_flood_projects AS (
-                SELECT id, project_name, contractors, cost, province, city
-                FROM projects 
-                WHERE (meilisearch_id IS NULL OR meilisearch_id = '')
-                  AND (
-                      LOWER(project_name) LIKE '%flood%' 
-                      OR LOWER(description) LIKE '%flood%'
-                      OR LOWER(project_name) LIKE '%drainage%'
-                      OR LOWER(description) LIKE '%drainage%'
-                      OR LOWER(project_name) LIKE '%canal%'
-                      OR LOWER(description) LIKE '%canal%'
-                      OR LOWER(project_name) LIKE '%water%'
-                      OR LOWER(description) LIKE '%water%'
-                  )
-            ),
-            contractor_stats AS (
-                SELECT 
-                    unnest(contractors) as contractor_name,
-                    COUNT(*) as project_count,
-                    SUM(cost) as total_value,
-                    AVG(cost) as avg_value,
-                    MAX(cost) as max_value,
-                    MIN(cost) as min_value,
-                    array_agg(DISTINCT province) as provinces,
-                    array_agg(DISTINCT city) as cities
-                FROM hidden_flood_projects
-                WHERE contractors IS NOT NULL AND array_length(contractors, 1) > 0
-                GROUP BY contractor_name
-                HAVING contractor_name IS NOT NULL AND contractor_name != ''
-            )
-            SELECT contractor_name, project_count, total_value, avg_value, max_value, min_value, provinces, cities
-            FROM contractor_stats
+            GROUP BY awardee_name
+            HAVING awardee_name IS NOT NULL AND awardee_name != ''
             ORDER BY project_count DESC, total_value DESC
             LIMIT $1
         """, limit)
         
-        await dime_conn.close()
+        await philgeps_conn.close()
         
         contractors_list = []
         for contractor in contractors:
