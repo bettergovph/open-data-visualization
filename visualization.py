@@ -1822,6 +1822,18 @@ async def hidden_flood_statistics_api():
             database=os.getenv('POSTGRES_DB_DIME', 'dime')
         )
         
+        # Connect to Meilisearch to get total flood projects count
+        from meilisearch import Client
+        meilisearch_client = Client('http://localhost:7700')
+        
+        # Get total count of projects in Meilisearch flood index
+        try:
+            meilisearch_stats = meilisearch_client.index('flood').get_stats()
+            total_meilisearch_projects = meilisearch_stats.get('numberOfDocuments', 0)
+        except Exception as e:
+            print(f"Error getting Meilisearch stats: {e}")
+            total_meilisearch_projects = 0
+        
         # Get comprehensive statistics
         stats = await dime_conn.fetchrow("""
             WITH hidden_flood_projects AS (
@@ -1864,6 +1876,15 @@ async def hidden_flood_statistics_api():
         
         await dime_conn.close()
         
+        # Calculate accurate omission rate
+        hidden_projects_count = stats['total_projects']
+        total_flood_projects = hidden_projects_count + total_meilisearch_projects
+        
+        if total_flood_projects > 0:
+            omission_rate = (hidden_projects_count / total_flood_projects) * 100
+        else:
+            omission_rate = 0
+        
         return JSONResponse({
             "success": True,
             "total_projects": stats['total_projects'],
@@ -1876,7 +1897,10 @@ async def hidden_flood_statistics_api():
                 "name": stats['top_contractor'],
                 "project_count": stats['top_contractor_projects'],
                 "total_value": float(stats['top_contractor_value']) if stats['top_contractor_value'] else 0
-            }
+            },
+            "omission_rate": round(omission_rate, 1),
+            "total_meilisearch_projects": total_meilisearch_projects,
+            "total_flood_projects": total_flood_projects
         })
         
     except Exception as e:
