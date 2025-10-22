@@ -1615,54 +1615,16 @@ async def hidden_flood_projects_api(limit: int = 100):
         total_value = 0
         
         for proj in hidden_projects:
-            # Extract year from any available date field
+            # Extract year from award_date
             year = None
-            for date_field in ['date_started', 'contract_completion_date']:
-                if proj.get(date_field):
-                    year = proj[date_field].year if hasattr(proj[date_field], 'year') else None
-                    if year:
-                        break
-            
-            # Get contractor information from PhilGEPS database
-            contractors = []
-            if proj['id']:
+            if proj.get('date_started'):
                 try:
-                    # Try to find contractors in PhilGEPS by project ID or name
-                    philgeps_contractors = await philgeps_conn.fetch("""
-                        SELECT DISTINCT awardee_name, organization_name
-                        FROM contracts 
-                        WHERE (reference_id = $1 OR LOWER(award_title) LIKE LOWER($2))
-                        AND awardee_name IS NOT NULL 
-                        AND awardee_name != ''
-                        LIMIT 5
-                    """, str(proj['id']), f"%{proj['project_name']}%")
-                    
-                    for contract in philgeps_contractors:
-                        contractor_name = contract['awardee_name'] or contract['organization_name']
-                        if contractor_name and contractor_name not in contractors:
-                            contractors.append(contractor_name)
-                            
-                except Exception as e:
-                    print(f"Error fetching contractors for project {proj['id']}: {e}")
-                    # Fallback to DIME contractors if PhilGEPS fails
-                    if proj['contractors']:
-                        try:
-                            if isinstance(proj['contractors'], list):
-                                contractors = proj['contractors']
-                            else:
-                                contractors = [proj['contractors']]
-                        except:
-                            contractors = []
-            
-            # If no contractors found in PhilGEPS, try DIME contractors as fallback
-            if not contractors and proj['contractors']:
-                try:
-                    if isinstance(proj['contractors'], list):
-                        contractors = proj['contractors']
-                    else:
-                        contractors = [proj['contractors']]
+                    year = proj['date_started'].year if hasattr(proj['date_started'], 'year') else None
                 except:
-                    contractors = []
+                    pass
+            
+            # Contractor is already in the data from PhilGEPS
+            contractors = [proj['contractor']] if proj['contractor'] else []
             
             project_value = float(proj['cost']) if proj['cost'] else 0
             total_value += project_value
@@ -1673,9 +1635,9 @@ async def hidden_flood_projects_api(limit: int = 100):
                 'description': proj['description'],
                 'contractors': contractors,
                 'cost': project_value,
-                'province': proj['province'],
-                'city': proj['city'],
-                'region': proj['region'],
+                'province': proj['location'] or '',
+                'city': proj['location'] or '',
+                'region': proj['location'] or '',
                 'status': proj['status'],
                 'year': year,
                 'date_started': proj['date_started'].isoformat() if proj.get('date_started') else None,
@@ -1795,13 +1757,13 @@ async def hidden_flood_statistics_api():
     try:
         import asyncpg
         
-        # Connect to DIME database
-        dime_conn = await asyncpg.connect(
+        # Connect to PhilGEPS database
+        philgeps_conn = await asyncpg.connect(
             host=os.getenv('POSTGRES_HOST', 'localhost'),
             port=int(os.getenv('POSTGRES_PORT', 5432)),
             user=os.getenv('POSTGRES_USER', 'budget_admin'),
             password=os.getenv('POSTGRES_PASSWORD', ''),
-            database=os.getenv('POSTGRES_DB_DIME', 'dime')
+            database=os.getenv('POSTGRES_DB_PHILGEPS', 'philgeps')
         )
         
         # Connect to Meilisearch to get total flood projects count
@@ -1817,32 +1779,33 @@ async def hidden_flood_statistics_api():
             print(f"Error getting Meilisearch stats: {e}")
             total_meilisearch_projects = 0
         
-        # Get comprehensive statistics
-        stats = await dime_conn.fetchrow("""
-            WITH hidden_flood_projects AS (
-                SELECT id, project_name, contractors, cost, province, city, region
-                FROM projects 
+        # Get comprehensive statistics from PhilGEPS
+        stats = await philgeps_conn.fetchrow("""
+            WITH hidden_flood_contracts AS (
+                SELECT reference_id as id, award_title as project_name, awardee_name as contractor, 
+                       contract_amount as cost, area_of_delivery as location
+                FROM contracts 
                 WHERE (meilisearch_id IS NULL OR meilisearch_id = '')
                   AND (
-                      LOWER(project_name) LIKE '%flood%' 
-                      OR LOWER(description) LIKE '%flood%'
-                      OR LOWER(project_name) LIKE '%drainage%'
-                      OR LOWER(description) LIKE '%drainage%'
-                      OR LOWER(project_name) LIKE '%canal%'
-                      OR LOWER(description) LIKE '%canal%'
-                      OR LOWER(project_name) LIKE '%water%'
-                      OR LOWER(description) LIKE '%water%'
+                      LOWER(award_title) LIKE '%flood%' 
+                      OR LOWER(notice_title) LIKE '%flood%'
+                      OR LOWER(award_title) LIKE '%drainage%'
+                      OR LOWER(notice_title) LIKE '%drainage%'
+                      OR LOWER(award_title) LIKE '%canal%'
+                      OR LOWER(notice_title) LIKE '%canal%'
+                      OR LOWER(award_title) LIKE '%water%'
+                      OR LOWER(notice_title) LIKE '%water%'
                   )
             ),
             contractor_stats AS (
                 SELECT 
-                    unnest(contractors) as contractor_name,
+                    contractor as contractor_name,
                     COUNT(*) as project_count,
                     SUM(cost) as total_value
-                FROM hidden_flood_projects
-                WHERE contractors IS NOT NULL AND array_length(contractors, 1) > 0
-                GROUP BY contractor_name
-                HAVING contractor_name IS NOT NULL AND contractor_name != ''
+                FROM hidden_flood_contracts
+                WHERE contractor IS NOT NULL AND contractor != ''
+                GROUP BY contractor
+                HAVING contractor IS NOT NULL AND contractor != ''
             )
             SELECT 
                 COUNT(*) as total_projects,
@@ -1850,14 +1813,14 @@ async def hidden_flood_statistics_api():
                 COALESCE(AVG(cost), 0) as avg_value,
                 COALESCE(MAX(cost), 0) as max_value,
                 COALESCE(MIN(cost), 0) as min_value,
-                COUNT(DISTINCT unnest(contractors)) as unique_contractors,
+                COUNT(DISTINCT contractor) as unique_contractors,
                 (SELECT contractor_name FROM contractor_stats ORDER BY project_count DESC LIMIT 1) as top_contractor,
                 (SELECT project_count FROM contractor_stats ORDER BY project_count DESC LIMIT 1) as top_contractor_projects,
                 (SELECT total_value FROM contractor_stats ORDER BY total_value DESC LIMIT 1) as top_contractor_value
-            FROM hidden_flood_projects
+            FROM hidden_flood_contracts
         """)
         
-        await dime_conn.close()
+        await philgeps_conn.close()
         
         # Calculate accurate omission rate
         hidden_projects_count = stats['total_projects']
