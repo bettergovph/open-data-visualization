@@ -745,6 +745,9 @@ function populateHiddenProjectsTable(projects) {
                 <div style="font-weight: bold; color: #333; margin-bottom: 4px;">
                     ${project.project_name}
                 </div>
+                <div style="font-size: 0.9em; color: #666; margin-top: 4px;">
+                    ${project.description ? (project.description.length > 80 ? project.description.substring(0, 80) + '...' : project.description) : 'No description'}
+                </div>
             </td>
             <td style="padding: 12px; max-width: 200px; font-size: 0.9em; color: #666;">
                 ${primaryContractor}
