@@ -1768,9 +1768,19 @@ async def hidden_flood_statistics_api():
             database=os.getenv('POSTGRES_DB_PHILGEPS', 'philgeps')
         )
         
-        # For now, we'll use a placeholder for Meilisearch projects count
-        # In a real scenario, this would come from the Meilisearch database
-        total_meilisearch_projects = 0  # Placeholder - would need actual Meilisearch count
+        # Get total flood projects from the flood API endpoint
+        try:
+            import aiohttp
+            async with aiohttp.ClientSession() as session:
+                async with session.get('http://172.30.147.217:8001/api/flood/statistics') as response:
+                    if response.status == 200:
+                        flood_data = await response.json()
+                        total_meilisearch_projects = flood_data.get('totalProjects', 0)
+                    else:
+                        total_meilisearch_projects = 0
+        except Exception as e:
+            print(f"Error getting flood statistics: {e}")
+            total_meilisearch_projects = 0
         
         # Get comprehensive statistics from PhilGEPS
         stats = await philgeps_conn.fetchrow("""
@@ -1813,28 +1823,14 @@ async def hidden_flood_statistics_api():
             FROM hidden_flood_contracts
         """)
         
-        # Calculate omission rate based on PhilGEPS data
+        # Calculate omission rate: excluded / (total_flood + excluded)
         hidden_projects_count = stats['total_projects']
-        
-        # Get total flood contracts in PhilGEPS (both indexed and excluded)
-        total_flood_contracts = await philgeps_conn.fetchval("""
-            SELECT COUNT(*) FROM contracts 
-            WHERE (
-                LOWER(award_title) LIKE '%flood%' 
-                OR LOWER(notice_title) LIKE '%flood%'
-                OR LOWER(award_title) LIKE '%drainage%'
-                OR LOWER(notice_title) LIKE '%drainage%'
-                OR LOWER(award_title) LIKE '%canal%'
-                OR LOWER(notice_title) LIKE '%canal%'
-                OR LOWER(award_title) LIKE '%water%'
-                OR LOWER(notice_title) LIKE '%water%'
-            )
-        """)
+        total_flood_projects = total_meilisearch_projects + hidden_projects_count
         
         await philgeps_conn.close()
         
-        if total_flood_contracts > 0:
-            omission_rate = (hidden_projects_count / total_flood_contracts) * 100
+        if total_flood_projects > 0:
+            omission_rate = (hidden_projects_count / total_flood_projects) * 100
         else:
             omission_rate = 0
         
@@ -1853,7 +1849,7 @@ async def hidden_flood_statistics_api():
             },
             "omission_rate": round(omission_rate, 1),
             "total_meilisearch_projects": total_meilisearch_projects,
-            "total_flood_projects": total_flood_contracts
+            "total_flood_projects": total_flood_projects
         })
         
     except Exception as e:
