@@ -1549,7 +1549,6 @@ let projectSearchContractors = [];
 let currentFloodPage = 0;
 let currentDimePage = 0;
 let currentPhilgepsPage = 0;
-const projectsPerPage = 5;
 let cachedSearchResults = null;
 
 // Setup autocomplete for project search
@@ -1652,19 +1651,19 @@ async function searchContractorProjects() {
 }
 
 function changeFloodPage(direction) {
-    const totalPages = Math.ceil(cachedSearchResults.projects.flood.length / projectsPerPage);
+    const totalPages = Math.ceil(cachedSearchResults.projects.flood.length / 5);
     currentFloodPage = Math.max(0, Math.min(totalPages - 1, currentFloodPage + direction));
     displayProjectSearchResults(cachedSearchResults);
 }
 
 function changeDimePage(direction) {
-    const totalPages = Math.ceil(cachedSearchResults.projects.dime.length / projectsPerPage);
+    const totalPages = Math.ceil(cachedSearchResults.projects.dime.length / 5);
     currentDimePage = Math.max(0, Math.min(totalPages - 1, currentDimePage + direction));
     displayProjectSearchResults(cachedSearchResults);
 }
 
 function changePhilgepsPage(direction) {
-    const totalPages = Math.ceil(cachedSearchResults.projects.philgeps.length / projectsPerPage);
+    const totalPages = Math.ceil(cachedSearchResults.projects.philgeps.length / 5);
     currentPhilgepsPage = Math.max(0, Math.min(totalPages - 1, currentPhilgepsPage + direction));
     displayProjectSearchResults(cachedSearchResults);
 }
@@ -1762,10 +1761,10 @@ function displayProjectSearchResults(data) {
     
     // Flood Control Projects
     if (projects.flood && projects.flood.length > 0) {
-        const floodStart = currentFloodPage * projectsPerPage;
-        const floodEnd = floodStart + projectsPerPage;
+        const floodStart = currentFloodPage * 5;
+        const floodEnd = floodStart + 5;
         const floodPaginated = projects.flood.slice(floodStart, floodEnd);
-        const floodTotalPages = Math.ceil(projects.flood.length / projectsPerPage);
+        const floodTotalPages = Math.ceil(projects.flood.length / 5);
         
         html += `
             <div style="background: white; padding: 25px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); margin-bottom: 25px; border-left: 5px solid #1976D2;">
@@ -1811,10 +1810,10 @@ function displayProjectSearchResults(data) {
     
     // DIME Projects
     if (projects.dime && projects.dime.length > 0) {
-        const dimeStart = currentDimePage * projectsPerPage;
-        const dimeEnd = dimeStart + projectsPerPage;
+        const dimeStart = currentDimePage * 5;
+        const dimeEnd = dimeStart + 5;
         const dimePaginated = projects.dime.slice(dimeStart, dimeEnd);
-        const dimeTotalPages = Math.ceil(projects.dime.length / projectsPerPage);
+        const dimeTotalPages = Math.ceil(projects.dime.length / 5);
         
         html += `
             <div style="background: white; padding: 25px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); margin-bottom: 25px; border-left: 5px solid #388E3C;">
@@ -1858,10 +1857,10 @@ function displayProjectSearchResults(data) {
     
     // PhilGEPS Projects
     if (projects.philgeps && projects.philgeps.length > 0) {
-        const philgepsStart = currentPhilgepsPage * projectsPerPage;
-        const philgepsEnd = philgepsStart + projectsPerPage;
+        const philgepsStart = currentPhilgepsPage * 5;
+        const philgepsEnd = philgepsStart + 5;
         const philgepsPaginated = projects.philgeps.slice(philgepsStart, philgepsEnd);
-        const philgepsTotalPages = Math.ceil(projects.philgeps.length / projectsPerPage);
+        const philgepsTotalPages = Math.ceil(projects.philgeps.length / 5);
         
         html += `
             <div style="background: white; padding: 25px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); margin-bottom: 25px; border-left: 5px solid #F57C00;">
