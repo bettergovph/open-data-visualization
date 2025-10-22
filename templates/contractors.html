@@ -706,9 +706,9 @@ function populateHiddenProjectsTable(projects) {
         
         row.innerHTML = `
             <td style="padding: 12px; font-weight: bold; color: #0038A8;">${index + 1}</td>
-            <td style="padding: 12px; max-width: 250px;">
+            <td style="padding: 12px; max-width: 300px;">
                 <div style="font-weight: bold; color: #333; margin-bottom: 4px;">
-                    ${project.project_name.length > 60 ? project.project_name.substring(0, 60) + '...' : project.project_name}
+                    ${project.project_name}
                 </div>
             </td>
             <td style="padding: 12px; max-width: 200px; font-size: 0.9em; color: #666;">
