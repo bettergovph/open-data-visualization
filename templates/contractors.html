@@ -636,7 +636,7 @@ async function loadHiddenFloodData() {
         if (projectsResponse.ok) {
             const projectsData = await projectsResponse.json();
             if (projectsData.projects && Array.isArray(projectsData.projects)) {
-                populateHiddenProjectsTable(projectsData.projects);
+                populateHiddenProjectsTable(projectsData);
                 console.log('✅ Hidden projects table data loaded:', projectsData.projects.length, 'projects');
             } else {
                 console.warn('⚠️ No projects data received or invalid format');
