@@ -3087,16 +3087,16 @@ async function loadDepartmentsChart() {
                                 padding: 8,
                                 usePointStyle: true,
                                 font: { size: 10 },
-                                maxWidth: 120,
+                                maxWidth: 200,
                                 generateLabels: function(chart) {
                                     const data = chart.data;
                                     if (data.labels.length && data.datasets.length) {
                                         return data.labels.map((label, i) => {
                                             const dataset = data.datasets[0];
                                             const value = dataset.data[i];
-                                            const truncatedLabel = label.length > 18 ? label.substring(0, 18) + '...' : label;
+                                            // Don't truncate department names - show full names
                                             return {
-                                                text: `${truncatedLabel}: ₱${(value / 1000000000).toFixed(1)}B`,
+                                                text: `${label}: ₱${(value / 1000000000).toFixed(1)}B`,
                                                 fillStyle: dataset.backgroundColor[i] || dataset.backgroundColor,
                                                 strokeStyle: dataset.borderColor || '#fff',
                                                 lineWidth: dataset.borderWidth || 0,
@@ -3287,7 +3287,7 @@ async function loadExpenseCategoriesChart() {
 async function loadRegionsChart() {
     try {
         const apiYear = getApiYear();
-        const response = await fetch(`/api/budget/regions?year=${apiYear}&limit=8`);
+        const response = await fetch(`/api/budget/regions?year=${apiYear}&limit=100`);
         const result = await response.json();
         
         if (result.success && result.data) {
@@ -3329,7 +3329,7 @@ async function loadRegionsChart() {
                                 padding: 8,
                                 usePointStyle: true,
                                 font: { size: 10 },
-                                maxWidth: 120,
+                                maxWidth: 200,
                                 generateLabels: function(chart) {
                                     const data = chart.data;
                                     if (data.labels.length && data.datasets.length) {

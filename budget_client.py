@@ -2003,7 +2003,7 @@ async def get_budget_regions(year: str = "2025", limit: int = 10):
         
         table_name = f"budget_{year}"
         
-        # Get regions with total amounts
+        # Get regions with total amounts - show all regions regardless of size
         regions_query = f"""
         SELECT
             uacs_reg_id as region_id,
@@ -2018,8 +2018,7 @@ async def get_budget_regions(year: str = "2025", limit: int = 10):
         AND sorder != -1
         AND uacs_reg_id IS NOT NULL
         GROUP BY uacs_reg_id
-        ORDER BY total_amount DESC
-        LIMIT {limit}
+        ORDER BY uacs_reg_id ASC
         """
         
         results = await conn.fetch(regions_query)
