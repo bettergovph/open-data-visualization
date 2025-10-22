@@ -1587,15 +1587,15 @@ async def hidden_flood_projects_api(limit: int = 100):
         
         print(f"🔍 Debug PhilGEPS: {total_contracts} total contracts, {flood_contracts} flood contracts")
         
-        # Find flood contracts that don't have meilisearch_id (not in flood database)
+        # Find flood contracts that cannot be correlated with Meilisearch flood database
+        # These are PhilGEPS flood contracts that don't have a corresponding match in Meilisearch
         hidden_projects = await philgeps_conn.fetch(f"""
             SELECT reference_id as id, award_title as project_name, notice_title as description, 
                    awardee_name as contractor, contract_amount as cost, 
                    area_of_delivery as location, award_status as status, 
                    award_date as date_started, award_date as contract_completion_date
             FROM contracts 
-            WHERE (meilisearch_id IS NULL OR meilisearch_id = '')
-              AND (
+            WHERE (
                   LOWER(award_title) LIKE '%flood%' 
                   OR LOWER(notice_title) LIKE '%flood%'
                   OR LOWER(award_title) LIKE '%drainage%'
@@ -1605,6 +1605,7 @@ async def hidden_flood_projects_api(limit: int = 100):
                   OR LOWER(award_title) LIKE '%water%'
                   OR LOWER(notice_title) LIKE '%water%'
               )
+              AND (meilisearch_id IS NULL OR meilisearch_id = '')
             ORDER BY contract_amount DESC
             LIMIT $1
         """, limit)
@@ -1690,7 +1691,7 @@ async def hidden_flood_contractors_api(limit: int = 20):
         
         print(f"🔍 Debug PhilGEPS: {total_contracts} total contracts, {flood_contracts} flood-related contracts")
         
-        # Get top contractors from PhilGEPS with flood-related projects
+        # Get top contractors from PhilGEPS with flood-related projects that cannot be correlated with Meilisearch
         contractors = await philgeps_conn.fetch(f"""
             SELECT 
                 awardee_name as contractor_name,
@@ -1714,6 +1715,7 @@ async def hidden_flood_contractors_api(limit: int = 20):
                   OR LOWER(award_title) LIKE '%water%'
                   OR LOWER(notice_title) LIKE '%water%'
               )
+              AND (meilisearch_id IS NULL OR meilisearch_id = '')
             GROUP BY awardee_name
             HAVING awardee_name IS NOT NULL AND awardee_name != ''
             ORDER BY project_count DESC, total_value DESC
@@ -1785,8 +1787,7 @@ async def hidden_flood_statistics_api():
                 SELECT reference_id as id, award_title as project_name, awardee_name as contractor, 
                        contract_amount as cost, area_of_delivery as location
                 FROM contracts 
-                WHERE (meilisearch_id IS NULL OR meilisearch_id = '')
-                  AND (
+                WHERE (
                       LOWER(award_title) LIKE '%flood%' 
                       OR LOWER(notice_title) LIKE '%flood%'
                       OR LOWER(award_title) LIKE '%drainage%'
@@ -1796,6 +1797,7 @@ async def hidden_flood_statistics_api():
                       OR LOWER(award_title) LIKE '%water%'
                       OR LOWER(notice_title) LIKE '%water%'
                   )
+                  AND (meilisearch_id IS NULL OR meilisearch_id = '')
             ),
             contractor_stats AS (
                 SELECT 
