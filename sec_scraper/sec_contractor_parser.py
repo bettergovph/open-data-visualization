@@ -426,12 +426,12 @@ class SECContractorParser:
         sec_files = glob.glob('sec_scraper/sec_results/*.txt')
 
         print(f"📁 Found {len(sec_files)} SEC result files")
-        print(f"🧵 Using 11 threads for parallel parsing...")
+        print(f"🧵 Using 20 threads for parallel parsing...")
 
         all_companies = []
 
-        # Parse all SEC files in parallel using 11 threads
-        with ThreadPoolExecutor(max_workers=11) as executor:
+        # Parse all SEC files in parallel using 20 threads
+        with ThreadPoolExecutor(max_workers=20) as executor:
             results = list(executor.map(self.parse_file_wrapper, sec_files))
         
         # Collect results

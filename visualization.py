@@ -1550,5 +1550,240 @@ async def dime_province_suggestions_api(query: str, limit: int = 10):
     except Exception as e:
         return JSONResponse({"success": False, "error": str(e)})
 
+# ============================================================================
+# Hidden Flood Control API Endpoints
+# ============================================================================
+
+@app.get("/api/flood/hidden-projects")
+async def hidden_flood_projects_api(limit: int = 100):
+    """Get projects that mention flood but are not in Meilisearch database - no authentication required"""
+    try:
+        import asyncpg
+        
+        # Connect to DIME database to find projects mentioning flood
+        dime_conn = await asyncpg.connect(
+            host=os.getenv('POSTGRES_HOST', 'localhost'),
+            port=int(os.getenv('POSTGRES_PORT', 5432)),
+            user=os.getenv('POSTGRES_USER', 'budget_admin'),
+            password=os.getenv('POSTGRES_PASSWORD', ''),
+            database=os.getenv('POSTGRES_DB_DIME', 'dime')
+        )
+        
+        # Find projects that mention flood but don't have meilisearch_id (not in flood database)
+        hidden_projects = await dime_conn.fetch(f"""
+            SELECT id, project_name, description, contractors, cost, 
+                   province, city, region, status, date_started, contract_completion_date
+            FROM projects 
+            WHERE (meilisearch_id IS NULL OR meilisearch_id = '')
+              AND (
+                  LOWER(project_name) LIKE '%flood%' 
+                  OR LOWER(description) LIKE '%flood%'
+                  OR LOWER(project_name) LIKE '%drainage%'
+                  OR LOWER(description) LIKE '%drainage%'
+                  OR LOWER(project_name) LIKE '%canal%'
+                  OR LOWER(description) LIKE '%canal%'
+                  OR LOWER(project_name) LIKE '%water%'
+                  OR LOWER(description) LIKE '%water%'
+              )
+            ORDER BY cost DESC
+            LIMIT $1
+        """, limit)
+        
+        await dime_conn.close()
+        
+        projects_list = []
+        total_value = 0
+        
+        for proj in hidden_projects:
+            # Extract year from any available date field
+            year = None
+            for date_field in ['date_started', 'contract_completion_date']:
+                if proj.get(date_field):
+                    year = proj[date_field].year if hasattr(proj[date_field], 'year') else None
+                    if year:
+                        break
+            
+            project_value = float(proj['cost']) if proj['cost'] else 0
+            total_value += project_value
+            
+            projects_list.append({
+                'id': proj['id'],
+                'project_name': proj['project_name'],
+                'description': proj['description'],
+                'contractors': proj['contractors'],
+                'cost': project_value,
+                'province': proj['province'],
+                'city': proj['city'],
+                'region': proj['region'],
+                'status': proj['status'],
+                'year': year,
+                'date_started': proj['date_started'].isoformat() if proj.get('date_started') else None,
+                'contract_completion_date': proj['contract_completion_date'].isoformat() if proj.get('contract_completion_date') else None
+            })
+        
+        return JSONResponse({
+            "success": True,
+            "projects": projects_list,
+            "count": len(projects_list),
+            "total_value": total_value,
+            "average_value": total_value / len(projects_list) if projects_list else 0
+        })
+        
+    except Exception as e:
+        return JSONResponse({"success": False, "error": str(e)})
+
+@app.get("/api/flood/hidden-contractors")
+async def hidden_flood_contractors_api(limit: int = 20):
+    """Get top contractors from hidden flood projects - no authentication required"""
+    try:
+        import asyncpg
+        
+        # Connect to DIME database
+        dime_conn = await asyncpg.connect(
+            host=os.getenv('POSTGRES_HOST', 'localhost'),
+            port=int(os.getenv('POSTGRES_PORT', 5432)),
+            user=os.getenv('POSTGRES_USER', 'budget_admin'),
+            password=os.getenv('POSTGRES_PASSWORD', ''),
+            database=os.getenv('POSTGRES_DB_DIME', 'dime')
+        )
+        
+        # Get top contractors from hidden flood projects
+        # We need to unnest the contractors array and aggregate
+        contractors = await dime_conn.fetch(f"""
+            WITH hidden_flood_projects AS (
+                SELECT id, project_name, contractors, cost, province, city
+                FROM projects 
+                WHERE (meilisearch_id IS NULL OR meilisearch_id = '')
+                  AND (
+                      LOWER(project_name) LIKE '%flood%' 
+                      OR LOWER(description) LIKE '%flood%'
+                      OR LOWER(project_name) LIKE '%drainage%'
+                      OR LOWER(description) LIKE '%drainage%'
+                      OR LOWER(project_name) LIKE '%canal%'
+                      OR LOWER(description) LIKE '%canal%'
+                      OR LOWER(project_name) LIKE '%water%'
+                      OR LOWER(description) LIKE '%water%'
+                  )
+            ),
+            contractor_stats AS (
+                SELECT 
+                    unnest(contractors) as contractor_name,
+                    COUNT(*) as project_count,
+                    SUM(cost) as total_value,
+                    AVG(cost) as avg_value,
+                    MAX(cost) as max_value,
+                    MIN(cost) as min_value,
+                    array_agg(DISTINCT province) as provinces,
+                    array_agg(DISTINCT city) as cities
+                FROM hidden_flood_projects
+                WHERE contractors IS NOT NULL AND array_length(contractors, 1) > 0
+                GROUP BY contractor_name
+                HAVING contractor_name IS NOT NULL AND contractor_name != ''
+            )
+            SELECT contractor_name, project_count, total_value, avg_value, max_value, min_value, provinces, cities
+            FROM contractor_stats
+            ORDER BY project_count DESC, total_value DESC
+            LIMIT $1
+        """, limit)
+        
+        await dime_conn.close()
+        
+        contractors_list = []
+        for contractor in contractors:
+            contractors_list.append({
+                'contractor_name': contractor['contractor_name'],
+                'project_count': contractor['project_count'],
+                'total_value': float(contractor['total_value']) if contractor['total_value'] else 0,
+                'avg_value': float(contractor['avg_value']) if contractor['avg_value'] else 0,
+                'max_value': float(contractor['max_value']) if contractor['max_value'] else 0,
+                'min_value': float(contractor['min_value']) if contractor['min_value'] else 0,
+                'provinces': contractor['provinces'],
+                'cities': contractor['cities']
+            })
+        
+        return JSONResponse({
+            "success": True,
+            "contractors": contractors_list,
+            "count": len(contractors_list)
+        })
+        
+    except Exception as e:
+        return JSONResponse({"success": False, "error": str(e)})
+
+@app.get("/api/flood/hidden-statistics")
+async def hidden_flood_statistics_api():
+    """Get comprehensive statistics for hidden flood projects - no authentication required"""
+    try:
+        import asyncpg
+        
+        # Connect to DIME database
+        dime_conn = await asyncpg.connect(
+            host=os.getenv('POSTGRES_HOST', 'localhost'),
+            port=int(os.getenv('POSTGRES_PORT', 5432)),
+            user=os.getenv('POSTGRES_USER', 'budget_admin'),
+            password=os.getenv('POSTGRES_PASSWORD', ''),
+            database=os.getenv('POSTGRES_DB_DIME', 'dime')
+        )
+        
+        # Get comprehensive statistics
+        stats = await dime_conn.fetchrow("""
+            WITH hidden_flood_projects AS (
+                SELECT id, project_name, contractors, cost, province, city, region
+                FROM projects 
+                WHERE (meilisearch_id IS NULL OR meilisearch_id = '')
+                  AND (
+                      LOWER(project_name) LIKE '%flood%' 
+                      OR LOWER(description) LIKE '%flood%'
+                      OR LOWER(project_name) LIKE '%drainage%'
+                      OR LOWER(description) LIKE '%drainage%'
+                      OR LOWER(project_name) LIKE '%canal%'
+                      OR LOWER(description) LIKE '%canal%'
+                      OR LOWER(project_name) LIKE '%water%'
+                      OR LOWER(description) LIKE '%water%'
+                  )
+            ),
+            contractor_stats AS (
+                SELECT 
+                    unnest(contractors) as contractor_name,
+                    COUNT(*) as project_count,
+                    SUM(cost) as total_value
+                FROM hidden_flood_projects
+                WHERE contractors IS NOT NULL AND array_length(contractors, 1) > 0
+                GROUP BY contractor_name
+                HAVING contractor_name IS NOT NULL AND contractor_name != ''
+            )
+            SELECT 
+                COUNT(*) as total_projects,
+                COALESCE(SUM(cost), 0) as total_value,
+                COALESCE(AVG(cost), 0) as avg_value,
+                COALESCE(MAX(cost), 0) as max_value,
+                COALESCE(MIN(cost), 0) as min_value,
+                COUNT(DISTINCT unnest(contractors)) as unique_contractors,
+                (SELECT contractor_name FROM contractor_stats ORDER BY project_count DESC LIMIT 1) as top_contractor,
+                (SELECT project_count FROM contractor_stats ORDER BY project_count DESC LIMIT 1) as top_contractor_projects,
+                (SELECT total_value FROM contractor_stats ORDER BY total_value DESC LIMIT 1) as top_contractor_value
+            FROM hidden_flood_projects
+        """)
+        
+        await dime_conn.close()
+        
+        return JSONResponse({
+            "success": True,
+            "total_projects": stats['total_projects'],
+            "total_value": float(stats['total_value']) if stats['total_value'] else 0,
+            "avg_value": float(stats['avg_value']) if stats['avg_value'] else 0,
+            "max_value": float(stats['max_value']) if stats['max_value'] else 0,
+            "min_value": float(stats['min_value']) if stats['min_value'] else 0,
+            "unique_contractors": stats['unique_contractors'],
+            "top_contractor": {
+                "name": stats['top_contractor'],
+                "project_count": stats['top_contractor_projects'],
+                "total_value": float(stats['top_contractor_value']) if stats['top_contractor_value'] else 0
+            }
+        })
+        
+    except Exception as e:
+        return JSONResponse({"success": False, "error": str(e)})
+
 if __name__ == "__main__":
     uvicorn.run(app, host="127.0.0.1", port=8000)
