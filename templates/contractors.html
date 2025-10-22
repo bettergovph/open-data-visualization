@@ -447,16 +447,16 @@ function toggleMobileMenu() {
                         <div style="background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
                             <h3 style="color: #0038A8; margin: 0 0 20px 0;">🔍 Hidden Flood Control Projects</h3>
                             <p style="color: #666; margin: 0 0 20px 0;">
-                                This tab reveals flood-related projects that exist in the DIME database but are not indexed in the Meilisearch flood database. 
-                                It identifies contractors from PhilGEPS who work on flood control projects, showing potential data gaps and transparency issues 
-                                in the official flood control database. The analysis helps uncover hidden infrastructure projects and contractor patterns 
-                                that may not be visible through standard flood control data sources.
+                                This tab reveals flood-related contracts from PhilGEPS that are not indexed in the Meilisearch flood database. 
+                                It shows contractors and projects that mention flood, drainage, canal, or water-related terms but are missing from 
+                                the official flood control database. The analysis helps uncover hidden infrastructure contracts and contractor patterns 
+                                that may not be visible through standard flood control data sources, revealing potential data gaps and transparency issues.
                             </p>
                         
                         <!-- Hidden Flood Statistics -->
                         <div class="hidden-flood-stats" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 20px;">
                             <div class="stat-card" style="background: #f8f9fa; padding: 15px; border-radius: 8px; text-align: center;">
-                                <h4 style="color: #0038A8; margin: 0 0 5px 0; font-size: 1.2em;">Hidden Projects</h4>
+                                <h4 style="color: #0038A8; margin: 0 0 5px 0; font-size: 1.2em;">Hidden Contracts</h4>
                                 <p id="hidden-projects-count" style="font-size: 2em; font-weight: bold; color: #dc3545; margin: 0;">Loading...</p>
                             </div>
                             <div class="stat-card" style="background: #f8f9fa; padding: 15px; border-radius: 8px; text-align: center;">
@@ -485,7 +485,7 @@ function toggleMobileMenu() {
                             
                             <!-- Hidden Projects Table -->
                             <div style="background: #f8f9fa; padding: 20px; border-radius: 8px;">
-                                <h4 style="color: #0038A8; margin: 0 0 15px 0; text-align: center;">📊 Top 100 Hidden Flood Projects</h4>
+                                <h4 style="color: #0038A8; margin: 0 0 15px 0; text-align: center;">📊 Top 100 Hidden Flood Contracts</h4>
                                 <div style="overflow-x: auto; border: 1px solid #dee2e6; border-radius: 8px;">
                                     <table id="hidden-projects-table" style="width: 100%; border-collapse: collapse; background: white;">
                                         <thead style="background: #0038A8; color: white; position: sticky; top: 0;">

@@ -1560,16 +1560,7 @@ async def hidden_flood_projects_api(limit: int = 100):
     try:
         import asyncpg
         
-        # Connect to DIME database to find projects mentioning flood
-        dime_conn = await asyncpg.connect(
-            host=os.getenv('POSTGRES_HOST', 'localhost'),
-            port=int(os.getenv('POSTGRES_PORT', 5432)),
-            user=os.getenv('POSTGRES_USER', 'budget_admin'),
-            password=os.getenv('POSTGRES_PASSWORD', ''),
-            database=os.getenv('POSTGRES_DB_DIME', 'dime')
-        )
-        
-        # Connect to PhilGEPS database for contractor information
+        # Connect to PhilGEPS database to find flood projects
         philgeps_conn = await asyncpg.connect(
             host=os.getenv('POSTGRES_HOST', 'localhost'),
             port=int(os.getenv('POSTGRES_PORT', 5432)),
@@ -1578,27 +1569,47 @@ async def hidden_flood_projects_api(limit: int = 100):
             database=os.getenv('POSTGRES_DB_PHILGEPS', 'philgeps')
         )
         
-        # Find projects that mention flood but don't have meilisearch_id (not in flood database)
-        hidden_projects = await dime_conn.fetch(f"""
-            SELECT id, project_name, description, contractors, cost, 
-                   province, city, region, status, date_started, contract_completion_date
-            FROM projects 
+        # First, let's check what data we have in PhilGEPS
+        total_contracts = await philgeps_conn.fetchval("SELECT COUNT(*) FROM contracts")
+        flood_contracts = await philgeps_conn.fetchval("""
+            SELECT COUNT(*) FROM contracts 
+            WHERE (
+                LOWER(award_title) LIKE '%flood%' 
+                OR LOWER(notice_title) LIKE '%flood%'
+                OR LOWER(award_title) LIKE '%drainage%'
+                OR LOWER(notice_title) LIKE '%drainage%'
+                OR LOWER(award_title) LIKE '%canal%'
+                OR LOWER(notice_title) LIKE '%canal%'
+                OR LOWER(award_title) LIKE '%water%'
+                OR LOWER(notice_title) LIKE '%water%'
+            )
+        """)
+        
+        print(f"🔍 Debug PhilGEPS: {total_contracts} total contracts, {flood_contracts} flood contracts")
+        
+        # Find flood contracts that don't have meilisearch_id (not in flood database)
+        hidden_projects = await philgeps_conn.fetch(f"""
+            SELECT reference_id as id, award_title as project_name, notice_title as description, 
+                   awardee_name as contractor, contract_amount as cost, 
+                   area_of_delivery as location, award_status as status, 
+                   award_date as date_started, award_date as contract_completion_date
+            FROM contracts 
             WHERE (meilisearch_id IS NULL OR meilisearch_id = '')
               AND (
-                  LOWER(project_name) LIKE '%flood%' 
-                  OR LOWER(description) LIKE '%flood%'
-                  OR LOWER(project_name) LIKE '%drainage%'
-                  OR LOWER(description) LIKE '%drainage%'
-                  OR LOWER(project_name) LIKE '%canal%'
-                  OR LOWER(description) LIKE '%canal%'
-                  OR LOWER(project_name) LIKE '%water%'
-                  OR LOWER(description) LIKE '%water%'
+                  LOWER(award_title) LIKE '%flood%' 
+                  OR LOWER(notice_title) LIKE '%flood%'
+                  OR LOWER(award_title) LIKE '%drainage%'
+                  OR LOWER(notice_title) LIKE '%drainage%'
+                  OR LOWER(award_title) LIKE '%canal%'
+                  OR LOWER(notice_title) LIKE '%canal%'
+                  OR LOWER(award_title) LIKE '%water%'
+                  OR LOWER(notice_title) LIKE '%water%'
               )
-            ORDER BY cost DESC
+            ORDER BY contract_amount DESC
             LIMIT $1
         """, limit)
         
-        await dime_conn.close()
+        await philgeps_conn.close()
         
         projects_list = []
         total_value = 0
@@ -1699,6 +1710,24 @@ async def hidden_flood_contractors_api(limit: int = 20):
             database=os.getenv('POSTGRES_DB_PHILGEPS', 'philgeps')
         )
         
+        # First, let's check what data we have in PhilGEPS
+        total_contracts = await philgeps_conn.fetchval("SELECT COUNT(*) FROM contracts")
+        flood_contracts = await philgeps_conn.fetchval("""
+            SELECT COUNT(*) FROM contracts 
+            WHERE (
+                LOWER(award_title) LIKE '%flood%' 
+                OR LOWER(notice_title) LIKE '%flood%'
+                OR LOWER(award_title) LIKE '%drainage%'
+                OR LOWER(notice_title) LIKE '%drainage%'
+                OR LOWER(award_title) LIKE '%canal%'
+                OR LOWER(notice_title) LIKE '%canal%'
+                OR LOWER(award_title) LIKE '%water%'
+                OR LOWER(notice_title) LIKE '%water%'
+            )
+        """)
+        
+        print(f"🔍 Debug PhilGEPS: {total_contracts} total contracts, {flood_contracts} flood-related contracts")
+        
         # Get top contractors from PhilGEPS with flood-related projects
         contractors = await philgeps_conn.fetch(f"""
             SELECT 
@@ -1783,6 +1812,7 @@ async def hidden_flood_statistics_api():
         try:
             meilisearch_stats = meilisearch_client.index('flood').get_stats()
             total_meilisearch_projects = meilisearch_stats.get('numberOfDocuments', 0)
+            print(f"🔍 Debug Meilisearch: {total_meilisearch_projects} flood projects in index")
         except Exception as e:
             print(f"Error getting Meilisearch stats: {e}")
             total_meilisearch_projects = 0
