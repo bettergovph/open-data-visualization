@@ -1733,19 +1733,19 @@ async def hidden_flood_contractors_api(limit: int = 20):
                 'avg_value': float(contractor['avg_value']) if contractor['avg_value'] else 0,
                 'max_value': float(contractor['max_value']) if contractor['max_value'] else 0,
                 'min_value': float(contractor['min_value']) if contractor['min_value'] else 0,
-                'provinces': contractor['provinces'],
-                'cities': contractor['cities']
+                'areas': contractor.get('areas', []),
+                'categories': contractor.get('categories', [])
             })
         
         return JSONResponse({
             "success": True,
             "contractors": contractors_list,
             "count": len(contractors_list),
-            "total_projects": hidden_projects_count,
-            "projects_with_contractors": projects_with_contractors,
+            "total_contracts": total_contracts,
+            "flood_contracts": flood_contracts,
             "debug": {
-                "hidden_projects_count": hidden_projects_count,
-                "projects_with_contractors": projects_with_contractors,
+                "total_contracts": total_contracts,
+                "flood_contracts": flood_contracts,
                 "contractors_found": len(contractors_list)
             }
         })
