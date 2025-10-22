@@ -1555,7 +1555,7 @@ async def dime_province_suggestions_api(query: str, limit: int = 10):
 # ============================================================================
 
 @app.get("/api/flood/hidden-projects")
-async def hidden_flood_projects_api(limit: int = 100):
+async def hidden_flood_projects_api():
     """Get projects that mention flood but are not in Meilisearch database - no authentication required"""
     try:
         import asyncpg
@@ -1589,7 +1589,7 @@ async def hidden_flood_projects_api(limit: int = 100):
         
         # Find flood contracts that cannot be correlated with Meilisearch flood database
         # These are PhilGEPS flood contracts that don't have a corresponding match in Meilisearch
-        hidden_projects = await philgeps_conn.fetch(f"""
+        hidden_projects = await philgeps_conn.fetch("""
             SELECT reference_id as id, award_title as project_name, notice_title as description, 
                    awardee_name as contractor, contract_amount as cost, 
                    area_of_delivery as location, award_status as status, 
@@ -1607,8 +1607,7 @@ async def hidden_flood_projects_api(limit: int = 100):
               )
               AND (meilisearch_id IS NULL OR meilisearch_id = '')
             ORDER BY contract_amount DESC
-            LIMIT $1
-        """, limit)
+        """)
         
         await philgeps_conn.close()
         
