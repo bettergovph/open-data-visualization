@@ -1647,6 +1647,44 @@ async def hidden_flood_contractors_api(limit: int = 20):
             database=os.getenv('POSTGRES_DB_DIME', 'dime')
         )
         
+        # First, let's check if there are any hidden flood projects at all
+        hidden_projects_count = await dime_conn.fetchval("""
+            SELECT COUNT(*) 
+            FROM projects 
+            WHERE (meilisearch_id IS NULL OR meilisearch_id = '')
+              AND (
+                  LOWER(project_name) LIKE '%flood%' 
+                  OR LOWER(description) LIKE '%flood%'
+                  OR LOWER(project_name) LIKE '%drainage%'
+                  OR LOWER(description) LIKE '%drainage%'
+                  OR LOWER(project_name) LIKE '%canal%'
+                  OR LOWER(description) LIKE '%canal%'
+                  OR LOWER(project_name) LIKE '%water%'
+                  OR LOWER(description) LIKE '%water%'
+              )
+        """)
+        
+        # Check how many of those have contractors
+        projects_with_contractors = await dime_conn.fetchval("""
+            SELECT COUNT(*) 
+            FROM projects 
+            WHERE (meilisearch_id IS NULL OR meilisearch_id = '')
+              AND (
+                  LOWER(project_name) LIKE '%flood%' 
+                  OR LOWER(description) LIKE '%flood%'
+                  OR LOWER(project_name) LIKE '%drainage%'
+                  OR LOWER(description) LIKE '%drainage%'
+                  OR LOWER(project_name) LIKE '%canal%'
+                  OR LOWER(description) LIKE '%canal%'
+                  OR LOWER(project_name) LIKE '%water%'
+                  OR LOWER(description) LIKE '%water%'
+              )
+              AND contractors IS NOT NULL 
+              AND array_length(contractors, 1) > 0
+        """)
+        
+        print(f"🔍 Debug: Found {hidden_projects_count} hidden flood projects, {projects_with_contractors} with contractors")
+        
         # Get top contractors from hidden flood projects
         # We need to unnest the contractors array and aggregate
         contractors = await dime_conn.fetch(f"""
@@ -1704,7 +1742,14 @@ async def hidden_flood_contractors_api(limit: int = 20):
         return JSONResponse({
             "success": True,
             "contractors": contractors_list,
-            "count": len(contractors_list)
+            "count": len(contractors_list),
+            "total_projects": hidden_projects_count,
+            "projects_with_contractors": projects_with_contractors,
+            "debug": {
+                "hidden_projects_count": hidden_projects_count,
+                "projects_with_contractors": projects_with_contractors,
+                "contractors_found": len(contractors_list)
+            }
         })
         
     except Exception as e:

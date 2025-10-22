@@ -481,15 +481,14 @@ function toggleMobileMenu() {
                             <!-- Hidden Projects Table -->
                             <div style="background: #f8f9fa; padding: 20px; border-radius: 8px;">
                                 <h4 style="color: #0038A8; margin: 0 0 15px 0; text-align: center;">📊 Top 100 Hidden Flood Projects</h4>
-                                <div style="overflow-x: auto; max-height: 500px; border: 1px solid #dee2e6; border-radius: 8px;">
+                                <div style="overflow-x: auto; border: 1px solid #dee2e6; border-radius: 8px;">
                                     <table id="hidden-projects-table" style="width: 100%; border-collapse: collapse; background: white;">
                                         <thead style="background: #0038A8; color: white; position: sticky; top: 0;">
                                             <tr>
                                                 <th style="padding: 12px; text-align: left; border-bottom: 2px solid #0038A8;">#</th>
                                                 <th style="padding: 12px; text-align: left; border-bottom: 2px solid #0038A8;">Project Name</th>
-                                                <th style="padding: 12px; text-align: left; border-bottom: 2px solid #0038A8;">Description</th>
+                                                <th style="padding: 12px; text-align: left; border-bottom: 2px solid #0038A8;">Contractor</th>
                                                 <th style="padding: 12px; text-align: right; border-bottom: 2px solid #0038A8;">Cost</th>
-                                                <th style="padding: 12px; text-align: left; border-bottom: 2px solid #0038A8;">Contractors</th>
                                                 <th style="padding: 12px; text-align: left; border-bottom: 2px solid #0038A8;">Location</th>
                                                 <th style="padding: 12px; text-align: left; border-bottom: 2px solid #0038A8;">Status</th>
                                                 <th style="padding: 12px; text-align: left; border-bottom: 2px solid #0038A8;">Dates</th>
@@ -497,7 +496,7 @@ function toggleMobileMenu() {
                                         </thead>
                                         <tbody id="hidden-projects-tbody">
                                             <tr>
-                                                <td colspan="8" style="padding: 20px; text-align: center; color: #666;">Loading hidden flood projects...</td>
+                                                <td colspan="7" style="padding: 20px; text-align: center; color: #666;">Loading hidden flood projects...</td>
                                             </tr>
                                         </tbody>
                                     </table>
@@ -633,16 +632,33 @@ async function loadHiddenFloodData() {
         if (contractorsResponse.ok) {
             const contractorsData = await contractorsResponse.json();
             console.log('🔍 Raw contractors data:', contractorsData);
+            
+            // Log debug information
+            if (contractorsData.debug) {
+                console.log('🔍 Debug info:', contractorsData.debug);
+                console.log(`📊 Found ${contractorsData.debug.hidden_projects_count} hidden flood projects`);
+                console.log(`👥 ${contractorsData.debug.projects_with_contractors} projects have contractors`);
+                console.log(`🏢 ${contractorsData.debug.contractors_found} contractors found`);
+            }
+            
             if (contractorsData.contractors && Array.isArray(contractorsData.contractors)) {
                 if (contractorsData.contractors.length > 0) {
                     createHiddenContractorsChart(contractorsData.contractors);
                     console.log('✅ Hidden contractors chart data loaded:', contractorsData.contractors.length, 'contractors');
                 } else {
                     console.warn('⚠️ No contractors found in the data');
-                    // Show a message in the chart area
+                    // Show a message in the chart area with debug info
                     const chartContainer = document.getElementById('hidden-contractors-chart');
                     if (chartContainer) {
-                        chartContainer.innerHTML = '<div style="text-align: center; padding: 50px; color: #666;">No hidden flood contractors found</div>';
+                        const debugInfo = contractorsData.debug ? 
+                            `Found ${contractorsData.debug.hidden_projects_count} hidden projects, but ${contractorsData.debug.projects_with_contractors} have contractors` : 
+                            'No debug info available';
+                        chartContainer.innerHTML = `
+                            <div style="text-align: center; padding: 50px; color: #666;">
+                                <div>No hidden flood contractors found</div>
+                                <div style="font-size: 0.9em; margin-top: 10px; color: #999;">${debugInfo}</div>
+                            </div>
+                        `;
                     }
                 }
             } else {
@@ -675,9 +691,9 @@ function populateHiddenProjectsTable(projects) {
         row.style.borderBottom = '1px solid #dee2e6';
         row.style.backgroundColor = index % 2 === 0 ? '#f8f9fa' : 'white';
         
-        // Format contractors
-        const contractors = project.contractors && Array.isArray(project.contractors) 
-            ? project.contractors.slice(0, 2).join(', ') + (project.contractors.length > 2 ? '...' : '')
+        // Format contractors - show primary contractor
+        const primaryContractor = project.contractors && Array.isArray(project.contractors) && project.contractors.length > 0
+            ? project.contractors[0]
             : 'N/A';
         
         // Format location
@@ -690,19 +706,16 @@ function populateHiddenProjectsTable(projects) {
         
         row.innerHTML = `
             <td style="padding: 12px; font-weight: bold; color: #0038A8;">${index + 1}</td>
-            <td style="padding: 12px; max-width: 200px;">
+            <td style="padding: 12px; max-width: 250px;">
                 <div style="font-weight: bold; color: #333; margin-bottom: 4px;">
-                    ${project.project_name.length > 50 ? project.project_name.substring(0, 50) + '...' : project.project_name}
+                    ${project.project_name.length > 60 ? project.project_name.substring(0, 60) + '...' : project.project_name}
                 </div>
             </td>
-            <td style="padding: 12px; max-width: 250px; color: #666; font-size: 0.9em;">
-                ${project.description ? (project.description.length > 100 ? project.description.substring(0, 100) + '...' : project.description) : 'N/A'}
+            <td style="padding: 12px; max-width: 200px; font-size: 0.9em; color: #666;">
+                ${primaryContractor}
             </td>
             <td style="padding: 12px; text-align: right; font-weight: bold; color: #dc3545;">
                 ₱${(project.cost / 1000000).toFixed(2)}M
-            </td>
-            <td style="padding: 12px; max-width: 200px; font-size: 0.9em; color: #666;">
-                ${contractors}
             </td>
             <td style="padding: 12px; font-size: 0.9em; color: #666;">
                 ${location}
