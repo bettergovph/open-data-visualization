@@ -1569,6 +1569,15 @@ async def hidden_flood_projects_api(limit: int = 100):
             database=os.getenv('POSTGRES_DB_DIME', 'dime')
         )
         
+        # Connect to PhilGEPS database for contractor information
+        philgeps_conn = await asyncpg.connect(
+            host=os.getenv('POSTGRES_HOST', 'localhost'),
+            port=int(os.getenv('POSTGRES_PORT', 5432)),
+            user=os.getenv('POSTGRES_USER', 'budget_admin'),
+            password=os.getenv('POSTGRES_PASSWORD', ''),
+            database=os.getenv('POSTGRES_DB_PHILGEPS', 'philgeps')
+        )
+        
         # Find projects that mention flood but don't have meilisearch_id (not in flood database)
         hidden_projects = await dime_conn.fetch(f"""
             SELECT id, project_name, description, contractors, cost, 
@@ -1603,6 +1612,47 @@ async def hidden_flood_projects_api(limit: int = 100):
                     if year:
                         break
             
+            # Get contractor information from PhilGEPS database
+            contractors = []
+            if proj['id']:
+                try:
+                    # Try to find contractors in PhilGEPS by project ID or name
+                    philgeps_contractors = await philgeps_conn.fetch("""
+                        SELECT DISTINCT awardee_name, organization_name
+                        FROM contracts 
+                        WHERE (reference_id = $1 OR LOWER(award_title) LIKE LOWER($2))
+                        AND awardee_name IS NOT NULL 
+                        AND awardee_name != ''
+                        LIMIT 5
+                    """, str(proj['id']), f"%{proj['project_name']}%")
+                    
+                    for contract in philgeps_contractors:
+                        contractor_name = contract['awardee_name'] or contract['organization_name']
+                        if contractor_name and contractor_name not in contractors:
+                            contractors.append(contractor_name)
+                            
+                except Exception as e:
+                    print(f"Error fetching contractors for project {proj['id']}: {e}")
+                    # Fallback to DIME contractors if PhilGEPS fails
+                    if proj['contractors']:
+                        try:
+                            if isinstance(proj['contractors'], list):
+                                contractors = proj['contractors']
+                            else:
+                                contractors = [proj['contractors']]
+                        except:
+                            contractors = []
+            
+            # If no contractors found in PhilGEPS, try DIME contractors as fallback
+            if not contractors and proj['contractors']:
+                try:
+                    if isinstance(proj['contractors'], list):
+                        contractors = proj['contractors']
+                    else:
+                        contractors = [proj['contractors']]
+                except:
+                    contractors = []
+            
             project_value = float(proj['cost']) if proj['cost'] else 0
             total_value += project_value
             
@@ -1610,7 +1660,7 @@ async def hidden_flood_projects_api(limit: int = 100):
                 'id': proj['id'],
                 'project_name': proj['project_name'],
                 'description': proj['description'],
-                'contractors': proj['contractors'],
+                'contractors': contractors,
                 'cost': project_value,
                 'province': proj['province'],
                 'city': proj['city'],
@@ -1620,6 +1670,8 @@ async def hidden_flood_projects_api(limit: int = 100):
                 'date_started': proj['date_started'].isoformat() if proj.get('date_started') else None,
                 'contract_completion_date': proj['contract_completion_date'].isoformat() if proj.get('contract_completion_date') else None
             })
+        
+        await philgeps_conn.close()
         
         return JSONResponse({
             "success": True,
