@@ -485,7 +485,14 @@ function toggleMobileMenu() {
                             
                             <!-- Hidden Projects Table -->
                             <div style="background: #f8f9fa; padding: 20px; border-radius: 8px;">
-                                <h4 style="color: #0038A8; margin: 0 0 15px 0; text-align: center;">📊 Top 100 Excluded Flood Contracts</h4>
+                                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                                    <h4 style="color: #0038A8; margin: 0;">📊 Excluded Flood Contracts</h4>
+                                    <div style="display: flex; gap: 10px; align-items: center;">
+                                        <span id="projects-page-info" style="color: #666; font-size: 0.9em;">Loading...</span>
+                                        <button id="projects-prev" style="background: #6c757d; color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-size: 0.8em;" disabled>← Previous</button>
+                                        <button id="projects-next" style="background: #6c757d; color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-size: 0.8em;" disabled>Next →</button>
+                                    </div>
+                                </div>
                                 <div style="overflow-x: auto; border: 1px solid #dee2e6; border-radius: 8px;">
                                     <table id="hidden-projects-table" style="width: 100%; border-collapse: collapse; background: white;">
                                         <thead style="background: #0038A8; color: white; position: sticky; top: 0;">
@@ -501,7 +508,7 @@ function toggleMobileMenu() {
                                         </thead>
                                         <tbody id="hidden-projects-tbody">
                                             <tr>
-                                                <td colspan="5" style="padding: 20px; text-align: center; color: #666;">Loading hidden flood projects...</td>
+                                                <td colspan="7" style="padding: 20px; text-align: center; color: #666;">Loading excluded flood projects...</td>
                                             </tr>
                                         </tbody>
                                     </table>
@@ -685,17 +692,53 @@ async function loadHiddenFloodData() {
     }
 }
 
+// Pagination variables for projects table
+let allProjects = [];
+let currentProjectPage = 1;
+const projectsPerPage = 20;
+
 // Populate Hidden Projects Table
 function populateHiddenProjectsTable(projects) {
     const tbody = document.getElementById('hidden-projects-tbody');
     if (!tbody) return;
     
-    // Sort projects by cost (highest first)
-    const sortedProjects = projects.sort((a, b) => b.cost - a.cost);
+    // Store all projects and sort by cost (highest first)
+    allProjects = projects.sort((a, b) => b.cost - a.cost);
+    currentProjectPage = 1;
+    
+    // Update pagination info
+    updateProjectPaginationInfo();
+    
+    // Display first page
+    displayProjectPage();
+}
+
+// Update pagination info display
+function updateProjectPaginationInfo() {
+    const totalPages = Math.ceil(allProjects.length / projectsPerPage);
+    const startItem = (currentProjectPage - 1) * projectsPerPage + 1;
+    const endItem = Math.min(currentProjectPage * projectsPerPage, allProjects.length);
+    
+    document.getElementById('projects-page-info').textContent = 
+        `Page ${currentProjectPage} of ${totalPages} (${startItem}-${endItem} of ${allProjects.length})`;
+    
+    // Update button states
+    document.getElementById('projects-prev').disabled = currentProjectPage <= 1;
+    document.getElementById('projects-next').disabled = currentProjectPage >= totalPages;
+}
+
+// Display current page of projects
+function displayProjectPage() {
+    const tbody = document.getElementById('hidden-projects-tbody');
+    if (!tbody) return;
+    
+    const startIndex = (currentProjectPage - 1) * projectsPerPage;
+    const endIndex = startIndex + projectsPerPage;
+    const pageProjects = allProjects.slice(startIndex, endIndex);
     
     // Check if all status values are the same and all dates are N/A
-    const allStatusSame = sortedProjects.every(p => p.status === sortedProjects[0].status);
-    const allDatesNA = sortedProjects.every(p => {
+    const allStatusSame = pageProjects.every(p => p.status === pageProjects[0].status);
+    const allDatesNA = pageProjects.every(p => {
         const startDate = p.date_started ? new Date(p.date_started).toLocaleDateString('en-PH') : 'N/A';
         const endDate = p.contract_completion_date ? new Date(p.contract_completion_date).toLocaleDateString('en-PH') : 'N/A';
         return startDate === 'N/A' && endDate === 'N/A';
@@ -713,13 +756,24 @@ function populateHiddenProjectsTable(projects) {
             <th style="padding: 12px; text-align: right; border-bottom: 2px solid #0038A8;">Cost</th>
             <th style="padding: 12px; text-align: left; border-bottom: 2px solid #0038A8;">Location</th>
         `;
+    } else {
+        // Ensure all headers are present if conditions are not met
+        thead.innerHTML = `
+            <th style="padding: 12px; text-align: left; border-bottom: 2px solid #0038A8;">#</th>
+            <th style="padding: 12px; text-align: left; border-bottom: 2px solid #0038A8;">Project Name</th>
+            <th style="padding: 12px; text-align: left; border-bottom: 2px solid #0038A8;">Contractor</th>
+            <th style="padding: 12px; text-align: right; border-bottom: 2px solid #0038A8;">Cost</th>
+            <th style="padding: 12px; text-align: left; border-bottom: 2px solid #0038A8;">Location</th>
+            <th style="padding: 12px; text-align: left; border-bottom: 2px solid #0038A8;">Status</th>
+            <th style="padding: 12px; text-align: left; border-bottom: 2px solid #0038A8;">Dates</th>
+        `;
     }
     
     // Clear loading message
     tbody.innerHTML = '';
     
     // Populate table rows
-    sortedProjects.forEach((project, index) => {
+    pageProjects.forEach((project, index) => {
         const row = document.createElement('tr');
         row.style.borderBottom = '1px solid #dee2e6';
         row.style.backgroundColor = index % 2 === 0 ? '#f8f9fa' : 'white';
@@ -739,7 +793,7 @@ function populateHiddenProjectsTable(projects) {
         
         // Generate row content based on whether to show Status and Dates columns
         let rowContent = `
-            <td style="padding: 12px; font-weight: bold; color: #0038A8;">${index + 1}</td>
+            <td style="padding: 12px; font-weight: bold; color: #0038A8;">${startIndex + index + 1}</td>
             <td style="padding: 12px; max-width: 300px;">
                 <div style="font-weight: bold; color: #333; margin-bottom: 4px;">
                     ${project.project_name}
@@ -778,7 +832,7 @@ function populateHiddenProjectsTable(projects) {
         tbody.appendChild(row);
     });
     
-    console.log('✅ Hidden projects table populated with', sortedProjects.length, 'projects');
+    console.log('✅ Projects table page populated with', pageProjects.length, 'projects (page', currentProjectPage, ')');
 }
 
 // Create Hidden Contractors Chart
@@ -1179,6 +1233,24 @@ document.getElementById('sec-next').addEventListener('click', function() {
     if (currentSecPage < totalPages - 1) {
         currentSecPage++;
         renderSuspiciousContractors();
+    }
+});
+
+// Projects pagination event listeners
+document.getElementById('projects-prev').addEventListener('click', function() {
+    if (currentProjectPage > 1) {
+        currentProjectPage--;
+        displayProjectPage();
+        updateProjectPaginationInfo();
+    }
+});
+
+document.getElementById('projects-next').addEventListener('click', function() {
+    const totalPages = Math.ceil(allProjects.length / projectsPerPage);
+    if (currentProjectPage < totalPages) {
+        currentProjectPage++;
+        displayProjectPage();
+        updateProjectPaginationInfo();
     }
 });
 
