@@ -631,8 +631,8 @@ async function loadHiddenFloodData() {
             console.error('❌ Failed to load hidden flood statistics:', statsResponse.status);
         }
         
-        // Load hidden projects for table
-        const projectsResponse = await fetch('/api/flood/hidden-projects?limit=100');
+        // Load hidden projects for table (first page)
+        const projectsResponse = await fetch('/api/flood/hidden-projects?page=1&limit=20');
         if (projectsResponse.ok) {
             const projectsData = await projectsResponse.json();
             if (projectsData.projects && Array.isArray(projectsData.projects)) {
@@ -695,32 +695,35 @@ async function loadHiddenFloodData() {
 // Pagination variables for projects table
 let allProjects = [];
 let currentProjectPage = 1;
+let totalProjects = 0;
+let totalPages = 1;
 const projectsPerPage = 20;
 
 // Populate Hidden Projects Table
-function populateHiddenProjectsTable(projects) {
+function populateHiddenProjectsTable(apiResponse) {
     const tbody = document.getElementById('hidden-projects-tbody');
     if (!tbody) return;
     
-    // Store all projects and sort by cost (highest first)
-    allProjects = projects.sort((a, b) => b.cost - a.cost);
-    currentProjectPage = 1;
+    // Store projects and pagination info from API
+    allProjects = apiResponse.projects || [];
+    currentProjectPage = apiResponse.pagination?.page || 1;
+    totalProjects = apiResponse.total_count || 0;
+    totalPages = apiResponse.pagination?.total_pages || 1;
     
     // Update pagination info
     updateProjectPaginationInfo();
     
-    // Display first page
+    // Display current page
     displayProjectPage();
 }
 
 // Update pagination info display
 function updateProjectPaginationInfo() {
-    const totalPages = Math.ceil(allProjects.length / projectsPerPage);
     const startItem = (currentProjectPage - 1) * projectsPerPage + 1;
-    const endItem = Math.min(currentProjectPage * projectsPerPage, allProjects.length);
+    const endItem = Math.min(currentProjectPage * projectsPerPage, totalProjects);
     
     document.getElementById('projects-page-info').textContent = 
-        `Page ${currentProjectPage} of ${totalPages} (${startItem}-${endItem} of ${allProjects.length})`;
+        `Page ${currentProjectPage} of ${totalPages} (${startItem}-${endItem} of ${totalProjects})`;
     
     // Update button states
     document.getElementById('projects-prev').disabled = currentProjectPage <= 1;
@@ -1237,22 +1240,34 @@ document.getElementById('sec-next').addEventListener('click', function() {
 });
 
 // Projects pagination event listeners
-document.getElementById('projects-prev').addEventListener('click', function() {
+document.getElementById('projects-prev').addEventListener('click', async function() {
     if (currentProjectPage > 1) {
         currentProjectPage--;
-        displayProjectPage();
-        updateProjectPaginationInfo();
+        await loadProjectPage(currentProjectPage);
     }
 });
 
-document.getElementById('projects-next').addEventListener('click', function() {
-    const totalPages = Math.ceil(allProjects.length / projectsPerPage);
+document.getElementById('projects-next').addEventListener('click', async function() {
     if (currentProjectPage < totalPages) {
         currentProjectPage++;
-        displayProjectPage();
-        updateProjectPaginationInfo();
+        await loadProjectPage(currentProjectPage);
     }
 });
+
+// Load specific page from API
+async function loadProjectPage(page) {
+    try {
+        const response = await fetch(`/api/flood/hidden-projects?page=${page}&limit=20`);
+        if (response.ok) {
+            const data = await response.json();
+            populateHiddenProjectsTable(data);
+        } else {
+            console.error('Failed to load project page:', response.status);
+        }
+    } catch (error) {
+        console.error('Error loading project page:', error);
+    }
+}
 
 // Show contractor hover tooltip
 // Normalize contractor name for better matching

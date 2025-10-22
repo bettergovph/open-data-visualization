@@ -1555,7 +1555,7 @@ async def dime_province_suggestions_api(query: str, limit: int = 10):
 # ============================================================================
 
 @app.get("/api/flood/hidden-projects")
-async def hidden_flood_projects_api():
+async def hidden_flood_projects_api(page: int = 1, limit: int = 20):
     """Get projects that mention flood but are not in Meilisearch database - no authentication required"""
     try:
         import asyncpg
@@ -1587,6 +1587,9 @@ async def hidden_flood_projects_api():
         
         print(f"🔍 Debug PhilGEPS: {total_contracts} total contracts, {flood_contracts} flood contracts")
         
+        # Calculate offset for pagination
+        offset = (page - 1) * limit
+        
         # Find flood contracts that cannot be correlated with Meilisearch flood database
         # These are PhilGEPS flood contracts that don't have a corresponding match in Meilisearch
         hidden_projects = await philgeps_conn.fetch("""
@@ -1607,6 +1610,23 @@ async def hidden_flood_projects_api():
               )
               AND (meilisearch_id IS NULL OR meilisearch_id = '')
             ORDER BY contract_amount DESC
+            LIMIT $1 OFFSET $2
+        """, limit, offset)
+        
+        # Get total count for pagination info
+        total_count = await philgeps_conn.fetchval("""
+            SELECT COUNT(*) FROM contracts 
+            WHERE (
+                  LOWER(award_title) LIKE '%flood%' 
+                  OR LOWER(notice_title) LIKE '%flood%'
+                  OR LOWER(award_title) LIKE '%drainage%'
+                  OR LOWER(notice_title) LIKE '%drainage%'
+                  OR LOWER(award_title) LIKE '%canal%'
+                  OR LOWER(notice_title) LIKE '%canal%'
+                  OR LOWER(award_title) LIKE '%water%'
+                  OR LOWER(notice_title) LIKE '%water%'
+              )
+              AND (meilisearch_id IS NULL OR meilisearch_id = '')
         """)
         
         await philgeps_conn.close()
@@ -1646,12 +1666,27 @@ async def hidden_flood_projects_api():
         
         await philgeps_conn.close()
         
+        # Calculate pagination info
+        total_pages = (total_count + limit - 1) // limit
+        start_item = offset + 1
+        end_item = min(offset + limit, total_count)
+        
         return JSONResponse({
             "success": True,
             "projects": projects_list,
             "count": len(projects_list),
+            "total_count": total_count,
             "total_value": total_value,
-            "average_value": total_value / len(projects_list) if projects_list else 0
+            "average_value": total_value / len(projects_list) if projects_list else 0,
+            "pagination": {
+                "page": page,
+                "limit": limit,
+                "total_pages": total_pages,
+                "start_item": start_item,
+                "end_item": end_item,
+                "has_next": page < total_pages,
+                "has_prev": page > 1
+            }
         })
         
     except Exception as e:
