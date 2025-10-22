@@ -496,7 +496,7 @@ function toggleMobileMenu() {
                                         </thead>
                                         <tbody id="hidden-projects-tbody">
                                             <tr>
-                                                <td colspan="7" style="padding: 20px; text-align: center; color: #666;">Loading hidden flood projects...</td>
+                                                <td colspan="5" style="padding: 20px; text-align: center; color: #666;">Loading hidden flood projects...</td>
                                             </tr>
                                         </tbody>
                                     </table>
@@ -682,6 +682,28 @@ function populateHiddenProjectsTable(projects) {
     // Sort projects by cost (highest first)
     const sortedProjects = projects.sort((a, b) => b.cost - a.cost);
     
+    // Check if all status values are the same and all dates are N/A
+    const allStatusSame = sortedProjects.every(p => p.status === sortedProjects[0].status);
+    const allDatesNA = sortedProjects.every(p => {
+        const startDate = p.date_started ? new Date(p.date_started).toLocaleDateString('en-PH') : 'N/A';
+        const endDate = p.contract_completion_date ? new Date(p.contract_completion_date).toLocaleDateString('en-PH') : 'N/A';
+        return startDate === 'N/A' && endDate === 'N/A';
+    });
+    
+    // Update table headers based on data
+    const table = document.getElementById('hidden-projects-table');
+    const thead = table.querySelector('thead tr');
+    if (allStatusSame && allDatesNA) {
+        // Remove Status and Dates columns
+        thead.innerHTML = `
+            <th style="padding: 12px; text-align: left; border-bottom: 2px solid #0038A8;">#</th>
+            <th style="padding: 12px; text-align: left; border-bottom: 2px solid #0038A8;">Project Name</th>
+            <th style="padding: 12px; text-align: left; border-bottom: 2px solid #0038A8;">Contractor</th>
+            <th style="padding: 12px; text-align: right; border-bottom: 2px solid #0038A8;">Cost</th>
+            <th style="padding: 12px; text-align: left; border-bottom: 2px solid #0038A8;">Location</th>
+        `;
+    }
+    
     // Clear loading message
     tbody.innerHTML = '';
     
@@ -704,7 +726,8 @@ function populateHiddenProjectsTable(projects) {
         const endDate = project.contract_completion_date ? new Date(project.contract_completion_date).toLocaleDateString('en-PH') : 'N/A';
         const dates = `${startDate} - ${endDate}`;
         
-        row.innerHTML = `
+        // Generate row content based on whether to show Status and Dates columns
+        let rowContent = `
             <td style="padding: 12px; font-weight: bold; color: #0038A8;">${index + 1}</td>
             <td style="padding: 12px; max-width: 300px;">
                 <div style="font-weight: bold; color: #333; margin-bottom: 4px;">
@@ -719,7 +742,11 @@ function populateHiddenProjectsTable(projects) {
             </td>
             <td style="padding: 12px; font-size: 0.9em; color: #666;">
                 ${location}
-            </td>
+            </td>`;
+        
+        // Only add Status and Dates columns if not all status are same or not all dates are N/A
+        if (!(allStatusSame && allDatesNA)) {
+            rowContent += `
             <td style="padding: 12px;">
                 <span style="padding: 4px 8px; border-radius: 4px; font-size: 0.8em; font-weight: bold; 
                      background: ${project.status === 'completed' ? '#d4edda' : project.status === 'ongoing' ? '#fff3cd' : '#f8d7da'}; 
@@ -729,8 +756,10 @@ function populateHiddenProjectsTable(projects) {
             </td>
             <td style="padding: 12px; font-size: 0.8em; color: #666;">
                 ${dates}
-            </td>
-        `;
+            </td>`;
+        }
+        
+        row.innerHTML = rowContent;
         
         tbody.appendChild(row);
     });
