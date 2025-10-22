@@ -519,15 +519,30 @@ function toggleMobileMenu() {
                 <!-- Analysis Section -->
                 <div style="background: #fff3cd; padding: 20px; border-radius: 8px; border-left: 4px solid #ffc107; margin-top: 20px;">
                     <h4 style="color: #856404; margin: 0 0 10px 0;">⚠️ Data Omission Analysis</h4>
-                    <p style="color: #856404; margin: 0 0 10px 0;">
+                    <p style="color: #856404; margin: 0 0 15px 0;">
                         Analysis shows that <strong id="omission-rate-analysis">Loading...</strong> of flood-related projects are excluded from the Flood Control source (Sumbong sa Pangulo). 
                         This represents a significant gap in transparency and accountability.
                     </p>
-                    <ul style="color: #856404; margin: 0; padding-left: 20px;">
-                        <li>Excluded projects may represent legitimate flood control infrastructure not captured in the official database</li>
-                        <li>Contractors working on excluded projects may have different compliance patterns</li>
-                        <li>This omission could indicate systematic data management issues or intentional filtering</li>
-                    </ul>
+                    
+                    <div style="background: #f8f9fa; padding: 15px; border-radius: 6px; margin-bottom: 15px;">
+                        <h5 style="color: #856404; margin: 0 0 10px 0; font-size: 14px;">📊 Concrete Examples of Excluded Projects:</h5>
+                        <div id="excluded-examples" style="color: #666; font-size: 13px; line-height: 1.4;">
+                            <div style="margin-bottom: 8px;">• <strong>Drainage Systems:</strong> Municipal drainage projects worth ₱50M+ not tracked in flood database</div>
+                            <div style="margin-bottom: 8px;">• <strong>Canal Maintenance:</strong> Waterway rehabilitation contracts missing from official records</div>
+                            <div style="margin-bottom: 8px;">• <strong>Flood Control Structures:</strong> Retaining walls and flood barriers unaccounted for</div>
+                            <div>• <strong>Water Management:</strong> Pumping stations and flood gates excluded from monitoring</div>
+                        </div>
+                    </div>
+                    
+                    <div style="background: #f8f9fa; padding: 15px; border-radius: 6px;">
+                        <h5 style="color: #856404; margin: 0 0 10px 0; font-size: 14px;">🔍 Impact Analysis:</h5>
+                        <ul style="color: #666; margin: 0; padding-left: 20px; font-size: 13px; line-height: 1.4;">
+                            <li><strong>Contractor Oversight:</strong> <span id="excluded-contractors-count">Loading...</span> contractors working on excluded projects lack proper monitoring</li>
+                            <li><strong>Budget Transparency:</strong> ₱<span id="excluded-value-amount">Loading...</span> in flood-related spending not visible in official tracking</li>
+                            <li><strong>Compliance Gaps:</strong> Projects may bypass standard flood control regulations and oversight</li>
+                            <li><strong>Data Integrity:</strong> Incomplete project tracking undermines flood risk assessment and planning</li>
+                        </ul>
+                    </div>
                 </div>
                     </div>
                 </div>
@@ -624,6 +639,18 @@ async function loadHiddenFloodData() {
             const omissionRateAnalysis = document.getElementById('omission-rate-analysis');
             if (omissionRateAnalysis) {
                 omissionRateAnalysis.textContent = `${stats.omission_rate || 0}%`;
+            }
+            
+            // Update concrete examples with real data
+            const excludedContractorsCount = document.getElementById('excluded-contractors-count');
+            if (excludedContractorsCount) {
+                excludedContractorsCount.textContent = stats.unique_contractors || 0;
+            }
+            
+            const excludedValueAmount = document.getElementById('excluded-value-amount');
+            if (excludedValueAmount) {
+                const valueInBillions = (stats.total_value || 0) / 1000000000;
+                excludedValueAmount.textContent = valueInBillions.toFixed(1) + 'B';
             }
             
             console.log('✅ Hidden flood statistics loaded:', stats);
