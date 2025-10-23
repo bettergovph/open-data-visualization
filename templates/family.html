@@ -29,8 +29,13 @@
                     </a>
                 </div>
                 <div class="flex items-center space-x-4">
-                    <a href="/" class="text-gray-700 hover:text-primary px-3 py-2 rounded-md text-sm font-medium">Home</a>
-                    <a href="/dynasty" class="text-gray-700 hover:text-primary px-3 py-2 rounded-md text-sm font-medium">Dynasties</a>
+                    <a href="/nep" class="text-gray-700 hover:text-primary px-3 py-2 rounded-md text-sm font-medium">NEP</a>
+                    <a href="/budget" class="text-gray-700 hover:text-primary px-3 py-2 rounded-md text-sm font-medium">Budget</a>
+                    <a href="/flood" class="text-gray-700 hover:text-primary px-3 py-2 rounded-md text-sm font-medium">Flood Control</a>
+                    <a href="/dime" class="text-gray-700 hover:text-primary px-3 py-2 rounded-md text-sm font-medium">DIME</a>
+                    <a href="/map" class="text-gray-700 hover:text-primary px-3 py-2 rounded-md text-sm font-medium">Map</a>
+                    <a href="/contractors" class="text-gray-700 hover:text-primary px-3 py-2 rounded-md text-sm font-medium">Contractors</a>
+                    <a href="/dynasty" class="text-gray-700 hover:text-primary px-3 py-2 rounded-md text-sm font-medium border-b-2 border-primary">Dynasties</a>
                 </div>
             </div>
         </div>
@@ -251,5 +256,7 @@
         // Load data when page loads
         document.addEventListener('DOMContentLoaded', loadFamilyData);
     </script>
+    
+    {% include "footer.html" %}
 </body>
 </html>
