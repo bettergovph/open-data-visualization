@@ -1827,18 +1827,21 @@ fetch('/static/data/dime_summary.json')
                 // Get contractor information for aggregated barangays data
                 let contractorName = 'Multiple Contractors';
                 let contractorSource = '';
+                let contractorClickable = '';
                 
-                // For aggregated barangays data, we don't have individual contractor info
-                // Show appropriate message based on project count
+                // For aggregated barangays data, make contractor clickable to show modal
                 if (brgy.project_count > 1) {
                     contractorName = 'Multiple Contractors';
                     contractorSource = '<span style="background: #6c757d; color: white; padding: 2px 6px; border-radius: 4px; font-size: 0.8em; font-weight: 600;">AGGREGATED</span>';
+                    contractorClickable = `onclick="showBarangayContractorsModal('${brgy.barangay}', '${brgy.city}', '${brgy.province}', '${brgy.region}')" style="cursor: pointer; color: #0038A8; text-decoration: underline;"`;
                 } else if (brgy.project_count === 1) {
                     contractorName = 'Single Project';
                     contractorSource = '<span style="background: #6c757d; color: white; padding: 2px 6px; border-radius: 4px; font-size: 0.8em; font-weight: 600;">DIME</span>';
+                    contractorClickable = `onclick="showBarangayContractorsModal('${brgy.barangay}', '${brgy.city}', '${brgy.province}', '${brgy.region}')" style="cursor: pointer; color: #0038A8; text-decoration: underline;"`;
                 } else {
                     contractorName = 'N/A';
                     contractorSource = '<span style="background: #6c757d; color: white; padding: 2px 6px; border-radius: 4px; font-size: 0.8em; font-weight: 600;">DIME</span>';
+                    contractorClickable = '';
                 }
 
                 row.innerHTML = `
@@ -1848,7 +1851,7 @@ fetch('/static/data/dime_summary.json')
                     <td style="text-align: center;"><strong>${brgy.project_count || 0}</strong></td>
                     <td style="text-align: right; font-weight: 600; color: #0038A8;">₱${parseFloat(brgy.total_amount).toLocaleString('en-PH', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
                     <td style="text-align: right; color: #666;">₱${parseFloat(brgy.avg_amount).toLocaleString('en-PH', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
-                    <td style="font-size: 0.9em;">${contractorName}<br/>${contractorSource}</td>
+                    <td style="font-size: 0.9em;">${contractorClickable ? `<span ${contractorClickable}>${contractorName}</span>` : contractorName}<br/>${contractorSource}</td>
                 `;
                 
                 tbody.appendChild(row);
@@ -1921,18 +1924,21 @@ fetch('/static/data/dime_summary.json')
                 // Get contractor information for aggregated barangays data
                 let contractorName = 'Multiple Contractors';
                 let contractorSource = '';
+                let contractorClickable = '';
                 
-                // For aggregated barangays data, we don't have individual contractor info
-                // Show appropriate message based on project count
+                // For aggregated barangays data, make contractor clickable to show modal
                 if (brgy.project_count > 1) {
                     contractorName = 'Multiple Contractors';
                     contractorSource = '<span style="background: #6c757d; color: white; padding: 2px 6px; border-radius: 4px; font-size: 0.8em; font-weight: 600;">AGGREGATED</span>';
+                    contractorClickable = `onclick="showBarangayContractorsModal('${brgy.barangay}', '${brgy.city}', '${brgy.province}', '${brgy.region}')" style="cursor: pointer; color: #0038A8; text-decoration: underline;"`;
                 } else if (brgy.project_count === 1) {
                     contractorName = 'Single Project';
                     contractorSource = '<span style="background: #6c757d; color: white; padding: 2px 6px; border-radius: 4px; font-size: 0.8em; font-weight: 600;">DIME</span>';
+                    contractorClickable = `onclick="showBarangayContractorsModal('${brgy.barangay}', '${brgy.city}', '${brgy.province}', '${brgy.region}')" style="cursor: pointer; color: #0038A8; text-decoration: underline;"`;
                 } else {
                     contractorName = 'N/A';
                     contractorSource = '<span style="background: #6c757d; color: white; padding: 2px 6px; border-radius: 4px; font-size: 0.8em; font-weight: 600;">DIME</span>';
+                    contractorClickable = '';
                 }
 
                 row.innerHTML = `
@@ -1942,7 +1948,7 @@ fetch('/static/data/dime_summary.json')
                     <td style="text-align: center;"><strong>${brgy.project_count || 0}</strong></td>
                     <td style="text-align: right; font-weight: 600; color: #0038A8;">₱${parseFloat(brgy.total_amount).toLocaleString('en-PH', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
                     <td style="text-align: right; color: #666;">₱${parseFloat(brgy.avg_amount).toLocaleString('en-PH', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
-                    <td style="font-size: 0.9em;">${contractorName}<br/>${contractorSource}</td>
+                    <td style="font-size: 0.9em;">${contractorClickable ? `<span ${contractorClickable}>${contractorName}</span>` : contractorName}<br/>${contractorSource}</td>
                 `;
                 
                 tbody.appendChild(row);
@@ -2041,7 +2047,120 @@ fetch('/static/data/dime_summary.json')
 
         // Last updated (removed - no longer displayed in footer)
     });
+
+    // Barangay Contractors Modal Functions
+    function showBarangayContractorsModal(barangay, city, province, region) {
+        console.log('🏘️ Showing contractors for:', barangay, city, province, region);
+        
+        const modal = document.getElementById('barangay-contractors-modal');
+        const title = document.getElementById('barangay-contractors-title');
+        const content = document.getElementById('barangay-contractors-content');
+        
+        title.textContent = `🏘️ Contractors in ${barangay}, ${city}`;
+        modal.style.display = 'block';
+        
+        // Show loading state
+        content.innerHTML = `
+            <div style="text-align: center; padding: 2rem;">
+                <div style="width: 40px; height: 40px; border: 4px solid #f3f3f3; border-top: 4px solid #0038A8; border-radius: 50%; animation: spin 1s linear infinite; margin: 0 auto 15px;"></div>
+                <p style="color: #666; margin: 0;">Loading contractors...</p>
+            </div>
+        `;
+        
+        // Fetch contractors for this barangay
+        fetchContractorsForBarangay(barangay, city, province, region);
+    }
+    
+    function closeBarangayContractorsModal() {
+        document.getElementById('barangay-contractors-modal').style.display = 'none';
+    }
+    
+    async function fetchContractorsForBarangay(barangay, city, province, region) {
+        try {
+            console.log('🔍 Fetching contractors for barangay:', barangay);
+            
+            // Try to fetch projects for this specific barangay
+            const response = await fetch(`/api/dime/projects?barangay=${encodeURIComponent(barangay)}&city=${encodeURIComponent(city)}&limit=100`);
+            const data = await response.json();
+            
+            if (!data.success) {
+                throw new Error(data.error || 'Failed to load contractors');
+            }
+            
+            const projects = data.projects || [];
+            console.log('📊 Found projects:', projects.length);
+            
+            // Extract unique contractors
+            const contractors = new Set();
+            projects.forEach(project => {
+                if (project.contractors && project.contractors.length > 0) {
+                    project.contractors.forEach(contractor => contractors.add(contractor));
+                }
+            });
+            
+            const contractorList = Array.from(contractors);
+            
+            // Update modal content
+            const content = document.getElementById('barangay-contractors-content');
+            
+            if (contractorList.length === 0) {
+                content.innerHTML = `
+                    <div style="text-align: center; padding: 2rem; color: #666;">
+                        <p style="font-size: 1.1em; margin-bottom: 10px;">No contractor data available</p>
+                        <p style="font-size: 0.9em;">This barangay may not have contractor information in the database.</p>
+                    </div>
+                `;
+            } else {
+                content.innerHTML = `
+                    <div style="margin-bottom: 20px;">
+                        <p style="color: #666; margin: 0 0 15px 0;"><strong>${projects.length}</strong> projects found in <strong>${barangay}, ${city}</strong></p>
+                        <p style="color: #666; margin: 0 0 20px 0;"><strong>${contractorList.length}</strong> unique contractors</p>
+                    </div>
+                    <div style="max-height: 400px; overflow-y: auto;">
+                        ${contractorList.map((contractor, index) => `
+                            <div style="padding: 10px; border-bottom: 1px solid #eee; ${index % 2 === 0 ? 'background: #f8f9fa;' : 'background: white;'}">
+                                <strong style="color: #0038A8;">${contractor}</strong>
+                            </div>
+                        `).join('')}
+                    </div>
+                `;
+            }
+            
+        } catch (error) {
+            console.error('❌ Error fetching contractors:', error);
+            const content = document.getElementById('barangay-contractors-content');
+            content.innerHTML = `
+                <div style="text-align: center; padding: 2rem; color: #dc3545;">
+                    <p style="font-size: 1.1em; margin-bottom: 10px;">❌ Error loading contractors</p>
+                    <p style="font-size: 0.9em;">${error.message}</p>
+                </div>
+            `;
+        }
+    }
+    
+    // Close modal when clicking outside
+    document.getElementById('barangay-contractors-modal').addEventListener('click', function(e) {
+        if (e.target === this) {
+            closeBarangayContractorsModal();
+        }
+    });
 </script>
+
+<!-- Barangay Contractors Modal -->
+<div id="barangay-contractors-modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 10000;">
+    <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background: white; border-radius: 8px; padding: 30px; max-width: 600px; max-height: 80vh; overflow-y: auto; box-shadow: 0 10px 30px rgba(0,0,0,0.3);">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+            <h3 id="barangay-contractors-title" style="margin: 0; color: #0038A8; font-size: 1.5em;">🏘️ Barangay Contractors</h3>
+            <button onclick="closeBarangayContractorsModal()" style="background: none; border: none; font-size: 1.5em; cursor: pointer; color: #666;">&times;</button>
+        </div>
+        <div id="barangay-contractors-content">
+            <div style="text-align: center; padding: 2rem;">
+                <div style="width: 40px; height: 40px; border: 4px solid #f3f3f3; border-top: 4px solid #0038A8; border-radius: 50%; animation: spin 1s linear infinite; margin: 0 auto 15px;"></div>
+                <p style="color: #666; margin: 0;">Loading contractors...</p>
+            </div>
+        </div>
+    </div>
+</div>
 
 </body>
 </html>
