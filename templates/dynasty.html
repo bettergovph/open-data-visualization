@@ -1084,11 +1084,13 @@ function createSurnamesChart(data) {
         }
 
         async function loadDynastyMap() {
-            const loadingState = document.getElementById('mapLoadingState');
             const mapContainer = document.getElementById('dynastyMap');
             
-            // Show loading state
-            loadingState.classList.remove('hidden');
+            // Check if map container exists
+            if (!mapContainer) {
+                console.error('Map container not found');
+                return;
+            }
     
         try {
             // Initialize map centered on Philippines with optimized settings
@@ -1332,12 +1334,10 @@ function createSurnamesChart(data) {
             `;
         }
         
-    } catch (error) {
-        console.error('Error loading dynasty map:', error);
-        mapContainer.innerHTML = '<div class="text-center text-red-600 p-8">Error loading map</div>';
-    } finally {
-        loadingState.classList.add('hidden');
-    }
+        } catch (error) {
+            console.error('Error loading dynasty map:', error);
+            mapContainer.innerHTML = '<div class="text-center text-red-600 p-8">Error loading map</div>';
+        }
 }
 
 // Popup functions for province surnames
