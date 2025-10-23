@@ -1730,7 +1730,7 @@ fetch('/static/data/dime_summary.json')
                 if (project.contractor_source === 'flood_connected' || project.contractor_source === 'dime_fallback') {
                     // Project connected to flood data (SSP) - contractor from MeiliSearch or DIME fallback
                     contractorName = project.contractors[0];
-                    contractorSource = '<span style="background: #28a745; color: white; padding: 2px 6px; border-radius: 4px; font-size: 0.8em; font-weight: 600;">SSP</span>';
+                    contractorSource = '<span style="background: #ffc107; color: black; padding: 2px 6px; border-radius: 4px; font-size: 0.8em; font-weight: 600;">SSP</span>';
                 } else if (project.contractors && project.contractors.length > 0) {
                     // Use DIME contractor data
                     contractorName = project.contractors[0];
