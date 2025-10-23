@@ -2573,31 +2573,35 @@ async def dynasty_family_api(
                 ORDER BY year DESC, first_name
             """, surname, province)
             
-            # If no results, try province-level mapping for common cases
+            # If no results, try province-level mapping from JSON cache
             if not family_members:
-                province_mappings = {
-                    'NEGROS ORIENTAL': ['BAIS CITY', 'TANJAY CITY', 'VALENCIA (LUZURRIAGA)', 'DUMAGUETE CITY'],
-                    'NEGROS OCCIDENTAL': ['BACOLOD CITY', 'SAN CARLOS CITY'],
-                    'CEBU': ['CEBU CITY', 'MANDAUE CITY', 'LAPU-LAPU CITY'],
-                    'LEYTE': ['TACLOBAN CITY', 'ORMOC CITY'],
-                    'SAMAR': ['CATBALOGAN CITY', 'CALBAYOG CITY']
-                }
-                
-                if province in province_mappings:
-                    cities = province_mappings[province]
-                    placeholders = ','.join([f'${i+2}' for i in range(len(cities))])
-                    family_members = await conn.fetch(f"""
-                        SELECT 
-                            first_name,
-                            last_name,
-                            position,
-                            municipality_city as province,
-                            year,
-                            fat
-                        FROM political_dynasties 
-                        WHERE last_name = $1 AND municipality_city IN ({placeholders})
-                        ORDER BY year DESC, first_name
-                    """, surname, *cities)
+                try:
+                    import json
+                    import os
+                    
+                    # Load province-cities mapping from JSON cache
+                    mapping_file = os.path.join(os.path.dirname(__file__), 'static', 'data', 'province_cities_mapping_hybrid.json')
+                    with open(mapping_file, 'r') as f:
+                        province_mappings = json.load(f)
+                    
+                    if province in province_mappings:
+                        cities = province_mappings[province]
+                        placeholders = ','.join([f'${i+2}' for i in range(len(cities))])
+                        family_members = await conn.fetch(f"""
+                            SELECT 
+                                first_name,
+                                last_name,
+                                position,
+                                municipality_city as province,
+                                year,
+                                fat
+                            FROM political_dynasties 
+                            WHERE last_name = $1 AND municipality_city IN ({placeholders})
+                            ORDER BY year DESC, first_name
+                        """, surname, *cities)
+                except Exception as e:
+                    print(f"Error loading province mapping: {e}")
+                    pass
         else:
             family_members = await conn.fetch("""
                 SELECT 
