@@ -27,18 +27,20 @@ class JSONGenerator:
         
         # JSON file inventory with their generators
         self.json_generators = {
-            # SEC and Contractor Data
-            'sec_contractors_database.json': {
-                'script': 'sec_scraper/generate_sec_json.py',
-                'description': 'SEC contractors database from PostgreSQL',
-                'category': 'sec_data',
-                'dependencies': ['PostgreSQL SEC database']
-            },
+            # Existing Scripts (Created Before Today)
             'contractor_sec_mapping.json': {
                 'script': 'sec_scraper/sec_complete_automation.py',
                 'description': 'Contractor SEC mapping data',
                 'category': 'sec_data',
                 'dependencies': ['SEC database', 'Flood data']
+            },
+            
+            # New Scripts (Created Today) - For New JSON Files
+            'sec_contractors_database.json': {
+                'script': 'sec_scraper/generate_sec_json.py',
+                'description': 'SEC contractors database from PostgreSQL',
+                'category': 'sec_data',
+                'dependencies': ['PostgreSQL SEC database']
             },
             'excluded_flood_contractors_cache.json': {
                 'script': 'sec_scraper/generate_contractors_cache.py',
@@ -46,17 +48,17 @@ class JSONGenerator:
                 'category': 'cache_data',
                 'dependencies': ['PhilGEPS database']
             },
-            'contractors_dashboard_cache.json': {
+            'top_contractors_cache.json': {
                 'script': 'sec_scraper/generate_contractors_dashboard_cache.py',
-                'description': 'Complete contractors dashboard cache (SEC, top contractors, Venn, excluded flood)',
+                'description': 'Top contractors cache',
                 'category': 'cache_data',
-                'dependencies': ['SEC database', 'PhilGEPS database']
+                'dependencies': ['Database queries']
             },
-            'api_cache_generation': {
-                'script': 'sec_scraper/generate_api_cache.py',
-                'description': 'Generate all API endpoint JSON caches (19 endpoints)',
-                'category': 'api_cache',
-                'dependencies': ['FastAPI server running']
+            'contractors_venn_cache.json': {
+                'script': 'sec_scraper/generate_contractors_dashboard_cache.py',
+                'description': 'Contractors Venn diagram cache',
+                'category': 'cache_data',
+                'dependencies': ['Database queries']
             },
             
             # Summary Statistics
@@ -91,12 +93,6 @@ class JSONGenerator:
                 'description': 'Flood projects proximity analysis results',
                 'category': 'analysis_data',
                 'dependencies': ['Flood control data']
-            },
-            'contractor_stats_cache.json': {
-                'script': 'API endpoint (generated on-demand)',
-                'description': 'Contractor statistics cache',
-                'category': 'cache_data',
-                'dependencies': ['Database queries']
             },
             
             # Geographic Data (usually static, but may need updates)
@@ -276,25 +272,19 @@ class JSONGenerator:
         print("\n🏛️ Generating SEC Data...")
         print("=" * 40)
         
-        # Generate SEC contractors database
-        success, output = await self.run_script(
+        # Generate contractor SEC mapping (existing script)
+        success1, output1 = await self.run_script(
+            'sec_scraper/sec_complete_automation.py',
+            'Contractor SEC Mapping'
+        )
+        
+        # Generate SEC contractors database (new script for new JSON)
+        success2, output2 = await self.run_script(
             'sec_scraper/generate_sec_json.py',
             'SEC Contractors Database'
         )
         
-        # Generate excluded flood contractors cache
-        success2, output2 = await self.run_script(
-            'sec_scraper/generate_contractors_cache.py',
-            'Excluded Flood Contractors Cache'
-        )
-        
-        # Generate contractors dashboard cache
-        success3, output3 = await self.run_script(
-            'sec_scraper/generate_contractors_dashboard_cache.py',
-            'Contractors Dashboard Cache'
-        )
-        
-        return success and success2 and success3
+        return success1 and success2
     
     async def generate_summary_stats(self):
         """Generate summary statistics JSON files."""
@@ -321,12 +311,31 @@ class JSONGenerator:
         
         return success
     
+    async def generate_cache_data(self):
+        """Generate cache JSON files."""
+        print("\n💾 Generating Cache Data...")
+        print("=" * 40)
+        
+        # Generate excluded flood contractors cache (new script for new JSON)
+        success1, output1 = await self.run_script(
+            'sec_scraper/generate_contractors_cache.py',
+            'Excluded Flood Contractors Cache'
+        )
+        
+        # Generate contractors dashboard cache (new script for new JSON)
+        success2, output2 = await self.run_script(
+            'sec_scraper/generate_contractors_dashboard_cache.py',
+            'Contractors Dashboard Cache'
+        )
+        
+        return success1 and success2
+    
     async def generate_api_cache(self):
         """Generate API cache files by calling all endpoints."""
         print("\n🌐 Generating API Cache...")
         print("=" * 40)
         
-        # Generate API cache
+        # Generate API cache (new script for new JSON files)
         success, output = await self.run_script(
             'sec_scraper/generate_api_cache.py',
             'API Cache Generation (33 endpoints)'
@@ -342,7 +351,7 @@ class JSONGenerator:
         print(f"Target directory: {self.static_data_dir}")
         
         if categories is None:
-            categories = ['sec_data', 'summary_data', 'analysis_data', 'api_cache']
+            categories = ['sec_data', 'summary_data', 'analysis_data', 'cache_data', 'api_cache']
         
         results = {}
         
@@ -357,6 +366,10 @@ class JSONGenerator:
         # Generate analysis data
         if 'analysis_data' in categories:
             results['analysis_data'] = await self.generate_analysis_data()
+        
+        # Generate cache data
+        if 'cache_data' in categories:
+            results['cache_data'] = await self.generate_cache_data()
         
         # Generate API cache
         if 'api_cache' in categories:
