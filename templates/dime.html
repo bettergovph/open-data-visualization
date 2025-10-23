@@ -2228,12 +2228,6 @@ fetch('/static/data/dime_summary.json')
         }
     }
     
-    // Close modal when clicking outside
-    document.getElementById('barangay-contractors-modal').addEventListener('click', function(e) {
-        if (e.target === this) {
-            closeBarangayContractorsModal();
-        }
-    });
 </script>
 
 <!-- Barangay Contractors Modal -->
@@ -2251,6 +2245,15 @@ fetch('/static/data/dime_summary.json')
         </div>
     </div>
 </div>
+
+<script>
+// Close modal when clicking outside
+document.getElementById('barangay-contractors-modal').addEventListener('click', function(e) {
+    if (e.target === this) {
+        closeBarangayContractorsModal();
+    }
+});
+</script>
 
 </body>
 </html>
