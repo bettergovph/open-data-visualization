@@ -1090,12 +1090,21 @@ function createSurnamesChart(data) {
             return 'Unknown Region';
         }
 
+        // Global map instance to prevent re-initialization
+        let dynastyMapInstance = null;
+
         async function loadDynastyMap() {
             const mapContainer = document.getElementById('dynastyMap');
             
             // Check if map container exists
             if (!mapContainer) {
                 console.error('Map container not found');
+                return;
+            }
+            
+            // Check if map is already initialized
+            if (dynastyMapInstance) {
+                console.log('Map already initialized, skipping...');
                 return;
             }
     
@@ -1105,6 +1114,9 @@ function createSurnamesChart(data) {
                 preferCanvas: false,
                 renderer: L.canvas()
             }).setView([12.8797, 121.7740], 6);
+            
+            // Store map instance globally
+            dynastyMapInstance = map;
             
             // Add OpenStreetMap tiles with proper configuration for better loading
             L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
