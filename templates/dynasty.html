@@ -269,19 +269,13 @@ function toggleMobileMenu() {
                         <!-- Map Legend -->
                         <div class="map-legend" style="background: white; padding: 12px; border-radius: 6px; box-shadow: 0 1px 5px rgba(0,0,0,0.1); margin-bottom: 15px;">
                             <h4 style="color: #0038A8; margin: 0 0 8px 0; font-size: 14px; font-weight: bold;">🗺️ How to Use the Map</h4>
-                            <div style="display: flex; flex-direction: column; gap: 6px;">
-                                <div style="display: flex; align-items: center;">
-                                    <span style="color: #28a745; font-size: 16px; margin-right: 6px;">🖱️</span>
-                                    <span style="color: #333; font-size: 11px;">Click any province to view top dynasty surnames</span>
-                                </div>
-                                <div style="display: flex; align-items: center;">
-                                    <span style="color: #17a2b8; font-size: 16px; margin-right: 6px;">⏳</span>
-                                    <span style="color: #333; font-size: 11px;">Hover to see province names</span>
-                                </div>
-                                <div style="display: flex; align-items: center;">
-                                    <span style="color: #dc3545; font-size: 16px; margin-right: 6px;">👆</span>
-                                    <span style="color: #333; font-size: 11px;">Click surnames to view family details</span>
-                                </div>
+                            <div style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap;">
+                                <span style="color: #28a745; font-size: 14px;">🖱️</span>
+                                <span style="color: #333; font-size: 11px;">Click any province to view top dynasty surnames</span>
+                                <span style="color: #17a2b8; font-size: 14px;">⏳</span>
+                                <span style="color: #333; font-size: 11px;">Hover to see province names</span>
+                                <span style="color: #dc3545; font-size: 14px;">👆</span>
+                                <span style="color: #333; font-size: 11px;">Click surnames to view family details</span>
                             </div>
                         </div>
                         
@@ -906,7 +900,7 @@ function createSurnamesChart(data) {
                 'san jose': 'SAN JOSE',
                 // Province-level mappings
                 'isabela': 'ISABELA',
-                'cagayan': 'CAGAYAN DE ORO CITY',  // This might be wrong, let's check
+                'cagayan': 'CAGAYAN',
                 'batangas': 'BATANGAS',
                 'cavite': 'CAVITE',
                 'laguna': 'LAGUNA',

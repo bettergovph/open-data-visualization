@@ -2470,6 +2470,9 @@ async def dynasty_top_surnames_api(
         # Filter data based on parameters
         surnames = cache_data.get('surnames', [])
         
+        # Only include surnames with actual dynasty members (dynasty_count > 0)
+        surnames = [s for s in surnames if s.get('dynasty_count', 0) > 0]
+        
         # Apply province filter if specified
         if province:
             surnames = [s for s in surnames if province.lower() in s['province'].lower()]

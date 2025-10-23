@@ -108,10 +108,11 @@ function toggleMobileMenu() {
                     <p class="text-2xl font-bold text-primary" id="provincesCount">Loading...</p>
                 </div>
                 
-                <div class="bg-gray-50 p-6 rounded-lg text-center">
+                <div class="bg-gray-50 p-6 rounded-lg text-center cursor-pointer hover:bg-gray-100 transition-colors" onclick="showNonDynastyMembers()">
                     <div class="text-3xl font-bold text-gray-600 mb-2">👥</div>
                     <h3 class="text-lg font-semibold text-gray-800">Non-Dynasty</h3>
                     <p class="text-2xl font-bold text-gray-600" id="nonDynastyCount">Loading...</p>
+                    <p class="text-xs text-gray-500 mt-1">Click to view</p>
                 </div>
             </div>
 
@@ -158,11 +159,51 @@ function toggleMobileMenu() {
     <footer class="bg-gray-800 text-white py-8 mt-12">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="text-center">
-                <p class="text-gray-400">&copy; 2024 BetterGovPH. All rights reserved.</p>
-                <p class="text-gray-500 text-sm mt-2">Open Data Visualization Platform</p>
+                <!-- Footer content removed -->
             </div>
         </div>
     </footer>
+
+    <!-- Non-Dynasty Members Modal -->
+    <div id="nonDynastyModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full hidden z-50">
+        <div class="relative top-20 mx-auto p-5 border w-11/12 md:w-3/4 lg:w-1/2 shadow-lg rounded-md bg-white">
+            <div class="mt-3">
+                <!-- Modal Header -->
+                <div class="flex items-center justify-between mb-4">
+                    <h3 class="text-lg font-medium text-gray-900">Non-Dynasty Family Members</h3>
+                    <button onclick="closeNonDynastyModal()" class="text-gray-400 hover:text-gray-600">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                        </svg>
+                    </button>
+                </div>
+                
+                <!-- Modal Content -->
+                <div class="max-h-96 overflow-y-auto">
+                    <table class="min-w-full divide-y divide-gray-200">
+                        <thead class="bg-gray-50">
+                            <tr>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Position</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Province</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Year</th>
+                            </tr>
+                        </thead>
+                        <tbody id="nonDynastyTableBody" class="bg-white divide-y divide-gray-200">
+                            <!-- Non-dynasty members will be populated here -->
+                        </tbody>
+                    </table>
+                </div>
+                
+                <!-- Modal Footer -->
+                <div class="flex justify-end mt-4">
+                    <button onclick="closeNonDynastyModal()" class="bg-gray-500 hover:bg-gray-600 text-white font-bold py-2 px-4 rounded">
+                        Close
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
 
     <script>
         // Get surname from URL parameter
@@ -215,7 +256,7 @@ function toggleMobileMenu() {
             
             // Filter out non-dynasty members (fat = 0) for the table
             const dynastyMembers = familyData.filter(member => member.fat === 1);
-            const nonDynastyMembers = familyData.filter(member => member.fat === 0);
+            nonDynastyMembers = familyData.filter(member => member.fat === 0);
             
             // Update summary counts
             familyCount.textContent = dynastyMembers.length;
@@ -284,6 +325,63 @@ function toggleMobileMenu() {
                 </tr>
             `;
         }
+        
+        // Global variable to store non-dynasty members
+        let nonDynastyMembers = [];
+        
+        // Show non-dynasty members modal
+        function showNonDynastyMembers() {
+            const modal = document.getElementById('nonDynastyModal');
+            const tableBody = document.getElementById('nonDynastyTableBody');
+            
+            if (nonDynastyMembers.length === 0) {
+                tableBody.innerHTML = `
+                    <tr>
+                        <td colspan="4" class="px-6 py-8 text-center text-gray-500">
+                            <div class="text-4xl mb-4">📭</div>
+                            <h3 class="text-lg font-medium text-gray-900 mb-2">No Non-Dynasty Members</h3>
+                            <p class="text-gray-500">All family members are dynasty members.</p>
+                        </td>
+                    </tr>
+                `;
+            } else {
+                tableBody.innerHTML = '';
+                nonDynastyMembers.forEach(member => {
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                            ${member.first_name} ${member.last_name}
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                            ${member.position}
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                            ${member.province}
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                            ${member.year}
+                        </td>
+                    `;
+                    tableBody.appendChild(row);
+                });
+            }
+            
+            modal.classList.remove('hidden');
+        }
+        
+        // Close non-dynasty members modal
+        function closeNonDynastyModal() {
+            const modal = document.getElementById('nonDynastyModal');
+            modal.classList.add('hidden');
+        }
+        
+        // Close modal when clicking outside
+        document.addEventListener('click', function(event) {
+            const modal = document.getElementById('nonDynastyModal');
+            if (event.target === modal) {
+                closeNonDynastyModal();
+            }
+        });
         
         // Load data when page loads
         document.addEventListener('DOMContentLoaded', loadFamilyData);
