@@ -64,6 +64,12 @@
                     <h3 class="text-lg font-semibold text-gray-800">Towns/Cities</h3>
                     <p class="text-2xl font-bold text-primary" id="provincesCount">Loading...</p>
                 </div>
+                
+                <div class="bg-gray-50 p-6 rounded-lg text-center">
+                    <div class="text-3xl font-bold text-gray-600 mb-2">👥</div>
+                    <h3 class="text-lg font-semibold text-gray-800">Non-Dynasty</h3>
+                    <p class="text-2xl font-bold text-gray-600" id="nonDynastyCount">Loading...</p>
+                </div>
             </div>
 
             <!-- Family Members Table -->
@@ -163,23 +169,29 @@
             const positionsCount = document.getElementById('positionsCount');
             const uniquePositionsCount = document.getElementById('uniquePositionsCount');
             const provincesCount = document.getElementById('provincesCount');
+            const nonDynastyCount = document.getElementById('nonDynastyCount');
+            
+            // Filter out non-dynasty members (fat = 0) for the table
+            const dynastyMembers = familyData.filter(member => member.fat === 1);
+            const nonDynastyMembers = familyData.filter(member => member.fat === 0);
             
             // Update summary counts
-            familyCount.textContent = familyData.length;
+            familyCount.textContent = dynastyMembers.length;
+            nonDynastyCount.textContent = nonDynastyMembers.length;
             
-            // Total positions (not unique)
-            positionsCount.textContent = familyData.length;
+            // Total positions (not unique) - only for dynasty members
+            positionsCount.textContent = dynastyMembers.length;
             
-            // Unique positions as subtitle
-            const uniquePositions = new Set(familyData.map(member => member.position)).size;
+            // Unique positions as subtitle - only for dynasty members
+            const uniquePositions = new Set(dynastyMembers.map(member => member.position)).size;
             uniquePositionsCount.textContent = `Unique: ${uniquePositions}`;
             
-            const uniqueProvinces = new Set(familyData.map(member => member.province)).size;
+            const uniqueProvinces = new Set(dynastyMembers.map(member => member.province)).size;
             provincesCount.textContent = uniqueProvinces;
             
-            // Populate table
+            // Populate table - only show dynasty members
             tableBody.innerHTML = '';
-            familyData.forEach(member => {
+            dynastyMembers.forEach(member => {
                 const row = document.createElement('tr');
                 row.innerHTML = `
                     <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
@@ -220,6 +232,7 @@
             document.getElementById('positionsCount').textContent = '0';
             document.getElementById('uniquePositionsCount').textContent = 'Unique: 0';
             document.getElementById('provincesCount').textContent = '0';
+            document.getElementById('nonDynastyCount').textContent = '0';
         }
         
         function displayError() {
