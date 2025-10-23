@@ -2248,23 +2248,40 @@ fetch('/static/data/dime_summary.json')
                     </div>
                 `;
             } else {
-                const sourceBadge = dataSource === 'SSP' ? 
-                    '<span style="background: #28a745; color: white; padding: 2px 6px; border-radius: 4px; font-size: 0.8em; font-weight: 600;">SSP</span>' :
-                    '<span style="background: #6c757d; color: white; padding: 2px 6px; border-radius: 4px; font-size: 0.8em; font-weight: 600;">DIME</span>';
+                // Check if contractors are actually available or just "No Data Available"
+                const hasValidContractors = contractorList.length > 0 && !contractorList.every(contractor => contractor === 'No Data Available');
                 
-                content.innerHTML = `
-                    <div style="margin-bottom: 20px;">
-                        <p style="color: #666; margin: 0 0 15px 0;"><strong>${projects.length}</strong> projects found in <strong>${barangay}, ${city}</strong></p>
-                        <p style="color: #666; margin: 0 0 20px 0;"><strong>${contractorList.length}</strong> unique contractors ${sourceBadge}</p>
-                    </div>
-                    <div style="max-height: 400px; overflow-y: auto;">
-                        ${contractorList.map((contractor, index) => `
-                            <div style="padding: 10px; border-bottom: 1px solid #eee; ${index % 2 === 0 ? 'background: #f8f9fa;' : 'background: white;'}">
-                                <strong style="color: #0038A8;">${contractor}</strong>
+                if (!hasValidContractors) {
+                    content.innerHTML = `
+                        <div style="text-align: center; padding: 2rem; color: #dc3545;">
+                            <p style="font-size: 1.1em; margin-bottom: 10px;">No contractor data available</p>
+                            <p style="font-size: 0.9em;">Contractor information is missing for this barangay.</p>
+                            <div style="margin-top: 15px; padding: 10px; background: #f8f9fa; border-radius: 4px;">
+                                <p style="font-size: 0.85em; margin: 0; color: #666;">
+                                    <strong>Status:</strong> <span style="background: #dc3545; color: white; padding: 2px 6px; border-radius: 4px; font-size: 0.8em; font-weight: 600;">Missing</span>
+                                </p>
                             </div>
-                        `).join('')}
-                    </div>
-                `;
+                        </div>
+                    `;
+                } else {
+                    const sourceBadge = dataSource === 'SSP' ? 
+                        '<span style="background: #ffc107; color: black; padding: 2px 6px; border-radius: 4px; font-size: 0.8em; font-weight: 600;">SSP</span>' :
+                        '<span style="background: #28a745; color: white; padding: 2px 6px; border-radius: 4px; font-size: 0.8em; font-weight: 600;">DIME</span>';
+                    
+                    content.innerHTML = `
+                        <div style="margin-bottom: 20px;">
+                            <p style="color: #666; margin: 0 0 15px 0;"><strong>${projects.length}</strong> projects found in <strong>${barangay}, ${city}</strong></p>
+                            <p style="color: #666; margin: 0 0 20px 0;"><strong>${contractorList.length}</strong> unique contractors ${sourceBadge}</p>
+                        </div>
+                        <div style="max-height: 400px; overflow-y: auto;">
+                            ${contractorList.map((contractor, index) => `
+                                <div style="padding: 10px; border-bottom: 1px solid #eee; ${index % 2 === 0 ? 'background: #f8f9fa;' : 'background: white;'}">
+                                    <strong style="color: #0038A8;">${contractor}</strong>
+                                </div>
+                            `).join('')}
+                        </div>
+                    `;
+                }
             }
             
         } catch (error) {
