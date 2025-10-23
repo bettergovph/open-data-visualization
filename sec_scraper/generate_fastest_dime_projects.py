@@ -8,8 +8,13 @@ import asyncio
 import os
 import json
 import asyncpg
+import sys
 from datetime import datetime
 from dotenv import load_dotenv
+
+# Add parent directory to path for flood_client import
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+from flood_client import FloodControlClient
 
 load_dotenv()
 
@@ -26,6 +31,19 @@ async def get_db_connection():
         return conn
     except Exception as e:
         print(f"❌ Database connection failed: {e}")
+        return None
+
+async def get_contractor_from_meilisearch(meilisearch_id):
+    """Get contractor information from MeiliSearch using meilisearch_id"""
+    try:
+        client = FloodControlClient()
+        project = await client.get_project_by_id(meilisearch_id)
+        
+        if project and project.Contractor:
+            return project.Contractor
+        return None
+    except Exception as e:
+        print(f"⚠️ MeiliSearch query failed for {meilisearch_id}: {e}")
         return None
 
 async def generate_fastest_dime_projects():
@@ -84,10 +102,23 @@ async def generate_fastest_dime_projects():
             contractor_source = "dime"  # Default to DIME data
             
             if row['meilisearch_id']:
-                # Project is connected to flood data - contractor info should come from flood/MeiliSearch
-                # For now, we'll note that contractor info is missing
+                # Project is connected to flood data - get contractor from MeiliSearch
                 contractor_source = "flood_connected"
-                contractors = ["Redacted/Missing"]  # Placeholder - would need MeiliSearch query
+                meilisearch_contractor = await get_contractor_from_meilisearch(row['meilisearch_id'])
+                
+                if meilisearch_contractor:
+                    contractors = [meilisearch_contractor]
+                else:
+                    # Fallback to DIME contractor data if MeiliSearch fails
+                    if row['contractors']:
+                        for contractor in row['contractors']:
+                            if contractor and contractor != 'No Data Available':
+                                contractors.append(contractor)
+                                contractor_source = "dime_fallback"
+                    
+                    # If still no contractors found, show Redacted/Missing
+                    if not contractors:
+                        contractors = ["Redacted/Missing"]
             else:
                 # Project is NOT connected to flood data - use DIME contractor data
                 if row['contractors']:
