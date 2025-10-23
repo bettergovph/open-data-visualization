@@ -88,15 +88,17 @@ async def generate_red_flag_data():
         
         return {
             'success': True,
-            'years': years,
-            'budgets': budgets,
-            'historical_avg': historical_avg,
-            'analysis_date': datetime.now().isoformat(),
-            'description': 'NEP Road Infrastructure Budget Analysis (2020-2026)',
-            'red_flags': {
-                'sudden_rise_2026': budgets[-1] > historical_avg * 1.5 if len(budgets) > 0 else False,
-                'historical_average': historical_avg,
-                'current_year': budgets[-1] if len(budgets) > 0 else 0
+            'data': {
+                'years': years,
+                'budgets': budgets,
+                'historical_avg': historical_avg,
+                'analysis_date': datetime.now().isoformat(),
+                'description': 'NEP Road Infrastructure Budget Analysis (2020-2026)',
+                'red_flags': {
+                    'sudden_rise_2026': budgets[-1] > historical_avg * 1.5 if len(budgets) > 0 else False,
+                    'historical_average': historical_avg,
+                    'current_year': budgets[-1] if len(budgets) > 0 else 0
+                }
             }
         }
         
@@ -124,9 +126,9 @@ async def main():
         json.dump(data, f, indent=2, ensure_ascii=False)
     
     print(f"✅ Generated {output_file}")
-    print(f"📊 Years: {data['years']}")
-    print(f"💰 Budgets: {[f'₱{b/1000000000:.1f}B' for b in data['budgets']]}")
-    print(f"📈 Historical Average: ₱{data['historical_avg']/1000000000:.1f}B")
+    print(f"📊 Years: {data['data']['years']}")
+    print(f"💰 Budgets: {[f'₱{b/1000000000:.1f}B' for b in data['data']['budgets']]}")
+    print(f"📈 Historical Average: ₱{data['data']['historical_avg']/1000000000:.1f}B")
 
 if __name__ == "__main__":
     asyncio.run(main())
