@@ -35,34 +35,40 @@ async def generate_fastest_dime_projects():
         return None
     
     try:
-        # Get fastest completed projects (top 50)
+        # Get fastest completed projects (top 100, sorted by completion days ascending then cost descending)
         query = """
-        SELECT 
-            project_name,
-            description,
-            cost,
-            date_started,
-            contract_completion_date,
-            status,
-            implementing_offices,
-            region,
-            province,
-            city,
-            barangay,
-            project_type,
-            -- Calculate completion time in days
-            CASE 
-                WHEN date_started IS NOT NULL AND contract_completion_date IS NOT NULL 
-                THEN EXTRACT(EPOCH FROM (contract_completion_date::timestamp - date_started::timestamp)) / 86400
-                ELSE NULL
-            END as completion_days
-        FROM projects 
-        WHERE status = 'Completed'
-          AND date_started IS NOT NULL 
-          AND contract_completion_date IS NOT NULL
-          AND date_started < contract_completion_date
-        ORDER BY completion_days ASC
-        LIMIT 50
+        WITH project_completion AS (
+            SELECT 
+                project_name,
+                description,
+                cost,
+                date_started,
+                contract_completion_date,
+                status,
+                implementing_offices,
+                region,
+                province,
+                city,
+                barangay,
+                project_type,
+                -- Calculate completion time in days
+                CASE 
+                    WHEN date_started IS NOT NULL AND contract_completion_date IS NOT NULL 
+                    THEN EXTRACT(EPOCH FROM (contract_completion_date::timestamp - date_started::timestamp)) / 86400
+                    ELSE NULL
+                END as completion_days
+            FROM projects 
+            WHERE status = 'Completed'
+              AND date_started IS NOT NULL 
+              AND contract_completion_date IS NOT NULL
+              AND date_started < contract_completion_date
+              AND date_started::timestamp IS NOT NULL
+              AND contract_completion_date::timestamp IS NOT NULL
+        )
+        SELECT * FROM project_completion
+        WHERE completion_days IS NOT NULL AND completion_days > 0
+        ORDER BY completion_days ASC, cost DESC
+        LIMIT 100
         """
         
         results = await conn.fetch(query)
@@ -92,7 +98,7 @@ async def generate_fastest_dime_projects():
             'projects': projects,
             'count': len(projects),
             'generated_at': datetime.now().isoformat(),
-            'description': 'Top 50 fastest completed DIME projects',
+            'description': 'Top 100 fastest completed DIME projects (sorted by completion days ascending, then cost descending)',
             'cache_version': '1.0'
         }
         
