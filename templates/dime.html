@@ -2085,9 +2085,14 @@ fetch('/static/data/dime_summary.json')
             let dataSource = 'DIME';
             
             try {
+                console.log('🔍 Fetching barangay contractors JSON...');
                 const response = await fetch('/static/data/barangay_contractors.json');
+                console.log('🔍 Response status:', response.status);
                 if (response.ok) {
                     const data = await response.json();
+                    console.log('🔍 JSON data loaded:', data);
+                    console.log('🔍 Data success:', data.success);
+                    console.log('🔍 Barangay contractors exists:', !!data.barangay_contractors);
                     if (data.success && data.barangay_contractors) {
                         const key = `${barangay},${city}`.toLowerCase();
                         console.log('🔍 Looking for key:', key);
@@ -2120,6 +2125,7 @@ fetch('/static/data/dime_summary.json')
                             console.log('⚠️ No preprocessed data found for this barangay');
                             console.log('🔍 Tried key:', key);
                             console.log('🔍 Available keys:', Object.keys(data.barangay_contractors));
+                            console.log('🔍 Key exists in data:', key in data.barangay_contractors);
                         }
                     }
                 }
@@ -2130,6 +2136,8 @@ fetch('/static/data/dime_summary.json')
             // If no preprocessed data found, try raw DIME API as fallback
             if (contractors.size === 0) {
                 console.log('🔍 No preprocessed data found, trying raw DIME API...');
+                console.log('🔍 Current contractors set size:', contractors.size);
+                console.log('🔍 Current projects array length:', projects.length);
                 const dimeResponse = await fetch(`/api/dime/projects?barangay=${encodeURIComponent(barangay)}&city=${encodeURIComponent(city)}&limit=100`);
                 const dimeData = await dimeResponse.json();
                 
