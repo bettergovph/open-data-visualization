@@ -6073,12 +6073,12 @@ async function initializeNetworkGraph() {
     try {
         console.log('🔄 Initializing network graph...');
         
-        // Load joint venture data
-        const response = await fetch('/static/data/flood_control_data.json');
+        // Load joint venture data from the dedicated JV file
+        const response = await fetch('/static/data/flood_control_data_with_jv.json');
         const data = await response.json();
         
-        // Check the correct data structure: data.data.projects
-        const projects = data.data && data.data.projects ? data.data.projects : data.projects;
+        // Check the data structure
+        const projects = data.projects;
         
         if (!projects || !Array.isArray(projects)) {
             console.log('⚠️ No projects data available for network graph');
@@ -6086,10 +6086,10 @@ async function initializeNetworkGraph() {
             return;
         }
         
-        console.log(`📊 Loaded ${projects.length} projects from JSON`);
+        console.log(`📊 Loaded ${projects.length} projects from JV JSON`);
         
-        // Process joint ventures
-        const jointVentures = projects.filter(p => p.Contractor && p.Contractor.includes(' / '));
+        // Process joint ventures using the dedicated JV fields
+        const jointVentures = projects.filter(p => p.is_joint_venture === true);
         
         if (jointVentures.length === 0) {
             console.log('⚠️ No joint ventures found in data');
@@ -6190,13 +6190,12 @@ function buildNetworkData(jointVentures) {
     
     // Process each joint venture
     jointVentures.forEach((jv) => {
-        const contractor = jv.Contractor;
-        const parts = contractor.split(' / ');
+        // Use the dedicated JV partner fields instead of parsing contractor name
+        const company1 = jv.jv_partner1;
+        const company2 = jv.jv_partner2;
+        const cost = parseFloat(jv.ContractCost) || 0;
         
-        if (parts.length >= 2) {
-            const company1 = parts[0].trim();
-            const company2 = parts[1].trim();
-            const cost = parseFloat(jv.ContractCost) || 0;
+        if (company1 && company2) {
             
             // Add companies as nodes (only once each)
             if (!nodes.has(company1)) {
@@ -6221,7 +6220,7 @@ function buildNetworkData(jointVentures) {
             }
             
             // Add JV as node (only once per unique partnership)
-            const jvId = `JV: ${contractor}`;
+            const jvId = `JV: ${company1} & ${company2}`;
             
             if (!nodes.has(jvId)) {
                 nodes.set(jvId, { 
