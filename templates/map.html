@@ -855,7 +855,7 @@ async function processProjects(projects) {
                     
                     try {
                         // Load SEC database
-                        const secResponse = await fetch('/static/sec_contractors_database.json');
+                        const secResponse = await fetch('/static/data/sec_contractors_database.json');
                         if (!secResponse.ok) {
                             throw new Error('Failed to load SEC database');
                         }
@@ -1076,7 +1076,7 @@ async function processDimeBatch(batch) {
                             const secContainer = document.getElementById(`sec-info-${dimeProjectId}`);
                             if (secContainer && contractorsList !== 'Unknown') {
                                 try {
-                                    const secResponse = await fetch('/static/sec_contractors_database.json');
+                                    const secResponse = await fetch('/static/data/sec_contractors_database.json');
                                     if (!secResponse.ok) throw new Error('Failed to load SEC database');
                                     
                                     const secData = await secResponse.json();
@@ -1419,7 +1419,7 @@ async function loadDimeSquaresForRegion(regionName) {
                         const secContainer = document.getElementById(`sec-info-${dimeProjectId}`);
                         if (secContainer && contractorsList !== 'Unknown') {
                             try {
-                                const secResponse = await fetch('/static/sec_contractors_database.json');
+                                const secResponse = await fetch('/static/data/sec_contractors_database.json');
                                 if (!secResponse.ok) throw new Error('Failed to load SEC database');
                                 
                                 const secData = await secResponse.json();

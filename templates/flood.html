@@ -5007,7 +5007,7 @@ let contractorMapping = null;
 async function loadContractorDatabase() {
     try {
         // Load SEC database (with cache busting)
-        const dbResponse = await fetch(`/static/sec_contractors_database.json?v=${Date.now()}`);
+        const dbResponse = await fetch(`/static/data/sec_contractors_database.json?v=${Date.now()}`);
         if (dbResponse.ok) {
             contractorDatabase = await dbResponse.json();
             console.log('✅ Contractor database loaded:', contractorDatabase.summary);
@@ -5016,7 +5016,7 @@ async function loadContractorDatabase() {
         }
         
         // Load manual mapping
-        const mappingResponse = await fetch('/static/contractor_sec_mapping.json');
+        const mappingResponse = await fetch('/static/data/contractor_sec_mapping.json');
         if (mappingResponse.ok) {
             contractorMapping = await mappingResponse.json();
             console.log('✅ Contractor mapping loaded:', Object.keys(contractorMapping.mapping).length, 'mappings');
@@ -5275,7 +5275,7 @@ async function loadSecModalData(contractorName) {
     
     try {
         // Load SEC database (with cache busting)
-        const response = await fetch(`/static/sec_contractors_database.json?v=${Date.now()}`);
+        const response = await fetch(`/static/data/sec_contractors_database.json?v=${Date.now()}`);
         if (!response.ok) {
             throw new Error('Failed to load SEC database');
         }
@@ -5287,7 +5287,7 @@ async function loadSecModalData(contractorName) {
                 let matchingContractor = null;
                 
                 // Load mapping data for better matching
-                const mappingResponse = await fetch('/static/contractor_sec_mapping.json');
+                const mappingResponse = await fetch('/static/data/contractor_sec_mapping.json');
                 let contractorMapping = { mapping: {} };
                 if (mappingResponse.ok) {
                     contractorMapping = await mappingResponse.json();
@@ -5649,7 +5649,7 @@ async function loadContractorsWithoutSec() {
     
     try {
         // Load SEC database to get contractors without SEC data (with cache busting)
-        const response = await fetch(`/static/sec_contractors_database.json?v=${Date.now()}`);
+        const response = await fetch(`/static/data/sec_contractors_database.json?v=${Date.now()}`);
         if (!response.ok) {
             throw new Error('Failed to load SEC database');
         }
@@ -5757,7 +5757,7 @@ async function loadSecData() {
     
     try {
         // Get SEC data from SEC database first (with cache busting)
-        const secResponse = await fetch(`/static/sec_contractors_database.json?v=${Date.now()}`);
+        const secResponse = await fetch(`/static/data/sec_contractors_database.json?v=${Date.now()}`);
         console.log('🔍 SEC database response status:', secResponse.status, secResponse.statusText);
         
         if (secResponse.ok) {

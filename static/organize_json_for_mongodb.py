@@ -152,9 +152,9 @@ def create_mongodb_migration_plan(categories: Dict[str, List[str]]) -> Dict[str,
         '/static/data/philippines-regions.json',
         '/static/data/contractor_stats_cache.json',
         '/static/data/flood_summary.json',
-        '/static/sec_contractors_database.json',
-        '/static/contractor_sec_mapping.json',
-        '/static/excluded_flood_contractors_cache.json'
+        '/static/data/sec_contractors_database.json',
+        '/static/data/contractor_sec_mapping.json',
+        '/static/data/excluded_flood_contractors_cache.json'
     ]
     
     # Migration steps
