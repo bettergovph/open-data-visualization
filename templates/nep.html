@@ -186,13 +186,13 @@ function toggleMobileMenu() {
                                     <canvas id="yearOverYearChart"></canvas>
                                 </div>
                             </div>
-                            
-                            <!-- Top Programs Chart -->
-                            <div class="chart-container" style="background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); height: 400px;">
-                                <h3 style="color: #0038A8; margin: 0 0 15px 0;">🎯 Top 10 Programs by Budget</h3>
-                                <div style="height: calc(100% - 50px); position: relative;">
-                                    <canvas id="topProgramsChart"></canvas>
-                                </div>
+                        </div>
+                        
+                        <!-- Top Programs Chart - Full Width Row -->
+                        <div class="chart-container" style="background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); height: 800px; margin-bottom: 30px;">
+                            <h3 style="color: #0038A8; margin: 0 0 15px 0;">🎯 Top 20 Programs by Budget</h3>
+                            <div style="height: calc(100% - 50px); position: relative;">
+                                <canvas id="topProgramsChart"></canvas>
                             </div>
                         </div>
                         
@@ -1462,6 +1462,7 @@ function toggleMobileMenu() {
     display: flex;
     gap: 1rem;
     margin-bottom: 2rem;
+    overflow: visible;
 }
 
 .trends-summary-cards .metric-card {
@@ -3045,7 +3046,7 @@ let topProgramsChartInstance = null;
 
 async function loadNEPTopProgramsChart(year = '2025') {
     try {
-        const response = await fetch(`${getApiBaseUrl()}/api/budget/nep/top-programs?year=${year}&limit=10`);
+        const response = await fetch(`${getApiBaseUrl()}/api/budget/nep/top-programs?year=${year}&limit=20`);
         const result = await response.json();
         
         if (!result.success || !result.programs) {
@@ -3081,8 +3082,7 @@ async function loadNEPTopProgramsChart(year = '2025') {
             },
             options: {
                 responsive: true,
-                maintainAspectRatio: true,
-                aspectRatio: 1.5,
+                maintainAspectRatio: false,
                 indexAxis: 'y',
                 plugins: {
                     legend: {

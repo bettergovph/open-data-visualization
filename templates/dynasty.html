@@ -196,10 +196,10 @@
             <a href="/" class="text-xl font-bold text-black hover:text-gray-600">Data Visualizations</a>
         </div>
         <div class="hidden md:flex space-x-6">
+            <a href="/nep" class="text-black hover:text-gray-600 font-medium transition">NEP</a>
             <a href="/budget" class="text-black hover:text-gray-600 font-medium transition">Budget</a>
             <a href="/flood" class="text-black hover:text-gray-600 font-medium transition">Flood Control</a>
             <a href="/dime" class="text-black hover:text-gray-600 font-medium transition">DIME</a>
-            <a href="/nep" class="text-black hover:text-gray-600 font-medium transition">NEP</a>
             <a href="/map" class="text-black hover:text-gray-600 font-medium transition">Map</a>
             <a href="/contractors" class="text-black hover:text-gray-600 font-medium transition">Contractors</a>
             <a href="/dynasty" class="text-black hover:text-gray-600 font-medium transition border-b-2 border-black">Dynasties</a>
@@ -223,10 +223,10 @@
     </div>
     <!-- Mobile menu (hidden by default) -->
     <div id="mobileMenu" class="hidden mt-4 px-4 space-y-2">
+        <a href="/nep" class="block text-black hover:text-gray-600 font-medium py-2">NEP</a>
         <a href="/budget" class="block text-black hover:text-gray-600 font-medium py-2">Budget</a>
         <a href="/flood" class="block text-black hover:text-gray-600 font-medium py-2">Flood Control</a>
         <a href="/dime" class="block text-black hover:text-gray-600 font-medium py-2">DIME</a>
-        <a href="/nep" class="block text-black hover:text-gray-600 font-medium py-2">NEP</a>
         <a href="/map" class="block text-black hover:text-gray-600 font-medium py-2">Map</a>
         <a href="/contractors" class="block text-black hover:text-gray-600 font-medium py-2">Contractors</a>
         <a href="/dynasty" class="block text-black hover:text-gray-600 font-medium py-2 border-b-2 border-black">Dynasties</a>
@@ -323,9 +323,9 @@ function toggleMobileMenu() {
 
                         <!-- Top Surnames Chart -->
                         <div class="chart-container" style="background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); height: 1200px; margin-bottom: 30px;">
-                            <h3 style="color: #0038A8; margin: 0 0 15px 0;">👥 Top Surnames by Province</h3>
+                            <h3 style="color: #0038A8; margin: 0 0 15px 0;">👥 Top Surnames by Province <span style="font-size: 12px; color: #666; font-weight: normal;">(Click bars to view family details)</span></h3>
                             <div style="height: calc(100% - 35px); position: relative;">
-                                <canvas id="topSurnamesChart"></canvas>
+                                <canvas id="topSurnamesChart" style="cursor: pointer;"></canvas>
                             </div>
                         </div>
 
@@ -864,6 +864,24 @@ function createSurnamesChart(data) {
                     right: 10,
                     top: 10,
                     bottom: 10
+                }
+            },
+            interaction: {
+                intersect: false,
+                mode: 'index'
+            },
+            onClick: function(event, elements) {
+                if (elements.length > 0) {
+                    const element = elements[0];
+                    const dataIndex = element.index;
+                    const item = data[dataIndex];
+                    
+                    // Redirect to family page with surname and province parameters
+                    const encodedSurname = encodeURIComponent(item.surname);
+                    const mappedProvince = mapProvinceNameToDynasty(item.province);
+                    const encodedProvince = encodeURIComponent(mappedProvince);
+                    
+                    window.location.href = `/family?surname=${encodedSurname}&province=${encodedProvince}`;
                 }
             }
         }
