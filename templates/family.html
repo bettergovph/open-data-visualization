@@ -130,7 +130,7 @@
                 const province = urlParams.get('province') || '';
                 
                 // Build API URL with province parameter if provided
-                let apiUrl = `/api/dynasty/family?surname=${encodeURIComponent(surname)}`;
+                let apiUrl = `http://172.30.147.217:8001/api/dynasty/family?surname=${encodeURIComponent(surname)}`;
                 if (province) {
                     apiUrl += `&province=${encodeURIComponent(province)}`;
                 }
