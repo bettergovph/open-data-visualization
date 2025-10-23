@@ -2100,7 +2100,20 @@ fetch('/static/data/dime_summary.json')
                             console.log('🔍 Contractors array length:', barangayData.contractors.length);
                             contractors = new Set(barangayData.contractors);
                             projects = barangayData.projects;
-                            dataSource = 'DIME';
+                            
+                            // Determine data source from project data
+                            if (projects.length > 0) {
+                                const firstProject = projects[0];
+                                if (firstProject.contractor_source === 'SSP') {
+                                    dataSource = 'SSP';
+                                } else {
+                                    dataSource = 'DIME';
+                                }
+                                console.log('🔍 Determined data source:', dataSource, 'from project:', firstProject.contractor_source);
+                            } else {
+                                dataSource = 'DIME';
+                            }
+                            
                             console.log('🔍 Converted to Set:', contractors);
                             console.log('🔍 Set size:', contractors.size);
                         } else {
