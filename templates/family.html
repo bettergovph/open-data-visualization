@@ -56,6 +56,7 @@
                     <div class="text-3xl font-bold text-primary mb-2">🏛️</div>
                     <h3 class="text-lg font-semibold text-gray-800">Positions Held</h3>
                     <p class="text-2xl font-bold text-primary" id="positionsCount">Loading...</p>
+                    <p class="text-sm text-gray-600" id="uniquePositionsCount">Loading...</p>
                 </div>
                 
                 <div class="bg-yellow-50 p-6 rounded-lg text-center">
@@ -160,13 +161,18 @@
             const tableBody = document.getElementById('familyTableBody');
             const familyCount = document.getElementById('familyCount');
             const positionsCount = document.getElementById('positionsCount');
+            const uniquePositionsCount = document.getElementById('uniquePositionsCount');
             const provincesCount = document.getElementById('provincesCount');
             
             // Update summary counts
             familyCount.textContent = familyData.length;
             
+            // Total positions (not unique)
+            positionsCount.textContent = familyData.length;
+            
+            // Unique positions as subtitle
             const uniquePositions = new Set(familyData.map(member => member.position)).size;
-            positionsCount.textContent = uniquePositions;
+            uniquePositionsCount.textContent = `Unique: ${uniquePositions}`;
             
             const uniqueProvinces = new Set(familyData.map(member => member.province)).size;
             provincesCount.textContent = uniqueProvinces;
@@ -212,6 +218,7 @@
             
             document.getElementById('familyCount').textContent = '0';
             document.getElementById('positionsCount').textContent = '0';
+            document.getElementById('uniquePositionsCount').textContent = 'Unique: 0';
             document.getElementById('provincesCount').textContent = '0';
         }
         
