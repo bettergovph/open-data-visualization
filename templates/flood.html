@@ -6073,12 +6073,12 @@ async function initializeNetworkGraph() {
     try {
         console.log('🔄 Initializing network graph...');
         
-        // Load joint venture data from the dedicated JV file
-        const response = await fetch('/static/data/flood_control_data_with_jv.json');
+        // Load joint venture data from the main flood control data
+        const response = await fetch('/static/data/flood_control_data.json');
         const data = await response.json();
         
-        // Check the data structure
-        const projects = data.projects;
+        // Check the correct data structure: data.data.projects
+        const projects = data.data && data.data.projects ? data.data.projects : data.projects;
         
         if (!projects || !Array.isArray(projects)) {
             console.log('⚠️ No projects data available for network graph');
@@ -6086,10 +6086,23 @@ async function initializeNetworkGraph() {
             return;
         }
         
-        console.log(`📊 Loaded ${projects.length} projects from JV JSON`);
+        console.log(`📊 Loaded ${projects.length} projects from JSON`);
         
-        // Process joint ventures using the dedicated JV fields
-        const jointVentures = projects.filter(p => p.is_joint_venture === true);
+        // Enhanced joint venture detection - look for various patterns
+        const jointVentures = projects.filter(p => {
+            if (!p.Contractor) return false;
+            const contractor = p.Contractor;
+            
+            // Check for various joint venture patterns
+            return contractor.includes(' / ') || 
+                   contractor.includes(' & ') || 
+                   contractor.includes(' AND ') ||
+                   contractor.includes(' + ') ||
+                   contractor.includes(' JOINT ') ||
+                   contractor.includes(' JV ') ||
+                   contractor.includes(' PARTNERSHIP ') ||
+                   contractor.includes(' CONSORTIUM ');
+        });
         
         if (jointVentures.length === 0) {
             console.log('⚠️ No joint ventures found in data');
@@ -6190,10 +6203,32 @@ function buildNetworkData(jointVentures) {
     
     // Process each joint venture
     jointVentures.forEach((jv) => {
-        // Use the dedicated JV partner fields instead of parsing contractor name
-        const company1 = jv.jv_partner1;
-        const company2 = jv.jv_partner2;
+        const contractor = jv.Contractor;
         const cost = parseFloat(jv.ContractCost) || 0;
+        
+        // Enhanced parsing for various joint venture formats
+        let company1, company2;
+        
+        if (contractor.includes(' / ')) {
+            const parts = contractor.split(' / ');
+            company1 = parts[0].trim();
+            company2 = parts[1].trim();
+        } else if (contractor.includes(' & ')) {
+            const parts = contractor.split(' & ');
+            company1 = parts[0].trim();
+            company2 = parts[1].trim();
+        } else if (contractor.includes(' AND ')) {
+            const parts = contractor.split(' AND ');
+            company1 = parts[0].trim();
+            company2 = parts[1].trim();
+        } else if (contractor.includes(' + ')) {
+            const parts = contractor.split(' + ');
+            company1 = parts[0].trim();
+            company2 = parts[1].trim();
+        } else {
+            // Skip if we can't parse it
+            return;
+        }
         
         if (company1 && company2) {
             
