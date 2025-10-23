@@ -76,10 +76,16 @@ async def generate_sec_json():
                 if contractor['status'] == 'NO_SEC_RESULTS':
                     contractors_suspicious += 1
 
+        # Get unique contractor count
+        unique_contractors = await conn.fetchrow('SELECT COUNT(DISTINCT contractor_name) as unique_count FROM contractors')
+        unique_count = unique_contractors['unique_count']
+        
         # Build complete JSON structure
         output = {
             'summary': {
-                'total_contractors': len(contractors),
+                'total_contractors': unique_count,  # Use unique count instead of total rows
+                'total_rows': len(contractors),  # Keep total rows for reference
+                'duplicate_entries': len(contractors) - unique_count,  # Show duplicate count
                 'with_sec_data': contractors_with_sec,
                 'without_sec_data': contractors_without_sec,
                 'suspicious_no_results': contractors_suspicious,
@@ -96,7 +102,9 @@ async def generate_sec_json():
             json.dump(output, f, indent=2, ensure_ascii=False)
 
         print(f"✅ Generated static/data/sec_contractors_database.json")
-        print(f"   • Total contractors: {len(contractors)}")
+        print(f"   • Total contractors: {unique_count}")
+        print(f"   • Total rows: {len(contractors)}")
+        print(f"   • Duplicate entries: {len(contractors) - unique_count}")
         print(f"   • With SEC data: {contractors_with_sec}")
         print(f"   • Without SEC data: {contractors_without_sec}")
         print(f"   • ⚠️ Suspicious (NO SEC RESULTS): {contractors_suspicious}")

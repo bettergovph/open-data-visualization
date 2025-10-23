@@ -259,6 +259,49 @@ async fn sources(_req: HttpRequest) -> Result<HttpResponse, ActixError> {
     Ok(HttpResponse::Ok().content_type("text/html").body(rendered))
 }
 
+// Political Dynasties Page
+async fn dynasty(_req: HttpRequest) -> Result<HttpResponse, ActixError> {
+    let tera = Tera::new("templates/**/*").map_err(|e| actix_web::error::ErrorInternalServerError(e))?;
+    let mut context = Context::new();
+
+    add_frontend_env_to_context(&mut context);
+
+    context.insert("title", "Political Dynasties - BetterGovPH");
+    context.insert("company_name", "BetterGovPH");
+    context.insert("platform", "BetterGovPH");
+    context.insert("SITE_NAME", "BetterGovPH Data Visualizations");
+    context.insert("SITE_URL", "https://visualizations.bettergov.ph");
+
+    let template_name = "dynasty.html";
+
+    let rendered = tera.render(template_name, &context).map_err(|e| actix_web::error::ErrorInternalServerError(e))?;
+    Ok(HttpResponse::Ok().content_type("text/html").body(rendered))
+}
+
+// Family Details Page
+async fn family(req: HttpRequest) -> Result<HttpResponse, ActixError> {
+    let tera = Tera::new("templates/**/*").map_err(|e| actix_web::error::ErrorInternalServerError(e))?;
+    let mut context = Context::new();
+
+    add_frontend_env_to_context(&mut context);
+
+    // Get surname parameter from query string
+    let query = web::Query::<std::collections::HashMap<String, String>>::from_query(req.query_string());
+    let surname = query.ok().and_then(|q| q.get("surname").cloned()).unwrap_or_else(|| "Unknown".to_string());
+
+    context.insert("title", &format!("Family Details: {} - BetterGovPH", surname));
+    context.insert("surname", &surname);
+    context.insert("company_name", "BetterGovPH");
+    context.insert("platform", "BetterGovPH");
+    context.insert("SITE_NAME", "BetterGovPH Data Visualizations");
+    context.insert("SITE_URL", "https://visualizations.bettergov.ph");
+
+    let template_name = "family.html";
+
+    let rendered = tera.render(template_name, &context).map_err(|e| actix_web::error::ErrorInternalServerError(e))?;
+    Ok(HttpResponse::Ok().content_type("text/html").body(rendered))
+}
+
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
     // Load environment variables from .env file
@@ -295,6 +338,8 @@ async fn main() -> std::io::Result<()> {
             .service(web::resource("/nep").to(nep))
             .service(web::resource("/map").to(map))
         .service(web::resource("/contractors").to(contractors))
+        .service(web::resource("/dynasty").to(dynasty))
+        .service(web::resource("/family").to(family))
         .service(web::resource("/correlation").to(correlation))
             .service(web::resource("/budget-nep-correlation").to(budget_nep_correlation))
             .service(web::resource("/budget-flood-correlation").to(budget_flood_correlation))

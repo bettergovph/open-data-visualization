@@ -271,6 +271,12 @@ class JSONGenerator:
                 'description': 'Flood control data with joint venture detection and partner extraction',
                 'category': 'flood_data',
                 'dependencies': ['MeiliSearch flood control data']
+            },
+            'dynasty_surnames_cache.json': {
+                'script': 'sec_scraper/generate_dynasty_surnames.py',
+                'description': 'Top political dynasty surnames by province (province-sensitive)',
+                'category': 'dynasty_data',
+                'dependencies': ['PostgreSQL dynasty database']
             }
         }
     
@@ -421,6 +427,19 @@ class JSONGenerator:
         
         return success
     
+    async def generate_dynasty_data(self):
+        """Generate Dynasty analysis JSON files."""
+        print("\n👑 Generating Dynasty Data...")
+        print("=" * 40)
+        
+        # Generate dynasty surnames cache
+        success, output = await self.run_script(
+            'sec_scraper/generate_dynasty_surnames.py',
+            'Dynasty Surnames Cache'
+        )
+        
+        return success
+    
     async def generate_cache_data(self):
         """Generate cache JSON files."""
         print("\n💾 Generating Cache Data...")
@@ -467,7 +486,7 @@ class JSONGenerator:
         print(f"Target directory: {self.static_data_dir}")
         
         if categories is None:
-            categories = ['sec_data', 'summary_data', 'analysis_data', 'nep_data', 'dime_data', 'cache_data', 'api_cache']
+            categories = ['sec_data', 'summary_data', 'analysis_data', 'nep_data', 'dime_data', 'cache_data', 'api_cache', 'dynasty_data']
         
         results = {}
         
@@ -490,6 +509,10 @@ class JSONGenerator:
         # Generate DIME data
         if 'dime_data' in categories:
             results['dime_data'] = await self.generate_dime_data()
+        
+        # Generate Dynasty data
+        if 'dynasty_data' in categories:
+            results['dynasty_data'] = await self.generate_dynasty_data()
         
         # Generate cache data
         if 'cache_data' in categories:

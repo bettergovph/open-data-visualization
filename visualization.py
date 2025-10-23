@@ -2319,5 +2319,272 @@ async def hidden_flood_statistics_api():
     except Exception as e:
         return JSONResponse({"success": False, "error": str(e)})
 
+@app.get("/api/dynasty")
+async def dynasty_data_api(
+    page: int = Query(1, ge=1, description="Page number"),
+    limit: int = Query(50, ge=1, le=1000, description="Number of records per page"),
+    search: str = Query("", description="Search term for filtering"),
+    position: str = Query("", description="Filter by position"),
+    region: str = Query("", description="Filter by region"),
+    dynasty: str = Query("", description="Filter by dynasty status (dynasty/non-dynasty)")
+):
+    """Get paginated political dynasty data with search and filtering"""
+    try:
+        import asyncpg
+        
+        # Connect to dynasty database
+        conn = await asyncpg.connect(
+            host=os.getenv('POSTGRES_HOST', 'localhost'),
+            port=int(os.getenv('POSTGRES_PORT', 5432)),
+            user=os.getenv('POSTGRES_USER', 'budget_admin'),
+            password=os.getenv('POSTGRES_PASSWORD', ''),
+            database=os.getenv('POSTGRES_DB_DYNASTY_SEC', 'dynasty')
+        )
+        
+        # Build WHERE clause for filtering
+        where_conditions = []
+        params = []
+        param_count = 0
+        
+        # Search filter
+        if search:
+            param_count += 1
+            where_conditions.append(f"""
+                (first_name ILIKE ${param_count} OR 
+                 last_name ILIKE ${param_count} OR 
+                 party ILIKE ${param_count} OR 
+                 region ILIKE ${param_count} OR 
+                 province ILIKE ${param_count} OR 
+                 "municipality.city" ILIKE ${param_count} OR 
+                 position ILIKE ${param_count})
+            """)
+            params.append(f"%{search}%")
+        
+        # Position filter
+        if position:
+            param_count += 1
+            where_conditions.append(f"position ILIKE ${param_count}")
+            params.append(f"%{position}%")
+        
+        # Region filter
+        if region:
+            param_count += 1
+            where_conditions.append(f"region ILIKE ${param_count}")
+            params.append(f"%{region}%")
+        
+        # Dynasty filter
+        if dynasty.lower() == "dynasty":
+            where_conditions.append("fat = 1")
+        elif dynasty.lower() == "non-dynasty":
+            where_conditions.append("fat = 0")
+        
+        # Build complete WHERE clause
+        where_clause = ""
+        if where_conditions:
+            where_clause = "WHERE " + " AND ".join(where_conditions)
+        
+        # Get total count
+        count_query = f"SELECT COUNT(*) FROM political_dynasties {where_clause}"
+        total_count = await conn.fetchval(count_query, *params)
+        
+        # Calculate pagination
+        total_pages = (total_count + limit - 1) // limit
+        offset = (page - 1) * limit
+        
+        # Get paginated data
+        data_query = f"""
+            SELECT 
+                id,
+                first_name,
+                last_name,
+                party,
+                region,
+                province,
+                "municipality.city" as municipality_city,
+                position,
+                year,
+                fat,
+                created_at
+            FROM political_dynasties 
+            {where_clause}
+            ORDER BY year DESC, last_name ASC, first_name ASC
+            LIMIT ${param_count + 1} OFFSET ${param_count + 2}
+        """
+        
+        # Add limit and offset to params
+        params.extend([limit, offset])
+        
+        records = await conn.fetch(data_query, *params)
+        
+        # Convert records to dictionaries
+        data = []
+        for record in records:
+            data.append({
+                "id": record['id'],
+                "first_name": record['first_name'],
+                "last_name": record['last_name'],
+                "party": record['party'],
+                "region": record['region'],
+                "province": record['province'],
+                "municipality_city": record['municipality_city'],
+                "position": record['position'],
+                "year": record['year'],
+                "fat": record['fat'],
+                "created_at": record['created_at'].isoformat() if record['created_at'] else None
+            })
+        
+        await conn.close()
+        
+        return JSONResponse({
+            "success": True,
+            "data": data,
+            "pagination": {
+                "page": page,
+                "limit": limit,
+                "total_count": total_count,
+                "total_pages": total_pages,
+                "has_next": page < total_pages,
+                "has_prev": page > 1
+            }
+        })
+        
+    except Exception as e:
+        return JSONResponse({"success": False, "error": str(e)})
+
+@app.get("/api/dynasty/top-surnames")
+async def dynasty_top_surnames_api(
+    limit: int = Query(20, ge=1, le=100, description="Number of top surnames to return"),
+    province: str = Query("", description="Filter by specific province")
+):
+    """Get top surnames by province for political dynasty data from cached JSON"""
+    try:
+        import json
+        
+        # Load cached JSON data
+        cache_file = "static/data/dynasty_surnames_cache.json"
+        
+        if not os.path.exists(cache_file):
+            return JSONResponse({"success": False, "error": "Dynasty surnames cache not found. Please run the cache generation script."})
+        
+        with open(cache_file, 'r', encoding='utf-8') as f:
+            cache_data = json.load(f)
+        
+        # Filter data based on parameters
+        surnames = cache_data.get('surnames', [])
+        
+        # Apply province filter if specified
+        if province:
+            surnames = [s for s in surnames if province.lower() in s['province'].lower()]
+        
+        # Apply limit
+        surnames = surnames[:limit]
+        
+        return JSONResponse({
+            "success": True,
+            "data": surnames,
+            "total_surnames": len(surnames),
+            "cache_info": {
+                "last_updated": cache_data.get('summary', {}).get('last_updated'),
+                "total_cached": cache_data.get('summary', {}).get('total_surnames', 0)
+            }
+        })
+        
+    except Exception as e:
+        return JSONResponse({"success": False, "error": str(e)})
+
+@app.get("/api/dynasty/stats")
+async def dynasty_stats_api():
+    """Get dynasty dashboard statistics"""
+    try:
+        import asyncpg
+        import os
+        
+        # Database connection
+        conn = await asyncpg.connect(
+            host=os.getenv('POSTGRES_HOST', 'localhost'),
+            port=int(os.getenv('POSTGRES_PORT', 5432)),
+            user=os.getenv('POSTGRES_USER', 'postgres'),
+            password=os.getenv('POSTGRES_PASSWORD', ''),
+            database=os.getenv('POSTGRES_DB_DYNASTY_SEC', 'dynasty')
+        )
+        
+        # Get total records
+        total_records = await conn.fetchval("SELECT COUNT(*) FROM political_dynasties")
+        
+        # Get dynasty members (fat = 1)
+        dynasty_members = await conn.fetchval("SELECT COUNT(*) FROM political_dynasties WHERE fat = 1")
+        
+        # Get non-dynasty members (fat = 0)
+        non_dynasty_members = await conn.fetchval("SELECT COUNT(*) FROM political_dynasties WHERE fat = 0")
+        
+        # Get unique politicians (distinct first_name + last_name)
+        unique_politicians = await conn.fetchval("SELECT COUNT(DISTINCT CONCAT(first_name, ' ', last_name)) FROM political_dynasties")
+        
+        await conn.close()
+        
+        return JSONResponse({
+            "success": True,
+            "data": {
+                "total_records": total_records,
+                "dynasty_members": dynasty_members,
+                "non_dynasty_members": non_dynasty_members,
+                "unique_politicians": unique_politicians
+            }
+        })
+        
+    except Exception as e:
+        return JSONResponse({"success": False, "error": str(e)})
+
+@app.get("/api/dynasty/provinces")
+async def dynasty_provinces_api():
+    """Get dynasty data aggregated by province"""
+    try:
+        import json
+        
+        # Load cached JSON data
+        cache_file = "static/data/dynasty_surnames_cache.json"
+        
+        if not os.path.exists(cache_file):
+            return JSONResponse({"success": False, "error": "Dynasty surnames cache not found. Please run the cache generation script."})
+        
+        with open(cache_file, 'r', encoding='utf-8') as f:
+            cache_data = json.load(f)
+        
+        # Aggregate data by province
+        province_data = {}
+        for surname in cache_data.get('surnames', []):
+            province = surname['province']
+            if province not in province_data:
+                province_data[province] = {
+                    'province': province,
+                    'dynasty_count': 0,
+                    'total_count': 0,
+                    'surnames': []
+                }
+            
+            province_data[province]['dynasty_count'] += surname['dynasty_count']
+            province_data[province]['total_count'] += surname['total_count']
+            province_data[province]['surnames'].append({
+                'surname': surname['surname'],
+                'dynasty_count': surname['dynasty_count']
+            })
+        
+        # Convert to list and sort by dynasty count
+        data = list(province_data.values())
+        data.sort(key=lambda x: x['dynasty_count'], reverse=True)
+        
+        return JSONResponse({
+            "success": True,
+            "data": data,
+            "total_provinces": len(data),
+            "cache_info": {
+                "last_updated": cache_data.get('summary', {}).get('last_updated'),
+                "total_cached": cache_data.get('summary', {}).get('total_surnames', 0)
+            }
+        })
+        
+    except Exception as e:
+        return JSONResponse({"success": False, "error": str(e)})
+
 if __name__ == "__main__":
     uvicorn.run(app, host="127.0.0.1", port=8000)
