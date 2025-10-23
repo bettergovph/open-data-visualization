@@ -2079,24 +2079,50 @@ fetch('/static/data/dime_summary.json')
         try {
             console.log('🔍 Fetching contractors for barangay:', barangay);
             
-            // Try to fetch projects for this specific barangay
-            const response = await fetch(`/api/dime/projects?barangay=${encodeURIComponent(barangay)}&city=${encodeURIComponent(city)}&limit=100`);
-            const data = await response.json();
+            // Try to fetch projects for this specific barangay from DIME
+            const dimeResponse = await fetch(`/api/dime/projects?barangay=${encodeURIComponent(barangay)}&city=${encodeURIComponent(city)}&limit=100`);
+            const dimeData = await dimeResponse.json();
             
-            if (!data.success) {
-                throw new Error(data.error || 'Failed to load contractors');
+            let contractors = new Set();
+            let projects = [];
+            let dataSource = 'DIME';
+            
+            if (dimeData.success && dimeData.projects && dimeData.projects.length > 0) {
+                projects = dimeData.projects;
+                console.log('📊 Found DIME projects:', projects.length);
+                
+                // Extract unique contractors from DIME
+                projects.forEach(project => {
+                    if (project.contractors && project.contractors.length > 0) {
+                        project.contractors.forEach(contractor => contractors.add(contractor));
+                    }
+                });
             }
             
-            const projects = data.projects || [];
-            console.log('📊 Found projects:', projects.length);
-            
-            // Extract unique contractors
-            const contractors = new Set();
-            projects.forEach(project => {
-                if (project.contractors && project.contractors.length > 0) {
-                    project.contractors.forEach(contractor => contractors.add(contractor));
+            // If no DIME data, try SSP (flood control) database
+            if (contractors.size === 0) {
+                console.log('🔍 No DIME contractors found, checking SSP database...');
+                
+                try {
+                    const sspResponse = await fetch(`/api/flood/projects?barangay=${encodeURIComponent(barangay)}&city=${encodeURIComponent(city)}&limit=100`);
+                    const sspData = await sspResponse.json();
+                    
+                    if (sspData.success && sspData.projects && sspData.projects.length > 0) {
+                        projects = sspData.projects;
+                        dataSource = 'SSP';
+                        console.log('📊 Found SSP projects:', projects.length);
+                        
+                        // Extract unique contractors from SSP
+                        projects.forEach(project => {
+                            if (project.contractor) {
+                                contractors.add(project.contractor);
+                            }
+                        });
+                    }
+                } catch (sspError) {
+                    console.log('⚠️ SSP search failed:', sspError);
                 }
-            });
+            }
             
             const contractorList = Array.from(contractors);
             
@@ -2107,14 +2133,23 @@ fetch('/static/data/dime_summary.json')
                 content.innerHTML = `
                     <div style="text-align: center; padding: 2rem; color: #666;">
                         <p style="font-size: 1.1em; margin-bottom: 10px;">No contractor data available</p>
-                        <p style="font-size: 0.9em;">This barangay may not have contractor information in the database.</p>
+                        <p style="font-size: 0.9em;">This barangay has no projects in either DIME or SSP databases.</p>
+                        <div style="margin-top: 15px; padding: 10px; background: #f8f9fa; border-radius: 4px;">
+                            <p style="font-size: 0.85em; margin: 0; color: #666;">
+                                <strong>Checked:</strong> DIME Database & SSP (Sumbong sa Pangulo)
+                            </p>
+                        </div>
                     </div>
                 `;
             } else {
+                const sourceBadge = dataSource === 'SSP' ? 
+                    '<span style="background: #28a745; color: white; padding: 2px 6px; border-radius: 4px; font-size: 0.8em; font-weight: 600;">SSP</span>' :
+                    '<span style="background: #6c757d; color: white; padding: 2px 6px; border-radius: 4px; font-size: 0.8em; font-weight: 600;">DIME</span>';
+                
                 content.innerHTML = `
                     <div style="margin-bottom: 20px;">
                         <p style="color: #666; margin: 0 0 15px 0;"><strong>${projects.length}</strong> projects found in <strong>${barangay}, ${city}</strong></p>
-                        <p style="color: #666; margin: 0 0 20px 0;"><strong>${contractorList.length}</strong> unique contractors</p>
+                        <p style="color: #666; margin: 0 0 20px 0;"><strong>${contractorList.length}</strong> unique contractors ${sourceBadge}</p>
                     </div>
                     <div style="max-height: 400px; overflow-y: auto;">
                         ${contractorList.map((contractor, index) => `
