@@ -1,0 +1,261 @@
+{
+  "collections": {
+    "flood_data": {
+      "description": "Flood control projects and related data",
+      "files": [
+        "data/flood_dime_contractor_correlation.json",
+        "data/flood_dime_contractor_correlation_2024.json",
+        "data/flood_control_data_working.json",
+        "data/flood_dime_contractor_correlation_2020.json",
+        "data/flood_control_data_backup.json",
+        "data/flood_baseline_pattern.json",
+        "data/flood_dime_contractor_correlation_2025.json",
+        "data/flood_dime_contractor_correlation_2021.json",
+        "data/flood_dime_contractor_correlation_all_years.json",
+        "data/fastest_dime_projects.json",
+        "data/flood_dime_contractor_correlation_2023.json",
+        "data/flood_control_data.json",
+        "data/excluded_flood_contractors_cache.json",
+        "data/flood_summary.json",
+        "data/flood_same_amount_proximity_results.json",
+        "data/flood_dime_contractor_correlation_2022.json",
+        "data/flood_control_data_with_jv.json"
+      ],
+      "primary_key": "project_id",
+      "indexes": [
+        "region",
+        "year",
+        "contractor",
+        "amount"
+      ]
+    },
+    "budget_data": {
+      "description": "Budget analysis and financial data",
+      "files": [
+        "data/budget_summary.json"
+      ],
+      "primary_key": "budget_id",
+      "indexes": [
+        "year",
+        "department",
+        "region",
+        "category"
+      ]
+    },
+    "nep_data": {
+      "description": "National Expenditure Program data",
+      "files": [
+        "data/nep_2026_overall_analysis.json",
+        "data/nep_summary.json",
+        "data/nep_2026_red_flag.json",
+        "data/nep_2026_infrastructure_categories.json"
+      ],
+      "primary_key": "nep_id",
+      "indexes": [
+        "year",
+        "category",
+        "department",
+        "region"
+      ]
+    },
+    "sec_data": {
+      "description": "SEC contractor and company data",
+      "files": [
+        "contractor_sec_mapping.json",
+        "sec_contractors_database.json"
+      ],
+      "primary_key": "sec_number",
+      "indexes": [
+        "contractor_name",
+        "status",
+        "registration_date"
+      ]
+    },
+    "geographic_data": {
+      "description": "Geographic and regional data",
+      "files": [
+        "data/region-mapping.json",
+        "data/philippines-regions.json"
+      ],
+      "primary_key": "region_id",
+      "indexes": [
+        "region_name",
+        "province",
+        "coordinates"
+      ]
+    },
+    "correlation_data": {
+      "description": "Data correlation and analysis results",
+      "files": [],
+      "primary_key": "correlation_id",
+      "indexes": [
+        "year",
+        "contractor",
+        "correlation_type"
+      ]
+    },
+    "cache_data": {
+      "description": "Cached data for performance optimization",
+      "files": [
+        "data/contractor_stats_cache.json",
+        "data/dime_stats.json"
+      ],
+      "primary_key": "cache_key",
+      "indexes": [
+        "cache_type",
+        "generated_at",
+        "expires_at"
+      ]
+    },
+    "summary_data": {
+      "description": "Summary and aggregated data",
+      "files": [
+        "data/dime_summary.json"
+      ],
+      "primary_key": "summary_id",
+      "indexes": [
+        "data_type",
+        "year",
+        "region"
+      ]
+    }
+  },
+  "file_mappings": {
+    "data/flood_dime_contractor_correlation.json": {
+      "collection": "flood_data",
+      "description": "Flood control projects and related data"
+    },
+    "data/flood_dime_contractor_correlation_2024.json": {
+      "collection": "flood_data",
+      "description": "Flood control projects and related data"
+    },
+    "data/flood_control_data_working.json": {
+      "collection": "flood_data",
+      "description": "Flood control projects and related data"
+    },
+    "data/flood_dime_contractor_correlation_2020.json": {
+      "collection": "flood_data",
+      "description": "Flood control projects and related data"
+    },
+    "data/flood_control_data_backup.json": {
+      "collection": "flood_data",
+      "description": "Flood control projects and related data"
+    },
+    "data/flood_baseline_pattern.json": {
+      "collection": "flood_data",
+      "description": "Flood control projects and related data"
+    },
+    "data/flood_dime_contractor_correlation_2025.json": {
+      "collection": "flood_data",
+      "description": "Flood control projects and related data"
+    },
+    "data/flood_dime_contractor_correlation_2021.json": {
+      "collection": "flood_data",
+      "description": "Flood control projects and related data"
+    },
+    "data/flood_dime_contractor_correlation_all_years.json": {
+      "collection": "flood_data",
+      "description": "Flood control projects and related data"
+    },
+    "data/fastest_dime_projects.json": {
+      "collection": "flood_data",
+      "description": "Flood control projects and related data"
+    },
+    "data/flood_dime_contractor_correlation_2023.json": {
+      "collection": "flood_data",
+      "description": "Flood control projects and related data"
+    },
+    "data/flood_control_data.json": {
+      "collection": "flood_data",
+      "description": "Flood control projects and related data"
+    },
+    "data/excluded_flood_contractors_cache.json": {
+      "collection": "flood_data",
+      "description": "Flood control projects and related data"
+    },
+    "data/flood_summary.json": {
+      "collection": "flood_data",
+      "description": "Flood control projects and related data"
+    },
+    "data/flood_same_amount_proximity_results.json": {
+      "collection": "flood_data",
+      "description": "Flood control projects and related data"
+    },
+    "data/flood_dime_contractor_correlation_2022.json": {
+      "collection": "flood_data",
+      "description": "Flood control projects and related data"
+    },
+    "data/flood_control_data_with_jv.json": {
+      "collection": "flood_data",
+      "description": "Flood control projects and related data"
+    },
+    "data/budget_summary.json": {
+      "collection": "budget_data",
+      "description": "Budget analysis and financial data"
+    },
+    "data/nep_2026_overall_analysis.json": {
+      "collection": "nep_data",
+      "description": "National Expenditure Program data"
+    },
+    "data/nep_summary.json": {
+      "collection": "nep_data",
+      "description": "National Expenditure Program data"
+    },
+    "data/nep_2026_red_flag.json": {
+      "collection": "nep_data",
+      "description": "National Expenditure Program data"
+    },
+    "data/nep_2026_infrastructure_categories.json": {
+      "collection": "nep_data",
+      "description": "National Expenditure Program data"
+    },
+    "contractor_sec_mapping.json": {
+      "collection": "sec_data",
+      "description": "SEC contractor and company data"
+    },
+    "sec_contractors_database.json": {
+      "collection": "sec_data",
+      "description": "SEC contractor and company data"
+    },
+    "data/region-mapping.json": {
+      "collection": "geographic_data",
+      "description": "Geographic and regional data"
+    },
+    "data/philippines-regions.json": {
+      "collection": "geographic_data",
+      "description": "Geographic and regional data"
+    },
+    "data/contractor_stats_cache.json": {
+      "collection": "cache_data",
+      "description": "Cached data for performance optimization"
+    },
+    "data/dime_stats.json": {
+      "collection": "cache_data",
+      "description": "Cached data for performance optimization"
+    },
+    "data/dime_summary.json": {
+      "collection": "summary_data",
+      "description": "Summary and aggregated data"
+    }
+  },
+  "api_endpoints_to_update": [
+    "/static/data/flood_control_data.json",
+    "/static/data/region-mapping.json",
+    "/static/data/philippines-regions.json",
+    "/static/data/contractor_stats_cache.json",
+    "/static/data/flood_summary.json",
+    "/static/sec_contractors_database.json",
+    "/static/contractor_sec_mapping.json",
+    "/static/excluded_flood_contractors_cache.json"
+  ],
+  "migration_steps": [
+    "1. Create MongoDB collections with proper schemas",
+    "2. Import JSON files into respective collections",
+    "3. Create indexes for performance optimization",
+    "4. Update API endpoints to read from MongoDB",
+    "5. Implement caching layer for frequently accessed data",
+    "6. Test all endpoints and visualizations",
+    "7. Deploy and monitor performance",
+    "8. Keep JSON files as backup during transition"
+  ]
+}

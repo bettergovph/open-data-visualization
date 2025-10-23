@@ -1795,7 +1795,7 @@ async def hidden_flood_contractors_cached_api():
         from pathlib import Path
         
         # Try to load from cache file
-        cache_file = Path("static/excluded_flood_contractors_cache.json")
+        cache_file = Path("static/data/excluded_flood_contractors_cache.json")
         
         if cache_file.exists():
             with open(cache_file, 'r', encoding='utf-8') as f:
