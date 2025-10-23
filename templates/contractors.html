@@ -164,8 +164,7 @@ function toggleMobileMenu() {
         <div class="budget-tabs">
             <div class="flex border-b-2 border-gray-200 mb-4 gap-2">
                 <a href="#visual-tab" class="budget-tab-btn active bg-white text-blue-600 border-blue-600 border-t border-l border-r px-6 py-3 rounded-t-lg cursor-pointer font-semibold transition-all duration-300 relative -mb-0.5 z-10" data-tab="visual">📊 Visual</a>
-                <a href="#table-tab" class="budget-tab-btn bg-gray-100 text-gray-600 border-gray-300 border px-6 py-3 rounded-t-lg cursor-pointer font-semibold transition-all duration-300 hover:bg-gray-200" data-tab="table">📋 Table</a>
-                <a href="#sec-tab" class="budget-tab-btn bg-gray-100 text-gray-600 border-gray-300 border px-6 py-3 rounded-t-lg cursor-pointer font-semibold transition-all duration-300 hover:bg-gray-200" data-tab="sec">🏛️ SEC</a>
+                <a href="#table-tab" class="budget-tab-btn bg-gray-100 text-gray-600 border-gray-300 border px-6 py-3 rounded-t-lg cursor-pointer font-semibold transition-all duration-300 hover:bg-gray-200" data-tab="table">🏛️ SEC Table</a>
                 <a href="#projects-search-tab" class="budget-tab-btn bg-gray-100 text-gray-600 border-gray-300 border px-6 py-3 rounded-t-lg cursor-pointer font-semibold transition-all duration-300 hover:bg-gray-200" data-tab="projects-search">🔍 Projects Search</a>
                 <a href="#hidden-flood-tab" class="budget-tab-btn bg-gray-100 text-gray-600 border-gray-300 border px-6 py-3 rounded-t-lg cursor-pointer font-semibold transition-all duration-300 hover:bg-gray-200" data-tab="hidden-flood">🔍 Excluded Flood Control</a>
             </div>
@@ -345,80 +344,6 @@ function toggleMobileMenu() {
                     </div>
                 </div>
 
-                <!-- SEC TAB -->
-                <div id="sec-tab" class="budget-tab-panel">
-                    <!-- SEC Data Analysis -->
-                    <div style="background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
-                        <h3 style="color: #0038A8; margin: 0 0 20px 0;">🏛️ SEC Data Analysis</h3>
-                        <p style="color: #666; margin: 0 0 20px 0;">Analyze contractor SEC registration data and identify contractors without SEC information</p>
-                        
-                        <!-- SEC Statistics -->
-                        <div class="sec-stats" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 20px;">
-                            <div class="stat-card" style="background: #f8f9fa; padding: 15px; border-radius: 8px; text-align: center;">
-                                <h4 style="color: #0038A8; margin: 0 0 5px 0; font-size: 1.1em;">Total Contractors</h4>
-                                <p id="sec-total-contractors-count" style="font-size: 2em; font-weight: bold; color: #007bff; margin: 0;">Loading...</p>
-                                <p style="font-size: 0.7em; color: #6c757d; margin: 5px 0 0 0;">In system</p>
-                            </div>
-                            <div class="stat-card" style="background: #f8f9fa; padding: 15px; border-radius: 8px; text-align: center;">
-                                <h4 style="color: #0038A8; margin: 0 0 5px 0; font-size: 1.1em;">Processed</h4>
-                                <p id="sec-processed-count" style="font-size: 2em; font-weight: bold; color: #17a2b8; margin: 0;">Loading...</p>
-                                <p style="font-size: 0.7em; color: #6c757d; margin: 5px 0 0 0;">From database</p>
-                            </div>
-                            <div class="stat-card" style="background: #d4edda; padding: 15px; border-radius: 8px; text-align: center; border: 2px solid #c3e6cb;">
-                                <h4 style="color: #155724; margin: 0 0 5px 0; font-size: 1.1em;">✅ With SEC Data</h4>
-                                <p id="total-sec-count" style="font-size: 2em; font-weight: bold; color: #28a745; margin: 0;">Loading...</p>
-                                <p style="font-size: 0.7em; color: #155724; margin: 5px 0 0 0;">Verified</p>
-                            </div>
-                            <div class="stat-card" style="background: #fff3cd; padding: 15px; border-radius: 8px; text-align: center; border: 2px solid #ffeaa7;">
-                                <h4 style="color: #856404; margin: 0 0 5px 0; font-size: 1.1em;">⚠️ NO SEC Results</h4>
-                                <p id="suspicious-sec-count" style="font-size: 2em; font-weight: bold; color: #856404; margin: 0;">Loading...</p>
-                                <p style="font-size: 0.7em; color: #856404; margin: 5px 0 0 0;">Suspicious</p>
-                            </div>
-                        </div>
-
-                        <!-- Suspicious Contractors -->
-                        <div class="chart-container" style="background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); margin-bottom: 20px;">
-                            <h3 style="color: #dc3545; margin: 0 0 15px 0;">⚠️ Suspicious Contractors (NO SEC Results)</h3>
-                            
-                            <!-- Pagination controls -->
-                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
-                                <div style="color: #666; font-size: 0.9em;">
-                                    Showing <span id="sec-page-info">0</span> of <span id="sec-total">0</span> suspicious contractors
-                                </div>
-                                <div style="display: flex; gap: 10px;">
-                                    <button id="sec-prev" style="background: #6c757d; color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer;" disabled>← Previous</button>
-                                    <button id="sec-next" style="background: #6c757d; color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer;" disabled>Next →</button>
-                                </div>
-                            </div>
-                            
-                            <!-- Suspicious Contractors Table -->
-                            <div style="overflow-x: auto;">
-                                <table style="width: 100%; border-collapse: collapse; background: white;">
-                                    <thead>
-                                        <tr style="background: #f8f9fa; border-bottom: 2px solid #dee2e6;">
-                                            <th style="padding: 12px; text-align: left; border-bottom: 2px solid #dee2e6; font-weight: 600; color: #0038A8; width: 5%;">#</th>
-                                            <th style="padding: 12px; text-align: left; border-bottom: 2px solid #dee2e6; font-weight: 600; color: #0038A8; width: 35%;">Contractor Name</th>
-                                            <th style="padding: 12px; text-align: center; border-bottom: 2px solid #dee2e6; font-weight: 600; color: #0038A8; width: 20%;">Status</th>
-                                            <th style="padding: 12px; text-align: center; border-bottom: 2px solid #dee2e6; font-weight: 600; color: #0038A8; width: 20%;">SEC Number</th>
-                                            <th style="padding: 12px; text-align: center; border-bottom: 2px solid #dee2e6; font-weight: 600; color: #0038A8; width: 20%;">Last Updated</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody id="contractorsWithoutSec">
-                                        <tr>
-                                            <td colspan="5" style="padding: 40px; text-align: center; color: #666;">
-                                                <div style="display: flex; flex-direction: column; align-items: center; gap: 10px;">
-                                                    <div style="font-size: 24px;">⚠️</div>
-                                                    <div>Loading suspicious contractors...</div>
-                                                </div>
-                                            </td>
-                                        </tr>
-                                    </tbody>
-                                </table>
-                            </div>
-                        </div>
-
-                    </div>
-                </div>
 
                 <!-- PROJECTS SEARCH TAB -->
                 <div id="projects-search-tab" class="budget-tab-panel">
@@ -1045,17 +970,8 @@ async function loadContractors() {
         document.getElementById('with-sec').textContent = (summary.with_sec_data || 0).toLocaleString('en-PH');
         document.getElementById('suspicious').textContent = (summary.suspicious_no_results || 0).toLocaleString('en-PH');
         
-        // Update SEC tab statistics
-        document.getElementById('sec-total-contractors-count').textContent = (summary.total_contractors || 0).toLocaleString('en-PH');
-        document.getElementById('sec-processed-count').textContent = processedCount.toLocaleString('en-PH');
-        document.getElementById('total-sec-count').textContent = (summary.with_sec_data || 0).toLocaleString('en-PH');
-        document.getElementById('suspicious-sec-count').textContent = (summary.suspicious_no_results || 0).toLocaleString('en-PH');
-        
-        // Load individual contractors data for the table (suspicious contractors only)
+        // Load individual contractors data for the table
         await loadIndividualContractors();
-        
-        // Load contractors without SEC for SEC tab
-        loadContractorsWithoutSec();
         
         // Count projects per contractor from flood data
         await loadContractorProjectCounts();
@@ -1073,78 +989,6 @@ async function loadContractors() {
     }
 }
 
-// Load suspicious contractors for SEC tab
-function loadContractorsWithoutSec() {
-    // Filter only suspicious contractors (NO_SEC_RESULTS status)
-    suspiciousContractors = allContractors.filter(c => c.status === 'NO_SEC_RESULTS');
-    
-    // Render first page
-    renderSuspiciousContractors();
-}
-
-// Render suspicious contractors with pagination
-function renderSuspiciousContractors() {
-    const container = document.getElementById('contractorsWithoutSec');
-    const start = currentSecPage * secPageSize;
-    const end = start + secPageSize;
-    const contractorsToShow = suspiciousContractors.slice(start, end);
-    
-    container.innerHTML = '';
-    
-    if (suspiciousContractors.length === 0) {
-        container.innerHTML = `
-            <tr>
-                <td colspan="5" style="padding: 40px; text-align: center; color: #28a745; background: #d4edda;">
-                    <div style="display: flex; flex-direction: column; align-items: center; gap: 10px;">
-                        <div style="font-size: 24px;">✅</div>
-                        <div style="font-weight: bold;">No suspicious contractors found!</div>
-                    </div>
-                </td>
-            </tr>
-        `;
-        document.getElementById('sec-page-info').textContent = '0';
-        document.getElementById('sec-total').textContent = '0';
-        document.getElementById('sec-prev').disabled = true;
-        document.getElementById('sec-next').disabled = true;
-        return;
-    }
-    
-    contractorsToShow.forEach((contractor, index) => {
-        const rowNumber = start + index + 1;
-        const row = document.createElement('tr');
-        row.style.cssText = 'border-bottom: 1px solid #dee2e6;';
-        
-        // Alternate row colors for better readability
-        if (index % 2 === 0) {
-            row.style.backgroundColor = '#fff3cd';
-        } else {
-            row.style.backgroundColor = '#fff8e1';
-        }
-        
-        row.innerHTML = `
-            <td style="padding: 12px; text-align: center; font-weight: 600; color: #0038A8;">${rowNumber}</td>
-            <td style="padding: 12px; font-weight: 600; color: #856404;">${contractor.contractor_name}</td>
-            <td style="padding: 12px; text-align: center;">
-                <span style="background: #f8d7da; color: #721c24; padding: 4px 8px; border-radius: 4px; font-size: 0.85em; font-weight: 600; border: 1px solid #f5c6cb;">
-                    ⚠️ NO SEC RESULTS
-                </span>
-            </td>
-            <td style="padding: 12px; text-align: center; color: #dc3545; font-weight: 600;">Not Found</td>
-            <td style="padding: 12px; text-align: center; color: #6c757d; font-size: 0.9em;">
-                ${contractor.last_updated ? new Date(contractor.last_updated).toLocaleDateString('en-PH') : 'N/A'}
-            </td>
-        `;
-        
-        container.appendChild(row);
-    });
-    
-    // Update pagination
-    const totalPages = Math.ceil(suspiciousContractors.length / secPageSize);
-    document.getElementById('sec-page-info').textContent = `${start + 1}-${Math.min(end, suspiciousContractors.length)}`;
-    document.getElementById('sec-total').textContent = suspiciousContractors.length;
-    document.getElementById('sec-prev').disabled = currentSecPage === 0;
-    document.getElementById('sec-next').disabled = currentSecPage >= totalPages - 1;
-}
 
 // Load contractor project counts from sec database
 async function loadContractorProjectCounts() {
@@ -1410,21 +1254,6 @@ document.getElementById('table-next').addEventListener('click', function() {
     }
 });
 
-// Pagination for SEC tab
-document.getElementById('sec-prev').addEventListener('click', function() {
-    if (currentSecPage > 0) {
-        currentSecPage--;
-        renderSuspiciousContractors();
-    }
-});
-
-document.getElementById('sec-next').addEventListener('click', function() {
-    const totalPages = Math.ceil(suspiciousContractors.length / secPageSize);
-    if (currentSecPage < totalPages - 1) {
-        currentSecPage++;
-        renderSuspiciousContractors();
-    }
-});
 
 // Projects pagination event listeners
 document.getElementById('projects-prev').addEventListener('click', async function() {
