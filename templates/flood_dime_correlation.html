@@ -451,9 +451,27 @@
                 console.log(`🔍 Loading contractor correlation data for ${yearLabel}...`);
                 
                 const response = await fetch(`/static/data/flood_dime_contractor_correlation_${selectedYear}.json`);
+                
+                if (!response.ok) {
+                    console.error(`❌ HTTP error: ${response.status} ${response.statusText}`);
+                    document.getElementById('contractor-loading-spinner').style.display = 'none';
+                    document.getElementById('contractor-error').style.display = 'block';
+                    document.getElementById('contractor-error').textContent = `Error: Failed to load data (${response.status})`;
+                    return;
+                }
+                
                 const data = await response.json();
                 
                 console.log('✅ Contractor data loaded:', data);
+                
+                // Check if data structure is valid
+                if (!data || !data.contractors) {
+                    console.error('❌ Invalid data structure:', data);
+                    document.getElementById('contractor-loading-spinner').style.display = 'none';
+                    document.getElementById('contractor-error').style.display = 'block';
+                    document.getElementById('contractor-error').textContent = 'Error: Invalid data structure received';
+                    return;
+                }
                 
                 // Hide spinner, show content
                 document.getElementById('contractor-loading-spinner').style.display = 'none';
