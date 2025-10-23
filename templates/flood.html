@@ -3906,14 +3906,13 @@ function getContractorSecStatusSync(contractorName) {
                 switchTab('contractors');
                 document.getElementById('contractor-search').value = contractorName;
                 
-                // Trigger the Apply button automatically
-                const applyButton = document.getElementById('refresh-contractor-data');
-                if (applyButton) {
-                    applyButton.click();
-                } else {
-                    // Fallback: just render contractors
+                // Apply the search filter directly with a small delay to ensure DOM is ready
+                setTimeout(() => {
+                    console.log('🔄 Auto-applying search filter for contractor:', contractorName);
+                    // Apply contractor filters and render (same as what the Apply button should do)
+                    applyContractorFilters();
                     renderContractors();
-                }
+                }, 100); // Small delay to ensure tab switch and DOM updates are complete
             }
         };
         
