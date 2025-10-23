@@ -1,8 +1,18 @@
 {
-  "data": null,
-  "generated_at": "2025-10-23T08:18:01.837546",
+  "data": {
+    "success": true,
+    "stats": {
+      "total_items": 723105,
+      "total_value": 12652648600.0,
+      "top_department": "INVALID",
+      "top_dept_amount": 6326324300.0,
+      "unique_agencies": 387,
+      "unique_departments": 40,
+      "last_updated": "2025-10-07T22:19:16.472343+00:00"
+    }
+  },
+  "generated_at": "2025-10-23T08:20:58.839352",
   "cache_version": "1.0",
   "endpoint": "/api/budget/overview/stats",
-  "status": "server_not_running",
-  "error": "FastAPI server not running - please start server and regenerate"
+  "status": "success"
 }

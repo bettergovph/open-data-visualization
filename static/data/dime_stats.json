@@ -1,8 +1,147 @@
 {
-  "data": null,
-  "generated_at": "2025-10-23T08:18:01.837380",
+  "data": {
+    "success": true,
+    "statistics": {
+      "total_projects": 12870,
+      "total_budget": 740208620412.9,
+      "avg_cost": 57514267.32034965,
+      "active_projects": 465
+    },
+    "status_distribution": {
+      "labels": [
+        "Completed",
+        "Not Yet Started",
+        "Ongoing",
+        "Incomplete"
+      ],
+      "data": [
+        10121,
+        1991,
+        465,
+        293
+      ]
+    },
+    "budget_by_region": {
+      "labels": [
+        "Central Luzon",
+        "Bicol Region",
+        "Cagayan Valley",
+        "NCR",
+        "Ilocos Region",
+        "Central Visayas",
+        "MIMAROPA Region",
+        "CALABARZON",
+        "Eastern Visayas",
+        "Western Visayas"
+      ],
+      "data": [
+        140.63,
+        64.07,
+        52.62,
+        52.49,
+        49.93,
+        46.97,
+        44.78,
+        41.56,
+        37.67,
+        34.29
+      ]
+    },
+    "top_offices": {
+      "labels": [
+        "{\"id\": 1, \"name\": \"Department of Public Works and Highways\", \"nameAbbreviation\": \"DPWH\"}",
+        "{\"id\": 11, \"name\": \"Department of Transportation\", \"nameAbbreviation\": \"DOTr\"}",
+        "{\"id\": 52, \"name\": \"National Irrigation Administration\", \"nameAbbreviation\": \"NIA\"}",
+        "{\"id\": 53, \"name\": \"Metropolitan Waterworks and Sewerage System\", \"nameAbbreviation\": \"MWSS\"}",
+        "{\"id\": 10, \"name\": \"Department of Agriculture\", \"nameAbbreviation\": \"DA\"}"
+      ],
+      "data": [
+        12861,
+        4,
+        2,
+        2,
+        1
+      ]
+    },
+    "project_types": {
+      "labels": [
+        "Main Portal"
+      ],
+      "data": [
+        12870
+      ]
+    },
+    "expensive_projects": {
+      "labels": [
+        "Cavite Industrial Area Flood Risk Management Proje...",
+        "Priority Bridges Crossing Pasig - Marikina River a...",
+        "Metro Manila Flood Management Project, Phase I (MM...",
+        "Construction of Flood Control Structures and Other...",
+        " TUBAY-CABADBARAN COASTAL ROAD (CONSTRUCTION OF BR..."
+      ],
+      "data": [
+        1.99,
+        1.82,
+        1.62,
+        0.4,
+        0.34
+      ]
+    },
+    "projects_by_year": {
+      "labels": [
+        "2018",
+        "2019",
+        "2020",
+        "2021",
+        "2022",
+        "2023",
+        "2024",
+        "2025"
+      ],
+      "data": [
+        7,
+        3,
+        34,
+        234,
+        4197,
+        3466,
+        2504,
+        391
+      ]
+    },
+    "source_of_funds": {
+      "labels": [
+        "[{\"id\": 8, \"name\": \"General Appropriations Act FY 2023\", \"nameAbbreviation\": \"GAA FY 2023\"}]",
+        "[{\"id\": 9, \"name\": \"General Appropriations Act FY 2022\", \"nameAbbreviation\": \"GAA FY 2022\"}]",
+        "[{\"id\": 6, \"name\": \"General Appropriations Act FY 2025\", \"nameAbbreviation\": \"GAA FY 2025\"}]",
+        "[{\"id\": 7, \"name\": \"General Appropriations Act FY 2024\", \"nameAbbreviation\": \"GAA FY 2024\"}]",
+        "[{\"id\": 10, \"name\": \"General Appropriations Act FY 2021\", \"nameAbbreviation\": \"GAA FY 2021\"}]"
+      ],
+      "data": [
+        27.41,
+        24.27,
+        23.61,
+        20.91,
+        3.24
+      ]
+    },
+    "progress_distribution": {
+      "labels": [
+        "0-25%",
+        "50-75%",
+        "75-100%",
+        "Unknown"
+      ],
+      "data": [
+        1991,
+        465,
+        10121,
+        293
+      ]
+    }
+  },
+  "generated_at": "2025-10-23T08:20:58.821373",
   "cache_version": "1.0",
   "endpoint": "/api/dime/statistics",
-  "status": "server_not_running",
-  "error": "FastAPI server not running - please start server and regenerate"
+  "status": "success"
 }

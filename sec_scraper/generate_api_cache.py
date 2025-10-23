@@ -15,7 +15,7 @@ from typing import Dict, Any, List
 from pathlib import Path
 
 # Base URL for the API
-BASE_URL = "http://localhost:8000"
+BASE_URL = "http://172.30.147.217:8001"
 
 # API endpoints that generate JSON on-demand
 API_ENDPOINTS = {

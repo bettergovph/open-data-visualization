@@ -1,8 +1,31 @@
 {
-  "data": null,
-  "generated_at": "2025-10-23T08:18:01.837615",
+  "data": {
+    "success": true,
+    "data": [
+      {
+        "uacs_exp_dsc": "Personnel Services",
+        "total_amount": 1632858868.0,
+        "project_count": 205054
+      },
+      {
+        "uacs_exp_dsc": "Capital Outlays",
+        "total_amount": 1461614248.0,
+        "project_count": 30347
+      },
+      {
+        "uacs_exp_dsc": "Maintenance and Other Operating Expenses",
+        "total_amount": 1251617162.0,
+        "project_count": 303956
+      },
+      {
+        "uacs_exp_dsc": "Financial Expenses",
+        "total_amount": 848068649.0,
+        "project_count": 3
+      }
+    ]
+  },
+  "generated_at": "2025-10-23T08:20:59.325609",
   "cache_version": "1.0",
   "endpoint": "/api/budget/expense-categories",
-  "status": "server_not_running",
-  "error": "FastAPI server not running - please start server and regenerate"
+  "status": "success"
 }

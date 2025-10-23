@@ -1,8 +1,61 @@
 {
-  "data": null,
-  "generated_at": "2025-10-23T08:18:01.837590",
+  "data": {
+    "success": true,
+    "data": [
+      {
+        "department_description": "Department of Public Works and Highways (DPWH)",
+        "total_amount": 1088800308.0,
+        "project_count": 33003
+      },
+      {
+        "department_description": "Automatic Appropriations",
+        "total_amount": 876730688.0,
+        "project_count": 2
+      },
+      {
+        "department_description": "Department of Education (DepEd)",
+        "total_amount": 782171034.0,
+        "project_count": 318568
+      },
+      {
+        "department_description": "New General Appropriations",
+        "total_amount": 390687073.0,
+        "project_count": 45
+      },
+      {
+        "department_description": "Department of the Interior and Local Government (DILG)",
+        "total_amount": 282325736.0,
+        "project_count": 7819
+      },
+      {
+        "department_description": "Department of National Defense (DND)",
+        "total_amount": 275973823.0,
+        "project_count": 2816
+      },
+      {
+        "department_description": "Department of Health (DOH)",
+        "total_amount": 253360769.0,
+        "project_count": 8717
+      },
+      {
+        "department_description": "Department of Social Welfare and Development (DSWD)",
+        "total_amount": 217537017.0,
+        "project_count": 4369
+      },
+      {
+        "department_description": "Budgetary Support to Government Corporations (BSGC)",
+        "total_amount": 137278174.0,
+        "project_count": 196
+      },
+      {
+        "department_description": "State Universities and Colleges (SUCs)",
+        "total_amount": 127227504.0,
+        "project_count": 19636
+      }
+    ]
+  },
+  "generated_at": "2025-10-23T08:20:59.250510",
   "cache_version": "1.0",
   "endpoint": "/api/budget/departments",
-  "status": "server_not_running",
-  "error": "FastAPI server not running - please start server and regenerate"
+  "status": "success"
 }
