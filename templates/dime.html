@@ -1811,6 +1811,7 @@ fetch('/static/data/dime_summary.json')
             }
             
             data.barangays.forEach((brgy, index) => {
+                console.log('🏘️ Barangay data:', brgy); // Debug: see what data is available
                 const row = document.createElement('tr');
                 
                 // Highlight top 3
@@ -1911,6 +1912,7 @@ fetch('/static/data/dime_summary.json')
             }
             
             data.barangays.forEach((brgy, index) => {
+                console.log('🏘️ Barangay data:', brgy); // Debug: see what data is available
                 const row = document.createElement('tr');
                 
                 // Highlight top 3
