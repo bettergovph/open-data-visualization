@@ -5128,10 +5128,12 @@ function updateYear(newYear) {
     currentYear = newYear;
     
     // Reload all data with new year
-    loadBudgetColumns()
+    loadVisualStatistics()
+        .then(() => loadBudgetColumns())
         .then(() => loadFloodControlAmount())
         .then(() => loadDataBrowser())
         .then(() => loadAnalysisDuplicatesPage(1))
+        .then(() => loadNEPTopProgramsChart(newYear))
 }
 
 // Load department spending trends
