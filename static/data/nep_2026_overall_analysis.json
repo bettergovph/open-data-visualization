@@ -1,8 +1,12 @@
 {
-  "data": null,
-  "generated_at": "2025-10-23T08:20:58.738510",
+  "data": {
+    "success": false,
+    "message": "NEP 2026 overall analysis endpoint not implemented",
+    "analysis": {}
+  },
+  "generated_at": "2025-10-23T08:30:00.000000",
   "cache_version": "1.0",
-  "endpoint": "/api/budget/nep/analysis",
-  "status": "error",
-  "error": "HTTP 404"
+  "endpoint": "/api/budget/nep/overall-analysis",
+  "status": "not_implemented",
+  "error": "Endpoint not implemented in FastAPI backend"
 }

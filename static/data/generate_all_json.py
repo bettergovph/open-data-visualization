@@ -174,24 +174,6 @@ class JSONGenerator:
             },
             
             # NEP Data
-            'nep_2026_infrastructure_categories.json': {
-                'script': 'API endpoint (generated on-demand)',
-                'description': 'NEP 2026 infrastructure categories',
-                'category': 'nep_data',
-                'dependencies': ['NEP database']
-            },
-            'nep_2026_overall_analysis.json': {
-                'script': 'API endpoint (generated on-demand)',
-                'description': 'NEP 2026 overall analysis',
-                'category': 'nep_data',
-                'dependencies': ['NEP database']
-            },
-            'nep_2026_red_flag.json': {
-                'script': 'API endpoint (generated on-demand)',
-                'description': 'NEP 2026 red flag analysis',
-                'category': 'nep_data',
-                'dependencies': ['NEP database']
-            },
             
             # DIME Data
             'dime_stats.json': {

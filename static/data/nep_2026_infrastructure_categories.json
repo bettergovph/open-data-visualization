@@ -1,8 +1,12 @@
 {
-  "data": null,
-  "generated_at": "2025-10-23T08:20:58.738271",
+  "data": {
+    "success": false,
+    "message": "NEP 2026 infrastructure categories endpoint not implemented",
+    "categories": []
+  },
+  "generated_at": "2025-10-23T08:30:00.000000",
   "cache_version": "1.0",
-  "endpoint": "/api/budget/nep/categories",
-  "status": "error",
-  "error": "HTTP 404"
+  "endpoint": "/api/budget/nep/infrastructure-categories",
+  "status": "not_implemented",
+  "error": "Endpoint not implemented in FastAPI backend"
 }

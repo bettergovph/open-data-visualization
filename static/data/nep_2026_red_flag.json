@@ -1,8 +1,14 @@
 {
-  "data": null,
-  "generated_at": "2025-10-23T08:20:58.738769",
+  "data": {
+    "success": false,
+    "message": "NEP 2026 red flag analysis endpoint not implemented",
+    "years": [],
+    "budgets": [],
+    "historical_avg": 0
+  },
+  "generated_at": "2025-10-23T08:30:00.000000",
   "cache_version": "1.0",
   "endpoint": "/api/budget/nep/red-flags",
-  "status": "error",
-  "error": "HTTP 404"
+  "status": "not_implemented",
+  "error": "Endpoint not implemented in FastAPI backend"
 }
