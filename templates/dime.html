@@ -1725,9 +1725,9 @@ fetch('/static/data/dime_summary.json')
                 let contractorSource = '';
                 
                 if (project.contractor_source === 'flood_connected') {
-                    // Project is connected to flood data - contractor info available from flood/MeiliSearch
-                    contractorName = '🌊 Flood Data';
-                    contractorSource = ' (Connected to Flood Control)';
+                    // Project is connected to flood data - contractor info redacted/missing
+                    contractorName = 'Redacted/Missing';
+                    contractorSource = '';
                 } else if (project.contractors && project.contractors.length > 0) {
                     // Use DIME contractor data
                     contractorName = project.contractors[0];

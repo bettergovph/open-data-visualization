@@ -85,9 +85,9 @@ async def generate_fastest_dime_projects():
             
             if row['meilisearch_id']:
                 # Project is connected to flood data - contractor info should come from flood/MeiliSearch
-                # For now, we'll note that contractor info is available from flood data
+                # For now, we'll note that contractor info is missing
                 contractor_source = "flood_connected"
-                contractors = ["Connected to Flood Data"]  # Placeholder - would need MeiliSearch query
+                contractors = ["Redacted/Missing"]  # Placeholder - would need MeiliSearch query
             else:
                 # Project is NOT connected to flood data - use DIME contractor data
                 if row['contractors']:
