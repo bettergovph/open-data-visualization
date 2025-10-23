@@ -7491,9 +7491,21 @@ document.addEventListener('click', function(event) {
             const redFlagResponse = await fetch('/static/data/nep_2026_red_flag.json');
             const redFlagData = await redFlagResponse.json();
             
+            // Check if red flag data is valid
+            if (!redFlagData || redFlagData.status === 'error' || !redFlagData.data || !redFlagData.data.years) {
+                console.warn('⚠️ Red flag data not available:', redFlagData?.error || 'No data');
+                return;
+            }
+            
             // Load baseline data
             const baselineResponse = await fetch('/static/data/flood_baseline_pattern.json');
             const baselineData = await baselineResponse.json();
+            
+            // Check if baseline data is valid
+            if (!baselineData || baselineData.status === 'error' || !baselineData.data) {
+                console.warn('⚠️ Baseline data not available:', baselineData?.error || 'No data');
+                return;
+            }
             
             // Create Red Flag Chart
             const redFlagCanvas = document.getElementById('redFlagChart');
@@ -7502,18 +7514,21 @@ document.addEventListener('click', function(event) {
                 
                 const ctx = redFlagCanvas.getContext('2d');
                 
+                // Use the actual data from the response
+                const actualRedFlagData = redFlagData.data;
+                
                 // Calculate average line
-                const avgValue = redFlagData.historical_avg;
-                const avgLine = Array(redFlagData.years.length).fill(avgValue);
+                const avgValue = actualRedFlagData.historical_avg;
+                const avgLine = Array(actualRedFlagData.years.length).fill(avgValue);
                 
                 redFlagChart = new Chart(ctx, {
                     type: 'line',
                     data: {
-                        labels: redFlagData.years.map(y => y.toString()),
+                        labels: actualRedFlagData.years.map(y => y.toString()),
                         datasets: [
                             {
                                 label: 'Road Infrastructure Budget',
-                                data: redFlagData.budgets,
+                                data: actualRedFlagData.budgets,
                                 borderColor: '#dc3545',
                                 backgroundColor: 'rgba(220, 53, 69, 0.1)',
                                 borderWidth: 3,
@@ -7591,17 +7606,20 @@ document.addEventListener('click', function(event) {
                 
                 const ctx = baselineCanvas.getContext('2d');
                 
+                // Use the actual data from the response
+                const actualBaselineData = baselineData.data;
+                
                 baselineChart = new Chart(ctx, {
                     type: 'bar',
                     data: {
-                        labels: baselineData.years,
+                        labels: actualBaselineData.years,
                         datasets: [
                             {
                                 label: 'Bulacan Flood Control Budget (Millions)',
-                                data: baselineData.budgets_millions,
+                                data: actualBaselineData.budgets_millions,
                                 backgroundColor: function(context) {
                                     const value = context.parsed.y;
-                                    const year = baselineData.years[context.dataIndex];
+                                    const year = actualBaselineData.years[context.dataIndex];
                                     // Highlight Bulacan years in red
                                     if (year === '2022' || year === '2023' || year === '2024') {
                                         return '#dc3545';
@@ -7609,7 +7627,7 @@ document.addEventListener('click', function(event) {
                                     return '#0038A8';
                                 },
                                 borderColor: function(context) {
-                                    const year = baselineData.years[context.dataIndex];
+                                    const year = actualBaselineData.years[context.dataIndex];
                                     if (year === '2022' || year === '2023' || year === '2024') {
                                         return '#c82333';
                                     }
@@ -7631,13 +7649,13 @@ document.addEventListener('click', function(event) {
                                 callbacks: {
                                     title: function(context) {
                                         const idx = context[0].dataIndex;
-                                        return `${baselineData.years[idx]} - ${baselineData.regions[idx]}`;
+                                        return `${actualBaselineData.years[idx]} - ${actualBaselineData.regions[idx]}`;
                                     },
                                     label: function(context) {
                                         const idx = context.dataIndex;
-                                        const budget = baselineData.budgets_millions[idx];
-                                        const projects = baselineData.project_counts[idx];
-                                        const growth = baselineData.growth_rates[idx];
+                                        const budget = actualBaselineData.budgets_millions[idx];
+                                        const projects = actualBaselineData.project_counts[idx];
+                                        const growth = actualBaselineData.growth_rates[idx];
                                         
                                         let label = `Budget: ₱${budget.toLocaleString()}M\n`;
                                         label += `Projects: ${projects}\n`;
