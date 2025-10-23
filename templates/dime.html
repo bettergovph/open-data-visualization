@@ -325,7 +325,6 @@ function toggleMobileMenu() {
                     <!-- Legend for contractor sources -->
                     <div style="text-align: center; margin-bottom: 30px; padding: 15px; background: #f8f9fa; border-radius: 8px; font-size: 0.9em; color: #666;">
                         <strong>Legend:</strong> 
-                        <span style="background: #0038A8; color: white; padding: 2px 6px; border-radius: 4px; font-size: 0.8em; font-weight: 600; margin: 0 5px;">🌊 Flood Data</span> = Connected to Flood Control Data | 
                         <span style="background: #28a745; color: white; padding: 2px 6px; border-radius: 4px; font-size: 0.8em; font-weight: 600; margin: 0 5px;">SSP</span> = Sumbong sa Pangulo | 
                         <span style="background: #6c757d; color: white; padding: 2px 6px; border-radius: 4px; font-size: 0.8em; font-weight: 600; margin: 0 5px;">DIME</span> = DIME Database
                     </div>
@@ -1728,12 +1727,8 @@ fetch('/static/data/dime_summary.json')
                 let contractorName = 'N/A';
                 let contractorSource = '';
                 
-                if (project.contractor_source === 'flood_connected') {
-                    // Project is connected to flood data - contractor from MeiliSearch
-                    contractorName = project.contractors[0];
-                    contractorSource = '<span style="background: #0038A8; color: white; padding: 2px 6px; border-radius: 4px; font-size: 0.8em; font-weight: 600;">🌊 Flood Data</span>';
-                } else if (project.contractor_source === 'dime_fallback') {
-                    // Project connected to flood but MeiliSearch failed, using DIME data
+                if (project.contractor_source === 'flood_connected' || project.contractor_source === 'dime_fallback') {
+                    // Project connected to flood data (SSP) - contractor from MeiliSearch or DIME fallback
                     contractorName = project.contractors[0];
                     contractorSource = '<span style="background: #28a745; color: white; padding: 2px 6px; border-radius: 4px; font-size: 0.8em; font-weight: 600;">SSP</span>';
                 } else if (project.contractors && project.contractors.length > 0) {
