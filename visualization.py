@@ -2559,7 +2559,7 @@ async def dynasty_family_api(
         
         # Build query based on whether province filter is provided
         if province:
-            # First try exact match
+            # First try exact match on province column
             family_members = await conn.fetch("""
                 SELECT 
                     first_name,
@@ -2569,7 +2569,7 @@ async def dynasty_family_api(
                     year,
                     fat
                 FROM political_dynasties 
-                WHERE last_name = $1 AND municipality_city = $2
+                WHERE last_name = $1 AND province = $2
                 ORDER BY year DESC, first_name
             """, surname, province)
             
