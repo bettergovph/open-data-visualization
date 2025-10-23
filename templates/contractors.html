@@ -890,15 +890,56 @@ function createHiddenContractorsChart(contractors) {
     });
 }
 
+// Load individual contractors data
+async function loadIndividualContractors() {
+    try {
+        // Try to load from SEC contractors database
+        const response = await fetch('/static/data/sec_contractors_database.json');
+        if (response.ok) {
+            const data = await response.json();
+            if (data.contractors) {
+                allContractors = data.contractors;
+                filteredContractors = allContractors;
+                console.log('✅ Loaded individual contractors:', allContractors.length);
+                return;
+            }
+        }
+        
+        // Fallback to contractor SEC mapping
+        const mappingResponse = await fetch('/static/data/contractor_sec_mapping.json');
+        if (mappingResponse.ok) {
+            const mappingData = await mappingResponse.json();
+            if (mappingData.contractors) {
+                allContractors = mappingData.contractors;
+                filteredContractors = allContractors;
+                console.log('✅ Loaded contractors from mapping:', allContractors.length);
+                return;
+            }
+        }
+        
+        console.log('⚠️ No individual contractors data found');
+    } catch (error) {
+        console.error('❌ Error loading individual contractors:', error);
+    }
+}
+
 // Load and process contractors data
 async function loadContractors() {
     try {
-        // Use PostgreSQL API endpoint
-        const response = await fetch('/api/contractors/sec');
+        // Use cached contractor statistics
+        const response = await fetch('/static/data/contractor_stats.json');
         const data = await response.json();
         
-        allContractors = data.contractors || [];
-        filteredContractors = allContractors;  // Initialize filtered list
+        // Handle different data structure - contractor_stats.json has summary data
+        if (data.summary) {
+            // This is the summary statistics file
+            allContractors = []; // No individual contractors in summary file
+            filteredContractors = [];
+        } else {
+            // This is the individual contractors file
+            allContractors = data.contractors || [];
+            filteredContractors = allContractors;  // Initialize filtered list
+        }
         
         // Update statistics (Visual tab)
         const summary = data.summary || {};
@@ -914,6 +955,9 @@ async function loadContractors() {
         document.getElementById('sec-processed-count').textContent = processedCount.toLocaleString('en-PH');
         document.getElementById('total-sec-count').textContent = (summary.with_sec_data || 0).toLocaleString('en-PH');
         document.getElementById('suspicious-sec-count').textContent = (summary.suspicious_no_results || 0).toLocaleString('en-PH');
+        
+        // Load individual contractors data for the table
+        await loadIndividualContractors();
         
         // Load contractors without SEC for SEC tab
         loadContractorsWithoutSec();
