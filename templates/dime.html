@@ -320,7 +320,15 @@ function toggleMobileMenu() {
                 <!-- Top 100 Fastest Completed Projects -->
                 <div style="background: white; padding: 30px; border-radius: 12px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); margin-bottom: 30px;">
                     <h2 style="color: #0038A8; margin: 0 0 10px 0; font-size: 1.8em; text-align: center;">⚡ Top 100 Projects Completed the Fastest</h2>
-                    <p style="text-align: center; color: #666; margin-bottom: 30px;">Infrastructure projects with the shortest time from start to completion</p>
+                    <p style="text-align: center; color: #666; margin-bottom: 15px;">Infrastructure projects with the shortest time from start to completion</p>
+                    
+                    <!-- Legend for contractor sources -->
+                    <div style="text-align: center; margin-bottom: 30px; padding: 10px; background: #f8f9fa; border-radius: 8px; font-size: 0.9em; color: #666;">
+                        <strong>Legend:</strong> 
+                        <span style="color: #0038A8;">🌊 Flood Data</span> = Connected to Flood Control Data | 
+                        <span style="color: #28a745;">SSP</span> = Sumbong sa Pangulo | 
+                        <span style="color: #6c757d;">DIME</span> = DIME Database
+                    </div>
 
                     <!-- Loading Spinner -->
                     <div id="fastest-projects-loading" style="display: flex; justify-content: center; align-items: center; padding: 40px;">
@@ -1727,7 +1735,7 @@ fetch('/static/data/dime_summary.json')
                 } else if (project.contractor_source === 'dime_fallback') {
                     // Project connected to flood but MeiliSearch failed, using DIME data
                     contractorName = project.contractors[0];
-                    contractorSource = ' (DIME Fallback)';
+                    contractorSource = ' (SSP)';
                 } else if (project.contractors && project.contractors.length > 0) {
                     // Use DIME contractor data
                     contractorName = project.contractors[0];
