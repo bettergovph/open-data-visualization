@@ -46,6 +46,12 @@ class JSONGenerator:
                 'category': 'cache_data',
                 'dependencies': ['PhilGEPS database']
             },
+            'contractors_dashboard_cache.json': {
+                'script': 'sec_scraper/generate_contractors_dashboard_cache.py',
+                'description': 'Complete contractors dashboard cache (SEC, top contractors, Venn, excluded flood)',
+                'category': 'cache_data',
+                'dependencies': ['SEC database', 'PhilGEPS database']
+            },
             
             # Summary Statistics
             'flood_summary.json': {
@@ -271,12 +277,18 @@ class JSONGenerator:
         )
         
         # Generate excluded flood contractors cache
-        success, output = await self.run_script(
+        success2, output2 = await self.run_script(
             'sec_scraper/generate_contractors_cache.py',
             'Excluded Flood Contractors Cache'
         )
         
-        return success
+        # Generate contractors dashboard cache
+        success3, output3 = await self.run_script(
+            'sec_scraper/generate_contractors_dashboard_cache.py',
+            'Contractors Dashboard Cache'
+        )
+        
+        return success and success2 and success3
     
     async def generate_summary_stats(self):
         """Generate summary statistics JSON files."""
