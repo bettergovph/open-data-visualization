@@ -893,26 +893,40 @@ function createHiddenContractorsChart(contractors) {
 // Load individual contractors data
 async function loadIndividualContractors() {
     try {
-        // Try to load from SEC contractors database
-        const response = await fetch('/static/data/sec_contractors_database.json');
+        // Try to load from flood hidden contractors (complete dataset)
+        const response = await fetch('/static/data/flood_hidden_contractors_cached.json');
         if (response.ok) {
             const data = await response.json();
-            if (data.contractors) {
-                allContractors = data.contractors;
+            if (data.data && data.data.contractors) {
+                // Convert flood contractor format to standard format
+                allContractors = data.data.contractors.map(contractor => ({
+                    name: contractor.contractor_name,
+                    project_count: contractor.project_count,
+                    total_value: contractor.total_value,
+                    avg_value: contractor.avg_value,
+                    areas: contractor.areas,
+                    sec_number: null, // No SEC data in flood contractors
+                    status: 'Unknown',
+                    date_registered: null,
+                    registered_address: null,
+                    secondary_license_details: null,
+                    reportorial_submissions: null,
+                    last_updated: null
+                }));
                 filteredContractors = allContractors;
-                console.log('✅ Loaded individual contractors:', allContractors.length);
+                console.log('✅ Loaded individual contractors from flood data:', allContractors.length);
                 return;
             }
         }
         
-        // Fallback to contractor SEC mapping
-        const mappingResponse = await fetch('/static/data/contractor_sec_mapping.json');
-        if (mappingResponse.ok) {
-            const mappingData = await mappingResponse.json();
-            if (mappingData.contractors) {
-                allContractors = mappingData.contractors;
+        // Fallback to SEC contractors database (limited dataset)
+        const secResponse = await fetch('/static/data/sec_contractors_database.json');
+        if (secResponse.ok) {
+            const secData = await secResponse.json();
+            if (secData.contractors) {
+                allContractors = secData.contractors;
                 filteredContractors = allContractors;
-                console.log('✅ Loaded contractors from mapping:', allContractors.length);
+                console.log('✅ Loaded individual contractors from SEC database:', allContractors.length);
                 return;
             }
         }
@@ -1210,18 +1224,28 @@ function renderContractorsTable() {
             row.style.background = '#fefce8';
         }
         
+        // Handle different data structures (SEC vs Flood contractors)
+        const contractorName = contractor.original_contractor_name || contractor.company_name || contractor.name || contractor.contractor_name || 'Unknown';
         const secNumber = contractor.sec_number || '-';
         const address = contractor.registered_address || contractor.address || '-';
+        const projectCount = contractor.project_count || contractor.projects || 0;
+        const totalValue = contractor.total_value || contractor.total_cost || 0;
         
-        const statusBadge = contractor.sec_number && contractor.sec_number.trim() !== '' ? 
-            `<span style="padding: 4px 12px; background: #dcfce7; color: #166534; font-size: 0.75rem; border-radius: 9999px; font-weight: 600;">✅ Verified</span>` :
-            contractor.status === 'NO_SEC_RESULTS' ?
-            `<span class="pulse-warning" style="padding: 4px 12px; background: #fff3cd; color: #854d0e; font-size: 0.75rem; border-radius: 9999px; font-weight: 600; border: 1px solid #fde047; white-space: nowrap;">⚠️ Suspicious</span>` :
-            `<span style="padding: 4px 12px; background: #fee2e2; color: #991b1b; font-size: 0.75rem; border-radius: 9999px; font-weight: 600;">❌ Missing</span>`;
+        // Determine status based on available data
+        let statusBadge;
+        if (contractor.sec_number && contractor.sec_number.trim() !== '') {
+            statusBadge = `<span style="padding: 4px 12px; background: #dcfce7; color: #166534; font-size: 0.75rem; border-radius: 9999px; font-weight: 600;">✅ Verified</span>`;
+        } else if (contractor.status === 'NO_SEC_RESULTS') {
+            statusBadge = `<span class="pulse-warning" style="padding: 4px 12px; background: #fff3cd; color: #854d0e; font-size: 0.75rem; border-radius: 9999px; font-weight: 600; border: 1px solid #fde047; white-space: nowrap;">⚠️ Suspicious</span>`;
+        } else if (projectCount > 0) {
+            statusBadge = `<span style="padding: 4px 12px; background: #f3f4f6; color: #374151; font-size: 0.75rem; border-radius: 9999px; font-weight: 600;">📊 Active</span>`;
+        } else {
+            statusBadge = `<span style="padding: 4px 12px; background: #fee2e2; color: #991b1b; font-size: 0.75rem; border-radius: 9999px; font-weight: 600;">❌ Missing</span>`;
+        }
         
         row.innerHTML = `
             <td style="padding: 16px; font-size: 0.875rem; color: #111827; white-space: nowrap;">${start + index + 1}</td>
-            <td style="padding: 16px; font-size: 0.875rem; font-weight: 500; color: #111827;">${contractor.original_contractor_name || contractor.company_name || contractor.contractor_name}</td>
+            <td style="padding: 16px; font-size: 0.875rem; font-weight: 500; color: #111827;">${contractorName}</td>
             <td style="padding: 16px; font-size: 0.875rem; color: #111827; white-space: nowrap;">${secNumber}</td>
             <td style="padding: 16px; font-size: 0.875rem;">${statusBadge}</td>
             <td style="padding: 16px; font-size: 0.875rem; color: #6b7280;">${address.substring(0, 100)}${address.length > 100 ? '...' : ''}</td>

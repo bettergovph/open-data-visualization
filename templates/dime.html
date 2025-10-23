@@ -1835,8 +1835,13 @@ fetch('/static/data/dime_summary.json')
                     contractorSource = '<span style="background: #6c757d; color: white; padding: 2px 6px; border-radius: 4px; font-size: 0.8em; font-weight: 600;">AGGREGATED</span>';
                     contractorClickable = `onclick="showBarangayContractorsModal('${brgy.barangay}', '${brgy.city}', '${brgy.province}', '${brgy.region}')" style="cursor: pointer; color: #0038A8; text-decoration: underline;"`;
                 } else if (brgy.project_count === 1) {
-                    contractorName = 'Single Project';
-                    contractorSource = '<span style="background: #6c757d; color: white; padding: 2px 6px; border-radius: 4px; font-size: 0.8em; font-weight: 600;">DIME</span>';
+                    contractorName = 'Single Contractor';
+                    // Use same logic as fastest projects - check contractor_source for SSP vs DIME
+                    if (brgy.contractor_source === 'flood_connected' || brgy.contractor_source === 'dime_fallback') {
+                        contractorSource = '<span style="background: #28a745; color: white; padding: 2px 6px; border-radius: 4px; font-size: 0.8em; font-weight: 600;">SSP</span>';
+                    } else {
+                        contractorSource = '<span style="background: #6c757d; color: white; padding: 2px 6px; border-radius: 4px; font-size: 0.8em; font-weight: 600;">DIME</span>';
+                    }
                     contractorClickable = `onclick="showBarangayContractorsModal('${brgy.barangay}', '${brgy.city}', '${brgy.province}', '${brgy.region}')" style="cursor: pointer; color: #0038A8; text-decoration: underline;"`;
                 } else {
                     contractorName = 'N/A';
@@ -1932,8 +1937,13 @@ fetch('/static/data/dime_summary.json')
                     contractorSource = '<span style="background: #6c757d; color: white; padding: 2px 6px; border-radius: 4px; font-size: 0.8em; font-weight: 600;">AGGREGATED</span>';
                     contractorClickable = `onclick="showBarangayContractorsModal('${brgy.barangay}', '${brgy.city}', '${brgy.province}', '${brgy.region}')" style="cursor: pointer; color: #0038A8; text-decoration: underline;"`;
                 } else if (brgy.project_count === 1) {
-                    contractorName = 'Single Project';
-                    contractorSource = '<span style="background: #6c757d; color: white; padding: 2px 6px; border-radius: 4px; font-size: 0.8em; font-weight: 600;">DIME</span>';
+                    contractorName = 'Single Contractor';
+                    // Use same logic as fastest projects - check contractor_source for SSP vs DIME
+                    if (brgy.contractor_source === 'flood_connected' || brgy.contractor_source === 'dime_fallback') {
+                        contractorSource = '<span style="background: #28a745; color: white; padding: 2px 6px; border-radius: 4px; font-size: 0.8em; font-weight: 600;">SSP</span>';
+                    } else {
+                        contractorSource = '<span style="background: #6c757d; color: white; padding: 2px 6px; border-radius: 4px; font-size: 0.8em; font-weight: 600;">DIME</span>';
+                    }
                     contractorClickable = `onclick="showBarangayContractorsModal('${brgy.barangay}', '${brgy.city}', '${brgy.province}', '${brgy.region}')" style="cursor: pointer; color: #0038A8; text-decoration: underline;"`;
                 } else {
                     contractorName = 'N/A';

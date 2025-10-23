@@ -166,7 +166,34 @@ async def get_dime_barangay_aggregates():
         return {"success": False, "error": "Database connection failed"}
     
     try:
-        rows = await conn.fetch("SELECT * FROM dime_barangay_aggregates")
+        # Get detailed project info for single-project barangays to determine contractor source
+        rows = await conn.fetch("""
+            SELECT 
+                barangay, region, province, city,
+                project_count, total_amount, avg_amount, percentage_of_total,
+                -- Get contractor info for single projects
+                CASE 
+                    WHEN project_count = 1 THEN (
+                        SELECT meilisearch_id 
+                        FROM projects p 
+                        WHERE p.barangay = dime_barangay_aggregates.barangay 
+                        AND p.city = dime_barangay_aggregates.city 
+                        LIMIT 1
+                    )
+                    ELSE NULL 
+                END as meilisearch_id,
+                CASE 
+                    WHEN project_count = 1 THEN (
+                        SELECT contractor_source 
+                        FROM projects p 
+                        WHERE p.barangay = dime_barangay_aggregates.barangay 
+                        AND p.city = dime_barangay_aggregates.city 
+                        LIMIT 1
+                    )
+                    ELSE NULL 
+                END as contractor_source
+            FROM dime_barangay_aggregates
+        """)
         
         barangays = []
         for idx, row in enumerate(rows):
@@ -179,7 +206,9 @@ async def get_dime_barangay_aggregates():
                 "project_count": row['project_count'],
                 "total_amount": float(row['total_amount']),
                 "avg_amount": float(row['avg_amount']),
-                "percentage_of_total": float(row['percentage_of_total']) if row['percentage_of_total'] else 0
+                "percentage_of_total": float(row['percentage_of_total']) if row['percentage_of_total'] else 0,
+                "meilisearch_id": row['meilisearch_id'],
+                "contractor_source": row['contractor_source']
             })
         
         return {
@@ -201,7 +230,34 @@ async def get_dime_barangay_aggregates_by_count():
         return {"success": False, "error": "Database connection failed"}
     
     try:
-        rows = await conn.fetch("SELECT * FROM dime_barangay_aggregates_by_count")
+        # Get detailed project info for single-project barangays to determine contractor source
+        rows = await conn.fetch("""
+            SELECT 
+                barangay, region, province, city,
+                project_count, total_amount, avg_amount, percentage_of_total,
+                -- Get contractor info for single projects
+                CASE 
+                    WHEN project_count = 1 THEN (
+                        SELECT meilisearch_id 
+                        FROM projects p 
+                        WHERE p.barangay = dime_barangay_aggregates_by_count.barangay 
+                        AND p.city = dime_barangay_aggregates_by_count.city 
+                        LIMIT 1
+                    )
+                    ELSE NULL 
+                END as meilisearch_id,
+                CASE 
+                    WHEN project_count = 1 THEN (
+                        SELECT contractor_source 
+                        FROM projects p 
+                        WHERE p.barangay = dime_barangay_aggregates_by_count.barangay 
+                        AND p.city = dime_barangay_aggregates_by_count.city 
+                        LIMIT 1
+                    )
+                    ELSE NULL 
+                END as contractor_source
+            FROM dime_barangay_aggregates_by_count
+        """)
         
         barangays = []
         for idx, row in enumerate(rows):
@@ -214,7 +270,9 @@ async def get_dime_barangay_aggregates_by_count():
                 "project_count": row['project_count'],
                 "total_amount": float(row['total_amount']),
                 "avg_amount": float(row['avg_amount']),
-                "percentage_of_total": float(row['percentage_of_total']) if row['percentage_of_total'] else 0
+                "percentage_of_total": float(row['percentage_of_total']) if row['percentage_of_total'] else 0,
+                "meilisearch_id": row['meilisearch_id'],
+                "contractor_source": row['contractor_source']
             })
         
         return {
