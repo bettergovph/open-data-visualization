@@ -66,27 +66,57 @@ async def generate_contractors_with_costs():
             contractor_stats[contractor]['projects'] += 1
             contractor_stats[contractor]['totalCost'] += cost
         
+        # Calculate statistics for SD calculation
+        all_project_counts = [stats['projects'] for stats in contractor_stats.values()]
+        all_avg_costs = [stats['totalCost'] / stats['projects'] if stats['projects'] > 0 else 0 for stats in contractor_stats.values()]
+        
+        # Calculate means and standard deviations
+        import statistics
+        mean_projects = statistics.mean(all_project_counts)
+        mean_costs = statistics.mean(all_avg_costs)
+        std_projects = statistics.stdev(all_project_counts) if len(all_project_counts) > 1 else 0
+        std_costs = statistics.stdev(all_avg_costs) if len(all_avg_costs) > 1 else 0
+        
+        print(f"📊 Statistical Analysis:")
+        print(f"   Projects - Mean: {mean_projects:.2f}, SD: {std_projects:.2f}")
+        print(f"   Costs - Mean: {mean_costs:.2f}, SD: {std_costs:.2f}")
+        
         # Calculate average costs and suspicion scores
         for contractor, stats in contractor_stats.items():
             if stats['projects'] > 0:
                 stats['avgCostPerProject'] = stats['totalCost'] / stats['projects']
             
-            # Calculate suspicion score using 50-50 multiplier approach
+            # Calculate suspicion score with SD, projects, and cost factors
             # Use raw numbers (not rounded) and normalize to 0-100 range
             project_count = stats['projects']  # Raw project count
             avg_cost = stats['avgCostPerProject']  # Raw average cost
             
-            # 50-50 multiplier: equal weight for both factors
-            # Factor 1: Project count (0.5 points per project, capped at 50)
-            # 0.5 points per project, so 100 projects = 50 points
-            project_factor = min(project_count * 0.5, 50.0)  # 0.5 points per project, capped at 50
+            # Factor 1: Standard Deviation (10 points per SD, capped at 40)
+            # Calculate how many SDs away from mean for both projects and costs
+            if std_projects > 0:
+                project_sd = abs(project_count - mean_projects) / std_projects
+            else:
+                project_sd = 0
+                
+            if std_costs > 0:
+                cost_sd = abs(avg_cost - mean_costs) / std_costs
+            else:
+                cost_sd = 0
+                
+            # Use the higher SD (more suspicious factor)
+            max_sd = max(project_sd, cost_sd)
+            sd_factor = min(max_sd * 10.0, 40.0)  # 10 points per SD, capped at 40
             
-            # Factor 2: Average cost per project (0.5 points per million, capped at 50)
-            # 0.5 points per million pesos, so 100M = 50 points
-            cost_factor = min((avg_cost / 1000000) * 0.5, 50.0)  # 0.5 points per million, capped at 50
+            # Factor 2: Project count (0.3 points per project, capped at 30)
+            # 0.3 points per project, so 100 projects = 30 points
+            project_factor = min(project_count * 0.3, 30.0)  # 0.3 points per project, capped at 30
             
-            # Add both factors together for final suspicion score (0-100 range)
-            suspicion_score = project_factor + cost_factor
+            # Factor 3: Average cost per project (0.3 points per million, capped at 30)
+            # 0.3 points per million pesos, so 100M = 30 points
+            cost_factor = min((avg_cost / 1000000) * 0.3, 30.0)  # 0.3 points per million, capped at 30
+            
+            # Add all factors together for final suspicion score (0-100 range)
+            suspicion_score = sd_factor + project_factor + cost_factor
             
             # Store the suspicion score with decimal values (0-100 range)
             stats['suspicionScore'] = round(suspicion_score, 2)
