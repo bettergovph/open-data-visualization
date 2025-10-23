@@ -2403,8 +2403,7 @@ async def dynasty_data_api(
                 municipality_city,
                 position,
                 year,
-                fat,
-                created_at
+                fat
             FROM political_dynasties 
             {where_clause}
             ORDER BY year DESC, last_name ASC, first_name ASC
@@ -2429,8 +2428,7 @@ async def dynasty_data_api(
                 "municipality_city": record['municipality_city'],
                 "position": record['position'],
                 "year": record['year'],
-                "fat": record['fat'],
-                "created_at": record['created_at'].isoformat() if record['created_at'] else None
+                "fat": record['fat']
             })
         
         await conn.close()
