@@ -28,7 +28,7 @@ async def generate_dynasty_surnames():
             database=os.getenv('POSTGRES_DB_DYNASTY_SEC', 'dynasty')
         )
         
-        # Get top surnames by province (province-sensitive) - ALL surnames
+        # Get top surnames by province (province-sensitive) - TOP 100 surnames
         query = """
             SELECT 
                 last_name,
@@ -40,6 +40,7 @@ async def generate_dynasty_surnames():
             WHERE last_name IS NOT NULL AND last_name != ''
             GROUP BY last_name, province
             ORDER BY total_count DESC
+            LIMIT 100
         """
         
         records = await conn.fetch(query)
@@ -76,7 +77,7 @@ async def generate_dynasty_surnames():
                 'total_non_dynasty': total_non_dynasty,
                 'unique_provinces': len(unique_provinces),
                 'last_updated': datetime.now().isoformat(),
-                'description': 'Top political dynasty surnames by province (province-sensitive)',
+                'description': 'Top 100 political dynasty surnames by province (province-sensitive)',
                 'source': 'PostgreSQL dynasty.political_dynasties table'
             },
             'provinces': unique_provinces,

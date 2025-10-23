@@ -2451,7 +2451,7 @@ async def dynasty_data_api(
 
 @app.get("/api/dynasty/top-surnames")
 async def dynasty_top_surnames_api(
-    limit: int = Query(20, ge=1, le=100, description="Number of top surnames to return"),
+    limit: int = Query(100, ge=1, le=100, description="Number of top surnames to return"),
     province: str = Query("", description="Filter by specific province")
 ):
     """Get top surnames by province for political dynasty data from cached JSON"""

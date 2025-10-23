@@ -322,10 +322,17 @@ function toggleMobileMenu() {
                         </div>
 
                         <!-- Top Surnames Chart -->
-                        <div class="chart-container" style="background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); height: 1200px; margin-bottom: 30px;">
-                            <h3 style="color: #0038A8; margin: 0 0 15px 0;">👥 Top Surnames by Province <span style="font-size: 12px; color: #666; font-weight: normal;">(Click bars to view family details)</span></h3>
-                            <div style="height: calc(100% - 35px); position: relative;">
-                                <canvas id="topSurnamesChart" style="cursor: pointer;"></canvas>
+                        <div class="chart-container" style="background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); height: 800px; margin-bottom: 30px;">
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                                <h3 style="color: #0038A8; margin: 0;">👥 Top Surnames by Province <span style="font-size: 12px; color: #666; font-weight: normal;">(Click bars to view family details)</span></h3>
+                                <div style="display: flex; align-items: center; gap: 10px;">
+                                    <span id="dynasty-page-info" style="font-size: 12px; color: #666;">Page 1 of 1</span>
+                                    <button id="dynasty-prev" style="background: #0038A8; color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer; font-size: 12px;" disabled>Previous</button>
+                                    <button id="dynasty-next" style="background: #0038A8; color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer; font-size: 12px;">Next</button>
+                                </div>
+                            </div>
+                            <div style="height: calc(100% - 50px); position: relative;">
+                                <canvas id="topSurnamesChart" style="cursor: pointer; width: 100%; height: 100%;"></canvas>
                             </div>
                         </div>
 
@@ -752,7 +759,7 @@ async function loadSurnamesChart() {
     try {
         const province = document.getElementById('provinceFilter').value;
         const params = new URLSearchParams({
-            limit: 50,
+            limit: 100,
             ...(province && { province: province })
         });
 
@@ -781,9 +788,36 @@ function createSurnamesChart(data) {
         window.surnamesChart.destroy();
     }
     
+        // Store data globally for consistent access
+        window.dynastyChartData = data;
+        
+        // Initialize pagination variables only if not already set
+        if (typeof window.dynastyPageSize === 'undefined') {
+            window.dynastyPageSize = 10;
+        }
+        if (typeof window.dynastyCurrentPage === 'undefined') {
+            window.dynastyCurrentPage = 0;
+        }
+        if (typeof window.dynastyAllData === 'undefined') {
+            window.dynastyAllData = data.slice(0, 100); // Limit to top 100
+        }
+        
+        console.log('📊 Dynasty data initialized:', {
+            totalItems: window.dynastyAllData.length,
+            pageSize: window.dynastyPageSize,
+            currentPage: window.dynastyCurrentPage,
+            totalPages: Math.ceil(window.dynastyAllData.length / window.dynastyPageSize),
+            firstFewItems: window.dynastyAllData.slice(0, 5).map(item => `${item.surname} (${item.province})`)
+        });
+    
+    // Get paginated data
+    const start = window.dynastyCurrentPage * window.dynastyPageSize;
+    const end = start + window.dynastyPageSize;
+    const pageData = window.dynastyAllData.slice(start, end);
+    
     // Prepare data for chart
-    const labels = data.map(item => `${item.surname} (${item.province})`);
-    const dynastyData = data.map(item => item.dynasty_count);
+    const labels = pageData.map(item => `${item.surname} (${item.province})`);
+    const dynastyData = pageData.map(item => item.dynasty_count);
     
     window.surnamesChart = new Chart(ctx, {
         type: 'bar',
@@ -800,7 +834,6 @@ function createSurnamesChart(data) {
             ]
         },
         options: {
-            indexAxis: 'y', // This makes it horizontal
             responsive: true,
             maintainAspectRatio: false,
             plugins: {
@@ -818,12 +851,34 @@ function createSurnamesChart(data) {
                 },
                 tooltip: {
                     callbacks: {
+                        title: function(context) {
+                            const dataIndex = context[0].dataIndex;
+                            const pageData = window.dynastyAllData.slice(
+                                window.dynastyCurrentPage * window.dynastyPageSize,
+                                (window.dynastyCurrentPage + 1) * window.dynastyPageSize
+                            );
+                            const item = pageData[dataIndex];
+                            return `${item.surname} (${item.province})`;
+                        },
+                        label: function(context) {
+                            const dataIndex = context.dataIndex;
+                            const pageData = window.dynastyAllData.slice(
+                                window.dynastyCurrentPage * window.dynastyPageSize,
+                                (window.dynastyCurrentPage + 1) * window.dynastyPageSize
+                            );
+                            const item = pageData[dataIndex];
+                            return `Dynasty Members: ${item.dynasty_count}`;
+                        },
                         afterLabel: function(context) {
                             const dataIndex = context.dataIndex;
-                            const item = data[dataIndex];
+                            const pageData = window.dynastyAllData.slice(
+                                window.dynastyCurrentPage * window.dynastyPageSize,
+                                (window.dynastyCurrentPage + 1) * window.dynastyPageSize
+                            );
+                            const item = pageData[dataIndex];
                             return [
-                                `Dynasty Members: ${item.dynasty_count}`,
-                                `Province: ${item.province}`
+                                `Province: ${item.province}`,
+                                `Click to view family details`
                             ];
                         }
                     }
@@ -834,34 +889,36 @@ function createSurnamesChart(data) {
                     display: true,
                     title: {
                         display: true,
-                        text: 'Number of Politicians'
+                        text: 'Surname (Province)'
                     },
-                    beginAtZero: true
+                    ticks: {
+                        maxRotation: 45,
+                        minRotation: 45,
+                        maxTicksLimit: 10, // Only show 10 labels per page
+                        font: {
+                            size: 10
+                        },
+                        callback: function(value, index, values) {
+                            return this.getLabelForValue(value);
+                        }
+                    }
                 },
                 y: {
                     display: true,
                     title: {
                         display: true,
-                        text: 'Surname (Province)'
+                        text: 'Number of Politicians'
                     },
+                    beginAtZero: true,
                     ticks: {
-                        maxRotation: 0,
-                        minRotation: 0,
-                        maxTicksLimit: undefined, // Show all labels
-                        callback: function(value, index, values) {
-                            return this.getLabelForValue(value);
-                        }
-                    },
-                    afterFit: function(scale) {
-                        // Ensure all labels are visible
-                        scale.options.ticks.maxTicksLimit = undefined;
+                        precision: 0
                     }
                 }
             },
             layout: {
                 padding: {
                     left: 10,
-                    right: 10,
+                    right: 50,
                     top: 10,
                     bottom: 10
                 }
@@ -870,22 +927,109 @@ function createSurnamesChart(data) {
                 intersect: false,
                 mode: 'index'
             },
+            elements: {
+                bar: {
+                    borderWidth: 2
+                }
+            },
             onClick: function(event, elements) {
                 if (elements.length > 0) {
                     const element = elements[0];
                     const dataIndex = element.index;
-                    const item = data[dataIndex];
+                    const pageData = window.dynastyAllData.slice(
+                        window.dynastyCurrentPage * window.dynastyPageSize,
+                        (window.dynastyCurrentPage + 1) * window.dynastyPageSize
+                    );
+                    const item = pageData[dataIndex];
                     
-                    // Redirect to family page with surname and province parameters
-                    const encodedSurname = encodeURIComponent(item.surname);
-                    const mappedProvince = mapProvinceNameToDynasty(item.province);
-                    const encodedProvince = encodeURIComponent(mappedProvince);
-                    
-                    window.location.href = `/family?surname=${encodedSurname}&province=${encodedProvince}`;
+                    if (item) {
+                        // Redirect to family page with surname and province parameters
+                        const encodedSurname = encodeURIComponent(item.surname);
+                        const mappedProvince = mapProvinceNameToDynasty(item.province);
+                        const encodedProvince = encodeURIComponent(mappedProvince);
+                        
+                        window.location.href = `/family?surname=${encodedSurname}&province=${encodedProvince}`;
+                    }
                 }
             }
         }
     });
+    
+    // Force chart resize to ensure proper initial size
+    setTimeout(() => {
+        if (window.surnamesChart) {
+            window.surnamesChart.resize();
+        }
+    }, 100);
+    
+    // Update pagination controls
+    updateDynastyPagination();
+}
+
+// Function to update dynasty pagination
+function updateDynastyPagination() {
+    const pageInfo = document.getElementById('dynasty-page-info');
+    const prevBtn = document.getElementById('dynasty-prev');
+    const nextBtn = document.getElementById('dynasty-next');
+    
+    if (!pageInfo || !prevBtn || !nextBtn) return;
+    
+    const totalItems = window.dynastyAllData.length;
+    const totalPages = Math.ceil(totalItems / window.dynastyPageSize);
+    const currentPage = window.dynastyCurrentPage + 1;
+    
+    // Update page info
+    const start = window.dynastyCurrentPage * window.dynastyPageSize + 1;
+    const end = Math.min(start + window.dynastyPageSize - 1, totalItems);
+    pageInfo.textContent = `Page ${currentPage} of ${totalPages} (${start}-${end} of ${totalItems})`;
+    
+    // Update button states
+    prevBtn.disabled = window.dynastyCurrentPage === 0;
+    nextBtn.disabled = window.dynastyCurrentPage >= totalPages - 1;
+    
+    if (prevBtn.disabled) {
+        prevBtn.style.background = '#dee2e6';
+        prevBtn.style.color = '#6c757d';
+    } else {
+        prevBtn.style.background = '#0038A8';
+        prevBtn.style.color = 'white';
+    }
+    
+    if (nextBtn.disabled) {
+        nextBtn.style.background = '#dee2e6';
+        nextBtn.style.color = '#6c757d';
+    } else {
+        nextBtn.style.background = '#0038A8';
+        nextBtn.style.color = 'white';
+    }
+}
+
+// Function to go to previous page
+function dynastyPreviousPage() {
+    console.log('Previous page clicked, current page:', window.dynastyCurrentPage);
+    if (window.dynastyCurrentPage > 0) {
+        window.dynastyCurrentPage--;
+        // Recreate chart with current pagination settings
+        const ctx = document.getElementById('topSurnamesChart');
+        if (ctx && window.dynastyAllData) {
+            createSurnamesChart(window.dynastyAllData);
+        }
+    }
+}
+
+// Function to go to next page
+function dynastyNextPage() {
+    console.log('Next page clicked, current page:', window.dynastyCurrentPage);
+    const totalPages = Math.ceil(window.dynastyAllData.length / window.dynastyPageSize);
+    console.log('Total pages:', totalPages);
+    if (window.dynastyCurrentPage < totalPages - 1) {
+        window.dynastyCurrentPage++;
+        // Recreate chart with current pagination settings
+        const ctx = document.getElementById('topSurnamesChart');
+        if (ctx && window.dynastyAllData) {
+            createSurnamesChart(window.dynastyAllData);
+        }
+    }
 }
 
         // Helper function to map GeoJSON province names to dynasty database format
@@ -1591,6 +1735,18 @@ document.addEventListener('keydown', function(e) {
     if (e.key === 'Escape') {
         closeProvinceSurnamesModal();
     }
+});
+
+// Add event listeners for pagination buttons
+document.addEventListener('DOMContentLoaded', function() {
+    // Use event delegation to handle dynamically created buttons
+    document.addEventListener('click', function(e) {
+        if (e.target && e.target.id === 'dynasty-prev') {
+            dynastyPreviousPage();
+        } else if (e.target && e.target.id === 'dynasty-next') {
+            dynastyNextPage();
+        }
+    });
 });
 </script>
 
