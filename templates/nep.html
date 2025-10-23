@@ -7615,21 +7615,24 @@ document.addEventListener('click', function(event) {
                 // Use the actual data from the response
                 const actualBaselineData = baselineData.data;
                 
+                // Convert years object to array of year strings
+                const yearsArray = Object.keys(actualBaselineData.years).sort();
+                
                 baselineChart = new Chart(ctx, {
                     type: 'bar',
                     data: {
-                        labels: actualBaselineData.years,
+                        labels: yearsArray,
                         datasets: [
                             {
-                                label: 'Bulacan Flood Control Budget (Millions)',
-                                data: actualBaselineData.budgets_millions,
+                                label: 'Flood Control Projects by Year',
+                                data: yearsArray.map(year => actualBaselineData.years[year]),
                                 backgroundColor: function(context) {
                                     // Check if context.parsed exists and has y value
                                     if (!context.parsed || context.parsed.y === undefined) {
                                         return '#0038A8'; // Default color
                                     }
                                     
-                                    const year = actualBaselineData.years[context.dataIndex];
+                                    const year = yearsArray[context.dataIndex];
                                     // Highlight Bulacan years in red
                                     if (year === '2022' || year === '2023' || year === '2024') {
                                         return '#dc3545';
@@ -7642,7 +7645,7 @@ document.addEventListener('click', function(event) {
                                         return '#002a75'; // Default color
                                     }
                                     
-                                    const year = actualBaselineData.years[context.dataIndex];
+                                    const year = yearsArray[context.dataIndex];
                                     if (year === '2022' || year === '2023' || year === '2024') {
                                         return '#c82333';
                                     }
@@ -7687,12 +7690,12 @@ document.addEventListener('click', function(event) {
                                 beginAtZero: true,
                                 title: {
                                     display: true,
-                                    text: 'Budget (₱ Millions)',
+                                    text: 'Number of Projects',
                                     font: { size: 12, weight: 'bold' }
                                 },
                                 ticks: {
                                     callback: function(value) {
-                                        return '₱' + value.toLocaleString() + 'M';
+                                        return value.toLocaleString();
                                     }
                                 }
                             },
