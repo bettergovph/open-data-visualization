@@ -1550,6 +1550,82 @@ async def dime_province_suggestions_api(query: str, limit: int = 10):
     except Exception as e:
         return JSONResponse({"success": False, "error": str(e)})
 
+@app.get("/api/dime/fastest-projects")
+async def dime_fastest_projects_api():
+    """Get fastest completed DIME projects - no authentication required"""
+    try:
+        import asyncpg
+        conn = await asyncpg.connect(
+            host=os.getenv('POSTGRES_HOST', 'localhost'),
+            port=int(os.getenv('POSTGRES_PORT', 5432)),
+            user=os.getenv('POSTGRES_USER', 'budget_admin'),
+            password=os.getenv('POSTGRES_PASSWORD', ''),
+            database=os.getenv('POSTGRES_DB_DIME', 'dime')
+        )
+        
+        # Get fastest completed projects (top 50)
+        query = """
+        SELECT 
+            project_name,
+            project_description,
+            total_project_cost,
+            start_date,
+            end_date,
+            project_status,
+            implementing_office,
+            region,
+            province,
+            city_municipality,
+            barangay,
+            project_type,
+            -- Calculate completion time in days
+            CASE 
+                WHEN start_date IS NOT NULL AND end_date IS NOT NULL 
+                THEN EXTRACT(EPOCH FROM (end_date - start_date)) / 86400
+                ELSE NULL
+            END as completion_days
+        FROM projects 
+        WHERE project_status = 'Completed'
+          AND start_date IS NOT NULL 
+          AND end_date IS NOT NULL
+          AND start_date < end_date
+        ORDER BY completion_days ASC
+        LIMIT 50
+        """
+        
+        results = await conn.fetch(query)
+        await conn.close()
+        
+        # Process results
+        projects = []
+        for row in results:
+            projects.append({
+                'project_name': row['project_name'],
+                'project_description': row['project_description'],
+                'total_project_cost': float(row['total_project_cost']) if row['total_project_cost'] else 0,
+                'start_date': row['start_date'].isoformat() if row['start_date'] else None,
+                'end_date': row['end_date'].isoformat() if row['end_date'] else None,
+                'project_status': row['project_status'],
+                'implementing_office': row['implementing_office'],
+                'region': row['region'],
+                'province': row['province'],
+                'city_municipality': row['city_municipality'],
+                'barangay': row['barangay'],
+                'project_type': row['project_type'],
+                'completion_days': float(row['completion_days']) if row['completion_days'] else None
+            })
+        
+        return JSONResponse({
+            "success": True,
+            "projects": projects,
+            "count": len(projects),
+            "generated_at": datetime.now().isoformat(),
+            "description": "Top 50 fastest completed DIME projects"
+        })
+        
+    except Exception as e:
+        return JSONResponse({"success": False, "error": str(e)})
+
 # ============================================================================
 # Hidden Flood Control API Endpoints
 # ============================================================================

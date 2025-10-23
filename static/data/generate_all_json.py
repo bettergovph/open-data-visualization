@@ -201,7 +201,7 @@ class JSONGenerator:
                 'dependencies': ['DIME database']
             },
             'fastest_dime_projects.json': {
-                'script': 'API endpoint (generated on-demand)',
+                'script': 'sec_scraper/generate_fastest_dime_projects.py',
                 'description': 'Fastest DIME projects analysis',
                 'category': 'dime_data',
                 'dependencies': ['DIME database']
@@ -336,6 +336,19 @@ class JSONGenerator:
         
         return success1 and success2 and success3
     
+    async def generate_dime_data(self):
+        """Generate DIME analysis JSON files."""
+        print("\n🏗️ Generating DIME Data...")
+        print("=" * 40)
+        
+        # Generate fastest DIME projects
+        success, output = await self.run_script(
+            'sec_scraper/generate_fastest_dime_projects.py',
+            'Fastest DIME Projects'
+        )
+        
+        return success
+    
     async def generate_cache_data(self):
         """Generate cache JSON files."""
         print("\n💾 Generating Cache Data...")
@@ -376,7 +389,7 @@ class JSONGenerator:
         print(f"Target directory: {self.static_data_dir}")
         
         if categories is None:
-            categories = ['sec_data', 'summary_data', 'analysis_data', 'nep_data', 'cache_data', 'api_cache']
+            categories = ['sec_data', 'summary_data', 'analysis_data', 'nep_data', 'dime_data', 'cache_data', 'api_cache']
         
         results = {}
         
@@ -395,6 +408,10 @@ class JSONGenerator:
         # Generate NEP data
         if 'nep_data' in categories:
             results['nep_data'] = await self.generate_nep_data()
+        
+        # Generate DIME data
+        if 'dime_data' in categories:
+            results['dime_data'] = await self.generate_dime_data()
         
         # Generate cache data
         if 'cache_data' in categories:
