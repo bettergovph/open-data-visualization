@@ -2185,6 +2185,15 @@ async def hidden_flood_contractors_cached_api():
 async def hidden_flood_statistics_api():
     """Get comprehensive statistics for hidden flood projects - no authentication required"""
     try:
+        # Try to load from cached JSON file first
+        cache_file = "static/data/hidden_flood_statistics_cache.json"
+        if os.path.exists(cache_file):
+            with open(cache_file, 'r', encoding='utf-8') as f:
+                cached_data = json.load(f)
+                if cached_data.get('success'):
+                    return JSONResponse(cached_data)
+        
+        # Fallback to database calculation if cache not available
         import asyncpg
         
         # Connect to PhilGEPS database

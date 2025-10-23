@@ -78,6 +78,12 @@ class JSONGenerator:
                 'category': 'cache_data',
                 'dependencies': ['PhilGEPS database']
             },
+            'hidden_flood_statistics_cache.json': {
+                'script': 'sec_scraper/generate_hidden_flood_statistics.py',
+                'description': 'Cached hidden flood statistics including omission rate',
+                'category': 'cache_data',
+                'dependencies': ['PhilGEPS database', 'MeiliSearch API']
+            },
             'top_contractors_cache.json': {
                 'script': 'sec_scraper/generate_contractors_dashboard_cache.py',
                 'description': 'Top contractors cache',
@@ -426,13 +432,19 @@ class JSONGenerator:
             'Excluded Flood Contractors Cache'
         )
         
-        # Generate contractors dashboard cache (new script for new JSON)
+        # Generate hidden flood statistics cache (new script for new JSON)
         success2, output2 = await self.run_script(
+            'sec_scraper/generate_hidden_flood_statistics.py',
+            'Hidden Flood Statistics Cache'
+        )
+        
+        # Generate contractors dashboard cache (new script for new JSON)
+        success3, output3 = await self.run_script(
             'sec_scraper/generate_contractors_dashboard_cache.py',
             'Contractors Dashboard Cache'
         )
         
-        return success1 and success2
+        return success1 and success2 and success3
     
     async def generate_api_cache(self):
         """Generate API cache files by calling all endpoints."""
