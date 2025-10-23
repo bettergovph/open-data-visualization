@@ -77,9 +77,9 @@ async def generate_contractors_with_costs():
             avg_cost = stats['avgCostPerProject']  # Raw average cost
             
             # 50-50 multiplier: equal weight for both factors
-            # Factor 1: Project count (normalized to 0-50 range)
-            # Assume max reasonable project count is 200, normalize to 0-50
-            project_factor = min(project_count / 4.0, 50.0)  # project_count/4, capped at 50
+            # Factor 1: Project count (0.5 points per project, capped at 50)
+            # 0.5 points per project, so 100 projects = 50 points
+            project_factor = min(project_count * 0.5, 50.0)  # 0.5 points per project, capped at 50
             
             # Factor 2: Average cost per project (0.5 points per million, capped at 50)
             # 0.5 points per million pesos, so 100M = 50 points
