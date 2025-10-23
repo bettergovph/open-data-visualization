@@ -383,44 +383,6 @@ function toggleMobileMenu() {
                             </div>
                         </div>
 
-                        <!-- Standard Deviation Analysis Chart -->
-                        <div class="chart-container" style="background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); margin-bottom: 20px;">
-                            <h3 style="color: #0038A8; margin: 0 0 15px 0;">📊 Contractor Project Distribution Analysis</h3>
-                            <p style="color: #666; margin: 0 0 20px 0; font-size: 0.9em;">
-                                Statistical analysis of contractor project counts across all databases (Flood Control, DIME, PhilGEPS)
-                            </p>
-                            
-                            <!-- Statistics Cards -->
-                            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 15px; margin-bottom: 20px;">
-                                <div style="background: #f8f9fa; padding: 15px; border-radius: 6px; text-align: center;">
-                                    <div style="font-size: 1.5em; font-weight: bold; color: #0038A8;" id="all-contractors-total">-</div>
-                                    <div style="color: #666; font-size: 0.8em;">Total Contractors</div>
-                                </div>
-                                <div style="background: #f8f9fa; padding: 15px; border-radius: 6px; text-align: center;">
-                                    <div style="font-size: 1.5em; font-weight: bold; color: #28a745;" id="all-contractors-mean">-</div>
-                                    <div style="color: #666; font-size: 0.8em;">Mean Projects</div>
-                                </div>
-                                <div style="background: #f8f9fa; padding: 15px; border-radius: 6px; text-align: center;">
-                                    <div style="font-size: 1.5em; font-weight: bold; color: #fd7e14;" id="all-contractors-std">-</div>
-                                    <div style="color: #666; font-size: 0.8em;">Std Deviation</div>
-                                </div>
-                                <div style="background: #f8f9fa; padding: 15px; border-radius: 6px; text-align: center;">
-                                    <div style="font-size: 1.5em; font-weight: bold; color: #dc3545;" id="all-contractors-outliers">-</div>
-                                    <div style="color: #666; font-size: 0.8em;">Outliers</div>
-                                </div>
-                            </div>
-                            
-                            <!-- Chart Placeholder -->
-                            <div style="background: #f8f9fa; border: 2px dashed #dee2e6; border-radius: 6px; padding: 40px; text-align: center;">
-                                <div style="color: #6c757d; font-size: 1.1em; margin-bottom: 10px;">📊 Standard Deviation Analysis Chart</div>
-                                <div style="color: #6c757d; font-size: 0.9em; margin-bottom: 20px;">
-                                    This chart will show contractor project count distribution with standard deviation bars (1SD, 1.5SD, 2SD, 2.5SD, 3SD)
-                                </div>
-                                <div style="color: #856404; background: #fff3cd; border: 1px solid #ffc107; border-radius: 4px; padding: 10px; font-size: 0.8em;">
-                                    <strong>📝 TODO:</strong> Implement standard deviation analysis for ALL contractors across all databases (not just MeiliSearch flood data)
-                                </div>
-                            </div>
-                        </div>
                     </div>
                 </div>
 
@@ -974,29 +936,37 @@ async function loadIndividualContractors() {
             console.log('🔍 SEC contractors database loaded:', data.summary);
             
             if (data.contractors) {
-                // Filter to get only suspicious contractors (NO_SEC_RESULTS)
-                const suspiciousContractors = data.contractors.filter(c => c.status === 'NO_SEC_RESULTS');
-                
-                console.log('🔍 Filtered suspicious contractors:', suspiciousContractors.length);
+                // Load ALL contractors from SEC database (not just suspicious ones)
+                console.log('🔍 Loading all SEC contractors:', data.contractors.length);
                 
                 // Convert to standard format
-                allContractors = suspiciousContractors.map(contractor => ({
-                    name: contractor.contractor_name,
+                allContractors = data.contractors.map(contractor => ({
+                    contractor_name: contractor.contractor_name,
+                    original_contractor_name: contractor.original_contractor_name,
+                    company_name: contractor.company_name,
+                    name: contractor.contractor_name, // For backward compatibility
                     project_count: contractor.project_count || 0,
                     total_value: 0, // Not available in current data
                     avg_value: 0, // Not available in current data
                     areas: [],
-                    sec_number: null, // No SEC number for suspicious contractors
-                    status: 'NO_SEC_RESULTS',
-                    date_registered: null,
-                    registered_address: null,
-                    secondary_license_details: null,
-                    reportorial_submissions: null,
-                    last_updated: null
+                    sec_number: contractor.sec_number || null,
+                    status: contractor.status || 'UNKNOWN',
+                    date_registered: contractor.date_registered || null,
+                    registered_address: contractor.registered_address || null,
+                    secondary_license_details: contractor.secondary_license_details || null,
+                    reportorial_submissions: contractor.reportorial_submissions || null,
+                    last_updated: contractor.last_updated || null
                 }));
                 
                 filteredContractors = allContractors;
-                console.log('✅ Loaded suspicious contractors from SEC database:', allContractors.length);
+                console.log('✅ Loaded all contractors from SEC database:', allContractors.length);
+                
+                // Debug: Check for missing contractor names
+                const unknownCount = allContractors.filter(c => !c.contractor_name || c.contractor_name.trim() === '').length;
+                if (unknownCount > 0) {
+                    console.warn(`⚠️ Found ${unknownCount} contractors with missing names`);
+                    console.log('Sample contractor data:', allContractors.slice(0, 3));
+                }
                 return;
             } else {
                 console.log('⚠️ No contractors data in JSON file');
@@ -1302,7 +1272,11 @@ function renderContractorsTable() {
         }
         
         // Handle different data structures (SEC vs Flood contractors)
-        const contractorName = contractor.original_contractor_name || contractor.company_name || contractor.name || contractor.contractor_name || 'Unknown';
+        const contractorName = contractor.contractor_name || 
+                              contractor.original_contractor_name || 
+                              contractor.company_name || 
+                              contractor.name || 
+                              (contractor.sec_number ? `SEC-${contractor.sec_number}` : 'Unknown');
         const secNumber = contractor.sec_number || '-';
         const address = contractor.registered_address || contractor.address || '-';
         const projectCount = contractor.project_count || contractor.projects || 0;
