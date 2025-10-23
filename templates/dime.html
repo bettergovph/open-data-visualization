@@ -1811,7 +1811,6 @@ fetch('/static/data/dime_summary.json')
             }
             
             data.barangays.forEach((brgy, index) => {
-                console.log('🏘️ Barangay data:', brgy); // Debug: see what data is available
                 const row = document.createElement('tr');
                 
                 // Highlight top 3
@@ -1825,27 +1824,21 @@ fetch('/static/data/dime_summary.json')
                 if (index === 1) rankBadge = '🥈';
                 if (index === 2) rankBadge = '🥉';
                 
-                // Get contractor information (same logic as fastest projects)
-                let contractorName = 'N/A';
+                // Get contractor information for aggregated barangays data
+                let contractorName = 'Multiple Contractors';
                 let contractorSource = '';
                 
-                if (brgy.contractor_source === 'flood_connected' || brgy.contractor_source === 'dime_fallback') {
-                    // Barangay connected to flood data (SSP) - contractor from MeiliSearch or DIME fallback
-                    contractorName = brgy.contractors[0];
-                    contractorSource = '<span style="background: #28a745; color: white; padding: 2px 6px; border-radius: 4px; font-size: 0.8em; font-weight: 600;">SSP</span>';
-                } else if (brgy.contractors && brgy.contractors.length > 0) {
-                    // Use DIME contractor data
-                    contractorName = brgy.contractors[0];
+                // For aggregated barangays data, we don't have individual contractor info
+                // Show appropriate message based on project count
+                if (brgy.project_count > 1) {
+                    contractorName = 'Multiple Contractors';
+                    contractorSource = '<span style="background: #6c757d; color: white; padding: 2px 6px; border-radius: 4px; font-size: 0.8em; font-weight: 600;">AGGREGATED</span>';
+                } else if (brgy.project_count === 1) {
+                    contractorName = 'Single Project';
                     contractorSource = '<span style="background: #6c757d; color: white; padding: 2px 6px; border-radius: 4px; font-size: 0.8em; font-weight: 600;">DIME</span>';
-                } else if (brgy.implementing_offices && brgy.implementing_offices.length > 0) {
-                    // Fallback to implementing offices
-                    try {
-                        const contractorObj = typeof brgy.implementing_offices[0] === 'string' ? JSON.parse(brgy.implementing_offices[0]) : brgy.implementing_offices[0];
-                        contractorName = contractorObj.name || contractorObj.nameAbbreviation || 'N/A';
-                        contractorSource = '<span style="background: #fd7e14; color: white; padding: 2px 6px; border-radius: 4px; font-size: 0.8em; font-weight: 600;">DIME Office</span>';
-                    } catch (e) {
-                        contractorName = 'N/A';
-                    }
+                } else {
+                    contractorName = 'N/A';
+                    contractorSource = '<span style="background: #6c757d; color: white; padding: 2px 6px; border-radius: 4px; font-size: 0.8em; font-weight: 600;">DIME</span>';
                 }
 
                 row.innerHTML = `
@@ -1912,7 +1905,6 @@ fetch('/static/data/dime_summary.json')
             }
             
             data.barangays.forEach((brgy, index) => {
-                console.log('🏘️ Barangay data:', brgy); // Debug: see what data is available
                 const row = document.createElement('tr');
                 
                 // Highlight top 3
@@ -1926,27 +1918,21 @@ fetch('/static/data/dime_summary.json')
                 if (index === 1) rankBadge = '🥈';
                 if (index === 2) rankBadge = '🥉';
                 
-                // Get contractor information (same logic as fastest projects)
-                let contractorName = 'N/A';
+                // Get contractor information for aggregated barangays data
+                let contractorName = 'Multiple Contractors';
                 let contractorSource = '';
                 
-                if (brgy.contractor_source === 'flood_connected' || brgy.contractor_source === 'dime_fallback') {
-                    // Barangay connected to flood data (SSP) - contractor from MeiliSearch or DIME fallback
-                    contractorName = brgy.contractors[0];
-                    contractorSource = '<span style="background: #28a745; color: white; padding: 2px 6px; border-radius: 4px; font-size: 0.8em; font-weight: 600;">SSP</span>';
-                } else if (brgy.contractors && brgy.contractors.length > 0) {
-                    // Use DIME contractor data
-                    contractorName = brgy.contractors[0];
+                // For aggregated barangays data, we don't have individual contractor info
+                // Show appropriate message based on project count
+                if (brgy.project_count > 1) {
+                    contractorName = 'Multiple Contractors';
+                    contractorSource = '<span style="background: #6c757d; color: white; padding: 2px 6px; border-radius: 4px; font-size: 0.8em; font-weight: 600;">AGGREGATED</span>';
+                } else if (brgy.project_count === 1) {
+                    contractorName = 'Single Project';
                     contractorSource = '<span style="background: #6c757d; color: white; padding: 2px 6px; border-radius: 4px; font-size: 0.8em; font-weight: 600;">DIME</span>';
-                } else if (brgy.implementing_offices && brgy.implementing_offices.length > 0) {
-                    // Fallback to implementing offices
-                    try {
-                        const contractorObj = typeof brgy.implementing_offices[0] === 'string' ? JSON.parse(brgy.implementing_offices[0]) : brgy.implementing_offices[0];
-                        contractorName = contractorObj.name || contractorObj.nameAbbreviation || 'N/A';
-                        contractorSource = '<span style="background: #fd7e14; color: white; padding: 2px 6px; border-radius: 4px; font-size: 0.8em; font-weight: 600;">DIME Office</span>';
-                    } catch (e) {
-                        contractorName = 'N/A';
-                    }
+                } else {
+                    contractorName = 'N/A';
+                    contractorSource = '<span style="background: #6c757d; color: white; padding: 2px 6px; border-radius: 4px; font-size: 0.8em; font-weight: 600;">DIME</span>';
                 }
 
                 row.innerHTML = `
