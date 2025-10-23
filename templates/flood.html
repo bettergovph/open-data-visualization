@@ -754,7 +754,7 @@ function toggleMobileMenu() {
                         <div style="display: flex; gap: 10px; align-items: center;">
                             <label for="contractor-search" style="font-weight: 600; color: #0038A8;">Search:</label>
                             <input type="text" id="contractor-search" placeholder="Search contractors..." style="padding: 8px 12px; border: 1px solid #ddd; border-radius: 4px; width: 200px;">
-                            <button id="refresh-contractor-data" style="background: #0038A8; color: white; border: none; padding: 8px 16px; border-radius: 4px; cursor: pointer;">🔄 Refresh</button>
+                            <button id="refresh-contractor-data" style="background: #0038A8; color: white; border: none; padding: 8px 16px; border-radius: 4px; cursor: pointer;">Apply</button>
                         </div>
                         <div style="display: flex; gap: 10px; align-items: center;">
                             <label for="contractor-sort" style="font-weight: 600; color: #0038A8;">Sort by:</label>
@@ -3905,7 +3905,15 @@ function getContractorSecStatusSync(contractorName) {
                 // Switch to contractors tab and filter by this contractor
                 switchTab('contractors');
                 document.getElementById('contractor-search').value = contractorName;
-                renderContractors();
+                
+                // Trigger the Apply button automatically
+                const applyButton = document.getElementById('refresh-contractor-data');
+                if (applyButton) {
+                    applyButton.click();
+                } else {
+                    // Fallback: just render contractors
+                    renderContractors();
+                }
             }
         };
         
