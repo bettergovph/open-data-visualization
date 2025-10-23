@@ -91,11 +91,11 @@ async def generate_sec_json():
         }
 
         # Write to JSON file
-        os.makedirs('static', exist_ok=True)
-        with open('static/sec_contractors_database.json', 'w', encoding='utf-8') as f:
+        os.makedirs('static/data', exist_ok=True)
+        with open('static/data/sec_contractors_database.json', 'w', encoding='utf-8') as f:
             json.dump(output, f, indent=2, ensure_ascii=False)
 
-        print(f"✅ Generated static/sec_contractors_database.json")
+        print(f"✅ Generated static/data/sec_contractors_database.json")
         print(f"   • Total contractors: {len(contractors)}")
         print(f"   • With SEC data: {contractors_with_sec}")
         print(f"   • Without SEC data: {contractors_without_sec}")
