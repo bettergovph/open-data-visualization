@@ -323,11 +323,11 @@ function toggleMobileMenu() {
                     <p style="text-align: center; color: #666; margin-bottom: 15px;">Infrastructure projects with the shortest time from start to completion</p>
                     
                     <!-- Legend for contractor sources -->
-                    <div style="text-align: center; margin-bottom: 30px; padding: 10px; background: #f8f9fa; border-radius: 8px; font-size: 0.9em; color: #666;">
+                    <div style="text-align: center; margin-bottom: 30px; padding: 15px; background: #f8f9fa; border-radius: 8px; font-size: 0.9em; color: #666;">
                         <strong>Legend:</strong> 
-                        <span style="color: #0038A8;">🌊 Flood Data</span> = Connected to Flood Control Data | 
-                        <span style="color: #28a745;">SSP</span> = Sumbong sa Pangulo | 
-                        <span style="color: #6c757d;">DIME</span> = DIME Database
+                        <span style="background: #0038A8; color: white; padding: 2px 6px; border-radius: 4px; font-size: 0.8em; font-weight: 600; margin: 0 5px;">🌊 Flood Data</span> = Connected to Flood Control Data | 
+                        <span style="background: #28a745; color: white; padding: 2px 6px; border-radius: 4px; font-size: 0.8em; font-weight: 600; margin: 0 5px;">SSP</span> = Sumbong sa Pangulo | 
+                        <span style="background: #6c757d; color: white; padding: 2px 6px; border-radius: 4px; font-size: 0.8em; font-weight: 600; margin: 0 5px;">DIME</span> = DIME Database
                     </div>
 
                     <!-- Loading Spinner -->
@@ -1731,21 +1731,21 @@ fetch('/static/data/dime_summary.json')
                 if (project.contractor_source === 'flood_connected') {
                     // Project is connected to flood data - contractor from MeiliSearch
                     contractorName = project.contractors[0];
-                    contractorSource = ' (Flood Data)';
+                    contractorSource = '<span style="background: #0038A8; color: white; padding: 2px 6px; border-radius: 4px; font-size: 0.8em; font-weight: 600;">🌊 Flood Data</span>';
                 } else if (project.contractor_source === 'dime_fallback') {
                     // Project connected to flood but MeiliSearch failed, using DIME data
                     contractorName = project.contractors[0];
-                    contractorSource = ' (SSP)';
+                    contractorSource = '<span style="background: #28a745; color: white; padding: 2px 6px; border-radius: 4px; font-size: 0.8em; font-weight: 600;">SSP</span>';
                 } else if (project.contractors && project.contractors.length > 0) {
                     // Use DIME contractor data
                     contractorName = project.contractors[0];
-                    contractorSource = ' (DIME)';
+                    contractorSource = '<span style="background: #6c757d; color: white; padding: 2px 6px; border-radius: 4px; font-size: 0.8em; font-weight: 600;">DIME</span>';
                 } else if (project.implementing_offices && project.implementing_offices.length > 0) {
                     // Fallback to implementing offices
                     try {
                         const contractorObj = typeof project.implementing_offices[0] === 'string' ? JSON.parse(project.implementing_offices[0]) : project.implementing_offices[0];
                         contractorName = contractorObj.name || contractorObj.nameAbbreviation || 'N/A';
-                        contractorSource = ' (DIME Office)';
+                        contractorSource = '<span style="background: #fd7e14; color: white; padding: 2px 6px; border-radius: 4px; font-size: 0.8em; font-weight: 600;">DIME Office</span>';
                     } catch (e) {
                         contractorName = 'N/A';
                     }
@@ -1759,7 +1759,7 @@ fetch('/static/data/dime_summary.json')
                     <td style="text-align: center;">${project.contract_completion_date || 'N/A'}</td>
                     <td style="text-align: center;"><strong style="color: #28a745;">${project.completion_days || 'N/A'}</strong></td>
                     <td style="text-align: right;">₱${project.cost ? parseFloat(project.cost).toLocaleString('en-PH', {minimumFractionDigits: 2}) : 'N/A'}</td>
-                    <td style="font-size: 0.9em;">${contractorName}${contractorSource}</td>
+                    <td style="font-size: 0.9em;">${contractorName}<br/>${contractorSource}</td>
                 `;
                 
                 tbody.appendChild(row);
