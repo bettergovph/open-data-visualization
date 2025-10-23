@@ -2092,28 +2092,29 @@ fetch('/static/data/dime_summary.json')
                 console.log('📊 Found DIME projects:', projects.length);
                 console.log('🔍 Sample project structure:', projects[0]); // Debug: see what fields are available
                 
-                // Extract unique contractors from DIME (check multiple possible fields)
+                // Extract unique contractors from DIME (same logic as fastest projects)
                 projects.forEach(project => {
-                    // Check contractors array
-                    if (project.contractors && project.contractors.length > 0) {
-                        project.contractors.forEach(contractor => contractors.add(contractor));
+                    let contractorName = 'N/A';
+                    
+                    // Use same contractor detection logic as fastest projects
+                    if (project.contractor_source === 'flood_connected' || project.contractor_source === 'dime_fallback') {
+                        // Project connected to flood data (SSP) - contractor from MeiliSearch or DIME fallback
+                        contractorName = project.contractors[0];
+                    } else if (project.contractors && project.contractors.length > 0) {
+                        // Use DIME contractor data
+                        contractorName = project.contractors[0];
+                    } else if (project.implementing_offices && project.implementing_offices.length > 0) {
+                        // Fallback to implementing offices
+                        try {
+                            const contractorObj = typeof project.implementing_offices[0] === 'string' ? JSON.parse(project.implementing_offices[0]) : project.implementing_offices[0];
+                            contractorName = contractorObj.name || contractorObj.nameAbbreviation || 'N/A';
+                        } catch (e) {
+                            contractorName = 'N/A';
+                        }
                     }
-                    // Check single contractor field
-                    if (project.contractor) {
-                        contractors.add(project.contractor);
-                    }
-                    // Check implementing offices as fallback
-                    if (project.implementing_offices && project.implementing_offices.length > 0) {
-                        project.implementing_offices.forEach(office => {
-                            try {
-                                const officeObj = typeof office === 'string' ? JSON.parse(office) : office;
-                                if (officeObj.name || officeObj.nameAbbreviation) {
-                                    contractors.add(officeObj.name || officeObj.nameAbbreviation);
-                                }
-                            } catch (e) {
-                                // Skip invalid JSON
-                            }
-                        });
+                    
+                    if (contractorName !== 'N/A') {
+                        contractors.add(contractorName);
                     }
                 });
             }
