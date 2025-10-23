@@ -1184,9 +1184,6 @@ function renderContractorsTable() {
     contractors.forEach((contractor, index) => {
         const row = document.createElement('tr');
         row.style.borderBottom = '1px solid #e5e7eb';
-        if (contractor.status === 'NO_SEC_RESULTS') {
-            row.style.background = '#fefce8';
-        }
         
         // Handle different data structures (SEC vs Flood contractors)
         const contractorName = contractor.contractor_name || 
