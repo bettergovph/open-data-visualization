@@ -1129,11 +1129,19 @@ function filterContractors() {
         filtered = allContractors.filter(contractor => {
             switch (secStatusFilter) {
                 case 'with-sec':
-                    return contractor.status === 'WITH_SEC_DATA' || contractor.sec_number;
+                    // Has SEC number or verified status
+                    return (contractor.sec_number && contractor.sec_number.trim() !== '') || 
+                           contractor.status === 'WITH_SEC_DATA' ||
+                           (contractor.sec_number && contractor.sec_number !== 'Not Found');
                 case 'no-sec':
+                    // Suspicious contractors - NO SEC RESULTS
                     return contractor.status === 'NO_SEC_RESULTS';
                 case 'not-processed':
-                    return !contractor.status || contractor.status === 'NOT_PROCESSED';
+                    // Not processed or no status
+                    return !contractor.status || 
+                           contractor.status === 'NOT_PROCESSED' ||
+                           contractor.status === '' ||
+                           (!contractor.sec_number || contractor.sec_number === 'Not Found' || contractor.sec_number.trim() === '');
                 default:
                     return true;
             }
