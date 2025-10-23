@@ -1722,12 +1722,12 @@ fetch('/static/data/dime_summary.json')
                 
                 // Parse contractor JSON to get name
                 let contractorName = 'N/A';
-                if (project.contractor) {
+                if (project.implementing_offices && project.implementing_offices.length > 0) {
                     try {
-                        const contractorObj = typeof project.contractor === 'string' ? JSON.parse(project.contractor) : project.contractor;
+                        const contractorObj = typeof project.implementing_offices[0] === 'string' ? JSON.parse(project.implementing_offices[0]) : project.implementing_offices[0];
                         contractorName = contractorObj.name || contractorObj.nameAbbreviation || 'N/A';
                     } catch (e) {
-                        contractorName = project.contractor;
+                        contractorName = 'N/A';
                     }
                 }
                 
@@ -1735,9 +1735,9 @@ fetch('/static/data/dime_summary.json')
                     <td style="text-align: center;"><strong>${rankBadge}</strong></td>
                     <td><strong style="color: #0038A8;">${project.project_name || 'N/A'}</strong></td>
                     <td>${project.region || 'N/A'}</td>
-                    <td style="text-align: center;">${project.start_date || 'N/A'}</td>
-                    <td style="text-align: center;">${project.completion_date || 'N/A'}</td>
-                    <td style="text-align: center;"><strong style="color: #28a745;">${project.duration_days || 'N/A'}</strong></td>
+                    <td style="text-align: center;">${project.date_started || 'N/A'}</td>
+                    <td style="text-align: center;">${project.contract_completion_date || 'N/A'}</td>
+                    <td style="text-align: center;"><strong style="color: #28a745;">${project.completion_days || 'N/A'}</strong></td>
                     <td style="text-align: right;">₱${project.cost ? parseFloat(project.cost).toLocaleString('en-PH', {minimumFractionDigits: 2}) : 'N/A'}</td>
                     <td style="font-size: 0.9em;">${contractorName}</td>
                 `;
