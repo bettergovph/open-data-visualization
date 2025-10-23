@@ -2196,14 +2196,16 @@ async def hidden_flood_statistics_api():
             database=os.getenv('POSTGRES_DB_PHILGEPS', 'philgeps')
         )
         
-        # Get total flood projects from the flood API endpoint
+        # Get total flood projects directly from MeiliSearch
         try:
+            client = get_flood_client()
+            # Get the total count from MeiliSearch stats
             import aiohttp
             async with aiohttp.ClientSession() as session:
-                async with session.get('http://172.30.147.217:8001/api/flood/statistics') as response:
+                async with session.get(f"{client.base_url}/stats") as response:
                     if response.status == 200:
-                        flood_data = await response.json()
-                        total_meilisearch_projects = flood_data.get('totalProjects', 0)
+                        stats_data = await response.json()
+                        total_meilisearch_projects = stats_data.get('numberOfDocuments', 0)
                     else:
                         total_meilisearch_projects = 0
         except Exception as e:
@@ -2257,10 +2259,17 @@ async def hidden_flood_statistics_api():
         
         await philgeps_conn.close()
         
+        # Debug logging
+        print(f"DEBUG: total_meilisearch_projects = {total_meilisearch_projects}")
+        print(f"DEBUG: hidden_projects_count = {hidden_projects_count}")
+        print(f"DEBUG: total_flood_projects = {total_flood_projects}")
+        
         if total_flood_projects > 0:
             omission_rate = (hidden_projects_count / total_flood_projects) * 100
         else:
             omission_rate = 0
+            
+        print(f"DEBUG: omission_rate = {omission_rate}%")
         
         return JSONResponse({
             "success": True,

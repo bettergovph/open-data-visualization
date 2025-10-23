@@ -595,7 +595,7 @@ async function loadHiddenFloodData() {
                     const valueInMillions = stats.total_value / 1000000;
                     if (valueInMillions >= 1000) {
                         // Show as trillions for values >= 1T
-                        hiddenProjectsValue.textContent = `₱${(valueInMillions / 1000).toFixed(6)}T`;
+                        hiddenProjectsValue.textContent = `₱${(valueInMillions / 1000).toFixed(4)}T`;
                     } else {
                         // Show as millions with commas for smaller values
                         hiddenProjectsValue.textContent = `₱${valueInMillions.toLocaleString('en-PH', {maximumFractionDigits: 1})}M`;
