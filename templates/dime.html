@@ -395,12 +395,12 @@ function toggleMobileMenu() {
                             <thead>
                                 <tr>
                                     <th style="width: 5%; text-align: center;">Rank</th>
-                                    <th style="width: 25%;">Barangay</th>
-                                    <th style="width: 20%;">City/Municipality</th>
-                                    <th style="width: 10%; text-align: center;">Projects</th>
-                                    <th style="width: 15%; text-align: right;">Total Amount</th>
-                                    <th style="width: 12%; text-align: right;">Avg Amount</th>
-                                    <th style="width: 6%; text-align: center;">%</th>
+                                    <th style="width: 20%;">Barangay</th>
+                                    <th style="width: 15%;">City/Municipality</th>
+                                    <th style="width: 8%; text-align: center;">Projects</th>
+                                    <th style="width: 12%; text-align: right;">Total Amount</th>
+                                    <th style="width: 10%; text-align: right;">Avg Amount</th>
+                                    <th style="width: 15%;">Contractor</th>
                                 </tr>
                             </thead>
                             <tbody id="barangays-tbody">
@@ -431,12 +431,12 @@ function toggleMobileMenu() {
                             <thead>
                                 <tr>
                                     <th style="width: 5%; text-align: center;">Rank</th>
-                                    <th style="width: 25%;">Barangay</th>
-                                    <th style="width: 20%;">City/Municipality</th>
-                                    <th style="width: 10%; text-align: center;">Projects</th>
-                                    <th style="width: 15%; text-align: right;">Total Amount</th>
-                                    <th style="width: 12%; text-align: right;">Avg Amount</th>
-                                    <th style="width: 6%; text-align: center;">%</th>
+                                    <th style="width: 20%;">Barangay</th>
+                                    <th style="width: 15%;">City/Municipality</th>
+                                    <th style="width: 8%; text-align: center;">Projects</th>
+                                    <th style="width: 12%; text-align: right;">Total Amount</th>
+                                    <th style="width: 10%; text-align: right;">Avg Amount</th>
+                                    <th style="width: 15%;">Contractor</th>
                                 </tr>
                             </thead>
                             <tbody id="barangays-active-tbody">
@@ -1831,7 +1831,7 @@ fetch('/static/data/dime_summary.json')
                     <td style="text-align: center;"><strong>${brgy.project_count || 0}</strong></td>
                     <td style="text-align: right; font-weight: 600; color: #0038A8;">₱${parseFloat(brgy.total_amount).toLocaleString('en-PH', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
                     <td style="text-align: right; color: #666;">₱${parseFloat(brgy.avg_amount).toLocaleString('en-PH', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
-                    <td style="text-align: center; font-size: 0.85em; color: #28a745;">${brgy.percentage_of_total ? parseFloat(brgy.percentage_of_total).toFixed(2) : '0.00'}%</td>
+                    <td style="font-size: 0.9em;">N/A<br/><span style="background: #6c757d; color: white; padding: 2px 6px; border-radius: 4px; font-size: 0.8em; font-weight: 600;">DIME</span></td>
                 `;
                 
                 tbody.appendChild(row);
@@ -1908,7 +1908,7 @@ fetch('/static/data/dime_summary.json')
                     <td style="text-align: center;"><strong>${brgy.project_count || 0}</strong></td>
                     <td style="text-align: right; font-weight: 600; color: #0038A8;">₱${parseFloat(brgy.total_amount).toLocaleString('en-PH', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
                     <td style="text-align: right; color: #666;">₱${parseFloat(brgy.avg_amount).toLocaleString('en-PH', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
-                    <td style="text-align: center; font-size: 0.85em; color: #28a745;">${brgy.percentage_of_total ? parseFloat(brgy.percentage_of_total).toFixed(2) : '0.00'}%</td>
+                    <td style="font-size: 0.9em;">N/A<br/><span style="background: #6c757d; color: white; padding: 2px 6px; border-radius: 4px; font-size: 0.8em; font-weight: 600;">DIME</span></td>
                 `;
                 
                 tbody.appendChild(row);
