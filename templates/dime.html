@@ -1824,6 +1824,29 @@ fetch('/static/data/dime_summary.json')
                 if (index === 1) rankBadge = '🥈';
                 if (index === 2) rankBadge = '🥉';
                 
+                // Get contractor information (same logic as fastest projects)
+                let contractorName = 'N/A';
+                let contractorSource = '';
+                
+                if (brgy.contractor_source === 'flood_connected' || brgy.contractor_source === 'dime_fallback') {
+                    // Barangay connected to flood data (SSP) - contractor from MeiliSearch or DIME fallback
+                    contractorName = brgy.contractors && brgy.contractors.length > 0 ? brgy.contractors[0] : 'N/A';
+                    contractorSource = '<span style="background: #28a745; color: white; padding: 2px 6px; border-radius: 4px; font-size: 0.8em; font-weight: 600;">SSP</span>';
+                } else if (brgy.contractors && brgy.contractors.length > 0) {
+                    // Use DIME contractor data
+                    contractorName = brgy.contractors[0];
+                    contractorSource = '<span style="background: #6c757d; color: white; padding: 2px 6px; border-radius: 4px; font-size: 0.8em; font-weight: 600;">DIME</span>';
+                } else if (brgy.implementing_offices && brgy.implementing_offices.length > 0) {
+                    // Fallback to implementing offices
+                    try {
+                        const contractorObj = typeof brgy.implementing_offices[0] === 'string' ? JSON.parse(brgy.implementing_offices[0]) : brgy.implementing_offices[0];
+                        contractorName = contractorObj.name || contractorObj.nameAbbreviation || 'N/A';
+                        contractorSource = '<span style="background: #fd7e14; color: white; padding: 2px 6px; border-radius: 4px; font-size: 0.8em; font-weight: 600;">DIME Office</span>';
+                    } catch (e) {
+                        contractorName = 'N/A';
+                    }
+                }
+
                 row.innerHTML = `
                     <td style="text-align: center;"><strong>${rankBadge}</strong></td>
                     <td><strong style="color: #0038A8;">${brgy.barangay || 'N/A'}</strong></td>
@@ -1831,7 +1854,7 @@ fetch('/static/data/dime_summary.json')
                     <td style="text-align: center;"><strong>${brgy.project_count || 0}</strong></td>
                     <td style="text-align: right; font-weight: 600; color: #0038A8;">₱${parseFloat(brgy.total_amount).toLocaleString('en-PH', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
                     <td style="text-align: right; color: #666;">₱${parseFloat(brgy.avg_amount).toLocaleString('en-PH', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
-                    <td style="font-size: 0.9em;">N/A<br/><span style="background: #6c757d; color: white; padding: 2px 6px; border-radius: 4px; font-size: 0.8em; font-weight: 600;">DIME</span></td>
+                    <td style="font-size: 0.9em;">${contractorName}<br/>${contractorSource}</td>
                 `;
                 
                 tbody.appendChild(row);
@@ -1901,6 +1924,29 @@ fetch('/static/data/dime_summary.json')
                 if (index === 1) rankBadge = '🥈';
                 if (index === 2) rankBadge = '🥉';
                 
+                // Get contractor information (same logic as fastest projects)
+                let contractorName = 'N/A';
+                let contractorSource = '';
+                
+                if (brgy.contractor_source === 'flood_connected' || brgy.contractor_source === 'dime_fallback') {
+                    // Barangay connected to flood data (SSP) - contractor from MeiliSearch or DIME fallback
+                    contractorName = brgy.contractors && brgy.contractors.length > 0 ? brgy.contractors[0] : 'N/A';
+                    contractorSource = '<span style="background: #28a745; color: white; padding: 2px 6px; border-radius: 4px; font-size: 0.8em; font-weight: 600;">SSP</span>';
+                } else if (brgy.contractors && brgy.contractors.length > 0) {
+                    // Use DIME contractor data
+                    contractorName = brgy.contractors[0];
+                    contractorSource = '<span style="background: #6c757d; color: white; padding: 2px 6px; border-radius: 4px; font-size: 0.8em; font-weight: 600;">DIME</span>';
+                } else if (brgy.implementing_offices && brgy.implementing_offices.length > 0) {
+                    // Fallback to implementing offices
+                    try {
+                        const contractorObj = typeof brgy.implementing_offices[0] === 'string' ? JSON.parse(brgy.implementing_offices[0]) : brgy.implementing_offices[0];
+                        contractorName = contractorObj.name || contractorObj.nameAbbreviation || 'N/A';
+                        contractorSource = '<span style="background: #fd7e14; color: white; padding: 2px 6px; border-radius: 4px; font-size: 0.8em; font-weight: 600;">DIME Office</span>';
+                    } catch (e) {
+                        contractorName = 'N/A';
+                    }
+                }
+
                 row.innerHTML = `
                     <td style="text-align: center;"><strong>${rankBadge}</strong></td>
                     <td><strong style="color: #0038A8;">${brgy.barangay || 'N/A'}</strong></td>
@@ -1908,7 +1954,7 @@ fetch('/static/data/dime_summary.json')
                     <td style="text-align: center;"><strong>${brgy.project_count || 0}</strong></td>
                     <td style="text-align: right; font-weight: 600; color: #0038A8;">₱${parseFloat(brgy.total_amount).toLocaleString('en-PH', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
                     <td style="text-align: right; color: #666;">₱${parseFloat(brgy.avg_amount).toLocaleString('en-PH', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
-                    <td style="font-size: 0.9em;">N/A<br/><span style="background: #6c757d; color: white; padding: 2px 6px; border-radius: 4px; font-size: 0.8em; font-weight: 600;">DIME</span></td>
+                    <td style="font-size: 0.9em;">${contractorName}<br/>${contractorSource}</td>
                 `;
                 
                 tbody.appendChild(row);
