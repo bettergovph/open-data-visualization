@@ -17,33 +17,24 @@ from pathlib import Path
 # Base URL for the API
 BASE_URL = "http://172.30.147.217:8001"
 
-# API endpoints that generate JSON on-demand
+# API endpoints that generate JSON on-demand (ACTUAL ENDPOINTS ONLY)
 API_ENDPOINTS = {
-    # Contractor Statistics Cache
-    'contractor_stats_cache.json': '/api/contractors/stats',
-    
     # Flood Data
     'flood_control_data.json': '/api/flood/projects',
     'flood_baseline_pattern.json': '/api/flood/statistics',
     
-    # Correlation Data
-    'flood_dime_contractor_correlation.json': '/api/flood/dime/correlation',
-    'flood_dime_contractor_correlation_2020.json': '/api/flood/dime/correlation/2020',
-    'flood_dime_contractor_correlation_2021.json': '/api/flood/dime/correlation/2021',
-    'flood_dime_contractor_correlation_2022.json': '/api/flood/dime/correlation/2022',
-    'flood_dime_contractor_correlation_2023.json': '/api/flood/dime/correlation/2023',
-    'flood_dime_contractor_correlation_2024.json': '/api/flood/dime/correlation/2024',
-    'flood_dime_contractor_correlation_2025.json': '/api/flood/dime/correlation/2025',
-    'flood_dime_contractor_correlation_all_years.json': '/api/flood/dime/correlation/all',
-    
-    # NEP Data
-    'nep_2026_infrastructure_categories.json': '/api/budget/nep/categories',
-    'nep_2026_overall_analysis.json': '/api/budget/nep/analysis',
-    'nep_2026_red_flag.json': '/api/budget/nep/red-flags',
+    # Contractors Data
+    'contractors_sec.json': '/api/contractors/sec',
+    'contractors_top.json': '/api/contractors/top',
+    'contractors_venn.json': '/api/contractors/venn',
+    'flood_hidden_contractors.json': '/api/flood/hidden-contractors',
+    'flood_hidden_contractors_cached.json': '/api/flood/hidden-contractors-cached',
     
     # DIME Data
     'dime_stats.json': '/api/dime/statistics',
-    'fastest_dime_projects.json': '/api/dime/fastest-projects',
+    'dime_filter_options.json': '/api/dime/filter-options',
+    'dime_barangay_aggregates.json': '/api/dime/barangay-aggregates',
+    'dime_projects_dime_only.json': '/api/dime/projects/dime-only',
     
     # Budget Data
     'budget_overview.json': '/api/budget/overview/stats',
@@ -52,17 +43,26 @@ API_ENDPOINTS = {
     'budget_regions.json': '/api/budget/regions',
     'budget_agencies.json': '/api/budget/agencies',
     
+    # NEP Data (ACTUAL ENDPOINTS)
+    'nep_anomalies_count.json': '/api/budget/nep/anomalies/count',
+    'nep_data_browser.json': '/api/budget/nep/data-browser',
+    'nep_year_over_year.json': '/api/budget/nep/year-over-year',
+    'nep_top_programs.json': '/api/budget/nep/top-programs',
+    'nep_overview_stats.json': '/api/budget/nep/overview/stats',
+    'nep_departments.json': '/api/budget/nep/departments',
+    'nep_expense_categories.json': '/api/budget/nep/expense-categories',
+    'nep_regions.json': '/api/budget/nep/regions',
+    'nep_agencies.json': '/api/budget/nep/agencies',
+    'nep_columns.json': '/api/budget/nep/columns',
+    'nep_duplicates_count.json': '/api/budget/nep/duplicates/count',
+    'nep_total_items_count.json': '/api/budget/nep/total-items/count',
+    
     # Flood Lookup Data
     'flood_regions.json': '/api/flood/lookup/regions',
     'flood_provinces.json': '/api/flood/lookup/provinces',
     'flood_years.json': '/api/flood/lookup/years',
     'flood_work_types.json': '/api/flood/lookup/types-of-work',
-    'flood_contractors.json': '/api/flood/lookup/contractors',
-    
-    # DIME Lookup Data
-    'dime_filter_options.json': '/api/dime/filter-options',
-    'dime_barangay_aggregates.json': '/api/dime/barangay-aggregates',
-    'dime_projects_dime_only.json': '/api/dime/projects/dime-only'
+    'flood_contractors.json': '/api/flood/lookup/contractors'
 }
 
 async def call_api_endpoint(session: aiohttp.ClientSession, endpoint: str, filename: str) -> Dict[str, Any]:
