@@ -182,13 +182,25 @@ async def get_dime_barangay_aggregates():
                     )
                     ELSE NULL 
                 END as meilisearch_id,
+                -- Determine contractor_source based on meilisearch_id presence
                 CASE 
                     WHEN project_count = 1 THEN (
-                        SELECT contractor_source 
-                        FROM projects p 
-                        WHERE p.barangay = dime_barangay_aggregates.barangay 
-                        AND p.city = dime_barangay_aggregates.city 
-                        LIMIT 1
+                        CASE 
+                            WHEN (
+                                SELECT meilisearch_id 
+                                FROM projects p 
+                                WHERE p.barangay = dime_barangay_aggregates.barangay 
+                                AND p.city = dime_barangay_aggregates.city 
+                                LIMIT 1
+                            ) IS NOT NULL AND (
+                                SELECT meilisearch_id 
+                                FROM projects p 
+                                WHERE p.barangay = dime_barangay_aggregates.barangay 
+                                AND p.city = dime_barangay_aggregates.city 
+                                LIMIT 1
+                            ) != '' THEN 'flood_connected'
+                            ELSE 'dime_only'
+                        END
                     )
                     ELSE NULL 
                 END as contractor_source
@@ -246,13 +258,25 @@ async def get_dime_barangay_aggregates_by_count():
                     )
                     ELSE NULL 
                 END as meilisearch_id,
+                -- Determine contractor_source based on meilisearch_id presence
                 CASE 
                     WHEN project_count = 1 THEN (
-                        SELECT contractor_source 
-                        FROM projects p 
-                        WHERE p.barangay = dime_barangay_aggregates_by_count.barangay 
-                        AND p.city = dime_barangay_aggregates_by_count.city 
-                        LIMIT 1
+                        CASE 
+                            WHEN (
+                                SELECT meilisearch_id 
+                                FROM projects p 
+                                WHERE p.barangay = dime_barangay_aggregates_by_count.barangay 
+                                AND p.city = dime_barangay_aggregates_by_count.city 
+                                LIMIT 1
+                            ) IS NOT NULL AND (
+                                SELECT meilisearch_id 
+                                FROM projects p 
+                                WHERE p.barangay = dime_barangay_aggregates_by_count.barangay 
+                                AND p.city = dime_barangay_aggregates_by_count.city 
+                                LIMIT 1
+                            ) != '' THEN 'flood_connected'
+                            ELSE 'dime_only'
+                        END
                     )
                     ELSE NULL 
                 END as contractor_source
