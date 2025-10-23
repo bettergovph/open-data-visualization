@@ -98,7 +98,7 @@ async def get_excluded_flood_contractors() -> Dict[str, Any]:
         if conn:
             await conn.close()
 
-def save_contractors_cache(data: Dict[str, Any], output_file: str = "excluded_flood_contractors_cache.json"):
+def save_contractors_cache(data: Dict[str, Any], output_file: str = "../static/excluded_flood_contractors_cache.json"):
     """
     Save contractors cache to JSON file.
     
