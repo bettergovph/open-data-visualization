@@ -7624,7 +7624,11 @@ document.addEventListener('click', function(event) {
                                 label: 'Bulacan Flood Control Budget (Millions)',
                                 data: actualBaselineData.budgets_millions,
                                 backgroundColor: function(context) {
-                                    const value = context.parsed.y;
+                                    // Check if context.parsed exists and has y value
+                                    if (!context.parsed || context.parsed.y === undefined) {
+                                        return '#0038A8'; // Default color
+                                    }
+                                    
                                     const year = actualBaselineData.years[context.dataIndex];
                                     // Highlight Bulacan years in red
                                     if (year === '2022' || year === '2023' || year === '2024') {
@@ -7633,6 +7637,11 @@ document.addEventListener('click', function(event) {
                                     return '#0038A8';
                                 },
                                 borderColor: function(context) {
+                                    // Check if context.parsed exists
+                                    if (!context.parsed || context.parsed.y === undefined) {
+                                        return '#002a75'; // Default color
+                                    }
+                                    
                                     const year = actualBaselineData.years[context.dataIndex];
                                     if (year === '2022' || year === '2023' || year === '2024') {
                                         return '#c82333';
