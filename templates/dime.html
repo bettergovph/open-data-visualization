@@ -388,19 +388,17 @@ function toggleMobileMenu() {
                             <thead>
                                 <tr>
                                     <th style="width: 5%; text-align: center;">Rank</th>
-                                    <th style="width: 20%;">Barangay</th>
-                                    <th style="width: 15%;">City/Municipality</th>
-                                    <th style="width: 15%;">Province</th>
-                                    <th style="width: 10%;">Region</th>
-                                    <th style="width: 8%; text-align: center;">Projects</th>
-                                    <th style="width: 12%; text-align: right;">Total Amount</th>
-                                    <th style="width: 10%; text-align: right;">Avg Amount</th>
-                                    <th style="width: 5%; text-align: center;">%</th>
+                                    <th style="width: 25%;">Barangay</th>
+                                    <th style="width: 20%;">City/Municipality</th>
+                                    <th style="width: 10%; text-align: center;">Projects</th>
+                                    <th style="width: 15%; text-align: right;">Total Amount</th>
+                                    <th style="width: 12%; text-align: right;">Avg Amount</th>
+                                    <th style="width: 6%; text-align: center;">%</th>
                                 </tr>
                             </thead>
                             <tbody id="barangays-tbody">
                                 <tr>
-                                    <td colspan="9" style="text-align: center; padding: 2rem;">Loading...</td>
+                                    <td colspan="7" style="text-align: center; padding: 2rem;">Loading...</td>
                                 </tr>
                             </tbody>
                         </table>
@@ -426,19 +424,17 @@ function toggleMobileMenu() {
                             <thead>
                                 <tr>
                                     <th style="width: 5%; text-align: center;">Rank</th>
-                                    <th style="width: 20%;">Barangay</th>
-                                    <th style="width: 15%;">City/Municipality</th>
-                                    <th style="width: 15%;">Province</th>
-                                    <th style="width: 10%;">Region</th>
-                                    <th style="width: 8%; text-align: center;">Projects</th>
-                                    <th style="width: 12%; text-align: right;">Total Amount</th>
-                                    <th style="width: 10%; text-align: right;">Avg Amount</th>
-                                    <th style="width: 5%; text-align: center;">%</th>
+                                    <th style="width: 25%;">Barangay</th>
+                                    <th style="width: 20%;">City/Municipality</th>
+                                    <th style="width: 10%; text-align: center;">Projects</th>
+                                    <th style="width: 15%; text-align: right;">Total Amount</th>
+                                    <th style="width: 12%; text-align: right;">Avg Amount</th>
+                                    <th style="width: 6%; text-align: center;">%</th>
                                 </tr>
                             </thead>
                             <tbody id="barangays-active-tbody">
                                 <tr>
-                                    <td colspan="9" style="text-align: center; padding: 2rem;">Loading...</td>
+                                    <td colspan="7" style="text-align: center; padding: 2rem;">Loading...</td>
                                 </tr>
                             </tbody>
                         </table>
@@ -1803,7 +1799,7 @@ fetch('/static/data/dime_summary.json')
             if (!data.barangays || data.barangays.length === 0) {
                 tbody.innerHTML = `
                     <tr>
-                        <td colspan="9" style="text-align: center; padding: 2rem; color: #666;">
+                        <td colspan="7" style="text-align: center; padding: 2rem; color: #666;">
                             No barangay data available
                         </td>
                     </tr>
@@ -1829,8 +1825,6 @@ fetch('/static/data/dime_summary.json')
                     <td style="text-align: center;"><strong>${rankBadge}</strong></td>
                     <td><strong style="color: #0038A8;">${brgy.barangay || 'N/A'}</strong></td>
                     <td>${brgy.city || 'N/A'}</td>
-                    <td>${brgy.province || 'N/A'}</td>
-                    <td style="font-size: 0.9em;">${brgy.region || 'N/A'}</td>
                     <td style="text-align: center;"><strong>${brgy.project_count || 0}</strong></td>
                     <td style="text-align: right; font-weight: 600; color: #0038A8;">₱${parseFloat(brgy.total_amount).toLocaleString('en-PH', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
                     <td style="text-align: right; color: #666;">₱${parseFloat(brgy.avg_amount).toLocaleString('en-PH', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
@@ -1882,7 +1876,7 @@ fetch('/static/data/dime_summary.json')
             if (!data.barangays || data.barangays.length === 0) {
                 tbody.innerHTML = `
                     <tr>
-                        <td colspan="9" style="text-align: center; padding: 2rem; color: #666;">
+                        <td colspan="7" style="text-align: center; padding: 2rem; color: #666;">
                             No barangay data available
                         </td>
                     </tr>
@@ -1908,8 +1902,6 @@ fetch('/static/data/dime_summary.json')
                     <td style="text-align: center;"><strong>${rankBadge}</strong></td>
                     <td><strong style="color: #0038A8;">${brgy.barangay || 'N/A'}</strong></td>
                     <td>${brgy.city || 'N/A'}</td>
-                    <td>${brgy.province || 'N/A'}</td>
-                    <td style="font-size: 0.9em;">${brgy.region || 'N/A'}</td>
                     <td style="text-align: center;"><strong>${brgy.project_count || 0}</strong></td>
                     <td style="text-align: right; font-weight: 600; color: #0038A8;">₱${parseFloat(brgy.total_amount).toLocaleString('en-PH', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
                     <td style="text-align: right; color: #666;">₱${parseFloat(brgy.avg_amount).toLocaleString('en-PH', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
