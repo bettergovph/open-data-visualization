@@ -203,7 +203,18 @@ async def get_dime_barangay_aggregates():
                         END
                     )
                     ELSE NULL 
-                END as contractor_source
+                END as contractor_source,
+                -- Get contractors data for single projects
+                CASE 
+                    WHEN project_count = 1 THEN (
+                        SELECT contractors 
+                        FROM projects p 
+                        WHERE p.barangay = dime_barangay_aggregates.barangay 
+                        AND p.city = dime_barangay_aggregates.city 
+                        LIMIT 1
+                    )
+                    ELSE NULL 
+                END as contractors
             FROM dime_barangay_aggregates
         """)
         
@@ -220,7 +231,8 @@ async def get_dime_barangay_aggregates():
                 "avg_amount": float(row['avg_amount']),
                 "percentage_of_total": float(row['percentage_of_total']) if row['percentage_of_total'] else 0,
                 "meilisearch_id": row['meilisearch_id'],
-                "contractor_source": row['contractor_source']
+                "contractor_source": row['contractor_source'],
+                "contractors": row['contractors']
             })
         
         return {
@@ -279,7 +291,18 @@ async def get_dime_barangay_aggregates_by_count():
                         END
                     )
                     ELSE NULL 
-                END as contractor_source
+                END as contractor_source,
+                -- Get contractors data for single projects
+                CASE 
+                    WHEN project_count = 1 THEN (
+                        SELECT contractors 
+                        FROM projects p 
+                        WHERE p.barangay = dime_barangay_aggregates_by_count.barangay 
+                        AND p.city = dime_barangay_aggregates_by_count.city 
+                        LIMIT 1
+                    )
+                    ELSE NULL 
+                END as contractors
             FROM dime_barangay_aggregates_by_count
         """)
         
@@ -296,7 +319,8 @@ async def get_dime_barangay_aggregates_by_count():
                 "avg_amount": float(row['avg_amount']),
                 "percentage_of_total": float(row['percentage_of_total']) if row['percentage_of_total'] else 0,
                 "meilisearch_id": row['meilisearch_id'],
-                "contractor_source": row['contractor_source']
+                "contractor_source": row['contractor_source'],
+                "contractors": row['contractors']
             })
         
         return {
