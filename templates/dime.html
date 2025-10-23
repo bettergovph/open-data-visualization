@@ -1734,7 +1734,7 @@ fetch('/static/data/dime_summary.json')
                 } else if (project.contractors && project.contractors.length > 0) {
                     // Use DIME contractor data
                     contractorName = project.contractors[0];
-                    contractorSource = '<span style="background: #dc3545; color: white; padding: 2px 6px; border-radius: 4px; font-size: 0.8em; font-weight: 600;">DIME</span>';
+                    contractorSource = '<span style="background: #28a745; color: white; padding: 2px 6px; border-radius: 4px; font-size: 0.8em; font-weight: 600;">DIME</span>';
                 } else if (project.implementing_offices && project.implementing_offices.length > 0) {
                     // Fallback to implementing offices
                     try {
@@ -1838,14 +1838,14 @@ fetch('/static/data/dime_summary.json')
                     contractorName = 'Single Contractor';
                     // Use same logic as fastest projects - check contractor_source for SSP vs DIME
                     if (brgy.contractor_source === 'flood_connected') {
-                        contractorSource = '<span style="background: #28a745; color: white; padding: 2px 6px; border-radius: 4px; font-size: 0.8em; font-weight: 600;">SSP</span>';
+                        contractorSource = '<span style="background: #ffc107; color: black; padding: 2px 6px; border-radius: 4px; font-size: 0.8em; font-weight: 600;">SSP</span>';
                     } else {
-                        contractorSource = '<span style="background: #dc3545; color: white; padding: 2px 6px; border-radius: 4px; font-size: 0.8em; font-weight: 600;">DIME</span>';
+                        contractorSource = '<span style="background: #28a745; color: white; padding: 2px 6px; border-radius: 4px; font-size: 0.8em; font-weight: 600;">DIME</span>';
                     }
                     contractorClickable = `onclick="showBarangayContractorsModal('${brgy.barangay}', '${brgy.city}', '${brgy.province}', '${brgy.region}')" style="cursor: pointer; color: #0038A8; text-decoration: underline;"`;
                 } else {
                     contractorName = 'N/A';
-                    contractorSource = '<span style="background: #dc3545; color: white; padding: 2px 6px; border-radius: 4px; font-size: 0.8em; font-weight: 600;">DIME</span>';
+                    contractorSource = '<span style="background: #28a745; color: white; padding: 2px 6px; border-radius: 4px; font-size: 0.8em; font-weight: 600;">DIME</span>';
                     contractorClickable = '';
                 }
 
@@ -1940,14 +1940,14 @@ fetch('/static/data/dime_summary.json')
                     contractorName = 'Single Contractor';
                     // Use same logic as fastest projects - check contractor_source for SSP vs DIME
                     if (brgy.contractor_source === 'flood_connected') {
-                        contractorSource = '<span style="background: #28a745; color: white; padding: 2px 6px; border-radius: 4px; font-size: 0.8em; font-weight: 600;">SSP</span>';
+                        contractorSource = '<span style="background: #ffc107; color: black; padding: 2px 6px; border-radius: 4px; font-size: 0.8em; font-weight: 600;">SSP</span>';
                     } else {
-                        contractorSource = '<span style="background: #dc3545; color: white; padding: 2px 6px; border-radius: 4px; font-size: 0.8em; font-weight: 600;">DIME</span>';
+                        contractorSource = '<span style="background: #28a745; color: white; padding: 2px 6px; border-radius: 4px; font-size: 0.8em; font-weight: 600;">DIME</span>';
                     }
                     contractorClickable = `onclick="showBarangayContractorsModal('${brgy.barangay}', '${brgy.city}', '${brgy.province}', '${brgy.region}')" style="cursor: pointer; color: #0038A8; text-decoration: underline;"`;
                 } else {
                     contractorName = 'N/A';
-                    contractorSource = '<span style="background: #dc3545; color: white; padding: 2px 6px; border-radius: 4px; font-size: 0.8em; font-weight: 600;">DIME</span>';
+                    contractorSource = '<span style="background: #28a745; color: white; padding: 2px 6px; border-radius: 4px; font-size: 0.8em; font-weight: 600;">DIME</span>';
                     contractorClickable = '';
                 }
 
