@@ -2145,6 +2145,8 @@ fetch('/static/data/dime_summary.json')
             }
             
             const contractorList = Array.from(contractors);
+            console.log('🔍 Final contractor list:', contractorList);
+            console.log('🔍 Contractor list length:', contractorList.length);
             
             // Update modal content
             const content = document.getElementById('barangay-contractors-content');
