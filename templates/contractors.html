@@ -289,15 +289,28 @@ function toggleMobileMenu() {
                     <div style="background: white; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); padding: 32px;">
                         <h2 style="font-size: 1.5rem; font-weight: 600; color: black; margin-bottom: 24px;">📋 Contractor Database</h2>
                         
-                        <!-- Search filter -->
+                        <!-- Search and Filter Controls -->
                         <div style="margin-bottom: 20px;">
-                            <input 
-                                type="text" 
-                                id="contractor-search" 
-                                placeholder="Search contractor name..." 
-                                style="width: 100%; padding: 10px; border: 1px solid #d1d5db; border-radius: 4px; font-size: 0.9em;"
-                                onkeyup="filterContractors()"
-                            />
+                            <div style="display: flex; gap: 15px; margin-bottom: 15px; flex-wrap: wrap;">
+                                <div style="flex: 1; min-width: 300px;">
+                                    <input 
+                                        type="text" 
+                                        id="contractor-search" 
+                                        placeholder="Search contractor name..." 
+                                        style="width: 100%; padding: 10px; border: 1px solid #d1d5db; border-radius: 4px; font-size: 0.9em;"
+                                        onkeyup="filterContractors()"
+                                    />
+                                </div>
+                                <div style="display: flex; gap: 10px; align-items: center;">
+                                    <label style="font-weight: 600; color: #374151; font-size: 0.9em;">Filter:</label>
+                                    <select id="sec-status-filter" style="padding: 8px 12px; border: 1px solid #d1d5db; border-radius: 4px; font-size: 0.9em; background: white;" onchange="filterContractors()">
+                                        <option value="all">All Contractors</option>
+                                        <option value="with-sec">With SEC Data</option>
+                                        <option value="no-sec">⚠️ Suspicious (NO SEC Results)</option>
+                                        <option value="not-processed">Not Processed</option>
+                                    </select>
+                                </div>
+                            </div>
                         </div>
                         
                         <!-- Pagination controls -->
@@ -1260,18 +1273,38 @@ function renderContractorsChart() {
     document.getElementById('contractors-next').disabled = currentChartPage >= totalPages - 1;
 }
 
-// Filter contractors by search input
+// Filter contractors by search input and SEC status
 function filterContractors() {
     const searchInput = document.getElementById('contractor-search').value.toLowerCase();
+    const secStatusFilter = document.getElementById('sec-status-filter').value;
     
-    if (!searchInput) {
-        filteredContractors = allContractors;
-    } else {
-        filteredContractors = allContractors.filter(contractor => {
+    let filtered = allContractors;
+    
+    // Apply SEC status filter first
+    if (secStatusFilter !== 'all') {
+        filtered = allContractors.filter(contractor => {
+            switch (secStatusFilter) {
+                case 'with-sec':
+                    return contractor.status === 'WITH_SEC_DATA' || contractor.sec_number;
+                case 'no-sec':
+                    return contractor.status === 'NO_SEC_RESULTS';
+                case 'not-processed':
+                    return !contractor.status || contractor.status === 'NOT_PROCESSED';
+                default:
+                    return true;
+            }
+        });
+    }
+    
+    // Apply search filter
+    if (searchInput) {
+        filtered = filtered.filter(contractor => {
             const name = (contractor.original_contractor_name || contractor.company_name || contractor.contractor_name || '').toLowerCase();
             return name.includes(searchInput);
         });
     }
+    
+    filteredContractors = filtered;
     
     // Reset to first page when filtering
     currentTablePage = 0;
