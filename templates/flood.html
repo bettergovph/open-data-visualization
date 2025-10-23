@@ -5937,10 +5937,32 @@ function switchTab(tabName, updateHash = true) {
                         console.log('✅ Rendering network graph after init from switchTab');
                         renderNetworkGraph(networkData);
                     } else {
-                        console.error('❌ Network data still not available after init from switchTab');
+                        console.log('⚠️ No network data available - showing empty state');
+                        // Show empty state or message
+                        const container = document.getElementById('network-graph');
+                        if (container) {
+                            container.innerHTML = `
+                                <div style="text-align: center; padding: 40px; color: #666;">
+                                    <div style="font-size: 24px; margin-bottom: 10px;">🕸️</div>
+                                    <div style="font-size: 18px; margin-bottom: 10px;">No Joint Ventures Found</div>
+                                    <div style="font-size: 14px;">No joint venture partnerships were found in the flood control data.</div>
+                                </div>
+                            `;
+                        }
                     }
                 }).catch(error => {
                     console.error('❌ Error initializing network from switchTab:', error);
+                    // Show error state
+                    const container = document.getElementById('network-graph');
+                    if (container) {
+                        container.innerHTML = `
+                            <div style="text-align: center; padding: 40px; color: #dc3545;">
+                                <div style="font-size: 24px; margin-bottom: 10px;">❌</div>
+                                <div style="font-size: 18px; margin-bottom: 10px;">Error Loading Network Data</div>
+                                <div style="font-size: 14px;">Failed to load joint venture network data.</div>
+                            </div>
+                        `;
+                    }
                 });
             }
             break;
@@ -6049,20 +6071,36 @@ let zoomLevel = 1;
 
 async function initializeNetworkGraph() {
     try {
-            // Load joint venture data
-            const response = await fetch('/static/data/flood_control_data.json');
-            const data = await response.json();
-            
-            if (!data.projects || !Array.isArray(data.projects)) {
-                console.log('⚠️ No projects data available for network graph');
-                return;
-            }
-            
-            // Process joint ventures
-            const jointVentures = data.projects.filter(p => p.Contractor && p.Contractor.includes(' / '));
+        console.log('🔄 Initializing network graph...');
+        
+        // Load joint venture data
+        const response = await fetch('/static/data/flood_control_data.json');
+        const data = await response.json();
+        
+        if (!data.projects || !Array.isArray(data.projects)) {
+            console.log('⚠️ No projects data available for network graph');
+            networkData = { nodes: [], links: [] };
+            return;
+        }
+        
+        // Process joint ventures
+        const jointVentures = data.projects.filter(p => p.Contractor && p.Contractor.includes(' / '));
+        
+        if (jointVentures.length === 0) {
+            console.log('⚠️ No joint ventures found in data');
+            networkData = { nodes: [], links: [] };
+            return;
+        }
+        
+        console.log(`📊 Found ${jointVentures.length} joint ventures`);
         
         // Build network data
         networkData = buildNetworkData(jointVentures);
+        
+        console.log('✅ Network data built:', {
+            nodes: networkData.nodes ? networkData.nodes.length : 0,
+            links: networkData.links ? networkData.links.length : 0
+        });
         
         // Update statistics
         updateJVStatistics(jointVentures, networkData);
@@ -6072,6 +6110,7 @@ async function initializeNetworkGraph() {
         
     } catch (error) {
         console.error('❌ Error initializing network graph:', error);
+        networkData = { nodes: [], links: [] };
     }
 }
 
