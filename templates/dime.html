@@ -2090,6 +2090,8 @@ fetch('/static/data/dime_summary.json')
                     const data = await response.json();
                     if (data.success && data.barangay_contractors) {
                         const key = `${barangay},${city}`.toLowerCase();
+                        console.log('🔍 Looking for key:', key);
+                        console.log('🔍 Available keys:', Object.keys(data.barangay_contractors));
                         const barangayData = data.barangay_contractors[key];
                         
                         if (barangayData) {
@@ -2099,6 +2101,8 @@ fetch('/static/data/dime_summary.json')
                             dataSource = 'DIME';
                         } else {
                             console.log('⚠️ No preprocessed data found for this barangay');
+                            console.log('🔍 Tried key:', key);
+                            console.log('🔍 Available keys:', Object.keys(data.barangay_contractors));
                         }
                     }
                 }
