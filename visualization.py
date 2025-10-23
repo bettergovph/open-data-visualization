@@ -935,8 +935,26 @@ async def philgeps_contracts_api(meilisearch_id: str):
 
 @app.get("/api/contractors/sec")
 async def get_sec_contractors():
-    """Get all SEC contractors from PostgreSQL - no authentication required"""
+    """Get all SEC contractors from cached JSON - no authentication required"""
     try:
+        import json
+        from pathlib import Path
+        
+        # Try to load from cached JSON first
+        cache_file = Path("static/data/contractor_stats.json")
+        if cache_file.exists():
+            with open(cache_file, 'r', encoding='utf-8') as f:
+                cached_data = json.load(f)
+            
+            # Check if cache is fresh (less than 1 hour old)
+            from datetime import datetime, timedelta
+            cache_time = datetime.fromisoformat(cached_data.get('generated_at', '1970-01-01T00:00:00'))
+            if datetime.now() - cache_time < timedelta(hours=1):
+                print("📊 Using cached contractor statistics")
+                return JSONResponse(cached_data)
+        
+        # Fallback to database if cache is missing or stale
+        print("⚠️ Cache not available, falling back to database")
         import asyncpg
         conn = await asyncpg.connect(
             host=os.getenv('POSTGRES_HOST', 'localhost'),
@@ -982,17 +1000,26 @@ async def get_sec_contractors():
                 "project_count": contractor['project_count'] or 0
             })
         
+        # Calculate processed count to match script format
+        processed_count = (stats['with_sec_data'] or 0) + (stats['suspicious_no_results'] or 0)
+        
+        from datetime import datetime
         return JSONResponse({
+            "success": True,
             "summary": {
                 "total_contractors": stats['total_contractors'],
+                "processed_contractors": processed_count,
                 "with_sec_data": stats['with_sec_data'],
                 "without_sec_data": stats['without_sec_data'],
                 "suspicious_no_results": stats['suspicious_no_results'],
-                "last_updated": "database",
+                "last_updated": datetime.now().isoformat(),
                 "processing_batch": "database_generated",
                 "source": "PostgreSQL sec.contractors table"
             },
-            "contractors": contractors_list
+            "contractors": contractors_list,
+            "generated_at": datetime.now().isoformat(),
+            "description": "Contractor statistics for /contractors page",
+            "cache_version": "1.0"
         })
     except Exception as e:
         return JSONResponse({"success": False, "error": str(e)})

@@ -205,6 +205,12 @@ class JSONGenerator:
                 'description': 'Fastest DIME projects analysis',
                 'category': 'dime_data',
                 'dependencies': ['DIME database']
+            },
+            'contractor_stats.json': {
+                'script': 'sec_scraper/generate_contractor_stats.py',
+                'description': 'Contractor statistics for /contractors page',
+                'category': 'sec_data',
+                'dependencies': ['PostgreSQL SEC database']
             }
         }
     
@@ -284,7 +290,13 @@ class JSONGenerator:
             'SEC Contractors Database'
         )
         
-        return success1 and success2
+        # Generate contractor statistics (new script for new JSON)
+        success3, output3 = await self.run_script(
+            'sec_scraper/generate_contractor_stats.py',
+            'Contractor Statistics'
+        )
+        
+        return success1 and success2 and success3
     
     async def generate_summary_stats(self):
         """Generate summary statistics JSON files."""
