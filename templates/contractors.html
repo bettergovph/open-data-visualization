@@ -627,46 +627,67 @@ async function loadHiddenFloodData() {
             console.error('❌ Failed to load hidden projects:', projectsResponse.status);
         }
         
-        // Load hidden contractors for chart
-        const contractorsResponse = await fetch('/api/flood/hidden-contractors?limit=20');
-        if (contractorsResponse.ok) {
-            const contractorsData = await contractorsResponse.json();
-            console.log('🔍 Raw contractors data:', contractorsData);
-            
-            // Log debug information
-            if (contractorsData.debug) {
-                console.log('🔍 Debug info:', contractorsData.debug);
-                console.log(`📊 Found ${contractorsData.debug.hidden_projects_count} hidden flood projects`);
-                console.log(`👥 ${contractorsData.debug.projects_with_contractors} projects have contractors`);
-                console.log(`🏢 ${contractorsData.debug.contractors_found} contractors found`);
-            }
-            
-            if (contractorsData.contractors && Array.isArray(contractorsData.contractors)) {
-                if (contractorsData.contractors.length > 0) {
-                    createHiddenContractorsChart(contractorsData.contractors);
-                    console.log('✅ Hidden contractors chart data loaded:', contractorsData.contractors.length, 'contractors');
+        // Load hidden contractors for chart (use cached version for faster loading)
+        let contractorsData = null;
+        let useCache = true;
+        
+        try {
+            const contractorsResponse = await fetch('/api/flood/hidden-contractors-cached');
+            if (contractorsResponse.ok) {
+                contractorsData = await contractorsResponse.json();
+                console.log('🔍 Cached contractors data:', contractorsData);
+                
+                if (contractorsData.cached && contractorsData.contractors && contractorsData.contractors.length > 0) {
+                    console.log('✅ Using cached contractors data');
                 } else {
-                    console.warn('⚠️ No contractors found in the data');
-                    // Show a message in the chart area with debug info
-                    const chartContainer = document.getElementById('hidden-contractors-chart');
-                    if (chartContainer) {
-                        const debugInfo = contractorsData.debug ? 
-                            `Found ${contractorsData.debug.hidden_projects_count} hidden projects, but ${contractorsData.debug.projects_with_contractors} have contractors` : 
-                            'No debug info available';
-                        chartContainer.innerHTML = `
-                            <div style="text-align: center; padding: 50px; color: #666;">
-                                <div>No hidden flood contractors found</div>
-                                <div style="font-size: 0.9em; margin-top: 10px; color: #999;">${debugInfo}</div>
-                            </div>
-                        `;
-                    }
+                    console.log('⚠️ Cache not available or empty, falling back to live data');
+                    useCache = false;
                 }
             } else {
-                console.warn('⚠️ No contractors data received or invalid format');
-                console.log('🔍 Expected contractors array, got:', contractorsData);
+                console.log('⚠️ Cached endpoint failed, falling back to live data');
+                useCache = false;
+            }
+        } catch (error) {
+            console.log('⚠️ Cache error, falling back to live data:', error);
+            useCache = false;
+        }
+        
+        // Fallback to live data if cache is not available
+        if (!useCache || !contractorsData || !contractorsData.contractors || contractorsData.contractors.length === 0) {
+            console.log('🔄 Loading live contractors data...');
+            const contractorsResponse = await fetch('/api/flood/hidden-contractors?limit=20');
+            if (contractorsResponse.ok) {
+                contractorsData = await contractorsResponse.json();
+                console.log('🔍 Live contractors data:', contractorsData);
+            } else {
+                console.error('❌ Failed to load live contractors data:', contractorsResponse.status);
+                contractorsData = { contractors: [] };
+            }
+        }
+        
+        // Process contractors data
+        if (contractorsData && contractorsData.contractors && Array.isArray(contractorsData.contractors)) {
+            if (contractorsData.contractors.length > 0) {
+                createHiddenContractorsChart(contractorsData.contractors);
+                console.log('✅ Hidden contractors chart data loaded:', contractorsData.contractors.length, 'contractors');
+            } else {
+                console.warn('⚠️ No contractors found in the data');
+                // Show a message in the chart area
+                const chartContainer = document.getElementById('hidden-contractors-chart');
+                if (chartContainer) {
+                    chartContainer.innerHTML = `
+                        <div style="text-align: center; padding: 50px; color: #666;">
+                            <div>No hidden flood contractors found</div>
+                            <div style="font-size: 0.9em; margin-top: 10px; color: #999;">
+                                ${useCache ? 'Using cached data' : 'Using live data'}
+                            </div>
+                        </div>
+                    `;
+                }
             }
         } else {
-            console.error('❌ Failed to load hidden contractors:', contractorsResponse.status);
+            console.warn('⚠️ No contractors data received or invalid format');
+            console.log('🔍 Expected contractors array, got:', contractorsData);
         }
         
     } catch (error) {

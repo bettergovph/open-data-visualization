@@ -1787,6 +1787,46 @@ async def hidden_flood_contractors_api(limit: int = 20):
     except Exception as e:
         return JSONResponse({"success": False, "error": str(e)})
 
+@app.get("/api/flood/hidden-contractors-cached")
+async def hidden_flood_contractors_cached_api():
+    """Get cached excluded flood contractors data for fast loading"""
+    try:
+        import json
+        from pathlib import Path
+        
+        # Try to load from cache file
+        cache_file = Path("sec_scraper/excluded_flood_contractors_cache.json")
+        
+        if cache_file.exists():
+            with open(cache_file, 'r', encoding='utf-8') as f:
+                cache_data = json.load(f)
+            
+            # Check if cache is recent (less than 1 hour old)
+            if 'generated_at' in cache_data:
+                from datetime import datetime, timedelta
+                cache_time = datetime.fromisoformat(cache_data['generated_at'])
+                if datetime.now() - cache_time < timedelta(hours=1):
+                    return JSONResponse({
+                        "success": True,
+                        "contractors": cache_data.get('contractors', []),
+                        "count": cache_data.get('count', 0),
+                        "cached": True,
+                        "generated_at": cache_data.get('generated_at'),
+                        "cache_version": cache_data.get('cache_version', '1.0')
+                    })
+        
+        # If no cache or cache is old, return empty result
+        return JSONResponse({
+            "success": True,
+            "contractors": [],
+            "count": 0,
+            "cached": False,
+            "message": "Cache not available or expired"
+        })
+        
+    except Exception as e:
+        return JSONResponse({"success": False, "error": str(e)})
+
 @app.get("/api/flood/hidden-statistics")
 async def hidden_flood_statistics_api():
     """Get comprehensive statistics for hidden flood projects - no authentication required"""
