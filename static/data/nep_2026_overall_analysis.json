@@ -1,12 +1,118 @@
 {
-  "data": {
-    "success": false,
-    "message": "NEP 2026 overall analysis endpoint not implemented",
-    "analysis": {}
+  "success": true,
+  "analysis_date": "2025-10-23T09:24:53.928448",
+  "description": "NEP 2026 Overall Analysis",
+  "statistics": {
+    "total_projects": 506696,
+    "total_amount": 6793036357.0,
+    "avg_amount": 13406.532431675008,
+    "min_amount": 1.0,
+    "max_amount": 950000000.0,
+    "unique_organizations": 13155,
+    "unique_regions": 19
   },
-  "generated_at": "2025-10-23T08:30:00.000000",
-  "cache_version": "1.0",
-  "endpoint": "/api/budget/nep/overall-analysis",
-  "status": "not_implemented",
-  "error": "Endpoint not implemented in FastAPI backend"
+  "top_organizations": [
+    {
+      "org_uacs_code": "180010100000",
+      "project_count": 706,
+      "total_amount": 700858696.0
+    },
+    {
+      "org_uacs_code": "140060100000",
+      "project_count": 575,
+      "total_amount": 198143963.0
+    },
+    {
+      "org_uacs_code": "380010100000",
+      "project_count": 395,
+      "total_amount": 149870600.0
+    },
+    {
+      "org_uacs_code": "170070000000",
+      "project_count": 221,
+      "total_amount": 142083545.0
+    },
+    {
+      "org_uacs_code": "070010100000",
+      "project_count": 658,
+      "total_amount": 138091494.0
+    },
+    {
+      "org_uacs_code": "130010100000",
+      "project_count": 903,
+      "total_amount": 113553088.0
+    },
+    {
+      "org_uacs_code": "200010100000",
+      "project_count": 860,
+      "total_amount": 67635249.0
+    },
+    {
+      "org_uacs_code": "050010100000",
+      "project_count": 884,
+      "total_amount": 59783248.0
+    },
+    {
+      "org_uacs_code": "170080000000",
+      "project_count": 219,
+      "total_amount": 59134808.0
+    },
+    {
+      "org_uacs_code": "290010000000",
+      "project_count": 528,
+      "total_amount": 58553951.0
+    }
+  ],
+  "top_regions": [
+    {
+      "region_code": "13",
+      "project_count": 70043,
+      "total_amount": 2697053098.0
+    },
+    {
+      "region_code": "04",
+      "project_count": 42144,
+      "total_amount": 294149706.0
+    },
+    {
+      "region_code": "03",
+      "project_count": 43079,
+      "total_amount": 268039320.0
+    },
+    {
+      "region_code": "05",
+      "project_count": 42506,
+      "total_amount": 184015322.0
+    },
+    {
+      "region_code": "07",
+      "project_count": 35846,
+      "total_amount": 169511126.0
+    },
+    {
+      "region_code": "08",
+      "project_count": 30701,
+      "total_amount": 168064524.0
+    },
+    {
+      "region_code": "06",
+      "project_count": 39176,
+      "total_amount": 161076823.0
+    },
+    {
+      "region_code": "10",
+      "project_count": 31597,
+      "total_amount": 156075126.0
+    },
+    {
+      "region_code": "01",
+      "project_count": 32711,
+      "total_amount": 154238697.0
+    },
+    {
+      "region_code": "11",
+      "project_count": 31656,
+      "total_amount": 141716466.0
+    }
+  ]
 }

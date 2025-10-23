@@ -1,14 +1,29 @@
 {
-  "data": {
-    "success": false,
-    "message": "NEP 2026 red flag analysis endpoint not implemented",
-    "years": [],
-    "budgets": [],
-    "historical_avg": 0
-  },
-  "generated_at": "2025-10-23T08:30:00.000000",
-  "cache_version": "1.0",
-  "endpoint": "/api/budget/nep/red-flags",
-  "status": "not_implemented",
-  "error": "Endpoint not implemented in FastAPI backend"
+  "success": true,
+  "years": [
+    2020,
+    2021,
+    2022,
+    2023,
+    2024,
+    2025,
+    2026
+  ],
+  "budgets": [
+    252755939.0,
+    322699.0,
+    248299.0,
+    344716001.0,
+    373012611.0,
+    379961113.0,
+    377336992.0
+  ],
+  "historical_avg": 225169443.66666666,
+  "analysis_date": "2025-10-23T09:24:52.789574",
+  "description": "NEP Road Infrastructure Budget Analysis (2020-2026)",
+  "red_flags": {
+    "sudden_rise_2026": true,
+    "historical_average": 225169443.66666666,
+    "current_year": 377336992.0
+  }
 }

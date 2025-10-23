@@ -174,6 +174,24 @@ class JSONGenerator:
             },
             
             # NEP Data
+            'nep_2026_red_flag.json': {
+                'script': 'analysis/generate_nep_2026_red_flag.py',
+                'description': 'NEP 2026 red flag analysis for road infrastructure',
+                'category': 'nep_data',
+                'dependencies': ['NEP database']
+            },
+            'nep_2026_infrastructure_categories.json': {
+                'script': 'analysis/generate_nep_2026_infrastructure_categories.py',
+                'description': 'NEP 2026 infrastructure categories analysis',
+                'category': 'nep_data',
+                'dependencies': ['NEP database']
+            },
+            'nep_2026_overall_analysis.json': {
+                'script': 'analysis/generate_nep_2026_overall_analysis.py',
+                'description': 'NEP 2026 overall analysis and statistics',
+                'category': 'nep_data',
+                'dependencies': ['NEP database']
+            },
             
             # DIME Data
             'dime_stats.json': {
@@ -293,6 +311,31 @@ class JSONGenerator:
         
         return success
     
+    async def generate_nep_data(self):
+        """Generate NEP 2026 analysis JSON files."""
+        print("\n🏛️ Generating NEP 2026 Analysis...")
+        print("=" * 40)
+        
+        # Generate NEP 2026 red flag analysis
+        success1, output1 = await self.run_script(
+            'analysis/generate_nep_2026_red_flag.py',
+            'NEP 2026 Red Flag Analysis'
+        )
+        
+        # Generate NEP 2026 infrastructure categories
+        success2, output2 = await self.run_script(
+            'analysis/generate_nep_2026_infrastructure_categories.py',
+            'NEP 2026 Infrastructure Categories'
+        )
+        
+        # Generate NEP 2026 overall analysis
+        success3, output3 = await self.run_script(
+            'analysis/generate_nep_2026_overall_analysis.py',
+            'NEP 2026 Overall Analysis'
+        )
+        
+        return success1 and success2 and success3
+    
     async def generate_cache_data(self):
         """Generate cache JSON files."""
         print("\n💾 Generating Cache Data...")
@@ -333,7 +376,7 @@ class JSONGenerator:
         print(f"Target directory: {self.static_data_dir}")
         
         if categories is None:
-            categories = ['sec_data', 'summary_data', 'analysis_data', 'cache_data', 'api_cache']
+            categories = ['sec_data', 'summary_data', 'analysis_data', 'nep_data', 'cache_data', 'api_cache']
         
         results = {}
         
@@ -348,6 +391,10 @@ class JSONGenerator:
         # Generate analysis data
         if 'analysis_data' in categories:
             results['analysis_data'] = await self.generate_analysis_data()
+        
+        # Generate NEP data
+        if 'nep_data' in categories:
+            results['nep_data'] = await self.generate_nep_data()
         
         # Generate cache data
         if 'cache_data' in categories:

@@ -7489,6 +7489,12 @@ document.addEventListener('click', function(event) {
             
             // Load red flag data
             const redFlagResponse = await fetch('/static/data/nep_2026_red_flag.json');
+            
+            if (!redFlagResponse.ok) {
+                console.warn('⚠️ Red flag data file not found - skipping red flag chart');
+                return;
+            }
+            
             const redFlagData = await redFlagResponse.json();
             
             // Check if red flag data is valid

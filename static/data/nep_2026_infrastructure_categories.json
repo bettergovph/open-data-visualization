@@ -1,12 +1,44 @@
 {
-  "data": {
-    "success": false,
-    "message": "NEP 2026 infrastructure categories endpoint not implemented",
-    "categories": []
-  },
-  "generated_at": "2025-10-23T08:30:00.000000",
-  "cache_version": "1.0",
-  "endpoint": "/api/budget/nep/infrastructure-categories",
-  "status": "not_implemented",
-  "error": "Endpoint not implemented in FastAPI backend"
+  "success": true,
+  "categories": [
+    {
+      "category": "Other Infrastructure",
+      "project_count": 620563,
+      "total_amount": 5815765696.0
+    },
+    {
+      "category": "Road Infrastructure",
+      "project_count": 53008,
+      "total_amount": 377336992.0
+    },
+    {
+      "category": "Flood Control",
+      "project_count": 17677,
+      "total_amount": 265342980.0
+    },
+    {
+      "category": "Rehabilitation",
+      "project_count": 8455,
+      "total_amount": 151418376.0
+    },
+    {
+      "category": "Bridge Construction",
+      "project_count": 3842,
+      "total_amount": 83548798.0
+    },
+    {
+      "category": "Building Construction",
+      "project_count": 61108,
+      "total_amount": 61665767.0
+    },
+    {
+      "category": "Water Systems",
+      "project_count": 6763,
+      "total_amount": 37957275.0
+    }
+  ],
+  "analysis_date": "2025-10-23T09:24:53.573275",
+  "description": "NEP 2026 Infrastructure Categories Analysis",
+  "total_projects": 771416,
+  "total_amount": 6793035884.0
 }

@@ -26,9 +26,9 @@ This table shows which script generates each JSON file in `static/data/`.
 | `flood_dime_contractor_correlation_2024.json` | API endpoint (generated on-demand) | Correlation Data | Flood data, DIME data |
 | `flood_dime_contractor_correlation_2025.json` | API endpoint (generated on-demand) | Correlation Data | Flood data, DIME data |
 | `flood_dime_contractor_correlation_all_years.json` | API endpoint (generated on-demand) | Correlation Data | Flood data, DIME data |
-| `nep_2026_infrastructure_categories.json` | API endpoint (generated on-demand) | NEP Data | NEP database |
-| `nep_2026_overall_analysis.json` | API endpoint (generated on-demand) | NEP Data | NEP database |
-| `nep_2026_red_flag.json` | API endpoint (generated on-demand) | NEP Data | NEP database |
+| `nep_2026_infrastructure_categories.json` | `analysis/generate_nep_2026_infrastructure_categories.py` | NEP Data | NEP database |
+| `nep_2026_overall_analysis.json` | `analysis/generate_nep_2026_overall_analysis.py` | NEP Data | NEP database |
+| `nep_2026_red_flag.json` | `analysis/generate_nep_2026_red_flag.py` | NEP Data | NEP database |
 | `dime_stats.json` | API endpoint (generated on-demand) | DIME Data | DIME database |
 | `fastest_dime_projects.json` | `sec_scraper/generate_api_cache.py` | DIME Data | DIME database |
 
@@ -42,6 +42,9 @@ This table shows which script generates each JSON file in `static/data/`.
 - `sec_scraper/generate_api_cache.py` → 19 JSON files (API endpoints)
 - `utils/generate_summary_stats.py` → 4 JSON files
 - `analysis/flood_same_amount_proximity_analysis.py` → 1 JSON file
+- `analysis/generate_nep_2026_red_flag.py` → 1 JSON file
+- `analysis/generate_nep_2026_infrastructure_categories.py` → 1 JSON file
+- `analysis/generate_nep_2026_overall_analysis.py` → 1 JSON file
 
 ### Static Files
 - 2 JSON files are static/manual files
