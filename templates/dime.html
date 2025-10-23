@@ -2090,11 +2090,30 @@ fetch('/static/data/dime_summary.json')
             if (dimeData.success && dimeData.projects && dimeData.projects.length > 0) {
                 projects = dimeData.projects;
                 console.log('📊 Found DIME projects:', projects.length);
+                console.log('🔍 Sample project structure:', projects[0]); // Debug: see what fields are available
                 
-                // Extract unique contractors from DIME
+                // Extract unique contractors from DIME (check multiple possible fields)
                 projects.forEach(project => {
+                    // Check contractors array
                     if (project.contractors && project.contractors.length > 0) {
                         project.contractors.forEach(contractor => contractors.add(contractor));
+                    }
+                    // Check single contractor field
+                    if (project.contractor) {
+                        contractors.add(project.contractor);
+                    }
+                    // Check implementing offices as fallback
+                    if (project.implementing_offices && project.implementing_offices.length > 0) {
+                        project.implementing_offices.forEach(office => {
+                            try {
+                                const officeObj = typeof office === 'string' ? JSON.parse(office) : office;
+                                if (officeObj.name || officeObj.nameAbbreviation) {
+                                    contractors.add(officeObj.name || officeObj.nameAbbreviation);
+                                }
+                            } catch (e) {
+                                // Skip invalid JSON
+                            }
+                        });
                     }
                 });
             }
