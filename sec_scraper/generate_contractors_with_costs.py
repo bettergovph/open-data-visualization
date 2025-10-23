@@ -71,52 +71,31 @@ async def generate_contractors_with_costs():
             if stats['projects'] > 0:
                 stats['avgCostPerProject'] = stats['totalCost'] / stats['projects']
             
-            # Calculate suspicion score based on project count and average cost per project
-            # Score range: 0-100
-            project_count = stats['projects']
-            avg_cost = stats['avgCostPerProject']
+            # Calculate suspicion score using 50-50 multiplier approach
+            # Use raw numbers (not rounded) and normalize to 0-100 range
+            project_count = stats['projects']  # Raw project count
+            avg_cost = stats['avgCostPerProject']  # Raw average cost
             
-            suspicion_score = 0
+            # 50-50 multiplier: equal weight for both factors
+            # Factor 1: Project count (normalized to 0-50 range)
+            # Assume max reasonable project count is 200, normalize to 0-50
+            project_factor = min(project_count / 4.0, 50.0)  # project_count/4, capped at 50
             
-            # Factor 1: Number of projects (more projects = higher suspicion)
-            # Scale: 0-50 points based on project count
-            if project_count >= 100:
-                suspicion_score += 50  # Maximum for project count
-            elif project_count >= 80:
-                suspicion_score += 40
-            elif project_count >= 60:
-                suspicion_score += 35
-            elif project_count >= 40:
-                suspicion_score += 30
-            elif project_count >= 20:
-                suspicion_score += 20
-            elif project_count >= 10:
-                suspicion_score += 10
-            # 0-9 projects = 0 points
+            # Factor 2: Average cost per project (normalized to 0-50 range)
+            # Scale cost to reasonable range (divide by 1M to get millions, then normalize)
+            # Assume max reasonable cost is 100M per project, normalize to 0-50
+            cost_factor = min((avg_cost / 1000000) / 2.0, 50.0)  # (avg_cost/1M)/2, capped at 50
             
-            # Factor 2: Average cost per project (higher average = higher suspicion)
-            # Scale: 0-50 points based on average cost
-            if avg_cost >= 100000000:  # 100M+ per project
-                suspicion_score += 50  # Maximum for average cost
-            elif avg_cost >= 50000000:  # 50M+ per project
-                suspicion_score += 40
-            elif avg_cost >= 20000000:  # 20M+ per project
-                suspicion_score += 35
-            elif avg_cost >= 10000000:  # 10M+ per project
-                suspicion_score += 30
-            elif avg_cost >= 5000000:  # 5M+ per project
-                suspicion_score += 20
-            elif avg_cost >= 1000000:  # 1M+ per project
-                suspicion_score += 10
-            # Less than 1M per project = 0 points
+            # Add both factors together for final suspicion score (0-100 range)
+            suspicion_score = project_factor + cost_factor
             
-            # Cap suspicion score at 100
-            stats['suspicionScore'] = min(suspicion_score, 100)
+            # Store the suspicion score with decimal values (0-100 range)
+            stats['suspicionScore'] = round(suspicion_score, 2)
             
-            # Set performance level
-            if stats['suspicionScore'] >= 70:
+            # Set performance level based on 0-100 scoring system
+            if stats['suspicionScore'] >= 70.0:  # High risk threshold
                 stats['performance'] = 'High Risk'
-            elif stats['suspicionScore'] >= 40:
+            elif stats['suspicionScore'] >= 40.0:  # Medium risk threshold
                 stats['performance'] = 'Medium Risk'
             else:
                 stats['performance'] = 'Normal'
