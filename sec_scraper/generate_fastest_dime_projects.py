@@ -38,19 +38,21 @@ async def generate_fastest_dime_projects():
         # Get fastest completed projects (top 100, sorted by completion days ascending then cost descending)
         query = """
         WITH project_completion AS (
-            SELECT 
-                project_name,
-                description,
-                cost,
-                date_started,
-                contract_completion_date,
-                status,
-                implementing_offices,
-                region,
-                province,
-                city,
-                barangay,
-                project_type,
+        SELECT 
+            project_name,
+            description,
+            cost,
+            date_started,
+            contract_completion_date,
+            status,
+            implementing_offices,
+            contractors,
+            meilisearch_id,
+            region,
+            province,
+            city,
+            barangay,
+            project_type,
                 -- Calculate completion time in days
                 CASE 
                     WHEN date_started IS NOT NULL AND contract_completion_date IS NOT NULL 
@@ -77,6 +79,26 @@ async def generate_fastest_dime_projects():
         # Process results
         projects = []
         for row in results:
+            # Handle contractor information based on meilisearch_id connection
+            contractors = []
+            contractor_source = "dime"  # Default to DIME data
+            
+            if row['meilisearch_id']:
+                # Project is connected to flood data - contractor info should come from flood/MeiliSearch
+                # For now, we'll note that contractor info is available from flood data
+                contractor_source = "flood_connected"
+                contractors = ["Connected to Flood Data"]  # Placeholder - would need MeiliSearch query
+            else:
+                # Project is NOT connected to flood data - use DIME contractor data
+                if row['contractors']:
+                    for contractor in row['contractors']:
+                        if contractor and contractor != 'No Data Available':
+                            contractors.append(contractor)
+            
+            # If no contractors found, show N/A
+            if not contractors:
+                contractors = ["N/A"]
+            
             projects.append({
                 'project_name': row['project_name'],
                 'description': row['description'],
@@ -85,6 +107,9 @@ async def generate_fastest_dime_projects():
                 'contract_completion_date': row['contract_completion_date'].isoformat() if row['contract_completion_date'] else None,
                 'status': row['status'],
                 'implementing_offices': row['implementing_offices'],
+                'contractors': contractors,
+                'contractor_source': contractor_source,
+                'meilisearch_id': row['meilisearch_id'],
                 'region': row['region'],
                 'province': row['province'],
                 'city': row['city'],

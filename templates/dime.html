@@ -1720,12 +1720,24 @@ fetch('/static/data/dime_summary.json')
                 if (index === 1) rankBadge = '🥈';
                 if (index === 2) rankBadge = '🥉';
                 
-                // Parse contractor JSON to get name
+                // Get contractor name with source indicator
                 let contractorName = 'N/A';
-                if (project.implementing_offices && project.implementing_offices.length > 0) {
+                let contractorSource = '';
+                
+                if (project.contractor_source === 'flood_connected') {
+                    // Project is connected to flood data - contractor info available from flood/MeiliSearch
+                    contractorName = '🌊 Flood Data';
+                    contractorSource = ' (Connected to Flood Control)';
+                } else if (project.contractors && project.contractors.length > 0) {
+                    // Use DIME contractor data
+                    contractorName = project.contractors[0];
+                    contractorSource = ' (DIME)';
+                } else if (project.implementing_offices && project.implementing_offices.length > 0) {
+                    // Fallback to implementing offices
                     try {
                         const contractorObj = typeof project.implementing_offices[0] === 'string' ? JSON.parse(project.implementing_offices[0]) : project.implementing_offices[0];
                         contractorName = contractorObj.name || contractorObj.nameAbbreviation || 'N/A';
+                        contractorSource = ' (DIME Office)';
                     } catch (e) {
                         contractorName = 'N/A';
                     }
@@ -1739,7 +1751,7 @@ fetch('/static/data/dime_summary.json')
                     <td style="text-align: center;">${project.contract_completion_date || 'N/A'}</td>
                     <td style="text-align: center;"><strong style="color: #28a745;">${project.completion_days || 'N/A'}</strong></td>
                     <td style="text-align: right;">₱${project.cost ? parseFloat(project.cost).toLocaleString('en-PH', {minimumFractionDigits: 2}) : 'N/A'}</td>
-                    <td style="font-size: 0.9em;">${contractorName}</td>
+                    <td style="font-size: 0.9em;">${contractorName}${contractorSource}</td>
                 `;
                 
                 tbody.appendChild(row);
