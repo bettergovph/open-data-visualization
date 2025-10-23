@@ -2565,7 +2565,7 @@ async def dynasty_family_api(
                     first_name,
                     last_name,
                     position,
-                    municipality_city as province,
+                    province,
                     year,
                     fat
                 FROM political_dynasties 
@@ -2608,7 +2608,7 @@ async def dynasty_family_api(
                     first_name,
                     last_name,
                     position,
-                    municipality_city as province,
+                    province,
                     year,
                     fat
                 FROM political_dynasties 
