@@ -257,14 +257,42 @@ function toggleMobileMenu() {
             <!-- Dynasty Tabs -->
             <div class="dynasty-tabs">
                     <div class="dynasty-tab-nav">
-                        <a href="#visual" class="dynasty-tab-btn active" data-tab="visual">📈 Visual</a>
-                        <a href="#overlords" class="dynasty-tab-btn" data-tab="overlords">🗺️ Overlords</a>
+                        <a href="#overlords" class="dynasty-tab-btn active" data-tab="overlords">🗺️ Overlords</a>
+                        <a href="#visual" class="dynasty-tab-btn" data-tab="visual">📈 Visual</a>
                         <a href="#table" class="dynasty-tab-btn" data-tab="table">📊 Table</a>
                     </div>
                 
                 <div class="dynasty-tab-content">
+                    <!-- Overlords Tab -->
+                    <div id="tab-overlords" class="dynasty-tab-panel active">
+                        <h3 class="dynasty-section-title">🗺️ Political Dynasty Overlords</h3>
+                        <p class="dynasty-section-desc">Interactive map showing political dynasty surnames by province</p>
+                        
+                        <!-- Map Legend -->
+                        <div class="map-legend" style="background: white; padding: 12px; border-radius: 6px; box-shadow: 0 1px 5px rgba(0,0,0,0.1); margin-bottom: 15px;">
+                            <h4 style="color: #0038A8; margin: 0 0 8px 0; font-size: 14px; font-weight: bold;">🗺️ How to Use the Map</h4>
+                            <div style="display: flex; flex-direction: column; gap: 6px;">
+                                <div style="display: flex; align-items: center;">
+                                    <span style="color: #28a745; font-size: 16px; margin-right: 6px;">🖱️</span>
+                                    <span style="color: #333; font-size: 11px;">Click any province to view top dynasty surnames</span>
+                                </div>
+                                <div style="display: flex; align-items: center;">
+                                    <span style="color: #17a2b8; font-size: 16px; margin-right: 6px;">⏳</span>
+                                    <span style="color: #333; font-size: 11px;">Hover to see province names</span>
+                                </div>
+                                <div style="display: flex; align-items: center;">
+                                    <span style="color: #dc3545; font-size: 16px; margin-right: 6px;">👆</span>
+                                    <span style="color: #333; font-size: 11px;">Click surnames to view family details</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Map Container -->
+                        <div id="dynastyMap" style="height: 600px; width: 100%; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);"></div>
+                    </div>
+
                     <!-- Visual Tab -->
-                    <div id="tab-visual" class="dynasty-tab-panel active">
+                    <div id="tab-visual" class="dynasty-tab-panel">
                         <h3 class="dynasty-section-title">📈 Dynasty Visual Analytics</h3>
                         <p class="dynasty-section-desc">Interactive charts and visualizations of political dynasty data</p>
                         
@@ -321,56 +349,6 @@ function toggleMobileMenu() {
                         </div>
                     </div>
 
-                    <!-- Overlords Tab -->
-                    <div id="tab-overlords" class="dynasty-tab-panel">
-                        <h3 class="dynasty-section-title">🗺️ Political Dynasty Overlords</h3>
-                        <p class="dynasty-section-desc">Interactive map showing political dynasty surnames by province</p>
-                        
-                        <!-- Map Legend -->
-                        <div class="map-legend" style="background: white; padding: 12px; border-radius: 6px; box-shadow: 0 1px 5px rgba(0,0,0,0.1); margin-bottom: 15px;">
-                            <h4 style="color: #0038A8; margin: 0 0 8px 0; font-size: 14px; font-weight: bold;">🗺️ How to Use the Map</h4>
-                            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 8px;">
-                                <div style="display: flex; align-items: center;">
-                                    <div style="width: 12px; height: 12px; background: #e3f2fd; border: 1px solid #0038A8; border-radius: 2px; margin-right: 6px;"></div>
-                                    <span style="color: #333; font-size: 11px;">Click any province to view top dynasty surnames</span>
-                                </div>
-                                <div style="display: flex; align-items: center;">
-                                    <div style="width: 12px; height: 12px; background: #f8f9fa; border: 1px solid #6c757d; border-radius: 2px; margin-right: 6px;"></div>
-                                    <span style="color: #333; font-size: 11px;">Hover to see province information</span>
-                                </div>
-                                <div style="display: flex; align-items: center;">
-                                    <span style="color: #0038A8; font-size: 16px; margin-right: 6px;">👑</span>
-                                    <span style="color: #333; font-size: 11px;">Surnames show dynasty members only</span>
-                                </div>
-                                <div style="display: flex; align-items: center;">
-                                    <span style="color: #28a745; font-size: 16px; margin-right: 6px;">📊</span>
-                                    <span style="color: #333; font-size: 11px;">Data loads automatically when you click</span>
-                                </div>
-                                <div style="display: flex; align-items: center;">
-                                    <span style="color: #dc3545; font-size: 16px; margin-right: 6px;">👆</span>
-                                    <span style="color: #333; font-size: 11px;">Click surnames to view family details</span>
-                                </div>
-                            </div>
-                        </div>
-                        
-                        
-                        <!-- Map Container -->
-                        <div class="map-container" style="background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); height: 600px; margin-bottom: 30px;">
-                            <h3 style="color: #0038A8; margin: 0 0 15px 0;">🏛️ Dynasty Power Map</h3>
-                            <div id="dynastyMap" style="height: calc(100% - 35px); width: 100%; border-radius: 4px;"></div>
-                        </div>
-
-                        <!-- Map Loading State -->
-                        <div id="mapLoadingState" class="text-center py-8 hidden">
-                            <div class="inline-flex items-center">
-                                <svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-blue-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                                </svg>
-                                Loading dynasty map...
-                            </div>
-                        </div>
-                    </div>
 
                     <!-- Table Tab -->
                     <div id="tab-table" class="dynasty-tab-panel">
@@ -477,8 +455,8 @@ let currentFilters = {
 // Initialize page
 document.addEventListener('DOMContentLoaded', function() {
     initializeDynastyPage();
-    // Load chart data for Visual tab (now default active tab)
-    loadSurnamesChart();
+    // Load map data for Overlords tab (now default active tab)
+    loadDynastyMap();
     // Load dashboard statistics
     loadDashboardStats();
 });
@@ -905,16 +883,28 @@ function createSurnamesChart(data) {
             const province = geojsonProvinceName.toLowerCase().replace(/-/g, ' ');
             console.log(`🔍 Mapping province: "${geojsonProvinceName}" → "${province}"`);
             
-            // Manual mapping for special cases
+            // Manual mapping for special cases - carefully handle multiple provinces
             const provinceMapping = {
                 'metropolitan manila': 'NCR, CITY OF MANILA, FIRST DISTRICT',
+                // 3 Samar provinces - be very specific
                 'northern samar': 'NORTHERN SAMAR',
-                'eastern samar': 'EASTERN SAMAR',
-                'samar': 'SAMAR',
+                'eastern samar': 'EASTERN SAMAR', 
+                'samar': 'SAMAR',  // This is WESTERN SAMAR
+                'western samar': 'SAMAR',
+                // 2 Leyte provinces - be very specific
                 'southern leyte': 'SOUTHERN LEYTE',
-                'leyte': 'LEYTE',
+                'leyte': 'LEYTE',  // This is NORTHERN LEYTE
+                'northern leyte': 'LEYTE',
+                // 2 Cotabato provinces - be very specific  
                 'north cotabato': 'COTABATO',
                 'south cotabato': 'SOUTH COTABATO',
+                // City-level mappings for database compatibility
+                'cauayan': 'CAUAYAN CITY',
+                'catbalogan': 'CATBALOGAN CITY',
+                'dipolog': 'DIPOLOG CITY',
+                'iligan': 'ILIGAN CITY',
+                'san fernando': 'SAN FERNANDO',
+                'san jose': 'SAN JOSE',
                 'davao del norte': 'DAVAO DEL NORTE',
                 'davao del sur': 'DAVAO DEL SUR',
                 'davao oriental': 'DAVAO ORIENTAL',
@@ -955,6 +945,13 @@ function createSurnamesChart(data) {
                 const result = provinceMapping[province];
                 console.log(`✅ Mapped "${province}" → "${result}"`);
                 return result;
+            }
+            
+            // Handle common city name patterns
+            if (province.includes('city') && !province.includes('CITY')) {
+                const cityName = province.replace('city', 'CITY');
+                console.log(`🏙️ City pattern detected: "${province}" → "${cityName}"`);
+                return cityName;
             }
             
             // Convert to uppercase and replace spaces with underscores for general cases
@@ -1272,18 +1269,18 @@ function createSurnamesChart(data) {
                                 
                                 // Create popup with surnames
             layer.bindPopup(`
-                <div style="width: 95vw; height: 90vh; max-width: 1200px; max-height: 90vh;">
-                    <h4 style="margin: 0 0 20px 0; color: #0038A8; font-size: 28px; font-weight: bold; text-align: center;">${provinceName}</h4>
-                    <div id="popup-surnames-${provinceName.replace(/\s+/g, '-')}" style="height: calc(90vh - 80px); overflow-y: auto; padding: 20px;">
-                        <div style="text-align: center; padding: 60px;">
-                            <div style="display: inline-block; width: 40px; height: 40px; border: 5px solid #0038A8; border-radius: 50%; border-top-color: transparent; animation: spin 1s linear infinite;"></div>
-                            <p style="margin: 20px 0 0 0; color: #666; font-size: 18px;">Loading surnames...</p>
+                <div style="width: 70vw; height: 70vh; max-width: 800px; max-height: 70vh;">
+                    <h4 style="margin: 0 0 15px 0; color: #0038A8; font-size: 24px; font-weight: bold; text-align: center;">${provinceName}</h4>
+                    <div id="popup-surnames-${provinceName.replace(/\s+/g, '-')}" style="height: calc(70vh - 60px); overflow-y: auto; padding: 15px;">
+                        <div style="text-align: center; padding: 40px;">
+                            <div style="display: inline-block; width: 30px; height: 30px; border: 4px solid #0038A8; border-radius: 50%; border-top-color: transparent; animation: spin 1s linear infinite;"></div>
+                            <p style="margin: 15px 0 0 0; color: #666; font-size: 16px;">Loading surnames...</p>
                         </div>
                     </div>
                 </div>
             `, {
-                maxWidth: '95vw',
-                maxHeight: '90vh',
+                maxWidth: '80vw',
+                maxHeight: '70vh',
                 className: 'dynasty-popup'
             });
                                 
@@ -1372,17 +1369,20 @@ async function loadPopupSurnames(provinceName, containerId) {
             
             data.data.forEach((surname, index) => {
                 const surnameItem = document.createElement('div');
-                surnameItem.style.cssText = 'text-align: center; padding: 30px; margin: 15px 0; background: #f8f9fa; border-radius: 16px; border: 3px solid #e9ecef; cursor: pointer; transition: all 0.3s ease; min-height: 150px; display: flex; flex-direction: column; justify-content: center;';
+                surnameItem.style.cssText = 'text-align: center; padding: 20px; margin: 10px 0; background: #f8f9fa; border-radius: 12px; border: 2px solid #e9ecef; cursor: pointer; transition: all 0.3s ease; min-height: 100px; display: flex; flex-direction: column; justify-content: center;';
                 surnameItem.innerHTML = `
-                    <h3 style="margin: 0 0 15px 0; font-size: 40px; font-weight: bold; color: #0038A8; text-decoration: underline;">${surname.surname}</h3>
-                    <p style="margin: 0 0 10px 0; color: #666; font-size: 22px; font-weight: 600;">${surname.dynasty_count} dynasty members</p>
-                    <p style="margin: 0; color: #999; font-size: 16px;">👆 Click to view family details</p>
+                    <h3 style="margin: 0 0 10px 0; font-size: 28px; font-weight: bold; color: #0038A8; text-decoration: underline;">${surname.surname}</h3>
+                    <p style="margin: 0 0 8px 0; color: #666; font-size: 16px; font-weight: 600;">${surname.dynasty_count} dynasty members</p>
+                    <p style="margin: 0; color: #999; font-size: 12px;">👆 Click to view family details</p>
                 `;
                 
-                // Add click handler to redirect to /family with surname parameter
+                // Add click handler to redirect to /family with surname and province parameters
                 surnameItem.addEventListener('click', function() {
                     const encodedSurname = encodeURIComponent(surname.surname);
-                    window.location.href = `/family?surname=${encodedSurname}`;
+                    // Use the mapping function to convert province name to database format
+                    const mappedProvince = mapProvinceNameToDynasty(provinceName);
+                    const encodedProvince = encodeURIComponent(mappedProvince);
+                    window.location.href = `/family?surname=${encodedSurname}&province=${encodedProvince}`;
                 });
                 
                 // Add hover effects

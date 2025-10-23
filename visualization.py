@@ -2338,7 +2338,7 @@ async def dynasty_data_api(
             port=int(os.getenv('POSTGRES_PORT', 5432)),
             user=os.getenv('POSTGRES_USER', 'budget_admin'),
             password=os.getenv('POSTGRES_PASSWORD', ''),
-            database=os.getenv('POSTGRES_DB_DYNASTY_SEC', 'dynasty')
+            database=os.getenv('POSTGRES_DYNASTY_SEC', 'dynasty')
         )
         
         # Build WHERE clause for filtering
@@ -2505,7 +2505,7 @@ async def dynasty_stats_api():
             port=int(os.getenv('POSTGRES_PORT', 5432)),
             user=os.getenv('POSTGRES_USER', 'postgres'),
             password=os.getenv('POSTGRES_PASSWORD', ''),
-            database=os.getenv('POSTGRES_DB_DYNASTY_SEC', 'dynasty')
+            database=os.getenv('POSTGRES_DYNASTY_SEC', 'dynasty')
         )
         
         # Get total records
@@ -2530,6 +2530,78 @@ async def dynasty_stats_api():
                 "non_dynasty_members": non_dynasty_members,
                 "unique_politicians": unique_politicians
             }
+        })
+        
+    except Exception as e:
+        return JSONResponse({"success": False, "error": str(e)})
+
+@app.get("/api/dynasty/family")
+async def dynasty_family_api(
+    surname: str = Query("", description="Family surname to search for"),
+    province: str = Query("", description="Filter by specific province")
+):
+    """Get family members by surname, optionally filtered by province"""
+    try:
+        import asyncpg
+        import os
+        
+        if not surname:
+            return JSONResponse({"success": False, "error": "Surname parameter is required"})
+        
+        # Database connection
+        conn = await asyncpg.connect(
+            host=os.getenv('POSTGRES_HOST', 'localhost'),
+            port=int(os.getenv('POSTGRES_PORT', 5432)),
+            user=os.getenv('POSTGRES_USER', 'postgres'),
+            password=os.getenv('POSTGRES_PASSWORD', ''),
+            database=os.getenv('POSTGRES_DYNASTY_SEC', 'dynasty')
+        )
+        
+        # Build query based on whether province filter is provided
+        if province:
+            family_members = await conn.fetch("""
+                SELECT 
+                    first_name,
+                    last_name,
+                    position,
+                    municipality_city as province,
+                    year,
+                    fat
+                FROM political_dynasties 
+                WHERE last_name = $1 AND municipality_city = $2
+                ORDER BY year DESC, first_name
+            """, surname, province)
+        else:
+            family_members = await conn.fetch("""
+                SELECT 
+                    first_name,
+                    last_name,
+                    position,
+                    municipality_city as province,
+                    year,
+                    fat
+                FROM political_dynasties 
+                WHERE last_name = $1
+                ORDER BY year DESC, first_name
+            """, surname)
+        
+        await conn.close()
+        
+        # Convert to list of dictionaries
+        family_data = []
+        for member in family_members:
+            family_data.append({
+                "first_name": member["first_name"],
+                "last_name": member["last_name"],
+                "position": member["position"],
+                "province": member["province"],
+                "year": member["year"],
+                "fat": member["fat"]
+            })
+        
+        return JSONResponse({
+            "success": True,
+            "data": family_data
         })
         
     except Exception as e:

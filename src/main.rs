@@ -285,12 +285,14 @@ async fn family(req: HttpRequest) -> Result<HttpResponse, ActixError> {
 
     add_frontend_env_to_context(&mut context);
 
-    // Get surname parameter from query string
+    // Get surname and province parameters from query string
     let query = web::Query::<std::collections::HashMap<String, String>>::from_query(req.query_string());
-    let surname = query.ok().and_then(|q| q.get("surname").cloned()).unwrap_or_else(|| "Unknown".to_string());
+    let surname = query.as_ref().ok().and_then(|q| q.get("surname").cloned()).unwrap_or_else(|| "Unknown".to_string());
+    let province = query.as_ref().ok().and_then(|q| q.get("province").cloned()).unwrap_or_else(|| "".to_string());
 
     context.insert("title", &format!("Family Details: {} - BetterGovPH", surname));
     context.insert("surname", &surname);
+    context.insert("province", &province);
     context.insert("company_name", "BetterGovPH");
     context.insert("platform", "BetterGovPH");
     context.insert("SITE_NAME", "BetterGovPH Data Visualizations");

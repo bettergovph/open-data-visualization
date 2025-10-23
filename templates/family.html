@@ -125,7 +125,17 @@
         // Load family data
         async function loadFamilyData() {
             try {
-                const response = await fetch(`/api/dynasty/family?surname=${encodeURIComponent(surname)}`);
+                // Get province parameter from URL
+                const urlParams = new URLSearchParams(window.location.search);
+                const province = urlParams.get('province') || '';
+                
+                // Build API URL with province parameter if provided
+                let apiUrl = `/api/dynasty/family?surname=${encodeURIComponent(surname)}`;
+                if (province) {
+                    apiUrl += `&province=${encodeURIComponent(province)}`;
+                }
+                
+                const response = await fetch(apiUrl);
                 
                 if (!response.ok) {
                     throw new Error(`HTTP error! status: ${response.status}`);
