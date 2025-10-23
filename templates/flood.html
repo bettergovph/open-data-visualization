@@ -2883,14 +2883,16 @@ function toggleMobileMenu() {
         
         // Fetch actual total contractors count from statistics API
         try {
+            console.log('🔄 Attempting to fetch statistics from API...');
             const statsResponse = await fetch('/api/flood/statistics');
+            
             if (statsResponse.ok) {
                 const stats = await statsResponse.json();
                 const actualTotalContractors = stats.uniqueContractors;
                 const actualTotalProjects = stats.totalProjects;
                 const actualTotalCost = stats.totalCost;
                 
-                console.log('📊 Actual total contractors from API:', actualTotalContractors);
+                console.log('✅ Statistics API successful:', { actualTotalContractors, actualTotalProjects, actualTotalCost });
                 document.getElementById('total-contractors-count').textContent = actualTotalContractors.toLocaleString('en-PH');
                 
                 // Calculate average projects per contractor using actual totals
@@ -2903,16 +2905,26 @@ function toggleMobileMenu() {
                 console.log('📊 Average cost per project:', avgCostPerProject, '(', actualTotalCost, '/', actualTotalProjects, ')');
                 document.getElementById('avg-cost-per-project').textContent = '₱' + avgCostPerProject.toLocaleString('en-PH');
             } else {
-                throw new Error('Failed to fetch statistics');
+                console.warn('⚠️ Statistics API returned error:', statsResponse.status, statsResponse.statusText);
+                throw new Error(`API returned ${statsResponse.status}: ${statsResponse.statusText}`);
             }
         } catch (error) {
-            console.error('❌ Failed to fetch accurate contractor statistics:', error);
+            console.warn('⚠️ Statistics API failed, using fallback data:', error.message);
             // Fallback to displayed contractors count
-            document.getElementById('total-contractors-count').textContent = allContractors.length.toLocaleString('en-PH');
             const totalProjects = allContractors.reduce((sum, contractor) => sum + contractor.projects, 0);
             const totalCost = allContractors.reduce((sum, contractor) => sum + contractor.totalCost, 0);
-            const avgProjects = Math.round(totalProjects / allContractors.length);
-            const avgCostPerProject = Math.round(totalCost / totalProjects);
+            const avgProjects = totalProjects > 0 ? Math.round(totalProjects / allContractors.length) : 0;
+            const avgCostPerProject = totalProjects > 0 ? Math.round(totalCost / totalProjects) : 0;
+            
+            console.log('📊 Using fallback statistics:', { 
+                contractors: allContractors.length, 
+                projects: totalProjects, 
+                cost: totalCost,
+                avgProjects,
+                avgCostPerProject
+            });
+            
+            document.getElementById('total-contractors-count').textContent = allContractors.length.toLocaleString('en-PH');
             document.getElementById('avg-projects-per-contractor').textContent = avgProjects.toLocaleString('en-PH');
             document.getElementById('avg-cost-per-project').textContent = '₱' + avgCostPerProject.toLocaleString('en-PH');
         }
