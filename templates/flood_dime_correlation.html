@@ -354,6 +354,17 @@
             <p class="text-gray-600 text-sm">Loading contractor correlation data...</p>
         </div>
 
+        <!-- Error Message -->
+        <div id="contractor-error" class="bg-red-50 border border-red-200 rounded-lg p-6 text-center" style="display: none;">
+            <div class="text-red-600">
+                <svg class="mx-auto h-12 w-12 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z"></path>
+                </svg>
+                <h3 class="text-lg font-semibold mb-2">Error Loading Data</h3>
+                <p class="text-sm">Unable to load contractor correlation data. Please try again later.</p>
+            </div>
+        </div>
+
         <!-- Key Statistics -->
         <div id="stats-section" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8" style="display: none;">
             <div class="bg-white p-6 rounded-lg shadow-md text-center border-l-4 border-blue-500">
@@ -465,19 +476,37 @@
                 console.log('✅ Contractor data loaded:', data);
                 
                 // Check if data structure is valid
-                if (!data || !data.contractors) {
-                    console.error('❌ Invalid data structure:', data);
-                    document.getElementById('contractor-loading-spinner').style.display = 'none';
-                    document.getElementById('contractor-error').style.display = 'block';
-                    document.getElementById('contractor-error').textContent = 'Error: Invalid data structure received';
+                if (!data || data.status === 'error' || !data.contractors) {
+                    console.error('❌ Invalid data structure or API error:', data);
+                    
+                    // Hide spinner
+                    const spinner = document.getElementById('contractor-loading-spinner');
+                    if (spinner) spinner.style.display = 'none';
+                    
+                    // Show error message
+                    const errorElement = document.getElementById('contractor-error');
+                    if (errorElement) {
+                        errorElement.style.display = 'block';
+                        const errorMessage = data?.error || data?.message || 'Error: Invalid data structure received';
+                        errorElement.querySelector('p').textContent = `Unable to load contractor correlation data for ${yearLabel}. ${errorMessage}`;
+                    } else {
+                        console.error('❌ Error element not found in DOM');
+                    }
                     return;
                 }
                 
                 // Hide spinner, show content
-                document.getElementById('contractor-loading-spinner').style.display = 'none';
-                document.getElementById('stats-section').style.display = 'grid';
-                document.getElementById('contractor-section').style.display = 'block';
-                document.getElementById('methodology-section').style.display = 'block';
+                const spinner = document.getElementById('contractor-loading-spinner');
+                if (spinner) spinner.style.display = 'none';
+                
+                const statsSection = document.getElementById('stats-section');
+                if (statsSection) statsSection.style.display = 'grid';
+                
+                const contractorSection = document.getElementById('contractor-section');
+                if (contractorSection) contractorSection.style.display = 'block';
+                
+                const methodologySection = document.getElementById('methodology-section');
+                if (methodologySection) methodologySection.style.display = 'block';
                 
                 // Update statistics
                 const contractorsList = Object.values(data.contractors);

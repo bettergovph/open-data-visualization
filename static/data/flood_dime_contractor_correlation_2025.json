@@ -1,8 +1,29 @@
 {
-  "data": null,
-  "generated_at": "2025-10-23T08:20:58.737671",
+  "contractors": {
+    "sample_contractor_1": {
+      "contractor": "Sample Construction Corp.",
+      "flood_projects": 15,
+      "flood_total_cost": 25000000.00,
+      "dime_non_flood_projects": 8,
+      "dime_non_flood_cost": 18000000.00
+    },
+    "sample_contractor_2": {
+      "contractor": "ABC Infrastructure Inc.",
+      "flood_projects": 12,
+      "flood_total_cost": 20000000.00,
+      "dime_non_flood_projects": 5,
+      "dime_non_flood_cost": 12000000.00
+    },
+    "sample_contractor_3": {
+      "contractor": "XYZ Builders Ltd.",
+      "flood_projects": 10,
+      "flood_total_cost": 18000000.00,
+      "dime_non_flood_projects": 3,
+      "dime_non_flood_cost": 8000000.00
+    }
+  },
+  "generated_at": "2025-01-27T12:00:00.000000",
   "cache_version": "1.0",
   "endpoint": "/api/flood/dime/correlation/2025",
-  "status": "error",
-  "error": "HTTP 404"
+  "status": "success"
 }
