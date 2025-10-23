@@ -81,10 +81,9 @@ async def generate_contractors_with_costs():
             # Assume max reasonable project count is 200, normalize to 0-50
             project_factor = min(project_count / 4.0, 50.0)  # project_count/4, capped at 50
             
-            # Factor 2: Average cost per project (normalized to 0-50 range)
-            # Scale cost to reasonable range (divide by 1M to get millions, then normalize)
-            # Assume max reasonable cost is 100M per project, normalize to 0-50
-            cost_factor = min((avg_cost / 1000000) / 2.0, 50.0)  # (avg_cost/1M)/2, capped at 50
+            # Factor 2: Average cost per project (0.5 points per million, capped at 50)
+            # 0.5 points per million pesos, so 100M = 50 points
+            cost_factor = min((avg_cost / 1000000) * 0.5, 50.0)  # 0.5 points per million, capped at 50
             
             # Add both factors together for final suspicion score (0-100 range)
             suspicion_score = project_factor + cost_factor
