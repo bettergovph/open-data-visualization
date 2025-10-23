@@ -105,7 +105,8 @@ async def generate_contractors_with_costs():
                 
             # Use the higher SD (more suspicious factor)
             max_sd = max(project_sd, cost_sd)
-            sd_factor = min(max_sd * 10.0, 40.0)  # 10 points per SD, capped at 40
+            # Square the SD value and normalize to 40 max
+            sd_factor = min(max_sd * max_sd * 10.0, 40.0)  # Square SD, then 10 points per squared SD, capped at 40
             
             # Factor 2: Project count (0.3 points per project, capped at 30)
             # 0.3 points per project, so 100 projects = 30 points
