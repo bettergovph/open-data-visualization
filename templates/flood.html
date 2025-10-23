@@ -2723,28 +2723,40 @@ function toggleMobileMenu() {
         console.log('👥 Initializing contractor data...');
         
         try {
-            // Load from MeiliSearch flood contractors API
+            // Load from MeiliSearch contractors API (fallback to lookup if paginated fails)
             console.log('🔄 Loading contractor data from MeiliSearch...');
-            const response = await fetch('/api/flood/lookup/contractors');
+            let response = await fetch('/api/flood/contractors?page=1&limit=1000');
+            
+            if (!response.ok) {
+                console.log('⚠️ Paginated endpoint failed, trying lookup endpoint...');
+                response = await fetch('/api/flood/lookup/contractors');
+            }
             
             if (!response.ok) {
                 throw new Error(`API returned ${response.status}`);
             }
             
             const data = await response.json();
-            const contractors = data.contractors || [];
-            const counts = data.counts || {};
-            console.log('✅ Loaded contractor data from MeiliSearch:', contractors.length, 'contractors');
             
-            // Store all contractor data in memory with project counts from MeiliSearch
-            allContractors = contractors.map(contractorName => ({
-                name: contractorName,
-                projects: counts[contractorName] || 0,
-                totalCost: 0, // Not available in this data source
-                avgCostPerProject: 0, // Not available in this data source
-                suspicionScore: 0, // No SEC data available from MeiliSearch
-                performance: 'Normal' // Default performance
-            }));
+            if (data.contractors && Array.isArray(data.contractors)) {
+                // Paginated response
+                allContractors = data.contractors;
+            } else if (data.contractors && Array.isArray(data.contractors)) {
+                // Lookup response - convert to contractor objects
+                const counts = data.counts || {};
+                allContractors = data.contractors.map(contractorName => ({
+                    name: contractorName,
+                    projects: counts[contractorName] || 0,
+                    totalCost: 0,
+                    avgCostPerProject: 0,
+                    suspicionScore: 0,
+                    performance: 'Normal'
+                }));
+            } else {
+                allContractors = [];
+            }
+            
+            console.log('✅ Loaded contractor data from MeiliSearch:', allContractors.length, 'contractors');
             
             console.log('✅ Contractor data loaded from cache:', allContractors.length, 'contractors');
             console.log('💾 Cache benefits: Instant load, no API batching, ~2400 contractors ready');
@@ -5024,25 +5036,31 @@ let contractorMapping = null;
 // Load contractor database and mapping
 async function loadContractorDatabase() {
     try {
+        console.log('🔄 Loading contractor database...');
         // Load SEC database (with cache busting)
         const dbResponse = await fetch(`/static/data/sec_contractors_database.json?v=${Date.now()}`);
         if (dbResponse.ok) {
             contractorDatabase = await dbResponse.json();
             console.log('✅ Contractor database loaded:', contractorDatabase.summary);
+            console.log('📊 Total contractors in database:', contractorDatabase.contractors ? contractorDatabase.contractors.length : 'No contractors array');
         } else {
             console.log('⚠️ Contractor database not found, popups will show limited info');
+            console.log('❌ Database response status:', dbResponse.status, dbResponse.statusText);
         }
         
         // Load manual mapping
+        console.log('🔄 Loading contractor mapping...');
         const mappingResponse = await fetch('/static/data/contractor_sec_mapping.json');
         if (mappingResponse.ok) {
             contractorMapping = await mappingResponse.json();
             console.log('✅ Contractor mapping loaded:', Object.keys(contractorMapping.mapping).length, 'mappings');
         } else {
             console.log('⚠️ Contractor mapping not found, using fallback matching');
+            console.log('❌ Mapping response status:', mappingResponse.status, mappingResponse.statusText);
         }
     } catch (error) {
-        console.log('⚠️ Error loading contractor database:', error);
+        console.log('❌ Error loading contractor database:', error);
+        console.error('Full error details:', error);
     }
 }
 
@@ -5543,22 +5561,60 @@ function showContractorHoverTooltip(event, contractorName) {
     // Remove existing tooltip
     hideContractorHoverTooltip();
     
+    console.log('🔍 Showing tooltip for:', contractorName);
+    console.log('🔍 Contractor database available:', contractorDatabase ? 'Yes' : 'No');
+    console.log('🔍 Contractor mapping available:', contractorMapping ? 'Yes' : 'No');
+    
+    // If database not loaded, try to load it
+    if (!contractorDatabase) {
+        console.log('🔄 Database not loaded, attempting to load...');
+        loadContractorDatabase().then(() => {
+            // Retry showing tooltip after data loads
+            setTimeout(() => {
+                showContractorHoverTooltip(event, contractorName);
+            }, 1000);
+        });
+        // Show loading tooltip while data loads
+        showLoadingTooltip(event, contractorName);
+        return;
+    }
+    
     // Find contractor data for tooltip
     let contractor = null;
     if (contractorDatabase && contractorMapping) {
+        console.log('🔍 Searching in contractor database...');
         // Try manual mapping first
         if (contractorMapping.mapping[contractorName]) {
             const mappedName = contractorMapping.mapping[contractorName];
-            contractor = contractorDatabase.contractors.find(c => 
+            // Find all matches and prefer the one with SEC data
+            const matches = contractorDatabase.contractors.filter(c => 
                 c.original_contractor_name === mappedName
             );
+            
+            if (matches.length > 0) {
+                // Prefer entries with valid SEC data (non-empty sec_number)
+                contractor = matches.find(c => c.sec_number && c.sec_number.trim() !== '') || matches[0];
+                console.log('🔍 Manual mapping result:', contractor ? 'Found' : 'Not found');
+                console.log('🔍 Total matches found:', matches.length);
+                console.log('🔍 Selected match with SEC data:', contractor.sec_number ? 'Yes' : 'No');
+            }
+            
+            if (contractor) {
+                console.log('🔍 Found contractor data:', {
+                    company_name: contractor.company_name,
+                    sec_number: contractor.sec_number,
+                    date_registered: contractor.date_registered,
+                    status: contractor.status
+                });
+            }
         }
         
         // Fallback to fuzzy matching with stricter rules
         if (!contractor) {
             const normalizedSearch = normalizeContractorName(contractorName);
             
-            contractor = contractorDatabase.contractors.find(c => {
+            // Find all potential matches
+            const potentialMatches = contractorDatabase.contractors.filter(c => {
                 const originalName = normalizeContractorName(c.original_contractor_name || '');
                 const companyName = normalizeContractorName(c.company_name || '');
                 
@@ -5582,8 +5638,29 @@ function showContractorHoverTooltip(event, contractorName) {
                 
                 return false;
             });
+            
+            if (potentialMatches.length > 0) {
+                // Prefer entries with valid SEC data (non-empty sec_number)
+                contractor = potentialMatches.find(c => c.sec_number && c.sec_number.trim() !== '') || potentialMatches[0];
+                console.log('🔍 Total fuzzy matches found:', potentialMatches.length);
+                console.log('🔍 Selected match with SEC data:', contractor.sec_number ? 'Yes' : 'No');
+            }
+            console.log('🔍 Fuzzy matching result:', contractor ? 'Found' : 'Not found');
+            if (contractor) {
+                console.log('🔍 Found contractor data:', {
+                    company_name: contractor.company_name,
+                    sec_number: contractor.sec_number,
+                    date_registered: contractor.date_registered,
+                    status: contractor.status
+                });
+            }
         }
+    } else {
+        console.log('⚠️ Contractor database or mapping not available, showing basic tooltip');
     }
+    
+    console.log('🔍 Final contractor data for tooltip:', contractor);
+    console.log('🔍 Will show SEC data:', contractor ? 'Yes' : 'No');
     
     // Create tooltip HTML with actual SEC data
     const tooltipHTML = `
@@ -5615,9 +5692,9 @@ function showContractorHoverTooltip(event, contractorName) {
                 <div style="color: #666; margin-bottom: 5px;">
                     <strong>Address:</strong> ${contractor.registered_address ? contractor.registered_address.substring(0, 100) + '...' : 'N/A'}
                 </div>
-            ` : `
+            ` : contractorDatabase ? `
                 <div style="color: #dc3545; margin-bottom: 5px;">
-                    <strong>Company Name:</strong> <span style="color: #dc3545;">Not found</span>
+                    <strong>Company Name:</strong> <span style="color: #dc3545;">Not found in SEC database</span>
                 </div>
                 <div style="color: #dc3545; margin-bottom: 5px;">
                     <strong>SEC Number:</strong> <span style="color: #dc3545;">Not found</span>
@@ -5628,9 +5705,66 @@ function showContractorHoverTooltip(event, contractorName) {
                 <div style="color: #dc3545; margin-bottom: 5px;">
                     <strong>Address:</strong> <span style="color: #dc3545;">Not found</span>
                 </div>
+            ` : `
+                <div style="color: #6c757d; margin-bottom: 5px;">
+                    <strong>Company Name:</strong> <span style="color: #6c757d;">Loading SEC data...</span>
+                </div>
+                <div style="color: #6c757d; margin-bottom: 5px;">
+                    <strong>SEC Number:</strong> <span style="color: #6c757d;">Loading...</span>
+                </div>
+                <div style="color: #6c757d; margin-bottom: 5px;">
+                    <strong>Date Registered:</strong> <span style="color: #6c757d;">Loading...</span>
+                </div>
+                <div style="color: #6c757d; margin-bottom: 5px;">
+                    <strong>Address:</strong> <span style="color: #6c757d;">Loading...</span>
+                </div>
             `}
             <div style="color: #666; font-size: 12px; margin-top: 8px;">
                 💡 Click for full details
+            </div>
+        </div>
+    `;
+    
+    // Add tooltip to page
+    document.body.insertAdjacentHTML('beforeend', tooltipHTML);
+    
+    // Position tooltip near mouse cursor
+    const tooltip = document.getElementById('contractor-hover-tooltip');
+    const rect = tooltip.getBoundingClientRect();
+    const x = event.clientX + 10;
+    const y = event.clientY - rect.height - 10;
+    
+    // Adjust if tooltip would go off screen
+    const adjustedX = x + rect.width > window.innerWidth ? event.clientX - rect.width - 10 : x;
+    const adjustedY = y < 0 ? event.clientY + 10 : y;
+    
+    tooltip.style.left = adjustedX + 'px';
+    tooltip.style.top = adjustedY + 'px';
+}
+
+// Show loading tooltip while data loads
+function showLoadingTooltip(event, contractorName) {
+    const tooltipHTML = `
+        <div id="contractor-hover-tooltip" style="
+            position: fixed;
+            background: white;
+            border: 2px solid #0038A8;
+            border-radius: 8px;
+            padding: 15px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            z-index: 1000;
+            max-width: 300px;
+            font-size: 14px;
+            pointer-events: none;
+        ">
+            <div style="color: #0038A8; font-weight: bold; margin-bottom: 8px;">
+                🏢 ${contractorName}
+            </div>
+            <div style="color: #6c757d; margin-bottom: 5px;">
+                <strong>Status:</strong> <span style="color: #6c757d;">Loading SEC data...</span>
+            </div>
+            <div style="color: #6c757d; font-size: 12px; margin-top: 8px;">
+                ⏳ Please wait while we load the SEC database
             </div>
         </div>
     `;

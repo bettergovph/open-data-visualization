@@ -273,7 +273,7 @@ class FloodControlClient:
             response = await self._make_request(f"indexes/{self.index_name}/search", 
                                               "POST", data=search_params)
             
-            facets = response.get("facetsDistribution", {})
+            facets = response.get("facetDistribution", {})
             return facets.get(facet_name, {})
             
         except Exception as e:

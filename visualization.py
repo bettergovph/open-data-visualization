@@ -739,6 +739,78 @@ async def flood_contractors_lookup():
     except Exception as e:
         return JSONResponse({"success": False, "error": str(e)})
 
+@app.get("/api/flood/contractors")
+async def flood_contractors_paginated(
+    page: int = Query(default=1, description="Page number (1-based)"),
+    limit: int = Query(default=50, description="Number of contractors per page"),
+    search: str = Query(default="", description="Search query for contractor names")
+):
+    """Get paginated contractors with costs and suspicion scores - no authentication required"""
+    try:
+        # Try to load from generated contractor data with costs
+        try:
+            import json
+            with open('static/data/contractors_with_costs.json', 'r') as f:
+                data = json.load(f)
+                contractor_list = data.get('contractors', [])
+        except FileNotFoundError:
+            # Fallback to MeiliSearch facets if file not found
+            client = get_flood_client()
+            contractors = await client.get_facets("Contractor")
+            
+            if not contractors:
+                return JSONResponse({
+                    "success": True,
+                    "contractors": [],
+                    "pagination": {
+                        "page": page,
+                        "limit": limit,
+                        "total": 0,
+                        "total_pages": 0
+                    }
+                })
+            
+            # Convert to list of contractor objects
+            contractor_list = []
+            for name, count in contractors.items():
+                contractor_list.append({
+                    "name": name,
+                    "projects": count,
+                    "totalCost": 0,  # Not available from facets
+                    "avgCostPerProject": 0,  # Not available from facets
+                    "suspicionScore": 0,  # No SEC data in MeiliSearch
+                    "performance": "Normal"  # Default
+                })
+        
+        # Apply search filter if provided
+        if search:
+            search_lower = search.lower()
+            contractor_list = [c for c in contractor_list if search_lower in c["name"].lower()]
+        
+        # Sort by project count (descending)
+        contractor_list.sort(key=lambda x: x["projects"], reverse=True)
+        
+        # Calculate pagination
+        total = len(contractor_list)
+        total_pages = (total + limit - 1) // limit
+        offset = (page - 1) * limit
+        
+        # Get page data
+        page_contractors = contractor_list[offset:offset + limit]
+        
+        return JSONResponse({
+            "success": True,
+            "contractors": page_contractors,
+            "pagination": {
+                "page": page,
+                "limit": limit,
+                "total": total,
+                "total_pages": total_pages
+            }
+        })
+    except Exception as e:
+        return JSONResponse({"success": False, "error": str(e)})
+
 # ============================================================================
 # DIME Infrastructure API Endpoints
 # ============================================================================

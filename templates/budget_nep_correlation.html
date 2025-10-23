@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>NEP-Budget Correlation Analysis - BetterGovPH</title>
+    <title>Budget-NEP Correlation - BetterGovPH</title>
     
     <!-- Google Fonts - Inter -->
     <!-- Tailwind CSS -->
@@ -506,15 +506,16 @@
     </script>
 
     <!-- NEP-Budget Correlation Section -->
-    <div style="padding: 6rem;">
+    <div style="padding: 2rem;">
     <section class="py-8 px-4 max-w-7xl mx-auto">
+        <!-- Page Title -->
+        <div class="text-center mb-8">
+            <h1 class="text-4xl font-bold text-gray-800 mb-4">Budget-NEP Correlation</h1>
+            <p class="text-lg text-gray-600">Side-by-side comparison of total expenditures across overlapping years</p>
+        </div>
 
         <!-- Budget vs NEP Comparison Chart -->
         <div class="bg-white rounded-lg shadow-lg p-8 mb-8">
-            <h2 class="text-3xl font-bold text-gray-800 mb-6 text-center">📊 Budget vs NEP: Annual Expenditure Comparison</h2>
-            <div class="mb-4 text-center">
-                <p class="text-gray-600">Side-by-side comparison of total expenditures across overlapping years</p>
-            </div>
             <div class="w-full">
                 <canvas id="budgetNepChart" width="800" height="400"></canvas>
             </div>

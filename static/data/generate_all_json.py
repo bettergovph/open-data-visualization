@@ -253,6 +253,18 @@ class JSONGenerator:
                 'description': 'Contractor project count standard deviation analysis',
                 'category': 'analysis_data',
                 'dependencies': ['Contractor project data']
+            },
+            'contractors_with_costs.json': {
+                'script': 'sec_scraper/generate_contractors_with_costs.py',
+                'description': 'Contractor data with costs and suspicion scores from MeiliSearch',
+                'category': 'sec_data',
+                'dependencies': ['MeiliSearch flood control data']
+            },
+            'flood_control_data_with_jv.json': {
+                'script': 'sec_scraper/generate_flood_control_with_jv.py',
+                'description': 'Flood control data with joint venture detection and partner extraction',
+                'category': 'flood_data',
+                'dependencies': ['MeiliSearch flood control data']
             }
         }
     
