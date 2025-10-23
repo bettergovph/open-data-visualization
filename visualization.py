@@ -2355,7 +2355,7 @@ async def dynasty_data_api(
                  party ILIKE ${param_count} OR 
                  region ILIKE ${param_count} OR 
                  province ILIKE ${param_count} OR 
-                 "municipality.city" ILIKE ${param_count} OR 
+                 municipality_city ILIKE ${param_count} OR 
                  position ILIKE ${param_count})
             """)
             params.append(f"%{search}%")
@@ -2400,7 +2400,7 @@ async def dynasty_data_api(
                 party,
                 region,
                 province,
-                "municipality.city" as municipality_city,
+                municipality_city,
                 position,
                 year,
                 fat,
