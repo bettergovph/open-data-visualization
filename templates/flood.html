@@ -6077,14 +6077,19 @@ async function initializeNetworkGraph() {
         const response = await fetch('/static/data/flood_control_data.json');
         const data = await response.json();
         
-        if (!data.projects || !Array.isArray(data.projects)) {
+        // Check the correct data structure: data.data.projects
+        const projects = data.data && data.data.projects ? data.data.projects : data.projects;
+        
+        if (!projects || !Array.isArray(projects)) {
             console.log('⚠️ No projects data available for network graph');
             networkData = { nodes: [], links: [] };
             return;
         }
         
+        console.log(`📊 Loaded ${projects.length} projects from JSON`);
+        
         // Process joint ventures
-        const jointVentures = data.projects.filter(p => p.Contractor && p.Contractor.includes(' / '));
+        const jointVentures = projects.filter(p => p.Contractor && p.Contractor.includes(' / '));
         
         if (jointVentures.length === 0) {
             console.log('⚠️ No joint ventures found in data');
