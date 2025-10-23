@@ -378,8 +378,29 @@ function toggleMobileMenu() {
                                 </div>
                             </div>
                             
-                            <div id="contractorsWithoutSec" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 15px;">
-                                <!-- Suspicious contractors will be populated here -->
+                            <!-- Suspicious Contractors Table -->
+                            <div style="overflow-x: auto;">
+                                <table style="width: 100%; border-collapse: collapse; background: white;">
+                                    <thead>
+                                        <tr style="background: #f8f9fa; border-bottom: 2px solid #dee2e6;">
+                                            <th style="padding: 12px; text-align: left; border-bottom: 2px solid #dee2e6; font-weight: 600; color: #0038A8; width: 5%;">#</th>
+                                            <th style="padding: 12px; text-align: left; border-bottom: 2px solid #dee2e6; font-weight: 600; color: #0038A8; width: 35%;">Contractor Name</th>
+                                            <th style="padding: 12px; text-align: center; border-bottom: 2px solid #dee2e6; font-weight: 600; color: #0038A8; width: 20%;">Status</th>
+                                            <th style="padding: 12px; text-align: center; border-bottom: 2px solid #dee2e6; font-weight: 600; color: #0038A8; width: 20%;">SEC Number</th>
+                                            <th style="padding: 12px; text-align: center; border-bottom: 2px solid #dee2e6; font-weight: 600; color: #0038A8; width: 20%;">Last Updated</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="contractorsWithoutSec">
+                                        <tr>
+                                            <td colspan="5" style="padding: 40px; text-align: center; color: #666;">
+                                                <div style="display: flex; flex-direction: column; align-items: center; gap: 10px;">
+                                                    <div style="font-size: 24px;">⚠️</div>
+                                                    <div>Loading suspicious contractors...</div>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
                             </div>
                         </div>
 
@@ -1059,15 +1080,14 @@ function renderSuspiciousContractors() {
     
     if (suspiciousContractors.length === 0) {
         container.innerHTML = `
-            <div style="
-                background: #d4edda;
-                border: 2px solid #28a745;
-                border-radius: 8px;
-                padding: 20px;
-                text-align: center;
-                grid-column: 1 / -1;">
-                <strong>✅ No suspicious contractors found!</strong>
-            </div>
+            <tr>
+                <td colspan="5" style="padding: 40px; text-align: center; color: #28a745; background: #d4edda;">
+                    <div style="display: flex; flex-direction: column; align-items: center; gap: 10px;">
+                        <div style="font-size: 24px;">✅</div>
+                        <div style="font-weight: bold;">No suspicious contractors found!</div>
+                    </div>
+                </td>
+            </tr>
         `;
         document.getElementById('sec-page-info').textContent = '0';
         document.getElementById('sec-total').textContent = '0';
@@ -1076,21 +1096,33 @@ function renderSuspiciousContractors() {
         return;
     }
     
-    contractorsToShow.forEach(contractor => {
-        const contractorCard = document.createElement('div');
-        contractorCard.style.cssText = 'background: #fff3cd; border: 2px solid #ffc107; border-radius: 8px; padding: 15px;';
+    contractorsToShow.forEach((contractor, index) => {
+        const rowNumber = start + index + 1;
+        const row = document.createElement('tr');
+        row.style.cssText = 'border-bottom: 1px solid #dee2e6;';
         
-        contractorCard.innerHTML = `
-            <div style="font-weight: bold; color: #856404; margin-bottom: 8px; font-size: 1.1em;">
-                ${contractor.contractor_name}
-            </div>
-            <div style="color: #721c24; background: #f8d7da; padding: 8px; border-radius: 4px; font-size: 0.9em; border: 1px solid #f5c6cb;">
-                <strong>⚠️ NO SEC RESULTS - SUSPICIOUS</strong><br>
-                <span style="font-size: 0.85em;">This contractor was searched in the SEC database but yielded zero results.</span>
-            </div>
+        // Alternate row colors for better readability
+        if (index % 2 === 0) {
+            row.style.backgroundColor = '#fff3cd';
+        } else {
+            row.style.backgroundColor = '#fff8e1';
+        }
+        
+        row.innerHTML = `
+            <td style="padding: 12px; text-align: center; font-weight: 600; color: #0038A8;">${rowNumber}</td>
+            <td style="padding: 12px; font-weight: 600; color: #856404;">${contractor.contractor_name}</td>
+            <td style="padding: 12px; text-align: center;">
+                <span style="background: #f8d7da; color: #721c24; padding: 4px 8px; border-radius: 4px; font-size: 0.85em; font-weight: 600; border: 1px solid #f5c6cb;">
+                    ⚠️ NO SEC RESULTS
+                </span>
+            </td>
+            <td style="padding: 12px; text-align: center; color: #dc3545; font-weight: 600;">Not Found</td>
+            <td style="padding: 12px; text-align: center; color: #6c757d; font-size: 0.9em;">
+                ${contractor.last_updated ? new Date(contractor.last_updated).toLocaleDateString('en-PH') : 'N/A'}
+            </td>
         `;
         
-        container.appendChild(contractorCard);
+        container.appendChild(row);
     });
     
     // Update pagination
