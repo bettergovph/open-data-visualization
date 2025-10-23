@@ -2093,28 +2093,41 @@ fetch('/static/data/dime_summary.json')
                 console.log('🔍 Sample project structure:', projects[0]); // Debug: see what fields are available
                 
                 // Extract unique contractors from DIME (same logic as fastest projects)
-                projects.forEach(project => {
+                projects.forEach((project, index) => {
+                    console.log(`🔍 Processing project ${index + 1}:`, {
+                        contractor_source: project.contractor_source,
+                        contractors: project.contractors,
+                        implementing_offices: project.implementing_offices
+                    });
+                    
                     let contractorName = 'N/A';
                     
                     // Use same contractor detection logic as fastest projects
                     if (project.contractor_source === 'flood_connected' || project.contractor_source === 'dime_fallback') {
                         // Project connected to flood data (SSP) - contractor from MeiliSearch or DIME fallback
                         contractorName = project.contractors[0];
+                        console.log('✅ Found SSP contractor:', contractorName);
                     } else if (project.contractors && project.contractors.length > 0) {
                         // Use DIME contractor data
                         contractorName = project.contractors[0];
+                        console.log('✅ Found DIME contractor:', contractorName);
                     } else if (project.implementing_offices && project.implementing_offices.length > 0) {
                         // Fallback to implementing offices
                         try {
                             const contractorObj = typeof project.implementing_offices[0] === 'string' ? JSON.parse(project.implementing_offices[0]) : project.implementing_offices[0];
                             contractorName = contractorObj.name || contractorObj.nameAbbreviation || 'N/A';
+                            console.log('✅ Found implementing office contractor:', contractorName);
                         } catch (e) {
                             contractorName = 'N/A';
+                            console.log('❌ Failed to parse implementing office:', e);
                         }
+                    } else {
+                        console.log('❌ No contractor data found for project');
                     }
                     
                     if (contractorName !== 'N/A') {
                         contractors.add(contractorName);
+                        console.log('✅ Added contractor to set:', contractorName);
                     }
                 });
             }
