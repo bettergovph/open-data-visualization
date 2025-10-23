@@ -336,6 +336,43 @@ function toggleMobileMenu() {
                             </div>
                         </div>
 
+                        <!-- Dynasty Control Heatmap -->
+                        <div class="chart-container" style="background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); height: 700px; margin-bottom: 30px;">
+                            <h3 style="color: #0038A8; margin: 0 0 15px 0;">🗺️ Dynasty Control by Province <span style="font-size: 12px; color: #666; font-weight: normal;">(Darker red = More dynasty control)</span></h3>
+                            
+                            <!-- Legend -->
+                            <div style="display: flex; justify-content: center; margin-bottom: 15px; flex-wrap: wrap; gap: 10px;">
+                                <div style="display: flex; align-items: center; font-size: 11px;">
+                                    <div style="width: 15px; height: 15px; background: #4B0000; border: 1px solid #000; margin-right: 5px;"></div>
+                                    <span>1 Family</span>
+                                </div>
+                                <div style="display: flex; align-items: center; font-size: 11px;">
+                                    <div style="width: 15px; height: 15px; background: #6B0000; border: 1px solid #000; margin-right: 5px;"></div>
+                                    <span>2 Families</span>
+                                </div>
+                                <div style="display: flex; align-items: center; font-size: 11px;">
+                                    <div style="width: 15px; height: 15px; background: #A00000; border: 1px solid #000; margin-right: 5px;"></div>
+                                    <span>3-5 Families</span>
+                                </div>
+                                <div style="display: flex; align-items: center; font-size: 11px;">
+                                    <div style="width: 15px; height: 15px; background: #C00000; border: 1px solid #000; margin-right: 5px;"></div>
+                                    <span>6-10 Families</span>
+                                </div>
+                                <div style="display: flex; align-items: center; font-size: 11px;">
+                                    <div style="width: 15px; height: 15px; background: #E00000; border: 1px solid #000; margin-right: 5px;"></div>
+                                    <span>10+ Families</span>
+                                </div>
+                                <div style="display: flex; align-items: center; font-size: 11px;">
+                                    <div style="width: 15px; height: 15px; background: #F0F0F0; border: 1px solid #000; margin-right: 5px;"></div>
+                                    <span>No Data</span>
+                                </div>
+                            </div>
+                            
+                            <div style="height: calc(100% - 80px); position: relative;">
+                                <canvas id="dynastyHeatmapChart" style="cursor: pointer; width: 100%; height: 100%;"></canvas>
+                            </div>
+                        </div>
+
                         <!-- Chart Loading State -->
                         <div id="chartLoadingState" class="text-center py-8 hidden">
                             <div class="inline-flex items-center">
@@ -768,6 +805,8 @@ async function loadSurnamesChart() {
 
         if (data.success) {
             createSurnamesChart(data.data);
+            // Create the dynasty heatmap
+            createDynastyHeatmap(data.data);
         } else {
             console.error('Error loading surnames data:', data.error);
             chartContainer.innerHTML = '<div class="text-center text-red-600 p-8">Error loading chart data</div>';
@@ -1030,6 +1069,207 @@ function dynastyNextPage() {
             createSurnamesChart(window.dynastyAllData);
         }
     }
+}
+
+// Function to create dynasty control heatmap
+function createDynastyHeatmap(dynastyData) {
+    const heatmapCtx = document.getElementById('dynastyHeatmapChart');
+    if (!heatmapCtx) return;
+
+    // Load Philippine provinces GeoJSON data
+    fetch('/static/data/philippines-provinces.json')
+        .then(response => response.json())
+        .then(geoJsonData => {
+            console.log('🗺️ Dynasty heatmap: GeoJSON data loaded:', geoJsonData.features.length, 'features');
+            
+            // Process dynasty data to get province control intensity
+            const provinceControl = {};
+            
+            // Group dynasty data by province and calculate control intensity
+            dynastyData.forEach(item => {
+                const province = item.province;
+                if (!provinceControl[province]) {
+                    provinceControl[province] = {
+                        totalPoliticians: 0,
+                        dynastyMembers: 0,
+                        controlIntensity: 0,
+                        uniqueFamilies: new Set()
+                    };
+                }
+                provinceControl[province].totalPoliticians += item.total_count;
+                provinceControl[province].dynastyMembers += item.dynasty_count;
+                provinceControl[province].uniqueFamilies.add(item.surname);
+            });
+            
+            // Calculate control intensity based on family concentration
+            // Single family = darker (more concentrated control)
+            // Multiple families = lighter (less concentrated control)
+            Object.keys(provinceControl).forEach(province => {
+                const data = provinceControl[province];
+                const familyCount = data.uniqueFamilies.size;
+                
+                // If only one family, make it darker (more concentrated)
+                // If multiple families, make it lighter (less concentrated)
+                if (familyCount === 1) {
+                    data.controlIntensity = 90; // Dark red for single family control
+                } else if (familyCount === 2) {
+                    data.controlIntensity = 70; // Medium red for two families
+                } else if (familyCount <= 5) {
+                    data.controlIntensity = 50; // Orange for 3-5 families
+                } else if (familyCount <= 10) {
+                    data.controlIntensity = 30; // Light orange for 6-10 families
+                } else {
+                    data.controlIntensity = 10; // Very light for many families
+                }
+            });
+            
+            console.log('🗺️ Dynasty control data:', provinceControl);
+
+            // Canvas setup
+            const canvas = heatmapCtx;
+            const ctx = canvas.getContext('2d');
+            
+            // Set proper canvas resolution to avoid blurriness
+            const rect = canvas.getBoundingClientRect();
+            const dpr = window.devicePixelRatio || 1;
+            
+            canvas.width = rect.width * dpr;
+            canvas.height = rect.height * dpr;
+            ctx.scale(dpr, dpr);
+            
+            const width = rect.width;
+            const height = rect.height;
+            
+            console.log('🗺️ Canvas setup:', { width, height, dpr });
+
+            // Clear canvas
+            ctx.clearRect(0, 0, width, height);
+            ctx.fillStyle = '#f8f9fa';
+            ctx.fillRect(0, 0, width, height);
+
+            // Calculate bounds of the Philippines
+            let minLat = Infinity, maxLat = -Infinity;
+            let minLng = Infinity, maxLng = -Infinity;
+
+            geoJsonData.features.forEach(feature => {
+                if (feature.geometry.type === 'MultiPolygon') {
+                    feature.geometry.coordinates.forEach(polygon => {
+                        polygon.forEach(ring => {
+                            ring.forEach(coord => {
+                                const [lng, lat] = coord;
+                                minLat = Math.min(minLat, lat);
+                                maxLat = Math.max(maxLat, lat);
+                                minLng = Math.min(minLng, lng);
+                                maxLng = Math.max(maxLng, lng);
+                            });
+                        });
+                    });
+                }
+            });
+
+            // Calculate scale and offset to fit Philippines in canvas
+            const scaleX = (width - 40) / (maxLng - minLng);
+            const scaleY = (height - 40) / (maxLat - minLat);
+            const scale = Math.min(scaleX, scaleY);
+            const offsetX = (width - (maxLng - minLng) * scale) / 2 - minLng * scale;
+            const offsetY = (height - (maxLat - minLat) * scale) / 2 - minLat * scale;
+
+            // Function to convert coordinates to canvas position
+            const toCanvasCoords = (lng, lat) => ({
+                x: lng * scale + offsetX,
+                y: height - (lat * scale + offsetY) // Flip Y axis
+            });
+
+            // Function to get color based on dynasty control intensity
+            const getDynastyColor = (intensity) => {
+                // Use darker shades of red based on control intensity (0-100%)
+                if (intensity >= 80) return '#4B0000';        // Very dark red (80%+ dynasty control)
+                else if (intensity >= 70) return '#6B0000';    // Dark red (70-79%)
+                else if (intensity >= 60) return '#8B0000';    // Dark red (60-69%)
+                else if (intensity >= 50) return '#A00000';     // Dark red (50-59%)
+                else if (intensity >= 40) return '#B00000';    // Dark red (40-49%)
+                else if (intensity >= 30) return '#C00000';     // Dark red (30-39%)
+                else if (intensity >= 20) return '#D00000';     // Dark red (20-29%)
+                else if (intensity >= 10) return '#E00000';     // Dark red (10-19%)
+                else if (intensity > 0) return '#F00000';      // Dark red (1-9%)
+                else return '#F0F0F0';                          // Light gray (0% - no dynasty data)
+            };
+
+            // Draw each province
+            console.log('🗺️ Starting to draw provinces...');
+            geoJsonData.features.forEach((feature, index) => {
+                if (index % 10 === 0) {
+                    console.log(`🗺️ Drawing province ${index + 1}/${geoJsonData.features.length}`);
+                }
+                let provinceName = feature.properties.name || feature.properties.NAME_1 || feature.properties.PROVINCE;
+                console.log(`🗺️ Processing province: ${provinceName}`);
+                
+                // Find matching province data
+                let controlData = null;
+                let matchedProvince = null;
+                
+                // Try to match province name with our data
+                Object.keys(provinceControl).forEach(dataProvince => {
+                    if (provinceName.toLowerCase().includes(dataProvince.toLowerCase()) || 
+                        dataProvince.toLowerCase().includes(provinceName.toLowerCase())) {
+                        controlData = provinceControl[dataProvince];
+                        matchedProvince = dataProvince;
+                    }
+                });
+                
+                const intensity = controlData ? controlData.controlIntensity : 0;
+                const color = getDynastyColor(intensity);
+                
+                console.log(`🗺️ Province: ${provinceName} → Matched: ${matchedProvince} → Intensity: ${intensity.toFixed(1)}% → Color: ${color}`);
+
+                // Draw the province polygon
+                ctx.fillStyle = color;
+                ctx.strokeStyle = '#000000'; // Black boundaries
+                ctx.lineWidth = 0.5; // Thinner boundaries
+
+                if (feature.geometry.type === 'MultiPolygon') {
+                    feature.geometry.coordinates.forEach(polygon => {
+                        polygon.forEach(ring => {
+                            ctx.beginPath();
+                            ring.forEach((coord, index) => {
+                                const [lng, lat] = coord;
+                                const { x, y } = toCanvasCoords(lng, lat);
+                                
+                                if (index === 0) {
+                                    ctx.moveTo(x, y);
+                                } else {
+                                    ctx.lineTo(x, y);
+                                }
+                            });
+                            ctx.closePath();
+                            ctx.fill();
+                            ctx.stroke();
+                        });
+                    });
+                }
+            });
+
+            console.log('🗺️ Finished drawing all provinces');
+
+            // Add click event for province details
+            canvas.addEventListener('click', function(event) {
+                const rect = canvas.getBoundingClientRect();
+                const x = event.clientX - rect.left;
+                const y = event.clientY - rect.top;
+                
+                // Find clicked province (simplified - could be enhanced)
+                console.log('🗺️ Clicked at:', x, y);
+                
+                // Show province information
+                const clickedProvince = 'Click detected - province lookup could be enhanced';
+                console.log('🗺️ Clicked province:', clickedProvince);
+            });
+
+            console.log('✅ Dynasty heatmap created successfully');
+        })
+        .catch(error => {
+            console.error('❌ Error creating dynasty heatmap:', error);
+        });
 }
 
         // Helper function to map GeoJSON province names to dynasty database format
