@@ -329,7 +329,7 @@ class JSONGenerator:
         # Generate API cache
         success, output = await self.run_script(
             'sec_scraper/generate_api_cache.py',
-            'API Cache Generation (19 endpoints)'
+            'API Cache Generation (33 endpoints)'
         )
         
         return success
