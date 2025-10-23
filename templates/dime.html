@@ -2080,8 +2080,35 @@ fetch('/static/data/dime_summary.json')
             console.log('🔍 Fetching contractors for barangay:', barangay);
             
             // Try to fetch projects for this specific barangay from DIME
-            const dimeResponse = await fetch(`/api/dime/projects?barangay=${encodeURIComponent(barangay)}&city=${encodeURIComponent(city)}&limit=100`);
-            const dimeData = await dimeResponse.json();
+            // First try the processed fastest projects data (same as fastest projects table)
+            let dimeData = { success: false, projects: [] };
+            
+            try {
+                const fastestResponse = await fetch('/static/data/fastest_dime_projects.json');
+                if (fastestResponse.ok) {
+                    const fastestData = await fastestResponse.json();
+                    if (fastestData.success && fastestData.projects) {
+                        // Filter fastest projects by barangay and city
+                        const filteredProjects = fastestData.projects.filter(project => 
+                            project.barangay && project.barangay.toLowerCase().includes(barangay.toLowerCase()) &&
+                            project.city && project.city.toLowerCase().includes(city.toLowerCase())
+                        );
+                        if (filteredProjects.length > 0) {
+                            dimeData = { success: true, projects: filteredProjects };
+                            console.log('✅ Found processed projects from fastest data:', filteredProjects.length);
+                        }
+                    }
+                }
+            } catch (error) {
+                console.log('⚠️ Could not load from fastest projects data:', error);
+            }
+            
+            // If no processed data found, try raw DIME API
+            if (!dimeData.success || dimeData.projects.length === 0) {
+                console.log('🔍 No processed data found, trying raw DIME API...');
+                const dimeResponse = await fetch(`/api/dime/projects?barangay=${encodeURIComponent(barangay)}&city=${encodeURIComponent(city)}&limit=100`);
+                dimeData = await dimeResponse.json();
+            }
             
             let contractors = new Set();
             let projects = [];
