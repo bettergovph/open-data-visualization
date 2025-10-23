@@ -2196,21 +2196,38 @@ async def hidden_flood_statistics_api():
             database=os.getenv('POSTGRES_DB_PHILGEPS', 'philgeps')
         )
         
-        # Get total flood projects directly from MeiliSearch
+        # Get total flood projects from the flood control database directly
         try:
-            client = get_flood_client()
-            # Get the total count from MeiliSearch stats
-            import aiohttp
-            async with aiohttp.ClientSession() as session:
-                async with session.get(f"{client.base_url}/stats") as response:
-                    if response.status == 200:
-                        stats_data = await response.json()
-                        total_meilisearch_projects = stats_data.get('numberOfDocuments', 0)
-                    else:
-                        total_meilisearch_projects = 0
+            # Connect to the flood control database to get the actual count
+            flood_conn = await asyncpg.connect(
+                host=os.getenv('POSTGRES_HOST', 'localhost'),
+                port=int(os.getenv('POSTGRES_PORT', 5432)),
+                user=os.getenv('POSTGRES_USER', 'budget_admin'),
+                password=os.getenv('POSTGRES_PASSWORD', ''),
+                database=os.getenv('POSTGRES_DB_FLOOD', 'flood_control')
+            )
+            
+            # Get the total count of flood control projects
+            result = await flood_conn.fetchrow("SELECT COUNT(*) as total FROM flood_control_projects")
+            total_meilisearch_projects = result['total'] if result else 0
+            
+            await flood_conn.close()
         except Exception as e:
-            print(f"Error getting flood statistics: {e}")
-            total_meilisearch_projects = 0
+            print(f"Error getting flood statistics from database: {e}")
+            # Fallback: try to get from MeiliSearch stats
+            try:
+                client = get_flood_client()
+                import aiohttp
+                async with aiohttp.ClientSession() as session:
+                    async with session.get(f"{client.base_url}/stats") as response:
+                        if response.status == 200:
+                            stats_data = await response.json()
+                            total_meilisearch_projects = stats_data.get('numberOfDocuments', 0)
+                        else:
+                            total_meilisearch_projects = 0
+            except Exception as e2:
+                print(f"Error getting flood statistics from MeiliSearch: {e2}")
+                total_meilisearch_projects = 0
         
         # Get comprehensive statistics from PhilGEPS
         stats = await philgeps_conn.fetchrow("""
