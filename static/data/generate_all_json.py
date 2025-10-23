@@ -2,6 +2,11 @@
 """
 Master script to generate all JSON files in static/data/ directory.
 This is the single entry point for updating all cached JSON data.
+
+CACHING STRATEGY:
+- Complex tables and visuals are candidates for JSON caching
+- Heavy database queries, aggregations, and transformations should be preprocessed
+- See JSON_CACHING_STRATEGY.md for detailed guidelines
 """
 
 import os
@@ -10,12 +15,26 @@ import asyncio
 import subprocess
 from pathlib import Path
 from datetime import datetime
+
+# Future MongoDB integration
+try:
+    from analysis.mongodb_cache_manager import MongoDBCacheManager
+    MONGODB_AVAILABLE = True
+except ImportError:
+    MONGODB_AVAILABLE = False
+    print("⚠️ MongoDB cache manager not available (optional dependency)")
 from typing import Dict, List, Any, Tuple
 
 class JSONGenerator:
     """Master class to coordinate all JSON file generation."""
     
-    def __init__(self):
+    def __init__(self, mongodb_connection_string: str = None):
+        """
+        Initialize the JSON generator with project paths.
+        
+        Args:
+            mongodb_connection_string: Optional MongoDB connection for cache storage
+        """
         self.project_root = Path(__file__).parent.parent.parent
         self.static_data_dir = self.project_root / "static" / "data"
         self.scripts_dir = self.project_root / "sec_scraper"
@@ -25,7 +44,18 @@ class JSONGenerator:
         # Ensure static/data directory exists
         self.static_data_dir.mkdir(parents=True, exist_ok=True)
         
+        # MongoDB cache manager (future implementation)
+        self.mongodb_cache = None
+        if MONGODB_AVAILABLE and mongodb_connection_string:
+            try:
+                self.mongodb_cache = MongoDBCacheManager(mongodb_connection_string)
+                print("✅ MongoDB cache manager initialized")
+            except Exception as e:
+                print(f"⚠️ MongoDB cache not available: {e}")
+                self.mongodb_cache = None
+        
         # JSON file inventory with their generators
+        # Categorized by complexity for caching strategy
         self.json_generators = {
             # Existing Scripts (Created Before Today)
             'contractor_sec_mapping.json': {
@@ -171,6 +201,12 @@ class JSONGenerator:
                 'description': 'All years Flood-DIME correlation',
                 'category': 'correlation_data',
                 'dependencies': ['Flood data', 'DIME data']
+            },
+            'barangay_contractors.json': {
+                'script': 'analysis/generate_barangay_contractors.py',
+                'description': 'Preprocessed barangay contractors with MeiliSearch connections',
+                'category': 'processed_data',
+                'dependencies': ['DIME data', 'MeiliSearch', 'Fastest projects data']
             },
             
             # NEP Data
@@ -445,6 +481,80 @@ class JSONGenerator:
         print(f"\nOverall: {total_success}/{total_categories} categories successful")
         
         return results
+    
+    def store_cache_to_mongodb(self, cache_name: str, data: Dict, metadata: Dict = None) -> str:
+        """
+        Store JSON cache in MongoDB (future implementation)
+        
+        Args:
+            cache_name: Name of the cache
+            data: JSON data to store
+            metadata: Additional metadata
+            
+        Returns:
+            Version ID of stored cache
+        """
+        if not self.mongodb_cache:
+            print(f"⚠️ MongoDB cache not available for '{cache_name}'")
+            return None
+        
+        try:
+            version_id = self.mongodb_cache.store_cache(cache_name, data, metadata)
+            print(f"✅ Stored '{cache_name}' in MongoDB cache")
+            return version_id
+        except Exception as e:
+            print(f"❌ Failed to store '{cache_name}' in MongoDB: {e}")
+            return None
+    
+    def get_cache_from_mongodb(self, cache_name: str, version_id: str = None) -> Dict:
+        """
+        Retrieve JSON cache from MongoDB (future implementation)
+        
+        Args:
+            cache_name: Name of the cache
+            version_id: Specific version (latest if None)
+            
+        Returns:
+            Cache data or None
+        """
+        if not self.mongodb_cache:
+            print(f"⚠️ MongoDB cache not available for '{cache_name}'")
+            return None
+        
+        try:
+            data = self.mongodb_cache.get_cache(cache_name, version_id)
+            if data:
+                print(f"✅ Retrieved '{cache_name}' from MongoDB cache")
+            else:
+                print(f"⚠️ Cache '{cache_name}' not found in MongoDB")
+            return data
+        except Exception as e:
+            print(f"❌ Failed to retrieve '{cache_name}' from MongoDB: {e}")
+            return None
+    
+    def get_cache_analytics(self) -> Dict:
+        """Get MongoDB cache analytics (future implementation)"""
+        if not self.mongodb_cache:
+            return {}
+        
+        try:
+            return self.mongodb_cache.get_cache_analytics()
+        except Exception as e:
+            print(f"❌ Failed to get cache analytics: {e}")
+            return {}
+    
+    def get_cache_status(self) -> Dict:
+        """Get MongoDB cache system status (future implementation)"""
+        if not self.mongodb_cache:
+            return {"mongodb_available": False}
+        
+        try:
+            status = self.mongodb_cache.get_cache_status()
+            status["mongodb_available"] = True
+            return status
+        except Exception as e:
+            print(f"❌ Failed to get cache status: {e}")
+            return {"mongodb_available": False, "error": str(e)}
 
 async def main():
     """Main function to run JSON generation."""

@@ -1,0 +1,14 @@
+# MongoDB Cache Dependencies (Future Implementation)
+# Install with: pip install -r requirements-mongodb.txt
+
+# MongoDB driver
+pymongo>=4.6.0
+
+# Optional: MongoDB connection pooling
+motor>=3.3.0
+
+# Optional: MongoDB monitoring
+pymongo[srv]>=4.6.0
+
+# Optional: Connection string parsing
+dnspython>=2.4.0

@@ -2079,84 +2079,77 @@ fetch('/static/data/dime_summary.json')
         try {
             console.log('🔍 Fetching contractors for barangay:', barangay);
             
-            // Try to fetch projects for this specific barangay from DIME
-            // First try the processed fastest projects data (same as fastest projects table)
-            let dimeData = { success: false, projects: [] };
-            
-            try {
-                const fastestResponse = await fetch('/static/data/fastest_dime_projects.json');
-                if (fastestResponse.ok) {
-                    const fastestData = await fastestResponse.json();
-                    if (fastestData.success && fastestData.projects) {
-                        // Filter fastest projects by barangay and city
-                        const filteredProjects = fastestData.projects.filter(project => 
-                            project.barangay && project.barangay.toLowerCase().includes(barangay.toLowerCase()) &&
-                            project.city && project.city.toLowerCase().includes(city.toLowerCase())
-                        );
-                        if (filteredProjects.length > 0) {
-                            dimeData = { success: true, projects: filteredProjects };
-                            console.log('✅ Found processed projects from fastest data:', filteredProjects.length);
-                        }
-                    }
-                }
-            } catch (error) {
-                console.log('⚠️ Could not load from fastest projects data:', error);
-            }
-            
-            // If no processed data found, try raw DIME API
-            if (!dimeData.success || dimeData.projects.length === 0) {
-                console.log('🔍 No processed data found, trying raw DIME API...');
-                const dimeResponse = await fetch(`/api/dime/projects?barangay=${encodeURIComponent(barangay)}&city=${encodeURIComponent(city)}&limit=100`);
-                dimeData = await dimeResponse.json();
-            }
-            
+            // Try to fetch preprocessed barangay contractors data
             let contractors = new Set();
             let projects = [];
             let dataSource = 'DIME';
             
-            if (dimeData.success && dimeData.projects && dimeData.projects.length > 0) {
-                projects = dimeData.projects;
-                console.log('📊 Found DIME projects:', projects.length);
-                console.log('🔍 Sample project structure:', projects[0]); // Debug: see what fields are available
-                
-                // Extract unique contractors from DIME (same logic as fastest projects)
-                projects.forEach((project, index) => {
-                    console.log(`🔍 Processing project ${index + 1}:`, {
-                        contractor_source: project.contractor_source,
-                        contractors: project.contractors,
-                        implementing_offices: project.implementing_offices
-                    });
-                    
-                    let contractorName = 'N/A';
-                    
-                    // Use same contractor detection logic as fastest projects
-                    if (project.contractor_source === 'flood_connected' || project.contractor_source === 'dime_fallback') {
-                        // Project connected to flood data (SSP) - contractor from MeiliSearch or DIME fallback
-                        contractorName = project.contractors[0];
-                        console.log('✅ Found SSP contractor:', contractorName);
-                    } else if (project.contractors && project.contractors.length > 0) {
-                        // Use DIME contractor data
-                        contractorName = project.contractors[0];
-                        console.log('✅ Found DIME contractor:', contractorName);
-                    } else if (project.implementing_offices && project.implementing_offices.length > 0) {
-                        // Fallback to implementing offices
-                        try {
-                            const contractorObj = typeof project.implementing_offices[0] === 'string' ? JSON.parse(project.implementing_offices[0]) : project.implementing_offices[0];
-                            contractorName = contractorObj.name || contractorObj.nameAbbreviation || 'N/A';
-                            console.log('✅ Found implementing office contractor:', contractorName);
-                        } catch (e) {
-                            contractorName = 'N/A';
-                            console.log('❌ Failed to parse implementing office:', e);
+            try {
+                const response = await fetch('/static/data/barangay_contractors.json');
+                if (response.ok) {
+                    const data = await response.json();
+                    if (data.success && data.barangay_contractors) {
+                        const key = `${barangay},${city}`.toLowerCase();
+                        const barangayData = data.barangay_contractors[key];
+                        
+                        if (barangayData) {
+                            console.log('✅ Found preprocessed barangay data:', barangayData);
+                            contractors = new Set(barangayData.contractors);
+                            projects = barangayData.projects;
+                            dataSource = 'DIME';
+                        } else {
+                            console.log('⚠️ No preprocessed data found for this barangay');
                         }
-                    } else {
-                        console.log('❌ No contractor data found for project');
                     }
-                    
-                    if (contractorName !== 'N/A') {
-                        contractors.add(contractorName);
-                        console.log('✅ Added contractor to set:', contractorName);
-                    }
-                });
+                }
+            } catch (error) {
+                console.log('⚠️ Could not load preprocessed barangay data:', error);
+            }
+            
+            // If no preprocessed data found, try raw DIME API as fallback
+            if (contractors.size === 0) {
+                console.log('🔍 No preprocessed data found, trying raw DIME API...');
+                const dimeResponse = await fetch(`/api/dime/projects?barangay=${encodeURIComponent(barangay)}&city=${encodeURIComponent(city)}&limit=100`);
+                const dimeData = await dimeResponse.json();
+                
+                if (dimeData.success && dimeData.projects) {
+                    projects = dimeData.projects;
+                    // Use the existing contractor extraction logic for raw data
+                    projects.forEach((project, index) => {
+                        console.log(`🔍 Processing project ${index + 1}:`, {
+                            contractor_source: project.contractor_source,
+                            contractors: project.contractors,
+                            implementing_offices: project.implementing_offices
+                        });
+                        
+                        let contractorName = 'N/A';
+                        
+                        // Use same contractor detection logic as fastest projects
+                        if (project.contractor_source === 'flood_connected' || project.contractor_source === 'dime_fallback') {
+                            contractorName = project.contractors[0];
+                            console.log('✅ Found SSP contractor:', contractorName);
+                        } else if (project.contractors && project.contractors.length > 0) {
+                            contractorName = project.contractors[0];
+                            console.log('✅ Found DIME contractor:', contractorName);
+                        } else if (project.implementing_offices && project.implementing_offices.length > 0) {
+                            try {
+                                const contractorObj = typeof project.implementing_offices[0] === 'string' ? JSON.parse(project.implementing_offices[0]) : project.implementing_offices[0];
+                                contractorName = contractorObj.name || contractorObj.nameAbbreviation || 'N/A';
+                                console.log('✅ Found implementing office contractor:', contractorName);
+                            } catch (e) {
+                                contractorName = 'N/A';
+                                console.log('❌ Failed to parse implementing office:', e);
+                            }
+                        } else {
+                            console.log('❌ No contractor data found for project');
+                        }
+                        
+                        if (contractorName !== 'N/A') {
+                            contractors.add(contractorName);
+                            console.log('✅ Added contractor to set:', contractorName);
+                        }
+                    });
+                }
             }
             
             // If no DIME data, try SSP (flood control) database
