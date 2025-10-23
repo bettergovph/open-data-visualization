@@ -52,6 +52,12 @@ class JSONGenerator:
                 'category': 'cache_data',
                 'dependencies': ['SEC database', 'PhilGEPS database']
             },
+            'api_cache_generation': {
+                'script': 'sec_scraper/generate_api_cache.py',
+                'description': 'Generate all API endpoint JSON caches (19 endpoints)',
+                'category': 'api_cache',
+                'dependencies': ['FastAPI server running']
+            },
             
             # Summary Statistics
             'flood_summary.json': {
@@ -315,6 +321,19 @@ class JSONGenerator:
         
         return success
     
+    async def generate_api_cache(self):
+        """Generate API cache files by calling all endpoints."""
+        print("\n🌐 Generating API Cache...")
+        print("=" * 40)
+        
+        # Generate API cache
+        success, output = await self.run_script(
+            'sec_scraper/generate_api_cache.py',
+            'API Cache Generation (19 endpoints)'
+        )
+        
+        return success
+    
     async def generate_all(self, categories: List[str] = None):
         """Generate all JSON files or specific categories."""
         print("🚀 Starting JSON Generation Process")
@@ -323,7 +342,7 @@ class JSONGenerator:
         print(f"Target directory: {self.static_data_dir}")
         
         if categories is None:
-            categories = ['sec_data', 'summary_data', 'analysis_data']
+            categories = ['sec_data', 'summary_data', 'analysis_data', 'api_cache']
         
         results = {}
         
@@ -338,6 +357,10 @@ class JSONGenerator:
         # Generate analysis data
         if 'analysis_data' in categories:
             results['analysis_data'] = await self.generate_analysis_data()
+        
+        # Generate API cache
+        if 'api_cache' in categories:
+            results['api_cache'] = await self.generate_api_cache()
         
         # Print results summary
         print("\n📋 Generation Results Summary")

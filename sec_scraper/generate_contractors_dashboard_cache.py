@@ -3,12 +3,11 @@
 Generate contractors dashboard cache JSON files for fast loading.
 
 This script caches the data needed for the /contractors dashboard charts and statistics:
-- SEC contractors database (for search/verification)
 - Top contractors by project count (for charts)
 - Venn diagram data (contractor sources overlap)
 - Excluded flood contractors (for charts)
 
-Note: Paginated tables are excluded as they are already optimized with frontend/backend pagination.
+Note: Paginated tables (SEC contractors database, projects table) are excluded as they are already optimized with frontend/backend pagination.
 """
 
 import asyncio
@@ -342,22 +341,17 @@ async def main():
     print("🏛️ Generating Contractors Dashboard Cache...")
     print("=" * 50)
     
-    # 1. SEC Contractors Database
-    print("🔄 Generating SEC contractors database...")
-    sec_data = await get_sec_contractors()
-    save_json_cache(sec_data, "static/data/sec_contractors_database.json")
-    
-    # 2. Top Contractors
+    # 1. Top Contractors
     print("🔄 Generating top contractors...")
     top_data = await get_top_contractors(100)
     save_json_cache(top_data, "static/data/top_contractors_cache.json")
     
-    # 3. Venn Diagram Data
+    # 2. Venn Diagram Data
     print("🔄 Generating contractors Venn diagram data...")
     venn_data = await get_contractors_venn()
     save_json_cache(venn_data, "static/data/contractors_venn_cache.json")
     
-    # 4. Excluded Flood Contractors
+    # 3. Excluded Flood Contractors
     print("🔄 Generating excluded flood contractors...")
     flood_data = await get_excluded_flood_contractors(20)
     save_json_cache(flood_data, "static/data/excluded_flood_contractors_cache.json")
@@ -365,7 +359,6 @@ async def main():
     print("\n🎉 Contractors dashboard cache generation completed!")
     print("=" * 50)
     print("📁 Generated files:")
-    print("  • static/data/sec_contractors_database.json")
     print("  • static/data/top_contractors_cache.json")
     print("  • static/data/contractors_venn_cache.json")
     print("  • static/data/excluded_flood_contractors_cache.json")
