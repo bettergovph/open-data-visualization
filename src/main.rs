@@ -201,6 +201,7 @@ async fn contractors(_req: HttpRequest) -> Result<HttpResponse, ActixError> {
     Ok(HttpResponse::Ok().content_type("text/html").body(rendered))
 }
 
+
 // Correlation Landing Page
 async fn correlation(_req: HttpRequest) -> Result<HttpResponse, ActixError> {
     let tera = Tera::new("templates/**/*").map_err(|e| actix_web::error::ErrorInternalServerError(e))?;
@@ -293,8 +294,8 @@ async fn main() -> std::io::Result<()> {
             .service(web::resource("/dime").to(dime))
             .service(web::resource("/nep").to(nep))
             .service(web::resource("/map").to(map))
-            .service(web::resource("/contractors").to(contractors))
-            .service(web::resource("/correlation").to(correlation))
+        .service(web::resource("/contractors").to(contractors))
+        .service(web::resource("/correlation").to(correlation))
             .service(web::resource("/budget-nep-correlation").to(budget_nep_correlation))
             .service(web::resource("/budget-flood-correlation").to(budget_flood_correlation))
             .service(web::resource("/flood-dime-correlation").to(flood_dime_correlation))

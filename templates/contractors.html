@@ -202,36 +202,36 @@ function toggleMobileMenu() {
                         <h3 style="color: #0038A8; margin: 0 0 15px 0;">🔵🟢🟡 Contractor Data Sources Distribution</h3>
                         <p style="color: #666; margin: 0 0 20px 0;">Venn diagram showing overlap between Flood Control, DIME, and PhilGEPS contractor databases</p>
                         <div style="max-width: 800px; margin: 0 auto;">
-                            <canvas id="vennDiagram" width="800" height="500"></canvas>
+                            <canvas id="vennDiagram" width="800" height="600"></canvas>
                         </div>
-                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 10px; margin-top: 20px; font-size: 0.9em;">
-                            <div style="background: #e3f2fd; padding: 10px; border-radius: 4px; text-align: center; word-wrap: break-word; overflow-wrap: break-word;">
+                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 15px; margin-top: 20px; font-size: 0.9em;">
+                            <div style="background: #e3f2fd; padding: 15px; border-radius: 4px; text-align: center; word-wrap: break-word; overflow-wrap: break-word; min-height: 80px; display: flex; flex-direction: column; justify-content: center;">
                                 <strong style="color: #1976d2;">🔵 Flood Only</strong><br>
-                                <span id="venn-flood-only" style="font-size: 1.5em; font-weight: bold; color: #1976d2; word-wrap: break-word; overflow-wrap: break-word;">-</span>
+                                <span id="venn-flood-only" style="font-size: 1.5em; font-weight: bold; color: #1976d2; word-wrap: break-word; overflow-wrap: break-word; margin-top: 5px;">-</span>
                             </div>
-                            <div style="background: #e8f5e9; padding: 10px; border-radius: 4px; text-align: center; word-wrap: break-word; overflow-wrap: break-word;">
+                            <div style="background: #e8f5e9; padding: 15px; border-radius: 4px; text-align: center; word-wrap: break-word; overflow-wrap: break-word; min-height: 80px; display: flex; flex-direction: column; justify-content: center;">
                                 <strong style="color: #388e3c;">🟢 DIME Only</strong><br>
-                                <span id="venn-dime-only" style="font-size: 1.5em; font-weight: bold; color: #388e3c; word-wrap: break-word; overflow-wrap: break-word;">-</span>
+                                <span id="venn-dime-only" style="font-size: 1.5em; font-weight: bold; color: #388e3c; word-wrap: break-word; overflow-wrap: break-word; margin-top: 5px;">-</span>
                             </div>
-                            <div style="background: #fff9c4; padding: 10px; border-radius: 4px; text-align: center; word-wrap: break-word; overflow-wrap: break-word;">
+                            <div style="background: #fff9c4; padding: 15px; border-radius: 4px; text-align: center; word-wrap: break-word; overflow-wrap: break-word; min-height: 80px; display: flex; flex-direction: column; justify-content: center;">
                                 <strong style="color: #f57c00;">🟡 PhilGEPS Only</strong><br>
-                                <span id="venn-philgeps-only" style="font-size: 1.5em; font-weight: bold; color: #f57c00; word-wrap: break-word; overflow-wrap: break-word;">-</span>
+                                <span id="venn-philgeps-only" style="font-size: 1.5em; font-weight: bold; color: #f57c00; word-wrap: break-word; overflow-wrap: break-word; margin-top: 5px;">-</span>
                             </div>
-                            <div style="background: #f3e5f5; padding: 10px; border-radius: 4px; text-align: center; word-wrap: break-word; overflow-wrap: break-word;">
+                            <div style="background: #f3e5f5; padding: 15px; border-radius: 4px; text-align: center; word-wrap: break-word; overflow-wrap: break-word; min-height: 80px; display: flex; flex-direction: column; justify-content: center;">
                                 <strong style="color: #7b1fa2;">🔵🟢 Flood + DIME</strong><br>
-                                <span id="venn-flood-dime" style="font-size: 1.5em; font-weight: bold; color: #7b1fa2; word-wrap: break-word; overflow-wrap: break-word;">-</span>
+                                <span id="venn-flood-dime" style="font-size: 1.5em; font-weight: bold; color: #7b1fa2; word-wrap: break-word; overflow-wrap: break-word; margin-top: 5px;">-</span>
                             </div>
-                            <div style="background: #fce4ec; padding: 10px; border-radius: 4px; text-align: center; word-wrap: break-word; overflow-wrap: break-word;">
+                            <div style="background: #fce4ec; padding: 15px; border-radius: 4px; text-align: center; word-wrap: break-word; overflow-wrap: break-word; min-height: 80px; display: flex; flex-direction: column; justify-content: center;">
                                 <strong style="color: #c2185b;">🔵🟡 Flood + PhilGEPS</strong><br>
-                                <span id="venn-flood-philgeps" style="font-size: 1.5em; font-weight: bold; color: #c2185b; word-wrap: break-word; overflow-wrap: break-word;">-</span>
+                                <span id="venn-flood-philgeps" style="font-size: 1.5em; font-weight: bold; color: #c2185b; word-wrap: break-word; overflow-wrap: break-word; margin-top: 5px;">-</span>
                             </div>
-                            <div style="background: #e0f2f1; padding: 10px; border-radius: 4px; text-align: center; word-wrap: break-word; overflow-wrap: break-word;">
+                            <div style="background: #e0f2f1; padding: 15px; border-radius: 4px; text-align: center; word-wrap: break-word; overflow-wrap: break-word; min-height: 80px; display: flex; flex-direction: column; justify-content: center;">
                                 <strong style="color: #00796b;">🟢🟡 DIME + PhilGEPS</strong><br>
-                                <span id="venn-dime-philgeps" style="font-size: 1.5em; font-weight: bold; color: #00796b; word-wrap: break-word; overflow-wrap: break-word;">-</span>
+                                <span id="venn-dime-philgeps" style="font-size: 1.5em; font-weight: bold; color: #00796b; word-wrap: break-word; overflow-wrap: break-word; margin-top: 5px;">-</span>
                             </div>
-                            <div style="background: #ede7f6; padding: 10px; border-radius: 4px; text-align: center; word-wrap: break-word; overflow-wrap: break-word;">
+                            <div style="background: #ede7f6; padding: 15px; border-radius: 4px; text-align: center; word-wrap: break-word; overflow-wrap: break-word; min-height: 80px; display: flex; flex-direction: column; justify-content: center;">
                                 <strong style="color: #512da8;">🔵🟢🟡 All Three</strong><br>
-                                <span id="venn-all-three" style="font-size: 1.5em; font-weight: bold; color: #512da8; word-wrap: break-word; overflow-wrap: break-word;">-</span>
+                                <span id="venn-all-three" style="font-size: 1.5em; font-weight: bold; color: #512da8; word-wrap: break-word; overflow-wrap: break-word; margin-top: 5px;">-</span>
                             </div>
                         </div>
                     </div>
@@ -247,6 +247,39 @@ function toggleMobileMenu() {
                             </div>
                         </div>
                         <canvas id="contractorsChart" width="800" height="600"></canvas>
+                    </div>
+
+                    <!-- Standard Deviation Analysis Chart -->
+                    <div class="chart-container" style="background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); margin-bottom: 20px;">
+                        <h3 style="color: #0038A8; margin: 0 0 15px 0;">📊 Standard Deviation Analysis Chart</h3>
+                        <p style="color: #666; margin: 0 0 20px 0; font-size: 0.9em;">
+                            Statistical analysis of contractor project counts from SEC database (all contractors across all databases)
+                        </p>
+                        
+                        <!-- Statistics Cards -->
+                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 15px; margin-bottom: 20px;">
+                            <div style="background: #f8f9fa; padding: 15px; border-radius: 6px; text-align: center;">
+                                <div style="font-size: 1.5em; font-weight: bold; color: #0038A8;" id="sec-contractors-total">-</div>
+                                <div style="color: #666; font-size: 0.8em;">Total Contractors</div>
+                            </div>
+                            <div style="background: #f8f9fa; padding: 15px; border-radius: 6px; text-align: center;">
+                                <div style="font-size: 1.5em; font-weight: bold; color: #28a745;" id="sec-contractors-mean">-</div>
+                                <div style="color: #666; font-size: 0.8em;">Mean Projects</div>
+                            </div>
+                            <div style="background: #f8f9fa; padding: 15px; border-radius: 6px; text-align: center;">
+                                <div style="font-size: 1.5em; font-weight: bold; color: #fd7e14;" id="sec-contractors-std">-</div>
+                                <div style="color: #666; font-size: 0.8em;">Std Deviation</div>
+                            </div>
+                            <div style="background: #f8f9fa; padding: 15px; border-radius: 6px; text-align: center;">
+                                <div style="font-size: 1.5em; font-weight: bold; color: #dc3545;" id="sec-contractors-outliers">-</div>
+                                <div style="color: #666; font-size: 0.8em;">Outliers</div>
+                            </div>
+                        </div>
+                        
+                        <!-- Chart Canvas -->
+                        <div style="position: relative; height: 400px; width: 100%;">
+                            <canvas id="secContractorDistributionChart"></canvas>
+                        </div>
                     </div>
                 </div>
 
@@ -347,6 +380,45 @@ function toggleMobileMenu() {
                             
                             <div id="contractorsWithoutSec" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 15px;">
                                 <!-- Suspicious contractors will be populated here -->
+                            </div>
+                        </div>
+
+                        <!-- Standard Deviation Analysis Chart -->
+                        <div class="chart-container" style="background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); margin-bottom: 20px;">
+                            <h3 style="color: #0038A8; margin: 0 0 15px 0;">📊 Contractor Project Distribution Analysis</h3>
+                            <p style="color: #666; margin: 0 0 20px 0; font-size: 0.9em;">
+                                Statistical analysis of contractor project counts across all databases (Flood Control, DIME, PhilGEPS)
+                            </p>
+                            
+                            <!-- Statistics Cards -->
+                            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 15px; margin-bottom: 20px;">
+                                <div style="background: #f8f9fa; padding: 15px; border-radius: 6px; text-align: center;">
+                                    <div style="font-size: 1.5em; font-weight: bold; color: #0038A8;" id="all-contractors-total">-</div>
+                                    <div style="color: #666; font-size: 0.8em;">Total Contractors</div>
+                                </div>
+                                <div style="background: #f8f9fa; padding: 15px; border-radius: 6px; text-align: center;">
+                                    <div style="font-size: 1.5em; font-weight: bold; color: #28a745;" id="all-contractors-mean">-</div>
+                                    <div style="color: #666; font-size: 0.8em;">Mean Projects</div>
+                                </div>
+                                <div style="background: #f8f9fa; padding: 15px; border-radius: 6px; text-align: center;">
+                                    <div style="font-size: 1.5em; font-weight: bold; color: #fd7e14;" id="all-contractors-std">-</div>
+                                    <div style="color: #666; font-size: 0.8em;">Std Deviation</div>
+                                </div>
+                                <div style="background: #f8f9fa; padding: 15px; border-radius: 6px; text-align: center;">
+                                    <div style="font-size: 1.5em; font-weight: bold; color: #dc3545;" id="all-contractors-outliers">-</div>
+                                    <div style="color: #666; font-size: 0.8em;">Outliers</div>
+                                </div>
+                            </div>
+                            
+                            <!-- Chart Placeholder -->
+                            <div style="background: #f8f9fa; border: 2px dashed #dee2e6; border-radius: 6px; padding: 40px; text-align: center;">
+                                <div style="color: #6c757d; font-size: 1.1em; margin-bottom: 10px;">📊 Standard Deviation Analysis Chart</div>
+                                <div style="color: #6c757d; font-size: 0.9em; margin-bottom: 20px;">
+                                    This chart will show contractor project count distribution with standard deviation bars (1SD, 1.5SD, 2SD, 2.5SD, 3SD)
+                                </div>
+                                <div style="color: #856404; background: #fff3cd; border: 1px solid #ffc107; border-radius: 4px; padding: 10px; font-size: 0.8em;">
+                                    <strong>📝 TODO:</strong> Implement standard deviation analysis for ALL contractors across all databases (not just MeiliSearch flood data)
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -893,47 +965,52 @@ function createHiddenContractorsChart(contractors) {
 // Load individual contractors data
 async function loadIndividualContractors() {
     try {
-        // Try to load from flood hidden contractors (complete dataset)
-        const response = await fetch('/static/data/flood_hidden_contractors_cached.json');
+        // Load contractor data from SEC contractors database JSON file
+        console.log('🔄 Loading contractor data from SEC contractors database JSON...');
+        const response = await fetch('/static/data/sec_contractors_database.json');
+        
         if (response.ok) {
             const data = await response.json();
-            if (data.data && data.data.contractors) {
-                // Convert flood contractor format to standard format
-                allContractors = data.data.contractors.map(contractor => ({
+            console.log('🔍 SEC contractors database loaded:', data.summary);
+            
+            if (data.contractors) {
+                // Filter to get only suspicious contractors (NO_SEC_RESULTS)
+                const suspiciousContractors = data.contractors.filter(c => c.status === 'NO_SEC_RESULTS');
+                
+                console.log('🔍 Filtered suspicious contractors:', suspiciousContractors.length);
+                
+                // Convert to standard format
+                allContractors = suspiciousContractors.map(contractor => ({
                     name: contractor.contractor_name,
-                    project_count: contractor.project_count,
-                    total_value: contractor.total_value,
-                    avg_value: contractor.avg_value,
-                    areas: contractor.areas,
-                    sec_number: null, // No SEC data in flood contractors
-                    status: 'Unknown',
+                    project_count: contractor.project_count || 0,
+                    total_value: 0, // Not available in current data
+                    avg_value: 0, // Not available in current data
+                    areas: [],
+                    sec_number: null, // No SEC number for suspicious contractors
+                    status: 'NO_SEC_RESULTS',
                     date_registered: null,
                     registered_address: null,
                     secondary_license_details: null,
                     reportorial_submissions: null,
                     last_updated: null
                 }));
+                
                 filteredContractors = allContractors;
-                console.log('✅ Loaded individual contractors from flood data:', allContractors.length);
+                console.log('✅ Loaded suspicious contractors from SEC database:', allContractors.length);
                 return;
+            } else {
+                console.log('⚠️ No contractors data in JSON file');
+                allContractors = [];
             }
-        }
-        
-        // Fallback to SEC contractors database (limited dataset)
-        const secResponse = await fetch('/static/data/sec_contractors_database.json');
-        if (secResponse.ok) {
-            const secData = await secResponse.json();
-            if (secData.contractors) {
-                allContractors = secData.contractors;
-                filteredContractors = allContractors;
-                console.log('✅ Loaded individual contractors from SEC database:', allContractors.length);
-                return;
-            }
+        } else {
+            console.log('⚠️ SEC contractors JSON request failed:', response.status);
+            allContractors = [];
         }
         
         console.log('⚠️ No individual contractors data found');
     } catch (error) {
-        console.error('❌ Error loading individual contractors:', error);
+        console.error('❌ Error loading individual contractors from SEC database:', error);
+        allContractors = [];
     }
 }
 
@@ -970,7 +1047,7 @@ async function loadContractors() {
         document.getElementById('total-sec-count').textContent = (summary.with_sec_data || 0).toLocaleString('en-PH');
         document.getElementById('suspicious-sec-count').textContent = (summary.suspicious_no_results || 0).toLocaleString('en-PH');
         
-        // Load individual contractors data for the table
+        // Load individual contractors data for the table (suspicious contractors only)
         await loadIndividualContractors();
         
         // Load contractors without SEC for SEC tab
@@ -1246,9 +1323,9 @@ function renderContractorsTable() {
         row.innerHTML = `
             <td style="padding: 16px; font-size: 0.875rem; color: #111827; white-space: nowrap;">${start + index + 1}</td>
             <td style="padding: 16px; font-size: 0.875rem; font-weight: 500; color: #111827;">${contractorName}</td>
-            <td style="padding: 16px; font-size: 0.875rem; color: #111827; white-space: nowrap;">${secNumber}</td>
-            <td style="padding: 16px; font-size: 0.875rem;">${statusBadge}</td>
-            <td style="padding: 16px; font-size: 0.875rem; color: #6b7280;">${address.substring(0, 100)}${address.length > 100 ? '...' : ''}</td>
+            <td style="padding: 16px; font-size: 0.875rem; color: #111827; white-space: nowrap; font-family: monospace;">${secNumber}</td>
+            <td style="padding: 16px; font-size: 0.875rem; white-space: nowrap;">${statusBadge}</td>
+            <td style="padding: 16px; font-size: 0.875rem; color: #6b7280; max-width: 300px; word-wrap: break-word;">${address}</td>
         `;
         
         tbody.appendChild(row);
@@ -1594,9 +1671,9 @@ function drawVennDiagram(data) {
     // PhilGEPS label
     ctx.font = 'bold 16px Inter';
     ctx.fillStyle = '#F57C00';
-    ctx.fillText('🟡 PhilGEPS', philgepsCenter.x, philgepsCenter.y + radius + 20);
+    ctx.fillText('🟡 PhilGEPS', philgepsCenter.x, philgepsCenter.y + radius + 10);
     ctx.font = '14px Inter';
-    ctx.fillText(data.philgeps_total.toLocaleString('en-PH'), philgepsCenter.x, philgepsCenter.y + radius + 40);
+    ctx.fillText(data.philgeps_total.toLocaleString('en-PH'), philgepsCenter.x, philgepsCenter.y + radius + 30);
     
     // Draw numbers in overlap regions
     ctx.font = 'bold 18px Inter';
@@ -1611,7 +1688,7 @@ function drawVennDiagram(data) {
     
     // PhilGEPS only (bottom)
     ctx.fillStyle = '#F57C00';
-    ctx.fillText(data.philgeps_only, philgepsCenter.x, philgepsCenter.y + 80);
+    ctx.fillText(data.philgeps_only, philgepsCenter.x, philgepsCenter.y + 60);
     
     // Flood + DIME (top middle)
     ctx.fillStyle = '#7B1FA2';
@@ -2027,9 +2104,147 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 });
 
+// SEC Standard Deviation Chart
+let secDistributionChart = null;
+
+async function createSecDistributionChart() {
+    const ctx = document.getElementById('secContractorDistributionChart');
+    if (!ctx) return;
+    
+    try {
+        // Load SEC standard deviation analysis
+        const response = await fetch('/api/contractors/sec-standard-deviation');
+        if (!response.ok) {
+            console.log('⚠️ SEC standard deviation analysis not available');
+            return;
+        }
+        
+        const data = await response.json();
+        const analysis = data.analysis;
+        
+        if (!analysis || !analysis.distribution_stats) {
+            console.log('⚠️ SEC standard deviation analysis data not available');
+            return;
+        }
+        
+        const distribution = analysis.distribution_stats;
+        const basicStats = analysis.basic_stats;
+        
+        // Update statistics cards
+        document.getElementById('sec-contractors-total').textContent = basicStats.total_contractors.toLocaleString();
+        document.getElementById('sec-contractors-mean').textContent = basicStats.mean.toFixed(1);
+        document.getElementById('sec-contractors-std').textContent = basicStats.standard_deviation.toFixed(1);
+        document.getElementById('sec-contractors-outliers').textContent = distribution.outliers.count.toLocaleString();
+        
+        // Create distribution chart
+        if (secDistributionChart) {
+            secDistributionChart.destroy();
+        }
+        
+        secDistributionChart = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: [
+                    '1 Standard Deviation\n(68% of contractors)',
+                    '1.5 Standard Deviations\n(87% of contractors)', 
+                    '2 Standard Deviations\n(95% of contractors)',
+                    '2.5 Standard Deviations\n(99% of contractors)',
+                    '3 Standard Deviations\n(99.7% of contractors)',
+                    'Outliers\n(Beyond 3SD)'
+                ],
+                datasets: [{
+                    label: 'Number of Contractors',
+                    data: [
+                        distribution.within_1sd.count,
+                        distribution.within_1_5sd.count,
+                        distribution.within_2sd.count,
+                        distribution.within_2_5sd.count,
+                        distribution.within_3sd.count,
+                        distribution.outliers.count
+                    ],
+                    backgroundColor: [
+                        '#28a745', // Green - 1SD
+                        '#ffc107', // Yellow - 1.5SD
+                        '#fd7e14', // Orange - 2SD
+                        '#dc3545', // Red - 2.5SD
+                        '#6f42c1', // Purple - 3SD
+                        '#e83e8c'  // Pink - Outliers
+                    ],
+                    borderColor: [
+                        '#1e7e34',
+                        '#d39e00',
+                        '#dc6903',
+                        '#c82333',
+                        '#5a2d91',
+                        '#c2185b'
+                    ],
+                    borderWidth: 2
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                aspectRatio: 2,
+                plugins: {
+                    legend: {
+                        display: false
+                    },
+                    title: {
+                        display: true,
+                        text: `Mean: ${basicStats.mean.toFixed(1)} projects | Standard Deviation: ${basicStats.standard_deviation.toFixed(1)}`,
+                        font: {
+                            size: 12
+                        },
+                        color: '#666'
+                    },
+                    tooltip: {
+                        backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                        titleColor: 'white',
+                        bodyColor: 'white',
+                        borderColor: 'rgba(255, 255, 255, 0.1)',
+                        borderWidth: 1,
+                        callbacks: {
+                            label: function(context) {
+                                const total = basicStats.total_contractors;
+                                const value = context.parsed.y;
+                                const percentage = ((value / total) * 100).toFixed(1);
+                                return `${value} contractors (${percentage}%)`;
+                            }
+                        }
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        title: {
+                            display: true,
+                            text: 'Number of Contractors',
+                            font: {
+                                weight: 'bold'
+                            }
+                        }
+                    },
+                    x: {
+                        ticks: {
+                            font: {
+                                size: 10
+                            }
+                        }
+                    }
+                }
+            }
+        });
+        
+        console.log('✅ SEC contractor distribution chart created');
+    } catch (error) {
+        console.error('❌ Failed to create SEC contractor distribution chart:', error);
+    }
+}
+
 // Load on page load
 loadContractors();
 loadVennDiagram();
+createSecDistributionChart();
 </script>
 
 {% include "footer.html" %}

@@ -247,6 +247,12 @@ class JSONGenerator:
                 'description': 'Contractor statistics for /contractors page',
                 'category': 'sec_data',
                 'dependencies': ['PostgreSQL SEC database']
+            },
+            'contractor_standard_deviation.json': {
+                'script': 'analysis/generate_contractor_standard_deviation.py',
+                'description': 'Contractor project count standard deviation analysis',
+                'category': 'analysis_data',
+                'dependencies': ['Contractor project data']
             }
         }
     

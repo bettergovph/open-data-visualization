@@ -1127,6 +1127,62 @@ async def get_contractors_venn():
     except Exception as e:
         return JSONResponse({"success": False, "error": str(e)})
 
+@app.get("/api/contractors/standard-deviation")
+async def get_contractor_standard_deviation():
+    """Get contractor project distribution standard deviation analysis - no authentication required"""
+    try:
+        import json
+        from pathlib import Path
+        
+        # Load standard deviation analysis data
+        data_file = Path("static/data/contractor_standard_deviation.json")
+        if not data_file.exists():
+            return JSONResponse({
+                "success": False, 
+                "error": "Standard deviation analysis not available. Run the analysis script first."
+            })
+        
+        with open(data_file, 'r', encoding='utf-8') as f:
+            data = json.load(f)
+        
+        return JSONResponse({
+            "success": True,
+            "analysis": data.get('analysis', {}),
+            "chart_data": data.get('chart_data', {}),
+            "metadata": data.get('metadata', {})
+        })
+        
+    except Exception as e:
+        return JSONResponse({"success": False, "error": str(e)})
+
+@app.get("/api/contractors/sec-standard-deviation")
+async def get_sec_contractor_standard_deviation():
+    """Get SEC contractor project distribution standard deviation analysis - no authentication required"""
+    try:
+        import json
+        from pathlib import Path
+        
+        # Load SEC standard deviation analysis data
+        data_file = Path("static/data/sec_contractor_standard_deviation.json")
+        if not data_file.exists():
+            return JSONResponse({
+                "success": False, 
+                "error": "SEC standard deviation analysis not available. Run the SEC analysis script first."
+            })
+        
+        with open(data_file, 'r', encoding='utf-8') as f:
+            data = json.load(f)
+        
+        return JSONResponse({
+            "success": True,
+            "analysis": data.get('analysis', {}),
+            "chart_data": data.get('chart_data', {}),
+            "metadata": data.get('metadata', {})
+        })
+        
+    except Exception as e:
+        return JSONResponse({"success": False, "error": str(e)})
+
 @app.get("/api/contractors/projects/{contractor_name}")
 async def search_contractor_projects(contractor_name: str):
     """Search for contractor projects across Flood, DIME, and PhilGEPS databases"""

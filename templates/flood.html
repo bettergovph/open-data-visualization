@@ -2723,25 +2723,26 @@ function toggleMobileMenu() {
         console.log('👥 Initializing contractor data...');
         
         try {
-            // Load from cached contractor stats (instant loading!)
-            console.log('🔄 Loading contractor data from cache...');
-            const cacheResponse = await fetch('/static/data/contractor_stats_cache.json');
+            // Load from contractors top data (working data source)
+            console.log('🔄 Loading contractor data from contractors top...');
+            const cacheResponse = await fetch('/static/data/contractors_top.json');
             
             if (!cacheResponse.ok) {
-                throw new Error('Contractor stats cache not available');
+                throw new Error('Contractors top data not available');
             }
             
             const cacheData = await cacheResponse.json();
-            console.log('✅ Loaded cached contractor data:', cacheData.contractors.length, 'contractors');
+            const contractors = cacheData.data?.contractors || [];
+            console.log('✅ Loaded contractor data:', contractors.length, 'contractors');
             
             // Store all contractor data in memory (lightweight, just metadata)
-            allContractors = cacheData.contractors.map(c => ({
-                name: c.name,
-                projects: c.projects,
-                totalCost: c.total_cost,
-                avgCostPerProject: c.avg_cost_per_project,
-                suspicionScore: c.suspicion_score || 0,
-                performance: c.suspicion
+            allContractors = contractors.map(c => ({
+                name: c.contractor,
+                projects: c.count,
+                totalCost: 0, // Not available in this data source
+                avgCostPerProject: 0, // Not available in this data source
+                suspicionScore: c.status === 'NO_SEC_RESULTS' ? 100 : (c.sec_number ? 0 : 50),
+                performance: c.status === 'NO_SEC_RESULTS' ? 'High' : (c.sec_number ? 'Normal' : 'Medium')
             }));
             
             console.log('✅ Contractor data loaded from cache:', allContractors.length, 'contractors');
@@ -3933,51 +3934,70 @@ function getContractorSecStatusSync(contractorName) {
         if (!distCtx) return;
         
         try {
-            // Load contractor stats cache
-            const response = await fetch('/static/data/contractor_stats_cache.json');
+            // Load standard deviation analysis
+            const response = await fetch('/static/data/contractor_standard_deviation.json');
             if (!response.ok) {
-                console.log('⚠️ Contractor stats cache not available');
+                console.log('⚠️ Standard deviation analysis not available');
                 return;
             }
             
-            const cacheData = await response.json();
-            const stats = cacheData.statistics;
-            const distribution = stats.distribution;
+            const data = await response.json();
+            const analysis = data.analysis;
             
-            // Update distribution stats display
-            document.getElementById('dist-avg-projects').textContent = stats.avg_projects_per_contractor;
-            document.getElementById('dist-std-dev').textContent = stats.std_dev;
-            document.getElementById('dist-beyond-3sd').textContent = distribution.beyond_3sd;
+            if (!analysis || !analysis.distribution_stats) {
+                console.log('⚠️ Standard deviation analysis data not available');
+                return;
+            }
             
-            // Create distribution chart
+            const distribution = analysis.distribution_stats;
+            const basicStats = analysis.basic_stats;
+            
+            // Update distribution stats display if elements exist
+            const avgElement = document.getElementById('dist-avg-projects');
+            const stdElement = document.getElementById('dist-std-dev');
+            const outliersElement = document.getElementById('dist-beyond-3sd');
+            
+            if (avgElement) avgElement.textContent = basicStats.mean.toFixed(1);
+            if (stdElement) stdElement.textContent = basicStats.standard_deviation.toFixed(1);
+            if (outliersElement) outliersElement.textContent = distribution.outliers.count;
+            
+            // Create distribution chart with standard deviation bars
             new Chart(distCtx, {
                 type: 'bar',
                 data: {
                     labels: [
-                        'Within 1 SD\n(Normal Range)',
-                        'Within 2 SD\n(Moderately Unusual)',
-                        'Within 3 SD\n(Unusual)',
-                        'Beyond 3 SD\n(Highly Unusual)'
+                        '1 Standard Deviation\n(68% of contractors)',
+                        '1.5 Standard Deviations\n(87% of contractors)', 
+                        '2 Standard Deviations\n(95% of contractors)',
+                        '2.5 Standard Deviations\n(99% of contractors)',
+                        '3 Standard Deviations\n(99.7% of contractors)',
+                        'Outliers\n(Beyond 3SD)'
                     ],
                     datasets: [{
                         label: 'Number of Contractors',
                         data: [
-                            distribution.within_1sd,
-                            distribution.within_2sd,
-                            distribution.within_3sd,
-                            distribution.beyond_3sd
+                            distribution.within_1sd.count,
+                            distribution.within_1_5sd.count,
+                            distribution.within_2sd.count,
+                            distribution.within_2_5sd.count,
+                            distribution.within_3sd.count,
+                            distribution.outliers.count
                         ],
                         backgroundColor: [
-                            '#28a745', // Green - Normal
-                            '#ffc107', // Yellow - Moderately unusual
-                            '#fd7e14', // Orange - Unusual
-                            '#dc3545'  // Red - Highly unusual
+                            '#28a745', // Green - 1SD
+                            '#ffc107', // Yellow - 1.5SD
+                            '#fd7e14', // Orange - 2SD
+                            '#dc3545', // Red - 2.5SD
+                            '#6f42c1', // Purple - 3SD
+                            '#e83e8c'  // Pink - Outliers
                         ],
                         borderColor: [
                             '#1e7e34',
                             '#d39e00',
                             '#dc6903',
-                            '#c82333'
+                            '#c82333',
+                            '#5a2d91',
+                            '#c2185b'
                         ],
                         borderWidth: 2
                     }]
@@ -3990,7 +4010,7 @@ function getContractorSecStatusSync(contractorName) {
                         },
                         title: {
                             display: true,
-                            text: `Average: ${stats.avg_projects_per_contractor} projects | Standard Deviation: ${stats.std_dev}`,
+                            text: `Mean: ${basicStats.mean.toFixed(1)} projects | Standard Deviation: ${basicStats.standard_deviation.toFixed(1)}`,
                             font: {
                                 size: 12
                             },
@@ -4004,7 +4024,7 @@ function getContractorSecStatusSync(contractorName) {
                             borderWidth: 1,
                             callbacks: {
                                 label: function(context) {
-                                    const total = stats.total_contractors;
+                                    const total = basicStats.total_contractors;
                                     const value = context.parsed.y;
                                     const percentage = ((value / total) * 100).toFixed(1);
                                     return `${value} contractors (${percentage}%)`;
@@ -6029,12 +6049,17 @@ let zoomLevel = 1;
 
 async function initializeNetworkGraph() {
     try {
-        // Load joint venture data
-        const response = await fetch('/static/data/flood_control_data.json');
-        const data = await response.json();
-        
-        // Process joint ventures
-        const jointVentures = data.projects.filter(p => p.Contractor && p.Contractor.includes(' / '));
+            // Load joint venture data
+            const response = await fetch('/static/data/flood_control_data.json');
+            const data = await response.json();
+            
+            if (!data.projects || !Array.isArray(data.projects)) {
+                console.log('⚠️ No projects data available for network graph');
+                return;
+            }
+            
+            // Process joint ventures
+            const jointVentures = data.projects.filter(p => p.Contractor && p.Contractor.includes(' / '));
         
         // Build network data
         networkData = buildNetworkData(jointVentures);

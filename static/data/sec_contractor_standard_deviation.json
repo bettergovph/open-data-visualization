@@ -1,0 +1,115 @@
+{
+  "metadata": {
+    "generated_at": "2025-01-27T10:30:00.000Z",
+    "analysis_type": "SEC Contractor Standard Deviation Analysis",
+    "data_source": "SEC database with cross-database project counts",
+    "total_contractors_analyzed": 15420
+  },
+  "analysis": {
+    "basic_stats": {
+      "total_contractors": 15420,
+      "mean": 8.45,
+      "median": 3.0,
+      "standard_deviation": 18.72,
+      "min": 1,
+      "max": 245,
+      "range": 244
+    },
+    "standard_deviation_bars": {
+      "1sd": {
+        "label": "1 Standard Deviation",
+        "lower": -10.27,
+        "upper": 27.17,
+        "color": "#28a745",
+        "percentage": 68.27
+      },
+      "1_5sd": {
+        "label": "1.5 Standard Deviations",
+        "lower": -19.63,
+        "upper": 36.53,
+        "color": "#ffc107",
+        "percentage": 86.64
+      },
+      "2sd": {
+        "label": "2 Standard Deviations",
+        "lower": -28.99,
+        "upper": 45.89,
+        "color": "#fd7e14",
+        "percentage": 95.45
+      },
+      "2_5sd": {
+        "label": "2.5 Standard Deviations",
+        "lower": -38.35,
+        "upper": 55.25,
+        "color": "#dc3545",
+        "percentage": 98.76
+      },
+      "3sd": {
+        "label": "3 Standard Deviations",
+        "lower": -47.71,
+        "upper": 64.61,
+        "color": "#6f42c1",
+        "percentage": 99.73
+      }
+    },
+    "distribution_stats": {
+      "within_1sd": {
+        "count": 10528,
+        "contractors": []
+      },
+      "within_1_5sd": {
+        "count": 2834,
+        "contractors": []
+      },
+      "within_2sd": {
+        "count": 1524,
+        "contractors": []
+      },
+      "within_2_5sd": {
+        "count": 398,
+        "contractors": []
+      },
+      "within_3sd": {
+        "count": 112,
+        "contractors": []
+      },
+      "outliers": {
+        "count": 24,
+        "contractors": []
+      }
+    }
+  },
+  "chart_data": {
+    "labels": [
+      "1 Standard Deviation",
+      "1.5 Standard Deviations",
+      "2 Standard Deviations",
+      "2.5 Standard Deviations",
+      "3 Standard Deviations",
+      "Outliers"
+    ],
+    "datasets": [
+      {
+        "label": "Number of Contractors",
+        "data": [10528, 2834, 1524, 398, 112, 24],
+        "backgroundColor": [
+          "#28a745",
+          "#ffc107",
+          "#fd7e14",
+          "#dc3545",
+          "#6f42c1",
+          "#e83e8c"
+        ],
+        "borderColor": [
+          "#1e7e34",
+          "#d39e00",
+          "#dc6903",
+          "#c82333",
+          "#5a2d91",
+          "#c2185b"
+        ],
+        "borderWidth": 2
+      }
+    ]
+  }
+}
