@@ -1830,14 +1830,14 @@ function toggleMobileMenu() {
         } catch (error) {
             console.error('❌ Error loading table data:', error);
             
-            // Try static data fallback
+            // Try static data fallback with JV data
             try {
-                const staticResponse = await fetch('/static/data/flood_control_data.json');
+                const staticResponse = await fetch('/static/data/flood_control_data_with_jv.json');
                 if (staticResponse.ok) {
                     const staticData = await staticResponse.json();
                     allTableProjects = staticData.projects || [];
-                    console.log('✅ Table data loaded from static fallback:', allTableProjects.length, 'projects');
-                    updateTableStatus(`Loaded ${allTableProjects.length} projects from static data`);
+                    console.log('✅ Table data loaded from static JV fallback:', allTableProjects.length, 'projects');
+                    updateTableStatus(`Loaded ${allTableProjects.length} projects from static JV data`);
                     createExpensiveProjectsChart();
                 } else {
                     throw new Error('Static data also failed');
@@ -2723,26 +2723,27 @@ function toggleMobileMenu() {
         console.log('👥 Initializing contractor data...');
         
         try {
-            // Load from contractors top data (working data source)
-            console.log('🔄 Loading contractor data from contractors top...');
-            const cacheResponse = await fetch('/static/data/contractors_top.json');
+            // Load from MeiliSearch flood contractors API
+            console.log('🔄 Loading contractor data from MeiliSearch...');
+            const response = await fetch('/api/flood/lookup/contractors');
             
-            if (!cacheResponse.ok) {
-                throw new Error('Contractors top data not available');
+            if (!response.ok) {
+                throw new Error(`API returned ${response.status}`);
             }
             
-            const cacheData = await cacheResponse.json();
-            const contractors = cacheData.data?.contractors || [];
-            console.log('✅ Loaded contractor data:', contractors.length, 'contractors');
+            const data = await response.json();
+            const contractors = data.contractors || [];
+            const counts = data.counts || {};
+            console.log('✅ Loaded contractor data from MeiliSearch:', contractors.length, 'contractors');
             
-            // Store all contractor data in memory (lightweight, just metadata)
-            allContractors = contractors.map(c => ({
-                name: c.contractor,
-                projects: c.count,
+            // Store all contractor data in memory with project counts from MeiliSearch
+            allContractors = contractors.map(contractorName => ({
+                name: contractorName,
+                projects: counts[contractorName] || 0,
                 totalCost: 0, // Not available in this data source
                 avgCostPerProject: 0, // Not available in this data source
-                suspicionScore: c.status === 'NO_SEC_RESULTS' ? 100 : (c.sec_number ? 0 : 50),
-                performance: c.status === 'NO_SEC_RESULTS' ? 'High' : (c.sec_number ? 'Normal' : 'Medium')
+                suspicionScore: 0, // No SEC data available from MeiliSearch
+                performance: 'Normal' // Default performance
             }));
             
             console.log('✅ Contractor data loaded from cache:', allContractors.length, 'contractors');
@@ -2883,48 +2884,33 @@ function toggleMobileMenu() {
         
         // Fetch actual total contractors count from statistics API
         try {
-            console.log('🔄 Attempting to fetch statistics from API...');
             const statsResponse = await fetch('/api/flood/statistics');
-            
             if (statsResponse.ok) {
                 const stats = await statsResponse.json();
                 const actualTotalContractors = stats.uniqueContractors;
                 const actualTotalProjects = stats.totalProjects;
                 const actualTotalCost = stats.totalCost;
                 
-                console.log('✅ Statistics API successful:', { actualTotalContractors, actualTotalProjects, actualTotalCost });
                 document.getElementById('total-contractors-count').textContent = actualTotalContractors.toLocaleString('en-PH');
                 
                 // Calculate average projects per contractor using actual totals
                 const avgProjects = Math.round(actualTotalProjects / actualTotalContractors);
-                console.log('📊 Average projects per contractor:', avgProjects, '(', actualTotalProjects, '/', actualTotalContractors, ')');
                 document.getElementById('avg-projects-per-contractor').textContent = avgProjects.toLocaleString('en-PH');
                 
                 // Calculate average cost per project using actual totals
                 const avgCostPerProject = Math.round(actualTotalCost / actualTotalProjects);
-                console.log('📊 Average cost per project:', avgCostPerProject, '(', actualTotalCost, '/', actualTotalProjects, ')');
                 document.getElementById('avg-cost-per-project').textContent = '₱' + avgCostPerProject.toLocaleString('en-PH');
             } else {
-                console.warn('⚠️ Statistics API returned error:', statsResponse.status, statsResponse.statusText);
-                throw new Error(`API returned ${statsResponse.status}: ${statsResponse.statusText}`);
+                throw new Error('Failed to fetch statistics');
             }
         } catch (error) {
-            console.warn('⚠️ Statistics API failed, using fallback data:', error.message);
+            console.error('❌ Failed to fetch accurate contractor statistics:', error);
             // Fallback to displayed contractors count
+            document.getElementById('total-contractors-count').textContent = allContractors.length.toLocaleString('en-PH');
             const totalProjects = allContractors.reduce((sum, contractor) => sum + contractor.projects, 0);
             const totalCost = allContractors.reduce((sum, contractor) => sum + contractor.totalCost, 0);
-            const avgProjects = totalProjects > 0 ? Math.round(totalProjects / allContractors.length) : 0;
-            const avgCostPerProject = totalProjects > 0 ? Math.round(totalCost / totalProjects) : 0;
-            
-            console.log('📊 Using fallback statistics:', { 
-                contractors: allContractors.length, 
-                projects: totalProjects, 
-                cost: totalCost,
-                avgProjects,
-                avgCostPerProject
-            });
-            
-            document.getElementById('total-contractors-count').textContent = allContractors.length.toLocaleString('en-PH');
+            const avgProjects = Math.round(totalProjects / allContractors.length);
+            const avgCostPerProject = Math.round(totalCost / totalProjects);
             document.getElementById('avg-projects-per-contractor').textContent = avgProjects.toLocaleString('en-PH');
             document.getElementById('avg-cost-per-project').textContent = '₱' + avgCostPerProject.toLocaleString('en-PH');
         }
@@ -6085,12 +6071,12 @@ async function initializeNetworkGraph() {
     try {
         console.log('🔄 Initializing network graph...');
         
-        // Load joint venture data from the main flood control data
-        const response = await fetch('/static/data/flood_control_data.json');
+        // Load joint venture data from the dedicated JV file
+        const response = await fetch('/static/data/flood_control_data_with_jv.json');
         const data = await response.json();
         
-        // Check the correct data structure: data.data.projects
-        const projects = data.data && data.data.projects ? data.data.projects : data.projects;
+        // Use the projects array directly from the JV file
+        const projects = data.projects;
         
         if (!projects || !Array.isArray(projects)) {
             console.log('⚠️ No projects data available for network graph');
@@ -6100,21 +6086,8 @@ async function initializeNetworkGraph() {
         
         console.log(`📊 Loaded ${projects.length} projects from JSON`);
         
-        // Enhanced joint venture detection - look for various patterns
-        const jointVentures = projects.filter(p => {
-            if (!p.Contractor) return false;
-            const contractor = p.Contractor;
-            
-            // Check for various joint venture patterns
-            return contractor.includes(' / ') || 
-                   contractor.includes(' & ') || 
-                   contractor.includes(' AND ') ||
-                   contractor.includes(' + ') ||
-                   contractor.includes(' JOINT ') ||
-                   contractor.includes(' JV ') ||
-                   contractor.includes(' PARTNERSHIP ') ||
-                   contractor.includes(' CONSORTIUM ');
-        });
+        // Use the pre-processed joint venture data
+        const jointVentures = projects.filter(p => p.is_joint_venture === true);
         
         if (jointVentures.length === 0) {
             console.log('⚠️ No joint ventures found in data');
@@ -6218,27 +6191,12 @@ function buildNetworkData(jointVentures) {
         const contractor = jv.Contractor;
         const cost = parseFloat(jv.ContractCost) || 0;
         
-        // Enhanced parsing for various joint venture formats
-        let company1, company2;
+        // Use pre-processed joint venture partner data
+        const company1 = jv.jv_partner1;
+        const company2 = jv.jv_partner2;
         
-        if (contractor.includes(' / ')) {
-            const parts = contractor.split(' / ');
-            company1 = parts[0].trim();
-            company2 = parts[1].trim();
-        } else if (contractor.includes(' & ')) {
-            const parts = contractor.split(' & ');
-            company1 = parts[0].trim();
-            company2 = parts[1].trim();
-        } else if (contractor.includes(' AND ')) {
-            const parts = contractor.split(' AND ');
-            company1 = parts[0].trim();
-            company2 = parts[1].trim();
-        } else if (contractor.includes(' + ')) {
-            const parts = contractor.split(' + ');
-            company1 = parts[0].trim();
-            company2 = parts[1].trim();
-        } else {
-            // Skip if we can't parse it
+        // Skip if partners are not available
+        if (!company1 || !company2) {
             return;
         }
         

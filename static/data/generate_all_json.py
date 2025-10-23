@@ -155,49 +155,49 @@ class JSONGenerator:
             
             # Correlation Data
             'flood_dime_contractor_correlation.json': {
-                'script': 'API endpoint (generated on-demand)',
+                'script': 'analysis/generate_flood_dime_correlation.py',
                 'description': 'Flood-DIME contractor correlation',
                 'category': 'correlation_data',
                 'dependencies': ['Flood data', 'DIME data']
             },
             'flood_dime_contractor_correlation_2020.json': {
-                'script': 'API endpoint (generated on-demand)',
+                'script': 'analysis/generate_flood_dime_correlation.py',
                 'description': '2020 Flood-DIME correlation',
                 'category': 'correlation_data',
                 'dependencies': ['Flood data', 'DIME data']
             },
             'flood_dime_contractor_correlation_2021.json': {
-                'script': 'API endpoint (generated on-demand)',
+                'script': 'analysis/generate_flood_dime_correlation.py',
                 'description': '2021 Flood-DIME correlation',
                 'category': 'correlation_data',
                 'dependencies': ['Flood data', 'DIME data']
             },
             'flood_dime_contractor_correlation_2022.json': {
-                'script': 'API endpoint (generated on-demand)',
+                'script': 'analysis/generate_flood_dime_correlation.py',
                 'description': '2022 Flood-DIME correlation',
                 'category': 'correlation_data',
                 'dependencies': ['Flood data', 'DIME data']
             },
             'flood_dime_contractor_correlation_2023.json': {
-                'script': 'API endpoint (generated on-demand)',
+                'script': 'analysis/generate_flood_dime_correlation.py',
                 'description': '2023 Flood-DIME correlation',
                 'category': 'correlation_data',
                 'dependencies': ['Flood data', 'DIME data']
             },
             'flood_dime_contractor_correlation_2024.json': {
-                'script': 'API endpoint (generated on-demand)',
+                'script': 'analysis/generate_flood_dime_correlation.py',
                 'description': '2024 Flood-DIME correlation',
                 'category': 'correlation_data',
                 'dependencies': ['Flood data', 'DIME data']
             },
             'flood_dime_contractor_correlation_2025.json': {
-                'script': 'API endpoint (generated on-demand)',
+                'script': 'analysis/generate_flood_dime_correlation.py',
                 'description': '2025 Flood-DIME correlation',
                 'category': 'correlation_data',
                 'dependencies': ['Flood data', 'DIME data']
             },
             'flood_dime_contractor_correlation_all_years.json': {
-                'script': 'API endpoint (generated on-demand)',
+                'script': 'analysis/generate_flood_dime_correlation.py',
                 'description': 'All years Flood-DIME correlation',
                 'category': 'correlation_data',
                 'dependencies': ['Flood data', 'DIME data']

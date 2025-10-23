@@ -62,7 +62,17 @@ API_ENDPOINTS = {
     'flood_provinces.json': '/api/flood/lookup/provinces',
     'flood_years.json': '/api/flood/lookup/years',
     'flood_work_types.json': '/api/flood/lookup/types-of-work',
-    'flood_contractors.json': '/api/flood/lookup/contractors'
+    'flood_contractors.json': '/api/flood/lookup/contractors',
+    
+    # Flood-DIME Correlation Data
+    'flood_dime_contractor_correlation.json': '/api/flood/dime/correlation',
+    'flood_dime_contractor_correlation_2020.json': '/api/flood/dime/correlation/2020',
+    'flood_dime_contractor_correlation_2021.json': '/api/flood/dime/correlation/2021',
+    'flood_dime_contractor_correlation_2022.json': '/api/flood/dime/correlation/2022',
+    'flood_dime_contractor_correlation_2023.json': '/api/flood/dime/correlation/2023',
+    'flood_dime_contractor_correlation_2024.json': '/api/flood/dime/correlation/2024',
+    'flood_dime_contractor_correlation_2025.json': '/api/flood/dime/correlation/2025',
+    'flood_dime_contractor_correlation_all_years.json': '/api/flood/dime/correlation/all'
 }
 
 async def call_api_endpoint(session: aiohttp.ClientSession, endpoint: str, filename: str) -> Dict[str, Any]:

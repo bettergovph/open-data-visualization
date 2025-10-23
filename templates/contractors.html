@@ -591,7 +591,18 @@ async function loadHiddenFloodData() {
                 hiddenProjectsCount.textContent = stats.total_projects ? stats.total_projects.toLocaleString('en-PH') : '0';
             }
             if (hiddenProjectsValue) {
-                hiddenProjectsValue.textContent = stats.total_value ? `₱${(stats.total_value / 1000000).toFixed(1)}M` : '₱0M';
+                if (stats.total_value) {
+                    const valueInMillions = stats.total_value / 1000000;
+                    if (valueInMillions >= 1000) {
+                        // Show as trillions for values >= 1T
+                        hiddenProjectsValue.textContent = `₱${(valueInMillions / 1000).toFixed(6)}T`;
+                    } else {
+                        // Show as millions with commas for smaller values
+                        hiddenProjectsValue.textContent = `₱${valueInMillions.toLocaleString('en-PH', {maximumFractionDigits: 1})}M`;
+                    }
+                } else {
+                    hiddenProjectsValue.textContent = '₱0M';
+                }
             }
             if (topHiddenContractor) {
                 topHiddenContractor.textContent = (stats.top_contractor && stats.top_contractor.name) ? stats.top_contractor.name : 'N/A';

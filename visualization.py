@@ -1183,6 +1183,123 @@ async def get_sec_contractor_standard_deviation():
     except Exception as e:
         return JSONResponse({"success": False, "error": str(e)})
 
+# ============================================================================
+# Flood-DIME Correlation API Endpoints
+# ============================================================================
+
+@app.get("/api/flood/dime/correlation")
+async def flood_dime_correlation_api():
+    """Get flood-DIME contractor correlation data - no authentication required"""
+    try:
+        import json
+        from pathlib import Path
+        
+        # Load correlation data
+        data_file = Path("static/data/flood_dime_contractor_correlation.json")
+        if not data_file.exists():
+            return JSONResponse({
+                "success": False,
+                "error": "Flood-DIME correlation data not available"
+            })
+        
+        with open(data_file, 'r', encoding='utf-8') as f:
+            data = json.load(f)
+        
+        # Check if it's an error response
+        if data.get('status') == 'error':
+            return JSONResponse({
+                "success": False,
+                "error": data.get('error', 'Unknown error'),
+                "contractors": []
+            })
+        
+        return JSONResponse({
+            "success": True,
+            "contractors": data.get('contractors', []),
+            "summary": data.get('summary', {}),
+            "generated_at": data.get('generated_at'),
+            "cache_version": data.get('cache_version', '1.0')
+        })
+        
+    except Exception as e:
+        return JSONResponse({"success": False, "error": str(e), "contractors": []})
+
+@app.get("/api/flood/dime/correlation/{year}")
+async def flood_dime_correlation_year_api(year: str):
+    """Get flood-DIME contractor correlation data for specific year - no authentication required"""
+    try:
+        import json
+        from pathlib import Path
+        
+        # Load correlation data for specific year
+        data_file = Path(f"static/data/flood_dime_contractor_correlation_{year}.json")
+        if not data_file.exists():
+            return JSONResponse({
+                "success": False,
+                "error": f"Flood-DIME correlation data for {year} not available"
+            })
+        
+        with open(data_file, 'r', encoding='utf-8') as f:
+            data = json.load(f)
+        
+        # Check if it's an error response
+        if data.get('status') == 'error':
+            return JSONResponse({
+                "success": False,
+                "error": data.get('error', 'Unknown error'),
+                "contractors": []
+            })
+        
+        return JSONResponse({
+            "success": True,
+            "contractors": data.get('contractors', []),
+            "summary": data.get('summary', {}),
+            "year": year,
+            "generated_at": data.get('generated_at'),
+            "cache_version": data.get('cache_version', '1.0')
+        })
+        
+    except Exception as e:
+        return JSONResponse({"success": False, "error": str(e), "contractors": []})
+
+@app.get("/api/flood/dime/correlation/all")
+async def flood_dime_correlation_all_api():
+    """Get flood-DIME contractor correlation data for all years - no authentication required"""
+    print("🔍 DEBUG: flood_dime_correlation_all_api called")
+    try:
+        import json
+        from pathlib import Path
+        
+        # Load correlation data for all years
+        data_file = Path("static/data/flood_dime_contractor_correlation_all_years.json")
+        if not data_file.exists():
+            return JSONResponse({
+                "success": False,
+                "error": "Flood-DIME correlation data for all years not available"
+            })
+        
+        with open(data_file, 'r', encoding='utf-8') as f:
+            data = json.load(f)
+        
+        # Check if it's an error response
+        if data.get('status') == 'error':
+            return JSONResponse({
+                "success": False,
+                "error": data.get('error', 'Unknown error'),
+                "contractors": []
+            })
+        
+        return JSONResponse({
+            "success": True,
+            "contractors": data.get('contractors', []),
+            "summary": data.get('summary', {}),
+            "generated_at": data.get('generated_at'),
+            "cache_version": data.get('cache_version', '1.0')
+        })
+        
+    except Exception as e:
+        return JSONResponse({"success": False, "error": str(e), "contractors": []})
+
 @app.get("/api/contractors/projects/{contractor_name}")
 async def search_contractor_projects(contractor_name: str):
     """Search for contractor projects across Flood, DIME, and PhilGEPS databases"""
