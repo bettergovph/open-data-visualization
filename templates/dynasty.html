@@ -1222,25 +1222,34 @@ function createSurnamesChart(data) {
                 'ph.autonomous-region-of-muslim-mindanao-armm.sulu.any.any.geo.json',
                 'ph.autonomous-region-of-muslim-mindanao-armm.tawi-tawi.any.any.geo.json'
             ];
-            
-            // Load provinces with optimized batching (like /map page)
+
+            // Load city-level GeoJSON files for better precision
+            const cityFiles = [
+                'ph.cagayan-valley-region-ii.isabela.cauayan-city.any.geo.json',
+                'ph.eastern-visayas-region-viii.samar.catbalogan-city.any.geo.json',
+                'ph.zamboanga-peninsula-region-ix.zamboanga-del-norte.dipolog-city.any.geo.json',
+                'ph.northern-mindanao-region-x.lanao-del-norte.iligan-city.any.geo.json'
+            ];
+
+            // Load provinces and cities with optimized batching (like /map page)
             const batchSize = 10; // Load 10 provinces at a time
             let loadedCount = 0;
+            const allFiles = [...provinceFiles, ...cityFiles];
             
-            for (let i = 0; i < provinceFiles.length; i += batchSize) {
-                const batch = provinceFiles.slice(i, i + batchSize);
+            for (let i = 0; i < allFiles.length; i += batchSize) {
+                const batch = allFiles.slice(i, i + batchSize);
                 
                 // Load batch in parallel
-                const batchPromises = batch.map(async (provinceFile) => {
+                const batchPromises = batch.map(async (geoFile) => {
                     try {
-                        const geoResponse = await fetch(`/static/data/${provinceFile}`);
+                        const geoResponse = await fetch(`/static/data/${geoFile}`);
                         const geoData = await geoResponse.json();
                         
                         // Extract province name from filename
                         // Example: ph.central-visayas-region-vii.cebu.any.any.geo.json -> cebu
-                        const parts = provinceFile.split('.');
+                        const parts = geoFile.split('.');
                         const provinceName = parts[2].replace(/-/g, ' ').toUpperCase();
-                        console.log(`🗺️ Loading province: ${provinceName} from file: ${provinceFile}`);
+                        console.log(`🗺️ Loading province: ${provinceName} from file: ${geoFile}`);
                         
                         // Find dynasty data for this province
                         const dynastyInfo = dynastyData.data.find(d => 
@@ -1317,15 +1326,15 @@ function createSurnamesChart(data) {
                 });
                 
                 // Update loading status
-                console.log(`✅ Loaded ${loadedCount}/${provinceFiles.length} provinces`);
+                console.log(`✅ Loaded ${loadedCount}/${allFiles.length} provinces and cities`);
                 
                 // Small delay between batches to prevent browser freeze
-                if (i + batchSize < provinceFiles.length) {
+                if (i + batchSize < allFiles.length) {
                     await new Promise(resolve => setTimeout(resolve, 50));
                 }
             }
             
-            console.log(`✅ All ${loadedCount} provinces loaded successfully`);
+            console.log(`✅ All ${loadedCount} provinces and cities loaded successfully`);
             
             
         } else {
