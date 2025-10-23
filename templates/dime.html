@@ -2096,9 +2096,13 @@ fetch('/static/data/dime_summary.json')
                         
                         if (barangayData) {
                             console.log('✅ Found preprocessed barangay data:', barangayData);
+                            console.log('🔍 Contractors array:', barangayData.contractors);
+                            console.log('🔍 Contractors array length:', barangayData.contractors.length);
                             contractors = new Set(barangayData.contractors);
                             projects = barangayData.projects;
                             dataSource = 'DIME';
+                            console.log('🔍 Converted to Set:', contractors);
+                            console.log('🔍 Set size:', contractors.size);
                         } else {
                             console.log('⚠️ No preprocessed data found for this barangay');
                             console.log('🔍 Tried key:', key);
