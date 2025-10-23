@@ -1109,13 +1109,19 @@ async def get_top_contractors(limit: int = 100):
             database=os.getenv('POSTGRES_DB_SEC', 'sec')
         )
         
-        # Get top contractors by project count
+        # Get top contractors by project count - aggregate duplicates by contractor name
         contractors = await conn.fetch(
-            """SELECT contractor_name, project_count, sec_number, status,
-                      has_flood, has_dime, has_philgeps
+            """SELECT contractor_name, 
+                      SUM(project_count) as total_projects,
+                      MAX(sec_number) as sec_number,
+                      MAX(status) as status,
+                      BOOL_OR(has_flood) as has_flood,
+                      BOOL_OR(has_dime) as has_dime,
+                      BOOL_OR(has_philgeps) as has_philgeps
                FROM contractors
                WHERE project_count IS NOT NULL AND project_count > 0
-               ORDER BY project_count DESC
+               GROUP BY contractor_name
+               ORDER BY total_projects DESC
                LIMIT $1""",
             limit
         )
@@ -1126,7 +1132,7 @@ async def get_top_contractors(limit: int = 100):
         for c in contractors:
             contractors_list.append({
                 'contractor': c['contractor_name'],
-                'count': c['project_count'] or 0,
+                'count': c['total_projects'] or 0,
                 'sec_number': c['sec_number'],
                 'status': c['status'],
                 'has_flood': c['has_flood'],
