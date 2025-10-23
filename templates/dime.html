@@ -1830,7 +1830,7 @@ fetch('/static/data/dime_summary.json')
                 
                 if (brgy.contractor_source === 'flood_connected' || brgy.contractor_source === 'dime_fallback') {
                     // Barangay connected to flood data (SSP) - contractor from MeiliSearch or DIME fallback
-                    contractorName = brgy.contractors && brgy.contractors.length > 0 ? brgy.contractors[0] : 'N/A';
+                    contractorName = brgy.contractors[0];
                     contractorSource = '<span style="background: #28a745; color: white; padding: 2px 6px; border-radius: 4px; font-size: 0.8em; font-weight: 600;">SSP</span>';
                 } else if (brgy.contractors && brgy.contractors.length > 0) {
                     // Use DIME contractor data
@@ -1930,7 +1930,7 @@ fetch('/static/data/dime_summary.json')
                 
                 if (brgy.contractor_source === 'flood_connected' || brgy.contractor_source === 'dime_fallback') {
                     // Barangay connected to flood data (SSP) - contractor from MeiliSearch or DIME fallback
-                    contractorName = brgy.contractors && brgy.contractors.length > 0 ? brgy.contractors[0] : 'N/A';
+                    contractorName = brgy.contractors[0];
                     contractorSource = '<span style="background: #28a745; color: white; padding: 2px 6px; border-radius: 4px; font-size: 0.8em; font-weight: 600;">SSP</span>';
                 } else if (brgy.contractors && brgy.contractors.length > 0) {
                     // Use DIME contractor data
