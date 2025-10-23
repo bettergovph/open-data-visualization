@@ -1781,8 +1781,9 @@ function toggleMobileMenu() {
         const contractorSearch = document.getElementById('contractor-search');
         if (contractorSearch) {
             contractorSearch.addEventListener('input', () => {
-                applyContractorFilters();
-                renderContractors();
+                // Use server-side search instead of client-side filtering
+                currentContractorPage = 0;
+                loadContractorsPage(1);
             });
         }
         
@@ -2723,14 +2724,23 @@ function toggleMobileMenu() {
         console.log('👥 Initializing contractor data...');
         
         try {
-            // Load from MeiliSearch contractors API (fallback to lookup if paginated fails)
-            console.log('🔄 Loading contractor data from MeiliSearch...');
-            let response = await fetch('/api/flood/contractors?page=1&limit=1000');
+            // Load contractors with server-side pagination
+            await loadContractorsPage(1);
             
-            if (!response.ok) {
-                console.log('⚠️ Paginated endpoint failed, trying lookup endpoint...');
-                response = await fetch('/api/flood/lookup/contractors');
-            }
+        } catch (error) {
+            console.error('❌ Error loading contractors:', error);
+            allContractors = [];
+            filteredContractors = [];
+            renderContractors();
+        }
+    }
+
+    async function loadContractorsPage(page) {
+        console.log(`🔄 Loading contractors page ${page}...`);
+        
+        try {
+            const searchQuery = document.getElementById('contractor-search')?.value || '';
+            const response = await fetch(`/api/flood/contractors?page=${page}&limit=${contractorPageSize}&search=${encodeURIComponent(searchQuery)}`);
             
             if (!response.ok) {
                 throw new Error(`API returned ${response.status}`);
@@ -2738,43 +2748,39 @@ function toggleMobileMenu() {
             
             const data = await response.json();
             
-            if (data.contractors && Array.isArray(data.contractors)) {
-                // Paginated response
+            if (data.success && data.contractors && Array.isArray(data.contractors)) {
+                // Update contractors data
                 allContractors = data.contractors;
-            } else if (data.contractors && Array.isArray(data.contractors)) {
-                // Lookup response - convert to contractor objects
-                const counts = data.counts || {};
-                allContractors = data.contractors.map(contractorName => ({
-                    name: contractorName,
-                    projects: counts[contractorName] || 0,
-                    totalCost: 0,
-                    avgCostPerProject: 0,
-                    suspicionScore: 0,
-                    performance: 'Normal'
-                }));
+                filteredContractors = [...allContractors];
+                
+                // Update pagination info
+                const pagination = data.pagination;
+                console.log(`✅ Loaded contractors page ${page}:`, allContractors.length, 'contractors');
+                console.log('📊 Pagination info:', pagination);
+                
+                // Store pagination info globally
+                window.contractorsPagination = pagination;
+                
+                // Update contractor statistics
+                console.log('📊 Updating contractor statistics with', allContractors.length, 'contractors');
+                updateContractorStatistics();
+                
+                // Render contractors table
+                renderContractors();
             } else {
+                console.log('⚠️ No contractors in response, using empty array');
                 allContractors = [];
+                filteredContractors = [];
+                renderContractors();
             }
             
-            console.log('✅ Loaded contractor data from MeiliSearch:', allContractors.length, 'contractors');
-            
-            console.log('✅ Contractor data loaded from cache:', allContractors.length, 'contractors');
-            console.log('💾 Cache benefits: Instant load, no API batching, ~2400 contractors ready');
         } catch (error) {
-            console.error('❌ Error loading contractor data:', error);
+            console.error('❌ Error loading contractors page:', error);
             allContractors = [];
+            filteredContractors = [];
+            renderContractors();
         }
-        
-        // Update contractor statistics
-        console.log('📊 Updating contractor statistics with', allContractors.length, 'contractors');
-        updateContractorStatistics();
-        
-        
-        // Apply current filters and render
-        console.log('🔄 Applying filters and rendering contractors...');
-        applyContractorFilters();
-        renderContractors();
-        }
+    }
 
     async function processContractorData(contractors, counts = {}) {
     // Fetch actual project data to calculate real costs
@@ -3249,12 +3255,23 @@ function getContractorSecStatusSync(contractorName) {
             }
         });
 
-        const totalContractors = sortedContractors.length;
-        const totalPages = Math.ceil(totalContractors / contractorPageSize);
-
-        const start = currentContractorPage * contractorPageSize;
-        const end = start + contractorPageSize;
-        const contractorsToDisplay = sortedContractors.slice(start, end);
+        // Use server-side pagination info if available, otherwise client-side
+        const pagination = window.contractorsPagination;
+        let totalContractors, totalPages, contractorsToDisplay;
+        
+        if (pagination) {
+            // Server-side pagination
+            totalContractors = pagination.total;
+            totalPages = pagination.total_pages;
+            contractorsToDisplay = sortedContractors; // Already paginated by server
+        } else {
+            // Client-side pagination fallback
+            totalContractors = sortedContractors.length;
+            totalPages = Math.ceil(totalContractors / contractorPageSize);
+            const start = currentContractorPage * contractorPageSize;
+            const end = start + contractorPageSize;
+            contractorsToDisplay = sortedContractors.slice(start, end);
+        }
 
         let html = '';
         if (contractorsToDisplay.length === 0) {
@@ -3308,27 +3325,54 @@ function getContractorSecStatusSync(contractorName) {
         tableBody.innerHTML = html;
 
         // Update pagination info
-        contractorsShowing.textContent = Math.min(end, totalContractors).toLocaleString('en-PH');
-        contractorsTotal.textContent = totalContractors.toLocaleString('en-PH');
-        contractorsPageInfo.textContent = `Page ${currentContractorPage + 1} of ${totalPages || 1}`;
-
-        contractorsPrev.disabled = currentContractorPage === 0;
-        contractorsNext.disabled = currentContractorPage >= totalPages - 1;
+        if (pagination) {
+            // Server-side pagination
+            const showing = contractorsToDisplay.length;
+            contractorsShowing.textContent = showing.toLocaleString('en-PH');
+            contractorsTotal.textContent = totalContractors.toLocaleString('en-PH');
+            contractorsPageInfo.textContent = `Page ${pagination.page} of ${totalPages}`;
+            
+            contractorsPrev.disabled = pagination.page <= 1;
+            contractorsNext.disabled = pagination.page >= totalPages;
+        } else {
+            // Client-side pagination
+            const end = Math.min((currentContractorPage + 1) * contractorPageSize, totalContractors);
+            contractorsShowing.textContent = end.toLocaleString('en-PH');
+            contractorsTotal.textContent = totalContractors.toLocaleString('en-PH');
+            contractorsPageInfo.textContent = `Page ${currentContractorPage + 1} of ${totalPages || 1}`;
+            
+            contractorsPrev.disabled = currentContractorPage === 0;
+            contractorsNext.disabled = currentContractorPage >= totalPages - 1;
+        }
         
         console.log(`📄 Pagination: ${contractorsShowing.textContent} of ${contractorsTotal.textContent}, page ${currentContractorPage + 1}/${totalPages}, prev: ${contractorsPrev.disabled}, next: ${contractorsNext.disabled}`);
     }
 
-    function refreshContractorData() {
+    async function refreshContractorData() {
         console.log('🔄 Refreshing contractor data...');
-    currentContractorPage = 0;
-    initializeContractors();
+        currentContractorPage = 0;
+        await loadContractorsPage(1);
     }
 
-    function changeContractorPage(direction) {
-    const totalContractors = filteredContractors.length;
-    const totalPages = Math.ceil(totalContractors / contractorPageSize);
-    currentContractorPage = Math.max(0, Math.min(totalPages - 1, currentContractorPage + direction));
-    renderContractors();
+    async function changeContractorPage(direction) {
+        const newPage = currentContractorPage + direction;
+        const pagination = window.contractorsPagination;
+        
+        if (pagination) {
+            const totalPages = pagination.total_pages;
+            const validPage = Math.max(1, Math.min(totalPages, newPage + 1)); // API uses 1-based pages
+            
+            if (validPage !== (currentContractorPage + 1)) {
+                currentContractorPage = validPage - 1; // Convert back to 0-based for frontend
+                await loadContractorsPage(validPage);
+            }
+        } else {
+            console.log('⚠️ No pagination info available, using client-side pagination');
+            const totalContractors = filteredContractors.length;
+            const totalPages = Math.ceil(totalContractors / contractorPageSize);
+            currentContractorPage = Math.max(0, Math.min(totalPages - 1, currentContractorPage + direction));
+            renderContractors();
+        }
     }
 
     // Tab functionality moved outside class scope
@@ -3909,9 +3953,9 @@ function getContractorSecStatusSync(contractorName) {
                 // Apply the search filter directly with a small delay to ensure DOM is ready
                 setTimeout(() => {
                     console.log('🔄 Auto-applying search filter for contractor:', contractorName);
-                    // Apply contractor filters and render (same as what the Apply button should do)
-                    applyContractorFilters();
-                    renderContractors();
+                    // Use server-side search instead of client-side filtering
+                    currentContractorPage = 0;
+                    loadContractorsPage(1);
                 }, 100); // Small delay to ensure tab switch and DOM updates are complete
             }
         };
