@@ -625,12 +625,16 @@ function toggleMobileMenu() {
                 // Center this level using the same center point as the widest level
                 const startX = centerX + (maxWidth - totalWidth) / 2;
                 
+                // Ensure minimum spacing between rectangles
+                const minSpacing = 20;
+                const actualSpacing = Math.max(nodeSpacing, minSpacing);
+                
                 console.log(`📊 Level ${levelIndex + 1} (Position Level ${level}): ${uniqueMembers.length} unique members (${members.length} total records)`);
                 console.log(`   Total width needed: ${totalWidth}px, Starting X: ${startX}px`);
                 console.log(`   Unique members:`, uniqueMembers.map(m => `${m.name} (${m.years.join(',')})`));
                 
                 uniqueMembers.forEach((member, memberIndex) => {
-                    const x = startX + (memberIndex * (nodeWidth + nodeSpacing));
+                    const x = startX + (memberIndex * (nodeWidth + actualSpacing));
                     nodePositions.push({
                         ...member,
                         x: x,
@@ -640,7 +644,7 @@ function toggleMobileMenu() {
                         memberIndex: memberIndex
                     });
                     console.log(`   Member ${memberIndex + 1}: ${member.name} (Years: ${member.years.join(', ')}) at (${x}, ${levelY})`);
-                    console.log(`     startX: ${startX}, memberIndex: ${memberIndex}, spacing: ${nodeWidth + nodeSpacing}`);
+                    console.log(`     startX: ${startX}, memberIndex: ${memberIndex}, spacing: ${nodeWidth + actualSpacing}`);
                 });
             });
             
