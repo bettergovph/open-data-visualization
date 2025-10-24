@@ -176,6 +176,9 @@ function toggleMobileMenu() {
                         <button id="toggleTable" class="px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition-colors">
                             <i class="fas fa-table mr-2"></i>Table View
                         </button>
+                        <button id="toggleYear" class="px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition-colors">
+                            <i class="fas fa-calendar mr-2"></i>Year View
+                        </button>
                     </div>
                 </div>
                 
@@ -214,6 +217,35 @@ function toggleMobileMenu() {
                                 </tr>
                             </tbody>
                         </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Year View Container (Hidden by default) -->
+            <div id="yearView" class="hidden mb-8">
+                <div class="bg-white border border-gray-200 rounded-lg p-6">
+                    <div class="flex items-center justify-between mb-4">
+                        <h3 class="text-lg font-semibold text-gray-800">Year View</h3>
+                        <div class="flex items-center space-x-4">
+                            <label for="yearSelect" class="text-sm font-medium text-gray-700">Election Year:</label>
+                            <select id="yearSelect" class="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                <option value="">Select Year</option>
+                            </select>
+                            <div class="flex space-x-2">
+                                <button id="prevYear" class="px-3 py-1 bg-gray-200 text-gray-700 rounded hover:bg-gray-300 transition-colors">
+                                    <i class="fas fa-chevron-left"></i>
+                                </button>
+                                <button id="nextYear" class="px-3 py-1 bg-gray-200 text-gray-700 rounded hover:bg-gray-300 transition-colors">
+                                    <i class="fas fa-chevron-right"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    <div id="yearChart" class="min-h-96 overflow-auto">
+                        <div class="text-center py-8">
+                            <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto"></div>
+                            <p class="mt-2 text-gray-500">Loading year view...</p>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -915,29 +947,291 @@ function toggleMobileMenu() {
         }
         
         // Toggle between chart and table views
-        function toggleView() {
+        let currentView = 'chart'; // 'chart', 'table', 'year'
+        
+        function switchView(view) {
             const chartContainer = document.getElementById('hierarchyChart');
             const tableContainer = document.getElementById('familyTable');
+            const yearContainer = document.getElementById('yearView');
             const toggleViewBtn = document.getElementById('toggleView');
             const toggleTableBtn = document.getElementById('toggleTable');
+            const toggleYearBtn = document.getElementById('toggleYear');
             
-            if (chartContainer && !chartContainer.classList.contains('hidden')) {
-                // Switch to table view
-                chartContainer.classList.add('hidden');
-                tableContainer.classList.remove('hidden');
-                toggleViewBtn.classList.remove('bg-primary');
-                toggleViewBtn.classList.add('bg-gray-500');
-                toggleTableBtn.classList.remove('bg-gray-500');
-                toggleTableBtn.classList.add('bg-primary');
-            } else {
-                // Switch to chart view
+            // Hide all containers
+            chartContainer.classList.add('hidden');
+            tableContainer.classList.add('hidden');
+            yearContainer.classList.add('hidden');
+            
+            // Reset all buttons
+            toggleViewBtn.classList.remove('bg-primary');
+            toggleViewBtn.classList.add('bg-gray-500');
+            toggleTableBtn.classList.remove('bg-primary');
+            toggleTableBtn.classList.add('bg-gray-500');
+            toggleYearBtn.classList.remove('bg-primary');
+            toggleYearBtn.classList.add('bg-gray-500');
+            
+            // Show selected container and update button
+            if (view === 'chart') {
                 chartContainer.classList.remove('hidden');
-                tableContainer.classList.add('hidden');
                 toggleViewBtn.classList.remove('bg-gray-500');
                 toggleViewBtn.classList.add('bg-primary');
-                toggleTableBtn.classList.remove('bg-primary');
-                toggleTableBtn.classList.add('bg-gray-500');
+            } else if (view === 'table') {
+                tableContainer.classList.remove('hidden');
+                toggleTableBtn.classList.remove('bg-gray-500');
+                toggleTableBtn.classList.add('bg-primary');
+            } else if (view === 'year') {
+                yearContainer.classList.remove('hidden');
+                toggleYearBtn.classList.remove('bg-gray-500');
+                toggleYearBtn.classList.add('bg-primary');
+                // Initialize year view if not already done
+                if (!window.yearViewInitialized) {
+                    initializeYearView();
+                }
             }
+            
+            currentView = view;
+        }
+        
+        function toggleView() {
+            if (currentView === 'chart') {
+                switchView('table');
+            } else {
+                switchView('chart');
+            }
+        }
+        
+        // Initialize Year View
+        function initializeYearView() {
+            if (!window.familyData) return;
+            
+            // Get unique years from the data
+            const years = [...new Set(window.familyData.map(member => member.year))].sort((a, b) => a - b);
+            
+            // Populate year select dropdown
+            const yearSelect = document.getElementById('yearSelect');
+            yearSelect.innerHTML = '<option value="">Select Year</option>';
+            years.forEach(year => {
+                const option = document.createElement('option');
+                option.value = year;
+                option.textContent = year;
+                yearSelect.appendChild(option);
+            });
+            
+            // Set up event listeners
+            yearSelect.addEventListener('change', (e) => {
+                const selectedYear = e.target.value;
+                if (selectedYear) {
+                    displayYearView(parseInt(selectedYear));
+                }
+            });
+            
+            document.getElementById('prevYear').addEventListener('click', () => {
+                const currentYear = parseInt(yearSelect.value) || years[0];
+                const currentIndex = years.indexOf(currentYear);
+                if (currentIndex > 0) {
+                    yearSelect.value = years[currentIndex - 1];
+                    displayYearView(years[currentIndex - 1]);
+                }
+            });
+            
+            document.getElementById('nextYear').addEventListener('click', () => {
+                const currentYear = parseInt(yearSelect.value) || years[0];
+                const currentIndex = years.indexOf(currentYear);
+                if (currentIndex < years.length - 1) {
+                    yearSelect.value = years[currentIndex + 1];
+                    displayYearView(years[currentIndex + 1]);
+                }
+            });
+            
+            // Auto-select the most recent year
+            if (years.length > 0) {
+                yearSelect.value = years[years.length - 1];
+                displayYearView(years[years.length - 1]);
+            }
+            
+            window.yearViewInitialized = true;
+        }
+        
+        // Display Year View for a specific year
+        function displayYearView(year) {
+            if (!window.familyData) return;
+            
+            // Filter data for the selected year
+            const yearData = window.familyData.filter(member => member.year === year);
+            
+            if (yearData.length === 0) {
+                document.getElementById('yearChart').innerHTML = `
+                    <div class="text-center py-8">
+                        <i class="fas fa-calendar-times text-4xl text-gray-300 mb-4"></i>
+                        <p class="text-gray-500">No data available for ${year}</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            // Create year-specific hierarchy chart
+            createYearHierarchyChart(yearData, year);
+        }
+        
+        // Create hierarchy chart for a specific year
+        function createYearHierarchyChart(yearData, year) {
+            const container = document.getElementById('yearChart');
+            container.innerHTML = '';
+            
+            // Create SVG
+            const width = Math.max(1200, container.clientWidth || 1000);
+            const height = Math.max(600, yearData.length * 100 + 200);
+            
+            const svg = d3.select(container)
+                .append('svg')
+                .attr('width', width)
+                .attr('height', height)
+                .style('background', '#f8fafc');
+            
+            // Add zoom behavior
+            const zoom = d3.zoom()
+                .scaleExtent([0.1, 3])
+                .on('zoom', (event) => {
+                    chartGroup.attr('transform', event.transform);
+                });
+            
+            svg.call(zoom);
+            
+            const chartGroup = svg.append('g');
+            
+            // Group data by position level
+            const membersByLevel = {};
+            yearData.forEach(member => {
+                const position = member.position;
+                const level = positionHierarchy[position]?.level || 7;
+                if (!membersByLevel[level]) {
+                    membersByLevel[level] = [];
+                }
+                membersByLevel[level].push({
+                    first_name: member.first_name,
+                    last_name: member.last_name,
+                    name: `${member.first_name} ${member.last_name}`,
+                    position: member.position,
+                    province: member.province,
+                    municipality_city: member.municipality_city,
+                    year: member.year,
+                    level: level,
+                    category: positionHierarchy[position]?.category || 'municipal',
+                    color: positionHierarchy[position]?.color || 'position-municipal',
+                    fat: member.fat
+                });
+            });
+            
+            const levels = Object.keys(membersByLevel).map(Number).sort((a, b) => a - b);
+            const levelHeight = 120;
+            const nodeWidth = 160;
+            const nodeHeight = 80;
+            const nodeSpacing = 20;
+            
+            // Calculate positions for each level
+            const nodePositions = [];
+            levels.forEach((level, levelIndex) => {
+                const members = membersByLevel[level];
+                const totalWidth = members.length * (nodeWidth + nodeSpacing) - nodeSpacing;
+                const startX = (width - totalWidth) / 2;
+                const y = levelIndex * levelHeight + 100;
+                
+                members.forEach((member, memberIndex) => {
+                    const x = startX + memberIndex * (nodeWidth + nodeSpacing);
+                    nodePositions.push({
+                        ...member,
+                        x: x,
+                        y: y,
+                        levelIndex: levelIndex
+                    });
+                });
+            });
+            
+            // Draw rectangles
+            const nodes = chartGroup.selectAll('.hierarchy-node')
+                .data(nodePositions)
+                .enter()
+                .append('g')
+                .attr('class', 'hierarchy-node')
+                .attr('transform', d => `translate(${d.x}, ${d.y})`);
+            
+            nodes.append('rect')
+                .attr('width', nodeWidth)
+                .attr('height', nodeHeight)
+                .attr('rx', 8)
+                .attr('ry', 8)
+                .style('fill', d => levelBaseColors[d.levelIndex] || '#6B7280')
+                .style('stroke', '#1F2937')
+                .style('stroke-width', 2)
+                .style('filter', 'drop-shadow(0 2px 4px rgba(0,0,0,0.1))');
+            
+            // Add text elements
+            nodes.append('text')
+                .attr('text-anchor', 'middle')
+                .attr('x', nodeWidth/2)
+                .attr('y', 18)
+                .style('fill', 'white')
+                .style('font-size', '12px')
+                .style('font-weight', 'bold')
+                .text(d => {
+                    const name = d.name;
+                    return name.length > 18 ? name.substring(0, 18) + '...' : name;
+                });
+            
+            nodes.append('text')
+                .attr('text-anchor', 'middle')
+                .attr('x', nodeWidth/2)
+                .attr('y', 35)
+                .style('fill', 'white')
+                .style('font-size', '9px')
+                .style('font-weight', 'normal')
+                .text(d => {
+                    const position = d.position || '';
+                    return position.length > 25 ? position.substring(0, 25) + '...' : position;
+                });
+            
+            nodes.append('text')
+                .attr('text-anchor', 'middle')
+                .attr('x', nodeWidth/2)
+                .attr('y', 50)
+                .style('fill', 'white')
+                .style('font-size', '12px')
+                .style('font-weight', 'bold')
+                .style('text-shadow', '1px 1px 2px rgba(0,0,0,0.5)')
+                .text(d => d.year || 'N/A');
+            
+            nodes.append('text')
+                .attr('text-anchor', 'middle')
+                .attr('x', nodeWidth/2)
+                .attr('y', 65)
+                .style('fill', 'white')
+                .style('font-size', '10px')
+                .style('font-weight', 'normal')
+                .style('text-shadow', '1px 1px 2px rgba(0,0,0,0.5)')
+                .text(d => {
+                    if (d.position && (d.position.includes('MAYOR') || d.position.includes('VICE MAYOR') || d.position.includes('COUNCILOR'))) {
+                        const location = d.municipality_city || d.province || 'N/A';
+                        return location.length > 20 ? location.substring(0, 20) + '...' : location;
+                    }
+                    return '';
+                });
+            
+            // Add title
+            chartGroup.append('text')
+                .attr('x', width/2)
+                .attr('y', 30)
+                .attr('text-anchor', 'middle')
+                .style('font-size', '18px')
+                .style('font-weight', 'bold')
+                .style('fill', '#1F2937')
+                .text(`Political Positions in ${year}`);
+            
+            // Set initial zoom and pan
+            const initialScale = 0.4;
+            const panX = Math.max(200, width * 0.12);
+            const panY = Math.max(100, levels.length * 30);
+            
+            chartGroup.attr('transform', `translate(${panX}, ${panY}) scale(${initialScale})`);
         }
         
         // Update displayFamilyData to also create hierarchy chart
@@ -1005,10 +1299,13 @@ function toggleMobileMenu() {
             const toggleTableBtn = document.getElementById('toggleTable');
             
             if (toggleViewBtn) {
-                toggleViewBtn.addEventListener('click', toggleView);
+                toggleViewBtn.addEventListener('click', () => switchView('chart'));
             }
             if (toggleTableBtn) {
-                toggleTableBtn.addEventListener('click', toggleView);
+                toggleTableBtn.addEventListener('click', () => switchView('table'));
+            }
+            if (document.getElementById('toggleYear')) {
+                document.getElementById('toggleYear').addEventListener('click', () => switchView('year'));
             }
         });
         
