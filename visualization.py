@@ -2567,6 +2567,7 @@ async def dynasty_family_api(
                     last_name,
                     position,
                     province,
+                    municipality_city,
                     year,
                     fat
                 FROM political_dynasties 
@@ -2593,7 +2594,8 @@ async def dynasty_family_api(
                                 first_name,
                                 last_name,
                                 position,
-                                municipality_city as province,
+                                province,
+                                municipality_city,
                                 year,
                                 fat
                             FROM political_dynasties 
@@ -2610,6 +2612,7 @@ async def dynasty_family_api(
                     last_name,
                     position,
                     province,
+                    municipality_city,
                     year,
                     fat
                 FROM political_dynasties 
@@ -2627,6 +2630,7 @@ async def dynasty_family_api(
                 "last_name": member["last_name"],
                 "position": member["position"],
                 "province": member["province"],
+                "municipality_city": member["municipality_city"],
                 "year": member["year"],
                 "fat": member["fat"]
             })

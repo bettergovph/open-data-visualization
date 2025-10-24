@@ -744,10 +744,8 @@ function toggleMobileMenu() {
                 .attr('rx', 8)
                 .attr('ry', 8)
                 .style('fill', d => {
-                    // Use level-based colors with year-based shades
-                    // For merged people, use the most recent year for color calculation
-                    const yearForColor = d.years && d.years.length > 0 ? Math.max(...d.years) : d.year;
-                    return getColorWithShade(d.levelIndex, yearForColor);
+                    // Use level-based colors without year-based shades
+                    return levelBaseColors[d.levelIndex] || '#6B7280';
                 })
                 .style('stroke', '#1F2937')
                 .style('stroke-width', 2)
