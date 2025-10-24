@@ -345,11 +345,13 @@ function toggleMobileMenu() {
             nonDynastyCount.textContent = uniqueNonDynastyMembers.size;
             
             // Total positions (not unique) - only for dynasty members
-            positionsCount.textContent = dynastyMembers.length;
+            // Show unique positions count instead of total count
+            const uniquePositions = new Set(dynastyMembers.map(member => member.position)).size;
+            positionsCount.textContent = uniquePositions;
             
             // Unique positions as subtitle - only for dynasty members
             const uniquePositions = new Set(dynastyMembers.map(member => member.position)).size;
-            uniquePositionsCount.textContent = `Unique: ${uniquePositions}`;
+            uniquePositionsCount.textContent = uniquePositions;
             
             const uniqueProvinces = new Set(dynastyMembers.map(member => member.province)).size;
             provincesCount.textContent = uniqueProvinces;
@@ -886,11 +888,13 @@ function toggleMobileMenu() {
             nonDynastyCount.textContent = uniqueNonDynastyMembers.size;
             
             // Total positions (not unique) - only for dynasty members
-            positionsCount.textContent = dynastyMembers.length;
+            // Show unique positions count instead of total count
+            const uniquePositions = new Set(dynastyMembers.map(member => member.position)).size;
+            positionsCount.textContent = uniquePositions;
             
             // Unique positions as subtitle - only for dynasty members
             const uniquePositions = new Set(dynastyMembers.map(member => member.position)).size;
-            uniquePositionsCount.textContent = `Unique: ${uniquePositions}`;
+            uniquePositionsCount.textContent = uniquePositions;
             
             const uniqueProvinces = new Set(dynastyMembers.map(member => member.province)).size;
             provincesCount.textContent = uniqueProvinces;
