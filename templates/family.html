@@ -325,57 +325,6 @@ function toggleMobileMenu() {
             }
         }
         
-        function displayFamilyData(familyData) {
-            const tableBody = document.getElementById('familyTableBody');
-            const familyCount = document.getElementById('familyCount');
-            const positionsCount = document.getElementById('positionsCount');
-            const uniquePositionsCount = document.getElementById('uniquePositionsCount');
-            const provincesCount = document.getElementById('provincesCount');
-            const nonDynastyCount = document.getElementById('nonDynastyCount');
-            
-            // Filter out non-dynasty members (fat = 0) for the table
-            const dynastyMembers = familyData.filter(member => member.fat === 1);
-            nonDynastyMembers = familyData.filter(member => member.fat === 0);
-            
-            // Update summary counts
-            // Count unique members (by first_name + last_name combination)
-            const uniqueMembers = new Set(dynastyMembers.map(member => `${member.first_name} ${member.last_name}`));
-            familyCount.textContent = uniqueMembers.size;
-            const uniqueNonDynastyMembers = new Set(nonDynastyMembers.map(member => `${member.first_name} ${member.last_name}`));
-            nonDynastyCount.textContent = uniqueNonDynastyMembers.size;
-            
-            // Total positions (not unique) - only for dynasty members
-            // Show unique positions count instead of total count
-            const uniquePositions = new Set(dynastyMembers.map(member => member.position)).size;
-            positionsCount.textContent = uniquePositions;
-            
-            // Unique positions as subtitle - only for dynasty members (removed duplicate)
-            uniquePositionsCount.textContent = '';
-            
-            const uniqueProvinces = new Set(dynastyMembers.map(member => member.province)).size;
-            provincesCount.textContent = uniqueProvinces;
-            
-            // Populate table - only show dynasty members
-            tableBody.innerHTML = '';
-            dynastyMembers.forEach(member => {
-                const row = document.createElement('tr');
-                row.innerHTML = `
-                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                        ${member.first_name} ${member.last_name}
-                    </td>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                        ${member.position}
-                    </td>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                        ${member.province}
-                    </td>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                        ${member.year}
-                    </td>
-                `;
-                tableBody.appendChild(row);
-            });
-        }
         
         function displayNoData() {
             const tableBody = document.getElementById('familyTableBody');
