@@ -867,9 +867,9 @@ function toggleMobileMenu() {
             
             // Remove the golden border highlighting to prevent visual glitches
             
-            // Add legend
+            // Add legend at the top of the viewport
             const legend = svg.append('g')
-                .attr('transform', `translate(20, ${height - 80})`);
+                .attr('transform', 'translate(20, 20)');
             
             const legendItems = [
                 { color: 'position-national', label: 'National Level' },
