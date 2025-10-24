@@ -581,6 +581,7 @@ function toggleMobileMenu() {
             
             console.log(`📏 Max rectangles in any level: ${maxRectangles}`);
             console.log(`📏 Max width needed: ${maxWidth}px, Center X: ${centerX}px`);
+            console.log(`📏 SVG width: ${width}px, Available space: ${width - 200}px`);
             
             // Set initial zoom and pan to show the chart content
             const initialScale = 0.4; // Start at 40% zoom (zoomed in 1 level)
@@ -639,6 +640,7 @@ function toggleMobileMenu() {
                         memberIndex: memberIndex
                     });
                     console.log(`   Member ${memberIndex + 1}: ${member.name} (Years: ${member.years.join(', ')}) at (${x}, ${levelY})`);
+                    console.log(`     startX: ${startX}, memberIndex: ${memberIndex}, spacing: ${nodeWidth + nodeSpacing}`);
                 });
             });
             
