@@ -20,6 +20,18 @@ def create_dynasty_overlord_geojson():
         print(f"Error loading dynasty cache: {e}")
         return
     
+    # Load province mapping
+    mapping_file = '/home/joebert/open-data-visualization/static/data/dynasty_province_mapping.json'
+    
+    try:
+        with open(mapping_file, 'r', encoding='utf-8') as f:
+            mapping_data = json.load(f)
+        province_mapping = mapping_data['mapping']
+        print(f"✅ Loaded province mapping with {len(province_mapping)} mappings")
+    except Exception as e:
+        print(f"❌ Error loading province mapping: {e}")
+        province_mapping = {}
+    
     # Process dynasty data to find overlords (strongest dynasty per province)
     province_overlords = {}
     
@@ -71,15 +83,22 @@ def create_dynasty_overlord_geojson():
             if len(parts) >= 3:
                 province_name = parts[2].replace('-', ' ').title()
                 
-                # Find matching overlord data
-                overlord_data = None
-                for dynasty_province, overlord in province_overlords.items():
-                    if province_name.upper() == dynasty_province.upper():
-                        overlord_data = overlord
-                        break
+                # Use province mapping to get the correct database name
+                province_key = province_name.lower()
+                mapped_province = province_mapping.get(province_key, province_name.upper())
+                
+                # Find matching overlord data using the mapped province name
+                overlord_data = province_overlords.get(mapped_province)
+                
+                if overlord_data:
+                    print(f"✅ Mapped {province_name} → {mapped_province} → {overlord_data['surname']}")
+                else:
+                    print(f"⚠️ No overlord data for {province_name} (mapped to {mapped_province})")
                 
                 # Add the feature to our consolidated GeoJSON
+                # Handle FeatureCollection, individual Feature, and direct coordinate arrays
                 if 'features' in province_data and province_data['features']:
+                    # Standard GeoJSON FeatureCollection format
                     feature = province_data['features'][0]
                     feature['properties'] = {
                         'name': province_name,
@@ -91,6 +110,44 @@ def create_dynasty_overlord_geojson():
                     }
                     consolidated_geojson['features'].append(feature)
                     print(f"Added: {province_name} - Overlord: {feature['properties']['overlord_surname']}")
+                elif 'type' in province_data and province_data['type'] == 'Feature':
+                    # Individual GeoJSON Feature format
+                    feature = province_data.copy()
+                    feature['properties'] = {
+                        'name': province_name,
+                        'id': i + 1,
+                        'overlord_surname': overlord_data['surname'] if overlord_data else 'Unknown',
+                        'dynasty_count': overlord_data['dynasty_count'] if overlord_data else 0,
+                        'total_count': overlord_data['total_count'] if overlord_data else 0,
+                        'control_intensity': (overlord_data['dynasty_count'] / overlord_data['total_count'] * 100) if overlord_data and overlord_data['total_count'] > 0 else 0
+                    }
+                    consolidated_geojson['features'].append(feature)
+                    print(f"Added: {province_name} - Overlord: {feature['properties']['overlord_surname']}")
+                elif 'coordinates' in province_data or isinstance(province_data, list):
+                    # Direct coordinate array format - create a proper GeoJSON Feature
+                    coordinates = province_data if isinstance(province_data, list) else province_data.get('coordinates', [])
+                    if coordinates:
+                        feature = {
+                            'type': 'Feature',
+                            'geometry': {
+                                'type': 'Polygon',
+                                'coordinates': coordinates
+                            },
+                            'properties': {
+                                'name': province_name,
+                                'id': i + 1,
+                                'overlord_surname': overlord_data['surname'] if overlord_data else 'Unknown',
+                                'dynasty_count': overlord_data['dynasty_count'] if overlord_data else 0,
+                                'total_count': overlord_data['total_count'] if overlord_data else 0,
+                                'control_intensity': (overlord_data['dynasty_count'] / overlord_data['total_count'] * 100) if overlord_data and overlord_data['total_count'] > 0 else 0
+                            }
+                        }
+                        consolidated_geojson['features'].append(feature)
+                        print(f"Added: {province_name} - Overlord: {feature['properties']['overlord_surname']}")
+                    else:
+                        print(f"⚠️ No coordinates found for {province_name}")
+                else:
+                    print(f"⚠️ No GeoJSON features or coordinates found for {province_name}")
             
         except Exception as e:
             print(f"Error processing {province_file}: {e}")

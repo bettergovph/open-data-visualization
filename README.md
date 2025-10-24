@@ -2,6 +2,22 @@
 
 This project contains the **BetterGovPH Data Visualizations** platform - a comprehensive open data visualization tool for Philippine government budget, infrastructure, and flood control projects.
 
+## ⚠️ Data Accuracy Priority
+
+**CRITICAL REMINDER**: Our credibility will be judged on how accurate our data is, not by how flashy it looks. All visualizations must be based on verified, accurate data sources. Data integrity is paramount.
+
+### Data Quality Disclaimer
+
+**IMPORTANT**: The datasets we work with are inherently "dirty" and the integration processes may not be perfectly accurate. We acknowledge that:
+
+- **Raw data quality**: Government datasets often contain inconsistencies, missing values, and formatting issues
+- **Integration challenges**: Mapping between different data sources (budget, NEP, DIME, dynasty) involves interpretation and may contain errors
+- **Continuous improvement**: We welcome corrections and feedback from domain experts to improve data accuracy
+- **Learning process**: We are committed to learning from subject matter experts about what the data truly represents
+- **Transparency**: We are open about data limitations and actively seek to improve accuracy through expert input
+
+**If you find data inaccuracies or have domain expertise to share, please point them out so we can correct and improve the visualizations.**
+
 ## Project Status
 
 ✅ **FULLY ISOLATED** from kenchlightyear business platform  

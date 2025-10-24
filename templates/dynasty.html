@@ -837,9 +837,10 @@ function createSurnamesChart(data) {
         if (typeof window.dynastyCurrentPage === 'undefined') {
             window.dynastyCurrentPage = 0;
         }
-        if (typeof window.dynastyAllData === 'undefined') {
-            window.dynastyAllData = data.slice(0, 100); // Limit to top 100
-        }
+        // Always sort and update the data to ensure correct ordering
+        window.dynastyAllData = data
+            .sort((a, b) => b.dynasty_count - a.dynasty_count)
+            .slice(0, 100);
         
         console.log('📊 Dynasty data initialized:', {
             totalItems: window.dynastyAllData.length,
@@ -971,7 +972,7 @@ function createSurnamesChart(data) {
                     borderWidth: 2
                 }
             },
-            onClick: function(event, elements) {
+            onClick: async function(event, elements) {
                 if (elements.length > 0) {
                     const element = elements[0];
                     const dataIndex = element.index;
@@ -984,7 +985,7 @@ function createSurnamesChart(data) {
                     if (item) {
                         // Redirect to family page with surname and province parameters
                         const encodedSurname = encodeURIComponent(item.surname);
-                        const mappedProvince = mapProvinceNameToDynasty(item.province);
+                        const mappedProvince = await mapProvinceNameToDynasty(item.province);
                         const encodedProvince = encodeURIComponent(mappedProvince);
                         
                         window.location.href = `/family?surname=${encodedSurname}&province=${encodedProvince}`;
@@ -1272,76 +1273,33 @@ function createDynastyHeatmap(dynastyData) {
         });
 }
 
+        // Province mapping cache
+        let provinceMappingCache = null;
+        
+        // Load province mapping from JSON file
+        async function loadProvinceMapping() {
+            if (provinceMappingCache) {
+                return provinceMappingCache;
+            }
+            
+            try {
+                const response = await fetch('/static/data/dynasty_province_mapping.json');
+                const data = await response.json();
+                provinceMappingCache = data.mapping;
+                console.log('✅ Loaded province mapping from JSON:', Object.keys(provinceMappingCache).length, 'mappings');
+                return provinceMappingCache;
+            } catch (error) {
+                console.error('❌ Failed to load province mapping:', error);
+                return {};
+            }
+        }
+        
         // Helper function to map GeoJSON province names to dynasty database format
-        function mapProvinceNameToDynasty(geojsonProvinceName) {
+        async function mapProvinceNameToDynasty(geojsonProvinceName) {
             const province = geojsonProvinceName.toLowerCase().replace(/-/g, ' ');
             console.log(`🔍 Mapping province: "${geojsonProvinceName}" → "${province}"`);
             
-            // Manual mapping for special cases - carefully handle multiple provinces
-            const provinceMapping = {
-                'metropolitan manila': 'NCR, CITY OF MANILA, FIRST DISTRICT',
-                'manila': 'NCR, CITY OF MANILA, FIRST DISTRICT',
-                // 3 Samar provinces - be very specific
-                'northern samar': 'NORTHERN SAMAR',
-                'eastern samar': 'EASTERN SAMAR', 
-                'samar': 'SAMAR',  // This is WESTERN SAMAR
-                'western samar': 'SAMAR',
-                // 2 Leyte provinces - be very specific
-                'southern leyte': 'SOUTHERN LEYTE',
-                'leyte': 'LEYTE',  // This is NORTHERN LEYTE
-                'northern leyte': 'LEYTE',
-                // 2 Cotabato provinces - be very specific  
-                'north cotabato': 'COTABATO',
-                'south cotabato': 'SOUTH COTABATO',
-                // City-level mappings for database compatibility
-                'cauayan': 'CAUAYAN CITY',
-                'catbalogan': 'CATBALOGAN CITY',
-                'dipolog': 'DIPOLOG CITY',
-                'iligan': 'ILIGAN CITY',
-                'san fernando': 'SAN FERNANDO',
-                'san jose': 'SAN JOSE',
-                // Province-level mappings
-                'isabela': 'ISABELA',
-                'cagayan': 'CAGAYAN',
-                'batangas': 'BATANGAS',
-                'cavite': 'CAVITE',
-                'laguna': 'LAGUNA',
-                'iloilo': 'ILOILO CITY',  // Iloilo City is part of Iloilo Province
-                'negros oriental': 'BAIS CITY',  // Use Bais City as representative for Negros Oriental
-                'davao del norte': 'DAVAO DEL NORTE',
-                'davao del sur': 'DAVAO DEL SUR',
-                'davao oriental': 'DAVAO ORIENTAL',
-                'davao occidental': 'DAVAO OCCIDENTAL',
-                'tawi tawi': 'TAWI-TAWI',
-                'tawi-tawi': 'TAWI-TAWI',
-                'compostela valley': 'COMPOSTELA VALLEY',
-                'agusan del norte': 'AGUSAN DEL NORTE',
-                'agusan del sur': 'AGUSAN DEL SUR',
-                'surigao del norte': 'SURIGAO DEL NORTE',
-                'surigao del sur': 'SURIGAO DEL SUR',
-                'lanao del norte': 'LANAO DEL NORTE',
-                'lanao del sur': 'LANAO DEL SUR',
-                'zamboanga del norte': 'ZAMBOANGA DEL NORTE',
-                'zamboanga del sur': 'ZAMBOANGA DEL SUR',
-                'zamboanga sibugay': 'ZAMBOANGA SIBUGAY',
-                'camarines norte': 'CAMARINES NORTE',
-                'camarines sur': 'CAMARINES SUR',
-                'nueva ecija': 'NUEVA ECIJA',
-                'nueva vizcaya': 'NUEVA VIZCAYA',
-                'occidental mindoro': 'OCCIDENTAL MINDORO',
-                'oriental mindoro': 'ORIENTAL MINDORO',
-                'negros occidental': 'NEGROS OCCIDENTAL',
-                'negros oriental': 'NEGROS ORIENTAL',
-                'misamis occidental': 'MISAMIS OCCIDENTAL',
-                'misamis oriental': 'MISAMIS ORIENTAL',
-                'mountain province': 'MOUNTAIN PROVINCE',
-                'dinagat islands': 'DINAGAT ISLANDS',
-                'sultan kudarat': 'SULTAN KUDARAT',
-                'ilocos norte': 'ILOCOS NORTE',
-                'ilocos sur': 'ILOCOS SUR',
-                'la union': 'LA UNION',
-                'pangasinan': 'PANGASINAN'
-            };
+            const provinceMapping = await loadProvinceMapping();
             
             // Check for exact mapping first
             if (provinceMapping[province]) {
@@ -1801,10 +1759,10 @@ async function loadPopupSurnames(provinceName, containerId) {
                 `;
                 
                 // Add click handler to redirect to /family with surname and province parameters
-                surnameItem.addEventListener('click', function() {
+                surnameItem.addEventListener('click', async function() {
                     const encodedSurname = encodeURIComponent(surname.surname);
                     // Use the mapping function to convert province name to database format
-                    const mappedProvince = mapProvinceNameToDynasty(provinceName);
+                    const mappedProvince = await mapProvinceNameToDynasty(provinceName);
                     const encodedProvince = encodeURIComponent(mappedProvince);
                     window.location.href = `/family?surname=${encodedSurname}&province=${encodedProvince}`;
                 });

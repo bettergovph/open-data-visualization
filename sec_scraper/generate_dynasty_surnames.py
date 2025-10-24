@@ -28,19 +28,29 @@ async def generate_dynasty_surnames():
             database=os.getenv('POSTGRES_DB_DYNASTY_SEC', 'dynasty')
         )
         
-        # Get top surnames by province (province-sensitive) - TOP 100 surnames
+        # Get top surnames by province (province-sensitive) - TOP 3 surnames per province
         query = """
+            WITH ranked_surnames AS (
+                SELECT 
+                    last_name,
+                    province,
+                    COUNT(*) as total_count,
+                    COUNT(CASE WHEN fat = 1 THEN 1 END) as dynasty_count,
+                    COUNT(CASE WHEN fat = 0 THEN 1 END) as non_dynasty_count,
+                    ROW_NUMBER() OVER (PARTITION BY province ORDER BY COUNT(*) DESC) as rn
+                FROM political_dynasties 
+                WHERE last_name IS NOT NULL AND last_name != ''
+                GROUP BY last_name, province
+            )
             SELECT 
                 last_name,
                 province,
-                COUNT(*) as total_count,
-                COUNT(CASE WHEN fat = 1 THEN 1 END) as dynasty_count,
-                COUNT(CASE WHEN fat = 0 THEN 1 END) as non_dynasty_count
-            FROM political_dynasties 
-            WHERE last_name IS NOT NULL AND last_name != ''
-            GROUP BY last_name, province
-            ORDER BY total_count DESC
-            LIMIT 100
+                total_count,
+                dynasty_count,
+                non_dynasty_count
+            FROM ranked_surnames
+            WHERE rn <= 3
+            ORDER BY dynasty_count DESC, total_count DESC
         """
         
         records = await conn.fetch(query)
@@ -77,7 +87,7 @@ async def generate_dynasty_surnames():
                 'total_non_dynasty': total_non_dynasty,
                 'unique_provinces': len(unique_provinces),
                 'last_updated': datetime.now().isoformat(),
-                'description': 'Top 100 political dynasty surnames by province (province-sensitive)',
+                'description': 'Top 3 political dynasty surnames per province (province-sensitive)',
                 'source': 'PostgreSQL dynasty.political_dynasties table'
             },
             'provinces': unique_provinces,
