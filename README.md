@@ -132,6 +132,14 @@ The `.env` file is gitignored to protect your credentials.
 
 ### Source Code
 - `src/main.rs` - Actix-Web frontend application
+
+### Family Scraper Module
+- `family_scraper/` - Political dynasty relationship discovery tools
+  - Wikipedia scrapers for automated family connection discovery
+  - Advanced name matching for maiden/married names
+  - Database integration for relationship mapping
+  - Scheduled processing for continuous discovery
+  - See `family_scraper/README.md` for detailed documentation
 - `visualization.py` - FastAPI backend (mock responses)
 - `Cargo.toml` - Rust dependencies
 - `requirements.txt` - Python dependencies

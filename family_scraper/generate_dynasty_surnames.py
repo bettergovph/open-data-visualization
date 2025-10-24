@@ -34,10 +34,10 @@ async def generate_dynasty_surnames():
                 SELECT 
                     last_name,
                     province,
-                    COUNT(*) as total_count,
-                    COUNT(CASE WHEN fat = 1 THEN 1 END) as dynasty_count,
-                    COUNT(CASE WHEN fat = 0 THEN 1 END) as non_dynasty_count,
-                    ROW_NUMBER() OVER (PARTITION BY province ORDER BY COUNT(*) DESC) as rn
+                    COUNT(DISTINCT first_name || ' ' || last_name) as total_count,
+                    COUNT(DISTINCT CASE WHEN fat = 1 THEN first_name || ' ' || last_name END) as dynasty_count,
+                    COUNT(DISTINCT CASE WHEN fat = 0 THEN first_name || ' ' || last_name END) as non_dynasty_count,
+                    ROW_NUMBER() OVER (PARTITION BY province ORDER BY COUNT(DISTINCT first_name || ' ' || last_name) DESC) as rn
                 FROM political_dynasties 
                 WHERE last_name IS NOT NULL AND last_name != ''
                 GROUP BY last_name, province

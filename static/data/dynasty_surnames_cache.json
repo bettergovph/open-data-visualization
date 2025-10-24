@@ -1,1986 +1,1066 @@
 {
   "summary": {
     "total_surnames": 370,
-    "total_politicians": 4602,
-    "total_dynasty": 4461,
-    "total_non_dynasty": 141,
+    "total_politicians": 2441,
+    "total_dynasty": 2364,
+    "total_non_dynasty": 181,
     "unique_provinces": 130,
-    "last_updated": "2025-10-24T20:26:16.242639",
+    "last_updated": "2025-10-24T20:30:19.351929",
     "description": "Top 3 political dynasty surnames per province (province-sensitive)",
     "source": "PostgreSQL dynasty.political_dynasties table"
   },
   "provinces": [
-    "SULU",
-    "ALBAY",
-    "MISAMIS ORIENTAL",
-    "Muntinlupa",
-    "ABRA PROVINCE",
-    "NUEVA ECIJA PROVINCE",
-    "SIQUIJOR PROVINCE",
-    "MISAMIS OCCIDENTAL",
-    "Parañaque",
-    "KALINGA",
-    "DAVAO DEL SUR",
-    "CAMIGUIN",
-    "BENGUET",
-    "CAPIZ",
-    "CAMARINES NORTE",
-    "Taguig",
-    "Maguindanao del Norte",
-    "Santiago",
-    "APAYAO PROVINCE",
-    "Tuguegarao",
-    "Malabon",
-    "ISABELA PROVINCE",
-    "BATAAN PROVINCE",
-    "Bilirian",
-    "EASTERN SAMAR",
-    "DAVAO ORIENTAL",
-    "LANAO DEL NORTE",
-    "ABRA",
-    "PANGASINAN",
-    "BATAAN",
-    "AGUSAN DEL NORTE",
-    "TAWI-TAWI",
-    "AKLAN",
-    "LA UNION",
-    "ZAMBOANGA DEL SUR",
-    "BATANGAS",
-    "SULTAN KUDARAT",
-    "Cauayan",
-    "RIZAL",
-    "SIQUIJOR",
-    "Pasay",
-    "SAMAR",
-    "NUEVA VIZCAYA",
-    "IFUGAO",
-    "BULACAN",
-    "QUIRINO",
-    "San Juan",
-    "PAMPANGA",
-    "APAYAO",
-    "NEGROS OCCIDENTAL",
-    "SORSOGON",
-    "LANAO DEL SUR",
-    "ISABELA",
-    "NCR, SECOND DISTRICT",
-    "COMPOSTELA VALLEY",
-    "BILIRAN",
-    "ILOILO",
-    "BATANES",
-    "NEGROS ORIENTAL",
-    "ILOILO PROVINCE",
-    "NUEVA VIZCAYA PROVINCE",
-    "CAGAYAN PROVINCE",
-    "GUIMARAS",
-    "NCR, THIRD DISTRICT",
-    "ROMBLON",
-    "NORTHERN SAMAR",
-    "CAVITE",
-    "PANGASINAN PROVINCE",
-    "AGUSAN DEL SUR",
-    "Ilagan",
-    "BUKIDNON",
-    "SURIGAO DEL NORTE",
-    "AURORA",
-    "DAVAO OCCIDENTAL",
-    "SARANGANI",
-    "LA UNION PROVINCE",
-    "ZAMBALES PROVINCE",
+    "TARLAC PROVINCE",
     "Navotas",
-    "CAVITE PROVINCE",
-    "CAMARINES SUR",
-    "Makati",
-    "ILOCOS NORTE",
-    "ZAMBOANGA DEL NORTE",
-    "BOHOL",
+    "SULU",
+    "BATANES",
     "DAVAO DE ORO",
-    "BENGUET PROVINCE",
-    "MAGUINDANAO",
-    "OCCIDENTAL MINDORO",
-    "PALAWAN",
-    "Mandaluyong",
-    "SOUTH COTABATO",
-    "QUEZON",
-    "BASILAN",
+    "Bilirian",
     "LAGUNA",
-    "NUEVA ECIJA",
-    "ILOCOS SUR",
-    "LEYTE",
-    "Marikina",
-    "MARINDUQUE",
-    "ORIENTAL MINDORO",
-    "COTABATO",
+    "Mandaluyong",
     "KALINGA PROVINCE",
-    "Valenzuela",
-    "MASBATE",
-    "PAMPANGA PROVINCE",
-    "ZAMBOANGA SIBUGAY",
-    "GUIMARAS PROVINCE",
-    "CAGAYAN",
-    "Pasig",
-    "Las Piñas",
-    "DAVAO DEL NORTE",
-    "CEBU",
-    "IFUGAO PROVINCE",
-    "QUIRINO PROVINCE",
-    "ANTIQUE",
     "BATANES PROVINCE",
-    "SURIGAO DEL SUR",
-    "Manila",
-    "MOUNTAIN PROVINCE",
-    "DINAGAT ISLANDS",
-    "BULACAN PROVINCE",
-    "NCR, CITY OF MANILA, FIRST DISTRICT",
-    "SOUTHERN LEYTE",
-    "NCR, FOURTH DISTRICT",
-    "TARLAC",
-    "Maguindanao del Sur",
+    "EASTERN SAMAR",
+    "SOUTH COTABATO",
+    "KALINGA",
+    "IFUGAO PROVINCE",
+    "ABRA",
+    "CEBU",
+    "NUEVA VIZCAYA",
+    "QUEZON",
+    "AGUSAN DEL NORTE",
+    "NUEVA ECIJA",
+    "CAMARINES SUR",
     "CATANDUANES",
+    "LA UNION",
+    "Makati",
+    "COMPOSTELA VALLEY",
+    "ZAMBOANGA DEL SUR",
+    "PALAWAN",
+    "SORSOGON",
+    "CAMARINES NORTE",
+    "Tuguegarao",
+    "SULTAN KUDARAT",
+    "Las Piñas",
+    "BATAAN",
+    "ANTIQUE",
+    "NCR, CITY OF MANILA, FIRST DISTRICT",
+    "AURORA",
+    "PAMPANGA PROVINCE",
+    "NCR, THIRD DISTRICT",
+    "CAPIZ",
+    "NORTHERN SAMAR",
+    "MISAMIS OCCIDENTAL",
+    "MOUNTAIN PROVINCE",
+    "GUIMARAS",
+    "ABRA PROVINCE",
+    "ILOILO",
+    "ZAMBOANGA SIBUGAY",
+    "BILIRAN",
+    "BATAAN PROVINCE",
+    "Pasig",
+    "AKLAN",
+    "Muntinlupa",
+    "ZAMBOANGA DEL NORTE",
+    "Pasay",
+    "CAGAYAN",
+    "MARINDUQUE",
+    "Taguig",
+    "SARANGANI",
+    "SURIGAO DEL SUR",
+    "DAVAO ORIENTAL",
+    "DAVAO DEL NORTE",
+    "BATANGAS",
+    "PAMPANGA",
+    "CAGAYAN PROVINCE",
+    "DINAGAT ISLANDS",
+    "NUEVA VIZCAYA PROVINCE",
+    "ORIENTAL MINDORO",
+    "NEGROS ORIENTAL",
+    "NCR, FOURTH DISTRICT",
+    "LANAO DEL SUR",
+    "Malabon",
+    "Manila",
+    "CAVITE PROVINCE",
+    "Maguindanao del Norte",
+    "NUEVA ECIJA PROVINCE",
+    "SURIGAO DEL NORTE",
+    "MISAMIS ORIENTAL",
+    "MAGUINDANAO",
+    "ILOCOS NORTE",
+    "ROMBLON",
+    "BENGUET PROVINCE",
+    "Cauayan",
+    "ISABELA PROVINCE",
+    "APAYAO",
+    "LA UNION PROVINCE",
+    "Marikina",
+    "OCCIDENTAL MINDORO",
+    "BULACAN PROVINCE",
+    "PANGASINAN PROVINCE",
+    "SIQUIJOR PROVINCE",
+    "BUKIDNON",
+    "ALBAY",
+    "SAMAR",
+    "COTABATO",
+    "NEGROS OCCIDENTAL",
+    "TARLAC",
     "Caloocan",
+    "APAYAO PROVINCE",
+    "MASBATE",
+    "CAMIGUIN",
+    "ILOCOS SUR",
+    "Maguindanao del Sur",
+    "SIQUIJOR",
+    "LANAO DEL NORTE",
+    "PANGASINAN",
+    "Valenzuela",
+    "QUIRINO",
+    "QUIRINO PROVINCE",
     "ZAMBALES",
-    "TARLAC PROVINCE"
+    "AGUSAN DEL SUR",
+    "BOHOL",
+    "NCR, SECOND DISTRICT",
+    "RIZAL",
+    "BENGUET",
+    "Parañaque",
+    "CAVITE",
+    "ILOILO PROVINCE",
+    "BASILAN",
+    "BULACAN",
+    "IFUGAO",
+    "GUIMARAS PROVINCE",
+    "Ilagan",
+    "LEYTE",
+    "San Juan",
+    "DAVAO DEL SUR",
+    "ZAMBALES PROVINCE",
+    "Santiago",
+    "TAWI-TAWI",
+    "DAVAO OCCIDENTAL",
+    "ISABELA",
+    "SOUTHERN LEYTE"
   ],
   "surnames": [
     {
       "surname": "AMPATUAN",
       "province": "MAGUINDANAO",
-      "total_count": 101,
-      "dynasty_count": 101,
+      "total_count": 61,
+      "dynasty_count": 61,
+      "non_dynasty_count": 0,
+      "dynasty_percentage": 100.0
+    },
+    {
+      "surname": "SINSUAT",
+      "province": "MAGUINDANAO",
+      "total_count": 30,
+      "dynasty_count": 30,
       "non_dynasty_count": 0,
       "dynasty_percentage": 100.0
     },
     {
       "surname": "SANTOS",
       "province": "BULACAN",
-      "total_count": 57,
-      "dynasty_count": 57,
-      "non_dynasty_count": 0,
-      "dynasty_percentage": 100.0
-    },
-    {
-      "surname": "CRUZ",
-      "province": "BULACAN",
-      "total_count": 48,
-      "dynasty_count": 48,
-      "non_dynasty_count": 0,
-      "dynasty_percentage": 100.0
-    },
-    {
-      "surname": "MIDTIMBANG",
-      "province": "MAGUINDANAO",
-      "total_count": 48,
-      "dynasty_count": 47,
-      "non_dynasty_count": 1,
-      "dynasty_percentage": 97.9
-    },
-    {
-      "surname": "SINSUAT",
-      "province": "MAGUINDANAO",
-      "total_count": 47,
-      "dynasty_count": 47,
-      "non_dynasty_count": 0,
-      "dynasty_percentage": 100.0
-    },
-    {
-      "surname": "TAN",
-      "province": "SAMAR",
-      "total_count": 45,
-      "dynasty_count": 45,
-      "non_dynasty_count": 0,
-      "dynasty_percentage": 100.0
-    },
-    {
-      "surname": "ECLEO",
-      "province": "DINAGAT ISLANDS",
-      "total_count": 42,
-      "dynasty_count": 42,
-      "non_dynasty_count": 0,
-      "dynasty_percentage": 100.0
-    },
-    {
-      "surname": "UY",
-      "province": "ISABELA",
-      "total_count": 39,
-      "dynasty_count": 39,
-      "non_dynasty_count": 0,
-      "dynasty_percentage": 100.0
-    },
-    {
-      "surname": "SISON",
-      "province": "PANGASINAN",
-      "total_count": 38,
-      "dynasty_count": 38,
+      "total_count": 29,
+      "dynasty_count": 29,
       "non_dynasty_count": 0,
       "dynasty_percentage": 100.0
     },
     {
       "surname": "BALINDONG",
       "province": "LANAO DEL SUR",
-      "total_count": 37,
-      "dynasty_count": 37,
-      "non_dynasty_count": 0,
-      "dynasty_percentage": 100.0
-    },
-    {
-      "surname": "RODRIGUEZ",
-      "province": "PALAWAN",
-      "total_count": 35,
-      "dynasty_count": 35,
-      "non_dynasty_count": 0,
-      "dynasty_percentage": 100.0
-    },
-    {
-      "surname": "SINGSON",
-      "province": "ILOCOS SUR",
-      "total_count": 35,
-      "dynasty_count": 35,
-      "non_dynasty_count": 0,
-      "dynasty_percentage": 100.0
-    },
-    {
-      "surname": "REYES",
-      "province": "BATANGAS",
-      "total_count": 34,
-      "dynasty_count": 34,
-      "non_dynasty_count": 0,
-      "dynasty_percentage": 100.0
-    },
-    {
-      "surname": "DE GUZMAN",
-      "province": "PANGASINAN",
-      "total_count": 33,
-      "dynasty_count": 33,
-      "non_dynasty_count": 0,
-      "dynasty_percentage": 100.0
-    },
-    {
-      "surname": "ORTEGA",
-      "province": "LA UNION",
-      "total_count": 33,
-      "dynasty_count": 33,
-      "non_dynasty_count": 0,
-      "dynasty_percentage": 100.0
-    },
-    {
-      "surname": "MENDOZA",
-      "province": "BATANGAS",
-      "total_count": 32,
-      "dynasty_count": 32,
-      "non_dynasty_count": 0,
-      "dynasty_percentage": 100.0
-    },
-    {
-      "surname": "TAN",
-      "province": "NORTHERN SAMAR",
-      "total_count": 32,
-      "dynasty_count": 32,
-      "non_dynasty_count": 0,
-      "dynasty_percentage": 100.0
-    },
-    {
-      "surname": "MENDOZA",
-      "province": "BULACAN",
-      "total_count": 32,
-      "dynasty_count": 32,
-      "non_dynasty_count": 0,
-      "dynasty_percentage": 100.0
-    },
-    {
-      "surname": "TAN",
-      "province": "QUEZON",
-      "total_count": 32,
-      "dynasty_count": 32,
-      "non_dynasty_count": 0,
-      "dynasty_percentage": 100.0
-    },
-    {
-      "surname": "CELESTE",
-      "province": "PANGASINAN",
-      "total_count": 30,
-      "dynasty_count": 30,
-      "non_dynasty_count": 0,
-      "dynasty_percentage": 100.0
-    },
-    {
-      "surname": "SALCEDO",
-      "province": "ILOILO",
-      "total_count": 30,
-      "dynasty_count": 30,
-      "non_dynasty_count": 0,
-      "dynasty_percentage": 100.0
-    },
-    {
-      "surname": "LIM",
-      "province": "BOHOL",
-      "total_count": 29,
-      "dynasty_count": 29,
-      "non_dynasty_count": 0,
-      "dynasty_percentage": 100.0
-    },
-    {
-      "surname": "ATIENZA",
-      "province": "BATANGAS",
-      "total_count": 29,
-      "dynasty_count": 29,
-      "non_dynasty_count": 0,
-      "dynasty_percentage": 100.0
-    },
-    {
-      "surname": "VALERA",
-      "province": "ABRA",
-      "total_count": 28,
-      "dynasty_count": 28,
-      "non_dynasty_count": 0,
-      "dynasty_percentage": 100.0
-    },
-    {
-      "surname": "ALI",
-      "province": "LANAO DEL NORTE",
-      "total_count": 28,
-      "dynasty_count": 28,
-      "non_dynasty_count": 0,
-      "dynasty_percentage": 100.0
-    },
-    {
-      "surname": "PIMENTEL",
-      "province": "SURIGAO DEL SUR",
-      "total_count": 28,
-      "dynasty_count": 28,
-      "non_dynasty_count": 0,
-      "dynasty_percentage": 100.0
-    },
-    {
-      "surname": "DURANO",
-      "province": "CEBU",
       "total_count": 27,
       "dynasty_count": 27,
       "non_dynasty_count": 0,
       "dynasty_percentage": 100.0
     },
     {
+      "surname": "CRUZ",
+      "province": "BULACAN",
+      "total_count": 26,
+      "dynasty_count": 26,
+      "non_dynasty_count": 0,
+      "dynasty_percentage": 100.0
+    },
+    {
+      "surname": "MIDTIMBANG",
+      "province": "MAGUINDANAO",
+      "total_count": 26,
+      "dynasty_count": 26,
+      "non_dynasty_count": 1,
+      "dynasty_percentage": 100.0
+    },
+    {
+      "surname": "TAN",
+      "province": "SAMAR",
+      "total_count": 23,
+      "dynasty_count": 23,
+      "non_dynasty_count": 0,
+      "dynasty_percentage": 100.0
+    },
+    {
+      "surname": "ECLEO",
+      "province": "DINAGAT ISLANDS",
+      "total_count": 22,
+      "dynasty_count": 22,
+      "non_dynasty_count": 0,
+      "dynasty_percentage": 100.0
+    },
+    {
+      "surname": "MENDOZA",
+      "province": "BATANGAS",
+      "total_count": 20,
+      "dynasty_count": 20,
+      "non_dynasty_count": 0,
+      "dynasty_percentage": 100.0
+    },
+    {
+      "surname": "SISON",
+      "province": "PANGASINAN",
+      "total_count": 20,
+      "dynasty_count": 20,
+      "non_dynasty_count": 0,
+      "dynasty_percentage": 100.0
+    },
+    {
+      "surname": "ATIENZA",
+      "province": "BATANGAS",
+      "total_count": 19,
+      "dynasty_count": 19,
+      "non_dynasty_count": 0,
+      "dynasty_percentage": 100.0
+    },
+    {
+      "surname": "HERNANDEZ",
+      "province": "BATANGAS",
+      "total_count": 19,
+      "dynasty_count": 19,
+      "non_dynasty_count": 0,
+      "dynasty_percentage": 100.0
+    },
+    {
+      "surname": "DE GUZMAN",
+      "province": "PANGASINAN",
+      "total_count": 19,
+      "dynasty_count": 19,
+      "non_dynasty_count": 0,
+      "dynasty_percentage": 100.0
+    },
+    {
       "surname": "UY",
+      "province": "ISABELA",
+      "total_count": 18,
+      "dynasty_count": 18,
+      "non_dynasty_count": 0,
+      "dynasty_percentage": 100.0
+    },
+    {
+      "surname": "TAN",
+      "province": "NORTHERN SAMAR",
+      "total_count": 17,
+      "dynasty_count": 17,
+      "non_dynasty_count": 0,
+      "dynasty_percentage": 100.0
+    },
+    {
+      "surname": "LIM",
       "province": "BOHOL",
-      "total_count": 26,
-      "dynasty_count": 26,
-      "non_dynasty_count": 0,
-      "dynasty_percentage": 100.0
-    },
-    {
-      "surname": "PLAZA",
-      "province": "AGUSAN DEL SUR",
-      "total_count": 26,
-      "dynasty_count": 26,
-      "non_dynasty_count": 0,
-      "dynasty_percentage": 100.0
-    },
-    {
-      "surname": "TUPAS",
-      "province": "ILOILO",
-      "total_count": 26,
-      "dynasty_count": 26,
+      "total_count": 17,
+      "dynasty_count": 17,
       "non_dynasty_count": 0,
       "dynasty_percentage": 100.0
     },
     {
       "surname": "TAN",
       "province": "SULU",
-      "total_count": 26,
-      "dynasty_count": 26,
+      "total_count": 17,
+      "dynasty_count": 17,
+      "non_dynasty_count": 0,
+      "dynasty_percentage": 100.0
+    },
+    {
+      "surname": "ORTEGA",
+      "province": "LA UNION",
+      "total_count": 16,
+      "dynasty_count": 16,
+      "non_dynasty_count": 0,
+      "dynasty_percentage": 100.0
+    },
+    {
+      "surname": "PLAZA",
+      "province": "AGUSAN DEL SUR",
+      "total_count": 16,
+      "dynasty_count": 16,
+      "non_dynasty_count": 0,
+      "dynasty_percentage": 100.0
+    },
+    {
+      "surname": "RODRIGUEZ",
+      "province": "PALAWAN",
+      "total_count": 16,
+      "dynasty_count": 16,
+      "non_dynasty_count": 0,
+      "dynasty_percentage": 100.0
+    },
+    {
+      "surname": "MENDOZA",
+      "province": "BULACAN",
+      "total_count": 16,
+      "dynasty_count": 16,
+      "non_dynasty_count": 0,
+      "dynasty_percentage": 100.0
+    },
+    {
+      "surname": "AQUINO",
+      "province": "PANGASINAN",
+      "total_count": 15,
+      "dynasty_count": 15,
+      "non_dynasty_count": 0,
+      "dynasty_percentage": 100.0
+    },
+    {
+      "surname": "VALERA",
+      "province": "ABRA",
+      "total_count": 15,
+      "dynasty_count": 15,
+      "non_dynasty_count": 0,
+      "dynasty_percentage": 100.0
+    },
+    {
+      "surname": "PIMENTEL",
+      "province": "SURIGAO DEL SUR",
+      "total_count": 15,
+      "dynasty_count": 15,
       "non_dynasty_count": 0,
       "dynasty_percentage": 100.0
     },
     {
       "surname": "GARCIA",
       "province": "BOHOL",
-      "total_count": 25,
-      "dynasty_count": 25,
+      "total_count": 14,
+      "dynasty_count": 14,
       "non_dynasty_count": 0,
       "dynasty_percentage": 100.0
     },
     {
-      "surname": "UY",
-      "province": "SAMAR",
-      "total_count": 25,
-      "dynasty_count": 25,
-      "non_dynasty_count": 0,
-      "dynasty_percentage": 100.0
-    },
-    {
-      "surname": "AHAJA",
-      "province": "TAWI-TAWI",
-      "total_count": 25,
-      "dynasty_count": 25,
-      "non_dynasty_count": 0,
-      "dynasty_percentage": 100.0
-    },
-    {
-      "surname": "VILLANUEVA",
-      "province": "ILOILO",
-      "total_count": 25,
-      "dynasty_count": 25,
-      "non_dynasty_count": 0,
-      "dynasty_percentage": 100.0
-    },
-    {
-      "surname": "DY",
-      "province": "ISABELA",
-      "total_count": 25,
-      "dynasty_count": 25,
-      "non_dynasty_count": 0,
-      "dynasty_percentage": 100.0
-    },
-    {
-      "surname": "ALVAREZ",
-      "province": "NEGROS OCCIDENTAL",
-      "total_count": 25,
-      "dynasty_count": 25,
-      "non_dynasty_count": 0,
-      "dynasty_percentage": 100.0
-    },
-    {
-      "surname": "DAVID",
-      "province": "PAMPANGA",
-      "total_count": 24,
-      "dynasty_count": 24,
-      "non_dynasty_count": 0,
-      "dynasty_percentage": 100.0
-    },
-    {
-      "surname": "FLORES",
-      "province": "LA UNION",
-      "total_count": 24,
-      "dynasty_count": 24,
-      "non_dynasty_count": 0,
-      "dynasty_percentage": 100.0
-    },
-    {
-      "surname": "EMANO",
-      "province": "MISAMIS ORIENTAL",
-      "total_count": 24,
-      "dynasty_count": 24,
-      "non_dynasty_count": 0,
-      "dynasty_percentage": 100.0
-    },
-    {
-      "surname": "ARBISON",
-      "province": "SULU",
-      "total_count": 24,
-      "dynasty_count": 24,
-      "non_dynasty_count": 0,
-      "dynasty_percentage": 100.0
-    },
-    {
-      "surname": "GARVIDA",
-      "province": "ILOCOS NORTE",
-      "total_count": 24,
-      "dynasty_count": 23,
-      "non_dynasty_count": 1,
-      "dynasty_percentage": 95.8
-    },
-    {
-      "surname": "ARREZA",
-      "province": "SURIGAO DEL SUR",
-      "total_count": 23,
-      "dynasty_count": 23,
-      "non_dynasty_count": 0,
-      "dynasty_percentage": 100.0
-    },
-    {
-      "surname": "NICART",
-      "province": "EASTERN SAMAR",
-      "total_count": 23,
-      "dynasty_count": 23,
-      "non_dynasty_count": 0,
-      "dynasty_percentage": 100.0
-    },
-    {
-      "surname": "TEVES",
-      "province": "NEGROS ORIENTAL",
-      "total_count": 23,
-      "dynasty_count": 23,
-      "non_dynasty_count": 0,
-      "dynasty_percentage": 100.0
-    },
-    {
-      "surname": "TRIA",
-      "province": "OCCIDENTAL MINDORO",
-      "total_count": 23,
-      "dynasty_count": 23,
-      "non_dynasty_count": 0,
-      "dynasty_percentage": 100.0
-    },
-    {
-      "surname": "AGUINALDO",
-      "province": "ILOCOS NORTE",
-      "total_count": 23,
-      "dynasty_count": 23,
-      "non_dynasty_count": 0,
-      "dynasty_percentage": 100.0
-    },
-    {
-      "surname": "DAVID",
-      "province": "TARLAC",
-      "total_count": 23,
-      "dynasty_count": 23,
+      "surname": "TAN",
+      "province": "QUEZON",
+      "total_count": 14,
+      "dynasty_count": 14,
       "non_dynasty_count": 0,
       "dynasty_percentage": 100.0
     },
     {
       "surname": "SARIP",
       "province": "LANAO DEL SUR",
-      "total_count": 22,
-      "dynasty_count": 22,
+      "total_count": 14,
+      "dynasty_count": 14,
+      "non_dynasty_count": 0,
+      "dynasty_percentage": 100.0
+    },
+    {
+      "surname": "UY",
+      "province": "BOHOL",
+      "total_count": 13,
+      "dynasty_count": 13,
+      "non_dynasty_count": 0,
+      "dynasty_percentage": 100.0
+    },
+    {
+      "surname": "DY",
+      "province": "ISABELA",
+      "total_count": 13,
+      "dynasty_count": 13,
+      "non_dynasty_count": 0,
+      "dynasty_percentage": 100.0
+    },
+    {
+      "surname": "ALI",
+      "province": "LANAO DEL NORTE",
+      "total_count": 13,
+      "dynasty_count": 13,
       "non_dynasty_count": 0,
       "dynasty_percentage": 100.0
     },
     {
       "surname": "JOSON",
       "province": "NUEVA ECIJA",
-      "total_count": 22,
-      "dynasty_count": 22,
-      "non_dynasty_count": 0,
-      "dynasty_percentage": 100.0
-    },
-    {
-      "surname": "DIMAPORO",
-      "province": "LANAO DEL NORTE",
-      "total_count": 21,
-      "dynasty_count": 21,
-      "non_dynasty_count": 0,
-      "dynasty_percentage": 100.0
-    },
-    {
-      "surname": "ESPINA",
-      "province": "BILIRAN",
-      "total_count": 21,
-      "dynasty_count": 21,
-      "non_dynasty_count": 0,
-      "dynasty_percentage": 100.0
-    },
-    {
-      "surname": "MERCADO",
-      "province": "SOUTHERN LEYTE",
-      "total_count": 21,
-      "dynasty_count": 21,
-      "non_dynasty_count": 0,
-      "dynasty_percentage": 100.0
-    },
-    {
-      "surname": "LAGBAS",
-      "province": "MISAMIS ORIENTAL",
-      "total_count": 21,
-      "dynasty_count": 21,
-      "non_dynasty_count": 0,
-      "dynasty_percentage": 100.0
-    },
-    {
-      "surname": "GARCIA",
-      "province": "ILOCOS NORTE",
-      "total_count": 21,
-      "dynasty_count": 21,
-      "non_dynasty_count": 0,
-      "dynasty_percentage": 100.0
-    },
-    {
-      "surname": "TAN",
-      "province": "LEYTE",
-      "total_count": 21,
-      "dynasty_count": 21,
-      "non_dynasty_count": 0,
-      "dynasty_percentage": 100.0
-    },
-    {
-      "surname": "CAPAL",
-      "province": "LANAO DEL SUR",
-      "total_count": 21,
-      "dynasty_count": 21,
-      "non_dynasty_count": 0,
-      "dynasty_percentage": 100.0
-    },
-    {
-      "surname": "SAN JUAN",
-      "province": "RIZAL",
-      "total_count": 21,
-      "dynasty_count": 21,
-      "non_dynasty_count": 0,
-      "dynasty_percentage": 100.0
-    },
-    {
-      "surname": "DAYANGHIRANG",
-      "province": "DAVAO ORIENTAL",
-      "total_count": 20,
-      "dynasty_count": 20,
-      "non_dynasty_count": 0,
-      "dynasty_percentage": 100.0
-    },
-    {
-      "surname": "PINEDA",
-      "province": "PAMPANGA",
-      "total_count": 20,
-      "dynasty_count": 20,
-      "non_dynasty_count": 0,
-      "dynasty_percentage": 100.0
-    },
-    {
-      "surname": "UY",
-      "province": "ZAMBOANGA DEL NORTE",
-      "total_count": 20,
-      "dynasty_count": 20,
-      "non_dynasty_count": 0,
-      "dynasty_percentage": 100.0
-    },
-    {
-      "surname": "SANTOS",
-      "province": "NUEVA ECIJA",
-      "total_count": 20,
-      "dynasty_count": 20,
-      "non_dynasty_count": 0,
-      "dynasty_percentage": 100.0
-    },
-    {
-      "surname": "LOZADA",
-      "province": "SURIGAO DEL SUR",
-      "total_count": 20,
-      "dynasty_count": 20,
+      "total_count": 13,
+      "dynasty_count": 13,
       "non_dynasty_count": 0,
       "dynasty_percentage": 100.0
     },
     {
       "surname": "CASTILLO",
       "province": "NORTHERN SAMAR",
-      "total_count": 20,
-      "dynasty_count": 20,
+      "total_count": 13,
+      "dynasty_count": 13,
       "non_dynasty_count": 0,
       "dynasty_percentage": 100.0
     },
     {
-      "surname": "UY",
-      "province": "MISAMIS ORIENTAL",
-      "total_count": 20,
-      "dynasty_count": 20,
+      "surname": "SINGSON",
+      "province": "ILOCOS SUR",
+      "total_count": 13,
+      "dynasty_count": 13,
+      "non_dynasty_count": 0,
+      "dynasty_percentage": 100.0
+    },
+    {
+      "surname": "SALCEDO",
+      "province": "ILOILO",
+      "total_count": 13,
+      "dynasty_count": 13,
+      "non_dynasty_count": 0,
+      "dynasty_percentage": 100.0
+    },
+    {
+      "surname": "TAN",
+      "province": "LEYTE",
+      "total_count": 13,
+      "dynasty_count": 13,
+      "non_dynasty_count": 0,
+      "dynasty_percentage": 100.0
+    },
+    {
+      "surname": "MINDALANO",
+      "province": "LANAO DEL SUR",
+      "total_count": 13,
+      "dynasty_count": 13,
+      "non_dynasty_count": 1,
+      "dynasty_percentage": 100.0
+    },
+    {
+      "surname": "ESCUDERO",
+      "province": "SORSOGON",
+      "total_count": 12,
+      "dynasty_count": 12,
+      "non_dynasty_count": 0,
+      "dynasty_percentage": 100.0
+    },
+    {
+      "surname": "GARVIDA",
+      "province": "ILOCOS NORTE",
+      "total_count": 12,
+      "dynasty_count": 12,
+      "non_dynasty_count": 1,
+      "dynasty_percentage": 100.0
+    },
+    {
+      "surname": "DURANO",
+      "province": "CEBU",
+      "total_count": 12,
+      "dynasty_count": 12,
+      "non_dynasty_count": 0,
+      "dynasty_percentage": 100.0
+    },
+    {
+      "surname": "ARBISON",
+      "province": "SULU",
+      "total_count": 12,
+      "dynasty_count": 12,
       "non_dynasty_count": 0,
       "dynasty_percentage": 100.0
     },
     {
       "surname": "GARCIA",
       "province": "BATAAN",
-      "total_count": 20,
-      "dynasty_count": 20,
-      "non_dynasty_count": 0,
-      "dynasty_percentage": 100.0
-    },
-    {
-      "surname": "LACSON",
-      "province": "NEGROS OCCIDENTAL",
-      "total_count": 20,
-      "dynasty_count": 20,
-      "non_dynasty_count": 0,
-      "dynasty_percentage": 100.0
-    },
-    {
-      "surname": "CADUNGON",
-      "province": "COTABATO",
-      "total_count": 20,
-      "dynasty_count": 20,
-      "non_dynasty_count": 0,
-      "dynasty_percentage": 100.0
-    },
-    {
-      "surname": "DAUD",
-      "province": "SULU",
-      "total_count": 20,
-      "dynasty_count": 20,
-      "non_dynasty_count": 0,
-      "dynasty_percentage": 100.0
-    },
-    {
-      "surname": "MENDOZA",
-      "province": "QUEZON",
-      "total_count": 20,
-      "dynasty_count": 19,
-      "non_dynasty_count": 1,
-      "dynasty_percentage": 95.0
-    },
-    {
-      "surname": "PUA",
-      "province": "ISABELA",
-      "total_count": 20,
-      "dynasty_count": 19,
-      "non_dynasty_count": 1,
-      "dynasty_percentage": 95.0
-    },
-    {
-      "surname": "MIRANDA",
-      "province": "ILOCOS SUR",
-      "total_count": 19,
-      "dynasty_count": 19,
-      "non_dynasty_count": 0,
-      "dynasty_percentage": 100.0
-    },
-    {
-      "surname": "BERNOS",
-      "province": "ABRA",
-      "total_count": 19,
-      "dynasty_count": 19,
-      "non_dynasty_count": 0,
-      "dynasty_percentage": 100.0
-    },
-    {
-      "surname": "MANGUDADATU",
-      "province": "SULTAN KUDARAT",
-      "total_count": 19,
-      "dynasty_count": 19,
-      "non_dynasty_count": 0,
-      "dynasty_percentage": 100.0
-    },
-    {
-      "surname": "ESCUDERO",
-      "province": "SORSOGON",
-      "total_count": 19,
-      "dynasty_count": 19,
-      "non_dynasty_count": 0,
-      "dynasty_percentage": 100.0
-    },
-    {
-      "surname": "ASTORGA",
-      "province": "SAMAR",
-      "total_count": 19,
-      "dynasty_count": 19,
+      "total_count": 12,
+      "dynasty_count": 12,
       "non_dynasty_count": 0,
       "dynasty_percentage": 100.0
     },
     {
       "surname": "CRUZ",
       "province": "RIZAL",
-      "total_count": 19,
-      "dynasty_count": 19,
+      "total_count": 12,
+      "dynasty_count": 12,
       "non_dynasty_count": 0,
       "dynasty_percentage": 100.0
     },
     {
-      "surname": "SUAREZ",
-      "province": "QUEZON",
-      "total_count": 19,
-      "dynasty_count": 19,
+      "surname": "EMANO",
+      "province": "MISAMIS ORIENTAL",
+      "total_count": 12,
+      "dynasty_count": 12,
       "non_dynasty_count": 0,
       "dynasty_percentage": 100.0
     },
     {
-      "surname": "DOMINGO",
-      "province": "NUEVA ECIJA",
-      "total_count": 19,
-      "dynasty_count": 19,
-      "non_dynasty_count": 0,
-      "dynasty_percentage": 100.0
-    },
-    {
-      "surname": "TORRES",
-      "province": "NEGROS OCCIDENTAL",
-      "total_count": 19,
-      "dynasty_count": 19,
-      "non_dynasty_count": 0,
-      "dynasty_percentage": 100.0
-    },
-    {
-      "surname": "VELOSO",
-      "province": "LEYTE",
-      "total_count": 19,
-      "dynasty_count": 19,
+      "surname": "DAVID",
+      "province": "PAMPANGA",
+      "total_count": 12,
+      "dynasty_count": 12,
       "non_dynasty_count": 0,
       "dynasty_percentage": 100.0
     },
     {
       "surname": "YAP",
       "province": "MISAMIS OCCIDENTAL",
-      "total_count": 19,
-      "dynasty_count": 18,
+      "total_count": 12,
+      "dynasty_count": 12,
       "non_dynasty_count": 1,
-      "dynasty_percentage": 94.7
+      "dynasty_percentage": 100.0
     },
     {
-      "surname": "TAN",
-      "province": "MISAMIS OCCIDENTAL",
-      "total_count": 18,
-      "dynasty_count": 18,
+      "surname": "ISMAEL",
+      "province": "BASILAN",
+      "total_count": 12,
+      "dynasty_count": 12,
       "non_dynasty_count": 0,
       "dynasty_percentage": 100.0
     },
     {
-      "surname": "AGUSTIN",
-      "province": "TARLAC",
-      "total_count": 18,
-      "dynasty_count": 18,
-      "non_dynasty_count": 0,
-      "dynasty_percentage": 100.0
+      "surname": "TULAWIE",
+      "province": "SULU",
+      "total_count": 12,
+      "dynasty_count": 11,
+      "non_dynasty_count": 1,
+      "dynasty_percentage": 91.7
     },
     {
-      "surname": "ESPINOSA",
-      "province": "CEBU",
-      "total_count": 18,
-      "dynasty_count": 18,
-      "non_dynasty_count": 0,
-      "dynasty_percentage": 100.0
-    },
-    {
-      "surname": "ROMUALDO",
-      "province": "CAMIGUIN",
-      "total_count": 18,
-      "dynasty_count": 18,
-      "non_dynasty_count": 0,
-      "dynasty_percentage": 100.0
-    },
-    {
-      "surname": "LOYOLA",
-      "province": "CAVITE",
-      "total_count": 18,
-      "dynasty_count": 18,
-      "non_dynasty_count": 0,
-      "dynasty_percentage": 100.0
-    },
-    {
-      "surname": "MANUEL",
-      "province": "TARLAC",
-      "total_count": 18,
-      "dynasty_count": 18,
-      "non_dynasty_count": 0,
-      "dynasty_percentage": 100.0
-    },
-    {
-      "surname": "FONTANILLA",
-      "province": "LA UNION",
-      "total_count": 18,
-      "dynasty_count": 18,
-      "non_dynasty_count": 0,
-      "dynasty_percentage": 100.0
-    },
-    {
-      "surname": "UY",
-      "province": "DAVAO ORIENTAL",
-      "total_count": 18,
-      "dynasty_count": 18,
-      "non_dynasty_count": 0,
-      "dynasty_percentage": 100.0
-    },
-    {
-      "surname": "EVARDONE",
-      "province": "EASTERN SAMAR",
-      "total_count": 18,
-      "dynasty_count": 18,
-      "non_dynasty_count": 0,
-      "dynasty_percentage": 100.0
-    },
-    {
-      "surname": "VALLE",
-      "province": "ILOCOS SUR",
-      "total_count": 18,
-      "dynasty_count": 18,
-      "non_dynasty_count": 0,
-      "dynasty_percentage": 100.0
-    },
-    {
-      "surname": "CREUS",
-      "province": "CEBU",
-      "total_count": 18,
-      "dynasty_count": 18,
-      "non_dynasty_count": 0,
-      "dynasty_percentage": 100.0
-    },
-    {
-      "surname": "SOMBILON",
-      "province": "ROMBLON",
-      "total_count": 17,
-      "dynasty_count": 17,
-      "non_dynasty_count": 0,
-      "dynasty_percentage": 100.0
-    },
-    {
-      "surname": "SANTOS",
-      "province": "NCR, FOURTH DISTRICT",
-      "total_count": 17,
-      "dynasty_count": 17,
-      "non_dynasty_count": 0,
-      "dynasty_percentage": 100.0
-    },
-    {
-      "surname": "BIONG",
-      "province": "EASTERN SAMAR",
-      "total_count": 17,
-      "dynasty_count": 17,
+      "surname": "REYES",
+      "province": "NUEVA ECIJA",
+      "total_count": 11,
+      "dynasty_count": 11,
       "non_dynasty_count": 0,
       "dynasty_percentage": 100.0
     },
     {
       "surname": "SALIH",
       "province": "TAWI-TAWI",
-      "total_count": 17,
-      "dynasty_count": 17,
+      "total_count": 11,
+      "dynasty_count": 11,
       "non_dynasty_count": 0,
       "dynasty_percentage": 100.0
     },
     {
-      "surname": "ISMAEL",
-      "province": "BASILAN",
-      "total_count": 17,
-      "dynasty_count": 17,
+      "surname": "VELOSO",
+      "province": "LEYTE",
+      "total_count": 11,
+      "dynasty_count": 11,
       "non_dynasty_count": 0,
       "dynasty_percentage": 100.0
     },
     {
-      "surname": "MENDOZA",
-      "province": "CAVITE",
-      "total_count": 17,
-      "dynasty_count": 17,
+      "surname": "SAN JUAN",
+      "province": "RIZAL",
+      "total_count": 11,
+      "dynasty_count": 11,
+      "non_dynasty_count": 0,
+      "dynasty_percentage": 100.0
+    },
+    {
+      "surname": "DE LA CRUZ",
+      "province": "NUEVA ECIJA",
+      "total_count": 11,
+      "dynasty_count": 11,
+      "non_dynasty_count": 0,
+      "dynasty_percentage": 100.0
+    },
+    {
+      "surname": "AHAJA",
+      "province": "TAWI-TAWI",
+      "total_count": 11,
+      "dynasty_count": 11,
+      "non_dynasty_count": 0,
+      "dynasty_percentage": 100.0
+    },
+    {
+      "surname": "TRIA",
+      "province": "OCCIDENTAL MINDORO",
+      "total_count": 11,
+      "dynasty_count": 11,
+      "non_dynasty_count": 0,
+      "dynasty_percentage": 100.0
+    },
+    {
+      "surname": "LACSON",
+      "province": "NEGROS OCCIDENTAL",
+      "total_count": 11,
+      "dynasty_count": 11,
+      "non_dynasty_count": 0,
+      "dynasty_percentage": 100.0
+    },
+    {
+      "surname": "ALVAREZ",
+      "province": "NEGROS OCCIDENTAL",
+      "total_count": 11,
+      "dynasty_count": 11,
+      "non_dynasty_count": 0,
+      "dynasty_percentage": 100.0
+    },
+    {
+      "surname": "ROMUALDO",
+      "province": "CAMIGUIN",
+      "total_count": 11,
+      "dynasty_count": 11,
+      "non_dynasty_count": 0,
+      "dynasty_percentage": 100.0
+    },
+    {
+      "surname": "LIM",
+      "province": "MASBATE",
+      "total_count": 11,
+      "dynasty_count": 11,
+      "non_dynasty_count": 0,
+      "dynasty_percentage": 100.0
+    },
+    {
+      "surname": "ASTORGA",
+      "province": "SAMAR",
+      "total_count": 11,
+      "dynasty_count": 11,
       "non_dynasty_count": 0,
       "dynasty_percentage": 100.0
     },
     {
       "surname": "REYES",
+      "province": "ISABELA",
+      "total_count": 11,
+      "dynasty_count": 10,
+      "non_dynasty_count": 1,
+      "dynasty_percentage": 90.9
+    },
+    {
+      "surname": "TAN",
+      "province": "NEGROS OCCIDENTAL",
+      "total_count": 10,
+      "dynasty_count": 10,
+      "non_dynasty_count": 0,
+      "dynasty_percentage": 100.0
+    },
+    {
+      "surname": "VILLANUEVA",
+      "province": "ILOILO",
+      "total_count": 10,
+      "dynasty_count": 10,
+      "non_dynasty_count": 0,
+      "dynasty_percentage": 100.0
+    },
+    {
+      "surname": "UY",
+      "province": "MISAMIS ORIENTAL",
+      "total_count": 10,
+      "dynasty_count": 10,
+      "non_dynasty_count": 0,
+      "dynasty_percentage": 100.0
+    },
+    {
+      "surname": "TAN",
+      "province": "MISAMIS ORIENTAL",
+      "total_count": 10,
+      "dynasty_count": 10,
+      "non_dynasty_count": 1,
+      "dynasty_percentage": 100.0
+    },
+    {
+      "surname": "TEVES",
       "province": "NEGROS ORIENTAL",
-      "total_count": 17,
-      "dynasty_count": 17,
+      "total_count": 10,
+      "dynasty_count": 10,
+      "non_dynasty_count": 0,
+      "dynasty_percentage": 100.0
+    },
+    {
+      "surname": "NALUPTA",
+      "province": "ILOCOS NORTE",
+      "total_count": 10,
+      "dynasty_count": 10,
+      "non_dynasty_count": 0,
+      "dynasty_percentage": 100.0
+    },
+    {
+      "surname": "AGUINALDO",
+      "province": "ILOCOS NORTE",
+      "total_count": 10,
+      "dynasty_count": 10,
+      "non_dynasty_count": 0,
+      "dynasty_percentage": 100.0
+    },
+    {
+      "surname": "MENDOZA",
+      "province": "QUEZON",
+      "total_count": 10,
+      "dynasty_count": 10,
+      "non_dynasty_count": 1,
+      "dynasty_percentage": 100.0
+    },
+    {
+      "surname": "DIMAPORO",
+      "province": "LANAO DEL NORTE",
+      "total_count": 10,
+      "dynasty_count": 10,
+      "non_dynasty_count": 0,
+      "dynasty_percentage": 100.0
+    },
+    {
+      "surname": "ARREZA",
+      "province": "SURIGAO DEL SUR",
+      "total_count": 10,
+      "dynasty_count": 10,
+      "non_dynasty_count": 0,
+      "dynasty_percentage": 100.0
+    },
+    {
+      "surname": "LOZADA",
+      "province": "SURIGAO DEL SUR",
+      "total_count": 10,
+      "dynasty_count": 10,
+      "non_dynasty_count": 0,
+      "dynasty_percentage": 100.0
+    },
+    {
+      "surname": "UY",
+      "province": "SAMAR",
+      "total_count": 10,
+      "dynasty_count": 10,
+      "non_dynasty_count": 0,
+      "dynasty_percentage": 100.0
+    },
+    {
+      "surname": "MOLINA",
+      "province": "ABRA",
+      "total_count": 10,
+      "dynasty_count": 9,
+      "non_dynasty_count": 2,
+      "dynasty_percentage": 90.0
+    },
+    {
+      "surname": "CABAHUG",
+      "province": "CEBU",
+      "total_count": 9,
+      "dynasty_count": 9,
+      "non_dynasty_count": 0,
+      "dynasty_percentage": 100.0
+    },
+    {
+      "surname": "FLORES",
+      "province": "LA UNION",
+      "total_count": 9,
+      "dynasty_count": 9,
+      "non_dynasty_count": 0,
+      "dynasty_percentage": 100.0
+    },
+    {
+      "surname": "MIRANDA",
+      "province": "ILOCOS SUR",
+      "total_count": 9,
+      "dynasty_count": 9,
+      "non_dynasty_count": 0,
+      "dynasty_percentage": 100.0
+    },
+    {
+      "surname": "PINEDA",
+      "province": "PAMPANGA",
+      "total_count": 9,
+      "dynasty_count": 9,
+      "non_dynasty_count": 0,
+      "dynasty_percentage": 100.0
+    },
+    {
+      "surname": "ESPINA",
+      "province": "BILIRAN",
+      "total_count": 9,
+      "dynasty_count": 9,
+      "non_dynasty_count": 0,
+      "dynasty_percentage": 100.0
+    },
+    {
+      "surname": "BIONG",
+      "province": "EASTERN SAMAR",
+      "total_count": 9,
+      "dynasty_count": 9,
+      "non_dynasty_count": 0,
+      "dynasty_percentage": 100.0
+    },
+    {
+      "surname": "PALANCA",
+      "province": "PALAWAN",
+      "total_count": 9,
+      "dynasty_count": 9,
+      "non_dynasty_count": 0,
+      "dynasty_percentage": 100.0
+    },
+    {
+      "surname": "REYES",
+      "province": "LAGUNA",
+      "total_count": 9,
+      "dynasty_count": 9,
+      "non_dynasty_count": 0,
+      "dynasty_percentage": 100.0
+    },
+    {
+      "surname": "NICART",
+      "province": "EASTERN SAMAR",
+      "total_count": 9,
+      "dynasty_count": 9,
+      "non_dynasty_count": 0,
+      "dynasty_percentage": 100.0
+    },
+    {
+      "surname": "UY",
+      "province": "DAVAO ORIENTAL",
+      "total_count": 9,
+      "dynasty_count": 9,
       "non_dynasty_count": 0,
       "dynasty_percentage": 100.0
     },
     {
       "surname": "BELMONTE",
       "province": "NCR, SECOND DISTRICT",
-      "total_count": 17,
-      "dynasty_count": 16,
+      "total_count": 9,
+      "dynasty_count": 9,
       "non_dynasty_count": 1,
-      "dynasty_percentage": 94.1
-    },
-    {
-      "surname": "REGALADO",
-      "province": "MISAMIS OCCIDENTAL",
-      "total_count": 16,
-      "dynasty_count": 16,
-      "non_dynasty_count": 0,
       "dynasty_percentage": 100.0
-    },
-    {
-      "surname": "YNARES",
-      "province": "RIZAL",
-      "total_count": 16,
-      "dynasty_count": 16,
-      "non_dynasty_count": 0,
-      "dynasty_percentage": 100.0
-    },
-    {
-      "surname": "CAGAS",
-      "province": "DAVAO DEL SUR",
-      "total_count": 16,
-      "dynasty_count": 16,
-      "non_dynasty_count": 0,
-      "dynasty_percentage": 100.0
-    },
-    {
-      "surname": "VARGAS",
-      "province": "CAGAYAN",
-      "total_count": 16,
-      "dynasty_count": 16,
-      "non_dynasty_count": 0,
-      "dynasty_percentage": 100.0
-    },
-    {
-      "surname": "MARUHOM",
-      "province": "LANAO DEL NORTE",
-      "total_count": 16,
-      "dynasty_count": 16,
-      "non_dynasty_count": 0,
-      "dynasty_percentage": 100.0
-    },
-    {
-      "surname": "SULONG",
-      "province": "ZAMBOANGA DEL SUR",
-      "total_count": 16,
-      "dynasty_count": 16,
-      "non_dynasty_count": 0,
-      "dynasty_percentage": 100.0
-    },
-    {
-      "surname": "BALAO-AS",
-      "province": "ABRA",
-      "total_count": 16,
-      "dynasty_count": 16,
-      "non_dynasty_count": 0,
-      "dynasty_percentage": 100.0
-    },
-    {
-      "surname": "PASCUAL",
-      "province": "CAGAYAN",
-      "total_count": 16,
-      "dynasty_count": 15,
-      "non_dynasty_count": 1,
-      "dynasty_percentage": 93.8
-    },
-    {
-      "surname": "JAVIER",
-      "province": "ANTIQUE",
-      "total_count": 16,
-      "dynasty_count": 15,
-      "non_dynasty_count": 1,
-      "dynasty_percentage": 93.8
     },
     {
       "surname": "ABELEDA",
       "province": "OCCIDENTAL MINDORO",
-      "total_count": 15,
-      "dynasty_count": 15,
+      "total_count": 9,
+      "dynasty_count": 9,
       "non_dynasty_count": 0,
       "dynasty_percentage": 100.0
     },
     {
-      "surname": "FLORES",
-      "province": "PAMPANGA",
-      "total_count": 15,
-      "dynasty_count": 15,
+      "surname": "DAYANGHIRANG",
+      "province": "DAVAO ORIENTAL",
+      "total_count": 9,
+      "dynasty_count": 9,
       "non_dynasty_count": 0,
       "dynasty_percentage": 100.0
     },
     {
-      "surname": "CONTRERAS",
-      "province": "CAPIZ",
-      "total_count": 15,
-      "dynasty_count": 15,
-      "non_dynasty_count": 0,
-      "dynasty_percentage": 100.0
-    },
-    {
-      "surname": "CABRERA",
-      "province": "CATANDUANES",
-      "total_count": 15,
-      "dynasty_count": 15,
-      "non_dynasty_count": 0,
-      "dynasty_percentage": 100.0
-    },
-    {
-      "surname": "YAP",
-      "province": "SARANGANI",
-      "total_count": 15,
-      "dynasty_count": 15,
-      "non_dynasty_count": 0,
-      "dynasty_percentage": 100.0
-    },
-    {
-      "surname": "PEPITO",
-      "province": "BUKIDNON",
-      "total_count": 15,
-      "dynasty_count": 15,
-      "non_dynasty_count": 0,
-      "dynasty_percentage": 100.0
-    },
-    {
-      "surname": "ZUBIRI",
-      "province": "BUKIDNON",
-      "total_count": 15,
-      "dynasty_count": 15,
+      "surname": "RAMOS",
+      "province": "ILOCOS SUR",
+      "total_count": 9,
+      "dynasty_count": 9,
       "non_dynasty_count": 0,
       "dynasty_percentage": 100.0
     },
     {
       "surname": "CALO",
       "province": "AGUSAN DEL NORTE",
-      "total_count": 15,
-      "dynasty_count": 15,
+      "total_count": 9,
+      "dynasty_count": 9,
       "non_dynasty_count": 0,
       "dynasty_percentage": 100.0
     },
     {
-      "surname": "SEGURA",
-      "province": "SULTAN KUDARAT",
-      "total_count": 15,
-      "dynasty_count": 15,
+      "surname": "CADUNGON",
+      "province": "COTABATO",
+      "total_count": 9,
+      "dynasty_count": 9,
       "non_dynasty_count": 0,
       "dynasty_percentage": 100.0
     },
     {
       "surname": "GO",
-      "province": "LEYTE",
-      "total_count": 15,
-      "dynasty_count": 15,
-      "non_dynasty_count": 0,
-      "dynasty_percentage": 100.0
-    },
-    {
-      "surname": "BALGOS",
-      "province": "NUEVA VIZCAYA",
-      "total_count": 15,
-      "dynasty_count": 15,
-      "non_dynasty_count": 0,
-      "dynasty_percentage": 100.0
-    },
-    {
-      "surname": "JALOSJOS",
-      "province": "ZAMBOANGA DEL NORTE",
-      "total_count": 15,
-      "dynasty_count": 15,
-      "non_dynasty_count": 0,
-      "dynasty_percentage": 100.0
-    },
-    {
-      "surname": "PLAZA",
-      "province": "SURIGAO DEL NORTE",
-      "total_count": 15,
-      "dynasty_count": 15,
-      "non_dynasty_count": 0,
-      "dynasty_percentage": 100.0
-    },
-    {
-      "surname": "BAUTISTA",
-      "province": "DAVAO DEL SUR",
-      "total_count": 15,
-      "dynasty_count": 15,
-      "non_dynasty_count": 0,
-      "dynasty_percentage": 100.0
-    },
-    {
-      "surname": "NAVAROSA",
-      "province": "AKLAN",
-      "total_count": 15,
-      "dynasty_count": 15,
-      "non_dynasty_count": 0,
-      "dynasty_percentage": 100.0
-    },
-    {
-      "surname": "AGUILAR",
-      "province": "NCR, FOURTH DISTRICT",
-      "total_count": 15,
-      "dynasty_count": 15,
-      "non_dynasty_count": 0,
-      "dynasty_percentage": 100.0
-    },
-    {
-      "surname": "DULNUAN",
-      "province": "IFUGAO",
-      "total_count": 15,
-      "dynasty_count": 15,
-      "non_dynasty_count": 0,
-      "dynasty_percentage": 100.0
-    },
-    {
-      "surname": "LIM",
-      "province": "MASBATE",
-      "total_count": 15,
-      "dynasty_count": 15,
-      "non_dynasty_count": 0,
-      "dynasty_percentage": 100.0
-    },
-    {
-      "surname": "OLVIS",
-      "province": "ZAMBOANGA DEL NORTE",
-      "total_count": 16,
-      "dynasty_count": 14,
-      "non_dynasty_count": 2,
-      "dynasty_percentage": 87.5
-    },
-    {
-      "surname": "VILLEGAS",
-      "province": "NEGROS ORIENTAL",
-      "total_count": 15,
-      "dynasty_count": 14,
+      "province": "EASTERN SAMAR",
+      "total_count": 9,
+      "dynasty_count": 9,
       "non_dynasty_count": 1,
-      "dynasty_percentage": 93.3
-    },
-    {
-      "surname": "LOPEZ",
-      "province": "DAVAO DEL SUR",
-      "total_count": 15,
-      "dynasty_count": 14,
-      "non_dynasty_count": 1,
-      "dynasty_percentage": 93.3
-    },
-    {
-      "surname": "PACIFICADOR",
-      "province": "ANTIQUE",
-      "total_count": 15,
-      "dynasty_count": 14,
-      "non_dynasty_count": 1,
-      "dynasty_percentage": 93.3
-    },
-    {
-      "surname": "DE CASTRO",
-      "province": "CAVITE",
-      "total_count": 15,
-      "dynasty_count": 14,
-      "non_dynasty_count": 1,
-      "dynasty_percentage": 93.3
+      "dynasty_percentage": 100.0
     },
     {
       "surname": "SANCHEZ",
-      "province": "MASBATE",
-      "total_count": 15,
-      "dynasty_count": 14,
+      "province": "ANTIQUE",
+      "total_count": 9,
+      "dynasty_count": 9,
       "non_dynasty_count": 1,
-      "dynasty_percentage": 93.3
+      "dynasty_percentage": 100.0
     },
     {
-      "surname": "FERNANDEZ",
-      "province": "AKLAN",
-      "total_count": 15,
-      "dynasty_count": 14,
+      "surname": "JAVIER",
+      "province": "ANTIQUE",
+      "total_count": 9,
+      "dynasty_count": 9,
       "non_dynasty_count": 1,
-      "dynasty_percentage": 93.3
+      "dynasty_percentage": 100.0
     },
     {
-      "surname": "KALLAHAL",
-      "province": "BASILAN",
-      "total_count": 15,
-      "dynasty_count": 14,
+      "surname": "MANGUDADATU",
+      "province": "SULTAN KUDARAT",
+      "total_count": 9,
+      "dynasty_count": 9,
+      "non_dynasty_count": 0,
+      "dynasty_percentage": 100.0
+    },
+    {
+      "surname": "TUPAS",
+      "province": "ILOILO",
+      "total_count": 9,
+      "dynasty_count": 9,
+      "non_dynasty_count": 0,
+      "dynasty_percentage": 100.0
+    },
+    {
+      "surname": "FRANCISCO",
+      "province": "RIZAL",
+      "total_count": 9,
+      "dynasty_count": 8,
       "non_dynasty_count": 1,
-      "dynasty_percentage": 93.3
+      "dynasty_percentage": 88.9
     },
     {
-      "surname": "UMALI",
-      "province": "ORIENTAL MINDORO",
-      "total_count": 14,
-      "dynasty_count": 14,
-      "non_dynasty_count": 0,
+      "surname": "LANTUD",
+      "province": "LANAO DEL NORTE",
+      "total_count": 8,
+      "dynasty_count": 8,
+      "non_dynasty_count": 1,
       "dynasty_percentage": 100.0
     },
     {
-      "surname": "BITONG",
-      "province": "AURORA",
-      "total_count": 14,
-      "dynasty_count": 14,
-      "non_dynasty_count": 0,
+      "surname": "MATUGAS",
+      "province": "SURIGAO DEL NORTE",
+      "total_count": 8,
+      "dynasty_count": 8,
+      "non_dynasty_count": 1,
       "dynasty_percentage": 100.0
     },
     {
-      "surname": "PASCUA",
-      "province": "APAYAO",
-      "total_count": 14,
-      "dynasty_count": 14,
-      "non_dynasty_count": 0,
-      "dynasty_percentage": 100.0
-    },
-    {
-      "surname": "LLOPIS",
-      "province": "CAGAYAN",
-      "total_count": 14,
-      "dynasty_count": 14,
-      "non_dynasty_count": 0,
-      "dynasty_percentage": 100.0
-    },
-    {
-      "surname": "DEL ROSARIO",
-      "province": "BATAAN",
-      "total_count": 14,
-      "dynasty_count": 14,
-      "non_dynasty_count": 0,
-      "dynasty_percentage": 100.0
-    },
-    {
-      "surname": "CHAVEZ",
-      "province": "CAMARINES SUR",
-      "total_count": 14,
-      "dynasty_count": 14,
-      "non_dynasty_count": 0,
-      "dynasty_percentage": 100.0
-    },
-    {
-      "surname": "PATRICIO",
-      "province": "CAPIZ",
-      "total_count": 14,
-      "dynasty_count": 14,
+      "surname": "SEGURA",
+      "province": "SULTAN KUDARAT",
+      "total_count": 8,
+      "dynasty_count": 8,
       "non_dynasty_count": 0,
       "dynasty_percentage": 100.0
     },
     {
       "surname": "LIM",
-      "province": "NORTHERN SAMAR",
-      "total_count": 14,
-      "dynasty_count": 14,
+      "province": "SOUTHERN LEYTE",
+      "total_count": 8,
+      "dynasty_count": 8,
+      "non_dynasty_count": 1,
+      "dynasty_percentage": 100.0
+    },
+    {
+      "surname": "MERCADO",
+      "province": "SOUTHERN LEYTE",
+      "total_count": 8,
+      "dynasty_count": 8,
       "non_dynasty_count": 0,
+      "dynasty_percentage": 100.0
+    },
+    {
+      "surname": "MATBA",
+      "province": "TAWI-TAWI",
+      "total_count": 8,
+      "dynasty_count": 8,
+      "non_dynasty_count": 1,
+      "dynasty_percentage": 100.0
+    },
+    {
+      "surname": "YAP",
+      "province": "SARANGANI",
+      "total_count": 8,
+      "dynasty_count": 8,
+      "non_dynasty_count": 0,
+      "dynasty_percentage": 100.0
+    },
+    {
+      "surname": "DAVID",
+      "province": "TARLAC",
+      "total_count": 8,
+      "dynasty_count": 8,
+      "non_dynasty_count": 0,
+      "dynasty_percentage": 100.0
+    },
+    {
+      "surname": "IMPERIAL",
+      "province": "ALBAY",
+      "total_count": 8,
+      "dynasty_count": 8,
+      "non_dynasty_count": 1,
+      "dynasty_percentage": 100.0
+    },
+    {
+      "surname": "PASCUAL",
+      "province": "CAGAYAN",
+      "total_count": 8,
+      "dynasty_count": 8,
+      "non_dynasty_count": 1,
+      "dynasty_percentage": 100.0
+    },
+    {
+      "surname": "FUENTEBELLA",
+      "province": "CAMARINES SUR",
+      "total_count": 8,
+      "dynasty_count": 8,
+      "non_dynasty_count": 1,
+      "dynasty_percentage": 100.0
+    },
+    {
+      "surname": "RIMANDO",
+      "province": "LA UNION",
+      "total_count": 8,
+      "dynasty_count": 8,
+      "non_dynasty_count": 1,
+      "dynasty_percentage": 100.0
+    },
+    {
+      "surname": "CASTRO",
+      "province": "CAPIZ",
+      "total_count": 8,
+      "dynasty_count": 8,
+      "non_dynasty_count": 0,
+      "dynasty_percentage": 100.0
+    },
+    {
+      "surname": "YAP",
+      "province": "CAPIZ",
+      "total_count": 8,
+      "dynasty_count": 8,
+      "non_dynasty_count": 1,
+      "dynasty_percentage": 100.0
+    },
+    {
+      "surname": "VILLANUEVA",
+      "province": "CAVITE",
+      "total_count": 8,
+      "dynasty_count": 8,
+      "non_dynasty_count": 0,
+      "dynasty_percentage": 100.0
+    },
+    {
+      "surname": "MENDOZA",
+      "province": "CAVITE",
+      "total_count": 8,
+      "dynasty_count": 8,
+      "non_dynasty_count": 0,
+      "dynasty_percentage": 100.0
+    },
+    {
+      "surname": "CALDERON",
+      "province": "CEBU",
+      "total_count": 8,
+      "dynasty_count": 8,
+      "non_dynasty_count": 2,
+      "dynasty_percentage": 100.0
+    },
+    {
+      "surname": "FLORES",
+      "province": "LAGUNA",
+      "total_count": 8,
+      "dynasty_count": 8,
+      "non_dynasty_count": 1,
       "dynasty_percentage": 100.0
     },
     {
       "surname": "CASTELO",
       "province": "NCR, SECOND DISTRICT",
-      "total_count": 14,
-      "dynasty_count": 14,
+      "total_count": 8,
+      "dynasty_count": 8,
       "non_dynasty_count": 0,
       "dynasty_percentage": 100.0
-    },
-    {
-      "surname": "DE LEON",
-      "province": "LAGUNA",
-      "total_count": 14,
-      "dynasty_count": 14,
-      "non_dynasty_count": 0,
-      "dynasty_percentage": 100.0
-    },
-    {
-      "surname": "DE SAN JOSE",
-      "province": "APAYAO",
-      "total_count": 14,
-      "dynasty_count": 14,
-      "non_dynasty_count": 0,
-      "dynasty_percentage": 100.0
-    },
-    {
-      "surname": "OLEGARIO",
-      "province": "ZAMBOANGA SIBUGAY",
-      "total_count": 14,
-      "dynasty_count": 14,
-      "non_dynasty_count": 0,
-      "dynasty_percentage": 100.0
-    },
-    {
-      "surname": "GONZALES",
-      "province": "SURIGAO DEL NORTE",
-      "total_count": 14,
-      "dynasty_count": 13,
-      "non_dynasty_count": 1,
-      "dynasty_percentage": 92.9
-    },
-    {
-      "surname": "YAP",
-      "province": "CAPIZ",
-      "total_count": 14,
-      "dynasty_count": 13,
-      "non_dynasty_count": 1,
-      "dynasty_percentage": 92.9
-    },
-    {
-      "surname": "MATUGAS",
-      "province": "SURIGAO DEL NORTE",
-      "total_count": 14,
-      "dynasty_count": 13,
-      "non_dynasty_count": 1,
-      "dynasty_percentage": 92.9
-    },
-    {
-      "surname": "CERILLES",
-      "province": "ZAMBOANGA DEL SUR",
-      "total_count": 14,
-      "dynasty_count": 13,
-      "non_dynasty_count": 1,
-      "dynasty_percentage": 92.9
-    },
-    {
-      "surname": "LEGASPI",
-      "province": "AKLAN",
-      "total_count": 14,
-      "dynasty_count": 13,
-      "non_dynasty_count": 1,
-      "dynasty_percentage": 92.9
-    },
-    {
-      "surname": "LIM",
-      "province": "AGUSAN DEL NORTE",
-      "total_count": 14,
-      "dynasty_count": 13,
-      "non_dynasty_count": 1,
-      "dynasty_percentage": 92.9
-    },
-    {
-      "surname": "HERNANDEZ",
-      "province": "LAGUNA",
-      "total_count": 14,
-      "dynasty_count": 13,
-      "non_dynasty_count": 1,
-      "dynasty_percentage": 92.9
-    },
-    {
-      "surname": "PALANCA",
-      "province": "PALAWAN",
-      "total_count": 13,
-      "dynasty_count": 13,
-      "non_dynasty_count": 0,
-      "dynasty_percentage": 100.0
-    },
-    {
-      "surname": "ROSIT",
-      "province": "DAVAO ORIENTAL",
-      "total_count": 13,
-      "dynasty_count": 13,
-      "non_dynasty_count": 0,
-      "dynasty_percentage": 100.0
-    },
-    {
-      "surname": "PADILLA",
-      "province": "NUEVA VIZCAYA",
-      "total_count": 13,
-      "dynasty_count": 13,
-      "non_dynasty_count": 0,
-      "dynasty_percentage": 100.0
-    },
-    {
-      "surname": "RONDILLA",
-      "province": "LAGUNA",
-      "total_count": 13,
-      "dynasty_count": 13,
-      "non_dynasty_count": 0,
-      "dynasty_percentage": 100.0
-    },
-    {
-      "surname": "MARTINEZ",
-      "province": "SARANGANI",
-      "total_count": 13,
-      "dynasty_count": 13,
-      "non_dynasty_count": 0,
-      "dynasty_percentage": 100.0
-    },
-    {
-      "surname": "LAGUMBAY",
-      "province": "SOUTHERN LEYTE",
-      "total_count": 13,
-      "dynasty_count": 13,
-      "non_dynasty_count": 0,
-      "dynasty_percentage": 100.0
-    },
-    {
-      "surname": "FERNANDEZ",
-      "province": "CATANDUANES",
-      "total_count": 13,
-      "dynasty_count": 13,
-      "non_dynasty_count": 0,
-      "dynasty_percentage": 100.0
-    },
-    {
-      "surname": "PESAYCO",
-      "province": "ANTIQUE",
-      "total_count": 13,
-      "dynasty_count": 13,
-      "non_dynasty_count": 0,
-      "dynasty_percentage": 100.0
-    },
-    {
-      "surname": "TORRELIZA",
-      "province": "OCCIDENTAL MINDORO",
-      "total_count": 14,
-      "dynasty_count": 12,
-      "non_dynasty_count": 2,
-      "dynasty_percentage": 85.7
-    },
-    {
-      "surname": "SALI",
-      "province": "BASILAN",
-      "total_count": 14,
-      "dynasty_count": 12,
-      "non_dynasty_count": 2,
-      "dynasty_percentage": 85.7
-    },
-    {
-      "surname": "ELORDE",
-      "province": "AGUSAN DEL SUR",
-      "total_count": 14,
-      "dynasty_count": 12,
-      "non_dynasty_count": 2,
-      "dynasty_percentage": 85.7
-    },
-    {
-      "surname": "RAMOS",
-      "province": "CAMARINES SUR",
-      "total_count": 14,
-      "dynasty_count": 12,
-      "non_dynasty_count": 2,
-      "dynasty_percentage": 85.7
-    },
-    {
-      "surname": "FIANZA",
-      "province": "BENGUET",
-      "total_count": 13,
-      "dynasty_count": 12,
-      "non_dynasty_count": 1,
-      "dynasty_percentage": 92.3
-    },
-    {
-      "surname": "IMPERIAL",
-      "province": "ALBAY",
-      "total_count": 13,
-      "dynasty_count": 12,
-      "non_dynasty_count": 1,
-      "dynasty_percentage": 92.3
-    },
-    {
-      "surname": "MAGBANUA",
-      "province": "PALAWAN",
-      "total_count": 13,
-      "dynasty_count": 12,
-      "non_dynasty_count": 1,
-      "dynasty_percentage": 92.3
-    },
-    {
-      "surname": "ESCANO",
-      "province": "SOUTHERN LEYTE",
-      "total_count": 12,
-      "dynasty_count": 12,
-      "non_dynasty_count": 0,
-      "dynasty_percentage": 100.0
-    },
-    {
-      "surname": "BALDO",
-      "province": "ALBAY",
-      "total_count": 12,
-      "dynasty_count": 12,
-      "non_dynasty_count": 0,
-      "dynasty_percentage": 100.0
-    },
-    {
-      "surname": "SALCEDA",
-      "province": "ALBAY",
-      "total_count": 12,
-      "dynasty_count": 12,
-      "non_dynasty_count": 0,
-      "dynasty_percentage": 100.0
-    },
-    {
-      "surname": "AMID",
-      "province": "APAYAO",
-      "total_count": 12,
-      "dynasty_count": 12,
-      "non_dynasty_count": 0,
-      "dynasty_percentage": 100.0
-    },
-    {
-      "surname": "TOLENTINO",
-      "province": "AURORA",
-      "total_count": 12,
-      "dynasty_count": 12,
-      "non_dynasty_count": 0,
-      "dynasty_percentage": 100.0
-    },
-    {
-      "surname": "MEDINA",
-      "province": "NCR, FOURTH DISTRICT",
-      "total_count": 12,
-      "dynasty_count": 12,
-      "non_dynasty_count": 0,
-      "dynasty_percentage": 100.0
-    },
-    {
-      "surname": "DIMAPILIS",
-      "province": "ORIENTAL MINDORO",
-      "total_count": 12,
-      "dynasty_count": 12,
-      "non_dynasty_count": 0,
-      "dynasty_percentage": 100.0
-    },
-    {
-      "surname": "JOE",
-      "province": "TAWI-TAWI",
-      "total_count": 12,
-      "dynasty_count": 12,
-      "non_dynasty_count": 0,
-      "dynasty_percentage": 100.0
-    },
-    {
-      "surname": "KHONGHUN",
-      "province": "ZAMBALES",
-      "total_count": 12,
-      "dynasty_count": 12,
-      "non_dynasty_count": 0,
-      "dynasty_percentage": 100.0
-    },
-    {
-      "surname": "PIODENA",
-      "province": "ZAMBOANGA SIBUGAY",
-      "total_count": 12,
-      "dynasty_count": 12,
-      "non_dynasty_count": 0,
-      "dynasty_percentage": 100.0
-    },
-    {
-      "surname": "DE GUZMAN",
-      "province": "NCR, SECOND DISTRICT",
-      "total_count": 13,
-      "dynasty_count": 11,
-      "non_dynasty_count": 2,
-      "dynasty_percentage": 84.6
     },
     {
       "surname": "SANTOS",
-      "province": "BATAAN",
-      "total_count": 13,
-      "dynasty_count": 11,
-      "non_dynasty_count": 2,
-      "dynasty_percentage": 84.6
-    },
-    {
-      "surname": "ANGARA",
-      "province": "AURORA",
-      "total_count": 13,
-      "dynasty_count": 11,
-      "non_dynasty_count": 2,
-      "dynasty_percentage": 84.6
-    },
-    {
-      "surname": "FUENTEBELLA",
-      "province": "CAMARINES SUR",
-      "total_count": 13,
-      "dynasty_count": 11,
-      "non_dynasty_count": 2,
-      "dynasty_percentage": 84.6
-    },
-    {
-      "surname": "FUA",
-      "province": "SIQUIJOR",
-      "total_count": 12,
-      "dynasty_count": 11,
-      "non_dynasty_count": 1,
-      "dynasty_percentage": 91.7
-    },
-    {
-      "surname": "LAZARO",
-      "province": "MASBATE",
-      "total_count": 12,
-      "dynasty_count": 11,
-      "non_dynasty_count": 1,
-      "dynasty_percentage": 91.7
-    },
-    {
-      "surname": "CHUA",
-      "province": "AGUSAN DEL SUR",
-      "total_count": 12,
-      "dynasty_count": 11,
-      "non_dynasty_count": 1,
-      "dynasty_percentage": 91.7
-    },
-    {
-      "surname": "CALINGASAN",
-      "province": "BUKIDNON",
-      "total_count": 11,
-      "dynasty_count": 11,
+      "province": "NCR, FOURTH DISTRICT",
+      "total_count": 8,
+      "dynasty_count": 8,
       "non_dynasty_count": 0,
       "dynasty_percentage": 100.0
-    },
-    {
-      "surname": "GAITAN",
-      "province": "GUIMARAS",
-      "total_count": 11,
-      "dynasty_count": 11,
-      "non_dynasty_count": 0,
-      "dynasty_percentage": 100.0
-    },
-    {
-      "surname": "NAVA",
-      "province": "GUIMARAS",
-      "total_count": 11,
-      "dynasty_count": 11,
-      "non_dynasty_count": 0,
-      "dynasty_percentage": 100.0
-    },
-    {
-      "surname": "LONGOS",
-      "province": "DINAGAT ISLANDS",
-      "total_count": 11,
-      "dynasty_count": 11,
-      "non_dynasty_count": 0,
-      "dynasty_percentage": 100.0
-    },
-    {
-      "surname": "CABAYA",
-      "province": "COTABATO",
-      "total_count": 11,
-      "dynasty_count": 10,
-      "non_dynasty_count": 1,
-      "dynasty_percentage": 90.9
-    },
-    {
-      "surname": "ENAGE",
-      "province": "BILIRAN",
-      "total_count": 11,
-      "dynasty_count": 10,
-      "non_dynasty_count": 1,
-      "dynasty_percentage": 90.9
-    },
-    {
-      "surname": "AMANTE",
-      "province": "AGUSAN DEL NORTE",
-      "total_count": 11,
-      "dynasty_count": 10,
-      "non_dynasty_count": 1,
-      "dynasty_percentage": 90.9
-    },
-    {
-      "surname": "LIBAYAO",
-      "province": "DAVAO DEL NORTE",
-      "total_count": 11,
-      "dynasty_count": 10,
-      "non_dynasty_count": 1,
-      "dynasty_percentage": 90.9
-    },
-    {
-      "surname": "FELARCA",
-      "province": "ZAMBALES",
-      "total_count": 11,
-      "dynasty_count": 10,
-      "non_dynasty_count": 1,
-      "dynasty_percentage": 90.9
-    },
-    {
-      "surname": "AGUSTIN",
-      "province": "QUIRINO",
-      "total_count": 10,
-      "dynasty_count": 10,
-      "non_dynasty_count": 0,
-      "dynasty_percentage": 100.0
-    },
-    {
-      "surname": "DAMAS",
-      "province": "ZAMBOANGA DEL SUR",
-      "total_count": 10,
-      "dynasty_count": 10,
-      "non_dynasty_count": 0,
-      "dynasty_percentage": 100.0
-    },
-    {
-      "surname": "PINOL",
-      "province": "COTABATO",
-      "total_count": 10,
-      "dynasty_count": 10,
-      "non_dynasty_count": 0,
-      "dynasty_percentage": 100.0
-    },
-    {
-      "surname": "CALIBO",
-      "province": "SIQUIJOR",
-      "total_count": 10,
-      "dynasty_count": 10,
-      "non_dynasty_count": 0,
-      "dynasty_percentage": 100.0
-    },
-    {
-      "surname": "JAUOD",
-      "province": "COMPOSTELA VALLEY",
-      "total_count": 10,
-      "dynasty_count": 10,
-      "non_dynasty_count": 0,
-      "dynasty_percentage": 100.0
-    },
-    {
-      "surname": "CUA",
-      "province": "QUIRINO",
-      "total_count": 10,
-      "dynasty_count": 10,
-      "non_dynasty_count": 0,
-      "dynasty_percentage": 100.0
-    },
-    {
-      "surname": "HERNANDEZ",
-      "province": "ORIENTAL MINDORO",
-      "total_count": 11,
-      "dynasty_count": 9,
-      "non_dynasty_count": 2,
-      "dynasty_percentage": 81.8
-    },
-    {
-      "surname": "TEVES",
-      "province": "CATANDUANES",
-      "total_count": 11,
-      "dynasty_count": 9,
-      "non_dynasty_count": 2,
-      "dynasty_percentage": 81.8
-    },
-    {
-      "surname": "CABALLERO",
-      "province": "COMPOSTELA VALLEY",
-      "total_count": 10,
-      "dynasty_count": 9,
-      "non_dynasty_count": 1,
-      "dynasty_percentage": 90.0
-    },
-    {
-      "surname": "DUJALI",
-      "province": "DAVAO DEL NORTE",
-      "total_count": 10,
-      "dynasty_count": 9,
-      "non_dynasty_count": 1,
-      "dynasty_percentage": 90.0
-    },
-    {
-      "surname": "FERNANDEZ",
-      "province": "GUIMARAS",
-      "total_count": 10,
-      "dynasty_count": 9,
-      "non_dynasty_count": 1,
-      "dynasty_percentage": 90.0
-    },
-    {
-      "surname": "ISIP",
-      "province": "NCR, CITY OF MANILA, FIRST DISTRICT",
-      "total_count": 10,
-      "dynasty_count": 9,
-      "non_dynasty_count": 1,
-      "dynasty_percentage": 90.0
-    },
-    {
-      "surname": "CHILAGAN",
-      "province": "IFUGAO",
-      "total_count": 10,
-      "dynasty_count": 9,
-      "non_dynasty_count": 1,
-      "dynasty_percentage": 90.0
-    },
-    {
-      "surname": "LADAGA",
-      "province": "DINAGAT ISLANDS",
-      "total_count": 9,
-      "dynasty_count": 9,
-      "non_dynasty_count": 0,
-      "dynasty_percentage": 100.0
-    },
-    {
-      "surname": "FRUELDA",
-      "province": "ROMBLON",
-      "total_count": 10,
-      "dynasty_count": 8,
-      "non_dynasty_count": 2,
-      "dynasty_percentage": 80.0
-    },
-    {
-      "surname": "SINGCOY",
-      "province": "SARANGANI",
-      "total_count": 10,
-      "dynasty_count": 8,
-      "non_dynasty_count": 2,
-      "dynasty_percentage": 80.0
-    },
-    {
-      "surname": "HAO",
-      "province": "SORSOGON",
-      "total_count": 10,
-      "dynasty_count": 8,
-      "non_dynasty_count": 2,
-      "dynasty_percentage": 80.0
-    },
-    {
-      "surname": "RAMOS",
-      "province": "ROMBLON",
-      "total_count": 10,
-      "dynasty_count": 8,
-      "non_dynasty_count": 2,
-      "dynasty_percentage": 80.0
-    },
-    {
-      "surname": "PALMA",
-      "province": "ZAMBOANGA SIBUGAY",
-      "total_count": 10,
-      "dynasty_count": 8,
-      "non_dynasty_count": 2,
-      "dynasty_percentage": 80.0
-    },
-    {
-      "surname": "VALDEZ",
-      "province": "NUEVA VIZCAYA",
-      "total_count": 10,
-      "dynasty_count": 8,
-      "non_dynasty_count": 2,
-      "dynasty_percentage": 80.0
-    },
-    {
-      "surname": "BUENAFLOR",
-      "province": "SULTAN KUDARAT",
-      "total_count": 10,
-      "dynasty_count": 8,
-      "non_dynasty_count": 2,
-      "dynasty_percentage": 80.0
-    },
-    {
-      "surname": "PALMA",
-      "province": "CAMARINES NORTE",
-      "total_count": 9,
-      "dynasty_count": 8,
-      "non_dynasty_count": 1,
-      "dynasty_percentage": 88.9
-    },
-    {
-      "surname": "MAGANA",
-      "province": "CAMARINES NORTE",
-      "total_count": 9,
-      "dynasty_count": 8,
-      "non_dynasty_count": 1,
-      "dynasty_percentage": 88.9
-    },
-    {
-      "surname": "PAGBILAO",
-      "province": "QUIRINO",
-      "total_count": 9,
-      "dynasty_count": 8,
-      "non_dynasty_count": 1,
-      "dynasty_percentage": 88.9
-    },
-    {
-      "surname": "CASTILLO",
-      "province": "BATANES",
-      "total_count": 9,
-      "dynasty_count": 8,
-      "non_dynasty_count": 1,
-      "dynasty_percentage": 88.9
-    },
-    {
-      "surname": "CARANTES",
-      "province": "BENGUET",
-      "total_count": 9,
-      "dynasty_count": 8,
-      "non_dynasty_count": 1,
-      "dynasty_percentage": 88.9
-    },
-    {
-      "surname": "COSALAN",
-      "province": "BENGUET",
-      "total_count": 9,
-      "dynasty_count": 8,
-      "non_dynasty_count": 1,
-      "dynasty_percentage": 88.9
-    },
-    {
-      "surname": "AGUIRRE",
-      "province": "SOUTH COTABATO",
-      "total_count": 9,
-      "dynasty_count": 8,
-      "non_dynasty_count": 1,
-      "dynasty_percentage": 88.9
-    },
-    {
-      "surname": "CHUA",
-      "province": "NCR, CITY OF MANILA, FIRST DISTRICT",
-      "total_count": 9,
-      "dynasty_count": 8,
-      "non_dynasty_count": 1,
-      "dynasty_percentage": 88.9
-    },
-    {
-      "surname": "CUNANAN",
-      "province": "NCR, THIRD DISTRICT",
-      "total_count": 9,
-      "dynasty_count": 8,
-      "non_dynasty_count": 1,
-      "dynasty_percentage": 88.9
-    },
-    {
-      "surname": "GATCHALIAN",
-      "province": "NCR, THIRD DISTRICT",
-      "total_count": 9,
-      "dynasty_count": 8,
-      "non_dynasty_count": 1,
-      "dynasty_percentage": 88.9
-    },
-    {
-      "surname": "RAVANILLA",
-      "province": "SORSOGON",
-      "total_count": 9,
-      "dynasty_count": 8,
-      "non_dynasty_count": 1,
-      "dynasty_percentage": 88.9
-    },
-    {
-      "surname": "RIMANDO",
-      "province": "COMPOSTELA VALLEY",
-      "total_count": 9,
-      "dynasty_count": 8,
-      "non_dynasty_count": 1,
-      "dynasty_percentage": 88.9
-    },
-    {
-      "surname": "AMOG",
-      "province": "ZAMBALES",
-      "total_count": 9,
-      "dynasty_count": 8,
-      "non_dynasty_count": 1,
-      "dynasty_percentage": 88.9
     },
     {
       "surname": "AMPATUAN",
@@ -1991,75 +1071,75 @@
       "dynasty_percentage": 100.0
     },
     {
-      "surname": "TAMAYO",
-      "province": "SOUTH COTABATO",
-      "total_count": 10,
-      "dynasty_count": 7,
-      "non_dynasty_count": 3,
-      "dynasty_percentage": 70.0
+      "surname": "CHIONG",
+      "province": "MISAMIS OCCIDENTAL",
+      "total_count": 8,
+      "dynasty_count": 8,
+      "non_dynasty_count": 1,
+      "dynasty_percentage": 100.0
     },
     {
-      "surname": "MONTE",
-      "province": "SIQUIJOR",
-      "total_count": 9,
-      "dynasty_count": 7,
-      "non_dynasty_count": 2,
-      "dynasty_percentage": 77.8
+      "surname": "PAROJINOG",
+      "province": "MISAMIS OCCIDENTAL",
+      "total_count": 8,
+      "dynasty_count": 8,
+      "non_dynasty_count": 1,
+      "dynasty_percentage": 100.0
     },
     {
-      "surname": "MORENO",
-      "province": "CAMARINES NORTE",
-      "total_count": 9,
-      "dynasty_count": 7,
-      "non_dynasty_count": 2,
-      "dynasty_percentage": 77.8
+      "surname": "DULNUAN",
+      "province": "IFUGAO",
+      "total_count": 8,
+      "dynasty_count": 8,
+      "non_dynasty_count": 0,
+      "dynasty_percentage": 100.0
     },
     {
-      "surname": "ASISTIO",
-      "province": "NCR, THIRD DISTRICT",
-      "total_count": 9,
-      "dynasty_count": 7,
-      "non_dynasty_count": 2,
-      "dynasty_percentage": 77.8
+      "surname": "JALOSJOS",
+      "province": "ZAMBOANGA DEL NORTE",
+      "total_count": 8,
+      "dynasty_count": 8,
+      "non_dynasty_count": 0,
+      "dynasty_percentage": 100.0
     },
     {
-      "surname": "REVELDEZ",
-      "province": "BILIRAN",
-      "total_count": 9,
-      "dynasty_count": 7,
-      "non_dynasty_count": 2,
-      "dynasty_percentage": 77.8
-    },
-    {
-      "surname": "LACUNA",
-      "province": "NCR, CITY OF MANILA, FIRST DISTRICT",
-      "total_count": 9,
-      "dynasty_count": 7,
-      "non_dynasty_count": 2,
-      "dynasty_percentage": 77.8
-    },
-    {
-      "surname": "RED",
-      "province": "MARINDUQUE",
+      "surname": "GUZMAN",
+      "province": "ABRA",
       "total_count": 8,
       "dynasty_count": 7,
-      "non_dynasty_count": 1,
+      "non_dynasty_count": 2,
       "dynasty_percentage": 87.5
     },
     {
-      "surname": "NANUD",
-      "province": "BATANES",
+      "surname": "ESPINOSA",
+      "province": "MASBATE",
       "total_count": 8,
       "dynasty_count": 7,
-      "non_dynasty_count": 1,
+      "non_dynasty_count": 2,
       "dynasty_percentage": 87.5
     },
     {
-      "surname": "BAUTISTA",
-      "province": "DAVAO OCCIDENTAL",
+      "surname": "RIMANDO",
+      "province": "COMPOSTELA VALLEY",
+      "total_count": 7,
+      "dynasty_count": 7,
+      "non_dynasty_count": 1,
+      "dynasty_percentage": 100.0
+    },
+    {
+      "surname": "LIM",
+      "province": "NORTHERN SAMAR",
       "total_count": 7,
       "dynasty_count": 7,
       "non_dynasty_count": 0,
+      "dynasty_percentage": 100.0
+    },
+    {
+      "surname": "MOJICA",
+      "province": "CAVITE",
+      "total_count": 7,
+      "dynasty_count": 7,
+      "non_dynasty_count": 1,
       "dynasty_percentage": 100.0
     },
     {
@@ -2071,68 +1151,500 @@
       "dynasty_percentage": 100.0
     },
     {
-      "surname": "TIMBOL",
-      "province": "DAVAO DEL NORTE",
-      "total_count": 9,
-      "dynasty_count": 6,
-      "non_dynasty_count": 3,
-      "dynasty_percentage": 66.7
+      "surname": "DE LEON",
+      "province": "LAGUNA",
+      "total_count": 7,
+      "dynasty_count": 7,
+      "non_dynasty_count": 0,
+      "dynasty_percentage": 100.0
     },
     {
-      "surname": "DUPINGAY",
-      "province": "IFUGAO",
-      "total_count": 8,
-      "dynasty_count": 6,
+      "surname": "BAUTISTA",
+      "province": "AKLAN",
+      "total_count": 7,
+      "dynasty_count": 7,
+      "non_dynasty_count": 1,
+      "dynasty_percentage": 100.0
+    },
+    {
+      "surname": "TIU",
+      "province": "SURIGAO DEL NORTE",
+      "total_count": 7,
+      "dynasty_count": 7,
+      "non_dynasty_count": 0,
+      "dynasty_percentage": 100.0
+    },
+    {
+      "surname": "PATRICIO",
+      "province": "CAPIZ",
+      "total_count": 7,
+      "dynasty_count": 7,
+      "non_dynasty_count": 0,
+      "dynasty_percentage": 100.0
+    },
+    {
+      "surname": "ALVAREZ",
+      "province": "PALAWAN",
+      "total_count": 7,
+      "dynasty_count": 7,
       "non_dynasty_count": 2,
-      "dynasty_percentage": 75.0
+      "dynasty_percentage": 100.0
     },
     {
-      "surname": "DASAYON",
-      "province": "KALINGA",
-      "total_count": 8,
-      "dynasty_count": 6,
+      "surname": "UY",
+      "province": "ZAMBOANGA DEL NORTE",
+      "total_count": 7,
+      "dynasty_count": 7,
+      "non_dynasty_count": 0,
+      "dynasty_percentage": 100.0
+    },
+    {
+      "surname": "GONZALES",
+      "province": "PAMPANGA",
+      "total_count": 7,
+      "dynasty_count": 7,
+      "non_dynasty_count": 0,
+      "dynasty_percentage": 100.0
+    },
+    {
+      "surname": "SANCHEZ",
+      "province": "MASBATE",
+      "total_count": 7,
+      "dynasty_count": 7,
+      "non_dynasty_count": 1,
+      "dynasty_percentage": 100.0
+    },
+    {
+      "surname": "ALVIOLA",
+      "province": "NEGROS ORIENTAL",
+      "total_count": 7,
+      "dynasty_count": 7,
+      "non_dynasty_count": 1,
+      "dynasty_percentage": 100.0
+    },
+    {
+      "surname": "REMOLLO",
+      "province": "NEGROS ORIENTAL",
+      "total_count": 7,
+      "dynasty_count": 7,
+      "non_dynasty_count": 0,
+      "dynasty_percentage": 100.0
+    },
+    {
+      "surname": "CAGAS",
+      "province": "DAVAO DEL SUR",
+      "total_count": 7,
+      "dynasty_count": 7,
+      "non_dynasty_count": 0,
+      "dynasty_percentage": 100.0
+    },
+    {
+      "surname": "SANTOS",
+      "province": "BATAAN",
+      "total_count": 7,
+      "dynasty_count": 7,
       "non_dynasty_count": 2,
-      "dynasty_percentage": 75.0
+      "dynasty_percentage": 100.0
     },
     {
-      "surname": "CORNEJO",
-      "province": "SOUTH COTABATO",
-      "total_count": 8,
-      "dynasty_count": 6,
-      "non_dynasty_count": 2,
-      "dynasty_percentage": 75.0
+      "surname": "BAUTISTA",
+      "province": "DAVAO OCCIDENTAL",
+      "total_count": 7,
+      "dynasty_count": 7,
+      "non_dynasty_count": 0,
+      "dynasty_percentage": 100.0
     },
     {
-      "surname": "ACEBES",
-      "province": "BATANES",
-      "total_count": 8,
-      "dynasty_count": 6,
-      "non_dynasty_count": 2,
-      "dynasty_percentage": 75.0
+      "surname": "MANUEL",
+      "province": "TARLAC",
+      "total_count": 7,
+      "dynasty_count": 7,
+      "non_dynasty_count": 0,
+      "dynasty_percentage": 100.0
     },
     {
-      "surname": "SAROL",
-      "province": "KALINGA",
+      "surname": "DEL ROSARIO",
+      "province": "BATAAN",
+      "total_count": 7,
+      "dynasty_count": 7,
+      "non_dynasty_count": 0,
+      "dynasty_percentage": 100.0
+    },
+    {
+      "surname": "VARGAS",
+      "province": "CAGAYAN",
+      "total_count": 7,
+      "dynasty_count": 7,
+      "non_dynasty_count": 0,
+      "dynasty_percentage": 100.0
+    },
+    {
+      "surname": "SALCEDA",
+      "province": "ALBAY",
+      "total_count": 7,
+      "dynasty_count": 7,
+      "non_dynasty_count": 0,
+      "dynasty_percentage": 100.0
+    },
+    {
+      "surname": "YU",
+      "province": "LEYTE",
+      "total_count": 7,
+      "dynasty_count": 7,
+      "non_dynasty_count": 1,
+      "dynasty_percentage": 100.0
+    },
+    {
+      "surname": "BALDO",
+      "province": "ALBAY",
+      "total_count": 7,
+      "dynasty_count": 7,
+      "non_dynasty_count": 0,
+      "dynasty_percentage": 100.0
+    },
+    {
+      "surname": "JR.",
+      "province": "BUKIDNON",
+      "total_count": 7,
+      "dynasty_count": 7,
+      "non_dynasty_count": 0,
+      "dynasty_percentage": 100.0
+    },
+    {
+      "surname": "ACOSTA",
+      "province": "BUKIDNON",
+      "total_count": 7,
+      "dynasty_count": 7,
+      "non_dynasty_count": 0,
+      "dynasty_percentage": 100.0
+    },
+    {
+      "surname": "PACIFICADOR",
+      "province": "ANTIQUE",
+      "total_count": 7,
+      "dynasty_count": 7,
+      "non_dynasty_count": 1,
+      "dynasty_percentage": 100.0
+    },
+    {
+      "surname": "PASCUA",
+      "province": "APAYAO",
+      "total_count": 7,
+      "dynasty_count": 7,
+      "non_dynasty_count": 0,
+      "dynasty_percentage": 100.0
+    },
+    {
+      "surname": "OLEGARIO",
+      "province": "ZAMBOANGA SIBUGAY",
+      "total_count": 7,
+      "dynasty_count": 7,
+      "non_dynasty_count": 0,
+      "dynasty_percentage": 100.0
+    },
+    {
+      "surname": "SOMBILON",
+      "province": "ROMBLON",
+      "total_count": 7,
+      "dynasty_count": 7,
+      "non_dynasty_count": 0,
+      "dynasty_percentage": 100.0
+    },
+    {
+      "surname": "SANTOS",
+      "province": "NCR, SECOND DISTRICT",
+      "total_count": 7,
+      "dynasty_count": 7,
+      "non_dynasty_count": 1,
+      "dynasty_percentage": 100.0
+    },
+    {
+      "surname": "AGUILAR",
+      "province": "NCR, FOURTH DISTRICT",
+      "total_count": 7,
+      "dynasty_count": 7,
+      "non_dynasty_count": 0,
+      "dynasty_percentage": 100.0
+    },
+    {
+      "surname": "AGUILAR",
+      "province": "CAMARINES SUR",
       "total_count": 7,
       "dynasty_count": 6,
-      "non_dynasty_count": 1,
+      "non_dynasty_count": 2,
       "dynasty_percentage": 85.7
     },
     {
-      "surname": "LIM",
-      "province": "MARINDUQUE",
+      "surname": "HERNANDEZ",
+      "province": "QUEZON",
       "total_count": 7,
       "dynasty_count": 6,
-      "non_dynasty_count": 1,
+      "non_dynasty_count": 2,
       "dynasty_percentage": 85.7
     },
     {
-      "surname": "ROXAS",
-      "province": "CAMIGUIN",
-      "total_count": 8,
+      "surname": "SINGCOY",
+      "province": "SARANGANI",
+      "total_count": 7,
+      "dynasty_count": 6,
+      "non_dynasty_count": 2,
+      "dynasty_percentage": 85.7
+    },
+    {
+      "surname": "ESCANO",
+      "province": "SOUTHERN LEYTE",
+      "total_count": 6,
+      "dynasty_count": 6,
+      "non_dynasty_count": 0,
+      "dynasty_percentage": 100.0
+    },
+    {
+      "surname": "ELORDE",
+      "province": "AGUSAN DEL SUR",
+      "total_count": 6,
+      "dynasty_count": 6,
+      "non_dynasty_count": 1,
+      "dynasty_percentage": 100.0
+    },
+    {
+      "surname": "LEGASPI",
+      "province": "AKLAN",
+      "total_count": 6,
+      "dynasty_count": 6,
+      "non_dynasty_count": 1,
+      "dynasty_percentage": 100.0
+    },
+    {
+      "surname": "DE SAN JOSE",
+      "province": "APAYAO",
+      "total_count": 6,
+      "dynasty_count": 6,
+      "non_dynasty_count": 0,
+      "dynasty_percentage": 100.0
+    },
+    {
+      "surname": "MARZAN",
+      "province": "AURORA",
+      "total_count": 6,
+      "dynasty_count": 6,
+      "non_dynasty_count": 1,
+      "dynasty_percentage": 100.0
+    },
+    {
+      "surname": "SALI",
+      "province": "BASILAN",
+      "total_count": 6,
+      "dynasty_count": 6,
+      "non_dynasty_count": 2,
+      "dynasty_percentage": 100.0
+    },
+    {
+      "surname": "AKBAR",
+      "province": "BASILAN",
+      "total_count": 6,
+      "dynasty_count": 6,
+      "non_dynasty_count": 2,
+      "dynasty_percentage": 100.0
+    },
+    {
+      "surname": "FIANZA",
+      "province": "BENGUET",
+      "total_count": 6,
+      "dynasty_count": 6,
+      "non_dynasty_count": 1,
+      "dynasty_percentage": 100.0
+    },
+    {
+      "surname": "ZUBIRI",
+      "province": "BUKIDNON",
+      "total_count": 6,
+      "dynasty_count": 6,
+      "non_dynasty_count": 0,
+      "dynasty_percentage": 100.0
+    },
+    {
+      "surname": "CABALLERO",
+      "province": "COMPOSTELA VALLEY",
+      "total_count": 6,
+      "dynasty_count": 6,
+      "non_dynasty_count": 1,
+      "dynasty_percentage": 100.0
+    },
+    {
+      "surname": "PIÃ‘OL",
+      "province": "COTABATO",
+      "total_count": 6,
+      "dynasty_count": 6,
+      "non_dynasty_count": 0,
+      "dynasty_percentage": 100.0
+    },
+    {
+      "surname": "CAMINERO",
+      "province": "DAVAO DEL SUR",
+      "total_count": 6,
+      "dynasty_count": 6,
+      "non_dynasty_count": 0,
+      "dynasty_percentage": 100.0
+    },
+    {
+      "surname": "VARGAS",
+      "province": "DINAGAT ISLANDS",
+      "total_count": 6,
+      "dynasty_count": 6,
+      "non_dynasty_count": 0,
+      "dynasty_percentage": 100.0
+    },
+    {
+      "surname": "NAVA",
+      "province": "GUIMARAS",
+      "total_count": 6,
+      "dynasty_count": 6,
+      "non_dynasty_count": 0,
+      "dynasty_percentage": 100.0
+    },
+    {
+      "surname": "BALGOS",
+      "province": "NUEVA VIZCAYA",
+      "total_count": 6,
+      "dynasty_count": 6,
+      "non_dynasty_count": 0,
+      "dynasty_percentage": 100.0
+    },
+    {
+      "surname": "CASTILLO",
+      "province": "NUEVA VIZCAYA",
+      "total_count": 6,
+      "dynasty_count": 6,
+      "non_dynasty_count": 2,
+      "dynasty_percentage": 100.0
+    },
+    {
+      "surname": "PEREZ",
+      "province": "ORIENTAL MINDORO",
+      "total_count": 6,
+      "dynasty_count": 6,
+      "non_dynasty_count": 1,
+      "dynasty_percentage": 100.0
+    },
+    {
+      "surname": "UMALI",
+      "province": "ORIENTAL MINDORO",
+      "total_count": 6,
+      "dynasty_count": 6,
+      "non_dynasty_count": 0,
+      "dynasty_percentage": 100.0
+    },
+    {
+      "surname": "FABELLA",
+      "province": "ROMBLON",
+      "total_count": 6,
+      "dynasty_count": 6,
+      "non_dynasty_count": 1,
+      "dynasty_percentage": 100.0
+    },
+    {
+      "surname": "AGUSTIN",
+      "province": "TARLAC",
+      "total_count": 6,
+      "dynasty_count": 6,
+      "non_dynasty_count": 0,
+      "dynasty_percentage": 100.0
+    },
+    {
+      "surname": "CARLOTO",
+      "province": "ZAMBOANGA DEL NORTE",
+      "total_count": 6,
+      "dynasty_count": 6,
+      "non_dynasty_count": 1,
+      "dynasty_percentage": 100.0
+    },
+    {
+      "surname": "SULONG",
+      "province": "ZAMBOANGA DEL SUR",
+      "total_count": 6,
+      "dynasty_count": 6,
+      "non_dynasty_count": 0,
+      "dynasty_percentage": 100.0
+    },
+    {
+      "surname": "CERILLES",
+      "province": "ZAMBOANGA DEL SUR",
+      "total_count": 6,
+      "dynasty_count": 6,
+      "non_dynasty_count": 1,
+      "dynasty_percentage": 100.0
+    },
+    {
+      "surname": "RABAT",
+      "province": "DAVAO ORIENTAL",
+      "total_count": 6,
       "dynasty_count": 5,
-      "non_dynasty_count": 3,
-      "dynasty_percentage": 62.5
+      "non_dynasty_count": 1,
+      "dynasty_percentage": 83.3
+    },
+    {
+      "surname": "BINAY",
+      "province": "NCR, FOURTH DISTRICT",
+      "total_count": 6,
+      "dynasty_count": 5,
+      "non_dynasty_count": 1,
+      "dynasty_percentage": 83.3
+    },
+    {
+      "surname": "MAYOR",
+      "province": "ROMBLON",
+      "total_count": 6,
+      "dynasty_count": 5,
+      "non_dynasty_count": 2,
+      "dynasty_percentage": 83.3
+    },
+    {
+      "surname": "ANGARA",
+      "province": "AURORA",
+      "total_count": 6,
+      "dynasty_count": 5,
+      "non_dynasty_count": 1,
+      "dynasty_percentage": 83.3
+    },
+    {
+      "surname": "IBABAO",
+      "province": "AKLAN",
+      "total_count": 6,
+      "dynasty_count": 5,
+      "non_dynasty_count": 1,
+      "dynasty_percentage": 83.3
+    },
+    {
+      "surname": "PLAZA",
+      "province": "AGUSAN DEL NORTE",
+      "total_count": 6,
+      "dynasty_count": 5,
+      "non_dynasty_count": 1,
+      "dynasty_percentage": 83.3
+    },
+    {
+      "surname": "CASTILLO",
+      "province": "BATANES",
+      "total_count": 6,
+      "dynasty_count": 5,
+      "non_dynasty_count": 1,
+      "dynasty_percentage": 83.3
+    },
+    {
+      "surname": "ASIS",
+      "province": "AGUSAN DEL SUR",
+      "total_count": 6,
+      "dynasty_count": 5,
+      "non_dynasty_count": 1,
+      "dynasty_percentage": 83.3
+    },
+    {
+      "surname": "CARAG",
+      "province": "CAGAYAN",
+      "total_count": 6,
+      "dynasty_count": 5,
+      "non_dynasty_count": 2,
+      "dynasty_percentage": 83.3
     },
     {
       "surname": "JR.",
@@ -2143,8 +1655,80 @@
       "dynasty_percentage": 100.0
     },
     {
-      "surname": "MANGUDADATU",
-      "province": "Maguindanao del Sur",
+      "surname": "PINOL",
+      "province": "COTABATO",
+      "total_count": 5,
+      "dynasty_count": 5,
+      "non_dynasty_count": 0,
+      "dynasty_percentage": 100.0
+    },
+    {
+      "surname": "ASISTIO",
+      "province": "NCR, THIRD DISTRICT",
+      "total_count": 5,
+      "dynasty_count": 5,
+      "non_dynasty_count": 1,
+      "dynasty_percentage": 100.0
+    },
+    {
+      "surname": "TIMBOL",
+      "province": "DAVAO DEL NORTE",
+      "total_count": 5,
+      "dynasty_count": 5,
+      "non_dynasty_count": 1,
+      "dynasty_percentage": 100.0
+    },
+    {
+      "surname": "LIBAYAO",
+      "province": "DAVAO DEL NORTE",
+      "total_count": 5,
+      "dynasty_count": 5,
+      "non_dynasty_count": 1,
+      "dynasty_percentage": 100.0
+    },
+    {
+      "surname": "JR.",
+      "province": "BULACAN PROVINCE",
+      "total_count": 5,
+      "dynasty_count": 5,
+      "non_dynasty_count": 0,
+      "dynasty_percentage": 100.0
+    },
+    {
+      "surname": "LATOG",
+      "province": "SULTAN KUDARAT",
+      "total_count": 5,
+      "dynasty_count": 5,
+      "non_dynasty_count": 1,
+      "dynasty_percentage": 100.0
+    },
+    {
+      "surname": "GANGE",
+      "province": "GUIMARAS",
+      "total_count": 5,
+      "dynasty_count": 5,
+      "non_dynasty_count": 1,
+      "dynasty_percentage": 100.0
+    },
+    {
+      "surname": "JR.",
+      "province": "BATAAN PROVINCE",
+      "total_count": 5,
+      "dynasty_count": 5,
+      "non_dynasty_count": 0,
+      "dynasty_percentage": 100.0
+    },
+    {
+      "surname": "LONGOS",
+      "province": "DINAGAT ISLANDS",
+      "total_count": 5,
+      "dynasty_count": 5,
+      "non_dynasty_count": 0,
+      "dynasty_percentage": 100.0
+    },
+    {
+      "surname": "BITONG",
+      "province": "AURORA",
       "total_count": 5,
       "dynasty_count": 5,
       "non_dynasty_count": 0,
@@ -2159,64 +1743,160 @@
       "dynasty_percentage": 100.0
     },
     {
-      "surname": "JR.",
-      "province": "BATAAN PROVINCE",
+      "surname": "BALAOD",
+      "province": "ZAMBOANGA DEL SUR",
+      "total_count": 5,
+      "dynasty_count": 5,
+      "non_dynasty_count": 1,
+      "dynasty_percentage": 100.0
+    },
+    {
+      "surname": "ASIS",
+      "province": "CAMARINES NORTE",
       "total_count": 5,
       "dynasty_count": 5,
       "non_dynasty_count": 0,
       "dynasty_percentage": 100.0
     },
     {
-      "surname": "JR.",
-      "province": "BULACAN PROVINCE",
+      "surname": "AMANTE",
+      "province": "AGUSAN DEL NORTE",
       "total_count": 5,
       "dynasty_count": 5,
-      "non_dynasty_count": 0,
+      "non_dynasty_count": 1,
       "dynasty_percentage": 100.0
     },
     {
-      "surname": "LACWASAN",
-      "province": "MOUNTAIN PROVINCE",
-      "total_count": 7,
-      "dynasty_count": 4,
-      "non_dynasty_count": 3,
-      "dynasty_percentage": 57.1
-    },
-    {
-      "surname": "ALUNDAY",
-      "province": "KALINGA",
-      "total_count": 7,
-      "dynasty_count": 4,
-      "non_dynasty_count": 3,
-      "dynasty_percentage": 57.1
-    },
-    {
-      "surname": "JR.",
-      "province": "PAMPANGA PROVINCE",
-      "total_count": 4,
-      "dynasty_count": 4,
-      "non_dynasty_count": 0,
-      "dynasty_percentage": 100.0
-    },
-    {
-      "surname": "MIDTIMBANG",
+      "surname": "MANGUDADATU",
       "province": "Maguindanao del Sur",
-      "total_count": 4,
-      "dynasty_count": 4,
+      "total_count": 5,
+      "dynasty_count": 5,
       "non_dynasty_count": 0,
       "dynasty_percentage": 100.0
     },
     {
-      "surname": "MARISCAL",
+      "surname": "DIMAPILIS",
+      "province": "ORIENTAL MINDORO",
+      "total_count": 5,
+      "dynasty_count": 5,
+      "non_dynasty_count": 0,
+      "dynasty_percentage": 100.0
+    },
+    {
+      "surname": "PALMA",
+      "province": "ZAMBOANGA SIBUGAY",
+      "total_count": 5,
+      "dynasty_count": 5,
+      "non_dynasty_count": 2,
+      "dynasty_percentage": 100.0
+    },
+    {
+      "surname": "TAMAYO",
+      "province": "SOUTH COTABATO",
+      "total_count": 5,
+      "dynasty_count": 5,
+      "non_dynasty_count": 2,
+      "dynasty_percentage": 100.0
+    },
+    {
+      "surname": "PADILLA",
+      "province": "NUEVA VIZCAYA",
+      "total_count": 5,
+      "dynasty_count": 5,
+      "non_dynasty_count": 0,
+      "dynasty_percentage": 100.0
+    },
+    {
+      "surname": "FELARCA",
+      "province": "ZAMBALES",
+      "total_count": 5,
+      "dynasty_count": 5,
+      "non_dynasty_count": 1,
+      "dynasty_percentage": 100.0
+    },
+    {
+      "surname": "COSALAN",
+      "province": "BENGUET",
+      "total_count": 5,
+      "dynasty_count": 5,
+      "non_dynasty_count": 1,
+      "dynasty_percentage": 100.0
+    },
+    {
+      "surname": "FERNANDEZ",
+      "province": "CATANDUANES",
+      "total_count": 5,
+      "dynasty_count": 5,
+      "non_dynasty_count": 0,
+      "dynasty_percentage": 100.0
+    },
+    {
+      "surname": "LACUNA",
+      "province": "NCR, CITY OF MANILA, FIRST DISTRICT",
+      "total_count": 6,
+      "dynasty_count": 4,
+      "non_dynasty_count": 2,
+      "dynasty_percentage": 66.7
+    },
+    {
+      "surname": "BONGUYAN",
+      "province": "DAVAO DEL SUR",
+      "total_count": 6,
+      "dynasty_count": 4,
+      "non_dynasty_count": 3,
+      "dynasty_percentage": 66.7
+    },
+    {
+      "surname": "TESIORNA",
+      "province": "SURIGAO DEL NORTE",
+      "total_count": 6,
+      "dynasty_count": 4,
+      "non_dynasty_count": 2,
+      "dynasty_percentage": 66.7
+    },
+    {
+      "surname": "GARCIA",
+      "province": "OCCIDENTAL MINDORO",
+      "total_count": 5,
+      "dynasty_count": 4,
+      "non_dynasty_count": 1,
+      "dynasty_percentage": 80.0
+    },
+    {
+      "surname": "BUYAGAN",
+      "province": "MOUNTAIN PROVINCE",
+      "total_count": 5,
+      "dynasty_count": 4,
+      "non_dynasty_count": 1,
+      "dynasty_percentage": 80.0
+    },
+    {
+      "surname": "MANGAOANG",
+      "province": "KALINGA",
+      "total_count": 5,
+      "dynasty_count": 4,
+      "non_dynasty_count": 2,
+      "dynasty_percentage": 80.0
+    },
+    {
+      "surname": "QUINTOS",
+      "province": "NCR, CITY OF MANILA, FIRST DISTRICT",
+      "total_count": 5,
+      "dynasty_count": 4,
+      "non_dynasty_count": 2,
+      "dynasty_percentage": 80.0
+    },
+    {
+      "surname": "ISIP",
+      "province": "NCR, CITY OF MANILA, FIRST DISTRICT",
+      "total_count": 5,
+      "dynasty_count": 4,
+      "non_dynasty_count": 1,
+      "dynasty_percentage": 80.0
+    },
+    {
+      "surname": "MARUYA",
       "province": "DAVAO OCCIDENTAL",
-      "total_count": 4,
-      "dynasty_count": 4,
-      "non_dynasty_count": 0,
-      "dynasty_percentage": 100.0
-    },
-    {
-      "surname": "JR.",
-      "province": "ISABELA PROVINCE",
       "total_count": 4,
       "dynasty_count": 4,
       "non_dynasty_count": 0,
@@ -2231,6 +1911,46 @@
       "dynasty_percentage": 100.0
     },
     {
+      "surname": "BULUT",
+      "province": "APAYAO",
+      "total_count": 4,
+      "dynasty_count": 4,
+      "non_dynasty_count": 0,
+      "dynasty_percentage": 100.0
+    },
+    {
+      "surname": "JR.",
+      "province": "PAMPANGA PROVINCE",
+      "total_count": 4,
+      "dynasty_count": 4,
+      "non_dynasty_count": 0,
+      "dynasty_percentage": 100.0
+    },
+    {
+      "surname": "JR.",
+      "province": "ISABELA PROVINCE",
+      "total_count": 4,
+      "dynasty_count": 4,
+      "non_dynasty_count": 0,
+      "dynasty_percentage": 100.0
+    },
+    {
+      "surname": "ALAVADO",
+      "province": "BATANES",
+      "total_count": 4,
+      "dynasty_count": 4,
+      "non_dynasty_count": 1,
+      "dynasty_percentage": 100.0
+    },
+    {
+      "surname": "CHAVEZ",
+      "province": "GUIMARAS",
+      "total_count": 4,
+      "dynasty_count": 4,
+      "non_dynasty_count": 1,
+      "dynasty_percentage": 100.0
+    },
+    {
       "surname": "UY",
       "province": "ISABELA PROVINCE",
       "total_count": 4,
@@ -2239,11 +1959,91 @@
       "dynasty_percentage": 100.0
     },
     {
-      "surname": "JR.",
-      "province": "ABRA PROVINCE",
+      "surname": "REVELDEZ",
+      "province": "BILIRAN",
+      "total_count": 4,
+      "dynasty_count": 4,
+      "non_dynasty_count": 1,
+      "dynasty_percentage": 100.0
+    },
+    {
+      "surname": "NANUD",
+      "province": "BATANES",
+      "total_count": 4,
+      "dynasty_count": 4,
+      "non_dynasty_count": 1,
+      "dynasty_percentage": 100.0
+    },
+    {
+      "surname": "PALENCIA",
+      "province": "SOUTH COTABATO",
+      "total_count": 4,
+      "dynasty_count": 4,
+      "non_dynasty_count": 1,
+      "dynasty_percentage": 100.0
+    },
+    {
+      "surname": "FUENTES",
+      "province": "SOUTH COTABATO",
+      "total_count": 4,
+      "dynasty_count": 4,
+      "non_dynasty_count": 2,
+      "dynasty_percentage": 100.0
+    },
+    {
+      "surname": "PIODENA",
+      "province": "ZAMBOANGA SIBUGAY",
       "total_count": 4,
       "dynasty_count": 4,
       "non_dynasty_count": 0,
+      "dynasty_percentage": 100.0
+    },
+    {
+      "surname": "YANONG",
+      "province": "COMPOSTELA VALLEY",
+      "total_count": 4,
+      "dynasty_count": 4,
+      "non_dynasty_count": 1,
+      "dynasty_percentage": 100.0
+    },
+    {
+      "surname": "TAYABAN",
+      "province": "IFUGAO",
+      "total_count": 4,
+      "dynasty_count": 4,
+      "non_dynasty_count": 2,
+      "dynasty_percentage": 100.0
+    },
+    {
+      "surname": "JR.",
+      "province": "CAVITE PROVINCE",
+      "total_count": 4,
+      "dynasty_count": 4,
+      "non_dynasty_count": 0,
+      "dynasty_percentage": 100.0
+    },
+    {
+      "surname": "CARANTES",
+      "province": "BENGUET",
+      "total_count": 4,
+      "dynasty_count": 4,
+      "non_dynasty_count": 1,
+      "dynasty_percentage": 100.0
+    },
+    {
+      "surname": "CHILAGAN",
+      "province": "IFUGAO",
+      "total_count": 4,
+      "dynasty_count": 4,
+      "non_dynasty_count": 1,
+      "dynasty_percentage": 100.0
+    },
+    {
+      "surname": "RED",
+      "province": "MARINDUQUE",
+      "total_count": 4,
+      "dynasty_count": 4,
+      "non_dynasty_count": 1,
       "dynasty_percentage": 100.0
     },
     {
@@ -2263,40 +2063,120 @@
       "dynasty_percentage": 100.0
     },
     {
+      "surname": "DIONEDA",
+      "province": "SORSOGON",
+      "total_count": 4,
+      "dynasty_count": 4,
+      "non_dynasty_count": 2,
+      "dynasty_percentage": 100.0
+    },
+    {
       "surname": "JR.",
-      "province": "CAVITE PROVINCE",
+      "province": "ABRA PROVINCE",
       "total_count": 4,
       "dynasty_count": 4,
       "non_dynasty_count": 0,
       "dynasty_percentage": 100.0
     },
     {
-      "surname": "ABECIA",
-      "province": "CAMIGUIN",
-      "total_count": 7,
-      "dynasty_count": 3,
-      "non_dynasty_count": 4,
-      "dynasty_percentage": 42.9
+      "surname": "PACQUIAO",
+      "province": "SARANGANI",
+      "total_count": 4,
+      "dynasty_count": 4,
+      "non_dynasty_count": 1,
+      "dynasty_percentage": 100.0
     },
     {
-      "surname": "RAFAEL",
-      "province": "MOUNTAIN PROVINCE",
+      "surname": "MIDTIMBANG",
+      "province": "Maguindanao del Sur",
+      "total_count": 4,
+      "dynasty_count": 4,
+      "non_dynasty_count": 0,
+      "dynasty_percentage": 100.0
+    },
+    {
+      "surname": "PENA",
+      "province": "CAMARINES SUR",
       "total_count": 6,
       "dynasty_count": 3,
       "non_dynasty_count": 3,
       "dynasty_percentage": 50.0
     },
     {
-      "surname": "BERNOS",
-      "province": "ABRA PROVINCE",
-      "total_count": 3,
+      "surname": "RAFAEL",
+      "province": "MOUNTAIN PROVINCE",
+      "total_count": 5,
       "dynasty_count": 3,
-      "non_dynasty_count": 0,
-      "dynasty_percentage": 100.0
+      "non_dynasty_count": 3,
+      "dynasty_percentage": 60.0
     },
     {
-      "surname": "CRISOLOGO",
-      "province": "ABRA PROVINCE",
+      "surname": "FRIVALDO",
+      "province": "SORSOGON",
+      "total_count": 5,
+      "dynasty_count": 3,
+      "non_dynasty_count": 3,
+      "dynasty_percentage": 60.0
+    },
+    {
+      "surname": "OCO",
+      "province": "CAMARINES NORTE",
+      "total_count": 5,
+      "dynasty_count": 3,
+      "non_dynasty_count": 2,
+      "dynasty_percentage": 60.0
+    },
+    {
+      "surname": "GUERRERO",
+      "province": "CATANDUANES",
+      "total_count": 5,
+      "dynasty_count": 3,
+      "non_dynasty_count": 2,
+      "dynasty_percentage": 60.0
+    },
+    {
+      "surname": "UY",
+      "province": "DAVAO DEL NORTE",
+      "total_count": 5,
+      "dynasty_count": 3,
+      "non_dynasty_count": 3,
+      "dynasty_percentage": 60.0
+    },
+    {
+      "surname": "JUMAWAN",
+      "province": "SIQUIJOR",
+      "total_count": 5,
+      "dynasty_count": 3,
+      "non_dynasty_count": 2,
+      "dynasty_percentage": 60.0
+    },
+    {
+      "surname": "ROXAS",
+      "province": "CAMIGUIN",
+      "total_count": 4,
+      "dynasty_count": 3,
+      "non_dynasty_count": 1,
+      "dynasty_percentage": 75.0
+    },
+    {
+      "surname": "ALUNDAY",
+      "province": "KALINGA",
+      "total_count": 4,
+      "dynasty_count": 3,
+      "non_dynasty_count": 2,
+      "dynasty_percentage": 75.0
+    },
+    {
+      "surname": "MANANGAN",
+      "province": "ZAMBALES",
+      "total_count": 4,
+      "dynasty_count": 3,
+      "non_dynasty_count": 3,
+      "dynasty_percentage": 75.0
+    },
+    {
+      "surname": "ANTONIO",
+      "province": "CAGAYAN PROVINCE",
       "total_count": 3,
       "dynasty_count": 3,
       "non_dynasty_count": 0,
@@ -2305,38 +2185,6 @@
     {
       "surname": "JR.",
       "province": "BENGUET PROVINCE",
-      "total_count": 3,
-      "dynasty_count": 3,
-      "non_dynasty_count": 0,
-      "dynasty_percentage": 100.0
-    },
-    {
-      "surname": "III",
-      "province": "PANGASINAN PROVINCE",
-      "total_count": 3,
-      "dynasty_count": 3,
-      "non_dynasty_count": 0,
-      "dynasty_percentage": 100.0
-    },
-    {
-      "surname": "JR.",
-      "province": "CAGAYAN PROVINCE",
-      "total_count": 3,
-      "dynasty_count": 3,
-      "non_dynasty_count": 0,
-      "dynasty_percentage": 100.0
-    },
-    {
-      "surname": "CRUZ",
-      "province": "BULACAN PROVINCE",
-      "total_count": 3,
-      "dynasty_count": 3,
-      "non_dynasty_count": 0,
-      "dynasty_percentage": 100.0
-    },
-    {
-      "surname": "ANTONIO",
-      "province": "CAGAYAN PROVINCE",
       "total_count": 3,
       "dynasty_count": 3,
       "non_dynasty_count": 0,
@@ -2351,24 +2199,152 @@
       "dynasty_percentage": 100.0
     },
     {
-      "surname": "SR.",
-      "province": "BENGUET PROVINCE",
+      "surname": "CRUZ",
+      "province": "BULACAN PROVINCE",
+      "total_count": 3,
+      "dynasty_count": 3,
+      "non_dynasty_count": 0,
+      "dynasty_percentage": 100.0
+    },
+    {
+      "surname": "VITTO",
+      "province": "MARINDUQUE",
+      "total_count": 3,
+      "dynasty_count": 3,
+      "non_dynasty_count": 1,
+      "dynasty_percentage": 100.0
+    },
+    {
+      "surname": "PADAYHAG",
+      "province": "SIQUIJOR",
+      "total_count": 3,
+      "dynasty_count": 3,
+      "non_dynasty_count": 1,
+      "dynasty_percentage": 100.0
+    },
+    {
+      "surname": "III",
+      "province": "PANGASINAN PROVINCE",
+      "total_count": 3,
+      "dynasty_count": 3,
+      "non_dynasty_count": 0,
+      "dynasty_percentage": 100.0
+    },
+    {
+      "surname": "BERNOS",
+      "province": "ABRA PROVINCE",
+      "total_count": 3,
+      "dynasty_count": 3,
+      "non_dynasty_count": 0,
+      "dynasty_percentage": 100.0
+    },
+    {
+      "surname": "JR.",
+      "province": "CAGAYAN PROVINCE",
+      "total_count": 3,
+      "dynasty_count": 3,
+      "non_dynasty_count": 0,
+      "dynasty_percentage": 100.0
+    },
+    {
+      "surname": "AGUSTIN",
+      "province": "QUIRINO",
+      "total_count": 3,
+      "dynasty_count": 3,
+      "non_dynasty_count": 0,
+      "dynasty_percentage": 100.0
+    },
+    {
+      "surname": "CRISOLOGO",
+      "province": "ABRA PROVINCE",
+      "total_count": 3,
+      "dynasty_count": 3,
+      "non_dynasty_count": 0,
+      "dynasty_percentage": 100.0
+    },
+    {
+      "surname": "SANTELICES",
+      "province": "CATANDUANES",
+      "total_count": 6,
+      "dynasty_count": 2,
+      "non_dynasty_count": 4,
+      "dynasty_percentage": 33.3
+    },
+    {
+      "surname": "CARDENAS",
+      "province": "QUIRINO",
+      "total_count": 4,
+      "dynasty_count": 2,
+      "non_dynasty_count": 3,
+      "dynasty_percentage": 50.0
+    },
+    {
+      "surname": "PANOTES",
+      "province": "CAMARINES NORTE",
+      "total_count": 4,
+      "dynasty_count": 2,
+      "non_dynasty_count": 3,
+      "dynasty_percentage": 50.0
+    },
+    {
+      "surname": "ALBELDA",
+      "province": "BILIRAN",
+      "total_count": 4,
+      "dynasty_count": 2,
+      "non_dynasty_count": 2,
+      "dynasty_percentage": 50.0
+    },
+    {
+      "surname": "MALANNAG",
+      "province": "KALINGA",
+      "total_count": 4,
+      "dynasty_count": 2,
+      "non_dynasty_count": 2,
+      "dynasty_percentage": 50.0
+    },
+    {
+      "surname": "SANDOVAL",
+      "province": "NCR, THIRD DISTRICT",
+      "total_count": 4,
+      "dynasty_count": 2,
+      "non_dynasty_count": 3,
+      "dynasty_percentage": 50.0
+    },
+    {
+      "surname": "LIM",
+      "province": "ZAMBALES",
+      "total_count": 4,
+      "dynasty_count": 2,
+      "non_dynasty_count": 3,
+      "dynasty_percentage": 50.0
+    },
+    {
+      "surname": "PALOMARES",
+      "province": "MARINDUQUE",
+      "total_count": 3,
+      "dynasty_count": 2,
+      "non_dynasty_count": 2,
+      "dynasty_percentage": 66.7
+    },
+    {
+      "surname": "MALATON",
+      "province": "CAMIGUIN",
+      "total_count": 3,
+      "dynasty_count": 2,
+      "non_dynasty_count": 1,
+      "dynasty_percentage": 66.7
+    },
+    {
+      "surname": "SANTOS",
+      "province": "PAMPANGA PROVINCE",
       "total_count": 2,
       "dynasty_count": 2,
       "non_dynasty_count": 0,
       "dynasty_percentage": 100.0
     },
     {
-      "surname": "CALDERON",
+      "surname": "TALAUE",
       "province": "ISABELA PROVINCE",
-      "total_count": 2,
-      "dynasty_count": 2,
-      "non_dynasty_count": 0,
-      "dynasty_percentage": 100.0
-    },
-    {
-      "surname": "GORRICETA",
-      "province": "ILOILO PROVINCE",
       "total_count": 2,
       "dynasty_count": 2,
       "non_dynasty_count": 0,
@@ -2383,16 +2359,8 @@
       "dynasty_percentage": 100.0
     },
     {
-      "surname": "MASTURA",
-      "province": "Maguindanao del Norte",
-      "total_count": 2,
-      "dynasty_count": 2,
-      "non_dynasty_count": 0,
-      "dynasty_percentage": 100.0
-    },
-    {
-      "surname": "DIOCOLANO",
-      "province": "Maguindanao del Norte",
+      "surname": "GORRICETA",
+      "province": "ILOILO PROVINCE",
       "total_count": 2,
       "dynasty_count": 2,
       "non_dynasty_count": 0,
@@ -2401,6 +2369,22 @@
     {
       "surname": "JR.",
       "province": "GUIMARAS PROVINCE",
+      "total_count": 2,
+      "dynasty_count": 2,
+      "non_dynasty_count": 0,
+      "dynasty_percentage": 100.0
+    },
+    {
+      "surname": "MANALAO",
+      "province": "Maguindanao del Norte",
+      "total_count": 2,
+      "dynasty_count": 2,
+      "non_dynasty_count": 0,
+      "dynasty_percentage": 100.0
+    },
+    {
+      "surname": "MASTURA",
+      "province": "Maguindanao del Norte",
       "total_count": 2,
       "dynasty_count": 2,
       "non_dynasty_count": 0,
@@ -2439,30 +2423,6 @@
       "dynasty_percentage": 100.0
     },
     {
-      "surname": "RAMOS",
-      "province": "NUEVA ECIJA PROVINCE",
-      "total_count": 2,
-      "dynasty_count": 2,
-      "non_dynasty_count": 0,
-      "dynasty_percentage": 100.0
-    },
-    {
-      "surname": "PASCUAL",
-      "province": "NUEVA ECIJA PROVINCE",
-      "total_count": 2,
-      "dynasty_count": 2,
-      "non_dynasty_count": 0,
-      "dynasty_percentage": 100.0
-    },
-    {
-      "surname": "AUSTRIA",
-      "province": "NUEVA ECIJA PROVINCE",
-      "total_count": 2,
-      "dynasty_count": 2,
-      "non_dynasty_count": 0,
-      "dynasty_percentage": 100.0
-    },
-    {
       "surname": "DUALAN",
       "province": "CAVITE PROVINCE",
       "total_count": 2,
@@ -2471,7 +2431,7 @@
       "dynasty_percentage": 100.0
     },
     {
-      "surname": "TOLENTINO",
+      "surname": "CHUA",
       "province": "CAVITE PROVINCE",
       "total_count": 2,
       "dynasty_count": 2,
@@ -2479,24 +2439,24 @@
       "dynasty_percentage": 100.0
     },
     {
-      "surname": "FLORES",
-      "province": "PAMPANGA PROVINCE",
+      "surname": "ROMANO",
+      "province": "NUEVA ECIJA PROVINCE",
       "total_count": 2,
       "dynasty_count": 2,
       "non_dynasty_count": 0,
       "dynasty_percentage": 100.0
     },
     {
-      "surname": "PINEDA",
-      "province": "PAMPANGA PROVINCE",
+      "surname": "JR.",
+      "province": "NUEVA ECIJA PROVINCE",
       "total_count": 2,
       "dynasty_count": 2,
       "non_dynasty_count": 0,
       "dynasty_percentage": 100.0
     },
     {
-      "surname": "AGBAYANI",
-      "province": "PANGASINAN PROVINCE",
+      "surname": "BADAR",
+      "province": "NUEVA ECIJA PROVINCE",
       "total_count": 2,
       "dynasty_count": 2,
       "non_dynasty_count": 0,
@@ -2511,8 +2471,16 @@
       "dynasty_percentage": 100.0
     },
     {
-      "surname": "JR.",
-      "province": "QUIRINO PROVINCE",
+      "surname": "SAGUM",
+      "province": "PAMPANGA PROVINCE",
+      "total_count": 2,
+      "dynasty_count": 2,
+      "non_dynasty_count": 0,
+      "dynasty_percentage": 100.0
+    },
+    {
+      "surname": "VERA",
+      "province": "PANGASINAN PROVINCE",
       "total_count": 2,
       "dynasty_count": 2,
       "non_dynasty_count": 0,
@@ -2527,7 +2495,7 @@
       "dynasty_percentage": 100.0
     },
     {
-      "surname": "JUAN",
+      "surname": "FLORES",
       "province": "BULACAN PROVINCE",
       "total_count": 2,
       "dynasty_count": 2,
@@ -2536,7 +2504,15 @@
     },
     {
       "surname": "JR.",
-      "province": "SIQUIJOR PROVINCE",
+      "province": "QUIRINO PROVINCE",
+      "total_count": 2,
+      "dynasty_count": 2,
+      "non_dynasty_count": 0,
+      "dynasty_percentage": 100.0
+    },
+    {
+      "surname": "SR.",
+      "province": "BENGUET PROVINCE",
       "total_count": 2,
       "dynasty_count": 2,
       "non_dynasty_count": 0,
@@ -2544,7 +2520,7 @@
     },
     {
       "surname": "JR.",
-      "province": "KALINGA PROVINCE",
+      "province": "SIQUIJOR PROVINCE",
       "total_count": 2,
       "dynasty_count": 2,
       "non_dynasty_count": 0,
@@ -2567,7 +2543,7 @@
       "dynasty_percentage": 100.0
     },
     {
-      "surname": "AQUINO",
+      "surname": "ROXAS",
       "province": "TARLAC PROVINCE",
       "total_count": 2,
       "dynasty_count": 2,
@@ -2583,7 +2559,7 @@
       "dynasty_percentage": 100.0
     },
     {
-      "surname": "ROXAS",
+      "surname": "TESORO",
       "province": "TARLAC PROVINCE",
       "total_count": 2,
       "dynasty_count": 2,
@@ -2607,16 +2583,8 @@
       "dynasty_percentage": 100.0
     },
     {
-      "surname": "III",
-      "province": "LA UNION PROVINCE",
-      "total_count": 2,
-      "dynasty_count": 2,
-      "non_dynasty_count": 0,
-      "dynasty_percentage": 100.0
-    },
-    {
-      "surname": "FONTANILLA",
-      "province": "LA UNION PROVINCE",
+      "surname": "JR.",
+      "province": "KALINGA PROVINCE",
       "total_count": 2,
       "dynasty_count": 2,
       "non_dynasty_count": 0,
@@ -2631,23 +2599,79 @@
       "dynasty_percentage": 100.0
     },
     {
-      "surname": "AWISAN",
-      "province": "MOUNTAIN PROVINCE",
-      "total_count": 6,
-      "dynasty_count": 1,
-      "non_dynasty_count": 5,
-      "dynasty_percentage": 16.7
+      "surname": "III",
+      "province": "LA UNION PROVINCE",
+      "total_count": 2,
+      "dynasty_count": 2,
+      "non_dynasty_count": 0,
+      "dynasty_percentage": 100.0
     },
     {
-      "surname": "LIVELO",
-      "province": "MARINDUQUE",
-      "total_count": 6,
-      "dynasty_count": 1,
-      "non_dynasty_count": 5,
-      "dynasty_percentage": 16.7
+      "surname": "CONCEPCION",
+      "province": "LA UNION PROVINCE",
+      "total_count": 2,
+      "dynasty_count": 2,
+      "non_dynasty_count": 0,
+      "dynasty_percentage": 100.0
     },
     {
-      "surname": "QUEZON",
+      "surname": "RUBI",
+      "province": "Bilirian",
+      "total_count": 1,
+      "dynasty_count": 1,
+      "non_dynasty_count": 0,
+      "dynasty_percentage": 100.0
+    },
+    {
+      "surname": "TIANGCO",
+      "province": "Navotas",
+      "total_count": 1,
+      "dynasty_count": 1,
+      "non_dynasty_count": 0,
+      "dynasty_percentage": 100.0
+    },
+    {
+      "surname": "RUBIANO",
+      "province": "Pasay",
+      "total_count": 1,
+      "dynasty_count": 1,
+      "non_dynasty_count": 0,
+      "dynasty_percentage": 100.0
+    },
+    {
+      "surname": "VILLAFUERTE-DENSING",
+      "province": "Parañaque",
+      "total_count": 1,
+      "dynasty_count": 1,
+      "non_dynasty_count": 0,
+      "dynasty_percentage": 100.0
+    },
+    {
+      "surname": "OLIVAREZ",
+      "province": "Parañaque",
+      "total_count": 1,
+      "dynasty_count": 1,
+      "non_dynasty_count": 0,
+      "dynasty_percentage": 100.0
+    },
+    {
+      "surname": "DIAZ",
+      "province": "Ilagan",
+      "total_count": 1,
+      "dynasty_count": 1,
+      "non_dynasty_count": 0,
+      "dynasty_percentage": 100.0
+    },
+    {
+      "surname": "NERY",
+      "province": "Las Piñas",
+      "total_count": 1,
+      "dynasty_count": 1,
+      "non_dynasty_count": 0,
+      "dynasty_percentage": 100.0
+    },
+    {
+      "surname": "RAGAY",
       "province": "SIQUIJOR PROVINCE",
       "total_count": 1,
       "dynasty_count": 1,
@@ -2655,7 +2679,7 @@
       "dynasty_percentage": 100.0
     },
     {
-      "surname": "AQUE",
+      "surname": "DALAYGON",
       "province": "SIQUIJOR PROVINCE",
       "total_count": 1,
       "dynasty_count": 1,
@@ -2663,8 +2687,40 @@
       "dynasty_percentage": 100.0
     },
     {
-      "surname": "CAYTON",
+      "surname": "HORTIZ",
+      "province": "BATANES PROVINCE",
+      "total_count": 1,
+      "dynasty_count": 1,
+      "non_dynasty_count": 0,
+      "dynasty_percentage": 100.0
+    },
+    {
+      "surname": "SANCHEZ",
+      "province": "Navotas",
+      "total_count": 1,
+      "dynasty_count": 1,
+      "non_dynasty_count": 0,
+      "dynasty_percentage": 100.0
+    },
+    {
+      "surname": "BAGASAO",
       "province": "NUEVA VIZCAYA PROVINCE",
+      "total_count": 1,
+      "dynasty_count": 1,
+      "non_dynasty_count": 0,
+      "dynasty_percentage": 100.0
+    },
+    {
+      "surname": "LINO",
+      "province": "NUEVA VIZCAYA PROVINCE",
+      "total_count": 1,
+      "dynasty_count": 1,
+      "non_dynasty_count": 0,
+      "dynasty_percentage": 100.0
+    },
+    {
+      "surname": "MALAPITAN",
+      "province": "Caloocan",
       "total_count": 1,
       "dynasty_count": 1,
       "non_dynasty_count": 0,
@@ -2679,8 +2735,16 @@
       "dynasty_percentage": 100.0
     },
     {
-      "surname": "MALAPITAN",
-      "province": "Caloocan",
+      "surname": "SAGON",
+      "province": "BATANES PROVINCE",
+      "total_count": 1,
+      "dynasty_count": 1,
+      "non_dynasty_count": 0,
+      "dynasty_percentage": 100.0
+    },
+    {
+      "surname": "AGANA",
+      "province": "BATANES PROVINCE",
       "total_count": 1,
       "dynasty_count": 1,
       "non_dynasty_count": 0,
@@ -2703,14 +2767,6 @@
       "dynasty_percentage": 100.0
     },
     {
-      "surname": "ANDRES",
-      "province": "Marikina",
-      "total_count": 1,
-      "dynasty_count": 1,
-      "non_dynasty_count": 0,
-      "dynasty_percentage": 100.0
-    },
-    {
       "surname": "TEODORO",
       "province": "Marikina",
       "total_count": 1,
@@ -2719,24 +2775,24 @@
       "dynasty_percentage": 100.0
     },
     {
-      "surname": "SAL-ONGAN",
-      "province": "BENGUET PROVINCE",
+      "surname": "BAGUILAT",
+      "province": "IFUGAO PROVINCE",
       "total_count": 1,
       "dynasty_count": 1,
       "non_dynasty_count": 0,
       "dynasty_percentage": 100.0
     },
     {
-      "surname": "TAMBALONG",
-      "province": "KALINGA PROVINCE",
+      "surname": "MARTY",
+      "province": "ZAMBALES PROVINCE",
       "total_count": 1,
       "dynasty_count": 1,
       "non_dynasty_count": 0,
       "dynasty_percentage": 100.0
     },
     {
-      "surname": "LACUNA-PANGAN",
-      "province": "Manila",
+      "surname": "ANDRES",
+      "province": "Marikina",
       "total_count": 1,
       "dynasty_count": 1,
       "non_dynasty_count": 0,
@@ -2744,6 +2800,14 @@
     },
     {
       "surname": "NIETO",
+      "province": "Manila",
+      "total_count": 1,
+      "dynasty_count": 1,
+      "non_dynasty_count": 0,
+      "dynasty_percentage": 100.0
+    },
+    {
+      "surname": "LACUNA-PANGAN",
       "province": "Manila",
       "total_count": 1,
       "dynasty_count": 1,
@@ -2759,71 +2823,23 @@
       "dynasty_percentage": 100.0
     },
     {
-      "surname": "SR.",
-      "province": "Mandaluyong",
+      "surname": "BAYAUA",
+      "province": "APAYAO PROVINCE",
       "total_count": 1,
       "dynasty_count": 1,
       "non_dynasty_count": 0,
       "dynasty_percentage": 100.0
     },
     {
-      "surname": "VELAYO",
-      "province": "BATANES PROVINCE",
+      "surname": "LAOAT",
+      "province": "APAYAO PROVINCE",
       "total_count": 1,
       "dynasty_count": 1,
       "non_dynasty_count": 0,
       "dynasty_percentage": 100.0
     },
     {
-      "surname": "PONCIO",
-      "province": "BATANES PROVINCE",
-      "total_count": 1,
-      "dynasty_count": 1,
-      "non_dynasty_count": 0,
-      "dynasty_percentage": 100.0
-    },
-    {
-      "surname": "BATALLONES",
-      "province": "BATANES PROVINCE",
-      "total_count": 1,
-      "dynasty_count": 1,
-      "non_dynasty_count": 0,
-      "dynasty_percentage": 100.0
-    },
-    {
-      "surname": "CRUZ",
-      "province": "Malabon",
-      "total_count": 1,
-      "dynasty_count": 1,
-      "non_dynasty_count": 0,
-      "dynasty_percentage": 100.0
-    },
-    {
-      "surname": "SANDOVAL",
-      "province": "Malabon",
-      "total_count": 1,
-      "dynasty_count": 1,
-      "non_dynasty_count": 0,
-      "dynasty_percentage": 100.0
-    },
-    {
-      "surname": "BINAY",
-      "province": "Makati",
-      "total_count": 1,
-      "dynasty_count": 1,
-      "non_dynasty_count": 0,
-      "dynasty_percentage": 100.0
-    },
-    {
-      "surname": "SORIA",
-      "province": "ZAMBALES PROVINCE",
-      "total_count": 1,
-      "dynasty_count": 1,
-      "non_dynasty_count": 0,
-      "dynasty_percentage": 100.0
-    },
-    {
-      "surname": "BLAS",
+      "surname": "BULUT",
       "province": "APAYAO PROVINCE",
       "total_count": 1,
       "dynasty_count": 1,
@@ -2847,14 +2863,6 @@
       "dynasty_percentage": 100.0
     },
     {
-      "surname": "ABAYA",
-      "province": "Santiago",
-      "total_count": 1,
-      "dynasty_count": 1,
-      "non_dynasty_count": 0,
-      "dynasty_percentage": 100.0
-    },
-    {
       "surname": "TAN-DY",
       "province": "Santiago",
       "total_count": 1,
@@ -2863,8 +2871,16 @@
       "dynasty_percentage": 100.0
     },
     {
-      "surname": "LAGDAMEO",
-      "province": "Makati",
+      "surname": "ABAYA",
+      "province": "Santiago",
+      "total_count": 1,
+      "dynasty_count": 1,
+      "non_dynasty_count": 0,
+      "dynasty_percentage": 100.0
+    },
+    {
+      "surname": "SR.",
+      "province": "Mandaluyong",
       "total_count": 1,
       "dynasty_count": 1,
       "non_dynasty_count": 0,
@@ -2872,30 +2888,30 @@
     },
     {
       "surname": "CRUZ",
-      "province": "GUIMARAS PROVINCE",
+      "province": "Malabon",
       "total_count": 1,
       "dynasty_count": 1,
       "non_dynasty_count": 0,
       "dynasty_percentage": 100.0
     },
     {
-      "surname": "NERY",
-      "province": "Las Piñas",
+      "surname": "SANDOVAL",
+      "province": "Malabon",
       "total_count": 1,
       "dynasty_count": 1,
       "non_dynasty_count": 0,
       "dynasty_percentage": 100.0
     },
     {
-      "surname": "AGUILAR",
-      "province": "Las Piñas",
+      "surname": "DAMIAN",
+      "province": "KALINGA PROVINCE",
       "total_count": 1,
       "dynasty_count": 1,
       "non_dynasty_count": 0,
       "dynasty_percentage": 100.0
     },
     {
-      "surname": "DIAZ",
+      "surname": "BELLO",
       "province": "Ilagan",
       "total_count": 1,
       "dynasty_count": 1,
@@ -2903,24 +2919,24 @@
       "dynasty_percentage": 100.0
     },
     {
-      "surname": "BAYAUA",
-      "province": "APAYAO PROVINCE",
+      "surname": "BULAYUNGAN",
+      "province": "IFUGAO PROVINCE",
       "total_count": 1,
       "dynasty_count": 1,
       "non_dynasty_count": 0,
       "dynasty_percentage": 100.0
     },
     {
-      "surname": "JUAN",
-      "province": "APAYAO PROVINCE",
+      "surname": "BINAY",
+      "province": "Makati",
       "total_count": 1,
       "dynasty_count": 1,
       "non_dynasty_count": 0,
       "dynasty_percentage": 100.0
     },
     {
-      "surname": "SAMANIEGO",
-      "province": "GUIMARAS PROVINCE",
+      "surname": "LAGDAMEO",
+      "province": "Makati",
       "total_count": 1,
       "dynasty_count": 1,
       "non_dynasty_count": 0,
@@ -2975,15 +2991,23 @@
       "dynasty_percentage": 100.0
     },
     {
-      "surname": "LIM-ANG",
-      "province": "IFUGAO PROVINCE",
+      "surname": "GUMARIN",
+      "province": "GUIMARAS PROVINCE",
       "total_count": 1,
       "dynasty_count": 1,
       "non_dynasty_count": 0,
       "dynasty_percentage": 100.0
     },
     {
-      "surname": "CALAUNAN",
+      "surname": "GAJO",
+      "province": "GUIMARAS PROVINCE",
+      "total_count": 1,
+      "dynasty_count": 1,
+      "non_dynasty_count": 0,
+      "dynasty_percentage": 100.0
+    },
+    {
+      "surname": "PAGBILAO",
       "province": "QUIRINO PROVINCE",
       "total_count": 1,
       "dynasty_count": 1,
@@ -2991,7 +3015,7 @@
       "dynasty_percentage": 100.0
     },
     {
-      "surname": "ALBERTO",
+      "surname": "TOLENTINO",
       "province": "QUIRINO PROVINCE",
       "total_count": 1,
       "dynasty_count": 1,
@@ -2999,15 +3023,7 @@
       "dynasty_percentage": 100.0
     },
     {
-      "surname": "ADOBO",
-      "province": "Bilirian",
-      "total_count": 1,
-      "dynasty_count": 1,
-      "non_dynasty_count": 0,
-      "dynasty_percentage": 100.0
-    },
-    {
-      "surname": "RUBI",
+      "surname": "REVITA",
       "province": "Bilirian",
       "total_count": 1,
       "dynasty_count": 1,
@@ -3031,14 +3047,6 @@
       "dynasty_percentage": 100.0
     },
     {
-      "surname": "KIMAYONG",
-      "province": "IFUGAO PROVINCE",
-      "total_count": 1,
-      "dynasty_count": 1,
-      "non_dynasty_count": 0,
-      "dynasty_percentage": 100.0
-    },
-    {
       "surname": "ROSARIO",
       "province": "Pasay",
       "total_count": 1,
@@ -3047,60 +3055,52 @@
       "dynasty_percentage": 100.0
     },
     {
-      "surname": "RUBIANO",
-      "province": "Pasay",
+      "surname": "IGNACIO",
+      "province": "BENGUET PROVINCE",
       "total_count": 1,
       "dynasty_count": 1,
       "non_dynasty_count": 0,
       "dynasty_percentage": 100.0
     },
     {
-      "surname": "OLIVAREZ",
-      "province": "Parañaque",
+      "surname": "AGUILAR",
+      "province": "Las Piñas",
       "total_count": 1,
       "dynasty_count": 1,
       "non_dynasty_count": 0,
       "dynasty_percentage": 100.0
     },
     {
-      "surname": "VILLAFUERTE-DENSING",
-      "province": "Parañaque",
-      "total_count": 1,
-      "dynasty_count": 1,
-      "non_dynasty_count": 0,
-      "dynasty_percentage": 100.0
+      "surname": "PAGLINAWAN",
+      "province": "SIQUIJOR",
+      "total_count": 3,
+      "dynasty_count": 0,
+      "non_dynasty_count": 3,
+      "dynasty_percentage": 0.0
     },
     {
-      "surname": "SANCHEZ",
-      "province": "Navotas",
-      "total_count": 1,
-      "dynasty_count": 1,
-      "non_dynasty_count": 0,
-      "dynasty_percentage": 100.0
+      "surname": "GUITELEN",
+      "province": "MOUNTAIN PROVINCE",
+      "total_count": 3,
+      "dynasty_count": 0,
+      "non_dynasty_count": 3,
+      "dynasty_percentage": 0.0
     },
     {
-      "surname": "MAGAWAY",
-      "province": "NUEVA VIZCAYA PROVINCE",
-      "total_count": 1,
-      "dynasty_count": 1,
-      "non_dynasty_count": 0,
-      "dynasty_percentage": 100.0
+      "surname": "BLANZA",
+      "province": "QUIRINO",
+      "total_count": 3,
+      "dynasty_count": 0,
+      "non_dynasty_count": 3,
+      "dynasty_percentage": 0.0
     },
     {
-      "surname": "TIANGCO",
-      "province": "Navotas",
-      "total_count": 1,
-      "dynasty_count": 1,
-      "non_dynasty_count": 0,
-      "dynasty_percentage": 100.0
-    },
-    {
-      "surname": "BELLO",
-      "province": "Ilagan",
-      "total_count": 1,
-      "dynasty_count": 1,
-      "non_dynasty_count": 0,
-      "dynasty_percentage": 100.0
+      "surname": "ARUELO",
+      "province": "NCR, THIRD DISTRICT",
+      "total_count": 3,
+      "dynasty_count": 0,
+      "non_dynasty_count": 3,
+      "dynasty_percentage": 0.0
     }
   ]
 }

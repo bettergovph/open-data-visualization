@@ -2563,6 +2563,7 @@ async def dynasty_family_api(
             # First try exact match on province column
             family_members = await conn.fetch("""
                 SELECT 
+                    id,
                     first_name,
                     last_name,
                     position,
@@ -2570,7 +2571,7 @@ async def dynasty_family_api(
                     municipality_city,
                     year,
                     fat,
-                    connection
+                    nickname
                 FROM political_dynasties 
                 WHERE last_name = $1 AND province = $2
                 ORDER BY year DESC, first_name
@@ -2599,7 +2600,6 @@ async def dynasty_family_api(
                                 municipality_city,
                                 year,
                                 fat,
-                                connection
                             FROM political_dynasties 
                             WHERE last_name = $1 AND municipality_city IN ({placeholders})
                             ORDER BY year DESC, first_name
@@ -2617,7 +2617,7 @@ async def dynasty_family_api(
                     municipality_city,
                     year,
                     fat,
-                    connection
+                    nickname
                 FROM political_dynasties 
                 WHERE last_name = $1
                 ORDER BY year DESC, first_name
@@ -2629,6 +2629,7 @@ async def dynasty_family_api(
         family_data = []
         for member in family_members:
             family_data.append({
+                "id": member["id"],
                 "first_name": member["first_name"],
                 "last_name": member["last_name"],
                 "position": member["position"],
@@ -2636,13 +2637,211 @@ async def dynasty_family_api(
                 "municipality_city": member["municipality_city"],
                 "year": member["year"],
                 "fat": member["fat"],
-                "connection": member["connection"]
+                "nickname": member["nickname"]
             })
+        
+        # Find connected family members (people connected to this family)
+        connected_members = []
+        if family_data:
+            # Get all unique IDs from the current family members
+            family_member_ids = []
+            for member in family_members:
+                if member.get("id"):  # If we have the database ID
+                    family_member_ids.append(member["id"])
+            
+            # Use only the family member IDs
+            all_family_ids = family_member_ids
+            
+            if all_family_ids:
+                # Reconnect to database for the connected members query
+                conn2 = await asyncpg.connect(
+                    host=os.getenv('POSTGRES_HOST', 'localhost'),
+                    port=int(os.getenv('POSTGRES_PORT', 5432)),
+                    user=os.getenv('POSTGRES_USER', 'postgres'),
+                    password=os.getenv('POSTGRES_PASSWORD', ''),
+                    database=os.getenv('POSTGRES_DYNASTY_SEC', 'dynasty')
+                )
+                
+                try:
+                    # Find people who are connected to this family using the relationships table
+                    # This includes people connected through the normalized relationships table
+                    connected_query = """
+                        WITH RECURSIVE connected_people AS (
+                            -- Base case: people directly connected to family members via relationships table
+                            SELECT DISTINCT
+                                p.id,
+                                p.first_name,
+                                p.last_name,
+                                p.position,
+                                p.province,
+                                p.municipality_city,
+                                p.year,
+                                p.fat,
+                                p.nickname,
+                                1 as level
+                            FROM political_dynasties p
+                            JOIN relationships r ON p.id = r.person_id
+                            WHERE r.related_person_id = ANY($1)
+                            
+                            UNION ALL
+                            
+                            -- Recursive case: people connected to already found connected people
+                            SELECT DISTINCT
+                                p.id,
+                                p.first_name,
+                                p.last_name,
+                                p.position,
+                                p.province,
+                                p.municipality_city,
+                                p.year,
+                                p.fat,
+                                p.nickname,
+                                cp.level + 1
+                            FROM political_dynasties p
+                            JOIN relationships r ON p.id = r.person_id
+                            INNER JOIN connected_people cp ON r.related_person_id = cp.id
+                            WHERE cp.level < 3  -- Limit to 3 levels of connections
+                        )
+                        SELECT DISTINCT
+                            id,
+                            first_name,
+                            last_name,
+                            position,
+                            province,
+                            municipality_city,
+                            year,
+                            fat,
+                            nickname
+                        FROM connected_people
+                        WHERE CONCAT(first_name, ' ', last_name) NOT IN (
+                            SELECT CONCAT(first_name, ' ', last_name) 
+                            FROM political_dynasties 
+                            WHERE last_name = $2 AND province = $3
+                        )
+                        ORDER BY year DESC, first_name
+                    """
+                    
+                    connected_results = await conn2.fetch(connected_query, all_family_ids, surname, province)
+                    
+                    for connected_member in connected_results:
+                        connected_members.append({
+                            "id": connected_member["id"],
+                            "first_name": connected_member["first_name"],
+                            "last_name": connected_member["last_name"],
+                            "position": connected_member["position"],
+                            "province": connected_member["province"],
+                            "municipality_city": connected_member["municipality_city"],
+                            "year": connected_member["year"],
+                            "fat": connected_member["fat"],
+                            "nickname": connected_member["nickname"],
+                            "is_connected_member": True  # Flag to identify connected members
+                        })
+                finally:
+                    await conn2.close()
+        
+        # Get relationships for all members using a fresh connection
+        all_member_ids = [member["id"] for member in family_data + connected_members if member.get("id")]
+        
+        relationships = []
+        if all_member_ids:
+            # Use a fresh connection for the relationships query
+            conn3 = await asyncpg.connect(
+                host=os.getenv('POSTGRES_HOST', 'localhost'),
+                port=int(os.getenv('POSTGRES_PORT', 5432)),
+                user=os.getenv('POSTGRES_USER', 'postgres'),
+                password=os.getenv('POSTGRES_PASSWORD', ''),
+                database=os.getenv('POSTGRES_DYNASTY_SEC', 'dynasty')
+            )
+            
+            try:
+                relationships = await conn3.fetch("""
+                    SELECT 
+                        r.person_id,
+                        r.related_person_id,
+                        r.relationship_type,
+                        r.relationship_description,
+                        p1.first_name as person_first_name,
+                        p1.last_name as person_last_name,
+                        p2.first_name as related_first_name,
+                        p2.last_name as related_last_name
+                    FROM relationships r
+                    JOIN political_dynasties p1 ON r.person_id = p1.id
+                    JOIN political_dynasties p2 ON r.related_person_id = p2.id
+                    WHERE r.person_id = ANY($1) OR r.related_person_id = ANY($1)
+                """, all_member_ids)
+            finally:
+                await conn3.close()
+        
+        # Add relationship data to each member
+        for member in family_data + connected_members:
+            member_relationships = []
+            for rel in relationships:
+                if rel["person_id"] == member.get("id"):
+                    member_relationships.append({
+                        "related_person_id": rel["related_person_id"],
+                        "relationship_type": rel["relationship_type"],
+                        "relationship_description": rel["relationship_description"],
+                        "related_person_name": f"{rel['related_first_name']} {rel['related_last_name']}"
+                    })
+                elif rel["related_person_id"] == member.get("id"):
+                    member_relationships.append({
+                        "related_person_id": rel["person_id"],
+                        "relationship_type": rel["relationship_type"],
+                        "relationship_description": rel["relationship_description"],
+                        "related_person_name": f"{rel['person_first_name']} {rel['person_last_name']}"
+                    })
+            
+            member["relationships"] = member_relationships
+        
+        # Combine family members and connected members
+        all_members = family_data + connected_members
         
         return JSONResponse({
             "success": True,
-            "data": family_data
+            "data": all_members,
+            "family_count": len(family_data),
+            "connected_count": len(connected_members),
+            "total_count": len(all_members)
         })
+        
+    except Exception as e:
+        return JSONResponse({"success": False, "error": str(e)})
+
+@app.get("/api/dynasty/family/advanced-search")
+async def dynasty_family_advanced_search_api(
+    name: str = Query("", description="Full name to search for"),
+    province: str = Query("", description="Filter by specific province")
+):
+    """Advanced family search using improved name matching"""
+    try:
+        import asyncpg
+        import os
+        from advanced_name_matcher import AdvancedNameMatcher
+        
+        if not name:
+            return JSONResponse({"success": False, "error": "Name parameter is required"})
+        
+        # Database connection
+        conn = await asyncpg.connect(
+            host=os.getenv('POSTGRES_HOST', 'localhost'),
+            port=int(os.getenv('POSTGRES_PORT', 5432)),
+            user=os.getenv('POSTGRES_USER', 'postgres'),
+            password=os.getenv('POSTGRES_PASSWORD', ''),
+            database=os.getenv('POSTGRES_DYNASTY_SEC', 'dynasty')
+        )
+        
+        try:
+            # Use advanced name matcher
+            name_matcher = AdvancedNameMatcher(conn)
+            suggestions = await name_matcher.suggest_name_connections(name, province)
+            
+            return JSONResponse({
+                "success": True,
+                "data": suggestions
+            })
+            
+        finally:
+            await conn.close()
         
     except Exception as e:
         return JSONResponse({"success": False, "error": str(e)})

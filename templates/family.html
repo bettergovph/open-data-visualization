@@ -519,29 +519,30 @@ function toggleMobileMenu() {
                 if (!membersByLevel[level]) {
                     membersByLevel[level] = [];
                 }
-                membersByLevel[level].push({
-                    first_name: member.first_name,
-                    last_name: member.last_name,
-                    name: `${member.first_name} ${member.last_name}`,
-                    position: member.position,
-                    province: member.province,
-                    municipality_city: member.municipality_city,
-                    year: member.year,
-                    level: level,
-                    category: positionHierarchy[position]?.category || 'municipal',
-                    color: positionHierarchy[position]?.color || 'position-municipal',
-                    fat: member.fat,
-                    // Add unique identifier for same person in different years
-                    uniqueId: `${member.first_name}_${member.last_name}_${member.position}_${member.year}`
-                });
+        membersByLevel[level].push({
+            id: member.id, // Preserve the database ID
+            first_name: member.first_name,
+            last_name: member.last_name,
+            name: `${member.first_name} ${member.last_name}`,
+            position: member.position,
+            province: member.province,
+            municipality_city: member.municipality_city,
+            year: member.year,
+            level: level,
+            category: positionHierarchy[position]?.category || 'municipal',
+            color: positionHierarchy[position]?.color || 'position-municipal',
+            fat: member.fat,
+            relationships: member.relationships || [],
+            nickname: member.nickname,
+            is_connected_member: member.is_connected_member,
+            // Add unique identifier for same person in different years
+            uniqueId: `${member.first_name}_${member.last_name}_${member.position}_${member.year}`
+        });
             });
-            
-            console.log('📊 Members by level:', membersByLevel);
             
             // Get all levels and sort them (highest to lowest)
             const levels = Object.keys(membersByLevel).map(Number).sort((a, b) => a - b);
-            console.log('📈 Position levels found:', levels);
-            console.log('📏 Number of unique position levels:', levels.length);
+            console.log('📈 Position levels found:', levels.length);
             
             // Create hierarchy data structure with proper levels
             const hierarchyData = {
@@ -553,8 +554,6 @@ function toggleMobileMenu() {
                     children: membersByLevel[level]
                 }))
             };
-            
-            console.log('🌳 Hierarchy data:', hierarchyData);
             
             // Create SVG with proper dimensions for org chart
             // Calculate required width based on maximum rectangles
@@ -572,8 +571,6 @@ function toggleMobileMenu() {
             const requiredWidth = (maxRectangles * (160 + 20)) - 20 + 200; // Add padding
             const width = Math.max(requiredWidth, container.clientWidth || 1000);
             const height = Math.max(600, levels.length * 200 + 100);
-            
-            console.log(`📐 SVG dimensions: ${width}x${height}`);
             
             const svg = d3.select(container)
                 .append('svg')
@@ -634,13 +631,20 @@ function toggleMobileMenu() {
                     const key = `${member.first_name} ${member.last_name}`;
                     if (!groupedMembers[key]) {
                         groupedMembers[key] = {
+                            id: member.id, // Preserve the database ID
                             first_name: member.first_name,
                             last_name: member.last_name,
                             position: member.position,
                             name: member.name,
                             municipality_city: member.municipality_city,
                             years: [],
-                            fat: member.fat
+                            fat: member.fat,
+                            relationships: member.relationships || [],
+                            nickname: member.nickname,
+                            is_connected_member: member.is_connected_member,
+                            province: member.province,
+                            category: member.category,
+                            color: member.color
                         };
                     }
                     groupedMembers[key].years.push(member.year);
@@ -670,6 +674,7 @@ function toggleMobileMenu() {
                     const x = startX + (memberIndex * (nodeWidth + actualSpacing));
                     nodePositions.push({
                         ...member,
+                        year: member.years[member.years.length - 1], // Use the most recent year
                         x: x,
                         y: levelY,
                         level: level,
@@ -774,8 +779,14 @@ function toggleMobileMenu() {
                     // Use level-based colors without year-based shades
                     return levelBaseColors[d.levelIndex] || '#6B7280';
                 })
-                .style('stroke', '#1F2937')
-                .style('stroke-width', 2)
+                .style('stroke', d => {
+                    // Different border for connected members
+                    return d.is_connected_member ? '#F59E0B' : '#1F2937';
+                })
+                .style('stroke-width', d => {
+                    // Thicker border for connected members
+                    return d.is_connected_member ? 3 : 2;
+                })
                 .style('filter', 'drop-shadow(0 2px 4px rgba(0,0,0,0.1))');
             
             // Add name text
@@ -788,7 +799,8 @@ function toggleMobileMenu() {
                 .style('font-weight', 'bold')
                 .text(d => {
                     const name = d.name;
-                    return name.length > 18 ? name.substring(0, 18) + '...' : name;
+                    const displayName = name.length > 18 ? name.substring(0, 18) + '...' : name;
+                    return d.is_connected_member ? `🔗 ${displayName}` : displayName;
                 });
             
             // Add position text
@@ -839,58 +851,211 @@ function toggleMobileMenu() {
                     return '';
                 });
             
-            // Add connecting lines for the same person across different levels
+            // Add connecting lines for relationships (marriage, family connections)
             const connections = [];
+            const connectionSet = new Set(); // To prevent duplicate connections
             
-            // Group nodes by person name to find connections
-            const personNodes = {};
+            // Debug: Check what relationship data we have
+            console.log('🔍 Checking relationship data in nodePositions:');
+            nodePositions.forEach((node, index) => {
+                if (node.relationships && node.relationships.length > 0) {
+                    console.log(`  Node ${index}: ${node.first_name} ${node.last_name} (ID: ${node.id})`, {
+                        relationships: node.relationships.length,
+                        related_ids: node.relationships.map(r => r.related_person_id)
+                    });
+                }
+            });
+            
+            // Find connections by matching people with connection relationships
             nodePositions.forEach(node => {
-                const personKey = `${node.first_name} ${node.last_name}`;
-                if (!personNodes[personKey]) {
-                    personNodes[personKey] = [];
-                }
-                personNodes[personKey].push(node);
-            });
-            
-            // Create connections for each person who appears on multiple levels
-            Object.values(personNodes).forEach(personNodeList => {
-                if (personNodeList.length > 1) {
-                    // Sort by level (highest to lowest)
-                    personNodeList.sort((a, b) => a.levelIndex - b.levelIndex);
-                    
-                    // Connect each level to the next level for the same person
-                    for (let i = 0; i < personNodeList.length - 1; i++) {
-                        const fromNode = personNodeList[i];
-                        const toNode = personNodeList[i + 1];
-                        
+                // First, find same person across different years (self-connections)
+                const samePersonNodes = nodePositions.filter(target => {
+                    return target !== node && 
+                           node.first_name === target.first_name && 
+                           node.last_name === target.last_name && 
+                           node.year !== target.year;
+                });
+                
+                // Add self-connections (same person, different years)
+                samePersonNodes.forEach(targetNode => {
+                    const connectionKey = `${node.first_name}_${node.last_name}_${node.year}_${targetNode.year}`;
+                    if (!connectionSet.has(connectionKey)) {
                         connections.push({
-                            from: fromNode,
-                            to: toNode,
-                            person: `${fromNode.first_name} ${fromNode.last_name}`
+                            from: node,
+                            to: targetNode,
+                            relationship: `${node.first_name} ${node.last_name} (${node.year} → ${targetNode.year})`,
+                            type: 'self'
                         });
+                        connectionSet.add(connectionKey);
                     }
+                });
+                
+            // Then, find family/marriage relationships using the new relationships structure
+            if (node.relationships && node.relationships.length > 0) {
+                console.log(`🔍 Looking for family connections for ${node.first_name} ${node.last_name} (ID: ${node.id}):`);
+                
+                node.relationships.forEach(relationship => {
+                    const familyNode = nodePositions.find(target => {
+                        const isDifferentPerson = target.first_name !== node.first_name;
+                        const hasIdMatch = target.id === relationship.related_person_id;
+                        
+                        if (isDifferentPerson && hasIdMatch) {
+                            console.log(`  ✅ Found family connection: ${node.first_name} ${node.last_name} → ${target.first_name} ${target.last_name} (${relationship.relationship_description})`);
+                        }
+                        
+                        return isDifferentPerson && hasIdMatch;
+                    });
+                    
+                        if (familyNode) {
+                            const connectionKey = `${node.first_name}_${node.last_name}_${familyNode.first_name}_${familyNode.last_name}`;
+                            const reverseKey = `${familyNode.first_name}_${familyNode.last_name}_${node.first_name}_${node.last_name}`;
+                            if (!connectionSet.has(connectionKey) && !connectionSet.has(reverseKey)) {
+                                connections.push({
+                                    from: node,
+                                    to: familyNode,
+                                    relationship: `${node.first_name} ${node.last_name} ↔ ${familyNode.first_name} ${familyNode.last_name}`,
+                                    type: 'family'
+                                });
+                                connectionSet.add(connectionKey);
+                            }
+                        }
+                    });
                 }
             });
             
-            console.log('🔗 Connections found:', connections.length);
+            console.log('🔗 Total connections found:', connections.length);
+            const familyConnections = connections.filter(c => c.type === 'family');
+            console.log('🔗 Family connections:', familyConnections.length);
+            if (familyConnections.length > 0) {
+                familyConnections.forEach((c, index) => {
+                    console.log(`  ${index + 1}. ${c.from.first_name} ${c.from.last_name} ↔ ${c.to.first_name} ${c.to.last_name}`);
+                });
+            }
             
             // Draw connecting lines
             const lines = chartGroup.append('g')
                 .attr('class', 'connection-lines');
+            
                 
             lines.selectAll('.connection-line')
                 .data(connections)
                 .enter()
-                .append('line')
+                .append('path')
                 .attr('class', 'connection-line')
-                .attr('x1', d => d.from.x + nodeWidth/2)
-                .attr('y1', d => d.from.y + nodeHeight)
-                .attr('x2', d => d.to.x + nodeWidth/2)
-                .attr('y2', d => d.to.y)
-                .style('stroke', '#4B5563')
-                .style('stroke-width', 2)
-                .style('stroke-dasharray', '5,5')
-                .style('opacity', 0.7);
+                .attr('d', d => {
+                    // Calculate connection points
+                    const fromCenterX = d.from.x + nodeWidth/2;
+                    const fromCenterY = d.from.y + nodeHeight/2;
+                    const toCenterX = d.to.x + nodeWidth/2;
+                    const toCenterY = d.to.y + nodeHeight/2;
+                    
+                    // Determine start and end points
+                    let startX, startY, endX, endY;
+                    
+                    if (d.from.y < d.to.y) {
+                        // From rectangle is above - connect from bottom edge
+                        startX = fromCenterX;
+                        startY = d.from.y + nodeHeight;
+                        endX = toCenterX;
+                        endY = d.to.y;
+                    } else if (d.from.y > d.to.y) {
+                        // From rectangle is below - connect from top edge
+                        startX = fromCenterX;
+                        startY = d.from.y;
+                        endX = toCenterX;
+                        endY = d.to.y + nodeHeight;
+                    } else {
+                        // Same level - connect from side edges
+                        if (d.from.x < d.to.x) {
+                            // From rectangle is left - connect from right edge
+                            startX = d.from.x + nodeWidth;
+                            startY = fromCenterY;
+                            endX = d.to.x;
+                            endY = toCenterY;
+                        } else {
+                            // From rectangle is right - connect from left edge
+                            startX = d.from.x;
+                            startY = fromCenterY;
+                            endX = d.to.x + nodeWidth;
+                            endY = toCenterY;
+                        }
+                    }
+                    
+                    // Create curved path using cubic Bézier curves
+                    const dx = endX - startX;
+                    const dy = endY - startY;
+                    const distance = Math.sqrt(dx * dx + dy * dy);
+                    
+                    // Only curve 90-degree connections (pure vertical lines), keep everything else straight
+                    if (Math.abs(dx) < 5 && (d.from.y < d.to.y || d.from.y > d.to.y)) {
+                        // Pure vertical connection (90-degree line) - use C-curve to avoid rectangles
+                        const horizontalOffset = Math.max(120, Math.abs(dx) + 150); // More aggressive horizontal offset
+                        const verticalOffset = Math.min(distance * 0.4, 80); // Increased vertical curve
+                        
+                        if (d.from.y < d.to.y) {
+                            // From above to below - C-curve to the right
+                            cp1x = startX + horizontalOffset;
+                            cp1y = startY + verticalOffset;
+                            cp2x = endX + horizontalOffset;
+                            cp2y = endY - verticalOffset;
+                        } else {
+                            // From below to above - C-curve to the right
+                            cp1x = startX + horizontalOffset;
+                            cp1y = startY - verticalOffset;
+                            cp2x = endX + horizontalOffset;
+                            cp2y = endY + verticalOffset;
+                        }
+                    } else {
+                        // All other connections - simple straight line
+                        return `M ${startX} ${startY} L ${endX} ${endY}`;
+                    }
+                    
+                    // Create SVG path with cubic Bézier curve
+                    return `M ${startX} ${startY} C ${cp1x} ${cp1y}, ${cp2x} ${cp2y}, ${endX} ${endY}`;
+                })
+                .style('fill', 'none') // Ensure paths are just strokes
+                .style('stroke', d => {
+                    if (d.type === 'self') {
+                        return '#1F2937'; // Dark gray for same person across years
+                    } else if (d.type === 'family') {
+                        // Different colors for different family relationships
+                        if (d.relationship.includes('↔') && d.relationship.includes('STEPHEN JAMES TAN') && d.relationship.includes('STEPHANY TAN')) {
+                            return '#DC2626'; // Red for marriage (husband-wife)
+                        } else if (d.relationship.includes('COEFREDO UY')) {
+                            return '#059669'; // Green for father-in-law/daughter relationships
+                        } else {
+                            return '#F59E0B'; // Orange for other family connections
+                        }
+                    }
+                    return '#6B7280'; // Default gray
+                })
+                .style('stroke-width', d => {
+                    if (d.type === 'self') {
+                        return 4; // Thick for same person
+                    } else if (d.relationship.includes('↔') && d.relationship.includes('STEPHEN JAMES TAN') && d.relationship.includes('STEPHANY TAN')) {
+                        return 5; // Extra thick for marriage
+                    } else {
+                        return 3; // Medium for other family connections
+                    }
+                })
+                .style('stroke-dasharray', d => {
+                    if (d.type === 'self') {
+                        return 'none'; // Solid line for same person
+                    } else if (d.relationship.includes('↔') && d.relationship.includes('STEPHEN JAMES TAN') && d.relationship.includes('STEPHANY TAN')) {
+                        return 'none'; // Solid line for marriage
+                    } else {
+                        return '8,4'; // Dashed for other family connections
+                    }
+                })
+                .style('opacity', d => {
+                    if (d.type === 'self') {
+                        return 0.9; // High opacity for same person
+                    } else if (d.relationship.includes('↔') && d.relationship.includes('STEPHEN JAMES TAN') && d.relationship.includes('STEPHANY TAN')) {
+                        return 1.0; // Full opacity for marriage
+                    } else {
+                        return 0.8; // Medium opacity for other family connections
+                    }
+                })
             
             // Remove the golden border highlighting to prevent visual glitches
             
@@ -913,6 +1078,7 @@ function toggleMobileMenu() {
             const presentLevels = [...new Set(levels)].sort((a, b) => a - b);
             console.log('📊 Present levels:', presentLevels);
             
+            // Add position level legend
             presentLevels.forEach((level, i) => {
                 const legendGroup = legend.append('g')
                     .attr('transform', `translate(${i * 120}, 0)`);
@@ -936,6 +1102,58 @@ function toggleMobileMenu() {
                     .style('fill', '#333')
                     .style('font-weight', '500')
                     .text(levelLabels[level] || `Level ${level}`);
+            });
+            
+            // Add connection type legend
+            const connectionLegend = svg.append('g')
+                .attr('transform', `translate(20, ${presentLevels.length > 0 ? 50 : 20})`);
+            
+            const connectionTypes = [
+                {
+                    label: 'Marriage',
+                    color: '#DC2626',
+                    width: 5,
+                    dash: 'none',
+                    opacity: 1.0
+                },
+                {
+                    label: 'Family',
+                    color: '#059669',
+                    width: 3,
+                    dash: '8,4',
+                    opacity: 0.8
+                },
+                {
+                    label: 'Same Person',
+                    color: '#1F2937',
+                    width: 4,
+                    dash: 'none',
+                    opacity: 0.9
+                }
+            ];
+            
+            connectionTypes.forEach((connType, i) => {
+                const connGroup = connectionLegend.append('g')
+                    .attr('transform', `translate(${i * 120}, 0)`);
+                
+                // Add line sample
+                connGroup.append('line')
+                    .attr('x1', 0)
+                    .attr('y1', 6)
+                    .attr('x2', 20)
+                    .attr('y2', 6)
+                    .style('stroke', connType.color)
+                    .style('stroke-width', connType.width)
+                    .style('stroke-dasharray', connType.dash)
+                    .style('opacity', connType.opacity);
+                
+                connGroup.append('text')
+                    .attr('x', 25)
+                    .attr('y', 9)
+                    .style('font-size', '11px')
+                    .style('fill', '#333')
+                    .style('font-weight', '500')
+                    .text(connType.label);
             });
             
             console.log('✅ Hierarchy chart created successfully');
@@ -1120,6 +1338,7 @@ function toggleMobileMenu() {
                     membersByLevel[level] = [];
                 }
                 membersByLevel[level].push({
+                    id: member.id, // Preserve the database ID
                     first_name: member.first_name,
                     last_name: member.last_name,
                     name: `${member.first_name} ${member.last_name}`,
@@ -1130,7 +1349,12 @@ function toggleMobileMenu() {
                     level: level,
                     category: positionHierarchy[position]?.category || 'municipal',
                     color: positionHierarchy[position]?.color || 'position-municipal',
-                    fat: member.fat
+                    fat: member.fat,
+                    relationships: member.relationships || [],
+                    nickname: member.nickname,
+                    is_connected_member: member.is_connected_member,
+                    // Add unique identifier for same person in different years
+                    uniqueId: `${member.first_name}_${member.last_name}_${member.position}_${member.year}`
                 });
             });
             
@@ -1263,11 +1487,32 @@ function toggleMobileMenu() {
             nonDynastyMembers = familyData.filter(member => member.fat === 0);
             
             // Update summary counts
-            // Count unique members (by first_name + last_name combination)
-            const uniqueMembers = new Set(dynastyMembers.map(member => `${member.first_name} ${member.last_name}`));
-            familyCount.textContent = uniqueMembers.size;
-            const uniqueNonDynastyMembers = new Set(nonDynastyMembers.map(member => `${member.first_name} ${member.last_name}`));
-            nonDynastyCount.textContent = uniqueNonDynastyMembers.size;
+        // Count unique members (by first_name + last_name combination)
+        const uniqueMembers = new Set(dynastyMembers.map(member => `${member.first_name} ${member.last_name}`));
+        familyCount.textContent = uniqueMembers.size;
+        const uniqueNonDynastyMembers = new Set(nonDynastyMembers.map(member => `${member.first_name} ${member.last_name}`));
+        nonDynastyCount.textContent = uniqueNonDynastyMembers.size;
+        
+        // Update counts to include connected members if available
+        if (window.familyData && window.familyData.family_count !== undefined) {
+            familyCount.textContent = window.familyData.family_count;
+            nonDynastyCount.textContent = window.familyData.connected_count || 0;
+        }
+        
+        // Separate connected members for display
+        const connectedMembers = familyData.filter(member => member.is_connected_member);
+        if (connectedMembers.length > 0) {
+            console.log(`🔗 Found ${connectedMembers.length} connected family members`);
+            
+            // Add connected members to the main family data for processing
+            // They will be included in the normal hierarchy chart creation
+            connectedMembers.forEach(member => {
+                // Add to the main familyData array so they get processed normally
+                if (!familyData.find(f => f.first_name === member.first_name && f.last_name === member.last_name && f.year === member.year)) {
+                    familyData.push(member);
+                }
+            });
+        }
             
             // Total positions (not unique) - only for dynasty members
             // Show unique positions count instead of total count
