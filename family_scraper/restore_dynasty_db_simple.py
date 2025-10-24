@@ -63,6 +63,27 @@ async def restore_dynasty_database():
         except Exception as e:
             print(f"⚠️ Warning: Could not drop existing database: {e}")
             print("🔄 Continuing with restoration...")
+            
+            # Try to connect to existing database and drop all tables
+            try:
+                print("🔄 Attempting to clean existing database...")
+                conn = await asyncpg.connect(
+                    host=db_host,
+                    port=db_port,
+                    user=db_user,
+                    password=db_password,
+                    database=db_name
+                )
+                
+                # Drop all tables in the database
+                await conn.execute("DROP SCHEMA public CASCADE;")
+                await conn.execute("CREATE SCHEMA public;")
+                print("✅ Existing database cleaned")
+                
+                await conn.close()
+            except Exception as e2:
+                print(f"⚠️ Warning: Could not clean existing database: {e2}")
+                print("🔄 Continuing with restoration...")
         
         # Restore database using psql
         print("📥 Restoring database from SQL dump...")
