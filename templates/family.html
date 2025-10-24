@@ -598,6 +598,7 @@ function toggleMobileMenu() {
                 
                 // Group members by name to merge same people (only same person gets merged)
                 const groupedMembers = {};
+                console.log(`🔍 Raw members for level ${level}:`, members.map(m => `${m.first_name} ${m.last_name}`));
                 members.forEach(member => {
                     const key = `${member.first_name} ${member.last_name}`;
                     if (!groupedMembers[key]) {
@@ -612,6 +613,7 @@ function toggleMobileMenu() {
                     }
                     groupedMembers[key].years.push(member.year);
                 });
+                console.log(`🔍 Grouped members for level ${level}:`, Object.keys(groupedMembers));
                 
                 // Convert to array and sort years - each unique person gets one rectangle
                 const uniqueMembers = Object.values(groupedMembers).map(member => ({
