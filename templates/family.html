@@ -812,6 +812,59 @@ function toggleMobileMenu() {
                     return '';
                 });
             
+            // Add connecting lines for the same person across different levels
+            const connections = [];
+            
+            // Group nodes by person name to find connections
+            const personNodes = {};
+            nodePositions.forEach(node => {
+                const personKey = `${node.first_name} ${node.last_name}`;
+                if (!personNodes[personKey]) {
+                    personNodes[personKey] = [];
+                }
+                personNodes[personKey].push(node);
+            });
+            
+            // Create connections for each person who appears on multiple levels
+            Object.values(personNodes).forEach(personNodeList => {
+                if (personNodeList.length > 1) {
+                    // Sort by level (highest to lowest)
+                    personNodeList.sort((a, b) => a.levelIndex - b.levelIndex);
+                    
+                    // Connect each level to the next level for the same person
+                    for (let i = 0; i < personNodeList.length - 1; i++) {
+                        const fromNode = personNodeList[i];
+                        const toNode = personNodeList[i + 1];
+                        
+                        connections.push({
+                            from: fromNode,
+                            to: toNode,
+                            person: `${fromNode.first_name} ${fromNode.last_name}`
+                        });
+                    }
+                }
+            });
+            
+            console.log('🔗 Connections found:', connections.length);
+            
+            // Draw connecting lines
+            const lines = chartGroup.append('g')
+                .attr('class', 'connection-lines');
+                
+            lines.selectAll('.connection-line')
+                .data(connections)
+                .enter()
+                .append('line')
+                .attr('class', 'connection-line')
+                .attr('x1', d => d.from.x + nodeWidth/2)
+                .attr('y1', d => d.from.y + nodeHeight)
+                .attr('x2', d => d.to.x + nodeWidth/2)
+                .attr('y2', d => d.to.y)
+                .style('stroke', '#4B5563')
+                .style('stroke-width', 2)
+                .style('stroke-dasharray', '5,5')
+                .style('opacity', 0.7);
+            
             // Remove the golden border highlighting to prevent visual glitches
             
             // Add legend
