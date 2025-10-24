@@ -99,6 +99,20 @@ log "🐍 Step 4: Installing Python dependencies..."
 pip install -r requirements.txt
 log "✅ Python dependencies installed"
 
+# Step 4.5: Restore dynasty database
+log "🗄️ Step 4.5: Restoring dynasty database..."
+if [ -f "database/dynasty.sql" ]; then
+    log "📊 Found dynasty SQL dump, restoring database..."
+    if python3 family_scraper/restore_dynasty_db.py; then
+        log "✅ Dynasty database restored successfully"
+    else
+        error "Dynasty database restoration failed"
+        exit 1
+    fi
+else
+    warning "Dynasty SQL dump not found, skipping database restoration"
+fi
+
 # Step 5: Reload systemd daemon
 log "🔄 Step 5: Reloading systemd daemon..."
 sudo systemctl daemon-reload
