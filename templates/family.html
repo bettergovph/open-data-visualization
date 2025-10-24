@@ -338,8 +338,11 @@ function toggleMobileMenu() {
             nonDynastyMembers = familyData.filter(member => member.fat === 0);
             
             // Update summary counts
-            familyCount.textContent = dynastyMembers.length;
-            nonDynastyCount.textContent = nonDynastyMembers.length;
+            // Count unique members (by first_name + last_name combination)
+            const uniqueMembers = new Set(dynastyMembers.map(member => `${member.first_name} ${member.last_name}`));
+            familyCount.textContent = uniqueMembers.size;
+            const uniqueNonDynastyMembers = new Set(nonDynastyMembers.map(member => `${member.first_name} ${member.last_name}`));
+            nonDynastyCount.textContent = uniqueNonDynastyMembers.size;
             
             // Total positions (not unique) - only for dynasty members
             positionsCount.textContent = dynastyMembers.length;
@@ -876,8 +879,11 @@ function toggleMobileMenu() {
             nonDynastyMembers = familyData.filter(member => member.fat === 0);
             
             // Update summary counts
-            familyCount.textContent = dynastyMembers.length;
-            nonDynastyCount.textContent = nonDynastyMembers.length;
+            // Count unique members (by first_name + last_name combination)
+            const uniqueMembers = new Set(dynastyMembers.map(member => `${member.first_name} ${member.last_name}`));
+            familyCount.textContent = uniqueMembers.size;
+            const uniqueNonDynastyMembers = new Set(nonDynastyMembers.map(member => `${member.first_name} ${member.last_name}`));
+            nonDynastyCount.textContent = uniqueNonDynastyMembers.size;
             
             // Total positions (not unique) - only for dynasty members
             positionsCount.textContent = dynastyMembers.length;
