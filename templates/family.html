@@ -350,7 +350,6 @@ function toggleMobileMenu() {
             positionsCount.textContent = uniquePositions;
             
             // Unique positions as subtitle - only for dynasty members
-            const uniquePositions = new Set(dynastyMembers.map(member => member.position)).size;
             uniquePositionsCount.textContent = uniquePositions;
             
             const uniqueProvinces = new Set(dynastyMembers.map(member => member.province)).size;
@@ -893,7 +892,6 @@ function toggleMobileMenu() {
             positionsCount.textContent = uniquePositions;
             
             // Unique positions as subtitle - only for dynasty members
-            const uniquePositions = new Set(dynastyMembers.map(member => member.position)).size;
             uniquePositionsCount.textContent = uniquePositions;
             
             const uniqueProvinces = new Set(dynastyMembers.map(member => member.province)).size;
