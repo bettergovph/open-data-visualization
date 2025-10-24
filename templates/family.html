@@ -493,6 +493,8 @@ function toggleMobileMenu() {
                     membersByLevel[level] = [];
                 }
                 membersByLevel[level].push({
+                    first_name: member.first_name,
+                    last_name: member.last_name,
                     name: `${member.first_name} ${member.last_name}`,
                     position: member.position,
                     province: member.province,
@@ -500,6 +502,7 @@ function toggleMobileMenu() {
                     level: level,
                     category: positionHierarchy[position]?.category || 'municipal',
                     color: positionHierarchy[position]?.color || 'position-municipal',
+                    fat: member.fat,
                     // Add unique identifier for same person in different years
                     uniqueId: `${member.first_name}_${member.last_name}_${member.position}_${member.year}`
                 });
