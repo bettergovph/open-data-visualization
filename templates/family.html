@@ -1078,6 +1078,17 @@ function toggleMobileMenu() {
             const container = document.getElementById('yearChart');
             container.innerHTML = '';
             
+            // Define level colors (same as main hierarchy chart)
+            const levelBaseColors = [
+                '#1E40AF', // Level 1 - Dark Blue
+                '#DC2626', // Level 2 - Red
+                '#D97706', // Level 3 - Orange
+                '#059669', // Level 4 - Green
+                '#7C3AED', // Level 5 - Purple
+                '#DB2777', // Level 6 - Pink
+                '#0891B2'  // Level 7 - Cyan
+            ];
+            
             // Create SVG
             const width = Math.max(1200, container.clientWidth || 1000);
             const height = Math.max(600, yearData.length * 100 + 200);
