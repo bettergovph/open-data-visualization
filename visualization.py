@@ -2475,7 +2475,7 @@ async def dynasty_top_surnames_api(
         
         # Apply province filter if specified
         if province:
-            surnames = [s for s in surnames if province.lower() in s['province'].lower()]
+            surnames = [s for s in surnames if s['province'].upper() == province.upper()]
         
         # Apply limit
         surnames = surnames[:limit]
