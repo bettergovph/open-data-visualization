@@ -2569,7 +2569,8 @@ async def dynasty_family_api(
                     province,
                     municipality_city,
                     year,
-                    fat
+                    fat,
+                    connection
                 FROM political_dynasties 
                 WHERE last_name = $1 AND province = $2
                 ORDER BY year DESC, first_name
@@ -2597,7 +2598,8 @@ async def dynasty_family_api(
                                 province,
                                 municipality_city,
                                 year,
-                                fat
+                                fat,
+                                connection
                             FROM political_dynasties 
                             WHERE last_name = $1 AND municipality_city IN ({placeholders})
                             ORDER BY year DESC, first_name
@@ -2614,7 +2616,8 @@ async def dynasty_family_api(
                     province,
                     municipality_city,
                     year,
-                    fat
+                    fat,
+                    connection
                 FROM political_dynasties 
                 WHERE last_name = $1
                 ORDER BY year DESC, first_name
@@ -2632,7 +2635,8 @@ async def dynasty_family_api(
                 "province": member["province"],
                 "municipality_city": member["municipality_city"],
                 "year": member["year"],
-                "fat": member["fat"]
+                "fat": member["fat"],
+                "connection": member["connection"]
             })
         
         return JSONResponse({
