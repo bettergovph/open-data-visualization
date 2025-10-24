@@ -68,11 +68,6 @@ async def import_2025_elections():
         # Find all CSV files
         csv_files = list(elections_data_path.rglob('*.csv'))
         print(f"📊 Found {len(csv_files)} CSV files to process")
-        if len(csv_files) > 0:
-            print(f"DEBUG: First CSV file: {csv_files[0]}")
-            print(f"DEBUG: File exists: {csv_files[0].exists()}")
-            if csv_files[0].exists():
-                print(f"DEBUG: File size: {csv_files[0].stat().st_size} bytes")
         
         # Position mapping for dynasty database
         position_mapping = {
@@ -174,9 +169,9 @@ async def import_2025_elections():
                             if 'PARTY LIST' in scope or 'PARTY LIST' in contest_name.upper():
                                 continue
                             
-                            # Debug: Print first valid position found
-                            if position and position != 'OTHER' and total_records == 0:
-                                print(f"DEBUG: Found position '{position}' from contest_name '{contest_name}'")
+                            # Debug: Print first few positions to see what's happening
+                            if total_records < 3:
+                                print(f"DEBUG: contest_name='{contest_name}', position='{position}'")
                             
                             
                             # Parse candidate name
@@ -222,25 +217,20 @@ async def import_2025_elections():
             
             return file_candidates
         
-        # Test with smaller dataset first - limit to first 100 files
-        test_files = csv_files[:100]
-        print(f"🧪 TESTING: Processing only {len(test_files)} CSV files (first 100) for debugging...")
-        
         # Process CSV files with 20 threads
-        print(f"🚀 Processing {len(test_files)} CSV files with 20 threads...")
+        print(f"🚀 Processing {len(csv_files)} CSV files with 20 threads...")
         
         # Partition CSV files into chunks for each thread
-        chunk_size = len(test_files) // 20
+        chunk_size = len(csv_files) // 20
         if chunk_size == 0:
             chunk_size = 1
         
         csv_chunks = []
-        for i in range(0, len(test_files), chunk_size):
-            chunk = test_files[i:i + chunk_size]
+        for i in range(0, len(csv_files), chunk_size):
+            chunk = csv_files[i:i + chunk_size]
             csv_chunks.append(chunk)
         
-        print(f"📊 Split {len(test_files)} files into {len(csv_chunks)} chunks for {20} threads")
-        print(f"DEBUG: First chunk has {len(csv_chunks[0])} files")
+        print(f"📊 Split {len(csv_files)} files into {len(csv_chunks)} chunks for {20} threads")
         
         def process_csv_chunk(chunk_files):
             """Process a chunk of CSV files and return all candidates data"""
@@ -275,33 +265,54 @@ async def import_2025_elections():
                                     province = None
                                     municipality_city = None
                                 
-                                # Map contest to position
+                                # Map contest to position based on scope and contest_name
                                 position = None
-                                for key, value in position_mapping.items():
-                                    if key in scope:
-                                        position = value
-                                        break
                                 
+                                # First try to extract from contest_name (more reliable)
+                                contest_name_upper = contest_name.upper()
+                                if 'SENATOR' in contest_name_upper:
+                                    position = 'SENATOR'
+                                elif 'REPRESENTATIVES' in contest_name_upper or 'HOUSE OF REPRESENTATIVES' in contest_name_upper:
+                                    position = 'MEMBER, HOUSE OF REPRESENTATIVES'
+                                elif 'PROVINCIAL GOVERNOR' in contest_name_upper:
+                                    position = 'GOVERNOR'
+                                elif 'PROVINCIAL VICE-GOVERNOR' in contest_name_upper:
+                                    position = 'VICE GOVERNOR'
+                                elif 'MAYOR' in contest_name_upper:
+                                    position = 'MAYOR'
+                                elif 'VICE-MAYOR' in contest_name_upper:
+                                    position = 'VICE MAYOR'
+                                elif 'SANGGUNIANG PANLUNGSOD' in contest_name_upper or 'SANGGUNIANG BAYAN' in contest_name_upper:
+                                    position = 'COUNCILOR'
+                                elif 'SANGGUNIANG PANLALAWIGAN' in contest_name_upper:
+                                    position = 'PROVINCIAL BOARD MEMBER'
+                                
+                                # If not found in contest_name, try scope
                                 if not position:
-                                    # Try to extract position from scope
-                                    if 'SENATOR' in scope:
+                                    scope_upper = scope.upper()
+                                    if 'SENATOR' in scope_upper:
                                         position = 'SENATOR'
-                                    elif 'REPRESENTATIVES' in scope:
+                                    elif 'REPRESENTATIVES' in scope_upper:
                                         position = 'MEMBER, HOUSE OF REPRESENTATIVES'
-                                    elif 'GOVERNOR' in scope:
+                                    elif 'GOVERNOR' in scope_upper:
                                         position = 'GOVERNOR'
-                                    elif 'VICE-GOVERNOR' in scope:
+                                    elif 'VICE-GOVERNOR' in scope_upper:
                                         position = 'VICE GOVERNOR'
-                                    elif 'MAYOR' in scope:
+                                    elif 'MAYOR' in scope_upper:
                                         position = 'MAYOR'
-                                    elif 'VICE-MAYOR' in scope:
+                                    elif 'VICE-MAYOR' in scope_upper:
                                         position = 'VICE MAYOR'
-                                    elif 'SANGGUNIANG PANLUNGSOD' in scope:
+                                    elif 'SANGGUNIANG PANLUNGSOD' in scope_upper:
                                         position = 'COUNCILOR'
-                                    elif 'SANGGUNIANG PANLALAWIGAN' in scope:
+                                    elif 'SANGGUNIANG PANLALAWIGAN' in scope_upper:
                                         position = 'PROVINCIAL BOARD MEMBER'
                                     else:
                                         position = 'OTHER'
+                                
+                                # Skip party-list positions only
+                                if 'PARTY LIST' in scope or 'PARTY LIST' in contest_name.upper():
+                                    continue
+                                
                                 
                                 # Skip party-list and other non-dynasty positions
                                 if position == 'OTHER' or 'PARTY LIST' in scope:
@@ -386,17 +397,11 @@ async def import_2025_elections():
             for candidate in candidates:
                 is_winner = (candidate['votes'] == winner['votes'])
                 
-                # Use INSERT ... ON CONFLICT to handle duplicates and update winner status
+                # Insert the candidate with winner flag
                 await conn.execute("""
                     INSERT INTO political_dynasties 
                     (first_name, last_name, party, region, province, municipality_city, position, year, fat, nickname, winner, votes)
                     VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)
-                    ON CONFLICT (first_name, last_name, province, municipality_city, position, year) 
-                    DO UPDATE SET 
-                        winner = EXCLUDED.winner,
-                        party = EXCLUDED.party,
-                        region = EXCLUDED.region,
-                        votes = EXCLUDED.votes
                 """, 
                 candidate['first_name'],
                 candidate['last_name'],
