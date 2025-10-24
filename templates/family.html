@@ -664,6 +664,7 @@ function toggleMobileMenu() {
                 
                 console.log(`📊 Level ${levelIndex + 1} (Position Level ${level}): ${uniqueMembers.length} unique members (${members.length} total records)`);
                 console.log(`   Total width needed: ${totalWidth}px, Starting X: ${startX}px`);
+                console.log(`   Unique members:`, uniqueMembers.map(m => `${m.name} (${m.years.join(',')})`));
                 
                 uniqueMembers.forEach((member, memberIndex) => {
                     const x = startX + (memberIndex * (nodeWidth + nodeSpacing));
