@@ -2338,7 +2338,7 @@ async def dynasty_data_api(
             port=int(os.getenv('POSTGRES_PORT', 5432)),
             user=os.getenv('POSTGRES_USER', 'budget_admin'),
             password=os.getenv('POSTGRES_PASSWORD', ''),
-            database=os.getenv('POSTGRES_DYNASTY_SEC', 'dynasty')
+            database=os.getenv('POSTGRES_DB_DYNASTY', 'dynasty')
         )
         
         # Build WHERE clause for filtering
@@ -2506,7 +2506,7 @@ async def dynasty_stats_api():
             port=int(os.getenv('POSTGRES_PORT', 5432)),
             user=os.getenv('POSTGRES_USER', 'postgres'),
             password=os.getenv('POSTGRES_PASSWORD', ''),
-            database=os.getenv('POSTGRES_DYNASTY_SEC', 'dynasty')
+            database=os.getenv('POSTGRES_DB_DYNASTY', 'dynasty')
         )
         
         # Get total records
@@ -2555,7 +2555,7 @@ async def dynasty_family_api(
             port=int(os.getenv('POSTGRES_PORT', 5432)),
             user=os.getenv('POSTGRES_USER', 'postgres'),
             password=os.getenv('POSTGRES_PASSWORD', ''),
-            database=os.getenv('POSTGRES_DYNASTY_SEC', 'dynasty')
+            database=os.getenv('POSTGRES_DB_DYNASTY', 'dynasty')
         )
         
         # Build query based on whether province filter is provided
@@ -2659,7 +2659,7 @@ async def dynasty_family_api(
                     port=int(os.getenv('POSTGRES_PORT', 5432)),
                     user=os.getenv('POSTGRES_USER', 'postgres'),
                     password=os.getenv('POSTGRES_PASSWORD', ''),
-                    database=os.getenv('POSTGRES_DYNASTY_SEC', 'dynasty')
+                    database=os.getenv('POSTGRES_DB_DYNASTY', 'dynasty')
                 )
                 
                 try:
@@ -2750,7 +2750,7 @@ async def dynasty_family_api(
                 port=int(os.getenv('POSTGRES_PORT', 5432)),
                 user=os.getenv('POSTGRES_USER', 'postgres'),
                 password=os.getenv('POSTGRES_PASSWORD', ''),
-                database=os.getenv('POSTGRES_DYNASTY_SEC', 'dynasty')
+                database=os.getenv('POSTGRES_DB_DYNASTY', 'dynasty')
             )
             
             try:
@@ -2827,7 +2827,7 @@ async def dynasty_family_advanced_search_api(
             port=int(os.getenv('POSTGRES_PORT', 5432)),
             user=os.getenv('POSTGRES_USER', 'postgres'),
             password=os.getenv('POSTGRES_PASSWORD', ''),
-            database=os.getenv('POSTGRES_DYNASTY_SEC', 'dynasty')
+            database=os.getenv('POSTGRES_DB_DYNASTY', 'dynasty')
         )
         
         try:
