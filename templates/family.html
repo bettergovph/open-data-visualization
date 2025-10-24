@@ -612,8 +612,21 @@ function toggleMobileMenu() {
             const nodeHeight = 80;
             const nodeSpacing = 20;
             
-            // Pre-calculate the maximum number of rectangles in any level
-            const maxRectangles = Math.max(...levels.map(level => membersByLevel[level].length));
+            // Pre-calculate the maximum number of rectangles in any level (after grouping)
+            let maxRectangles = 0;
+            levels.forEach(level => {
+                const members = membersByLevel[level];
+                // Group members by name to get unique count
+                const groupedMembers = {};
+                members.forEach(member => {
+                    const key = `${member.first_name} ${member.last_name}`;
+                    if (!groupedMembers[key]) {
+                        groupedMembers[key] = { ...member };
+                    }
+                });
+                const uniqueCount = Object.keys(groupedMembers).length;
+                maxRectangles = Math.max(maxRectangles, uniqueCount);
+            });
             const maxWidth = (maxRectangles * (nodeWidth + nodeSpacing)) - nodeSpacing;
             const centerX = (width - maxWidth) / 2;
             
