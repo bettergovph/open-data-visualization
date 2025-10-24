@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
-Restore Dynasty Database from SQL Dump
-This script restores the dynasty database from the SQL dump file
+Simple Dynasty Database Restoration Script
+This script restores the dynasty database from the SQL dump with hardcoded credentials
 """
 
 import asyncio
@@ -9,20 +9,16 @@ import asyncpg
 import os
 import subprocess
 import sys
-from dotenv import load_dotenv
 
 async def restore_dynasty_database():
     """Restore the dynasty database from SQL dump"""
     try:
-        # Load environment variables
-        load_dotenv('visualization.env')
-        
-        # Database connection parameters
-        db_host = os.getenv('POSTGRES_HOST', 'localhost')
-        db_port = int(os.getenv('POSTGRES_PORT', 5432))
-        db_user = os.getenv('POSTGRES_USER', 'budget_admin')
-        db_password = os.getenv('POSTGRES_PASSWORD', 'wuQ5gBYCKkZiOGb61chLcByMu')
-        db_name = os.getenv('POSTGRES_DYNASTY_SEC', 'dynasty')
+        # Hardcoded database credentials for production
+        db_host = 'localhost'
+        db_port = 5432
+        db_user = 'budget_admin'
+        db_password = 'wuQ5gBYCKkZiOGb61chLcByMu'
+        db_name = 'dynasty'
         
         print(f"🔄 Restoring dynasty database from SQL dump...")
         print(f"📊 Database: {db_name} on {db_host}:{db_port}")
@@ -114,15 +110,12 @@ async def restore_dynasty_database():
 async def verify_database():
     """Verify that the database was restored correctly"""
     try:
-        # Load environment variables
-        load_dotenv('visualization.env')
-        
-        # Database connection parameters
-        db_host = os.getenv('POSTGRES_HOST', 'localhost')
-        db_port = int(os.getenv('POSTGRES_PORT', 5432))
-        db_user = os.getenv('POSTGRES_USER', 'budget_admin')
-        db_password = os.getenv('POSTGRES_PASSWORD', 'wuQ5gBYCKkZiOGb61chLcByMu')
-        db_name = os.getenv('POSTGRES_DYNASTY_SEC', 'dynasty')
+        # Hardcoded database credentials for production
+        db_host = 'localhost'
+        db_port = 5432
+        db_user = 'budget_admin'
+        db_password = 'wuQ5gBYCKkZiOGb61chLcByMu'
+        db_name = 'dynasty'
         
         print("🔍 Verifying database restoration...")
         

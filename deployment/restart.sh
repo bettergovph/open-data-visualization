@@ -103,7 +103,7 @@ log "✅ Python dependencies installed"
 log "🗄️ Step 4.5: Restoring dynasty database..."
 if [ -f "database/dynasty.sql" ]; then
     log "📊 Found dynasty SQL dump, restoring database..."
-    if python3 family_scraper/restore_dynasty_db.py; then
+    if python3 family_scraper/restore_dynasty_db_simple.py; then
         log "✅ Dynasty database restored successfully"
     else
         error "Dynasty database restoration failed"
