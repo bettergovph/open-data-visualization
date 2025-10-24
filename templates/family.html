@@ -311,6 +311,8 @@ function toggleMobileMenu() {
         const surname = urlParams.get('surname') || '{{ surname }}';
         
         console.log('🔍 Loading family data for surname:', surname);
+        console.log('🔍 URL params:', window.location.search);
+        console.log('🔍 Template surname:', '{{ surname }}');
         
         // Load family data
         async function loadFamilyData() {
@@ -787,7 +789,46 @@ function toggleMobileMenu() {
                     // Thicker border for connected members
                     return d.is_connected_member ? 3 : 2;
                 })
-                .style('filter', 'drop-shadow(0 2px 4px rgba(0,0,0,0.1))');
+                .style('filter', 'drop-shadow(0 2px 4px rgba(0,0,0,0.1))')
+                .style('cursor', d => {
+                    // Make cursor pointer if this is a different surname
+                    const currentSurname = surname.toLowerCase();
+                    const rectangleSurname = d.last_name.toLowerCase();
+                    const isClickable = rectangleSurname !== currentSurname;
+                    console.log(`🔍 Rectangle for ${d.last_name}: clickable=${isClickable} (current: ${surname})`);
+                    return isClickable ? 'pointer' : 'default';
+                })
+                .on('click', function(event, d) {
+                    event.stopPropagation(); // Prevent event bubbling
+                    console.log('🖱️ Main chart rectangle clicked!', { 
+                        currentSurname: surname, 
+                        rectangleSurname: d.last_name,
+                        rectangleData: d,
+                        rawEvent: event,
+                        target: event.target
+                    });
+                    
+                    // Check if this rectangle has a different surname
+                    const currentSurname = surname.toLowerCase();
+                    const rectangleSurname = d.last_name.toLowerCase();
+                    
+                    console.log(`🔍 Comparison: "${rectangleSurname}" !== "${currentSurname}" = ${rectangleSurname !== currentSurname}`);
+                    
+                    if (rectangleSurname !== currentSurname) {
+                        console.log(`🔗 Clicked on different surname: ${d.last_name} (current: ${surname})`);
+                        // Navigate to /family with the new surname and preserve province parameter
+                        const urlParams = new URLSearchParams(window.location.search);
+                        const province = urlParams.get('province') || '';
+                        let newUrl = `/family?surname=${encodeURIComponent(d.last_name)}`;
+                        if (province) {
+                            newUrl += `&province=${encodeURIComponent(province)}`;
+                        }
+                        console.log('🔗 Navigating to:', newUrl);
+                        window.location.href = newUrl;
+                    } else {
+                        console.log(`👤 Clicked on same surname: ${d.last_name} (no navigation needed)`);
+                    }
+                });
             
             // Add name text
             nodes.append('text')
@@ -1399,7 +1440,40 @@ function toggleMobileMenu() {
                 .style('fill', d => levelBaseColors[d.levelIndex] || '#6B7280')
                 .style('stroke', '#1F2937')
                 .style('stroke-width', 2)
-                .style('filter', 'drop-shadow(0 2px 4px rgba(0,0,0,0.1))');
+                .style('filter', 'drop-shadow(0 2px 4px rgba(0,0,0,0.1))')
+                .style('cursor', d => {
+                    // Make cursor pointer if this is a different surname
+                    const currentSurname = surname.toLowerCase();
+                    const rectangleSurname = d.last_name.toLowerCase();
+                    return rectangleSurname !== currentSurname ? 'pointer' : 'default';
+                })
+                .on('click', function(event, d) {
+                    event.stopPropagation(); // Prevent event bubbling
+                    console.log('🖱️ Year view rectangle clicked!', { 
+                        currentSurname: surname, 
+                        rectangleSurname: d.last_name,
+                        rectangleData: d 
+                    });
+                    
+                    // Check if this rectangle has a different surname
+                    const currentSurname = surname.toLowerCase();
+                    const rectangleSurname = d.last_name.toLowerCase();
+                    
+                    if (rectangleSurname !== currentSurname) {
+                        console.log(`🔗 Clicked on different surname: ${d.last_name} (current: ${surname})`);
+                        // Navigate to /family with the new surname and preserve province parameter
+                        const urlParams = new URLSearchParams(window.location.search);
+                        const province = urlParams.get('province') || '';
+                        let newUrl = `/family?surname=${encodeURIComponent(d.last_name)}`;
+                        if (province) {
+                            newUrl += `&province=${encodeURIComponent(province)}`;
+                        }
+                        console.log('🔗 Navigating to:', newUrl);
+                        window.location.href = newUrl;
+                    } else {
+                        console.log(`👤 Clicked on same surname: ${d.last_name} (no navigation needed)`);
+                    }
+                });
             
             // Add text elements
             nodes.append('text')

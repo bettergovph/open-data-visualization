@@ -39,7 +39,7 @@ async def generate_dynasty_surnames():
                     COUNT(DISTINCT CASE WHEN fat = 0 THEN first_name || ' ' || last_name END) as non_dynasty_count,
                     ROW_NUMBER() OVER (PARTITION BY province ORDER BY COUNT(DISTINCT first_name || ' ' || last_name) DESC) as rn
                 FROM political_dynasties 
-                WHERE last_name IS NOT NULL AND last_name != ''
+                WHERE last_name IS NOT NULL AND last_name != '' AND winner = true
                 GROUP BY last_name, province
             )
             SELECT 

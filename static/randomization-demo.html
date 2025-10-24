@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dynasty Flag Randomization Demo</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 20px;
+            background: #f5f5f5;
+        }
+        
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        h1 {
+            color: #333;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .demo-section {
+            margin: 30px 0;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            background: #fafafa;
+        }
+        
+        .flag-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
+        }
+        
+        .flag-item {
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 10px;
+            text-align: center;
+            background: white;
+        }
+        
+        .flag-preview {
+            width: 40px;
+            height: 40px;
+            margin: 0 auto 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: white;
+            border-radius: 4px;
+            border: 1px solid #eee;
+        }
+        
+        .flag-preview svg {
+            max-width: 100%;
+            max-height: 100%;
+        }
+        
+        .flag-name {
+            font-weight: bold;
+            font-size: 12px;
+            margin-bottom: 4px;
+        }
+        
+        .flag-info {
+            font-size: 10px;
+            color: #666;
+            margin-bottom: 2px;
+        }
+        
+        .sequence-info {
+            font-size: 9px;
+            color: #888;
+            font-style: italic;
+        }
+        
+        .controls {
+            text-align: center;
+            margin: 20px 0;
+        }
+        
+        .controls button {
+            margin: 5px;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            background: #007bff;
+            color: white;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        
+        .controls button:hover {
+            background: #0056b3;
+        }
+        
+        .stats {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 20px 0;
+        }
+        
+        .stat-item {
+            display: flex;
+            justify-content: space-between;
+            margin: 5px 0;
+            font-size: 14px;
+        }
+        
+        .stat-label {
+            font-weight: bold;
+        }
+        
+        .stat-value {
+            color: #666;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎲 Dynasty Flag Randomization Demo</h1>
+        <p style="text-align: center; color: #666; margin-bottom: 30px;">
+            Proper randomization: Random slices (1-10) + Random shapes per slice + No consecutive identical shapes
+        </p>
+        
+        <div class="controls">
+            <button onclick="generateRandomFlags()">Generate Random Flags</button>
+            <button onclick="showStatistics()">Show Statistics</button>
+        </div>
+        
+        <div class="demo-section">
+            <h3>Random Flag Generation</h3>
+            <div id="flag-grid" class="flag-grid"></div>
+        </div>
+        
+        <div id="statistics" class="stats" style="display: none;">
+            <h3>Randomization Statistics</h3>
+            <div id="statistics-content"></div>
+        </div>
+    </div>
+
+    <script src="/static/js/dynasty-flags.js"></script>
+    
+    <script>
+        let flagGenerator;
+        let currentFlags = [];
+        
+        // Sample dynasty names
+        const sampleDynasties = [
+            'Aquino Dynasty', 'Marcos Dynasty', 'Duterte Dynasty', 'Estrada Dynasty',
+            'Roxas Dynasty', 'Villar Dynasty', 'Cayetano Dynasty', 'Binay Dynasty',
+            'Lacson Dynasty', 'Poe Dynasty', 'Garcia Dynasty', 'Magsaysay Dynasty',
+            'Quirino Dynasty', 'Osmeña Dynasty', 'Laurel Dynasty', 'Ramos Dynasty',
+            'Enrile Dynasty', 'Revilla Dynasty', 'Sotto Dynasty', 'Gordon Dynasty',
+            'Angara Dynasty', 'Recto Dynasty', 'Tan Dynasty', 'Lim Dynasty'
+        ];
+        
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            flagGenerator = new DynastyFlagGenerator();
+            generateRandomFlags();
+        });
+        
+        function generateRandomFlags() {
+            const grid = document.getElementById('flag-grid');
+            grid.innerHTML = '';
+            
+            currentFlags = [];
+            
+            // Generate flags for sample dynasties
+            sampleDynasties.forEach((name, index) => {
+                const flag = flagGenerator.generateFlag(index + 1, name);
+                currentFlags.push(flag);
+                
+                const flagItem = document.createElement('div');
+                flagItem.className = 'flag-item';
+                flagItem.innerHTML = `
+                    <div class="flag-preview">${flag.svg}</div>
+                    <div class="flag-name">${flag.name}</div>
+                    <div class="flag-info">${flag.slices} slices</div>
+                    <div class="flag-info">Variation ${flag.variation}</div>
+                    <div class="sequence-info">${flag.shapeSequence.join(' → ')}</div>
+                `;
+                
+                grid.appendChild(flagItem);
+            });
+            
+            console.log(`Generated ${currentFlags.length} randomized flags`);
+        }
+        
+        function showStatistics() {
+            const statsDiv = document.getElementById('statistics');
+            const contentDiv = document.getElementById('statistics-content');
+            
+            if (currentFlags.length === 0) {
+                alert('Please generate flags first');
+                return;
+            }
+            
+            const stats = calculateStatistics();
+            
+            contentDiv.innerHTML = `
+                <div class="stat-item">
+                    <span class="stat-label">Total Flags:</span>
+                    <span class="stat-value">${stats.totalFlags}</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">Slice Distribution:</span>
+                    <span class="stat-value">${Object.entries(stats.sliceDistribution).map(([slices, count]) => `${slices}: ${count}`).join(', ')}</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">Shape Distribution:</span>
+                    <span class="stat-value">${Object.entries(stats.shapes).map(([shape, count]) => `${shape}: ${count}`).join(', ')}</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">Consecutive Shapes:</span>
+                    <span class="stat-value" style="color: ${stats.consecutiveShapes === 0 ? 'green' : 'red'}">${stats.consecutiveShapes} (should be 0)</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">Unique Sequences:</span>
+                    <span class="stat-value">${Object.keys(stats.shapeSequences).length}</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">Colors Used:</span>
+                    <span class="stat-value">${Object.keys(stats.colorUsage).length} / 10</span>
+                </div>
+            `;
+            
+            statsDiv.style.display = statsDiv.style.display === 'none' ? 'block' : 'none';
+        }
+        
+        function calculateStatistics() {
+            const stats = {
+                totalFlags: currentFlags.length,
+                shapes: {},
+                shapeSequences: {},
+                sliceDistribution: {},
+                colorUsage: {},
+                consecutiveShapes: 0
+            };
+            
+            currentFlags.forEach(flag => {
+                // Count individual shapes
+                flag.shapeSequence.forEach(shape => {
+                    stats.shapes[shape] = (stats.shapes[shape] || 0) + 1;
+                });
+                
+                // Count shape sequences
+                const sequenceKey = flag.shapeSequence.join('-');
+                stats.shapeSequences[sequenceKey] = (stats.shapeSequences[sequenceKey] || 0) + 1;
+                
+                // Count slices
+                stats.sliceDistribution[flag.slices] = (stats.sliceDistribution[flag.slices] || 0) + 1;
+                
+                // Count colors
+                flag.colors.forEach(color => {
+                    stats.colorUsage[color] = (stats.colorUsage[color] || 0) + 1;
+                });
+                
+                // Check for consecutive identical shapes (should be 0 with our algorithm)
+                for (let i = 1; i < flag.shapeSequence.length; i++) {
+                    if (flag.shapeSequence[i] === flag.shapeSequence[i-1]) {
+                        stats.consecutiveShapes++;
+                    }
+                }
+            });
+            
+            return stats;
+        }
+    </script>
+</body>
+</html>

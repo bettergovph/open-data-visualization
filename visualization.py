@@ -2378,10 +2378,29 @@ async def dynasty_data_api(
         elif dynasty.lower() == "non-dynasty":
             where_conditions.append("fat = 0")
         
+        # Always filter by winners only (when available)
+        where_conditions.append("winner = true")
+        
         # Build complete WHERE clause
         where_clause = ""
         if where_conditions:
             where_clause = "WHERE " + " AND ".join(where_conditions)
+        
+        # Check if there are any winners first
+        winners_count = await conn.fetchval("SELECT COUNT(*) FROM political_dynasties WHERE winner = true")
+        if winners_count == 0:
+            await conn.close()
+            return JSONResponse({
+                "success": True,
+                "data": [],
+                "pagination": {
+                    "total_records": 0,
+                    "total_pages": 0,
+                    "current_page": page,
+                    "limit": limit
+                },
+                "message": "No winning candidates found yet. The election data import is still in progress."
+            })
         
         # Get total count
         count_query = f"SELECT COUNT(*) FROM political_dynasties {where_clause}"
@@ -2509,17 +2528,32 @@ async def dynasty_stats_api():
             database=os.getenv('POSTGRES_DB_DYNASTY', 'dynasty')
         )
         
-        # Get total records
-        total_records = await conn.fetchval("SELECT COUNT(*) FROM political_dynasties")
+        # Check if there are any winners first
+        winners_count = await conn.fetchval("SELECT COUNT(*) FROM political_dynasties WHERE winner = true")
+        if winners_count == 0:
+            await conn.close()
+            return JSONResponse({
+                "success": True,
+                "data": {
+                    "total_records": 0,
+                    "dynasty_members": 0,
+                    "non_dynasty_members": 0,
+                    "unique_politicians": 0
+                },
+                "message": "No winning candidates found yet. The election data import is still in progress."
+            })
         
-        # Get dynasty members (fat = 1)
-        dynasty_members = await conn.fetchval("SELECT COUNT(*) FROM political_dynasties WHERE fat = 1")
+        # Get total records (winners only)
+        total_records = winners_count
         
-        # Get non-dynasty members (fat = 0)
-        non_dynasty_members = await conn.fetchval("SELECT COUNT(*) FROM political_dynasties WHERE fat = 0")
+        # Get dynasty members (fat = 1, winners only)
+        dynasty_members = await conn.fetchval("SELECT COUNT(*) FROM political_dynasties WHERE fat = 1 AND winner = true")
         
-        # Get unique politicians (distinct first_name + last_name)
-        unique_politicians = await conn.fetchval("SELECT COUNT(DISTINCT CONCAT(first_name, ' ', last_name)) FROM political_dynasties")
+        # Get non-dynasty members (fat = 0, winners only)
+        non_dynasty_members = await conn.fetchval("SELECT COUNT(*) FROM political_dynasties WHERE fat = 0 AND winner = true")
+        
+        # Get unique politicians (distinct first_name + last_name, winners only)
+        unique_politicians = await conn.fetchval("SELECT COUNT(DISTINCT CONCAT(first_name, ' ', last_name)) FROM political_dynasties WHERE winner = true")
         
         await conn.close()
         
@@ -2558,6 +2592,16 @@ async def dynasty_family_api(
             database=os.getenv('POSTGRES_DB_DYNASTY', 'dynasty')
         )
         
+        # Check if there are any winners first
+        winners_count = await conn.fetchval("SELECT COUNT(*) FROM political_dynasties WHERE winner = true")
+        if winners_count == 0:
+            await conn.close()
+            return JSONResponse({
+                "success": True,
+                "data": [],
+                "message": "No winning candidates found yet. The election data import is still in progress."
+            })
+        
         # Build query based on whether province filter is provided
         if province:
             # First try exact match on province column
@@ -2573,7 +2617,7 @@ async def dynasty_family_api(
                     fat,
                     nickname
                 FROM political_dynasties 
-                WHERE last_name = $1 AND province = $2
+                WHERE last_name = $1 AND province = $2 AND winner = true
                 ORDER BY year DESC, first_name
             """, surname, province)
             
@@ -2619,7 +2663,7 @@ async def dynasty_family_api(
                     fat,
                     nickname
                 FROM political_dynasties 
-                WHERE last_name = $1
+                WHERE last_name = $1 AND winner = true
                 ORDER BY year DESC, first_name
             """, surname)
         

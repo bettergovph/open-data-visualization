@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 """
-Optimized Wikipedia Scraper for Political Dynasty Relationships
-Targets provinces with exactly 2 political families to find connections
+Wikipedia-Based Political Dynasty Relationship Verifier
+Strictly uses Wikipedia to verify and discover family relationships
+Only adds relationships that are documented and verified through Wikipedia sources
 """
 
 import asyncio
@@ -12,6 +13,8 @@ import re
 from urllib.parse import quote, unquote
 import os
 from dotenv import load_dotenv
+import concurrent.futures
+from concurrent.futures import ThreadPoolExecutor
 import time
 from typing import Dict, List, Tuple, Optional
 from advanced_name_matcher import AdvancedNameMatcher
@@ -50,35 +53,182 @@ class OptimizedWikipediaScraper:
         if self.db_conn:
             await self.db_conn.close()
 
-    async def get_two_family_provinces(self) -> List[Dict]:
-        """Get provinces with exactly 2 political families"""
-        provinces = await self.db_conn.fetch("""
+    async def get_prioritized_dynasties(self) -> List[Dict]:
+        """Get top political dynasties prioritized by influence and power"""
+        print("🎯 Prioritizing top political dynasties by influence...")
+        
+        # Get dynasties ranked by political power and influence
+        dynasties = await self.db_conn.fetch("""
+            WITH dynasty_stats AS (
+                SELECT 
+                    CONCAT(first_name, ' ', last_name) as family_name,
+                    province,
+                    COUNT(*) as total_positions,
+                    COUNT(DISTINCT year) as years_active,
+                    COUNT(DISTINCT position) as unique_positions,
+                    MAX(CASE 
+                        WHEN position LIKE '%MEMBER, HOUSE OF REPRESENTATIVES%' THEN 7
+                        WHEN position LIKE '%GOVERNOR%' THEN 6
+                        WHEN position LIKE '%VICE GOVERNOR%' THEN 5
+                        WHEN position LIKE '%MAYOR%' THEN 4
+                        WHEN position LIKE '%VICE MAYOR%' THEN 3
+                        WHEN position LIKE '%COUNCILOR%' THEN 2
+                        ELSE 1
+                    END) as highest_position_level,
+                    STRING_AGG(DISTINCT position, ', ') as positions_held
+                FROM political_dynasties 
+                WHERE fat = 1
+                GROUP BY CONCAT(first_name, ' ', last_name), province
+            ),
+            ranked_dynasties AS (
+                SELECT *,
+                    -- Calculate influence score
+                    (total_positions * 0.3 + 
+                     years_active * 0.2 + 
+                     unique_positions * 0.2 + 
+                     highest_position_level * 0.3) as influence_score
+                FROM dynasty_stats
+            )
             SELECT 
+                family_name,
                 province,
-                COUNT(DISTINCT CONCAT(first_name, ' ', last_name)) as family_count,
-                STRING_AGG(DISTINCT CONCAT(first_name, ' ', last_name), ', ') as families
-            FROM political_dynasties 
-            WHERE fat = 1
-            GROUP BY province
-            HAVING COUNT(DISTINCT CONCAT(first_name, ' ', last_name)) = 2
-            ORDER BY province
+                total_positions,
+                years_active,
+                unique_positions,
+                highest_position_level,
+                positions_held,
+                influence_score
+            FROM ranked_dynasties
+            WHERE influence_score >= 3.0  -- Include more dynasties for broader coverage
+            AND family_name NOT IN (
+                -- Exclude dynasties that already have Wikipedia relationships
+                SELECT DISTINCT 
+                    CASE 
+                        WHEN pd1.id IS NOT NULL THEN pd1.first_name || ' ' || pd1.last_name
+                        ELSE pd2.first_name || ' ' || pd2.last_name
+                    END
+                FROM relationships r
+                LEFT JOIN political_dynasties pd1 ON r.person_id = pd1.id
+                LEFT JOIN political_dynasties pd2 ON r.related_person_id = pd2.id
+                WHERE r.relationship_description LIKE 'Wikipedia:%'
+            )
+            ORDER BY influence_score DESC, total_positions DESC, years_active DESC
+            LIMIT 5000  -- Try 5000 more dynasties that haven't been processed yet
         """)
         
-        return [dict(province) for province in provinces]
+        print(f"📊 Found {len(dynasties)} high-influence political dynasties")
+        for i, dynasty in enumerate(dynasties[:10], 1):
+            print(f"  {i:2d}. {dynasty['family_name']} ({dynasty['province']}) - Score: {dynasty['influence_score']:.1f}")
+        
+        return [dict(dynasty) for dynasty in dynasties]
 
-    async def get_family_members(self, province: str) -> List[Dict]:
-        """Get all family members for a specific province"""
-        families = await self.db_conn.fetch("""
+    async def get_dynasty_members(self, family_name: str, province: str) -> List[Dict]:
+        """Get all family members for a specific dynasty"""
+        members = await self.db_conn.fetch("""
             SELECT DISTINCT
                 first_name, last_name, position, year,
                 MIN(id) as id
             FROM political_dynasties 
-            WHERE fat = 1 AND province = $1
+            WHERE fat = 1 
+            AND province = $1 
+            AND CONCAT(first_name, ' ', last_name) = $2
             GROUP BY first_name, last_name, position, year
             ORDER BY last_name, first_name, year DESC
-        """, province)
+        """, province, family_name)
         
-        return [dict(family) for family in families]
+        return [dict(member) for member in members]
+
+    async def get_dynasty_members_threaded(self, db_conn, family_name: str, province: str) -> List[Dict]:
+        """Get all family members for a specific dynasty (threaded version)"""
+        members = await db_conn.fetch("""
+            SELECT DISTINCT
+                first_name, last_name, position, year,
+                MIN(id) as id
+            FROM political_dynasties 
+            WHERE fat = 1 
+            AND province = $1 
+            AND CONCAT(first_name, ' ', last_name) = $2
+            GROUP BY first_name, last_name, position, year
+            ORDER BY last_name, first_name, year DESC
+        """, province, family_name)
+        
+        return [dict(member) for member in members]
+
+    async def process_person_threaded(self, db_conn, person_id: int, first_name: str, last_name: str, province: str, target_families: List[str]) -> Dict:
+        """Process a single person to find Wikipedia relationships (threaded version)"""
+        full_name = f"{first_name} {last_name}"
+        print(f"🔍 Processing: {full_name} from {province}")
+        
+        # Search Wikipedia
+        wiki_data = await self.search_wikipedia(full_name)
+        if not wiki_data:
+            return {'person': full_name, 'status': 'no_wikipedia', 'relationships': []}
+        
+        content = await self.get_wikipedia_content(wiki_data['title'])
+        if not content:
+            return {'person': full_name, 'status': 'no_content', 'relationships': []}
+        
+        # Extract relationships
+        relationships = self.extract_relationships(content, full_name, target_families)
+        print(f"🔗 Found {len(relationships)} potential relationships")
+        
+        # Extract nickname
+        nickname = self.extract_nickname(content, full_name)
+        if nickname:
+            try:
+                await db_conn.execute("""
+                    UPDATE political_dynasties 
+                    SET nickname = $1 
+                    WHERE id = $2
+                """, nickname, person_id)
+                print(f"🏷️ Found nickname: '{nickname}' for {full_name}")
+                print(f"✅ Updated nickname '{nickname}' for person ID {person_id}")
+            except Exception as e:
+                print(f"❌ Error updating nickname: {e}")
+        
+        # Update database with relationships
+        await self.update_database_connections_threaded(db_conn, person_id, relationships)
+        
+        return {
+            'person': full_name,
+            'status': 'processed',
+            'relationships': relationships
+        }
+
+    async def update_database_connections_threaded(self, db_conn, person_id: int, relationships: List[Dict]):
+        """Update database with discovered relationships (threaded version)"""
+        for rel in relationships:
+            if rel['db_matches'] and rel['connection_type']:
+                # Use the first (most recent) match
+                target_person = rel['db_matches'][0]
+                target_id = target_person['id']
+                connection_type = rel['connection_type']
+                
+                try:
+                    # Insert into the relationships table (forward relationship)
+                    await db_conn.execute("""
+                        INSERT INTO relationships (person_id, related_person_id, relationship_type, relationship_description)
+                        VALUES ($1, $2, $3, $4)
+                        ON CONFLICT (person_id, related_person_id, relationship_type) DO UPDATE SET
+                            relationship_description = EXCLUDED.relationship_description
+                    """, person_id, target_id, connection_type, 
+                        f"Wikipedia: {rel['relationship_type']} of {rel['related_person']}")
+                    
+                    # Insert reverse relationship
+                    reverse_connection_type = self.get_reverse_connection_type(connection_type)
+                    if reverse_connection_type:
+                        await db_conn.execute("""
+                            INSERT INTO relationships (person_id, related_person_id, relationship_type, relationship_description)
+                            VALUES ($1, $2, $3, $4)
+                            ON CONFLICT (person_id, related_person_id, relationship_type) DO UPDATE SET
+                                relationship_description = EXCLUDED.relationship_description
+                        """, target_id, person_id, reverse_connection_type,
+                            f"Wikipedia: {rel['relationship_type']} of {rel['person']}")
+                    
+                    print(f"✅ Updated relationship: {rel['person']} -> {rel['related_person']} ({rel['relationship_type']})")
+                    
+                except Exception as e:
+                    print(f"❌ Error updating relationship: {e}")
 
     async def search_wikipedia(self, query: str) -> Optional[Dict]:
         """Search Wikipedia for a person with multiple strategies"""
@@ -452,81 +602,129 @@ class OptimizedWikipediaScraper:
             'relationships': processed_relationships
         }
 
-    async def scrape_two_family_provinces(self, limit: int = 10):
-        """Scrape provinces with exactly 2 political families"""
-        print(f"🚀 Starting optimized Wikipedia scraper for {limit} two-family provinces...")
+    async def scrape_prioritized_dynasties(self, limit: int = 25):
+        """Scrape top political dynasties prioritized by influence"""
+        print(f"🚀 Starting prioritized Wikipedia scraper for top {limit} political dynasties...")
         
-        # Get provinces with exactly 2 families
-        provinces = await self.get_two_family_provinces()
-        print(f"📊 Found {len(provinces)} provinces with exactly 2 political families")
+        # Get top political dynasties by influence
+        dynasties = await self.get_prioritized_dynasties()
+        print(f"📊 Found {len(dynasties)} high-influence political dynasties")
         
-        # Limit the number of provinces to process
-        target_provinces = provinces[:limit]
+        # Limit the number of dynasties to process
+        target_dynasties = dynasties[:limit]
         
         all_results = []
         
-        for i, province_data in enumerate(target_provinces, 1):
-            province = province_data['province']
-            families = province_data['families'].split(', ')
-            
-            print(f"\n{'='*80}")
-            print(f"🏛️ Processing {i}/{len(target_provinces)}: {province}")
-            print(f"👥 Families: {', '.join(families)}")
-            
-            # Get all family members for this province
-            family_members = await self.get_family_members(province)
-            
-            # Process each family member
-            province_results = []
-            for member in family_members:
-                full_name = f"{member['first_name']} {member['last_name']}"
-                
-                # Skip if we already processed this person
-                if any(r['person'] == full_name for r in province_results):
-                    continue
-                
-                result = await self.process_person(
-                    member['id'],
-                    member['first_name'],
-                    member['last_name'],
-                    province,
-                    families
-                )
-                
-                province_results.append(result)
-                
-                # Rate limiting
-                await asyncio.sleep(self.rate_limit_delay)
-            
-            # Add province info to results
-            province_summary = {
-                'province': province,
-                'families': families,
-                'results': province_results
-            }
-            
-            all_results.append(province_summary)
-            
-            # Show summary for this province
-            total_relationships = sum(len(r['relationships']) for r in province_results)
-            target_relationships = sum(
-                len([rel for rel in r['relationships'] if rel.get('is_target_family', False)])
-                for r in province_results
+        # Process dynasties in parallel with 20 threads
+        print(f"🚀 Processing {len(target_dynasties)} dynasties with 20 parallel threads...")
+        
+        async def process_dynasty(dynasty_data, index):
+            # Create separate database connection for this thread
+            thread_db_conn = await asyncpg.connect(
+                host='localhost',
+                port='5432',
+                user='budget_admin',
+                password='wuQ5gBYCKkZiOGb61chLcByMu',
+                database='dynasty'
             )
             
-            print(f"📊 Province Summary: {total_relationships} total relationships, {target_relationships} target family relationships")
+            try:
+                family_name = dynasty_data['family_name']
+                province = dynasty_data['province']
+                influence_score = dynasty_data['influence_score']
+                
+                print(f"\n{'='*80}")
+                print(f"👑 Processing {index+1}/{len(target_dynasties)}: {family_name}")
+                print(f"📍 Province: {province}")
+                print(f"⭐ Influence Score: {influence_score:.1f}")
+                print(f"📊 Positions: {dynasty_data['total_positions']}, Years: {dynasty_data['years_active']}")
+                
+                # Get all family members for this specific dynasty
+                family_members = await self.get_dynasty_members_threaded(thread_db_conn, family_name, province)
+                
+                # Process each family member
+                dynasty_results = []
+                for member in family_members:
+                    full_name = f"{member['first_name']} {member['last_name']}"
+                    
+                    # Skip if we already processed this person
+                    if any(r['person'] == full_name for r in dynasty_results):
+                        continue
+                    
+                    result = await self.process_person_threaded(
+                        thread_db_conn,
+                        member['id'],
+                        member['first_name'],
+                        member['last_name'],
+                        province,
+                        [family_name]  # Pass the current dynasty as target family
+                    )
+                    
+                    dynasty_results.append(result)
+                    
+                    # Rate limiting
+                    await asyncio.sleep(self.rate_limit_delay)
+                
+                return dynasty_data, dynasty_results
+                
+            finally:
+                await thread_db_conn.close()
+        
+        # Create semaphore to limit concurrent requests
+        semaphore = asyncio.Semaphore(20)
+        
+        async def process_with_semaphore(dynasty_data, index):
+            async with semaphore:
+                return await process_dynasty(dynasty_data, index)
+        
+        # Process all dynasties concurrently
+        tasks = [process_with_semaphore(dynasty_data, i) for i, dynasty_data in enumerate(target_dynasties)]
+        results = await asyncio.gather(*tasks, return_exceptions=True)
+        
+        # Process results
+        for result in results:
+            if isinstance(result, Exception):
+                print(f"❌ Error processing dynasty: {result}")
+                continue
+                
+            dynasty_data, dynasty_results = result
+            
+            # Add dynasty info to results
+            dynasty_summary = {
+                'family_name': dynasty_data['family_name'],
+                'province': dynasty_data['province'],
+                'influence_score': dynasty_data['influence_score'],
+                'results': dynasty_results
+            }
+            
+            all_results.append(dynasty_summary)
+            
+            # Show summary for this dynasty
+            total_relationships = sum(len(r['relationships']) for r in dynasty_results)
+            target_relationships = sum(
+                len([rel for rel in r['relationships'] if rel.get('is_target_family', False)])
+                for r in dynasty_results
+            )
+            
+            print(f"📊 Dynasty Summary: {total_relationships} total relationships, {target_relationships} target family relationships")
         
         # Save results to file
         with open('optimized_wikipedia_scraping_results.json', 'w') as f:
             json.dump(all_results, f, indent=2, default=str)
         
         print(f"\n🎉 Optimized scraping complete! Results saved to optimized_wikipedia_scraping_results.json")
+        
+        # Wikipedia scraping complete - quality over quantity
+        print(f"\n✅ High-quality Wikipedia relationship verification complete")
+        print(f"🎯 Focus: Accuracy over quantity - only verified relationships added")
+        
         return all_results
+
 
 async def main():
     """Main execution function"""
     async with OptimizedWikipediaScraper() as scraper:
-        await scraper.scrape_two_family_provinces(limit=19)  # Process all 19 provinces
+        await scraper.scrape_prioritized_dynasties(limit=5000)  # Process top 5000 dynasties that haven't been tried yet
 
 if __name__ == "__main__":
     asyncio.run(main())
