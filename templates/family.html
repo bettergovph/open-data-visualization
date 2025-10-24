@@ -690,20 +690,7 @@ function toggleMobileMenu() {
                     
                     console.log(`🔗 Connecting Level ${levelIndex + 1} (${currentLevelNodes.length} nodes) to Level ${levelIndex + 2} (${nextLevelNodes.length} nodes)`);
                     
-                    // Connect each node in current level to each node in next level
-                    currentLevelNodes.forEach((currentNode, currentIndex) => {
-                        nextLevelNodes.forEach((nextNode, nextIndex) => {
-                            chartGroup.append('line')
-                                .attr('class', 'hierarchy-link')
-                                .attr('x1', currentNode.x + nodeWidth/2)
-                                .attr('y1', currentNode.y + nodeHeight)
-                                .attr('x2', nextNode.x + nodeWidth/2)
-                                .attr('y2', nextNode.y)
-                                .style('stroke', '#374151')
-                                .style('stroke-width', 1)
-                                .style('opacity', 0.2);
-                        });
-                    });
+                    // Lines removed - showing only nodes without connections
                 }
             });
             
