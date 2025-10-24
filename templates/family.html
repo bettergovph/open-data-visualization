@@ -867,32 +867,48 @@ function toggleMobileMenu() {
             
             // Remove the golden border highlighting to prevent visual glitches
             
-            // Add legend at the top of the viewport
+            // Add dynamic legend at the top of the viewport based on actual levels
             const legend = svg.append('g')
                 .attr('transform', 'translate(20, 20)');
             
-            const legendItems = [
-                { color: 'position-national', label: 'National Level' },
-                { color: 'position-provincial', label: 'Provincial Level' },
-                { color: 'position-municipal', label: 'Municipal Level' }
-            ];
+            // Create dynamic legend items based on actual levels present
+            const levelLabels = {
+                1: 'Congressman',
+                2: 'Governor', 
+                3: 'Vice Governor',
+                4: 'Provincial Board',
+                5: 'Mayor',
+                6: 'Vice Mayor',
+                7: 'Councilor'
+            };
             
-            legendItems.forEach((item, i) => {
+            // Get unique levels present in the data
+            const presentLevels = [...new Set(levels)].sort((a, b) => a - b);
+            console.log('📊 Present levels:', presentLevels);
+            
+            presentLevels.forEach((level, i) => {
                 const legendGroup = legend.append('g')
-                    .attr('transform', `translate(${i * 150}, 0)`);
+                    .attr('transform', `translate(${i * 120}, 0)`);
                 
-                legendGroup.append('circle')
-                    .attr('r', 6)
-                    .attr('class', item.color)
+                const levelIndex = level - 1; // Convert to 0-based index
+                const color = levelBaseColors[levelIndex] || '#6B7280';
+                
+                legendGroup.append('rect')
+                    .attr('width', 12)
+                    .attr('height', 12)
+                    .attr('rx', 2)
+                    .attr('ry', 2)
+                    .style('fill', color)
                     .style('stroke', '#fff')
-                    .style('stroke-width', 2);
+                    .style('stroke-width', 1);
                 
                 legendGroup.append('text')
-                    .attr('x', 15)
-                    .attr('y', 5)
-                    .style('font-size', '12px')
-                    .style('fill', '#666')
-                    .text(item.label);
+                    .attr('x', 18)
+                    .attr('y', 9)
+                    .style('font-size', '11px')
+                    .style('fill', '#333')
+                    .style('font-weight', '500')
+                    .text(levelLabels[level] || `Level ${level}`);
             });
             
             console.log('✅ Hierarchy chart created successfully');
