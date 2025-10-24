@@ -349,8 +349,8 @@ function toggleMobileMenu() {
             const uniquePositions = new Set(dynastyMembers.map(member => member.position)).size;
             positionsCount.textContent = uniquePositions;
             
-            // Unique positions as subtitle - only for dynasty members
-            uniquePositionsCount.textContent = uniquePositions;
+            // Unique positions as subtitle - only for dynasty members (removed duplicate)
+            uniquePositionsCount.textContent = '';
             
             const uniqueProvinces = new Set(dynastyMembers.map(member => member.province)).size;
             provincesCount.textContent = uniqueProvinces;
@@ -878,8 +878,8 @@ function toggleMobileMenu() {
             const uniquePositions = new Set(dynastyMembers.map(member => member.position)).size;
             positionsCount.textContent = uniquePositions;
             
-            // Unique positions as subtitle - only for dynasty members
-            uniquePositionsCount.textContent = uniquePositions;
+            // Unique positions as subtitle - only for dynasty members (removed duplicate)
+            uniquePositionsCount.textContent = '';
             
             const uniqueProvinces = new Set(dynastyMembers.map(member => member.province)).size;
             provincesCount.textContent = uniqueProvinces;
