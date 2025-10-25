@@ -143,7 +143,12 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 1rem;
+            margin-bottom: 1.5rem;
+            padding: 1rem;
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 0.75rem;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
         }
 
         .pagination-info {
@@ -159,22 +164,32 @@
         }
 
         .pagination-btn {
-            padding: 0.5rem 1rem;
-            background: #f3f4f6;
-            border: 1px solid #d1d5db;
-            border-radius: 0.375rem;
+            padding: 0.75rem 1.5rem;
+            background: #667eea;
+            color: white;
+            border: 2px solid #667eea;
+            border-radius: 0.5rem;
             cursor: pointer;
-            font-size: 0.875rem;
-            transition: all 0.2s;
+            font-size: 0.9rem;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 4px rgba(102, 126, 234, 0.2);
         }
 
         .pagination-btn:hover:not(:disabled) {
-            background: #e5e7eb;
+            background: #5a67d8;
+            border-color: #5a67d8;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 8px rgba(102, 126, 234, 0.3);
         }
 
         .pagination-btn:disabled {
-            opacity: 0.5;
+            background: #9ca3af;
+            border-color: #9ca3af;
+            opacity: 0.6;
             cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
         }
 
         /* Risk Level Colors */
@@ -273,17 +288,41 @@ function toggleMobileMenu() {
                                 <span class="text-sm text-gray-600">per page</span>
                                 <label for="hhi-min-politicians" class="text-sm font-medium ml-4">Min Politicians:</label>
                                 <select id="hhi-min-politicians" class="border border-gray-300 rounded px-2 py-1 text-sm" onchange="updatePoliticalHHIPagination()">
-                                    <option value="0">All</option>
+                                    <option value="0" selected>All</option>
                                     <option value="5">5+</option>
-                                    <option value="10" selected>10+</option>
+                                    <option value="10">10+</option>
                                     <option value="20">20+</option>
                                     <option value="50">50+</option>
                                 </select>
+                                <span class="text-xs text-gray-500 ml-2">Filter by sample size for meaningful HHI analysis</span>
                             </div>
                             <div class="pagination-buttons">
-                                <button id="hhi-prev-btn" onclick="changePoliticalHHIPage(-1)" class="pagination-btn" disabled>Previous</button>
-                                <span id="hhi-page-info" class="text-sm text-gray-600">Page 1 of 1</span>
-                                <button id="hhi-next-btn" onclick="changePoliticalHHIPage(1)" class="pagination-btn" disabled>Next</button>
+                                <button id="hhi-prev-btn" onclick="changePoliticalHHIPage(-1)" class="pagination-btn" disabled>← Previous</button>
+                                <span id="hhi-page-info" class="text-sm font-semibold text-gray-700 bg-white px-3 py-1 rounded border">Page 1 of 1</span>
+                                <button id="hhi-next-btn" onclick="changePoliticalHHIPage(1)" class="pagination-btn" disabled>Next →</button>
+                            </div>
+                        </div>
+                        
+                        <!-- Political HHI Statistics Card -->
+                        <div id="political-hhi-stats" class="mb-6 p-4 bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-lg shadow-sm">
+                            <h5 class="font-semibold text-lg mb-3 text-blue-800">📊 Political HHI Statistics</h5>
+                            <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                                <div class="text-center">
+                                    <div class="text-2xl font-bold text-blue-600" id="stats-average-hhi">-</div>
+                                    <div class="text-sm text-gray-600">Average HHI</div>
+                                </div>
+                                <div class="text-center">
+                                    <div class="text-2xl font-bold text-red-600" id="stats-highest-hhi">-</div>
+                                    <div class="text-sm text-gray-600">Highest HHI</div>
+                                </div>
+                                <div class="text-center">
+                                    <div class="text-2xl font-bold text-gray-700" id="stats-total-provinces">-</div>
+                                    <div class="text-sm text-gray-600">Total Provinces</div>
+                                </div>
+                                <div class="text-center">
+                                    <div class="text-2xl font-bold text-red-600" id="stats-high-risk">-</div>
+                                    <div class="text-sm text-gray-600">High Risk (>50)</div>
+                                </div>
                             </div>
                         </div>
                         
@@ -452,73 +491,42 @@ function displayPoliticalHHIData() {
     document.getElementById('hhi-prev-btn').disabled = politicalHHIPage <= 1;
     document.getElementById('hhi-next-btn').disabled = politicalHHIPage >= totalPages;
     
+    // Update statistics card
+    document.getElementById('stats-average-hhi').textContent = politicalHHIData.statistics.average_hhi;
+    document.getElementById('stats-highest-hhi').textContent = politicalHHIData.statistics.highest_hhi;
+    document.getElementById('stats-total-provinces').textContent = filteredData.length;
+    document.getElementById('stats-high-risk').textContent = filteredData.filter(item => item.hhi > 50).length;
+    
     // Display results
     const resultsDiv = document.getElementById('political-hhi-results');
     resultsDiv.innerHTML = `
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-                <h5 class="font-semibold mb-2">Political HHI by Province (${startIndex + 1}-${Math.min(endIndex, filteredData.length)} of ${filteredData.length}${minPoliticians > 0 ? ` with ${minPoliticians}+ politicians` : ''})</h5>
-                <div class="space-y-2">
-                    ${pageData.map((result, index) => {
-                        const riskLevel = result.hhi > 70 ? 'risk-high' : result.hhi > 50 ? 'risk-medium' : result.hhi > 30 ? 'risk-low' : 'risk-very-low';
-                        const isLowSample = result.total_politicians <= 5;
-                        const isCauayan = result.province.toLowerCase().includes('cauayan');
-                        const sampleWarning = isLowSample ? '<div class="text-xs text-red-600 font-semibold">⚠️ Low sample size - HHI not ideal</div>' : '';
-                        const cauayanBadge = isCauayan ? '<div class="text-xs text-red-600 font-semibold">🎯 Perfect example of misleading HHI</div>' : '';
-                        const lowSampleBadge = isLowSample && !isCauayan ? '<div class="text-xs text-orange-600 font-semibold">📊 May need more data or municipality too small</div>' : '';
-                        return `
-                            <div class="flex justify-between items-center p-3 ${riskLevel} rounded">
-                                <span class="font-medium">${result.province}</span>
-                                <div class="text-right">
-                                    <span class="font-bold text-lg">${result.hhi}</span>
-                                    <div class="text-xs text-gray-500">${result.total_politicians} politicians, ${result.unique_surnames} surnames</div>
-                                    <div class="text-xs text-gray-500">Largest dynasty: ${result.dynasty_size} members</div>
-                                    ${sampleWarning}
-                                    ${cauayanBadge}
-                                    ${lowSampleBadge}
-                                </div>
-                            </div>
-                        `;
-                    }).join('')}
-                </div>
-            </div>
-            <div>
-                <h5 class="font-semibold mb-2">Political HHI Statistics</h5>
-                <div class="space-y-2">
-                    <div class="flex justify-between">
-                        <span>Average HHI:</span>
-                        <span class="font-bold">${politicalHHIData.statistics.average_hhi}</span>
+        <div class="space-y-2">
+            <h5 class="font-semibold mb-2">Political HHI by Province (${startIndex + 1}-${Math.min(endIndex, filteredData.length)} of ${filteredData.length}${minPoliticians > 0 ? ` with ${minPoliticians}+ politicians` : ''})</h5>
+            ${pageData.map((result, index) => {
+                const riskLevel = result.hhi > 70 ? 'risk-high' : result.hhi > 50 ? 'risk-medium' : result.hhi > 30 ? 'risk-low' : 'risk-very-low';
+                return `
+                    <div class="flex justify-between items-center p-3 ${riskLevel} rounded">
+                        <span class="font-medium">${result.province}</span>
+                        <div class="text-right">
+                            <span class="font-bold text-lg">${result.hhi}</span>
+                            <div class="text-xs text-gray-500">${result.total_politicians} politicians, ${result.unique_surnames} surnames</div>
+                            <div class="text-xs text-gray-500">Largest dynasty: ${result.dynasty_size} members</div>
+                        </div>
                     </div>
-                    <div class="flex justify-between">
-                        <span>Highest HHI:</span>
-                        <span class="font-bold text-red-600">${politicalHHIData.statistics.highest_hhi} (${politicalHHIData.data[0].province})</span>
-                    </div>
-                    <div class="flex justify-between">
-                        <span>Total Provinces:</span>
-                        <span class="font-bold">${filteredData.length}${minPoliticians > 0 ? ` (${minPoliticians}+ politicians)` : ''}</span>
-                    </div>
-                    <div class="flex justify-between">
-                        <span>High Risk (HHI > 50):</span>
-                        <span class="font-bold text-red-600">${filteredData.filter(item => item.hhi > 50).length}</span>
-                    </div>
-                    <div class="flex justify-between">
-                        <span>Low Sample (≤5 politicians):</span>
-                        <span class="font-bold text-orange-600">${filteredData.filter(item => item.total_politicians <= 5).length}</span>
-                    </div>
-                </div>
-                <div class="mt-4 p-3 bg-blue-50 rounded">
-                    <p class="text-sm text-blue-800">
-                        <strong>EOGO Paper:</strong> Political HHI measures political dynasty concentration. 
-                        Higher values indicate greater political concentration and potential corruption risk.
-                    </p>
-                    <p class="text-sm text-blue-800 mt-2">
-                        <strong>Statistical Critique:</strong> HHI is only meaningful with larger sample sizes. 
-                        Provinces with ≤5 politicians are tagged as problematic because they may need more data 
-                        or represent municipalities too small for meaningful political analysis. 
-                        Focus on provinces with 10+ politicians for statistically sound analysis.
-                    </p>
-                </div>
-            </div>
+                `;
+            }).join('')}
+        </div>
+        <div class="mt-6 p-4 bg-blue-50 rounded-lg">
+            <p class="text-sm text-blue-800">
+                <strong>EOGO Paper:</strong> Political HHI measures political dynasty concentration. 
+                Higher values indicate greater political concentration and potential corruption risk.
+            </p>
+            <p class="text-sm text-blue-800 mt-2">
+                <strong>Statistical Critique:</strong> HHI is only meaningful with larger sample sizes. 
+                Provinces with ≤5 politicians are tagged as problematic because they may need more data 
+                or represent municipalities too small for meaningful political analysis. 
+                Focus on provinces with 10+ politicians for statistically sound analysis.
+            </p>
         </div>
     `;
 }
