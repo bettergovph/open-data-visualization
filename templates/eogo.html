@@ -271,6 +271,14 @@ function toggleMobileMenu() {
                                     <option value="100">100</option>
                                 </select>
                                 <span class="text-sm text-gray-600">per page</span>
+                                <label for="hhi-min-politicians" class="text-sm font-medium ml-4">Min Politicians:</label>
+                                <select id="hhi-min-politicians" class="border border-gray-300 rounded px-2 py-1 text-sm" onchange="updatePoliticalHHIPagination()">
+                                    <option value="0">All</option>
+                                    <option value="5">5+</option>
+                                    <option value="10" selected>10+</option>
+                                    <option value="20">20+</option>
+                                    <option value="50">50+</option>
+                                </select>
                             </div>
                             <div class="pagination-buttons">
                                 <button id="hhi-prev-btn" onclick="changePoliticalHHIPage(-1)" class="pagination-btn" disabled>Previous</button>
@@ -430,10 +438,14 @@ async function loadPoliticalHHI() {
 function displayPoliticalHHIData() {
     if (!politicalHHIData) return;
     
+    // Filter by minimum politicians
+    const minPoliticians = parseInt(document.getElementById('hhi-min-politicians').value);
+    const filteredData = politicalHHIData.data.filter(item => item.total_politicians >= minPoliticians);
+    
     const startIndex = (politicalHHIPage - 1) * politicalHHIPageSize;
     const endIndex = startIndex + politicalHHIPageSize;
-    const pageData = politicalHHIData.data.slice(startIndex, endIndex);
-    const totalPages = Math.ceil(politicalHHIData.data.length / politicalHHIPageSize);
+    const pageData = filteredData.slice(startIndex, endIndex);
+    const totalPages = Math.ceil(filteredData.length / politicalHHIPageSize);
     
     // Update pagination controls
     document.getElementById('hhi-page-info').textContent = `Page ${politicalHHIPage} of ${totalPages}`;
@@ -445,7 +457,7 @@ function displayPoliticalHHIData() {
     resultsDiv.innerHTML = `
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-                <h5 class="font-semibold mb-2">Political HHI by Province (${startIndex + 1}-${Math.min(endIndex, politicalHHIData.data.length)} of ${politicalHHIData.data.length})</h5>
+                <h5 class="font-semibold mb-2">Political HHI by Province (${startIndex + 1}-${Math.min(endIndex, filteredData.length)} of ${filteredData.length}${minPoliticians > 0 ? ` with ${minPoliticians}+ politicians` : ''})</h5>
                 <div class="space-y-2">
                     ${pageData.map((result, index) => {
                         const riskLevel = result.hhi > 70 ? 'risk-high' : result.hhi > 50 ? 'risk-medium' : result.hhi > 30 ? 'risk-low' : 'risk-very-low';
@@ -475,17 +487,22 @@ function displayPoliticalHHIData() {
                     </div>
                     <div class="flex justify-between">
                         <span>Total Provinces:</span>
-                        <span class="font-bold">${politicalHHIData.total_provinces}</span>
+                        <span class="font-bold">${filteredData.length}${minPoliticians > 0 ? ` (${minPoliticians}+ politicians)` : ''}</span>
                     </div>
                     <div class="flex justify-between">
                         <span>High Risk (HHI > 50):</span>
-                        <span class="font-bold text-red-600">${politicalHHIData.statistics.high_risk_count}</span>
+                        <span class="font-bold text-red-600">${filteredData.filter(item => item.hhi > 50).length}</span>
                     </div>
                 </div>
                 <div class="mt-4 p-3 bg-blue-50 rounded">
                     <p class="text-sm text-blue-800">
                         <strong>EOGO Paper:</strong> Political HHI measures political dynasty concentration. 
                         Higher values indicate greater political concentration and potential corruption risk.
+                    </p>
+                    <p class="text-sm text-blue-800 mt-2">
+                        <strong>Statistical Note:</strong> HHI is only significant with larger sample sizes. 
+                        Small provinces (e.g., 2 politicians) can achieve HHI=100 but lack political significance. 
+                        Focus on provinces with 10+ politicians for meaningful analysis.
                     </p>
                 </div>
             </div>
@@ -500,7 +517,9 @@ function updatePoliticalHHIPagination() {
 }
 
 function changePoliticalHHIPage(direction) {
-    const totalPages = Math.ceil(politicalHHIData.data.length / politicalHHIPageSize);
+    const minPoliticians = parseInt(document.getElementById('hhi-min-politicians').value);
+    const filteredData = politicalHHIData.data.filter(item => item.total_politicians >= minPoliticians);
+    const totalPages = Math.ceil(filteredData.length / politicalHHIPageSize);
     politicalHHIPage = Math.max(1, Math.min(totalPages, politicalHHIPage + direction));
     displayPoliticalHHIData();
 }
