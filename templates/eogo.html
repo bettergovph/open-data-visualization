@@ -348,6 +348,29 @@ function toggleMobileMenu() {
                         <h3 class="budget-section-title">🎯 CRI Analysis</h3>
                         <p class="budget-section-desc">Corruption Risk Indicator combining multiple factors from the EOGO paper methodology.</p>
                         
+                        <!-- CRI Analysis Statistics Card -->
+                        <div id="cri-analysis-stats" class="mb-6 p-4 bg-gradient-to-r from-green-50 to-emerald-50 border border-green-200 rounded-lg shadow-sm">
+                            <h5 class="font-semibold text-lg mb-3 text-green-800">📊 CRI Analysis Statistics</h5>
+                            <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                                <div class="text-center">
+                                    <div class="text-2xl font-bold text-green-600" id="cri-stats-average-cri">-</div>
+                                    <div class="text-sm text-gray-600">Average CRI</div>
+                                </div>
+                                <div class="text-center">
+                                    <div class="text-2xl font-bold text-red-600" id="cri-stats-highest-cri">-</div>
+                                    <div class="text-sm text-gray-600">Highest CRI</div>
+                                </div>
+                                <div class="text-center">
+                                    <div class="text-2xl font-bold text-gray-700" id="cri-stats-total-provinces">-</div>
+                                    <div class="text-sm text-gray-600">Total Provinces</div>
+                                </div>
+                                <div class="text-center">
+                                    <div class="text-2xl font-bold text-red-600" id="cri-stats-high-risk">-</div>
+                                    <div class="text-sm text-gray-600">High Risk (>50)</div>
+                                </div>
+                            </div>
+                        </div>
+                        
                         <!-- Pagination Controls -->
                         <div class="pagination-controls">
                             <div class="pagination-info">
@@ -379,6 +402,29 @@ function toggleMobileMenu() {
                     <div id="tab-poverty-correlation" class="budget-tab-panel">
                         <h3 class="budget-section-title">📈 Poverty Correlation Analysis</h3>
                         <p class="budget-section-desc">Analysis of poverty incidence correlation with corruption risk factors as identified in the EOGO paper.</p>
+                        
+                        <!-- Poverty Statistics Card -->
+                        <div id="poverty-stats" class="mb-6 p-4 bg-gradient-to-r from-orange-50 to-red-50 border border-orange-200 rounded-lg shadow-sm">
+                            <h5 class="font-semibold text-lg mb-3 text-orange-800">📊 Poverty Statistics</h5>
+                            <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                                <div class="text-center">
+                                    <div class="text-2xl font-bold text-orange-600" id="poverty-stats-average">-</div>
+                                    <div class="text-sm text-gray-600">Average Poverty</div>
+                                </div>
+                                <div class="text-center">
+                                    <div class="text-2xl font-bold text-red-600" id="poverty-stats-highest">-</div>
+                                    <div class="text-sm text-gray-600">Highest Poverty</div>
+                                </div>
+                                <div class="text-center">
+                                    <div class="text-2xl font-bold text-gray-700" id="poverty-stats-total-provinces">-</div>
+                                    <div class="text-sm text-gray-600">Total Provinces</div>
+                                </div>
+                                <div class="text-center">
+                                    <div class="text-2xl font-bold text-red-600" id="poverty-stats-high-poverty">-</div>
+                                    <div class="text-sm text-gray-600">High Poverty (>20%)</div>
+                                </div>
+                            </div>
+                        </div>
                         
                         <!-- Pagination Controls -->
                         <div class="pagination-controls">
@@ -582,6 +628,12 @@ function displayCRIData() {
     document.getElementById('cri-prev-btn').disabled = criPage <= 1;
     document.getElementById('cri-next-btn').disabled = criPage >= totalPages;
     
+    // Update CRI statistics card
+    document.getElementById('cri-stats-average-cri').textContent = criAnalysisData.statistics.average_cri;
+    document.getElementById('cri-stats-highest-cri').textContent = criAnalysisData.statistics.highest_cri;
+    document.getElementById('cri-stats-total-provinces').textContent = criAnalysisData.total_provinces;
+    document.getElementById('cri-stats-high-risk').textContent = criAnalysisData.statistics.high_risk_count;
+    
     // Display results
     const resultsDiv = document.getElementById('cri-analysis-results');
     resultsDiv.innerHTML = `
@@ -678,6 +730,12 @@ function displayPovertyData() {
     document.getElementById('poverty-page-info').textContent = `Page ${povertyPage} of ${totalPages}`;
     document.getElementById('poverty-prev-btn').disabled = povertyPage <= 1;
     document.getElementById('poverty-next-btn').disabled = povertyPage >= totalPages;
+    
+    // Update Poverty statistics card
+    document.getElementById('poverty-stats-average').textContent = povertyData.statistics.average_poverty + '%';
+    document.getElementById('poverty-stats-highest').textContent = povertyData.statistics.highest_poverty + '%';
+    document.getElementById('poverty-stats-total-provinces').textContent = povertyData.total_provinces;
+    document.getElementById('poverty-stats-high-poverty').textContent = povertyData.statistics.high_poverty_count;
     
     // Display results
     const resultsDiv = document.getElementById('poverty-correlation-results');
