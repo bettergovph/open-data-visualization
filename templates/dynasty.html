@@ -1457,7 +1457,39 @@ function createDynastyHeatmap(dynastyData) {
     console.log('🗺️ Dynasty heatmap canvas found:', heatmapCtx);
     console.log('🗺️ Canvas dimensions:', heatmapCtx.width, 'x', heatmapCtx.height);
 
-    // Load Philippine provinces GeoJSON data
+    // Province coordinates for Philippines map (same as Animation tab)
+    const provinceCoordinates = {
+        'Metro Manila': { x: 200, y: 180 },
+        'Cebu': { x: 250, y: 250 },
+        'Davao': { x: 280, y: 300 },
+        'Laguna': { x: 190, y: 200 },
+        'Cavite': { x: 180, y: 190 },
+        'Bulacan': { x: 190, y: 170 },
+        'Pampanga': { x: 180, y: 160 },
+        'Nueva Ecija': { x: 200, y: 150 },
+        'Batangas': { x: 170, y: 220 },
+        'Quezon': { x: 200, y: 240 },
+        'Rizal': { x: 200, y: 190 },
+        'Palawan': { x: 120, y: 280 },
+        'Negros Occidental': { x: 220, y: 280 },
+        'Iloilo': { x: 200, y: 270 },
+        'Bohol': { x: 240, y: 260 },
+        'Leyte': { x: 260, y: 250 },
+        'Samar': { x: 270, y: 240 },
+        'Zamboanga': { x: 200, y: 320 },
+        'Cotabato': { x: 250, y: 320 },
+        'Cagayan': { x: 220, y: 120 },
+        'Isabela': { x: 240, y: 130 },
+        'Nueva Vizcaya': { x: 200, y: 140 },
+        'Benguet': { x: 190, y: 150 },
+        'Pangasinan': { x: 180, y: 160 },
+        'Tarlac': { x: 190, y: 170 },
+        'Zambales': { x: 170, y: 180 },
+        'Bataan': { x: 170, y: 190 },
+        'Unknown': { x: 100, y: 100 }
+    };
+
+    // Load Philippine provinces GeoJSON data for accurate positioning
     fetch('/static/data/philippines-provinces.json')
         .then(response => {
             if (!response.ok) {
@@ -1478,40 +1510,17 @@ function createDynastyHeatmap(dynastyData) {
             
             // Group dynasty data by province and calculate control intensity
             dynastyData.forEach(item => {
-                const province = item.province;
+                const province = item.province || 'Unknown';
                 if (!provinceControl[province]) {
                     provinceControl[province] = {
-                        totalPoliticians: 0,
-                        dynastyMembers: 0,
-                        controlIntensity: 0,
-                        uniqueFamilies: new Set()
+                        count: 0,
+                        totalMembers: 0,
+                        surnames: new Set()
                     };
                 }
-                provinceControl[province].totalPoliticians += item.total_count;
-                provinceControl[province].dynastyMembers += item.dynasty_count;
-                provinceControl[province].uniqueFamilies.add(item.surname);
-            });
-            
-            // Calculate control intensity based on family concentration
-            // Single family = darker (more concentrated control)
-            // Multiple families = lighter (less concentrated control)
-            Object.keys(provinceControl).forEach(province => {
-                const data = provinceControl[province];
-                const familyCount = data.uniqueFamilies.size;
-                
-                // If only one family, make it darker (more concentrated)
-                // If multiple families, make it lighter (less concentrated)
-                if (familyCount === 1) {
-                    data.controlIntensity = 90; // Dark red for single family control
-                } else if (familyCount === 2) {
-                    data.controlIntensity = 70; // Medium red for two families
-                } else if (familyCount <= 5) {
-                    data.controlIntensity = 50; // Orange for 3-5 families
-                } else if (familyCount <= 10) {
-                    data.controlIntensity = 30; // Light orange for 6-10 families
-                } else {
-                    data.controlIntensity = 10; // Very light for many families
-                }
+                provinceControl[province].count++;
+                provinceControl[province].totalMembers += item.dynasty_count || 0;
+                provinceControl[province].surnames.add(item.surname || item.last_name || 'Unknown');
             });
             
             console.log('🗺️ Dynasty control data:', provinceControl);
@@ -1523,7 +1532,6 @@ function createDynastyHeatmap(dynastyData) {
             // Set proper canvas resolution to avoid blurriness
             const rect = canvas.getBoundingClientRect();
             const dpr = window.devicePixelRatio || 1;
-            
             canvas.width = rect.width * dpr;
             canvas.height = rect.height * dpr;
             ctx.scale(dpr, dpr);
@@ -1535,7 +1543,7 @@ function createDynastyHeatmap(dynastyData) {
 
             // Clear canvas
             ctx.clearRect(0, 0, width, height);
-            ctx.fillStyle = '#f8f9fa';
+            ctx.fillStyle = '#f0f8ff';
             ctx.fillRect(0, 0, width, height);
 
             // Calculate bounds of the Philippines
@@ -1573,27 +1581,22 @@ function createDynastyHeatmap(dynastyData) {
 
             // Function to get color based on dynasty control intensity
             const getDynastyColor = (intensity) => {
-                // Use darker shades of red based on control intensity (0-100%)
-                if (intensity >= 80) return '#4B0000';        // Very dark red (80%+ dynasty control)
-                else if (intensity >= 70) return '#6B0000';    // Dark red (70-79%)
-                else if (intensity >= 60) return '#8B0000';    // Dark red (60-69%)
-                else if (intensity >= 50) return '#A00000';     // Dark red (50-59%)
-                else if (intensity >= 40) return '#B00000';    // Dark red (40-49%)
-                else if (intensity >= 30) return '#C00000';     // Dark red (30-39%)
-                else if (intensity >= 20) return '#D00000';     // Dark red (20-29%)
-                else if (intensity >= 10) return '#E00000';     // Dark red (10-19%)
-                else if (intensity > 0) return '#F00000';      // Dark red (1-9%)
-                else return '#F0F0F0';                          // Light gray (0% - no dynasty data)
+                if (intensity >= 80) return '#4B0000';        // Very dark red
+                else if (intensity >= 70) return '#6B0000';    // Dark red
+                else if (intensity >= 60) return '#8B0000';    // Dark red
+                else if (intensity >= 50) return '#A00000';     // Dark red
+                else if (intensity >= 40) return '#B00000';    // Dark red
+                else if (intensity >= 30) return '#C00000';     // Dark red
+                else if (intensity >= 20) return '#D00000';     // Dark red
+                else if (intensity >= 10) return '#E00000';     // Dark red
+                else if (intensity > 0) return '#F00000';      // Dark red
+                else return '#F0F0F0';                          // Light gray (no data)
             };
 
-            // Draw each province
+            // Draw each province with accurate GeoJSON boundaries
             console.log('🗺️ Starting to draw provinces...');
             geoJsonData.features.forEach((feature, index) => {
-                if (index % 10 === 0) {
-                    console.log(`🗺️ Drawing province ${index + 1}/${geoJsonData.features.length}`);
-                }
                 let provinceName = feature.properties.name || feature.properties.NAME_1 || feature.properties.PROVINCE;
-                console.log(`🗺️ Processing province: ${provinceName}`);
                 
                 // Find matching province data
                 let controlData = null;
@@ -1608,15 +1611,15 @@ function createDynastyHeatmap(dynastyData) {
                     }
                 });
                 
-                const intensity = controlData ? controlData.controlIntensity : 0;
+                const intensity = controlData ? Math.min(controlData.count * 20, 100) : 0;
                 const color = getDynastyColor(intensity);
                 
                 console.log(`🗺️ Province: ${provinceName} → Matched: ${matchedProvince} → Intensity: ${intensity.toFixed(1)}% → Color: ${color}`);
 
-                // Draw the province polygon
+                // Draw the province polygon with accurate boundaries
                 ctx.fillStyle = color;
-                ctx.strokeStyle = '#000000'; // Black boundaries
-                ctx.lineWidth = 0.5; // Thinner boundaries
+                ctx.strokeStyle = '#000000';
+                ctx.lineWidth = 0.5;
 
                 if (feature.geometry.type === 'MultiPolygon') {
                     feature.geometry.coordinates.forEach(polygon => {
@@ -1648,12 +1651,38 @@ function createDynastyHeatmap(dynastyData) {
                 const x = event.clientX - rect.left;
                 const y = event.clientY - rect.top;
                 
-                // Find clicked province (simplified - could be enhanced)
                 console.log('🗺️ Clicked at:', x, y);
                 
-                // Show province information
-                const clickedProvince = 'Click detected - province lookup could be enhanced';
-                console.log('🗺️ Clicked province:', clickedProvince);
+                // Find clicked province by checking if point is inside polygon
+                geoJsonData.features.forEach(feature => {
+                    let provinceName = feature.properties.name || feature.properties.NAME_1 || feature.properties.PROVINCE;
+                    
+                    // Simple point-in-polygon check (could be enhanced)
+                    if (feature.geometry.type === 'MultiPolygon') {
+                        feature.geometry.coordinates.forEach(polygon => {
+                            polygon.forEach(ring => {
+                                // Convert ring coordinates to canvas coordinates
+                                const canvasCoords = ring.map(coord => {
+                                    const [lng, lat] = coord;
+                                    return toCanvasCoords(lng, lat);
+                                });
+                                
+                                // Simple bounding box check
+                                const minX = Math.min(...canvasCoords.map(c => c.x));
+                                const maxX = Math.max(...canvasCoords.map(c => c.x));
+                                const minY = Math.min(...canvasCoords.map(c => c.y));
+                                const maxY = Math.max(...canvasCoords.map(c => c.y));
+                                
+                                if (x >= minX && x <= maxX && y >= minY && y <= maxY) {
+                                    const data = provinceControl[provinceName];
+                                    if (data) {
+                                        alert(`${provinceName}\nDynasties: ${data.count}\nTotal Members: ${data.totalMembers}\nSurnames: ${Array.from(data.surnames).join(', ')}`);
+                                    }
+                                }
+                            });
+                        });
+                    }
+                });
             });
 
             console.log('✅ Dynasty heatmap created successfully');
@@ -3147,29 +3176,67 @@ function showDynastiesForYear(year) {
         provinceGroups[province].push(dynasty);
     });
     
-    // Create map content
+    // Create map content with Philippines map background
     let mapContent = `
-        <div style="position: relative; width: 100%; height: 100%; background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%);">
-            <div style="position: absolute; top: 20px; left: 20px; background: rgba(0,0,0,0.8); color: white; padding: 15px; border-radius: 8px; font-size: 16px; font-weight: bold;">
+        <div style="position: relative; width: 100%; height: 100%; background: #f0f8ff; overflow: hidden;">
+            <!-- Philippines Map Background -->
+            <div style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAwIiBoZWlnaHQ9IjQwMCIgdmlld0JveD0iMCAwIDQwMCA0MDAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSI0MDAiIGhlaWdodD0iNDAwIiBmaWxsPSIjZjBmOGZmIi8+CjxwYXRoIGQ9Ik0xMDAgMTAwIEwyMDAgODAgTDMwMCA5MCBMMzUwIDEyMCBMMzIwIDE4MCBMMjgwIDI1MCBMMjAwIDMwMCBMMTIwIDI4MCBMMTAwIDIwMCBMMTAwIDEwMCBaIiBmaWxsPSIjZDBkOGZmIiBzdHJva2U9IiM5OTkiIHN0cm9rZS13aWR0aD0iMiIvPgo8dGV4dCB4PSIyMDAiIHk9IjIwMCIgZm9udC1mYW1pbHk9IkFyaWFsIiBmb250LXNpemU9IjE0IiBmaWxsPSIjMzMzIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIj5QaGlsaXBwaW5lczwvdGV4dD4KPC9zdmc+') center/contain no-repeat;">
+            </div>
+            
+            <!-- Info Overlays -->
+            <div style="position: absolute; top: 20px; left: 20px; background: rgba(0,0,0,0.8); color: white; padding: 15px; border-radius: 8px; font-size: 16px; font-weight: bold; z-index: 100;">
                 Year: ${year}
             </div>
-            <div style="position: absolute; top: 20px; right: 20px; background: rgba(0,0,0,0.8); color: white; padding: 15px; border-radius: 8px; font-size: 16px; font-weight: bold;">
+            <div style="position: absolute; top: 20px; right: 20px; background: rgba(0,0,0,0.8); color: white; padding: 15px; border-radius: 8px; font-size: 16px; font-weight: bold; z-index: 100;">
                 Dynasties: ${Object.keys(provinceGroups).length} provinces
             </div>
     `;
     
+    // Province coordinates for Philippines map (approximate positions)
+    const provinceCoordinates = {
+        'Metro Manila': { x: 200, y: 180 },
+        'Cebu': { x: 250, y: 250 },
+        'Davao': { x: 280, y: 300 },
+        'Laguna': { x: 190, y: 200 },
+        'Cavite': { x: 180, y: 190 },
+        'Bulacan': { x: 190, y: 170 },
+        'Pampanga': { x: 180, y: 160 },
+        'Nueva Ecija': { x: 200, y: 150 },
+        'Batangas': { x: 170, y: 220 },
+        'Quezon': { x: 200, y: 240 },
+        'Rizal': { x: 200, y: 190 },
+        'Palawan': { x: 120, y: 280 },
+        'Negros Occidental': { x: 220, y: 280 },
+        'Iloilo': { x: 200, y: 270 },
+        'Bohol': { x: 240, y: 260 },
+        'Leyte': { x: 260, y: 250 },
+        'Samar': { x: 270, y: 240 },
+        'Zamboanga': { x: 200, y: 320 },
+        'Cotabato': { x: 250, y: 320 },
+        'Cagayan': { x: 220, y: 120 },
+        'Isabela': { x: 240, y: 130 },
+        'Nueva Vizcaya': { x: 200, y: 140 },
+        'Benguet': { x: 190, y: 150 },
+        'Pangasinan': { x: 180, y: 160 },
+        'Tarlac': { x: 190, y: 170 },
+        'Zambales': { x: 170, y: 180 },
+        'Bataan': { x: 170, y: 190 },
+        'Unknown': { x: 100, y: 100 }
+    };
+    
     // Add flags for each province
     Object.entries(provinceGroups).forEach(([province, dynasties], index) => {
-        const x = 50 + (index % 3) * 200; // 3 columns
-        const y = 100 + Math.floor(index / 3) * 150; // Rows
+        const coords = provinceCoordinates[province] || provinceCoordinates['Unknown'];
+        const x = coords.x;
+        const y = coords.y;
         
         dynasties.forEach((dynasty, dynastyIndex) => {
             // Add safety checks for undefined values
             const surname = dynasty.surname || dynasty.last_name || 'Unknown';
             const dynastyCount = dynasty.dynasty_count || dynasty.member_count || 1;
             const flagSize = Math.max(20, Math.min(80, dynastyCount * 2)); // Size based on family count
-            const flagX = x + (dynastyIndex * 30);
-            const flagY = y + (dynastyIndex * 20);
+            const flagX = x + (dynastyIndex * 25) - (dynasties.length * 12.5); // Center flags around province
+            const flagY = y + (dynastyIndex * 15) - (dynasties.length * 7.5);
             
             // Generate a simple flag if no dynasty_id
             const flagId = dynasty.dynasty_id || `generated_${surname}_${dynasty.province}`.replace(/\s+/g, '_');
