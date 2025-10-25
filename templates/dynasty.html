@@ -3104,19 +3104,40 @@ function createAnimationMap2004(ampatuan2004, flagData) {
         <div id="leafletMap" style="width: 100%; height: 600px; border: 1px solid #ddd; border-radius: 8px;"></div>
     `;
     
-    // Create Leaflet map
+    // Create Leaflet map after DOM is updated
     console.log('🗺️ Creating Leaflet map...');
-    createLeafletMap(familySize, flagData);
+    setTimeout(() => {
+        createLeafletMap(familySize, flagData);
+    }, 100);
 }
 
 function createLeafletMap(familySize, flagData) {
+    console.log('🗺️ Initializing Leaflet map...');
+    
+    // Check if Leaflet is available
+    if (typeof L === 'undefined') {
+        console.error('❌ Leaflet is not loaded!');
+        return;
+    }
+    
+    // Check if the map container exists
+    const mapContainer = document.getElementById('leafletMap');
+    if (!mapContainer) {
+        console.error('❌ Leaflet map container not found!');
+        return;
+    }
+    
+    console.log('✅ Leaflet map container found:', mapContainer);
+    
     // Initialize the map centered on the Philippines
     const map = L.map('leafletMap').setView([12.8797, 121.7740], 6);
+    console.log('✅ Leaflet map initialized');
     
     // Add OpenStreetMap tiles
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
         attribution: '© OpenStreetMap contributors'
     }).addTo(map);
+    console.log('✅ OpenStreetMap tiles added');
     
     // Add Philippines GeoJSON
     fetch('/static/data/philippines-provinces.json')
