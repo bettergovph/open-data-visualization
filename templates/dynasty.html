@@ -251,6 +251,7 @@ function toggleMobileMenu() {
                         <a href="#table" class="dynasty-tab-btn" data-tab="table">📊 Table</a>
                         <a href="#poverty" class="dynasty-tab-btn" data-tab="poverty">💰 Poverty</a>
                         <a href="#conflicts" class="dynasty-tab-btn" data-tab="conflicts">⚔️ Conflicts of Interest</a>
+                        <a href="#animation" class="dynasty-tab-btn" data-tab="animation">🎬 Animation</a>
                     </div>
                 
                 <div class="dynasty-tab-content">
@@ -656,6 +657,57 @@ function toggleMobileMenu() {
                             </div>
                         </div>
                     </div>
+
+                    <!-- Animation Tab -->
+                    <div id="tab-animation" class="dynasty-tab-panel">
+                        <div class="dynasty-section">
+                            <h3 class="dynasty-section-title">🎬 Dynasty Animation by Province</h3>
+                            <p class="dynasty-section-desc">Watch political dynasties evolve over time with flags representing family size and location</p>
+                            
+                            <div class="dynasty-controls">
+                                <div class="dynasty-control-group">
+                                    <label for="animationYearFilter">Year:</label>
+                                    <select id="animationYearFilter">
+                                        <option value="all">All Years (Auto)</option>
+                                    </select>
+                                </div>
+                                
+                                <div class="dynasty-control-group">
+                                    <label for="animationSpeed">Speed:</label>
+                                    <select id="animationSpeed">
+                                        <option value="5000">5 seconds</option>
+                                        <option value="10000" selected>10 seconds</option>
+                                        <option value="15000">15 seconds</option>
+                                        <option value="30000">30 seconds</option>
+                                    </select>
+                                </div>
+                                
+                                <button id="startAnimation" class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors">
+                                    ▶️ Start Animation
+                                </button>
+                                
+                                <button id="pauseAnimation" class="px-4 py-2 bg-yellow-600 text-white rounded-lg hover:bg-yellow-700 transition-colors">
+                                    ⏸️ Pause
+                                </button>
+                                
+                                <button id="stopAnimation" class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors">
+                                    ⏹️ Stop
+                                </button>
+                            </div>
+                            
+                            <div class="dynasty-section-content">
+                                <div class="dynasty-chart-container">
+                                    <h4 style="color: #0038A8; margin-bottom: 15px;">🗺️ Philippines Dynasty Map</h4>
+                                    <div id="animationMap" style="width: 100%; height: 600px; border: 1px solid #ddd; border-radius: 8px; background: #f0f8ff; position: relative; overflow: hidden;">
+                                        <div id="animationInfo" style="position: absolute; top: 10px; left: 10px; background: rgba(0,0,0,0.8); color: white; padding: 10px; border-radius: 5px; font-size: 14px;">
+                                            <div>Year: <span id="currentYear">Loading...</span></div>
+                                            <div>Dynasties: <span id="dynastyCount">0</span></div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -727,6 +779,10 @@ function initializeDynastyPage() {
                 } else {
                     console.error('❌ D3.js is NOT available in conflicts tab');
                 }
+            } else if (tabName === 'animation') {
+                // Initialize animation tab
+                console.log('🎬 Animation tab activated');
+                loadAnimationData();
             }
         });
     });
@@ -2945,6 +3001,184 @@ function clearConflictsFilters() {
             </td>
         </tr>
     `;
+}
+
+// Animation Tab Functions
+let animationData = [];
+let currentAnimationYear = null;
+let animationInterval = null;
+let isAnimating = false;
+
+async function loadAnimationData() {
+    console.log('🎬 Loading animation data...');
+    
+    try {
+        // Load dynasty data with years
+        const response = await fetch('/api/dynasty?limit=1000');
+        const data = await response.json();
+        
+        if (data.success) {
+            animationData = data.data;
+            console.log('✅ Animation data loaded:', animationData.length, 'records');
+            
+            // Populate year filter
+            populateAnimationYears();
+            
+            // Set up animation controls
+            setupAnimationControls();
+            
+            // Initialize map
+            initializeAnimationMap();
+        } else {
+            console.error('❌ Error loading animation data:', data.error);
+        }
+    } catch (error) {
+        console.error('❌ Error loading animation data:', error);
+    }
+}
+
+function populateAnimationYears() {
+    const yearFilter = document.getElementById('animationYearFilter');
+    const years = [...new Set(animationData.map(item => item.year).filter(Boolean))].sort();
+    
+    // Clear existing options except "All Years"
+    yearFilter.innerHTML = '<option value="all">All Years (Auto)</option>';
+    
+    years.forEach(year => {
+        const option = document.createElement('option');
+        option.value = year;
+        option.textContent = year;
+        yearFilter.appendChild(option);
+    });
+}
+
+function setupAnimationControls() {
+    document.getElementById('startAnimation').addEventListener('click', startAnimation);
+    document.getElementById('pauseAnimation').addEventListener('click', pauseAnimation);
+    document.getElementById('stopAnimation').addEventListener('click', stopAnimation);
+}
+
+function initializeAnimationMap() {
+    const mapContainer = document.getElementById('animationMap');
+    mapContainer.innerHTML = `
+        <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; color: #666;">
+            <div style="font-size: 2em;">🗺️</div>
+            <div>Click "Start Animation" to begin</div>
+        </div>
+    `;
+}
+
+function startAnimation() {
+    if (isAnimating) return;
+    
+    isAnimating = true;
+    const speed = parseInt(document.getElementById('animationSpeed').value);
+    const yearFilter = document.getElementById('animationYearFilter').value;
+    
+    let years = [];
+    if (yearFilter === 'all') {
+        years = [...new Set(animationData.map(item => item.year).filter(Boolean))].sort();
+    } else {
+        years = [parseInt(yearFilter)];
+    }
+    
+    let currentYearIndex = 0;
+    
+    function animateYear() {
+        if (!isAnimating) return;
+        
+        const year = years[currentYearIndex];
+        showDynastiesForYear(year);
+        
+        currentYearIndex++;
+        if (currentYearIndex >= years.length) {
+            currentYearIndex = 0; // Loop back to start
+        }
+        
+        animationInterval = setTimeout(animateYear, speed);
+    }
+    
+    animateYear();
+}
+
+function pauseAnimation() {
+    isAnimating = false;
+    if (animationInterval) {
+        clearTimeout(animationInterval);
+        animationInterval = null;
+    }
+}
+
+function stopAnimation() {
+    pauseAnimation();
+    initializeAnimationMap();
+    document.getElementById('currentYear').textContent = 'Stopped';
+    document.getElementById('dynastyCount').textContent = '0';
+}
+
+function showDynastiesForYear(year) {
+    const mapContainer = document.getElementById('animationMap');
+    const yearData = animationData.filter(item => item.year === year);
+    
+    // Group by province
+    const provinceGroups = {};
+    yearData.forEach(dynasty => {
+        const province = dynasty.province || 'Unknown';
+        if (!provinceGroups[province]) {
+            provinceGroups[province] = [];
+        }
+        provinceGroups[province].push(dynasty);
+    });
+    
+    // Create map content
+    let mapContent = `
+        <div style="position: relative; width: 100%; height: 100%; background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%);">
+            <div style="position: absolute; top: 20px; left: 20px; background: rgba(0,0,0,0.8); color: white; padding: 15px; border-radius: 8px; font-size: 16px; font-weight: bold;">
+                Year: ${year}
+            </div>
+            <div style="position: absolute; top: 20px; right: 20px; background: rgba(0,0,0,0.8); color: white; padding: 15px; border-radius: 8px; font-size: 16px; font-weight: bold;">
+                Dynasties: ${Object.keys(provinceGroups).length} provinces
+            </div>
+    `;
+    
+    // Add flags for each province
+    Object.entries(provinceGroups).forEach(([province, dynasties], index) => {
+        const x = 50 + (index % 3) * 200; // 3 columns
+        const y = 100 + Math.floor(index / 3) * 150; // Rows
+        
+        dynasties.forEach((dynasty, dynastyIndex) => {
+            const flagSize = Math.max(20, Math.min(80, dynasty.dynasty_count * 2)); // Size based on family count
+            const flagX = x + (dynastyIndex * 30);
+            const flagY = y + (dynastyIndex * 20);
+            
+            mapContent += `
+                <div style="position: absolute; left: ${flagX}px; top: ${flagY}px; z-index: 10;">
+                    <img src="/static/flags/flag_${dynasty.dynasty_id || 'default'}.svg" 
+                         alt="${dynasty.surname}" 
+                         style="width: ${flagSize}px; height: ${flagSize * 0.6}px; border: 2px solid #333; border-radius: 4px; box-shadow: 0 2px 8px rgba(0,0,0,0.3);"
+                         onerror="this.style.display='none'"
+                         title="${dynasty.surname} (${dynasty.dynasty_count} members)"/>
+                    <div style="position: absolute; bottom: -20px; left: 50%; transform: translateX(-50%); font-size: 10px; font-weight: bold; color: #333; text-align: center; white-space: nowrap;">
+                        ${dynasty.surname}
+                    </div>
+                </div>
+            `;
+        });
+        
+        // Add province label
+        mapContent += `
+            <div style="position: absolute; left: ${x}px; top: ${y - 30}px; font-size: 12px; font-weight: bold; color: #333; background: rgba(255,255,255,0.8); padding: 4px 8px; border-radius: 4px;">
+                ${province}
+            </div>
+        `;
+    });
+    
+    mapContent += '</div>';
+    mapContainer.innerHTML = mapContent;
+    
+    // Update info display
+    document.getElementById('currentYear').textContent = year;
+    document.getElementById('dynastyCount').textContent = yearData.length;
 }
 </script>
 
