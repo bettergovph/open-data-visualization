@@ -3099,10 +3099,10 @@ function createAnimationMap2004(ampatuan2004, flagData) {
     console.log('🗺️ Creating plain white map for Animation tab...');
     createPlainWhiteMap().then((mapData) => {
         console.log('🗺️ Map rendering completed, adding flag overlay...');
-        // Add Ampatuan flag overlay after map is fully rendered
+        // Add dynasty flag overlay after map is fully rendered
         setTimeout(() => {
             console.log('🏴 Adding flag overlay after map render...');
-            addAmpatuanFlagOverlay2004(ampatuan2004, flagData, familySize, mapData);
+            addDynastyFlagOverlay(ampatuan2004, flagData, familySize, mapData, 2004);
         }, 500); // Short delay to ensure canvas is ready
     }).catch(error => {
         console.error('❌ Error creating map:', error);
@@ -3174,8 +3174,8 @@ function addAmpatuanFlagOverlay(ampatuan, flagData) {
     console.log('✅ Ampatuan flag added to map at position:', flagX, flagY);
 }
 
-function addAmpatuanFlagOverlay2004(ampatuan2004, flagData, familySize, mapData) {
-    console.log('🏴 Adding Ampatuan 2004 flag overlay sized by family count...');
+function addDynastyFlagOverlay(dynastyMembers, flagData, familySize, mapData, year) {
+    console.log(`🏴 Adding dynasty flag overlay for year ${year}...`);
     
     const mapContainer = document.getElementById('animationMap');
     const canvas = document.getElementById('dynastyHeatmapChart');
@@ -3190,40 +3190,48 @@ function addAmpatuanFlagOverlay2004(ampatuan2004, flagData, familySize, mapData)
         return;
     }
     
-    // Get Ampatuan's province from the dynasty data
-    let ampatuanProvince = null;
-    if (ampatuan2004 && ampatuan2004.length > 0) {
-        ampatuanProvince = ampatuan2004[0].province || ampatuan2004[0].region;
-        console.log('🏴 Ampatuan province from data:', ampatuanProvince);
+    if (!dynastyMembers || dynastyMembers.length === 0) {
+        console.error('❌ No dynasty members provided');
+        return;
+    }
+    
+    // Get dynasty's province from the data
+    let dynastyProvince = null;
+    let dynastySurname = null;
+    if (dynastyMembers && dynastyMembers.length > 0) {
+        dynastyProvince = dynastyMembers[0].province || dynastyMembers[0].region;
+        dynastySurname = dynastyMembers[0].last_name || dynastyMembers[0].surname;
+        console.log(`🏴 Dynasty province from data:`, dynastyProvince);
+        console.log(`🏴 Dynasty surname:`, dynastySurname);
     }
     
     // Find the province in GeoJSON data
     let provinceFeature = null;
-    if (ampatuanProvince && mapData.geoJsonData) {
+    if (dynastyProvince && mapData.geoJsonData) {
         provinceFeature = mapData.geoJsonData.features.find(feature => {
             const provinceName = feature.properties?.NAME_1 || feature.properties?.name || feature.properties?.PROVINCE;
-            return provinceName && provinceName.toLowerCase().includes(ampatuanProvince.toLowerCase());
+            return provinceName && provinceName.toLowerCase().includes(dynastyProvince.toLowerCase());
         });
         
         if (provinceFeature) {
-            console.log('🗺️ Found Ampatuan province in GeoJSON:', provinceFeature.properties);
+            console.log('🗺️ Found dynasty province in GeoJSON:', provinceFeature.properties);
         } else {
-            console.log('⚠️ Ampatuan province not found in GeoJSON, using fallback position');
+            console.log('⚠️ Dynasty province not found in GeoJSON, using fallback position');
         }
     }
     
-    // Find Ampatuan's flag
+    // Find dynasty's flag
     let flagUrl = '/static/flags/flag_default.svg';
-    if (flagData && flagData.dynasties) {
-        // Try to find Ampatuan's flag
-        const ampatuanKey = Object.keys(flagData.dynasties).find(key => 
-            key.toLowerCase().includes('ampatuan')
+    if (flagData && flagData.dynasties && dynastySurname) {
+        // Try to find dynasty's flag by surname
+        const dynastyKey = Object.keys(flagData.dynasties).find(key => 
+            key.toLowerCase().includes(dynastySurname.toLowerCase())
         );
         
-        if (ampatuanKey) {
-            const dynastyInfo = flagData.dynasties[ampatuanKey];
+        if (dynastyKey) {
+            const dynastyInfo = flagData.dynasties[dynastyKey];
             flagUrl = `/static/flags/flag_${dynastyInfo.dynasty_id}.svg`;
-            console.log('🏴 Found Ampatuan flag:', flagUrl);
+            console.log('🏴 Found dynasty flag:', flagUrl);
         }
     }
     
@@ -3287,11 +3295,11 @@ function addAmpatuanFlagOverlay2004(ampatuan2004, flagData, familySize, mapData)
     flagOverlay.innerHTML = `
         <div style="display: flex; flex-direction: column; align-items: center;">
             <img src="${flagUrl}" 
-                 alt="Ampatuan Flag (2004)" 
+                 alt="${dynastySurname} Flag (${year})" 
                  style="width: ${flagWidth}px; height: ${flagHeight}px; border: 3px solid #000; border-radius: 4px; box-shadow: 0 4px 12px rgba(0,0,0,0.7);"
                  onerror="this.style.display='none'"/>
             <div style="font-size: 12px; font-weight: bold; color: #000; text-align: center; margin-top: 4px; background: rgba(255,255,255,0.9); padding: 4px 8px; border-radius: 4px; border: 1px solid #000;">
-                Ampatuan (2004)
+                ${dynastySurname} (${year})
             </div>
             <div style="font-size: 10px; color: #666; text-align: center; margin-top: 2px; background: rgba(255,255,255,0.8); padding: 2px 6px; border-radius: 3px;">
                 ${familySize} members
@@ -3300,7 +3308,7 @@ function addAmpatuanFlagOverlay2004(ampatuan2004, flagData, familySize, mapData)
     `;
     
     mapContainer.appendChild(flagOverlay);
-    console.log('✅ Ampatuan 2004 flag added to map at position:', flagX, flagY, 'with size:', flagWidth, 'x', flagHeight);
+    console.log(`✅ ${dynastySurname} ${year} flag added to map at position:`, flagX, flagY, 'with size:', flagWidth, 'x', flagHeight);
 }
 
 function initializeAnimationMap() {
