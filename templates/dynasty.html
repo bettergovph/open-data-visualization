@@ -14,11 +14,10 @@
 
     <script src="/static/js/chart.js"></script>
     <script src="https://d3js.org/d3.v7.min.js"></script>
-    <script src="/static/js/dynasty-flags.js"></script>
-
-    <!-- Leaflet for maps -->
+    <!-- Leaflet for map rendering -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="/static/js/dynasty-flags.js"></script>
 
     <!-- Cache Control -->
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
@@ -3100,25 +3099,103 @@ function createAnimationMap2004(ampatuan2004, flagData) {
     const familySize = ampatuan2004.length;
     console.log('👥 Ampatuan 2004 family size:', familySize);
     
-    // Clear the container and add the animation canvas
+    // Clear the container and add Leaflet map
     mapContainer.innerHTML = `
-        <div style="height: calc(100% - 80px); position: relative;">
-            <canvas id="animationMapCanvas" style="cursor: pointer; width: 100%; height: 100%;"></canvas>
-        </div>
+        <div id="leafletMap" style="width: 100%; height: 600px; border: 1px solid #ddd; border-radius: 8px;"></div>
     `;
     
-    // Create the animation map first
-    console.log('🗺️ Creating animation map...');
-    createAnimationMap().then((mapData) => {
-        console.log('🗺️ Animation map created, adding flag overlay...');
-        // Add dynasty flag overlay after map is fully rendered
-        setTimeout(() => {
-            console.log('🏴 Adding flag overlay after map render...');
-            addDynastyFlagOverlay(ampatuan2004, flagData, familySize, mapData, 2004);
-        }, 1000); // Wait longer to ensure map is fully rendered
-    }).catch(error => {
-        console.error('❌ Error creating animation map:', error);
+    // Create Leaflet map
+    console.log('🗺️ Creating Leaflet map...');
+    createLeafletMap(familySize, flagData);
+}
+
+function createLeafletMap(familySize, flagData) {
+    // Initialize the map centered on the Philippines
+    const map = L.map('leafletMap').setView([12.8797, 121.7740], 6);
+    
+    // Add OpenStreetMap tiles
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '© OpenStreetMap contributors'
+    }).addTo(map);
+    
+    // Add Philippines GeoJSON
+    fetch('/static/data/philippines-provinces.json')
+        .then(response => response.json())
+        .then(geojson => {
+            // Add province boundaries
+            L.geoJSON(geojson, {
+                style: {
+                    fillColor: '#ffffff',
+                    weight: 2,
+                    opacity: 1,
+                    color: '#000000',
+                    dashArray: '0',
+                    fillOpacity: 0.1
+                }
+            }).addTo(map);
+            
+            // Add Ampatuan flag marker
+            addAmpatuanFlagMarker(map, familySize, flagData);
+        })
+        .catch(error => {
+            console.error('❌ Error loading GeoJSON:', error);
+        });
+}
+
+function addAmpatuanFlagMarker(map, familySize, flagData) {
+    // Maguindanao coordinates (approximate center)
+    const maguindanaoLng = 124.3;
+    const maguindanaoLat = 7.1;
+    
+    // Calculate flag size based on family member count
+    const baseSize = 30;
+    const sizeMultiplier = Math.max(1, Math.min(3, familySize / 5));
+    const flagSize = Math.round(baseSize * sizeMultiplier);
+    
+    console.log('🏴 Adding Ampatuan flag marker at:', maguindanaoLat, maguindanaoLng);
+    console.log('📏 Flag size:', flagSize, 'px (family size:', familySize, ')');
+    
+    // Create custom flag icon
+    const flagIcon = L.divIcon({
+        html: `
+            <div style="
+                width: ${flagSize}px; 
+                height: ${flagSize}px; 
+                background: #ff0000; 
+                border: 3px solid #000; 
+                border-radius: 8px; 
+                display: flex; 
+                align-items: center; 
+                justify-content: center; 
+                font-weight: bold; 
+                color: white; 
+                text-shadow: 1px 1px 2px rgba(0,0,0,0.8);
+                box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+            ">
+                AMP
+            </div>
+        `,
+        className: 'custom-flag-icon',
+        iconSize: [flagSize, flagSize],
+        iconAnchor: [flagSize/2, flagSize/2]
     });
+    
+    // Add marker to map
+    const marker = L.marker([maguindanaoLat, maguindanaoLng], { icon: flagIcon })
+        .addTo(map);
+    
+    // Add popup with dynasty info
+    marker.bindPopup(`
+        <div style="text-align: center;">
+            <h3 style="margin: 0 0 8px 0; color: #0038A8;">🏴 AMPATUAN Dynasty</h3>
+            <p style="margin: 0 0 4px 0;"><strong>Year:</strong> 2004</p>
+            <p style="margin: 0 0 4px 0;"><strong>Members:</strong> ${familySize}</p>
+            <p style="margin: 0 0 4px 0;"><strong>Province:</strong> Maguindanao</p>
+            <p style="margin: 0; font-size: 12px; color: #666;">Flag size represents family size</p>
+        </div>
+    `);
+    
+    console.log('✅ Ampatuan flag marker added to Leaflet map');
 }
 
 function addAmpatuanFlagOverlay(ampatuan, flagData) {
