@@ -1205,19 +1205,20 @@ function createSurnamesChart(data, flagData = null) {
                             }
                             
                             if (dynastyInfo && dynastyInfo.flag_parameters) {
-                                const flag = flagGenerator.createFlagFromParameters(dynastyInfo.flag_parameters);
+                                // Use static flag image instead of generating dynamically
+                                const flagUrl = `/static/flags/flag_${dynastyInfo.dynasty_id}.svg`;
                                 
                                 tooltipContent += `
                                     <div style="margin-top: 12px; padding-top: 8px; border-top: 1px solid rgba(255,255,255,0.2);">
                                         <div style="font-weight: bold; margin-bottom: 8px;">🏴 Dynasty Flag</div>
                                         <div style="display: flex; align-items: center; gap: 12px;">
-                                            <div style="flex-shrink: 0;">${flag.svg.outerHTML}</div>
+                                            <div style="flex-shrink: 0;">
+                                                <img src="${flagUrl}" alt="Dynasty Flag" style="width: 60px; height: 36px; border: 1px solid #ddd; border-radius: 4px;" onerror="this.style.display='none'"/>
+                                            </div>
                                             <div style="font-size: 11px; line-height: 1.4;">
                                                 <div>ID: ${dynastyInfo.dynasty_id}</div>
                                                 <div>📍 ${dynastyInfo.location_display}</div>
-                                                <div>🎨 ${flag.slices} slices, ${flag.shape}</div>
-                                                <div>📐 ${flag.orientation}</div>
-                                                ${flag.symbol !== 'None' ? `<div>🔮 ${flag.symbol}</div>` : ''}
+                                                <div>👥 ${dynastyInfo.member_count} members</div>
                                             </div>
                                         </div>
                                     </div>
