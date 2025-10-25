@@ -3133,6 +3133,10 @@ function showDynastiesForYear(year) {
     const mapContainer = document.getElementById('animationMap');
     const yearData = animationData.filter(item => item.year === year);
     
+    console.log('🎬 Showing dynasties for year:', year);
+    console.log('📊 Year data:', yearData);
+    console.log('📊 Sample dynasty:', yearData[0]);
+    
     // Group by province
     const provinceGroups = {};
     yearData.forEach(dynasty => {
@@ -3160,21 +3164,24 @@ function showDynastiesForYear(year) {
         const y = 100 + Math.floor(index / 3) * 150; // Rows
         
         dynasties.forEach((dynasty, dynastyIndex) => {
-            const flagSize = Math.max(20, Math.min(80, dynasty.dynasty_count * 2)); // Size based on family count
+            // Add safety checks for undefined values
+            const surname = dynasty.surname || dynasty.last_name || 'Unknown';
+            const dynastyCount = dynasty.dynasty_count || dynasty.member_count || 1;
+            const flagSize = Math.max(20, Math.min(80, dynastyCount * 2)); // Size based on family count
             const flagX = x + (dynastyIndex * 30);
             const flagY = y + (dynastyIndex * 20);
             
             // Generate a simple flag if no dynasty_id
-            const flagId = dynasty.dynasty_id || `generated_${dynasty.surname}_${dynasty.province}`.replace(/\s+/g, '_');
+            const flagId = dynasty.dynasty_id || `generated_${surname}_${dynasty.province}`.replace(/\s+/g, '_');
             
             mapContent += `
                 <div style="position: absolute; left: ${flagX}px; top: ${flagY}px; z-index: 10;">
                     <div style="width: ${flagSize}px; height: ${flagSize * 0.6}px; border: 2px solid #333; border-radius: 4px; box-shadow: 0 2px 8px rgba(0,0,0,0.3); background: linear-gradient(45deg, #${Math.floor(Math.random()*16777215).toString(16).padStart(6,'0')}, #${Math.floor(Math.random()*16777215).toString(16).padStart(6,'0')}); display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; font-size: 10px;"
-                         title="${dynasty.surname} (${dynasty.dynasty_count} members)">
-                        ${dynasty.surname.substring(0, 3).toUpperCase()}
+                         title="${surname} (${dynastyCount} members)">
+                        ${surname.substring(0, 3).toUpperCase()}
                     </div>
                     <div style="position: absolute; bottom: -20px; left: 50%; transform: translateX(-50%); font-size: 10px; font-weight: bold; color: #333; text-align: center; white-space: nowrap;">
-                        ${dynasty.surname}
+                        ${surname}
                     </div>
                 </div>
             `;
