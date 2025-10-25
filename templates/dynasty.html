@@ -14,6 +14,7 @@
 
     <script src="/static/js/chart.js"></script>
     <script src="https://d3js.org/d3.v7.min.js"></script>
+    <script src="/static/js/dynasty-flags.js"></script>
 
     <!-- Leaflet for maps -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
@@ -1038,7 +1039,18 @@ async function loadSurnamesChart() {
 
         if (data.success) {
             console.log('✅ Dynasty data loaded successfully, creating charts...');
-            createSurnamesChart(data.data);
+            
+            // Load dynasty flags
+            let flagData = null;
+            try {
+                const flagResponse = await fetch('/static/data/dynasty_flags_cache.json');
+                flagData = await flagResponse.json();
+                console.log('🏴 Dynasty flags loaded:', flagData.summary.total_dynasties);
+            } catch (error) {
+                console.log('⚠️ Dynasty flags not available:', error);
+            }
+            
+            createSurnamesChart(data.data, flagData);
             // Create the dynasty heatmap
             console.log('🗺️ Creating dynasty heatmap...');
             createDynastyHeatmap(data.data);
@@ -1054,12 +1066,19 @@ async function loadSurnamesChart() {
     }
 }
 
-function createSurnamesChart(data) {
+function createSurnamesChart(data, flagData = null) {
     const ctx = document.getElementById('topSurnamesChart').getContext('2d');
     
     // Destroy existing chart if it exists
     if (window.surnamesChart) {
         window.surnamesChart.destroy();
+    }
+    
+    // Initialize flag generator if flag data is available
+    let flagGenerator = null;
+    if (flagData && typeof DynastyFlagGenerator !== 'undefined') {
+        flagGenerator = new DynastyFlagGenerator();
+        console.log('🏴 Flag generator initialized');
     }
     
         // Store data globally for consistent access
@@ -1151,10 +1170,24 @@ function createSurnamesChart(data) {
                                 (window.dynastyCurrentPage + 1) * window.dynastyPageSize
                             );
                             const item = pageData[dataIndex];
-                            return [
+                            
+                            let tooltipLines = [
                                 `Province: ${item.province}`,
                                 `Click to view family details`
                             ];
+                            
+                            // Add flag information if available
+                            if (flagData && flagGenerator) {
+                                const locationKey = `${item.surname}_${item.province}_${item.municipality_city || ''}`;
+                                const dynastyInfo = flagData.dynasties[locationKey];
+                                if (dynastyInfo) {
+                                    const flag = flagGenerator.generateFlag(dynastyInfo.dynasty_id, item.surname);
+                                    tooltipLines.push(`🏴 Dynasty Flag ID: ${dynastyInfo.dynasty_id}`);
+                                    tooltipLines.push(`📍 Location: ${dynastyInfo.location_display}`);
+                                }
+                            }
+                            
+                            return tooltipLines;
                         }
                     }
                 }
