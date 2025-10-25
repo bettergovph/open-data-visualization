@@ -3097,12 +3097,12 @@ function createAnimationMap2004(ampatuan2004, flagData) {
     
     // Create a plain white map for Animation tab
     console.log('🗺️ Creating plain white map for Animation tab...');
-    createPlainWhiteMap().then(() => {
+    createPlainWhiteMap().then((mapData) => {
         console.log('🗺️ Map rendering completed, adding flag overlay...');
         // Add Ampatuan flag overlay after map is fully rendered
         setTimeout(() => {
             console.log('🏴 Adding flag overlay after map render...');
-            addAmpatuanFlagOverlay2004(ampatuan2004, flagData, familySize);
+            addAmpatuanFlagOverlay2004(ampatuan2004, flagData, familySize, mapData);
         }, 500); // Short delay to ensure canvas is ready
     }).catch(error => {
         console.error('❌ Error creating map:', error);
@@ -3174,7 +3174,7 @@ function addAmpatuanFlagOverlay(ampatuan, flagData) {
     console.log('✅ Ampatuan flag added to map at position:', flagX, flagY);
 }
 
-function addAmpatuanFlagOverlay2004(ampatuan2004, flagData, familySize) {
+function addAmpatuanFlagOverlay2004(ampatuan2004, flagData, familySize, mapData) {
     console.log('🏴 Adding Ampatuan 2004 flag overlay sized by family count...');
     
     const mapContainer = document.getElementById('animationMap');
@@ -3185,14 +3185,32 @@ function addAmpatuanFlagOverlay2004(ampatuan2004, flagData, familySize) {
         return;
     }
     
-    // Get canvas position and size
-    const rect = canvas.getBoundingClientRect();
-    const mapRect = mapContainer.getBoundingClientRect();
+    if (!mapData) {
+        console.error('❌ Map data not available');
+        return;
+    }
     
-    console.log('📐 Canvas rect:', rect);
-    console.log('📐 Map container rect:', mapRect);
-    console.log('📐 Canvas dimensions:', canvas.width, 'x', canvas.height);
-    console.log('📐 Canvas offsetWidth/Height:', canvas.offsetWidth, 'x', canvas.offsetHeight);
+    // Get Ampatuan's province from the dynasty data
+    let ampatuanProvince = null;
+    if (ampatuan2004 && ampatuan2004.length > 0) {
+        ampatuanProvince = ampatuan2004[0].province || ampatuan2004[0].region;
+        console.log('🏴 Ampatuan province from data:', ampatuanProvince);
+    }
+    
+    // Find the province in GeoJSON data
+    let provinceFeature = null;
+    if (ampatuanProvince && mapData.geoJsonData) {
+        provinceFeature = mapData.geoJsonData.features.find(feature => {
+            const provinceName = feature.properties?.NAME_1 || feature.properties?.name || feature.properties?.PROVINCE;
+            return provinceName && provinceName.toLowerCase().includes(ampatuanProvince.toLowerCase());
+        });
+        
+        if (provinceFeature) {
+            console.log('🗺️ Found Ampatuan province in GeoJSON:', provinceFeature.properties);
+        } else {
+            console.log('⚠️ Ampatuan province not found in GeoJSON, using fallback position');
+        }
+    }
     
     // Find Ampatuan's flag
     let flagUrl = '/static/flags/flag_default.svg';
@@ -3209,17 +3227,41 @@ function addAmpatuanFlagOverlay2004(ampatuan2004, flagData, familySize) {
         }
     }
     
-    // Use canvas dimensions for positioning, fallback to container if canvas is 0
-    const canvasWidth = canvas.width || canvas.offsetWidth || mapRect.width;
-    const canvasHeight = canvas.height || canvas.offsetHeight || mapRect.height;
+    // Calculate flag position
+    let flagX, flagY;
     
-    console.log('📐 Using canvas dimensions:', canvasWidth, 'x', canvasHeight);
+    if (provinceFeature) {
+        // Calculate center of the province
+        const coordinates = provinceFeature.geometry.coordinates;
+        let totalLat = 0, totalLng = 0, pointCount = 0;
+        
+        coordinates.forEach(polygon => {
+            polygon.forEach(ring => {
+                ring.forEach(coord => {
+                    const [lng, lat] = coord;
+                    totalLng += lng;
+                    totalLat += lat;
+                    pointCount++;
+                });
+            });
+        });
+        
+        const centerLng = totalLng / pointCount;
+        const centerLat = totalLat / pointCount;
+        
+        // Convert to canvas coordinates
+        flagX = mapData.offsetX + (centerLng - mapData.bounds.minLng) * mapData.scale;
+        flagY = mapData.offsetY + (mapData.bounds.maxLat - centerLat) * mapData.scale;
+        
+        console.log('📍 Province center coordinates:', { centerLng, centerLat });
+        console.log('📍 Flag position from province center:', flagX, flagY);
+    } else {
+        // Fallback: position in center-right area (where Maguindanao would be)
+        flagX = mapData.width * 0.7; // 70% from left
+        flagY = mapData.height * 0.6; // 60% from top
+        console.log('📍 Flag position (fallback):', flagX, flagY);
+    }
     
-    // Position flag in the center-right area of the map (where Maguindanao would be)
-    const flagX = canvasWidth * 0.7; // 70% from left
-    const flagY = canvasHeight * 0.6; // 60% from top
-    
-    console.log('📍 Flag position:', flagX, flagY);
     console.log('👥 Family size for flag sizing:', familySize);
     
     // Calculate flag size based on family member count
@@ -3348,6 +3390,17 @@ function createPlainWhiteMap() {
             console.log('📐 Plain white map bounds:', { minLat, maxLat, minLng, maxLng });
             console.log('📐 Plain white map scale:', scale, 'offset:', offsetX, offsetY);
 
+            // Store map data for flag positioning
+            const mapData = {
+                geoJsonData: geoJsonData,
+                bounds: { minLat, maxLat, minLng, maxLng },
+                scale: scale,
+                offsetX: offsetX,
+                offsetY: offsetY,
+                width: width,
+                height: height
+            };
+
             // Draw all provinces with plain white fill and dark borders
             geoJsonData.features.forEach(feature => {
                 if (feature.geometry.type === 'MultiPolygon') {
@@ -3381,7 +3434,7 @@ function createPlainWhiteMap() {
             ctx.stroke();
 
             console.log('✅ Plain white map created successfully');
-            return true; // Return success
+            return mapData; // Return map data for flag positioning
         })
         .catch(error => {
             console.error('❌ Error loading GeoJSON for plain white map:', error);
