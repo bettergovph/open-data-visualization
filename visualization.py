@@ -3201,8 +3201,8 @@ async def get_contractor_projects_frontend(contractor_name: str):
     except Exception as e:
         return JSONResponse({"success": False, "error": str(e)})
 
-@app.get("/api/dynasty/conflicts")
-async def dynasty_conflicts_api(
+@app.get("/api/dynasty/relationship-chains")
+async def dynasty_relationship_chains_api(
     chain_length: int = Query(3, ge=2, le=10, description="Minimum chain length to find"),
     max_chains: int = Query(20, ge=1, le=100, description="Maximum number of chains to return")
 ):

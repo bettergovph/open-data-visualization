@@ -2713,7 +2713,7 @@ function loadConflictsData() {
     console.log('✅ D3.js is available:', d3.version);
     
     // Fetch conflicts data
-    fetch(`/api/dynasty/conflicts?chain_length=${chainLength}&max_chains=${maxChains}`)
+    fetch(`/api/dynasty/relationship-chains?chain_length=${chainLength}&max_chains=${maxChains}`)
         .then(response => {
             console.log('📡 API Response status:', response.status);
             return response.json();
