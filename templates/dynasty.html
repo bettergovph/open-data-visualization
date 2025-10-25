@@ -3245,9 +3245,9 @@ function addDynastyFlagOverlay(dynastyMembers, flagData, familySize, mapData, ye
     console.log('👥 Family size for flag sizing:', familySize);
     
     // Calculate flag size based on family member count
-    // Base size: 50px width, scale up with family size
-    const baseWidth = 50;
-    const baseHeight = 30;
+    // Base size: 100px width, scale up with family size
+    const baseWidth = 100;
+    const baseHeight = 60;
     const sizeMultiplier = Math.max(1, Math.min(3, familySize / 5)); // Scale 1x to 3x based on family size
     const flagWidth = Math.round(baseWidth * sizeMultiplier);
     const flagHeight = Math.round(baseHeight * sizeMultiplier);
@@ -3268,7 +3268,7 @@ function addDynastyFlagOverlay(dynastyMembers, flagData, familySize, mapData, ye
         <div style="display: flex; flex-direction: column; align-items: center;">
             <img src="${flagUrl}" 
                  alt="${dynastySurname} Flag (${year})" 
-                 style="width: ${flagWidth}px; height: ${flagHeight}px; border: 3px solid #000; border-radius: 4px; box-shadow: 0 4px 12px rgba(0,0,0,0.7);"
+                 style="width: ${flagWidth}px; height: ${flagHeight}px; border: 4px solid #ff0000; border-radius: 8px; box-shadow: 0 6px 20px rgba(255,0,0,0.8); background: white;"
                  onerror="this.style.display='none'"/>
             <div style="font-size: 12px; font-weight: bold; color: #000; text-align: center; margin-top: 4px; background: rgba(255,255,255,0.9); padding: 4px 8px; border-radius: 4px; border: 1px solid #000;">
                 ${dynastySurname} (${year})
