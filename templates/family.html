@@ -11,9 +11,9 @@
         body {
             font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
         }
-        .bg-primary { background-color: #0038A8; }
+        .bg-blue-800 { background-color: #0038A8; }
         .text-primary { color: #0038A8; }
-        .border-primary { border-color: #0038A8; }
+        .border-blue-800 { border-color: #0038A8; }
         
         /* Hierarchy Chart Styles */
         .hierarchy-node {
@@ -65,10 +65,9 @@
     </style>
 </head>
 <body class="bg-gray-50">
-    <!-- Navigation -->
-    <nav class="bg-white shadow-lg">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex justify-between h-16">
+    <!-- Navigation - BetterGov Theme -->
+    <nav class="visualizations-nav py-4 px-6 bg-white border-b border-gray-200">
+        <div class="max-w-7xl mx-auto flex items-center justify-between">
                 <div class="flex items-center">
                     <a href="https://bettergov.ph" class="flex items-center">
                         <img src="https://raw.githubusercontent.com/bettergovph/logo/main/png/BetterGov_Horizontal-Black.png"
@@ -78,13 +77,13 @@
                     </a>
                     <a href="/" class="text-xl font-bold text-black hover:text-gray-600">Data Visualizations</a>
                 </div>
-                <div class="hidden md:flex items-center space-x-4">
+                <div class="hidden md:flex space-x-6">
+                    <a href="/nep" class="text-black hover:text-gray-600 font-medium transition">NEP</a>
                     <a href="/budget" class="text-black hover:text-gray-600 font-medium transition">Budget</a>
                     <a href="/flood" class="text-black hover:text-gray-600 font-medium transition">Flood Control</a>
                     <a href="/dime" class="text-black hover:text-gray-600 font-medium transition">DIME</a>
-                    <a href="/nep" class="text-black hover:text-gray-600 font-medium transition">NEP</a>
                     <a href="/map" class="text-black hover:text-gray-600 font-medium transition">Map</a>
-                    <a href="/contractors" class="text-black hover:text-gray-600 font-medium transition">Contractors</a>
+                    <a href="/contractors" class="text-black hover:text-gray-600 font-medium transition">PhilGEPS</a>
                     <a href="/dynasty" class="text-black hover:text-gray-600 font-medium transition border-b-2 border-black">Dynasties</a>
                     <div class="relative" onmouseenter="this.querySelector('.dropdown-menu').classList.remove('hidden')" onmouseleave="this.querySelector('.dropdown-menu').classList.add('hidden')">
                         <a href="/correlation" class="text-black hover:text-gray-600 font-medium transition">Correlation ▾</a>
@@ -112,7 +111,7 @@
             <a href="/dime" class="block text-black hover:text-gray-600 font-medium py-2">DIME</a>
             <a href="/nep" class="block text-black hover:text-gray-600 font-medium py-2">NEP</a>
             <a href="/map" class="block text-black hover:text-gray-600 font-medium py-2">Map</a>
-            <a href="/contractors" class="block text-black hover:text-gray-600 font-medium py-2">Contractors</a>
+            <a href="/contractors" class="block text-black hover:text-gray-600 font-medium py-2">PhilGEPS</a>
             <a href="/dynasty" class="block text-black hover:text-gray-600 font-medium py-2 border-b-2 border-black">Dynasties</a>
             <a href="/correlation" class="block text-black hover:text-gray-600 font-medium py-2">Correlation</a>
             <a href="/budget-nep-correlation" class="block text-black hover:text-gray-600 font-medium py-2 pl-4">→ NEP-Budget</a>
@@ -132,29 +131,29 @@ function toggleMobileMenu() {
     <div class="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
         <div class="bg-white shadow rounded-lg p-6">
             <div class="text-center mb-8">
-                <h1 class="text-4xl font-bold text-primary mb-4">👑 {{ surname }} Family</h1>
+                <h1 class="text-4xl font-bold text-blue-800 mb-4">👑 {{ surname }} Family</h1>
                 <p class="text-gray-600 text-lg">Political Dynasty Details</p>
             </div>
 
             <!-- Family Information -->
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
                 <div class="bg-blue-50 p-6 rounded-lg text-center">
-                    <div class="text-3xl font-bold text-primary mb-2">👥</div>
+                    <div class="text-3xl font-bold text-blue-800 mb-2">👥</div>
                     <h3 class="text-lg font-semibold text-gray-800">Family Members</h3>
-                    <p class="text-2xl font-bold text-primary" id="familyCount">Loading...</p>
+                    <p class="text-2xl font-bold text-blue-800" id="familyCount">Loading...</p>
                 </div>
                 
                 <div class="bg-green-50 p-6 rounded-lg text-center">
-                    <div class="text-3xl font-bold text-primary mb-2">🏛️</div>
+                    <div class="text-3xl font-bold text-blue-800 mb-2">🏛️</div>
                     <h3 class="text-lg font-semibold text-gray-800">Positions Held</h3>
-                    <p class="text-2xl font-bold text-primary" id="positionsCount">Loading...</p>
+                    <p class="text-2xl font-bold text-blue-800" id="positionsCount">Loading...</p>
                     <p class="text-sm text-gray-600" id="uniquePositionsCount">Loading...</p>
                 </div>
                 
                 <div class="bg-yellow-50 p-6 rounded-lg text-center">
-                    <div class="text-3xl font-bold text-primary mb-2">📍</div>
+                    <div class="text-3xl font-bold text-blue-800 mb-2">📍</div>
                     <h3 class="text-lg font-semibold text-gray-800">Towns/Cities</h3>
-                    <p class="text-2xl font-bold text-primary" id="provincesCount">Loading...</p>
+                    <p class="text-2xl font-bold text-blue-800" id="provincesCount">Loading...</p>
                 </div>
                 
                 <div class="bg-gray-50 p-6 rounded-lg text-center cursor-pointer hover:bg-gray-100 transition-colors" onclick="showNonDynastyMembers()">
@@ -170,7 +169,7 @@ function toggleMobileMenu() {
                 <div class="flex items-center justify-between mb-4">
                     <h2 class="text-2xl font-bold text-gray-800">Family Political Hierarchy</h2>
                     <div class="flex space-x-2">
-                        <button id="toggleView" class="px-4 py-2 bg-primary text-white rounded-lg hover:bg-blue-700 transition-colors">
+                        <button id="toggleView" class="px-4 py-2 bg-blue-800 text-white rounded-lg hover:bg-blue-700 transition-colors">
                             <i class="fas fa-sitemap mr-2"></i>Org Chart
                         </button>
                         <button id="toggleTable" class="px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition-colors">
@@ -185,7 +184,7 @@ function toggleMobileMenu() {
                 <!-- Hierarchy Chart Container (Default visible) -->
                 <div id="hierarchyChart" class="bg-white border border-gray-200 rounded-lg p-6 min-h-96 overflow-auto">
                     <div class="text-center py-8">
-                        <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto"></div>
+                        <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-800 mx-auto"></div>
                         <p class="mt-2 text-gray-500">Loading hierarchy chart...</p>
                         <p class="text-sm mt-2 text-gray-400">Use mouse wheel to zoom, drag to pan</p>
                     </div>
@@ -210,7 +209,7 @@ function toggleMobileMenu() {
                                 <tr>
                                     <td colspan="4" class="px-6 py-4 text-center text-gray-500">
                                         <div class="flex items-center justify-center">
-                                            <div class="animate-spin rounded-full h-6 w-6 border-b-2 border-primary"></div>
+                                            <div class="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-800"></div>
                                             <span class="ml-2">Loading family data...</span>
                                         </div>
                                     </td>
@@ -238,7 +237,7 @@ function toggleMobileMenu() {
                     </div>
                     <div id="yearChart" class="min-h-96 overflow-auto">
                         <div class="text-center py-8">
-                            <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto"></div>
+                            <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-800 mx-auto"></div>
                             <p class="mt-2 text-gray-500">Loading year view...</p>
                         </div>
                     </div>
@@ -247,7 +246,7 @@ function toggleMobileMenu() {
 
             <!-- Back to Dynasty Map -->
             <div class="text-center">
-                <a href="/dynasty" class="inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-md text-white bg-primary hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary">
+                <a href="/dynasty" class="inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-md text-white bg-blue-800 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary">
                     <i class="fas fa-arrow-left mr-2"></i>
                     Back to Dynasty Map
                 </a>
@@ -1217,26 +1216,26 @@ function toggleMobileMenu() {
             yearContainer.classList.add('hidden');
             
             // Reset all buttons
-            toggleViewBtn.classList.remove('bg-primary');
+            toggleViewBtn.classList.remove('bg-blue-800');
             toggleViewBtn.classList.add('bg-gray-500');
-            toggleTableBtn.classList.remove('bg-primary');
+            toggleTableBtn.classList.remove('bg-blue-800');
             toggleTableBtn.classList.add('bg-gray-500');
-            toggleYearBtn.classList.remove('bg-primary');
+            toggleYearBtn.classList.remove('bg-blue-800');
             toggleYearBtn.classList.add('bg-gray-500');
             
             // Show selected container and update button
             if (view === 'chart') {
                 chartContainer.classList.remove('hidden');
                 toggleViewBtn.classList.remove('bg-gray-500');
-                toggleViewBtn.classList.add('bg-primary');
+                toggleViewBtn.classList.add('bg-blue-800');
             } else if (view === 'table') {
                 tableContainer.classList.remove('hidden');
                 toggleTableBtn.classList.remove('bg-gray-500');
-                toggleTableBtn.classList.add('bg-primary');
+                toggleTableBtn.classList.add('bg-blue-800');
             } else if (view === 'year') {
                 yearContainer.classList.remove('hidden');
                 toggleYearBtn.classList.remove('bg-gray-500');
-                toggleYearBtn.classList.add('bg-primary');
+                toggleYearBtn.classList.add('bg-blue-800');
                 // Initialize year view if not already done
                 if (!window.yearViewInitialized) {
                     initializeYearView();
