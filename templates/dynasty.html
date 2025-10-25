@@ -3094,15 +3094,15 @@ function createAnimationMap2004(ampatuan2004, flagData) {
         </div>
     `;
     
-    // Create the same heatmap as Visual tab but with Ampatuan flag overlay
-    console.log('🗺️ Calling createDynastyHeatmap with data:', animationData.length, 'records');
-    createDynastyHeatmap(animationData);
+    // Create a simple map background for the Animation tab
+    console.log('🗺️ Creating simple map background...');
+    createSimpleMapBackground();
     
-    // Add Ampatuan flag overlay after heatmap is created, sized by family count
+    // Add Ampatuan flag overlay after map is created
     setTimeout(() => {
-        console.log('🏴 Adding flag overlay after heatmap render...');
+        console.log('🏴 Adding flag overlay after map render...');
         addAmpatuanFlagOverlay2004(ampatuan2004, flagData, familySize);
-    }, 2000); // Wait longer for heatmap to render
+    }, 1000); // Wait for map to render
 }
 
 function addAmpatuanFlagOverlay(ampatuan, flagData) {
@@ -3187,6 +3187,8 @@ function addAmpatuanFlagOverlay2004(ampatuan2004, flagData, familySize) {
     
     console.log('📐 Canvas rect:', rect);
     console.log('📐 Map container rect:', mapRect);
+    console.log('📐 Canvas dimensions:', canvas.width, 'x', canvas.height);
+    console.log('📐 Canvas offsetWidth/Height:', canvas.offsetWidth, 'x', canvas.offsetHeight);
     
     // Find Ampatuan's flag
     let flagUrl = '/static/flags/flag_default.svg';
@@ -3203,9 +3205,15 @@ function addAmpatuanFlagOverlay2004(ampatuan2004, flagData, familySize) {
         }
     }
     
+    // Use canvas dimensions for positioning, fallback to container if canvas is 0
+    const canvasWidth = canvas.width || canvas.offsetWidth || mapRect.width;
+    const canvasHeight = canvas.height || canvas.offsetHeight || mapRect.height;
+    
+    console.log('📐 Using canvas dimensions:', canvasWidth, 'x', canvasHeight);
+    
     // Position flag in the center-right area of the map (where Maguindanao would be)
-    const flagX = rect.width * 0.7; // 70% from left
-    const flagY = rect.height * 0.6; // 60% from top
+    const flagX = canvasWidth * 0.7; // 70% from left
+    const flagY = canvasHeight * 0.6; // 60% from top
     
     console.log('📍 Flag position:', flagX, flagY);
     console.log('👥 Family size for flag sizing:', familySize);
@@ -3260,6 +3268,59 @@ function initializeAnimationMap() {
 }
 
 // Removed unused animation control functions
+
+function createSimpleMapBackground() {
+    console.log('🗺️ Creating simple map background...');
+    
+    const canvas = document.getElementById('dynastyHeatmapChart');
+    if (!canvas) {
+        console.error('❌ Canvas not found');
+        return;
+    }
+    
+    const ctx = canvas.getContext('2d');
+    
+    // Set canvas size
+    const rect = canvas.getBoundingClientRect();
+    canvas.width = rect.width;
+    canvas.height = rect.height;
+    
+    console.log('📐 Canvas size:', canvas.width, 'x', canvas.height);
+    
+    // Clear canvas with light blue background
+    ctx.fillStyle = '#f0f8ff';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    
+    // Draw a simple Philippines outline
+    ctx.strokeStyle = '#000000';
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    
+    // Simple Philippines shape (approximate)
+    const centerX = canvas.width / 2;
+    const centerY = canvas.height / 2;
+    const width = canvas.width * 0.6;
+    const height = canvas.height * 0.8;
+    
+    // Draw main islands
+    ctx.beginPath();
+    ctx.moveTo(centerX - width/3, centerY - height/2);
+    ctx.lineTo(centerX + width/3, centerY - height/2);
+    ctx.lineTo(centerX + width/2, centerY);
+    ctx.lineTo(centerX + width/3, centerY + height/2);
+    ctx.lineTo(centerX - width/3, centerY + height/2);
+    ctx.lineTo(centerX - width/2, centerY);
+    ctx.closePath();
+    ctx.stroke();
+    
+    // Add some text
+    ctx.fillStyle = '#333333';
+    ctx.font = '16px Arial';
+    ctx.textAlign = 'center';
+    ctx.fillText('Philippines', centerX, centerY);
+    
+    console.log('✅ Simple map background created');
+}
 
 // Removed unused showDynastiesForYear function
 </script>
