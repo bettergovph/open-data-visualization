@@ -3074,7 +3074,9 @@ function createAnimationMap(ampatuan, flagData) {
         </div>
     `;
     
-    // Animation tab will use its own createAnimationMap function
+    // Create the same heatmap as Visual tab but with Ampatuan flag overlay
+    console.log('🗺️ Calling createDynastyHeatmap with data:', animationData.length, 'records');
+    createDynastyHeatmap(animationData);
     
     // Add Ampatuan flag overlay after heatmap is created
     setTimeout(() => {
