@@ -1178,25 +1178,12 @@ function createSurnamesChart(data, flagData = null) {
                             max-width: 300px;
                         `;
                         
-                        let tooltipContent = `
-                            <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 8px;">
-                                <div style="flex-shrink: 0;">
-                                    <img src="/static/flags/flag_${dynastyInfo?.dynasty_id || 'default'}.svg" alt="Dynasty Flag" style="width: 40px; height: 24px; border: 1px solid #ddd; border-radius: 4px;" onerror="this.style.display='none'"/>
-                                </div>
-                                <div>
-                                    <div style="font-weight: bold; font-size: 14px;">${item.surname}</div>
-                                    <div style="font-size: 11px; color: #ccc;">${item.province}</div>
-                                </div>
-                            </div>
-                            <div>Dynasty Members: ${item.dynasty_count}</div>
-                            <div style="font-size: 11px; color: #ccc; margin-top: 4px;">Click to view family details</div>
-                        `;
-                        
-                        // Add flag information if available
+                        // Find dynasty info first
+                        let dynastyInfo = null;
                         if (flagData && flagGenerator) {
                             // Try to find a matching dynasty flag
                             let locationKey = `${item.surname}_${item.province}_${item.municipality_city || ''}`;
-                            let dynastyInfo = flagData.dynasties[locationKey];
+                            dynastyInfo = flagData.dynasties[locationKey];
                             
                             // If no exact match, try to find any dynasty with same surname and province
                             if (!dynastyInfo) {
@@ -1210,16 +1197,21 @@ function createSurnamesChart(data, flagData = null) {
                                     dynastyInfo = matchingDynasties[0][1];
                                 }
                             }
-                            
-                            if (dynastyInfo && dynastyInfo.flag_parameters) {
-                                // Update the flag URL in the main content
-                                const flagUrl = `/static/flags/flag_${dynastyInfo.dynasty_id}.svg`;
-                                const flagImg = tooltipEl.querySelector('img');
-                                if (flagImg) {
-                                    flagImg.src = flagUrl;
-                                }
-                            }
                         }
+                        
+                        let tooltipContent = `
+                            <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 8px;">
+                                <div style="flex-shrink: 0;">
+                                    <img src="/static/flags/flag_${dynastyInfo?.dynasty_id || 'default'}.svg" alt="Dynasty Flag" style="width: 40px; height: 24px; border: 1px solid #ddd; border-radius: 4px;" onerror="this.style.display='none'"/>
+                                </div>
+                                <div>
+                                    <div style="font-weight: bold; font-size: 14px;">${item.surname}</div>
+                                    <div style="font-size: 11px; color: #ccc;">${item.province}</div>
+                                </div>
+                            </div>
+                            <div>Dynasty Members: ${item.dynasty_count}</div>
+                            <div style="font-size: 11px; color: #ccc; margin-top: 4px;">Click to view family details</div>
+                        `;
                         
                         tooltipEl.innerHTML = tooltipContent;
                         document.body.appendChild(tooltipEl);
