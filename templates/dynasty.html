@@ -3063,6 +3063,13 @@ async function loadAnimationData() {
             console.log('✅ Animation data loaded (top 10):', animationData.length, 'records');
             console.log('📊 Top 10 dynasties:', animationData.map(d => `${d.surname} (${d.dynasty_count} members)`));
             
+            // Check specifically for Ampatuan and Tan
+            const ampatuan = animationData.find(d => d.surname && d.surname.toLowerCase().includes('ampatuan'));
+            const tan = animationData.find(d => d.surname && d.surname.toLowerCase().includes('tan'));
+            
+            console.log('🔍 Ampatuan found:', ampatuan ? `${ampatuan.surname} (${ampatuan.dynasty_count} members)` : 'NOT FOUND');
+            console.log('🔍 Tan found:', tan ? `${tan.surname} (${tan.dynasty_count} members)` : 'NOT FOUND');
+            
             // Populate year filter
             populateAnimationYears();
             
