@@ -1208,13 +1208,6 @@ function createSurnamesChart(data, flagData = null) {
                                 // Use static flag image instead of generating dynamically
                                 const flagUrl = `/static/flags/flag_${dynastyInfo.dynasty_id}.svg`;
                                 
-                                console.log('🏴 Flag debug:', {
-                                    dynastyId: dynastyInfo.dynasty_id,
-                                    flagUrl: flagUrl,
-                                    surname: dynastyInfo.surname,
-                                    location: dynastyInfo.location_display
-                                });
-                                
                                 tooltipContent += `
                                     <div style="margin-top: 12px; padding-top: 8px; border-top: 1px solid rgba(255,255,255,0.2);">
                                         <div style="text-align: center;">
@@ -1232,13 +1225,6 @@ function createSurnamesChart(data, flagData = null) {
                         // Position tooltip using chart's caret position directly
                         tooltipEl.style.left = tooltip.caretX + 15 + 'px';
                         tooltipEl.style.top = tooltip.caretY - 15 + 'px';
-                        
-                        console.log('🔍 Tooltip positioning debug:', {
-                            caretX: tooltip.caretX,
-                            caretY: tooltip.caretY,
-                            finalLeft: tooltip.caretX + 15,
-                            finalTop: tooltip.caretY - 15
-                        });
                     },
                     // Clean up tooltip when mouse leaves
                     onHover: function(event, elements) {
