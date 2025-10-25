@@ -2980,6 +2980,7 @@ async function loadAnimationData() {
         if (data.success) {
             animationData = data.data;
             console.log('✅ Dynasty data loaded:', animationData.length, 'records');
+            console.log('📊 Sample dynasty data:', animationData[0]);
             
             // Filter for Ampatuan dynasty members
             const ampatuanMembers = animationData.filter(member => 
