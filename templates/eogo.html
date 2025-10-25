@@ -465,6 +465,7 @@ function displayPoliticalHHIData() {
                         const isCauayan = result.province.toLowerCase().includes('cauayan');
                         const sampleWarning = isLowSample ? '<div class="text-xs text-red-600 font-semibold">⚠️ Low sample size - HHI not ideal</div>' : '';
                         const cauayanBadge = isCauayan ? '<div class="text-xs text-red-600 font-semibold">🎯 Perfect example of misleading HHI</div>' : '';
+                        const lowSampleBadge = isLowSample && !isCauayan ? '<div class="text-xs text-orange-600 font-semibold">📊 May need more data or municipality too small</div>' : '';
                         return `
                             <div class="flex justify-between items-center p-3 ${riskLevel} rounded">
                                 <span class="font-medium">${result.province}</span>
@@ -474,6 +475,7 @@ function displayPoliticalHHIData() {
                                     <div class="text-xs text-gray-500">Largest dynasty: ${result.dynasty_size} members</div>
                                     ${sampleWarning}
                                     ${cauayanBadge}
+                                    ${lowSampleBadge}
                                 </div>
                             </div>
                         `;
@@ -511,8 +513,8 @@ function displayPoliticalHHIData() {
                     </p>
                     <p class="text-sm text-blue-800 mt-2">
                         <strong>Statistical Critique:</strong> HHI is only meaningful with larger sample sizes. 
-                        Provinces with ≤5 politicians are tagged as "not ideal for HHI" because small samples 
-                        can produce misleading results (e.g., 2 politicians = automatic HHI=100). 
+                        Provinces with ≤5 politicians are tagged as problematic because they may need more data 
+                        or represent municipalities too small for meaningful political analysis. 
                         Focus on provinces with 10+ politicians for statistically sound analysis.
                     </p>
                 </div>
