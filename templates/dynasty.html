@@ -3111,18 +3111,11 @@ function createAnimationMap2004(ampatuan2004, flagData) {
         </div>
     `;
     
-    // Create a plain white map for Animation tab
-    console.log('🗺️ Creating plain white map for Animation tab...');
-    createAnimationMap().then((mapData) => {
-        console.log('🗺️ Map rendering completed, adding flag overlay...');
-        // Add dynasty flag overlay after map is fully rendered
-        setTimeout(() => {
-            console.log('🏴 Adding flag overlay after map render...');
-            addDynastyFlagOverlay(ampatuan2004, flagData, familySize, mapData, 2004);
-        }, 1000); // Wait longer to ensure map is fully rendered
-    }).catch(error => {
-        console.error('❌ Error creating map:', error);
-    });
+    // Add dynasty flag overlay after map is created
+    setTimeout(() => {
+        console.log('🏴 Adding flag overlay after map render...');
+        addDynastyFlagOverlay(ampatuan2004, flagData, familySize, null, 2004);
+    }, 1000); // Wait longer to ensure map is fully rendered
 }
 
 function addAmpatuanFlagOverlay(ampatuan, flagData) {
