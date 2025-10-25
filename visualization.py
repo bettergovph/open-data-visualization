@@ -3255,7 +3255,7 @@ async def dynasty_relationship_chains_api(
             FROM relationship_chains rc
             JOIN relationships r ON rc.next_person = r.person_id
             JOIN political_dynasties p ON r.related_person_id = p.id
-            WHERE r.related_person_id != ALL(rc.path)  -- Avoid cycles
+            WHERE NOT (r.related_person_id = ANY(rc.path))  -- Avoid cycles
             AND rc.chain_length < 8  -- Limit depth
             AND p.last_name != rc.start_surname  -- Ensure different families
         ),
