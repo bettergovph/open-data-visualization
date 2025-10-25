@@ -1,0 +1,207 @@
+# Political Dynasty Relationship Analysis - Batch 7
+
+You are a political research analyst specializing in Philippine political dynasties. Your task is to analyze the relationships between the following political figures and return findings in CSV format.
+
+## ANALYSIS INSTRUCTIONS
+
+1. **Research each name** using web sources to find:
+   - Family relationships (parent-child, siblings, spouses)
+   - Political connections and alliances
+   - Marriage connections between dynasties
+   - Succession patterns within families
+   - Cross-dynasty relationships
+
+2. **Return results in CSV format** with these EXACT columns:
+   - person1_name
+   - person2_name  
+   - relationship_type
+   - relationship_description
+   - dynasty1
+   - dynasty2
+   - source_url
+   - confidence_level
+
+## RELATIONSHIP TYPES TO IDENTIFY:
+- Father/Mother
+- Son/Daughter
+- Husband/Wife
+- Brother/Sister
+- Uncle/Aunt
+- Nephew/Niece
+- Cousin
+- Grandfather/Grandmother
+- Grandson/Granddaughter
+- Father-in-law/Mother-in-law
+- Son-in-law/Daughter-in-law
+- Political Ally
+- Business Partner
+- Successor/Predecessor
+
+## NAMES TO ANALYZE (Grouped by Dynasty):
+
+
+### ABADA Dynasty (1 members):
+- JON REY ABADA (NEGROS ORIENTAL) - COUNCILOR
+
+### AFAGA Dynasty (1 members):
+- HENEDINA AFAGA (ILOCOS NORTE) - COUNCILOR
+
+### AMADOR Dynasty (1 members):
+- MARI ANNE ANGELEE AMADOR (NEGROS ORIENTAL) - COUNCILOR
+
+### BAHIAN Dynasty (1 members):
+- NESTOR BAHIAN (ZAMBOANGA DEL SUR) - COUNCILOR
+
+### BALADING Dynasty (1 members):
+- ALI BALADING (LANAO DEL SUR) - COUNCILOR
+
+### BALBALAN Dynasty (1 members):
+- RIOLITA BALBALAN (ILOCOS SUR) - MAYOR
+
+### BALHON Dynasty (1 members):
+- DIOSDADO BALHON (MISAMIS ORIENTAL) - COUNCILOR
+
+### BARA Dynasty (1 members):
+- ABDULLA BARA (SULU) - COUNCILOR
+
+### BERNATE Dynasty (1 members):
+- ANTONIO JR. II BERNATE (SAMAR) - COUNCILOR
+
+### BOLETIC Dynasty (1 members):
+- LANDO BOLETIC (CAMARINES SUR) - COUNCILOR
+
+### BUENDIA Dynasty (1 members):
+- WILLIAM BUENDIA (ALBAY) - COUNCILOR
+
+### CABRERA Dynasty (1 members):
+- LIBRADO CABRERA (BATANGAS) - MAYOR
+
+### CAHUCOM Dynasty (1 members):
+- FRANCISCA CAHUCOM (SOUTHERN LEYTE) - COUNCILOR
+
+### CORDOVA Dynasty (1 members):
+- BAYANI CORDOVA (AKLAN) - COUNCILOR
+
+### DAGALE Dynasty (1 members):
+- CRISANTA DAGALE (EASTERN SAMAR) - COUNCILOR
+
+### DANWATA Dynasty (1 members):
+- JIMMY DANWATA (DAVAO DEL SUR) - COUNCILOR
+
+### DELA ROSA Dynasty (1 members):
+- HAZEL DELA ROSA (NORTHERN SAMAR) - COUNCILOR
+
+### DIEZ Dynasty (1 members):
+- PEPITO DIEZ (BUKIDNON) - COUNCILOR
+
+### DOMECILLO Dynasty (1 members):
+- TESSIE DOMECILLO (DAVAO DEL NORTE) - VICE MAYOR
+
+### FERNANDEZ Dynasty (1 members):
+- SOCRATES FERNANDEZ (CEBU) - MAYOR
+
+### FERRIOL Dynasty (1 members):
+- EUNICE FERRIOL (CAVITE) - COUNCILOR
+
+### GALINDON Dynasty (1 members):
+- EDWIN GALINDON (CAGAYAN) - COUNCILOR
+
+### GREGORIO Dynasty (1 members):
+- VALDEZ GREGORIO (ABRA) - COUNCILOR
+
+### GUIMBAOLIBOT Dynasty (1 members):
+- FLORO GUIMBAOLIBOT (EASTERN SAMAR) - COUNCILOR
+
+### GUNTING Dynasty (1 members):
+- EDGAR GUNTING (LANAO DEL SUR) - COUNCILOR
+
+### IGNACIO Dynasty (1 members):
+- ANDREI IGNACIO (NUEVA ECIJA) - COUNCILOR
+
+### JAINAL Dynasty (1 members):
+- ALLAN-NAHIER JAINAL (SULU) - VICE MAYOR
+
+### LOPEZ Dynasty (1 members):
+- CARLOS LOPEZ (PANGASINAN) - COUNCILOR
+
+### LUNA Dynasty (1 members):
+- JUAN PAOLO LUNA (ORIENTAL MINDORO) - COUNCILOR
+
+### MANGALAO Dynasty (1 members):
+- NESTOR MANGALAO (DINAGAT ISLANDS) - COUNCILOR
+
+### MONDANO Dynasty (1 members):
+- CRISANTA O. MONDANO (SURIGAO DEL NORTE) - MAYOR
+
+### MONTECILLO Dynasty (1 members):
+- MARK MONTECILLO (DAVAO DEL SUR) - COUNCILOR
+
+### NANUD Dynasty (1 members):
+- ARTHUR NANUD (BATANES) - COUNCILOR
+
+### NARISMA Dynasty (1 members):
+- SOFONIAS NARISMA (BOHOL) - COUNCILOR
+
+### NOLASCO Dynasty (1 members):
+- MATTHEW NOLASCO (CAGAYAN) - VICE MAYOR
+
+### NOOR Dynasty (1 members):
+- SAIDAR NOOR (LANAO DEL SUR) - COUNCILOR
+
+### PABE Dynasty (1 members):
+- ELESIO PABE (BOHOL) - COUNCILOR
+
+### PADO Dynasty (1 members):
+- NELIA PADO (CAMARINES SUR) - COUNCILOR
+
+### PARIN Dynasty (1 members):
+- RICHARD PARIN (CAVITE) - COUNCILOR
+
+### PEREZ Dynasty (1 members):
+- NESTOR PEREZ (OCCIDENTAL MINDORO) - VICE MAYOR
+
+### PUNAY Dynasty (1 members):
+- EDUARDO PUNAY (BILIRAN) - COUNCILOR
+
+### RANAY Dynasty (1 members):
+- ROMEL RANAY (ILOCOS NORTE) - COUNCILOR
+
+### RETUYA Dynasty (1 members):
+- MIGUEL RETUYA (LEYTE) - COUNCILOR
+
+### REYES Dynasty (1 members):
+- ARGEL JOSEPH REYES (CAVITE) - COUNCILOR
+
+### ROMA Dynasty (1 members):
+- BENEDICTO ROMA (SAMAR) - COUNCILOR
+
+### SABAYBAY Dynasty (1 members):
+- JOSE RAFAELITO SABAYBAY (ALBAY) - COUNCILOR
+
+### SANTOS Dynasty (1 members):
+- GILBERT SANTOS (PAMPANGA) - COUNCILOR
+
+### TEVES Dynasty (1 members):
+- MYRNA TEVES (MISAMIS ORIENTAL) - COUNCILOR
+
+### TWANO Dynasty (1 members):
+- ANTHONNY TWANO (PAMPANGA) - VICE MAYOR
+
+### VILLAMOR Dynasty (1 members):
+- KUYA CIAN VILLAMOR (CAMARINES NORTE) - COUNCILOR
+
+## OUTPUT REQUIREMENTS:
+
+1. **CSV Format**: Return ONLY the CSV data with the exact column headers specified
+2. **Source URLs**: Include working URLs for verification
+3. **Confidence Level**: Rate 1-10 (10 = highest confidence)
+4. **Focus on**: Documented, verifiable relationships only
+5. **Include**: Both intra-dynasty and inter-dynasty relationships
+
+## EXAMPLE OUTPUT:
+```csv
+person1_name,person2_name,relationship_type,relationship_description,dynasty1,dynasty2,source_url,confidence_level
+"JOHN DOE","JANE DOE","Husband","Married couple in politics","DOE","DOE","https://example.com",9
+```
+
+Analyze all 50 names above and return the complete relationship matrix in CSV format.

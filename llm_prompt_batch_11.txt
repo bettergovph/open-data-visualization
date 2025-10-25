@@ -1,0 +1,205 @@
+# Political Dynasty Relationship Analysis - Batch 11
+
+You are a political research analyst specializing in Philippine political dynasties. Your task is to analyze the relationships between the following political figures and return findings in CSV format.
+
+## ANALYSIS INSTRUCTIONS
+
+1. **Research each name** using web sources to find:
+   - Family relationships (parent-child, siblings, spouses)
+   - Political connections and alliances
+   - Marriage connections between dynasties
+   - Succession patterns within families
+   - Cross-dynasty relationships
+
+2. **Return results in CSV format** with these EXACT columns:
+   - person1_name
+   - person2_name  
+   - relationship_type
+   - relationship_description
+   - dynasty1
+   - dynasty2
+   - source_url
+   - confidence_level
+
+## RELATIONSHIP TYPES TO IDENTIFY:
+- Father/Mother
+- Son/Daughter
+- Husband/Wife
+- Brother/Sister
+- Uncle/Aunt
+- Nephew/Niece
+- Cousin
+- Grandfather/Grandmother
+- Grandson/Granddaughter
+- Father-in-law/Mother-in-law
+- Son-in-law/Daughter-in-law
+- Political Ally
+- Business Partner
+- Successor/Predecessor
+
+## NAMES TO ANALYZE (Grouped by Dynasty):
+
+
+### ACOY Dynasty (1 members):
+- MARSITO C. ACOY (PALAWAN) - VICE MAYOR
+
+### ALPINO Dynasty (1 members):
+- NOEL ALPINO (LEYTE) - COUNCILOR
+
+### AMID Dynasty (1 members):
+- PATERNO AMID (APAYAO) - COUNCILOR
+
+### AMISTAS Dynasty (1 members):
+- ELENITO AMISTAS (ZAMBOANGA DEL NORTE) - COUNCILOR
+
+### ARGONZA Dynasty (1 members):
+- ALEXANDER ARGONZA (BATANES) - PROVINCIAL BOARD MEMBER
+
+### BURGUETE Dynasty (1 members):
+- YOLLY BURGUETE (ROMBLON) - COUNCILOR
+
+### CARDONA Dynasty (1 members):
+- ANTONIO CARDONA (EASTERN SAMAR) - MAYOR
+
+### CEREBO Dynasty (1 members):
+- JOEMAR CEREBO (COTABATO) - PROVINCIAL BOARD MEMBER
+
+### CEZAR Dynasty (1 members):
+- PERFECTO CEZAR (PANGASINAN) - COUNCILOR
+
+### CIDRO Dynasty (1 members):
+- EMILIANO CIDRO (SAMAR) - COUNCILOR
+
+### CO Dynasty (1 members):
+- NAPOLEON CO (PANGASINAN) - COUNCILOR
+
+### CORDERO Dynasty (1 members):
+- RHAYLAN CORDERO (ILOILO) - COUNCILOR
+
+### CRUZ Dynasty (1 members):
+- RODEL CRUZ (PANGASINAN) - COUNCILOR
+
+### DALAWIS Dynasty (1 members):
+- AJID DALAWIS (BASILAN) - COUNCILOR
+
+### DANDAY Dynasty (1 members):
+- EDGAR DANDAY (SAMAR) - COUNCILOR
+
+### DASAYON Dynasty (1 members):
+- JIMMY DASAYON (KALINGA) - MAYOR
+
+### DAYAO Dynasty (1 members):
+- PHILMORE DAYAO (BENGUET) - COUNCILOR
+
+### DELMONTE Dynasty (1 members):
+- RUBY DELMONTE (NORTHERN SAMAR) - COUNCILOR
+
+### DIZON Dynasty (1 members):
+- ANACLITO DIZON (SOUTHERN LEYTE) - COUNCILOR
+
+### EDORA Dynasty (1 members):
+- DESIREE EDORA (ZAMBALES) - MAYOR
+
+### EVANGELISTA Dynasty (1 members):
+- ERLINDA EVANGELISTA (MASBATE) - COUNCILOR
+
+### FUENTES Dynasty (1 members):
+- PACIENTE FUENTES (BOHOL) - COUNCILOR
+
+### GESTOPA Dynasty (1 members):
+- ALEXANDER GESTOPA (CEBU) - COUNCILOR
+
+### JOSE Dynasty (1 members):
+- AMOR JOSE (NUEVA ECIJA) - COUNCILOR
+
+### LUNA Dynasty (1 members):
+- ANDRES LUNA (CEBU) - COUNCILOR
+
+### MALA Dynasty (1 members):
+- ABDULHAKIM MALA (LANAO DEL SUR) - COUNCILOR
+
+### MENES Dynasty (1 members):
+- LEODEL MENES (CAMARINES SUR) - COUNCILOR
+
+### METEORO Dynasty (1 members):
+- GEMMA METEORO (MASBATE) - COUNCILOR
+
+### MONTEZA Dynasty (1 members):
+- OSCAR MONTEZA (LEYTE) - MAYOR
+
+### NAZARRO Dynasty (1 members):
+- JUAN JR. NAZARRO (BENGUET) - PROVINCIAL BOARD MEMBER
+
+### NOCHE Dynasty (1 members):
+- WILLIAM NOCHE (QUEZON) - COUNCILOR
+
+### NOVERO Dynasty (1 members):
+- CLEMENTINA NOVERO (SOUTHERN LEYTE) - COUNCILOR
+
+### ONG Dynasty (1 members):
+- ANDREW ONG (PALAWAN) - MAYOR
+
+### PAME Dynasty (1 members):
+- JESSIE PAME (SURIGAO DEL SUR) - COUNCILOR
+
+### PELAYO Dynasty (1 members):
+- LUIS PELAYO (PAMPANGA) - COUNCILOR
+
+### PELIGRO Dynasty (1 members):
+- CRISTITO PELIGRO (SURIGAO DEL NORTE) - COUNCILOR
+
+### RAMIREZ Dynasty (1 members):
+- PHILLIP RAMIREZ (AGUSAN DEL NORTE) - COUNCILOR
+
+### SAJULGA Dynasty (1 members):
+- ROMINA R. SAJULGA (Surigao del Norte) - VICE MAYOR
+
+### SANTOS Dynasty (1 members):
+- ROMANOEL L. SANTOS (PAMPANGA PROVINCE) - VICE MAYOR
+
+### SEMBRANO Dynasty (1 members):
+- ELAINE SEMBRANO (BENGUET) - COUNCILOR
+
+### SILVOSA Dynasty (1 members):
+- JOHN SILVOSA (SURIGAO DEL NORTE) - COUNCILOR
+
+### SISON Dynasty (1 members):
+- MAURO SISON (CAGAYAN) - COUNCILOR
+
+### TARSUM Dynasty (1 members):
+- PULAUS A. TARSUM (Sulu) - VICE MAYOR
+
+### TORREMOCHA Dynasty (1 members):
+- EDUARDO TORREMOCHA (BOHOL) - VICE MAYOR
+
+### VARGAS Dynasty (2 members):
+- MARK JOHN VARGAS (NEGROS OCCIDENTAL) - COUNCILOR
+- ELIZABETH VARGAS (NUEVA ECIJA) - VICE MAYOR
+
+### VELARDE Dynasty (1 members):
+- RODEL VELARDE (CAMARINES SUR) - VICE MAYOR
+
+### VELASCO Dynasty (1 members):
+- RAQUEL VELASCO (NCR, FOURTH DISTRICT) - COUNCILOR
+
+### VILLANUEVA Dynasty (1 members):
+- LAMBERTO VILLANUEVA (BULACAN) - COUNCILOR
+
+### WONG Dynasty (1 members):
+- MELVIE WONG (COTABATO) - COUNCILOR
+
+## OUTPUT REQUIREMENTS:
+
+1. **CSV Format**: Return ONLY the CSV data with the exact column headers specified
+2. **Source URLs**: Include working URLs for verification
+3. **Confidence Level**: Rate 1-10 (10 = highest confidence)
+4. **Focus on**: Documented, verifiable relationships only
+5. **Include**: Both intra-dynasty and inter-dynasty relationships
+
+## EXAMPLE OUTPUT:
+```csv
+person1_name,person2_name,relationship_type,relationship_description,dynasty1,dynasty2,source_url,confidence_level
+"JOHN DOE","JANE DOE","Husband","Married couple in politics","DOE","DOE","https://example.com",9
+```
+
+Analyze all 50 names above and return the complete relationship matrix in CSV format.

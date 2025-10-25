@@ -1,0 +1,207 @@
+# Political Dynasty Relationship Analysis - Batch 8
+
+You are a political research analyst specializing in Philippine political dynasties. Your task is to analyze the relationships between the following political figures and return findings in CSV format.
+
+## ANALYSIS INSTRUCTIONS
+
+1. **Research each name** using web sources to find:
+   - Family relationships (parent-child, siblings, spouses)
+   - Political connections and alliances
+   - Marriage connections between dynasties
+   - Succession patterns within families
+   - Cross-dynasty relationships
+
+2. **Return results in CSV format** with these EXACT columns:
+   - person1_name
+   - person2_name  
+   - relationship_type
+   - relationship_description
+   - dynasty1
+   - dynasty2
+   - source_url
+   - confidence_level
+
+## RELATIONSHIP TYPES TO IDENTIFY:
+- Father/Mother
+- Son/Daughter
+- Husband/Wife
+- Brother/Sister
+- Uncle/Aunt
+- Nephew/Niece
+- Cousin
+- Grandfather/Grandmother
+- Grandson/Granddaughter
+- Father-in-law/Mother-in-law
+- Son-in-law/Daughter-in-law
+- Political Ally
+- Business Partner
+- Successor/Predecessor
+
+## NAMES TO ANALYZE (Grouped by Dynasty):
+
+
+### ACTUB Dynasty (1 members):
+- BORIS OLIVIER ACTUB (MISAMIS ORIENTAL) - COUNCILOR
+
+### BACOLOD Dynasty (1 members):
+- EUSTAQUIO BACOLOD (BOHOL) - COUNCILOR
+
+### BALLEZA Dynasty (1 members):
+- PARLY BALLEZA (ILOILO) - COUNCILOR
+
+### BURMAN Dynasty (1 members):
+- CARMELITA BURMAN (ILOILO) - COUNCILOR
+
+### CABRIDO Dynasty (1 members):
+- NESTOR CABRIDO (CAGAYAN) - COUNCILOR
+
+### CALISIN Dynasty (1 members):
+- JESUS CALISIN (ALBAY) - VICE GOVERNOR
+
+### CALVO Dynasty (1 members):
+- FRANCISCO CALVO (ILOILO) - COUNCILOR
+
+### CARPIO Dynasty (1 members):
+- DENNIS CARPIO (BULACAN) - COUNCILOR
+
+### CASIPLE Dynasty (1 members):
+- VIRGILIO CASIPLE (ILOILO) - COUNCILOR
+
+### CELESTE Dynasty (1 members):
+- EDWIN CELESTE (CEBU) - COUNCILOR
+
+### CHAN Dynasty (1 members):
+- ARTEMIO CHAN (PANGASINAN) - MAYOR
+
+### CIRINEO Dynasty (1 members):
+- NOEL CIRINEO (ISABELA) - COUNCILOR
+
+### COSIP Dynasty (1 members):
+- THOMAS JR. COSIP (APAYAO) - COUNCILOR
+
+### DATINGUINOO Dynasty (1 members):
+- CARMELA DATINGUINOO (ORIENTAL MINDORO) - COUNCILOR
+
+### DAVIN Dynasty (1 members):
+- ARTHUR DAVIN (DAVAO DEL SUR) - VICE MAYOR
+
+### DE LA CRUZ Dynasty (1 members):
+- CYNTHIA DE LA CRUZ (NEGROS OCCIDENTAL) - VICE MAYOR
+
+### DELA CRUZ Dynasty (1 members):
+- DEMETRIO DELA CRUZ (NUEVA ECIJA) - COUNCILOR
+
+### EDILLO Dynasty (1 members):
+- FE EDILLO (SOUTHERN LEYTE) - PROVINCIAL BOARD MEMBER
+
+### ENRILE Dynasty (1 members):
+- EDWIN ENRILE (BATAAN) - PROVINCIAL BOARD MEMBER
+
+### FAJARDO Dynasty (1 members):
+- MAR FAJARDO (MASBATE) - COUNCILOR
+
+### FONTANILLA Dynasty (1 members):
+- JENNIEVIEVE FONTANILLA (BUKIDNON) - COUNCILOR
+
+### GLINO Dynasty (1 members):
+- ALLAN GLINO (EASTERN SAMAR) - COUNCILOR
+
+### GUEVARRA Dynasty (1 members):
+- AIDA GUEVARRA (SORSOGON) - COUNCILOR
+
+### HAMOR Dynasty (1 members):
+- JOSE EDWIN HAMOR (SORSOGON) - MAYOR
+
+### ILAGAN Dynasty (1 members):
+- MARIO ILAGAN (BATANGAS) - COUNCILOR
+
+### JAMERO Dynasty (1 members):
+- BOROGOY JAMERO (CAPIZ) - COUNCILOR
+
+### LABIO Dynasty (1 members):
+- MEL LABIO (MAGUINDANAO) - COUNCILOR
+
+### LAMINTA Dynasty (1 members):
+- JUN LAMINTA (MOUNTAIN PROVINCE) - COUNCILOR
+
+### MABRAS Dynasty (1 members):
+- FLORENTINO MABRAS (AGUSAN DEL SUR) - COUNCILOR
+
+### MAMA Dynasty (1 members):
+- TAGOT MAMA (MAGUINDANAO) - COUNCILOR
+
+### MAUTE Dynasty (1 members):
+- MEME MAUTE (LANAO DEL SUR) - COUNCILOR
+
+### MECA Dynasty (1 members):
+- JESUS LAZARO MECA (CEBU) - COUNCILOR
+
+### MENESE Dynasty (1 members):
+- ANTONIO MENESE (ROMBLON) - COUNCILOR
+
+### ORLINO Dynasty (1 members):
+- JOSE ORLINO (NEGROS ORIENTAL) - COUNCILOR
+
+### PACLAR Dynasty (1 members):
+- TERESITO PACLAR (MISAMIS ORIENTAL) - COUNCILOR
+
+### PASCUA Dynasty (1 members):
+- FERDINAND PASCUA (ILOCOS NORTE) - COUNCILOR
+
+### QUIBLADO Dynasty (1 members):
+- MARCIAL QUIBLADO (ABRA) - COUNCILOR
+
+### QUINTILLA Dynasty (1 members):
+- CARLA KRIS QUINTILLA (ZAMBOANGA SIBUGAY) - COUNCILOR
+
+### REMORIN Dynasty (1 members):
+- ANGELITO REMORIN (PANGASINAN) - COUNCILOR
+
+### SERDENA Dynasty (1 members):
+- CARLOTA SERDENA (BILIRAN) - COUNCILOR
+
+### SINAJON Dynasty (1 members):
+- BALTAZAR SINAJON (AGUSAN DEL NORTE) - COUNCILOR
+
+### SINSUAT Dynasty (1 members):
+- OSMEÃ‘A III SINSUAT (MAGUINDANAO) - COUNCILOR
+
+### SUAN Dynasty (1 members):
+- CESAR "DIDOY" SUAN (Cebu) - MAYOR
+
+### SULATAN Dynasty (1 members):
+- NASRIA SULATAN (LANAO DEL SUR) - COUNCILOR
+
+### TIATSON Dynasty (1 members):
+- MICHAEL RON TIATSON (OCCIDENTAL MINDORO) - COUNCILOR
+
+### TIGUE Dynasty (1 members):
+- ROGELIO TIGUE (ZAMBOANGA DEL SUR) - COUNCILOR
+
+### TOLERO Dynasty (1 members):
+- CATALINA TOLERO (LEYTE) - COUNCILOR
+
+### TUPAZ Dynasty (1 members):
+- EDDIE TUPAZ (CAPIZ) - COUNCILOR
+
+### UY Dynasty (1 members):
+- AUXILIADORA UY (CEBU) - COUNCILOR
+
+### YAP Dynasty (1 members):
+- CHRISTOPHERSON YAP (SOUTHERN LEYTE) - COUNCILOR
+
+## OUTPUT REQUIREMENTS:
+
+1. **CSV Format**: Return ONLY the CSV data with the exact column headers specified
+2. **Source URLs**: Include working URLs for verification
+3. **Confidence Level**: Rate 1-10 (10 = highest confidence)
+4. **Focus on**: Documented, verifiable relationships only
+5. **Include**: Both intra-dynasty and inter-dynasty relationships
+
+## EXAMPLE OUTPUT:
+```csv
+person1_name,person2_name,relationship_type,relationship_description,dynasty1,dynasty2,source_url,confidence_level
+"JOHN DOE","JANE DOE","Husband","Married couple in politics","DOE","DOE","https://example.com",9
+```
+
+Analyze all 50 names above and return the complete relationship matrix in CSV format.

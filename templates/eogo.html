@@ -1,0 +1,918 @@
+{% extends "base.html" %}
+
+{% block head %}
+<!-- Google Fonts - Inter -->
+<!-- Tailwind CSS -->
+<link rel="stylesheet" href="/static/css/tailwind.css">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+<!-- BetterGovPH Metadata -->
+<meta name="description" content="EOGO Corruption Risk Analysis - BetterGovPH Open Data Visualization Platform">
+<meta name="keywords" content="corruption risk, political dynasties, public procurement, Philippines, transparency, EOGO">
+<meta name="author" content="BetterGovPH">
+
+<!-- Open Graph / Facebook -->
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://visualizations.bettergov.ph/eogo">
+<meta property="og:title" content="EOGO Corruption Risk Analysis - BetterGovPH">
+<meta property="og:description" content="Corruption Risk Indicator analysis based on political dynasties and public procurement data">
+<meta property="og:image" content="/static/images/gov_logo.png">
+
+<!-- Twitter -->
+<meta property="twitter:card" content="summary_large_image">
+<meta property="twitter:url" content="https://visualizations.bettergov.ph/eogo">
+<meta property="twitter:title" content="EOGO Corruption Risk Analysis - BetterGovPH">
+<meta property="twitter:description" content="Corruption Risk Indicator analysis based on political dynasties and public procurement data">
+<meta property="twitter:image" content="/static/images/gov_logo.png">
+
+<style>
+    body {
+        font-family: 'Inter', sans-serif !important;
+        margin: 0;
+        padding: 0;
+        background: white !important;
+        color: black !important;
+        min-height: 100vh;
+    }
+    
+    .eogo-section {
+        background: white;
+        border-radius: 12px;
+        padding: 2rem;
+        margin-bottom: 2rem;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+    
+    .eogo-section h3 {
+        color: #1f2937;
+        font-size: 1.5rem;
+        font-weight: 600;
+        margin-bottom: 1rem;
+        border-bottom: 2px solid #3b82f6;
+        padding-bottom: 0.5rem;
+    }
+    
+    .status-badge {
+        display: inline-block;
+        padding: 0.25rem 0.75rem;
+        border-radius: 9999px;
+        font-size: 0.875rem;
+        font-weight: 500;
+    }
+    
+    .status-available {
+        background-color: #dcfce7;
+        color: #166534;
+    }
+    
+    .status-partial {
+        background-color: #fef3c7;
+        color: #92400e;
+    }
+    
+    .status-missing {
+        background-color: #fee2e2;
+        color: #991b1b;
+    }
+    
+    .computation-card {
+        background: #f8fafc;
+        border: 1px solid #e2e8f0;
+        border-radius: 8px;
+        padding: 1.5rem;
+        margin-bottom: 1rem;
+    }
+    
+    /* Tab Styles */
+    .tab-button {
+        padding: 0.75rem 1rem;
+        border-bottom: 2px solid transparent;
+        color: #6b7280;
+        font-weight: 500;
+        transition: all 0.2s;
+    }
+    
+    .tab-button:hover {
+        color: #374151;
+        border-bottom-color: #d1d5db;
+    }
+    
+    .tab-button.active {
+        color: #1f2937;
+        border-bottom-color: #3b82f6;
+    }
+    
+    .tab-content {
+        display: block;
+    }
+    
+    .tab-content.hidden {
+        display: none;
+    }
+    
+    .data-gap {
+        background: #fef2f2;
+        border-left: 4px solid #ef4444;
+        padding: 1rem;
+        margin: 1rem 0;
+    }
+    
+    .data-available {
+        background: #f0fdf4;
+        border-left: 4px solid #22c55e;
+        padding: 1rem;
+        margin: 1rem 0;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Navigation -->
+<nav class="visualizations-nav py-4 px-6 bg-white border-b border-gray-200">
+    <div class="max-w-7xl mx-auto flex items-center justify-between">
+        <div class="flex items-center">
+            <a href="/" class="flex items-center">
+                <img src="https://raw.githubusercontent.com/bettergovph/logo/main/png/BetterGov_Horizontal-Black.png" 
+                     alt="BetterGov" 
+                     class="h-12">
+            </a>
+        </div>
+        <div class="hidden md:flex space-x-6">
+            <a href="/nep" class="text-black hover:text-gray-600 font-medium transition">NEP</a>
+            <a href="/budget" class="text-black hover:text-gray-600 font-medium transition">Budget</a>
+            <a href="/flood" class="text-black hover:text-gray-600 font-medium transition">Flood Control</a>
+            <a href="/dime" class="text-black hover:text-gray-600 font-medium transition">DIME</a>
+            <a href="/map" class="text-black hover:text-gray-600 font-medium transition">Map</a>
+            <a href="/philgeps" class="text-black hover:text-gray-600 font-medium transition">PhilGEPS</a>
+            <a href="/dynasty" class="text-black hover:text-gray-600 font-medium transition">Dynasties</a>
+            <a href="/eogo" class="text-black hover:text-gray-600 font-medium transition bg-blue-50 px-3 py-1 rounded">EOGO</a>
+            <a href="/sources" class="text-black hover:text-gray-600 font-medium transition">Sources</a>
+        </div>
+        <div class="md:hidden">
+            <button class="text-black focus:outline-none" onclick="toggleMobileMenu()">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+                </svg>
+            </button>
+        </div>
+    </div>
+    <!-- Mobile menu (hidden by default) -->
+    <div id="mobileMenu" class="hidden mt-4 px-4 space-y-2">
+        <a href="/nep" class="block text-black hover:text-gray-600 font-medium py-2">NEP</a>
+        <a href="/budget" class="block text-black hover:text-gray-600 font-medium py-2">Budget</a>
+        <a href="/flood" class="block text-black hover:text-gray-600 font-medium py-2">Flood Control</a>
+        <a href="/dime" class="block text-black hover:text-gray-600 font-medium py-2">DIME</a>
+        <a href="/map" class="block text-black hover:text-gray-600 font-medium py-2">Map</a>
+        <a href="/philgeps" class="block text-black hover:text-gray-600 font-medium py-2">PhilGEPS</a>
+        <a href="/dynasty" class="block text-black hover:text-gray-600 font-medium py-2">Dynasties</a>
+        <a href="/eogo" class="block text-black hover:text-gray-600 font-medium py-2 bg-blue-50 px-3 py-1 rounded">EOGO</a>
+        <a href="/sources" class="block text-black hover:text-gray-600 font-medium py-2">Sources</a>
+    </div>
+</nav>
+
+<!-- Hero Section -->
+<div style="padding: 4rem 6rem 2rem 6rem; background: white;">
+    <div class="max-w-7xl mx-auto text-center">
+        <h1 class="text-5xl font-bold text-black mb-4">🎯 EOGO Corruption Risk Analysis</h1>
+        <p class="text-xl text-gray-600 max-w-4xl mx-auto">Corruption Risk Indicator (CRI) computation based on political dynasties and public procurement data. Implementing the academic framework from "Corruption risk and political dynasties: exploring the links using public procurement data in the Philippines"</p>
+    </div>
+</div>
+
+<!-- Main Content -->
+<div style="padding: 2rem 6rem 6rem 6rem;">
+    <div class="max-w-7xl mx-auto">
+        
+        <!-- Overview Section -->
+        <div class="eogo-section">
+            <h3>📊 CRI Implementation Overview</h3>
+            <p class="text-gray-700 mb-4">Based on the academic paper by Davis, Mendoza & Yap (2023), we implement a Corruption Risk Indicator using Item Response Theory (IRT) to synthesize contract quality data into normalized CRI scores.</p>
+            
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+                <div class="computation-card">
+                    <h4 class="font-semibold text-lg mb-2">🎯 Target: 9 Red Flag Factors</h4>
+                    <p class="text-sm text-gray-600">Academic paper identifies 9 key corruption risk indicators</p>
+                </div>
+                <div class="computation-card">
+                    <h4 class="font-semibold text-lg mb-2">📈 Political HHI</h4>
+                    <p class="text-sm text-gray-600">Herfindahl-Hirschman Index for political concentration</p>
+                </div>
+                <div class="computation-card">
+                    <h4 class="font-semibold text-lg mb-2">👑 Dynasty Analysis</h4>
+                    <p class="text-sm text-gray-600">Political dynasty size and GCM linkage analysis</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Data Availability Assessment -->
+        <div class="eogo-section">
+            <h3>📋 Data Availability Assessment</h3>
+            
+            <!-- Available Data -->
+            <div class="data-available">
+                <h4 class="font-semibold text-lg mb-3">✅ Available Data Sources</h4>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <h5 class="font-medium">PhilGEPS Contracts Database</h5>
+                        <p class="text-sm text-gray-600">104,819 flood control contracts with award details</p>
+                        <span class="status-badge status-available">Available</span>
+                    </div>
+                    <div>
+                        <h5 class="font-medium">Political Dynasty Database</h5>
+                        <p class="text-sm text-gray-600">3,705 dynasty politicians across 130 provinces</p>
+                        <span class="status-badge status-available">Available</span>
+                    </div>
+                    <div>
+                        <h5 class="font-medium">SEC Contractors Database</h5>
+                        <p class="text-sm text-gray-600">10,981 unique contractors with verification status</p>
+                        <span class="status-badge status-available">Available</span>
+                    </div>
+                    <div>
+                        <h5 class="font-medium">Poverty Data (JSON)</h5>
+                        <p class="text-sm text-gray-600">Complete province-level poverty incidence</p>
+                        <span class="status-badge status-available">Available</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Missing Data -->
+            <div class="data-gap">
+                <h4 class="font-semibold text-lg mb-3">❌ Missing Data for Full CRI</h4>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <h5 class="font-medium">Publication Dates</h5>
+                        <p class="text-sm text-gray-600">Initial publication dates for procurement notices</p>
+                        <span class="status-badge status-missing">Missing</span>
+                    </div>
+                    <div>
+                        <h5 class="font-medium">Closing Dates</h5>
+                        <p class="text-sm text-gray-600">Bid submission deadline dates</p>
+                        <span class="status-badge status-missing">Missing</span>
+                    </div>
+                    <div>
+                        <h5 class="font-medium">Initial Estimated Prices</h5>
+                        <p class="text-sm text-gray-600">Original budget estimates vs final amounts</p>
+                        <span class="status-badge status-missing">Missing</span>
+                    </div>
+                    <div>
+                        <h5 class="font-medium">Number of Bidders</h5>
+                        <p class="text-sm text-gray-600">Competition level in procurement process</p>
+                        <span class="status-badge status-missing">Missing</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- CRI Factors Analysis -->
+        <div class="eogo-section">
+            <h3>🔍 CRI Factors Analysis</h3>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <!-- Available Factors -->
+                <div>
+                    <h4 class="font-semibold text-lg mb-3 text-green-700">✅ Computable Factors (6-7 factors)</h4>
+                    <div class="space-y-3">
+                        <div class="computation-card">
+                            <h5 class="font-medium">1. Procurement Mode</h5>
+                            <p class="text-sm text-gray-600">Analysis of business_category field</p>
+                            <span class="status-badge status-available">Available</span>
+                        </div>
+                        <div class="computation-card">
+                            <h5 class="font-medium">2. Approved Budget</h5>
+                            <p class="text-sm text-gray-600">Contract amount outlier analysis</p>
+                            <span class="status-badge status-available">Available</span>
+                        </div>
+                        <div class="computation-card">
+                            <h5 class="font-medium">3. Classification</h5>
+                            <p class="text-sm text-gray-600">Business category risk assessment</p>
+                            <span class="status-badge status-available">Available</span>
+                        </div>
+                        <div class="computation-card">
+                            <h5 class="font-medium">4. Contractor Concentration</h5>
+                            <p class="text-sm text-gray-600">HHI analysis of contractor market share</p>
+                            <span class="status-badge status-available">Available</span>
+                        </div>
+                        <div class="computation-card">
+                            <h5 class="font-medium">5. Political Dynasty Risk</h5>
+                            <p class="text-sm text-gray-600">Political HHI and dynasty size analysis</p>
+                            <span class="status-badge status-available">Available</span>
+                        </div>
+                        <div class="computation-card">
+                            <h5 class="font-medium">6. SEC Verification</h5>
+                            <p class="text-sm text-gray-600">Contractor legitimacy verification rate</p>
+                            <span class="status-badge status-available">Available</span>
+                        </div>
+                        <div class="computation-card">
+                            <h5 class="font-medium">7. Poverty Correlation</h5>
+                            <p class="text-sm text-gray-600">Poverty incidence as control variable</p>
+                            <span class="status-badge status-available">Available</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Missing Factors -->
+                <div>
+                    <h4 class="font-semibold text-lg mb-3 text-red-700">❌ Missing Factors (2-3 factors)</h4>
+                    <div class="space-y-3">
+                        <div class="computation-card">
+                            <h5 class="font-medium">8. Time to Close</h5>
+                            <p class="text-sm text-gray-600">Publication to closing date analysis</p>
+                            <span class="status-badge status-missing">Missing</span>
+                        </div>
+                        <div class="computation-card">
+                            <h5 class="font-medium">9. Contract Duration</h5>
+                            <p class="text-sm text-gray-600">Award to completion timeline</p>
+                            <span class="status-badge status-missing">Missing</span>
+                        </div>
+                        <div class="computation-card">
+                            <h5 class="font-medium">10. Competition Level</h5>
+                            <p class="text-sm text-gray-600">Number of bidders analysis</p>
+                            <span class="status-badge status-missing">Missing</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Implementation Plan -->
+        <div class="eogo-section">
+            <h3>🚀 Implementation Plan</h3>
+            
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div class="computation-card">
+                    <h4 class="font-semibold text-lg mb-3">Phase 1: Enhanced CRI</h4>
+                    <p class="text-sm text-gray-600 mb-3">Implement 6-7 computable factors</p>
+                    <ul class="text-sm text-gray-600 space-y-1">
+                        <li>• Political HHI calculation</li>
+                        <li>• Contractor concentration analysis</li>
+                        <li>• SEC verification rates</li>
+                        <li>• Poverty correlation</li>
+                    </ul>
+                    <span class="status-badge status-partial">Ready to Implement</span>
+                </div>
+                
+                <div class="computation-card">
+                    <h4 class="font-semibold text-lg mb-3">Phase 2: Academic CRI</h4>
+                    <p class="text-sm text-gray-600 mb-3">Approximate missing factors</p>
+                    <ul class="text-sm text-gray-600 space-y-1">
+                        <li>• Time patterns from award_date</li>
+                        <li>• Contract status analysis</li>
+                        <li>• Geographic risk clustering</li>
+                    </ul>
+                    <span class="status-badge status-partial">In Development</span>
+                </div>
+                
+                <div class="computation-card">
+                    <h4 class="font-semibold text-lg mb-3">Phase 3: Advanced CRI</h4>
+                    <p class="text-sm text-gray-600 mb-3">Unique insights beyond academic paper</p>
+                    <ul class="text-sm text-gray-600 space-y-1">
+                        <li>• Agency concentration risk</li>
+                        <li>• Temporal risk patterns</li>
+                        <li>• Real-time risk monitoring</li>
+                    </ul>
+                    <span class="status-badge status-partial">Future Enhancement</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Expected Results -->
+        <div class="eogo-section">
+            <h3>📈 Expected Results</h3>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                    <h4 class="font-semibold text-lg mb-3">High-Risk Provinces (Academic Predictions)</h4>
+                    <div class="space-y-2">
+                        <div class="flex justify-between items-center p-2 bg-red-50 rounded">
+                            <span class="font-medium">Biliran, Eastern Samar, Pangasinan</span>
+                            <span class="text-sm text-red-600">High Political HHI</span>
+                        </div>
+                        <div class="flex justify-between items-center p-2 bg-orange-50 rounded">
+                            <span class="font-medium">Marinduque, La Union</span>
+                            <span class="text-sm text-orange-600">Strong Dynasty Presence</span>
+                        </div>
+                        <div class="flex justify-between items-center p-2 bg-yellow-50 rounded">
+                            <span class="font-medium">Agusan del Norte, Batangas</span>
+                            <span class="text-sm text-yellow-600">Contractor Concentration</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div>
+                    <h4 class="font-semibold text-lg mb-3">Unique Insights We Can Provide</h4>
+                    <div class="space-y-2">
+                        <div class="p-2 bg-blue-50 rounded">
+                            <span class="font-medium">SEC Verification Impact</span>
+                            <p class="text-sm text-gray-600">How contractor legitimacy affects corruption risk</p>
+                        </div>
+                        <div class="p-2 bg-green-50 rounded">
+                            <span class="font-medium">Agency Concentration</span>
+                            <p class="text-sm text-gray-600">Which agencies have highest risk contracts</p>
+                        </div>
+                        <div class="p-2 bg-purple-50 rounded">
+                            <span class="font-medium">Temporal Patterns</span>
+                            <p class="text-sm text-gray-600">Risk changes over time</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Technical Implementation -->
+        <div class="eogo-section">
+            <h3>⚙️ Technical Implementation</h3>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                    <h4 class="font-semibold text-lg mb-3">Database Queries Required</h4>
+                    <div class="bg-gray-100 p-4 rounded-lg">
+                        <pre class="text-sm"><code>-- Political HHI per province
+SELECT province, 
+       SUM(POWER(surname_count::float / total_positions, 2)) * 100 as political_hhi
+FROM dynasty.political_dynasties 
+GROUP BY province;
+
+-- Contractor concentration per province  
+SELECT area_of_delivery,
+       SUM(POWER(contractor_share, 2)) as contractor_hhi
+FROM philgeps.contracts 
+GROUP BY area_of_delivery;</code></pre>
+                    </div>
+                </div>
+                
+                <div>
+                    <h4 class="font-semibold text-lg mb-3">Visualization Strategy</h4>
+                    <ul class="space-y-2 text-sm">
+                        <li>• Province-level CRI heat map</li>
+                        <li>• Political dynasty concentration charts</li>
+                        <li>• Contractor concentration risk maps</li>
+                        <li>• SEC verification rate dashboards</li>
+                        <li>• Poverty vs corruption risk scatter plots</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Live CRI Computations -->
+        <div class="eogo-section">
+            <h3>📊 Live CRI Computations</h3>
+            <p class="text-gray-700 mb-6">Real-time analysis using our available data sources:</p>
+            
+            <!-- Tab Navigation -->
+            <div class="mb-6">
+                <div class="border-b border-gray-200">
+                    <nav class="-mb-px flex space-x-8">
+                        <button onclick="switchTab('political-hhi')" id="tab-political-hhi" class="tab-button active">
+                            🏛️ Political HHI
+                        </button>
+                        <button onclick="switchTab('cri-analysis')" id="tab-cri-analysis" class="tab-button">
+                            🎯 CRI Analysis
+                        </button>
+                        <button onclick="switchTab('poverty-correlation')" id="tab-poverty-correlation" class="tab-button">
+                            📈 Poverty Correlation
+                        </button>
+                    </nav>
+                </div>
+            </div>
+
+            <!-- Political HHI Tab -->
+            <div id="content-political-hhi" class="tab-content">
+                <div class="computation-card">
+                    <h4 class="font-semibold text-lg mb-3">🏛️ Political HHI Analysis</h4>
+                    <p class="text-gray-600 mb-4">Political Herfindahl-Hirschman Index measures political dynasty concentration by province. Higher values indicate greater political concentration and potential corruption risk.</p>
+                    <div id="political-hhi-results" class="text-gray-600">
+                        <div class="flex items-center justify-center py-8">
+                            <div class="spinner border-4 border-gray-300 border-t-blue-600 rounded-full w-8 h-8 animate-spin"></div>
+                            <span class="ml-3">Loading political dynasty data...</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- CRI Analysis Tab -->
+            <div id="content-cri-analysis" class="tab-content hidden">
+                <div class="computation-card">
+                    <h4 class="font-semibold text-lg mb-3">🎯 CRI Analysis</h4>
+                    <p class="text-gray-600 mb-4">Corruption Risk Indicator combining multiple factors from the EOGO paper methodology.</p>
+                    <div id="cri-analysis-results" class="text-gray-600">
+                        <div class="flex items-center justify-center py-8">
+                            <div class="spinner border-4 border-gray-300 border-t-blue-600 rounded-full w-8 h-8 animate-spin"></div>
+                            <span class="ml-3">Computing comprehensive CRI scores...</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Poverty Correlation Tab -->
+            <div id="content-poverty-correlation" class="tab-content hidden">
+                <div class="computation-card">
+                    <h4 class="font-semibold text-lg mb-3">📈 Poverty Correlation Analysis</h4>
+                    <p class="text-gray-600 mb-4">Analysis of poverty incidence correlation with corruption risk factors as identified in the EOGO paper.</p>
+                    <div id="poverty-correlation-results" class="text-gray-600">
+                        <div class="flex items-center justify-center py-8">
+                            <div class="spinner border-4 border-gray-300 border-t-blue-600 rounded-full w-8 h-8 animate-spin"></div>
+                            <span class="ml-3">Loading poverty correlation data...</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Conclusion -->
+        <div class="eogo-section">
+            <h3>🎉 Conclusion</h3>
+            <div class="bg-green-50 border border-green-200 rounded-lg p-6">
+                <h4 class="font-semibold text-lg mb-3 text-green-800">✅ Excellent Data Coverage for CRI Computation!</h4>
+                <p class="text-gray-700 mb-4">We have comprehensive data coverage for computing a meaningful, robust Corruption Risk Indicator. Our approach will be:</p>
+                <ul class="space-y-2 text-gray-700">
+                    <li>• <strong>More comprehensive</strong> than the academic paper (we have SEC data they don't)</li>
+                    <li>• <strong>More current</strong> than the 2004-2018 study period</li>
+                    <li>• <strong>More detailed</strong> with contractor-level analysis</li>
+                    <li>• <strong>More actionable</strong> with real-time risk indicators</li>
+                </ul>
+                <p class="text-gray-700 mt-4 font-medium">We can absolutely compute a meaningful, robust Corruption Risk Indicator using all available databases and the poverty JSON data!</p>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<script>
+function toggleMobileMenu() {
+    const mobileMenu = document.getElementById('mobileMenu');
+    mobileMenu.classList.toggle('hidden');
+}
+
+// Tab Switching
+function switchTab(tabName) {
+    // Hide all tab contents
+    document.querySelectorAll('.tab-content').forEach(content => {
+        content.classList.add('hidden');
+    });
+    
+    // Remove active class from all tab buttons
+    document.querySelectorAll('.tab-button').forEach(button => {
+        button.classList.remove('active');
+    });
+    
+    // Show selected tab content
+    document.getElementById(`content-${tabName}`).classList.remove('hidden');
+    
+    // Add active class to selected tab button
+    document.getElementById(`tab-${tabName}`).classList.add('active');
+    
+    // Load data for the selected tab if not already loaded
+    if (tabName === 'political-hhi' && !window.politicalHHILoaded) {
+        loadPoliticalHHI();
+    } else if (tabName === 'cri-analysis' && !window.criAnalysisLoaded) {
+        loadCRIAnalysis();
+    } else if (tabName === 'poverty-correlation' && !window.povertyCorrelationLoaded) {
+        loadPovertyCorrelation();
+    }
+}
+
+// CRI Computations
+async function loadCRIComputations() {
+    try {
+        // Load Political HHI Analysis (default tab)
+        await loadPoliticalHHI();
+        
+    } catch (error) {
+        console.error('Error loading CRI computations:', error);
+    }
+}
+
+async function loadPoliticalHHI() {
+    try {
+        const response = await fetch('/api/dynasty/surnames');
+        const data = await response.json();
+        
+        if (data.success && data.surnames) {
+            // Calculate Political HHI for each province (EOGO paper methodology)
+            const provinceStats = {};
+            
+            data.surnames.forEach(surname => {
+                const province = surname.province;
+                if (!provinceStats[province]) {
+                    provinceStats[province] = {
+                        total: 0,
+                        surnames: {}
+                    };
+                }
+                provinceStats[province].total += surname.total_count;
+                provinceStats[province].surnames[surname.surname] = surname.total_count;
+            });
+            
+            // Calculate HHI for each province (EOGO paper formula)
+            const hhiResults = Object.entries(provinceStats).map(([province, stats]) => {
+                let hhi = 0;
+                Object.values(stats.surnames).forEach(count => {
+                    const share = count / stats.total;
+                    hhi += share * share;
+                });
+                return {
+                    province,
+                    hhi: hhi * 100,
+                    totalPoliticians: stats.total,
+                    uniqueSurnames: Object.keys(stats.surnames).length,
+                    dynastySize: Math.max(...Object.values(stats.surnames)) // Largest dynasty size
+                };
+            }).sort((a, b) => b.hhi - a.hhi);
+            
+            // Display results
+            const resultsDiv = document.getElementById('political-hhi-results');
+            resultsDiv.innerHTML = `
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <h5 class="font-semibold mb-2">Top 10 High-Risk Provinces (Political HHI)</h5>
+                        <div class="space-y-2">
+                            ${hhiResults.slice(0, 10).map((result, index) => `
+                                <div class="flex justify-between items-center p-2 ${index < 3 ? 'bg-red-50' : index < 6 ? 'bg-orange-50' : 'bg-yellow-50'} rounded">
+                                    <span class="font-medium">${result.province}</span>
+                                    <div class="text-right">
+                                        <span class="font-bold">${result.hhi.toFixed(1)}</span>
+                                        <div class="text-xs text-gray-500">${result.totalPoliticians} politicians, ${result.uniqueSurnames} surnames</div>
+                                        <div class="text-xs text-gray-500">Largest dynasty: ${result.dynastySize} members</div>
+                                    </div>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                    <div>
+                        <h5 class="font-semibold mb-2">Political HHI Statistics</h5>
+                        <div class="space-y-2">
+                            <div class="flex justify-between">
+                                <span>Average HHI:</span>
+                                <span class="font-bold">${(hhiResults.reduce((sum, r) => sum + r.hhi, 0) / hhiResults.length).toFixed(1)}</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span>Highest HHI:</span>
+                                <span class="font-bold text-red-600">${hhiResults[0].hhi.toFixed(1)} (${hhiResults[0].province})</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span>Total Provinces:</span>
+                                <span class="font-bold">${hhiResults.length}</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span>High Risk (HHI > 50):</span>
+                                <span class="font-bold text-red-600">${hhiResults.filter(r => r.hhi > 50).length}</span>
+                            </div>
+                        </div>
+                        <div class="mt-4 p-3 bg-blue-50 rounded">
+                            <p class="text-sm text-blue-800">
+                                <strong>EOGO Paper:</strong> Political HHI measures political dynasty concentration. 
+                                Higher values indicate greater political concentration and potential corruption risk.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            `;
+            window.politicalHHILoaded = true;
+        }
+    } catch (error) {
+        document.getElementById('political-hhi-results').innerHTML = `
+            <div class="text-red-600">Error loading political HHI data: ${error.message}</div>
+        `;
+    }
+}
+
+async function loadCRIAnalysis() {
+    try {
+        // Load multiple data sources for comprehensive CRI analysis
+        const [dynastyResponse, philgepsResponse, povertyResponse] = await Promise.all([
+            fetch('/api/dynasty/surnames'),
+            fetch('/api/philgeps/top?limit=1000'),
+            fetch('/database/poverty.json')
+        ]);
+        
+        const dynastyData = await dynastyResponse.json();
+        const philgepsData = await philgepsResponse.json();
+        const povertyData = await povertyResponse.json();
+        
+        if (dynastyData.success && philgepsData.success && povertyData) {
+            // Calculate Political HHI (from dynasty data)
+            const provinceStats = {};
+            
+            // Process dynasty data
+            dynastyData.surnames.forEach(surname => {
+                const province = surname.province;
+                if (!provinceStats[province]) {
+                    provinceStats[province] = {
+                        totalPoliticians: 0,
+                        surnames: {},
+                        totalProjects: 0,
+                        contractors: {},
+                        povertyRate: 0
+                    };
+                }
+                provinceStats[province].totalPoliticians += surname.total_count;
+                provinceStats[province].surnames[surname.surname] = surname.total_count;
+            });
+            
+            // Process PhilGEPS data
+            philgepsData.contractors.forEach(contractor => {
+                const province = contractor.area_of_delivery || 'Unknown';
+                if (provinceStats[province]) {
+                    provinceStats[province].totalProjects += contractor.project_count;
+                    provinceStats[province].contractors[contractor.contractor_name] = contractor.project_count;
+                }
+            });
+            
+            // Process poverty data
+            povertyData.forEach(region => {
+                if (region.provinces) {
+                    region.provinces.forEach(province => {
+                        const provinceName = province.province.toUpperCase();
+                        if (provinceStats[provinceName]) {
+                            provinceStats[provinceName].povertyRate = province.poverty;
+                        }
+                    });
+                }
+            });
+            
+            // Calculate CRI scores for each province (EOGO methodology)
+            const criResults = Object.entries(provinceStats).map(([province, stats]) => {
+                // Political HHI
+                let politicalHHI = 0;
+                Object.values(stats.surnames).forEach(count => {
+                    const share = count / stats.totalPoliticians;
+                    politicalHHI += share * share;
+                });
+                politicalHHI *= 100;
+                
+                // Dynasty Size (largest dynasty in province)
+                const dynastySize = Math.max(...Object.values(stats.surnames));
+                
+                // Contractor HHI
+                let contractorHHI = 0;
+                if (stats.totalProjects > 0) {
+                    Object.values(stats.contractors).forEach(count => {
+                        const share = count / stats.totalProjects;
+                        contractorHHI += share * share;
+                    });
+                    contractorHHI *= 100;
+                }
+                
+                // Combined CRI Score (EOGO paper methodology)
+                const criScore = (politicalHHI * 0.4) + (dynastySize * 0.3) + (contractorHHI * 0.2) + (stats.povertyRate * 0.1);
+                
+                return {
+                    province,
+                    criScore: criScore.toFixed(1),
+                    politicalHHI: politicalHHI.toFixed(1),
+                    dynastySize,
+                    contractorHHI: contractorHHI.toFixed(1),
+                    povertyRate: stats.povertyRate,
+                    totalPoliticians: stats.totalPoliticians,
+                    totalProjects: stats.totalProjects
+                };
+            }).sort((a, b) => parseFloat(b.criScore) - parseFloat(a.criScore));
+            
+            // Display results
+            const resultsDiv = document.getElementById('cri-analysis-results');
+            resultsDiv.innerHTML = `
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <h5 class="font-semibold mb-2">Top 10 High-Risk Provinces (CRI Score)</h5>
+                        <div class="space-y-2">
+                            ${criResults.slice(0, 10).map((result, index) => `
+                                <div class="flex justify-between items-center p-2 ${index < 3 ? 'bg-red-50' : index < 6 ? 'bg-orange-50' : 'bg-yellow-50'} rounded">
+                                    <span class="font-medium">${result.province}</span>
+                                    <div class="text-right">
+                                        <span class="font-bold text-lg">${result.criScore}</span>
+                                        <div class="text-xs text-gray-500">
+                                            HHI: ${result.politicalHHI} | Dynasty: ${result.dynastySize} | 
+                                            Contractor: ${result.contractorHHI} | Poverty: ${result.povertyRate}%
+                                        </div>
+                                    </div>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                    <div>
+                        <h5 class="font-semibold mb-2">CRI Analysis Statistics</h5>
+                        <div class="space-y-2">
+                            <div class="flex justify-between">
+                                <span>Average CRI:</span>
+                                <span class="font-bold">${(criResults.reduce((sum, r) => sum + parseFloat(r.criScore), 0) / criResults.length).toFixed(1)}</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span>Highest CRI:</span>
+                                <span class="font-bold text-red-600">${criResults[0].criScore} (${criResults[0].province})</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span>Total Provinces:</span>
+                                <span class="font-bold">${criResults.length}</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span>High Risk (CRI > 50):</span>
+                                <span class="font-bold text-red-600">${criResults.filter(r => parseFloat(r.criScore) > 50).length}</span>
+                            </div>
+                        </div>
+                        <div class="mt-4 p-3 bg-green-50 rounded">
+                            <p class="text-sm text-green-800">
+                                <strong>EOGO Methodology:</strong> CRI combines Political HHI (40%), Dynasty Size (30%), 
+                                Contractor HHI (20%), and Poverty Rate (10%) using the academic paper's framework.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            `;
+            window.criAnalysisLoaded = true;
+        }
+    } catch (error) {
+        document.getElementById('cri-analysis-results').innerHTML = `
+            <div class="text-red-600">Error loading CRI analysis data: ${error.message}</div>
+        `;
+    }
+}
+
+
+async function loadPovertyCorrelation() {
+    try {
+        const response = await fetch('/database/poverty.json');
+        const data = await response.json();
+        
+        if (data && data.length > 0) {
+            // Extract poverty data
+            const povertyData = [];
+            data.forEach(region => {
+                if (region.provinces) {
+                    region.provinces.forEach(province => {
+                        povertyData.push({
+                            province: province.province,
+                            povertyRate: province.poverty
+                        });
+                    });
+                }
+            });
+            
+            // Sort by poverty rate
+            povertyData.sort((a, b) => b.povertyRate - a.povertyRate);
+            
+            // Calculate poverty statistics for EOGO analysis
+            const avgPoverty = povertyData.reduce((sum, p) => sum + p.povertyRate, 0) / povertyData.length;
+            const highPovertyCount = povertyData.filter(p => p.povertyRate > 20).length;
+            const extremePovertyCount = povertyData.filter(p => p.povertyRate > 30).length;
+            
+            // Display results
+            const resultsDiv = document.getElementById('poverty-correlation-results');
+            resultsDiv.innerHTML = `
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <h5 class="font-semibold mb-2">Highest Poverty Rates (EOGO Control Variable)</h5>
+                        <div class="space-y-2">
+                            ${povertyData.slice(0, 10).map((result, index) => `
+                                <div class="flex justify-between items-center p-2 ${result.povertyRate > 30 ? 'bg-red-50' : result.povertyRate > 20 ? 'bg-orange-50' : 'bg-yellow-50'} rounded">
+                                    <span class="font-medium">${result.province}</span>
+                                    <span class="font-bold">${result.povertyRate}%</span>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                    <div>
+                        <h5 class="font-semibold mb-2">Poverty Statistics</h5>
+                        <div class="space-y-2">
+                            <div class="flex justify-between">
+                                <span>Average Poverty:</span>
+                                <span class="font-bold">${avgPoverty.toFixed(1)}%</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span>Highest Poverty:</span>
+                                <span class="font-bold text-red-600">${povertyData[0].povertyRate}% (${povertyData[0].province})</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span>Total Provinces:</span>
+                                <span class="font-bold">${povertyData.length}</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span>High Poverty (>20%):</span>
+                                <span class="font-bold text-red-600">${highPovertyCount}</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span>Extreme Poverty (>30%):</span>
+                                <span class="font-bold text-red-600">${extremePovertyCount}</span>
+                            </div>
+                        </div>
+                        <div class="mt-4 p-3 bg-blue-50 rounded">
+                            <p class="text-sm text-blue-800">
+                                <strong>EOGO Paper:</strong> Poverty incidence is a key control variable in the CRI regression models. 
+                                Higher poverty rates correlate with increased corruption risk in public procurement.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            `;
+            window.povertyCorrelationLoaded = true;
+        }
+    } catch (error) {
+        document.getElementById('poverty-correlation-results').innerHTML = `
+            <div class="text-red-600">Error loading poverty data: ${error.message}</div>
+        `;
+    }
+}
+
+
+// Load computations when page loads
+document.addEventListener('DOMContentLoaded', loadCRIComputations);
+</script>
+{% endblock %}

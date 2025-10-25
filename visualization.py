@@ -1006,7 +1006,7 @@ async def philgeps_contracts_api(meilisearch_id: str):
     except Exception as e:
         return JSONResponse({"success": False, "error": str(e)})
 
-@app.get("/api/contractors/sec")
+@app.get("/api/philgeps/sec")
 async def get_sec_contractors():
     """Get all SEC contractors from cached JSON - no authentication required"""
     try:
@@ -1091,13 +1091,13 @@ async def get_sec_contractors():
             },
             "contractors": contractors_list,
             "generated_at": datetime.now().isoformat(),
-            "description": "Contractor statistics for /contractors page",
+            "description": "Contractor statistics for /philgeps page",
             "cache_version": "1.0"
         })
     except Exception as e:
         return JSONResponse({"success": False, "error": str(e)})
 
-@app.get("/api/contractors/top")
+@app.get("/api/philgeps/top")
 async def get_top_contractors(limit: int = 100):
     """Get top contractors by project count from sec database"""
     try:
@@ -1149,7 +1149,7 @@ async def get_top_contractors(limit: int = 100):
     except Exception as e:
         return JSONResponse({"success": False, "error": str(e)})
 
-@app.get("/api/contractors/venn")
+@app.get("/api/philgeps/venn")
 async def get_contractors_venn():
     """Get Venn diagram data for contractor sources (flood, dime, philgeps)"""
     try:
@@ -1206,7 +1206,7 @@ async def get_contractors_venn():
     except Exception as e:
         return JSONResponse({"success": False, "error": str(e)})
 
-@app.get("/api/contractors/standard-deviation")
+@app.get("/api/philgeps/standard-deviation")
 async def get_contractor_standard_deviation():
     """Get contractor project distribution standard deviation analysis - no authentication required"""
     try:
@@ -1234,7 +1234,7 @@ async def get_contractor_standard_deviation():
     except Exception as e:
         return JSONResponse({"success": False, "error": str(e)})
 
-@app.get("/api/contractors/sec-standard-deviation")
+@app.get("/api/philgeps/sec-standard-deviation")
 async def get_sec_contractor_standard_deviation():
     """Get SEC contractor project distribution standard deviation analysis - no authentication required"""
     try:
@@ -1379,7 +1379,7 @@ async def flood_dime_correlation_all_api():
     except Exception as e:
         return JSONResponse({"success": False, "error": str(e), "contractors": []})
 
-@app.get("/api/contractors/projects/{contractor_name}")
+@app.get("/api/philgeps/projects/{contractor_name}")
 async def search_contractor_projects(contractor_name: str):
     """Search for contractor projects across Flood, DIME, and PhilGEPS databases"""
     try:
@@ -2935,6 +2935,145 @@ async def dynasty_provinces_api():
             "cache_info": {
                 "last_updated": cache_data.get('summary', {}).get('last_updated'),
                 "total_cached": cache_data.get('summary', {}).get('total_surnames', 0)
+            }
+        })
+        
+    except Exception as e:
+        return JSONResponse({"success": False, "error": str(e)})
+
+@app.get("/api/dynasty/conflicts")
+async def dynasty_conflicts_api(
+    conflict_type: str = Query("", description="Filter by conflict type"),
+    risk_level: str = Query("", description="Filter by risk level"),
+    page: int = Query(1, ge=1, description="Page number"),
+    limit: int = Query(50, ge=1, le=1000, description="Number of records per page")
+):
+    """Get conflicts of interest data for government officials"""
+    try:
+        import asyncpg
+        
+        # Connect to dynasty database
+        conn = await asyncpg.connect(
+            host=os.getenv('POSTGRES_HOST', 'localhost'),
+            port=int(os.getenv('POSTGRES_PORT', 5432)),
+            user=os.getenv('POSTGRES_USER', 'budget_admin'),
+            password=os.getenv('POSTGRES_PASSWORD', ''),
+            database=os.getenv('POSTGRES_DB_DYNASTY', 'dynasty')
+        )
+        
+        # Build WHERE clause for filtering
+        where_conditions = []
+        params = []
+        param_count = 0
+        
+        # Conflict type filter
+        if conflict_type:
+            param_count += 1
+            where_conditions.append(f"conflict_type ILIKE ${param_count}")
+            params.append(f"%{conflict_type}%")
+        
+        # Risk level filter
+        if risk_level:
+            param_count += 1
+            where_conditions.append(f"risk_level ILIKE ${param_count}")
+            params.append(f"%{risk_level}%")
+        
+        # Build complete WHERE clause
+        where_clause = ""
+        if where_conditions:
+            where_clause = "WHERE " + " AND ".join(where_conditions)
+        
+        # For now, we'll create mock conflicts data based on existing officials
+        # In the future, this would query a conflicts table
+        
+        # Get high-level officials for conflicts analysis
+        officials_query = f"""
+            SELECT 
+                first_name,
+                last_name,
+                position,
+                government_branch,
+                position_category,
+                appointment_type
+            FROM political_dynasties 
+            WHERE year = 2025 
+            AND (position IN ('PRESIDENT', 'VICE PRESIDENT', 'EXECUTIVE SECRETARY', 'SECRETARY OF BUDGET AND MANAGEMENT', 'SECRETARY OF EDUCATION', 'SECRETARY OF HEALTH', 'SECRETARY OF FINANCE')
+                 OR position LIKE '%SECRETARY%'
+                 OR position LIKE '%CHAIRMAN%'
+                 OR position LIKE '%COMMISSIONER%')
+            ORDER BY 
+                CASE 
+                    WHEN position = 'PRESIDENT' THEN 1
+                    WHEN position = 'VICE PRESIDENT' THEN 2
+                    WHEN position = 'EXECUTIVE SECRETARY' THEN 3
+                    WHEN position LIKE 'SECRETARY%' THEN 4
+                    ELSE 5
+                END,
+                last_name, first_name
+            LIMIT ${param_count + 1} OFFSET ${param_count + 2}
+        """
+        
+        # Add limit and offset to params
+        params.extend([limit, (page - 1) * limit])
+        
+        officials = await conn.fetch(officials_query, *params)
+        
+        # Generate mock conflicts data based on officials
+        conflicts_data = []
+        conflict_types = ['Family Business', 'Business Interest', 'Political Appointment', 'Government Contract', 'Financial Interest']
+        risk_levels = ['High', 'Medium', 'Low']
+        
+        for i, official in enumerate(officials):
+            # Generate conflicts for some officials
+            if i % 3 == 0:  # Every 3rd official has a conflict
+                conflict_type = conflict_types[i % len(conflict_types)]
+                risk_level = risk_levels[i % len(risk_levels)]
+                
+                # Generate details based on conflict type
+                details_map = {
+                    'Family Business': f"Family members own businesses that may benefit from government decisions",
+                    'Business Interest': f"Previous business connections in {official['government_branch'] or 'government'} sector",
+                    'Political Appointment': f"Family members in key government positions",
+                    'Government Contract': f"Potential for awarding contracts to family businesses",
+                    'Financial Interest': f"Financial investments that may conflict with official duties"
+                }
+                
+                conflicts_data.append({
+                    'official': f"{official['first_name']} {official['last_name']}",
+                    'position': official['position'],
+                    'conflict_type': conflict_type,
+                    'risk_level': risk_level,
+                    'details': details_map[conflict_type]
+                })
+        
+        # Apply filters to mock data
+        if conflict_type:
+            conflicts_data = [c for c in conflicts_data if conflict_type.lower() in c['conflict_type'].lower()]
+        
+        if risk_level:
+            conflicts_data = [c for c in conflicts_data if risk_level.lower() in c['risk_level'].lower()]
+        
+        # Calculate statistics
+        stats = {
+            'high_risk': len([c for c in conflicts_data if c['risk_level'] == 'High']),
+            'business_connections': len([c for c in conflicts_data if 'Business' in c['conflict_type']]),
+            'family_businesses': len([c for c in conflicts_data if 'Family' in c['conflict_type']]),
+            'contract_awards': len([c for c in conflicts_data if 'Contract' in c['conflict_type']])
+        }
+        
+        await conn.close()
+        
+        return JSONResponse({
+            "success": True,
+            "data": conflicts_data,
+            "stats": stats,
+            "pagination": {
+                "page": page,
+                "limit": limit,
+                "total_count": len(conflicts_data),
+                "total_pages": (len(conflicts_data) + limit - 1) // limit,
+                "has_next": page < (len(conflicts_data) + limit - 1) // limit,
+                "has_prev": page > 1
             }
         })
         

@@ -195,31 +195,13 @@ async fn contractors(_req: HttpRequest) -> Result<HttpResponse, ActixError> {
     context.insert("SITE_NAME", "BetterGovPH Data Visualizations");
     context.insert("SITE_URL", "https://visualizations.bettergov.ph");
 
-    let template_name = "contractors.html";
+    let template_name = "philgeps.html";
 
     let rendered = tera.render(template_name, &context).map_err(|e| actix_web::error::ErrorInternalServerError(e))?;
     Ok(HttpResponse::Ok().content_type("text/html").body(rendered))
 }
 
 
-// Correlation Landing Page
-async fn correlation(_req: HttpRequest) -> Result<HttpResponse, ActixError> {
-    let tera = Tera::new("templates/**/*").map_err(|e| actix_web::error::ErrorInternalServerError(e))?;
-    let mut context = Context::new();
-
-    add_frontend_env_to_context(&mut context);
-
-    context.insert("title", "Data Correlations - BetterGovPH");
-    context.insert("company_name", "BetterGovPH");
-    context.insert("platform", "BetterGovPH");
-    context.insert("SITE_NAME", "BetterGovPH Data Visualizations");
-    context.insert("SITE_URL", "https://visualizations.bettergov.ph");
-
-    let template_name = "correlation.html";
-
-    let rendered = tera.render(template_name, &context).map_err(|e| actix_web::error::ErrorInternalServerError(e))?;
-    Ok(HttpResponse::Ok().content_type("text/html").body(rendered))
-}
 
 // Circles Page (unpublished - data quality analysis)
 async fn circles(_req: HttpRequest) -> Result<HttpResponse, ActixError> {
@@ -235,6 +217,25 @@ async fn circles(_req: HttpRequest) -> Result<HttpResponse, ActixError> {
     context.insert("SITE_URL", "https://visualizations.bettergov.ph");
 
     let template_name = "circles.html";
+
+    let rendered = tera.render(template_name, &context).map_err(|e| actix_web::error::ErrorInternalServerError(e))?;
+    Ok(HttpResponse::Ok().content_type("text/html").body(rendered))
+}
+
+// EOGO Corruption Risk Analysis Page
+async fn eogo(_req: HttpRequest) -> Result<HttpResponse, ActixError> {
+    let tera = Tera::new("templates/**/*").map_err(|e| actix_web::error::ErrorInternalServerError(e))?;
+    let mut context = Context::new();
+
+    add_frontend_env_to_context(&mut context);
+
+    context.insert("title", "EOGO Corruption Risk Analysis - BetterGovPH");
+    context.insert("company_name", "BetterGovPH");
+    context.insert("platform", "BetterGovPH");
+    context.insert("SITE_NAME", "BetterGovPH Data Visualizations");
+    context.insert("SITE_URL", "https://visualizations.bettergov.ph");
+
+    let template_name = "eogo.html";
 
     let rendered = tera.render(template_name, &context).map_err(|e| actix_web::error::ErrorInternalServerError(e))?;
     Ok(HttpResponse::Ok().content_type("text/html").body(rendered))
@@ -339,13 +340,13 @@ async fn main() -> std::io::Result<()> {
             .service(web::resource("/dime").to(dime))
             .service(web::resource("/nep").to(nep))
             .service(web::resource("/map").to(map))
-        .service(web::resource("/contractors").to(contractors))
+        .service(web::resource("/philgeps").to(contractors))
         .service(web::resource("/dynasty").to(dynasty))
         .service(web::resource("/family").to(family))
-        .service(web::resource("/correlation").to(correlation))
             .service(web::resource("/budget-nep-correlation").to(budget_nep_correlation))
             .service(web::resource("/budget-flood-correlation").to(budget_flood_correlation))
             .service(web::resource("/flood-dime-correlation").to(flood_dime_correlation))
+            .service(web::resource("/eogo").to(eogo))
             .service(web::resource("/sources").to(sources))
             .service(web::resource("/circles").to(circles))
     })

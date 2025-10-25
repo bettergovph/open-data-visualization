@@ -69,16 +69,8 @@
             <a href="/flood" class="text-black hover:text-gray-600 font-medium transition">Flood Control</a>
             <a href="/dime" class="text-black hover:text-gray-600 font-medium transition">DIME</a>
             <a href="/map" class="text-black hover:text-gray-600 font-medium transition">Map</a>
-            <a href="/contractors" class="text-black hover:text-gray-600 font-medium transition">PhilGEPS</a>
+            <a href="/philgeps" class="text-black hover:text-gray-600 font-medium transition">PhilGEPS</a>
             <a href="/dynasty" class="text-black hover:text-gray-600 font-medium transition">Dynasties</a>
-            <div class="relative" onmouseenter="this.querySelector('.dropdown-menu').classList.remove('hidden')" onmouseleave="this.querySelector('.dropdown-menu').classList.add('hidden')">
-                <a href="/correlation" class="text-black hover:text-gray-600 font-medium transition">Correlation ▾</a>
-                <div class="dropdown-menu absolute hidden bg-white shadow-lg rounded-md mt-0 py-2 w-48" style="z-index: 50;">
-                    <a href="/budget-nep-correlation" class="block px-4 py-2 text-black" style="border-radius: 4px; margin: 2px 4px; transition: all 0.2s;" onmouseover="this.style.background='#dbeafe'; this.style.color='#2563eb';" onmouseout="this.style.background='transparent'; this.style.color='black';">NEP-Budget</a>
-                    <a href="/budget-flood-correlation" class="block px-4 py-2 text-black" style="border-radius: 4px; margin: 2px 4px; transition: all 0.2s;" onmouseover="this.style.background='#dbeafe'; this.style.color='#2563eb';" onmouseout="this.style.background='transparent'; this.style.color='black';">Budget-Flood</a>
-                    <a href="/flood-dime-correlation" class="block px-4 py-2 text-black" style="border-radius: 4px; margin: 2px 4px; transition: all 0.2s;" onmouseover="this.style.background='#dbeafe'; this.style.color='#2563eb';" onmouseout="this.style.background='transparent'; this.style.color='black';">Flood-DIME</a>
-                </div>
-            </div>
             <a href="/sources" class="text-black hover:text-gray-600 font-medium transition">Sources</a>
         </div>
         <div class="md:hidden">
@@ -96,12 +88,8 @@
         <a href="/flood" class="block text-black hover:text-gray-600 font-medium py-2">Flood Control</a>
         <a href="/dime" class="block text-black hover:text-gray-600 font-medium py-2">DIME</a>
         <a href="/map" class="block text-black hover:text-gray-600 font-medium py-2">Map</a>
-        <a href="/contractors" class="block text-black hover:text-gray-600 font-medium py-2">PhilGEPS</a>
+        <a href="/philgeps" class="block text-black hover:text-gray-600 font-medium py-2">PhilGEPS</a>
         <a href="/dynasty" class="block text-black hover:text-gray-600 font-medium py-2">Dynasties</a>
-        <a href="/correlation" class="block text-black hover:text-gray-600 font-medium py-2">Correlation</a>
-        <a href="/budget-nep-correlation" class="block text-black hover:text-gray-600 font-medium py-2 pl-4">→ NEP-Budget</a>
-        <a href="/budget-flood-correlation" class="block text-black hover:text-gray-600 font-medium py-2 pl-4">→ Budget-Flood</a>
-        <a href="/flood-dime-correlation" class="block text-black hover:text-gray-600 font-medium py-2 pl-4">→ Flood-DIME</a>
     </div>
 </nav>
 
@@ -133,6 +121,15 @@ function toggleMobileMenu() {
                     <div id="tab-visual" class="budget-tab-panel active">
                         <h3 class="budget-section-title">📊 Budget Visual Analysis</h3>
                         <p class="budget-section-desc">Interactive charts and visualizations of budget data</p>
+                        
+                        <!-- NEP-Budget Correlation Link -->
+                        <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 20px; border-radius: 12px; margin: 20px 0; text-align: center; box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);">
+                            <h4 style="color: white; font-size: 1.2rem; font-weight: 600; margin-bottom: 8px;">🔗 Compare NEP with Budget Data</h4>
+                            <p style="color: rgba(255,255,255,0.9); margin-bottom: 15px; font-size: 0.95rem;">See how NEP allocations correlate with actual budget expenditures</p>
+                            <a href="/budget-nep-correlation" style="display: inline-block; background: white; color: #667eea; padding: 12px 24px; border-radius: 8px; text-decoration: none; font-weight: 600; transition: all 0.3s ease; box-shadow: 0 2px 8px rgba(0,0,0,0.1);" onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 4px 15px rgba(0,0,0,0.2)';" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 2px 8px rgba(0,0,0,0.1)';">
+                                📈 View NEP-Budget Correlation →
+                            </a>
+                        </div>
                         
                         <!-- Loading Spinner -->
                         <div id="visual-loading-spinner" class="loading-spinner" style="display: flex; justify-content: center; align-items: center; padding: 40px; margin: 20px 0;">

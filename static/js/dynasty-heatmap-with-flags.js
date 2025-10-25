@@ -254,3 +254,5 @@ document.addEventListener('DOMContentLoaded', function() {
     // Make heatmap globally accessible
     window.heatmap = heatmap;
 });
+
+

@@ -201,16 +201,8 @@
             <a href="/flood" class="text-black hover:text-gray-600 font-medium transition">Flood Control</a>
             <a href="/dime" class="text-black hover:text-gray-600 font-medium transition">DIME</a>
             <a href="/map" class="text-black hover:text-gray-600 font-medium transition">Map</a>
-            <a href="/contractors" class="text-black hover:text-gray-600 font-medium transition">PhilGEPS</a>
+            <a href="/philgeps" class="text-black hover:text-gray-600 font-medium transition">PhilGEPS</a>
             <a href="/dynasty" class="text-black hover:text-gray-600 font-medium transition border-b-2 border-black">Dynasties</a>
-            <div class="relative" onmouseenter="this.querySelector('.dropdown-menu').classList.remove('hidden')" onmouseleave="this.querySelector('.dropdown-menu').classList.add('hidden')">
-                <a href="/correlation" class="text-black hover:text-gray-600 font-medium transition">Correlation ▾</a>
-                <div class="dropdown-menu absolute hidden bg-white shadow-lg rounded-md mt-0 py-2 w-48" style="z-index: 50;">
-                    <a href="/budget-nep-correlation" class="block px-4 py-2 text-black" style="border-radius: 4px; margin: 2px 4px; transition: all 0.2s;" onmouseover="this.style.background='#dbeafe'; this.style.color='#2563eb';" onmouseout="this.style.background='transparent'; this.style.color='black';">NEP-Budget</a>
-                    <a href="/budget-flood-correlation" class="block px-4 py-2 text-black" style="border-radius: 4px; margin: 2px 4px; transition: all 0.2s;" onmouseover="this.style.background='#dbeafe'; this.style.color='#2563eb';" onmouseout="this.style.background='transparent'; this.style.color='black';">Budget-Flood</a>
-                    <a href="/flood-dime-correlation" class="block px-4 py-2 text-black" style="border-radius: 4px; margin: 2px 4px; transition: all 0.2s;" onmouseover="this.style.background='#dbeafe'; this.style.color='#2563eb';" onmouseout="this.style.background='transparent'; this.style.color='black';">Flood-DIME</a>
-                </div>
-            </div>
             <a href="/sources" class="text-black hover:text-gray-600 font-medium transition">Sources</a>
         </div>
         <div class="md:hidden">
@@ -228,12 +220,8 @@
         <a href="/flood" class="block text-black hover:text-gray-600 font-medium py-2">Flood Control</a>
         <a href="/dime" class="block text-black hover:text-gray-600 font-medium py-2">DIME</a>
         <a href="/map" class="block text-black hover:text-gray-600 font-medium py-2">Map</a>
-        <a href="/contractors" class="block text-black hover:text-gray-600 font-medium py-2">PhilGEPS</a>
+        <a href="/philgeps" class="block text-black hover:text-gray-600 font-medium py-2">PhilGEPS</a>
         <a href="/dynasty" class="block text-black hover:text-gray-600 font-medium py-2 border-b-2 border-black">Dynasties</a>
-        <a href="/correlation" class="block text-black hover:text-gray-600 font-medium py-2">Correlation</a>
-        <a href="/budget-nep-correlation" class="block text-black hover:text-gray-600 font-medium py-2 pl-4">→ NEP-Budget</a>
-        <a href="/budget-flood-correlation" class="block text-black hover:text-gray-600 font-medium py-2 pl-4">→ Budget-Flood</a>
-        <a href="/flood-dime-correlation" class="block text-black hover:text-gray-600 font-medium py-2 pl-4">→ Flood-DIME</a>
     </div>
 </nav>
 
@@ -471,6 +459,95 @@ function toggleMobileMenu() {
                             </div>
                         </div>
                     </div>
+
+                    <!-- Conflicts of Interest Tab -->
+                    <div id="tab-conflicts" class="dynasty-tab-panel">
+                        <h3 class="dynasty-section-title">⚖️ Conflicts of Interest</h3>
+                        <p class="dynasty-section-desc">Analyze potential conflicts of interest between government officials and business interests</p>
+                        
+                        <!-- Conflicts Analysis Cards -->
+                        <div class="conflicts-stats-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; margin-bottom: 30px;">
+                            <div class="stat-card" style="background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); text-align: center;">
+                                <h3 style="color: #0038A8; margin: 0 0 10px 0; font-size: 1.1em;">High Risk Officials</h3>
+                                <p id="highRiskOfficials" style="font-size: 2em; font-weight: bold; color: #dc3545; margin: 0;">Loading...</p>
+                            </div>
+                            <div class="stat-card" style="background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); text-align: center;">
+                                <h3 style="color: #0038A8; margin: 0 0 10px 0; font-size: 1.1em;">Business Connections</h3>
+                                <p id="businessConnections" style="font-size: 2em; font-weight: bold; color: #ffc107; margin: 0;">Loading...</p>
+                            </div>
+                            <div class="stat-card" style="background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); text-align: center;">
+                                <h3 style="color: #0038A8; margin: 0 0 10px 0; font-size: 1.1em;">Family Businesses</h3>
+                                <p id="familyBusinesses" style="font-size: 2em; font-weight: bold; color: #28a745; margin: 0;">Loading...</p>
+                            </div>
+                            <div class="stat-card" style="background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); text-align: center;">
+                                <h3 style="color: #0038A8; margin: 0 0 10px 0; font-size: 1.1em;">Contract Awards</h3>
+                                <p id="contractAwards" style="font-size: 2em; font-weight: bold; color: #17a2b8; margin: 0;">Loading...</p>
+                            </div>
+                        </div>
+
+                        <!-- Conflicts Analysis Table -->
+                        <div class="conflicts-analysis-section" style="background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); margin-bottom: 20px;">
+                            <h4 style="color: #0038A8; margin: 0 0 15px 0; font-size: 1.2em;">🔍 Conflicts Analysis</h4>
+                            <div class="conflicts-filters" style="display: flex; gap: 15px; margin-bottom: 20px; flex-wrap: wrap;">
+                                <select id="conflictTypeFilter" class="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
+                                    <option value="">All Conflict Types</option>
+                                    <option value="business">Business Interests</option>
+                                    <option value="family">Family Connections</option>
+                                    <option value="contracts">Government Contracts</option>
+                                    <option value="appointments">Political Appointments</option>
+                                </select>
+                                <select id="riskLevelFilter" class="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
+                                    <option value="">All Risk Levels</option>
+                                    <option value="high">High Risk</option>
+                                    <option value="medium">Medium Risk</option>
+                                    <option value="low">Low Risk</option>
+                                </select>
+                                <button id="applyConflictsFilter" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition">
+                                    Apply Filter
+                                </button>
+                            </div>
+                            
+                            <div class="conflicts-table-container" style="overflow-x: auto;">
+                                <table class="conflicts-table" style="width: 100%; border-collapse: collapse;">
+                                    <thead>
+                                        <tr style="background: #f8f9fa;">
+                                            <th style="padding: 12px; text-align: left; border-bottom: 2px solid #dee2e6; font-weight: 600;">Official</th>
+                                            <th style="padding: 12px; text-align: left; border-bottom: 2px solid #dee2e6; font-weight: 600;">Position</th>
+                                            <th style="padding: 12px; text-align: left; border-bottom: 2px solid #dee2e6; font-weight: 600;">Conflict Type</th>
+                                            <th style="padding: 12px; text-align: left; border-bottom: 2px solid #dee2e6; font-weight: 600;">Risk Level</th>
+                                            <th style="padding: 12px; text-align: left; border-bottom: 2px solid #dee2e6; font-weight: 600;">Details</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="conflictsTableBody">
+                                        <tr>
+                                            <td colspan="5" style="padding: 20px; text-align: center; color: #6c757d;">
+                                                <div style="display: flex; flex-direction: column; align-items: center; gap: 10px;">
+                                                    <div style="font-size: 2em;">🔍</div>
+                                                    <div>Loading conflicts analysis...</div>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                        <!-- Conflicts Network Visualization -->
+                        <div class="conflicts-network-section" style="background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
+                            <h4 style="color: #0038A8; margin: 0 0 15px 0; font-size: 1.2em;">🕸️ Conflicts Network</h4>
+                            <p style="color: #6c757d; margin: 0 0 15px 0; font-size: 0.9em;">
+                                Interactive network showing connections between officials and business interests
+                            </p>
+                            <div id="conflictsNetwork" style="height: 500px; width: 100%; border: 1px solid #dee2e6; border-radius: 8px; background: #f8f9fa;">
+                                <div style="display: flex; justify-content: center; align-items: center; height: 100%; color: #6c757d;">
+                                    <div style="text-align: center;">
+                                        <div style="font-size: 2em; margin-bottom: 10px;">🕸️</div>
+                                        <div>Conflicts network visualization will appear here</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -526,6 +603,8 @@ function initializeDynastyPage() {
                 loadSurnamesChart();
             } else if (tabName === 'overlords') {
                 loadDynastyMap();
+            } else if (tabName === 'conflicts') {
+                loadConflictsData();
             }
         });
     });
@@ -537,6 +616,9 @@ function initializeDynastyPage() {
             applyFilters();
         }
     });
+
+    // Set up conflicts filters
+    document.getElementById('applyConflictsFilter').addEventListener('click', loadConflictsData);
 
     // Set up pagination
     document.getElementById('prevPage').addEventListener('click', function() {
@@ -1999,6 +2081,98 @@ document.addEventListener('DOMContentLoaded', function() {
         </div>
     </div>
 </div>
+
+<!-- Load Conflicts Data Function -->
+<script>
+async function loadConflictsData() {
+    console.log('🔍 Loading conflicts of interest data...');
+    
+    try {
+        // Get filter values
+        const conflictType = document.getElementById('conflictTypeFilter').value;
+        const riskLevel = document.getElementById('riskLevelFilter').value;
+        
+        // Build API URL with filters
+        const params = new URLSearchParams();
+        if (conflictType) params.append('conflict_type', conflictType);
+        if (riskLevel) params.append('risk_level', riskLevel);
+        
+        // Call the conflicts API
+        const response = await fetch(`/api/dynasty/conflicts?${params}`);
+        const conflictsData = await response.json();
+        
+        if (!conflictsData.success) {
+            throw new Error(conflictsData.error || 'Failed to load conflicts data');
+        }
+        
+        // Update statistics cards
+        document.getElementById('highRiskOfficials').textContent = conflictsData.stats.high_risk;
+        document.getElementById('businessConnections').textContent = conflictsData.stats.business_connections;
+        document.getElementById('familyBusinesses').textContent = conflictsData.stats.family_businesses;
+        document.getElementById('contractAwards').textContent = conflictsData.stats.contract_awards;
+        
+        // Update conflicts table
+        const tableBody = document.getElementById('conflictsTableBody');
+        
+        if (conflictsData.data.length === 0) {
+            tableBody.innerHTML = `
+                <tr>
+                    <td colspan="5" style="padding: 20px; text-align: center; color: #6c757d;">
+                        <div style="display: flex; flex-direction: column; align-items: center; gap: 10px;">
+                            <div style="font-size: 2em;">📭</div>
+                            <div>No conflicts found matching your criteria</div>
+                        </div>
+                    </td>
+                </tr>
+            `;
+        } else {
+            tableBody.innerHTML = conflictsData.data.map(conflict => `
+                <tr style="border-bottom: 1px solid #dee2e6;">
+                    <td style="padding: 12px;">
+                        <div style="font-weight: 600; color: #0038A8;">${conflict.official}</div>
+                    </td>
+                    <td style="padding: 12px;">
+                        <div style="color: #6c757d; font-size: 0.9em;">${conflict.position}</div>
+                    </td>
+                    <td style="padding: 12px;">
+                        <span style="background: #e3f2fd; color: #1976d2; padding: 4px 8px; border-radius: 4px; font-size: 0.8em; font-weight: 500;">
+                            ${conflict.conflict_type}
+                        </span>
+                    </td>
+                    <td style="padding: 12px;">
+                        <span style="background: ${conflict.risk_level === 'High' ? '#ffebee' : conflict.risk_level === 'Medium' ? '#fff3e0' : '#e8f5e8'}; 
+                                    color: ${conflict.risk_level === 'High' ? '#c62828' : conflict.risk_level === 'Medium' ? '#ef6c00' : '#2e7d32'}; 
+                                    padding: 4px 8px; border-radius: 4px; font-size: 0.8em; font-weight: 500;">
+                            ${conflict.risk_level}
+                        </span>
+                    </td>
+                    <td style="padding: 12px;">
+                        <div style="color: #6c757d; font-size: 0.9em;">${conflict.details}</div>
+                    </td>
+                </tr>
+            `).join('');
+        }
+        
+        console.log('✅ Conflicts data loaded successfully');
+        
+    } catch (error) {
+        console.error('❌ Error loading conflicts data:', error);
+        
+        // Show error in table
+        const tableBody = document.getElementById('conflictsTableBody');
+        tableBody.innerHTML = `
+            <tr>
+                <td colspan="5" style="padding: 20px; text-align: center; color: #dc3545;">
+                    <div style="display: flex; flex-direction: column; align-items: center; gap: 10px;">
+                        <div style="font-size: 2em;">❌</div>
+                        <div>Error loading conflicts data</div>
+                    </div>
+                </td>
+            </tr>
+        `;
+    }
+}
+</script>
 
 </body>
 </html>

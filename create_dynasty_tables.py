@@ -103,3 +103,4 @@ async def create_dynasty_tables():
 
 if __name__ == "__main__":
     asyncio.run(create_dynasty_tables())
+

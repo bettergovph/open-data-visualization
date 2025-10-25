@@ -1,0 +1,119 @@
+
+# Political Dynasty Relationship Analysis Prompt
+
+You are a political research analyst specializing in Philippine political dynasties. Your task is to analyze the relationships between members of the top 5 political dynasties in the Philippines and return the findings in CSV format.
+
+## Top 5 Political Dynasties Analyzed:
+1. **TULFO Dynasty** - 4,054 members
+2. **TAN Dynasty** - 4,013 members  
+3. **MENDOZA Dynasty** - 2,910 members
+4. **RODRIGUEZ Dynasty** - 2,674 members
+5. **GO Dynasty** - 2,389 members
+
+## Names to Analyze:
+RICKY RODRIGUEZ
+ANN TAN
+GAY TAN
+RAFFY MENDOZA
+ALAN GO
+FRANK MENDOZA
+ALEXIS RODRIGUEZ
+ERWIN TULFO
+VICENTE D. MENDOZA
+CHRISTIAN V. RODRIGUEZ
+CHERYLL Z. TAN
+BUTCH MENDOZA
+BONG GO GO
+ISONG MENDOZA
+CHRISTIAN HEZRON MENDOZA
+LINA GO
+ARNOLD TAN
+YOLANDA TAN
+ELMER A. MENDOZA
+WENDELL MENDOZA
+BEN BITAG TULFO
+ROSELLER B. RODRIGUEZ
+PETHYAS MENDOZA
+RICKY C. RODRIGUEZ
+ANTONIO RODRIGUEZ
+SED HENDRIX TAN
+ARCADIO JR. MENDOZA
+PEEWEE MENDOZA
+JOSEPH GO
+JULIO JR. RODRIGUEZ
+RONALD ALLAN GO
+WIN MENDOZA
+RUFUS RODRIGUEZ
+BUTCH RODRIGUEZ
+LAN LAN TAN
+GIRLIE GO
+PATRICK ELLIS GO
+BEBOT RODRIGUEZ
+DINDIN MENDOZA
+VLADIMIR RODRIGUEZ
+ALLAN MARIE R. TAN
+DANTE TAN
+NARDO GO
+DIANA MENDOZA
+JAY DOMINADOR G. GO
+JORMAC TAN
+RAFAEL JR. RODRIGUEZ
+MODESTO II RODRIGUEZ
+GILBERT I. GO
+NARICRES GO  # Show first 50 names
+... and 111 more names
+
+## Your Task:
+1. **Research each name** using web sources to find:
+   - Family relationships (parent-child, siblings, spouses)
+   - Political connections and alliances
+   - Marriage connections between dynasties
+   - Succession patterns within families
+   - Cross-dynasty relationships
+
+2. **Return results in CSV format** with these columns:
+   - person1_name
+   - person2_name  
+   - relationship_type
+   - relationship_description
+   - dynasty1
+   - dynasty2
+   - source_url
+   - confidence_level (1-10)
+
+## Relationship Types to Identify:
+- Father/Mother
+- Son/Daughter
+- Husband/Wife
+- Brother/Sister
+- Uncle/Aunt
+- Nephew/Niece
+- Cousin
+- Grandfather/Grandmother
+- Grandson/Granddaughter
+- Father-in-law/Mother-in-law
+- Son-in-law/Daughter-in-law
+- Political Ally
+- Business Partner
+- Successor/Predecessor
+
+## Instructions:
+1. Use web sources to verify relationships
+2. Focus on documented, verifiable connections
+3. Include source URLs for verification
+4. Rate confidence level (1=low, 10=high)
+5. Identify both intra-dynasty and inter-dynasty relationships
+6. Look for marriage alliances between dynasties
+7. Document political succession patterns
+
+## Output Format:
+Return a CSV with the exact column headers specified above. Include a header row and ensure all fields are properly quoted if they contain commas.
+
+## Example Output:
+```csv
+person1_name,person2_name,relationship_type,relationship_description,dynasty1,dynasty2,source_url,confidence_level
+"BEN BITAG TULFO","ERWIN TULFO","Brother","Siblings in TULFO dynasty","TULFO","TULFO","https://example.com",9
+"STEPHANY TAN","STEPHEN JAMES TAN","Husband","Married couple","TAN","TAN","https://example.com",8
+```
+
+Analyze all 161 names and return the complete relationship matrix in CSV format.

@@ -6,11 +6,11 @@ module.exports = {
   ],
   safelist: [
     'animate-spin', 'bg-[#17a2b8]', 'bg-[#28a745]', 'bg-[#6c757d]', 'bg-[#dc3545]', 'bg-[#ffc107]',
-    'bg-black', 'bg-blue-100', 'bg-blue-50', 'bg-blue-600', 'bg-gradient-to-br', 'bg-gradient-to-r',
+    'bg-black', 'bg-blue-100', 'bg-blue-50', 'bg-blue-600', 'bg-blue-700', 'bg-blue-800', 'bg-gradient-to-br', 'bg-gradient-to-r',
     'bg-gray-100', 'bg-gray-50', 'bg-gray-600', 'bg-green-100', 'bg-green-50', 'bg-green-600',
     'bg-red-100', 'bg-red-50', 'bg-white', 'bg-yellow-100', 'bg-yellow-50',
     'border-2', 'border-4', 'border-b', 'border-b-2', 'border-black', 'border-blue-200',
-    'border-blue-500', 'border-blue-600', 'border-gray-200', 'border-gray-300', 'border-green-200',
+    'border-blue-500', 'border-blue-600', 'border-blue-800', 'border-gray-200', 'border-gray-300', 'border-green-200',
     'border-green-400', 'border-green-500', 'border-l', 'border-l-4', 'border-r', 'border-red-400',
     'border-red-500', 'border-t', 'border-t-blue-900', 'border-yellow-400',
     'cursor-pointer', 'divide-gray-200', 'divide-y', 'duration-300',

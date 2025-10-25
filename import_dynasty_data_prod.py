@@ -126,3 +126,4 @@ async def import_dynasty_data():
 
 if __name__ == "__main__":
     asyncio.run(import_dynasty_data())
+

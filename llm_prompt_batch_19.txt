@@ -1,0 +1,205 @@
+# Political Dynasty Relationship Analysis - Batch 19
+
+You are a political research analyst specializing in Philippine political dynasties. Your task is to analyze the relationships between the following political figures and return findings in CSV format.
+
+## ANALYSIS INSTRUCTIONS
+
+1. **Research each name** using web sources to find:
+   - Family relationships (parent-child, siblings, spouses)
+   - Political connections and alliances
+   - Marriage connections between dynasties
+   - Succession patterns within families
+   - Cross-dynasty relationships
+
+2. **Return results in CSV format** with these EXACT columns:
+   - person1_name
+   - person2_name  
+   - relationship_type
+   - relationship_description
+   - dynasty1
+   - dynasty2
+   - source_url
+   - confidence_level
+
+## RELATIONSHIP TYPES TO IDENTIFY:
+- Father/Mother
+- Son/Daughter
+- Husband/Wife
+- Brother/Sister
+- Uncle/Aunt
+- Nephew/Niece
+- Cousin
+- Grandfather/Grandmother
+- Grandson/Granddaughter
+- Father-in-law/Mother-in-law
+- Son-in-law/Daughter-in-law
+- Political Ally
+- Business Partner
+- Successor/Predecessor
+
+## NAMES TO ANALYZE (Grouped by Dynasty):
+
+
+### ABAD Dynasty (1 members):
+- MERLY ABAD (CEBU) - COUNCILOR
+
+### AGUSTIN Dynasty (1 members):
+- REX C. VILLA AGUSTIN (TARLAC PROVINCE) - MAYOR
+
+### AMERICA Dynasty (1 members):
+- FILIPINA GRACE AMERICA (QUEZON) - MAYOR
+
+### ARCASETAS Dynasty (1 members):
+- LOURDES ARCASETAS (LAGUNA) - VICE MAYOR
+
+### ARLAN Dynasty (1 members):
+- EDGAR ARLAN (SURIGAO DEL NORTE) - COUNCILOR
+
+### BAUTISTA Dynasty (1 members):
+- ELMER BAUTISTA (ISABELA) - COUNCILOR
+
+### BOADO Dynasty (1 members):
+- CARLITO BOADO (LA UNION) - COUNCILOR
+
+### BUNYOG Dynasty (1 members):
+- 87 BUNYOG (MISAMIS ORIENTAL) - OTHER
+
+### CAPENDIT Dynasty (1 members):
+- BALBINA CAPENDIT (ANTIQUE) - COUNCILOR
+
+### CHUA Dynasty (1 members):
+- WILLIAM CHRISTOPHER CHUA (ZAMBOANGA SIBUGAY) - COUNCILOR
+
+### CUEVA Dynasty (1 members):
+- LEO RAFAEL CUEVA (NEGROS OCCIDENTAL) - VICE MAYOR
+
+### CUSTORIO Dynasty (1 members):
+- MARIA CUSTORIO (NORTHERN SAMAR) - VICE MAYOR
+
+### DAVID Dynasty (1 members):
+- CARLITO DAVID (TARLAC) - VICE GOVERNOR
+
+### DE ROXAS Dynasty (1 members):
+- CARLITO DE ROXAS (ORIENTAL MINDORO) - COUNCILOR
+
+### DELA CRUZ Dynasty (2 members):
+- NOLI DELA CRUZ (COMPOSTELA VALLEY) - COUNCILOR
+- MELY DELA CRUZ (ILOCOS SUR) - COUNCILOR
+
+### DOMINGO Dynasty (1 members):
+- CANDIDO DOMINGO (AGUSAN DEL SUR) - COUNCILOR
+
+### DUMAGAY Dynasty (1 members):
+- BAITAL DUMAGAY (LANAO DEL SUR) - COUNCILOR
+
+### ESCOBAR Dynasty (1 members):
+- DELFIN ESCOBAR (ILOCOS SUR) - COUNCILOR
+
+### ESPIRITU Dynasty (1 members):
+- ALBERTO ESPIRITU (PANGASINAN) - COUNCILOR
+
+### ESTRADA Dynasty (1 members):
+- DOMINGO ESTRADA (COMPOSTELA VALLEY) - COUNCILOR
+
+### FACUN Dynasty (1 members):
+- LUZ FACUN (TARLAC) - COUNCILOR
+
+### FIDER Dynasty (1 members):
+- DAVIS GREGORY FIDER (BATANGAS) - VICE MAYOR
+
+### GAKO Dynasty (1 members):
+- MARVIN JESSIE GAKO (ZAMBOANGA SIBUGAY) - VICE MAYOR
+
+### GATPOLINTAN Dynasty (1 members):
+- ROGELIO GATPOLINTAN (SURIGAO DEL NORTE) - COUNCILOR
+
+### GONZALES Dynasty (1 members):
+- FRANCISCO GONZALES (SURIGAO DEL NORTE) - COUNCILOR
+
+### HACHUELA Dynasty (1 members):
+- MATEO C. HACHUELA (Capiz) - MAYOR
+
+### HENSON Dynasty (1 members):
+- ARLON HENSON (PAMPANGA) - COUNCILOR
+
+### IGAMA Dynasty (1 members):
+- CECILIO IGAMA (PANGASINAN) - COUNCILOR
+
+### LUCEÑO Dynasty (1 members):
+- JONATHAN LUCEÑO (BUKIDNON) - COUNCILOR
+
+### LUTAN Dynasty (1 members):
+- STEVEN LUTAN (SOUTH COTABATO) - COUNCILOR
+
+### MAPALO Dynasty (1 members):
+- EDNA MAPALO (LEYTE) - COUNCILOR
+
+### NAVA Dynasty (1 members):
+- JOAQUIN CARLOS RAHMAN NAVA (GUIMARAS) - GOVERNOR
+
+### OCSAN Dynasty (1 members):
+- RAMIE OCSAN (PANGASINAN) - COUNCILOR
+
+### ORFANEL Dynasty (1 members):
+- RODOLFO ORFANEL (QUEZON) - COUNCILOR
+
+### ORTIZ Dynasty (1 members):
+- JOSEPH ORTIZ (NUEVA ECIJA) - COUNCILOR
+
+### PEREZ Dynasty (1 members):
+- ADELAIDA PEREZ (BATANGAS) - COUNCILOR
+
+### PINAROC Dynasty (1 members):
+- FLORENTINO PINAROC (MARINDUQUE) - COUNCILOR
+
+### ROBLES Dynasty (1 members):
+- CAMILO ROBLES (CAPIZ) - PROVINCIAL BOARD MEMBER
+
+### ROSALES Dynasty (1 members):
+- FRANCISCO JR. ROSALES (NORTHERN SAMAR) - MAYOR
+
+### SALOMON Dynasty (1 members):
+- RITCHE SALOMON (SOUTHERN LEYTE) - COUNCILOR
+
+### SECUYA Dynasty (1 members):
+- ERNESTO SECUYA (CEBU) - COUNCILOR
+
+### SOLEE Dynasty (1 members):
+- AMELIA SOLEE (PANGASINAN) - COUNCILOR
+
+### TANCAWAN Dynasty (1 members):
+- MARIA BREGIDORIETTA TANCAWAN (CEBU) - COUNCILOR
+
+### UTLEG Dynasty (1 members):
+- JAMES UTLEG (CAGAYAN) - COUNCILOR
+
+### VERSOZA Dynasty (1 members):
+- MEMING VERSOZA (PANGASINAN) - COUNCILOR
+
+### VILLA AGUSTIN Dynasty (1 members):
+- VITTORIO N VILLA AGUSTIN (TARLAC) - COUNCILOR
+
+### VOLANTE Dynasty (1 members):
+- ROLI VOLANTE (ALBAY) - COUNCILOR
+
+### YNARES Dynasty (1 members):
+- CECILIO YNARES (RIZAL) - MAYOR
+
+### ZAYAS Dynasty (1 members):
+- ENRIQUE ZAYAS (MISAMIS ORIENTAL) - COUNCILOR
+
+## OUTPUT REQUIREMENTS:
+
+1. **CSV Format**: Return ONLY the CSV data with the exact column headers specified
+2. **Source URLs**: Include working URLs for verification
+3. **Confidence Level**: Rate 1-10 (10 = highest confidence)
+4. **Focus on**: Documented, verifiable relationships only
+5. **Include**: Both intra-dynasty and inter-dynasty relationships
+
+## EXAMPLE OUTPUT:
+```csv
+person1_name,person2_name,relationship_type,relationship_description,dynasty1,dynasty2,source_url,confidence_level
+"JOHN DOE","JANE DOE","Husband","Married couple in politics","DOE","DOE","https://example.com",9
+```
+
+Analyze all 50 names above and return the complete relationship matrix in CSV format.

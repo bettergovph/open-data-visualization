@@ -83,16 +83,8 @@
                     <a href="/flood" class="text-black hover:text-gray-600 font-medium transition">Flood Control</a>
                     <a href="/dime" class="text-black hover:text-gray-600 font-medium transition">DIME</a>
                     <a href="/map" class="text-black hover:text-gray-600 font-medium transition">Map</a>
-                    <a href="/contractors" class="text-black hover:text-gray-600 font-medium transition">PhilGEPS</a>
+                    <a href="/philgeps" class="text-black hover:text-gray-600 font-medium transition">PhilGEPS</a>
                     <a href="/dynasty" class="text-black hover:text-gray-600 font-medium transition border-b-2 border-black">Dynasties</a>
-                    <div class="relative" onmouseenter="this.querySelector('.dropdown-menu').classList.remove('hidden')" onmouseleave="this.querySelector('.dropdown-menu').classList.add('hidden')">
-                        <a href="/correlation" class="text-black hover:text-gray-600 font-medium transition">Correlation ▾</a>
-                        <div class="dropdown-menu absolute hidden bg-white shadow-lg rounded-md mt-0 py-2 w-48" style="z-index: 50;">
-                            <a href="/budget-nep-correlation" class="block px-4 py-2 text-black" style="border-radius: 4px; margin: 2px 4px; transition: all 0.2s;" onmouseover="this.style.background='#dbeafe'; this.style.color='#2563eb';" onmouseout="this.style.background='transparent'; this.style.color='black';">NEP-Budget</a>
-                            <a href="/budget-flood-correlation" class="block px-4 py-2 text-black" style="border-radius: 4px; margin: 2px 4px; transition: all 0.2s;" onmouseover="this.style.background='#dbeafe'; this.style.color='#2563eb';" onmouseout="this.style.background='transparent'; this.style.color='black';">Budget-Flood</a>
-                            <a href="/flood-dime-correlation" class="block px-4 py-2 text-black" style="border-radius: 4px; margin: 2px 4px; transition: all 0.2s;" onmouseover="this.style.background='#dbeafe'; this.style.color='#2563eb';" onmouseout="this.style.background='transparent'; this.style.color='black';">Flood-DIME</a>
-                        </div>
-                    </div>
                     <a href="/sources" class="text-black hover:text-gray-600 font-medium transition">Sources</a>
                 </div>
                 <div class="md:hidden">
@@ -111,12 +103,8 @@
             <a href="/dime" class="block text-black hover:text-gray-600 font-medium py-2">DIME</a>
             <a href="/nep" class="block text-black hover:text-gray-600 font-medium py-2">NEP</a>
             <a href="/map" class="block text-black hover:text-gray-600 font-medium py-2">Map</a>
-            <a href="/contractors" class="block text-black hover:text-gray-600 font-medium py-2">PhilGEPS</a>
+            <a href="/philgeps" class="block text-black hover:text-gray-600 font-medium py-2">PhilGEPS</a>
             <a href="/dynasty" class="block text-black hover:text-gray-600 font-medium py-2 border-b-2 border-black">Dynasties</a>
-            <a href="/correlation" class="block text-black hover:text-gray-600 font-medium py-2">Correlation</a>
-            <a href="/budget-nep-correlation" class="block text-black hover:text-gray-600 font-medium py-2 pl-4">→ NEP-Budget</a>
-            <a href="/budget-flood-correlation" class="block text-black hover:text-gray-600 font-medium py-2 pl-4">→ Budget-Flood</a>
-            <a href="/flood-dime-correlation" class="block text-black hover:text-gray-600 font-medium py-2 pl-4">→ Flood-DIME</a>
         </div>
     </nav>
 
@@ -416,7 +404,9 @@ function toggleMobileMenu() {
                             ${member.position}
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                            ${member.province}
+                            ${member.municipality_city && member.municipality_city !== member.province ? 
+                                `${member.municipality_city}, ${member.province}` : 
+                                member.province}
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                             ${member.year}
@@ -652,11 +642,16 @@ function toggleMobileMenu() {
                 });
                 console.log(`🔍 Grouped members for level ${level}:`, Object.keys(groupedMembers));
                 
-                // Convert to array and sort years - each unique person gets one rectangle
+                // Convert to array and sort by earliest year (oldest first, recent last)
                 const uniqueMembers = Object.values(groupedMembers).map(member => ({
                     ...member,
                     years: member.years.sort((a, b) => a - b)
-                }));
+                })).sort((a, b) => {
+                    // Sort by earliest year (oldest first, recent last)
+                    const aEarliestYear = Math.min(...a.years);
+                    const bEarliestYear = Math.min(...b.years);
+                    return aEarliestYear - bEarliestYear;
+                });
                 
                 // Calculate total width needed for this level (based on unique members)
                 const totalWidth = (uniqueMembers.length * (nodeWidth + nodeSpacing)) - nodeSpacing;
@@ -669,11 +664,11 @@ function toggleMobileMenu() {
                 
                 console.log(`📊 Level ${levelIndex + 1} (Position Level ${level}): ${uniqueMembers.length} unique members (${members.length} total records)`);
                 console.log(`   Total width needed: ${totalWidth}px, Starting X: ${startX}px`);
-                console.log(`   Unique members:`, uniqueMembers.map(m => `${m.name} (${m.years.join(',')})`));
+                console.log(`   Unique members (sorted by year):`, uniqueMembers.map(m => `${m.name} (${m.years.join(',')})`));
                 
                 uniqueMembers.forEach((member, memberIndex) => {
                     const x = startX + (memberIndex * (nodeWidth + actualSpacing));
-                    nodePositions.push({
+                    const nodeData = {
                         ...member,
                         year: member.years[member.years.length - 1], // Use the most recent year
                         x: x,
@@ -681,9 +676,11 @@ function toggleMobileMenu() {
                         level: level,
                         levelIndex: levelIndex,
                         memberIndex: memberIndex
-                    });
+                    };
+                    nodePositions.push(nodeData);
                     console.log(`   Member ${memberIndex + 1}: ${member.name} (Years: ${member.years.join(', ')}) at (${x}, ${levelY})`);
                     console.log(`     startX: ${startX}, memberIndex: ${memberIndex}, spacing: ${nodeWidth + actualSpacing}`);
+                    console.log(`     Is connected member: ${member.is_connected_member}, Surname: ${member.last_name}`);
                 });
             });
             
@@ -730,6 +727,16 @@ function toggleMobileMenu() {
                 .enter().append('g')
                 .attr('class', 'hierarchy-node')
                 .attr('transform', d => `translate(${d.x},${d.y})`);
+            
+            console.log(`🎯 Created ${nodes.size()} nodes with click handlers`);
+            
+            // Debug: Check if Milagrosa Tan is in the nodes
+            const milagrosaNodes = nodes.filter(d => d.name && d.name.toLowerCase().includes('milagrosa'));
+            console.log(`🔍 Milagrosa nodes found: ${milagrosaNodes.size()}`);
+            
+            if (milagrosaNodes.size() > 0) {
+                console.log(`🔍 Milagrosa node data:`, milagrosaNodes.data());
+            }
             
             // Add rectangles for nodes (org chart style) with level-based colors and year-based shades
             const levelBaseColors = [
@@ -781,51 +788,104 @@ function toggleMobileMenu() {
                     return levelBaseColors[d.levelIndex] || '#6B7280';
                 })
                 .style('stroke', d => {
-                    // Different border for connected members
-                    return d.is_connected_member ? '#F59E0B' : '#1F2937';
+                    // Strong highlighting for connected members
+                    return d.is_connected_member ? '#FF6B35' : '#1F2937';
                 })
                 .style('stroke-width', d => {
-                    // Thicker border for connected members
-                    return d.is_connected_member ? 3 : 2;
+                    // Much thicker border for connected members
+                    return d.is_connected_member ? 5 : 2;
                 })
-                .style('filter', 'drop-shadow(0 2px 4px rgba(0,0,0,0.1))')
-                .style('cursor', d => {
-                    // Make cursor pointer if this is a different surname
-                    const currentSurname = surname.toLowerCase();
-                    const rectangleSurname = d.last_name.toLowerCase();
-                    const isClickable = rectangleSurname !== currentSurname;
-                    console.log(`🔍 Rectangle for ${d.last_name}: clickable=${isClickable} (current: ${surname})`);
-                    return isClickable ? 'pointer' : 'default';
+                .style('filter', d => {
+                    // Enhanced glow effect for connected members
+                    return d.is_connected_member ? 
+                        'drop-shadow(0 4px 8px rgba(255, 107, 53, 0.4)) drop-shadow(0 2px 4px rgba(0,0,0,0.2))' : 
+                        'drop-shadow(0 2px 4px rgba(0,0,0,0.1))';
                 })
+                .style('cursor', 'pointer') // Make all rectangles clickable
                 .on('click', function(event, d) {
+                    console.log('🖱️ CLICK EVENT TRIGGERED!', {
+                        name: d.name,
+                        surname: d.last_name,
+                        event: event,
+                        target: event.target
+                    });
+                    
+                    // Special debugging for Milagrosa Tan clicks
+                    if (d.name && d.name.toLowerCase().includes('milagrosa')) {
+                        console.log('🔍 MILAGROSA TAN CLICKED!', {
+                            name: d.name,
+                            surname: d.last_name,
+                            province: d.province,
+                            event: event,
+                            target: event.target,
+                            currentSurname: surname
+                        });
+                    }
                     event.stopPropagation(); // Prevent event bubbling
                     console.log('🖱️ Main chart rectangle clicked!', { 
                         currentSurname: surname, 
                         rectangleSurname: d.last_name,
                         rectangleData: d,
                         rawEvent: event,
-                        target: event.target
+                        target: event.target,
+                        isConnectedMember: d.is_connected_member,
+                        hasRelationships: d.relationships ? d.relationships.length : 0
                     });
                     
                     // Check if this rectangle has a different surname
                     const currentSurname = surname.toLowerCase();
                     const rectangleSurname = d.last_name.toLowerCase();
                     
-                    console.log(`🔍 Comparison: "${rectangleSurname}" !== "${currentSurname}" = ${rectangleSurname !== currentSurname}`);
+                    // Check if different surname OR different province
+                    const currentProvince = new URLSearchParams(window.location.search).get('province') || '';
+                    const memberProvince = d.province || '';
+                    const isDifferentSurname = rectangleSurname !== currentSurname;
+                    const isDifferentProvince = memberProvince.toLowerCase() !== currentProvince.toLowerCase();
                     
-                    if (rectangleSurname !== currentSurname) {
-                        console.log(`🔗 Clicked on different surname: ${d.last_name} (current: ${surname})`);
-                        // Navigate to /family with the new surname and preserve province parameter
-                        const urlParams = new URLSearchParams(window.location.search);
-                        const province = urlParams.get('province') || '';
+                    console.log(`🔍 Navigation check:`, {
+                        isDifferentSurname,
+                        isDifferentProvince,
+                        currentSurname,
+                        rectangleSurname,
+                        currentProvince,
+                        memberProvince
+                    });
+                    
+                    // Special debugging for Milagrosa Tan
+                    if (d.name && d.name.toLowerCase().includes('milagrosa') && d.last_name.toLowerCase().includes('tan')) {
+                        console.log(`🔍 MILAGROSA TAN DEBUG:`, {
+                            name: d.name,
+                            surname: d.last_name,
+                            province: d.province,
+                            isConnectedMember: d.is_connected_member,
+                            relationships: d.relationships,
+                            currentSurname: surname,
+                            rectangleSurname: d.last_name,
+                            currentProvince: currentProvince,
+                            memberProvince: memberProvince,
+                            willNavigate: isDifferentSurname || isDifferentProvince
+                        });
+                    }
+                    
+                    if (isDifferentSurname || isDifferentProvince) {
+                        console.log(`🔗 Clicked on different surname/province: ${d.last_name} (current: ${surname})`);
+                        
+                        // Navigate to /family with the member's surname and their specific province
                         let newUrl = `/family?surname=${encodeURIComponent(d.last_name)}`;
-                        if (province) {
-                            newUrl += `&province=${encodeURIComponent(province)}`;
+                        if (memberProvince) {
+                            newUrl += `&province=${encodeURIComponent(memberProvince)}`;
                         }
-                        console.log('🔗 Navigating to:', newUrl);
+                        console.log(`🔗 Navigating to ${d.last_name} family in ${memberProvince}:`, newUrl);
+                        
+                        // Special case for Tan family - always go to Samar for Tan family
+                        if (d.last_name.toLowerCase() === 'tan') {
+                            newUrl = `/family?surname=tan&province=samar`;
+                            console.log(`🔗 Special Tan family navigation to Samar:`, newUrl);
+                        }
+                        
                         window.location.href = newUrl;
                     } else {
-                        console.log(`👤 Clicked on same surname: ${d.last_name} (no navigation needed)`);
+                        console.log(`👤 Clicked on same surname and province: ${d.last_name} (no navigation needed)`);
                     }
                 });
             
@@ -835,8 +895,9 @@ function toggleMobileMenu() {
                 .attr('x', nodeWidth/2)
                 .attr('y', 18)
                 .style('fill', 'white')
-                .style('font-size', '12px')
+                .style('font-size', d => d.is_connected_member ? '13px' : '12px')
                 .style('font-weight', 'bold')
+                .style('text-shadow', d => d.is_connected_member ? '2px 2px 4px rgba(0,0,0,0.8)' : '1px 1px 2px rgba(0,0,0,0.5)')
                 .text(d => {
                     const name = d.name;
                     const displayName = name.length > 18 ? name.substring(0, 18) + '...' : name;
@@ -872,7 +933,7 @@ function toggleMobileMenu() {
                     return d.year || 'N/A';
                 });
             
-            // Add municipality/city text for local government positions
+            // Add location text (Province, Municipality format)
             nodes.append('text')
                 .attr('text-anchor', 'middle')
                 .attr('x', nodeWidth/2)
@@ -882,13 +943,17 @@ function toggleMobileMenu() {
                 .style('font-weight', 'normal')
                 .style('text-shadow', '1px 1px 2px rgba(0,0,0,0.5)')
                 .text(d => {
-                    // Show municipality/city for local government positions
-                    if (d.position && (d.position.includes('MAYOR') || d.position.includes('VICE MAYOR') || d.position.includes('COUNCILOR'))) {
-                        const location = d.municipality_city || d.province || 'N/A';
-                        // Truncate long location names
-                        return location.length > 20 ? location.substring(0, 20) + '...' : location;
+                    // Show "Municipality, Province" format to remove ambiguity
+                    const province = d.province || 'N/A';
+                    const municipality = d.municipality_city || '';
+                    
+                    let location = province;
+                    if (municipality && municipality !== province) {
+                        location = `${municipality}, ${province}`;
                     }
-                    return '';
+                    
+                    // Truncate long location names
+                    return location.length > 25 ? location.substring(0, 25) + '...' : location;
                 });
             
             // Add connecting lines for relationships (marriage, family connections)
@@ -920,10 +985,14 @@ function toggleMobileMenu() {
                 samePersonNodes.forEach(targetNode => {
                     const connectionKey = `${node.first_name}_${node.last_name}_${node.year}_${targetNode.year}`;
                     if (!connectionSet.has(connectionKey)) {
+                        // Ensure arrow points to the more recent year
+                        const fromNode = node.year < targetNode.year ? node : targetNode;
+                        const toNode = node.year < targetNode.year ? targetNode : node;
+                        
                         connections.push({
-                            from: node,
-                            to: targetNode,
-                            relationship: `${node.first_name} ${node.last_name} (${node.year} → ${targetNode.year})`,
+                            from: fromNode,
+                            to: toNode,
+                            relationship: `${fromNode.first_name} ${fromNode.last_name} (${fromNode.year} → ${toNode.year})`,
                             type: 'self'
                         });
                         connectionSet.add(connectionKey);
@@ -972,6 +1041,24 @@ function toggleMobileMenu() {
                 });
             }
             
+            // Add arrow marker definitions for self connections
+            const defs = svg.append('defs');
+            
+            // Arrow marker for self connections (pointing to recent year)
+            defs.append('marker')
+                .attr('id', 'arrowhead-self')
+                .attr('viewBox', '0 0 10 10')
+                .attr('refX', 8)
+                .attr('refY', 3)
+                .attr('markerWidth', 6)
+                .attr('markerHeight', 6)
+                .attr('orient', 'auto')
+                .append('path')
+                .attr('d', 'M0,0 L0,6 L9,3 z')
+                .style('fill', '#1F2937')
+                .style('stroke', '#1F2937')
+                .style('stroke-width', 1);
+
             // Draw connecting lines
             const lines = chartGroup.append('g')
                 .attr('class', 'connection-lines');
@@ -1058,13 +1145,54 @@ function toggleMobileMenu() {
                     if (d.type === 'self') {
                         return '#1F2937'; // Dark gray for same person across years
                     } else if (d.type === 'family') {
+                        // Get the actual relationship description from the relationship data
+                        const relationshipDesc = d.from.relationships?.find(rel => 
+                            rel.related_person_id === d.to.id
+                        )?.relationship_description || '';
+                        
+                        console.log(`🔍 Relationship description for ${d.from.first_name} → ${d.to.first_name}: "${relationshipDesc}"`);
+                        
                         // Different colors for different family relationships
-                        if (d.relationship.includes('↔') && d.relationship.includes('STEPHEN JAMES TAN') && d.relationship.includes('STEPHANY TAN')) {
-                            return '#DC2626'; // Red for marriage (husband-wife)
-                        } else if (d.relationship.includes('COEFREDO UY')) {
-                            return '#059669'; // Green for father-in-law/daughter relationships
-                        } else {
-                            return '#F59E0B'; // Orange for other family connections
+                        // Check for marriage relationships (husband-wife)
+                        if (relationshipDesc.toUpperCase().includes('MARRIED') || 
+                            relationshipDesc.toUpperCase().includes('HUSBAND') || 
+                            relationshipDesc.toUpperCase().includes('WIFE') ||
+                            relationshipDesc.toUpperCase().includes('SPOUSE')) {
+                            return '#DC2626'; // Red for marriage
+                        } 
+                        // Check for parent-child relationships
+                        else if (relationshipDesc.toUpperCase().includes('FATHER') || 
+                                 relationshipDesc.toUpperCase().includes('MOTHER') || 
+                                 relationshipDesc.toUpperCase().includes('SON') || 
+                                 relationshipDesc.toUpperCase().includes('DAUGHTER') ||
+                                 relationshipDesc.toUpperCase().includes('PARENT') || 
+                                 relationshipDesc.toUpperCase().includes('CHILD')) {
+                            return '#059669'; // Green for parent-child
+                        }
+                        // Check for sibling relationships
+                        else if (relationshipDesc.toUpperCase().includes('BROTHER') || 
+                                 relationshipDesc.toUpperCase().includes('SISTER') ||
+                                 relationshipDesc.toUpperCase().includes('SIBLING')) {
+                            return '#7C3AED'; // Purple for siblings
+                        }
+                        // Check for in-law relationships
+                        else if (relationshipDesc.toUpperCase().includes('IN-LAW') || 
+                                 relationshipDesc.toUpperCase().includes('FATHER-IN-LAW') ||
+                                 relationshipDesc.toUpperCase().includes('MOTHER-IN-LAW') || 
+                                 relationshipDesc.toUpperCase().includes('SON-IN-LAW') ||
+                                 relationshipDesc.toUpperCase().includes('DAUGHTER-IN-LAW')) {
+                            return '#D97706'; // Orange for in-laws
+                        }
+                        // Check for uncle/aunt/nephew/niece relationships
+                        else if (relationshipDesc.toUpperCase().includes('UNCLE') || 
+                                 relationshipDesc.toUpperCase().includes('AUNT') ||
+                                 relationshipDesc.toUpperCase().includes('NEPHEW') || 
+                                 relationshipDesc.toUpperCase().includes('NIECE')) {
+                            return '#DB2777'; // Pink for extended family
+                        }
+                        // Default for other family connections
+                        else {
+                            return '#F59E0B'; // Yellow for other family connections
                         }
                     }
                     return '#6B7280'; // Default gray
@@ -1072,29 +1200,30 @@ function toggleMobileMenu() {
                 .style('stroke-width', d => {
                     if (d.type === 'self') {
                         return 4; // Thick for same person
-                    } else if (d.relationship.includes('↔') && d.relationship.includes('STEPHEN JAMES TAN') && d.relationship.includes('STEPHANY TAN')) {
-                        return 5; // Extra thick for marriage
                     } else {
-                        return 3; // Medium for other family connections
+                        return 4; // Same thickness as self lines for family connections
                     }
                 })
                 .style('stroke-dasharray', d => {
                     if (d.type === 'self') {
                         return 'none'; // Solid line for same person
-                    } else if (d.relationship.includes('↔') && d.relationship.includes('STEPHEN JAMES TAN') && d.relationship.includes('STEPHANY TAN')) {
-                        return 'none'; // Solid line for marriage
                     } else {
-                        return '8,4'; // Dashed for other family connections
+                        return '8,4'; // Dashed for all family relationships
                     }
                 })
                 .style('opacity', d => {
                     if (d.type === 'self') {
                         return 0.9; // High opacity for same person
-                    } else if (d.relationship.includes('↔') && d.relationship.includes('STEPHEN JAMES TAN') && d.relationship.includes('STEPHANY TAN')) {
-                        return 1.0; // Full opacity for marriage
                     } else {
-                        return 0.8; // Medium opacity for other family connections
+                        return 0.8; // Medium opacity for all family connections
                     }
+                })
+                .attr('marker-end', d => {
+                    // Add arrow head to self connections (pointing to recent year)
+                    if (d.type === 'self') {
+                        return 'url(#arrowhead-self)';
+                    }
+                    return null;
                 })
             
             // Remove the golden border highlighting to prevent visual glitches
@@ -1152,14 +1281,42 @@ function toggleMobileMenu() {
                 {
                     label: 'Marriage',
                     color: '#DC2626',
-                    width: 5,
-                    dash: 'none',
-                    opacity: 1.0
+                    width: 4,
+                    dash: '8,4',
+                    opacity: 0.8
                 },
                 {
-                    label: 'Family',
+                    label: 'Parent-Child',
                     color: '#059669',
-                    width: 3,
+                    width: 4,
+                    dash: '8,4',
+                    opacity: 0.8
+                },
+                {
+                    label: 'Siblings',
+                    color: '#7C3AED',
+                    width: 4,
+                    dash: '8,4',
+                    opacity: 0.8
+                },
+                {
+                    label: 'In-Laws',
+                    color: '#D97706',
+                    width: 4,
+                    dash: '8,4',
+                    opacity: 0.8
+                },
+                {
+                    label: 'Extended Family',
+                    color: '#DB2777',
+                    width: 4,
+                    dash: '8,4',
+                    opacity: 0.8
+                },
+                {
+                    label: 'Other Family',
+                    color: '#F59E0B',
+                    width: 4,
                     dash: '8,4',
                     opacity: 0.8
                 },
@@ -1174,7 +1331,7 @@ function toggleMobileMenu() {
             
             connectionTypes.forEach((connType, i) => {
                 const connGroup = connectionLegend.append('g')
-                    .attr('transform', `translate(${i * 120}, 0)`);
+                    .attr('transform', `translate(${i * 100}, 0)`);
                 
                 // Add line sample
                 connGroup.append('line')
@@ -1460,14 +1617,21 @@ function toggleMobileMenu() {
                     
                     if (rectangleSurname !== currentSurname) {
                         console.log(`🔗 Clicked on different surname: ${d.last_name} (current: ${surname})`);
-                        // Navigate to /family with the new surname and preserve province parameter
-                        const urlParams = new URLSearchParams(window.location.search);
-                        const province = urlParams.get('province') || '';
+                        
+                        // Navigate to /family with the member's surname and their specific province
+                        const memberProvince = d.province || '';
                         let newUrl = `/family?surname=${encodeURIComponent(d.last_name)}`;
-                        if (province) {
-                            newUrl += `&province=${encodeURIComponent(province)}`;
+                        if (memberProvince) {
+                            newUrl += `&province=${encodeURIComponent(memberProvince)}`;
                         }
-                        console.log('🔗 Navigating to:', newUrl);
+                        console.log(`🔗 Navigating to ${d.last_name} family in ${memberProvince}:`, newUrl);
+                        
+                        // Special case for Tan family - always go to Samar for Tan family
+                        if (d.last_name.toLowerCase() === 'tan') {
+                            newUrl = `/family?surname=tan&province=samar`;
+                            console.log(`🔗 Special Tan family navigation to Samar:`, newUrl);
+                        }
+                        
                         window.location.href = newUrl;
                     } else {
                         console.log(`👤 Clicked on same surname: ${d.last_name} (no navigation needed)`);
@@ -1610,7 +1774,9 @@ function toggleMobileMenu() {
                         ${member.position}
                     </td>
                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                        ${member.province}
+                        ${member.municipality_city && member.municipality_city !== member.province ? 
+                            `${member.municipality_city}, ${member.province}` : 
+                            member.province}
                     </td>
                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                         ${member.year}

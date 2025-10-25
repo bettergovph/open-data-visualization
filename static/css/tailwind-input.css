@@ -2,3 +2,9 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Force include blue classes */
+.bg-blue-800 { background-color: #1e40af; }
+.bg-blue-700 { background-color: #1d4ed8; }
+.border-blue-800 { border-color: #1e40af; }
+.text-blue-800 { color: #1e40af; }
+
