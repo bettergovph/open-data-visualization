@@ -277,6 +277,32 @@ class JSONGenerator:
                 'description': 'Top political dynasty surnames by province (province-sensitive)',
                 'category': 'dynasty_data',
                 'dependencies': ['PostgreSQL dynasty database']
+            },
+            
+            # EOGO Corruption Risk Analysis
+            'political_hhi_cache.json': {
+                'script': 'compute_cri_analysis.py',
+                'description': 'Political HHI analysis by province for corruption risk assessment',
+                'category': 'eogo_data',
+                'dependencies': ['Dynasty database', 'Poverty JSON data']
+            },
+            'cri_analysis_cache.json': {
+                'script': 'compute_cri_analysis.py',
+                'description': 'Comprehensive CRI scores combining political, dynasty, contractor, and poverty factors',
+                'category': 'eogo_data',
+                'dependencies': ['Dynasty database', 'PhilGEPS data', 'Poverty JSON data']
+            },
+            'poverty_correlation_cache.json': {
+                'script': 'compute_cri_analysis.py',
+                'description': 'Poverty correlation analysis for EOGO control variables',
+                'category': 'eogo_data',
+                'dependencies': ['Poverty JSON data']
+            },
+            'contractor_hhi_cache.json': {
+                'script': 'compute_cri_analysis.py',
+                'description': 'Contractor concentration HHI analysis (national level)',
+                'category': 'eogo_data',
+                'dependencies': ['PhilGEPS data']
             }
         }
     
@@ -440,6 +466,19 @@ class JSONGenerator:
         
         return success
     
+    async def generate_eogo_data(self):
+        """Generate EOGO Corruption Risk Analysis JSON files."""
+        print("\n🎯 Generating EOGO Corruption Risk Analysis...")
+        print("=" * 40)
+        
+        # Generate EOGO CRI analysis (all cache files)
+        success, output = await self.run_script(
+            'compute_cri_analysis.py',
+            'EOGO CRI Analysis (Political HHI, CRI Scores, Poverty Correlation, Contractor HHI)'
+        )
+        
+        return success
+    
     async def generate_cache_data(self):
         """Generate cache JSON files."""
         print("\n💾 Generating Cache Data...")
@@ -486,7 +525,7 @@ class JSONGenerator:
         print(f"Target directory: {self.static_data_dir}")
         
         if categories is None:
-            categories = ['sec_data', 'summary_data', 'analysis_data', 'nep_data', 'dime_data', 'cache_data', 'api_cache', 'dynasty_data']
+            categories = ['sec_data', 'summary_data', 'analysis_data', 'nep_data', 'dime_data', 'cache_data', 'api_cache', 'dynasty_data', 'eogo_data']
         
         results = {}
         
@@ -513,6 +552,10 @@ class JSONGenerator:
         # Generate Dynasty data
         if 'dynasty_data' in categories:
             results['dynasty_data'] = await self.generate_dynasty_data()
+        
+        # Generate EOGO data
+        if 'eogo_data' in categories:
+            results['eogo_data'] = await self.generate_eogo_data()
         
         # Generate cache data
         if 'cache_data' in categories:
