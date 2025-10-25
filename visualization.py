@@ -3201,5 +3201,130 @@ async def get_contractor_projects_frontend(contractor_name: str):
     except Exception as e:
         return JSONResponse({"success": False, "error": str(e)})
 
+@app.get("/api/dynasty/conflicts")
+async def dynasty_conflicts_api(
+    chain_length: int = Query(3, ge=2, le=10, description="Minimum chain length to find"),
+    max_chains: int = Query(20, ge=1, le=100, description="Maximum number of chains to return")
+):
+    """Get longest relationship chains connecting different political families"""
+    try:
+        import asyncpg
+        
+        # Connect to dynasty database
+        conn = await asyncpg.connect(
+            host=os.getenv('POSTGRES_HOST', 'localhost'),
+            port=int(os.getenv('POSTGRES_PORT', 5432)),
+            user=os.getenv('POSTGRES_USER', 'budget_admin'),
+            password=os.getenv('POSTGRES_PASSWORD', ''),
+            database=os.getenv('POSTGRES_DB_DYNASTY', 'dynasty')
+        )
+        
+        # Find longest relationship chains using recursive CTE
+        # This query finds paths between different families (different surnames)
+        chains_query = """
+        WITH RECURSIVE relationship_chains AS (
+            -- Base case: start with all relationships
+            SELECT 
+                r.person_id as start_person,
+                r.related_person_id as end_person,
+                r.person_id as current_person,
+                r.related_person_id as next_person,
+                ARRAY[r.person_id, r.related_person_id] as path,
+                ARRAY[r.relationship_description] as relationships,
+                1 as chain_length,
+                p1.last_name as start_surname,
+                p2.last_name as end_surname
+            FROM relationships r
+            JOIN political_dynasties p1 ON r.person_id = p1.id
+            JOIN political_dynasties p2 ON r.related_person_id = p2.id
+            WHERE p1.last_name != p2.last_name  -- Only different families
+            
+            UNION ALL
+            
+            -- Recursive case: extend chains
+            SELECT 
+                rc.start_person,
+                rc.end_person,
+                r.related_person_id as current_person,
+                r.related_person_id as next_person,
+                rc.path || r.related_person_id,
+                rc.relationships || r.relationship_description,
+                rc.chain_length + 1,
+                rc.start_surname,
+                p.last_name as end_surname
+            FROM relationship_chains rc
+            JOIN relationships r ON rc.next_person = r.person_id
+            JOIN political_dynasties p ON r.related_person_id = p.id
+            WHERE r.related_person_id != ALL(rc.path)  -- Avoid cycles
+            AND rc.chain_length < 8  -- Limit depth
+            AND p.last_name != rc.start_surname  -- Ensure different families
+        ),
+        valid_chains AS (
+            SELECT 
+                start_person,
+                end_person,
+                path,
+                relationships,
+                chain_length,
+                start_surname,
+                end_surname
+            FROM relationship_chains
+            WHERE chain_length >= $1
+            AND start_surname != end_surname
+            AND start_person != end_person
+        )
+        SELECT DISTINCT
+            vc.chain_length,
+            vc.path,
+            vc.relationships,
+            vc.start_surname,
+            vc.end_surname,
+            -- Get person details for the path
+            ARRAY(
+                SELECT json_build_object(
+                    'id', p.id,
+                    'first_name', p.first_name,
+                    'last_name', p.last_name,
+                    'position', p.position,
+                    'relationship_description', 
+                    CASE 
+                        WHEN array_position(vc.path, p.id) = 1 THEN 'Starting person'
+                        ELSE vc.relationships[array_position(vc.path, p.id) - 1]
+                    END
+                )
+                FROM unnest(vc.path) WITH ORDINALITY AS person_id(id, ord)
+                JOIN political_dynasties p ON p.id = person_id.id
+                ORDER BY ord
+            ) as path_details
+        FROM valid_chains vc
+        ORDER BY vc.chain_length DESC, vc.start_surname, vc.end_surname
+        LIMIT $2;
+        """
+        
+        chains = await conn.fetch(chains_query, chain_length, max_chains)
+        await conn.close()
+        
+        # Format the response
+        formatted_chains = []
+        for chain in chains:
+            formatted_chains.append({
+                "length": chain['chain_length'],
+                "start_surname": chain['start_surname'],
+                "end_surname": chain['end_surname'],
+                "path": chain['path_details'],
+                "relationships": chain['relationships']
+            })
+        
+        return JSONResponse({
+            "success": True,
+            "data": formatted_chains,
+            "total_chains": len(formatted_chains),
+            "min_chain_length": chain_length,
+            "max_chains_returned": max_chains
+        })
+        
+    except Exception as e:
+        return JSONResponse({"success": False, "error": str(e)})
+
 if __name__ == "__main__":
     uvicorn.run(app, host="127.0.0.1", port=8000)

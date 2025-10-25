@@ -13,6 +13,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
     <script src="/static/js/chart.js"></script>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
 
     <!-- Leaflet for maps -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
@@ -248,6 +249,7 @@ function toggleMobileMenu() {
                         <a href="#visual" class="dynasty-tab-btn" data-tab="visual">📈 Visual</a>
                         <a href="#table" class="dynasty-tab-btn" data-tab="table">📊 Table</a>
                         <a href="#poverty" class="dynasty-tab-btn" data-tab="poverty">💰 Poverty</a>
+                        <a href="#conflicts" class="dynasty-tab-btn" data-tab="conflicts">⚔️ Conflicts of Interest</a>
                     </div>
                 
                 <div class="dynasty-tab-content">
@@ -654,6 +656,85 @@ function toggleMobileMenu() {
                                                 <div style="display: flex; flex-direction: column; align-items: center; gap: 10px;">
                                                     <div style="font-size: 2em;">💰</div>
                                                     <div>Click "Load Data" to view poverty statistics</div>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Conflicts Tab -->
+                    <div id="tab-conflicts" class="dynasty-tab-panel">
+                        <h3 class="dynasty-section-title">⚔️ Conflicts of Interest & Relationship Chains</h3>
+                        <p class="dynasty-section-desc">Visualize the longest relationship chains connecting different political families that may create conflicts of interest</p>
+                        
+                        <!-- Conflicts Controls -->
+                        <div class="conflicts-controls" style="background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); margin-bottom: 20px;">
+                            <div style="display: flex; gap: 15px; margin-bottom: 15px; flex-wrap: wrap; align-items: center;">
+                                <div>
+                                    <label style="display: block; margin-bottom: 5px; font-weight: 600; color: #333;">Chain Length:</label>
+                                    <select id="chainLengthFilter" style="padding: 8px 12px; border: 1px solid #ddd; border-radius: 4px; width: 120px;">
+                                        <option value="3">3+ connections</option>
+                                        <option value="4">4+ connections</option>
+                                        <option value="5" selected>5+ connections</option>
+                                        <option value="6">6+ connections</option>
+                                        <option value="7">7+ connections</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label style="display: block; margin-bottom: 5px; font-weight: 600; color: #333;">Max Chains:</label>
+                                    <select id="maxChainsFilter" style="padding: 8px 12px; border: 1px solid #ddd; border-radius: 4px; width: 120px;">
+                                        <option value="10">Top 10</option>
+                                        <option value="20" selected>Top 20</option>
+                                        <option value="50">Top 50</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <button onclick="loadConflictsData()" style="padding: 8px 16px; background: #0038A8; color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: 600;">
+                                        🔍 Find Longest Chains
+                                    </button>
+                                </div>
+                                <div>
+                                    <button onclick="clearConflictsFilters()" style="padding: 8px 16px; background: #6c757d; color: white; border: none; border-radius: 4px; cursor: pointer;">
+                                        Clear Filters
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Conflicts Network -->
+                        <div class="conflicts-visualization" style="background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); margin-bottom: 20px;">
+                            <h4 style="color: #0038A8; margin-bottom: 15px;">🕸️ Conflicts Network</h4>
+                            <div id="conflictsNetwork" style="width: 100%; height: 600px; border: 1px solid #ddd; border-radius: 4px; position: relative;">
+                                <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); text-align: center; color: #6c757d;">
+                                    <div style="font-size: 2em; margin-bottom: 10px;">🕸️</div>
+                                    <div>Click "Find Longest Chains" to visualize relationship networks</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Conflicts Table -->
+                        <div class="conflicts-table" style="background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
+                            <h4 style="color: #0038A8; margin-bottom: 15px;">📊 Conflicts of Interest Chain Details</h4>
+                            <div style="overflow-x: auto;">
+                                <table style="width: 100%; border-collapse: collapse; font-size: 14px;">
+                                    <thead>
+                                        <tr style="background: #f8f9fa; border-bottom: 2px solid #dee2e6;">
+                                            <th style="padding: 12px; text-align: left; font-weight: 600; color: #333;">Chain Length</th>
+                                            <th style="padding: 12px; text-align: left; font-weight: 600; color: #333;">Family A</th>
+                                            <th style="padding: 12px; text-align: left; font-weight: 600; color: #333;">Family B</th>
+                                            <th style="padding: 12px; text-align: left; font-weight: 600; color: #333;">Connecting Path</th>
+                                            <th style="padding: 12px; text-align: left; font-weight: 600; color: #333;">Relationships</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="conflictsTableBody">
+                                        <tr>
+                                            <td colspan="5" style="padding: 20px; text-align: center; color: #6c757d;">
+                                                <div style="display: flex; flex-direction: column; align-items: center; gap: 10px;">
+                                                    <div style="font-size: 2em;">⚔️</div>
+                                                    <div>Click "Find Longest Chains" to view relationship conflicts</div>
                                                 </div>
                                             </td>
                                         </tr>
@@ -2598,6 +2679,330 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 });
+
+// Conflicts Tab Functions
+let conflictsData = [];
+let conflictsNetwork = null;
+
+function loadConflictsData() {
+    const chainLength = document.getElementById('chainLengthFilter').value;
+    const maxChains = document.getElementById('maxChainsFilter').value;
+    
+    console.log('🔍 Loading conflicts data with chain length:', chainLength, 'max chains:', maxChains);
+    
+    // Show loading state
+    document.getElementById('conflictsNetwork').innerHTML = `
+        <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); text-align: center; color: #6c757d;">
+            <div style="font-size: 2em; margin-bottom: 10px;">⏳</div>
+            <div>Finding longest relationship chains...</div>
+        </div>
+    `;
+    
+    // Check if D3 is available
+    if (typeof d3 === 'undefined') {
+        console.error('❌ D3.js is not loaded!');
+        document.getElementById('conflictsNetwork').innerHTML = `
+            <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); text-align: center; color: #dc3545;">
+                <div style="font-size: 2em; margin-bottom: 10px;">❌</div>
+                <div>D3.js library not loaded</div>
+            </div>
+        `;
+        return;
+    }
+    
+    console.log('✅ D3.js is available:', d3.version);
+    
+    // Fetch conflicts data
+    fetch(`/api/dynasty/conflicts?chain_length=${chainLength}&max_chains=${maxChains}`)
+        .then(response => {
+            console.log('📡 API Response status:', response.status);
+            return response.json();
+        })
+        .then(data => {
+            console.log('📊 API Response data:', data);
+            if (data.success) {
+                conflictsData = data.data;
+                console.log('✅ Conflicts data loaded:', conflictsData.length, 'chains');
+                displayConflictsNetwork();
+                displayConflictsTable();
+            } else {
+                console.error('❌ Error loading conflicts data:', data.error);
+                document.getElementById('conflictsNetwork').innerHTML = `
+                    <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); text-align: center; color: #dc3545;">
+                        <div style="font-size: 2em; margin-bottom: 10px;">❌</div>
+                        <div>Error: ${data.error}</div>
+                    </div>
+                `;
+            }
+        })
+        .catch(error => {
+            console.error('❌ Network error:', error);
+            document.getElementById('conflictsNetwork').innerHTML = `
+                <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); text-align: center; color: #dc3545;">
+                    <div style="font-size: 2em; margin-bottom: 10px;">❌</div>
+                    <div>Network error: ${error.message}</div>
+                </div>
+            `;
+        });
+}
+
+function displayConflictsNetwork() {
+    console.log('🕸️ Displaying conflicts network with data:', conflictsData);
+    
+    const container = document.getElementById('conflictsNetwork');
+    container.innerHTML = '';
+    
+    if (!conflictsData || conflictsData.length === 0) {
+        console.log('⚠️ No conflicts data available');
+        container.innerHTML = `
+            <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); text-align: center; color: #6c757d;">
+                <div style="font-size: 2em; margin-bottom: 10px;">🕸️</div>
+                <div>No relationship chains found with current filters</div>
+            </div>
+        `;
+        return;
+    }
+    
+    console.log('✅ Creating network visualization with', conflictsData.length, 'chains');
+    
+    // Create SVG for network visualization
+    const width = container.offsetWidth;
+    const height = container.offsetHeight;
+    
+    const svg = d3.select(container)
+        .append('svg')
+        .attr('width', width)
+        .attr('height', height)
+        .style('background', '#fafafa');
+    
+    // Create nodes and links from conflicts data
+    const nodes = [];
+    const links = [];
+    const nodeMap = new Map();
+    
+    conflictsData.forEach((chain, chainIndex) => {
+        chain.path.forEach((person, personIndex) => {
+            const nodeId = person.id;
+            if (!nodeMap.has(nodeId)) {
+                nodeMap.set(nodeId, {
+                    id: nodeId,
+                    name: `${person.first_name} ${person.last_name}`,
+                    surname: person.last_name,
+                    position: person.position,
+                    chainIndex: chainIndex,
+                    chainLength: chain.length,
+                    isConnector: personIndex > 0 && personIndex < chain.path.length - 1
+                });
+            }
+        });
+        
+        // Create links between consecutive people in the chain
+        for (let i = 0; i < chain.path.length - 1; i++) {
+            links.push({
+                source: chain.path[i].id,
+                target: chain.path[i + 1].id,
+                relationship: chain.path[i + 1].relationship_description,
+                chainIndex: chainIndex
+            });
+        }
+    });
+    
+    // Convert to arrays
+    nodes.push(...nodeMap.values());
+    
+    // Create force simulation with spider web-like behavior
+    const simulation = d3.forceSimulation(nodes)
+        .force('link', d3.forceLink(links).id(d => d.id).distance(80).strength(0.8))
+        .force('charge', d3.forceManyBody().strength(-400))
+        .force('center', d3.forceCenter(width / 2, height / 2))
+        .force('collision', d3.forceCollide().radius(25))
+        .force('radial', d3.forceRadial(100, width / 2, height / 2).strength(0.1));
+    
+    // Create links with spider web styling
+    const link = svg.append('g')
+        .selectAll('line')
+        .data(links)
+        .enter().append('line')
+        .attr('stroke', d => {
+            const colors = ['#DC2626', '#059669', '#7C3AED', '#D97706', '#DB2777', '#0891B2', '#CA8A04'];
+            return colors[d.chainIndex % colors.length];
+        })
+        .attr('stroke-width', 1.5)
+        .attr('stroke-opacity', 0.7)
+        .attr('stroke-dasharray', d => d.chainIndex % 2 === 0 ? '3,3' : '0'); // Alternating dashed lines
+    
+    // Create nodes (circles) with enhanced styling
+    const node = svg.append('g')
+        .selectAll('circle')
+        .data(nodes)
+        .enter().append('circle')
+        .attr('r', d => d.isConnector ? 6 : 15)
+        .attr('fill', d => {
+            if (d.isConnector) {
+                return '#6c757d'; // Gray for connectors
+            } else {
+                const colors = ['#DC2626', '#059669', '#7C3AED', '#D97706', '#DB2777', '#0891B2', '#CA8A04'];
+                return colors[d.chainIndex % colors.length];
+            }
+        })
+        .attr('stroke', d => d.isConnector ? '#fff' : '#fff')
+        .attr('stroke-width', d => d.isConnector ? 1 : 3)
+        .style('cursor', 'pointer')
+        .style('filter', 'drop-shadow(0 2px 4px rgba(0,0,0,0.2))')
+        .on('mouseover', function(event, d) {
+            // Highlight connected nodes
+            const connectedNodes = links.filter(l => l.source.id === d.id || l.target.id === d.id)
+                .map(l => l.source.id === d.id ? l.target.id : l.source.id);
+            
+            node.style('opacity', n => 
+                n.id === d.id || connectedNodes.includes(n.id) ? 1 : 0.3);
+            link.style('opacity', l => 
+                l.source.id === d.id || l.target.id === d.id ? 1 : 0.1);
+            
+            // Show enhanced tooltip
+            const tooltip = d3.select('body').append('div')
+                .attr('class', 'conflicts-tooltip')
+                .style('position', 'absolute')
+                .style('background', 'rgba(0, 0, 0, 0.9)')
+                .style('color', 'white')
+                .style('padding', '12px 16px')
+                .style('border-radius', '8px')
+                .style('font-size', '13px')
+                .style('pointer-events', 'none')
+                .style('z-index', '1000')
+                .style('opacity', 0)
+                .style('box-shadow', '0 4px 12px rgba(0,0,0,0.3)')
+                .style('border', '1px solid rgba(255,255,255,0.2)');
+            
+            tooltip.html(`
+                <div style="font-weight: bold; margin-bottom: 4px;">${d.name}</div>
+                <div style="color: #ccc; margin-bottom: 4px;">${d.position || 'Unknown Position'}</div>
+                <div style="color: #4ade80;">Chain Length: ${d.chainLength}</div>
+                ${d.isConnector ? '<div style="color: #fbbf24;">🔗 Connecting Node</div>' : '<div style="color: #60a5fa;">🏛️ Family Member</div>'}
+            `);
+            
+            tooltip.transition()
+                .duration(200)
+                .style('opacity', 1);
+        })
+        .on('mousemove', function(event) {
+            d3.select('.conflicts-tooltip')
+                .style('left', (event.pageX + 15) + 'px')
+                .style('top', (event.pageY - 15) + 'px');
+        })
+        .on('mouseout', function() {
+            // Reset opacity
+            node.style('opacity', 1);
+            link.style('opacity', 0.7);
+            d3.select('.conflicts-tooltip').remove();
+        });
+    
+    // Add labels for family nodes only
+    const labels = svg.append('g')
+        .selectAll('text')
+        .data(nodes.filter(d => !d.isConnector))
+        .enter().append('text')
+        .text(d => d.surname)
+        .attr('font-size', '11px')
+        .attr('font-weight', 'bold')
+        .attr('text-anchor', 'middle')
+        .attr('dy', '0.35em')
+        .attr('fill', '#333')
+        .style('pointer-events', 'none')
+        .style('text-shadow', '1px 1px 2px rgba(255,255,255,0.8)');
+    
+    // Add chain indicators
+    const chainGroups = svg.append('g')
+        .selectAll('g')
+        .data(conflictsData)
+        .enter().append('g');
+    
+    // Update positions on simulation tick
+    simulation.on('tick', () => {
+        link
+            .attr('x1', d => d.source.x)
+            .attr('y1', d => d.source.y)
+            .attr('x2', d => d.target.x)
+            .attr('y2', d => d.target.y);
+        
+        node
+            .attr('cx', d => d.x)
+            .attr('cy', d => d.y);
+        
+        labels
+            .attr('x', d => d.x)
+            .attr('y', d => d.y);
+    });
+    
+    // Add zoom behavior
+    const zoom = d3.zoom()
+        .scaleExtent([0.5, 3])
+        .on('zoom', function(event) {
+            svg.selectAll('g').attr('transform', event.transform);
+        });
+    
+    svg.call(zoom);
+}
+
+function displayConflictsTable() {
+    const tbody = document.getElementById('conflictsTableBody');
+    
+    if (!conflictsData || conflictsData.length === 0) {
+        tbody.innerHTML = `
+            <tr>
+                <td colspan="5" style="padding: 20px; text-align: center; color: #6c757d;">
+                    <div style="display: flex; flex-direction: column; align-items: center; gap: 10px;">
+                        <div style="font-size: 2em;">⚔️</div>
+                        <div>No relationship chains found with current filters</div>
+                    </div>
+                </td>
+            </tr>
+        `;
+        return;
+    }
+    
+    let html = '';
+    conflictsData.forEach((chain, index) => {
+        const familyA = chain.path[0];
+        const familyB = chain.path[chain.path.length - 1];
+        const connectingPath = chain.path.slice(1, -1).map(p => p.last_name).join(' → ');
+        const relationships = chain.path.slice(1).map(p => p.relationship_description).join(', ');
+        
+        html += `
+            <tr style="border-bottom: 1px solid #dee2e6;">
+                <td style="padding: 12px; font-weight: 600; color: #0038A8;">${chain.length}</td>
+                <td style="padding: 12px;">${familyA.first_name} ${familyA.last_name}</td>
+                <td style="padding: 12px;">${familyB.first_name} ${familyB.last_name}</td>
+                <td style="padding: 12px; font-size: 12px; color: #6c757d;">${connectingPath || 'Direct connection'}</td>
+                <td style="padding: 12px; font-size: 12px; color: #6c757d;">${relationships}</td>
+            </tr>
+        `;
+    });
+    
+    tbody.innerHTML = html;
+}
+
+function clearConflictsFilters() {
+    document.getElementById('chainLengthFilter').value = '5';
+    document.getElementById('maxChainsFilter').value = '20';
+    conflictsData = [];
+    document.getElementById('conflictsNetwork').innerHTML = `
+        <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); text-align: center; color: #6c757d;">
+            <div style="font-size: 2em; margin-bottom: 10px;">⚔️</div>
+            <div>Click "Find Longest Chains" to visualize relationship networks</div>
+        </div>
+    `;
+    document.getElementById('conflictsTableBody').innerHTML = `
+        <tr>
+            <td colspan="5" style="padding: 20px; text-align: center; color: #6c757d;">
+                <div style="display: flex; flex-direction: column; align-items: center; gap: 10px;">
+                    <div style="font-size: 2em;">⚔️</div>
+                    <div>Click "Find Longest Chains" to view relationship conflicts</div>
+                </div>
+            </td>
+        </tr>
+    `;
+}
 </script>
 
 </body>
