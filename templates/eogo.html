@@ -637,54 +637,29 @@ function displayCRIData() {
     // Display results
     const resultsDiv = document.getElementById('cri-analysis-results');
     resultsDiv.innerHTML = `
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-                <h5 class="font-semibold mb-2">CRI Scores by Province (${startIndex + 1}-${Math.min(endIndex, criAnalysisData.data.length)} of ${criAnalysisData.data.length})</h5>
-                <div class="space-y-2">
-                    ${pageData.map((result, index) => {
-                        const riskLevel = result.cri_score > 60 ? 'risk-high' : result.cri_score > 40 ? 'risk-medium' : result.cri_score > 20 ? 'risk-low' : 'risk-very-low';
-                        return `
-                            <div class="flex justify-between items-center p-3 ${riskLevel} rounded">
-                                <span class="font-medium">${result.province}</span>
-                                <div class="text-right">
-                                    <span class="font-bold text-lg">${result.cri_score}</span>
-                                    <div class="text-xs text-gray-500">
-                                        HHI: ${result.political_hhi} | Dynasty: ${result.dynasty_size} | 
-                                        Contractor: ${result.contractor_hhi} | Poverty: ${result.poverty_rate}%
-                                    </div>
-                                </div>
+        <div class="space-y-2">
+            <h5 class="font-semibold mb-2">CRI Scores by Province (${startIndex + 1}-${Math.min(endIndex, criAnalysisData.data.length)} of ${criAnalysisData.data.length})</h5>
+            ${pageData.map((result, index) => {
+                const riskLevel = result.cri_score > 60 ? 'risk-high' : result.cri_score > 40 ? 'risk-medium' : result.cri_score > 20 ? 'risk-low' : 'risk-very-low';
+                return `
+                    <div class="flex justify-between items-center p-3 ${riskLevel} rounded">
+                        <span class="font-medium">${result.province}</span>
+                        <div class="text-right">
+                            <span class="font-bold text-lg">${result.cri_score}</span>
+                            <div class="text-xs text-gray-500">
+                                HHI: ${result.political_hhi} | Dynasty: ${result.dynasty_size} | 
+                                Contractor: ${result.contractor_hhi} | Poverty: ${result.poverty_rate}%
                             </div>
-                        `;
-                    }).join('')}
-                </div>
-            </div>
-            <div>
-                <h5 class="font-semibold mb-2">CRI Analysis Statistics</h5>
-                <div class="space-y-2">
-                    <div class="flex justify-between">
-                        <span>Average CRI:</span>
-                        <span class="font-bold">${criAnalysisData.statistics.average_cri}</span>
+                        </div>
                     </div>
-                    <div class="flex justify-between">
-                        <span>Highest CRI:</span>
-                        <span class="font-bold text-red-600">${criAnalysisData.statistics.highest_cri} (${criAnalysisData.data[0].province})</span>
-                    </div>
-                    <div class="flex justify-between">
-                        <span>Total Provinces:</span>
-                        <span class="font-bold">${criAnalysisData.total_provinces}</span>
-                    </div>
-                    <div class="flex justify-between">
-                        <span>High Risk (CRI > 50):</span>
-                        <span class="font-bold text-red-600">${criAnalysisData.statistics.high_risk_count}</span>
-                    </div>
-                </div>
-                <div class="mt-4 p-3 bg-green-50 rounded">
-                    <p class="text-sm text-green-800">
-                        <strong>EOGO Methodology:</strong> CRI combines Political HHI (40%), Dynasty Size (30%), 
-                        Contractor HHI (20%), and Poverty Rate (10%) using the academic paper's framework.
-                    </p>
-                </div>
-            </div>
+                `;
+            }).join('')}
+        </div>
+        <div class="mt-6 p-4 bg-green-50 rounded-lg">
+            <p class="text-sm text-green-800">
+                <strong>EOGO Methodology:</strong> CRI combines Political HHI (40%), Dynasty Size (30%), 
+                Contractor HHI (20%), and Poverty Rate (10%) using the academic paper's framework.
+            </p>
         </div>
     `;
 }
@@ -740,50 +715,25 @@ function displayPovertyData() {
     // Display results
     const resultsDiv = document.getElementById('poverty-correlation-results');
     resultsDiv.innerHTML = `
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-                <h5 class="font-semibold mb-2">Poverty Rates by Province (${startIndex + 1}-${Math.min(endIndex, povertyData.data.length)} of ${povertyData.data.length})</h5>
-                <div class="space-y-2">
-                    ${pageData.map((result, index) => {
-                        const riskLevel = result.poverty_rate > 30 ? 'risk-high' : result.poverty_rate > 20 ? 'risk-medium' : result.poverty_rate > 10 ? 'risk-low' : 'risk-very-low';
-                        return `
-                            <div class="flex justify-between items-center p-3 ${riskLevel} rounded">
-                                <span class="font-medium">${result.province}</span>
-                                <div class="text-right">
-                                    <span class="font-bold text-lg">${result.poverty_rate}%</span>
-                                </div>
-                            </div>
-                        `;
-                    }).join('')}
-                </div>
-            </div>
-            <div>
-                <h5 class="font-semibold mb-2">Poverty Statistics</h5>
-                <div class="space-y-2">
-                    <div class="flex justify-between">
-                        <span>Average Poverty:</span>
-                        <span class="font-bold">${povertyData.statistics.average_poverty}%</span>
+        <div class="space-y-2">
+            <h5 class="font-semibold mb-2">Poverty Rates by Province (${startIndex + 1}-${Math.min(endIndex, povertyData.data.length)} of ${povertyData.data.length})</h5>
+            ${pageData.map((result, index) => {
+                const riskLevel = result.poverty_rate > 30 ? 'risk-high' : result.poverty_rate > 20 ? 'risk-medium' : result.poverty_rate > 10 ? 'risk-low' : 'risk-very-low';
+                return `
+                    <div class="flex justify-between items-center p-3 ${riskLevel} rounded">
+                        <span class="font-medium">${result.province}</span>
+                        <div class="text-right">
+                            <span class="font-bold text-lg">${result.poverty_rate}%</span>
+                        </div>
                     </div>
-                    <div class="flex justify-between">
-                        <span>Highest Poverty:</span>
-                        <span class="font-bold text-red-600">${povertyData.statistics.highest_poverty}% (${povertyData.data[0].province})</span>
-                    </div>
-                    <div class="flex justify-between">
-                        <span>Total Provinces:</span>
-                        <span class="font-bold">${povertyData.total_provinces}</span>
-                    </div>
-                    <div class="flex justify-between">
-                        <span>High Poverty (>20%):</span>
-                        <span class="font-bold text-red-600">${povertyData.statistics.high_poverty_count}</span>
-                    </div>
-                </div>
-                <div class="mt-4 p-3 bg-blue-50 rounded">
-                    <p class="text-sm text-blue-800">
-                        <strong>EOGO Paper:</strong> Poverty incidence is a key control variable in the CRI regression models. 
-                        Higher poverty rates correlate with increased corruption risk in public procurement.
-                    </p>
-                </div>
-            </div>
+                `;
+            }).join('')}
+        </div>
+        <div class="mt-6 p-4 bg-blue-50 rounded-lg">
+            <p class="text-sm text-blue-800">
+                <strong>EOGO Paper:</strong> Poverty incidence is a key control variable in the CRI regression models. 
+                Higher poverty rates correlate with increased corruption risk in public procurement.
+            </p>
         </div>
     `;
 }
