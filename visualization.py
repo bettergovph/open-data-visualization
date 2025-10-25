@@ -3203,80 +3203,37 @@ async def get_contractor_projects_frontend(contractor_name: str):
 
 @app.get("/api/dynasty/relationship-chains")
 async def dynasty_relationship_chains_api(
-    chain_length: int = Query(3, ge=2, le=10, description="Minimum chain length to find"),
+    chain_length: int = Query(2, ge=2, le=10, description="Minimum chain length to find"),
     max_chains: int = Query(20, ge=1, le=100, description="Maximum number of chains to return")
 ):
-    """Get longest relationship chains connecting different political families"""
+    """Get relationship chains from JSON cache"""
     try:
-        import asyncpg
+        import json
         
-        # Connect to dynasty database
-        conn = await asyncpg.connect(
-            host=os.getenv('POSTGRES_HOST', 'localhost'),
-            port=int(os.getenv('POSTGRES_PORT', 5432)),
-            user=os.getenv('POSTGRES_USER', 'budget_admin'),
-            password=os.getenv('POSTGRES_PASSWORD', ''),
-            database=os.getenv('POSTGRES_DB_DYNASTY', 'dynasty')
-        )
+        # Load cached JSON data
+        cache_file = "static/data/relationship_chains_cache.json"
         
-        # Simple query to find relationships between different families
-        chains_query = """
-        SELECT 
-            r.person_id as start_person,
-            r.related_person_id as end_person,
-            1 as chain_length,
-            p1.last_name as start_surname,
-            p2.last_name as end_surname,
-            p1.first_name as start_first_name,
-            p1.last_name as start_last_name,
-            p1.position as start_position,
-            p2.first_name as end_first_name,
-            p2.last_name as end_last_name,
-            p2.position as end_position,
-            r.relationship_description
-        FROM relationships r
-        JOIN political_dynasties p1 ON r.person_id = p1.id
-        JOIN political_dynasties p2 ON r.related_person_id = p2.id
-        WHERE p1.last_name != p2.last_name  -- Only different families
-        ORDER BY p1.last_name, p2.last_name
-        LIMIT 20;
-        """
+        if not os.path.exists(cache_file):
+            return JSONResponse({"success": False, "error": "Relationship chains cache not found. Please run the cache generation script."})
         
-        chains = await conn.fetch(chains_query)
-        await conn.close()
+        with open(cache_file, 'r', encoding='utf-8') as f:
+            cache_data = json.load(f)
         
-        # Format the response
-        formatted_chains = []
-        for chain in chains:
-            formatted_chains.append({
-                "length": chain['chain_length'],
-                "start_surname": chain['start_surname'],
-                "end_surname": chain['end_surname'],
-                "path": [
-                    {
-                        "id": chain['start_person'],
-                        "first_name": chain['start_first_name'],
-                        "last_name": chain['start_last_name'],
-                        "position": chain['start_position'],
-                        "relationship_description": "Starting person"
-                    },
-                    {
-                        "id": chain['end_person'],
-                        "first_name": chain['end_first_name'],
-                        "last_name": chain['end_last_name'],
-                        "position": chain['end_position'],
-                        "relationship_description": chain['relationship_description']
-                    }
-                ],
-                "relationships": [chain['relationship_description']]
-            })
+        # Filter chains by minimum length and limit results
+        all_chains = cache_data.get('chains', [])
+        filtered_chains = [chain for chain in all_chains if chain['length'] >= chain_length]
+        limited_chains = filtered_chains[:max_chains]
         
         return JSONResponse({
             "success": True,
-            "data": formatted_chains,
-            "total_chains": len(formatted_chains),
+            "data": limited_chains,
+            "total_chains": len(limited_chains),
             "min_chain_length": chain_length,
-            "max_chains_returned": max_chains
+            "max_chains_returned": max_chains,
+            "cache_info": {
+                "last_updated": cache_data.get('summary', {}).get('last_updated'),
+                "total_cached": cache_data.get('summary', {}).get('total_chains', 0)
+            }
         })
         
     except Exception as e:
