@@ -951,6 +951,48 @@ class DynastyFlagGenerator {
     }
 
     /**
+     * Create a flag from saved parameters using the existing flag generation logic
+     */
+    createFlagFromSavedParameters(params) {
+        const { slices, orientation, shapeSequence, colorScheme, symbol, variation, isCzechStyle } = params;
+        
+        // Create SVG element
+        const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+        svg.setAttribute('width', '100');
+        svg.setAttribute('height', '60');
+        svg.setAttribute('viewBox', '0 0 100 60');
+        svg.style.border = '1px solid #ddd';
+        svg.style.borderRadius = '4px';
+        
+        // Create flag slices based on saved parameters
+        const sliceWidth = 100 / slices;
+        const sliceHeight = 60;
+        
+        for (let i = 0; i < slices; i++) {
+            const x = i * sliceWidth;
+            const y = 0;
+            const width = sliceWidth;
+            const height = sliceHeight;
+            
+            // Get shape and color from saved parameters
+            const shape = shapeSequence[i] || 'rectangle';
+            const color = colorScheme[i] || '#FF6B6B';
+            
+            // Create the slice
+            const slice = this.createFlagSlice(x, y, width, height, shape, color, variation);
+            svg.appendChild(slice);
+        }
+        
+        // Add symbol if present
+        if (symbol && symbol !== 'None') {
+            const symbolElement = this.createSymbolOverlay(symbol, 20, variation, 0);
+            svg.appendChild(symbolElement);
+        }
+        
+        return svg;
+    }
+
+    /**
      * Create a flag from saved parameters
      */
     createFlagFromParameters(flagParams) {
@@ -966,7 +1008,8 @@ class DynastyFlagGenerator {
         } = flagParams;
 
         // Create the flag using the saved parameters
-        const flag = this.createFlagSVG({
+        // We need to create a custom flag generation that uses the saved parameters
+        const flag = this.createFlagFromSavedParameters({
             slices: slices,
             orientation: orientation,
             shapeSequence: shape_sequence,
