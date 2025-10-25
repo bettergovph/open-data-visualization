@@ -3095,15 +3095,15 @@ function createAnimationMap2004(ampatuan2004, flagData) {
         </div>
     `;
     
-    // Create the same heatmap as Visual tab but with Ampatuan flag overlay
-    console.log('🗺️ Calling createDynastyHeatmap with data:', animationData.length, 'records');
-    createDynastyHeatmap(animationData);
+    // Create a plain white map for Animation tab
+    console.log('🗺️ Creating plain white map for Animation tab...');
+    createPlainWhiteMap();
     
-    // Add Ampatuan flag overlay after heatmap is created, sized by family count
+    // Add Ampatuan flag overlay after map is created
     setTimeout(() => {
-        console.log('🏴 Adding flag overlay after heatmap render...');
+        console.log('🏴 Adding flag overlay after map render...');
         addAmpatuanFlagOverlay2004(ampatuan2004, flagData, familySize);
-    }, 3000); // Wait longer for heatmap to render
+    }, 2000); // Wait for map to render
 }
 
 function addAmpatuanFlagOverlay(ampatuan, flagData) {
@@ -3270,6 +3270,136 @@ function initializeAnimationMap() {
 
 // Removed unused animation control functions
 
+function createPlainWhiteMap() {
+    console.log('🗺️ Creating plain white map for Animation tab...');
+    
+    const canvas = document.getElementById('dynastyHeatmapChart');
+    if (!canvas) {
+        console.error('❌ Canvas not found');
+        return;
+    }
+    
+    // Load Philippine provinces GeoJSON data for accurate map rendering
+    fetch('/static/data/philippines-provinces.json')
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+            }
+            return response.json();
+        })
+        .then(geoJsonData => {
+            console.log('🗺️ Plain white map: GeoJSON data loaded:', geoJsonData.features.length, 'features');
+            
+            if (!geoJsonData.features || geoJsonData.features.length === 0) {
+                console.error('❌ No GeoJSON features found');
+                return;
+            }
+            
+            // Canvas setup
+            const ctx = canvas.getContext('2d');
+            
+            // Set proper canvas resolution to avoid blurriness
+            const rect = canvas.getBoundingClientRect();
+            const dpr = window.devicePixelRatio || 1;
+            canvas.width = rect.width * dpr;
+            canvas.height = rect.height * dpr;
+            ctx.scale(dpr, dpr);
+            
+            const width = rect.width;
+            const height = rect.height;
+            
+            console.log('📐 Plain white map canvas setup:', { width, height, dpr });
+
+            // Clear canvas with light blue background
+            ctx.clearRect(0, 0, width, height);
+            ctx.fillStyle = '#f0f8ff';
+            ctx.fillRect(0, 0, width, height);
+
+            // Calculate bounds of the Philippines
+            let minLat = Infinity, maxLat = -Infinity;
+            let minLng = Infinity, maxLng = -Infinity;
+
+            geoJsonData.features.forEach(feature => {
+                if (feature.geometry.type === 'MultiPolygon') {
+                    feature.geometry.coordinates.forEach(polygon => {
+                        polygon.forEach(ring => {
+                            ring.forEach(coord => {
+                                const [lng, lat] = coord;
+                                minLat = Math.min(minLat, lat);
+                                maxLat = Math.max(maxLat, lat);
+                                minLng = Math.min(minLng, lng);
+                                maxLng = Math.max(maxLng, lng);
+                            });
+                        });
+                    });
+                }
+            });
+
+            // Calculate scale and offset to fit Philippines in canvas
+            const latRange = maxLat - minLat;
+            const lngRange = maxLng - minLng;
+            const scale = Math.min((width - 40) / lngRange, (height - 40) / latRange);
+            const offsetX = (width - lngRange * scale) / 2;
+            const offsetY = (height - latRange * scale) / 2;
+
+            console.log('📐 Plain white map bounds:', { minLat, maxLat, minLng, maxLng });
+            console.log('📐 Plain white map scale:', scale, 'offset:', offsetX, offsetY);
+
+            // Draw all provinces with plain white fill and dark borders
+            geoJsonData.features.forEach(feature => {
+                if (feature.geometry.type === 'MultiPolygon') {
+                    feature.geometry.coordinates.forEach(polygon => {
+                        polygon.forEach(ring => {
+                            ctx.beginPath();
+                            ring.forEach((coord, index) => {
+                                const [lng, lat] = coord;
+                                const x = offsetX + (lng - minLng) * scale;
+                                const y = offsetY + (maxLat - lat) * scale;
+                                
+                                if (index === 0) {
+                                    ctx.moveTo(x, y);
+                                } else {
+                                    ctx.lineTo(x, y);
+                                }
+                            });
+                            ctx.closePath();
+                        });
+                    });
+                }
+            });
+
+            // Fill all provinces with white
+            ctx.fillStyle = '#FFFFFF';
+            ctx.fill();
+
+            // Draw province borders in dark color
+            ctx.strokeStyle = '#000000';
+            ctx.lineWidth = 1;
+            ctx.stroke();
+
+            console.log('✅ Plain white map created successfully');
+        })
+        .catch(error => {
+            console.error('❌ Error loading GeoJSON for plain white map:', error);
+            // Fallback: draw a simple rectangle
+            const ctx = canvas.getContext('2d');
+            const rect = canvas.getBoundingClientRect();
+            canvas.width = rect.width;
+            canvas.height = rect.height;
+            
+            ctx.fillStyle = '#f0f8ff';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            ctx.fillStyle = '#FFFFFF';
+            ctx.fillRect(50, 50, canvas.width - 100, canvas.height - 100);
+            
+            ctx.strokeStyle = '#000000';
+            ctx.lineWidth = 2;
+            ctx.strokeRect(50, 50, canvas.width - 100, canvas.height - 100);
+            
+            console.log('✅ Fallback plain white map created');
+        });
+}
 
 // Removed unused showDynastiesForYear function
 </script>
