@@ -2629,6 +2629,10 @@ function displayConflictsNetwork() {
                 name: `${person.first_name} ${person.last_name}`,
                 surname: person.last_name,
                 position: person.position,
+                region: person.region,
+                province: person.province,
+                municipality_city: person.municipality_city,
+                location: person.location,
                 relationship_description: person.relationship_description,
                 chainIndex: chainIndex,
                 chainLength: chain.length,
@@ -2723,6 +2727,7 @@ function displayConflictsNetwork() {
             tooltip.html(`
                 <div style="font-weight: bold; margin-bottom: 4px;">${d.name}</div>
                 <div style="color: #ccc; margin-bottom: 4px;">${d.position || 'Unknown Position'}</div>
+                <div style="color: #a78bfa; margin-bottom: 4px;">📍 ${d.location || 'Location unknown'}</div>
                 <div style="color: #4ade80;">${d.relationship_description || 'Relationship unknown'}</div>
                 ${d.isConnector ? '<div style="color: #fbbf24;">🔗 Connecting Node</div>' : '<div style="color: #60a5fa;">🏛️ Family Member</div>'}
             `);

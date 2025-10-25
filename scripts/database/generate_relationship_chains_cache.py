@@ -110,7 +110,7 @@ async def generate_relationship_chains_cache():
             for i, person_id in enumerate(person_ids):
                 # Get person details from database
                 person_query = """
-                SELECT id, first_name, last_name, position
+                SELECT id, first_name, last_name, position, region, province, municipality_city
                 FROM political_dynasties 
                 WHERE id = $1
                 """
@@ -118,11 +118,26 @@ async def generate_relationship_chains_cache():
                 
                 if person:
                     relationship_desc = "Starting person" if i == 0 else relationships[i-1] if i-1 < len(relationships) else "Unknown"
+                    
+                    # Build location string
+                    location_parts = []
+                    if person['municipality_city']:
+                        location_parts.append(person['municipality_city'])
+                    if person['province']:
+                        location_parts.append(person['province'])
+                    if person['region']:
+                        location_parts.append(person['region'])
+                    location = ', '.join(location_parts) if location_parts else 'Location unknown'
+                    
                     path_details.append({
                         "id": person['id'],
                         "first_name": person['first_name'],
                         "last_name": person['last_name'],
                         "position": person['position'],
+                        "region": person['region'],
+                        "province": person['province'],
+                        "municipality_city": person['municipality_city'],
+                        "location": location,
                         "relationship_description": relationship_desc
                     })
             
