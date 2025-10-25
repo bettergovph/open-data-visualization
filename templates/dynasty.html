@@ -3088,16 +3088,16 @@ function createAnimationMap2004(ampatuan2004, flagData) {
     const familySize = ampatuan2004.length;
     console.log('👥 Ampatuan 2004 family size:', familySize);
     
-    // Clear the container and add the heatmap canvas
+    // Clear the container and add the animation canvas
     mapContainer.innerHTML = `
         <div style="height: calc(100% - 80px); position: relative;">
-            <canvas id="dynastyHeatmapChart" style="cursor: pointer; width: 100%; height: 100%;"></canvas>
+            <canvas id="animationMapCanvas" style="cursor: pointer; width: 100%; height: 100%;"></canvas>
         </div>
     `;
     
     // Create a plain white map for Animation tab
     console.log('🗺️ Creating plain white map for Animation tab...');
-    createPlainWhiteMap().then((mapData) => {
+    createAnimationMap().then((mapData) => {
         console.log('🗺️ Map rendering completed, adding flag overlay...');
         // Add dynasty flag overlay after map is fully rendered
         setTimeout(() => {
@@ -3178,15 +3178,10 @@ function addDynastyFlagOverlay(dynastyMembers, flagData, familySize, mapData, ye
     console.log(`🏴 Adding dynasty flag overlay for year ${year}...`);
     
     const mapContainer = document.getElementById('animationMap');
-    const canvas = document.getElementById('dynastyHeatmapChart');
+    const canvas = document.getElementById('animationMapCanvas');
     
     if (!canvas) {
         console.error('❌ Heatmap canvas not found');
-        return;
-    }
-    
-    if (!mapData) {
-        console.error('❌ Map data not available');
         return;
     }
     
@@ -3205,21 +3200,6 @@ function addDynastyFlagOverlay(dynastyMembers, flagData, familySize, mapData, ye
         console.log(`🏴 Dynasty surname:`, dynastySurname);
     }
     
-    // Find the province in GeoJSON data
-    let provinceFeature = null;
-    if (dynastyProvince && mapData.geoJsonData) {
-        provinceFeature = mapData.geoJsonData.features.find(feature => {
-            const provinceName = feature.properties?.NAME_1 || feature.properties?.name || feature.properties?.PROVINCE;
-            return provinceName && provinceName.toLowerCase().includes(dynastyProvince.toLowerCase());
-        });
-        
-        if (provinceFeature) {
-            console.log('🗺️ Found dynasty province in GeoJSON:', provinceFeature.properties);
-        } else {
-            console.log('⚠️ Dynasty province not found in GeoJSON, using fallback position');
-        }
-    }
-    
     // Find dynasty's flag
     let flagUrl = '/static/flags/flag_default.svg';
     if (flagData && flagData.dynasties && dynastySurname) {
@@ -3235,40 +3215,18 @@ function addDynastyFlagOverlay(dynastyMembers, flagData, familySize, mapData, ye
         }
     }
     
-    // Calculate flag position
-    let flagX, flagY;
+    // Get canvas dimensions for positioning
+    const rect = canvas.getBoundingClientRect();
+    const canvasWidth = canvas.width || canvas.offsetWidth || rect.width;
+    const canvasHeight = canvas.height || canvas.offsetHeight || rect.height;
     
-    if (provinceFeature) {
-        // Calculate center of the province
-        const coordinates = provinceFeature.geometry.coordinates;
-        let totalLat = 0, totalLng = 0, pointCount = 0;
-        
-        coordinates.forEach(polygon => {
-            polygon.forEach(ring => {
-                ring.forEach(coord => {
-                    const [lng, lat] = coord;
-                    totalLng += lng;
-                    totalLat += lat;
-                    pointCount++;
-                });
-            });
-        });
-        
-        const centerLng = totalLng / pointCount;
-        const centerLat = totalLat / pointCount;
-        
-        // Convert to canvas coordinates
-        flagX = mapData.offsetX + (centerLng - mapData.bounds.minLng) * mapData.scale;
-        flagY = mapData.offsetY + (mapData.bounds.maxLat - centerLat) * mapData.scale;
-        
-        console.log('📍 Province center coordinates:', { centerLng, centerLat });
-        console.log('📍 Flag position from province center:', flagX, flagY);
-    } else {
-        // Fallback: position in center-right area (where Maguindanao would be)
-        flagX = mapData.width * 0.7; // 70% from left
-        flagY = mapData.height * 0.6; // 60% from top
-        console.log('📍 Flag position (fallback):', flagX, flagY);
-    }
+    console.log('📐 Canvas dimensions:', canvasWidth, 'x', canvasHeight);
+    
+    // Position flag in the center-right area (where Maguindanao would be)
+    const flagX = canvasWidth * 0.7; // 70% from left
+    const flagY = canvasHeight * 0.6; // 60% from top
+    
+    console.log('📍 Flag position:', flagX, flagY);
     
     console.log('👥 Family size for flag sizing:', familySize);
     
@@ -3323,18 +3281,18 @@ function initializeAnimationMap() {
 
 // Removed unused animation control functions
 
-function createPlainWhiteMap() {
-    console.log('🗺️ Creating plain white map for Animation tab...');
+function createAnimationMap() {
+    console.log('🗺️ Creating animation map for Animation tab...');
     
-    const canvas = document.getElementById('dynastyHeatmapChart');
+    const canvas = document.getElementById('animationMapCanvas');
     if (!canvas) {
-        console.error('❌ Canvas not found');
-        return Promise.reject('Canvas not found');
+        console.error('❌ Animation canvas not found');
+        return Promise.reject('Animation canvas not found');
     }
     
     // Check if map is already being created to prevent duplicate calls
     if (canvas.dataset.mapCreating === 'true') {
-        console.log('⚠️ Map creation already in progress, skipping duplicate call');
+        console.log('⚠️ Animation map creation already in progress, skipping duplicate call');
         return Promise.resolve(null);
     }
     
