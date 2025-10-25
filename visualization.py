@@ -3154,5 +3154,42 @@ async def cri_analysis_api():
     except Exception as e:
         return JSONResponse({"success": False, "error": str(e)})
 
+# Contractor endpoints that frontend expects
+@app.get("/api/contractors/top")
+async def get_contractors_top(limit: int = 100):
+    """Get top contractors by project count - frontend endpoint"""
+    try:
+        # Redirect to the existing philgeps endpoint
+        return await get_top_contractors(limit)
+    except Exception as e:
+        return JSONResponse({"success": False, "error": str(e)})
+
+@app.get("/api/contractors/venn")
+async def get_contractors_venn_frontend():
+    """Get Venn diagram data for contractor sources - frontend endpoint"""
+    try:
+        # Redirect to the existing philgeps endpoint
+        return await get_contractors_venn()
+    except Exception as e:
+        return JSONResponse({"success": False, "error": str(e)})
+
+@app.get("/api/contractors/sec-standard-deviation")
+async def get_contractors_sec_std_frontend():
+    """Get SEC contractor standard deviation analysis - frontend endpoint"""
+    try:
+        # Redirect to the existing philgeps endpoint
+        return await get_sec_contractor_standard_deviation()
+    except Exception as e:
+        return JSONResponse({"success": False, "error": str(e)})
+
+@app.get("/api/contractors/projects/{contractor_name}")
+async def get_contractor_projects_frontend(contractor_name: str):
+    """Get contractor projects - frontend endpoint"""
+    try:
+        # Redirect to the existing philgeps endpoint
+        return await search_contractor_projects(contractor_name)
+    except Exception as e:
+        return JSONResponse({"success": False, "error": str(e)})
+
 if __name__ == "__main__":
     uvicorn.run(app, host="127.0.0.1", port=8000)
