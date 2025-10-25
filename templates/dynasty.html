@@ -2970,20 +2970,30 @@ let animationInterval = null;
 let isAnimating = false;
 
 async function loadAnimationData() {
-    console.log('🎬 Loading animation data - showing Ampatuan flag on map...');
+    console.log('🎬 Loading 2004 family data for Ampatuan flag sizing...');
     
     try {
-        // Load dynasty data for the heatmap (same as Visual tab)
-        const response = await fetch('/api/dynasty?limit=1000');
+        // Load Ampatuan family data for 2004 specifically
+        const response = await fetch('/api/dynasty/family?surname=ampatuan');
         const data = await response.json();
         
         if (data.success) {
-            animationData = data.data;
-            console.log('✅ Animation data loaded:', animationData.length, 'records');
+            console.log('✅ Family data loaded:', data);
+            console.log('👥 Family members:', data.family_count);
+            console.log('🔗 Connected members:', data.connected_count);
+            console.log('📊 Total members:', data.total_count);
             
-            // Find Ampatuan dynasty
-            const ampatuan = animationData.find(d => d.surname && d.surname.toLowerCase().includes('ampatuan'));
-            console.log('🔍 Ampatuan found:', ampatuan ? `${ampatuan.surname} (${ampatuan.dynasty_count} members) in ${ampatuan.province}` : 'NOT FOUND');
+            // Filter for 2004 data only
+            const members2004 = data.data.filter(member => member.year === 2004);
+            console.log('📅 2004 members:', members2004.length);
+            
+            // Find Ampatuan family members in 2004
+            const ampatuan2004 = members2004.filter(member => 
+                member.last_name && member.last_name.toLowerCase().includes('ampatuan')
+            );
+            
+            console.log('🏴 Ampatuan 2004 members:', ampatuan2004.length);
+            console.log('📊 Sample member:', ampatuan2004[0]);
             
             // Load flag data (same as Top Surnames chart)
             let flagData = null;
@@ -2995,13 +3005,13 @@ async function loadAnimationData() {
                 console.log('⚠️ Dynasty flags not available:', error);
             }
             
-            // Create the map with Ampatuan flag
-            createAnimationMap(ampatuan, flagData);
+            // Create the map with Ampatuan flag sized by 2004 family count
+            createAnimationMap2004(ampatuan2004, flagData);
         } else {
-            console.error('❌ Error loading animation data:', data.error);
+            console.error('❌ Error loading family data:', data.error);
         }
     } catch (error) {
-        console.error('❌ Error loading animation data:', error);
+        console.error('❌ Error loading family data:', error);
     }
 }
 
@@ -3037,6 +3047,43 @@ function createAnimationMap(ampatuan, flagData) {
     setTimeout(() => {
         console.log('🏴 Adding flag overlay after heatmap render...');
         addAmpatuanFlagOverlay(ampatuan, flagData);
+    }, 2000); // Wait longer for heatmap to render
+}
+
+function createAnimationMap2004(ampatuan2004, flagData) {
+    console.log('🗺️ Creating 2004 animation map with Ampatuan flag sized by family count...');
+    
+    const mapContainer = document.getElementById('animationMap');
+    
+    if (!ampatuan2004 || ampatuan2004.length === 0) {
+        mapContainer.innerHTML = `
+            <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; color: #666;">
+                <div style="font-size: 2em;">❌</div>
+                <div>Ampatuan dynasty not found in 2004 data</div>
+            </div>
+        `;
+        return;
+    }
+    
+    // Calculate family size for flag sizing
+    const familySize = ampatuan2004.length;
+    console.log('👥 Ampatuan 2004 family size:', familySize);
+    
+    // Clear the container and add the heatmap canvas
+    mapContainer.innerHTML = `
+        <div style="height: calc(100% - 80px); position: relative;">
+            <canvas id="dynastyHeatmapChart" style="cursor: pointer; width: 100%; height: 100%;"></canvas>
+        </div>
+    `;
+    
+    // Create the same heatmap as Visual tab but with Ampatuan flag overlay
+    console.log('🗺️ Calling createDynastyHeatmap with data:', animationData.length, 'records');
+    createDynastyHeatmap(animationData);
+    
+    // Add Ampatuan flag overlay after heatmap is created, sized by family count
+    setTimeout(() => {
+        console.log('🏴 Adding flag overlay after heatmap render...');
+        addAmpatuanFlagOverlay2004(ampatuan2004, flagData, familySize);
     }, 2000); // Wait longer for heatmap to render
 }
 
@@ -3103,6 +3150,85 @@ function addAmpatuanFlagOverlay(ampatuan, flagData) {
     
     mapContainer.appendChild(flagOverlay);
     console.log('✅ Ampatuan flag added to map at position:', flagX, flagY);
+}
+
+function addAmpatuanFlagOverlay2004(ampatuan2004, flagData, familySize) {
+    console.log('🏴 Adding Ampatuan 2004 flag overlay sized by family count...');
+    
+    const mapContainer = document.getElementById('animationMap');
+    const canvas = document.getElementById('dynastyHeatmapChart');
+    
+    if (!canvas) {
+        console.error('❌ Heatmap canvas not found');
+        return;
+    }
+    
+    // Get canvas position and size
+    const rect = canvas.getBoundingClientRect();
+    const mapRect = mapContainer.getBoundingClientRect();
+    
+    console.log('📐 Canvas rect:', rect);
+    console.log('📐 Map container rect:', mapRect);
+    
+    // Find Ampatuan's flag
+    let flagUrl = '/static/flags/flag_default.svg';
+    if (flagData && flagData.dynasties) {
+        // Try to find Ampatuan's flag
+        const ampatuanKey = Object.keys(flagData.dynasties).find(key => 
+            key.toLowerCase().includes('ampatuan')
+        );
+        
+        if (ampatuanKey) {
+            const dynastyInfo = flagData.dynasties[ampatuanKey];
+            flagUrl = `/static/flags/flag_${dynastyInfo.dynasty_id}.svg`;
+            console.log('🏴 Found Ampatuan flag:', flagUrl);
+        }
+    }
+    
+    // Position flag in the center-right area of the map (where Maguindanao would be)
+    const flagX = rect.width * 0.7; // 70% from left
+    const flagY = rect.height * 0.6; // 60% from top
+    
+    console.log('📍 Flag position:', flagX, flagY);
+    console.log('👥 Family size for flag sizing:', familySize);
+    
+    // Calculate flag size based on family member count
+    // Base size: 50px width, scale up with family size
+    const baseWidth = 50;
+    const baseHeight = 30;
+    const sizeMultiplier = Math.max(1, Math.min(3, familySize / 5)); // Scale 1x to 3x based on family size
+    const flagWidth = Math.round(baseWidth * sizeMultiplier);
+    const flagHeight = Math.round(baseHeight * sizeMultiplier);
+    
+    console.log('📏 Flag dimensions:', flagWidth, 'x', flagHeight, '(multiplier:', sizeMultiplier.toFixed(2), ')');
+    
+    // Create flag overlay positioned relative to the map container
+    const flagOverlay = document.createElement('div');
+    flagOverlay.style.cssText = `
+        position: absolute;
+        left: ${flagX}px;
+        top: ${flagY}px;
+        z-index: 1000;
+        pointer-events: none;
+    `;
+    
+    flagOverlay.innerHTML = `
+        <div style="display: flex; flex-direction: column; align-items: center;">
+            <img src="${flagUrl}" 
+                 alt="Ampatuan Flag (2004)" 
+                 style="width: ${flagWidth}px; height: ${flagHeight}px; border: 3px solid #000; border-radius: 4px; box-shadow: 0 4px 12px rgba(0,0,0,0.7);"
+                 onerror="this.style.display='none'"/>
+            <div style="font-size: 12px; font-weight: bold; color: #000; text-align: center; margin-top: 4px; background: rgba(255,255,255,0.9); padding: 4px 8px; border-radius: 4px; border: 1px solid #000;">
+                Ampatuan (2004)
+            </div>
+            <div style="font-size: 10px; color: #666; text-align: center; margin-top: 2px; background: rgba(255,255,255,0.8); padding: 2px 6px; border-radius: 3px;">
+                ${familySize} members
+            </div>
+        </div>
+    `;
+    
+    mapContainer.appendChild(flagOverlay);
+    console.log('✅ Ampatuan 2004 flag added to map at position:', flagX, flagY, 'with size:', flagWidth, 'x', flagHeight);
 }
 
 function initializeAnimationMap() {
