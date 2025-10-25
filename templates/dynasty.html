@@ -3088,16 +3088,16 @@ function createAnimationMap2004(ampatuan2004, flagData) {
     const familySize = ampatuan2004.length;
     console.log('👥 Ampatuan 2004 family size:', familySize);
     
-    // Clear the container and add the animation canvas
+    // Clear the container and add the heatmap canvas
     mapContainer.innerHTML = `
         <div style="height: calc(100% - 80px); position: relative;">
-            <canvas id="animationMapCanvas" style="cursor: pointer; width: 100%; height: 100%;"></canvas>
+            <canvas id="dynastyHeatmapChart" style="cursor: pointer; width: 100%; height: 100%;"></canvas>
         </div>
     `;
     
     // Create a plain white map for Animation tab
     console.log('🗺️ Creating plain white map for Animation tab...');
-    createAnimationMap().then((mapData) => {
+    createPlainWhiteMap().then((mapData) => {
         console.log('🗺️ Map rendering completed, adding flag overlay...');
         // Add dynasty flag overlay after map is fully rendered
         setTimeout(() => {
@@ -3178,7 +3178,7 @@ function addDynastyFlagOverlay(dynastyMembers, flagData, familySize, mapData, ye
     console.log(`🏴 Adding dynasty flag overlay for year ${year}...`);
     
     const mapContainer = document.getElementById('animationMap');
-    const canvas = document.getElementById('animationMapCanvas');
+    const canvas = document.getElementById('dynastyHeatmapChart');
     
     if (!canvas) {
         console.error('❌ Heatmap canvas not found');
@@ -3281,18 +3281,18 @@ function initializeAnimationMap() {
 
 // Removed unused animation control functions
 
-function createAnimationMap() {
-    console.log('🗺️ Creating animation map for Animation tab...');
+function createPlainWhiteMap() {
+    console.log('🗺️ Creating plain white map for Animation tab...');
     
-    const canvas = document.getElementById('animationMapCanvas');
+    const canvas = document.getElementById('dynastyHeatmapChart');
     if (!canvas) {
-        console.error('❌ Animation canvas not found');
-        return Promise.reject('Animation canvas not found');
+        console.error('❌ Canvas not found');
+        return Promise.reject('Canvas not found');
     }
     
     // Check if map is already being created to prevent duplicate calls
     if (canvas.dataset.mapCreating === 'true') {
-        console.log('⚠️ Animation map creation already in progress, skipping duplicate call');
+        console.log('⚠️ Map creation already in progress, skipping duplicate call');
         return Promise.resolve(null);
     }
     
