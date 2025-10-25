@@ -203,6 +203,7 @@
             <a href="/map" class="text-black hover:text-gray-600 font-medium transition">Map</a>
             <a href="/philgeps" class="text-black hover:text-gray-600 font-medium transition">PhilGEPS</a>
             <a href="/dynasty" class="text-black hover:text-gray-600 font-medium transition border-b-2 border-black">Dynasties</a>
+            <a href="/eogo" class="text-black hover:text-gray-600 font-medium transition">EOGO</a>
             <a href="/sources" class="text-black hover:text-gray-600 font-medium transition">Sources</a>
         </div>
         <div class="md:hidden">
@@ -246,7 +247,7 @@ function toggleMobileMenu() {
                         <a href="#overlords" class="dynasty-tab-btn active" data-tab="overlords">🗺️ Overlords</a>
                         <a href="#visual" class="dynasty-tab-btn" data-tab="visual">📈 Visual</a>
                         <a href="#table" class="dynasty-tab-btn" data-tab="table">📊 Table</a>
-                        <a href="#conflicts" class="dynasty-tab-btn" data-tab="conflicts">⚖️ Conflicts of Interest</a>
+                        <a href="#poverty" class="dynasty-tab-btn" data-tab="poverty">💰 Poverty</a>
                     </div>
                 
                 <div class="dynasty-tab-content">
@@ -378,7 +379,7 @@ function toggleMobileMenu() {
                     <!-- Table Tab -->
                     <div id="tab-table" class="dynasty-tab-panel">
                         <h3 class="dynasty-section-title">📊 Dynasty Data Browser</h3>
-                        <p class="dynasty-section-desc">Search and explore political dynasty records (2004-2016)</p>
+                        <p class="dynasty-section-desc">Search and explore political dynasty records (2004-2025)</p>
                         
                         <!-- Search and Filters -->
                         <div class="mb-6">
@@ -411,18 +412,34 @@ function toggleMobileMenu() {
                             </div>
                         </div>
 
+                        <!-- Top Pagination -->
+                        <div id="topPaginationContainer" class="flex items-center justify-between mb-4">
+                            <div class="flex items-center text-sm text-gray-700">
+                                <span id="topPaginationInfo">Showing 0 to 0 of 0 results</span>
+                            </div>
+                            <div class="flex items-center space-x-2">
+                                <button id="topPrevPage" class="px-3 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed">
+                                    Previous
+                                </button>
+                                <span id="topPageNumbers" class="flex space-x-1">
+                                    <!-- Page numbers will be generated here -->
+                                </span>
+                                <button id="topNextPage" class="px-3 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed">
+                                    Next
+                                </button>
+                            </div>
+                        </div>
+
                         <!-- Table -->
-                        <div class="table-responsive">
-                            <table class="min-w-full divide-y divide-gray-200">
+                        <div class="table-responsive overflow-x-auto">
+                            <table class="min-w-full divide-y divide-gray-200 table-fixed">
                                 <thead class="bg-gray-50">
                                     <tr>
                                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
-                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Party</th>
-                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Position</th>
-                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Branch</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider" style="width: 200px; max-width: 200px;">Position</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider" style="width: 200px; max-width: 200px;">Organization</th>
                                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Location</th>
-                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Year</th>
-                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider" style="width: 60px; max-width: 60px;">Year</th>
                                     </tr>
                                 </thead>
                                 <tbody id="dynastyTableBody" class="bg-white divide-y divide-gray-200">
@@ -549,6 +566,102 @@ function toggleMobileMenu() {
                             </div>
                         </div>
                     </div>
+
+                    <!-- Poverty Tab -->
+                    <div id="tab-poverty" class="dynasty-tab-panel">
+                        <h3 class="dynasty-section-title">💰 Poverty Data</h3>
+                        <p class="dynasty-section-desc">Poverty statistics and data analysis</p>
+                        
+                        <!-- Poverty Filters -->
+                        <div class="poverty-filters" style="background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); margin-bottom: 20px;">
+                            <div style="display: flex; gap: 15px; margin-bottom: 15px; flex-wrap: wrap; align-items: center;">
+                                <div>
+                                    <label style="display: block; margin-bottom: 5px; font-weight: 600; color: #333;">Search:</label>
+                                    <input type="text" id="povertySearch" placeholder="Search poverty data..." 
+                                           style="padding: 8px 12px; border: 1px solid #ddd; border-radius: 4px; width: 200px;">
+                                </div>
+                                <div>
+                                    <label style="display: block; margin-bottom: 5px; font-weight: 600; color: #333;">Region:</label>
+                                    <select id="povertyRegionFilter" style="padding: 8px 12px; border: 1px solid #ddd; border-radius: 4px; width: 150px;">
+                                        <option value="">All Regions</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label style="display: block; margin-bottom: 5px; font-weight: 600; color: #333;">Year:</label>
+                                    <select id="povertyYearFilter" style="padding: 8px 12px; border: 1px solid #ddd; border-radius: 4px; width: 120px;">
+                                        <option value="">All Years</option>
+                                    </select>
+                                </div>
+                                <div style="display: flex; align-items: end; gap: 10px;">
+                                    <button onclick="loadPovertyData()" style="background: #0038A8; color: white; padding: 8px 16px; border: none; border-radius: 4px; cursor: pointer; font-weight: 600;">
+                                        🔍 Load Data
+                                    </button>
+                                    <button onclick="clearPovertyFilters()" style="background: #6c757d; color: white; padding: 8px 16px; border: none; border-radius: 4px; cursor: pointer;">
+                                        Clear
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Poverty Data Table -->
+                        <div class="poverty-table-section" style="background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
+                            <h4 style="color: #0038A8; margin: 0 0 15px 0; font-size: 1.2em;">📊 Poverty Data Table</h4>
+                            
+                            <!-- Pagination Controls -->
+                            <div class="poverty-pagination" style="display: flex; justify-content: between; align-items: center; margin-bottom: 15px; flex-wrap: wrap; gap: 10px;">
+                                <div style="display: flex; align-items: center; gap: 10px;">
+                                    <span style="color: #6c757d; font-size: 0.9em;">Rows per page:</span>
+                                    <select id="povertyRowsPerPage" style="padding: 4px 8px; border: 1px solid #ddd; border-radius: 4px;">
+                                        <option value="10">10</option>
+                                        <option value="25" selected>25</option>
+                                        <option value="50">50</option>
+                                        <option value="100">100</option>
+                                    </select>
+                                </div>
+                                <div id="povertyPaginationInfo" style="color: #6c757d; font-size: 0.9em;">
+                                    <!-- Pagination info will be displayed here -->
+                                </div>
+                                <div id="povertyPaginationControls" style="display: flex; gap: 5px;">
+                                    <!-- Pagination buttons will be displayed here -->
+                                </div>
+                            </div>
+
+                            <!-- Table -->
+                            <div class="table-responsive" style="overflow-x: auto;">
+                                <table class="poverty-table" style="width: 100%; border-collapse: collapse;">
+                                    <thead>
+                                        <tr style="background: #f8f9fa;">
+                                            <th style="padding: 12px; text-align: left; border-bottom: 2px solid #dee2e6; font-weight: 600; cursor: pointer;" onclick="sortPovertyTable('region')">
+                                                Region <span id="sort-region">↕️</span>
+                                            </th>
+                                            <th style="padding: 12px; text-align: left; border-bottom: 2px solid #dee2e6; font-weight: 600; cursor: pointer;" onclick="sortPovertyTable('province')">
+                                                Province <span id="sort-province">↕️</span>
+                                            </th>
+                                            <th style="padding: 12px; text-align: left; border-bottom: 2px solid #dee2e6; font-weight: 600; cursor: pointer;" onclick="sortPovertyTable('year')">
+                                                Year <span id="sort-year">↕️</span>
+                                            </th>
+                                            <th style="padding: 12px; text-align: left; border-bottom: 2px solid #dee2e6; font-weight: 600; cursor: pointer;" onclick="sortPovertyTable('poverty_rate')">
+                                                Poverty Rate <span id="sort-poverty_rate">↕️</span>
+                                            </th>
+                                            <th style="padding: 12px; text-align: left; border-bottom: 2px solid #dee2e6; font-weight: 600; cursor: pointer;" onclick="sortPovertyTable('population')">
+                                                Population <span id="sort-population">↕️</span>
+                                            </th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="povertyTableBody">
+                                        <tr>
+                                            <td colspan="5" style="padding: 20px; text-align: center; color: #6c757d;">
+                                                <div style="display: flex; flex-direction: column; align-items: center; gap: 10px;">
+                                                    <div style="font-size: 2em;">💰</div>
+                                                    <div>Click "Load Data" to view poverty statistics</div>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -601,11 +714,12 @@ function initializeDynastyPage() {
             if (tabName === 'table') {
                 loadDynastyData();
             } else if (tabName === 'visual') {
+                // Automatically load the surnames chart and heatmap when visual tab is selected
                 loadSurnamesChart();
             } else if (tabName === 'overlords') {
                 loadDynastyMap();
-            } else if (tabName === 'conflicts') {
-                loadConflictsData();
+            } else if (tabName === 'poverty') {
+                loadPovertyData();
             }
         });
     });
@@ -630,6 +744,20 @@ function initializeDynastyPage() {
     });
 
     document.getElementById('nextPage').addEventListener('click', function() {
+        currentPage++;
+        loadDynastyData();
+    });
+
+    // Top pagination event listeners
+    document.getElementById('topPrevPage').addEventListener('click', function() {
+        if (currentPage > 1) {
+            currentPage--;
+            loadDynastyData();
+        }
+    });
+
+    document.getElementById('topNextPage').addEventListener('click', function() {
+        currentPage++;
         loadDynastyData();
     });
 
@@ -710,11 +838,11 @@ async function loadDynastyData() {
             updateStatistics(data.pagination);
         } else {
             console.error('Error loading dynasty data:', data.error);
-            tableBody.innerHTML = '<tr><td colspan="7" class="px-6 py-4 text-center text-red-600">Error loading data</td></tr>';
+            tableBody.innerHTML = '<tr><td colspan="6" class="px-6 py-4 text-center text-red-600">Error loading data</td></tr>';
         }
     } catch (error) {
         console.error('Error loading dynasty data:', error);
-        tableBody.innerHTML = '<tr><td colspan="7" class="px-6 py-4 text-center text-red-600">Error loading data</td></tr>';
+        tableBody.innerHTML = '<tr><td colspan="6" class="px-6 py-4 text-center text-red-600">Error loading data</td></tr>';
     } finally {
         loadingState.classList.add('hidden');
     }
@@ -724,7 +852,7 @@ function renderDynastyTable(data) {
     const tableBody = document.getElementById('dynastyTableBody');
     
     if (data.length === 0) {
-        tableBody.innerHTML = '<tr><td colspan="7" class="px-6 py-4 text-center text-gray-500">No dynasty data found</td></tr>';
+        tableBody.innerHTML = '<tr><td colspan="5" class="px-6 py-4 text-center text-gray-500">No dynasty data found</td></tr>';
         return;
     }
 
@@ -733,26 +861,19 @@ function renderDynastyTable(data) {
             <td class="px-6 py-4 whitespace-nowrap">
                 <div class="text-sm font-medium text-gray-900">${record.first_name} ${record.last_name}</div>
             </td>
-            <td class="px-6 py-4 whitespace-nowrap">
-                <div class="text-sm text-gray-900">${record.party || '-'}</div>
+            <td class="px-6 py-4" style="width: 200px; max-width: 200px;">
+                <div class="text-sm text-gray-900 break-words">${record.position}</div>
             </td>
-            <td class="px-6 py-4 whitespace-nowrap">
-                <div class="text-sm text-gray-900">${record.position}</div>
+            <td class="px-6 py-4" style="width: 200px; max-width: 200px;">
+                <div class="text-sm text-gray-900 break-words">${record.organization || record.municipality_city || '-'}</div>
+                <div class="text-xs text-gray-500 break-words">${record.province || ''}</div>
             </td>
-            <td class="px-6 py-4 whitespace-nowrap">
-                <div class="text-sm text-gray-900">${record.government_branch || '-'}</div>
-            </td>
-            <td class="px-6 py-4 whitespace-nowrap">
+            <td class="px-6 py-4">
                 <div class="text-sm text-gray-900">${record.municipality_city}, ${record.province}</div>
                 <div class="text-xs text-gray-500">${record.region}</div>
             </td>
-            <td class="px-6 py-4 whitespace-nowrap">
+            <td class="px-6 py-4 whitespace-nowrap" style="width: 60px; max-width: 60px;">
                 <div class="text-sm text-gray-900">${record.year}</div>
-            </td>
-            <td class="px-6 py-4 whitespace-nowrap">
-                <span class="${record.fat === 1 ? 'dynasty-badge' : 'non-dynasty-badge'}">
-                    ${record.fat === 1 ? 'Dynasty' : 'Non-Dynasty'}
-                </span>
             </td>
         </tr>
     `).join('');
@@ -763,26 +884,36 @@ function updatePagination(pagination) {
     const nextButton = document.getElementById('nextPage');
     const pageNumbers = document.getElementById('pageNumbers');
     const paginationInfo = document.getElementById('paginationInfo');
+    
+    // Top pagination elements
+    const topPrevButton = document.getElementById('topPrevPage');
+    const topNextButton = document.getElementById('topNextPage');
+    const topPageNumbers = document.getElementById('topPageNumbers');
+    const topPaginationInfo = document.getElementById('topPaginationInfo');
 
     // Update button states
     prevButton.disabled = !pagination.has_prev;
     nextButton.disabled = !pagination.has_next;
+    topPrevButton.disabled = !pagination.has_prev;
+    topNextButton.disabled = !pagination.has_next;
 
     // Update pagination info
     const start = (pagination.page - 1) * pagination.limit + 1;
     const end = Math.min(pagination.page * pagination.limit, pagination.total_count);
-    paginationInfo.textContent = `Showing ${start} to ${end} of ${pagination.total_count.toLocaleString()} results`;
+    const paginationText = `Showing ${start} to ${end} of ${pagination.total_count.toLocaleString()} results`;
+    paginationInfo.textContent = paginationText;
+    topPaginationInfo.textContent = paginationText;
 
     // Update page numbers (simplified - show current page and a few around it)
-    const currentPage = pagination.page;
+    const pageNum = pagination.page;
     const totalPages = pagination.total_pages;
     
     let pageNumbersHTML = '';
-    const startPage = Math.max(1, currentPage - 2);
-    const endPage = Math.min(totalPages, currentPage + 2);
+    const startPage = Math.max(1, pageNum - 2);
+    const endPage = Math.min(totalPages, pageNum + 2);
 
     for (let i = startPage; i <= endPage; i++) {
-        const isActive = i === currentPage;
+        const isActive = i === pageNum;
         pageNumbersHTML += `
             <button class="page-number px-3 py-2 text-sm font-medium ${isActive ? 'bg-blue-600 text-white' : 'text-gray-500 bg-white border border-gray-300'} rounded-md hover:bg-gray-50" data-page="${i}">
                 ${i}
@@ -791,9 +922,18 @@ function updatePagination(pagination) {
     }
 
     pageNumbers.innerHTML = pageNumbersHTML;
+    topPageNumbers.innerHTML = pageNumbersHTML;
 
     // Add click handlers for page numbers
     pageNumbers.querySelectorAll('.page-number').forEach(button => {
+        button.addEventListener('click', function() {
+            currentPage = parseInt(this.getAttribute('data-page'));
+            loadDynastyData();
+        });
+    });
+    
+    // Add click handlers for top page numbers
+    topPageNumbers.querySelectorAll('.page-number').forEach(button => {
         button.addEventListener('click', function() {
             currentPage = parseInt(this.getAttribute('data-page'));
             loadDynastyData();
@@ -874,6 +1014,7 @@ function loadProvinceOptions() {
 }
 
 async function loadSurnamesChart() {
+    console.log('🔄 Loading surnames chart and heatmap...');
     const loadingState = document.getElementById('chartLoadingState');
     const chartContainer = document.getElementById('topSurnamesChart');
     
@@ -887,19 +1028,22 @@ async function loadSurnamesChart() {
             ...(province && { province: province })
         });
 
+        console.log('📊 Fetching dynasty data from API...');
         const response = await fetch(`/api/dynasty/top-surnames?${params}`);
         const data = await response.json();
 
         if (data.success) {
+            console.log('✅ Dynasty data loaded successfully, creating charts...');
             createSurnamesChart(data.data);
             // Create the dynasty heatmap
+            console.log('🗺️ Creating dynasty heatmap...');
             createDynastyHeatmap(data.data);
         } else {
-            console.error('Error loading surnames data:', data.error);
+            console.error('❌ Error loading surnames data:', data.error);
             chartContainer.innerHTML = '<div class="text-center text-red-600 p-8">Error loading chart data</div>';
         }
     } catch (error) {
-        console.error('Error loading surnames data:', error);
+        console.error('❌ Error loading surnames data:', error);
         chartContainer.innerHTML = '<div class="text-center text-red-600 p-8">Error loading chart data</div>';
     } finally {
         loadingState.classList.add('hidden');
@@ -1161,14 +1305,32 @@ function dynastyNextPage() {
 
 // Function to create dynasty control heatmap
 function createDynastyHeatmap(dynastyData) {
+    console.log('🗺️ Creating dynasty heatmap with data:', dynastyData);
+    console.log('🗺️ Dynasty data length:', dynastyData ? dynastyData.length : 'undefined');
+    
     const heatmapCtx = document.getElementById('dynastyHeatmapChart');
-    if (!heatmapCtx) return;
+    if (!heatmapCtx) {
+        console.error('❌ Dynasty heatmap canvas element not found');
+        return;
+    }
+    console.log('🗺️ Dynasty heatmap canvas found:', heatmapCtx);
+    console.log('🗺️ Canvas dimensions:', heatmapCtx.width, 'x', heatmapCtx.height);
 
     // Load Philippine provinces GeoJSON data
     fetch('/static/data/philippines-provinces.json')
-        .then(response => response.json())
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+            }
+            return response.json();
+        })
         .then(geoJsonData => {
             console.log('🗺️ Dynasty heatmap: GeoJSON data loaded:', geoJsonData.features.length, 'features');
+            
+            if (!geoJsonData.features || geoJsonData.features.length === 0) {
+                console.error('❌ No GeoJSON features found');
+                return;
+            }
             
             // Process dynasty data to get province control intensity
             const provinceControl = {};
@@ -1357,6 +1519,19 @@ function createDynastyHeatmap(dynastyData) {
         })
         .catch(error => {
             console.error('❌ Error creating dynasty heatmap:', error);
+            // Display error on canvas
+            const heatmapCtx = document.getElementById('dynastyHeatmapChart');
+            if (heatmapCtx) {
+                const ctx = heatmapCtx.getContext('2d');
+                ctx.clearRect(0, 0, heatmapCtx.width, heatmapCtx.height);
+                ctx.fillStyle = '#f8f9fa';
+                ctx.fillRect(0, 0, heatmapCtx.width, heatmapCtx.height);
+                ctx.fillStyle = '#dc3545';
+                ctx.font = '16px Arial';
+                ctx.textAlign = 'center';
+                ctx.fillText('Error loading heatmap data', heatmapCtx.width / 2, heatmapCtx.height / 2);
+                ctx.fillText(error.message, heatmapCtx.width / 2, heatmapCtx.height / 2 + 25);
+            }
         });
 }
 
@@ -2176,6 +2351,253 @@ async function loadConflictsData() {
         `;
     }
 }
+
+// Poverty Tab Functions
+let povertyData = [];
+let currentPovertyPage = 1;
+let povertyRowsPerPage = 25;
+let povertySortBy = 'region';
+let povertySortOrder = 'asc';
+
+async function loadPovertyData() {
+    try {
+        console.log('💰 Loading poverty data...');
+        
+        // Show loading state
+        const tableBody = document.getElementById('povertyTableBody');
+        tableBody.innerHTML = `
+            <tr>
+                <td colspan="5" style="padding: 20px; text-align: center; color: #6c757d;">
+                    <div style="display: flex; flex-direction: column; align-items: center; gap: 10px;">
+                        <div style="font-size: 2em;">⏳</div>
+                        <div>Loading poverty data...</div>
+                    </div>
+                </td>
+            </tr>
+        `;
+        
+        // Load poverty data from JSON file
+        const response = await fetch('/static/data/poverty_correlation_cache.json');
+        if (!response.ok) {
+            throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+        }
+        
+        const responseData = await response.json();
+        povertyData = responseData.data || responseData; // Handle both structures
+        console.log('💰 Poverty data loaded:', povertyData.length, 'records');
+        
+        // Populate filter options
+        populatePovertyFilters();
+        
+        // Display data
+        displayPovertyData();
+        
+    } catch (error) {
+        console.error('❌ Error loading poverty data:', error);
+        
+        const tableBody = document.getElementById('povertyTableBody');
+        tableBody.innerHTML = `
+            <tr>
+                <td colspan="5" style="padding: 20px; text-align: center; color: #dc3545;">
+                    <div style="display: flex; flex-direction: column; align-items: center; gap: 10px;">
+                        <div style="font-size: 2em;">❌</div>
+                        <div>Error loading poverty data: ${error.message}</div>
+                    </div>
+                </td>
+            </tr>
+        `;
+    }
+}
+
+function populatePovertyFilters() {
+    // Populate region filter (if regions exist in data)
+    const regionFilter = document.getElementById('povertyRegionFilter');
+    const regions = [...new Set(povertyData.map(item => item.region).filter(Boolean))].sort();
+    if (regions.length > 0) {
+        regionFilter.innerHTML = '<option value="">All Regions</option>' + 
+            regions.map(region => `<option value="${region}">${region}</option>`).join('');
+    } else {
+        regionFilter.innerHTML = '<option value="">All Regions</option>';
+    }
+    
+    // Populate year filter (if years exist in data)
+    const yearFilter = document.getElementById('povertyYearFilter');
+    const years = [...new Set(povertyData.map(item => item.year).filter(Boolean))].sort((a, b) => b - a);
+    if (years.length > 0) {
+        yearFilter.innerHTML = '<option value="">All Years</option>' + 
+            years.map(year => `<option value="${year}">${year}</option>`).join('');
+    } else {
+        yearFilter.innerHTML = '<option value="">All Years</option>';
+    }
+}
+
+function displayPovertyData() {
+    const tableBody = document.getElementById('povertyTableBody');
+    const searchTerm = document.getElementById('povertySearch').value.toLowerCase();
+    const regionFilter = document.getElementById('povertyRegionFilter').value;
+    const yearFilter = document.getElementById('povertyYearFilter').value;
+    
+    // Filter data
+    let filteredData = povertyData.filter(item => {
+        const matchesSearch = !searchTerm || 
+            item.province.toLowerCase().includes(searchTerm);
+        const matchesRegion = !regionFilter || item.region === regionFilter;
+        const matchesYear = !yearFilter || (item.year && item.year.toString() === yearFilter);
+        
+        return matchesSearch && matchesRegion && matchesYear;
+    });
+    
+    // Sort data
+    filteredData.sort((a, b) => {
+        const aVal = a[povertySortBy];
+        const bVal = b[povertySortBy];
+        
+        if (povertySortOrder === 'asc') {
+            return aVal > bVal ? 1 : -1;
+        } else {
+            return aVal < bVal ? 1 : -1;
+        }
+    });
+    
+    // Calculate pagination
+    const totalPages = Math.ceil(filteredData.length / povertyRowsPerPage);
+    const startIndex = (currentPovertyPage - 1) * povertyRowsPerPage;
+    const endIndex = startIndex + povertyRowsPerPage;
+    const pageData = filteredData.slice(startIndex, endIndex);
+    
+    // Display data
+    if (pageData.length === 0) {
+        tableBody.innerHTML = `
+            <tr>
+                <td colspan="5" style="padding: 20px; text-align: center; color: #6c757d;">
+                    <div style="display: flex; flex-direction: column; align-items: center; gap: 10px;">
+                        <div style="font-size: 2em;">📭</div>
+                        <div>No poverty data found</div>
+                    </div>
+                </td>
+            </tr>
+        `;
+    } else {
+        tableBody.innerHTML = pageData.map(item => `
+            <tr style="border-bottom: 1px solid #dee2e6;">
+                <td style="padding: 12px; font-weight: 600;">${item.region || '-'}</td>
+                <td style="padding: 12px;">${item.province}</td>
+                <td style="padding: 12px;">${item.year || '-'}</td>
+                <td style="padding: 12px; text-align: right; font-weight: 600; color: ${item.poverty_rate > 20 ? '#dc3545' : item.poverty_rate > 10 ? '#ffc107' : '#28a745'};">
+                    ${item.poverty_rate}%
+                </td>
+                <td style="padding: 12px; text-align: right;">${item.population ? item.population.toLocaleString() : '-'}</td>
+            </tr>
+        `).join('');
+    }
+    
+    // Update pagination
+    updatePovertyPagination(filteredData.length, totalPages);
+}
+
+function updatePovertyPagination(totalItems, totalPages) {
+    const paginationInfo = document.getElementById('povertyPaginationInfo');
+    const paginationControls = document.getElementById('povertyPaginationControls');
+    
+    const startItem = (currentPovertyPage - 1) * povertyRowsPerPage + 1;
+    const endItem = Math.min(currentPovertyPage * povertyRowsPerPage, totalItems);
+    
+    paginationInfo.textContent = `Showing ${startItem}-${endItem} of ${totalItems} items`;
+    
+    // Create pagination buttons
+    let buttons = '';
+    
+    // Previous button
+    buttons += `<button onclick="changePovertyPage(${currentPovertyPage - 1})" 
+                style="padding: 6px 12px; border: 1px solid #ddd; background: white; cursor: pointer; border-radius: 4px;"
+                ${currentPovertyPage <= 1 ? 'disabled' : ''}>Previous</button>`;
+    
+    // Page numbers
+    const startPage = Math.max(1, currentPovertyPage - 2);
+    const endPage = Math.min(totalPages, currentPovertyPage + 2);
+    
+    for (let i = startPage; i <= endPage; i++) {
+        buttons += `<button onclick="changePovertyPage(${i})" 
+                    style="padding: 6px 12px; border: 1px solid #ddd; background: ${i === currentPovertyPage ? '#0038A8' : 'white'}; 
+                           color: ${i === currentPovertyPage ? 'white' : 'black'}; cursor: pointer; border-radius: 4px; margin: 0 2px;">${i}</button>`;
+    }
+    
+    // Next button
+    buttons += `<button onclick="changePovertyPage(${currentPovertyPage + 1})" 
+                style="padding: 6px 12px; border: 1px solid #ddd; background: white; cursor: pointer; border-radius: 4px;"
+                ${currentPovertyPage >= totalPages ? 'disabled' : ''}>Next</button>`;
+    
+    paginationControls.innerHTML = buttons;
+}
+
+function changePovertyPage(page) {
+    const totalPages = Math.ceil(povertyData.length / povertyRowsPerPage);
+    if (page >= 1 && page <= totalPages) {
+        currentPovertyPage = page;
+        displayPovertyData();
+    }
+}
+
+function sortPovertyTable(column) {
+    if (povertySortBy === column) {
+        povertySortOrder = povertySortOrder === 'asc' ? 'desc' : 'asc';
+    } else {
+        povertySortBy = column;
+        povertySortOrder = 'asc';
+    }
+    
+    // Update sort indicators
+    document.querySelectorAll('[id^="sort-"]').forEach(span => {
+        span.textContent = '↕️';
+    });
+    document.getElementById(`sort-${column}`).textContent = povertySortOrder === 'asc' ? '↑' : '↓';
+    
+    displayPovertyData();
+}
+
+function clearPovertyFilters() {
+    document.getElementById('povertySearch').value = '';
+    document.getElementById('povertyRegionFilter').value = '';
+    document.getElementById('povertyYearFilter').value = '';
+    currentPovertyPage = 1;
+    displayPovertyData();
+}
+
+// Add event listeners for poverty filters
+document.addEventListener('DOMContentLoaded', function() {
+    const povertyRowsPerPageSelect = document.getElementById('povertyRowsPerPage');
+    if (povertyRowsPerPageSelect) {
+        povertyRowsPerPageSelect.addEventListener('change', function() {
+            povertyRowsPerPage = parseInt(this.value);
+            currentPovertyPage = 1;
+            displayPovertyData();
+        });
+    }
+    
+    const povertySearch = document.getElementById('povertySearch');
+    if (povertySearch) {
+        povertySearch.addEventListener('input', function() {
+            currentPovertyPage = 1;
+            displayPovertyData();
+        });
+    }
+    
+    const povertyRegionFilter = document.getElementById('povertyRegionFilter');
+    if (povertyRegionFilter) {
+        povertyRegionFilter.addEventListener('change', function() {
+            currentPovertyPage = 1;
+            displayPovertyData();
+        });
+    }
+    
+    const povertyYearFilter = document.getElementById('povertyYearFilter');
+    if (povertyYearFilter) {
+        povertyYearFilter.addEventListener('change', function() {
+            currentPovertyPage = 1;
+            displayPovertyData();
+        });
+    }
+});
 </script>
 
 </body>

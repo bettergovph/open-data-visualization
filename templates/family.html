@@ -85,6 +85,7 @@
                     <a href="/map" class="text-black hover:text-gray-600 font-medium transition">Map</a>
                     <a href="/philgeps" class="text-black hover:text-gray-600 font-medium transition">PhilGEPS</a>
                     <a href="/dynasty" class="text-black hover:text-gray-600 font-medium transition border-b-2 border-black">Dynasties</a>
+                    <a href="/eogo" class="text-black hover:text-gray-600 font-medium transition">EOGO</a>
                     <a href="/sources" class="text-black hover:text-gray-600 font-medium transition">Sources</a>
                 </div>
                 <div class="md:hidden">
@@ -105,6 +106,7 @@
             <a href="/map" class="block text-black hover:text-gray-600 font-medium py-2">Map</a>
             <a href="/philgeps" class="block text-black hover:text-gray-600 font-medium py-2">PhilGEPS</a>
             <a href="/dynasty" class="block text-black hover:text-gray-600 font-medium py-2 border-b-2 border-black">Dynasties</a>
+            <a href="/eogo" class="block text-black hover:text-gray-600 font-medium py-2">EOGO</a>
         </div>
     </nav>
 
@@ -297,9 +299,16 @@ function toggleMobileMenu() {
         const urlParams = new URLSearchParams(window.location.search);
         const surname = urlParams.get('surname') || '{{ surname }}';
         
+        // Convert surname to proper case for display
+        const surnameDisplay = surname.charAt(0).toUpperCase() + surname.slice(1).toLowerCase();
+        
+        // Update the page title to show proper case
+        document.querySelector('h1').textContent = `👑 ${surnameDisplay} Family`;
+        
         console.log('🔍 Loading family data for surname:', surname);
         console.log('🔍 URL params:', window.location.search);
         console.log('🔍 Template surname:', '{{ surname }}');
+        console.log('🔍 Display surname:', surnameDisplay);
         
         // Load family data
         async function loadFamilyData() {
@@ -1445,11 +1454,7 @@ function toggleMobileMenu() {
         function initializeYearView() {
             if (!window.familyData) return;
             
-            // Only initialize if year view is actually active
-            if (currentView !== 'year') {
-                console.log('Year view not active, skipping initialization');
-                return;
-            }
+            // Initialize year view
             
             // Get unique years from the data and sort in ascending order
             const years = [...new Set(window.familyData.map(member => member.year))].sort((a, b) => a - b);
@@ -1525,11 +1530,7 @@ function toggleMobileMenu() {
                 return;
             }
             
-            // Only proceed if year view is actually active
-            if (currentView !== 'year') {
-                console.log('Year view not active, skipping year chart creation');
-                return;
-            }
+            // Proceed with year chart creation
             
             container.innerHTML = '';
             

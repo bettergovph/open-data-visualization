@@ -2423,7 +2423,8 @@ async def dynasty_data_api(
                 position,
                 year,
                 fat,
-                government_branch
+                government_branch,
+                organization
             FROM political_dynasties 
             {where_clause}
             ORDER BY year DESC, last_name ASC, first_name ASC
@@ -2448,7 +2449,8 @@ async def dynasty_data_api(
                 "municipality_city": record['municipality_city'],
                 "position": record['position'],
                 "year": record['year'],
-                "fat": record['fat']
+                "fat": record['fat'],
+                "organization": record['organization']
             })
         
         await conn.close()
@@ -2583,6 +2585,10 @@ async def dynasty_family_api(
         
         if not surname:
             return JSONResponse({"success": False, "error": "Surname parameter is required"})
+        
+        # Convert parameters to uppercase for database matching
+        surname = surname.upper()
+        province = province.upper() if province else province
         
         # Database connection
         conn = await asyncpg.connect(
@@ -2865,6 +2871,10 @@ async def dynasty_family_advanced_search_api(
         
         if not name:
             return JSONResponse({"success": False, "error": "Name parameter is required"})
+        
+        # Convert parameters to uppercase for database matching
+        name = name.upper()
+        province = province.upper() if province else province
         
         # Database connection
         conn = await asyncpg.connect(
