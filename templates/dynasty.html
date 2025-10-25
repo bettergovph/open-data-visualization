@@ -2723,6 +2723,7 @@ function loadConflictsData() {
             if (data.success) {
                 conflictsData = data.data;
                 console.log('✅ Conflicts data loaded:', conflictsData.length, 'chains');
+                console.log('🔍 First chain data:', conflictsData[0]);
                 displayConflictsNetwork();
                 displayConflictsTable();
             } else {
@@ -2764,10 +2765,13 @@ function displayConflictsNetwork() {
     }
     
     console.log('✅ Creating network visualization with', conflictsData.length, 'chains');
+    console.log('📐 Container dimensions:', container.offsetWidth, 'x', container.offsetHeight);
     
     // Create SVG for network visualization
     const width = container.offsetWidth;
     const height = container.offsetHeight;
+    
+    console.log('🎨 Creating SVG with dimensions:', width, 'x', height);
     
     const svg = d3.select(container)
         .append('svg')
@@ -2809,6 +2813,11 @@ function displayConflictsNetwork() {
     
     // Convert to arrays
     nodes.push(...nodeMap.values());
+    
+    console.log('🔗 Created nodes:', nodes.length);
+    console.log('🔗 Created links:', links.length);
+    console.log('📊 Sample node:', nodes[0]);
+    console.log('📊 Sample link:', links[0]);
     
     // Create force simulation with spider web-like behavior
     const simulation = d3.forceSimulation(nodes)
