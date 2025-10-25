@@ -461,6 +461,10 @@ function displayPoliticalHHIData() {
                 <div class="space-y-2">
                     ${pageData.map((result, index) => {
                         const riskLevel = result.hhi > 70 ? 'risk-high' : result.hhi > 50 ? 'risk-medium' : result.hhi > 30 ? 'risk-low' : 'risk-very-low';
+                        const isLowSample = result.total_politicians <= 5;
+                        const isCauayan = result.province.toLowerCase().includes('cauayan');
+                        const sampleWarning = isLowSample ? '<div class="text-xs text-red-600 font-semibold">⚠️ Low sample size - HHI not ideal</div>' : '';
+                        const cauayanBadge = isCauayan ? '<div class="text-xs text-red-600 font-semibold">🎯 Perfect example of misleading HHI</div>' : '';
                         return `
                             <div class="flex justify-between items-center p-3 ${riskLevel} rounded">
                                 <span class="font-medium">${result.province}</span>
@@ -468,6 +472,8 @@ function displayPoliticalHHIData() {
                                     <span class="font-bold text-lg">${result.hhi}</span>
                                     <div class="text-xs text-gray-500">${result.total_politicians} politicians, ${result.unique_surnames} surnames</div>
                                     <div class="text-xs text-gray-500">Largest dynasty: ${result.dynasty_size} members</div>
+                                    ${sampleWarning}
+                                    ${cauayanBadge}
                                 </div>
                             </div>
                         `;
@@ -493,6 +499,10 @@ function displayPoliticalHHIData() {
                         <span>High Risk (HHI > 50):</span>
                         <span class="font-bold text-red-600">${filteredData.filter(item => item.hhi > 50).length}</span>
                     </div>
+                    <div class="flex justify-between">
+                        <span>Low Sample (≤5 politicians):</span>
+                        <span class="font-bold text-orange-600">${filteredData.filter(item => item.total_politicians <= 5).length}</span>
+                    </div>
                 </div>
                 <div class="mt-4 p-3 bg-blue-50 rounded">
                     <p class="text-sm text-blue-800">
@@ -500,9 +510,10 @@ function displayPoliticalHHIData() {
                         Higher values indicate greater political concentration and potential corruption risk.
                     </p>
                     <p class="text-sm text-blue-800 mt-2">
-                        <strong>Statistical Note:</strong> HHI is only significant with larger sample sizes. 
-                        Small provinces (e.g., 2 politicians) can achieve HHI=100 but lack political significance. 
-                        Focus on provinces with 10+ politicians for meaningful analysis.
+                        <strong>Statistical Critique:</strong> HHI is only meaningful with larger sample sizes. 
+                        Provinces with ≤5 politicians are tagged as "not ideal for HHI" because small samples 
+                        can produce misleading results (e.g., 2 politicians = automatic HHI=100). 
+                        Focus on provinces with 10+ politicians for statistically sound analysis.
                     </p>
                 </div>
             </div>
