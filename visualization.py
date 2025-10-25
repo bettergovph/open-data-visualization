@@ -3239,10 +3239,10 @@ async def dynasty_relationship_chains_api(
         JOIN political_dynasties p2 ON r.related_person_id = p2.id
         WHERE p1.last_name != p2.last_name  -- Only different families
         ORDER BY p1.last_name, p2.last_name
-        LIMIT $2;
+        LIMIT 20;
         """
         
-        chains = await conn.fetch(chains_query, chain_length, max_chains)
+        chains = await conn.fetch(chains_query)
         await conn.close()
         
         # Format the response
