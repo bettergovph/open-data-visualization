@@ -1178,12 +1178,36 @@ function createSurnamesChart(data, flagData = null) {
                             
                             // Add flag information if available
                             if (flagData && flagGenerator) {
-                                const locationKey = `${item.surname}_${item.province}_${item.municipality_city || ''}`;
-                                const dynastyInfo = flagData.dynasties[locationKey];
-                                if (dynastyInfo) {
-                                    const flag = flagGenerator.generateFlag(dynastyInfo.dynasty_id, item.surname);
+                                // Try to find a matching dynasty flag
+                                // Look for exact match first: SURNAME_PROVINCE_MUNICIPALITY_CITY
+                                let locationKey = `${item.surname}_${item.province}_${item.municipality_city || ''}`;
+                                let dynastyInfo = flagData.dynasties[locationKey];
+                                
+                                // If no exact match, try to find any dynasty with same surname and province
+                                if (!dynastyInfo) {
+                                    const matchingDynasties = Object.entries(flagData.dynasties)
+                                        .filter(([key, dynasty]) => 
+                                            dynasty.surname === item.surname && 
+                                            dynasty.province === item.province
+                                        );
+                                    
+                                    if (matchingDynasties.length > 0) {
+                                        // Use the first matching dynasty
+                                        dynastyInfo = matchingDynasties[0][1];
+                                        console.log(`🏴 Found matching dynasty for ${item.surname} in ${item.province}:`, dynastyInfo);
+                                    }
+                                }
+                                
+                                if (dynastyInfo && dynastyInfo.flag_parameters) {
+                                    const flag = flagGenerator.createFlagFromParameters(dynastyInfo.flag_parameters);
                                     tooltipLines.push(`🏴 Dynasty Flag ID: ${dynastyInfo.dynasty_id}`);
                                     tooltipLines.push(`📍 Location: ${dynastyInfo.location_display}`);
+                                    tooltipLines.push(`🎨 Flag: ${flag.slices} slices, ${flag.shape}, ${flag.orientation}`);
+                                    if (flag.symbol !== 'None') {
+                                        tooltipLines.push(`🔮 Symbol: ${flag.symbol}`);
+                                    }
+                                } else {
+                                    console.log(`⚠️ No flag found for ${item.surname} in ${item.province}`);
                                 }
                             }
                             

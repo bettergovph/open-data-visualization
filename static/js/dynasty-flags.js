@@ -949,6 +949,44 @@ class DynastyFlagGenerator {
         
         return legend;
     }
+
+    /**
+     * Create a flag from saved parameters
+     */
+    createFlagFromParameters(flagParams) {
+        const {
+            slices,
+            orientation,
+            shape_sequence,
+            color_scheme,
+            symbol,
+            variation,
+            is_czech_style,
+            seed
+        } = flagParams;
+
+        // Create the flag using the saved parameters
+        const flag = this.createFlagSVG({
+            slices: slices,
+            orientation: orientation,
+            shapeSequence: shape_sequence,
+            colorScheme: color_scheme,
+            symbol: symbol,
+            variation: variation,
+            isCzechStyle: is_czech_style
+        });
+
+        return {
+            svg: flag,
+            name: `Dynasty Flag (ID: ${seed})`,
+            slices: slices,
+            shape: is_czech_style ? 'Czech-style' : 'Standard',
+            orientation: orientation,
+            colors: color_scheme,
+            symbol: symbol || 'None',
+            variation: variation
+        };
+    }
 }
 
 // CSS for flag styling
