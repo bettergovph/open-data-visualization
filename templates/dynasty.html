@@ -2970,48 +2970,66 @@ let animationInterval = null;
 let isAnimating = false;
 
 async function loadAnimationData() {
-    console.log('🎬 Loading 2004 family data for Ampatuan flag sizing...');
+    console.log('🎬 Loading 2004 dynasty data for Ampatuan flag sizing...');
     
     try {
-        // Load Ampatuan family data for 2004 specifically
-        const response = await fetch('/api/dynasty/family?surname=ampatuan');
+        // Load dynasty data and filter for Ampatuan
+        const response = await fetch('/api/dynasty?limit=1000');
         const data = await response.json();
         
         if (data.success) {
-            console.log('✅ Family data loaded:', data);
-            console.log('👥 Family members:', data.family_count);
-            console.log('🔗 Connected members:', data.connected_count);
-            console.log('📊 Total members:', data.total_count);
+            animationData = data.data;
+            console.log('✅ Dynasty data loaded:', animationData.length, 'records');
             
-            // Filter for 2004 data only
-            const members2004 = data.data.filter(member => member.year === 2004);
-            console.log('📅 2004 members:', members2004.length);
-            
-            // Find Ampatuan family members in 2004
-            const ampatuan2004 = members2004.filter(member => 
+            // Filter for Ampatuan dynasty members
+            const ampatuanMembers = animationData.filter(member => 
                 member.last_name && member.last_name.toLowerCase().includes('ampatuan')
             );
             
-            console.log('🏴 Ampatuan 2004 members:', ampatuan2004.length);
-            console.log('📊 Sample member:', ampatuan2004[0]);
+            console.log('🏴 Ampatuan members found:', ampatuanMembers.length);
+            console.log('📊 Sample Ampatuan member:', ampatuanMembers[0]);
             
-            // Load flag data (same as Top Surnames chart)
-            let flagData = null;
-            try {
-                const flagResponse = await fetch('/static/data/dynasty_flags_cache.json');
-                flagData = await flagResponse.json();
-                console.log('✅ Flag data loaded:', flagData);
-            } catch (error) {
-                console.log('⚠️ Dynasty flags not available:', error);
+            // Filter for 2004 data only
+            const ampatuan2004 = ampatuanMembers.filter(member => member.year === 2004);
+            console.log('📅 Ampatuan 2004 members:', ampatuan2004.length);
+            
+            if (ampatuan2004.length === 0) {
+                // If no 2004 data, use all Ampatuan members for sizing
+                console.log('⚠️ No 2004 Ampatuan data found, using all years for sizing');
+                const ampatuanAllYears = ampatuanMembers;
+                console.log('🏴 Using all Ampatuan members for sizing:', ampatuanAllYears.length);
+                
+                // Load flag data (same as Top Surnames chart)
+                let flagData = null;
+                try {
+                    const flagResponse = await fetch('/static/data/dynasty_flags_cache.json');
+                    flagData = await flagResponse.json();
+                    console.log('✅ Flag data loaded:', flagData);
+                } catch (error) {
+                    console.log('⚠️ Dynasty flags not available:', error);
+                }
+                
+                // Create the map with Ampatuan flag sized by total family count
+                createAnimationMap2004(ampatuanAllYears, flagData);
+            } else {
+                // Load flag data (same as Top Surnames chart)
+                let flagData = null;
+                try {
+                    const flagResponse = await fetch('/static/data/dynasty_flags_cache.json');
+                    flagData = await flagResponse.json();
+                    console.log('✅ Flag data loaded:', flagData);
+                } catch (error) {
+                    console.log('⚠️ Dynasty flags not available:', error);
+                }
+                
+                // Create the map with Ampatuan flag sized by 2004 family count
+                createAnimationMap2004(ampatuan2004, flagData);
             }
-            
-            // Create the map with Ampatuan flag sized by 2004 family count
-            createAnimationMap2004(ampatuan2004, flagData);
         } else {
-            console.error('❌ Error loading family data:', data.error);
+            console.error('❌ Error loading dynasty data:', data.error);
         }
     } catch (error) {
-        console.error('❌ Error loading family data:', error);
+        console.error('❌ Error loading dynasty data:', error);
     }
 }
 
