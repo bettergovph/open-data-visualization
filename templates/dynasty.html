@@ -1505,25 +1505,8 @@ function createDynastyHeatmap(dynastyData) {
                 return;
             }
             
-            // Process dynasty data to get province control intensity
-            const provinceControl = {};
-            
-            // Group dynasty data by province and calculate control intensity
-            dynastyData.forEach(item => {
-                const province = item.province || 'Unknown';
-                if (!provinceControl[province]) {
-                    provinceControl[province] = {
-                        count: 0,
-                        totalMembers: 0,
-                        surnames: new Set()
-                    };
-                }
-                provinceControl[province].count++;
-                provinceControl[province].totalMembers += item.dynasty_count || 0;
-                provinceControl[province].surnames.add(item.surname || item.last_name || 'Unknown');
-            });
-            
-            console.log('🗺️ Dynasty control data:', provinceControl);
+            // No data processing needed - just draw plain white map
+            console.log('🗺️ Drawing plain white map with dark borders...');
 
             // Canvas setup
             const canvas = heatmapCtx;
@@ -1579,47 +1562,20 @@ function createDynastyHeatmap(dynastyData) {
                 y: height - (lat * scale + offsetY) // Flip Y axis
             });
 
-            // Function to get color based on dynasty control intensity
+            // Function to get color - plain white with dark borders
             const getDynastyColor = (intensity) => {
-                if (intensity >= 80) return '#4B0000';        // Very dark red
-                else if (intensity >= 70) return '#6B0000';    // Dark red
-                else if (intensity >= 60) return '#8B0000';    // Dark red
-                else if (intensity >= 50) return '#A00000';     // Dark red
-                else if (intensity >= 40) return '#B00000';    // Dark red
-                else if (intensity >= 30) return '#C00000';     // Dark red
-                else if (intensity >= 20) return '#D00000';     // Dark red
-                else if (intensity >= 10) return '#E00000';     // Dark red
-                else if (intensity > 0) return '#F00000';      // Dark red
-                else return '#F0F0F0';                          // Light gray (no data)
+                return '#FFFFFF'; // Always white
             };
 
-            // Draw each province with accurate GeoJSON boundaries
+            // Draw each province with plain white fill and dark borders
             console.log('🗺️ Starting to draw provinces...');
             geoJsonData.features.forEach((feature, index) => {
                 let provinceName = feature.properties.name || feature.properties.NAME_1 || feature.properties.PROVINCE;
                 
-                // Find matching province data
-                let controlData = null;
-                let matchedProvince = null;
-                
-                // Try to match province name with our data
-                Object.keys(provinceControl).forEach(dataProvince => {
-                    if (provinceName.toLowerCase().includes(dataProvince.toLowerCase()) || 
-                        dataProvince.toLowerCase().includes(provinceName.toLowerCase())) {
-                        controlData = provinceControl[dataProvince];
-                        matchedProvince = dataProvince;
-                    }
-                });
-                
-                const intensity = controlData ? Math.min(controlData.count * 20, 100) : 0;
-                const color = getDynastyColor(intensity);
-                
-                console.log(`🗺️ Province: ${provinceName} → Matched: ${matchedProvince} → Intensity: ${intensity.toFixed(1)}% → Color: ${color}`);
-
-                // Draw the province polygon with accurate boundaries
-                ctx.fillStyle = color;
-                ctx.strokeStyle = '#000000';
-                ctx.lineWidth = 0.5;
+                // Draw the province polygon with plain white fill and dark borders
+                ctx.fillStyle = '#FFFFFF'; // Plain white
+                ctx.strokeStyle = '#000000'; // Dark borders
+                ctx.lineWidth = 1;
 
                 if (feature.geometry.type === 'MultiPolygon') {
                     feature.geometry.coordinates.forEach(polygon => {
@@ -1645,7 +1601,7 @@ function createDynastyHeatmap(dynastyData) {
 
             console.log('🗺️ Finished drawing all provinces');
 
-            // Add click event for province details
+            // Add simple click event for province names
             canvas.addEventListener('click', function(event) {
                 const rect = canvas.getBoundingClientRect();
                 const x = event.clientX - rect.left;
@@ -1653,11 +1609,10 @@ function createDynastyHeatmap(dynastyData) {
                 
                 console.log('🗺️ Clicked at:', x, y);
                 
-                // Find clicked province by checking if point is inside polygon
+                // Simple province name display
                 geoJsonData.features.forEach(feature => {
                     let provinceName = feature.properties.name || feature.properties.NAME_1 || feature.properties.PROVINCE;
                     
-                    // Simple point-in-polygon check (could be enhanced)
                     if (feature.geometry.type === 'MultiPolygon') {
                         feature.geometry.coordinates.forEach(polygon => {
                             polygon.forEach(ring => {
@@ -1674,10 +1629,7 @@ function createDynastyHeatmap(dynastyData) {
                                 const maxY = Math.max(...canvasCoords.map(c => c.y));
                                 
                                 if (x >= minX && x <= maxX && y >= minY && y <= maxY) {
-                                    const data = provinceControl[provinceName];
-                                    if (data) {
-                                        alert(`${provinceName}\nDynasties: ${data.count}\nTotal Members: ${data.totalMembers}\nSurnames: ${Array.from(data.surnames).join(', ')}`);
-                                    }
+                                    alert(`Province: ${provinceName}`);
                                 }
                             });
                         });
@@ -3119,13 +3071,22 @@ function createAnimationMap(ampatuan, flagData) {
         return;
     }
     
+    // Clear the container and add the heatmap canvas
+    mapContainer.innerHTML = `
+        <div style="height: calc(100% - 80px); position: relative;">
+            <canvas id="dynastyHeatmapChart" style="cursor: pointer; width: 100%; height: 100%;"></canvas>
+        </div>
+    `;
+    
     // Create the same heatmap as Visual tab but with Ampatuan flag overlay
+    console.log('🗺️ Calling createDynastyHeatmap with data:', animationData.length, 'records');
     createDynastyHeatmap(animationData);
     
     // Add Ampatuan flag overlay after heatmap is created
     setTimeout(() => {
+        console.log('🏴 Adding flag overlay after heatmap render...');
         addAmpatuanFlagOverlay(ampatuan, flagData);
-    }, 1000); // Wait for heatmap to render
+    }, 2000); // Wait longer for heatmap to render
 }
 
 function addAmpatuanFlagOverlay(ampatuan, flagData) {
