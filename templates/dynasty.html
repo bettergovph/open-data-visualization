@@ -3168,51 +3168,48 @@ function addAnimationAmpatuanFlagMarker(map, familySize, flagData) {
     const maguindanaoLng = 124.3;
     const maguindanaoLat = 7.1;
     
-    // Calculate flag size based on family member count (smaller base size)
-    const baseSize = 20;
-    const sizeMultiplier = Math.max(1, Math.min(2, familySize / 20)); // Scale more gradually
+    // Calculate flag size based on family member count
+    const baseSize = 30;
+    const sizeMultiplier = Math.max(1, Math.min(2, familySize / 20));
     const flagSize = Math.round(baseSize * sizeMultiplier);
     
     console.log('🏴 Adding Ampatuan flag marker to Animation map at:', maguindanaoLat, maguindanaoLng);
     console.log('📏 Flag size:', flagSize, 'px (family size:', familySize, ')');
     
-    // Create custom flag icon with multiple colors
+    // Use the existing dynasty flag system
+    let flagSvg = '';
+    if (flagData && typeof DynastyFlagGenerator !== 'undefined') {
+        const flagGenerator = new DynastyFlagGenerator();
+        
+        // Try to find Ampatuan dynasty flag data
+        let dynastyInfo = null;
+        const ampatuanKeys = Object.keys(flagData.dynasties).filter(key => 
+            key.toLowerCase().includes('ampatuan') || 
+            flagData.dynasties[key].surname.toLowerCase().includes('ampatuan')
+        );
+        
+        if (ampatuanKeys.length > 0) {
+            dynastyInfo = flagData.dynasties[ampatuanKeys[0]];
+            console.log('🏴 Found Ampatuan dynasty flag data:', dynastyInfo);
+        }
+        
+        if (dynastyInfo && dynastyInfo.flag_parameters) {
+            // Generate flag using the existing system
+            flagSvg = flagGenerator.createFlagFromParameters(dynastyInfo.flag_parameters);
+            console.log('✅ Generated Ampatuan flag using existing system');
+        } else {
+            console.log('⚠️ No Ampatuan flag data found, using default');
+            // Fallback to a simple flag
+            flagSvg = `<div style="width: ${flagSize}px; height: ${flagSize}px; background: #ff0000; border: 2px solid #000; border-radius: 4px; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold;">AMP</div>`;
+        }
+    } else {
+        console.log('⚠️ Flag generator not available, using default');
+        flagSvg = `<div style="width: ${flagSize}px; height: ${flagSize}px; background: #ff0000; border: 2px solid #000; border-radius: 4px; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold;">AMP</div>`;
+    }
+    
+    // Create flag icon using the generated flag
     const flagIcon = L.divIcon({
-        html: `
-            <div style="
-                width: ${flagSize}px; 
-                height: ${flagSize}px; 
-                background: linear-gradient(45deg, #ff0000 0%, #ff6600 25%, #ffff00 50%, #00ff00 75%, #0066ff 100%); 
-                border: 2px solid #000; 
-                border-radius: 4px; 
-                display: flex; 
-                align-items: center; 
-                justify-content: center; 
-                font-weight: bold; 
-                color: white; 
-                text-shadow: 1px 1px 2px rgba(0,0,0,0.8);
-                box-shadow: 0 4px 12px rgba(0,0,0,0.3);
-                position: relative;
-            ">
-                <div style="
-                    position: absolute;
-                    top: 2px;
-                    left: 2px;
-                    right: 2px;
-                    bottom: 2px;
-                    background: rgba(255,255,255,0.2);
-                    border-radius: 2px;
-                    display: flex;
-                    align-items: center;
-                    justify-content: center;
-                    font-size: 10px;
-                    font-weight: bold;
-                    color: #000;
-                ">
-                    AMP
-                </div>
-            </div>
-        `,
+        html: flagSvg,
         className: 'animation-flag-icon',
         iconSize: [flagSize, flagSize],
         iconAnchor: [flagSize/2, flagSize/2]
