@@ -673,36 +673,6 @@ function toggleMobileMenu() {
                                 </div>
                             </div>
                             
-                            <div class="dynasty-controls">
-                                <div class="dynasty-control-group">
-                                    <label for="animationYearFilter">Year:</label>
-                                    <select id="animationYearFilter">
-                                        <option value="all">All Years (Auto)</option>
-                                    </select>
-                                </div>
-                                
-                                <div class="dynasty-control-group">
-                                    <label for="animationSpeed">Speed:</label>
-                                    <select id="animationSpeed">
-                                        <option value="5000">5 seconds</option>
-                                        <option value="10000" selected>10 seconds</option>
-                                        <option value="15000">15 seconds</option>
-                                        <option value="30000">30 seconds</option>
-                                    </select>
-                                </div>
-                                
-                                <button id="startAnimation" class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors">
-                                    ▶️ Start Animation
-                                </button>
-                                
-                                <button id="pauseAnimation" class="px-4 py-2 bg-yellow-600 text-white rounded-lg hover:bg-yellow-700 transition-colors">
-                                    ⏸️ Pause
-                                </button>
-                                
-                                <button id="stopAnimation" class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors">
-                                    ⏹️ Stop
-                                </button>
-                            </div>
                             
                             <div class="dynasty-section-content">
                                 <div class="dynasty-chart-container">
@@ -3035,26 +3005,7 @@ async function loadAnimationData() {
     }
 }
 
-function populateAnimationYears() {
-    const yearFilter = document.getElementById('animationYearFilter');
-    const years = [...new Set(animationData.map(item => item.year).filter(Boolean))].sort();
-    
-    // Clear existing options except "All Years"
-    yearFilter.innerHTML = '<option value="all">All Years (Auto)</option>';
-    
-    years.forEach(year => {
-        const option = document.createElement('option');
-        option.value = year;
-        option.textContent = year;
-        yearFilter.appendChild(option);
-    });
-}
-
-function setupAnimationControls() {
-    document.getElementById('startAnimation').addEventListener('click', startAnimation);
-    document.getElementById('pauseAnimation').addEventListener('click', pauseAnimation);
-    document.getElementById('stopAnimation').addEventListener('click', stopAnimation);
-}
+// Removed unused animation functions
 
 function createAnimationMap(ampatuan, flagData) {
     console.log('🗺️ Creating animation map with Ampatuan flag...');
