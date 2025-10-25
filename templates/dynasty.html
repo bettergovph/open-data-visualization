@@ -337,27 +337,27 @@ function toggleMobileMenu() {
                             <!-- Legend -->
                             <div style="display: flex; justify-content: center; margin-bottom: 15px; flex-wrap: wrap; gap: 10px;">
                                 <div style="display: flex; align-items: center; font-size: 11px;">
-                                    <div style="width: 15px; height: 15px; background: #4B0000; border: 1px solid #000; margin-right: 5px;"></div>
+                                    <div style="width: 15px; height: 15px; background: #ffebee; border: 1px solid #000; margin-right: 5px;"></div>
                                     <span>1 Family</span>
                                 </div>
                                 <div style="display: flex; align-items: center; font-size: 11px;">
-                                    <div style="width: 15px; height: 15px; background: #6B0000; border: 1px solid #000; margin-right: 5px;"></div>
+                                    <div style="width: 15px; height: 15px; background: #ffcdd2; border: 1px solid #000; margin-right: 5px;"></div>
                                     <span>2 Families</span>
                                 </div>
                                 <div style="display: flex; align-items: center; font-size: 11px;">
-                                    <div style="width: 15px; height: 15px; background: #A00000; border: 1px solid #000; margin-right: 5px;"></div>
+                                    <div style="width: 15px; height: 15px; background: #ef9a9a; border: 1px solid #000; margin-right: 5px;"></div>
                                     <span>3-5 Families</span>
                                 </div>
                                 <div style="display: flex; align-items: center; font-size: 11px;">
-                                    <div style="width: 15px; height: 15px; background: #C00000; border: 1px solid #000; margin-right: 5px;"></div>
+                                    <div style="width: 15px; height: 15px; background: #e57373; border: 1px solid #000; margin-right: 5px;"></div>
                                     <span>6-10 Families</span>
                                 </div>
                                 <div style="display: flex; align-items: center; font-size: 11px;">
-                                    <div style="width: 15px; height: 15px; background: #E00000; border: 1px solid #000; margin-right: 5px;"></div>
+                                    <div style="width: 15px; height: 15px; background: #ef5350; border: 1px solid #000; margin-right: 5px;"></div>
                                     <span>10+ Families</span>
                                 </div>
                                 <div style="display: flex; align-items: center; font-size: 11px;">
-                                    <div style="width: 15px; height: 15px; background: #F0F0F0; border: 1px solid #000; margin-right: 5px;"></div>
+                                    <div style="width: 15px; height: 15px; background: #f8f9fa; border: 1px solid #000; margin-right: 5px;"></div>
                                     <span>No Data</span>
                                 </div>
                             </div>
@@ -3111,11 +3111,18 @@ function createAnimationMap2004(ampatuan2004, flagData) {
         </div>
     `;
     
-    // Add dynasty flag overlay after map is created
-    setTimeout(() => {
-        console.log('🏴 Adding flag overlay after map render...');
-        addDynastyFlagOverlay(ampatuan2004, flagData, familySize, null, 2004);
-    }, 1000); // Wait longer to ensure map is fully rendered
+    // Create the animation map first
+    console.log('🗺️ Creating animation map...');
+    createAnimationMap().then((mapData) => {
+        console.log('🗺️ Animation map created, adding flag overlay...');
+        // Add dynasty flag overlay after map is fully rendered
+        setTimeout(() => {
+            console.log('🏴 Adding flag overlay after map render...');
+            addDynastyFlagOverlay(ampatuan2004, flagData, familySize, mapData, 2004);
+        }, 1000); // Wait longer to ensure map is fully rendered
+    }).catch(error => {
+        console.error('❌ Error creating animation map:', error);
+    });
 }
 
 function addAmpatuanFlagOverlay(ampatuan, flagData) {
