@@ -1144,74 +1144,102 @@ function createSurnamesChart(data, flagData = null) {
                     position: 'top'
                 },
                 tooltip: {
-                    callbacks: {
-                        title: function(context) {
-                            const dataIndex = context[0].dataIndex;
-                            const pageData = window.dynastyAllData.slice(
-                                window.dynastyCurrentPage * window.dynastyPageSize,
-                                (window.dynastyCurrentPage + 1) * window.dynastyPageSize
-                            );
-                            const item = pageData[dataIndex];
-                            return `${item.surname} (${item.province})`;
-                        },
-                        label: function(context) {
-                            const dataIndex = context.dataIndex;
-                            const pageData = window.dynastyAllData.slice(
-                                window.dynastyCurrentPage * window.dynastyPageSize,
-                                (window.dynastyCurrentPage + 1) * window.dynastyPageSize
-                            );
-                            const item = pageData[dataIndex];
-                            return `Dynasty Members: ${item.dynasty_count}`;
-                        },
-                        afterLabel: function(context) {
-                            const dataIndex = context.dataIndex;
-                            const pageData = window.dynastyAllData.slice(
-                                window.dynastyCurrentPage * window.dynastyPageSize,
-                                (window.dynastyCurrentPage + 1) * window.dynastyPageSize
-                            );
-                            const item = pageData[dataIndex];
+                    enabled: false, // Disable default tooltip
+                    external: function(context) {
+                        // Create custom tooltip with flag display
+                        const { chart, tooltip } = context;
+                        const dataIndex = tooltip.dataPoints[0].dataIndex;
+                        const pageData = window.dynastyAllData.slice(
+                            window.dynastyCurrentPage * window.dynastyPageSize,
+                            (window.dynastyCurrentPage + 1) * window.dynastyPageSize
+                        );
+                        const item = pageData[dataIndex];
+                        
+                        // Remove existing custom tooltip
+                        const existingTooltip = document.getElementById('dynasty-custom-tooltip');
+                        if (existingTooltip) {
+                            existingTooltip.remove();
+                        }
+                        
+                        // Create custom tooltip
+                        const tooltipEl = document.createElement('div');
+                        tooltipEl.id = 'dynasty-custom-tooltip';
+                        tooltipEl.style.cssText = `
+                            position: absolute;
+                            background: rgba(0, 0, 0, 0.9);
+                            color: white;
+                            padding: 12px 16px;
+                            border-radius: 8px;
+                            font-size: 13px;
+                            pointer-events: none;
+                            z-index: 1000;
+                            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+                            border: 1px solid rgba(255,255,255,0.2);
+                            max-width: 300px;
+                        `;
+                        
+                        let tooltipContent = `
+                            <div style="font-weight: bold; margin-bottom: 8px;">${item.surname} (${item.province})</div>
+                            <div>Dynasty Members: ${item.dynasty_count}</div>
+                            <div>Province: ${item.province}</div>
+                            <div style="font-size: 11px; color: #ccc; margin-top: 4px;">Click to view family details</div>
+                        `;
+                        
+                        // Add flag information if available
+                        if (flagData && flagGenerator) {
+                            // Try to find a matching dynasty flag
+                            let locationKey = `${item.surname}_${item.province}_${item.municipality_city || ''}`;
+                            let dynastyInfo = flagData.dynasties[locationKey];
                             
-                            let tooltipLines = [
-                                `Province: ${item.province}`,
-                                `Click to view family details`
-                            ];
-                            
-                            // Add flag information if available
-                            if (flagData && flagGenerator) {
-                                // Try to find a matching dynasty flag
-                                // Look for exact match first: SURNAME_PROVINCE_MUNICIPALITY_CITY
-                                let locationKey = `${item.surname}_${item.province}_${item.municipality_city || ''}`;
-                                let dynastyInfo = flagData.dynasties[locationKey];
+                            // If no exact match, try to find any dynasty with same surname and province
+                            if (!dynastyInfo) {
+                                const matchingDynasties = Object.entries(flagData.dynasties)
+                                    .filter(([key, dynasty]) => 
+                                        dynasty.surname === item.surname && 
+                                        dynasty.province === item.province
+                                    );
                                 
-                                // If no exact match, try to find any dynasty with same surname and province
-                                if (!dynastyInfo) {
-                                    const matchingDynasties = Object.entries(flagData.dynasties)
-                                        .filter(([key, dynasty]) => 
-                                            dynasty.surname === item.surname && 
-                                            dynasty.province === item.province
-                                        );
-                                    
-                                    if (matchingDynasties.length > 0) {
-                                        // Use the first matching dynasty
-                                        dynastyInfo = matchingDynasties[0][1];
-                                        console.log(`🏴 Found matching dynasty for ${item.surname} in ${item.province}:`, dynastyInfo);
-                                    }
-                                }
-                                
-                                if (dynastyInfo && dynastyInfo.flag_parameters) {
-                                    const flag = flagGenerator.createFlagFromParameters(dynastyInfo.flag_parameters);
-                                    tooltipLines.push(`🏴 Dynasty Flag ID: ${dynastyInfo.dynasty_id}`);
-                                    tooltipLines.push(`📍 Location: ${dynastyInfo.location_display}`);
-                                    tooltipLines.push(`🎨 Flag: ${flag.slices} slices, ${flag.shape}, ${flag.orientation}`);
-                                    if (flag.symbol !== 'None') {
-                                        tooltipLines.push(`🔮 Symbol: ${flag.symbol}`);
-                                    }
-                                } else {
-                                    console.log(`⚠️ No flag found for ${item.surname} in ${item.province}`);
+                                if (matchingDynasties.length > 0) {
+                                    dynastyInfo = matchingDynasties[0][1];
                                 }
                             }
                             
-                            return tooltipLines;
+                            if (dynastyInfo && dynastyInfo.flag_parameters) {
+                                const flag = flagGenerator.createFlagFromParameters(dynastyInfo.flag_parameters);
+                                
+                                tooltipContent += `
+                                    <div style="margin-top: 12px; padding-top: 8px; border-top: 1px solid rgba(255,255,255,0.2);">
+                                        <div style="font-weight: bold; margin-bottom: 8px;">🏴 Dynasty Flag</div>
+                                        <div style="display: flex; align-items: center; gap: 12px;">
+                                            <div style="flex-shrink: 0;">${flag.svg.outerHTML}</div>
+                                            <div style="font-size: 11px; line-height: 1.4;">
+                                                <div>ID: ${dynastyInfo.dynasty_id}</div>
+                                                <div>📍 ${dynastyInfo.location_display}</div>
+                                                <div>🎨 ${flag.slices} slices, ${flag.shape}</div>
+                                                <div>📐 ${flag.orientation}</div>
+                                                ${flag.symbol !== 'None' ? `<div>🔮 ${flag.symbol}</div>` : ''}
+                                            </div>
+                                        </div>
+                                    </div>
+                                `;
+                            }
+                        }
+                        
+                        tooltipEl.innerHTML = tooltipContent;
+                        document.body.appendChild(tooltipEl);
+                        
+                        // Position tooltip
+                        const position = Chart.helpers.getRelativePosition(tooltip.caretX, tooltip.caretY, chart);
+                        tooltipEl.style.left = position.x + 15 + 'px';
+                        tooltipEl.style.top = position.y - 15 + 'px';
+                    },
+                    // Clean up tooltip when mouse leaves
+                    onHover: function(event, elements) {
+                        if (elements.length === 0) {
+                            const existingTooltip = document.getElementById('dynasty-custom-tooltip');
+                            if (existingTooltip) {
+                                existingTooltip.remove();
+                            }
                         }
                     }
                 }
