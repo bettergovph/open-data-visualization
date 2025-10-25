@@ -2623,17 +2623,18 @@ function displayConflictsNetwork() {
     conflictsData.forEach((chain, chainIndex) => {
         chain.path.forEach((person, personIndex) => {
             const nodeId = person.id;
-            if (!nodeMap.has(nodeId)) {
-                nodeMap.set(nodeId, {
-                    id: nodeId,
-                    name: `${person.first_name} ${person.last_name}`,
-                    surname: person.last_name,
-                    position: person.position,
-                    chainIndex: chainIndex,
-                    chainLength: chain.length,
-                    isConnector: personIndex > 0 && personIndex < chain.path.length - 1
-                });
-            }
+        if (!nodeMap.has(nodeId)) {
+            nodeMap.set(nodeId, {
+                id: nodeId,
+                name: `${person.first_name} ${person.last_name}`,
+                surname: person.last_name,
+                position: person.position,
+                relationship_description: person.relationship_description,
+                chainIndex: chainIndex,
+                chainLength: chain.length,
+                isConnector: personIndex > 0 && personIndex < chain.path.length - 1
+            });
+        }
         });
         
         // Create links between consecutive people in the chain
