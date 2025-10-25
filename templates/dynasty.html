@@ -3048,16 +3048,20 @@ let animationInterval = null;
 let isAnimating = false;
 
 async function loadAnimationData() {
-    console.log('🎬 Loading animation data...');
+    console.log('🎬 Loading animation data (top 10 dynasties)...');
     
     try {
-        // Load dynasty data with years
+        // Load dynasty data with years, same as Visual tab
         const response = await fetch('/api/dynasty?limit=1000');
         const data = await response.json();
         
         if (data.success) {
-            animationData = data.data;
-            console.log('✅ Animation data loaded:', animationData.length, 'records');
+            // Get top 10 dynasties by member count
+            const sortedData = data.data.sort((a, b) => (b.dynasty_count || 0) - (a.dynasty_count || 0));
+            animationData = sortedData.slice(0, 10);
+            
+            console.log('✅ Animation data loaded (top 10):', animationData.length, 'records');
+            console.log('📊 Top 10 dynasties:', animationData.map(d => `${d.surname} (${d.dynasty_count} members)`));
             
             // Populate year filter
             populateAnimationYears();
@@ -3188,7 +3192,7 @@ function showDynastiesForYear(year) {
                 Year: ${year}
             </div>
             <div style="position: absolute; top: 20px; right: 20px; background: rgba(0,0,0,0.8); color: white; padding: 15px; border-radius: 8px; font-size: 16px; font-weight: bold; z-index: 100;">
-                Dynasties: ${Object.keys(provinceGroups).length} provinces
+                Top 10 Dynasties: ${Object.keys(provinceGroups).length} provinces
             </div>
     `;
     
