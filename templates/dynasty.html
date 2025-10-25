@@ -734,8 +734,6 @@ function initializeDynastyPage() {
         }
     });
 
-    // Set up conflicts filters
-    document.getElementById('applyConflictsFilter').addEventListener('click', loadConflictsData);
 
     // Set up pagination
     document.getElementById('prevPage').addEventListener('click', function() {
@@ -2263,96 +2261,6 @@ document.addEventListener('DOMContentLoaded', function() {
     </div>
 </div>
 
-<!-- Load Conflicts Data Function -->
-<script>
-async function loadConflictsData() {
-    console.log('🔍 Loading conflicts of interest data...');
-    
-    try {
-        // Get filter values
-        const conflictType = document.getElementById('conflictTypeFilter').value;
-        const riskLevel = document.getElementById('riskLevelFilter').value;
-        
-        // Build API URL with filters
-        const params = new URLSearchParams();
-        if (conflictType) params.append('conflict_type', conflictType);
-        if (riskLevel) params.append('risk_level', riskLevel);
-        
-        // Call the conflicts API
-        const response = await fetch(`/api/dynasty/conflicts?${params}`);
-        const conflictsData = await response.json();
-        
-        if (!conflictsData.success) {
-            throw new Error(conflictsData.error || 'Failed to load conflicts data');
-        }
-        
-        // Update statistics cards
-        document.getElementById('highRiskOfficials').textContent = conflictsData.stats.high_risk;
-        document.getElementById('businessConnections').textContent = conflictsData.stats.business_connections;
-        document.getElementById('familyBusinesses').textContent = conflictsData.stats.family_businesses;
-        document.getElementById('contractAwards').textContent = conflictsData.stats.contract_awards;
-        
-        // Update conflicts table
-        const tableBody = document.getElementById('conflictsTableBody');
-        
-        if (conflictsData.data.length === 0) {
-            tableBody.innerHTML = `
-                <tr>
-                    <td colspan="5" style="padding: 20px; text-align: center; color: #6c757d;">
-                        <div style="display: flex; flex-direction: column; align-items: center; gap: 10px;">
-                            <div style="font-size: 2em;">📭</div>
-                            <div>No conflicts found matching your criteria</div>
-                        </div>
-                    </td>
-                </tr>
-            `;
-        } else {
-            tableBody.innerHTML = conflictsData.data.map(conflict => `
-                <tr style="border-bottom: 1px solid #dee2e6;">
-                    <td style="padding: 12px;">
-                        <div style="font-weight: 600; color: #0038A8;">${conflict.official}</div>
-                    </td>
-                    <td style="padding: 12px;">
-                        <div style="color: #6c757d; font-size: 0.9em;">${conflict.position}</div>
-                    </td>
-                    <td style="padding: 12px;">
-                        <span style="background: #e3f2fd; color: #1976d2; padding: 4px 8px; border-radius: 4px; font-size: 0.8em; font-weight: 500;">
-                            ${conflict.conflict_type}
-                        </span>
-                    </td>
-                    <td style="padding: 12px;">
-                        <span style="background: ${conflict.risk_level === 'High' ? '#ffebee' : conflict.risk_level === 'Medium' ? '#fff3e0' : '#e8f5e8'}; 
-                                    color: ${conflict.risk_level === 'High' ? '#c62828' : conflict.risk_level === 'Medium' ? '#ef6c00' : '#2e7d32'}; 
-                                    padding: 4px 8px; border-radius: 4px; font-size: 0.8em; font-weight: 500;">
-                            ${conflict.risk_level}
-                        </span>
-                    </td>
-                    <td style="padding: 12px;">
-                        <div style="color: #6c757d; font-size: 0.9em;">${conflict.details}</div>
-                    </td>
-                </tr>
-            `).join('');
-        }
-        
-        console.log('✅ Conflicts data loaded successfully');
-        
-    } catch (error) {
-        console.error('❌ Error loading conflicts data:', error);
-        
-        // Show error in table
-        const tableBody = document.getElementById('conflictsTableBody');
-        tableBody.innerHTML = `
-            <tr>
-                <td colspan="5" style="padding: 20px; text-align: center; color: #dc3545;">
-                    <div style="display: flex; flex-direction: column; align-items: center; gap: 10px;">
-                        <div style="font-size: 2em;">❌</div>
-                        <div>Error loading conflicts data</div>
-                    </div>
-                </td>
-            </tr>
-        `;
-    }
-}
 
 // Poverty Tab Functions
 let povertyData = [];
