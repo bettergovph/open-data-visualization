@@ -583,14 +583,14 @@ async function loadCRIComputations() {
 
 async function loadPoliticalHHI() {
     try {
-        const response = await fetch('/api/dynasty/surnames');
+        const response = await fetch('/api/dynasty/top-surnames');
         const data = await response.json();
         
-        if (data.success && data.surnames) {
+        if (data.success && data.data) {
             // Calculate Political HHI for each province (EOGO paper methodology)
             const provinceStats = {};
             
-            data.surnames.forEach(surname => {
+            data.data.forEach(surname => {
                 const province = surname.province;
                 if (!provinceStats[province]) {
                     provinceStats[province] = {
@@ -679,7 +679,7 @@ async function loadCRIAnalysis() {
     try {
         // Load multiple data sources for comprehensive CRI analysis
         const [dynastyResponse, philgepsResponse, povertyResponse] = await Promise.all([
-            fetch('/api/dynasty/surnames'),
+            fetch('/api/dynasty/top-surnames'),
             fetch('/api/philgeps/top?limit=1000'),
             fetch('/database/poverty.json')
         ]);
@@ -693,7 +693,7 @@ async function loadCRIAnalysis() {
             const provinceStats = {};
             
             // Process dynasty data
-            dynastyData.surnames.forEach(surname => {
+            dynastyData.data.forEach(surname => {
                 const province = surname.province;
                 if (!provinceStats[province]) {
                     provinceStats[province] = {

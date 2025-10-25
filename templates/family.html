@@ -736,9 +736,18 @@ function toggleMobileMenu() {
             
             if (milagrosaNodes.size() > 0) {
                 console.log(`🔍 Milagrosa node data:`, milagrosaNodes.data());
+                
+                // Check if click events are attached
+                const milagrosaNode = milagrosaNodes.node();
+                if (milagrosaNode) {
+                    console.log(`🔍 Milagrosa node element:`, milagrosaNode);
+                    console.log(`🔍 Milagrosa node has click handler:`, milagrosaNode.onclick !== null);
+                }
             }
             
             // Add rectangles for nodes (org chart style) with level-based colors and year-based shades
+            console.log(`🔍 About to create rectangles for ${nodes.size()} nodes`);
+            
             const levelBaseColors = [
                 '#1E40AF', // Level 1 - Dark Blue (highest positions)
                 '#DC2626', // Level 2 - Red
@@ -888,6 +897,19 @@ function toggleMobileMenu() {
                         console.log(`👤 Clicked on same surname and province: ${d.last_name} (no navigation needed)`);
                     }
                 });
+            
+            // Debug: Check if Milagrosa Tan's rectangle was created
+            const allRectangles = svg.selectAll('rect');
+            console.log(`🔍 Total rectangles created: ${allRectangles.size()}`);
+            
+            const milagrosaRectangles = allRectangles.filter(function(d) {
+                return d && d.name && d.name.toLowerCase().includes('milagrosa');
+            });
+            console.log(`🔍 Milagrosa rectangles found: ${milagrosaRectangles.size()}`);
+            
+            if (milagrosaRectangles.size() > 0) {
+                console.log(`🔍 Milagrosa rectangle data:`, milagrosaRectangles.data());
+            }
             
             // Add name text
             nodes.append('text')
@@ -1423,6 +1445,12 @@ function toggleMobileMenu() {
         function initializeYearView() {
             if (!window.familyData) return;
             
+            // Only initialize if year view is actually active
+            if (currentView !== 'year') {
+                console.log('Year view not active, skipping initialization');
+                return;
+            }
+            
             // Get unique years from the data and sort in ascending order
             const years = [...new Set(window.familyData.map(member => member.year))].sort((a, b) => a - b);
             
@@ -1492,6 +1520,17 @@ function toggleMobileMenu() {
         // Create hierarchy chart for a specific year
         function createYearHierarchyChart(yearData, year) {
             const container = document.getElementById('yearChart');
+            if (!container) {
+                console.error('Year chart container not found');
+                return;
+            }
+            
+            // Only proceed if year view is actually active
+            if (currentView !== 'year') {
+                console.log('Year view not active, skipping year chart creation');
+                return;
+            }
+            
             container.innerHTML = '';
             
             // Define level colors (same as main hierarchy chart)
