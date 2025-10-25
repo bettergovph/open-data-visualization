@@ -3392,34 +3392,13 @@ function createAnimationMap() {
                 height: height
             };
 
-            // Function to get color based on dynasty intensity
-            const getDynastyColor = (intensity) => {
-                if (intensity === 0) return '#f8f9fa'; // Light gray for no data
-                if (intensity === 1) return '#e3f2fd'; // Very light blue
-                if (intensity === 2) return '#bbdefb'; // Light blue
-                if (intensity === 3) return '#90caf9'; // Medium blue
-                if (intensity === 4) return '#64b5f6'; // Blue
-                if (intensity === 5) return '#42a5f5'; // Strong blue
-                if (intensity >= 6) return '#2196f3'; // Dark blue
-                return '#f8f9fa'; // Default light gray
-            };
-
-            // Draw each province with color based on dynasty intensity
+            // Draw all provinces with plain white fill and dark borders
             console.log('🗺️ Starting to draw provinces...');
             geoJsonData.features.forEach((feature, index) => {
                 let provinceName = feature.properties.name || feature.properties.NAME_1 || feature.properties.PROVINCE;
                 
-                // Calculate dynasty intensity for this province
-                let intensity = 0;
-                if (animationData && animationData.length > 0) {
-                    const provinceDynasties = animationData.filter(dynasty => 
-                        dynasty.province && dynasty.province.toLowerCase().includes(provinceName.toLowerCase())
-                    );
-                    intensity = provinceDynasties.length;
-                }
-                
-                // Draw the province polygon with color based on intensity
-                ctx.fillStyle = getDynastyColor(intensity);
+                // Draw the province polygon with plain white fill and dark borders
+                ctx.fillStyle = '#FFFFFF'; // Plain white
                 ctx.strokeStyle = '#000000'; // Dark borders
                 ctx.lineWidth = 1;
 
