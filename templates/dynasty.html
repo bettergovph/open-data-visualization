@@ -2657,11 +2657,11 @@ function displayConflictsNetwork() {
     
     // Create force simulation with spider web-like behavior
     const simulation = d3.forceSimulation(nodes)
-        .force('link', d3.forceLink(links).id(d => d.id).distance(80).strength(0.8))
-        .force('charge', d3.forceManyBody().strength(-400))
+        .force('link', d3.forceLink(links).id(d => d.id).distance(120).strength(0.8))
+        .force('charge', d3.forceManyBody().strength(-600))
         .force('center', d3.forceCenter(width / 2, height / 2))
-        .force('collision', d3.forceCollide().radius(25))
-        .force('radial', d3.forceRadial(100, width / 2, height / 2).strength(0.1));
+        .force('collision', d3.forceCollide().radius(30))
+        .force('radial', d3.forceRadial(150, width / 2, height / 2).strength(0.1));
     
     // Create links with spider web styling
     const link = svg.append('g')
@@ -2681,7 +2681,7 @@ function displayConflictsNetwork() {
         .selectAll('circle')
         .data(nodes)
         .enter().append('circle')
-        .attr('r', d => d.isConnector ? 6 : 15)
+        .attr('r', d => d.isConnector ? 10 : 25)
         .attr('fill', d => {
             if (d.isConnector) {
                 return '#6c757d'; // Gray for connectors
