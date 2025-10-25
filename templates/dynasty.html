@@ -2722,7 +2722,7 @@ function displayConflictsNetwork() {
             tooltip.html(`
                 <div style="font-weight: bold; margin-bottom: 4px;">${d.name}</div>
                 <div style="color: #ccc; margin-bottom: 4px;">${d.position || 'Unknown Position'}</div>
-                <div style="color: #4ade80;">Chain Length: ${d.chainLength}</div>
+                <div style="color: #4ade80;">${d.relationship_description || 'Relationship unknown'}</div>
                 ${d.isConnector ? '<div style="color: #fbbf24;">🔗 Connecting Node</div>' : '<div style="color: #60a5fa;">🏛️ Family Member</div>'}
             `);
             
