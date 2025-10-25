@@ -1179,9 +1179,16 @@ function createSurnamesChart(data, flagData = null) {
                         `;
                         
                         let tooltipContent = `
-                            <div style="font-weight: bold; margin-bottom: 8px;">${item.surname} (${item.province})</div>
+                            <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 8px;">
+                                <div style="flex-shrink: 0;">
+                                    <img src="/static/flags/flag_${dynastyInfo?.dynasty_id || 'default'}.svg" alt="Dynasty Flag" style="width: 40px; height: 24px; border: 1px solid #ddd; border-radius: 4px;" onerror="this.style.display='none'"/>
+                                </div>
+                                <div>
+                                    <div style="font-weight: bold; font-size: 14px;">${item.surname}</div>
+                                    <div style="font-size: 11px; color: #ccc;">${item.province}</div>
+                                </div>
+                            </div>
                             <div>Dynasty Members: ${item.dynasty_count}</div>
-                            <div>Province: ${item.province}</div>
                             <div style="font-size: 11px; color: #ccc; margin-top: 4px;">Click to view family details</div>
                         `;
                         
@@ -1205,17 +1212,12 @@ function createSurnamesChart(data, flagData = null) {
                             }
                             
                             if (dynastyInfo && dynastyInfo.flag_parameters) {
-                                // Use static flag image instead of generating dynamically
+                                // Update the flag URL in the main content
                                 const flagUrl = `/static/flags/flag_${dynastyInfo.dynasty_id}.svg`;
-                                
-                                tooltipContent += `
-                                    <div style="margin-top: 12px; padding-top: 8px; border-top: 1px solid rgba(255,255,255,0.2);">
-                                        <div style="text-align: center;">
-                                            <img src="${flagUrl}" alt="Dynasty Flag" style="width: 60px; height: 36px; border: 1px solid #ddd; border-radius: 4px; margin-bottom: 8px;" onerror="this.style.display='none'"/>
-                                            <div style="font-weight: bold; font-size: 14px;">${dynastyInfo.surname}</div>
-                                        </div>
-                                    </div>
-                                `;
+                                const flagImg = tooltipEl.querySelector('img');
+                                if (flagImg) {
+                                    flagImg.src = flagUrl;
+                                }
                             }
                         }
                         

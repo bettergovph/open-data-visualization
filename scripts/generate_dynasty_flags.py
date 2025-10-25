@@ -59,10 +59,12 @@ def generate_flag_parameters(flag_id, surname):
         else:
             shape_sequence.append(shapes[int(rng() * len(shapes))])
     
-    # Generate color scheme
+    # Generate color scheme - ensure different colors for each slice
     color_scheme = []
     for i in range(num_slices):
-        color_scheme.append(colors[int(rng() * len(colors))])
+        # Use slice index to ensure different colors
+        color_index = (int(rng() * len(colors)) + i) % len(colors)
+        color_scheme.append(colors[color_index])
     
     # Generate orientation
     orientation = slice_orientations[int(rng() * len(slice_orientations))]
