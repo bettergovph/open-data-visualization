@@ -3104,42 +3104,8 @@ function addAmpatuanFlagOverlay(ampatuan, flagData) {
     const rect = canvas.getBoundingClientRect();
     const mapRect = mapContainer.getBoundingClientRect();
     
-    // Province coordinates for positioning (same as before)
-    const provinceCoordinates = {
-        'Maguindanao': { x: 250, y: 320 }, // Ampatuan is from Maguindanao
-        'Metro Manila': { x: 200, y: 180 },
-        'Cebu': { x: 250, y: 250 },
-        'Davao': { x: 280, y: 300 },
-        'Laguna': { x: 190, y: 200 },
-        'Cavite': { x: 180, y: 190 },
-        'Bulacan': { x: 190, y: 170 },
-        'Pampanga': { x: 180, y: 160 },
-        'Nueva Ecija': { x: 200, y: 150 },
-        'Batangas': { x: 170, y: 220 },
-        'Quezon': { x: 200, y: 240 },
-        'Rizal': { x: 200, y: 190 },
-        'Palawan': { x: 120, y: 280 },
-        'Negros Occidental': { x: 220, y: 280 },
-        'Iloilo': { x: 200, y: 270 },
-        'Bohol': { x: 240, y: 260 },
-        'Leyte': { x: 260, y: 250 },
-        'Samar': { x: 270, y: 240 },
-        'Zamboanga': { x: 200, y: 320 },
-        'Cotabato': { x: 250, y: 320 },
-        'Cagayan': { x: 220, y: 120 },
-        'Isabela': { x: 240, y: 130 },
-        'Nueva Vizcaya': { x: 200, y: 140 },
-        'Benguet': { x: 190, y: 150 },
-        'Pangasinan': { x: 180, y: 160 },
-        'Tarlac': { x: 190, y: 170 },
-        'Zambales': { x: 170, y: 180 },
-        'Bataan': { x: 170, y: 190 },
-        'Unknown': { x: 100, y: 100 }
-    };
-    
-    // Get Ampatuan's province coordinates
-    const province = ampatuan.province || 'Maguindanao';
-    const coords = provinceCoordinates[province] || provinceCoordinates['Maguindanao'];
+    console.log('📐 Canvas rect:', rect);
+    console.log('📐 Map container rect:', mapRect);
     
     // Find Ampatuan's flag
     let flagUrl = '/static/flags/flag_default.svg';
@@ -3156,12 +3122,18 @@ function addAmpatuanFlagOverlay(ampatuan, flagData) {
         }
     }
     
-    // Create flag overlay
+    // Position flag in the center-right area of the map (where Maguindanao would be)
+    const flagX = rect.width * 0.7; // 70% from left
+    const flagY = rect.height * 0.6; // 60% from top
+    
+    console.log('📍 Flag position:', flagX, flagY);
+    
+    // Create flag overlay positioned relative to the map container
     const flagOverlay = document.createElement('div');
     flagOverlay.style.cssText = `
         position: absolute;
-        left: ${coords.x - 20}px;
-        top: ${coords.y - 15}px;
+        left: ${flagX}px;
+        top: ${flagY}px;
         z-index: 1000;
         pointer-events: none;
     `;
@@ -3170,16 +3142,16 @@ function addAmpatuanFlagOverlay(ampatuan, flagData) {
         <div style="display: flex; flex-direction: column; align-items: center;">
             <img src="${flagUrl}" 
                  alt="Ampatuan Flag" 
-                 style="width: 40px; height: 24px; border: 2px solid #333; border-radius: 4px; box-shadow: 0 2px 8px rgba(0,0,0,0.5);"
+                 style="width: 50px; height: 30px; border: 3px solid #000; border-radius: 4px; box-shadow: 0 4px 12px rgba(0,0,0,0.7);"
                  onerror="this.style.display='none'"/>
-            <div style="font-size: 10px; font-weight: bold; color: #333; text-align: center; margin-top: 2px; background: rgba(255,255,255,0.8); padding: 2px 4px; border-radius: 2px;">
+            <div style="font-size: 12px; font-weight: bold; color: #000; text-align: center; margin-top: 4px; background: rgba(255,255,255,0.9); padding: 4px 8px; border-radius: 4px; border: 1px solid #000;">
                 Ampatuan
             </div>
         </div>
     `;
     
     mapContainer.appendChild(flagOverlay);
-    console.log('✅ Ampatuan flag added to map at', province, coords);
+    console.log('✅ Ampatuan flag added to map at position:', flagX, flagY);
 }
 
 function initializeAnimationMap() {
