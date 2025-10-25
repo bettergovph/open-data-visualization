@@ -801,6 +801,15 @@ function initializeDynastyPage() {
                 loadDynastyMap();
             } else if (tabName === 'poverty') {
                 loadPovertyData();
+            } else if (tabName === 'conflicts') {
+                // Initialize conflicts tab
+                console.log('🔍 Conflicts tab activated');
+                // Test if D3 is available
+                if (typeof d3 !== 'undefined') {
+                    console.log('✅ D3.js is available in conflicts tab');
+                } else {
+                    console.error('❌ D3.js is NOT available in conflicts tab');
+                }
             }
         });
     });
@@ -2685,6 +2694,8 @@ let conflictsData = [];
 let conflictsNetwork = null;
 
 function loadConflictsData() {
+    console.log('🚀 loadConflictsData function called!');
+    
     const chainLength = document.getElementById('chainLengthFilter').value;
     const maxChains = document.getElementById('maxChainsFilter').value;
     
