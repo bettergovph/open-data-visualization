@@ -3099,45 +3099,125 @@ function createAnimationMap2004(ampatuan2004, flagData) {
     const familySize = ampatuan2004.length;
     console.log('👥 Ampatuan 2004 family size:', familySize);
     
-    // Clear the container and add simple map with flag
+    // Clear the container and add Leaflet map for Animation tab
     mapContainer.innerHTML = `
-        <div style="width: 100%; height: 600px; border: 1px solid #ddd; border-radius: 8px; background: #f0f8ff; position: relative; overflow: hidden;">
-            <div style="position: absolute; top: 10px; left: 10px; background: rgba(0,0,0,0.8); color: white; padding: 10px; border-radius: 5px; font-size: 14px;">
-                <div>🏴 AMPATUAN Dynasty (2004)</div>
-                <div>👥 Family Members: ${familySize}</div>
-                <div>📍 Province: Maguindanao</div>
-            </div>
-            <div id="ampatuanFlag" style="
-                position: absolute;
-                left: 60%;
-                top: 40%;
-                width: ${Math.min(200, 30 + familySize * 5)}px;
-                height: ${Math.min(120, 18 + familySize * 3)}px;
-                background: #ff0000;
-                border: 4px solid #000;
-                border-radius: 8px;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                font-weight: bold;
-                color: white;
-                text-shadow: 2px 2px 4px rgba(0,0,0,0.8);
-                box-shadow: 0 6px 20px rgba(255,0,0,0.8);
-                cursor: pointer;
-                transition: transform 0.2s;
-            " onmouseover="this.style.transform='scale(1.1)'" onmouseout="this.style.transform='scale(1)'">
-                <div style="text-align: center; font-size: 14px;">
-                    <div>🏴</div>
-                    <div>AMPATUAN</div>
-                    <div style="font-size: 10px;">${familySize} members</div>
-                </div>
-            </div>
-        </div>
+        <div id="animationLeafletMap" style="width: 100%; height: 600px; border: 1px solid #ddd; border-radius: 8px;"></div>
     `;
     
-    console.log('✅ Simple animation map created with Ampatuan flag');
+    // Create Leaflet map for Animation tab after DOM is updated
+    console.log('🗺️ Creating Leaflet map for Animation tab...');
+    setTimeout(() => {
+        createAnimationLeafletMap(familySize, flagData);
+    }, 100);
 }
 
+function createAnimationLeafletMap(familySize, flagData) {
+    console.log('🗺️ Initializing Animation Leaflet map...');
+    
+    // Check if Leaflet is available
+    if (typeof L === 'undefined') {
+        console.error('❌ Leaflet is not loaded!');
+        return;
+    }
+    
+    // Check if the animation map container exists
+    const mapContainer = document.getElementById('animationLeafletMap');
+    if (!mapContainer) {
+        console.error('❌ Animation Leaflet map container not found!');
+        return;
+    }
+    
+    console.log('✅ Animation Leaflet map container found:', mapContainer);
+    
+    // Initialize the map centered on the Philippines
+    const map = L.map('animationLeafletMap').setView([12.8797, 121.7740], 6);
+    console.log('✅ Animation Leaflet map initialized');
+    
+    // Add OpenStreetMap tiles
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '© OpenStreetMap contributors'
+    }).addTo(map);
+    console.log('✅ OpenStreetMap tiles added to Animation map');
+    
+    // Add Philippines GeoJSON
+    fetch('/static/data/philippines-provinces.json')
+        .then(response => response.json())
+        .then(geojson => {
+            // Add province boundaries
+            L.geoJSON(geojson, {
+                style: {
+                    fillColor: '#ffffff',
+                    weight: 2,
+                    opacity: 1,
+                    color: '#000000',
+                    dashArray: '0',
+                    fillOpacity: 0.1
+                }
+            }).addTo(map);
+            
+            // Add Ampatuan flag marker
+            addAnimationAmpatuanFlagMarker(map, familySize, flagData);
+        })
+        .catch(error => {
+            console.error('❌ Error loading GeoJSON for Animation map:', error);
+        });
+}
+
+function addAnimationAmpatuanFlagMarker(map, familySize, flagData) {
+    // Maguindanao coordinates (approximate center)
+    const maguindanaoLng = 124.3;
+    const maguindanaoLat = 7.1;
+    
+    // Calculate flag size based on family member count
+    const baseSize = 30;
+    const sizeMultiplier = Math.max(1, Math.min(3, familySize / 5));
+    const flagSize = Math.round(baseSize * sizeMultiplier);
+    
+    console.log('🏴 Adding Ampatuan flag marker to Animation map at:', maguindanaoLat, maguindanaoLng);
+    console.log('📏 Flag size:', flagSize, 'px (family size:', familySize, ')');
+    
+    // Create custom flag icon
+    const flagIcon = L.divIcon({
+        html: `
+            <div style="
+                width: ${flagSize}px; 
+                height: ${flagSize}px; 
+                background: #ff0000; 
+                border: 3px solid #000; 
+                border-radius: 8px; 
+                display: flex; 
+                align-items: center; 
+                justify-content: center; 
+                font-weight: bold; 
+                color: white; 
+                text-shadow: 1px 1px 2px rgba(0,0,0,0.8);
+                box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+            ">
+                AMP
+            </div>
+        `,
+        className: 'animation-flag-icon',
+        iconSize: [flagSize, flagSize],
+        iconAnchor: [flagSize/2, flagSize/2]
+    });
+    
+    // Add marker to map
+    const marker = L.marker([maguindanaoLat, maguindanaoLng], { icon: flagIcon })
+        .addTo(map);
+    
+    // Add popup with dynasty info
+    marker.bindPopup(`
+        <div style="text-align: center;">
+            <h3 style="margin: 0 0 8px 0; color: #0038A8;">🏴 AMPATUAN Dynasty</h3>
+            <p style="margin: 0 0 4px 0;"><strong>Year:</strong> 2004</p>
+            <p style="margin: 0 0 4px 0;"><strong>Members:</strong> ${familySize}</p>
+            <p style="margin: 0 0 4px 0;"><strong>Province:</strong> Maguindanao</p>
+            <p style="margin: 0; font-size: 12px; color: #666;">Flag size represents family size</p>
+        </div>
+    `);
+    
+    console.log('✅ Ampatuan flag marker added to Animation Leaflet map');
+}
 
 function addAmpatuanFlagOverlay(ampatuan, flagData) {
     console.log('🏴 Adding Ampatuan flag overlay...');
