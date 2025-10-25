@@ -604,6 +604,11 @@ function toggleMobileMenu() {
                                     </select>
                                 </div>
                                 <div>
+                                    <button onclick="loadConflictsData()" style="padding: 8px 16px; background: #0038A8; color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: 600;">
+                                        🔍 Apply Filters
+                                    </button>
+                                </div>
+                                <div>
                                     <button onclick="clearConflictsFilters()" style="padding: 8px 16px; background: #6c757d; color: white; border: none; border-radius: 4px; cursor: pointer;">
                                         Clear Filters
                                     </button>
@@ -716,6 +721,8 @@ function initializeDynastyPage() {
                     console.log('✅ D3.js is available in conflicts tab');
                     // Automatically load conflicts data
                     loadConflictsData();
+                    // Set up filter change listeners
+                    setupConflictsFilters();
                 } else {
                     console.error('❌ D3.js is NOT available in conflicts tab');
                 }
@@ -2820,14 +2827,34 @@ function displayConflictsTable() {
     tbody.innerHTML = html;
 }
 
+function setupConflictsFilters() {
+    // Set up filter change listeners for automatic updates
+    const chainLengthFilter = document.getElementById('chainLengthFilter');
+    const maxChainsFilter = document.getElementById('maxChainsFilter');
+    
+    if (chainLengthFilter) {
+        chainLengthFilter.addEventListener('change', function() {
+            console.log('🔧 Chain length filter changed to:', this.value);
+            loadConflictsData();
+        });
+    }
+    
+    if (maxChainsFilter) {
+        maxChainsFilter.addEventListener('change', function() {
+            console.log('🔧 Max chains filter changed to:', this.value);
+            loadConflictsData();
+        });
+    }
+}
+
 function clearConflictsFilters() {
-    document.getElementById('chainLengthFilter').value = '5';
+    document.getElementById('chainLengthFilter').value = '2';
     document.getElementById('maxChainsFilter').value = '20';
     conflictsData = [];
     document.getElementById('conflictsNetwork').innerHTML = `
         <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); text-align: center; color: #6c757d;">
-            <div style="font-size: 2em; margin-bottom: 10px;">⚔️</div>
-            <div>Click "Find Longest Chains" to visualize relationship networks</div>
+            <div style="font-size: 2em; margin-bottom: 10px;">🕸️</div>
+            <div>Loading relationship networks...</div>
         </div>
     `;
     document.getElementById('conflictsTableBody').innerHTML = `
@@ -2835,7 +2862,7 @@ function clearConflictsFilters() {
             <td colspan="5" style="padding: 20px; text-align: center; color: #6c757d;">
                 <div style="display: flex; flex-direction: column; align-items: center; gap: 10px;">
                     <div style="font-size: 2em;">⚔️</div>
-                    <div>Click "Find Longest Chains" to view relationship conflicts</div>
+                    <div>Loading relationship conflicts...</div>
                 </div>
             </td>
         </tr>
