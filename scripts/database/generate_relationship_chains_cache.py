@@ -24,25 +24,75 @@ async def generate_relationship_chains_cache():
     try:
         print("🔍 Generating relationship chains cache...")
         
-        # Query to find relationships between different families
+        # Query to find longer relationship chains using recursive CTE
         query = """
+        WITH RECURSIVE relationship_chains AS (
+            -- Base case: start with direct relationships
+            SELECT 
+                r.person_id as start_person,
+                r.related_person_id as end_person,
+                r.person_id as current_person,
+                r.related_person_id as next_person,
+                r.person_id::text || ',' || r.related_person_id::text as path_string,
+                r.relationship_description as relationship_string,
+                1 as chain_length,
+                p1.last_name as start_surname,
+                p2.last_name as end_surname,
+                p1.first_name as start_first_name,
+                p1.last_name as start_last_name,
+                p1.position as start_position,
+                p2.first_name as end_first_name,
+                p2.last_name as end_last_name,
+                p2.position as end_position
+            FROM relationships r
+            JOIN political_dynasties p1 ON r.person_id = p1.id
+            JOIN political_dynasties p2 ON r.related_person_id = p2.id
+            WHERE p1.last_name != p2.last_name  -- Only different families
+            
+            UNION ALL
+            
+            -- Recursive case: extend chains
+            SELECT 
+                rc.start_person,
+                rc.end_person,
+                r.related_person_id as current_person,
+                r.related_person_id as next_person,
+                rc.path_string || ',' || r.related_person_id::text,
+                rc.relationship_string || ',' || r.relationship_description,
+                rc.chain_length + 1,
+                rc.start_surname,
+                p.last_name as end_surname,
+                rc.start_first_name,
+                rc.start_last_name,
+                rc.start_position,
+                p.first_name as end_first_name,
+                p.last_name as end_last_name,
+                p.position as end_position
+            FROM relationship_chains rc
+            JOIN relationships r ON rc.next_person = r.person_id
+            JOIN political_dynasties p ON r.related_person_id = p.id
+            WHERE rc.path_string NOT LIKE '%' || r.related_person_id::text || '%'  -- Avoid cycles
+            AND rc.chain_length < 6  -- Limit depth
+            AND p.last_name != rc.start_surname  -- Ensure different families
+        )
         SELECT 
-            r.person_id as start_person,
-            r.related_person_id as end_person,
-            p1.first_name as start_first_name,
-            p1.last_name as start_last_name,
-            p1.position as start_position,
-            p2.first_name as end_first_name,
-            p2.last_name as end_last_name,
-            p2.position as end_position,
-            r.relationship_description,
-            p1.last_name as start_surname,
-            p2.last_name as end_surname
-        FROM relationships r
-        JOIN political_dynasties p1 ON r.person_id = p1.id
-        JOIN political_dynasties p2 ON r.related_person_id = p2.id
-        WHERE p1.last_name != p2.last_name  -- Only different families
-        ORDER BY p1.last_name, p2.last_name
+            rc.start_person,
+            rc.end_person,
+            rc.chain_length + 1 as chain_length,  -- +1 because chain_length is 0-based
+            rc.start_surname,
+            rc.end_surname,
+            rc.start_first_name,
+            rc.start_last_name,
+            rc.start_position,
+            rc.end_first_name,
+            rc.end_last_name,
+            rc.end_position,
+            rc.path_string,
+            rc.relationship_string
+        FROM relationship_chains rc
+        WHERE rc.start_surname != rc.end_surname
+        AND rc.start_person != rc.end_person
+        ORDER BY rc.chain_length DESC, rc.start_surname, rc.end_surname
         """
         
         chains = await conn.fetch(query)
@@ -51,27 +101,37 @@ async def generate_relationship_chains_cache():
         # Format the data
         formatted_chains = []
         for chain in chains:
+            # Parse the path string to get all person IDs
+            person_ids = [int(id_str) for id_str in chain['path_string'].split(',')]
+            relationships = chain['relationship_string'].split(',')
+            
+            # Get person details for each person in the chain
+            path_details = []
+            for i, person_id in enumerate(person_ids):
+                # Get person details from database
+                person_query = """
+                SELECT id, first_name, last_name, position
+                FROM political_dynasties 
+                WHERE id = $1
+                """
+                person = await conn.fetchrow(person_query, person_id)
+                
+                if person:
+                    relationship_desc = "Starting person" if i == 0 else relationships[i-1] if i-1 < len(relationships) else "Unknown"
+                    path_details.append({
+                        "id": person['id'],
+                        "first_name": person['first_name'],
+                        "last_name": person['last_name'],
+                        "position": person['position'],
+                        "relationship_description": relationship_desc
+                    })
+            
             formatted_chains.append({
-                "length": 2,  # Direct relationship = 2 people
+                "length": len(path_details),  # Actual number of people in chain
                 "start_surname": chain['start_surname'],
                 "end_surname": chain['end_surname'],
-                "path": [
-                    {
-                        "id": chain['start_person'],
-                        "first_name": chain['start_first_name'],
-                        "last_name": chain['start_last_name'],
-                        "position": chain['start_position'],
-                        "relationship_description": "Starting person"
-                    },
-                    {
-                        "id": chain['end_person'],
-                        "first_name": chain['end_first_name'],
-                        "last_name": chain['end_last_name'],
-                        "position": chain['end_position'],
-                        "relationship_description": chain['relationship_description']
-                    }
-                ],
-                "relationships": [chain['relationship_description']]
+                "path": path_details,
+                "relationships": relationships
             })
         
         # Create cache data structure
