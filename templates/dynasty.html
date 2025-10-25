@@ -3097,13 +3097,16 @@ function createAnimationMap2004(ampatuan2004, flagData) {
     
     // Create a plain white map for Animation tab
     console.log('🗺️ Creating plain white map for Animation tab...');
-    createPlainWhiteMap();
-    
-    // Add Ampatuan flag overlay after map is created
-    setTimeout(() => {
-        console.log('🏴 Adding flag overlay after map render...');
-        addAmpatuanFlagOverlay2004(ampatuan2004, flagData, familySize);
-    }, 2000); // Wait for map to render
+    createPlainWhiteMap().then(() => {
+        console.log('🗺️ Map rendering completed, adding flag overlay...');
+        // Add Ampatuan flag overlay after map is fully rendered
+        setTimeout(() => {
+            console.log('🏴 Adding flag overlay after map render...');
+            addAmpatuanFlagOverlay2004(ampatuan2004, flagData, familySize);
+        }, 500); // Short delay to ensure canvas is ready
+    }).catch(error => {
+        console.error('❌ Error creating map:', error);
+    });
 }
 
 function addAmpatuanFlagOverlay(ampatuan, flagData) {
@@ -3276,11 +3279,11 @@ function createPlainWhiteMap() {
     const canvas = document.getElementById('dynastyHeatmapChart');
     if (!canvas) {
         console.error('❌ Canvas not found');
-        return;
+        return Promise.reject('Canvas not found');
     }
     
     // Load Philippine provinces GeoJSON data for accurate map rendering
-    fetch('/static/data/philippines-provinces.json')
+    return fetch('/static/data/philippines-provinces.json')
         .then(response => {
             if (!response.ok) {
                 throw new Error(`HTTP ${response.status}: ${response.statusText}`);
@@ -3378,6 +3381,7 @@ function createPlainWhiteMap() {
             ctx.stroke();
 
             console.log('✅ Plain white map created successfully');
+            return true; // Return success
         })
         .catch(error => {
             console.error('❌ Error loading GeoJSON for plain white map:', error);
@@ -3398,6 +3402,7 @@ function createPlainWhiteMap() {
             ctx.strokeRect(50, 50, canvas.width - 100, canvas.height - 100);
             
             console.log('✅ Fallback plain white map created');
+            return true; // Return success even for fallback
         });
 }
 
