@@ -1208,17 +1208,24 @@ function createSurnamesChart(data, flagData = null) {
                                 // Use static flag image instead of generating dynamically
                                 const flagUrl = `/static/flags/flag_${dynastyInfo.dynasty_id}.svg`;
                                 
+                                console.log('🏴 Flag debug:', {
+                                    dynastyId: dynastyInfo.dynasty_id,
+                                    flagUrl: flagUrl,
+                                    surname: dynastyInfo.surname,
+                                    location: dynastyInfo.location_display
+                                });
+                                
                                 tooltipContent += `
                                     <div style="margin-top: 12px; padding-top: 8px; border-top: 1px solid rgba(255,255,255,0.2);">
-                                        <div style="font-weight: bold; margin-bottom: 8px;">🏴 Dynasty Flag</div>
                                         <div style="display: flex; align-items: center; gap: 12px;">
                                             <div style="flex-shrink: 0;">
                                                 <img src="${flagUrl}" alt="Dynasty Flag" style="width: 60px; height: 36px; border: 1px solid #ddd; border-radius: 4px;" onerror="this.style.display='none'"/>
                                             </div>
-                                            <div style="font-size: 11px; line-height: 1.4;">
-                                                <div>ID: ${dynastyInfo.dynasty_id}</div>
-                                                <div>📍 ${dynastyInfo.location_display}</div>
-                                                <div>👥 ${dynastyInfo.member_count} members</div>
+                                            <div style="font-size: 12px; line-height: 1.4;">
+                                                <div style="font-weight: bold; margin-bottom: 4px;">${dynastyInfo.surname}</div>
+                                                <div style="font-size: 10px; color: #ccc;">ID: ${dynastyInfo.dynasty_id}</div>
+                                                <div style="font-size: 10px; color: #ccc;">📍 ${dynastyInfo.location_display}</div>
+                                                <div style="font-size: 10px; color: #ccc;">👥 ${dynastyInfo.member_count} members</div>
                                             </div>
                                         </div>
                                     </div>
@@ -1229,10 +1236,24 @@ function createSurnamesChart(data, flagData = null) {
                         tooltipEl.innerHTML = tooltipContent;
                         document.body.appendChild(tooltipEl);
                         
-                        // Position tooltip
-                        const position = Chart.helpers.getRelativePosition(tooltip.caretX, tooltip.caretY, chart);
-                        tooltipEl.style.left = position.x + 15 + 'px';
-                        tooltipEl.style.top = position.y - 15 + 'px';
+                        // Position tooltip relative to mouse position
+                        const rect = chart.canvas.getBoundingClientRect();
+                        const mouseX = tooltip.caretX + rect.left;
+                        const mouseY = tooltip.caretY + rect.top;
+                        
+                        console.log('🔍 Tooltip positioning debug:', {
+                            caretX: tooltip.caretX,
+                            caretY: tooltip.caretY,
+                            rectLeft: rect.left,
+                            rectTop: rect.top,
+                            mouseX: mouseX,
+                            mouseY: mouseY,
+                            finalLeft: mouseX + 15,
+                            finalTop: mouseY - 15
+                        });
+                        
+                        tooltipEl.style.left = mouseX + 15 + 'px';
+                        tooltipEl.style.top = mouseY - 15 + 'px';
                     },
                     // Clean up tooltip when mouse leaves
                     onHover: function(event, elements) {
