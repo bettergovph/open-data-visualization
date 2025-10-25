@@ -664,6 +664,15 @@ function toggleMobileMenu() {
                             <h3 class="dynasty-section-title">🎬 Dynasty Animation by Province</h3>
                             <p class="dynasty-section-desc">Watch political dynasties evolve over time with flags representing family size and location</p>
                             
+                            <div style="background: #fff3cd; border: 1px solid #ffeaa7; border-radius: 8px; padding: 15px; margin-bottom: 20px;">
+                                <div style="display: flex; align-items: center; gap: 10px; color: #856404;">
+                                    <div style="font-size: 1.2em;">⚠️</div>
+                                    <div>
+                                        <strong>Disclaimer:</strong> The flags shown are generated automatically for visual distinction between families and do not represent actual political symbols, affiliations, or real-world flags. They are purely for data visualization purposes.
+                                    </div>
+                                </div>
+                            </div>
+                            
                             <div class="dynasty-controls">
                                 <div class="dynasty-control-group">
                                     <label for="animationYearFilter">Year:</label>
@@ -3112,8 +3121,12 @@ function pauseAnimation() {
 function stopAnimation() {
     pauseAnimation();
     initializeAnimationMap();
-    document.getElementById('currentYear').textContent = 'Stopped';
-    document.getElementById('dynastyCount').textContent = '0';
+    
+    const currentYearEl = document.getElementById('currentYear');
+    const dynastyCountEl = document.getElementById('dynastyCount');
+    
+    if (currentYearEl) currentYearEl.textContent = 'Stopped';
+    if (dynastyCountEl) dynastyCountEl.textContent = '0';
 }
 
 function showDynastiesForYear(year) {
@@ -3151,13 +3164,15 @@ function showDynastiesForYear(year) {
             const flagX = x + (dynastyIndex * 30);
             const flagY = y + (dynastyIndex * 20);
             
+            // Generate a simple flag if no dynasty_id
+            const flagId = dynasty.dynasty_id || `generated_${dynasty.surname}_${dynasty.province}`.replace(/\s+/g, '_');
+            
             mapContent += `
                 <div style="position: absolute; left: ${flagX}px; top: ${flagY}px; z-index: 10;">
-                    <img src="/static/flags/flag_${dynasty.dynasty_id || 'default'}.svg" 
-                         alt="${dynasty.surname}" 
-                         style="width: ${flagSize}px; height: ${flagSize * 0.6}px; border: 2px solid #333; border-radius: 4px; box-shadow: 0 2px 8px rgba(0,0,0,0.3);"
-                         onerror="this.style.display='none'"
-                         title="${dynasty.surname} (${dynasty.dynasty_count} members)"/>
+                    <div style="width: ${flagSize}px; height: ${flagSize * 0.6}px; border: 2px solid #333; border-radius: 4px; box-shadow: 0 2px 8px rgba(0,0,0,0.3); background: linear-gradient(45deg, #${Math.floor(Math.random()*16777215).toString(16).padStart(6,'0')}, #${Math.floor(Math.random()*16777215).toString(16).padStart(6,'0')}); display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; font-size: 10px;"
+                         title="${dynasty.surname} (${dynasty.dynasty_count} members)">
+                        ${dynasty.surname.substring(0, 3).toUpperCase()}
+                    </div>
                     <div style="position: absolute; bottom: -20px; left: 50%; transform: translateX(-50%); font-size: 10px; font-weight: bold; color: #333; text-align: center; white-space: nowrap;">
                         ${dynasty.surname}
                     </div>
@@ -3177,8 +3192,11 @@ function showDynastiesForYear(year) {
     mapContainer.innerHTML = mapContent;
     
     // Update info display
-    document.getElementById('currentYear').textContent = year;
-    document.getElementById('dynastyCount').textContent = yearData.length;
+    const currentYearEl = document.getElementById('currentYear');
+    const dynastyCountEl = document.getElementById('dynastyCount');
+    
+    if (currentYearEl) currentYearEl.textContent = year;
+    if (dynastyCountEl) dynastyCountEl.textContent = yearData.length;
 }
 </script>
 
