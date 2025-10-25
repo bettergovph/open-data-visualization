@@ -1165,7 +1165,7 @@ function createSurnamesChart(data, flagData = null) {
                         const tooltipEl = document.createElement('div');
                         tooltipEl.id = 'dynasty-custom-tooltip';
                         tooltipEl.style.cssText = `
-                            position: absolute;
+                            position: fixed;
                             background: rgba(0, 0, 0, 0.9);
                             color: white;
                             padding: 12px 16px;
@@ -1236,24 +1236,16 @@ function createSurnamesChart(data, flagData = null) {
                         tooltipEl.innerHTML = tooltipContent;
                         document.body.appendChild(tooltipEl);
                         
-                        // Position tooltip relative to mouse position
-                        const rect = chart.canvas.getBoundingClientRect();
-                        const mouseX = tooltip.caretX + rect.left;
-                        const mouseY = tooltip.caretY + rect.top;
+                        // Position tooltip using chart's caret position directly
+                        tooltipEl.style.left = tooltip.caretX + 15 + 'px';
+                        tooltipEl.style.top = tooltip.caretY - 15 + 'px';
                         
                         console.log('🔍 Tooltip positioning debug:', {
                             caretX: tooltip.caretX,
                             caretY: tooltip.caretY,
-                            rectLeft: rect.left,
-                            rectTop: rect.top,
-                            mouseX: mouseX,
-                            mouseY: mouseY,
-                            finalLeft: mouseX + 15,
-                            finalTop: mouseY - 15
+                            finalLeft: tooltip.caretX + 15,
+                            finalTop: tooltip.caretY - 15
                         });
-                        
-                        tooltipEl.style.left = mouseX + 15 + 'px';
-                        tooltipEl.style.top = mouseY - 15 + 'px';
                     },
                     // Clean up tooltip when mouse leaves
                     onHover: function(event, elements) {
