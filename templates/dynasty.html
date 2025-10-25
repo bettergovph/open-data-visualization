@@ -1532,18 +1532,34 @@ function createDynastyHeatmap(dynastyData) {
                 y: height - (lat * scale + offsetY) // Flip Y axis
             });
 
-            // Function to get color - plain white with dark borders
+            // Function to get color based on dynasty intensity
             const getDynastyColor = (intensity) => {
-                return '#FFFFFF'; // Always white
+                if (intensity === 0) return '#f8f9fa'; // Light gray for no data
+                if (intensity === 1) return '#e3f2fd'; // Very light blue
+                if (intensity === 2) return '#bbdefb'; // Light blue
+                if (intensity === 3) return '#90caf9'; // Medium blue
+                if (intensity === 4) return '#64b5f6'; // Blue
+                if (intensity === 5) return '#42a5f5'; // Strong blue
+                if (intensity >= 6) return '#2196f3'; // Dark blue
+                return '#f8f9fa'; // Default light gray
             };
 
-            // Draw each province with plain white fill and dark borders
+            // Draw each province with color based on dynasty intensity
             console.log('🗺️ Starting to draw provinces...');
             geoJsonData.features.forEach((feature, index) => {
                 let provinceName = feature.properties.name || feature.properties.NAME_1 || feature.properties.PROVINCE;
                 
-                // Draw the province polygon with plain white fill and dark borders
-                ctx.fillStyle = '#FFFFFF'; // Plain white
+                // Calculate dynasty intensity for this province
+                let intensity = 0;
+                if (dynastyData && dynastyData.length > 0) {
+                    const provinceDynasties = dynastyData.filter(dynasty => 
+                        dynasty.province && dynasty.province.toLowerCase().includes(provinceName.toLowerCase())
+                    );
+                    intensity = provinceDynasties.length;
+                }
+                
+                // Draw the province polygon with color based on intensity
+                ctx.fillStyle = getDynastyColor(intensity);
                 ctx.strokeStyle = '#000000'; // Dark borders
                 ctx.lineWidth = 1;
 
@@ -3376,8 +3392,37 @@ function createAnimationMap() {
                 height: height
             };
 
-            // Draw all provinces with plain white fill and dark borders
-            geoJsonData.features.forEach(feature => {
+            // Function to get color based on dynasty intensity
+            const getDynastyColor = (intensity) => {
+                if (intensity === 0) return '#f8f9fa'; // Light gray for no data
+                if (intensity === 1) return '#e3f2fd'; // Very light blue
+                if (intensity === 2) return '#bbdefb'; // Light blue
+                if (intensity === 3) return '#90caf9'; // Medium blue
+                if (intensity === 4) return '#64b5f6'; // Blue
+                if (intensity === 5) return '#42a5f5'; // Strong blue
+                if (intensity >= 6) return '#2196f3'; // Dark blue
+                return '#f8f9fa'; // Default light gray
+            };
+
+            // Draw each province with color based on dynasty intensity
+            console.log('🗺️ Starting to draw provinces...');
+            geoJsonData.features.forEach((feature, index) => {
+                let provinceName = feature.properties.name || feature.properties.NAME_1 || feature.properties.PROVINCE;
+                
+                // Calculate dynasty intensity for this province
+                let intensity = 0;
+                if (animationData && animationData.length > 0) {
+                    const provinceDynasties = animationData.filter(dynasty => 
+                        dynasty.province && dynasty.province.toLowerCase().includes(provinceName.toLowerCase())
+                    );
+                    intensity = provinceDynasties.length;
+                }
+                
+                // Draw the province polygon with color based on intensity
+                ctx.fillStyle = getDynastyColor(intensity);
+                ctx.strokeStyle = '#000000'; // Dark borders
+                ctx.lineWidth = 1;
+
                 if (feature.geometry.type === 'MultiPolygon') {
                     feature.geometry.coordinates.forEach(polygon => {
                         polygon.forEach(ring => {
@@ -3394,19 +3439,12 @@ function createAnimationMap() {
                                 }
                             });
                             ctx.closePath();
+                            ctx.fill();
+                            ctx.stroke();
                         });
                     });
                 }
             });
-
-            // Fill all provinces with white
-            ctx.fillStyle = '#FFFFFF';
-            ctx.fill();
-
-            // Draw province borders in dark color
-            ctx.strokeStyle = '#000000';
-            ctx.lineWidth = 1;
-            ctx.stroke();
 
             console.log('✅ Animation map created successfully');
             animationCanvas.dataset.mapCreating = 'false';
