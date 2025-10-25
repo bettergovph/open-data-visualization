@@ -583,40 +583,11 @@ async function loadCRIComputations() {
 
 async function loadPoliticalHHI() {
     try {
-        const response = await fetch('/api/dynasty/top-surnames');
+        const response = await fetch('/static/data/political_hhi_cache.json');
         const data = await response.json();
         
         if (data.success && data.data) {
-            // Calculate Political HHI for each province (EOGO paper methodology)
-            const provinceStats = {};
-            
-            data.data.forEach(surname => {
-                const province = surname.province;
-                if (!provinceStats[province]) {
-                    provinceStats[province] = {
-                        total: 0,
-                        surnames: {}
-                    };
-                }
-                provinceStats[province].total += surname.total_count;
-                provinceStats[province].surnames[surname.surname] = surname.total_count;
-            });
-            
-            // Calculate HHI for each province (EOGO paper formula)
-            const hhiResults = Object.entries(provinceStats).map(([province, stats]) => {
-                let hhi = 0;
-                Object.values(stats.surnames).forEach(count => {
-                    const share = count / stats.total;
-                    hhi += share * share;
-                });
-                return {
-                    province,
-                    hhi: hhi * 100,
-                    totalPoliticians: stats.total,
-                    uniqueSurnames: Object.keys(stats.surnames).length,
-                    dynastySize: Math.max(...Object.values(stats.surnames)) // Largest dynasty size
-                };
-            }).sort((a, b) => b.hhi - a.hhi);
+            const hhiResults = data.data;
             
             // Display results
             const resultsDiv = document.getElementById('political-hhi-results');
@@ -629,9 +600,9 @@ async function loadPoliticalHHI() {
                                 <div class="flex justify-between items-center p-2 ${index < 3 ? 'bg-red-50' : index < 6 ? 'bg-orange-50' : 'bg-yellow-50'} rounded">
                                     <span class="font-medium">${result.province}</span>
                                     <div class="text-right">
-                                        <span class="font-bold">${result.hhi.toFixed(1)}</span>
-                                        <div class="text-xs text-gray-500">${result.totalPoliticians} politicians, ${result.uniqueSurnames} surnames</div>
-                                        <div class="text-xs text-gray-500">Largest dynasty: ${result.dynastySize} members</div>
+                                        <span class="font-bold">${result.hhi}</span>
+                                        <div class="text-xs text-gray-500">${result.total_politicians} politicians, ${result.unique_surnames} surnames</div>
+                                        <div class="text-xs text-gray-500">Largest dynasty: ${result.dynasty_size} members</div>
                                     </div>
                                 </div>
                             `).join('')}
@@ -642,19 +613,19 @@ async function loadPoliticalHHI() {
                         <div class="space-y-2">
                             <div class="flex justify-between">
                                 <span>Average HHI:</span>
-                                <span class="font-bold">${(hhiResults.reduce((sum, r) => sum + r.hhi, 0) / hhiResults.length).toFixed(1)}</span>
+                                <span class="font-bold">${data.statistics.average_hhi}</span>
                             </div>
                             <div class="flex justify-between">
                                 <span>Highest HHI:</span>
-                                <span class="font-bold text-red-600">${hhiResults[0].hhi.toFixed(1)} (${hhiResults[0].province})</span>
+                                <span class="font-bold text-red-600">${data.statistics.highest_hhi} (${hhiResults[0].province})</span>
                             </div>
                             <div class="flex justify-between">
                                 <span>Total Provinces:</span>
-                                <span class="font-bold">${hhiResults.length}</span>
+                                <span class="font-bold">${data.total_provinces}</span>
                             </div>
                             <div class="flex justify-between">
                                 <span>High Risk (HHI > 50):</span>
-                                <span class="font-bold text-red-600">${hhiResults.filter(r => r.hhi > 50).length}</span>
+                                <span class="font-bold text-red-600">${data.statistics.high_risk_count}</span>
                             </div>
                         </div>
                         <div class="mt-4 p-3 bg-blue-50 rounded">
@@ -677,95 +648,11 @@ async function loadPoliticalHHI() {
 
 async function loadCRIAnalysis() {
     try {
-        // Load multiple data sources for comprehensive CRI analysis
-        const [dynastyResponse, philgepsResponse, povertyResponse] = await Promise.all([
-            fetch('/api/dynasty/top-surnames'),
-            fetch('/api/philgeps/top?limit=1000'),
-            fetch('/database/poverty.json')
-        ]);
+        const response = await fetch('/static/data/cri_analysis_cache.json');
+        const data = await response.json();
         
-        const dynastyData = await dynastyResponse.json();
-        const philgepsData = await philgepsResponse.json();
-        const povertyData = await povertyResponse.json();
-        
-        if (dynastyData.success && philgepsData.success && povertyData) {
-            // Calculate Political HHI (from dynasty data)
-            const provinceStats = {};
-            
-            // Process dynasty data
-            dynastyData.data.forEach(surname => {
-                const province = surname.province;
-                if (!provinceStats[province]) {
-                    provinceStats[province] = {
-                        totalPoliticians: 0,
-                        surnames: {},
-                        totalProjects: 0,
-                        contractors: {},
-                        povertyRate: 0
-                    };
-                }
-                provinceStats[province].totalPoliticians += surname.total_count;
-                provinceStats[province].surnames[surname.surname] = surname.total_count;
-            });
-            
-            // Process PhilGEPS data
-            philgepsData.contractors.forEach(contractor => {
-                const province = contractor.area_of_delivery || 'Unknown';
-                if (provinceStats[province]) {
-                    provinceStats[province].totalProjects += contractor.project_count;
-                    provinceStats[province].contractors[contractor.contractor_name] = contractor.project_count;
-                }
-            });
-            
-            // Process poverty data
-            povertyData.forEach(region => {
-                if (region.provinces) {
-                    region.provinces.forEach(province => {
-                        const provinceName = province.province.toUpperCase();
-                        if (provinceStats[provinceName]) {
-                            provinceStats[provinceName].povertyRate = province.poverty;
-                        }
-                    });
-                }
-            });
-            
-            // Calculate CRI scores for each province (EOGO methodology)
-            const criResults = Object.entries(provinceStats).map(([province, stats]) => {
-                // Political HHI
-                let politicalHHI = 0;
-                Object.values(stats.surnames).forEach(count => {
-                    const share = count / stats.totalPoliticians;
-                    politicalHHI += share * share;
-                });
-                politicalHHI *= 100;
-                
-                // Dynasty Size (largest dynasty in province)
-                const dynastySize = Math.max(...Object.values(stats.surnames));
-                
-                // Contractor HHI
-                let contractorHHI = 0;
-                if (stats.totalProjects > 0) {
-                    Object.values(stats.contractors).forEach(count => {
-                        const share = count / stats.totalProjects;
-                        contractorHHI += share * share;
-                    });
-                    contractorHHI *= 100;
-                }
-                
-                // Combined CRI Score (EOGO paper methodology)
-                const criScore = (politicalHHI * 0.4) + (dynastySize * 0.3) + (contractorHHI * 0.2) + (stats.povertyRate * 0.1);
-                
-                return {
-                    province,
-                    criScore: criScore.toFixed(1),
-                    politicalHHI: politicalHHI.toFixed(1),
-                    dynastySize,
-                    contractorHHI: contractorHHI.toFixed(1),
-                    povertyRate: stats.povertyRate,
-                    totalPoliticians: stats.totalPoliticians,
-                    totalProjects: stats.totalProjects
-                };
-            }).sort((a, b) => parseFloat(b.criScore) - parseFloat(a.criScore));
+        if (data.success && data.data) {
+            const criResults = data.data;
             
             // Display results
             const resultsDiv = document.getElementById('cri-analysis-results');
@@ -778,10 +665,10 @@ async function loadCRIAnalysis() {
                                 <div class="flex justify-between items-center p-2 ${index < 3 ? 'bg-red-50' : index < 6 ? 'bg-orange-50' : 'bg-yellow-50'} rounded">
                                     <span class="font-medium">${result.province}</span>
                                     <div class="text-right">
-                                        <span class="font-bold text-lg">${result.criScore}</span>
+                                        <span class="font-bold text-lg">${result.cri_score}</span>
                                         <div class="text-xs text-gray-500">
-                                            HHI: ${result.politicalHHI} | Dynasty: ${result.dynastySize} | 
-                                            Contractor: ${result.contractorHHI} | Poverty: ${result.povertyRate}%
+                                            HHI: ${result.political_hhi} | Dynasty: ${result.dynasty_size} | 
+                                            Contractor: ${result.contractor_hhi} | Poverty: ${result.poverty_rate}%
                                         </div>
                                     </div>
                                 </div>
@@ -793,19 +680,19 @@ async function loadCRIAnalysis() {
                         <div class="space-y-2">
                             <div class="flex justify-between">
                                 <span>Average CRI:</span>
-                                <span class="font-bold">${(criResults.reduce((sum, r) => sum + parseFloat(r.criScore), 0) / criResults.length).toFixed(1)}</span>
+                                <span class="font-bold">${data.statistics.average_cri}</span>
                             </div>
                             <div class="flex justify-between">
                                 <span>Highest CRI:</span>
-                                <span class="font-bold text-red-600">${criResults[0].criScore} (${criResults[0].province})</span>
+                                <span class="font-bold text-red-600">${data.statistics.highest_cri} (${criResults[0].province})</span>
                             </div>
                             <div class="flex justify-between">
                                 <span>Total Provinces:</span>
-                                <span class="font-bold">${criResults.length}</span>
+                                <span class="font-bold">${data.total_provinces}</span>
                             </div>
                             <div class="flex justify-between">
                                 <span>High Risk (CRI > 50):</span>
-                                <span class="font-bold text-red-600">${criResults.filter(r => parseFloat(r.criScore) > 50).length}</span>
+                                <span class="font-bold text-red-600">${data.statistics.high_risk_count}</span>
                             </div>
                         </div>
                         <div class="mt-4 p-3 bg-green-50 rounded">
@@ -829,30 +716,11 @@ async function loadCRIAnalysis() {
 
 async function loadPovertyCorrelation() {
     try {
-        const response = await fetch('/database/poverty.json');
+        const response = await fetch('/static/data/poverty_correlation_cache.json');
         const data = await response.json();
         
-        if (data && data.length > 0) {
-            // Extract poverty data
-            const povertyData = [];
-            data.forEach(region => {
-                if (region.provinces) {
-                    region.provinces.forEach(province => {
-                        povertyData.push({
-                            province: province.province,
-                            povertyRate: province.poverty
-                        });
-                    });
-                }
-            });
-            
-            // Sort by poverty rate
-            povertyData.sort((a, b) => b.povertyRate - a.povertyRate);
-            
-            // Calculate poverty statistics for EOGO analysis
-            const avgPoverty = povertyData.reduce((sum, p) => sum + p.povertyRate, 0) / povertyData.length;
-            const highPovertyCount = povertyData.filter(p => p.povertyRate > 20).length;
-            const extremePovertyCount = povertyData.filter(p => p.povertyRate > 30).length;
+        if (data.success && data.data) {
+            const povertyData = data.data;
             
             // Display results
             const resultsDiv = document.getElementById('poverty-correlation-results');
@@ -862,9 +730,9 @@ async function loadPovertyCorrelation() {
                         <h5 class="font-semibold mb-2">Highest Poverty Rates (EOGO Control Variable)</h5>
                         <div class="space-y-2">
                             ${povertyData.slice(0, 10).map((result, index) => `
-                                <div class="flex justify-between items-center p-2 ${result.povertyRate > 30 ? 'bg-red-50' : result.povertyRate > 20 ? 'bg-orange-50' : 'bg-yellow-50'} rounded">
+                                <div class="flex justify-between items-center p-2 ${result.poverty_rate > 30 ? 'bg-red-50' : result.poverty_rate > 20 ? 'bg-orange-50' : 'bg-yellow-50'} rounded">
                                     <span class="font-medium">${result.province}</span>
-                                    <span class="font-bold">${result.povertyRate}%</span>
+                                    <span class="font-bold">${result.poverty_rate}%</span>
                                 </div>
                             `).join('')}
                         </div>
@@ -874,23 +742,19 @@ async function loadPovertyCorrelation() {
                         <div class="space-y-2">
                             <div class="flex justify-between">
                                 <span>Average Poverty:</span>
-                                <span class="font-bold">${avgPoverty.toFixed(1)}%</span>
+                                <span class="font-bold">${data.statistics.average_poverty}%</span>
                             </div>
                             <div class="flex justify-between">
                                 <span>Highest Poverty:</span>
-                                <span class="font-bold text-red-600">${povertyData[0].povertyRate}% (${povertyData[0].province})</span>
+                                <span class="font-bold text-red-600">${data.statistics.highest_poverty}% (${povertyData[0].province})</span>
                             </div>
                             <div class="flex justify-between">
                                 <span>Total Provinces:</span>
-                                <span class="font-bold">${povertyData.length}</span>
+                                <span class="font-bold">${data.total_provinces}</span>
                             </div>
                             <div class="flex justify-between">
                                 <span>High Poverty (>20%):</span>
-                                <span class="font-bold text-red-600">${highPovertyCount}</span>
-                            </div>
-                            <div class="flex justify-between">
-                                <span>Extreme Poverty (>30%):</span>
-                                <span class="font-bold text-red-600">${extremePovertyCount}</span>
+                                <span class="font-bold text-red-600">${data.statistics.high_poverty_count}</span>
                             </div>
                         </div>
                         <div class="mt-4 p-3 bg-blue-50 rounded">

@@ -3080,5 +3080,78 @@ async def dynasty_conflicts_api(
     except Exception as e:
         return JSONResponse({"success": False, "error": str(e)})
 
+# EOGO CRI Analysis API Endpoints
+@app.get("/api/eogo/political-hhi")
+async def political_hhi_api():
+    """Get Political HHI analysis from cache"""
+    try:
+        import json
+        
+        cache_file = "static/data/political_hhi_cache.json"
+        if not os.path.exists(cache_file):
+            return JSONResponse({"success": False, "error": "Political HHI cache not found. Please run the CRI analysis script."})
+        
+        with open(cache_file, 'r', encoding='utf-8') as f:
+            cache_data = json.load(f)
+        
+        return JSONResponse(cache_data)
+        
+    except Exception as e:
+        return JSONResponse({"success": False, "error": str(e)})
+
+@app.get("/api/eogo/contractor-hhi")
+async def contractor_hhi_api():
+    """Get Contractor HHI analysis from cache"""
+    try:
+        import json
+        
+        cache_file = "static/data/contractor_hhi_cache.json"
+        if not os.path.exists(cache_file):
+            return JSONResponse({"success": False, "error": "Contractor HHI cache not found. Please run the CRI analysis script."})
+        
+        with open(cache_file, 'r', encoding='utf-8') as f:
+            cache_data = json.load(f)
+        
+        return JSONResponse(cache_data)
+        
+    except Exception as e:
+        return JSONResponse({"success": False, "error": str(e)})
+
+@app.get("/api/eogo/poverty-correlation")
+async def poverty_correlation_api():
+    """Get Poverty Correlation analysis from cache"""
+    try:
+        import json
+        
+        cache_file = "static/data/poverty_correlation_cache.json"
+        if not os.path.exists(cache_file):
+            return JSONResponse({"success": False, "error": "Poverty correlation cache not found. Please run the CRI analysis script."})
+        
+        with open(cache_file, 'r', encoding='utf-8') as f:
+            cache_data = json.load(f)
+        
+        return JSONResponse(cache_data)
+        
+    except Exception as e:
+        return JSONResponse({"success": False, "error": str(e)})
+
+@app.get("/api/eogo/cri-analysis")
+async def cri_analysis_api():
+    """Get Comprehensive CRI Analysis from cache"""
+    try:
+        import json
+        
+        cache_file = "static/data/cri_analysis_cache.json"
+        if not os.path.exists(cache_file):
+            return JSONResponse({"success": False, "error": "CRI analysis cache not found. Please run the CRI analysis script."})
+        
+        with open(cache_file, 'r', encoding='utf-8') as f:
+            cache_data = json.load(f)
+        
+        return JSONResponse(cache_data)
+        
+    except Exception as e:
+        return JSONResponse({"success": False, "error": str(e)})
+
 if __name__ == "__main__":
     uvicorn.run(app, host="127.0.0.1", port=8000)
