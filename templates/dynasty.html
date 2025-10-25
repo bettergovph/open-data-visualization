@@ -1535,12 +1535,12 @@ function createDynastyHeatmap(dynastyData) {
             // Function to get color based on dynasty intensity
             const getDynastyColor = (intensity) => {
                 if (intensity === 0) return '#f8f9fa'; // Light gray for no data
-                if (intensity === 1) return '#e3f2fd'; // Very light blue
-                if (intensity === 2) return '#bbdefb'; // Light blue
-                if (intensity === 3) return '#90caf9'; // Medium blue
-                if (intensity === 4) return '#64b5f6'; // Blue
-                if (intensity === 5) return '#42a5f5'; // Strong blue
-                if (intensity >= 6) return '#2196f3'; // Dark blue
+                if (intensity === 1) return '#ffebee'; // Very light red
+                if (intensity === 2) return '#ffcdd2'; // Light red
+                if (intensity === 3) return '#ef9a9a'; // Medium red
+                if (intensity === 4) return '#e57373'; // Red
+                if (intensity === 5) return '#ef5350'; // Strong red
+                if (intensity >= 6) return '#f44336'; // Dark red
                 return '#f8f9fa'; // Default light gray
             };
 
