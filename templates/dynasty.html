@@ -3088,16 +3088,16 @@ function createAnimationMap2004(ampatuan2004, flagData) {
     const familySize = ampatuan2004.length;
     console.log('👥 Ampatuan 2004 family size:', familySize);
     
-    // Clear the container and add the heatmap canvas
+    // Clear the container and add the animation canvas
     mapContainer.innerHTML = `
         <div style="height: calc(100% - 80px); position: relative;">
-            <canvas id="dynastyHeatmapChart" style="cursor: pointer; width: 100%; height: 100%;"></canvas>
+            <canvas id="animationMapCanvas" style="cursor: pointer; width: 100%; height: 100%;"></canvas>
         </div>
     `;
     
     // Create a plain white map for Animation tab
     console.log('🗺️ Creating plain white map for Animation tab...');
-    createPlainWhiteMap().then((mapData) => {
+    createAnimationMap().then((mapData) => {
         console.log('🗺️ Map rendering completed, adding flag overlay...');
         // Add dynasty flag overlay after map is fully rendered
         setTimeout(() => {
@@ -3178,7 +3178,7 @@ function addDynastyFlagOverlay(dynastyMembers, flagData, familySize, mapData, ye
     console.log(`🏴 Adding dynasty flag overlay for year ${year}...`);
     
     const mapContainer = document.getElementById('animationMap');
-    const canvas = document.getElementById('dynastyHeatmapChart');
+    const canvas = document.getElementById('animationMapCanvas');
     
     if (!canvas) {
         console.error('❌ Heatmap canvas not found');
@@ -3281,22 +3281,22 @@ function initializeAnimationMap() {
 
 // Removed unused animation control functions
 
-function createPlainWhiteMap() {
-    console.log('🗺️ Creating plain white map for Animation tab...');
+function createAnimationMap() {
+    console.log('🗺️ Creating animation map for Animation tab...');
     
-    const canvas = document.getElementById('dynastyHeatmapChart');
-    if (!canvas) {
-        console.error('❌ Canvas not found');
-        return Promise.reject('Canvas not found');
+    const animationCanvas = document.getElementById('animationMapCanvas');
+    if (!animationCanvas) {
+        console.error('❌ Animation canvas not found');
+        return Promise.reject('Animation canvas not found');
     }
     
     // Check if map is already being created to prevent duplicate calls
-    if (canvas.dataset.mapCreating === 'true') {
-        console.log('⚠️ Map creation already in progress, skipping duplicate call');
+    if (animationCanvas.dataset.mapCreating === 'true') {
+        console.log('⚠️ Animation map creation already in progress, skipping duplicate call');
         return Promise.resolve(null);
     }
     
-    canvas.dataset.mapCreating = 'true';
+    animationCanvas.dataset.mapCreating = 'true';
     
     // Load Philippine provinces GeoJSON data for accurate map rendering
     return fetch('/static/data/philippines-provinces.json')
@@ -3307,7 +3307,7 @@ function createPlainWhiteMap() {
             return response.json();
         })
         .then(geoJsonData => {
-            console.log('🗺️ Plain white map: GeoJSON data loaded:', geoJsonData.features.length, 'features');
+            console.log('🗺️ Animation map: GeoJSON data loaded:', geoJsonData.features.length, 'features');
             
             if (!geoJsonData.features || geoJsonData.features.length === 0) {
                 console.error('❌ No GeoJSON features found');
@@ -3315,6 +3315,7 @@ function createPlainWhiteMap() {
             }
             
             // Canvas setup
+            const canvas = animationCanvas;
             const ctx = canvas.getContext('2d');
             
             // Set proper canvas resolution to avoid blurriness
@@ -3327,7 +3328,7 @@ function createPlainWhiteMap() {
             const width = rect.width;
             const height = rect.height;
             
-            console.log('📐 Plain white map canvas setup:', { width, height, dpr });
+            console.log('📐 Animation map canvas setup:', { width, height, dpr });
 
             // Clear canvas with light blue background
             ctx.clearRect(0, 0, width, height);
@@ -3361,8 +3362,8 @@ function createPlainWhiteMap() {
             const offsetX = (width - lngRange * scale) / 2;
             const offsetY = (height - latRange * scale) / 2;
 
-            console.log('📐 Plain white map bounds:', { minLat, maxLat, minLng, maxLng });
-            console.log('📐 Plain white map scale:', scale, 'offset:', offsetX, offsetY);
+            console.log('📐 Animation map bounds:', { minLat, maxLat, minLng, maxLng });
+            console.log('📐 Animation map scale:', scale, 'offset:', offsetX, offsetY);
 
             // Store map data for flag positioning
             const mapData = {
@@ -3407,30 +3408,30 @@ function createPlainWhiteMap() {
             ctx.lineWidth = 1;
             ctx.stroke();
 
-            console.log('✅ Plain white map created successfully');
-            canvas.dataset.mapCreating = 'false';
+            console.log('✅ Animation map created successfully');
+            animationCanvas.dataset.mapCreating = 'false';
             return mapData; // Return map data for flag positioning
         })
         .catch(error => {
-            console.error('❌ Error loading GeoJSON for plain white map:', error);
+            console.error('❌ Error loading GeoJSON for animation map:', error);
             // Fallback: draw a simple rectangle
-            const ctx = canvas.getContext('2d');
-            const rect = canvas.getBoundingClientRect();
-            canvas.width = rect.width;
-            canvas.height = rect.height;
+            const ctx = animationCanvas.getContext('2d');
+            const rect = animationCanvas.getBoundingClientRect();
+            animationCanvas.width = rect.width;
+            animationCanvas.height = rect.height;
             
             ctx.fillStyle = '#f0f8ff';
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            ctx.fillRect(0, 0, animationCanvas.width, animationCanvas.height);
             
             ctx.fillStyle = '#FFFFFF';
-            ctx.fillRect(50, 50, canvas.width - 100, canvas.height - 100);
+            ctx.fillRect(50, 50, animationCanvas.width - 100, animationCanvas.height - 100);
             
             ctx.strokeStyle = '#000000';
             ctx.lineWidth = 2;
-            ctx.strokeRect(50, 50, canvas.width - 100, canvas.height - 100);
+            ctx.strokeRect(50, 50, animationCanvas.width - 100, animationCanvas.height - 100);
             
-            console.log('✅ Fallback plain white map created');
-            canvas.dataset.mapCreating = 'false';
+            console.log('✅ Fallback animation map created');
+            animationCanvas.dataset.mapCreating = 'false';
             return true; // Return success even for fallback
         });
 }
