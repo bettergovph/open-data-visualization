@@ -3103,7 +3103,7 @@ function createAnimationMap2004(ampatuan2004, flagData) {
         setTimeout(() => {
             console.log('🏴 Adding flag overlay after map render...');
             addDynastyFlagOverlay(ampatuan2004, flagData, familySize, mapData, 2004);
-        }, 500); // Short delay to ensure canvas is ready
+        }, 1000); // Wait longer to ensure map is fully rendered
     }).catch(error => {
         console.error('❌ Error creating map:', error);
     });
@@ -3332,6 +3332,14 @@ function createPlainWhiteMap() {
         return Promise.reject('Canvas not found');
     }
     
+    // Check if map is already being created to prevent duplicate calls
+    if (canvas.dataset.mapCreating === 'true') {
+        console.log('⚠️ Map creation already in progress, skipping duplicate call');
+        return Promise.resolve(null);
+    }
+    
+    canvas.dataset.mapCreating = 'true';
+    
     // Load Philippine provinces GeoJSON data for accurate map rendering
     return fetch('/static/data/philippines-provinces.json')
         .then(response => {
@@ -3442,6 +3450,7 @@ function createPlainWhiteMap() {
             ctx.stroke();
 
             console.log('✅ Plain white map created successfully');
+            canvas.dataset.mapCreating = 'false';
             return mapData; // Return map data for flag positioning
         })
         .catch(error => {
@@ -3463,6 +3472,7 @@ function createPlainWhiteMap() {
             ctx.strokeRect(50, 50, canvas.width - 100, canvas.height - 100);
             
             console.log('✅ Fallback plain white map created');
+            canvas.dataset.mapCreating = 'false';
             return true; // Return success even for fallback
         });
 }
