@@ -419,6 +419,7 @@ function toggleMobileMenu() {
                                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
                                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Party</th>
                                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Position</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Branch</th>
                                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Location</th>
                                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Year</th>
                                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
@@ -709,11 +710,11 @@ async function loadDynastyData() {
             updateStatistics(data.pagination);
         } else {
             console.error('Error loading dynasty data:', data.error);
-            tableBody.innerHTML = '<tr><td colspan="6" class="px-6 py-4 text-center text-red-600">Error loading data</td></tr>';
+            tableBody.innerHTML = '<tr><td colspan="7" class="px-6 py-4 text-center text-red-600">Error loading data</td></tr>';
         }
     } catch (error) {
         console.error('Error loading dynasty data:', error);
-        tableBody.innerHTML = '<tr><td colspan="6" class="px-6 py-4 text-center text-red-600">Error loading data</td></tr>';
+        tableBody.innerHTML = '<tr><td colspan="7" class="px-6 py-4 text-center text-red-600">Error loading data</td></tr>';
     } finally {
         loadingState.classList.add('hidden');
     }
@@ -723,7 +724,7 @@ function renderDynastyTable(data) {
     const tableBody = document.getElementById('dynastyTableBody');
     
     if (data.length === 0) {
-        tableBody.innerHTML = '<tr><td colspan="6" class="px-6 py-4 text-center text-gray-500">No dynasty data found</td></tr>';
+        tableBody.innerHTML = '<tr><td colspan="7" class="px-6 py-4 text-center text-gray-500">No dynasty data found</td></tr>';
         return;
     }
 
@@ -737,6 +738,9 @@ function renderDynastyTable(data) {
             </td>
             <td class="px-6 py-4 whitespace-nowrap">
                 <div class="text-sm text-gray-900">${record.position}</div>
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap">
+                <div class="text-sm text-gray-900">${record.government_branch || '-'}</div>
             </td>
             <td class="px-6 py-4 whitespace-nowrap">
                 <div class="text-sm text-gray-900">${record.municipality_city}, ${record.province}</div>

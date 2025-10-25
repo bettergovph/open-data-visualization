@@ -71,6 +71,7 @@
             <a href="/map" class="text-black hover:text-gray-600 font-medium transition">Map</a>
             <a href="/philgeps" class="text-black hover:text-gray-600 font-medium transition">PhilGEPS</a>
             <a href="/dynasty" class="text-black hover:text-gray-600 font-medium transition">Dynasties</a>
+            <a href="/eogo" class="text-black hover:text-gray-600 font-medium transition">EOGO</a>
             <a href="/sources" class="text-black hover:text-gray-600 font-medium transition">Sources</a>
         </div>
         <div class="md:hidden">
@@ -90,6 +91,7 @@
         <a href="/map" class="block text-black hover:text-gray-600 font-medium py-2">Map</a>
         <a href="/philgeps" class="block text-black hover:text-gray-600 font-medium py-2">PhilGEPS</a>
         <a href="/dynasty" class="block text-black hover:text-gray-600 font-medium py-2">Dynasties</a>
+        <a href="/eogo" class="block text-black hover:text-gray-600 font-medium py-2">EOGO</a>
     </div>
 </nav>
 
@@ -121,15 +123,6 @@ function toggleMobileMenu() {
                     <div id="tab-visual" class="budget-tab-panel active">
                         <h3 class="budget-section-title">📊 Budget Visual Analysis</h3>
                         <p class="budget-section-desc">Interactive charts and visualizations of budget data</p>
-                        
-                        <!-- NEP-Budget Correlation Link -->
-                        <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 20px; border-radius: 12px; margin: 20px 0; text-align: center; box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);">
-                            <h4 style="color: white; font-size: 1.2rem; font-weight: 600; margin-bottom: 8px;">🔗 Compare NEP with Budget Data</h4>
-                            <p style="color: rgba(255,255,255,0.9); margin-bottom: 15px; font-size: 0.95rem;">See how NEP allocations correlate with actual budget expenditures</p>
-                            <a href="/budget-nep-correlation" style="display: inline-block; background: white; color: #667eea; padding: 12px 24px; border-radius: 8px; text-decoration: none; font-weight: 600; transition: all 0.3s ease; box-shadow: 0 2px 8px rgba(0,0,0,0.1);" onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 4px 15px rgba(0,0,0,0.2)';" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 2px 8px rgba(0,0,0,0.1)';">
-                                📈 View NEP-Budget Correlation →
-                            </a>
-                        </div>
                         
                         <!-- Loading Spinner -->
                         <div id="visual-loading-spinner" class="loading-spinner" style="display: flex; justify-content: center; align-items: center; padding: 40px; margin: 20px 0;">
@@ -172,6 +165,15 @@ function toggleMobileMenu() {
                                 <h3 style="color: #0038A8; margin: 0 0 10px 0; font-size: 1.1em;">Unique Agencies</h3>
                                 <p id="unique-agencies" style="font-size: 2em; font-weight: bold; color: #fd7e14; margin: 0;">Loading...</p>
                             </div>
+                        </div>
+
+                        <!-- NEP-Budget Correlation Link -->
+                        <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 20px; border-radius: 12px; margin-bottom: 30px; text-align: center; box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);">
+                            <h4 style="color: white; font-size: 1.2rem; font-weight: 600; margin-bottom: 8px;">🔗 Compare NEP with Budget Data</h4>
+                            <p style="color: rgba(255,255,255,0.9); margin-bottom: 15px; font-size: 0.95rem;">See how NEP allocations correlate with actual budget expenditures</p>
+                            <a href="/budget-nep-correlation" style="display: inline-block; background: white; color: #667eea; padding: 12px 24px; border-radius: 8px; text-decoration: none; font-weight: 600; transition: all 0.3s ease; box-shadow: 0 2px 8px rgba(0,0,0,0.1);" onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 4px 15px rgba(0,0,0,0.2)';" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 2px 8px rgba(0,0,0,0.1)';">
+                                📈 View NEP-Budget Correlation →
+                            </a>
                         </div>
                         
                         <!-- Charts Section -->

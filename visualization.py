@@ -2422,7 +2422,8 @@ async def dynasty_data_api(
                 municipality_city,
                 position,
                 year,
-                fat
+                fat,
+                government_branch
             FROM political_dynasties 
             {where_clause}
             ORDER BY year DESC, last_name ASC, first_name ASC

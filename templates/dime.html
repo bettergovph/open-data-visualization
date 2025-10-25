@@ -103,6 +103,7 @@
             <a href="/map" class="text-black hover:text-gray-600 font-medium transition">Map</a>
             <a href="/philgeps" class="text-black hover:text-gray-600 font-medium transition">PhilGEPS</a>
             <a href="/dynasty" class="text-black hover:text-gray-600 font-medium transition">Dynasties</a>
+            <a href="/eogo" class="text-black hover:text-gray-600 font-medium transition">EOGO</a>
             <a href="/sources" class="text-black hover:text-gray-600 font-medium transition">Sources</a>
         </div>
         <div class="md:hidden">
@@ -122,6 +123,7 @@
         <a href="/map" class="block text-black hover:text-gray-600 font-medium py-2">Map</a>
         <a href="/philgeps" class="block text-black hover:text-gray-600 font-medium py-2">PhilGEPS</a>
         <a href="/dynasty" class="block text-black hover:text-gray-600 font-medium py-2">Dynasties</a>
+        <a href="/eogo" class="block text-black hover:text-gray-600 font-medium py-2">EOGO</a>
     </div>
 </nav>
 
@@ -176,6 +178,17 @@ function toggleMobileMenu() {
                     <div class="stat-card" style="background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); text-align: center;">
                         <h3 style="color: #0038A8; margin: 0 0 10px 0; font-size: 1.1em;">Active Projects</h3>
                         <p id="visual-active-projects" style="font-size: 2em; font-weight: bold; color: #fd7e14; margin: 0;">-</p>
+                    </div>
+                </div>
+
+                <!-- Correlation Card -->
+                <div style="margin-bottom: 30px;">
+                    <div style="background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); padding: 20px; border-radius: 12px; text-align: center; box-shadow: 0 4px 15px rgba(245, 158, 11, 0.3);">
+                        <h4 style="color: white; font-size: 1.2rem; font-weight: 600; margin-bottom: 8px;">🌉 Compare DIME with Flood Control</h4>
+                        <p style="color: rgba(255,255,255,0.9); margin-bottom: 15px; font-size: 0.95rem;">Analyze overlap between infrastructure projects and flood control projects</p>
+                        <a href="/flood-dime-correlation" style="display: inline-block; background: white; color: #f59e0b; padding: 12px 24px; border-radius: 8px; text-decoration: none; font-weight: 600; transition: all 0.3s ease; box-shadow: 0 2px 8px rgba(0,0,0,0.1);" onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 4px 15px rgba(0,0,0,0.2)';" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 2px 8px rgba(0,0,0,0.1)';">
+                            🏗️ View Flood-DIME Correlation →
+                        </a>
                     </div>
                 </div>
 
