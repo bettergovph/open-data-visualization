@@ -2989,8 +2989,8 @@ async function loadAnimationData() {
     console.log('🎬 Loading 2004 dynasty data for Ampatuan flag sizing...');
     
     try {
-        // Load dynasty data and filter for Ampatuan
-        const response = await fetch('/api/dynasty?limit=1000');
+        // Load Ampatuan dynasty data using search
+        const response = await fetch('/api/dynasty?limit=1000&search=ampatuan');
         const data = await response.json();
         
         if (data.success) {
@@ -2998,10 +2998,8 @@ async function loadAnimationData() {
             console.log('✅ Dynasty data loaded:', animationData.length, 'records');
             console.log('📊 Sample dynasty data:', animationData[0]);
             
-            // Filter for Ampatuan dynasty members
-            const ampatuanMembers = animationData.filter(member => 
-                member.last_name && member.last_name.toLowerCase().includes('ampatuan')
-            );
+            // All data is already Ampatuan members from the search
+            const ampatuanMembers = animationData;
             
             console.log('🏴 Ampatuan members found:', ampatuanMembers.length);
             console.log('📊 Sample Ampatuan member:', ampatuanMembers[0]);
