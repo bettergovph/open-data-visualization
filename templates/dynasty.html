@@ -3408,7 +3408,8 @@ async function loadAnimationData() {
                     const r = await fetch(`/api/dynasty/family?surname=${encodeURIComponent(surname)}`);
                     const j = await r.json();
                     if (j.success && Array.isArray(j.data)) {
-                        const members = j.data.filter(m => m.year === targetYear && m.fat === 1);
+                        const members = j.data.filter(m => m.year === targetYear);
+                        console.log(`📊 ${surname} year ${targetYear}: ${members.length} members`);
                         if (members.length === 0) return null;
                         const provinceCounts = {};
                         members.forEach(m => {
@@ -3430,6 +3431,7 @@ async function loadAnimationData() {
         // Rank by family size and keep top 100
         const topFamilies = summaries.sort((a,b) => b.dynasty_count - a.dynasty_count).slice(0, 100);
         console.log(`📊 Aggregated ${topFamilies.length} families for year ${selectedYear}`);
+        console.log('📊 Sample families:', topFamilies.slice(0, 5));
 
         // Load flag data
         let flagData = null;
@@ -3572,9 +3574,12 @@ async function createAnimationMapWithData(familySummaries, flagData, selectedYea
     }
 
     // Create markers
+    console.log('🗺️ Creating markers for', familySummaries.length, 'families');
     familySummaries.forEach(fam => {
+        console.log('📍 Processing family:', fam.surname, 'province:', fam.province, 'count:', fam.dynasty_count);
         const feature = fam.province ? getFeatureByProvince(fam.province) : null;
         const [lat, lng] = feature ? getFeatureCentroid(feature) : [12.8797, 121.7740];
+        console.log('📍 Coordinates for', fam.surname, ':', lat, lng);
 
         // Generate flag
         let flagHtml = '<div style="width: 30px; height: 18px; background:#dc3545; border:2px solid #000;"></div>';
