@@ -2422,7 +2422,7 @@ async function loadDynastyData() {
     try {
         console.log('🏛️ Loading dynasty data from API...');
         
-        const response = await fetch('/api/dynasty/top-surnames?limit=100');
+        const response = await fetch('/api/dynasty/provinces');
         if (!response.ok) {
             throw new Error(`HTTP ${response.status}: ${response.statusText}`);
         }
@@ -2434,28 +2434,11 @@ async function loadDynastyData() {
         }
         
         // Process dynasty data to create province -> top dynasty mapping
-        const provinceDynasties = {};
-        
-        data.data.forEach(item => {
-            const province = item.province;
-            if (!provinceDynasties[province]) {
-                provinceDynasties[province] = [];
-            }
-            provinceDynasties[province].push({
-                surname: item.surname,
-                dynasty_count: item.dynasty_count,
-                dynasty_percentage: item.dynasty_percentage
-            });
-        });
-        
-        // Get top dynasty per province
-        Object.keys(provinceDynasties).forEach(province => {
-            const dynasties = provinceDynasties[province]
-                .filter(d => d.dynasty_count > 0)
-                .sort((a, b) => b.dynasty_count - a.dynasty_count);
-            
-            if (dynasties.length > 0) {
-                dynastyData[province] = dynasties[0].surname;
+        data.data.forEach(provinceData => {
+            if (provinceData.surnames && provinceData.surnames.length > 0) {
+                // Get the top dynasty surname (first in the array, sorted by dynasty_count)
+                const topDynasty = provinceData.surnames[0];
+                dynastyData[provinceData.province] = topDynasty.surname;
             }
         });
         
@@ -2471,24 +2454,11 @@ function getTopDynastyForProvince(province) {
     // Normalize province names for case-insensitive matching
     const normalizedProvince = province.toUpperCase();
     
-    // Debug specific provinces
-    if (province.includes('SAMAR')) {
-        console.log(`🔍 Debug SAMAR: Looking for "${province}" (normalized: "${normalizedProvince}")`);
-        console.log('🔍 Available dynasty provinces:', Object.keys(dynastyData));
-    }
-    
     // Find matching dynasty data (case-insensitive)
     for (const [dynastyProvince, dynastySurname] of Object.entries(dynastyData)) {
         if (dynastyProvince.toUpperCase() === normalizedProvince) {
-            if (province.includes('SAMAR')) {
-                console.log(`✅ Found match: "${dynastyProvince}" -> "${dynastySurname}"`);
-            }
             return dynastySurname;
         }
-    }
-    
-    if (province.includes('SAMAR')) {
-        console.log(`❌ No match found for "${province}"`);
     }
     
     return '-';
