@@ -3407,7 +3407,8 @@ async function loadAnimationData() {
                 try {
                     const r = await fetch(`/api/dynasty/family?surname=${encodeURIComponent(surname)}`);
                     const j = await r.json();
-                    console.log(`🔍 Raw API response for ${surname}:`, j);
+                    console.log(`🔍 Raw API response for ${surname}:`, JSON.stringify(j, null, 2));
+                    console.log(`🔍 Response structure - success:`, j.success, 'data type:', typeof j.data, 'isArray:', Array.isArray(j.data));
                     if (j.success && Array.isArray(j.data)) {
                         const members = j.data.filter(m => m.year === targetYear && m.fat === 1);
                         console.log(`📊 ${surname} year ${targetYear}: ${members.length} members`);
