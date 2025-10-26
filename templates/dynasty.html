@@ -68,7 +68,7 @@
         .dynasty-tab-panel.active {
             display: block;
         }
-        
+
         .badge {
             display: inline-block;
             padding: 0.25em 0.4em;
@@ -3562,16 +3562,16 @@ async function loadAnimationDataWithCallback(callback) {
         console.log('📊 All summaries before filtering:', summaries);
 
         // Load flag data from master cache
-        let flagData = null;
-        try {
+                let flagData = null;
+                try {
             const masterResponse = await fetch('/static/data/dynasty_animation_cache/dynasty_animation_master.json');
             const masterData = await masterResponse.json();
             flagData = masterData.flag_data;
             console.log('✅ Flag data loaded from cache');
-        } catch (error) {
-            console.log('⚠️ Dynasty flags not available:', error);
-        }
-
+                } catch (error) {
+                    console.log('⚠️ Dynasty flags not available:', error);
+                }
+                
         // Update info boxes
         const currentYearSpan = document.getElementById('currentYear');
         if (currentYearSpan) currentYearSpan.textContent = selectedYear;
@@ -3687,39 +3687,56 @@ async function createAnimationMapWithData(familySummaries, flagData, selectedYea
     const mapContainer = document.getElementById('animationMap');
     if (!mapContainer) return;
 
-    // Initialize Leaflet map
-    mapContainer.innerHTML = `<div id="animationLeafletMap" style="width: 100%; height: 600px; border: 1px solid #ddd; border-radius: 8px;"></div>`;
-    const map = L.map('animationLeafletMap').setView([12.8797, 121.7740], 6);
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        attribution: '© OpenStreetMap contributors'
-    }).addTo(map);
-
-    // Load province polygons
-    let geojson;
-    try {
-        const resp = await fetch('/static/data/philippines-provinces.json');
-        geojson = await resp.json();
-    } catch (e) {
-        console.error('❌ Failed to load provinces GeoJSON', e);
-    }
-    if (geojson) {
-        L.geoJSON(geojson, {
-            style: {
-                fillColor: '#ffffff',
-                weight: 2,
-                opacity: 1,
-                color: '#000000',
-                dashArray: '0',
-                fillOpacity: 0.1
-            }
+    let map;
+    
+    // Initialize map only once, then reuse
+    if (!window.animationMap) {
+        mapContainer.innerHTML = `<div id="animationLeafletMap" style="width: 100%; height: 600px; border: 1px solid #ddd; border-radius: 8px;"></div>`;
+        map = L.map('animationLeafletMap').setView([12.8797, 121.7740], 6);
+        window.animationMap = map;
+        
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '© OpenStreetMap contributors'
         }).addTo(map);
+
+        // Load province polygons only once
+        if (!window.provinceGeoJSON) {
+            try {
+                const resp = await fetch('/static/data/philippines-provinces.json');
+                window.provinceGeoJSON = await resp.json();
+            } catch (e) {
+                console.error('❌ Failed to load provinces GeoJSON', e);
+            }
+        }
+        
+        if (window.provinceGeoJSON) {
+            window.provinceLayer = L.geoJSON(window.provinceGeoJSON, {
+                style: {
+                    fillColor: '#ffffff',
+                    weight: 2,
+                    opacity: 1,
+                    color: '#000000',
+                    dashArray: '0',
+                    fillOpacity: 0.1
+                }
+            }).addTo(map);
+        }
+    } else {
+        map = window.animationMap;
+    }
+    
+    // Clear only the dynasty markers, keep provinces
+    if (window.dynastyMarkers) {
+        window.dynastyMarkers.clearLayers();
+    } else {
+        window.dynastyMarkers = L.layerGroup().addTo(map);
     }
 
     // Province centroid cache by name (fallback: simple bounding box centroid)
     function getFeatureByProvince(name) {
-        if (!geojson || !geojson.features) return null;
+        if (!window.provinceGeoJSON || !window.provinceGeoJSON.features) return null;
         const lower = name.toLowerCase();
-        return geojson.features.find(f => {
+        return window.provinceGeoJSON.features.find(f => {
             const n = (f.properties.name || f.properties.NAME_1 || f.properties.PROVINCE || '').toLowerCase();
             return n === lower || n.includes(lower) || lower.includes(n);
         }) || null;
@@ -3803,7 +3820,7 @@ async function createAnimationMapWithData(familySummaries, flagData, selectedYea
         const html = `<div style="width:${size}px; height:${height}px;">${flagHtml}</div>`;
 
         const icon = L.divIcon({ html, className: 'dynasty-flag-icon', iconSize: [size, height], iconAnchor: [size/2, height/2] });
-        L.marker([lat, lng], { icon }).addTo(map)
+        L.marker([lat, lng], { icon }).addTo(window.dynastyMarkers)
             .bindPopup(`<div style="text-align:center;">
                 <div style="margin-bottom:6px;">${flagHtml}</div>
                 <div style="font-weight:800; color:#0038A8;">${fam.surname}</div>
