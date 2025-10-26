@@ -3682,6 +3682,12 @@ function updateAnimationLegend(surnames, flagData) {
 
 // Map with per-year family markers (Leaflet + province polygons)
 async function createAnimationMapWithData(familySummaries, flagData, selectedYear) {
+    // Check if Leaflet is loaded
+    if (typeof L === 'undefined') {
+        console.error('❌ Leaflet (L) is not loaded');
+        return;
+    }
+    
     const mapContainer = document.getElementById('animationMap');
     if (!mapContainer) {
         console.error('❌ animationMap container not found');
@@ -3702,6 +3708,8 @@ async function createAnimationMapWithData(familySummaries, flagData, selectedYea
         }
         
         try {
+            // Small delay to ensure DOM is ready
+            await new Promise(resolve => setTimeout(resolve, 100));
             map = L.map('animationLeafletMap').setView([12.8797, 121.7740], 6);
             console.log('✅ Map created successfully:', map);
         } catch (error) {
