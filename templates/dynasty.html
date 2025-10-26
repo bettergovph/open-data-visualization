@@ -3404,10 +3404,12 @@ async function loadAnimationData() {
                     // Try family API first (more accurate for dynasty detection)
                     const r = await fetch(`/api/dynasty/family?surname=${encodeURIComponent(surname)}`);
                     const j = await r.json();
+                    console.log(`🔍 Raw family API response for ${surname}:`, j);
                     
                     if (j.success && Array.isArray(j.data)) {
                         const members = j.data.filter(m => m.year === targetYear && m.fat === 1);
                         console.log(`📊 ${surname} year ${targetYear}: ${members.length} dynasty members`);
+                        console.log(`🔍 Sample members for ${surname}:`, members.slice(0, 3));
                         
                         if (members.length === 0) return null;
                         
