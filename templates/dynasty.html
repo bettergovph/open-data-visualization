@@ -2422,7 +2422,7 @@ async function loadDynastyData() {
     try {
         console.log('🏛️ Loading dynasty data from API...');
         
-        const response = await fetch('/api/dynasty/top-surnames?limit=1000');
+        const response = await fetch('/api/dynasty/top-surnames?limit=100');
         if (!response.ok) {
             throw new Error(`HTTP ${response.status}: ${response.statusText}`);
         }
