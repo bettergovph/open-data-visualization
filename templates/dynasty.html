@@ -572,7 +572,7 @@ function toggleMobileMenu() {
                                                 Year <span id="sort-year">↕️</span>
                                             </th>
                                             <th style="padding: 12px; text-align: left; border-bottom: 2px solid #dee2e6; font-weight: 600; cursor: pointer;" onclick="sortPovertyTable('poverty_rate')">
-                                                Poverty Rate <span id="sort-poverty_rate">↕️</span>
+                                                Poverty Rate <span id="sort-poverty_rate">↓</span>
                                             </th>
                                             <th style="padding: 12px; text-align: left; border-bottom: 2px solid #dee2e6; font-weight: 600; cursor: pointer;" onclick="sortPovertyTable('population')">
                                                 Population <span id="sort-population">↕️</span>
@@ -2420,8 +2420,8 @@ document.addEventListener('DOMContentLoaded', function() {
 let povertyData = [];
 let currentPovertyPage = 1;
 let povertyRowsPerPage = 25;
-let povertySortBy = 'region';
-let povertySortOrder = 'asc';
+let povertySortBy = 'poverty_rate';
+let povertySortOrder = 'desc';
 
 async function loadPovertyData() {
     try {
@@ -2513,13 +2513,19 @@ function displayPovertyData() {
     
     // Sort data
     filteredData.sort((a, b) => {
-        const aVal = a[povertySortBy];
-        const bVal = b[povertySortBy];
+        let aVal = a[povertySortBy];
+        let bVal = b[povertySortBy];
+        
+        // Handle numeric columns
+        if (povertySortBy === 'poverty_rate' || povertySortBy === 'population' || povertySortBy === 'year') {
+            aVal = parseFloat(aVal) || 0;
+            bVal = parseFloat(bVal) || 0;
+        }
         
         if (povertySortOrder === 'asc') {
-            return aVal > bVal ? 1 : -1;
+            return aVal > bVal ? 1 : aVal < bVal ? -1 : 0;
         } else {
-            return aVal < bVal ? 1 : -1;
+            return aVal < bVal ? 1 : aVal > bVal ? -1 : 0;
         }
     });
     
@@ -3039,8 +3045,8 @@ async function loadAnimationData() {
     console.log('📅 Loading dynasty data for year:', selectedYear);
     
     try {
-        // Load dynasty data for the selected year
-        const response = await fetch('/api/dynasty?limit=10000');
+        // Load dynasty data for the selected year (using search to filter by year)
+        const response = await fetch(`/api/dynasty?limit=1000&search=${selectedYear}`);
         const data = await response.json();
         
         if (data.success && data.data) {
