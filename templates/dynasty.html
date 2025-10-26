@@ -3558,8 +3558,6 @@ async function loadAnimationDataWithCallback(callback) {
         // Rank by family size and keep top 100
         const topFamilies = summaries.sort((a,b) => b.dynasty_count - a.dynasty_count).slice(0, 100);
         console.log(`📊 Aggregated ${topFamilies.length} families for year ${selectedYear}`);
-        console.log('📊 Sample families:', topFamilies.slice(0, 5));
-        console.log('📊 All summaries before filtering:', summaries);
 
         // Load flag data from master cache
                 let flagData = null;
@@ -3730,7 +3728,8 @@ async function createAnimationMapWithData(familySummaries, flagData, selectedYea
         window.dynastyMarkers.clearLayers();
     } else {
         window.dynastyMarkers = L.layerGroup();
-        window.dynastyMarkers.addTo(map);
+        map.addLayer(window.dynastyMarkers);
+        console.log('✅ Created dynastyMarkers layer group');
     }
 
     // Province centroid cache by name (fallback: simple bounding box centroid)
