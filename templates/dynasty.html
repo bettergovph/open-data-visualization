@@ -384,7 +384,7 @@ function toggleMobileMenu() {
                     <div class="dynasty-tab-nav">
                         <a href="#overlords" class="dynasty-tab-btn active" data-tab="overlords">🗺️ Dynasty Map</a>
                         <a href="#visual" class="dynasty-tab-btn" data-tab="visual">📈 Visual</a>
-                        <a href="#table" class="dynasty-tab-btn" data-tab="table">📊 Table</a>
+                        <a href="#table" class="dynasty-tab-btn" data-tab="table">🏛️ Officials</a>
                         <a href="#poverty" class="dynasty-tab-btn" data-tab="poverty">💰 Poverty</a>
                         <a href="#conflicts" class="dynasty-tab-btn" data-tab="conflicts">⚔️ Relationship Chains</a>
                         <a href="#animation" class="dynasty-tab-btn" data-tab="animation">🎬 Animation</a>
@@ -866,14 +866,16 @@ function toggleMobileMenu() {
                             <div class="dynasty-section-content">
                                 <div class="dynasty-chart-container">
                                     <h4 style="color: #0038A8; margin-bottom: 15px;">🗺️ Philippines Dynasty Map</h4>
-                                    <div id="animationMap" style="width: 100%; height: 600px; border: 1px solid #ddd; border-radius: 8px; background: #f0f8ff; position: relative; overflow: hidden;">
-                                        <div id="animationInfo" style="position: absolute; top: 10px; left: 10px; background: rgba(0,0,0,0.8); color: white; padding: 10px; border-radius: 5px; font-size: 14px; z-index: 1000;">
-                                            <div>Year: <span id="currentYear">Loading...</span></div>
-                                            <div>Dynasties: <span id="dynastyCount">0</span></div>
+                                    <div style="display: flex; gap: 15px; height: 600px;">
+                                        <div id="animationMap" style="flex: 1; border: 1px solid #ddd; border-radius: 8px; background: #f0f8ff; position: relative; overflow: hidden;">
+                                            <div id="animationInfo" style="position: absolute; top: 10px; left: 10px; background: rgba(0,0,0,0.8); color: white; padding: 10px; border-radius: 5px; font-size: 14px; z-index: 1000;">
+                                                <div>Year: <span id="currentYear">Loading...</span></div>
+                                                <div>Dynasties: <span id="dynastyCount">0</span></div>
+                                            </div>
                                         </div>
-                                        <div id="animationLegend" style="position: absolute; bottom: 10px; right: 10px; background: rgba(255,255,255,0.95); padding: 12px; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.3); border: 2px solid #0038A8; font-size: 12px; max-width: 300px; z-index: 1000;">
-                                            <div style="font-weight: bold; margin-bottom: 4px; color: #0038A8; font-size: 14px;">📋 Legend</div>
-                                            <div id="legendYear" style="font-weight: 600; margin-bottom: 8px; color: #dc3545; font-size: 13px; text-align: center; background: #fff3cd; padding: 4px; border-radius: 4px;">Year: <span id="legendYearValue">2004</span></div>
+                                        <div id="animationLegend" style="width: 300px; background: rgba(255,255,255,0.95); padding: 15px; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.3); border: 2px solid #0038A8; font-size: 12px; overflow-y: auto;">
+                                            <div style="font-weight: bold; margin-bottom: 10px; color: #0038A8; font-size: 16px;">📋 Legend</div>
+                                            <div id="legendYear" style="font-weight: 600; margin-bottom: 15px; color: #dc3545; font-size: 13px; text-align: center; background: #fff3cd; padding: 4px; border-radius: 4px;">Year: <span id="legendYearValue">2004</span></div>
                                             <div id="legendContent" style="color: #666; font-size: 11px;">
                                                 <!-- Dynamic legend content will be added here -->
                                             </div>
@@ -3601,12 +3603,7 @@ async function createAnimationMapWithData(familySummaries, flagData, selectedYea
         const sizeMultiplier = Math.max(1, Math.min(2, fam.dynasty_count / 20));
         const w = Math.round(40 * sizeMultiplier);
         const h = Math.round(24 * sizeMultiplier);
-        const html = `<div style="display:flex; flex-direction:column; align-items:center;">
-            <div style="width:${w}px; height:${h}px;">${flagHtml}</div>
-            <div style="margin-top:4px; padding:2px 6px; background:rgba(255,255,255,0.9); border:1px solid #000; border-radius:4px; font-size:11px; font-weight:700;">
-                ${fam.surname} (${fam.province || 'N/A'}) #${fam.dynasty_count}
-            </div>
-        </div>`;
+        const html = `<div style="width:${w}px; height:${h}px;">${flagHtml}</div>`;
 
         const icon = L.divIcon({ html, className: 'dynasty-flag-icon', iconSize: [w, h], iconAnchor: [w/2, h/2] });
         L.marker([lat, lng], { icon }).addTo(map)
