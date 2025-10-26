@@ -242,21 +242,37 @@ function toggleMobileMenu() {
         </div>
 
         <div class="dynasty-content">
+            <!-- Data Source Disclaimer -->
+            <div class="bg-yellow-50 border-l-4 border-yellow-400 p-4 mb-6 rounded-r-lg">
+                <div class="flex">
+                    <div class="flex-shrink-0">
+                        <svg class="h-5 w-5 text-yellow-400" viewBox="0 0 20 20" fill="currentColor">
+                            <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd" />
+                        </svg>
+                    </div>
+                    <div class="ml-3">
+                        <p class="text-sm text-yellow-700">
+                            <strong>Data Source Disclaimer:</strong> The political dynasty data presented here is sourced from the Ateneo School of Government (ASoG) Participate Project. While we strive for accuracy, any errors or inconsistencies in the data should be attributed to the original source. This visualization is for informational purposes only and should not be considered as definitive political analysis.
+                        </p>
+                    </div>
+                </div>
+            </div>
+            
             <!-- Dynasty Tabs -->
             <div class="dynasty-tabs">
                     <div class="dynasty-tab-nav">
-                        <a href="#overlords" class="dynasty-tab-btn active" data-tab="overlords">🗺️ Overlords</a>
+                        <a href="#overlords" class="dynasty-tab-btn active" data-tab="overlords">🗺️ Dynasty Map</a>
                         <a href="#visual" class="dynasty-tab-btn" data-tab="visual">📈 Visual</a>
                         <a href="#table" class="dynasty-tab-btn" data-tab="table">📊 Table</a>
                         <a href="#poverty" class="dynasty-tab-btn" data-tab="poverty">💰 Poverty</a>
-                        <a href="#conflicts" class="dynasty-tab-btn" data-tab="conflicts">⚔️ Conflicts of Interest</a>
+                        <a href="#conflicts" class="dynasty-tab-btn" data-tab="conflicts">⚔️ Relationship Chains</a>
                         <a href="#animation" class="dynasty-tab-btn" data-tab="animation">🎬 Animation</a>
                     </div>
                 
                 <div class="dynasty-tab-content">
                     <!-- Overlords Tab -->
                     <div id="tab-overlords" class="dynasty-tab-panel active">
-                        <h3 class="dynasty-section-title">🗺️ Political Dynasty Overlords</h3>
+                        <h3 class="dynasty-section-title">🗺️ Political Dynasty Map</h3>
                         <p class="dynasty-section-desc">Interactive map showing political dynasty surnames by province</p>
                         
                         <!-- Map Legend -->
@@ -331,28 +347,28 @@ function toggleMobileMenu() {
 
                         <!-- Dynasty Control Heatmap -->
                         <div class="chart-container" style="background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); height: 700px; margin-bottom: 30px;">
-                            <h3 style="color: #0038A8; margin: 0 0 15px 0;">🗺️ Dynasty Control by Province <span style="font-size: 12px; color: #666; font-weight: normal;">(Darker red = More dynasty control)</span></h3>
+                            <h3 style="color: #0038A8; margin: 0 0 15px 0;">🗺️ Dynasty Control by Province <span style="font-size: 12px; color: #666; font-weight: normal;">(Darker red = Single family control)</span></h3>
                             
                             <!-- Legend -->
                             <div style="display: flex; justify-content: center; margin-bottom: 15px; flex-wrap: wrap; gap: 10px;">
                                 <div style="display: flex; align-items: center; font-size: 11px;">
-                                    <div style="width: 15px; height: 15px; background: #ffebee; border: 1px solid #000; margin-right: 5px;"></div>
+                                    <div style="width: 15px; height: 15px; background: #8B0000; border: 1px solid #000; margin-right: 5px;"></div>
                                     <span>1 Family</span>
                                 </div>
                                 <div style="display: flex; align-items: center; font-size: 11px;">
-                                    <div style="width: 15px; height: 15px; background: #ffcdd2; border: 1px solid #000; margin-right: 5px;"></div>
+                                    <div style="width: 15px; height: 15px; background: #B22222; border: 1px solid #000; margin-right: 5px;"></div>
                                     <span>2 Families</span>
                                 </div>
                                 <div style="display: flex; align-items: center; font-size: 11px;">
-                                    <div style="width: 15px; height: 15px; background: #ef9a9a; border: 1px solid #000; margin-right: 5px;"></div>
+                                    <div style="width: 15px; height: 15px; background: #DC143C; border: 1px solid #000; margin-right: 5px;"></div>
                                     <span>3-5 Families</span>
                                 </div>
                                 <div style="display: flex; align-items: center; font-size: 11px;">
-                                    <div style="width: 15px; height: 15px; background: #e57373; border: 1px solid #000; margin-right: 5px;"></div>
+                                    <div style="width: 15px; height: 15px; background: #FF4500; border: 1px solid #000; margin-right: 5px;"></div>
                                     <span>6-10 Families</span>
                                 </div>
                                 <div style="display: flex; align-items: center; font-size: 11px;">
-                                    <div style="width: 15px; height: 15px; background: #ef5350; border: 1px solid #000; margin-right: 5px;"></div>
+                                    <div style="width: 15px; height: 15px; background: #FF6347; border: 1px solid #000; margin-right: 5px;"></div>
                                     <span>10+ Families</span>
                                 </div>
                                 <div style="display: flex; align-items: center; font-size: 11px;">
@@ -580,8 +596,8 @@ function toggleMobileMenu() {
 
                     <!-- Conflicts Tab -->
                     <div id="tab-conflicts" class="dynasty-tab-panel">
-                        <h3 class="dynasty-section-title">⚔️ Conflicts of Interest & Relationship Chains</h3>
-                        <p class="dynasty-section-desc">Visualize the longest relationship chains connecting different political families that may create conflicts of interest</p>
+                        <h3 class="dynasty-section-title">⚔️ Relationship Chains</h3>
+                        <p class="dynasty-section-desc">Visualize the longest relationship chains connecting different political families</p>
                         
                         <!-- Conflicts Controls -->
                         <div class="conflicts-controls" style="background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); margin-bottom: 20px;">
@@ -630,7 +646,7 @@ function toggleMobileMenu() {
 
                         <!-- Conflicts Table -->
                         <div class="conflicts-table" style="background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
-                            <h4 style="color: #0038A8; margin-bottom: 15px;">📊 Conflicts of Interest Chain Details</h4>
+                            <h4 style="color: #0038A8; margin-bottom: 15px;">📊 Relationship Chain Details</h4>
                             <div style="overflow-x: auto;">
                                 <table style="width: 100%; border-collapse: collapse; font-size: 14px;">
                                     <thead>
@@ -660,7 +676,7 @@ function toggleMobileMenu() {
                     <!-- Animation Tab -->
                     <div id="tab-animation" class="dynasty-tab-panel">
                         <div class="dynasty-section">
-                            <h3 class="dynasty-section-title">🎬 Dynasty Animation by Province</h3>
+                            <h3 class="dynasty-section-title">🎬 Dynasty Animation by Year</h3>
                             <p class="dynasty-section-desc">Watch political dynasties evolve over time with flags representing family size and location</p>
                             
                             <div style="background: #fff3cd; border: 1px solid #ffeaa7; border-radius: 8px; padding: 15px; margin-bottom: 20px;">
@@ -672,14 +688,35 @@ function toggleMobileMenu() {
                                 </div>
                             </div>
                             
+                            <!-- Year Selector -->
+                            <div style="background: white; padding: 15px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); margin-bottom: 20px;">
+                                <label for="animationYearSelector" style="display: block; margin-bottom: 10px; font-weight: 600; color: #333;">Select Election Year:</label>
+                                <select id="animationYearSelector" style="padding: 10px; border: 1px solid #ddd; border-radius: 4px; font-size: 16px; width: 100%; max-width: 300px;">
+                                    <option value="2004">2004</option>
+                                    <option value="2007">2007</option>
+                                    <option value="2010">2010</option>
+                                    <option value="2013">2013</option>
+                                    <option value="2016">2016</option>
+                                    <option value="2019">2019</option>
+                                    <option value="2022">2022</option>
+                                    <option value="2025">2025</option>
+                                </select>
+                            </div>
                             
                             <div class="dynasty-section-content">
                                 <div class="dynasty-chart-container">
                                     <h4 style="color: #0038A8; margin-bottom: 15px;">🗺️ Philippines Dynasty Map</h4>
                                     <div id="animationMap" style="width: 100%; height: 600px; border: 1px solid #ddd; border-radius: 8px; background: #f0f8ff; position: relative; overflow: hidden;">
-                                        <div id="animationInfo" style="position: absolute; top: 10px; left: 10px; background: rgba(0,0,0,0.8); color: white; padding: 10px; border-radius: 5px; font-size: 14px;">
+                                        <div id="animationInfo" style="position: absolute; top: 10px; left: 10px; background: rgba(0,0,0,0.8); color: white; padding: 10px; border-radius: 5px; font-size: 14px; z-index: 1000;">
                                             <div>Year: <span id="currentYear">Loading...</span></div>
                                             <div>Dynasties: <span id="dynastyCount">0</span></div>
+                                        </div>
+                                        <div id="animationLegend" style="position: absolute; bottom: 10px; right: 10px; background: rgba(255,255,255,0.95); padding: 12px; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.3); border: 2px solid #0038A8; font-size: 12px; max-width: 300px; z-index: 1000;">
+                                            <div style="font-weight: bold; margin-bottom: 4px; color: #0038A8; font-size: 14px;">📋 Legend</div>
+                                            <div id="legendYear" style="font-weight: 600; margin-bottom: 8px; color: #dc3545; font-size: 13px; text-align: center; background: #fff3cd; padding: 4px; border-radius: 4px;">Year: <span id="legendYearValue">2004</span></div>
+                                            <div id="legendContent" style="color: #666; font-size: 11px;">
+                                                <!-- Dynamic legend content will be added here -->
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
@@ -707,7 +744,7 @@ let currentFilters = {
 // Initialize page
 document.addEventListener('DOMContentLoaded', function() {
     initializeDynastyPage();
-    // Load map data for Overlords tab (now default active tab)
+    // Load map data for Dynasty Map tab (now default active tab)
     loadDynastyMap();
     // Load dashboard statistics
     loadDashboardStats();
@@ -808,6 +845,15 @@ function initializeDynastyPage() {
     
     // Set up visual tab functionality
     document.getElementById('loadSurnamesChart').addEventListener('click', loadSurnamesChart);
+    
+    // Set up animation year selector
+    const animationYearSelector = document.getElementById('animationYearSelector');
+    if (animationYearSelector) {
+        animationYearSelector.addEventListener('change', function() {
+            console.log('📅 Animation year changed to:', this.value);
+            loadAnimationData();
+        });
+    }
 }
 
 function loadRegionOptions() {
@@ -1534,12 +1580,12 @@ function createDynastyHeatmap(dynastyData) {
             // Function to get color based on dynasty intensity
             const getDynastyColor = (intensity) => {
                 if (intensity === 0) return '#f8f9fa'; // Light gray for no data
-                if (intensity === 1) return '#ffebee'; // Very light red
-                if (intensity === 2) return '#ffcdd2'; // Light red
-                if (intensity === 3) return '#ef9a9a'; // Medium red
-                if (intensity === 4) return '#e57373'; // Red
-                if (intensity === 5) return '#ef5350'; // Strong red
-                if (intensity >= 6) return '#f44336'; // Dark red
+                if (intensity === 1) return '#8B0000'; // Dark red (maroon) for single family control
+                if (intensity === 2) return '#B22222'; // Fire brick for 2 families
+                if (intensity === 3) return '#DC143C'; // Crimson red for 3-5 families
+                if (intensity === 4) return '#FF4500'; // Orange red for 6-10 families
+                if (intensity === 5) return '#FF6347'; // Tomato for 10+ families
+                if (intensity >= 6) return '#FF6347'; // Tomato for 10+ families
                 return '#f8f9fa'; // Default light gray
             };
 
@@ -2985,66 +3031,126 @@ let animationInterval = null;
 let isAnimating = false;
 
 async function loadAnimationData() {
-    console.log('🎬 Loading 2004 dynasty data for Ampatuan flag sizing...');
+    console.log('🎬 Loading animation data...');
+    
+    // Get the selected year
+    const yearSelector = document.getElementById('animationYearSelector');
+    const selectedYear = yearSelector ? yearSelector.value : '2004';
+    console.log('📅 Loading dynasty data for year:', selectedYear);
     
     try {
-        // Load Ampatuan dynasty data using search
-        const response = await fetch('/api/dynasty?limit=1000&search=ampatuan');
+        // Load dynasty data for the selected year
+        const response = await fetch('/api/dynasty?limit=10000');
         const data = await response.json();
         
-        if (data.success) {
-            animationData = data.data;
-            console.log('✅ Dynasty data loaded:', animationData.length, 'records');
-            console.log('📊 Sample dynasty data:', animationData[0]);
+        if (data.success && data.data) {
+            // Filter for the selected year
+            const yearData = data.data.filter(member => member.year === parseInt(selectedYear));
+            console.log(`📊 Loaded ${yearData.length} dynasty members for year ${selectedYear}`);
             
-            // All data is already Ampatuan members from the search
-            const ampatuanMembers = animationData;
+            // Load flag data
+            let flagData = null;
+            try {
+                const flagResponse = await fetch('/static/data/dynasty_flags_cache.json');
+                flagData = await flagResponse.json();
+                console.log('✅ Flag data loaded');
+            } catch (error) {
+                console.log('⚠️ Dynasty flags not available:', error);
+            }
             
-            console.log('🏴 Ampatuan members found:', ampatuanMembers.length);
-            console.log('📊 Sample Ampatuan member:', ampatuanMembers[0]);
+            // Update the info display
+            const currentYearSpan = document.getElementById('currentYear');
+            if (currentYearSpan) {
+                currentYearSpan.textContent = selectedYear;
+            }
             
-            // Filter for 2004 data only
-            const ampatuan2004 = ampatuanMembers.filter(member => member.year === 2004);
-            console.log('📅 Ampatuan 2004 members:', ampatuan2004.length);
+            // Update dynasty count
+            const dynastyCountSpan = document.getElementById('dynastyCount');
+            if (dynastyCountSpan) {
+                // Count unique surnames for this year
+                const uniqueSurnames = new Set(yearData.map(m => m.last_name?.toUpperCase()).filter(Boolean));
+                dynastyCountSpan.textContent = uniqueSurnames.size;
+            }
             
-            if (ampatuan2004.length === 0) {
-                // If no 2004 data, use all Ampatuan members for sizing
-                console.log('⚠️ No 2004 Ampatuan data found, using all years for sizing');
-                const ampatuanAllYears = ampatuanMembers;
-                console.log('🏴 Using all Ampatuan members for sizing:', ampatuanAllYears.length);
+            // Update legend year
+            const legendYearValue = document.getElementById('legendYearValue');
+            if (legendYearValue) {
+                legendYearValue.textContent = selectedYear;
+            }
+            
+            // Load top surnames for this year
+            const surnamesResponse = await fetch('/api/dynasty/top-surnames?limit=50');
+            const surnamesData = await surnamesResponse.json();
+            
+            if (surnamesData.success && surnamesData.data) {
+                // Filter surnames for the selected year
+                const filteredSurnames = surnamesData.data.filter(surname => 
+                    yearData.some(m => m.last_name?.toUpperCase() === surname.surname.toUpperCase())
+                );
                 
-                // Load flag data (same as Top Surnames chart)
-                let flagData = null;
-                try {
-                    const flagResponse = await fetch('/static/data/dynasty_flags_cache.json');
-                    flagData = await flagResponse.json();
-                    console.log('✅ Flag data loaded:', flagData);
-                } catch (error) {
-                    console.log('⚠️ Dynasty flags not available:', error);
-                }
+                console.log(`📊 Found ${filteredSurnames.length} surnames for year ${selectedYear}`);
                 
-                // Create the map with Ampatuan flag sized by total family count
-                createAnimationMap2004(ampatuanAllYears, flagData);
-            } else {
-                // Load flag data (same as Top Surnames chart)
-                let flagData = null;
-                try {
-                    const flagResponse = await fetch('/static/data/dynasty_flags_cache.json');
-                    flagData = await flagResponse.json();
-                    console.log('✅ Flag data loaded:', flagData);
-                } catch (error) {
-                    console.log('⚠️ Dynasty flags not available:', error);
-                }
+                // Update legend with actual data
+                updateAnimationLegend(filteredSurnames, flagData);
                 
-                // Create the map with Ampatuan flag sized by 2004 family count
-                createAnimationMap2004(ampatuan2004, flagData);
+                // Create the map
+                createAnimationMapWithData(yearData, filteredSurnames, flagData, selectedYear);
             }
         } else {
             console.error('❌ Error loading dynasty data:', data.error);
         }
     } catch (error) {
-        console.error('❌ Error loading dynasty data:', error);
+        console.error('❌ Error loading animation data:', error);
     }
+}
+
+function updateAnimationLegend(surnames, flagData) {
+    const legendContent = document.getElementById('legendContent');
+    if (!legendContent || !surnames || surnames.length === 0) {
+        if (legendContent) {
+            legendContent.innerHTML = '<div style="color: #666; font-size: 11px;">No dynasty data available</div>';
+        }
+        return;
+    }
+    
+    // Get top 10 surnames for the legend
+    const topSurnames = surnames.slice(0, 10);
+    
+    let legendHTML = '';
+    
+    topSurnames.forEach(surname => {
+        // Try to find the flag for this surname
+        let flagHtml = '🏴';
+        if (flagData && flagData.dynasties) {
+            const dynastyKey = Object.keys(flagData.dynasties).find(key => 
+                key.toLowerCase().includes(surname.surname.toLowerCase())
+            );
+            
+            if (dynastyKey) {
+                const dynastyInfo = flagData.dynasties[dynastyKey];
+                const flagUrl = `/static/flags/flag_${dynastyInfo.dynasty_id}.svg`;
+                flagHtml = `<img src="${flagUrl}" alt="Flag" style="width: 24px; height: 15px; vertical-align: middle; border: 1px solid #000;" onerror="this.style.display='none'"/>`;
+            }
+        }
+        
+        legendHTML += `
+            <div style="margin-bottom: 8px; padding: 8px; background: #f8f9fa; border-radius: 4px; border-left: 3px solid #0038A8;">
+                <div style="display: flex; align-items: center; gap: 8px;">
+                    <span>${flagHtml}</span>
+                    <span style="font-weight: bold; color: #333;">${surname.surname}</span>
+                </div>
+                <div style="font-size: 10px; color: #666; margin-left: 32px;">
+                    ${surname.province || 'N/A'} • ${surname.dynasty_count} members
+                </div>
+            </div>
+        `;
+    });
+    
+    if (surnames.length > 10) {
+        legendHTML += `<div style="color: #666; font-size: 10px; margin-top: 8px; text-align: center;">... and ${surnames.length - 10} more families</div>`;
+    }
+    
+    legendContent.innerHTML = legendHTML;
 }
 
 // Removed unused animation functions

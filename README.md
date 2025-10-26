@@ -1,243 +1,145 @@
-# BetterGovPH Data Visualizations
+# 🇵🇭 DPWH Archive Data Visualization
 
-This project contains the **BetterGovPH Data Visualizations** platform - a comprehensive open data visualization tool for Philippine government budget, infrastructure, and flood control projects.
+This project downloads, analyzes, and visualizes data from the Philippines Department of Public Works and Highways (DPWH) archive hosted on Internet Archive.
 
-## ⚠️ Data Accuracy Priority
+## 📋 Overview
 
-**CRITICAL REMINDER**: Our credibility will be judged on how accurate our data is, not by how flashy it looks. All visualizations must be based on verified, accurate data sources. Data integrity is paramount.
+The DPWH archive contains approximately 60GB of data across 31 zip files, representing a comprehensive dataset of public works and infrastructure information from the Philippines government.
 
-### Data Quality Disclaimer
+## 🚀 Quick Start
 
-**IMPORTANT**: The datasets we work with are inherently "dirty" and the integration processes may not be perfectly accurate. We acknowledge that:
+### Prerequisites
 
-- **Raw data quality**: Government datasets often contain inconsistencies, missing values, and formatting issues
-- **Integration challenges**: Mapping between different data sources (budget, NEP, DIME, dynasty) involves interpretation and may contain errors
-- **Continuous improvement**: We welcome corrections and feedback from domain experts to improve data accuracy
-- **Learning process**: We are committed to learning from subject matter experts about what the data truly represents
-- **Transparency**: We are open about data limitations and actively seek to improve accuracy through expert input
+- Python 3.7+
+- Internet connection for downloading
+- Sufficient disk space (~60GB for full download)
 
-**If you find data inaccuracies or have domain expertise to share, please point them out so we can correct and improve the visualizations.**
+### Installation
 
-## Project Status
-
-✅ **FULLY ISOLATED** from kenchlightyear business platform  
-✅ **PRODUCTION READY** for `visualizations.bettergov.ph`  
-✅ **CLEANED** - independent codebase with no external dependencies  
-✅ **SERVICES RUNNING** - Actix-Web frontend + FastAPI backend
-✅ **SSL CONFIGURED** - Let's Encrypt certificates
-✅ **MOBILE RESPONSIVE** - dedicated mobile templates  
-
-## Domains
-
-- **Production**: `https://visualizations.bettergov.ph`
-- **Test**: Internal testing environment
-
-## Architecture
-
-### Frontend (Rust/Actix-Web)
-- **Server**: 192.168.2.122:8888
-- **Framework**: Actix-Web with Tera templating
-- **Routes**: 11 major pages + correlation analysis
-- **Templates**: Clean visualizations-* CSS classes
-- **Mobile Support**: Responsive design with dedicated mobile templates
-
-### Backend (Python/FastAPI) 
-- **Server**: 192.168.2.122:8000
-- **Framework**: FastAPI with async PostgreSQL
-- **Databases**: 
-  - `budget_analysis` - Budget data (2017-2025)
-  - `nep` - NEP data (2020-2026)
-  - `dime` - DIME infrastructure projects
-- **Status**: Fully operational with real government data
-
-## Setup
-
-### Environment Configuration
-
-**IMPORTANT**: Before running the application, you must configure your environment:
-
+1. Clone or download this repository
+2. Install dependencies:
 ```bash
-# Copy the example environment file
-cp visualization.env .env
-
-# Edit .env and update with your actual credentials
-# - POSTGRES_PASSWORD: Your database password
-# - Other secrets as needed
+pip install -r requirements.txt
 ```
 
-The `.env` file is gitignored to protect your credentials.
+### Running the Pipeline
 
-### Reverse Proxy (Nginx)
-- **Ports**: 80/443
-- **SSL**: Let's Encrypt certificates
-- **Config**: `/etc/nginx/conf.d/visualizations_nginx.conf`
-- **Load Balancing**: API requests proxied to FastAPI backend
-
-## Routes and Functionality
-
-### / (Homepage)
-- **Templates**: `visualizations_home.html`, `mobile/visualizations_home.html`
-- **Functionality**: Landing page with navigation to all data sections
-- **Navigation**: Logo → bettergov.ph, "Data Visualizations" → /
-
-### /budget (Budget Analysis)
-- **Templates**: `budget.html`, `mobile/budget.html`
-- **Functionality**: AI-powered analysis of Government Appropriations Act (GAA) data
-- **Features**: Intelligent insights, duplicate detection, trend analysis
-
-### /flood (Flood Control Projects)
-- **Templates**: `flood.html`, `mobile/flood.html`
-- **Functionality**: Comprehensive tracking of DPWH flood control infrastructure
-- **Features**: Nationwide project mapping and analysis
-
-### /dime (DIME Infrastructure)
-- **Templates**: `dime.html`, `mobile/dime.html`
-- **Functionality**: Digital Information for Monitoring and Evaluation
-- **Features**: 12,870+ major infrastructure projects worth ₱740B+
-
-### /nep (NEP Analysis)
-- **Templates**: `nep.html`, `mobile/nep.html`
-- **Functionality**: National Expenditure Program analysis
-- **Features**: AI-powered insights, duplicate detection, budget tracking
-
-### /map (Interactive Map)
-- **Templates**: `map.html`, `mobile/map.html`
-- **Functionality**: Interactive geographical visualization
-- **Features**: Flood control projects and infrastructure mapping
-
-### /about (About Page)
-- **Templates**: `about.html`, `mobile/about.html`
-- **Functionality**: Project information and advocacy focus
-
-### Correlation Analysis
-- **Budget-NEP**: `/budget-nep-correlation`
-- **Budget-Flood**: `/budget-flood-correlation`
-- **Flood-DIME**: `/flood-dime-correlation`
-- **Templates**: Individual correlation analysis pages
-- **Functionality**: Data science connections between datasets
-
-## File Structure
-
-### Templates
-- `visualizations_home.html` - Main homepage
-- `base_visualizations.html` - Base template for desktop pages
-- `mobile/` - Mobile-optimized versions of all templates
-- **CSS Classes**: All use `visualizations-*` prefix
-
-### Static Assets
-- `static/css/visualizations-*.css` - Renamed CSS files
-- `static/js/` - JavaScript functionality
-- `static/images/` - Logos and assets
-- `static/data/` - JSON datasets for visualizations
-
-### Source Code
-- `src/main.rs` - Actix-Web frontend application
-
-### Family Analysis Module
-- `family_analysis/` - Combined political dynasty analysis tools
-  - `family_scraper/` - Political dynasty relationship discovery tools
-    - Wikipedia scrapers for automated family connection discovery
-    - Advanced name matching for maiden/married names
-    - Database integration for relationship mapping
-    - Scheduled processing for continuous discovery
-  - `family_parser/` - Government officials and election data processing
-    - Government officials import and classification
-    - Election data processing and analysis
-    - LLM-based relationship discovery
-    - Data quality validation and cleanup
-  - See `family_analysis/README.md` for detailed documentation
-- `visualization.py` - FastAPI backend (mock responses)
-- `Cargo.toml` - Rust dependencies
-- `requirements.txt` - Python dependencies
-
-## Development Status
-
-### ✅ Completed
-- Complete isolation from kenchlightyear platform
-- All routes functional (11 pages + correlations)
-- Mobile responsive design with clean CSS
-- SSL certificate configuration for both domains
-- Domain routing (production + test)
-- **Complete codebase cleanup** - independent and focused
-- Template cleanup (removed business content)
-- Navigation fixes (logo → bettergov.ph, text → /)
-
-### 🔄 In Progress
-- FastAPI backend service (syntax errors resolved)
-- PostgreSQL database integration
-- API endpoint testing
-- Production deployment verification
-
-### 📋 Next Steps
-- Fix FastAPI service startup
-- Test all API endpoints
-- Verify database connections
-- Performance optimization
-- Production SSL for visualizations.bettergov.ph
-
-## Deployment
-
-### Server: 10.27.79.7
-- **Frontend**: `visualization.service` (systemd)
-- **Backend**: `visualization_api.service` (systemd) 
-- **Proxy**: Nginx with SSL termination
-
-### Environment
-- `.env` - Application configuration (SITE_URL = visualizations.bettergov.ph)
-- `venv/` - Python virtual environment (gitignored)
-- `target/` - Rust build artifacts
-
-## Notes
-
-- **Complete Separation**: No dependencies on kenchlightyear codebase
-- **Advocacy Focus**: Removed all business/marketing content
-- **Open Data Mission**: Transparency and accessibility for citizens
-- **Mobile First**: Responsive design across all devices
-- **Clean Codebase**: Independent and focused on BetterGov mission
-- **API Ready**: FastAPI backend prepared for data endpoints
-
-## Summary Statistics Management
-
-### Overview
-
-Summary statistics are stored in JSON files under `static/data/` to avoid hardcoding values in frontend templates.
-
-**Files:**
-- `static/data/budget_summary.json` - Budget analysis statistics
-- `static/data/nep_summary.json` - NEP statistics  
-- `static/data/dime_summary.json` - DIME infrastructure statistics
-- `static/data/flood_summary.json` - Flood control statistics
-
-### When to Update
-
-⚠️ **IMPORTANT**: After importing new data into any database, regenerate summary statistics:
-
+Execute the complete data pipeline:
 ```bash
-./deployment/update_summary_stats.sh
+python dpwh_pipeline_runner.py
 ```
 
-Or directly:
+This will:
+1. Download all 31 zip files (~60GB)
+2. Extract and analyze the data structure
+3. Generate interactive visualizations
+4. Create an HTML report
 
-```bash
-python3 utils/generate_summary_stats.py
+## 📁 Project Structure
+
+```
+open-data-visualization/
+├── dpwh_archive_downloader.py  # Downloads all archive files
+├── dpwh_archive_analyzer.py    # Extracts and analyzes data
+├── dpwh_data_visualizer.py     # Creates visualizations
+├── dpwh_pipeline_runner.py     # Main orchestration script
+├── requirements.txt            # Python dependencies
+└── README.md                   # This file
 ```
 
-Then commit and deploy:
+## 🔧 Individual Scripts
 
+### Download Script
 ```bash
-git add static/data/*_summary.json
-git commit -m "Update summary statistics after data import"
-git push
-python3 deployment/deployment_mcp.py
+python dpwh_archive_downloader.py
 ```
+- Downloads all 31 zip files from Internet Archive
+- Creates `dpwh_archive/` directory
+- Shows progress for each download
+- Handles resume for interrupted downloads
 
-### Strategy
+### Analysis Script
+```bash
+python dpwh_archive_analyzer.py
+```
+- Extracts all zip files to `dpwh_archive/extracted/`
+- Analyzes file structure and types
+- Examines metadata files (XML, SQLite)
+- Samples data files for content analysis
+- Generates `data_summary.json`
 
-**Manual regeneration only** - no automatic scheduling. Data imports happen infrequently (weekly/monthly/yearly), so periodic updates would waste resources.
+### Visualization Script
+```bash
+python dpwh_data_visualizer.py
+```
+- Creates interactive charts and graphs
+- Generates comprehensive HTML report
+- Shows file type distributions
+- Displays directory structure analysis
 
-## Testing
+## 📊 Output Files
 
-Access the application at:
-- Production: `https://visualizations.bettergov.ph`
+After running the pipeline, you'll find:
 
-All 11 major pages load successfully with proper navigation (logo → bettergov.ph, "Data Visualizations" → /).
+- `dpwh_archive/` - Downloaded zip files
+- `dpwh_archive/extracted/` - Extracted data files
+- `dpwh_archive/data_summary.json` - Analysis results
+- `dpwh_analysis_report.html` - Interactive visualization report
+
+## 🎯 Features
+
+- **Comprehensive Download**: All 31 archive files with progress tracking
+- **Smart Extraction**: Automatic zip file extraction with error handling
+- **Data Analysis**: File type analysis, size distribution, metadata examination
+- **Interactive Visualizations**: Plotly-based charts and graphs
+- **HTML Report**: Self-contained report with embedded visualizations
+- **Resume Capability**: Skip already downloaded files
+- **Error Handling**: Robust error handling throughout the pipeline
+
+## 📈 Visualizations
+
+The generated report includes:
+
+- File type distribution charts
+- File size analysis by extension
+- Directory structure overview
+- Archive metadata summary
+- Interactive data exploration tools
+
+## 🔍 Data Insights
+
+The DPWH archive contains various file types including:
+- CSV files with infrastructure data
+- PDF documents and reports
+- Excel spreadsheets
+- XML metadata files
+- Database files (SQLite)
+- Text documents
+
+## 🛠️ Customization
+
+You can modify the scripts to:
+- Change download directory
+- Adjust visualization parameters
+- Add custom data analysis
+- Modify report styling
+- Add new file type handlers
+
+## 📝 Notes
+
+- The download process may take several hours depending on your internet connection
+- Ensure you have sufficient disk space (60GB+ recommended)
+- The analysis process may take time for large datasets
+- All scripts include progress indicators and error handling
+
+## 🤝 Contributing
+
+Feel free to submit issues, feature requests, or pull requests to improve this data visualization pipeline.
+
+## 📄 License
+
+This project is for educational and research purposes. Please respect the Internet Archive's terms of service and the DPWH's data usage policies.
+
+---
+
+**Last Updated**: October 2025

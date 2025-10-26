@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Generate relationship chains cache for conflicts visualization
+Generate relationship chains cache for relationship visualization
 """
 
 import asyncio

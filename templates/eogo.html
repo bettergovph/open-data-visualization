@@ -276,6 +276,7 @@ function toggleMobileMenu() {
                     <a href="#political-hhi" class="budget-tab-btn active" data-tab="political-hhi">🏛️ Political HHI</a>
                     <a href="#cri-analysis" class="budget-tab-btn" data-tab="cri-analysis">🎯 CRI Analysis</a>
                     <a href="#poverty-correlation" class="budget-tab-btn" data-tab="poverty-correlation">📈 Poverty Correlation</a>
+                    <a href="#limitations" class="budget-tab-btn" data-tab="limitations">⚠️ Limitations</a>
                 </div>
                 
                 <div class="budget-tab-content">
@@ -452,11 +453,247 @@ function toggleMobileMenu() {
                             </div>
                         </div>
                     </div>
+
+                    <!-- Limitations Tab -->
+                    <div id="tab-limitations" class="budget-tab-panel">
+                        <h3 class="budget-section-title">⚠️ Limitations of HHI and CRI Analysis</h3>
+                        <p class="budget-section-desc">Understanding the weaknesses and constraints of our corruption risk indicators based on the EOGO paper methodology.</p>
+                        
+                        <!-- Critical Warning Card -->
+                        <div class="mb-6 p-4 bg-gradient-to-r from-red-50 to-orange-50 border-2 border-red-300 rounded-lg shadow-sm">
+                            <h5 class="font-semibold text-lg mb-3 text-red-800">🚨 Critical Accuracy Issues</h5>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div class="text-center p-3 bg-red-100 rounded-lg">
+                                    <div class="text-2xl font-bold text-red-600">⚠️</div>
+                                    <div class="text-sm font-semibold text-red-800">HHI with Low Numbers</div>
+                                    <div class="text-xs text-red-700 mt-1">INACCURATE - Small sample sizes produce unreliable HHI scores</div>
                 </div>
+                                <div class="text-center p-3 bg-orange-100 rounded-lg">
+                                    <div class="text-2xl font-bold text-orange-600">≈</div>
+                                    <div class="text-sm font-semibold text-orange-800">CRI Approximation</div>
+                                    <div class="text-xs text-orange-700 mt-1">ONLY APPROXIMATION - Missing 6 of 9 input variables</div>
             </div>
         </div>
+                            <div class="mt-3 p-3 bg-yellow-100 rounded border border-yellow-300">
+                                <p class="text-sm text-yellow-800 font-semibold">
+                                    <strong>⚠️ Important:</strong> Our HHI calculations with low politician counts are statistically unreliable, 
+                                    and our CRI scores are approximations due to missing critical input variables from the EOGO paper methodology.
+                                </p>
     </div>
-</section>
+                        </div>
+
+                        <!-- HHI Limitations -->
+                        <div class="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg">
+                            <h5 class="font-semibold text-lg mb-3 text-red-800">🏛️ Political HHI Limitations</h5>
+                            <div class="space-y-3">
+                                <div class="flex items-start">
+                                    <span class="text-red-600 font-bold mr-2">🚨</span>
+                                    <div>
+                                        <strong>CRITICAL: Low Numbers = Inaccurate HHI:</strong> HHI calculations with fewer than 10-20 politicians are statistically unreliable. Small sample sizes produce misleading concentration scores that don't reflect actual political dynasty dominance.
+                                    </div>
+                                </div>
+                                <div class="flex items-start">
+                                    <span class="text-red-600 font-bold mr-2">❌</span>
+                                    <div>
+                                        <strong>Missing Political Dynasty Data:</strong> We lack comprehensive elected officials data with surnames, positions, and terms needed to calculate Political HHI.
+                                    </div>
+                                </div>
+                                <div class="flex items-start">
+                                    <span class="text-red-600 font-bold mr-2">❌</span>
+                                    <div>
+                                        <strong>No Historical Terms:</strong> Political HHI requires data across multiple election cycles (2004-2019) to measure dynasty persistence.
+                                    </div>
+                                </div>
+                                <div class="flex items-start">
+                                    <span class="text-orange-600 font-bold mr-2">⚠️</span>
+                                    <div>
+                                        <strong>Proxy Data Quality:</strong> Our current HHI calculations use contractor concentration as a proxy, which may not accurately reflect political dynasty concentration.
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- CRI Limitations -->
+                        <div class="mb-6 p-4 bg-orange-50 border border-orange-200 rounded-lg">
+                            <h5 class="font-semibold text-lg mb-3 text-orange-800">🎯 CRI Analysis Limitations</h5>
+                            <div class="space-y-3">
+                                <div class="flex items-start">
+                                    <span class="text-orange-600 font-bold mr-2">≈</span>
+                                    <div>
+                                        <strong>CRI is ONLY an Approximation:</strong> Our CRI scores are rough approximations, not true corruption risk indicators. We can only calculate 3 of 9 factors from the EOGO paper, making our scores incomplete and potentially misleading.
+                                    </div>
+                                </div>
+                                <div class="flex items-start">
+                                    <span class="text-red-600 font-bold mr-2">❌</span>
+                                    <div>
+                                        <strong>Missing Timeline Data:</strong> No publication dates, closing dates, or contract duration data needed for time-based red flags.
+                                    </div>
+                                </div>
+                                <div class="flex items-start">
+                                    <span class="text-red-600 font-bold mr-2">❌</span>
+                                    <div>
+                                        <strong>No Cost Deviation Analysis:</strong> Missing initial estimated prices prevents calculation of contract cost inflation indicators.
+                                    </div>
+                                </div>
+                                <div class="flex items-start">
+                                    <span class="text-orange-600 font-bold mr-2">⚠️</span>
+                                    <div>
+                                        <strong>Simplified Methodology:</strong> Our CRI uses basic statistical aggregation instead of the sophisticated Item Response Theory (IRT) model from the original paper.
+                                    </div>
+                                </div>
+                                <div class="flex items-start">
+                                    <span class="text-orange-600 font-bold mr-2">⚠️</span>
+                                    <div>
+                                        <strong>Limited Validation:</strong> Without the full 9-factor CRI, we cannot validate our simplified approach against the academic methodology.
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Data Quality Issues -->
+                        <div class="mb-6 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
+                            <h5 class="font-semibold text-lg mb-3 text-yellow-800">📊 Data Quality Issues</h5>
+                            <div class="space-y-3">
+                                <div class="flex items-start">
+                                    <span class="text-yellow-600 font-bold mr-2">⚠️</span>
+                                    <div>
+                                        <strong>PhilGEPS Data Gaps:</strong> Missing critical fields like entry dates, bidding timelines, and initial estimates limit comprehensive contract analysis.
+                                    </div>
+                                </div>
+                                <div class="flex items-start">
+                                    <span class="text-yellow-600 font-bold mr-2">⚠️</span>
+                                    <div>
+                                        <strong>Contractor Data Inconsistencies:</strong> SEC verification status varies across data sources, affecting contractor concentration calculations.
+                                    </div>
+                                </div>
+                                <div class="flex items-start">
+                                    <span class="text-yellow-600 font-bold mr-2">⚠️</span>
+                                    <div>
+                                        <strong>Geographic Mapping:</strong> Some contracts have incomplete or inconsistent province/region assignments.
+                                    </div>
+                                </div>
+                                <div class="flex items-start">
+                                    <span class="text-yellow-600 font-bold mr-2">⚠️</span>
+                                    <div>
+                                        <strong>Temporal Coverage:</strong> Limited historical data prevents analysis of corruption risk trends over time.
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Methodological Concerns -->
+                        <div class="mb-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                            <h5 class="font-semibold text-lg mb-3 text-blue-800">🔬 Methodological Concerns</h5>
+                            <div class="space-y-3">
+                                <div class="flex items-start">
+                                    <span class="text-blue-600 font-bold mr-2">📝</span>
+                                    <div>
+                                        <strong>Proxy Indicators:</strong> Using contractor concentration as a proxy for political dynasty concentration may not capture the same corruption mechanisms.
+                                    </div>
+                                </div>
+                                <div class="flex items-start">
+                                    <span class="text-blue-600 font-bold mr-2">📝</span>
+                                    <div>
+                                        <strong>Aggregation Methods:</strong> Our province-level aggregation may mask important municipal-level corruption patterns.
+                                    </div>
+                                </div>
+                                <div class="flex items-start">
+                                    <span class="text-blue-600 font-bold mr-2">📝</span>
+                                    <div>
+                                        <strong>Control Variables:</strong> Missing key socioeconomic controls (IRA dependency, poverty rates, ethnolinguistic fractionalization) limits causal inference.
+                                    </div>
+                                </div>
+                                <div class="flex items-start">
+                                    <span class="text-blue-600 font-bold mr-2">📝</span>
+                                    <div>
+                                        <strong>Endogeneity Issues:</strong> Without proper controls, observed correlations may reflect reverse causality or omitted variable bias.
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Recommendations -->
+                        <div class="mb-6 p-4 bg-green-50 border border-green-200 rounded-lg">
+                            <h5 class="font-semibold text-lg mb-3 text-green-800">💡 Recommendations for Improvement</h5>
+                            <div class="space-y-3">
+                                <div class="flex items-start">
+                                    <span class="text-green-600 font-bold mr-2">✅</span>
+                                    <div>
+                                        <strong>Enhanced Data Collection:</strong> Scrape complete PhilGEPS contract details including publication dates, closing dates, and initial estimates.
+                                    </div>
+                                </div>
+                                <div class="flex items-start">
+                                    <span class="text-green-600 font-bold mr-2">✅</span>
+                                    <div>
+                                        <strong>Political Dynasty Database:</strong> Build comprehensive elected officials dataset with surnames, positions, and terms from COMELEC records.
+                                    </div>
+                                </div>
+                                <div class="flex items-start">
+                                    <span class="text-green-600 font-bold mr-2">✅</span>
+                                    <div>
+                                        <strong>Socioeconomic Controls:</strong> Obtain poverty incidence, IRA allocations, and population data from PSA and DOF.
+                                    </div>
+                                </div>
+                                <div class="flex items-start">
+                                    <span class="text-green-600 font-bold mr-2">✅</span>
+                                    <div>
+                                        <strong>IRT Implementation:</strong> Implement the full Item Response Theory model from the EOGO paper for proper CRI calculation.
+                                    </div>
+                                </div>
+                                <div class="flex items-start">
+                                    <span class="text-green-600 font-bold mr-2">✅</span>
+                                    <div>
+                                        <strong>Academic Collaboration:</strong> Partner with Ateneo Policy Center to access their complete dataset and methodology.
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Documentation Reference -->
+                        <div class="mb-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                            <h5 class="font-semibold text-lg mb-3 text-blue-800">📚 Detailed Documentation</h5>
+                            <div class="space-y-3">
+                                <div class="flex items-start">
+                                    <span class="text-blue-600 font-bold mr-2">📄</span>
+                                    <div>
+                                        <strong>Complete EOGO Analysis:</strong> A detailed analysis of the EOGO methodology, data requirements, and implementation challenges is documented in <code>analysis/EOGO.md</code>
+                                    </div>
+                                </div>
+                                <div class="flex items-start">
+                                    <span class="text-blue-600 font-bold mr-2">📊</span>
+                                    <div>
+                                        <strong>Data Availability Assessment:</strong> The documentation includes a comprehensive assessment of what data we have vs. what's needed for full CRI calculation
+                                    </div>
+                                </div>
+                                <div class="flex items-start">
+                                    <span class="text-blue-600 font-bold mr-2">🔬</span>
+                                    <div>
+                                        <strong>Methodology Details:</strong> Complete breakdown of the 9 CRI factors, Political HHI formula, and regression models from the original EOGO paper
+                                    </div>
+                                </div>
+                                <div class="flex items-start">
+                                    <span class="text-blue-600 font-bold mr-2">💡</span>
+                                    <div>
+                                        <strong>Implementation Roadmap:</strong> Detailed recommendations for collecting missing data and implementing the full EOGO methodology
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Disclaimer -->
+                        <div class="mt-6 p-4 bg-gray-50 border border-gray-200 rounded-lg">
+                            <p class="text-sm text-gray-700">
+                                <strong>⚠️ Important Disclaimer:</strong> This analysis represents a partial implementation of the EOGO corruption risk methodology. 
+                                The limitations outlined above mean that our current HHI and CRI scores should be interpreted as preliminary indicators 
+                                rather than definitive measures of corruption risk. Users should exercise caution when drawing conclusions from these 
+                                incomplete analyses and consider the significant data gaps that affect the reliability of our findings.
+                            </p>
+                            <p class="text-sm text-gray-700 mt-2">
+                                <strong>📖 For complete details:</strong> See the comprehensive analysis in <code>analysis/EOGO.md</code> which documents 
+                                the full methodology, data requirements, and implementation challenges.
+                            </p>
+                        </div>
+                    </div>
 </div>
 
 <script>
@@ -498,6 +735,9 @@ function switchTab(tabName) {
         loadCRIAnalysis();
     } else if (tabName === 'poverty-correlation' && !window.povertyCorrelationLoaded) {
         loadPovertyCorrelation();
+    } else if (tabName === 'limitations') {
+        // Limitations tab doesn't need data loading - it's static content
+        window.limitationsLoaded = true;
     }
 }
 

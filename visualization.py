@@ -2959,7 +2959,7 @@ async def dynasty_conflicts_api(
     page: int = Query(1, ge=1, description="Page number"),
     limit: int = Query(50, ge=1, le=1000, description="Number of records per page")
 ):
-    """Get conflicts of interest data for government officials"""
+    """Get relationship data for government officials"""
     try:
         import asyncpg
         
