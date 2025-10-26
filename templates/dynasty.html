@@ -3494,9 +3494,19 @@ function updateAnimationLegend(surnames, flagData) {
     // Show all families (up to 100) in 2 columns
     const allFamilies = sortedSurnames.slice(0, 100);
     
+    // Calculate scaling for legend flags (same as map)
+    const minSize = 8;
+    const maxSize = 24;
+    const maxCount = Math.max(...allFamilies.map(f => f.dynasty_count));
+    
     let legendHTML = '';
     
     allFamilies.forEach(surname => {
+        // Calculate flag size using same scaling as map
+        const sqrtScale = Math.sqrt(surname.dynasty_count) / Math.sqrt(maxCount);
+        const flagSize = Math.round(minSize + (maxSize - minSize) * sqrtScale);
+        const flagHeight = Math.round(flagSize * 0.6);
+        
         // Try to find the flag for this surname
         let flagHtml = '🏴';
         if (flagData && flagData.dynasties) {
@@ -3507,7 +3517,7 @@ function updateAnimationLegend(surnames, flagData) {
             if (dynastyKey) {
                 const dynastyInfo = flagData.dynasties[dynastyKey];
                 const flagUrl = `/static/flags/flag_${dynastyInfo.dynasty_id}.svg`;
-                flagHtml = `<img src="${flagUrl}" alt="Flag" style="width: 14px; height: 9px; vertical-align: middle; border: 1px solid #000;" onerror="this.style.display='none'"/>`;
+                flagHtml = `<img src="${flagUrl}" alt="Flag" style="width: ${flagSize}px; height: ${flagHeight}px; vertical-align: middle; border: 1px solid #000;" onerror="this.style.display='none'"/>`;
             }
         }
         
@@ -3607,15 +3617,15 @@ async function createAnimationMapWithData(familySummaries, flagData, selectedYea
             }
         }
 
-        // Scale by family size - more proportional scaling
-        const minSize = 20;
-        const maxSize = 80;
+        // Scale by family size - more dramatic scaling
+        const minSize = 15;
+        const maxSize = 120;
         const minCount = 1;
         const maxCount = Math.max(...familySummaries.map(f => f.dynasty_count));
         
-        // Logarithmic scaling for better visual proportion
-        const logScale = Math.log(fam.dynasty_count) / Math.log(maxCount);
-        const size = Math.round(minSize + (maxSize - minSize) * logScale);
+        // More dramatic scaling - square root for better visual difference
+        const sqrtScale = Math.sqrt(fam.dynasty_count) / Math.sqrt(maxCount);
+        const size = Math.round(minSize + (maxSize - minSize) * sqrtScale);
         
         const html = `<div style="width:${size}px; height:${Math.round(size * 0.6)}px;">${flagHtml}</div>`;
 
