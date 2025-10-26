@@ -3386,70 +3386,76 @@ async function loadAnimationData() {
     console.log('📅 Loading dynasty data for year:', selectedYear);
     
     try {
-        // Load dynasty data for the selected year (using search to filter by year)
-        const response = await fetch(`/api/dynasty?limit=1000&search=${selectedYear}`);
-        const data = await response.json();
-        
-        if (data.success && data.data) {
-            // Filter for the selected year
-            const yearData = data.data.filter(member => member.year === parseInt(selectedYear));
-            console.log(`📊 Loaded ${yearData.length} dynasty members for year ${selectedYear}`);
-            
-            // Load flag data
-            let flagData = null;
-            try {
-                const flagResponse = await fetch('/static/data/dynasty_flags_cache.json');
-                flagData = await flagResponse.json();
-                console.log('✅ Flag data loaded');
-            } catch (error) {
-                console.log('⚠️ Dynasty flags not available:', error);
-            }
-            
-            // Update the info display
-            const currentYearSpan = document.getElementById('currentYear');
-            if (currentYearSpan) {
-                currentYearSpan.textContent = selectedYear;
-            }
-            
-            // Update dynasty count
-            const dynastyCountSpan = document.getElementById('dynastyCount');
-            if (dynastyCountSpan) {
-                // Count unique surnames for this year
-                const uniqueSurnames = new Set(yearData.map(m => m.last_name?.toUpperCase()).filter(Boolean));
-                dynastyCountSpan.textContent = uniqueSurnames.size;
-            }
-            
-            // Update legend year
-            const legendYearValue = document.getElementById('legendYearValue');
-            if (legendYearValue) {
-                legendYearValue.textContent = selectedYear;
-            }
-            
-            // Load top surnames for this year
-            const surnamesResponse = await fetch('/api/dynasty/top-surnames?limit=50');
-            const surnamesData = await surnamesResponse.json();
-            
-            if (surnamesData.success && surnamesData.data) {
-                // Filter surnames for the selected year
-                const filteredSurnames = surnamesData.data.filter(surname => 
-                    yearData.some(m => m.last_name?.toUpperCase() === surname.surname.toUpperCase())
-                );
-                
-                console.log(`📊 Found ${filteredSurnames.length} surnames for year ${selectedYear}`);
-                
-                // Update legend with actual data
-                updateAnimationLegend(filteredSurnames, flagData);
-                
-                // Create the map
-                createAnimationMapWithData(yearData, filteredSurnames, flagData, selectedYear);
-                
-                // Hide animation tab loading spinner
-                hideTabLoadingSpinner('animation');
-            }
-        } else {
-            console.error('❌ Error loading dynasty data:', data.error);
+        // Load candidate top surnames (all years), then aggregate per selected year via /api/dynasty/family
+        const topResp = await fetch('/api/dynasty/top-surnames?limit=200');
+        const topJson = await topResp.json();
+        if (!topJson.success || !Array.isArray(topJson.data)) {
+            console.error('❌ Failed to load candidate surnames');
             hideTabLoadingSpinner('animation');
+            return;
         }
+
+        const candidateSurnames = topJson.data.map(s => s.surname);
+        const targetYear = parseInt(selectedYear);
+        const summaries = [];
+
+        // Batch requests to family API
+        const batchSize = 10;
+        for (let i = 0; i < candidateSurnames.length; i += batchSize) {
+            const batch = candidateSurnames.slice(i, i + batchSize);
+            const results = await Promise.all(batch.map(async (surname) => {
+                try {
+                    const r = await fetch(`/api/dynasty/family?surname=${encodeURIComponent(surname)}`);
+                    const j = await r.json();
+                    if (j.success && Array.isArray(j.data)) {
+                        const members = j.data.filter(m => m.year === targetYear && m.fat === 1);
+                        if (members.length === 0) return null;
+                        const provinceCounts = {};
+                        members.forEach(m => {
+                            const p = (m.province || '').toUpperCase();
+                            if (!p) return;
+                            provinceCounts[p] = (provinceCounts[p] || 0) + 1;
+                        });
+                        const province = Object.entries(provinceCounts).sort((a,b)=>b[1]-a[1])[0]?.[0] || (members[0].province || '').toUpperCase();
+                        return { surname, province, dynasty_count: members.length };
+                    }
+                } catch (e) {
+                    console.warn('⚠️ Family API failed for', surname, e);
+                }
+                return null;
+            }));
+            results.forEach(r => { if (r) summaries.push(r); });
+        }
+
+        // Rank by family size and keep top 100
+        const topFamilies = summaries.sort((a,b) => b.dynasty_count - a.dynasty_count).slice(0, 100);
+        console.log(`📊 Aggregated ${topFamilies.length} families for year ${selectedYear}`);
+
+        // Load flag data
+        let flagData = null;
+        try {
+            const flagResponse = await fetch('/static/data/dynasty_flags_cache.json');
+            flagData = await flagResponse.json();
+            console.log('✅ Flag data loaded');
+        } catch (error) {
+            console.log('⚠️ Dynasty flags not available:', error);
+        }
+
+        // Update info boxes
+        const currentYearSpan = document.getElementById('currentYear');
+        if (currentYearSpan) currentYearSpan.textContent = selectedYear;
+        const dynastyCountSpan = document.getElementById('dynastyCount');
+        if (dynastyCountSpan) dynastyCountSpan.textContent = topFamilies.length;
+        const legendYearValue = document.getElementById('legendYearValue');
+        if (legendYearValue) legendYearValue.textContent = selectedYear;
+
+        // Update legend with real values
+        updateAnimationLegend(topFamilies, flagData);
+
+        // Render map with markers for families
+        await createAnimationMapWithData(topFamilies, flagData, selectedYear);
+
+        hideTabLoadingSpinner('animation');
     } catch (error) {
         console.error('❌ Error loading animation data:', error);
         hideTabLoadingSpinner('animation');
@@ -3505,7 +3511,104 @@ function updateAnimationLegend(surnames, flagData) {
     legendContent.innerHTML = legendHTML;
 }
 
-// Removed unused animation functions
+// Map with per-year family markers (Leaflet + province polygons)
+async function createAnimationMapWithData(familySummaries, flagData, selectedYear) {
+    const mapContainer = document.getElementById('animationMap');
+    if (!mapContainer) return;
+
+    // Initialize Leaflet map
+    mapContainer.innerHTML = `<div id="animationLeafletMap" style="width: 100%; height: 600px; border: 1px solid #ddd; border-radius: 8px;"></div>`;
+    const map = L.map('animationLeafletMap').setView([12.8797, 121.7740], 6);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '© OpenStreetMap contributors'
+    }).addTo(map);
+
+    // Load province polygons
+    let geojson;
+    try {
+        const resp = await fetch('/static/data/philippines-provinces.json');
+        geojson = await resp.json();
+    } catch (e) {
+        console.error('❌ Failed to load provinces GeoJSON', e);
+    }
+    if (geojson) {
+        L.geoJSON(geojson, {
+            style: {
+                fillColor: '#ffffff',
+                weight: 2,
+                opacity: 1,
+                color: '#000000',
+                dashArray: '0',
+                fillOpacity: 0.1
+            }
+        }).addTo(map);
+    }
+
+    // Province centroid cache by name (fallback: simple bounding box centroid)
+    function getFeatureByProvince(name) {
+        if (!geojson || !geojson.features) return null;
+        const lower = name.toLowerCase();
+        return geojson.features.find(f => {
+            const n = (f.properties.name || f.properties.NAME_1 || f.properties.PROVINCE || '').toLowerCase();
+            return n === lower || n.includes(lower) || lower.includes(n);
+        }) || null;
+    }
+
+    function getFeatureCentroid(feature) {
+        try {
+            const coords = [];
+            if (feature.geometry && feature.geometry.type === 'MultiPolygon') {
+                feature.geometry.coordinates.forEach(poly => {
+                    poly.forEach(ring => {
+                        ring.forEach(([lng, lat]) => coords.push([lat, lng]));
+                    });
+                });
+            }
+            if (coords.length === 0) return [12.8797, 121.7740];
+            const lat = coords.reduce((s, c) => s + c[0], 0) / coords.length;
+            const lng = coords.reduce((s, c) => s + c[1], 0) / coords.length;
+            return [lat, lng];
+        } catch { return [12.8797, 121.7740]; }
+    }
+
+    // Create markers
+    familySummaries.forEach(fam => {
+        const feature = fam.province ? getFeatureByProvince(fam.province) : null;
+        const [lat, lng] = feature ? getFeatureCentroid(feature) : [12.8797, 121.7740];
+
+        // Generate flag
+        let flagHtml = '<div style="width: 30px; height: 18px; background:#dc3545; border:2px solid #000;"></div>';
+        if (flagData && flagData.dynasties) {
+            const key = Object.keys(flagData.dynasties).find(k => k.toLowerCase().includes(fam.surname.toLowerCase()));
+            if (key) {
+                const info = flagData.dynasties[key];
+                const flagUrl = `/static/flags/flag_${info.dynasty_id}.svg`;
+                flagHtml = `<img src="${flagUrl}" style="width:40px; height:24px; border:2px solid #000; border-radius:4px;" onerror="this.style.display='none'"/>`;
+            }
+        }
+
+        // Scale by family size
+        const sizeMultiplier = Math.max(1, Math.min(2, fam.dynasty_count / 20));
+        const w = Math.round(40 * sizeMultiplier);
+        const h = Math.round(24 * sizeMultiplier);
+        const html = `<div style="display:flex; flex-direction:column; align-items:center;">
+            <div style="width:${w}px; height:${h}px;">${flagHtml}</div>
+            <div style="margin-top:4px; padding:2px 6px; background:rgba(255,255,255,0.9); border:1px solid #000; border-radius:4px; font-size:11px; font-weight:700;">
+                ${fam.surname} (${fam.province || 'N/A'}) #${fam.dynasty_count}
+            </div>
+        </div>`;
+
+        const icon = L.divIcon({ html, className: 'dynasty-flag-icon', iconSize: [w, h], iconAnchor: [w/2, h/2] });
+        L.marker([lat, lng], { icon }).addTo(map)
+            .bindPopup(`<div style="text-align:center;">
+                <div style="margin-bottom:6px;">${flagHtml}</div>
+                <div style="font-weight:800; color:#0038A8;">${fam.surname}</div>
+                <div style="font-size:12px; color:#333;">${fam.province || 'N/A'}</div>
+                <div style="font-size:12px;">Year: ${selectedYear}</div>
+                <div style="font-size:12px;">Members: ${fam.dynasty_count}</div>
+            </div>`);
+    });
+}
 
 function createAnimationMap(ampatuan, flagData) {
     console.log('🗺️ Creating animation map with Ampatuan flag...');
