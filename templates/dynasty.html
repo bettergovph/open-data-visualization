@@ -3551,19 +3551,46 @@ async function createAnimationMapWithData(familySummaries, flagData, selectedYea
         } catch { return [12.8797, 121.7740]; }
     }
 
-    // Calculate scaling for map flags (same as legend)
-    const minSize = 8;
-    const maxSize = 200;
+    // Calculate scaling for map flags (much smaller sizes)
+    const minSize = 4;
+    const maxSize = 40;
     const maxCount = Math.max(...familySummaries.map(f => f.dynasty_count));
     console.log('📏 Flag scaling: minSize=', minSize, 'maxSize=', maxSize, 'maxCount=', maxCount);
 
-    // Create markers
-    console.log('🗺️ Creating markers for', familySummaries.length, 'families');
+    // Group families by province for spacing
+    const provinceGroups = {};
     familySummaries.forEach(fam => {
-        console.log('📍 Processing family:', fam.surname, 'province:', fam.province, 'count:', fam.dynasty_count);
-        const feature = fam.province ? getFeatureByProvince(fam.province) : null;
-        const [lat, lng] = feature ? getFeatureCentroid(feature) : [12.8797, 121.7740];
-        console.log('📍 Coordinates for', fam.surname, ':', lat, lng);
+        const province = fam.province || 'Unknown';
+        if (!provinceGroups[province]) {
+            provinceGroups[province] = [];
+        }
+        provinceGroups[province].push(fam);
+    });
+
+    // Create markers with spacing for multiple families per province
+    console.log('🗺️ Creating markers for', familySummaries.length, 'families across', Object.keys(provinceGroups).length, 'provinces');
+    
+    Object.keys(provinceGroups).forEach(provinceName => {
+        const families = provinceGroups[provinceName];
+        const feature = getFeatureByProvince(provinceName);
+        const [baseLat, baseLng] = feature ? getFeatureCentroid(feature) : [12.8797, 121.7740];
+        
+        console.log(`📍 Province ${provinceName}: ${families.length} families at base coords [${baseLat}, ${baseLng}]`);
+        
+        families.forEach((fam, index) => {
+            // Calculate offset for multiple families in same province
+            let lat = baseLat;
+            let lng = baseLng;
+            
+            if (families.length > 1) {
+                // Space out multiple flags in same province
+                const spacing = 0.1; // degrees
+                const offset = (index - (families.length - 1) / 2) * spacing;
+                lat = baseLat + offset;
+                lng = baseLng + offset;
+            }
+            
+            console.log(`📍 ${fam.surname} in ${provinceName}: [${lat}, ${lng}] (offset ${index})`);
 
         // Scale by family size for map flags
         const linearScale = fam.dynasty_count / maxCount;
@@ -3594,6 +3621,7 @@ async function createAnimationMapWithData(familySummaries, flagData, selectedYea
                 <div style="font-size:12px;">Year: ${selectedYear}</div>
                 <div style="font-size:12px;">Members: ${fam.dynasty_count}</div>
             </div>`);
+        });
     });
 }
 
