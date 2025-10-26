@@ -1057,6 +1057,7 @@ function initializeDynastyPage() {
     if (animationYearSelector) {
         animationYearSelector.addEventListener('change', function() {
             console.log('📅 Animation year changed to:', this.value);
+            console.log('📅 Year selector value:', this.value);
             loadAnimationData();
         });
     }
@@ -3382,6 +3383,8 @@ async function loadAnimationData() {
     const yearSelector = document.getElementById('animationYearSelector');
     const selectedYear = yearSelector ? yearSelector.value : '2004';
     console.log('📅 Loading dynasty data for year:', selectedYear);
+    console.log('📅 Year selector element:', yearSelector);
+    console.log('📅 Year selector value:', yearSelector ? yearSelector.value : 'no element');
     
     try {
         // Load cached data for the selected year
@@ -3422,7 +3425,12 @@ async function loadAnimationData() {
         const dynastyCountSpan = document.getElementById('dynastyCount');
         if (dynastyCountSpan) dynastyCountSpan.textContent = topFamilies.length;
         const legendYearValue = document.getElementById('legendYearValue');
-        if (legendYearValue) legendYearValue.textContent = selectedYear;
+        if (legendYearValue) {
+            legendYearValue.textContent = selectedYear;
+            console.log('📅 Updated legend year to:', selectedYear);
+        } else {
+            console.log('❌ Could not find legendYearValue element');
+        }
 
         // Update legend with real values
         updateAnimationLegend(topFamilies, flagData);
