@@ -3376,7 +3376,7 @@ let animationInterval = null;
 let isAnimating = false;
 
 async function loadAnimationData() {
-    console.log('🎬 Loading animation data...');
+    console.log('🎬 Loading animation data from JSON cache...');
     
     // Get the selected year
     const yearSelector = document.getElementById('animationYearSelector');
@@ -3384,63 +3384,20 @@ async function loadAnimationData() {
     console.log('📅 Loading dynasty data for year:', selectedYear);
     
     try {
-        const targetYear = parseInt(selectedYear);
+        // Load cached data for the selected year
+        const response = await fetch(`/static/data/dynasty_animation_cache/dynasty_animation_${selectedYear}.json`);
+        const yearData = await response.json();
         
-        // Get top surnames by province for the selected year
-        const provincesResp = await fetch('/api/dynasty/provinces');
-        const provincesJson = await provincesResp.json();
-        
-        if (!provincesJson.success || !Array.isArray(provincesJson.data)) {
-            console.error('❌ Failed to load provinces data');
+        if (!yearData || !yearData.top_families) {
+            console.error('❌ Failed to load cached dynasty data for year', selectedYear);
             hideTabLoadingSpinner('animation');
             return;
         }
         
-        const summaries = [];
-        const batchSize = 3; // Even smaller batches
+        console.log(`📊 Loaded ${yearData.top_families.length} families from cache for year ${selectedYear}`);
         
-        // Process each province to get top families
-        for (let i = 0; i < provincesJson.data.length; i += batchSize) {
-            const batch = provincesJson.data.slice(i, i + batchSize);
-            const results = await Promise.all(batch.map(async (provinceData) => {
-                try {
-                    const provinceName = provinceData.province;
-                    console.log(`🔍 Processing province: ${provinceName}`);
-                    
-                    // Get top surnames for this province
-                    const surnamesResp = await fetch(`/api/dynasty/top-surnames?province=${encodeURIComponent(provinceName)}&limit=10`);
-                    const surnamesJson = await surnamesResp.json();
-                    
-                    if (surnamesJson.success && Array.isArray(surnamesJson.data)) {
-                        // Get top 3 surnames for this province
-                        const topSurnames = surnamesJson.data.slice(0, 3);
-                        
-                        for (const surnameData of topSurnames) {
-                            const surname = surnameData.surname;
-                            
-                            // Get family data for this surname in this province
-                            const familyResp = await fetch(`/api/dynasty/family?surname=${encodeURIComponent(surname)}&province=${encodeURIComponent(provinceName)}`);
-                            const familyJson = await familyResp.json();
-                            
-                            if (familyJson.success && Array.isArray(familyJson.data)) {
-                                const members = familyJson.data.filter(m => m.year === targetYear && m.fat === 1);
-                                console.log(`📊 ${surname} in ${provinceName} year ${targetYear}: ${members.length} dynasty members`);
-                                
-                                if (members.length > 0) {
-                                    summaries.push({
-                                        surname,
-                                        province: provinceName.toUpperCase(),
-                                        dynasty_count: members.length
-                                    });
-                                }
-                            }
-                        }
-                    }
-                } catch (e) {
-                    console.warn('⚠️ Failed to process province:', e);
-                }
-            }));
-        }
+        // Use the cached top families data
+        const summaries = yearData.top_families;
 
         // Rank by family size and keep top 100
         const topFamilies = summaries.sort((a,b) => b.dynasty_count - a.dynasty_count).slice(0, 100);
@@ -3448,12 +3405,13 @@ async function loadAnimationData() {
         console.log('📊 Sample families:', topFamilies.slice(0, 5));
         console.log('📊 All summaries before filtering:', summaries);
 
-        // Load flag data
+        // Load flag data from master cache
         let flagData = null;
         try {
-            const flagResponse = await fetch('/static/data/dynasty_flags_cache.json');
-            flagData = await flagResponse.json();
-            console.log('✅ Flag data loaded');
+            const masterResponse = await fetch('/static/data/dynasty_animation_cache/dynasty_animation_master.json');
+            const masterData = await masterResponse.json();
+            flagData = masterData.flag_data;
+            console.log('✅ Flag data loaded from cache');
         } catch (error) {
             console.log('⚠️ Dynasty flags not available:', error);
         }
