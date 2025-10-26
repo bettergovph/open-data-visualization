@@ -3748,6 +3748,13 @@ async function createAnimationMapWithData(familySummaries, flagData, selectedYea
     } else {
         map = window.animationMap;
         console.log('🔄 Reusing existing map:', map);
+        // Check if it's actually a Leaflet map object
+        if (!map || typeof map.addLayer !== 'function') {
+            console.error('❌ Stored map is not a valid Leaflet map, recreating...');
+            window.animationMap = null; // Clear the invalid reference
+            // Recursively call this function to recreate the map
+            return await createAnimationMapWithData(familySummaries, flagData, selectedYear);
+        }
     }
     
     // Verify map is valid before proceeding
