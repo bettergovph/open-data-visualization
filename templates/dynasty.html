@@ -3556,6 +3556,12 @@ async function createAnimationMapWithData(familySummaries, flagData, selectedYea
         } catch { return [12.8797, 121.7740]; }
     }
 
+    // Calculate scaling parameters once outside the loop
+    const minSize = 8;
+    const maxSize = 200;
+    const maxCount = Math.max(...familySummaries.map(f => f.dynasty_count));
+    console.log('📏 Flag scaling: minSize=', minSize, 'maxSize=', maxSize, 'maxCount=', maxCount);
+
     // Create markers
     console.log('🗺️ Creating markers for', familySummaries.length, 'families');
     familySummaries.forEach(fam => {
@@ -3576,18 +3582,15 @@ async function createAnimationMapWithData(familySummaries, flagData, selectedYea
         }
 
         // Scale by family size - EXTREMELY dramatic scaling
-        const minSize = 8;
-        const maxSize = 200;
-        const minCount = 1;
-        const maxCount = Math.max(...familySummaries.map(f => f.dynasty_count));
-        
-        // Linear scaling for maximum visual impact - each person makes a big difference
         const linearScale = fam.dynasty_count / maxCount;
         const size = Math.round(minSize + (maxSize - minSize) * linearScale);
+        const height = Math.round(size * 0.6);
         
-        const html = `<div style="width:${size}px; height:${Math.round(size * 0.6)}px;">${flagHtml}</div>`;
+        console.log(`📏 ${fam.surname}: count=${fam.dynasty_count}, scale=${linearScale.toFixed(3)}, size=${size}px`);
+        
+        const html = `<div style="width:${size}px; height:${height}px;">${flagHtml}</div>`;
 
-        const icon = L.divIcon({ html, className: 'dynasty-flag-icon', iconSize: [size, Math.round(size * 0.6)], iconAnchor: [size/2, Math.round(size * 0.6)/2] });
+        const icon = L.divIcon({ html, className: 'dynasty-flag-icon', iconSize: [size, height], iconAnchor: [size/2, height/2] });
         L.marker([lat, lng], { icon }).addTo(map)
             .bindPopup(`<div style="text-align:center;">
                 <div style="margin-bottom:6px;">${flagHtml}</div>
