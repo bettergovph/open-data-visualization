@@ -3683,14 +3683,32 @@ function updateAnimationLegend(surnames, flagData) {
 // Map with per-year family markers (Leaflet + province polygons)
 async function createAnimationMapWithData(familySummaries, flagData, selectedYear) {
     const mapContainer = document.getElementById('animationMap');
-    if (!mapContainer) return;
+    if (!mapContainer) {
+        console.error('❌ animationMap container not found');
+        return;
+    }
 
     let map;
     
     // Initialize map only once, then reuse
     if (!window.animationMap) {
+        console.log('🗺️ Creating new map...');
         mapContainer.innerHTML = `<div id="animationLeafletMap" style="width: 100%; height: 600px; border: 1px solid #ddd; border-radius: 8px;"></div>`;
-        map = L.map('animationLeafletMap').setView([12.8797, 121.7740], 6);
+        
+        const mapDiv = document.getElementById('animationLeafletMap');
+        if (!mapDiv) {
+            console.error('❌ animationLeafletMap div not created');
+            return;
+        }
+        
+        try {
+            map = L.map('animationLeafletMap').setView([12.8797, 121.7740], 6);
+            console.log('✅ Map created successfully:', map);
+        } catch (error) {
+            console.error('❌ Error creating map:', error);
+            return;
+        }
+        
         window.animationMap = map;
         
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
@@ -3724,18 +3742,19 @@ async function createAnimationMapWithData(familySummaries, flagData, selectedYea
         console.log('🔄 Reusing existing map:', map);
     }
     
+    // Verify map is valid before proceeding
+    if (!map || typeof map.addLayer !== 'function') {
+        console.error('❌ Map is not valid:', map);
+        return;
+    }
+    
     // Clear only the dynasty markers, keep provinces
     if (window.dynastyMarkers) {
         window.dynastyMarkers.clearLayers();
     } else {
         window.dynastyMarkers = L.layerGroup();
-        if (map && typeof map.addLayer === 'function') {
-            map.addLayer(window.dynastyMarkers);
-            console.log('✅ Created dynastyMarkers layer group');
-        } else {
-            console.error('❌ Map not properly initialized:', map);
-            return;
-        }
+        map.addLayer(window.dynastyMarkers);
+        console.log('✅ Created dynastyMarkers layer group');
     }
 
     // Province centroid cache by name (fallback: simple bounding box centroid)
