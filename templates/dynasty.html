@@ -3408,8 +3408,8 @@ async function loadAnimationData() {
                     console.log(`🔍 Raw API response for ${surname}:`, JSON.stringify(j, null, 2));
                     console.log(`🔍 Response structure - success:`, j.success, 'data type:', typeof j.data, 'isArray:', Array.isArray(j.data));
                     if (j.success && Array.isArray(j.data)) {
-                        const members = j.data.filter(m => m.year === targetYear && m.fat === 1);
-                        console.log(`📊 ${surname} year ${targetYear}: ${members.length} members`);
+                        const members = j.data.filter(m => m.year === targetYear);
+                        console.log(`📊 ${surname} year ${targetYear}: ${members.length} members (all)`);
                         if (members.length === 0) return null;
                         const provinceCounts = {};
                         members.forEach(m => {
