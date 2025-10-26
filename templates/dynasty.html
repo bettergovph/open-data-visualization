@@ -869,10 +869,10 @@ function toggleMobileMenu() {
                                     <div style="display: flex; gap: 15px; height: 600px;">
                                         <div id="animationMap" style="flex: 1; border: 1px solid #ddd; border-radius: 8px; background: #f0f8ff; position: relative; overflow: hidden;">
                                         </div>
-                                        <div id="animationLegend" style="width: 300px; background: rgba(255,255,255,0.95); padding: 15px; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.3); border: 2px solid #0038A8; font-size: 12px; overflow-y: auto;">
-                                            <div style="font-weight: bold; margin-bottom: 10px; color: #0038A8; font-size: 16px;">📋 Legend</div>
-                                            <div id="legendYear" style="font-weight: 600; margin-bottom: 15px; color: #dc3545; font-size: 13px; text-align: center; background: #fff3cd; padding: 4px; border-radius: 4px;">Year: <span id="legendYearValue">2004</span></div>
-                                            <div id="legendContent" style="color: #666; font-size: 11px;">
+                                        <div id="animationLegend" style="width: 300px; background: rgba(255,255,255,0.95); padding: 10px; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.3); border: 2px solid #0038A8; font-size: 10px; overflow-y: auto;">
+                                            <div style="font-weight: bold; margin-bottom: 8px; color: #0038A8; font-size: 14px;">📋 Legend</div>
+                                            <div id="legendYear" style="font-weight: 600; margin-bottom: 10px; color: #dc3545; font-size: 12px; text-align: center; background: #fff3cd; padding: 3px; border-radius: 4px;">Year: <span id="legendYearValue">2004</span></div>
+                                            <div id="legendContent" style="color: #666; font-size: 9px; display: grid; grid-template-columns: 1fr 1fr; gap: 4px;">
                                                 <!-- Dynamic legend content will be added here -->
                                             </div>
                                         </div>
@@ -3483,7 +3483,7 @@ function updateAnimationLegend(surnames, flagData) {
     const legendContent = document.getElementById('legendContent');
     if (!legendContent || !surnames || surnames.length === 0) {
         if (legendContent) {
-            legendContent.innerHTML = '<div style="color: #666; font-size: 11px;">No dynasty data available</div>';
+            legendContent.innerHTML = '<div style="color: #666; font-size: 9px;">No dynasty data available</div>';
         }
         return;
     }
@@ -3491,12 +3491,12 @@ function updateAnimationLegend(surnames, flagData) {
     // Sort by member count descending
     const sortedSurnames = surnames.sort((a, b) => b.dynasty_count - a.dynasty_count);
     
-    // Get top 10 surnames for the legend
-    const topSurnames = sortedSurnames.slice(0, 10);
+    // Show all families (up to 100) in 2 columns
+    const allFamilies = sortedSurnames.slice(0, 100);
     
     let legendHTML = '';
     
-    topSurnames.forEach(surname => {
+    allFamilies.forEach(surname => {
         // Try to find the flag for this surname
         let flagHtml = '🏴';
         if (flagData && flagData.dynasties) {
@@ -3507,13 +3507,13 @@ function updateAnimationLegend(surnames, flagData) {
             if (dynastyKey) {
                 const dynastyInfo = flagData.dynasties[dynastyKey];
                 const flagUrl = `/static/flags/flag_${dynastyInfo.dynasty_id}.svg`;
-                flagHtml = `<img src="${flagUrl}" alt="Flag" style="width: 24px; height: 15px; vertical-align: middle; border: 1px solid #000;" onerror="this.style.display='none'"/>`;
+                flagHtml = `<img src="${flagUrl}" alt="Flag" style="width: 16px; height: 10px; vertical-align: middle; border: 1px solid #000;" onerror="this.style.display='none'"/>`;
             }
         }
         
         legendHTML += `
-            <div style="margin-bottom: 6px; padding: 6px; background: #f8f9fa; border-radius: 4px; border-left: 3px solid #0038A8;">
-                <div style="display: flex; align-items: center; gap: 6px; font-size: 12px;">
+            <div style="margin-bottom: 3px; padding: 3px; background: #f8f9fa; border-radius: 3px; border-left: 2px solid #0038A8; font-size: 8px;">
+                <div style="display: flex; align-items: center; gap: 4px;">
                     <span>${flagHtml}</span>
                     <span style="font-weight: bold; color: #333;">${surname.surname}</span>
                     <span style="color: #666;">(${surname.province || 'N/A'})</span>
@@ -3522,10 +3522,6 @@ function updateAnimationLegend(surnames, flagData) {
             </div>
         `;
     });
-    
-    if (surnames.length > 10) {
-        legendHTML += `<div style="color: #666; font-size: 10px; margin-top: 8px; text-align: center;">... and ${surnames.length - 10} more families</div>`;
-    }
     
     legendContent.innerHTML = legendHTML;
 }
@@ -3609,13 +3605,19 @@ async function createAnimationMapWithData(familySummaries, flagData, selectedYea
             }
         }
 
-        // Scale by family size
-        const sizeMultiplier = Math.max(1, Math.min(2, fam.dynasty_count / 20));
-        const w = Math.round(40 * sizeMultiplier);
-        const h = Math.round(24 * sizeMultiplier);
-        const html = `<div style="width:${w}px; height:${h}px;">${flagHtml}</div>`;
+        // Scale by family size - more proportional scaling
+        const minSize = 20;
+        const maxSize = 80;
+        const minCount = 1;
+        const maxCount = Math.max(...familySummaries.map(f => f.dynasty_count));
+        
+        // Logarithmic scaling for better visual proportion
+        const logScale = Math.log(fam.dynasty_count) / Math.log(maxCount);
+        const size = Math.round(minSize + (maxSize - minSize) * logScale);
+        
+        const html = `<div style="width:${size}px; height:${Math.round(size * 0.6)}px;">${flagHtml}</div>`;
 
-        const icon = L.divIcon({ html, className: 'dynasty-flag-icon', iconSize: [w, h], iconAnchor: [w/2, h/2] });
+        const icon = L.divIcon({ html, className: 'dynasty-flag-icon', iconSize: [size, Math.round(size * 0.6)], iconAnchor: [size/2, Math.round(size * 0.6)/2] });
         L.marker([lat, lng], { icon }).addTo(map)
             .bindPopup(`<div style="text-align:center;">
                 <div style="margin-bottom:6px;">${flagHtml}</div>
