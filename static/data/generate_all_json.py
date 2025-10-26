@@ -279,6 +279,62 @@ class JSONGenerator:
                 'dependencies': ['PostgreSQL dynasty database']
             },
             
+            # Dynasty Animation Cache Files
+            'dynasty_animation_master.json': {
+                'script': 'cache_dynasty_animation.py',
+                'description': 'Master index for dynasty animation data with provinces, centroids, and flag data',
+                'category': 'dynasty_data',
+                'dependencies': ['PostgreSQL dynasty database', 'Philippines GeoJSON']
+            },
+            'dynasty_animation_2004.json': {
+                'script': 'cache_dynasty_animation.py',
+                'description': 'Dynasty animation data for 2004 election year',
+                'category': 'dynasty_data',
+                'dependencies': ['PostgreSQL dynasty database']
+            },
+            'dynasty_animation_2007.json': {
+                'script': 'cache_dynasty_animation.py',
+                'description': 'Dynasty animation data for 2007 election year',
+                'category': 'dynasty_data',
+                'dependencies': ['PostgreSQL dynasty database']
+            },
+            'dynasty_animation_2010.json': {
+                'script': 'cache_dynasty_animation.py',
+                'description': 'Dynasty animation data for 2010 election year',
+                'category': 'dynasty_data',
+                'dependencies': ['PostgreSQL dynasty database']
+            },
+            'dynasty_animation_2013.json': {
+                'script': 'cache_dynasty_animation.py',
+                'description': 'Dynasty animation data for 2013 election year',
+                'category': 'dynasty_data',
+                'dependencies': ['PostgreSQL dynasty database']
+            },
+            'dynasty_animation_2016.json': {
+                'script': 'cache_dynasty_animation.py',
+                'description': 'Dynasty animation data for 2016 election year',
+                'category': 'dynasty_data',
+                'dependencies': ['PostgreSQL dynasty database']
+            },
+            'dynasty_animation_2019.json': {
+                'script': 'cache_dynasty_animation.py',
+                'description': 'Dynasty animation data for 2019 election year',
+                'category': 'dynasty_data',
+                'dependencies': ['PostgreSQL dynasty database']
+            },
+            'dynasty_animation_2022.json': {
+                'script': 'cache_dynasty_animation.py',
+                'description': 'Dynasty animation data for 2022 election year',
+                'category': 'dynasty_data',
+                'dependencies': ['PostgreSQL dynasty database']
+            },
+            'dynasty_animation_2025.json': {
+                'script': 'cache_dynasty_animation.py',
+                'description': 'Dynasty animation data for 2025 election year',
+                'category': 'dynasty_data',
+                'dependencies': ['PostgreSQL dynasty database']
+            },
+            
             # EOGO Corruption Risk Analysis
             'political_hhi_cache.json': {
                 'script': 'compute_cri_analysis.py',
@@ -459,12 +515,18 @@ class JSONGenerator:
         print("=" * 40)
         
         # Generate dynasty surnames cache
-        success, output = await self.run_script(
+        success1, output1 = await self.run_script(
             'sec_scraper/generate_dynasty_surnames.py',
             'Dynasty Surnames Cache'
         )
         
-        return success
+        # Generate dynasty animation cache (all years + master index)
+        success2, output2 = await self.run_script(
+            'cache_dynasty_animation.py',
+            'Dynasty Animation Cache (All Years + Master Index)'
+        )
+        
+        return success1 and success2
     
     async def generate_eogo_data(self):
         """Generate EOGO Corruption Risk Analysis JSON files."""
