@@ -3387,7 +3387,7 @@ async function loadAnimationData() {
     
     try {
         // Load candidate top surnames (all years), then aggregate per selected year via /api/dynasty/family
-        const topResp = await fetch('/api/dynasty/top-surnames?limit=200');
+        const topResp = await fetch('/api/dynasty/top-surnames?limit=100');
         const topJson = await topResp.json();
         if (!topJson.success || !Array.isArray(topJson.data)) {
             console.error('❌ Failed to load candidate surnames');
