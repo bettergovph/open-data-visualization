@@ -2471,11 +2471,24 @@ function getTopDynastyForProvince(province) {
     // Normalize province names for case-insensitive matching
     const normalizedProvince = province.toUpperCase();
     
+    // Debug specific provinces
+    if (province.includes('SAMAR')) {
+        console.log(`🔍 Debug SAMAR: Looking for "${province}" (normalized: "${normalizedProvince}")`);
+        console.log('🔍 Available dynasty provinces:', Object.keys(dynastyData));
+    }
+    
     // Find matching dynasty data (case-insensitive)
     for (const [dynastyProvince, dynastySurname] of Object.entries(dynastyData)) {
         if (dynastyProvince.toUpperCase() === normalizedProvince) {
+            if (province.includes('SAMAR')) {
+                console.log(`✅ Found match: "${dynastyProvince}" -> "${dynastySurname}"`);
+            }
             return dynastySurname;
         }
+    }
+    
+    if (province.includes('SAMAR')) {
+        console.log(`❌ No match found for "${province}"`);
     }
     
     return '-';
