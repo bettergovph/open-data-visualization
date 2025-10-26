@@ -3399,13 +3399,13 @@ async function loadAnimationData() {
         const targetYear = parseInt(selectedYear);
         const summaries = [];
 
-        // Batch requests to family API
+        // Use main dynasty API with search instead of family API
         const batchSize = 10;
         for (let i = 0; i < candidateSurnames.length; i += batchSize) {
             const batch = candidateSurnames.slice(i, i + batchSize);
             const results = await Promise.all(batch.map(async (surname) => {
                 try {
-                    const r = await fetch(`/api/dynasty/family?surname=${encodeURIComponent(surname)}`);
+                    const r = await fetch(`/api/dynasty?limit=1000&search=${encodeURIComponent(surname)}`);
                     const j = await r.json();
                     console.log(`🔍 Raw API response for ${surname}:`, JSON.stringify(j, null, 2));
                     console.log(`🔍 Response structure - success:`, j.success, 'data type:', typeof j.data, 'isArray:', Array.isArray(j.data));
@@ -3423,7 +3423,7 @@ async function loadAnimationData() {
                         return { surname, province, dynasty_count: members.length };
                     }
                 } catch (e) {
-                    console.warn('⚠️ Family API failed for', surname, e);
+                    console.warn('⚠️ Dynasty API failed for', surname, e);
                 }
                 return null;
             }));
