@@ -848,21 +848,38 @@ function toggleMobileMenu() {
                                 </div>
                             </div>
                             
-                            <!-- Year Selector -->
+                            <!-- Year Selector and Controls -->
                             <div style="background: white; padding: 15px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); margin-bottom: 20px;">
-                                <label for="animationYearSelector" style="display: block; margin-bottom: 10px; font-weight: 600; color: #333;">Select Election Year:</label>
-                                <div style="display: flex; align-items: center; gap: 10px;">
-                                    <select id="animationYearSelector" style="padding: 10px; border: 1px solid #ddd; border-radius: 4px; font-size: 16px; width: 100%; max-width: 300px;">
-                                        <option value="2004">2004</option>
-                                        <option value="2007">2007</option>
-                                        <option value="2010">2010</option>
-                                        <option value="2013">2013</option>
-                                        <option value="2016">2016</option>
-                                        <option value="2019">2019</option>
-                                        <option value="2022">2022</option>
-                                        <option value="2025">2025</option>
-                                    </select>
-                                    <div id="yearLoadingSpinner" style="display: none; width: 20px; height: 20px; border: 2px solid #f3f3f3; border-top: 2px solid #0038A8; border-radius: 50%; animation: spin 1s linear infinite;"></div>
+                                <div style="display: flex; align-items: center; gap: 15px; flex-wrap: wrap;">
+                                    <!-- Year Selector -->
+                                    <div style="display: flex; align-items: center; gap: 8px;">
+                                        <label for="animationYearSelector" style="font-weight: 600; color: #333; white-space: nowrap;">Select Election Year:</label>
+                                        <select id="animationYearSelector" style="padding: 8px; border: 1px solid #ddd; border-radius: 4px; font-size: 14px; width: 100px;">
+                                            <option value="2004">2004</option>
+                                            <option value="2007">2007</option>
+                                            <option value="2010">2010</option>
+                                            <option value="2013">2013</option>
+                                            <option value="2016">2016</option>
+                                            <option value="2019">2019</option>
+                                            <option value="2022">2022</option>
+                                            <option value="2025">2025</option>
+                                        </select>
+                                        <div id="yearLoadingSpinner" style="display: none; width: 16px; height: 16px; border: 2px solid #f3f3f3; border-top: 2px solid #0038A8; border-radius: 50%; animation: spin 1s linear infinite;"></div>
+                                    </div>
+                                    
+                                    <!-- Play/Pause/Stop Controls -->
+                                    <div style="display: flex; align-items: center; gap: 8px;">
+                                        <button id="playButton" style="padding: 6px 12px; background: #28a745; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 12px;">▶️ Play</button>
+                                        <button id="pauseButton" style="padding: 6px 12px; background: #ffc107; color: black; border: none; border-radius: 4px; cursor: pointer; font-size: 12px; display: none;">⏸️ Pause</button>
+                                        <button id="stopButton" style="padding: 6px 12px; background: #dc3545; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 12px;">⏹️ Stop</button>
+                                    </div>
+                                    
+                                    <!-- Speed Control -->
+                                    <div style="display: flex; align-items: center; gap: 8px;">
+                                        <label for="speedSlider" style="font-weight: 600; color: #333; white-space: nowrap; font-size: 12px;">Speed:</label>
+                                        <input type="range" id="speedSlider" min="5" max="30" value="15" style="width: 100px;">
+                                        <span id="speedValue" style="font-size: 12px; color: #666; min-width: 30px;">15s</span>
+                                    </div>
                                 </div>
                             </div>
                             
@@ -1071,6 +1088,9 @@ function initializeDynastyPage() {
             loadAnimationData();
         });
     }
+    
+    // Set up animation controls
+    setupAnimationControls();
 }
 
 function loadRegionOptions() {
@@ -3385,6 +3405,116 @@ let animationData = [];
 let currentAnimationYear = null;
 let animationInterval = null;
 let isAnimating = false;
+let animationSpeed = 15; // seconds
+
+function setupAnimationControls() {
+    const playButton = document.getElementById('playButton');
+    const pauseButton = document.getElementById('pauseButton');
+    const stopButton = document.getElementById('stopButton');
+    const speedSlider = document.getElementById('speedSlider');
+    const speedValue = document.getElementById('speedValue');
+    
+    if (playButton) {
+        playButton.addEventListener('click', function() {
+            console.log('▶️ Play button clicked');
+            startAnimation();
+        });
+    }
+    
+    if (pauseButton) {
+        pauseButton.addEventListener('click', function() {
+            console.log('⏸️ Pause button clicked');
+            pauseAnimation();
+        });
+    }
+    
+    if (stopButton) {
+        stopButton.addEventListener('click', function() {
+            console.log('⏹️ Stop button clicked');
+            stopAnimation();
+        });
+    }
+    
+    if (speedSlider && speedValue) {
+        speedSlider.addEventListener('input', function() {
+            animationSpeed = parseInt(this.value);
+            speedValue.textContent = animationSpeed + 's';
+            console.log('🎛️ Speed changed to:', animationSpeed, 'seconds');
+        });
+    }
+}
+
+function startAnimation() {
+    if (isAnimating) return;
+    
+    isAnimating = true;
+    const playButton = document.getElementById('playButton');
+    const pauseButton = document.getElementById('pauseButton');
+    
+    if (playButton) playButton.style.display = 'none';
+    if (pauseButton) pauseButton.style.display = 'inline-block';
+    
+    // Get years array
+    const years = ['2004', '2007', '2010', '2013', '2016', '2019', '2022', '2025'];
+    let currentIndex = 0;
+    
+    // Set initial year
+    const yearSelector = document.getElementById('animationYearSelector');
+    if (yearSelector) {
+        yearSelector.value = years[currentIndex];
+        loadAnimationData();
+    }
+    
+    // Start cycling through years
+    animationInterval = setInterval(() => {
+        currentIndex = (currentIndex + 1) % years.length;
+        const nextYear = years[currentIndex];
+        
+        console.log('🔄 Cycling to year:', nextYear);
+        
+        if (yearSelector) {
+            yearSelector.value = nextYear;
+            loadAnimationData();
+        }
+    }, animationSpeed * 1000);
+}
+
+function pauseAnimation() {
+    if (!isAnimating) return;
+    
+    isAnimating = false;
+    const playButton = document.getElementById('playButton');
+    const pauseButton = document.getElementById('pauseButton');
+    
+    if (playButton) playButton.style.display = 'inline-block';
+    if (pauseButton) pauseButton.style.display = 'none';
+    
+    if (animationInterval) {
+        clearInterval(animationInterval);
+        animationInterval = null;
+    }
+}
+
+function stopAnimation() {
+    isAnimating = false;
+    const playButton = document.getElementById('playButton');
+    const pauseButton = document.getElementById('pauseButton');
+    
+    if (playButton) playButton.style.display = 'inline-block';
+    if (pauseButton) pauseButton.style.display = 'none';
+    
+    if (animationInterval) {
+        clearInterval(animationInterval);
+        animationInterval = null;
+    }
+    
+    // Reset to first year
+    const yearSelector = document.getElementById('animationYearSelector');
+    if (yearSelector) {
+        yearSelector.value = '2004';
+        loadAnimationData();
+    }
+}
 
 async function loadAnimationData() {
     console.log('🎬 Loading animation data from JSON cache...');
