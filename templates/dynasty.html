@@ -562,14 +562,8 @@ function toggleMobileMenu() {
                                 <table class="poverty-table" style="width: 100%; border-collapse: collapse;">
                                     <thead>
                                         <tr style="background: #f8f9fa;">
-                                            <th style="padding: 12px; text-align: left; border-bottom: 2px solid #dee2e6; font-weight: 600; cursor: pointer;" onclick="sortPovertyTable('region')">
-                                                Region <span id="sort-region">↕️</span>
-                                            </th>
                                             <th style="padding: 12px; text-align: left; border-bottom: 2px solid #dee2e6; font-weight: 600; cursor: pointer;" onclick="sortPovertyTable('province')">
                                                 Province <span id="sort-province">↕️</span>
-                                            </th>
-                                            <th style="padding: 12px; text-align: left; border-bottom: 2px solid #dee2e6; font-weight: 600; cursor: pointer;" onclick="sortPovertyTable('year')">
-                                                Year <span id="sort-year">↕️</span>
                                             </th>
                                             <th style="padding: 12px; text-align: left; border-bottom: 2px solid #dee2e6; font-weight: 600; cursor: pointer;" onclick="sortPovertyTable('poverty_rate')">
                                                 Poverty Rate <span id="sort-poverty_rate">↓</span>
@@ -577,11 +571,14 @@ function toggleMobileMenu() {
                                             <th style="padding: 12px; text-align: left; border-bottom: 2px solid #dee2e6; font-weight: 600; cursor: pointer;" onclick="sortPovertyTable('population')">
                                                 Population <span id="sort-population">↕️</span>
                                             </th>
+                                            <th style="padding: 12px; text-align: left; border-bottom: 2px solid #dee2e6; font-weight: 600; cursor: pointer;" onclick="sortPovertyTable('top_dynasty')">
+                                                Top Dynasty <span id="sort-top_dynasty">↕️</span>
+                                            </th>
                                         </tr>
                                     </thead>
                                     <tbody id="povertyTableBody">
                                         <tr>
-                                            <td colspan="5" style="padding: 20px; text-align: center; color: #6c757d;">
+                                            <td colspan="4" style="padding: 20px; text-align: center; color: #6c757d;">
                                                 <div style="display: flex; flex-direction: column; align-items: center; gap: 10px;">
                                                     <div style="font-size: 2em;">💰</div>
                                                     <div>Click "Load Data" to view poverty statistics</div>
@@ -780,6 +777,7 @@ function initializeDynastyPage() {
             } else if (tabName === 'overlords') {
                 loadDynastyMap();
             } else if (tabName === 'poverty') {
+                loadDynastyData();
                 loadPovertyData();
             } else if (tabName === 'conflicts') {
                 // Initialize conflicts tab
@@ -2416,6 +2414,62 @@ document.addEventListener('DOMContentLoaded', function() {
 
 
 <script>
+// Dynasty data for province mapping
+let dynastyData = {};
+
+// Load dynasty data
+async function loadDynastyData() {
+    try {
+        console.log('🏛️ Loading dynasty data from API...');
+        
+        const response = await fetch('/api/dynasty/top-surnames?limit=1000');
+        if (!response.ok) {
+            throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+        }
+        
+        const data = await response.json();
+        
+        if (!data.success) {
+            throw new Error(data.error || 'Failed to load dynasty data');
+        }
+        
+        // Process dynasty data to create province -> top dynasty mapping
+        const provinceDynasties = {};
+        
+        data.data.forEach(item => {
+            const province = item.province;
+            if (!provinceDynasties[province]) {
+                provinceDynasties[province] = [];
+            }
+            provinceDynasties[province].push({
+                surname: item.surname,
+                dynasty_count: item.dynasty_count,
+                dynasty_percentage: item.dynasty_percentage
+            });
+        });
+        
+        // Get top dynasty per province
+        Object.keys(provinceDynasties).forEach(province => {
+            const dynasties = provinceDynasties[province]
+                .filter(d => d.dynasty_count > 0)
+                .sort((a, b) => b.dynasty_count - a.dynasty_count);
+            
+            if (dynasties.length > 0) {
+                dynastyData[province] = dynasties[0].surname;
+            }
+        });
+        
+        console.log('🏛️ Dynasty data loaded:', Object.keys(dynastyData).length, 'provinces');
+    } catch (error) {
+        console.error('❌ Error loading dynasty data:', error);
+    }
+}
+
+// Get top dynasty for a province
+function getTopDynastyForProvince(province) {
+    return dynastyData[province] || '-';
+}
+
 // Poverty Tab Functions
 let povertyData = [];
 let currentPovertyPage = 1;
@@ -2462,7 +2516,7 @@ async function loadPovertyData() {
         const tableBody = document.getElementById('povertyTableBody');
         tableBody.innerHTML = `
             <tr>
-                <td colspan="5" style="padding: 20px; text-align: center; color: #dc3545;">
+                <td colspan="4" style="padding: 20px; text-align: center; color: #dc3545;">
                     <div style="display: flex; flex-direction: column; align-items: center; gap: 10px;">
                         <div style="font-size: 2em;">❌</div>
                         <div>Error loading poverty data: ${error.message}</div>
@@ -2522,6 +2576,12 @@ function displayPovertyData() {
             bVal = parseFloat(bVal) || 0;
         }
         
+        // Handle dynasty column (use the dynasty surname for sorting)
+        if (povertySortBy === 'top_dynasty') {
+            aVal = getTopDynastyForProvince(a.province);
+            bVal = getTopDynastyForProvince(b.province);
+        }
+        
         if (povertySortOrder === 'asc') {
             return aVal > bVal ? 1 : aVal < bVal ? -1 : 0;
         } else {
@@ -2539,7 +2599,7 @@ function displayPovertyData() {
     if (pageData.length === 0) {
         tableBody.innerHTML = `
             <tr>
-                <td colspan="5" style="padding: 20px; text-align: center; color: #6c757d;">
+                <td colspan="4" style="padding: 20px; text-align: center; color: #6c757d;">
                     <div style="display: flex; flex-direction: column; align-items: center; gap: 10px;">
                         <div style="font-size: 2em;">📭</div>
                         <div>No poverty data found</div>
@@ -2550,13 +2610,12 @@ function displayPovertyData() {
     } else {
         tableBody.innerHTML = pageData.map(item => `
             <tr style="border-bottom: 1px solid #dee2e6;">
-                <td style="padding: 12px; font-weight: 600;">${item.region || '-'}</td>
-                <td style="padding: 12px;">${item.province}</td>
-                <td style="padding: 12px;">${item.year || '-'}</td>
+                <td style="padding: 12px; font-weight: 600;">${item.province}</td>
                 <td style="padding: 12px; text-align: right; font-weight: 600; color: ${item.poverty_rate > 20 ? '#dc3545' : item.poverty_rate > 10 ? '#ffc107' : '#28a745'};">
                     ${item.poverty_rate}%
                 </td>
                 <td style="padding: 12px; text-align: right;">${item.population ? item.population.toLocaleString() : '-'}</td>
+                <td style="padding: 12px; font-weight: 600; color: #6c757d;">${getTopDynastyForProvince(item.province)}</td>
             </tr>
         `).join('');
     }
