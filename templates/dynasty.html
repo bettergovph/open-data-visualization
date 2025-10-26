@@ -2471,6 +2471,41 @@ function getTopDynastyForProvince(province) {
     // Normalize province names for case-insensitive matching
     const normalizedProvince = province.toUpperCase();
     
+    // Province name mappings for common variations
+    const provinceMappings = {
+        'NCR, CITY OF MANILA, FIRST DISTRICT': 'MANILA',
+        'NCR, SECOND DISTRICT': 'NCR, SECOND DISTRICT',
+        'NCR, THIRD DISTRICT': 'NCR, THIRD DISTRICT', 
+        'NCR, FOURTH DISTRICT': 'NCR, FOURTH DISTRICT',
+        'COMPOSTELA VALLEY': 'DAVAO DE ORO',
+        'DAVAO DEL NORTE': 'DAVAO DEL NORTE',
+        'DAVAO DEL SUR': 'DAVAO DEL SUR',
+        'DAVAO OCCIDENTAL': 'DAVAO OCCIDENTAL',
+        'DAVAO ORIENTAL': 'DAVAO ORIENTAL',
+        'ZAMBOANGA DEL NORTE': 'ZAMBOANGA DEL NORTE',
+        'ZAMBOANGA DEL SUR': 'ZAMBOANGA DEL SUR',
+        'ZAMBOANGA SIBUGAY': 'ZAMBOANGA SIBUGAY',
+        'SOUTH COTABATO': 'SOUTH COTABATO',
+        'SOUTHERN LEYTE': 'SOUTHERN LEYTE',
+        'CAMARINES NORTE': 'CAMARINES NORTE',
+        'CAMARINES SUR': 'CAMARINES SUR',
+        'NORTHERN SAMAR': 'NORTHERN SAMAR',
+        'EASTERN SAMAR': 'EASTERN SAMAR',
+        'SAMAR': 'SAMAR',
+        'OCCIDENTAL MINDORO': 'OCCIDENTAL MINDORO',
+        'ORIENTAL MINDORO': 'ORIENTAL MINDORO'
+    };
+    
+    // Try direct mapping first
+    const mappedProvince = provinceMappings[normalizedProvince];
+    if (mappedProvince) {
+        for (const [dynastyProvince, dynastySurname] of Object.entries(dynastyData)) {
+            if (dynastyProvince.toUpperCase() === mappedProvince.toUpperCase()) {
+                return dynastySurname;
+            }
+        }
+    }
+    
     // Find matching dynasty data (case-insensitive)
     for (const [dynastyProvince, dynastySurname] of Object.entries(dynastyData)) {
         if (dynastyProvince.toUpperCase() === normalizedProvince) {
@@ -2521,6 +2556,23 @@ async function loadPovertyData() {
         
         // Display data
         displayPovertyData();
+        
+        // Debug: Show matching statistics
+        let matchedCount = 0;
+        let unmatchedProvinces = [];
+        povertyData.forEach(item => {
+            const dynasty = getTopDynastyForProvince(item.province);
+            if (dynasty !== '-') {
+                matchedCount++;
+            } else {
+                unmatchedProvinces.push(item.province);
+            }
+        });
+        
+        console.log(`🏛️ Dynasty matching: ${matchedCount}/${povertyData.length} provinces matched`);
+        if (unmatchedProvinces.length > 0) {
+            console.log('🏛️ Unmatched provinces:', unmatchedProvinces.slice(0, 10));
+        }
         
     } catch (error) {
         console.error('❌ Error loading poverty data:', error);
