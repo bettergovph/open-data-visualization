@@ -3551,11 +3551,11 @@ async function createAnimationMapWithData(familySummaries, flagData, selectedYea
         } catch { return [12.8797, 121.7740]; }
     }
 
-    // Calculate scaling for map flags (much smaller sizes)
-    const minSize = 4;
-    const maxSize = 40;
+    // Calculate linear scaling for map flags (1 member = 1 unit size)
+    const baseSize = 4; // Base size for 1 member
+    const sizePerMember = 2; // Additional pixels per member
     const maxCount = Math.max(...familySummaries.map(f => f.dynasty_count));
-    console.log('📏 Flag scaling: minSize=', minSize, 'maxSize=', maxSize, 'maxCount=', maxCount);
+    console.log('📏 Linear flag scaling: baseSize=', baseSize, 'sizePerMember=', sizePerMember, 'maxCount=', maxCount);
 
     // Group families by province for spacing
     const provinceGroups = {};
@@ -3592,23 +3592,22 @@ async function createAnimationMapWithData(familySummaries, flagData, selectedYea
             
             console.log(`📍 ${fam.surname} in ${provinceName}: [${lat}, ${lng}] (offset ${index})`);
 
-        // Scale by family size for map flags
-        const linearScale = fam.dynasty_count / maxCount;
-        const size = Math.round(minSize + (maxSize - minSize) * linearScale);
+        // Linear scaling: 1 member = baseSize, each additional member adds sizePerMember
+        const size = baseSize + (fam.dynasty_count * sizePerMember);
         const height = Math.round(size * 0.6);
 
-        // Generate flag with scaled size
-        let flagHtml = '<div style="width: 30px; height: 18px; background:#dc3545; border:2px solid #000;"></div>';
+        // Generate flag with scaled size and thin borders
+        let flagHtml = '<div style="width: 30px; height: 18px; background:#dc3545; border:0.5px solid #000;"></div>';
         if (flagData && flagData.dynasties) {
             const key = Object.keys(flagData.dynasties).find(k => k.toLowerCase().includes(fam.surname.toLowerCase()));
             if (key) {
                 const info = flagData.dynasties[key];
                 const flagUrl = `/static/flags/flag_${info.dynasty_id}.svg`;
-                flagHtml = `<img src="${flagUrl}" style="width:${size}px; height:${height}px; border:2px solid #000; border-radius:4px;" onerror="this.style.display='none'"/>`;
+                flagHtml = `<img src="${flagUrl}" style="width:${size}px; height:${height}px; border:0.5px solid #000; border-radius:2px;" onerror="this.style.display='none'"/>`;
             }
         }
         
-        console.log(`📏 ${fam.surname}: count=${fam.dynasty_count}, scale=${linearScale.toFixed(3)}, size=${size}px`);
+        console.log(`📏 ${fam.surname}: count=${fam.dynasty_count}, linear size=${size}px`);
         
         const html = `<div style="width:${size}px; height:${height}px;">${flagHtml}</div>`;
 
