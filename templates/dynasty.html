@@ -2460,6 +2460,7 @@ async function loadDynastyData() {
         });
         
         console.log('🏛️ Dynasty data loaded:', Object.keys(dynastyData).length, 'provinces');
+        console.log('🏛️ Sample dynasty provinces:', Object.keys(dynastyData).slice(0, 5));
     } catch (error) {
         console.error('❌ Error loading dynasty data:', error);
     }
@@ -2467,7 +2468,17 @@ async function loadDynastyData() {
 
 // Get top dynasty for a province
 function getTopDynastyForProvince(province) {
-    return dynastyData[province] || '-';
+    // Normalize province names for case-insensitive matching
+    const normalizedProvince = province.toUpperCase();
+    
+    // Find matching dynasty data (case-insensitive)
+    for (const [dynastyProvince, dynastySurname] of Object.entries(dynastyData)) {
+        if (dynastyProvince.toUpperCase() === normalizedProvince) {
+            return dynastySurname;
+        }
+    }
+    
+    return '-';
 }
 
 // Poverty Tab Functions
@@ -2503,6 +2514,7 @@ async function loadPovertyData() {
         const responseData = await response.json();
         povertyData = responseData.data || responseData; // Handle both structures
         console.log('💰 Poverty data loaded:', povertyData.length, 'records');
+        console.log('💰 Sample poverty provinces:', povertyData.slice(0, 5).map(p => p.province));
         
         // Populate filter options
         populatePovertyFilters();
