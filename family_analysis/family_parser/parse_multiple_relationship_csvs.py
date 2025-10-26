@@ -201,7 +201,8 @@ class MultipleRelationshipCSVParser:
             if person_id:
                 return person_id
             
-            # Try fuzzy matching
+            # Try word-boundary match to prevent substring issues
+            # Split the name into parts and match each part exactly
             name_parts = full_name.split()
             if len(name_parts) >= 2:
                 first_name = name_parts[0]
@@ -209,14 +210,22 @@ class MultipleRelationshipCSVParser:
                 
                 person_id = await self.db_conn.fetchval("""
                     SELECT id FROM political_dynasties 
-                    WHERE first_name ILIKE $1 AND last_name ILIKE $2
+                    WHERE first_name = $1 AND last_name = $2
                     LIMIT 1
-                """, f"%{first_name}%", f"%{last_name}%")
+                """, first_name, last_name)
                 
                 if person_id:
                     return person_id
             
-            return None
+            # Only as last resort, try fuzzy matching with word boundaries
+            # This prevents "TAN" from matching "CATACUTAN"
+            person_id = await self.db_conn.fetchval("""
+                SELECT id FROM political_dynasties 
+                WHERE CONCAT(first_name, ' ', last_name) ~* $1
+                LIMIT 1
+            """, f"\\y{full_name}\\y")  # Word boundary regex
+            
+            return person_id
             
         except Exception as e:
             print(f"⚠️  Error finding person ID for {full_name}: {e}")

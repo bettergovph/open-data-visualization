@@ -58,14 +58,33 @@ class DynastyRelationshipUpdater:
             if person:
                 return dict(person)
             
-            # Try fuzzy match
+            # Try word-boundary match to prevent substring issues
+            # Split the name into parts and match each part exactly
+            name_parts = full_name.strip().split()
+            if len(name_parts) >= 2:
+                first_name = name_parts[0]
+                last_name = ' '.join(name_parts[1:])
+                
+                person = await self.db_conn.fetchrow("""
+                    SELECT id, first_name, last_name, province, position, year
+                    FROM political_dynasties 
+                    WHERE first_name = $1 AND last_name = $2
+                    ORDER BY year DESC
+                    LIMIT 1
+                """, first_name, last_name)
+                
+                if person:
+                    return dict(person)
+            
+            # Only as last resort, try fuzzy match but with word boundaries
+            # This prevents "TAN" from matching "CATACUTAN"
             person = await self.db_conn.fetchrow("""
                 SELECT id, first_name, last_name, province, position, year
                 FROM political_dynasties 
-                WHERE CONCAT(first_name, ' ', last_name) ILIKE $1
+                WHERE CONCAT(first_name, ' ', last_name) ~* $1
                 ORDER BY year DESC
                 LIMIT 1
-            """, f"%{full_name}%")
+            """, f"\\y{full_name}\\y")  # Word boundary regex
             
             return dict(person) if person else None
             
