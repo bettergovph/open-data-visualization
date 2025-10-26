@@ -189,7 +189,7 @@ class MultipleRelationshipCSVParser:
         return relationships
     
     async def find_person_id(self, full_name: str) -> int:
-        """Find person ID by full name"""
+        """Find person ID by full name with proper hyphenated name handling"""
         try:
             # Try exact match first
             person_id = await self.db_conn.fetchval("""
@@ -201,24 +201,61 @@ class MultipleRelationshipCSVParser:
             if person_id:
                 return person_id
             
-            # Try word-boundary match to prevent substring issues
-            # Split the name into parts and match each part exactly
+            # Handle hyphenated names (maiden name - married name)
             name_parts = full_name.split()
             if len(name_parts) >= 2:
                 first_name = name_parts[0]
                 last_name = ' '.join(name_parts[1:])
                 
-                person_id = await self.db_conn.fetchval("""
-                    SELECT id FROM political_dynasties 
-                    WHERE first_name = $1 AND last_name = $2
-                    LIMIT 1
-                """, first_name, last_name)
-                
-                if person_id:
-                    return person_id
+                # Check if the last name contains a hyphen (maiden-married format)
+                if '-' in last_name:
+                    # For hyphenated names, try both parts
+                    maiden_name, married_name = last_name.split('-', 1)
+                    maiden_name = maiden_name.strip()
+                    married_name = married_name.strip()
+                    
+                    # Try matching with maiden name
+                    person_id = await self.db_conn.fetchval("""
+                        SELECT id FROM political_dynasties 
+                        WHERE first_name = $1 AND last_name = $2
+                        LIMIT 1
+                    """, first_name, maiden_name)
+                    
+                    if person_id:
+                        return person_id
+                    
+                    # Try matching with married name
+                    person_id = await self.db_conn.fetchval("""
+                        SELECT id FROM political_dynasties 
+                        WHERE first_name = $1 AND last_name = $2
+                        LIMIT 1
+                    """, first_name, married_name)
+                    
+                    if person_id:
+                        return person_id
+                    
+                    # Try matching with full hyphenated name
+                    person_id = await self.db_conn.fetchval("""
+                        SELECT id FROM political_dynasties 
+                        WHERE first_name = $1 AND last_name = $2
+                        LIMIT 1
+                    """, first_name, last_name)
+                    
+                    if person_id:
+                        return person_id
+                else:
+                    # Regular name without hyphen
+                    person_id = await self.db_conn.fetchval("""
+                        SELECT id FROM political_dynasties 
+                        WHERE first_name = $1 AND last_name = $2
+                        LIMIT 1
+                    """, first_name, last_name)
+                    
+                    if person_id:
+                        return person_id
             
             # Only as last resort, try fuzzy matching with word boundaries
-            # This prevents "TAN" from matching "CATACUTAN"
+            # This prevents "TAN" from matching "CATACUTAN" but allows legitimate matches
             person_id = await self.db_conn.fetchval("""
                 SELECT id FROM political_dynasties 
                 WHERE CONCAT(first_name, ' ', last_name) ~* $1

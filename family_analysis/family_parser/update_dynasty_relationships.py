@@ -44,7 +44,7 @@ class DynastyRelationshipUpdater:
             print(f"   {code}: {name}")
     
     async def find_person_by_name(self, full_name: str) -> Optional[Dict]:
-        """Find a person in the database by full name"""
+        """Find a person in the database by full name with proper hyphenated name handling"""
         try:
             # Try exact match first
             person = await self.db_conn.fetchrow("""
@@ -58,26 +58,69 @@ class DynastyRelationshipUpdater:
             if person:
                 return dict(person)
             
-            # Try word-boundary match to prevent substring issues
-            # Split the name into parts and match each part exactly
+            # Handle hyphenated names (maiden name - married name)
             name_parts = full_name.strip().split()
             if len(name_parts) >= 2:
                 first_name = name_parts[0]
                 last_name = ' '.join(name_parts[1:])
                 
-                person = await self.db_conn.fetchrow("""
-                    SELECT id, first_name, last_name, province, position, year
-                    FROM political_dynasties 
-                    WHERE first_name = $1 AND last_name = $2
-                    ORDER BY year DESC
-                    LIMIT 1
-                """, first_name, last_name)
-                
-                if person:
-                    return dict(person)
+                # Check if the last name contains a hyphen (maiden-married format)
+                if '-' in last_name:
+                    # For hyphenated names, try both parts
+                    maiden_name, married_name = last_name.split('-', 1)
+                    maiden_name = maiden_name.strip()
+                    married_name = married_name.strip()
+                    
+                    # Try matching with maiden name
+                    person = await self.db_conn.fetchrow("""
+                        SELECT id, first_name, last_name, province, position, year
+                        FROM political_dynasties 
+                        WHERE first_name = $1 AND last_name = $2
+                        ORDER BY year DESC
+                        LIMIT 1
+                    """, first_name, maiden_name)
+                    
+                    if person:
+                        return dict(person)
+                    
+                    # Try matching with married name
+                    person = await self.db_conn.fetchrow("""
+                        SELECT id, first_name, last_name, province, position, year
+                        FROM political_dynasties 
+                        WHERE first_name = $1 AND last_name = $2
+                        ORDER BY year DESC
+                        LIMIT 1
+                    """, first_name, married_name)
+                    
+                    if person:
+                        return dict(person)
+                    
+                    # Try matching with full hyphenated name
+                    person = await self.db_conn.fetchrow("""
+                        SELECT id, first_name, last_name, province, position, year
+                        FROM political_dynasties 
+                        WHERE first_name = $1 AND last_name = $2
+                        ORDER BY year DESC
+                        LIMIT 1
+                    """, first_name, last_name)
+                    
+                    if person:
+                        return dict(person)
+                else:
+                    # Regular name without hyphen
+                    person = await self.db_conn.fetchrow("""
+                        SELECT id, first_name, last_name, province, position, year
+                        FROM political_dynasties 
+                        WHERE first_name = $1 AND last_name = $2
+                        ORDER BY year DESC
+                        LIMIT 1
+                    """, first_name, last_name)
+                    
+                    if person:
+                        return dict(person)
             
             # Only as last resort, try fuzzy match but with word boundaries
-            # This prevents "TAN" from matching "CATACUTAN"
+            # This prevents "TAN" from matching "CATACUTAN" but allows legitimate matches
             person = await self.db_conn.fetchrow("""
                 SELECT id, first_name, last_name, province, position, year
                 FROM political_dynasties 
