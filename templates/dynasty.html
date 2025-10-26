@@ -3384,6 +3384,8 @@ async function loadAnimationData() {
     console.log('📅 Loading dynasty data for year:', selectedYear);
     
     try {
+        const targetYear = parseInt(selectedYear);
+        
         // Get top surnames by province for the selected year
         const provincesResp = await fetch('/api/dynasty/provinces');
         const provincesJson = await provincesResp.json();
