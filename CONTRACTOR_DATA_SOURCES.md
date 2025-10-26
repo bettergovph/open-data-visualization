@@ -8,6 +8,7 @@ This document clarifies the different contractor data sources used across the Be
 
 ### 1. **Flood Control Database (MeiliSearch)**
 - **Source**: DPWH Flood Control Projects
+- **Credits**: Data provided by Sleeper Agent from https://extra.bayanwat.ch/
 - **Contractor Field**: `Contractor`
 - **Data Type**: Flood control infrastructure projects
 - **Coverage**: ~9,855 projects, ~2,409 unique contractors
