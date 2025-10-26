@@ -3409,6 +3409,46 @@ let animationInterval = null;
 let isAnimating = false;
 let animationSpeed = 15; // seconds
 
+function generateVariedFlag(surname, province, width, height) {
+    // Create unique flag based on surname + province combination
+    const seed = surname.toLowerCase() + province.toLowerCase();
+    let hash = 0;
+    for (let i = 0; i < seed.length; i++) {
+        hash = ((hash << 5) - hash + seed.charCodeAt(i)) & 0xffffffff;
+    }
+    
+    // Use hash to determine flag style
+    const style = Math.abs(hash) % 6;
+    const color1 = ['#dc3545', '#28a745', '#007bff', '#ffc107', '#6f42c1', '#fd7e14'][Math.abs(hash) % 6];
+    const color2 = ['#ffffff', '#000000', '#ffc107', '#dc3545', '#28a745', '#6f42c1'][Math.abs(hash + 1) % 6];
+    
+    let flagStyle = '';
+    switch (style) {
+        case 0: // Rectangle
+            flagStyle = `background: ${color1}; border-radius: 2px;`;
+            break;
+        case 1: // Rounded rectangle
+            flagStyle = `background: ${color1}; border-radius: 8px;`;
+            break;
+        case 2: // Horizontal stripes
+            flagStyle = `background: linear-gradient(to bottom, ${color1} 50%, ${color2} 50%); border-radius: 4px;`;
+            break;
+        case 3: // Vertical stripes
+            flagStyle = `background: linear-gradient(to right, ${color1} 50%, ${color2} 50%); border-radius: 4px;`;
+            break;
+        case 4: // Circle
+            flagStyle = `background: ${color1}; border-radius: 50%;`;
+            break;
+        case 5: // Diamond
+            flagStyle = `background: ${color1}; transform: rotate(45deg); border-radius: 2px;`;
+            break;
+    }
+    
+    return `<div style="width:${width}px; height:${height}px; ${flagStyle} border:0.5px solid #000; display:flex; align-items:center; justify-content:center;">
+        <span style="font-size:${Math.min(width, height) * 0.3}px; color:${color2}; font-weight:bold;">${surname.charAt(0)}</span>
+    </div>`;
+}
+
 function setupAnimationControls() {
     const playButton = document.getElementById('playButton');
     const pauseButton = document.getElementById('pauseButton');
@@ -3579,7 +3619,7 @@ async function loadAnimationDataWithCallback(callback) {
         if (legendYearValue) {
             legendYearValue.textContent = selectedYear;
             console.log('📅 Updated legend year to:', selectedYear);
-        } else {
+            } else {
             console.log('❌ Could not find legendYearValue element');
         }
 
@@ -3712,7 +3752,7 @@ async function createAnimationMapWithData(familySummaries, flagData, selectedYea
             await new Promise(resolve => setTimeout(resolve, 100));
             map = L.map('animationLeafletMap').setView([12.8797, 121.7740], 6);
             console.log('✅ Map created successfully:', map);
-        } catch (error) {
+                } catch (error) {
             console.error('❌ Error creating map:', error);
             return;
         }
@@ -3744,8 +3784,8 @@ async function createAnimationMapWithData(familySummaries, flagData, selectedYea
                     fillOpacity: 0.1
                 }
             }).addTo(map);
-        }
-    } else {
+            }
+        } else {
         map = window.animationMap;
         console.log('🔄 Reusing existing map:', map);
         // Check if it's actually a Leaflet map object

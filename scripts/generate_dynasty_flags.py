@@ -22,16 +22,18 @@ def generate_flag_parameters(flag_id, surname):
     
     rng = seeded_rng(flag_id)
     
-    # Generate flag parameters (matching the JavaScript DynastyFlagGenerator logic)
+    # Generate flag parameters with more variation
     colors = [
         '#FF6B6B', '#4ECDC4', '#45B7D1', '#96CEB4', '#FFEAA7',
-        '#DDA0DD', '#98D8C8', '#F7DC6F', '#BB8FCE', '#85C1E9'
+        '#DDA0DD', '#98D8C8', '#F7DC6F', '#BB8FCE', '#85C1E9',
+        '#FF9F43', '#6C5CE7', '#A29BFE', '#FD79A8', '#FDCB6E',
+        '#E17055', '#00B894', '#00CEC9', '#74B9FF', '#0984E3'
     ]
     
-    shapes = ['rectangle', 'horizontal-rectangle']
-    czech_shapes = ['triangle']
-    symbols = ['circle', 'cross', 'crescent', 'star', 'diamond', 'triangle', 'square', 'hexagon', 'arrow', 'heart']
-    slice_orientations = ['vertical', 'horizontal', 'diagonal-right', 'diagonal-left']
+    shapes = ['rectangle', 'horizontal-rectangle', 'rounded-rectangle', 'diamond', 'circle', 'triangle']
+    czech_shapes = ['triangle', 'chevron', 'arrow']
+    symbols = ['circle', 'cross', 'crescent', 'star', 'diamond', 'triangle', 'square', 'hexagon', 'arrow', 'heart', 'shield', 'crown', 'eagle', 'lion']
+    slice_orientations = ['vertical', 'horizontal', 'diagonal-right', 'diagonal-left', 'radial', 'spiral']
     
     # Generate number of slices (weighted random like in JavaScript)
     slice_weights = [1, 3, 4, 4, 4, 4, 4, 4, 3, 1]  # Weights for 1-10 slices
@@ -100,19 +102,20 @@ async def generate_dynasty_flags():
     try:
         print("🏴 Generating dynasty flags...")
         
-        # Get unique dynasties with their locations
+        # Get unique dynasties grouped by surname+province for unique flags
         query = """
         SELECT DISTINCT 
             last_name as surname,
             region,
             province,
-            municipality_city,
             COUNT(*) as member_count
         FROM political_dynasties 
         WHERE last_name IS NOT NULL 
         AND last_name != ''
-        GROUP BY last_name, region, province, municipality_city
-        ORDER BY member_count DESC, last_name, province, municipality_city
+        AND province IS NOT NULL
+        AND province != ''
+        GROUP BY last_name, region, province
+        ORDER BY member_count DESC, last_name, province
         """
         
         dynasties = await conn.fetch(query)
@@ -123,9 +126,10 @@ async def generate_dynasty_flags():
         
         for dynasty in dynasties:
             # Create a unique key for this dynasty-location combination
-            location_key = f"{dynasty['surname']}_{dynasty['province']}_{dynasty['municipality_city']}"
+            # Use surname + province for unique flags per surname+province
+            location_key = f"{dynasty['surname']}_{dynasty['province']}"
             
-            # Generate a deterministic flag ID based on the location using a stable hash
+            # Generate a deterministic flag ID based on the surname+province combination
             import hashlib
             # Create a stable hash from the location key
             hash_object = hashlib.md5(location_key.encode())
@@ -135,8 +139,6 @@ async def generate_dynasty_flags():
             
             # Determine the location display name
             location_parts = []
-            if dynasty['municipality_city']:
-                location_parts.append(dynasty['municipality_city'])
             if dynasty['province']:
                 location_parts.append(dynasty['province'])
             if dynasty['region']:
@@ -152,7 +154,6 @@ async def generate_dynasty_flags():
                 "surname": dynasty['surname'],
                 "region": dynasty['region'],
                 "province": dynasty['province'],
-                "municipality_city": dynasty['municipality_city'],
                 "location_display": location_display,
                 "member_count": dynasty['member_count'],
                 "flag_parameters": flag_params
