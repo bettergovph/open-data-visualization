@@ -3393,50 +3393,47 @@ async function loadAnimationData() {
             return;
         }
 
-        // Optimized: Use single API call with year filter instead of 100 individual calls
-        const response = await fetch(`/api/dynasty?limit=1000&search=${selectedYear}`);
-        const data = await response.json();
+        // Use family API with province filtering for accurate dynasty data
+        const summaries = [];
+        const batchSize = 5; // Smaller batches to avoid overwhelming the server
         
-        let summaries = [];
-        if (data.success && Array.isArray(data.data)) {
-            console.log(`📊 Loaded ${data.data.length} dynasty records for year ${selectedYear}`);
-            
-            // Group by surname and count members per province
-            const surnameGroups = {};
-            data.data.forEach(member => {
-                const surname = (member.last_name || '').toUpperCase();
-                if (!surname) return;
-                
-                if (!surnameGroups[surname]) {
-                    surnameGroups[surname] = {
-                        surname,
-                        provinceCounts: {},
-                        totalMembers: 0
-                    };
+        for (let i = 0; i < candidateSurnames.length; i += batchSize) {
+            const batch = candidateSurnames.slice(i, i + batchSize);
+            const results = await Promise.all(batch.map(async (surname) => {
+                try {
+                    // Try family API first (more accurate for dynasty detection)
+                    const r = await fetch(`/api/dynasty/family?surname=${encodeURIComponent(surname)}`);
+                    const j = await r.json();
+                    
+                    if (j.success && Array.isArray(j.data)) {
+                        const members = j.data.filter(m => m.year === targetYear && m.fat === 1);
+                        console.log(`📊 ${surname} year ${targetYear}: ${members.length} dynasty members`);
+                        
+                        if (members.length === 0) return null;
+                        
+                        // Count by province
+                        const provinceCounts = {};
+                        members.forEach(m => {
+                            const p = (m.province || '').toUpperCase();
+                            if (!p) return;
+                            provinceCounts[p] = (provinceCounts[p] || 0) + 1;
+                        });
+                        
+                        // Get the province with most members
+                        const province = Object.entries(provinceCounts).sort((a,b)=>b[1]-a[1])[0]?.[0] || (members[0].province || '').toUpperCase();
+                        
+                        return { surname, province, dynasty_count: members.length };
+                    } else {
+                        console.warn(`⚠️ Family API failed for ${surname}:`, j.error);
+                        return null;
+                    }
+                } catch (e) {
+                    console.warn('⚠️ API failed for', surname, e);
+                    return null;
                 }
-                
-                const province = (member.province || '').toUpperCase();
-                if (province) {
-                    surnameGroups[surname].provinceCounts[province] = (surnameGroups[surname].provinceCounts[province] || 0) + 1;
-                }
-                surnameGroups[surname].totalMembers++;
-            });
+            }));
             
-            // Convert to summaries array
-            summaries = Object.values(surnameGroups).map(group => {
-                const province = Object.entries(group.provinceCounts).sort((a,b)=>b[1]-a[1])[0]?.[0] || 'N/A';
-                return {
-                    surname: group.surname,
-                    province,
-                    dynasty_count: group.totalMembers
-                };
-            });
-            
-            console.log(`📊 Processed ${summaries.length} unique surnames`);
-        } else {
-            console.error('❌ Failed to load dynasty data:', data.error);
-            hideTabLoadingSpinner('animation');
-            return;
+            results.forEach(r => { if (r) summaries.push(r); });
         }
 
         // Rank by family size and keep top 100
