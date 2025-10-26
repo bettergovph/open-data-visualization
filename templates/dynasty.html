@@ -3721,6 +3721,7 @@ async function createAnimationMapWithData(familySummaries, flagData, selectedYea
         }
     } else {
         map = window.animationMap;
+        console.log('🔄 Reusing existing map:', map);
     }
     
     // Clear only the dynasty markers, keep provinces
@@ -3728,8 +3729,13 @@ async function createAnimationMapWithData(familySummaries, flagData, selectedYea
         window.dynastyMarkers.clearLayers();
     } else {
         window.dynastyMarkers = L.layerGroup();
-        map.addLayer(window.dynastyMarkers);
-        console.log('✅ Created dynastyMarkers layer group');
+        if (map && typeof map.addLayer === 'function') {
+            map.addLayer(window.dynastyMarkers);
+            console.log('✅ Created dynastyMarkers layer group');
+        } else {
+            console.error('❌ Map not properly initialized:', map);
+            return;
+        }
     }
 
     // Province centroid cache by name (fallback: simple bounding box centroid)
