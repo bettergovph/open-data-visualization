@@ -869,10 +869,10 @@ function toggleMobileMenu() {
                                     <div style="display: flex; gap: 15px; height: 600px;">
                                         <div id="animationMap" style="flex: 1; border: 1px solid #ddd; border-radius: 8px; background: #f0f8ff; position: relative; overflow: hidden;">
                                         </div>
-                                        <div id="animationLegend" style="width: 300px; background: rgba(255,255,255,0.95); padding: 10px; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.3); border: 2px solid #0038A8; font-size: 10px; overflow-y: auto;">
-                                            <div style="font-weight: bold; margin-bottom: 8px; color: #0038A8; font-size: 14px;">📋 Legend</div>
-                                            <div id="legendYear" style="font-weight: 600; margin-bottom: 10px; color: #dc3545; font-size: 12px; text-align: center; background: #fff3cd; padding: 3px; border-radius: 4px;">Year: <span id="legendYearValue">2004</span></div>
-                                            <div id="legendContent" style="color: #666; font-size: 9px; display: grid; grid-template-columns: 1fr 1fr; gap: 4px;">
+                                        <div id="animationLegend" style="width: 300px; background: rgba(255,255,255,0.95); padding: 8px; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.3); border: 2px solid #0038A8; font-size: 9px; overflow-y: auto;">
+                                            <div style="font-weight: bold; margin-bottom: 6px; color: #0038A8; font-size: 12px;">Legend</div>
+                                            <div id="legendYear" style="font-weight: 600; margin-bottom: 8px; color: #dc3545; font-size: 10px; text-align: center; background: #fff3cd; padding: 2px; border-radius: 3px;">Year: <span id="legendYearValue">2004</span></div>
+                                            <div id="legendContent" style="color: #666; font-size: 8px; display: grid; grid-template-columns: 1fr 1fr; gap: 2px;">
                                                 <!-- Dynamic legend content will be added here -->
                                             </div>
                                         </div>
@@ -3483,7 +3483,7 @@ function updateAnimationLegend(surnames, flagData) {
     const legendContent = document.getElementById('legendContent');
     if (!legendContent || !surnames || surnames.length === 0) {
         if (legendContent) {
-            legendContent.innerHTML = '<div style="color: #666; font-size: 9px;">No dynasty data available</div>';
+            legendContent.innerHTML = '<div style="color: #666; font-size: 8px;">No dynasty data available</div>';
         }
         return;
     }
@@ -3507,17 +3507,19 @@ function updateAnimationLegend(surnames, flagData) {
             if (dynastyKey) {
                 const dynastyInfo = flagData.dynasties[dynastyKey];
                 const flagUrl = `/static/flags/flag_${dynastyInfo.dynasty_id}.svg`;
-                flagHtml = `<img src="${flagUrl}" alt="Flag" style="width: 16px; height: 10px; vertical-align: middle; border: 1px solid #000;" onerror="this.style.display='none'"/>`;
+                flagHtml = `<img src="${flagUrl}" alt="Flag" style="width: 14px; height: 9px; vertical-align: middle; border: 1px solid #000;" onerror="this.style.display='none'"/>`;
             }
         }
         
         legendHTML += `
-            <div style="margin-bottom: 3px; padding: 3px; background: #f8f9fa; border-radius: 3px; border-left: 2px solid #0038A8; font-size: 8px;">
-                <div style="display: flex; align-items: center; gap: 4px;">
+            <div style="margin-bottom: 1px; padding: 2px; background: #f8f9fa; border-radius: 2px; border-left: 2px solid #0038A8;">
+                <div style="display: flex; align-items: center; gap: 3px;">
                     <span>${flagHtml}</span>
-                    <span style="font-weight: bold; color: #333;">${surname.surname}</span>
-                    <span style="color: #666;">(${surname.province || 'N/A'})</span>
-                    <span style="color: #0038A8; font-weight: bold;">#${surname.dynasty_count}</span>
+                    <div style="flex: 1; min-width: 0;">
+                        <div style="font-weight: bold; color: #333; font-size: 8px; line-height: 1.1;">${surname.surname}</div>
+                        <div style="color: #666; font-size: 7px; line-height: 1.1;">${surname.province || 'N/A'}</div>
+                    </div>
+                    <span style="color: #0038A8; font-weight: bold; font-size: 8px;">${surname.dynasty_count}</span>
                 </div>
             </div>
         `;
