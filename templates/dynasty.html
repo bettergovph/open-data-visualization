@@ -3729,7 +3729,8 @@ async function createAnimationMapWithData(familySummaries, flagData, selectedYea
     if (window.dynastyMarkers) {
         window.dynastyMarkers.clearLayers();
     } else {
-        window.dynastyMarkers = L.layerGroup().addTo(map);
+        window.dynastyMarkers = L.layerGroup();
+        window.dynastyMarkers.addTo(map);
     }
 
     // Province centroid cache by name (fallback: simple bounding box centroid)
