@@ -3475,8 +3475,11 @@ function updateAnimationLegend(surnames, flagData) {
         return;
     }
     
+    // Sort by member count descending
+    const sortedSurnames = surnames.sort((a, b) => b.dynasty_count - a.dynasty_count);
+    
     // Get top 10 surnames for the legend
-    const topSurnames = surnames.slice(0, 10);
+    const topSurnames = sortedSurnames.slice(0, 10);
     
     let legendHTML = '';
     
@@ -3496,13 +3499,12 @@ function updateAnimationLegend(surnames, flagData) {
         }
         
         legendHTML += `
-            <div style="margin-bottom: 8px; padding: 8px; background: #f8f9fa; border-radius: 4px; border-left: 3px solid #0038A8;">
-                <div style="display: flex; align-items: center; gap: 8px;">
+            <div style="margin-bottom: 6px; padding: 6px; background: #f8f9fa; border-radius: 4px; border-left: 3px solid #0038A8;">
+                <div style="display: flex; align-items: center; gap: 6px; font-size: 12px;">
                     <span>${flagHtml}</span>
                     <span style="font-weight: bold; color: #333;">${surname.surname}</span>
-                </div>
-                <div style="font-size: 10px; color: #666; margin-left: 32px;">
-                    ${surname.province || 'N/A'} • ${surname.dynasty_count} members
+                    <span style="color: #666;">(${surname.province || 'N/A'})</span>
+                    <span style="color: #0038A8; font-weight: bold;">#${surname.dynasty_count}</span>
                 </div>
             </div>
         `;
