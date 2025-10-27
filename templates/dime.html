@@ -866,7 +866,10 @@ fetch('/static/data/dime_summary.json')
             } else if (tabName === 'fastest') {
                 console.log('⚡ Loading fastest projects data...');
                 // Automatically load fastest projects when Speed tab is opened
-                loadFastestProjects();
+                // Add small delay to ensure tab is fully visible
+                setTimeout(() => {
+                    loadFastestProjects();
+                }, 100);
             }
         }
     }
@@ -2308,7 +2311,6 @@ fetch('/static/data/dime_summary.json')
         
         loadFilterOptions();
         loadVisualData();
-        loadFastestProjects();
         loadBarangayAggregates();
 
         // Pagination event listeners
