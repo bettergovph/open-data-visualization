@@ -865,6 +865,12 @@ fetch('/static/data/dime_summary.json')
                 loadVisualData();
             } else if (tabName === 'fastest') {
                 console.log('⚡ Loading fastest projects data...');
+                // Ensure fastest sub-tab is visible
+                document.querySelectorAll('.speed-subtab-panel').forEach(panel => {
+                    panel.style.display = 'none';
+                });
+                document.getElementById('subtab-fastest').style.display = 'block';
+                
                 // Automatically load fastest projects when Speed tab is opened
                 // Add small delay to ensure tab is fully visible
                 setTimeout(() => {
