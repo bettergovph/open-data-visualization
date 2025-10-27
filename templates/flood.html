@@ -3670,7 +3670,7 @@ function getContractorSecStatusSync(contractorName) {
     }
 
     // District Ranking Chart - Top Districts by Project Count
-    createDistrictRankingChart(data.regions);
+    createDistrictRankingChart();
 
     // Work Types Chart - Use statistics data
     const workTypesCtx = document.getElementById('workTypesChart');
@@ -4581,134 +4581,160 @@ function getContractorSecStatusSync(contractorName) {
         }
     }
 
-    function createDistrictRankingChart(regionsData) {
+    async function createDistrictRankingChart() {
         const districtRankingCtx = document.getElementById('districtRankingChart');
-        if (!districtRankingCtx || !regionsData) return;
+        if (!districtRankingCtx) return;
 
-        console.log('🏆 Creating district ranking chart with data:', regionsData);
+        console.log('🏆 Creating district ranking chart...');
 
-        // Convert regions data to array and sort by project count
-        const regionsArray = Object.entries(regionsData)
-            .map(([region, count]) => ({ 
-                region: region, 
-                count: count 
-            }))
-            .sort((a, b) => b.count - a.count); // Sort descending by count
-
-        console.log('🏆 Top 5 regions by project count:', regionsArray.slice(0, 5));
-
-        // Update summary statistics
-        const totalRegionsElement = document.getElementById('total-regions-count');
-        const topDistrictNameElement = document.getElementById('top-district-name');
-        const topDistrictCountElement = document.getElementById('top-district-count');
-
-        if (totalRegionsElement) {
-            totalRegionsElement.textContent = regionsArray.length.toLocaleString('en-PH');
-        }
-
-        if (topDistrictNameElement && topDistrictCountElement && regionsArray.length > 0) {
-            const topRegion = regionsArray[0];
-            topDistrictNameElement.textContent = topRegion.region;
-            topDistrictCountElement.textContent = topRegion.count.toLocaleString('en-PH');
-        }
-
-        // Create horizontal bar chart
-        new Chart(districtRankingCtx, {
-            type: 'bar',
-            data: {
-                labels: regionsArray.map(item => item.region.length > 25 ? item.region.substring(0, 25) + '...' : item.region),
-                datasets: [{
-                    label: 'Number of Projects',
-                    data: regionsArray.map(item => item.count),
-                    backgroundColor: regionsArray.map((item, index) => {
-                        // Color gradient from gold to blue for top performers
-                        if (index < 3) {
-                            return ['#FFD700', '#FFA500', '#FF8C00'][index]; // Gold, Orange, Dark Orange
-                        } else if (index < 6) {
-                            return '#0038A8'; // Blue for top 6
-                        } else {
-                            return '#6c757d'; // Gray for others
-                        }
-                    }),
-                    borderColor: '#ffffff',
-                    borderWidth: 1,
-                    borderRadius: 4,
-                    borderSkipped: false,
-                }]
-            },
-            options: {
-                indexAxis: 'y', // Horizontal bar chart
-                responsive: true,
-                maintainAspectRatio: false,
-                aspectRatio: 2,
-                layout: {
-                    padding: {
-                        top: 10,
-                        bottom: 10,
-                        left: 10,
-                        right: 10
-                    }
-                },
-                plugins: {
-                    legend: {
-                        display: false
-                    },
-                    tooltip: {
-                        callbacks: {
-                            label: function(context) {
-                                const region = regionsArray[context.dataIndex];
-                                const rank = context.dataIndex + 1;
-                                return [
-                                    `Rank: #${rank}`,
-                                    `Region: ${region.region}`,
-                                    `Projects: ${region.count.toLocaleString('en-PH')}`
-                                ];
-                            }
-                        }
-                    }
-                },
-                scales: {
-                    x: {
-                        beginAtZero: true,
-                        title: {
-                            display: true,
-                            text: 'Number of Projects',
-                            font: {
-                                weight: 'bold',
-                                size: 12
-                            },
-                            color: '#666'
-                        },
-                        ticks: {
-                            color: '#666',
-                            callback: function(value) {
-                                return value.toLocaleString('en-PH');
-                            }
-                        },
-                        grid: {
-                            color: 'rgba(0, 0, 0, 0.1)'
-                        }
-                    },
-                    y: {
-                        ticks: {
-                            color: '#666',
-                            font: {
-                                size: 11
-                            }
-                        },
-                        grid: {
-                            display: false
-                        }
-                    }
-                },
-                interaction: {
-                    intersect: false,
-                    mode: 'index'
-                }
+        try {
+            // Fetch district statistics from the new districts API
+            const response = await fetch('/api/flood/districts');
+            if (!response.ok) {
+                throw new Error(`API returned ${response.status}`);
             }
-        });
+            
+            const data = await response.json();
+            console.log('🏆 District statistics data:', data);
 
-        console.log('✅ District ranking chart created with', regionsArray.length, 'regions');
+            if (!data.success || !data.districts || data.districts.length === 0) {
+                console.warn('🏆 No district data available, showing message');
+                districtRankingCtx.parentElement.innerHTML = `
+                    <h3 style="color: #0038A8; margin: 0 0 15px 0;">🏆 Top Districts by Number of Projects</h3>
+                    <div style="color: #666; font-style: italic; text-align: center; padding: 40px;">
+                        District data not available
+                    </div>
+                `;
+                return;
+            }
+
+            // Use the districts array directly from the API response
+            const districtsArray = data.districts;
+
+            console.log('🏆 Top 5 districts by project count:', districtsArray.slice(0, 5));
+
+            // Update summary statistics
+            const totalRegionsElement = document.getElementById('total-regions-count');
+            const topDistrictNameElement = document.getElementById('top-district-name');
+            const topDistrictCountElement = document.getElementById('top-district-count');
+
+            if (totalRegionsElement) {
+                totalRegionsElement.textContent = districtsArray.length.toLocaleString('en-PH');
+            }
+
+            if (topDistrictNameElement && topDistrictCountElement && districtsArray.length > 0) {
+                const topDistrict = districtsArray[0];
+                topDistrictNameElement.textContent = topDistrict.district;
+                topDistrictCountElement.textContent = topDistrict.count.toLocaleString('en-PH');
+            }
+
+            // Create horizontal bar chart
+            new Chart(districtRankingCtx, {
+                type: 'bar',
+                data: {
+                    labels: districtsArray.map(item => item.district.length > 30 ? item.district.substring(0, 30) + '...' : item.district),
+                    datasets: [{
+                        label: 'Number of Projects',
+                        data: districtsArray.map(item => item.count),
+                        backgroundColor: districtsArray.map((item, index) => {
+                            // Color gradient from gold to blue for top performers
+                            if (index < 3) {
+                                return ['#FFD700', '#FFA500', '#FF8C00'][index]; // Gold, Orange, Dark Orange
+                            } else if (index < 6) {
+                                return '#0038A8'; // Blue for top 6
+                            } else {
+                                return '#6c757d'; // Gray for others
+                            }
+                        }),
+                        borderColor: '#ffffff',
+                        borderWidth: 1,
+                        borderRadius: 4,
+                        borderSkipped: false,
+                    }]
+                },
+                options: {
+                    indexAxis: 'y', // Horizontal bar chart
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    aspectRatio: 2,
+                    layout: {
+                        padding: {
+                            top: 10,
+                            bottom: 10,
+                            left: 10,
+                            right: 10
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            display: false
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    const district = districtsArray[context.dataIndex];
+                                    const rank = context.dataIndex + 1;
+                                    return [
+                                        `Rank: #${rank}`,
+                                        `District: ${district.district}`,
+                                        `Projects: ${district.count.toLocaleString('en-PH')}`
+                                    ];
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            beginAtZero: true,
+                            title: {
+                                display: true,
+                                text: 'Number of Projects',
+                                font: {
+                                    weight: 'bold',
+                                    size: 12
+                                },
+                                color: '#666'
+                            },
+                            ticks: {
+                                color: '#666',
+                                callback: function(value) {
+                                    return value.toLocaleString('en-PH');
+                                }
+                            },
+                            grid: {
+                                color: 'rgba(0, 0, 0, 0.1)'
+                            }
+                        },
+                        y: {
+                            ticks: {
+                                color: '#666',
+                                font: {
+                                    size: 10
+                                }
+                            },
+                            grid: {
+                                display: false
+                            }
+                        }
+                    },
+                    interaction: {
+                        intersect: false,
+                        mode: 'index'
+                    }
+                }
+            });
+
+            console.log('✅ District ranking chart created with', districtsArray.length, 'districts');
+
+        } catch (error) {
+            console.error('❌ Failed to create district ranking chart:', error);
+            districtRankingCtx.parentElement.innerHTML = `
+                <h3 style="color: #0038A8; margin: 0 0 15px 0;">🏆 Top Districts by Number of Projects</h3>
+                <div style="color: #dc3545; font-style: italic; text-align: center; padding: 40px;">
+                    Error loading district data: ${error.message}
+                </div>
+            `;
+        }
     }
 
     function populateExpensiveProjects(projects) {

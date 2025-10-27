@@ -666,6 +666,41 @@ async def flood_statistics_api(
     except Exception as e:
         return JSONResponse({"success": False, "error": str(e)})
 
+@app.get("/api/flood/districts")
+async def flood_districts_api():
+    """Get district statistics for flood control projects - no authentication required"""
+    try:
+        client = get_flood_client()
+        
+        # Get all projects to count by district
+        projects_response = await client.search("", {"limit": 10000})
+        projects = projects_response.hits
+        
+        # Count projects by DistrictEngineeringOffice
+        districts_data = {}
+        for project in projects:
+            district = project.get("DistrictEngineeringOffice", "Unknown District")
+            districts_data[district] = districts_data.get(district, 0) + 1
+        
+        # Convert to array format for consistency
+        districts_array = [
+            {"district": district, "count": count}
+            for district, count in districts_data.items()
+        ]
+        
+        # Sort by count descending
+        districts_array.sort(key=lambda x: x["count"], reverse=True)
+        
+        return JSONResponse({
+            "success": True,
+            "districts": districts_array,
+            "totalDistricts": len(districts_array),
+            "totalProjects": sum(count for _, count in districts_data.items())
+        })
+        
+    except Exception as e:
+        return JSONResponse({"success": False, "error": str(e)})
+
 @app.get("/api/flood/lookup/regions")
 async def flood_regions_lookup():
     """Get list of all regions - no authentication required"""
