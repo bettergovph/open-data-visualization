@@ -16,6 +16,20 @@
         display: block !important;
     }
 
+    /* Speed sub-tab styles */
+    .speed-subtab-panel {
+        display: none;
+    }
+    
+    .speed-subtab-panel.active {
+        display: block;
+    }
+    
+    .speed-subtab-btn:hover {
+        color: #0038A8 !important;
+        border-bottom-color: #0038A8 !important;
+    }
+    
     /* Mobile-optimized styles */
     .budget-section {
         padding: 0.5rem;
@@ -443,10 +457,22 @@
 
         <!-- Analysis Tab -->
         <div id="tab-analysis" class="budget-tab-panel">
-            <!-- Top 100 Fastest Completed Projects -->
-            <div class="bg-white p-5 rounded-xl shadow-lg">
-                <h2 class="text-blue-900 m-0 mb-2 text-xl text-center font-bold">🚀 Top 100 Projects by Speed</h2>
-                <p class="text-center text-gray-600 mb-5 text-sm">Shortest time from start to completion</p>
+            <!-- Sub-tab Navigation -->
+            <div style="background: white; padding: 15px 20px 5px; border-radius: 8px 8px 0 0; box-shadow: 0 2px 10px rgba(0,0,0,0.1); margin-bottom: 0;">
+                <div style="display: flex; gap: 5px; border-bottom: 2px solid #e0e0e0;">
+                    <button class="speed-subtab-btn active" data-subtab="fastest" style="padding: 8px 16px; background: none; border: none; border-bottom: 3px solid #0038A8; color: #0038A8; font-weight: 600; cursor: pointer; font-size: 0.9em; transition: all 0.3s;">
+                        ⚡ Fastest
+                    </button>
+                    <button class="speed-subtab-btn" data-subtab="slowest" style="padding: 8px 16px; background: none; border: none; border-bottom: 3px solid transparent; color: #666; font-weight: 500; cursor: pointer; font-size: 0.9em; transition: all 0.3s;">
+                        🐌 Slowest
+                    </button>
+                </div>
+            </div>
+
+            <!-- Fastest Projects Sub-tab -->
+            <div id="subtab-fastest" class="speed-subtab-panel" style="background: white; padding: 20px; border-radius: 0 0 8px 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); margin-bottom: 20px;">
+                <h2 class="text-blue-900 m-0 mb-2 text-lg text-center font-bold">⚡ Top 100 Fastest Projects</h2>
+                <p class="text-center text-gray-600 mb-4 text-sm">Shortest time from start to completion</p>
 
                 <!-- Loading Spinner -->
                 <div id="fastest-projects-loading" style="display: flex; justify-content: center; align-items: center; padding: 30px;">
@@ -459,6 +485,25 @@
                 <!-- Fastest Projects Container -->
                 <div id="fastest-projects-container" style="display: none;">
                     <div id="fastest-projects-mobile-cards"></div>
+                </div>
+            </div>
+
+            <!-- Slowest Projects Sub-tab -->
+            <div id="subtab-slowest" class="speed-subtab-panel" style="background: white; padding: 20px; border-radius: 0 0 8px 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); margin-bottom: 20px; display: none;">
+                <h2 class="text-blue-900 m-0 mb-2 text-lg text-center font-bold">🐌 Top 100 Slowest Projects</h2>
+                <p class="text-center text-gray-600 mb-4 text-sm">Longest time from start to completion</p>
+
+                <!-- Loading Spinner -->
+                <div id="slowest-projects-loading" style="display: flex; justify-content: center; align-items: center; padding: 30px;">
+                    <div style="display: flex; flex-direction: column; align-items: center; gap: 15px;">
+                        <div style="width: 40px; height: 40px; border: 4px solid #f3f3f3; border-top: 4px solid #0038A8; border-radius: 50%; animation: spin 1s linear infinite;"></div>
+                        <p style="color: #666; font-size: 14px; margin: 0;">Analyzing completion times...</p>
+                    </div>
+                </div>
+
+                <!-- Slowest Projects Container -->
+                <div id="slowest-projects-container" style="display: none;">
+                    <div id="slowest-projects-mobile-cards"></div>
                 </div>
             </div>
         </div>
@@ -1054,6 +1099,147 @@
                     </div>
                 `;
             }
+        }
+    }
+
+    }
+
+    // Mobile speed sub-tab switching
+    let slowestProjectsLoaded = false;
+    
+    document.querySelectorAll('.speed-subtab-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const subtab = this.getAttribute('data-subtab');
+            
+            // Update button states
+            document.querySelectorAll('.speed-subtab-btn').forEach(b => {
+                b.classList.remove('active');
+                b.style.borderBottomColor = 'transparent';
+                b.style.color = '#666';
+                b.style.fontWeight = '500';
+            });
+            this.classList.add('active');
+            this.style.borderBottomColor = '#0038A8';
+            this.style.color = '#0038A8';
+            this.style.fontWeight = '600';
+            
+            // Show corresponding sub-tab panel
+            document.querySelectorAll('.speed-subtab-panel').forEach(panel => {
+                panel.style.display = 'none';
+            });
+            document.getElementById(`subtab-${subtab}`).style.display = 'block';
+            
+            // Load data if not already loaded
+            if (subtab === 'slowest' && !slowestProjectsLoaded) {
+                loadSlowestProjectsMobile();
+                slowestProjectsLoaded = true;
+            }
+        });
+    });
+
+    // Load slowest completed projects for mobile
+    async function loadSlowestProjectsMobile() {
+        try {
+            console.log('🐌 Loading slowest completed projects for mobile...');
+            
+            const spinner = document.getElementById('slowest-projects-loading');
+            const container = document.getElementById('slowest-projects-container');
+            const mobileCards = document.getElementById('slowest-projects-mobile-cards');
+            
+            // Try to load from JSON file
+            let slowestProjects = [];
+            
+            try {
+                const response = await fetch('/static/data/slowest_dime_projects.json');
+                if (response.ok) {
+                    const data = await response.json();
+                    slowestProjects = data.projects || [];
+                    console.log(`✅ Loaded ${slowestProjects.length} slowest projects from JSON`);
+                }
+            } catch (error) {
+                console.log('⚠️ Could not load slowest projects from JSON');
+            }
+            
+            // If no data, show a note
+            if (slowestProjects.length === 0) {
+                mobileCards.innerHTML = `
+                    <div style="background: #f8f9fa; padding: 1.5rem; border-radius: 8px; text-align: center;">
+                        <h4 style="color: #0038A8; margin-bottom: 0.5rem; font-size: 1rem;">📊 Database Connection Required</h4>
+                        <p style="font-size: 0.875rem; color: #666;">To display the slowest completed DIME projects, database credentials are needed.</p>
+                    </div>
+                `;
+                spinner.style.display = 'none';
+                container.style.display = 'block';
+                return;
+            }
+            
+            // Hide spinner, show container
+            spinner.style.display = 'none';
+            container.style.display = 'block';
+            
+            mobileCards.innerHTML = '';
+            
+            slowestProjects.forEach((project, index) => {
+                const card = document.createElement('div');
+                card.style.cssText = `
+                    background: white;
+                    border: 1px solid #e0e0e0;
+                    border-radius: 8px;
+                    padding: 15px;
+                    margin-bottom: 10px;
+                    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+                `;
+                
+                let rankBadge = `#${index + 1}`;
+                if (index === 0) rankBadge = '🥇';
+                if (index === 1) rankBadge = '🥈';
+                if (index === 2) rankBadge = '🥉';
+                
+                // Get contractor name with source indicator
+                let contractorName = 'N/A';
+                let contractorSource = '';
+                
+                if (project.contractor_source === 'flood_connected' || project.contractor_source === 'dime_fallback') {
+                    contractorName = project.contractors[0];
+                    contractorSource = '<span style="background: #ffc107; color: black; padding: 2px 6px; border-radius: 4px; font-size: 0.8em; font-weight: 600;">SSP</span>';
+                } else if (project.contractors && project.contractors.length > 0) {
+                    contractorName = project.contractors[0];
+                    contractorSource = '<span style="background: #28a745; color: white; padding: 2px 6px; border-radius: 4px; font-size: 0.8em; font-weight: 600;">DIME</span>';
+                } else if (project.implementing_offices && project.implementing_offices.length > 0) {
+                    try {
+                        const contractorObj = typeof project.implementing_offices[0] === 'string' ? JSON.parse(project.implementing_offices[0]) : project.implementing_offices[0];
+                        contractorName = contractorObj.name || contractorObj.nameAbbreviation || 'N/A';
+                        contractorSource = '<span style="background: #fd7e14; color: white; padding: 2px 6px; border-radius: 4px; font-size: 0.8em; font-weight: 600;">DIME Office</span>';
+                    } catch (e) {
+                        contractorName = 'N/A';
+                    }
+                }
+                
+                card.innerHTML = `
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                        <span style="font-weight: bold; color: #0038A8; font-size: 1.1em;">${rankBadge}</span>
+                        <span style="font-weight: bold; color: #dc3545; font-size: 1.1em;">${project.completion_days || 'N/A'} days</span>
+                    </div>
+                    <div style="font-weight: 600; margin-bottom: 5px; color: #333;">${project.project_name || 'N/A'}</div>
+                    <div style="font-size: 0.9em; color: #666; margin-bottom: 5px;">
+                        <div>📍 ${project.region || 'N/A'}</div>
+                        <div>📅 Started: ${project.date_started || 'N/A'}</div>
+                        <div>✅ Completed: ${project.contract_completion_date || 'N/A'}</div>
+                        <div>💰 Cost: ₱${project.cost ? parseFloat(project.cost).toLocaleString('en-PH', {minimumFractionDigits: 2}) : 'N/A'}</div>
+                    </div>
+                    <div style="font-size: 0.8em; color: #666;">
+                        <div>👷 ${contractorName}</div>
+                        <div>${contractorSource}</div>
+                    </div>
+                `;
+                
+                mobileCards.appendChild(card);
+            });
+            
+            console.log(`✅ Loaded ${slowestProjects.length} slowest projects for mobile`);
+            
+        } catch (error) {
+            console.error('❌ Error loading slowest projects for mobile:', error);
         }
     }
 

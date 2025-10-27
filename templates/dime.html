@@ -316,11 +316,23 @@ function toggleMobileMenu() {
             </div>
 
 
-            <!-- Fastest Tab -->
+            <!-- Speed Tab -->
             <div id="tab-fastest" class="budget-tab-panel">
-                <!-- Top 100 Fastest Completed Projects -->
-                <div style="background: white; padding: 30px; border-radius: 12px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); margin-bottom: 30px;">
-                    <h2 style="color: #0038A8; margin: 0 0 10px 0; font-size: 1.8em; text-align: center;">🚀 Top 100 Projects by Speed</h2>
+                <!-- Sub-tab Navigation -->
+                <div style="background: white; padding: 20px 30px 10px; border-radius: 12px 12px 0 0; box-shadow: 0 2px 10px rgba(0,0,0,0.1); margin-bottom: 0;">
+                    <div style="display: flex; gap: 10px; border-bottom: 2px solid #e0e0e0;">
+                        <button class="speed-subtab-btn active" data-subtab="fastest" style="padding: 12px 24px; background: none; border: none; border-bottom: 3px solid #0038A8; color: #0038A8; font-weight: 600; cursor: pointer; font-size: 1em; transition: all 0.3s;">
+                            ⚡ Fastest Projects
+                        </button>
+                        <button class="speed-subtab-btn" data-subtab="slowest" style="padding: 12px 24px; background: none; border: none; border-bottom: 3px solid transparent; color: #666; font-weight: 500; cursor: pointer; font-size: 1em; transition: all 0.3s;">
+                            🐌 Slowest Projects
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Fastest Projects Sub-tab -->
+                <div id="subtab-fastest" class="speed-subtab-panel" style="background: white; padding: 30px; border-radius: 0 0 12px 12px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); margin-bottom: 30px;">
+                    <h2 style="color: #0038A8; margin: 0 0 10px 0; font-size: 1.8em; text-align: center;">⚡ Top 100 Fastest Completed Projects</h2>
                     <p style="text-align: center; color: #666; margin-bottom: 15px;">Infrastructure projects with the shortest time from start to completion</p>
                     
                     <!-- Legend for contractor sources -->
@@ -348,12 +360,56 @@ function toggleMobileMenu() {
                                     <th style="width: 12%;">Region</th>
                                     <th style="width: 10%; text-align: center;">Start Date</th>
                                     <th style="width: 10%; text-align: center;">Completion</th>
-                                    <th style="width: 8%; text-align: center; cursor: pointer;" onclick="sortFastestTable('days')">Days ↕️</th>
+                                    <th style="width: 8%; text-align: center;">Days</th>
                                     <th style="width: 10%; text-align: right;">Cost</th>
                                     <th style="width: 10%;">Contractor</th>
                                 </tr>
                             </thead>
                             <tbody id="fastest-projects-tbody">
+                                <tr>
+                                    <td colspan="8" style="text-align: center; padding: 2rem;">Loading...</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Slowest Projects Sub-tab -->
+                <div id="subtab-slowest" class="speed-subtab-panel" style="background: white; padding: 30px; border-radius: 0 0 12px 12px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); margin-bottom: 30px; display: none;">
+                    <h2 style="color: #0038A8; margin: 0 0 10px 0; font-size: 1.8em; text-align: center;">🐌 Top 100 Slowest Completed Projects</h2>
+                    <p style="text-align: center; color: #666; margin-bottom: 15px;">Infrastructure projects with the longest time from start to completion</p>
+                    
+                    <!-- Legend for contractor sources -->
+                    <div style="text-align: center; margin-bottom: 30px; padding: 15px; background: #f8f9fa; border-radius: 8px; font-size: 0.9em; color: #666;">
+                        <strong>Legend:</strong> 
+                        <span style="background: #ffc107; color: black; padding: 2px 6px; border-radius: 4px; font-size: 0.8em; font-weight: 600; margin: 0 5px;">SSP</span> = Sumbong sa Pangulo | 
+                        <span style="background: #28a745; color: white; padding: 2px 6px; border-radius: 4px; font-size: 0.8em; font-weight: 600; margin: 0 5px;">DIME</span> = DIME Database
+                    </div>
+
+                    <!-- Loading Spinner -->
+                    <div id="slowest-projects-loading" style="display: flex; justify-content: center; align-items: center; padding: 40px;">
+                        <div style="display: flex; flex-direction: column; align-items: center; gap: 15px;">
+                            <div style="width: 40px; height: 40px; border: 4px solid #f3f3f3; border-top: 4px solid #0038A8; border-radius: 50%; animation: spin 1s linear infinite;"></div>
+                            <p style="color: #666; font-size: 14px; margin: 0;">Analyzing project completion times...</p>
+                        </div>
+                    </div>
+
+                    <!-- Slowest Projects Table -->
+                    <div id="slowest-projects-container" style="display: none;">
+                        <table class="budget-projects-table">
+                            <thead>
+                                <tr>
+                                    <th style="width: 5%; text-align: center;">Rank</th>
+                                    <th style="width: 35%;">Project Name</th>
+                                    <th style="width: 12%;">Region</th>
+                                    <th style="width: 10%; text-align: center;">Start Date</th>
+                                    <th style="width: 10%; text-align: center;">Completion</th>
+                                    <th style="width: 8%; text-align: center;">Days</th>
+                                    <th style="width: 10%; text-align: right;">Cost</th>
+                                    <th style="width: 10%;">Contractor</th>
+                                </tr>
+                            </thead>
+                            <tbody id="slowest-projects-tbody">
                                 <tr>
                                     <td colspan="8" style="text-align: center; padding: 2rem;">Loading...</td>
                                 </tr>
@@ -495,6 +551,20 @@ fetch('/static/data/dime_summary.json')
     @keyframes spin {
         0% { transform: rotate(0deg); }
         100% { transform: rotate(360deg); }
+    }
+    
+    /* Speed sub-tab styles */
+    .speed-subtab-panel {
+        display: none;
+    }
+    
+    .speed-subtab-panel.active {
+        display: block;
+    }
+    
+    .speed-subtab-btn:hover {
+        color: #0038A8 !important;
+        border-bottom-color: #0038A8 !important;
     }
     
     /* Footer styling removed - now uses global visualizations-footer styles */
@@ -747,11 +817,6 @@ fetch('/static/data/dime_summary.json')
     let currentSortColumn = 'cost';
     let currentSortOrder = 'DESC';
     const itemsPerPage = 50;
-    
-    // Fastest projects sorting state
-    let fastestProjectsData = [];
-    let fastestSortColumn = 'days';
-    let fastestSortOrder = 'ASC'; // Default to ascending (fastest first)
 
     // Initialize tabs
     function initializeTabs() {
@@ -1696,9 +1761,6 @@ fetch('/static/data/dime_summary.json')
                 console.log('⚠️ Could not load fastest projects from JSON, showing note');
             }
             
-            // Store data globally for sorting
-            fastestProjectsData = fastestProjects;
-            
             // If no data, show a note that database connection is needed
             if (fastestProjects.length === 0) {
                 tbody.innerHTML = `
@@ -1721,8 +1783,69 @@ fetch('/static/data/dime_summary.json')
             spinner.style.display = 'none';
             container.style.display = 'block';
             
-            // Render the table with current sort
-            renderFastestProjectsTable();
+            tbody.innerHTML = '';
+            
+            if (fastestProjects.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="8" style="text-align: center; padding: 2rem; color: #666;">
+                            No completed projects with date information found
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+            
+            fastestProjects.forEach((project, index) => {
+                const row = document.createElement('tr');
+                
+                // Highlight top 3
+                if (index < 3) {
+                    row.style.background = index === 0 ? '#fff3cd' : index === 1 ? '#f8f9fa' : '#f8f9fa';
+                    row.style.fontWeight = index < 3 ? '500' : 'normal';
+                }
+                
+                let rankBadge = `#${index + 1}`;
+                if (index === 0) rankBadge = '🥇';
+                if (index === 1) rankBadge = '🥈';
+                if (index === 2) rankBadge = '🥉';
+                
+                // Get contractor name with source indicator
+                let contractorName = 'N/A';
+                let contractorSource = '';
+                
+                if (project.contractor_source === 'flood_connected' || project.contractor_source === 'dime_fallback') {
+                    // Project connected to flood data (SSP) - contractor from MeiliSearch or DIME fallback
+                    contractorName = project.contractors[0];
+                    contractorSource = '<span style="background: #ffc107; color: black; padding: 2px 6px; border-radius: 4px; font-size: 0.8em; font-weight: 600;">SSP</span>';
+                } else if (project.contractors && project.contractors.length > 0) {
+                    // Use DIME contractor data
+                    contractorName = project.contractors[0];
+                    contractorSource = '<span style="background: #28a745; color: white; padding: 2px 6px; border-radius: 4px; font-size: 0.8em; font-weight: 600;">DIME</span>';
+                } else if (project.implementing_offices && project.implementing_offices.length > 0) {
+                    // Fallback to implementing offices
+                    try {
+                        const contractorObj = typeof project.implementing_offices[0] === 'string' ? JSON.parse(project.implementing_offices[0]) : project.implementing_offices[0];
+                        contractorName = contractorObj.name || contractorObj.nameAbbreviation || 'N/A';
+                        contractorSource = '<span style="background: #fd7e14; color: white; padding: 2px 6px; border-radius: 4px; font-size: 0.8em; font-weight: 600;">DIME Office</span>';
+                    } catch (e) {
+                        contractorName = 'N/A';
+                    }
+                }
+                
+                row.innerHTML = `
+                    <td style="text-align: center;"><strong>${rankBadge}</strong></td>
+                    <td><strong style="color: #0038A8;">${project.project_name || 'N/A'}</strong></td>
+                    <td>${project.region || 'N/A'}</td>
+                    <td style="text-align: center;">${project.date_started || 'N/A'}</td>
+                    <td style="text-align: center;">${project.contract_completion_date || 'N/A'}</td>
+                    <td style="text-align: center;"><strong style="color: #28a745;">${project.completion_days || 'N/A'}</strong></td>
+                    <td style="text-align: right;">₱${project.cost ? parseFloat(project.cost).toLocaleString('en-PH', {minimumFractionDigits: 2}) : 'N/A'}</td>
+                    <td style="font-size: 0.9em;">${contractorName}<br/>${contractorSource}</td>
+                `;
+                
+                tbody.appendChild(row);
+            });
             
             console.log(`✅ Loaded ${fastestProjects.length} fastest projects`);
             
@@ -1740,109 +1863,129 @@ fetch('/static/data/dime_summary.json')
         }
     }
 
-    // Render fastest projects table with current sort
-    function renderFastestProjectsTable() {
-        const tbody = document.getElementById('fastest-projects-tbody');
-        if (!tbody) return;
-        
-        tbody.innerHTML = '';
-        
-        if (fastestProjectsData.length === 0) {
-            tbody.innerHTML = `
-                <tr>
-                    <td colspan="8" style="text-align: center; padding: 2rem; color: #666;">
-                        No completed projects with date information found
-                    </td>
-                </tr>
-            `;
-            return;
-        }
-        
-        // Sort the data
-        const sortedProjects = [...fastestProjectsData].sort((a, b) => {
-            if (fastestSortColumn === 'days') {
-                const aDays = parseInt(a.completion_days) || 0;
-                const bDays = parseInt(b.completion_days) || 0;
-                return fastestSortOrder === 'ASC' ? aDays - bDays : bDays - aDays;
-            }
-            // Add other sort columns if needed
-            return 0;
-        });
-        
-        sortedProjects.forEach((project, index) => {
-            const row = document.createElement('tr');
+    // Load slowest completed projects
+    async function loadSlowestProjects() {
+        try {
+            console.log('🐌 Loading slowest completed projects...');
             
-            // Highlight top 3
-            if (index < 3) {
-                row.style.background = index === 0 ? '#fff3cd' : index === 1 ? '#f8f9fa' : '#f8f9fa';
-                row.style.fontWeight = index < 3 ? '500' : 'normal';
-            }
+            const spinner = document.getElementById('slowest-projects-loading');
+            const container = document.getElementById('slowest-projects-container');
+            const tbody = document.getElementById('slowest-projects-tbody');
             
-            let rankBadge = `#${index + 1}`;
-            if (index === 0) rankBadge = '🥇';
-            if (index === 1) rankBadge = '🥈';
-            if (index === 2) rankBadge = '🥉';
+            // Try to load from JSON file, fallback to API, then placeholder
+            let slowestProjects = [];
             
-            // Get contractor name with source indicator
-            let contractorName = 'N/A';
-            let contractorSource = '';
-            
-            if (project.contractor_source === 'flood_connected' || project.contractor_source === 'dime_fallback') {
-                // Project connected to flood data (SSP) - contractor from MeiliSearch or DIME fallback
-                contractorName = project.contractors[0];
-                contractorSource = '<span style="background: #ffc107; color: black; padding: 2px 6px; border-radius: 4px; font-size: 0.8em; font-weight: 600;">SSP</span>';
-            } else if (project.contractors && project.contractors.length > 0) {
-                // Use DIME contractor data
-                contractorName = project.contractors[0];
-                contractorSource = '<span style="background: #28a745; color: white; padding: 2px 6px; border-radius: 4px; font-size: 0.8em; font-weight: 600;">DIME</span>';
-            } else if (project.implementing_offices && project.implementing_offices.length > 0) {
-                // Fallback to implementing offices
-                try {
-                    const contractorObj = typeof project.implementing_offices[0] === 'string' ? JSON.parse(project.implementing_offices[0]) : project.implementing_offices[0];
-                    contractorName = contractorObj.name || contractorObj.nameAbbreviation || 'N/A';
-                    contractorSource = '<span style="background: #fd7e14; color: white; padding: 2px 6px; border-radius: 4px; font-size: 0.8em; font-weight: 600;">DIME Office</span>';
-                } catch (e) {
-                    contractorName = 'N/A';
+            try {
+                const response = await fetch('/static/data/slowest_dime_projects.json');
+                if (response.ok) {
+                    const data = await response.json();
+                    slowestProjects = data.projects || [];
+                    console.log(`✅ Loaded ${slowestProjects.length} slowest projects from JSON`);
                 }
+            } catch (error) {
+                console.log('⚠️ Could not load slowest projects from JSON, showing note');
             }
             
-            row.innerHTML = `
-                <td style="text-align: center;"><strong>${rankBadge}</strong></td>
-                <td><strong style="color: #0038A8;">${project.project_name || 'N/A'}</strong></td>
-                <td>${project.region || 'N/A'}</td>
-                <td style="text-align: center;">${project.date_started || 'N/A'}</td>
-                <td style="text-align: center;">${project.contract_completion_date || 'N/A'}</td>
-                <td style="text-align: center;"><strong style="color: #28a745;">${project.completion_days || 'N/A'}</strong></td>
-                <td style="text-align: right;">₱${project.cost ? parseFloat(project.cost).toLocaleString('en-PH', {minimumFractionDigits: 2}) : 'N/A'}</td>
-                <td style="font-size: 0.9em;">${contractorName}<br/>${contractorSource}</td>
-            `;
+            // If no data, show a note that database connection is needed
+            if (slowestProjects.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="8" style="text-align: center; padding: 3rem; color: #666;">
+                            <div style="background: #f8f9fa; padding: 2rem; border-radius: 8px; max-width: 600px; margin: 0 auto;">
+                                <h4 style="color: #0038A8; margin-bottom: 1rem;">📊 Database Connection Required</h4>
+                                <p style="margin-bottom: 0.5rem;">To display the top 100 slowest completed DIME projects, database credentials are needed.</p>
+                                <p style="font-size: 0.9em; color: #888;">Run: <code>python3 generate_fastest_dime_projects.py</code> with proper PostgreSQL credentials.</p>
+                            </div>
+                        </td>
+                    </tr>
+                `;
+                spinner.style.display = 'none';
+                container.style.display = 'block';
+                return;
+            }
             
-            tbody.appendChild(row);
-        });
-    }
-
-    // Sort fastest projects table
-    function sortFastestTable(column) {
-        if (fastestSortColumn === column) {
-            // Toggle sort order if same column
-            fastestSortOrder = fastestSortOrder === 'ASC' ? 'DESC' : 'ASC';
-        } else {
-            // New column, default to ASC for days
-            fastestSortColumn = column;
-            fastestSortOrder = column === 'days' ? 'ASC' : 'ASC';
+            // Hide spinner, show table
+            spinner.style.display = 'none';
+            container.style.display = 'block';
+            
+            tbody.innerHTML = '';
+            
+            if (slowestProjects.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="8" style="text-align: center; padding: 2rem; color: #666;">
+                            No completed projects with date information found
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+            
+            slowestProjects.forEach((project, index) => {
+                const row = document.createElement('tr');
+                
+                // Highlight top 3
+                if (index < 3) {
+                    row.style.background = index === 0 ? '#fff3cd' : index === 1 ? '#f8f9fa' : '#f8f9fa';
+                    row.style.fontWeight = index < 3 ? '500' : 'normal';
+                }
+                
+                let rankBadge = `#${index + 1}`;
+                if (index === 0) rankBadge = '🥇';
+                if (index === 1) rankBadge = '🥈';
+                if (index === 2) rankBadge = '🥉';
+                
+                // Get contractor name with source indicator
+                let contractorName = 'N/A';
+                let contractorSource = '';
+                
+                if (project.contractor_source === 'flood_connected' || project.contractor_source === 'dime_fallback') {
+                    // Project connected to flood data (SSP) - contractor from MeiliSearch or DIME fallback
+                    contractorName = project.contractors[0];
+                    contractorSource = '<span style="background: #ffc107; color: black; padding: 2px 6px; border-radius: 4px; font-size: 0.8em; font-weight: 600;">SSP</span>';
+                } else if (project.contractors && project.contractors.length > 0) {
+                    // Use DIME contractor data
+                    contractorName = project.contractors[0];
+                    contractorSource = '<span style="background: #28a745; color: white; padding: 2px 6px; border-radius: 4px; font-size: 0.8em; font-weight: 600;">DIME</span>';
+                } else if (project.implementing_offices && project.implementing_offices.length > 0) {
+                    // Fallback to implementing offices
+                    try {
+                        const contractorObj = typeof project.implementing_offices[0] === 'string' ? JSON.parse(project.implementing_offices[0]) : project.implementing_offices[0];
+                        contractorName = contractorObj.name || contractorObj.nameAbbreviation || 'N/A';
+                        contractorSource = '<span style="background: #fd7e14; color: white; padding: 2px 6px; border-radius: 4px; font-size: 0.8em; font-weight: 600;">DIME Office</span>';
+                    } catch (e) {
+                        contractorName = 'N/A';
+                    }
+                }
+                
+                row.innerHTML = `
+                    <td style="text-align: center;"><strong>${rankBadge}</strong></td>
+                    <td><strong style="color: #0038A8;">${project.project_name || 'N/A'}</strong></td>
+                    <td>${project.region || 'N/A'}</td>
+                    <td style="text-align: center;">${project.date_started || 'N/A'}</td>
+                    <td style="text-align: center;">${project.contract_completion_date || 'N/A'}</td>
+                    <td style="text-align: center;"><strong style="color: #dc3545;">${project.completion_days || 'N/A'}</strong></td>
+                    <td style="text-align: right;">₱${project.cost ? parseFloat(project.cost).toLocaleString('en-PH', {minimumFractionDigits: 2}) : 'N/A'}</td>
+                    <td style="font-size: 0.9em;">${contractorName}<br/>${contractorSource}</td>
+                `;
+                
+                tbody.appendChild(row);
+            });
+            
+            console.log(`✅ Loaded ${slowestProjects.length} slowest projects`);
+            
+        } catch (error) {
+            console.error('❌ Error loading slowest projects:', error);
+            const spinner = document.getElementById('slowest-projects-loading');
+            if (spinner) {
+                spinner.innerHTML = `
+                    <div style="text-align: center; padding: 2rem; color: #dc3545;">
+                        <p style="font-size: 1.2em;">❌ Error loading slowest projects</p>
+                        <p style="font-size: 0.9em;">${error.message}</p>
+                    </div>
+                `;
+            }
         }
-        
-        // Update header icon
-        const header = document.querySelector(`th[onclick="sortFastestTable('${column}')"]`);
-        if (header) {
-            const icon = fastestSortOrder === 'ASC' ? '▲' : '▼';
-            header.innerHTML = `Days ${icon}`;
-        }
-        
-        // Re-render table
-        renderFastestProjectsTable();
-        
-        console.log(`🔄 Sorted fastest projects by ${column} ${fastestSortOrder}`);
     }
 
     // Load barangay aggregates
@@ -2060,6 +2203,39 @@ fetch('/static/data/dime_summary.json')
             }
         }
     }
+
+    // Speed sub-tab switching
+    let slowestProjectsLoaded = false;
+    
+    document.querySelectorAll('.speed-subtab-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const subtab = this.getAttribute('data-subtab');
+            
+            // Update button states
+            document.querySelectorAll('.speed-subtab-btn').forEach(b => {
+                b.classList.remove('active');
+                b.style.borderBottomColor = 'transparent';
+                b.style.color = '#666';
+                b.style.fontWeight = '500';
+            });
+            this.classList.add('active');
+            this.style.borderBottomColor = '#0038A8';
+            this.style.color = '#0038A8';
+            this.style.fontWeight = '600';
+            
+            // Show corresponding sub-tab panel
+            document.querySelectorAll('.speed-subtab-panel').forEach(panel => {
+                panel.style.display = 'none';
+            });
+            document.getElementById(`subtab-${subtab}`).style.display = 'block';
+            
+            // Load data if not already loaded
+            if (subtab === 'slowest' && !slowestProjectsLoaded) {
+                loadSlowestProjects();
+                slowestProjectsLoaded = true;
+            }
+        });
+    });
 
     // Barangay sub-tab switching
     let activeBarangaysLoaded = false;
