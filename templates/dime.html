@@ -855,6 +855,13 @@ fetch('/static/data/dime_summary.json')
             // Load data for specific tabs
             if (tabName === 'table') {
                 loadProjects(1);
+            } else if (tabName === 'barangays') {
+                loadBarangaysData();
+            } else if (tabName === 'visual') {
+                loadVisualData();
+            } else if (tabName === 'fastest') {
+                // Automatically load fastest projects when Speed tab is opened
+                loadFastestProjects();
             }
         }
     }

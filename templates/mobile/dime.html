@@ -544,6 +544,9 @@
                 // Load data for specific tabs
                 if (targetTab === 'table') {
                     loadProjects(1);
+                } else if (targetTab === 'analysis') {
+                    // Automatically load fastest projects when Speed tab is opened
+                    loadFastestProjectsMobile();
                 }
             });
         });
