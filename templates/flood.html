@@ -434,7 +434,7 @@ function toggleMobileMenu() {
                     <div class="chart-container bg-white p-5 rounded-lg shadow-lg">
                         <h3 class="text-blue-900 m-0 mb-4">🏆 Top Districts by Number of Projects</h3>
                         <div style="height: 500px; position: relative;">
-                            <canvas id="districtRankingChart" class="cursor-pointer border border-gray-300 rounded w-full"></canvas>
+                            <canvas id="districtRankingChart" width="800" height="500" class="cursor-pointer border border-gray-300 rounded w-full"></canvas>
                         </div>
                         <div class="mt-4 text-sm text-gray-600">
                             <p class="my-1"><strong>Total Regions:</strong> <span id="total-regions-count">-</span></p>
@@ -4642,6 +4642,12 @@ function getContractorSecStatusSync(contractorName) {
 
             // Create horizontal bar chart
             console.log('🏆 Creating Chart.js chart...');
+            console.log('🏆 Chart data:', {
+                labels: districtsArray.map(item => item.district.length > 30 ? item.district.substring(0, 30) + '...' : item.district),
+                data: districtsArray.map(item => item.count)
+            });
+            console.log('🏆 First 5 districts:', districtsArray.slice(0, 5));
+            
             new Chart(districtRankingCtx, {
                 type: 'bar',
                 data: {
@@ -4669,15 +4675,6 @@ function getContractorSecStatusSync(contractorName) {
                     indexAxis: 'y', // Horizontal bar chart
                     responsive: true,
                     maintainAspectRatio: false,
-                    aspectRatio: 2,
-                    layout: {
-                        padding: {
-                            top: 10,
-                            bottom: 10,
-                            left: 10,
-                            right: 10
-                        }
-                    },
                     plugins: {
                         legend: {
                             display: false
@@ -4729,10 +4726,6 @@ function getContractorSecStatusSync(contractorName) {
                                 display: false
                             }
                         }
-                    },
-                    interaction: {
-                        intersect: false,
-                        mode: 'index'
                     }
                 }
             });
