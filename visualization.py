@@ -671,7 +671,7 @@ async def flood_districts_api():
     """Get district statistics for flood control projects - no authentication required"""
     try:
         # Try to load from cached JSON file first
-        cache_file = "static/data/flood_districts_cache.json"
+        cache_file = os.path.join(os.path.dirname(__file__), "static", "data", "flood_districts_cache.json")
         if os.path.exists(cache_file):
             with open(cache_file, 'r', encoding='utf-8') as f:
                 cached_data = json.load(f)
@@ -683,13 +683,12 @@ async def flood_districts_api():
         client = get_flood_client()
         
         # Get all projects to count by district
-        projects_response = await client.search("", {"limit": 10000})
-        projects = projects_response.hits
+        projects, metadata = await client.search_projects(query="", limit=10000, offset=0)
         
         # Count projects by DistrictEngineeringOffice
         districts_data = {}
         for project in projects:
-            district = project.get("DistrictEngineeringOffice", "Unknown District")
+            district = project.DistrictEngineeringOffice or "Unknown District"
             districts_data[district] = districts_data.get(district, 0) + 1
         
         # Convert to array format for consistency
