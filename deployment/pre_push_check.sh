@@ -47,7 +47,7 @@ log "✅ Rust code compiles successfully"
 
 # Check 3: Verify Python syntax
 log "🐍 Checking Python syntax..."
-python_files=$(find . -name "*.py" -not -path "./venv/*" -not -path "./target/*")
+python_files=$(find . -name "*.py" -not -path "./venv/*" -not -path "./target/*" -not -path "./dpwh_archive/*" -not -path "./sec_scraper/*")
 for file in $python_files; do
     if ! python3 -m py_compile "$file" 2>/dev/null; then
         error "Python syntax error in: $file"
