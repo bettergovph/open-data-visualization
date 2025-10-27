@@ -11,6 +11,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
     <script src="/static/js/chart.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 
     <!-- BetterGovPH Metadata -->
     <meta name="description" content="PhilGEPS - Philippine Government Electronic Procurement System Data (2013-2025)">
@@ -187,7 +188,16 @@ function toggleMobileMenu() {
                     </div>
 
                     <!-- Venn Diagram: Data Sources -->
-                    <div class="chart-container" style="background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); margin-bottom: 20px;">
+                    <div id="vennDiagramContainer" class="chart-container relative" style="background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); margin-bottom: 20px;">
+                        <button 
+                            id="copyVennBtn" 
+                            style="position: absolute; top: 20px; right: 20px; z-index: 10;"
+                            class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded text-base transition-colors duration-200 flex items-center gap-2"
+                            onclick="copyChartToClipboard('vennDiagramContainer', 'copyVennBtn')"
+                            title="Copy chart image to clipboard"
+                        >
+                            📋 Copy
+                        </button>
                         <h3 style="color: #0038A8; margin: 0 0 15px 0;">🔵🟢🟡 Contractor Data Sources Distribution</h3>
                         <p style="color: #666; margin: 0 0 20px 0;">Venn diagram showing overlap between Flood Control, DIME, and PhilGEPS contractor databases</p>
                         <div style="max-width: 800px; margin: 0 auto;">
@@ -226,7 +236,16 @@ function toggleMobileMenu() {
                     </div>
 
                     <!-- Top Contractors Chart -->
-                    <div class="chart-container" style="background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); margin-bottom: 20px;">
+                    <div id="contractorsChartContainer" class="chart-container relative" style="background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); margin-bottom: 20px;">
+                        <button 
+                            id="copyContractorsBtn" 
+                            style="position: absolute; top: 60px; right: 20px; z-index: 10;"
+                            class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded text-base transition-colors duration-200 flex items-center gap-2"
+                            onclick="copyChartToClipboard('contractorsChartContainer', 'copyContractorsBtn')"
+                            title="Copy chart image to clipboard"
+                        >
+                            📋 Copy
+                        </button>
                         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
                             <h3 style="color: #0038A8; margin: 0;">Top Contractors by Project Count</h3>
                             <div style="display: flex; gap: 10px; align-items: center;">
@@ -239,7 +258,16 @@ function toggleMobileMenu() {
                     </div>
 
                     <!-- Standard Deviation Analysis Chart -->
-                    <div class="chart-container" style="background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); margin-bottom: 20px;">
+                    <div id="secContractorDistributionChartContainer" class="chart-container relative" style="background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); margin-bottom: 20px;">
+                        <button 
+                            id="copySecContractorDistributionBtn" 
+                            style="position: absolute; top: 20px; right: 20px; z-index: 10;"
+                            class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded text-base transition-colors duration-200 flex items-center gap-2"
+                            onclick="copyChartToClipboard('secContractorDistributionChartContainer', 'copySecContractorDistributionBtn')"
+                            title="Copy chart image to clipboard"
+                        >
+                            📋 Copy
+                        </button>
                         <h3 style="color: #0038A8; margin: 0 0 15px 0;">📊 Standard Deviation Analysis Chart</h3>
                         <p style="color: #666; margin: 0 0 20px 0; font-size: 0.9em;">
                             Statistical analysis of contractor project counts from SEC database (all contractors across all databases)
@@ -459,7 +487,16 @@ function toggleMobileMenu() {
                         <!-- Charts Section -->
                         <div style="margin-bottom: 20px;">
                             <!-- Top 20 Contractors Chart -->
-                            <div style="background: #f8f9fa; padding: 20px; border-radius: 8px; margin-bottom: 20px;">
+                            <div id="hiddenContractorsChartContainer" style="background: #f8f9fa; padding: 20px; border-radius: 8px; margin-bottom: 20px; position: relative;">
+                                <button 
+                                    id="copyHiddenContractorsBtn" 
+                                    style="position: absolute; top: 20px; right: 20px; z-index: 10;"
+                                    class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded text-base transition-colors duration-200 flex items-center gap-2"
+                                    onclick="copyChartToClipboard('hiddenContractorsChartContainer', 'copyHiddenContractorsBtn')"
+                                    title="Copy chart image to clipboard"
+                                >
+                                    📋 Copy
+                                </button>
                                 <h4 style="color: #0038A8; margin: 0 0 15px 0; text-align: center;">👥 Top 20 Excluded Flood Contractors</h4>
                                 <div style="position: relative; height: 400px;">
                                     <canvas id="hidden-contractors-chart"></canvas>
@@ -2150,6 +2187,112 @@ async function createSecDistributionChart() {
 loadContractors();
 loadVennDiagram();
 createSecDistributionChart();
+</script>
+
+<!-- Copy Chart Functionality -->
+<script>
+// Function to copy chart image to clipboard
+async function copyChartToClipboard(containerId, buttonId) {
+    console.log(`🔄 Attempting to copy chart container ${containerId}...`);
+    
+    try {
+        const container = document.getElementById(containerId);
+        console.log('Container element:', container);
+        
+        if (!container) {
+            throw new Error('Chart container not found');
+        }
+        
+        // Temporarily hide the copy button to avoid including it in the image
+        const button = document.getElementById(buttonId);
+        const originalDisplay = button.style.display;
+        button.style.display = 'none';
+        
+        console.log('Capturing container with html2canvas...');
+        
+        // Use html2canvas to capture the entire container
+        const canvas = await html2canvas(container, {
+            backgroundColor: '#ffffff',
+            scale: 1.5, // Good balance of quality and performance
+            useCORS: true,
+            allowTaint: true,
+            logging: false,
+            width: container.offsetWidth,
+            height: container.offsetHeight
+        });
+        
+        console.log('Canvas created:', canvas.width, 'x', canvas.height);
+        
+        // Convert canvas to blob
+        const blob = await new Promise((resolve, reject) => {
+            canvas.toBlob((blob) => {
+                if (blob) {
+                    console.log('Blob created successfully:', blob.size, 'bytes');
+                    resolve(blob);
+                } else {
+                    reject(new Error('Failed to create blob from canvas'));
+                }
+            }, 'image/png', 0.95);
+        });
+        
+        // Restore button visibility
+        button.style.display = originalDisplay;
+        
+        console.log('Checking clipboard API support...');
+        if (!navigator.clipboard) {
+            throw new Error('Clipboard API not supported');
+        }
+        
+        if (!window.ClipboardItem) {
+            throw new Error('ClipboardItem not supported');
+        }
+        
+        // Copy to clipboard
+        console.log('Writing to clipboard...');
+        await navigator.clipboard.write([
+            new ClipboardItem({
+                'image/png': blob
+            })
+        ]);
+        
+        console.log('✅ Successfully copied to clipboard!');
+        
+        // Show success feedback
+        const originalText = button.innerHTML;
+        button.innerHTML = '✅ Copied!';
+        button.classList.remove('bg-blue-500', 'hover:bg-blue-600');
+        button.classList.add('bg-green-500');
+        
+        // Reset button after 2 seconds
+        setTimeout(() => {
+            button.innerHTML = originalText;
+            button.classList.remove('bg-green-500');
+            button.classList.add('bg-blue-500', 'hover:bg-blue-600');
+        }, 2000);
+        
+    } catch (error) {
+        console.error('❌ Failed to copy chart to clipboard:', error);
+        
+        // Restore button visibility in case of error
+        const button = document.getElementById(buttonId);
+        if (button) {
+            button.style.display = '';
+        }
+        
+        // Show error feedback
+        const originalText = button.innerHTML;
+        button.innerHTML = '❌ Failed';
+        button.classList.remove('bg-blue-500', 'hover:bg-blue-600');
+        button.classList.add('bg-red-500');
+        
+        // Reset button after 2 seconds
+        setTimeout(() => {
+            button.innerHTML = originalText;
+            button.classList.remove('bg-red-500');
+            button.classList.add('bg-blue-500', 'hover:bg-blue-600');
+        }, 2000);
+    }
+}
 </script>
 
 {% include "footer.html" %}

@@ -286,18 +286,11 @@
                 <a href="/flood" class="text-black hover:text-gray-600 font-medium transition">Flood Control</a>
                 <a href="/dime" class="text-black hover:text-gray-600 font-medium transition">DIME</a>
                 <a href="/map" class="text-black hover:text-gray-600 font-medium transition">Map</a>
-                <a href="/contractors" class="text-black hover:text-gray-600 font-medium transition">PhilGEPS</a>
+                <a href="/philgeps" class="text-black hover:text-gray-600 font-medium transition">PhilGEPS</a>
                 <a href="/dynasty" class="text-black hover:text-gray-600 font-medium transition">Dynasties</a>
                 <a href="/eogo" class="text-black hover:text-gray-600 font-medium transition">EOGO</a>
-                <div class="relative" onmouseenter="this.querySelector('.dropdown-menu').classList.remove('hidden')" onmouseleave="this.querySelector('.dropdown-menu').classList.add('hidden')">
-                    <a href="/correlation" class="text-black hover:text-gray-600 font-medium transition">Correlation ▾</a>
-                    <div class="dropdown-menu absolute hidden bg-white shadow-lg rounded-md mt-0 py-2 w-48" style="z-index: 50;">
-                        <a href="/budget-nep-correlation" class="block px-4 py-2 text-black" style="border-radius: 4px; margin: 2px 4px; transition: all 0.2s;" onmouseover="this.style.background='#dbeafe'; this.style.color='#2563eb';" onmouseout="this.style.background='transparent'; this.style.color='black';">NEP-Budget</a>
-                        <a href="/budget-flood-correlation" class="block px-4 py-2 text-black" style="border-radius: 4px; margin: 2px 4px; transition: all 0.2s;" onmouseover="this.style.background='#dbeafe'; this.style.color='#2563eb';" onmouseout="this.style.background='transparent'; this.style.color='black';">Budget-Flood</a>
-                        <a href="/flood-dime-correlation" class="block px-4 py-2 text-black" style="border-radius: 4px; margin: 2px 4px; transition: all 0.2s; border-left: 3px solid #2563eb; font-weight: 600;" onmouseover="this.style.background='#dbeafe'; this.style.color='#2563eb';" onmouseout="this.style.background='transparent'; this.style.color='black';">Flood-DIME</a>
-                    </div>
+                <a href="/sources" class="text-black hover:text-gray-600 font-medium transition">Sources</a>
             </div>
-            <a href="/sources" class="text-black hover:text-gray-600 font-medium transition">Sources</a>
         </div>
         <div class="md:hidden">
                 <button class="text-black focus:outline-none" onclick="toggleMobileMenu()">
@@ -314,13 +307,10 @@
             <a href="/flood" class="block text-black hover:text-gray-600 font-medium py-2">Flood Control</a>
             <a href="/dime" class="block text-black hover:text-gray-600 font-medium py-2">DIME</a>
             <a href="/map" class="block text-black hover:text-gray-600 font-medium py-2">Map</a>
-            <a href="/contractors" class="block text-black hover:text-gray-600 font-medium py-2">PhilGEPS</a>
+            <a href="/philgeps" class="block text-black hover:text-gray-600 font-medium py-2">PhilGEPS</a>
             <a href="/dynasty" class="block text-black hover:text-gray-600 font-medium py-2">Dynasties</a>
             <a href="/eogo" class="block text-black hover:text-gray-600 font-medium py-2">EOGO</a>
-            <a href="/correlation" class="block text-black hover:text-gray-600 font-medium py-2">Correlation</a>
-            <a href="/budget-nep-correlation" class="block text-black hover:text-gray-600 font-medium py-2 pl-4">→ NEP-Budget</a>
-            <a href="/budget-flood-correlation" class="block text-black hover:text-gray-600 font-medium py-2 pl-4">→ Budget-Flood</a>
-            <a href="/flood-dime-correlation" class="block text-black hover:text-gray-600 font-medium py-2 pl-4 border-b-2 border-black">→ Flood-DIME</a>
+            <a href="/sources" class="block text-black hover:text-gray-600 font-medium py-2">Sources</a>
         </div>
     </nav>
 
@@ -483,7 +473,7 @@
                 console.log('✅ Contractor data loaded:', data);
                 
                 // Check if data structure is valid
-                if (!data || data.status === 'error' || !data.contractors) {
+                if (!data || data.status === 'error' || !data.data || !data.data.contractors) {
                     console.error('❌ Invalid data structure or API error:', data);
                     
                     // Hide spinner
@@ -516,7 +506,7 @@
                 if (methodologySection) methodologySection.style.display = 'block';
                 
                 // Update statistics
-                const contractorsList = Object.values(data.contractors);
+                const contractorsList = Object.values(data.data.contractors);
                 const totalFloodProjects = contractorsList.reduce((sum, c) => sum + c.flood_projects, 0);
                 const totalDimeProjects = contractorsList.reduce((sum, c) => sum + c.dime_non_flood_projects, 0);
                 const totalDimeValue = contractorsList.reduce((sum, c) => sum + c.dime_non_flood_cost, 0);

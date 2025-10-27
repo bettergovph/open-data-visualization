@@ -13,6 +13,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
     <script src="/static/js/chart.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <script src="https://d3js.org/d3.v7.min.js"></script>
     <!-- Leaflet for map rendering -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
@@ -470,7 +471,16 @@ function toggleMobileMenu() {
                         </div>
 
                         <!-- Top Surnames Chart -->
-                        <div class="chart-container" style="background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); height: 800px; margin-bottom: 30px;">
+                        <div id="topSurnamesChartContainer" class="chart-container relative" style="background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); height: 800px; margin-bottom: 30px;">
+                            <button 
+                                id="copyTopSurnamesBtn" 
+                                style="position: absolute; top: 60px; right: 20px; z-index: 10;"
+                                class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded text-base transition-colors duration-200 flex items-center gap-2"
+                                onclick="copyChartToClipboard('topSurnamesChartContainer', 'copyTopSurnamesBtn')"
+                                title="Copy chart image to clipboard"
+                            >
+                                📋 Copy
+                            </button>
                             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
                                 <h3 style="color: #0038A8; margin: 0;">👥 Top Surnames by Province <span style="font-size: 12px; color: #666; font-weight: normal;">(Click bars to view family details)</span></h3>
                                 <div style="display: flex; align-items: center; gap: 10px;">
@@ -485,7 +495,16 @@ function toggleMobileMenu() {
                         </div>
 
                         <!-- Dynasty Control Heatmap -->
-                        <div class="chart-container" style="background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); height: 700px; margin-bottom: 30px;">
+                        <div id="dynastyHeatmapChartContainer" class="chart-container relative" style="background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); height: 700px; margin-bottom: 30px;">
+                            <button 
+                                id="copyDynastyHeatmapBtn" 
+                                style="position: absolute; top: 20px; right: 20px; z-index: 10;"
+                                class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded text-base transition-colors duration-200 flex items-center gap-2"
+                                onclick="copyChartToClipboard('dynastyHeatmapChartContainer', 'copyDynastyHeatmapBtn')"
+                                title="Copy chart image to clipboard"
+                            >
+                                📋 Copy
+                            </button>
                             <h3 style="color: #0038A8; margin: 0 0 15px 0;">🗺️ Dynasty Control by Province <span style="font-size: 12px; color: #666; font-weight: normal;">(Darker red = Single family control)</span></h3>
                             
                             <!-- Legend -->
@@ -4425,6 +4444,112 @@ function createAnimationMap() {
 }
 
 // Removed unused showDynastiesForYear function
+</script>
+
+<!-- Copy Chart Functionality -->
+<script>
+// Function to copy chart image to clipboard
+async function copyChartToClipboard(containerId, buttonId) {
+    console.log(`🔄 Attempting to copy chart container ${containerId}...`);
+    
+    try {
+        const container = document.getElementById(containerId);
+        console.log('Container element:', container);
+        
+        if (!container) {
+            throw new Error('Chart container not found');
+        }
+        
+        // Temporarily hide the copy button to avoid including it in the image
+        const button = document.getElementById(buttonId);
+        const originalDisplay = button.style.display;
+        button.style.display = 'none';
+        
+        console.log('Capturing container with html2canvas...');
+        
+        // Use html2canvas to capture the entire container
+        const canvas = await html2canvas(container, {
+            backgroundColor: '#ffffff',
+            scale: 1.5, // Good balance of quality and performance
+            useCORS: true,
+            allowTaint: true,
+            logging: false,
+            width: container.offsetWidth,
+            height: container.offsetHeight
+        });
+        
+        console.log('Canvas created:', canvas.width, 'x', canvas.height);
+        
+        // Convert canvas to blob
+        const blob = await new Promise((resolve, reject) => {
+            canvas.toBlob((blob) => {
+                if (blob) {
+                    console.log('Blob created successfully:', blob.size, 'bytes');
+                    resolve(blob);
+                } else {
+                    reject(new Error('Failed to create blob from canvas'));
+                }
+            }, 'image/png', 0.95);
+        });
+        
+        // Restore button visibility
+        button.style.display = originalDisplay;
+        
+        console.log('Checking clipboard API support...');
+        if (!navigator.clipboard) {
+            throw new Error('Clipboard API not supported');
+        }
+        
+        if (!window.ClipboardItem) {
+            throw new Error('ClipboardItem not supported');
+        }
+        
+        // Copy to clipboard
+        console.log('Writing to clipboard...');
+        await navigator.clipboard.write([
+            new ClipboardItem({
+                'image/png': blob
+            })
+        ]);
+        
+        console.log('✅ Successfully copied to clipboard!');
+        
+        // Show success feedback
+        const originalText = button.innerHTML;
+        button.innerHTML = '✅ Copied!';
+        button.classList.remove('bg-blue-500', 'hover:bg-blue-600');
+        button.classList.add('bg-green-500');
+        
+        // Reset button after 2 seconds
+        setTimeout(() => {
+            button.innerHTML = originalText;
+            button.classList.remove('bg-green-500');
+            button.classList.add('bg-blue-500', 'hover:bg-blue-600');
+        }, 2000);
+        
+    } catch (error) {
+        console.error('❌ Failed to copy chart to clipboard:', error);
+        
+        // Restore button visibility in case of error
+        const button = document.getElementById(buttonId);
+        if (button) {
+            button.style.display = '';
+        }
+        
+        // Show error feedback
+        const originalText = button.innerHTML;
+        button.innerHTML = '❌ Failed';
+        button.classList.remove('bg-blue-500', 'hover:bg-blue-600');
+        button.classList.add('bg-red-500');
+        
+        // Reset button after 2 seconds
+        setTimeout(() => {
+            button.innerHTML = originalText;
+            button.classList.remove('bg-red-500');
+            button.classList.add('bg-blue-500', 'hover:bg-blue-600');
+        }, 2000);
+    }
+}
 </script>
 
 </body>
