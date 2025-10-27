@@ -432,9 +432,9 @@ function toggleMobileMenu() {
                     
                     <!-- Top Districts by Project Count - Full Width -->
                     <div class="chart-container bg-white p-5 rounded-lg shadow-lg">
-                        <h3 class="text-blue-900 m-0 mb-4">🏆 Top Districts by Number of Projects</h3>
-                        <div style="height: 500px; position: relative;">
-                            <canvas id="districtRankingChart" width="800" height="500" class="cursor-pointer border border-gray-300 rounded w-full"></canvas>
+                        <h3 class="text-blue-900 m-0 mb-4">🏆 Top 50 Districts by Number of Projects</h3>
+                        <div style="height: 800px; position: relative;">
+                            <canvas id="districtRankingChart" width="800" height="800" class="cursor-pointer border border-gray-300 rounded w-full"></canvas>
                         </div>
                         <div class="mt-4 text-sm text-gray-600">
                             <p class="my-1"><strong>Total Regions:</strong> <span id="total-regions-count">-</span></p>
@@ -4619,7 +4619,7 @@ function getContractorSecStatusSync(contractorName) {
             }
 
             // Use the districts array directly from the API response
-            const districtsArray = data.districts;
+            const districtsArray = data.districts.slice(0, 50); // Show only top 50 districts
 
             console.log('🏆 Top 5 districts by project count:', districtsArray.slice(0, 5));
 
