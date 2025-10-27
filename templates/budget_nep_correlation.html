@@ -14,6 +14,7 @@
     
     
     <script src="/static/js/chart.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <style>
         body {
             font-family: 'Inter', sans-serif !important;
@@ -331,8 +332,217 @@
         menu.classList.toggle('hidden');
     }
 
-    // Global chart instance to prevent canvas reuse errors
+    // Global chart instances to prevent canvas reuse errors
     let budgetNepChart = null;
+
+    // Program Comparison Charts
+    async function loadProgramComparisonCharts() {
+        try {
+            console.log('📊 Loading Program Comparison charts...');
+
+            // Fetch program comparison data from raw NEP files
+            // Fetch program comparison data from cached Excel
+            const response = await fetch('/api/budget/programs/excel-comparison');
+            const data = await response.json();
+
+            if (!response.ok || !data.success) {
+                throw new Error('Failed to fetch program comparison data');
+            }
+
+            const programs = data.programs;
+            
+            // Sort programs by Budget - NEP difference (highest jump first)
+            programs.sort((a, b) => {
+                const diffA = a.budget_total - a.nep_total;
+                const diffB = b.budget_total - b.nep_total;
+                return diffB - diffA; // Descending order (highest jump first)
+            });
+            
+            console.log('📊 Programs sorted by Budget-NEP difference (highest jump first):');
+            programs.forEach((program, index) => {
+                const diff = program.budget_total - program.nep_total;
+                console.log(`${index + 1}. ${program.program}: ₱${diff.toLocaleString()} difference`);
+            });
+            
+            // Create a container for all program charts
+            const programsContainer = document.createElement('div');
+            programsContainer.id = 'programs-charts-container';
+            programsContainer.className = 'space-y-8';
+            
+            // Insert the container after the main title
+            const mainTitle = document.querySelector('.text-center.mb-8');
+            mainTitle.parentNode.insertBefore(programsContainer, mainTitle.nextSibling);
+            
+            // Create charts for each program in sorted order
+            programs.forEach((programData, index) => {
+                const programName = programData.program;
+                const budgetYearly = programData.budget_yearly;
+                const nepYearly = programData.nep_yearly;
+                
+                // Get all years that have data in either database
+                const allYears = new Set([
+                    ...Object.keys(budgetYearly),
+                    ...Object.keys(nepYearly)
+                ]);
+                const sortedYears = Array.from(allYears).sort();
+                
+                // Prepare data arrays
+                const budgetAmounts = sortedYears.map(year => budgetYearly[year] || 0);
+                const nepAmounts = sortedYears.map(year => nepYearly[year] || 0);
+                
+                // Create chart container if it doesn't exist
+                const containerId = `programChart${index}`;
+                let container = document.getElementById(containerId);
+                if (!container) {
+                    container = document.createElement('div');
+                    container.id = containerId;
+                    container.className = 'bg-white rounded-lg shadow-lg p-8 mb-8';
+                    container.innerHTML = `
+                        <div class="relative mb-6">
+                            <h3 class="text-xl font-bold text-gray-800 text-center">${programName}</h3>
+                            <button 
+                                id="copyBtn${index}" 
+                                style="position: absolute; top: 0; right: 0;"
+                                class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded text-base transition-colors duration-200 flex items-center gap-2"
+                                onclick="copyChartToClipboard(${index})"
+                                title="Copy chart image to clipboard"
+                            >
+                                📋 Copy
+                            </button>
+                        </div>
+                        <div class="w-full">
+                            <canvas id="programChartCanvas${index}" width="800" height="300"></canvas>
+                        </div>
+                        <div class="mt-4 text-sm text-gray-500 text-center">
+                            <p><strong>Budget Total:</strong> ₱${programData.budget_total.toLocaleString()} (${programData.budget_count} entries)</p>
+                            <p><strong>NEP Total:</strong> ₱${programData.nep_total.toLocaleString()} (${programData.nep_count} entries)</p>
+                        </div>
+                    `;
+                    
+                    // Append to the programs container
+                    programsContainer.appendChild(container);
+                }
+                
+                // Create the chart
+                const ctx = document.getElementById(`programChartCanvas${index}`).getContext('2d');
+                
+                new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: sortedYears,
+                    datasets: [
+                        {
+                            label: 'NEP Database',
+                            data: nepAmounts,
+                            backgroundColor: 'rgba(16, 185, 129, 0.8)', // Green
+                            borderColor: 'rgba(16, 185, 129, 1)',
+                            borderWidth: 1,
+                            borderRadius: 4,
+                            borderSkipped: false,
+                        },
+                        {
+                            label: 'Budget Database',
+                            data: budgetAmounts,
+                            backgroundColor: 'rgba(59, 130, 246, 0.8)', // Blue
+                            borderColor: 'rgba(59, 130, 246, 1)',
+                            borderWidth: 1,
+                            borderRadius: 4,
+                            borderSkipped: false,
+                        }
+                    ]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                display: true,
+                                position: 'top',
+                                labels: {
+                                    usePointStyle: true,
+                                    padding: 15,
+                                    font: {
+                                        size: 11
+                                    }
+                                }
+                            },
+                            tooltip: {
+                                callbacks: {
+                                    label: function(context) {
+                                        let label = context.dataset.label || '';
+                                        if (label) {
+                                            label += ': ';
+                                        }
+                                        label += new Intl.NumberFormat('en-PH', {
+                                            style: 'currency',
+                                            currency: 'PHP',
+                                            minimumFractionDigits: 0,
+                                            maximumFractionDigits: 0,
+                                        }).format(context.parsed.y);
+                                        return label;
+                                    }
+                                }
+                            }
+                        },
+                        scales: {
+                            x: {
+                                title: {
+                                    display: true,
+                                    text: 'Fiscal Year',
+                                    font: {
+                                        size: 12,
+                                        weight: 'bold'
+                                    }
+                                },
+                                grid: {
+                                    display: false
+                                }
+                            },
+                            y: {
+                                title: {
+                                    display: true,
+                                    text: 'Amount (₱)',
+                                    font: {
+                                        size: 12,
+                                        weight: 'bold'
+                                    }
+                                },
+                                beginAtZero: true,
+                                ticks: {
+                                    callback: function(value) {
+                                        return new Intl.NumberFormat('en-PH', {
+                                            style: 'currency',
+                                            currency: 'PHP',
+                                            notation: 'compact',
+                                            minimumFractionDigits: 0,
+                                            maximumFractionDigits: 1,
+                                        }).format(value);
+                                    }
+                                },
+                                grid: {
+                                    color: 'rgba(0, 0, 0, 0.1)'
+                                }
+                            }
+                        },
+                        elements: {
+                            bar: {
+                                borderRadius: 4,
+                            }
+                        },
+                        animation: {
+                            duration: 1000,
+                            easing: 'easeInOutQuart'
+                        }
+                    }
+                });
+            });
+
+            console.log('✅ Program comparison charts loaded successfully');
+
+        } catch (error) {
+            console.error('❌ Error loading Program comparison charts:', error);
+        }
+    }
 
     // Budget vs NEP Comparison Chart
     async function loadBudgetNepChart() {
@@ -493,16 +703,224 @@
         }
     }
 
-    // Cleanup chart when page unloads
+    // Cleanup charts when page unloads
     window.addEventListener('beforeunload', function() {
         if (budgetNepChart) {
             budgetNepChart.destroy();
-            console.log('🧹 Cleaned up chart on page unload');
+            console.log('🧹 Cleaned up budget-nep chart on page unload');
         }
+        // Note: Individual program charts are automatically cleaned up by Chart.js
     });
 
-    // Load chart when page loads
+    // Function to copy chart image to clipboard
+    async function copyChartToClipboard(chartIndex) {
+        console.log(`🔄 Attempting to copy chart container ${chartIndex}...`);
+        
+        try {
+            const container = document.getElementById(`programChart${chartIndex}`);
+            console.log('Container element:', container);
+            
+            if (!container) {
+                throw new Error('Chart container not found');
+            }
+            
+            // Temporarily hide the copy button to avoid including it in the image
+            const button = document.getElementById(`copyBtn${chartIndex}`);
+            const originalDisplay = button.style.display;
+            button.style.display = 'none';
+            
+            console.log('Capturing container with html2canvas...');
+            
+            // Use html2canvas to capture the entire container
+            const canvas = await html2canvas(container, {
+                backgroundColor: '#ffffff',
+                scale: 1.5, // Good balance of quality and performance
+                useCORS: true,
+                allowTaint: true,
+                logging: false,
+                width: container.offsetWidth,
+                height: container.offsetHeight
+            });
+            
+            console.log('Canvas created:', canvas.width, 'x', canvas.height);
+            
+            // Convert canvas to blob
+            const blob = await new Promise((resolve, reject) => {
+                canvas.toBlob((blob) => {
+                    if (blob) {
+                        console.log('Blob created successfully:', blob.size, 'bytes');
+                        resolve(blob);
+                    } else {
+                        reject(new Error('Failed to create blob from canvas'));
+                    }
+                }, 'image/png', 0.95);
+            });
+            
+            // Restore button visibility
+            button.style.display = originalDisplay;
+            
+            console.log('Checking clipboard API support...');
+            if (!navigator.clipboard) {
+                throw new Error('Clipboard API not supported');
+            }
+            
+            if (!window.ClipboardItem) {
+                throw new Error('ClipboardItem not supported');
+            }
+            
+            // Copy to clipboard
+            console.log('Writing to clipboard...');
+            await navigator.clipboard.write([
+                new ClipboardItem({
+                    'image/png': blob
+                })
+            ]);
+            
+            console.log('✅ Successfully copied to clipboard!');
+            
+            // Show success feedback
+            const originalText = button.innerHTML;
+            button.innerHTML = '✅ Copied!';
+            button.classList.remove('bg-blue-500', 'hover:bg-blue-600');
+            button.classList.add('bg-green-500');
+            
+            // Reset button after 2 seconds
+            setTimeout(() => {
+                button.innerHTML = originalText;
+                button.classList.remove('bg-green-500');
+                button.classList.add('bg-blue-500', 'hover:bg-blue-600');
+            }, 2000);
+            
+        } catch (error) {
+            console.error('❌ Failed to copy chart to clipboard:', error);
+            
+            // Restore button visibility in case of error
+            const button = document.getElementById(`copyBtn${chartIndex}`);
+            if (button) {
+                button.style.display = '';
+            }
+            
+            // Show error feedback
+            const originalText = button.innerHTML;
+            button.innerHTML = '❌ Failed';
+            button.classList.remove('bg-blue-500', 'hover:bg-blue-600');
+            button.classList.add('bg-red-500');
+            
+            // Reset button after 2 seconds
+            setTimeout(() => {
+                button.innerHTML = originalText;
+                button.classList.remove('bg-red-500');
+                button.classList.add('bg-blue-500', 'hover:bg-blue-600');
+            }, 2000);
+        }
+    }
+
+    // Function to copy main chart image to clipboard
+    async function copyMainChartToClipboard() {
+        console.log(`🔄 Attempting to copy main chart...`);
+        
+        try {
+            const container = document.getElementById('mainBudgetNepChart');
+            console.log('Main chart container:', container);
+            
+            if (!container) {
+                throw new Error('Main chart container not found');
+            }
+            
+            // Temporarily hide the copy button to avoid including it in the image
+            const button = document.getElementById('copyMainChartBtn');
+            const originalDisplay = button.style.display;
+            button.style.display = 'none';
+            
+            console.log('Capturing main chart container with html2canvas...');
+            
+            // Use html2canvas to capture the entire container
+            const canvas = await html2canvas(container, {
+                backgroundColor: '#ffffff',
+                scale: 1.5, // Good balance of quality and performance
+                useCORS: true,
+                allowTaint: true,
+                logging: false,
+                width: container.offsetWidth,
+                height: container.offsetHeight
+            });
+            
+            console.log('Main chart canvas created:', canvas.width, 'x', canvas.height);
+            
+            // Convert canvas to blob
+            const blob = await new Promise((resolve, reject) => {
+                canvas.toBlob((blob) => {
+                    if (blob) {
+                        console.log('Main chart blob created successfully:', blob.size, 'bytes');
+                        resolve(blob);
+                    } else {
+                        reject(new Error('Failed to create blob from main chart canvas'));
+                    }
+                }, 'image/png', 0.95);
+            });
+            
+            // Restore button visibility
+            button.style.display = originalDisplay;
+            
+            console.log('Checking clipboard API support...');
+            if (!navigator.clipboard) {
+                throw new Error('Clipboard API not supported');
+            }
+            
+            if (!window.ClipboardItem) {
+                throw new Error('ClipboardItem not supported');
+            }
+            
+            // Copy to clipboard
+            console.log('Writing main chart to clipboard...');
+            await navigator.clipboard.write([
+                new ClipboardItem({
+                    'image/png': blob
+                })
+            ]);
+            
+            console.log('✅ Successfully copied main chart to clipboard!');
+            
+            // Show success feedback
+            const originalText = button.innerHTML;
+            button.innerHTML = '✅ Copied!';
+            button.classList.remove('bg-blue-500', 'hover:bg-blue-600');
+            button.classList.add('bg-green-500');
+            
+            // Reset button after 2 seconds
+            setTimeout(() => {
+                button.innerHTML = originalText;
+                button.classList.remove('bg-green-500');
+                button.classList.add('bg-blue-500', 'hover:bg-blue-600');
+            }, 2000);
+            
+        } catch (error) {
+            console.error('❌ Failed to copy main chart to clipboard:', error);
+            
+            // Restore button visibility in case of error
+            const button = document.getElementById('copyMainChartBtn');
+            if (button) {
+                button.style.display = '';
+            }
+            
+            // Show error feedback
+            const originalText = button.innerHTML;
+            button.innerHTML = '❌ Failed';
+            button.classList.remove('bg-blue-500', 'hover:bg-blue-600');
+            button.classList.add('bg-red-500');
+            
+            // Reset button after 2 seconds
+            setTimeout(() => {
+                button.innerHTML = originalText;
+                button.classList.remove('bg-red-500');
+                button.classList.add('bg-blue-500', 'hover:bg-blue-600');
+            }, 2000);
+        }
+    }
+
+    // Load charts when page loads
     document.addEventListener('DOMContentLoaded', function() {
+        loadProgramComparisonCharts();
         loadBudgetNepChart();
     });
     </script>
@@ -512,12 +930,21 @@
     <section class="py-8 px-4 max-w-7xl mx-auto">
         <!-- Page Title -->
         <div class="text-center mb-8">
-            <h1 class="text-4xl font-bold text-gray-800 mb-4">Budget-NEP Correlation</h1>
-            <p class="text-lg text-gray-600">Side-by-side comparison of total expenditures across overlapping years</p>
+            <h1 class="text-4xl font-bold text-gray-800 mb-4">Budget-NEP Program Correlation</h1>
+            <p class="text-lg text-gray-600">Year-by-year comparison of infrastructure programs across Budget and NEP databases</p>
         </div>
 
         <!-- Budget vs NEP Comparison Chart -->
-        <div class="bg-white rounded-lg shadow-lg p-8 mb-8">
+        <div id="mainBudgetNepChart" class="bg-white rounded-lg shadow-lg p-8 mb-8 relative">
+            <button 
+                id="copyMainChartBtn" 
+                style="position: absolute; top: 20px; right: 20px;"
+                class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded text-base transition-colors duration-200 flex items-center gap-2"
+                onclick="copyMainChartToClipboard()"
+                title="Copy chart image to clipboard"
+            >
+                📋 Copy
+            </button>
             <div class="w-full">
                 <canvas id="budgetNepChart" width="800" height="400"></canvas>
             </div>
@@ -855,12 +1282,6 @@
 
     {% include "footer.html" %}
 
-    <script>
-        // Load chart when page loads
-        document.addEventListener('DOMContentLoaded', function() {
-            loadBudgetNepChart();
-        });
-    </script>
 
 </body>
 </html>

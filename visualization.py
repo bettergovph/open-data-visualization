@@ -476,9 +476,256 @@ async def budget_analysis_comparison_chart_api():
             "nep_amounts": []
         })
 
-# ============================================================================
-# Flood Control API Endpoints (MeiliSearch)
-# ============================================================================
+@app.get("/api/budget/programs/comparison")
+async def budget_programs_comparison_api():
+    """Get program comparison data between Budget and NEP databases - no authentication required"""
+    try:
+        print(f"📊 [API] DEBUG: Fetching program comparison data")
+
+        # Direct database queries to get program data
+        import asyncpg
+
+        # Connect to budget_analysis database
+        budget_conn = await asyncpg.connect(
+            host=os.getenv('POSTGRES_HOST', 'localhost'),
+            port=int(os.getenv('POSTGRES_PORT', 5432)),
+            user=os.getenv('POSTGRES_USER', 'budget_admin'),
+            password=os.getenv('POSTGRES_PASSWORD', ''),
+            database='budget_analysis'
+        )
+
+        # Connect to nep database
+        nep_conn = await asyncpg.connect(
+            host=os.getenv('POSTGRES_HOST', 'localhost'),
+            port=int(os.getenv('POSTGRES_PORT', 5432)),
+            user=os.getenv('POSTGRES_USER', 'budget_admin'),
+            password=os.getenv('POSTGRES_PASSWORD', ''),
+            database='nep'
+        )
+
+        try:
+            # Define the programs we're looking for
+            programs = [
+                "Convergence and Special Support Program",
+                "Local Program", 
+                "Asset Preservation Program",
+                "Flood Management Program",
+                "General Administration and Support",
+                "Bridge Program",
+                "Network Development Program",
+                "Support to Operations"
+            ]
+
+            program_data = []
+
+            for program in programs:
+                # Get budget data for this program by year
+                budget_yearly = {}
+                budget_total = 0
+                budget_count = 0
+                
+                # Check budget tables (2020-2025) - earlier tables don't have dsc column
+                for year in range(2020, 2026):
+                    budget_table = f"budget_{year}"
+                    year_total = 0
+                    year_count = 0
+                    
+                    try:
+                        budget_result = await budget_conn.fetch(f"""
+                            SELECT dsc, amt, year
+                            FROM {budget_table}
+                            WHERE dsc ILIKE '%{program}%' AND amt > 0
+                        """)
+                        
+                        for row in budget_result:
+                            year_total += float(row['amt'])
+                            year_count += 1
+                            budget_total += float(row['amt'])
+                            budget_count += 1
+                        
+                        budget_yearly[str(year)] = year_total
+                        
+                    except Exception as e:
+                        print(f"⚠️ [API] DEBUG: Error fetching budget data for {program} in {year}: {e}")
+                        budget_yearly[str(year)] = 0
+
+                # Get NEP data for this program by year
+                nep_yearly = {}
+                nep_total = 0
+                nep_count = 0
+                
+                # Check all NEP tables (2020-2026)
+                for year in range(2020, 2027):
+                    nep_table = f"budget_{year}"
+                    year_total = 0
+                    year_count = 0
+                    
+                    try:
+                        nep_result = await nep_conn.fetch(f"""
+                            SELECT description, amount, fiscal_year
+                            FROM {nep_table}
+                            WHERE description ILIKE '%{program}%' AND amount > 0
+                        """)
+                        
+                        for row in nep_result:
+                            year_total += float(row['amount'])
+                            year_count += 1
+                            nep_total += float(row['amount'])
+                            nep_count += 1
+                        
+                        nep_yearly[str(year)] = year_total
+                        
+                    except Exception as e:
+                        print(f"⚠️ [API] DEBUG: Error fetching NEP data for {program} in {year}: {e}")
+                        nep_yearly[str(year)] = 0
+
+                program_data.append({
+                    'program': program,
+                    'budget_total': budget_total,
+                    'budget_count': budget_count,
+                    'budget_yearly': budget_yearly,
+                    'nep_total': nep_total,
+                    'nep_count': nep_count,
+                    'nep_yearly': nep_yearly
+                })
+
+                print(f"📊 [API] DEBUG: Program {program} - Budget: ₱{budget_total:,.0f} ({budget_count} entries), NEP: ₱{nep_total:,.0f} ({nep_count} entries)")
+
+            return JSONResponse({
+                "success": True,
+                "programs": program_data,
+                "total_programs": len(programs),
+                "generated_at": datetime.now().isoformat()
+            })
+
+        finally:
+            await budget_conn.close()
+            await nep_conn.close()
+
+    except Exception as e:
+        print(f"💥 [API] ERROR: Failed to fetch program comparison data: {e}")
+        return JSONResponse({
+            "success": False,
+            "error": str(e),
+            "programs": []
+        })
+
+@app.get("/api/budget/programs/raw-comparison")
+async def budget_programs_raw_comparison_api():
+    """Get program comparison data from raw NEP files - no authentication required"""
+    try:
+        print(f"📊 [API] DEBUG: Fetching raw program comparison data")
+
+        # Import the raw NEP processor
+        import sys
+        import os
+        sys.path.append(os.path.dirname(__file__))
+        
+        from process_raw_nep_programs import RawNEPProgramProcessor
+        
+        processor = RawNEPProgramProcessor()
+        
+        # Process all available years
+        years = [2020, 2021, 2022, 2023, 2024, 2025, 2026]
+        raw_data = processor.process_all_years(years)
+        
+        # Convert to the format expected by the frontend
+        programs = [
+            "Convergence and Special Support Program",
+            "Local Program", 
+            "Asset Preservation Program",
+            "Flood Management Program",
+            "General Administration and Support",
+            "Bridge Program",
+            "Network Development Program",
+            "Support to Operations"
+        ]
+        
+        program_data = []
+        
+        for program in programs:
+            budget_yearly = {}
+            nep_yearly = {}
+            
+            # Get NEP data from raw files
+            for year_str, year_data in raw_data.items():
+                if program in year_data:
+                    nep_yearly[year_str] = year_data[program]['total_amount']
+                else:
+                    nep_yearly[year_str] = 0
+            
+            # For now, set budget data to 0 since we're focusing on raw NEP data
+            # TODO: Process raw budget files similarly
+            for year_str in nep_yearly.keys():
+                budget_yearly[year_str] = 0
+            
+            program_data.append({
+                'program': program,
+                'budget_total': sum(budget_yearly.values()),
+                'budget_count': 0,  # TODO: Count from raw budget files
+                'budget_yearly': budget_yearly,
+                'nep_total': sum(nep_yearly.values()),
+                'nep_count': sum(year_data.get(program, {}).get('entry_count', 0) for year_data in raw_data.values()),
+                'nep_yearly': nep_yearly
+            })
+        
+        return JSONResponse({
+            "success": True,
+            "programs": program_data,
+            "total_programs": len(programs),
+            "data_source": "raw_nep_files",
+            "generated_at": datetime.now().isoformat()
+        })
+
+    except Exception as e:
+        print(f"💥 [API] ERROR: Failed to fetch raw program comparison data: {e}")
+        return JSONResponse({
+            "success": False,
+            "error": str(e),
+            "programs": []
+        })
+
+@app.get("/api/budget/programs/excel-comparison")
+async def budget_programs_excel_comparison_api():
+    """Get program comparison data from cached Excel JSON - no authentication required"""
+    try:
+        print(f"📊 [API] DEBUG: Fetching cached Excel program comparison data")
+
+        import json
+        import os
+        
+        # Path to the cached JSON file
+        cache_file = os.path.join(os.path.dirname(__file__), "static", "data", "excel_programs_cache.json")
+        
+        if not os.path.exists(cache_file):
+            return JSONResponse({
+                "success": False,
+                "error": "Cached Excel data not found. Please run generate_excel_programs_cache.py",
+                "programs": []
+            })
+        
+        # Load cached data
+        with open(cache_file, 'r', encoding='utf-8') as f:
+            cache_data = json.load(f)
+        
+        if not cache_data.get('success', False):
+            return JSONResponse({
+                "success": False,
+                "error": "Cached data indicates failure",
+                "programs": []
+            })
+        
+        print(f"📊 [API] DEBUG: Loaded cached data with {len(cache_data['programs'])} programs")
+        
+        return JSONResponse(cache_data)
+
+    except Exception as e:
+        print(f"💥 [API] ERROR: Failed to fetch cached Excel program comparison data: {e}")
+        return JSONResponse({
+            "success": False,
+            "error": str(e),
+            "programs": []
+        })
 
 from flood_client import FloodControlClient, FloodControlProject, build_filter_string
 
