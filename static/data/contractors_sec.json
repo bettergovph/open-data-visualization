@@ -1,22 +1,8 @@
 {
-  "data": {
-    "success": true,
-    "summary": {
-      "total_contractors": 16297,
-      "processed_contractors": 5783,
-      "with_sec_data": 2066,
-      "without_sec_data": 14231,
-      "suspicious_no_results": 3717,
-      "last_updated": "2025-10-23T21:30:00.033216",
-      "processing_batch": "cached_generated",
-      "source": "PostgreSQL sec.contractors table (cached)"
-    },
-    "generated_at": "2025-10-23T21:30:00.033222",
-    "description": "Contractor statistics for /contractors page",
-    "cache_version": "1.0"
-  },
-  "generated_at": "2025-10-23T21:30:06.413039",
+  "data": null,
+  "generated_at": "2025-10-27T18:35:08.661660",
   "cache_version": "1.0",
   "endpoint": "/api/contractors/sec",
-  "status": "success"
+  "status": "error",
+  "error": "HTTP 404"
 }

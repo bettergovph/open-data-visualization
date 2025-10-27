@@ -272,6 +272,12 @@ class JSONGenerator:
                 'category': 'cache_data',
                 'dependencies': ['MeiliSearch flood control data']
             },
+            'province_heatmap_cache.json': {
+                'script': 'sec_scraper/generate_province_heatmap_cache.py',
+                'description': 'Cached province heat map data for flood control projects visualization',
+                'category': 'cache_data',
+                'dependencies': ['MeiliSearch flood control data', 'District-to-province mapping']
+            },
             'flood_control_data_with_jv.json': {
                 'script': 'sec_scraper/generate_flood_control_with_jv.py',
                 'description': 'Flood control data with joint venture detection and partner extraction',
@@ -570,7 +576,13 @@ class JSONGenerator:
             'Contractors Dashboard Cache'
         )
         
-        return success1 and success2 and success3
+        # Generate province heat map cache (new script for new JSON)
+        success4, output4 = await self.run_script(
+            'sec_scraper/generate_province_heatmap_cache.py',
+            'Province Heat Map Cache'
+        )
+        
+        return success1 and success2 and success3 and success4
     
     async def generate_api_cache(self):
         """Generate API cache files by calling all endpoints."""

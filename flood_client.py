@@ -258,6 +258,71 @@ class FloodControlClient:
             logger.error(f"Failed to get statistics: {e}")
             return FloodControlStats()
 
+    async def get_most_expensive_projects(self, filters: Optional[str] = None, limit: int = 10) -> List[Dict]:
+        """Get the most expensive projects sorted by contract cost"""
+        try:
+            # First get all projects to sort them properly
+            search_params = {
+                "q": "",
+                "limit": 10000,  # Get more projects to sort properly
+                "attributesToRetrieve": [
+                    "GlobalID", "ProjectDescription", "ContractCost", "Contractor", 
+                    "Region", "Province", "Municipality", "InfraYear", "TypeofWork",
+                    "DistrictEngineeringOffice", "LegislativeDistrict"
+                ]
+            }
+            
+            if filters:
+                search_params["filter"] = filters
+                
+            response = await self._make_request(f"indexes/{self.index_name}/search", 
+                                              "POST", data=search_params)
+            
+            hits = response.get("hits", [])
+            
+            # Convert to the format expected by the frontend and sort by cost
+            projects = []
+            for hit in hits:
+                try:
+                    contract_cost = hit.get("ContractCost", 0)
+                    if isinstance(contract_cost, str):
+                        # Remove currency symbols and commas
+                        contract_cost = contract_cost.replace("₱", "").replace(",", "").replace(" ", "")
+                    cost = float(contract_cost)
+                    
+                    project = {
+                        "ProjectDescription": hit.get("ProjectDescription", "Unknown Project"),
+                        "ContractCost": cost,
+                        "Contractor": hit.get("Contractor", "Unknown Contractor"),
+                        "Region": hit.get("Region", "Unknown Region"),
+                        "Province": hit.get("Province", "Unknown Province"),
+                        "Municipality": hit.get("Municipality", "Unknown Municipality"),
+                        "InfraYear": hit.get("InfraYear", "Unknown Year"),
+                        "TypeofWork": hit.get("TypeofWork", "Unknown Type"),
+                        "DistrictEngineeringOffice": hit.get("DistrictEngineeringOffice", "Unknown District"),
+                        "LegislativeDistrict": hit.get("LegislativeDistrict", "Unknown District")
+                    }
+                    projects.append(project)
+                except (ValueError, TypeError) as e:
+                    logger.warning(f"Error processing project {hit.get('GlobalID', 'unknown')}: {e}")
+                    continue
+            
+            # Sort by contract cost descending and take top N
+            projects.sort(key=lambda x: x["ContractCost"], reverse=True)
+            
+            # Debug logging
+            logger.info(f"Found {len(projects)} projects with valid costs")
+            if projects:
+                logger.info(f"Top 3 most expensive projects:")
+                for i, project in enumerate(projects[:3]):
+                    logger.info(f"  {i+1}. {project['ProjectDescription'][:50]}... - ₱{project['ContractCost']:,.2f}")
+            
+            return projects[:limit]
+            
+        except Exception as e:
+            logger.error(f"Failed to get most expensive projects: {e}")
+            return []
+
     async def get_facets(self, facet_name: str, filters: Optional[str] = None) -> Dict[str, int]:
         """Get facet distribution for a specific field"""
         try:

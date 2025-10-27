@@ -459,7 +459,7 @@ function toggleMobileMenu() {
                     
                     <!-- Projects Heat Map - Full Width -->
                     <div class="chart-container bg-white p-5 rounded-lg shadow-lg">
-                        <h3 class="text-blue-900 m-0 mb-4">Projects Heat Map <span class="text-sm text-gray-600">(Click to view detailed map)</span></h3>
+                        <h3 class="text-blue-900 m-0 mb-4">Projects Heat Map by Province <span class="text-sm text-gray-600">(Click to view detailed map)</span></h3>
                         <canvas id="regionsChart" width="1000" height="750" class="cursor-pointer border border-gray-300 rounded w-full max-w-full"></canvas>
                     </div>
                     
@@ -474,16 +474,24 @@ function toggleMobileMenu() {
                         </div>
                     </div>
                     
+                    <!-- Most Expensive Projects - Full Width -->
+                    <div class="chart-container bg-white p-5 rounded-lg shadow-lg mb-5 w-full">
+                        <h3 class="text-blue-900 m-0 mb-4 text-center">Most Expensive Projects</h3>
+                        <div style="height: 400px; position: relative; width: 100%;">
+                            <canvas id="expensiveProjectsChart" style="width: 100% !important; height: 100% !important;"></canvas>
+                        </div>
+                    </div>
+                    
+                    <!-- Types of Work - Full Width -->
+                    <div class="chart-container bg-white p-5 rounded-lg shadow-lg mb-5 w-full">
+                        <h3 class="text-blue-900 m-0 mb-4 text-center">Types of Work</h3>
+                        <div style="height: 400px; position: relative; width: 100%;">
+                            <canvas id="workTypesChart" style="width: 100% !important; height: 100% !important;"></canvas>
+                        </div>
+                    </div>
+                    
                     <!-- Other Charts - Two columns -->
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
-                        <div class="chart-container bg-white p-5 rounded-lg shadow-lg">
-                            <h3 class="text-blue-900 m-0 mb-4">Types of Work</h3>
-                            <canvas id="workTypesChart" width="400" height="200"></canvas>
-                        </div>
-                        <div class="chart-container bg-white p-5 rounded-lg shadow-lg">
-                            <h3 class="text-blue-900 m-0 mb-4">Most Expensive Projects</h3>
-                            <canvas id="expensiveProjectsChart" width="400" height="200"></canvas>
-                        </div>
                         <div class="chart-container bg-white p-5 rounded-lg shadow-lg">
                             <h3 class="text-blue-900 m-0 mb-4">Projects by Year</h3>
                             <canvas id="yearlyChart" width="400" height="200"></canvas>
@@ -3702,7 +3710,7 @@ function getContractorSecStatusSync(contractorName) {
         new Chart(workTypesCtx, {
             type: 'pie',
             data: {
-                labels: typesArray.map(item => item.type.length > 20 ? item.type.substring(0, 20) + '...' : item.type),
+                labels: typesArray.map(item => item.type),
                 datasets: [{
                     label: 'Projects',
                     data: typesArray.map(item => item.count),
@@ -3717,11 +3725,37 @@ function getContractorSecStatusSync(contractorName) {
             },
             options: {
                 responsive: true,
-                maintainAspectRatio: true,
-                aspectRatio: 1.5,
+                maintainAspectRatio: false,
                 plugins: {
                     legend: {
-                        display: false
+                        display: true,
+                        position: 'right',
+                        labels: {
+                            usePointStyle: true,
+                            padding: 20,
+                            font: {
+                                size: 12
+                            },
+                            generateLabels: function(chart) {
+                                const data = chart.data;
+                                if (data.labels.length && data.datasets.length) {
+                                    return data.labels.map((label, i) => {
+                                        const dataset = data.datasets[0];
+                                        const value = dataset.data[i];
+                                        return {
+                                            text: `${label}: ${value}`,
+                                            fillStyle: dataset.backgroundColor[i],
+                                            strokeStyle: dataset.borderColor,
+                                            lineWidth: dataset.borderWidth,
+                                            pointStyle: 'circle',
+                                            hidden: false,
+                                            index: i
+                                        };
+                                    });
+                                }
+                                return [];
+                            }
+                        }
                     },
                     tooltip: {
                         backgroundColor: 'rgba(0, 0, 0, 0.8)',
@@ -3822,11 +3856,19 @@ function getContractorSecStatusSync(contractorName) {
         new Chart(expensiveProjectsCtx, {
             type: 'bar',
             data: {
-                labels: expensiveProjects.map(project => 
-                    project.ProjectDescription.length > 30 ? 
-                    project.ProjectDescription.substring(0, 30) + '...' : 
-                    project.ProjectDescription
-                ),
+                labels: expensiveProjects.map(project => {
+                    const description = project.ProjectDescription;
+                    // Truncate at 50 characters for better readability, but try to break at word boundaries
+                    if (description.length > 50) {
+                        const truncated = description.substring(0, 50);
+                        const lastSpace = truncated.lastIndexOf(' ');
+                        if (lastSpace > 30) {
+                            return truncated.substring(0, lastSpace) + '...';
+                        }
+                        return truncated + '...';
+                    }
+                    return description;
+                }),
                 datasets: [{
                     label: 'Contract Cost (₱)',
                     data: expensiveProjects.map(project => project.ContractCost),
@@ -3837,12 +3879,43 @@ function getContractorSecStatusSync(contractorName) {
             },
             options: {
                 responsive: true,
+                maintainAspectRatio: false,
                 plugins: {
                     legend: {
                         display: false
+                    },
+                    tooltip: {
+                        backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                        titleColor: 'white',
+                        bodyColor: 'white',
+                        borderColor: 'rgba(255, 255, 255, 0.1)',
+                        borderWidth: 1,
+                        callbacks: {
+                            title: function(context) {
+                                return context[0].label;
+                            },
+                            label: function(context) {
+                                const project = expensiveProjects[context.dataIndex];
+                                return [
+                                    `Project: ${project.ProjectDescription}`,
+                                    `Cost: ₱${project.ContractCost.toLocaleString()}`,
+                                    `Contractor: ${project.Contractor || 'N/A'}`,
+                                    `Location: ${project.Municipality || 'N/A'}, ${project.Province || 'N/A'}`
+                                ];
+                            }
+                        }
                     }
                 },
                 scales: {
+                    x: {
+                        ticks: {
+                            maxRotation: 45,
+                            minRotation: 45,
+                            font: {
+                                size: 10
+                            }
+                        }
+                    },
                     y: {
                         beginAtZero: true,
                         ticks: {
@@ -4297,32 +4370,33 @@ function getContractorSecStatusSync(contractorName) {
     const regionsCtx = document.getElementById('regionsChart');
     if (!regionsCtx) return;
 
-    // Load Philippine GeoJSON data and use live statistics
+    // Load Philippine provinces GeoJSON data and province statistics
     Promise.all([
-        fetch('/static/data/philippines-regions.json').then(r => r.json()),
-        fetch('/static/data/region-mapping.json').then(r => r.json())
+        fetch('/static/data/philippines-provinces.json').then(r => r.json()),
+        fetch('/api/flood/provinces').then(r => r.json())
     ])
-        .then(([geoJsonData, mappingData]) => {
-            console.log('🗺️ GeoJSON data loaded:', geoJsonData.features.length, 'features');
+        .then(([geoJsonData, provinceData]) => {
+            console.log('🗺️ Province GeoJSON data loaded:', geoJsonData.features.length, 'features');
             console.log('🗺️ Sample feature properties:', geoJsonData.features[0]?.properties);
-            console.log('🗺️ Region mapping loaded:', mappingData.regionMapping);
-            console.log('🗺️ Live regions data:', regionsData);
+            console.log('🗺️ Province statistics loaded:', provinceData);
             
-            // Use the live statistics data instead of static mapping
-            const regionCosts = {};
-            Object.entries(regionsData).forEach(([regionCode, count]) => {
-                regionCosts[regionCode] = count * 1000000; // Convert count to approximate cost
+            if (!provinceData.success) {
+                console.error('❌ Failed to load province data:', provinceData.error);
+                return;
+            }
+            
+            // Create province project counts mapping
+            const provinceCounts = {};
+            provinceData.provinces.forEach(province => {
+                provinceCounts[province.province] = province.total_projects;
             });
-            console.log('🗺️ Using live region statistics:', regionsData);
-            console.log('🗺️ Region III cost:', regionCosts['Region III']);
-            console.log('🗺️ NCR cost:', regionCosts['National Capital Region']);
-            console.log('🗺️ All region costs:', regionCosts);
+            console.log('🗺️ Province project counts:', provinceCounts);
 
-            // Get min and max costs for color scaling
-            const costs = Object.values(regionCosts);
-        const minCost = Math.min(...costs);
-            const maxCost = Math.max(...costs);
-            const costRange = maxCost - minCost;
+            // Get min and max project counts for color scaling
+            const counts = Object.values(provinceCounts);
+            const minCount = Math.min(...counts);
+            const maxCount = Math.max(...counts);
+            const countRange = maxCount - minCount;
 
             // Canvas setup
             const canvas = regionsCtx;
@@ -4369,63 +4443,35 @@ function getContractorSecStatusSync(contractorName) {
             });
 
             // Function to get color based on project count ranges
-            const getColor = (cost) => {
-                // Convert cost back to project count (cost = count * 1000000)
-                const projectCount = cost / 1000000;
-                
-                // Color grading based on project count ranges
-                if (projectCount >= 1500) return '#8B0000';        // Dark red (1500+ projects)
-                else if (projectCount >= 1200) return '#B22222';    // Fire brick (1200-1499 projects)
-                else if (projectCount >= 1000) return '#DC143C';    // Crimson red (1000-1199 projects)
-                else if (projectCount >= 800) return '#FF4500';     // Orange red (800-999 projects)
-                else if (projectCount >= 600) return '#FF6347';    // Tomato (600-799 projects)
-                else if (projectCount >= 400) return '#FF7F50';     // Coral (400-599 projects)
-                else if (projectCount >= 200) return '#FFA500';     // Orange (200-399 projects)
-                else if (projectCount >= 100) return '#FFD700';     // Gold (100-199 projects)
-                else if (projectCount >= 50) return '#FFD700';      // Gold (50-99 projects)
-                else if (projectCount >= 10) return '#FFF8DC';      // Cornsilk (10-49 projects)
+            const getColor = (projectCount) => {
+                // Color grading based on actual project count ranges
+                if (projectCount >= 1000) return '#8B0000';        // Dark red (1000+ projects)
+                else if (projectCount >= 600) return '#B22222';     // Fire brick (600-999 projects)
+                else if (projectCount >= 400) return '#DC143C';     // Crimson red (400-599 projects)
+                else if (projectCount >= 300) return '#FF4500';      // Orange red (300-399 projects)
+                else if (projectCount >= 200) return '#FF6347';     // Tomato (200-299 projects)
+                else if (projectCount >= 100) return '#FF7F50';      // Coral (100-199 projects)
+                else if (projectCount >= 50) return '#FFA500';       // Orange (50-99 projects)
+                else if (projectCount >= 20) return '#FFD700';       // Gold (20-49 projects)
+                else if (projectCount >= 10) return '#FFF8DC';      // Cornsilk (10-19 projects)
                 else if (projectCount > 0) return '#FFFACD';         // Lemon chiffon (1-9 projects)
                 else return '#F0F0F0';                                // Light gray (0 projects)
             };
 
-            // Use the loaded region mapping
-            const regionMapping = mappingData.regionMapping;
-
-            // Draw each region
+            // Draw each province
             geoJsonData.features.forEach(feature => {
-                let regionName = feature.properties.name || feature.properties.NAME_1;
-                console.log(`🗺️ Processing region: ${regionName}`);
+                let provinceName = feature.properties.name || feature.properties.NAME_1 || feature.properties.PROVINCE;
+                console.log(`🗺️ Processing province: ${provinceName}`);
                 
-                // Map GeoJSON name to Region code to get the cost
-                let cost = 0;
-                if (regionMapping[regionName]) {
-                    const regionCode = regionMapping[regionName];
-                    cost = regionCosts[regionCode] || 0;
-                    console.log(`🗺️ Mapped ${regionName} → ${regionCode} with cost ₱${cost.toLocaleString()}`);
-                    
-                    // Special debugging for missing regions
-                    if (regionName === 'Central Luzon' || regionName === 'National Capital Region') {
-                        console.log(`🔍 SPECIAL DEBUG for ${regionName}:`, {
-                            regionName,
-                            regionCode,
-                            cost,
-                            regionMappingExists: !!regionMapping[regionName],
-                            regionCostExists: !!regionCosts[regionCode],
-                            regionMappingValue: regionMapping[regionName],
-                            regionCostValue: regionCosts[regionCode],
-                            allRegionCosts: Object.keys(regionCosts),
-                            allRegionMappings: Object.keys(regionMapping)
-                        });
-                    }
-                } else {
-                    console.log(`🗺️ No mapping found for region: ${regionName}`);
-                }
+                // Get project count for this province
+                let projectCount = provinceCounts[provinceName] || 0;
+                console.log(`🗺️ Province ${provinceName} has ${projectCount} projects`);
                 
-                const color = getColor(cost);
+                const color = getColor(projectCount);
                 
                 // Debug logging
-                if (cost > 0) {
-                    console.log(`🗺️ Region: ${regionName}, Cost: ₱${cost.toLocaleString()}, Color: ${color}`);
+                if (projectCount > 0) {
+                    console.log(`🗺️ Province: ${provinceName}, Projects: ${projectCount}, Color: ${color}`);
                 }
 
                 ctx.fillStyle = color;
@@ -4467,47 +4513,6 @@ function getContractorSecStatusSync(contractorName) {
                 }
             });
 
-            // Add region labels for high-cost regions
-            const highCostRegions = Object.entries(regionCosts)
-                .filter(([region, cost]) => cost > minCost + (costRange * 0.7))
-                .sort((a, b) => b[1] - a[1])
-                .slice(0, 5);
-
-            ctx.fillStyle = '#333';
-            ctx.font = '10px Arial';
-            ctx.textAlign = 'center';
-
-            highCostRegions.forEach(([region, cost], index) => {
-                // Find center of region for label placement
-                const feature = geoJsonData.features.find(f => 
-                    (f.properties.name || f.properties.NAME_1) === region
-                );
-                
-                if (feature && feature.geometry.type === 'MultiPolygon') {
-                    // Calculate approximate center
-                    let totalLat = 0, totalLng = 0, pointCount = 0;
-                    
-                    feature.geometry.coordinates.forEach(polygon => {
-                        polygon.forEach(ring => {
-                            ring.forEach(coord => {
-                                totalLng += coord[0];
-                                totalLat += coord[1];
-                                pointCount++;
-                            });
-                        });
-                    });
-                    
-                    if (pointCount > 0) {
-                        const centerLng = totalLng / pointCount;
-                        const centerLat = totalLat / pointCount;
-                        const { x, y } = toCanvasCoords(centerLng, centerLat);
-                        
-                        ctx.fillText(region, x, y - 5);
-                        ctx.fillText(`₱${(cost / 1000000000).toFixed(1)}B`, x, y + 5);
-                    }
-                }
-            });
-
             // Add legend
             const legendX = width - 120;
             const legendY = 20;
@@ -4529,15 +4534,15 @@ function getContractorSecStatusSync(contractorName) {
             
             // Legend items - based on actual project count ranges
             const legendColors = [
-                { color: '#8B0000', label: '1500+' },
-                { color: '#B22222', label: '1200-1499' },
-                { color: '#DC143C', label: '1000-1199' },
-                { color: '#FF4500', label: '800-999' },
-                { color: '#FF6347', label: '600-799' },
-                { color: '#FF7F50', label: '400-599' },
-                { color: '#FFA500', label: '200-399' },
-                { color: '#FFD700', label: '100-199' },
-                { color: '#FFF8DC', label: '10-99' },
+                { color: '#8B0000', label: '1000+' },
+                { color: '#B22222', label: '600-999' },
+                { color: '#DC143C', label: '400-599' },
+                { color: '#FF4500', label: '300-399' },
+                { color: '#FF6347', label: '200-299' },
+                { color: '#FF7F50', label: '100-199' },
+                { color: '#FFA500', label: '50-99' },
+                { color: '#FFD700', label: '20-49' },
+                { color: '#FFF8DC', label: '10-19' },
                 { color: '#FFFACD', label: '1-9' },
                 { color: '#F0F0F0', label: '0' }
             ];
@@ -4559,7 +4564,7 @@ function getContractorSecStatusSync(contractorName) {
                 ctx.fillText(item.label, legendX + 20, itemY + 2);
             });
 
-            console.log('🗺️ Philippine heat map created with', Object.keys(regionCosts).length, 'regions');
+            console.log('🗺️ Philippine heat map created with', Object.keys(provinceCounts).length, 'provinces');
         })
         .catch(error => {
             console.error('❌ Failed to load Philippine GeoJSON:', error);

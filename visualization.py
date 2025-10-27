@@ -4,6 +4,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 import os
 import json
+from datetime import datetime
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -652,6 +653,9 @@ async def flood_statistics_api(
         filter_string = build_filter_string(filters) if filters else None
         stats = await client.get_statistics(filter_string)
         
+        # Get most expensive projects for the chart
+        most_expensive_projects = await client.get_most_expensive_projects(filter_string, limit=10)
+        
         return JSONResponse({
             "success": True,
             "totalProjects": stats.totalProjects,
@@ -660,7 +664,8 @@ async def flood_statistics_api(
             "regions": stats.regions,
             "years": stats.years,
             "typesOfWork": stats.typesOfWork,
-            "topContractors": stats.topContractors
+            "topContractors": stats.topContractors,
+            "mostExpensiveProjects": most_expensive_projects
         })
         
     except Exception as e:
@@ -705,6 +710,75 @@ async def flood_districts_api():
             "districts": districts_array,
             "totalDistricts": len(districts_array),
             "totalProjects": sum(count for _, count in districts_data.items())
+        })
+        
+    except Exception as e:
+        return JSONResponse({"success": False, "error": str(e)})
+
+@app.get("/api/flood/provinces")
+async def flood_provinces_api():
+    """Get province statistics for flood control projects - no authentication required"""
+    try:
+        # Import the district to province mapper
+        import sys
+        import os
+        sys.path.append(os.path.join(os.path.dirname(__file__), 'sec_scraper'))
+        from district_to_province_mapper import DistrictToProvinceMapper
+        
+        # Try to load from cached JSON file first
+        cache_file = os.path.join(os.path.dirname(__file__), "static", "data", "province_heatmap_cache.json")
+        if os.path.exists(cache_file):
+            with open(cache_file, 'r', encoding='utf-8') as f:
+                cached_data = json.load(f)
+                if cached_data.get('success'):
+                    print(f"✅ Using cached province heat map data from {cache_file}")
+                    return JSONResponse(cached_data)
+                else:
+                    print(f"⚠️ Cached province data has errors: {cached_data.get('error')}")
+        else:
+            print(f"⚠️ Province heat map cache not found at {cache_file}")
+        
+        # Fallback: generate from MeiliSearch if cache not available
+        print("⚠️ Cache not found, generating province data from MeiliSearch...")
+        client = get_flood_client()
+        projects, metadata = await client.search_projects(limit=10000)  # Get all projects
+        
+        # Group by DistrictEngineeringOffice
+        district_counts = {}
+        for project in projects:
+            district = project.DistrictEngineeringOffice or "Unknown District"
+            if district not in district_counts:
+                district_counts[district] = 0
+            district_counts[district] += 1
+        
+        # Convert to districts format for processing
+        districts_data = [{"district": district, "count": count} for district, count in district_counts.items()]
+        
+        # Process districts data and aggregate by province
+        mapper = DistrictToProvinceMapper()
+        province_aggregates = mapper.process_districts_data(districts_data)
+        
+        # Convert to list format for API response
+        provinces_list = []
+        for province_name, province_data in province_aggregates.items():
+            provinces_list.append({
+                'province': province_name,
+                'geojson_name': province_data['geojson_name'],
+                'total_projects': province_data['total_projects'],
+                'districts_count': len(province_data['districts']),
+                'districts': province_data['districts']
+            })
+        
+        # Sort by project count descending
+        provinces_list.sort(key=lambda x: x['total_projects'], reverse=True)
+        
+        return JSONResponse({
+            "success": True,
+            "provinces": provinces_list,
+            "total_provinces": len(provinces_list),
+            "total_projects": sum(p['total_projects'] for p in provinces_list),
+            "generated_at": datetime.now().isoformat(),
+            "description": "Province-level aggregation of flood control projects from MeiliSearch data"
         })
         
     except Exception as e:
