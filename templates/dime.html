@@ -145,7 +145,7 @@ function toggleMobileMenu() {
         <div class="flex border-b-2 border-gray-200 mb-4 gap-2">
             <button class="budget-tab-btn active bg-white text-blue-600 border-blue-600 border-t border-l border-r px-6 py-3 rounded-t-lg cursor-pointer font-semibold transition-all duration-300 relative -mb-0.5 z-10" data-tab="visual">📊 Visual</button>
             <button class="budget-tab-btn bg-gray-100 text-gray-600 border-gray-300 border px-6 py-3 rounded-t-lg cursor-pointer font-semibold transition-all duration-300 hover:bg-gray-200" data-tab="table">📋 Table</button>
-            <button class="budget-tab-btn bg-gray-100 text-gray-600 border-gray-300 border px-6 py-3 rounded-t-lg cursor-pointer font-semibold transition-all duration-300 hover:bg-gray-200" data-tab="fastest">⚡ Fastest</button>
+            <button class="budget-tab-btn bg-gray-100 text-gray-600 border-gray-300 border px-6 py-3 rounded-t-lg cursor-pointer font-semibold transition-all duration-300 hover:bg-gray-200" data-tab="fastest">🚀 Speed</button>
             <button class="budget-tab-btn bg-gray-100 text-gray-600 border-gray-300 border px-6 py-3 rounded-t-lg cursor-pointer font-semibold transition-all duration-300 hover:bg-gray-200" data-tab="barangays">🏘️ Barangays</button>
         </div>
 
@@ -320,7 +320,7 @@ function toggleMobileMenu() {
             <div id="tab-fastest" class="budget-tab-panel">
                 <!-- Top 100 Fastest Completed Projects -->
                 <div style="background: white; padding: 30px; border-radius: 12px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); margin-bottom: 30px;">
-                    <h2 style="color: #0038A8; margin: 0 0 10px 0; font-size: 1.8em; text-align: center;">⚡ Top 100 Projects Completed the Fastest</h2>
+                    <h2 style="color: #0038A8; margin: 0 0 10px 0; font-size: 1.8em; text-align: center;">🚀 Top 100 Projects by Speed</h2>
                     <p style="text-align: center; color: #666; margin-bottom: 15px;">Infrastructure projects with the shortest time from start to completion</p>
                     
                     <!-- Legend for contractor sources -->
@@ -348,7 +348,7 @@ function toggleMobileMenu() {
                                     <th style="width: 12%;">Region</th>
                                     <th style="width: 10%; text-align: center;">Start Date</th>
                                     <th style="width: 10%; text-align: center;">Completion</th>
-                                    <th style="width: 8%; text-align: center;">Days</th>
+                                    <th style="width: 8%; text-align: center; cursor: pointer;" onclick="sortFastestTable('days')">Days ↕️</th>
                                     <th style="width: 10%; text-align: right;">Cost</th>
                                     <th style="width: 10%;">Contractor</th>
                                 </tr>
@@ -747,6 +747,11 @@ fetch('/static/data/dime_summary.json')
     let currentSortColumn = 'cost';
     let currentSortOrder = 'DESC';
     const itemsPerPage = 50;
+    
+    // Fastest projects sorting state
+    let fastestProjectsData = [];
+    let fastestSortColumn = 'days';
+    let fastestSortOrder = 'ASC'; // Default to ascending (fastest first)
 
     // Initialize tabs
     function initializeTabs() {
@@ -1691,6 +1696,9 @@ fetch('/static/data/dime_summary.json')
                 console.log('⚠️ Could not load fastest projects from JSON, showing note');
             }
             
+            // Store data globally for sorting
+            fastestProjectsData = fastestProjects;
+            
             // If no data, show a note that database connection is needed
             if (fastestProjects.length === 0) {
                 tbody.innerHTML = `
@@ -1713,69 +1721,8 @@ fetch('/static/data/dime_summary.json')
             spinner.style.display = 'none';
             container.style.display = 'block';
             
-            tbody.innerHTML = '';
-            
-            if (fastestProjects.length === 0) {
-                tbody.innerHTML = `
-                    <tr>
-                        <td colspan="8" style="text-align: center; padding: 2rem; color: #666;">
-                            No completed projects with date information found
-                        </td>
-                    </tr>
-                `;
-                return;
-            }
-            
-            fastestProjects.forEach((project, index) => {
-                const row = document.createElement('tr');
-                
-                // Highlight top 3
-                if (index < 3) {
-                    row.style.background = index === 0 ? '#fff3cd' : index === 1 ? '#f8f9fa' : '#f8f9fa';
-                    row.style.fontWeight = index < 3 ? '500' : 'normal';
-                }
-                
-                let rankBadge = `#${index + 1}`;
-                if (index === 0) rankBadge = '🥇';
-                if (index === 1) rankBadge = '🥈';
-                if (index === 2) rankBadge = '🥉';
-                
-                // Get contractor name with source indicator
-                let contractorName = 'N/A';
-                let contractorSource = '';
-                
-                if (project.contractor_source === 'flood_connected' || project.contractor_source === 'dime_fallback') {
-                    // Project connected to flood data (SSP) - contractor from MeiliSearch or DIME fallback
-                    contractorName = project.contractors[0];
-                    contractorSource = '<span style="background: #ffc107; color: black; padding: 2px 6px; border-radius: 4px; font-size: 0.8em; font-weight: 600;">SSP</span>';
-                } else if (project.contractors && project.contractors.length > 0) {
-                    // Use DIME contractor data
-                    contractorName = project.contractors[0];
-                    contractorSource = '<span style="background: #28a745; color: white; padding: 2px 6px; border-radius: 4px; font-size: 0.8em; font-weight: 600;">DIME</span>';
-                } else if (project.implementing_offices && project.implementing_offices.length > 0) {
-                    // Fallback to implementing offices
-                    try {
-                        const contractorObj = typeof project.implementing_offices[0] === 'string' ? JSON.parse(project.implementing_offices[0]) : project.implementing_offices[0];
-                        contractorName = contractorObj.name || contractorObj.nameAbbreviation || 'N/A';
-                        contractorSource = '<span style="background: #fd7e14; color: white; padding: 2px 6px; border-radius: 4px; font-size: 0.8em; font-weight: 600;">DIME Office</span>';
-                    } catch (e) {
-                        contractorName = 'N/A';
-                    }
-                }
-                
-                row.innerHTML = `
-                    <td style="text-align: center;"><strong>${rankBadge}</strong></td>
-                    <td><strong style="color: #0038A8;">${project.project_name || 'N/A'}</strong></td>
-                    <td>${project.region || 'N/A'}</td>
-                    <td style="text-align: center;">${project.date_started || 'N/A'}</td>
-                    <td style="text-align: center;">${project.contract_completion_date || 'N/A'}</td>
-                    <td style="text-align: center;"><strong style="color: #28a745;">${project.completion_days || 'N/A'}</strong></td>
-                    <td style="text-align: right;">₱${project.cost ? parseFloat(project.cost).toLocaleString('en-PH', {minimumFractionDigits: 2}) : 'N/A'}</td>
-                    <td style="font-size: 0.9em;">${contractorName}<br/>${contractorSource}</td>
-                `;
-                
-                tbody.appendChild(row);
-            });
+            // Render the table with current sort
+            renderFastestProjectsTable();
             
             console.log(`✅ Loaded ${fastestProjects.length} fastest projects`);
             
@@ -1791,6 +1738,111 @@ fetch('/static/data/dime_summary.json')
                 `;
             }
         }
+    }
+
+    // Render fastest projects table with current sort
+    function renderFastestProjectsTable() {
+        const tbody = document.getElementById('fastest-projects-tbody');
+        if (!tbody) return;
+        
+        tbody.innerHTML = '';
+        
+        if (fastestProjectsData.length === 0) {
+            tbody.innerHTML = `
+                <tr>
+                    <td colspan="8" style="text-align: center; padding: 2rem; color: #666;">
+                        No completed projects with date information found
+                    </td>
+                </tr>
+            `;
+            return;
+        }
+        
+        // Sort the data
+        const sortedProjects = [...fastestProjectsData].sort((a, b) => {
+            if (fastestSortColumn === 'days') {
+                const aDays = parseInt(a.completion_days) || 0;
+                const bDays = parseInt(b.completion_days) || 0;
+                return fastestSortOrder === 'ASC' ? aDays - bDays : bDays - aDays;
+            }
+            // Add other sort columns if needed
+            return 0;
+        });
+        
+        sortedProjects.forEach((project, index) => {
+            const row = document.createElement('tr');
+            
+            // Highlight top 3
+            if (index < 3) {
+                row.style.background = index === 0 ? '#fff3cd' : index === 1 ? '#f8f9fa' : '#f8f9fa';
+                row.style.fontWeight = index < 3 ? '500' : 'normal';
+            }
+            
+            let rankBadge = `#${index + 1}`;
+            if (index === 0) rankBadge = '🥇';
+            if (index === 1) rankBadge = '🥈';
+            if (index === 2) rankBadge = '🥉';
+            
+            // Get contractor name with source indicator
+            let contractorName = 'N/A';
+            let contractorSource = '';
+            
+            if (project.contractor_source === 'flood_connected' || project.contractor_source === 'dime_fallback') {
+                // Project connected to flood data (SSP) - contractor from MeiliSearch or DIME fallback
+                contractorName = project.contractors[0];
+                contractorSource = '<span style="background: #ffc107; color: black; padding: 2px 6px; border-radius: 4px; font-size: 0.8em; font-weight: 600;">SSP</span>';
+            } else if (project.contractors && project.contractors.length > 0) {
+                // Use DIME contractor data
+                contractorName = project.contractors[0];
+                contractorSource = '<span style="background: #28a745; color: white; padding: 2px 6px; border-radius: 4px; font-size: 0.8em; font-weight: 600;">DIME</span>';
+            } else if (project.implementing_offices && project.implementing_offices.length > 0) {
+                // Fallback to implementing offices
+                try {
+                    const contractorObj = typeof project.implementing_offices[0] === 'string' ? JSON.parse(project.implementing_offices[0]) : project.implementing_offices[0];
+                    contractorName = contractorObj.name || contractorObj.nameAbbreviation || 'N/A';
+                    contractorSource = '<span style="background: #fd7e14; color: white; padding: 2px 6px; border-radius: 4px; font-size: 0.8em; font-weight: 600;">DIME Office</span>';
+                } catch (e) {
+                    contractorName = 'N/A';
+                }
+            }
+            
+            row.innerHTML = `
+                <td style="text-align: center;"><strong>${rankBadge}</strong></td>
+                <td><strong style="color: #0038A8;">${project.project_name || 'N/A'}</strong></td>
+                <td>${project.region || 'N/A'}</td>
+                <td style="text-align: center;">${project.date_started || 'N/A'}</td>
+                <td style="text-align: center;">${project.contract_completion_date || 'N/A'}</td>
+                <td style="text-align: center;"><strong style="color: #28a745;">${project.completion_days || 'N/A'}</strong></td>
+                <td style="text-align: right;">₱${project.cost ? parseFloat(project.cost).toLocaleString('en-PH', {minimumFractionDigits: 2}) : 'N/A'}</td>
+                <td style="font-size: 0.9em;">${contractorName}<br/>${contractorSource}</td>
+            `;
+            
+            tbody.appendChild(row);
+        });
+    }
+
+    // Sort fastest projects table
+    function sortFastestTable(column) {
+        if (fastestSortColumn === column) {
+            // Toggle sort order if same column
+            fastestSortOrder = fastestSortOrder === 'ASC' ? 'DESC' : 'ASC';
+        } else {
+            // New column, default to ASC for days
+            fastestSortColumn = column;
+            fastestSortOrder = column === 'days' ? 'ASC' : 'ASC';
+        }
+        
+        // Update header icon
+        const header = document.querySelector(`th[onclick="sortFastestTable('${column}')"]`);
+        if (header) {
+            const icon = fastestSortOrder === 'ASC' ? '▲' : '▼';
+            header.innerHTML = `Days ${icon}`;
+        }
+        
+        // Re-render table
+        renderFastestProjectsTable();
+        
+        console.log(`🔄 Sorted fastest projects by ${column} ${fastestSortOrder}`);
     }
 
     // Load barangay aggregates
