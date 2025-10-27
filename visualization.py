@@ -670,6 +670,16 @@ async def flood_statistics_api(
 async def flood_districts_api():
     """Get district statistics for flood control projects - no authentication required"""
     try:
+        # Try to load from cached JSON file first
+        cache_file = "static/data/flood_districts_cache.json"
+        if os.path.exists(cache_file):
+            with open(cache_file, 'r', encoding='utf-8') as f:
+                cached_data = json.load(f)
+                if cached_data.get('success'):
+                    print(f"✅ Using cached district data from {cache_file}")
+                    return JSONResponse(cached_data)
+        
+        print("⚠️ No cached district data found, fetching from MeiliSearch...")
         client = get_flood_client()
         
         # Get all projects to count by district

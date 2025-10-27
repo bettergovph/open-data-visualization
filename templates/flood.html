@@ -4599,8 +4599,7 @@ function getContractorSecStatusSync(contractorName) {
 
             if (!data.success || !data.districts || data.districts.length === 0) {
                 console.warn('🏆 No district data available, showing message');
-                districtRankingCtx.parentElement.innerHTML = `
-                    <h3 style="color: #0038A8; margin: 0 0 15px 0;">🏆 Top Districts by Number of Projects</h3>
+                districtRankingCtx.innerHTML = `
                     <div style="color: #666; font-style: italic; text-align: center; padding: 40px;">
                         District data not available
                     </div>
@@ -4728,8 +4727,7 @@ function getContractorSecStatusSync(contractorName) {
 
         } catch (error) {
             console.error('❌ Failed to create district ranking chart:', error);
-            districtRankingCtx.parentElement.innerHTML = `
-                <h3 style="color: #0038A8; margin: 0 0 15px 0;">🏆 Top Districts by Number of Projects</h3>
+            districtRankingCtx.innerHTML = `
                 <div style="color: #dc3545; font-style: italic; text-align: center; padding: 40px;">
                     Error loading district data: ${error.message}
                 </div>

@@ -266,6 +266,12 @@ class JSONGenerator:
                 'category': 'sec_data',
                 'dependencies': ['MeiliSearch flood control data']
             },
+            'flood_districts_cache.json': {
+                'script': 'sec_scraper/generate_district_cache.py',
+                'description': 'Cached district statistics for flood control projects ranking chart',
+                'category': 'cache_data',
+                'dependencies': ['MeiliSearch flood control data']
+            },
             'flood_control_data_with_jv.json': {
                 'script': 'sec_scraper/generate_flood_control_with_jv.py',
                 'description': 'Flood control data with joint venture detection and partner extraction',
