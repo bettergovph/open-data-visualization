@@ -833,6 +833,7 @@ fetch('/static/data/dime_summary.json')
     
     // Function to programmatically switch to a specific tab
     function switchToTab(tabName, updateHash = true) {
+        console.log(`🔄 Switching to tab: ${tabName}`);
         const tabButtons = document.querySelectorAll('.budget-tab-btn');
         const tabPanels = document.querySelectorAll('.budget-tab-panel');
 
@@ -854,12 +855,16 @@ fetch('/static/data/dime_summary.json')
 
             // Load data for specific tabs
             if (tabName === 'table') {
+                console.log('📋 Loading table data...');
                 loadProjects(1);
             } else if (tabName === 'barangays') {
+                console.log('🏘️ Loading barangays data...');
                 loadBarangaysData();
             } else if (tabName === 'visual') {
+                console.log('📊 Loading visual data...');
                 loadVisualData();
             } else if (tabName === 'fastest') {
+                console.log('⚡ Loading fastest projects data...');
                 // Automatically load fastest projects when Speed tab is opened
                 loadFastestProjects();
             }
@@ -2286,7 +2291,11 @@ fetch('/static/data/dime_summary.json')
         // Check for hash in URL and switch to that tab
         const hash = window.location.hash.substring(1); // Remove the # character
         if (hash && ['visual', 'table', 'fastest', 'barangays'].includes(hash)) {
+            console.log(`🔗 Switching to tab from URL hash: ${hash}`);
             switchToTab(hash, false); // Don't update hash since we're reading from it
+        } else {
+            // If no hash, ensure default tab loads its data
+            console.log('🔗 No hash found, loading default visual tab');
         }
         
         // Listen for hash changes
