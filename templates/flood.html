@@ -4606,6 +4606,7 @@ function getContractorSecStatusSync(contractorName) {
             const data = await response.json();
             console.log('🏆 District statistics data:', data);
             console.log('🏆 Districts array length:', data.districts ? data.districts.length : 'undefined');
+            console.log('🏆 Data keys:', Object.keys(data));
 
             if (!data.success || !data.districts || data.districts.length === 0) {
                 console.warn('🏆 No district data available, showing message');
@@ -4628,7 +4629,9 @@ function getContractorSecStatusSync(contractorName) {
             const topDistrictCountElement = document.getElementById('top-district-count');
 
             if (totalRegionsElement) {
-                totalRegionsElement.textContent = districtsArray.length.toLocaleString('en-PH');
+                // Handle both field name formats (totalDistricts vs total_districts)
+                const totalDistricts = data.totalDistricts || data.total_districts || districtsArray.length;
+                totalRegionsElement.textContent = totalDistricts.toLocaleString('en-PH');
             }
 
             if (topDistrictNameElement && topDistrictCountElement && districtsArray.length > 0) {
