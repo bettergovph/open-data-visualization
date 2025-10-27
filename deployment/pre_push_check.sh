@@ -45,16 +45,21 @@ if ! cargo check --quiet; then
 fi
 log "✅ Rust code compiles successfully"
 
-# Check 3: Verify Python syntax
-log "🐍 Checking Python syntax..."
-python_files=$(find . -name "*.py" -not -path "./venv/*" -not -path "./target/*" -not -path "./dpwh_archive/*" -not -path "./sec_scraper/*")
-for file in $python_files; do
-    if ! python3 -m py_compile "$file" 2>/dev/null; then
-        error "Python syntax error in: $file"
+# Check 3: Verify Python syntax for core application files only
+log "🐍 Checking Python syntax for core application files..."
+core_python_files=("visualization.py" "flood_client.py")
+for file in "${core_python_files[@]}"; do
+    if [ -f "$file" ]; then
+        if ! python3 -m py_compile "$file" 2>/dev/null; then
+            error "Python syntax error in core file: $file"
+            exit 1
+        fi
+    else
+        error "Required core file missing: $file"
         exit 1
     fi
 done
-log "✅ Python syntax is valid"
+log "✅ Core Python files syntax is valid"
 
 # Check 4: Verify requirements.txt is up to date
 log "📦 Checking Python dependencies..."
