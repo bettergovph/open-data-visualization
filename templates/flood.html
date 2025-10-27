@@ -430,6 +430,16 @@ function toggleMobileMenu() {
                         <canvas id="contractorsChart" width="800" height="600"></canvas>
                     </div>
                     
+                    <!-- Top Districts by Project Count - Full Width -->
+                    <div class="chart-container bg-white p-5 rounded-lg shadow-lg">
+                        <h3 class="text-blue-900 m-0 mb-4">🏆 Top Districts by Number of Projects</h3>
+                        <canvas id="districtRankingChart" width="1000" height="400" class="cursor-pointer border border-gray-300 rounded w-full max-w-full"></canvas>
+                        <div class="mt-4 text-sm text-gray-600">
+                            <p class="my-1"><strong>Total Regions:</strong> <span id="total-regions-count">-</span></p>
+                            <p class="my-1"><strong>Leading District:</strong> <span id="top-district-name">-</span> with <span id="top-district-count">-</span> projects</p>
+                        </div>
+                    </div>
+                    
                     <!-- Projects Heat Map - Full Width -->
                     <div class="chart-container bg-white p-5 rounded-lg shadow-lg">
                         <h3 class="text-blue-900 m-0 mb-4">Projects Heat Map <span class="text-sm text-gray-600">(Click to view detailed map)</span></h3>
@@ -3657,6 +3667,9 @@ function getContractorSecStatusSync(contractorName) {
         createPhilippineHeatMap(data.regions);
     }
 
+    // District Ranking Chart - Top Districts by Project Count
+    createDistrictRankingChart(data.regions);
+
     // Work Types Chart - Use statistics data
     const workTypesCtx = document.getElementById('workTypesChart');
     if (workTypesCtx && data.typesOfWork) {
@@ -4564,6 +4577,127 @@ function getContractorSecStatusSync(contractorName) {
             });
             regionsCtx.dataset.clickBound = '1';
         }
+    }
+
+    function createDistrictRankingChart(regionsData) {
+        const districtRankingCtx = document.getElementById('districtRankingChart');
+        if (!districtRankingCtx || !regionsData) return;
+
+        console.log('🏆 Creating district ranking chart with data:', regionsData);
+
+        // Convert regions data to array and sort by project count
+        const regionsArray = Object.entries(regionsData)
+            .map(([region, count]) => ({ 
+                region: region, 
+                count: count 
+            }))
+            .sort((a, b) => b.count - a.count); // Sort descending by count
+
+        console.log('🏆 Top 5 regions by project count:', regionsArray.slice(0, 5));
+
+        // Update summary statistics
+        const totalRegionsElement = document.getElementById('total-regions-count');
+        const topDistrictNameElement = document.getElementById('top-district-name');
+        const topDistrictCountElement = document.getElementById('top-district-count');
+
+        if (totalRegionsElement) {
+            totalRegionsElement.textContent = regionsArray.length.toLocaleString('en-PH');
+        }
+
+        if (topDistrictNameElement && topDistrictCountElement && regionsArray.length > 0) {
+            const topRegion = regionsArray[0];
+            topDistrictNameElement.textContent = topRegion.region;
+            topDistrictCountElement.textContent = topRegion.count.toLocaleString('en-PH');
+        }
+
+        // Create horizontal bar chart
+        new Chart(districtRankingCtx, {
+            type: 'bar',
+            data: {
+                labels: regionsArray.map(item => item.region.length > 25 ? item.region.substring(0, 25) + '...' : item.region),
+                datasets: [{
+                    label: 'Number of Projects',
+                    data: regionsArray.map(item => item.count),
+                    backgroundColor: regionsArray.map((item, index) => {
+                        // Color gradient from gold to blue for top performers
+                        if (index < 3) {
+                            return ['#FFD700', '#FFA500', '#FF8C00'][index]; // Gold, Orange, Dark Orange
+                        } else if (index < 6) {
+                            return '#0038A8'; // Blue for top 6
+                        } else {
+                            return '#6c757d'; // Gray for others
+                        }
+                    }),
+                    borderColor: '#ffffff',
+                    borderWidth: 1,
+                    borderRadius: 4,
+                    borderSkipped: false,
+                }]
+            },
+            options: {
+                indexAxis: 'y', // Horizontal bar chart
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        display: false
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                const region = regionsArray[context.dataIndex];
+                                const rank = context.dataIndex + 1;
+                                return [
+                                    `Rank: #${rank}`,
+                                    `Region: ${region.region}`,
+                                    `Projects: ${region.count.toLocaleString('en-PH')}`
+                                ];
+                            }
+                        }
+                    }
+                },
+                scales: {
+                    x: {
+                        beginAtZero: true,
+                        title: {
+                            display: true,
+                            text: 'Number of Projects',
+                            font: {
+                                weight: 'bold',
+                                size: 12
+                            },
+                            color: '#666'
+                        },
+                        ticks: {
+                            color: '#666',
+                            callback: function(value) {
+                                return value.toLocaleString('en-PH');
+                            }
+                        },
+                        grid: {
+                            color: 'rgba(0, 0, 0, 0.1)'
+                        }
+                    },
+                    y: {
+                        ticks: {
+                            color: '#666',
+                            font: {
+                                size: 11
+                            }
+                        },
+                        grid: {
+                            display: false
+                        }
+                    }
+                },
+                interaction: {
+                    intersect: false,
+                    mode: 'index'
+                }
+            }
+        });
+
+        console.log('✅ District ranking chart created with', regionsArray.length, 'regions');
     }
 
     function populateExpensiveProjects(projects) {
