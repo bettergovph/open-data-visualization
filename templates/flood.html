@@ -1878,6 +1878,16 @@ function toggleMobileMenu() {
                 }
             });
             
+            // Initialize visual sub-tabs - Charts visible by default
+            const chartsSubContent = document.getElementById('sub-tab-charts');
+            const heatmapSubContent = document.getElementById('sub-tab-heatmap');
+            
+            if (chartsSubContent && heatmapSubContent) {
+                chartsSubContent.style.display = 'block';
+                heatmapSubContent.style.display = 'none';
+                console.log('📊 Visual sub-tabs initialized - Charts visible');
+            }
+            
             console.log('🔧 Tabs initialized successfully');
         }, 100);
         
@@ -1952,18 +1962,21 @@ function toggleMobileMenu() {
                 return;
             }
             
-            // Update sub-tab buttons
-            activeTab.classList.add('active', 'bg-white', 'text-blue-600', 'border-blue-600');
+            console.log('📊 Switching to sub-tab:', activeContent.id);
+            
+            // Update sub-tab buttons - like DIME
+            document.querySelectorAll('.visual-sub-tab-btn').forEach(btn => {
+                btn.classList.remove('active', 'bg-white', 'text-blue-600', 'border-blue-600');
+                btn.classList.add('bg-gray-100', 'text-gray-600', 'border-gray-300');
+            });
             activeTab.classList.remove('bg-gray-100', 'text-gray-600', 'border-gray-300');
+            activeTab.classList.add('active', 'bg-white', 'text-blue-600', 'border-blue-600');
             
-            inactiveTab.classList.remove('active', 'bg-white', 'text-blue-600', 'border-blue-600');
-            inactiveTab.classList.add('bg-gray-100', 'text-gray-600', 'border-gray-300');
-            
-            // Update content
-            activeContent.classList.add('active');
-            inactiveContent.classList.remove('active');
-            
-            console.log('📊 Switched to sub-tab:', activeContent.id);
+            // Update content - use inline display style like DIME
+            document.querySelectorAll('.visual-sub-tab-panel').forEach(panel => {
+                panel.style.display = 'none';
+            });
+            activeContent.style.display = 'block';
             
             // Initialize charts when Charts sub-tab is shown
             if (activeContent.id === 'sub-tab-charts') {
@@ -3795,6 +3808,8 @@ function getContractorSecStatusSync(contractorName) {
     }
     
     function createRealCharts(data) {
+    console.log('📊 createRealCharts called with data:', data);
+    
     // Clear existing charts
     Chart.helpers.each(Chart.instances, function(instance) {
         instance.destroy();
@@ -3802,13 +3817,17 @@ function getContractorSecStatusSync(contractorName) {
 
     // Yearly Chart - Use statistics data
     const yearlyCtx = document.getElementById('yearlyChart');
+    console.log('📊 yearlyChart canvas element:', yearlyCtx);
+    console.log('📊 yearlyChart dimensions:', yearlyCtx ? `${yearlyCtx.width}x${yearlyCtx.height}` : 'N/A');
+    
     if (yearlyCtx && data.years) {
+        console.log('📊 Creating yearlyChart with years data:', Object.keys(data.years).length, 'years');
         // Use years from statistics
         const yearsArray = Object.entries(data.years)
             .map(([year, count]) => ({ year: year, count: count }))
             .sort((a, b) => parseInt(a.year) - parseInt(b.year));
         
-        new Chart(yearlyCtx, {
+        const yearlyChart = new Chart(yearlyCtx, {
             type: 'bar',
             data: {
                 labels: yearsArray.map(item => item.year),
@@ -3834,6 +3853,9 @@ function getContractorSecStatusSync(contractorName) {
                 }
             }
         });
+        console.log('✅ yearlyChart created successfully');
+    } else {
+        console.warn('⚠️ yearlyChart canvas not found or no years data');
     }
 
     // Budget by Year Chart
@@ -6949,21 +6971,38 @@ function switchTab(tabName, updateHash = true) {
             }
             break;
         case 'visual':
-            // Visual tab activated - initialize ALL charts AFTER tab is visible
-            console.log('📊 Visual tab activated - waiting for layout then loading charts');
+            // Visual tab activated - initialize ALL charts AFTER sub-tab is fully visible
+            console.log('📊 Visual tab activated - ensuring Charts sub-tab is visible');
             
-            // Wait for the tab to be fully visible and laid out before creating charts
-            setTimeout(() => {
-                console.log('📊 Tab is now visible, initializing charts...');
+            // Make sure Charts sub-tab is visible (default)
+            const chartsSubContent = document.getElementById('sub-tab-charts');
+            const heatmapSubContent = document.getElementById('sub-tab-heatmap');
+            
+            if (chartsSubContent && heatmapSubContent) {
+                // Show Charts, hide Heatmap
+                chartsSubContent.style.display = 'block';
+                heatmapSubContent.style.display = 'none';
                 
-                // Load basic charts (yearly, regions, etc.) from API data
-                loadChartData();
+                // Update sub-tab buttons
+                const chartsBtn = document.querySelector('[data-sub-tab="charts"]');
+                const heatmapBtn = document.querySelector('[data-sub-tab="heatmap"]');
+                if (chartsBtn && heatmapBtn) {
+                    chartsBtn.classList.remove('bg-gray-100', 'text-gray-600', 'border-gray-300');
+                    chartsBtn.classList.add('active', 'bg-white', 'text-blue-600', 'border-blue-600');
+                    heatmapBtn.classList.remove('active', 'bg-white', 'text-blue-600', 'border-blue-600');
+                    heatmapBtn.classList.add('bg-gray-100', 'text-gray-600', 'border-gray-300');
+                }
                 
-                // Initialize sub-tab specific charts if charts sub-tab is active
-                const chartsSubContent = document.getElementById('sub-tab-charts');
-                if (chartsSubContent && chartsSubContent.classList.contains('active')) {
+                // Wait for the tab to be fully visible and laid out before creating charts
+                setTimeout(() => {
+                    console.log('📊 Charts sub-tab is visible, initializing ALL charts...');
+                    
+                    // Load basic charts (yearly, regions, etc.) from API data
+                    loadChartData();
+                    
+                    // Initialize specialized charts after basic charts have time to render
                     setTimeout(() => {
-                        console.log('🔄 Initializing sub-tab charts');
+                        console.log('🔄 Initializing specialized charts');
                         if (typeof createContractorDistributionChart === 'function') {
                             createContractorDistributionChart();
                         }
@@ -6973,9 +7012,11 @@ function switchTab(tabName, updateHash = true) {
                         if (typeof createExpensiveProjectsChart === 'function') {
                             createExpensiveProjectsChart();
                         }
-                    }, 400);
-                }
-            }, 100);
+                    }, 300);
+                }, 200);
+            } else {
+                console.warn('⚠️ Sub-tab elements not found');
+            }
             break;
         case 'table':
             // Load table data if needed
