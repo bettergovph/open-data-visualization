@@ -1857,6 +1857,8 @@ function toggleMobileMenu() {
 
     // Initialize dashboard when page loads
     document.addEventListener('DOMContentLoaded', function() {
+        console.log('🚀 Page loaded - initializing flood control dashboard...');
+        
         // Initialize dashboard first
         const dashboard = new FloodControlDashboard();
         
@@ -1869,8 +1871,10 @@ function toggleMobileMenu() {
             tabContents.forEach(content => {
                 if (content.id === 'visual-tab') {
                     content.classList.add('active');
+                    content.style.display = 'block';
                 } else {
                     content.classList.remove('active');
+                    content.style.display = 'none';
                 }
             });
             
@@ -1882,6 +1886,144 @@ function toggleMobileMenu() {
         initializeTable();
         initializeContractors(); // Initialize contractor data
         setupEventListeners(); // Setup all button event listeners
+        
+        // Load contractor database and SEC data
+        loadContractorDatabase();
+        loadContractorsWithoutSec();
+        
+        // Handle URL hash on page load
+        function loadTabFromHash() {
+            const hash = window.location.hash.substring(1); // Remove the #
+            const validTabs = ['visual', 'table', 'proximity', 'contractors', 'contractors-web', 'sec'];
+            
+            if (hash && validTabs.includes(hash)) {
+                console.log('📍 Loading tab from hash:', hash);
+                switchTab(hash, false); // Don't update hash since we're loading from it
+            } else {
+                // Default to visual tab if no hash or invalid hash
+                console.log('📊 No valid tab hash found, defaulting to visual tab');
+                switchTab('visual', false);
+            }
+        }
+        
+        // Load tab from hash on page load
+        setTimeout(() => {
+            loadTabFromHash();
+        }, 200);
+        
+        // Handle browser back/forward buttons
+        window.addEventListener('hashchange', function() {
+            loadTabFromHash();
+        });
+        
+        // Add pagination button event listeners
+        const contractorsPrev = document.getElementById('contractors-prev');
+        const contractorsNext = document.getElementById('contractors-next');
+        
+        if (contractorsPrev) {
+            contractorsPrev.addEventListener('click', function() {
+                changeContractorPage(-1);
+            });
+        }
+        
+        if (contractorsNext) {
+            contractorsNext.addEventListener('click', function() {
+                changeContractorPage(1);
+            });
+        }
+        
+        // Load SEC data on page load
+        loadSecData();
+        
+        // Initialize network graph
+        initializeNetworkGraph();
+        
+        // Initialize visual sub-tabs
+        const chartsSubTab = document.querySelector('[data-sub-tab="charts"]');
+        const heatmapSubTab = document.querySelector('[data-sub-tab="heatmap"]');
+        const chartsContent = document.getElementById('sub-tab-charts');
+        const heatmapSubContent = document.getElementById('sub-tab-heatmap');
+        
+        function switchSubTab(activeTab, inactiveTab, activeContent, inactiveContent) {
+            if (!activeTab || !inactiveTab || !activeContent || !inactiveContent) {
+                console.warn('⚠️ Sub-tab elements not found');
+                return;
+            }
+            
+            // Update sub-tab buttons
+            activeTab.classList.add('active', 'bg-white', 'text-blue-600', 'border-blue-600');
+            activeTab.classList.remove('bg-gray-100', 'text-gray-600', 'border-gray-300');
+            
+            inactiveTab.classList.remove('active', 'bg-white', 'text-blue-600', 'border-blue-600');
+            inactiveTab.classList.add('bg-gray-100', 'text-gray-600', 'border-gray-300');
+            
+            // Update content
+            activeContent.classList.add('active');
+            inactiveContent.classList.remove('active');
+            
+            console.log('📊 Switched to sub-tab:', activeContent.id);
+            
+            // Initialize charts when Charts sub-tab is shown
+            if (activeContent.id === 'sub-tab-charts') {
+                setTimeout(() => {
+                    console.log('🔄 Initializing all charts for Charts sub-tab...');
+                    
+                    // Load basic charts (yearly, regions, etc.)
+                    loadChartData();
+                    
+                    // Load specialized charts (scatter, distribution, etc.)
+                    setTimeout(() => {
+                        if (typeof createContractorDistributionChart === 'function') {
+                            createContractorDistributionChart();
+                        }
+                        if (typeof createContractorScatterChart === 'function') {
+                            createContractorScatterChart();
+                        }
+                        if (typeof createExpensiveProjectsChart === 'function') {
+                            createExpensiveProjectsChart();
+                        }
+                    }, 200);
+                }, 100);
+            }
+        }
+        
+        // Sub-tab event listeners
+        if (chartsSubTab && heatmapSubTab && chartsContent && heatmapSubContent) {
+            chartsSubTab.addEventListener('click', function() {
+                console.log('📊 Charts sub-tab clicked');
+                switchSubTab(chartsSubTab, heatmapSubTab, chartsContent, heatmapSubContent);
+            });
+            
+            heatmapSubTab.addEventListener('click', function() {
+                console.log('🗺️ Heatmap sub-tab clicked');
+                switchSubTab(heatmapSubTab, chartsSubTab, heatmapSubContent, chartsContent);
+            });
+            
+            // Initialize charts for the default active Charts sub-tab on page load
+            setTimeout(() => {
+                if (chartsContent.classList.contains('active')) {
+                    console.log('🔄 Initializing ALL charts on page load...');
+                    
+                    // Load basic charts (yearly, regions, etc.)
+                    loadChartData();
+                    
+                    // Load specialized charts (scatter, distribution, etc.)
+                    setTimeout(() => {
+                        if (typeof createContractorDistributionChart === 'function') {
+                            createContractorDistributionChart();
+                        }
+                        if (typeof createContractorScatterChart === 'function') {
+                            createContractorScatterChart();
+                        }
+                        if (typeof createExpensiveProjectsChart === 'function') {
+                            createExpensiveProjectsChart();
+                        }
+                    }, 300);
+                }
+            }, 1000);
+        } else {
+            console.warn('⚠️ Sub-tab elements not found on page');
+        }
     });
 
     // Setup all event listeners for buttons
@@ -6893,146 +7035,6 @@ function switchTab(tabName, updateHash = true) {
             break;
     }
 }
-
-
-// Add click event listeners to tab buttons
-document.addEventListener('DOMContentLoaded', function() {
-    loadContractorDatabase();
-    loadContractorsWithoutSec();
-
-    // Tab click handlers are now set up by initializeTabs() function
-    
-    // Handle URL hash on page load
-    function loadTabFromHash() {
-        const hash = window.location.hash.substring(1); // Remove the #
-        const validTabs = ['visual', 'table', 'proximity', 'contractors', 'contractors-web', 'sec'];
-        
-        if (hash && validTabs.includes(hash)) {
-            switchTab(hash, false); // Don't update hash since we're loading from it
-        } else {
-            // Default to visual tab if no hash or invalid hash
-            console.log('📊 No valid tab hash found, defaulting to visual tab');
-            switchTab('visual', false);
-        }
-    }
-    
-    // Load tab from hash on page load
-    loadTabFromHash();
-    
-    // Handle browser back/forward buttons
-    window.addEventListener('hashchange', function() {
-        loadTabFromHash();
-    });
-    
-    // Add pagination button event listeners
-    const contractorsPrev = document.getElementById('contractors-prev');
-    const contractorsNext = document.getElementById('contractors-next');
-    
-    if (contractorsPrev) {
-        contractorsPrev.addEventListener('click', function() {
-            changeContractorPage(-1);
-        });
-    }
-    
-    if (contractorsNext) {
-        contractorsNext.addEventListener('click', function() {
-            changeContractorPage(1);
-        });
-    }
-    
-    // Load SEC data on page load
-    loadSecData();
-    
-    // Initialize network graph
-    initializeNetworkGraph();
-    
-    // Initialize visual sub-tabs
-    const chartsSubTab = document.querySelector('[data-sub-tab="charts"]');
-    const heatmapSubTab = document.querySelector('[data-sub-tab="heatmap"]');
-    const chartsContent = document.getElementById('sub-tab-charts');
-    const heatmapSubContent = document.getElementById('sub-tab-heatmap');
-    
-    function switchSubTab(activeTab, inactiveTab, activeContent, inactiveContent) {
-        if (!activeTab || !inactiveTab || !activeContent || !inactiveContent) {
-            console.warn('⚠️ Sub-tab elements not found');
-            return;
-        }
-        
-        // Update sub-tab buttons
-        activeTab.classList.add('active', 'bg-white', 'text-blue-600', 'border-blue-600');
-        activeTab.classList.remove('bg-gray-100', 'text-gray-600', 'border-gray-300');
-        
-        inactiveTab.classList.remove('active', 'bg-white', 'text-blue-600', 'border-blue-600');
-        inactiveTab.classList.add('bg-gray-100', 'text-gray-600', 'border-gray-300');
-        
-        // Update content
-        activeContent.classList.add('active');
-        inactiveContent.classList.remove('active');
-        
-        console.log('📊 Switched to sub-tab:', activeContent.id);
-        
-        // Initialize charts when Charts sub-tab is shown
-        if (activeContent.id === 'sub-tab-charts') {
-            setTimeout(() => {
-                console.log('🔄 Initializing all charts for Charts sub-tab...');
-                
-                // Load basic charts (yearly, regions, etc.)
-                loadChartData();
-                
-                // Load specialized charts (scatter, distribution, etc.)
-                setTimeout(() => {
-                    if (typeof createContractorDistributionChart === 'function') {
-                        createContractorDistributionChart();
-                    }
-                    if (typeof createContractorScatterChart === 'function') {
-                        createContractorScatterChart();
-                    }
-                    if (typeof createExpensiveProjectsChart === 'function') {
-                        createExpensiveProjectsChart();
-                    }
-                }, 200);
-            }, 100);
-        }
-    }
-    
-    // Sub-tab event listeners
-    if (chartsSubTab && heatmapSubTab && chartsContent && heatmapSubContent) {
-        chartsSubTab.addEventListener('click', function() {
-            console.log('📊 Charts sub-tab clicked');
-            switchSubTab(chartsSubTab, heatmapSubTab, chartsContent, heatmapSubContent);
-        });
-        
-        heatmapSubTab.addEventListener('click', function() {
-            console.log('🗺️ Heatmap sub-tab clicked');
-            switchSubTab(heatmapSubTab, chartsSubTab, heatmapSubContent, chartsContent);
-        });
-        
-        // Initialize charts for the default active Charts sub-tab on page load
-        setTimeout(() => {
-            if (chartsContent.classList.contains('active')) {
-                console.log('🔄 Initializing ALL charts on page load...');
-                
-                // Load basic charts (yearly, regions, etc.)
-                loadChartData();
-                
-                // Load specialized charts (scatter, distribution, etc.)
-                setTimeout(() => {
-                    if (typeof createContractorDistributionChart === 'function') {
-                        createContractorDistributionChart();
-                    }
-                    if (typeof createContractorScatterChart === 'function') {
-                        createContractorScatterChart();
-                    }
-                    if (typeof createExpensiveProjectsChart === 'function') {
-                        createExpensiveProjectsChart();
-                    }
-                }, 300);
-            }
-        }, 1000);
-    } else {
-        console.warn('⚠️ Sub-tab elements not found on page');
-    }
-});
 
 // Network Graph for Joint Ventures
 let networkGraph = null;
