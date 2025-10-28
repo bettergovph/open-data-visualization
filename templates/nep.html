@@ -5494,8 +5494,8 @@ document.addEventListener('DOMContentLoaded', function() {
     // Load analysis overview data
     loadAnalysisOverview();
     
-    // Load total budget items count
-    loadTotalBudgetItemsCount();
+    // Load total budget items count - DISABLED: endpoint not proxied by nginx
+    // loadTotalBudgetItemsCount();
     
     // Add event listener for analysis year filter
     const analysisYearFilter = document.getElementById('analysis-year-filter');
@@ -7595,19 +7595,9 @@ async function copyChartToClipboard(containerId, buttonId) {
     </div>
     
     <script>
-    // Load NEP summary stats
-    fetch('/static/data/nep_summary.json')
-        .then(response => response.json())
-        .then(data => {
-            const rangeEl = document.getElementById('nep-range');
-            if (rangeEl) rangeEl.textContent = data.data_range;
-            // total-budget-items-count is already loaded by existing API call
-        })
-        .catch(error => {
-            console.error('Error loading NEP summary:', error);
-            const rangeEl = document.getElementById('nep-range');
-            if (rangeEl) rangeEl.textContent = '2020-2026';
-        });
+    // Load NEP summary stats - DISABLED: file not available, using default
+    const rangeEl = document.getElementById('nep-range');
+    if (rangeEl) rangeEl.textContent = '2020-2026';
     
     // Load NEP 2026 Analysis Charts
     let redFlagChart = null;
@@ -7617,6 +7607,11 @@ async function copyChartToClipboard(containerId, buttonId) {
         try {
             console.log('📊 Loading NEP 2026 Analysis charts...');
             
+            // DISABLED: Red flag data file not available
+            console.warn('⚠️ Red flag analysis disabled - data file not available');
+            return;
+            
+            /*
             // Load red flag data
             const redFlagResponse = await fetch('/static/data/nep_2026_red_flag.json');
             
@@ -7624,6 +7619,7 @@ async function copyChartToClipboard(containerId, buttonId) {
                 console.warn('⚠️ Red flag data file not found - skipping red flag chart');
                 return;
             }
+            */
             
             const redFlagData = await redFlagResponse.json();
             
