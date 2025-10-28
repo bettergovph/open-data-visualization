@@ -7841,8 +7841,16 @@ document.addEventListener('DOMContentLoaded', function() {
             setTimeout(() => {
                 console.log('🔄 Initializing charts for Charts sub-tab...');
                 // Initialize all charts
-                createContractorScatterChart();
-                createExpensiveProjectsChart();
+                if (typeof createContractorScatterChart === 'function') {
+                    createContractorScatterChart();
+                } else {
+                    console.warn('createContractorScatterChart function not found');
+                }
+                if (typeof createExpensiveProjectsChart === 'function') {
+                    createExpensiveProjectsChart();
+                } else {
+                    console.warn('createExpensiveProjectsChart function not found');
+                }
                 // Add other chart initialization calls here
             }, 100);
         }
@@ -7891,8 +7899,17 @@ document.addEventListener('DOMContentLoaded', function() {
     setTimeout(() => {
         if (chartsContent && chartsContent.classList.contains('active')) {
             console.log('🔄 Initializing charts for default Charts sub-tab...');
-            createContractorScatterChart();
-            createExpensiveProjectsChart();
+            // Check if functions exist before calling them
+            if (typeof createContractorScatterChart === 'function') {
+                createContractorScatterChart();
+            } else {
+                console.warn('createContractorScatterChart function not found');
+            }
+            if (typeof createExpensiveProjectsChart === 'function') {
+                createExpensiveProjectsChart();
+            } else {
+                console.warn('createExpensiveProjectsChart function not found');
+            }
         }
     }, 500);
 });
