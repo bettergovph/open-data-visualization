@@ -254,11 +254,11 @@ class JSONGenerator:
                 'category': 'sec_data',
                 'dependencies': ['PostgreSQL SEC database']
             },
-            'contractor_standard_deviation.json': {
-                'script': 'analysis/generate_contractor_standard_deviation.py',
-                'description': 'Contractor project count standard deviation analysis',
+            'contractor_project_counts.json': {
+                'script': 'static/data/generate_contractor_project_counts.py',
+                'description': 'Contractor project counts for scatter plot analysis',
                 'category': 'analysis_data',
-                'dependencies': ['Contractor project data']
+                'dependencies': ['MeiliSearch flood control data']
             },
             'contractors_with_costs.json': {
                 'script': 'sec_scraper/generate_contractors_with_costs.py',
@@ -476,12 +476,18 @@ class JSONGenerator:
         print("=" * 40)
         
         # Generate proximity analysis
-        success, output = await self.run_script(
+        success1, output1 = await self.run_script(
             'analysis/flood_same_amount_proximity_analysis.py',
             'Flood Proximity Analysis'
         )
         
-        return success
+        # Generate contractor project counts for scatter plot
+        success2, output2 = await self.run_script(
+            'static/data/generate_contractor_project_counts.py',
+            'Contractor Project Counts for Scatter Plot'
+        )
+        
+        return success1 and success2
     
     async def generate_nep_data(self):
         """Generate NEP 2026 analysis JSON files."""

@@ -416,8 +416,21 @@ function toggleMobileMenu() {
                     </div>
                 </div>
             
-                <!-- Charts Section -->
-                <div class="charts-grid" style="display: grid; grid-template-columns: 1fr; gap: 20px; margin-bottom: 30px;">
+                <!-- Tab Navigation -->
+                <div class="tab-navigation mb-6">
+                    <div class="flex border-b border-gray-200">
+                        <button id="visual-tab" class="tab-button active px-6 py-3 text-sm font-medium text-blue-600 border-b-2 border-blue-600 bg-white">
+                            📊 Visual
+                        </button>
+                        <button id="heatmap-tab" class="tab-button px-6 py-3 text-sm font-medium text-gray-500 hover:text-gray-700 border-b-2 border-transparent hover:border-gray-300">
+                            🗺️ Heatmap
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Visual Tab Content -->
+                <div id="visual-content" class="tab-content">
+                    <div class="charts-grid" style="display: grid; grid-template-columns: 1fr; gap: 20px; margin-bottom: 30px;">
                     <!-- Top Contractors - Full Width -->
                     <div class="chart-container" style="background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
                         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
@@ -478,23 +491,8 @@ function toggleMobileMenu() {
                         </div>
                     </div>
                     
-                    <!-- Projects Heat Map - Full Width -->
-                    <div id="regionsChartContainer" class="chart-container bg-white p-5 rounded-lg shadow-lg relative">
-                        <button 
-                            id="copyRegionsBtn" 
-                            style="position: absolute; top: 20px; right: 20px;"
-                            class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded text-base transition-colors duration-200 flex items-center gap-2"
-                            onclick="copyChartToClipboard('regionsChartContainer', 'copyRegionsBtn')"
-                            title="Copy chart image to clipboard"
-                        >
-                            📋 Copy
-                        </button>
-                        <h3 class="text-blue-900 m-0 mb-4">Projects Heat Map by Province <span class="text-sm text-gray-600">(Click to view detailed map)</span></h3>
-                        <canvas id="regionsChart" width="1000" height="750" class="cursor-pointer border border-gray-300 rounded w-full max-w-full"></canvas>
-                    </div>
-                    
-                    <!-- Contractor Distribution - Full Width -->
-                    <div id="contractorDistributionChartContainer" class="chart-container bg-white p-5 rounded-lg shadow-lg relative">
+                    <!-- Contractor Distribution - Standard Deviation Analysis -->
+                    <div id="contractorDistributionChartContainer" class="chart-container bg-white p-5 rounded-lg shadow-lg mb-5 w-full relative">
                         <button 
                             id="copyContractorDistributionBtn" 
                             style="position: absolute; top: 20px; right: 20px;"
@@ -504,12 +502,32 @@ function toggleMobileMenu() {
                         >
                             📋 Copy
                         </button>
-                        <h3 class="text-blue-900 m-0 mb-4">Contractor Project Distribution <span class="text-sm text-gray-600">(Scatter Plot Analysis)</span></h3>
-                        <canvas id="contractorDistributionChart" width="800" height="400"></canvas>
+                        <h3 class="text-blue-900 m-0 mb-4">Contractor Project Distribution <span class="text-sm text-gray-600">(Standard Deviation Analysis)</span></h3>
+                        <canvas id="contractorDistributionChart" width="800" height="300"></canvas>
                         <div class="mt-4 text-sm text-gray-600">
                             <p class="my-1"><strong>Average Projects per Contractor:</strong> <span id="dist-avg-projects">-</span></p>
                             <p class="my-1"><strong>Standard Deviation:</strong> <span id="dist-std-dev">-</span></p>
                             <p class="my-1"><strong>Contractors Beyond 3 SD:</strong> <span id="dist-beyond-3sd">-</span> <span class="text-red-600">(Highly Unusual)</span></p>
+                        </div>
+                    </div>
+                    
+                    <!-- Contractor Scatter Plot - Individual Analysis -->
+                    <div id="contractorScatterChartContainer" class="chart-container bg-white p-5 rounded-lg shadow-lg mb-5 w-full relative">
+                        <button 
+                            id="copyContractorScatterBtn" 
+                            style="position: absolute; top: 20px; right: 20px;"
+                            class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded text-base transition-colors duration-200 flex items-center gap-2"
+                            onclick="copyChartToClipboard('contractorScatterChartContainer', 'copyContractorScatterBtn')"
+                            title="Copy chart image to clipboard"
+                        >
+                            📋 Copy
+                        </button>
+                        <h3 class="text-blue-900 m-0 mb-4">Contractor Project Distribution <span class="text-sm text-gray-600">(Scatter Plot Analysis)</span></h3>
+                        <canvas id="contractorScatterChart" width="800" height="400"></canvas>
+                        <div class="mt-4 text-sm text-gray-600">
+                            <p class="my-1"><strong>Each point represents one contractor</strong></p>
+                            <p class="my-1"><strong>Color coding:</strong> Green (normal), Yellow/Orange (suspicious), Red/Purple/Pink (outliers)</p>
+                            <p class="my-1"><strong>Hover over points to see contractor details</strong></p>
                         </div>
                     </div>
                     
@@ -579,6 +597,27 @@ function toggleMobileMenu() {
                                 <p class="my-1"><strong>Average per Project:</strong> <span id="avg-budget-per-project">₱0</span></p>
                                 <p class="my-1"><strong>Highest Year:</strong> <span id="highest-budget-year">-</span></p>
                             </div>
+                        </div>
+                    </div>
+                    </div>
+                </div>
+                
+                <!-- Heatmap Tab Content -->
+                <div id="heatmap-content" class="tab-content" style="display: none;">
+                    <div class="charts-grid" style="display: grid; grid-template-columns: 1fr; gap: 20px; margin-bottom: 30px;">
+                        <!-- Projects Heat Map - Full Width -->
+                        <div id="regionsChartContainer" class="chart-container bg-white p-5 rounded-lg shadow-lg relative">
+                            <button 
+                                id="copyRegionsBtn" 
+                                style="position: absolute; top: 20px; right: 20px;"
+                                class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded text-base transition-colors duration-200 flex items-center gap-2"
+                                onclick="copyChartToClipboard('regionsChartContainer', 'copyRegionsBtn')"
+                                title="Copy chart image to clipboard"
+                            >
+                                📋 Copy
+                            </button>
+                            <h3 class="text-blue-900 m-0 mb-4">Projects Heat Map by Province <span class="text-sm text-gray-600">(Click to view detailed map)</span></h3>
+                            <canvas id="regionsChart" width="1000" height="750" class="cursor-pointer border border-gray-300 rounded w-full max-w-full"></canvas>
                         </div>
                     </div>
                 </div>
@@ -4006,6 +4045,9 @@ function getContractorSecStatusSync(contractorName) {
     
     // Contractor Distribution Chart
     createContractorDistributionChart();
+    
+    // Contractor Scatter Plot
+    createContractorScatterChart();
     }
     
     // Function to update visual contractors pagination (global scope)
@@ -4211,8 +4253,129 @@ function getContractorSecStatusSync(contractorName) {
             if (stdElement) stdElement.textContent = basicStats.standard_deviation.toFixed(1);
             if (outliersElement) outliersElement.textContent = distribution.outliers.count;
             
-            // Create scatter plot showing project distribution per contractor
-            const projectCounts = analysis.project_counts || [];
+            // Create distribution chart with standard deviation bars
+            new Chart(distCtx, {
+                type: 'bar',
+                data: {
+                    labels: [
+                        '1 Standard Deviation\n(68% of contractors)',
+                        '1.5 Standard Deviations\n(87% of contractors)', 
+                        '2 Standard Deviations\n(95% of contractors)',
+                        '2.5 Standard Deviations\n(99% of contractors)',
+                        '3 Standard Deviations\n(99.7% of contractors)',
+                        'Outliers\n(Beyond 3SD)'
+                    ],
+                    datasets: [{
+                        label: 'Number of Contractors',
+                        data: [
+                            distribution.within_1sd.count,
+                            distribution.within_1_5sd.count,
+                            distribution.within_2sd.count,
+                            distribution.within_2_5sd.count,
+                            distribution.within_3sd.count,
+                            distribution.outliers.count
+                        ],
+                        backgroundColor: [
+                            '#28a745', // Green - 1SD
+                            '#ffc107', // Yellow - 1.5SD
+                            '#fd7e14', // Orange - 2SD
+                            '#dc3545', // Red - 2.5SD
+                            '#6f42c1', // Purple - 3SD
+                            '#e83e8c'  // Pink - Outliers
+                        ],
+                        borderColor: [
+                            '#1e7e34',
+                            '#d39e00',
+                            '#dc6903',
+                            '#c82333',
+                            '#5a2d91',
+                            '#c2185b'
+                        ],
+                        borderWidth: 2
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: {
+                            display: false
+                        },
+                        title: {
+                            display: true,
+                            text: `Mean: ${basicStats.mean.toFixed(1)} projects | Standard Deviation: ${basicStats.standard_deviation.toFixed(1)}`,
+                            font: {
+                                size: 12
+                            },
+                            color: '#666'
+                        },
+                        tooltip: {
+                            backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                            titleColor: 'white',
+                            bodyColor: 'white',
+                            borderColor: 'rgba(255, 255, 255, 0.1)',
+                            borderWidth: 1,
+                            callbacks: {
+                                label: function(context) {
+                                    const total = basicStats.total_contractors;
+                                    const value = context.parsed.y;
+                                    const percentage = ((value / total) * 100).toFixed(1);
+                                    return `${value} contractors (${percentage}%)`;
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            title: {
+                                display: true,
+                                text: 'Number of Contractors',
+                                font: {
+                                    weight: 'bold'
+                                }
+                            }
+                        },
+                        x: {
+                            ticks: {
+                                font: {
+                                    size: 10
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+            
+            console.log('✅ Contractor distribution chart created');
+        } catch (error) {
+            console.error('❌ Failed to create contractor distribution chart:', error);
+        }
+    }
+
+    async function createContractorScatterChart() {
+        const scatterCtx = document.getElementById('contractorScatterChart');
+        if (!scatterCtx) return;
+        
+        try {
+            // Load contractor project counts data
+            const response = await fetch('/static/data/contractor_project_counts.json');
+            if (!response.ok) {
+                console.log('⚠️ Contractor project counts not available');
+                return;
+            }
+            
+            const data = await response.json();
+            const projectCounts = data.project_counts || [];
+            
+            if (projectCounts.length === 0) {
+                console.log('⚠️ No project counts data available');
+                return;
+            }
+            
+            // Calculate basic statistics
+            const mean = projectCounts.reduce((sum, count) => sum + count, 0) / projectCounts.length;
+            const variance = projectCounts.reduce((sum, count) => sum + Math.pow(count - mean, 2), 0) / projectCounts.length;
+            const standardDeviation = Math.sqrt(variance);
             
             // Create scatter plot data points
             const scatterData = projectCounts.map((count, index) => ({
@@ -4223,7 +4386,7 @@ function getContractorSecStatusSync(contractorName) {
             
             // Color points based on standard deviation
             const backgroundColor = projectCounts.map(count => {
-                const zScore = Math.abs(count - basicStats.mean) / basicStats.standard_deviation;
+                const zScore = Math.abs(count - mean) / standardDeviation;
                 if (zScore > 3) return '#e83e8c'; // Pink - Outliers
                 if (zScore > 2.5) return '#6f42c1'; // Purple - 3SD
                 if (zScore > 2) return '#dc3545'; // Red - 2.5SD
@@ -4232,7 +4395,7 @@ function getContractorSecStatusSync(contractorName) {
                 return '#28a745'; // Green - 1SD
             });
             
-            new Chart(distCtx, {
+            new Chart(scatterCtx, {
                 type: 'scatter',
                 data: {
                     datasets: [{
@@ -4253,7 +4416,7 @@ function getContractorSecStatusSync(contractorName) {
                         },
                         title: {
                             display: true,
-                            text: `Scatter Plot: Mean ${basicStats.mean.toFixed(1)} projects | Std Dev: ${basicStats.standard_deviation.toFixed(1)} | Outliers: ${distribution.outliers.count}`,
+                            text: `Scatter Plot: Mean ${mean.toFixed(1)} projects | Std Dev: ${standardDeviation.toFixed(1)}`,
                             font: {
                                 size: 12
                             },
@@ -4271,7 +4434,7 @@ function getContractorSecStatusSync(contractorName) {
                                 },
                                 label: function(context) {
                                     const projectCount = context.parsed.y;
-                                    const zScore = Math.abs(projectCount - basicStats.mean) / basicStats.standard_deviation;
+                                    const zScore = Math.abs(projectCount - mean) / standardDeviation;
                                     return `Projects: ${projectCount} (Z-score: ${zScore.toFixed(1)})`;
                                 }
                             }
@@ -4311,9 +4474,9 @@ function getContractorSecStatusSync(contractorName) {
                 }
             });
             
-            console.log('✅ Contractor distribution chart created');
+            console.log('✅ Contractor scatter plot created');
         } catch (error) {
-            console.error('❌ Failed to create contractor distribution chart:', error);
+            console.error('❌ Failed to create contractor scatter plot:', error);
         }
     }
 
@@ -7534,6 +7697,35 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
     }
+});
+
+// Tab functionality
+document.addEventListener('DOMContentLoaded', function() {
+    const visualTab = document.getElementById('visual-tab');
+    const heatmapTab = document.getElementById('heatmap-tab');
+    const visualContent = document.getElementById('visual-content');
+    const heatmapContent = document.getElementById('heatmap-content');
+    
+    function switchTab(activeTab, inactiveTab, activeContent, inactiveContent) {
+        // Update tab buttons
+        activeTab.classList.add('active', 'text-blue-600', 'border-blue-600');
+        activeTab.classList.remove('text-gray-500', 'border-transparent');
+        
+        inactiveTab.classList.remove('active', 'text-blue-600', 'border-blue-600');
+        inactiveTab.classList.add('text-gray-500', 'border-transparent');
+        
+        // Update content
+        activeContent.style.display = 'block';
+        inactiveContent.style.display = 'none';
+    }
+    
+    visualTab.addEventListener('click', function() {
+        switchTab(visualTab, heatmapTab, visualContent, heatmapContent);
+    });
+    
+    heatmapTab.addEventListener('click', function() {
+        switchTab(heatmapTab, visualTab, heatmapContent, visualContent);
+    });
 });
 </script>
 
