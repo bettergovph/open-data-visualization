@@ -504,7 +504,7 @@ function toggleMobileMenu() {
                         >
                             📋 Copy
                         </button>
-                        <h3 class="text-blue-900 m-0 mb-4">Contractor Project Distribution <span class="text-sm text-gray-600">(Box Plot Analysis)</span></h3>
+                        <h3 class="text-blue-900 m-0 mb-4">Contractor Project Distribution <span class="text-sm text-gray-600">(Histogram Analysis)</span></h3>
                         <canvas id="contractorDistributionChart" width="800" height="400"></canvas>
                         <div class="mt-4 text-sm text-gray-600">
                             <p class="my-1"><strong>Average Projects per Contractor:</strong> <span id="dist-avg-projects">-</span></p>
@@ -4211,20 +4211,40 @@ function getContractorSecStatusSync(contractorName) {
             if (stdElement) stdElement.textContent = basicStats.standard_deviation.toFixed(1);
             if (outliersElement) outliersElement.textContent = distribution.outliers.count;
             
-            // Create box plot chart showing project distribution per contractor
+            // Create histogram chart showing project distribution per contractor
+            const projectCounts = analysis.project_counts || [];
+            const histogramData = {};
+            
+            // Create histogram bins
+            projectCounts.forEach(count => {
+                histogramData[count] = (histogramData[count] || 0) + 1;
+            });
+            
+            const sortedCounts = Object.keys(histogramData).map(Number).sort((a, b) => a - b);
+            const labels = sortedCounts.map(count => count.toString());
+            const data = sortedCounts.map(count => histogramData[count]);
+            
+            // Color bars based on standard deviation
+            const backgroundColor = sortedCounts.map(count => {
+                const zScore = Math.abs(count - basicStats.mean) / basicStats.standard_deviation;
+                if (zScore > 3) return '#e83e8c'; // Pink - Outliers
+                if (zScore > 2.5) return '#6f42c1'; // Purple - 3SD
+                if (zScore > 2) return '#dc3545'; // Red - 2.5SD
+                if (zScore > 1.5) return '#fd7e14'; // Orange - 2SD
+                if (zScore > 1) return '#ffc107'; // Yellow - 1.5SD
+                return '#28a745'; // Green - 1SD
+            });
+            
             new Chart(distCtx, {
-                type: 'boxplot',
+                type: 'bar',
                 data: {
-                    labels: ['Contractor Project Distribution'],
+                    labels: labels,
                     datasets: [{
-                        label: 'Projects per Contractor',
-                        data: [analysis.project_counts], // Array of project counts per contractor
-                        backgroundColor: 'rgba(54, 162, 235, 0.2)',
-                        borderColor: 'rgba(54, 162, 235, 1)',
-                        borderWidth: 2,
-                        outlierBackgroundColor: 'rgba(255, 99, 132, 0.8)',
-                        outlierBorderColor: 'rgba(255, 99, 132, 1)',
-                        outlierRadius: 4
+                        label: 'Number of Contractors',
+                        data: data,
+                        backgroundColor: backgroundColor,
+                        borderColor: backgroundColor.map(color => color.replace('0.8', '1')),
+                        borderWidth: 1
                     }]
                 },
                 options: {
@@ -4235,7 +4255,7 @@ function getContractorSecStatusSync(contractorName) {
                         },
                         title: {
                             display: true,
-                            text: `Box Plot: Mean ${basicStats.mean.toFixed(1)} projects | Std Dev: ${basicStats.standard_deviation.toFixed(1)} | Outliers: ${distribution.outliers.count}`,
+                            text: `Histogram: Mean ${basicStats.mean.toFixed(1)} projects | Std Dev: ${basicStats.standard_deviation.toFixed(1)} | Outliers: ${distribution.outliers.count}`,
                             font: {
                                 size: 12
                             },
@@ -4249,10 +4269,10 @@ function getContractorSecStatusSync(contractorName) {
                             borderWidth: 1,
                             callbacks: {
                                 label: function(context) {
-                                    if (context.parsed.outliers) {
-                                        return `Outliers: ${context.parsed.outliers.length} contractors`;
-                                    }
-                                    return `Projects: ${context.parsed.y}`;
+                                    const projectCount = context.label;
+                                    const contractorCount = context.parsed.y;
+                                    const zScore = Math.abs(projectCount - basicStats.mean) / basicStats.standard_deviation;
+                                    return `${contractorCount} contractors with ${projectCount} projects (Z-score: ${zScore.toFixed(1)})`;
                                 }
                             }
                         }
@@ -4262,19 +4282,25 @@ function getContractorSecStatusSync(contractorName) {
                             beginAtZero: true,
                             title: {
                                 display: true,
-                                text: 'Number of Projects per Contractor',
+                                text: 'Number of Contractors',
+                                font: {
+                                    weight: 'bold'
+                                }
+                            }
+                        },
+                        x: {
+                            title: {
+                                display: true,
+                                text: 'Projects per Contractor',
                                 font: {
                                     weight: 'bold'
                                 }
                             },
                             ticks: {
-                                callback: function(value) {
-                                    return Math.round(value);
+                                font: {
+                                    size: 10
                                 }
                             }
-                        },
-                        x: {
-                            display: false
                         }
                     }
                 }
