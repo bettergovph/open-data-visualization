@@ -6825,9 +6825,24 @@ function switchTab(tabName, updateHash = true) {
             }
             break;
         case 'visual':
-            // Load visual data and initialize charts
-            console.log('📊 Visual tab activated - initializing charts');
-            initializeCharts();
+            // Visual tab activated - sub-tabs will handle chart initialization
+            console.log('📊 Visual tab activated');
+            // Trigger sub-tab initialization if charts sub-tab is active
+            const chartsSubContent = document.getElementById('sub-tab-charts');
+            if (chartsSubContent && chartsSubContent.classList.contains('active')) {
+                setTimeout(() => {
+                    console.log('🔄 Triggering chart initialization for visual tab');
+                    if (typeof createContractorDistributionChart === 'function') {
+                        createContractorDistributionChart();
+                    }
+                    if (typeof createContractorScatterChart === 'function') {
+                        createContractorScatterChart();
+                    }
+                    if (typeof createExpensiveProjectsChart === 'function') {
+                        createExpensiveProjectsChart();
+                    }
+                }, 100);
+            }
             break;
         case 'table':
             // Load table data if needed
@@ -6926,6 +6941,79 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Initialize network graph
     initializeNetworkGraph();
+    
+    // Initialize visual sub-tabs
+    const chartsSubTab = document.querySelector('[data-sub-tab="charts"]');
+    const heatmapSubTab = document.querySelector('[data-sub-tab="heatmap"]');
+    const chartsContent = document.getElementById('sub-tab-charts');
+    const heatmapSubContent = document.getElementById('sub-tab-heatmap');
+    
+    function switchSubTab(activeTab, inactiveTab, activeContent, inactiveContent) {
+        if (!activeTab || !inactiveTab || !activeContent || !inactiveContent) {
+            console.warn('⚠️ Sub-tab elements not found');
+            return;
+        }
+        
+        // Update sub-tab buttons
+        activeTab.classList.add('active', 'bg-white', 'text-blue-600', 'border-blue-600');
+        activeTab.classList.remove('bg-gray-100', 'text-gray-600', 'border-gray-300');
+        
+        inactiveTab.classList.remove('active', 'bg-white', 'text-blue-600', 'border-blue-600');
+        inactiveTab.classList.add('bg-gray-100', 'text-gray-600', 'border-gray-300');
+        
+        // Update content
+        activeContent.classList.add('active');
+        inactiveContent.classList.remove('active');
+        
+        console.log('📊 Switched to sub-tab:', activeContent.id);
+        
+        // Initialize charts when Charts sub-tab is shown
+        if (activeContent.id === 'sub-tab-charts') {
+            setTimeout(() => {
+                console.log('🔄 Initializing charts for Charts sub-tab...');
+                if (typeof createContractorDistributionChart === 'function') {
+                    createContractorDistributionChart();
+                }
+                if (typeof createContractorScatterChart === 'function') {
+                    createContractorScatterChart();
+                }
+                if (typeof createExpensiveProjectsChart === 'function') {
+                    createExpensiveProjectsChart();
+                }
+            }, 100);
+        }
+    }
+    
+    // Sub-tab event listeners
+    if (chartsSubTab && heatmapSubTab && chartsContent && heatmapSubContent) {
+        chartsSubTab.addEventListener('click', function() {
+            console.log('📊 Charts sub-tab clicked');
+            switchSubTab(chartsSubTab, heatmapSubTab, chartsContent, heatmapSubContent);
+        });
+        
+        heatmapSubTab.addEventListener('click', function() {
+            console.log('🗺️ Heatmap sub-tab clicked');
+            switchSubTab(heatmapSubTab, chartsSubTab, heatmapSubContent, chartsContent);
+        });
+        
+        // Initialize charts for the default active Charts sub-tab on page load
+        setTimeout(() => {
+            if (chartsContent.classList.contains('active')) {
+                console.log('🔄 Initializing charts for default active Charts sub-tab...');
+                if (typeof createContractorDistributionChart === 'function') {
+                    createContractorDistributionChart();
+                }
+                if (typeof createContractorScatterChart === 'function') {
+                    createContractorScatterChart();
+                }
+                if (typeof createExpensiveProjectsChart === 'function') {
+                    createExpensiveProjectsChart();
+                }
+            }
+        }, 1000);
+    } else {
+        console.warn('⚠️ Sub-tab elements not found on page');
+    }
 });
 
 // Network Graph for Joint Ventures
@@ -7842,121 +7930,6 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
     }
-});
-
-// Tab functionality
-document.addEventListener('DOMContentLoaded', function() {
-    const visualTab = document.getElementById('visual-tab');
-    const heatmapTab = document.getElementById('heatmap-tab');
-    const visualContent = document.getElementById('visual-content');
-    const heatmapContent = document.getElementById('heatmap-content');
-    
-    // Sub-tab elements
-    const chartsSubTab = document.querySelector('[data-sub-tab="charts"]');
-    const heatmapSubTab = document.querySelector('[data-sub-tab="heatmap"]');
-    const chartsContent = document.getElementById('sub-tab-charts');
-    const heatmapSubContent = document.getElementById('sub-tab-heatmap');
-    
-    function switchSubTab(activeTab, inactiveTab, activeContent, inactiveContent) {
-        // Update sub-tab buttons
-        activeTab.classList.add('active', 'text-blue-600', 'border-blue-600');
-        activeTab.classList.remove('text-gray-600', 'border-gray-300');
-        
-        inactiveTab.classList.remove('active', 'text-blue-600', 'border-blue-600');
-        inactiveTab.classList.add('text-gray-600', 'border-gray-300');
-        
-        // Update content
-        activeContent.classList.add('active');
-        activeContent.style.display = 'block';
-        inactiveContent.classList.remove('active');
-        inactiveContent.style.display = 'none';
-        
-        // Initialize charts when Charts sub-tab is shown
-        if (activeContent.id === 'sub-tab-charts') {
-            setTimeout(() => {
-                console.log('🔄 Initializing charts for Charts sub-tab...');
-                // Initialize all charts
-                if (typeof createContractorDistributionChart === 'function') {
-                    createContractorDistributionChart();
-                } else {
-                    console.warn('createContractorDistributionChart function not found');
-                }
-                if (typeof createContractorScatterChart === 'function') {
-                    createContractorScatterChart();
-                } else {
-                    console.warn('createContractorScatterChart function not found');
-                }
-                if (typeof createExpensiveProjectsChart === 'function') {
-                    createExpensiveProjectsChart();
-                } else {
-                    console.warn('createExpensiveProjectsChart function not found');
-                }
-                // Add other chart initialization calls here
-            }, 100);
-        }
-    }
-    
-    function switchTab(activeTab, inactiveTab, activeContent, inactiveContent) {
-        // Update tab buttons
-        activeTab.classList.add('active', 'text-blue-600', 'border-blue-600');
-        activeTab.classList.remove('text-gray-500', 'border-transparent');
-        
-        inactiveTab.classList.remove('active', 'text-blue-600', 'border-blue-600');
-        inactiveTab.classList.add('text-gray-500', 'border-transparent');
-        
-        // Update content
-        activeContent.style.display = 'block';
-        inactiveContent.style.display = 'none';
-    }
-    
-    // Main tab event listeners
-    if (visualTab) {
-        visualTab.addEventListener('click', function() {
-            switchTab(visualTab, heatmapTab, visualContent, heatmapContent);
-        });
-    }
-    
-    if (heatmapTab) {
-        heatmapTab.addEventListener('click', function() {
-            switchTab(heatmapTab, visualTab, heatmapContent, visualContent);
-        });
-    }
-    
-    // Sub-tab event listeners
-    if (chartsSubTab) {
-        chartsSubTab.addEventListener('click', function() {
-            switchSubTab(chartsSubTab, heatmapSubTab, chartsContent, heatmapSubContent);
-        });
-    }
-    
-    if (heatmapSubTab) {
-        heatmapSubTab.addEventListener('click', function() {
-            switchSubTab(heatmapSubTab, chartsSubTab, heatmapSubContent, chartsContent);
-        });
-    }
-    
-    // Initialize charts for the default active Charts sub-tab
-    setTimeout(() => {
-        if (chartsContent && chartsContent.classList.contains('active')) {
-            console.log('🔄 Initializing charts for default Charts sub-tab...');
-            // Check if functions exist before calling them
-            if (typeof createContractorDistributionChart === 'function') {
-                createContractorDistributionChart();
-            } else {
-                console.warn('createContractorDistributionChart function not found');
-            }
-            if (typeof createContractorScatterChart === 'function') {
-                createContractorScatterChart();
-            } else {
-                console.warn('createContractorScatterChart function not found');
-            }
-            if (typeof createExpensiveProjectsChart === 'function') {
-                createExpensiveProjectsChart();
-            } else {
-                console.warn('createExpensiveProjectsChart function not found');
-            }
-        }
-    }, 500);
 });
 </script>
 
