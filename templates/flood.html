@@ -4393,6 +4393,32 @@ function getContractorSecStatusSync(contractorName) {
         const scatterCtx = document.getElementById('contractorScatterChart');
         if (!scatterCtx) return;
         
+        // Robust chart destruction
+        if (window.contractorScatterChart) {
+            try {
+                if (typeof window.contractorScatterChart.destroy === 'function') {
+                    window.contractorScatterChart.destroy();
+                }
+                window.contractorScatterChart = null;
+            } catch (error) {
+                console.warn('Error destroying existing scatter chart:', error);
+            }
+        }
+        
+        // Check if Chart.js has registered this canvas and destroy it
+        try {
+            const existingChart = Chart.getChart(scatterCtx);
+            if (existingChart) {
+                existingChart.destroy();
+            }
+        } catch (error) {
+            console.warn('Error destroying existing Chart.js scatter instance:', error);
+        }
+        
+        // Clear the canvas context
+        const ctx = scatterCtx.getContext('2d');
+        ctx.clearRect(0, 0, scatterCtx.width, scatterCtx.height);
+        
         try {
             // Load contractor project counts data
             const response = await fetch('/static/data/contractor_project_counts.json');
@@ -4432,7 +4458,8 @@ function getContractorSecStatusSync(contractorName) {
                 return '#28a745'; // Green - 1SD
             });
             
-            new Chart(scatterCtx, {
+            // Assign chart to window variable for future destruction
+            window.contractorScatterChart = new Chart(scatterCtx, {
                 type: 'scatter',
                 data: {
                     datasets: [{
