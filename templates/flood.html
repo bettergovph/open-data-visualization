@@ -431,14 +431,14 @@ function toggleMobileMenu() {
                         <div style="position: relative;">
                             <button 
                                 id="copyContractorsBtn" 
-                                style="position: absolute; top: 10px; right: 10px; z-index: 10;"
+                                style="position: absolute; top: 10px; right: 10px; z-index: 10; pointer-events: auto;"
                                 class="bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded text-sm transition-colors duration-200 flex items-center gap-1"
                                 onclick="copyChartToClipboard('contractorsChart', 'copyContractorsBtn')"
                                 title="Copy chart image to clipboard"
                             >
                                 📋 Copy
                             </button>
-                            <canvas id="contractorsChart" width="800" height="600"></canvas>
+                            <canvas id="contractorsChart" width="800" height="600" style="display: block;"></canvas>
                         </div>
                     </div>
                     
@@ -4317,7 +4317,7 @@ function getContractorSecStatusSync(contractorName) {
     }
 
     // Destroy existing chart if it exists
-    if (window.expensiveProjectsChart) {
+    if (window.expensiveProjectsChart && typeof window.expensiveProjectsChart.destroy === 'function') {
         window.expensiveProjectsChart.destroy();
     }
 
