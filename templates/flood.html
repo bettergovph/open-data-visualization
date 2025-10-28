@@ -4486,12 +4486,29 @@ function getContractorSecStatusSync(contractorName) {
         return;
     }
 
-    // Destroy existing chart if it exists
-    if (window.expensiveProjectsChart && typeof window.expensiveProjectsChart.destroy === 'function') {
-        window.expensiveProjectsChart.destroy();
+    // More robust chart destruction
+    if (window.expensiveProjectsChart) {
+        try {
+            if (typeof window.expensiveProjectsChart.destroy === 'function') {
+                window.expensiveProjectsChart.destroy();
+            }
+            window.expensiveProjectsChart = null;
+        } catch (error) {
+            console.warn('Error destroying existing chart:', error);
+        }
     }
-
-    // Extract city/province names from project descriptions and prepare chart data
+    
+    // Clear the canvas context
+    const ctx = expensiveProjectsCtx.getContext('2d');
+    ctx.clearRect(0, 0, expensiveProjectsCtx.width, expensiveProjectsCtx.height);
+    
+    // Small delay to ensure destruction completes
+    setTimeout(() => {
+        createChart();
+    }, 50);
+    
+    function createChart() {
+        // Extract city/province names from project descriptions and prepare chart data
     const expensiveProjects = allTableProjects
         .filter(project => project.ContractCost && project.ContractCost > 0)
         .sort((a, b) => parseFloat(b.ContractCost) - parseFloat(a.ContractCost))
@@ -4614,6 +4631,7 @@ function getContractorSecStatusSync(contractorName) {
             }
         }
     });
+    }
     }
 
     function createPhilippineHeatMap(regionsData) {
