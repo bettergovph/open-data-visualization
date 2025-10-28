@@ -504,8 +504,8 @@ function toggleMobileMenu() {
                         >
                             📋 Copy
                         </button>
-                        <h3 class="text-blue-900 m-0 mb-4">Contractor Project Distribution <span class="text-sm text-gray-600">(Standard Deviation Analysis)</span></h3>
-                        <canvas id="contractorDistributionChart" width="800" height="300"></canvas>
+                        <h3 class="text-blue-900 m-0 mb-4">Contractor Project Distribution <span class="text-sm text-gray-600">(Box Plot Analysis)</span></h3>
+                        <canvas id="contractorDistributionChart" width="800" height="400"></canvas>
                         <div class="mt-4 text-sm text-gray-600">
                             <p class="my-1"><strong>Average Projects per Contractor:</strong> <span id="dist-avg-projects">-</span></p>
                             <p class="my-1"><strong>Standard Deviation:</strong> <span id="dist-std-dev">-</span></p>
@@ -4211,45 +4211,20 @@ function getContractorSecStatusSync(contractorName) {
             if (stdElement) stdElement.textContent = basicStats.standard_deviation.toFixed(1);
             if (outliersElement) outliersElement.textContent = distribution.outliers.count;
             
-            // Create distribution chart with standard deviation bars
+            // Create box plot chart showing project distribution per contractor
             new Chart(distCtx, {
-                type: 'bar',
+                type: 'boxplot',
                 data: {
-                    labels: [
-                        '1 Standard Deviation\n(68% of contractors)',
-                        '1.5 Standard Deviations\n(87% of contractors)', 
-                        '2 Standard Deviations\n(95% of contractors)',
-                        '2.5 Standard Deviations\n(99% of contractors)',
-                        '3 Standard Deviations\n(99.7% of contractors)',
-                        'Outliers\n(Beyond 3SD)'
-                    ],
+                    labels: ['Contractor Project Distribution'],
                     datasets: [{
-                        label: 'Number of Contractors',
-                        data: [
-                            distribution.within_1sd.count,
-                            distribution.within_1_5sd.count,
-                            distribution.within_2sd.count,
-                            distribution.within_2_5sd.count,
-                            distribution.within_3sd.count,
-                            distribution.outliers.count
-                        ],
-                        backgroundColor: [
-                            '#28a745', // Green - 1SD
-                            '#ffc107', // Yellow - 1.5SD
-                            '#fd7e14', // Orange - 2SD
-                            '#dc3545', // Red - 2.5SD
-                            '#6f42c1', // Purple - 3SD
-                            '#e83e8c'  // Pink - Outliers
-                        ],
-                        borderColor: [
-                            '#1e7e34',
-                            '#d39e00',
-                            '#dc6903',
-                            '#c82333',
-                            '#5a2d91',
-                            '#c2185b'
-                        ],
-                        borderWidth: 2
+                        label: 'Projects per Contractor',
+                        data: [analysis.project_counts], // Array of project counts per contractor
+                        backgroundColor: 'rgba(54, 162, 235, 0.2)',
+                        borderColor: 'rgba(54, 162, 235, 1)',
+                        borderWidth: 2,
+                        outlierBackgroundColor: 'rgba(255, 99, 132, 0.8)',
+                        outlierBorderColor: 'rgba(255, 99, 132, 1)',
+                        outlierRadius: 4
                     }]
                 },
                 options: {
@@ -4260,7 +4235,7 @@ function getContractorSecStatusSync(contractorName) {
                         },
                         title: {
                             display: true,
-                            text: `Mean: ${basicStats.mean.toFixed(1)} projects | Standard Deviation: ${basicStats.standard_deviation.toFixed(1)}`,
+                            text: `Box Plot: Mean ${basicStats.mean.toFixed(1)} projects | Std Dev: ${basicStats.standard_deviation.toFixed(1)} | Outliers: ${distribution.outliers.count}`,
                             font: {
                                 size: 12
                             },
@@ -4274,10 +4249,10 @@ function getContractorSecStatusSync(contractorName) {
                             borderWidth: 1,
                             callbacks: {
                                 label: function(context) {
-                                    const total = basicStats.total_contractors;
-                                    const value = context.parsed.y;
-                                    const percentage = ((value / total) * 100).toFixed(1);
-                                    return `${value} contractors (${percentage}%)`;
+                                    if (context.parsed.outliers) {
+                                        return `Outliers: ${context.parsed.outliers.length} contractors`;
+                                    }
+                                    return `Projects: ${context.parsed.y}`;
                                 }
                             }
                         }
@@ -4287,18 +4262,19 @@ function getContractorSecStatusSync(contractorName) {
                             beginAtZero: true,
                             title: {
                                 display: true,
-                                text: 'Number of Contractors',
+                                text: 'Number of Projects per Contractor',
                                 font: {
                                     weight: 'bold'
+                                }
+                            },
+                            ticks: {
+                                callback: function(value) {
+                                    return Math.round(value);
                                 }
                             }
                         },
                         x: {
-                            ticks: {
-                                font: {
-                                    size: 10
-                                }
-                            }
+                            display: false
                         }
                     }
                 }
