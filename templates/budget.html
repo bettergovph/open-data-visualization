@@ -7576,7 +7576,7 @@ async function copyChartToClipboard(containerId, buttonId) {
                                     <div id="departmentTrendsChartContainer" class="relative" style="background: white; padding: 20px; border-radius: 8px; min-height: 600px;">
                                         <button 
                                             id="copyDepartmentTrendsBtn" 
-                                            style="position: absolute; top: 20px; right: 20px;"
+                                            style="position: absolute; top: 20px; right: 20px; z-index: 100;"
                                             class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded text-base transition-colors duration-200 flex items-center gap-2"
                                             onclick="copyChartToClipboard('departmentTrendsChartContainer', 'copyDepartmentTrendsBtn')"
                                             title="Copy chart image to clipboard"
