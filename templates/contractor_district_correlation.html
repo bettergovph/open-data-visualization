@@ -23,7 +23,7 @@
             font-family: 'Inter', sans-serif !important;
             margin: 0;
             padding: 0;
-            background: #f8f9fa !important;
+            background: white !important;
             color: #1a1a1a !important;
             min-height: 100vh;
         }
@@ -31,7 +31,7 @@
         .page-container {
             max-width: 1400px;
             margin: 0 auto;
-            padding: 40px 20px;
+            padding: 0;
         }
         
         .hero-section {
@@ -87,15 +87,15 @@
         
         .stats-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 20px;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 15px;
             margin: 30px 0;
         }
         
         .stat-card {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
-            padding: 30px;
+            padding: 20px 15px;
             border-radius: 12px;
             text-align: center;
             transition: transform 0.3s ease, box-shadow 0.3s ease;
@@ -108,25 +108,25 @@
         }
         
         .stat-card h3 {
-            margin: 0 0 15px 0;
-            font-size: 0.95em;
+            margin: 0 0 10px 0;
+            font-size: 0.85em;
             opacity: 0.9;
             font-weight: 500;
             text-transform: uppercase;
-            letter-spacing: 1px;
+            letter-spacing: 0.5px;
         }
         
         .stat-card .value {
-            font-size: 2.8em;
+            font-size: 2.2em;
             font-weight: 800;
-            margin: 15px 0;
+            margin: 10px 0;
             line-height: 1;
         }
         
         .stat-card .description {
-            font-size: 0.9em;
+            font-size: 0.8em;
             opacity: 0.85;
-            line-height: 1.4;
+            line-height: 1.3;
         }
         
         .hypothesis-box {
@@ -386,7 +386,17 @@
             font-weight: 700;
         }
         
+        @media (max-width: 1024px) {
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+        
         @media (max-width: 768px) {
+            body > div[style*="padding: 6rem"] {
+                padding: 2rem 1rem !important;
+            }
+            
             .hero-title {
                 font-size: 2em;
             }
@@ -395,8 +405,12 @@
                 font-size: 1.1em;
             }
             
+            .hero-section {
+                padding: 40px 20px;
+            }
+            
             .section-card {
-                padding: 25px;
+                padding: 25px 20px;
             }
             
             .stats-grid {
@@ -405,6 +419,10 @@
             
             .evidence-grid {
                 grid-template-columns: 1fr;
+            }
+            
+            .section-title {
+                font-size: 1.5em;
             }
         }
         
@@ -422,6 +440,58 @@
     </style>
 </head>
 <body>
+<!-- Navigation - BetterGov Theme -->
+<nav class="visualizations-nav py-4 px-6 bg-white border-b border-gray-200">
+    <div class="max-w-7xl mx-auto flex items-center justify-between">
+        <div class="flex items-center">
+            <a href="https://bettergov.ph" class="flex items-center">
+                <img src="https://raw.githubusercontent.com/bettergovph/logo/main/png/BetterGov_Horizontal-Black.png"
+                     alt="BetterGov.ph"
+                     class="h-12 mr-3">
+            </a>
+            <a href="/" class="text-xl font-bold text-black hover:text-gray-600">Data Visualizations</a>
+        </div>
+        <div class="hidden md:flex space-x-6">
+            <a href="/nep" class="text-black hover:text-gray-600 font-medium transition">NEP</a>
+            <a href="/budget" class="text-black hover:text-gray-600 font-medium transition">Budget</a>
+            <a href="/flood" class="text-black hover:text-gray-600 font-medium transition">Flood Control</a>
+            <a href="/dime" class="text-black hover:text-gray-600 font-medium transition">DIME</a>
+            <a href="/map" class="text-black hover:text-gray-600 font-medium transition">Map</a>
+            <a href="/philgeps" class="text-black hover:text-gray-600 font-medium transition">PhilGEPS</a>
+            <a href="/dynasty" class="text-black hover:text-gray-600 font-medium transition">Dynasties</a>
+            <a href="/eogo" class="text-black hover:text-gray-600 font-medium transition">EOGO</a>
+            <a href="/sources" class="text-black hover:text-gray-600 font-medium transition">Sources</a>
+        </div>
+        <div class="md:hidden">
+            <button class="text-black focus:outline-none" onclick="toggleMobileMenu()">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+                </svg>
+            </button>
+        </div>
+    </div>
+    <!-- Mobile menu (hidden by default) -->
+    <div id="mobileMenu" class="hidden mt-4 px-4 space-y-2">
+        <a href="/nep" class="block text-black hover:text-gray-600 font-medium py-2">NEP</a>
+        <a href="/budget" class="block text-black hover:text-gray-600 font-medium py-2">Budget</a>
+        <a href="/flood" class="block text-black hover:text-gray-600 font-medium py-2">Flood Control</a>
+        <a href="/dime" class="block text-black hover:text-gray-600 font-medium py-2">DIME</a>
+        <a href="/map" class="block text-black hover:text-gray-600 font-medium py-2">Map</a>
+        <a href="/philgeps" class="block text-black hover:text-gray-600 font-medium py-2">PhilGEPS</a>
+        <a href="/dynasty" class="block text-black hover:text-gray-600 font-medium py-2">Dynasties</a>
+        <a href="/eogo" class="block text-black hover:text-gray-600 font-medium py-2">EOGO</a>
+        <a href="/sources" class="block text-black hover:text-gray-600 font-medium py-2">Sources</a>
+    </div>
+</nav>
+
+<script>
+function toggleMobileMenu() {
+    const menu = document.getElementById('mobileMenu');
+    menu.classList.toggle('hidden');
+}
+</script>
+
+<div style="padding: 6rem;">
     <div class="page-container">
         <!-- Hero Section -->
         <div class="hero-section">
@@ -884,6 +954,10 @@
         // Load data on page load
         document.addEventListener('DOMContentLoaded', loadCorrelationData);
     </script>
+    </div>
+</div>
+
+{% include "footer.html" %}
 </body>
 </html>
 
