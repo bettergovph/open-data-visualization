@@ -396,7 +396,6 @@ function toggleMobileMenu() {
     menu.classList.toggle('hidden');
 }
 </script>
-
 <!-- Flood Control Projects Section -->
 <div style="padding: 6rem;">
 <section class="flood-section">
@@ -1108,7 +1107,6 @@ function toggleMobileMenu() {
     </div>
 </section>
 </div>
-
 <script>
     // Flood Control Dashboard JavaScript
     class FloodControlDashboard {
@@ -1711,7 +1709,6 @@ function toggleMobileMenu() {
                 setTimeout(loadMore, 1000);
             }
         }
-
         async loadAllProjects() {
             // Cancel all ongoing operations
             this.progressiveLoadingCancelled = true;
@@ -2360,7 +2357,6 @@ function toggleMobileMenu() {
         currentTablePage = Math.max(0, Math.min(totalPages - 1, currentTablePage + direction));
         renderTable();
     }
-    
     function escapeHtml(text) {
         const div = document.createElement('div');
         div.textContent = text;
@@ -3410,7 +3406,6 @@ function getContractorSecStatusSync(contractorName) {
         }
     }
 }
-
     function renderContractors() {
         const tableBody = document.getElementById('contractors-table-body');
         const contractorsShowing = document.getElementById('contractors-showing');
@@ -3603,42 +3598,76 @@ function getContractorSecStatusSync(contractorName) {
 
     // Chart initialization
     function initializeCharts() {
-    // Show error state for charts when data is not available
-    const chartContainers = document.querySelectorAll('.chart-container');
-    chartContainers.forEach(container => {
-        const canvas = container.querySelector('canvas');
-        if (canvas) {
-            const ctx = canvas.getContext('2d');
-            ctx.fillStyle = '#f8f9fa';
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
-            
-            ctx.fillStyle = '#dc3545';
-            ctx.font = '16px Arial';
-            ctx.textAlign = 'center';
-            ctx.fillText('Data Not Available', canvas.width / 2, canvas.height / 2);
-            ctx.fillText('API connection failed', canvas.width / 2, canvas.height / 2 + 25);
-        }
-    });
-    
-    // Try to load real data for charts
-    loadChartData();
+        console.log('📊 Initializing charts...');
+        
+        // Try to load real data for charts
+        loadChartData();
     }
     
     async function loadChartData() {
-    try {
-        console.log('🔍 Loading chart data from API...');
-        const response = await fetch('/api/flood/statistics');
-        if (response.ok) {
-            const data = await response.json();
-            console.log('✅ Chart data loaded from API:', data);
-            createRealCharts(data);
-            return;
+        try {
+            console.log('🔍 Loading chart data from API...');
+            const response = await fetch('/api/flood/statistics');
+            if (response.ok) {
+                const data = await response.json();
+                console.log('✅ Chart data loaded from API:', data);
+                createRealCharts(data);
+                return;
+            } else {
+                console.log('⚠️ API returned status:', response.status);
+            }
+        } catch (error) {
+            console.error('❌ Failed to load chart data from API:', error);
         }
-    } catch (error) {
-        console.error('❌ Failed to load chart data from API:', error);
+        
+        // Fallback: Try to load static data or show loading state
+        console.log('⚠️ No chart data available - trying static data fallback');
+        try {
+            // Try to load static data files
+            const [yearsResponse, regionsResponse] = await Promise.all([
+                fetch('/static/data/flood_years.json'),
+                fetch('/static/data/flood_regions.json')
+            ]);
+            
+            if (yearsResponse.ok && regionsResponse.ok) {
+                const yearsData = await yearsResponse.json();
+                const regionsData = await regionsResponse.json();
+                
+                // Create mock statistics data
+                const mockData = {
+                    years: yearsData.years || {},
+                    regions: regionsData.regions || {},
+                    total_projects: Object.values(yearsData.years || {}).reduce((sum, count) => sum + count, 0)
+                };
+                
+                console.log('✅ Using static data fallback:', mockData);
+                createRealCharts(mockData);
+                return;
+            }
+        } catch (staticError) {
+            console.error('❌ Static data fallback also failed:', staticError);
+        }
+        
+        // Final fallback: Show loading state
+        console.log('⚠️ All data loading failed - showing loading state');
+        showChartLoadingState();
     }
     
-    console.log('⚠️ No chart data available - showing error state');
+    function showChartLoadingState() {
+        const chartContainers = document.querySelectorAll('.chart-container');
+        chartContainers.forEach(container => {
+            const canvas = container.querySelector('canvas');
+            if (canvas) {
+                const ctx = canvas.getContext('2d');
+                ctx.fillStyle = '#f8f9fa';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                
+                ctx.fillStyle = '#6c757d';
+                ctx.font = '16px Arial';
+                ctx.textAlign = 'center';
+                ctx.fillText('Loading chart data...', canvas.width / 2, canvas.height / 2);
+            }
+        });
     }
     
     function createRealCharts(data) {
@@ -3997,7 +4026,6 @@ function getContractorSecStatusSync(contractorName) {
 
     // Most Expensive Projects Chart - will be populated from table data
     // This will be called after table data is loaded
-
     // Most Expensive Projects Chart
     const expensiveProjectsCtx = document.getElementById('expensiveProjectsChart');
     if (expensiveProjectsCtx && data.mostExpensiveProjects) {
@@ -4262,6 +4290,16 @@ function getContractorSecStatusSync(contractorName) {
         const distCtx = document.getElementById('contractorDistributionChart');
         if (!distCtx) return;
         
+        // Destroy any existing chart on this canvas
+        try {
+            const existingChart = Chart.getChart('contractorDistributionChart');
+            if (existingChart) {
+                existingChart.destroy();
+            }
+        } catch (error) {
+            console.warn('Error destroying existing distribution chart:', error);
+        }
+        
         try {
             // Load standard deviation analysis
             const response = await fetch('/static/data/contractor_standard_deviation.json');
@@ -4291,7 +4329,7 @@ function getContractorSecStatusSync(contractorName) {
             if (outliersElement) outliersElement.textContent = distribution.outliers.count;
             
             // Create distribution chart with standard deviation bars
-            new Chart(distCtx, {
+            window.contractorDistributionChart = new Chart(distCtx, {
                 type: 'bar',
                 data: {
                     labels: [
@@ -4393,21 +4431,9 @@ function getContractorSecStatusSync(contractorName) {
         const scatterCtx = document.getElementById('contractorScatterChart');
         if (!scatterCtx) return;
         
-        // Robust chart destruction
-        if (window.contractorScatterChart) {
-            try {
-                if (typeof window.contractorScatterChart.destroy === 'function') {
-                    window.contractorScatterChart.destroy();
-                }
-                window.contractorScatterChart = null;
-            } catch (error) {
-                console.warn('Error destroying existing scatter chart:', error);
-            }
-        }
-        
-        // Check if Chart.js has registered this canvas and destroy it
+        // Robust chart destruction - destroy any existing chart on this canvas
         try {
-            const existingChart = Chart.getChart(scatterCtx);
+            const existingChart = Chart.getChart('contractorScatterChart');
             if (existingChart) {
                 existingChart.destroy();
             }
@@ -4415,17 +4441,30 @@ function getContractorSecStatusSync(contractorName) {
             console.warn('Error destroying existing Chart.js scatter instance:', error);
         }
         
-        // Clear the canvas context
-        const ctx = scatterCtx.getContext('2d');
-        ctx.clearRect(0, 0, scatterCtx.width, scatterCtx.height);
+        // Also check window variable
+        if (window.contractorScatterChart) {
+            try {
+                if (typeof window.contractorScatterChart.destroy === 'function') {
+                    window.contractorScatterChart.destroy();
+                }
+                window.contractorScatterChart = null;
+            } catch (error) {
+                console.warn('Error destroying window scatter chart:', error);
+            }
+        }
         
         // Small delay to ensure destruction completes
         setTimeout(() => {
             createScatterChart();
-        }, 50);
+        }, 100);
         
         async function createScatterChart() {
             try {
+            // Double-check for any existing chart before creating
+            const existingChart = Chart.getChart('contractorScatterChart');
+            if (existingChart) {
+                existingChart.destroy();
+            }
             // Load contractor project counts data
             const response = await fetch('/static/data/contractor_project_counts.json');
             if (!response.ok) {
@@ -4549,6 +4588,7 @@ function getContractorSecStatusSync(contractorName) {
             console.error('❌ Failed to create contractor scatter plot:', error);
         }
     }
+}
 
     function createExpensiveProjectsChart() {
     const expensiveProjectsCtx = document.getElementById('expensiveProjectsChart');
@@ -4556,7 +4596,17 @@ function getContractorSecStatusSync(contractorName) {
         return;
     }
 
-    // More robust chart destruction
+    // Robust chart destruction - destroy any existing chart on this canvas
+    try {
+        const existingChart = Chart.getChart('expensiveProjectsChart');
+        if (existingChart) {
+            existingChart.destroy();
+        }
+    } catch (error) {
+        console.warn('Error destroying existing Chart.js instance:', error);
+    }
+    
+    // Also check window variable
     if (window.expensiveProjectsChart) {
         try {
             if (typeof window.expensiveProjectsChart.destroy === 'function') {
@@ -4564,40 +4614,24 @@ function getContractorSecStatusSync(contractorName) {
             }
             window.expensiveProjectsChart = null;
         } catch (error) {
-            console.warn('Error destroying existing chart:', error);
+            console.warn('Error destroying window chart:', error);
         }
     }
-    
-    // Clear the canvas context
-    const ctx = expensiveProjectsCtx.getContext('2d');
-    ctx.clearRect(0, 0, expensiveProjectsCtx.width, expensiveProjectsCtx.height);
     
     // Small delay to ensure destruction completes
     setTimeout(() => {
         createChart();
-    }, 50);
+    }, 100);
     
     function createChart() {
-        // Additional chart destruction check inside createChart
-        if (window.expensiveProjectsChart) {
-            try {
-                if (typeof window.expensiveProjectsChart.destroy === 'function') {
-                    window.expensiveProjectsChart.destroy();
-                }
-                window.expensiveProjectsChart = null;
-            } catch (error) {
-                console.warn('Error destroying chart in createChart:', error);
-            }
-        }
-        
-        // Check if Chart.js has registered this canvas and destroy it
+        // Double-check for any existing chart before creating
         try {
-            const existingChart = Chart.getChart(expensiveProjectsCtx);
+            const existingChart = Chart.getChart('expensiveProjectsChart');
             if (existingChart) {
                 existingChart.destroy();
             }
         } catch (error) {
-            console.warn('Error destroying existing Chart.js instance:', error);
+            console.warn('Error in final chart check:', error);
         }
         
         // Extract city/province names from project descriptions and prepare chart data
@@ -4724,7 +4758,7 @@ function getContractorSecStatusSync(contractorName) {
         }
     });
     }
-    }
+}
 
     function createPhilippineHeatMap(regionsData) {
     const regionsCtx = document.getElementById('regionsChart');
@@ -5249,7 +5283,6 @@ function getContractorSecStatusSync(contractorName) {
         container.innerHTML = '<p style="color: #666; font-style: italic;">No project data available</p>';
         return;
     }
-
     // Sort projects by ContractCost descending and take top 10
     const expensiveProjects = allTableProjects
         .filter(project => project.ContractCost && project.ContractCost > 0)
@@ -5816,7 +5849,6 @@ function showContractorPopup(contractorName) {
     // Load contractor data
     loadContractorData(contractorName);
 }
-
 // Load contractor data from database
 function loadContractorData(contractorName) {
     console.log('🔍 Loading contractor data for:', contractorName);
@@ -6436,7 +6468,6 @@ function showContractorHoverTooltip(event, contractorName) {
     tooltip.style.left = adjustedX + 'px';
     tooltip.style.top = adjustedY + 'px';
 }
-
 // Show loading tooltip while data loads
 function showLoadingTooltip(event, contractorName) {
     const tooltipHTML = `
@@ -6794,7 +6825,9 @@ function switchTab(tabName, updateHash = true) {
             }
             break;
         case 'visual':
-            // Load visual data if needed
+            // Load visual data and initialize charts
+            console.log('📊 Visual tab activated - initializing charts');
+            initializeCharts();
             break;
         case 'table':
             // Load table data if needed
@@ -6857,6 +6890,10 @@ document.addEventListener('DOMContentLoaded', function() {
         
         if (hash && validTabs.includes(hash)) {
             switchTab(hash, false); // Don't update hash since we're loading from it
+        } else {
+            // Default to visual tab if no hash or invalid hash
+            console.log('📊 No valid tab hash found, defaulting to visual tab');
+            switchTab('visual', false);
         }
     }
     
@@ -7008,7 +7045,6 @@ function fuzzyMatch(str1, str2, threshold = 0.7) {
     const similarity = matches / maxLen;
     return similarity >= threshold;
 }
-
 function buildNetworkData(jointVentures) {
     const nodes = new Map();
     const links = new Map(); // Use Map to prevent duplicate links
@@ -7549,7 +7585,6 @@ function updateProximityStatistics() {
     document.getElementById('proximity-zero-distance').textContent = zeroDist.toLocaleString('en-PH');
     document.getElementById('proximity-avg-distance').textContent = avgDist + ' km';
 }
-
 function displayProximityTable() {
     const startIdx = proximityCurrentPage * proximityPageSize;
     const endIdx = Math.min(startIdx + proximityPageSize, proximityData.length);
@@ -8034,4 +8069,5 @@ async function copyChartToClipboard(containerId, buttonId) {
 {% include "footer.html" %}
 
 </body>
+</html>
 </html>
