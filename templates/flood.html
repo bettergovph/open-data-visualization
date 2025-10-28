@@ -4545,6 +4545,28 @@ function getContractorSecStatusSync(contractorName) {
     }, 50);
     
     function createChart() {
+        // Additional chart destruction check inside createChart
+        if (window.expensiveProjectsChart) {
+            try {
+                if (typeof window.expensiveProjectsChart.destroy === 'function') {
+                    window.expensiveProjectsChart.destroy();
+                }
+                window.expensiveProjectsChart = null;
+            } catch (error) {
+                console.warn('Error destroying chart in createChart:', error);
+            }
+        }
+        
+        // Check if Chart.js has registered this canvas and destroy it
+        try {
+            const existingChart = Chart.getChart(expensiveProjectsCtx);
+            if (existingChart) {
+                existingChart.destroy();
+            }
+        } catch (error) {
+            console.warn('Error destroying existing Chart.js instance:', error);
+        }
+        
         // Extract city/province names from project descriptions and prepare chart data
     const expensiveProjects = allTableProjects
         .filter(project => project.ContractCost && project.ContractCost > 0)
