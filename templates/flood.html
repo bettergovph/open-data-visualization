@@ -7021,6 +7021,41 @@ function switchTab(tabName, updateHash = true) {
         case 'table':
             // Load table data if needed
             break;
+        case 'contractors':
+            // Load contractors data if needed
+            console.log('👥 Contractors tab activated - checking data');
+            if (allContractors.length === 0) {
+                console.log('🔄 No contractor data, initializing...');
+                initializeContractors();
+            } else {
+                console.log('✅ Contractor data already loaded:', allContractors.length, 'contractors');
+                renderContractors();
+            }
+            break;
+        case 'contractors-web':
+            // Load contractors web data if needed
+            console.log('🕸️ Contractors Web tab activated - rendering network');
+            if (networkData && networkData.nodes && networkData.nodes.length > 0) {
+                renderNetworkGraph(networkData);
+            } else {
+                console.log('⚠️ Network data not ready, initializing...');
+                initializeNetworkGraph().then(() => {
+                    if (networkData && networkData.nodes && networkData.nodes.length > 0) {
+                        console.log('✅ Rendering network graph after init from switchTab');
+                        renderNetworkGraph(networkData);
+                    } else {
+                        console.error('❌ Network data still not available after init from switchTab');
+                    }
+                }).catch(error => {
+                    console.error('❌ Error initializing network from switchTab:', error);
+                });
+            }
+            break;
+        case 'sec':
+            // Load SEC data if needed
+            console.log('🏛️ SEC tab activated - loading SEC data');
+            loadSecData();
+            break;
         case 'proximity':
             // Load proximity data if needed
             console.log('📍 Proximity tab activated - loading proximity data');
