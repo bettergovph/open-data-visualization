@@ -6825,13 +6825,17 @@ function switchTab(tabName, updateHash = true) {
             }
             break;
         case 'visual':
-            // Visual tab activated - sub-tabs will handle chart initialization
-            console.log('📊 Visual tab activated');
-            // Trigger sub-tab initialization if charts sub-tab is active
+            // Visual tab activated - initialize ALL charts
+            console.log('📊 Visual tab activated - loading all charts');
+            
+            // Load basic charts (yearly, regions, etc.) from API data
+            loadChartData();
+            
+            // Initialize sub-tab specific charts if charts sub-tab is active
             const chartsSubContent = document.getElementById('sub-tab-charts');
             if (chartsSubContent && chartsSubContent.classList.contains('active')) {
                 setTimeout(() => {
-                    console.log('🔄 Triggering chart initialization for visual tab');
+                    console.log('🔄 Initializing sub-tab charts');
                     if (typeof createContractorDistributionChart === 'function') {
                         createContractorDistributionChart();
                     }
@@ -6841,7 +6845,7 @@ function switchTab(tabName, updateHash = true) {
                     if (typeof createExpensiveProjectsChart === 'function') {
                         createExpensiveProjectsChart();
                     }
-                }, 100);
+                }, 300);
             }
             break;
         case 'table':
@@ -6970,16 +6974,23 @@ document.addEventListener('DOMContentLoaded', function() {
         // Initialize charts when Charts sub-tab is shown
         if (activeContent.id === 'sub-tab-charts') {
             setTimeout(() => {
-                console.log('🔄 Initializing charts for Charts sub-tab...');
-                if (typeof createContractorDistributionChart === 'function') {
-                    createContractorDistributionChart();
-                }
-                if (typeof createContractorScatterChart === 'function') {
-                    createContractorScatterChart();
-                }
-                if (typeof createExpensiveProjectsChart === 'function') {
-                    createExpensiveProjectsChart();
-                }
+                console.log('🔄 Initializing all charts for Charts sub-tab...');
+                
+                // Load basic charts (yearly, regions, etc.)
+                loadChartData();
+                
+                // Load specialized charts (scatter, distribution, etc.)
+                setTimeout(() => {
+                    if (typeof createContractorDistributionChart === 'function') {
+                        createContractorDistributionChart();
+                    }
+                    if (typeof createContractorScatterChart === 'function') {
+                        createContractorScatterChart();
+                    }
+                    if (typeof createExpensiveProjectsChart === 'function') {
+                        createExpensiveProjectsChart();
+                    }
+                }, 200);
             }, 100);
         }
     }
@@ -6999,16 +7010,23 @@ document.addEventListener('DOMContentLoaded', function() {
         // Initialize charts for the default active Charts sub-tab on page load
         setTimeout(() => {
             if (chartsContent.classList.contains('active')) {
-                console.log('🔄 Initializing charts for default active Charts sub-tab...');
-                if (typeof createContractorDistributionChart === 'function') {
-                    createContractorDistributionChart();
-                }
-                if (typeof createContractorScatterChart === 'function') {
-                    createContractorScatterChart();
-                }
-                if (typeof createExpensiveProjectsChart === 'function') {
-                    createExpensiveProjectsChart();
-                }
+                console.log('🔄 Initializing ALL charts on page load...');
+                
+                // Load basic charts (yearly, regions, etc.)
+                loadChartData();
+                
+                // Load specialized charts (scatter, distribution, etc.)
+                setTimeout(() => {
+                    if (typeof createContractorDistributionChart === 'function') {
+                        createContractorDistributionChart();
+                    }
+                    if (typeof createContractorScatterChart === 'function') {
+                        createContractorScatterChart();
+                    }
+                    if (typeof createExpensiveProjectsChart === 'function') {
+                        createExpensiveProjectsChart();
+                    }
+                }, 300);
             }
         }, 1000);
     } else {
