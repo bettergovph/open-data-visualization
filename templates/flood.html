@@ -1925,76 +1925,6 @@ function toggleMobileMenu() {
         
         // Initialize network graph
         initializeNetworkGraph();
-        
-        // Initialize visual sub-tabs
-        const chartsSubTab = document.querySelector('[data-sub-tab="charts"]');
-        const heatmapSubTab = document.querySelector('[data-sub-tab="heatmap"]');
-        const chartsContent = document.getElementById('sub-tab-charts');
-        const heatmapSubContent = document.getElementById('sub-tab-heatmap');
-        
-        function switchSubTab(activeTab, inactiveTab, activeContent, inactiveContent) {
-            if (!activeTab || !inactiveTab || !activeContent || !inactiveContent) {
-                console.warn('⚠️ Sub-tab elements not found');
-                return;
-            }
-            
-            console.log('📊 Switching to sub-tab:', activeContent.id);
-            
-            // Update sub-tab buttons - like DIME
-            document.querySelectorAll('.visual-sub-tab-btn').forEach(btn => {
-                btn.classList.remove('active', 'bg-white', 'text-blue-600', 'border-blue-600');
-                btn.classList.add('bg-gray-100', 'text-gray-600', 'border-gray-300');
-            });
-            activeTab.classList.remove('bg-gray-100', 'text-gray-600', 'border-gray-300');
-            activeTab.classList.add('active', 'bg-white', 'text-blue-600', 'border-blue-600');
-            
-            // Update content - use inline display style like DIME
-            document.querySelectorAll('.visual-sub-tab-panel').forEach(panel => {
-                panel.style.display = 'none';
-            });
-            activeContent.style.display = 'block';
-            
-            // Initialize charts when Charts sub-tab is shown
-            if (activeContent.id === 'sub-tab-charts') {
-                setTimeout(() => {
-                    console.log('🔄 Initializing all charts for Charts sub-tab...');
-                    
-                    // Load basic charts (yearly, regions, etc.)
-                    loadChartData();
-                    
-                    // Load specialized charts (scatter, distribution, etc.)
-                    setTimeout(() => {
-                        if (typeof createContractorDistributionChart === 'function') {
-                            createContractorDistributionChart();
-                        }
-                        if (typeof createContractorScatterChart === 'function') {
-                            createContractorScatterChart();
-                        }
-                        if (typeof createExpensiveProjectsChart === 'function') {
-                            createExpensiveProjectsChart();
-                        }
-                    }, 200);
-                }, 100);
-            }
-        }
-        
-        // Sub-tab event listeners
-        if (chartsSubTab && heatmapSubTab && chartsContent && heatmapSubContent) {
-            chartsSubTab.addEventListener('click', function() {
-                console.log('📊 Charts sub-tab clicked');
-                switchSubTab(chartsSubTab, heatmapSubTab, chartsContent, heatmapSubContent);
-            });
-            
-            heatmapSubTab.addEventListener('click', function() {
-                console.log('🗺️ Heatmap sub-tab clicked');
-                switchSubTab(heatmapSubTab, chartsSubTab, heatmapSubContent, chartsContent);
-            });
-            
-            // Chart initialization is now handled by switchTab() when visual tab is activated
-            // No need for duplicate initialization here
-        } else {
-            console.warn('⚠️ Sub-tab elements not found on page');
-        }
     });
 
     // Setup all event listeners for buttons
@@ -6867,6 +6797,7 @@ function switchTab(tabName, updateHash = true) {
     });
     document.querySelectorAll('.budget-tab-panel').forEach(content => {
         content.classList.remove('active');
+        content.style.display = 'none';
     });
 
     // Add active class to selected tab
@@ -6880,6 +6811,7 @@ function switchTab(tabName, updateHash = true) {
     const activeContent = document.getElementById(`${tabName}-tab`);
     if (activeContent) {
         activeContent.classList.add('active');
+        activeContent.style.display = 'block';
     }
     
     // Update URL hash (without triggering hashchange event)
