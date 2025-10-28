@@ -1,0 +1,889 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Contractor-District Correlation Analysis - BetterGovPH</title>
+    
+    <!-- Google Fonts - Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- Tailwind CSS -->
+    <link rel="stylesheet" href="/static/css/tailwind.css">
+    
+    <script src="/static/js/chart.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    
+    <!-- BetterGovPH Metadata -->
+    <meta name="description" content="Statistical analysis of contractor and district correlation patterns in Philippine infrastructure projects">
+    <meta name="keywords" content="contractors, districts, correlation, HHI, statistical analysis, Philippines, infrastructure">
+    <meta name="author" content="BetterGovPH">
+
+    <style>
+        body {
+            font-family: 'Inter', sans-serif !important;
+            margin: 0;
+            padding: 0;
+            background: #f8f9fa !important;
+            color: #1a1a1a !important;
+            min-height: 100vh;
+        }
+        
+        .page-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 40px 20px;
+        }
+        
+        .hero-section {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 60px 40px;
+            border-radius: 20px;
+            margin-bottom: 40px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.15);
+        }
+        
+        .hero-title {
+            font-size: 3em;
+            font-weight: 800;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+        
+        .hero-subtitle {
+            font-size: 1.4em;
+            text-align: center;
+            opacity: 0.95;
+            font-weight: 400;
+            max-width: 900px;
+            margin: 0 auto;
+            line-height: 1.6;
+        }
+        
+        .section-card {
+            background: white;
+            border-radius: 16px;
+            padding: 40px;
+            margin-bottom: 30px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+        }
+        
+        .section-title {
+            font-size: 2em;
+            font-weight: 700;
+            color: #333;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        .section-subtitle {
+            font-size: 1.1em;
+            color: #666;
+            margin-bottom: 30px;
+            line-height: 1.6;
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin: 30px 0;
+        }
+        
+        .stat-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            border-radius: 12px;
+            text-align: center;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
+        }
+        
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+        }
+        
+        .stat-card h3 {
+            margin: 0 0 15px 0;
+            font-size: 0.95em;
+            opacity: 0.9;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        
+        .stat-card .value {
+            font-size: 2.8em;
+            font-weight: 800;
+            margin: 15px 0;
+            line-height: 1;
+        }
+        
+        .stat-card .description {
+            font-size: 0.9em;
+            opacity: 0.85;
+            line-height: 1.4;
+        }
+        
+        .hypothesis-box {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+            padding: 40px;
+            border-radius: 16px;
+            margin: 40px 0;
+            box-shadow: 0 10px 30px rgba(245, 87, 108, 0.3);
+        }
+        
+        .hypothesis-title {
+            font-size: 1.8em;
+            font-weight: 700;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        
+        .hypothesis-text {
+            font-size: 1.3em;
+            font-style: italic;
+            text-align: center;
+            margin-bottom: 25px;
+            line-height: 1.6;
+        }
+        
+        .verdict {
+            background: white;
+            color: #333;
+            padding: 25px;
+            border-radius: 12px;
+            font-size: 1.2em;
+            font-weight: 600;
+            text-align: center;
+            margin-top: 20px;
+        }
+        
+        .verdict.supported {
+            background: #10b981;
+            color: white;
+        }
+        
+        .verdict.not-supported {
+            background: #ef4444;
+            color: white;
+        }
+        
+        .verdict.partial {
+            background: #f59e0b;
+            color: white;
+        }
+        
+        .evidence-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin: 30px 0;
+        }
+        
+        .evidence-card {
+            background: #f8f9fa;
+            padding: 25px;
+            border-radius: 12px;
+            border-left: 5px solid #667eea;
+        }
+        
+        .evidence-card h4 {
+            font-size: 1.2em;
+            font-weight: 700;
+            color: #333;
+            margin: 0 0 15px 0;
+        }
+        
+        .evidence-card .metric {
+            font-size: 1.5em;
+            font-weight: 700;
+            color: #667eea;
+            margin: 10px 0;
+        }
+        
+        .evidence-card .interpretation {
+            font-size: 0.95em;
+            color: #666;
+            line-height: 1.5;
+            margin-top: 10px;
+        }
+        
+        .result-badge {
+            display: inline-block;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-weight: 600;
+            font-size: 0.9em;
+            margin-top: 10px;
+        }
+        
+        .result-badge.significant {
+            background: #10b981;
+            color: white;
+        }
+        
+        .result-badge.not-significant {
+            background: #ef4444;
+            color: white;
+        }
+        
+        .result-badge.strong {
+            background: #8b5cf6;
+            color: white;
+        }
+        
+        .interpretation-box {
+            background: #eff6ff;
+            border-left: 4px solid #3b82f6;
+            padding: 20px 25px;
+            margin: 20px 0;
+            border-radius: 8px;
+        }
+        
+        .interpretation-box h4 {
+            font-size: 1.1em;
+            font-weight: 700;
+            color: #1e40af;
+            margin: 0 0 12px 0;
+        }
+        
+        .interpretation-box p {
+            margin: 8px 0;
+            color: #1e3a8a;
+            line-height: 1.6;
+        }
+        
+        .table-container {
+            overflow-x: auto;
+            margin: 25px 0;
+            border-radius: 12px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+        }
+        
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+        }
+        
+        .data-table th {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 18px 15px;
+            text-align: left;
+            font-weight: 600;
+            font-size: 0.95em;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .data-table td {
+            padding: 15px;
+            border-bottom: 1px solid #e5e7eb;
+            color: #374151;
+        }
+        
+        .data-table tbody tr:hover {
+            background: #f9fafb;
+        }
+        
+        .data-table tbody tr:last-child td {
+            border-bottom: none;
+        }
+        
+        .hhi-scale {
+            display: flex;
+            gap: 15px;
+            margin: 20px 0;
+            flex-wrap: wrap;
+        }
+        
+        .hhi-scale-item {
+            flex: 1;
+            min-width: 200px;
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+        }
+        
+        .hhi-competitive {
+            background: #d1fae5;
+            border: 2px solid #10b981;
+        }
+        
+        .hhi-moderate {
+            background: #fef3c7;
+            border: 2px solid #f59e0b;
+        }
+        
+        .hhi-concentrated {
+            background: #fee2e2;
+            border: 2px solid #ef4444;
+        }
+        
+        .key-finding {
+            background: linear-gradient(135deg, #ffeaa7 0%, #fdcb6e 100%);
+            padding: 25px 30px;
+            border-radius: 12px;
+            margin: 20px 0;
+            box-shadow: 0 4px 15px rgba(253, 203, 110, 0.3);
+        }
+        
+        .key-finding h4 {
+            font-size: 1.3em;
+            font-weight: 700;
+            color: #d63031;
+            margin: 0 0 12px 0;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .key-finding p {
+            font-size: 1.05em;
+            color: #2d3436;
+            margin: 8px 0;
+            line-height: 1.6;
+        }
+        
+        .methodology-section {
+            background: #f8f9fa;
+            padding: 30px;
+            border-radius: 12px;
+            margin: 30px 0;
+        }
+        
+        .methodology-section h4 {
+            font-size: 1.3em;
+            font-weight: 700;
+            color: #333;
+            margin: 0 0 20px 0;
+        }
+        
+        .methodology-list {
+            list-style: none;
+            padding: 0;
+        }
+        
+        .methodology-list li {
+            padding: 12px 0;
+            padding-left: 30px;
+            position: relative;
+            line-height: 1.6;
+        }
+        
+        .methodology-list li:before {
+            content: "▸";
+            position: absolute;
+            left: 10px;
+            color: #667eea;
+            font-weight: 700;
+        }
+        
+        @media (max-width: 768px) {
+            .hero-title {
+                font-size: 2em;
+            }
+            
+            .hero-subtitle {
+                font-size: 1.1em;
+            }
+            
+            .section-card {
+                padding: 25px;
+            }
+            
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .evidence-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 50px;
+            font-size: 1.2em;
+            color: #667eea;
+        }
+        
+        .icon {
+            font-size: 1.5em;
+            margin-right: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="page-container">
+        <!-- Hero Section -->
+        <div class="hero-section">
+            <h1 class="hero-title">📊 Contractor-District Correlation Analysis</h1>
+            <p class="hero-subtitle">
+                A comprehensive statistical analysis examining the relationship and concentration patterns 
+                between government contractors and district engineering offices in Philippine infrastructure projects
+            </p>
+        </div>
+
+        <!-- Loading Message -->
+        <div id="loading" class="loading">
+            <p>Loading analysis data...</p>
+        </div>
+
+        <!-- Main Content (Hidden until loaded) -->
+        <div id="content" style="display: none;">
+            
+            <!-- Hypothesis Test Results -->
+            <div class="hypothesis-box">
+                <h2 class="hypothesis-title">🎯 Hypothesis Test</h2>
+                <p class="hypothesis-text">
+                    "Projects are concentrated similarly across contractors and districts"
+                </p>
+                <div id="verdict-box" class="verdict"></div>
+            </div>
+
+            <!-- Overall Statistics -->
+            <div class="section-card">
+                <h2 class="section-title"><span class="icon">📈</span>Overall Statistics</h2>
+                <p class="section-subtitle">High-level overview of the dataset analyzed</p>
+                
+                <div class="stats-grid" id="overall-stats">
+                    <!-- Populated by JavaScript -->
+                </div>
+            </div>
+
+            <!-- Concentration Analysis (HHI) -->
+            <div class="section-card">
+                <h2 class="section-title"><span class="icon">🎯</span>Concentration Analysis (HHI)</h2>
+                <p class="section-subtitle">
+                    The Herfindahl-Hirschman Index (HHI) measures market concentration. 
+                    Higher values indicate greater concentration (less competition).
+                </p>
+                
+                <div class="hhi-scale">
+                    <div class="hhi-scale-item hhi-competitive">
+                        <strong>&lt; 1,500</strong><br>
+                        Competitive Market
+                    </div>
+                    <div class="hhi-scale-item hhi-moderate">
+                        <strong>1,500 - 2,500</strong><br>
+                        Moderate Concentration
+                    </div>
+                    <div class="hhi-scale-item hhi-concentrated">
+                        <strong>&gt; 2,500</strong><br>
+                        High Concentration
+                    </div>
+                </div>
+                
+                <div class="stats-grid" id="hhi-stats">
+                    <!-- Populated by JavaScript -->
+                </div>
+                
+                <div class="interpretation-box">
+                    <h4>📊 Key Interpretation</h4>
+                    <p id="hhi-interpretation"></p>
+                </div>
+
+                <div class="key-finding">
+                    <h4>💡 Key Finding</h4>
+                    <p id="concentration-finding"></p>
+                </div>
+            </div>
+
+            <!-- Inequality Analysis (Gini) -->
+            <div class="section-card">
+                <h2 class="section-title"><span class="icon">📉</span>Inequality Analysis (Gini Coefficient)</h2>
+                <p class="section-subtitle">
+                    The Gini coefficient measures inequality in distribution. 
+                    0 = perfect equality, 1 = perfect inequality.
+                </p>
+                
+                <div class="stats-grid" id="gini-stats">
+                    <!-- Populated by JavaScript -->
+                </div>
+                
+                <div class="interpretation-box">
+                    <h4>📊 Interpretation</h4>
+                    <p id="gini-interpretation"></p>
+                </div>
+            </div>
+
+            <!-- Association Test (Chi-square) -->
+            <div class="section-card">
+                <h2 class="section-title"><span class="icon">🔗</span>Independence Test (Chi-square)</h2>
+                <p class="section-subtitle">
+                    Tests whether contractor selection and district assignment are independent variables.
+                </p>
+                
+                <div class="evidence-grid" id="chi-square-results">
+                    <!-- Populated by JavaScript -->
+                </div>
+                
+                <div class="interpretation-box">
+                    <h4>📊 What This Means</h4>
+                    <p id="chi-interpretation"></p>
+                </div>
+            </div>
+
+            <!-- Correlation Analysis -->
+            <div class="section-card">
+                <h2 class="section-title"><span class="icon">📈</span>Concentration Pattern Correlation</h2>
+                <p class="section-subtitle">
+                    Correlates HHI values between contractors and districts to test if concentration patterns are similar.
+                </p>
+                
+                <div class="evidence-grid" id="correlation-results">
+                    <!-- Populated by JavaScript -->
+                </div>
+                
+                <div class="interpretation-box">
+                    <h4>📊 Interpretation</h4>
+                    <p id="correlation-interpretation"></p>
+                </div>
+            </div>
+
+            <!-- Evidence Summary -->
+            <div class="section-card">
+                <h2 class="section-title"><span class="icon">🔍</span>Evidence Summary</h2>
+                <p class="section-subtitle">Breakdown of all four statistical tests</p>
+                
+                <div class="evidence-grid" id="evidence-summary">
+                    <!-- Populated by JavaScript -->
+                </div>
+            </div>
+
+            <!-- Top Concentrated Districts -->
+            <div class="section-card">
+                <h2 class="section-title"><span class="icon">🏆</span>Top 10 Most Concentrated Districts</h2>
+                <p class="section-subtitle">Districts with the highest contractor concentration (HHI)</p>
+                
+                <div class="table-container">
+                    <table class="data-table" id="top-districts-table">
+                        <thead>
+                            <tr>
+                                <th>Rank</th>
+                                <th>District Engineering Office</th>
+                                <th>HHI Score</th>
+                                <th>Market Type</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <!-- Populated by JavaScript -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Top Concentrated Contractors -->
+            <div class="section-card">
+                <h2 class="section-title"><span class="icon">🏆</span>Top 10 Most Concentrated Contractors</h2>
+                <p class="section-subtitle">Contractors with the highest district concentration (HHI)</p>
+                
+                <div class="table-container">
+                    <table class="data-table" id="top-contractors-table">
+                        <thead>
+                            <tr>
+                                <th>Rank</th>
+                                <th>Contractor Name</th>
+                                <th>HHI Score</th>
+                                <th>Specialization</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <!-- Populated by JavaScript -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Methodology -->
+            <div class="methodology-section">
+                <h4>📚 Statistical Methods Used</h4>
+                <ul class="methodology-list">
+                    <li><strong>Herfindahl-Hirschman Index (HHI):</strong> Measures market concentration by summing the squares of market shares</li>
+                    <li><strong>Gini Coefficient:</strong> Measures statistical dispersion representing inequality in distribution</li>
+                    <li><strong>Chi-square Test of Independence:</strong> Tests whether two categorical variables are independent</li>
+                    <li><strong>Cramér's V:</strong> Effect size measure for categorical association (0 to 1 scale)</li>
+                    <li><strong>Pearson Correlation:</strong> Measures linear relationship between two continuous variables</li>
+                    <li><strong>Spearman Correlation:</strong> Non-parametric measure of rank correlation</li>
+                </ul>
+            </div>
+
+        </div>
+    </div>
+
+    <script>
+        // Load and display the correlation data
+        async function loadCorrelationData() {
+            try {
+                const response = await fetch('/static/data/contractor_district_correlation.json');
+                const data = await response.json();
+                
+                // Hide loading, show content
+                document.getElementById('loading').style.display = 'none';
+                document.getElementById('content').style.display = 'block';
+                
+                // Populate Overall Statistics
+                const overallStats = document.getElementById('overall-stats');
+                overallStats.innerHTML = `
+                    <div class="stat-card">
+                        <h3>Total Projects</h3>
+                        <div class="value">${data.metadata.total_projects.toLocaleString()}</div>
+                        <div class="description">Infrastructure projects analyzed</div>
+                    </div>
+                    <div class="stat-card">
+                        <h3>Unique Contractors</h3>
+                        <div class="value">${data.metadata.unique_contractors.toLocaleString()}</div>
+                        <div class="description">Different contractors identified</div>
+                    </div>
+                    <div class="stat-card">
+                        <h3>Unique Districts</h3>
+                        <div class="value">${data.metadata.unique_districts.toLocaleString()}</div>
+                        <div class="description">District Engineering Offices</div>
+                    </div>
+                    <div class="stat-card">
+                        <h3>Avg. Projects/Contractor</h3>
+                        <div class="value">${(data.metadata.total_projects / data.metadata.unique_contractors).toFixed(1)}</div>
+                        <div class="description">Average project count</div>
+                    </div>
+                `;
+                
+                // Populate HHI Statistics
+                const hhiStats = document.getElementById('hhi-stats');
+                const avgHHIDistrict = data.concentration.avg_hhi_district;
+                const avgHHIContractor = data.concentration.avg_hhi_contractor;
+                
+                hhiStats.innerHTML = `
+                    <div class="stat-card">
+                        <h3>Average HHI - Districts</h3>
+                        <div class="value">${avgHHIDistrict.toFixed(0)}</div>
+                        <div class="description">${getHHIType(avgHHIDistrict)}</div>
+                    </div>
+                    <div class="stat-card">
+                        <h3>Average HHI - Contractors</h3>
+                        <div class="value">${avgHHIContractor.toFixed(0)}</div>
+                        <div class="description">${getHHIType(avgHHIContractor)}</div>
+                    </div>
+                `;
+                
+                // HHI Interpretation
+                document.getElementById('hhi-interpretation').textContent = 
+                    `Districts show ${getHHIType(avgHHIDistrict).toLowerCase()} with an average HHI of ${avgHHIDistrict.toFixed(0)}, ` +
+                    `while contractors exhibit ${getHHIType(avgHHIContractor).toLowerCase()} with an average HHI of ${avgHHIContractor.toFixed(0)}. ` +
+                    `This indicates that contractors work in very focused geographic areas, but districts maintain competitive contractor markets.`;
+                
+                // Concentration Finding
+                const hhiDiff = Math.abs(avgHHIDistrict - avgHHIContractor);
+                document.getElementById('concentration-finding').textContent = 
+                    `Concentration levels are DIFFERENT (Δ = ${hhiDiff.toFixed(0)}). ` +
+                    `Contractors are highly specialized to specific districts (HHI: ${avgHHIContractor.toFixed(0)}), ` +
+                    `but districts maintain competitive markets among multiple contractors (HHI: ${avgHHIDistrict.toFixed(0)}).`;
+                
+                // Populate Gini Statistics
+                const giniStats = document.getElementById('gini-stats');
+                giniStats.innerHTML = `
+                    <div class="stat-card">
+                        <h3>Gini - Contractor Distribution</h3>
+                        <div class="value">${data.concentration.gini_contractor.toFixed(4)}</div>
+                        <div class="description">${getGiniType(data.concentration.gini_contractor)}</div>
+                    </div>
+                    <div class="stat-card">
+                        <h3>Gini - District Distribution</h3>
+                        <div class="value">${data.concentration.gini_district.toFixed(4)}</div>
+                        <div class="description">${getGiniType(data.concentration.gini_district)}</div>
+                    </div>
+                `;
+                
+                // Gini Interpretation
+                document.getElementById('gini-interpretation').textContent = 
+                    `Projects are distributed with ${getGiniType(data.concentration.gini_contractor).toLowerCase()} among contractors ` +
+                    `(Gini: ${data.concentration.gini_contractor.toFixed(4)}) and ${getGiniType(data.concentration.gini_district).toLowerCase()} ` +
+                    `among districts (Gini: ${data.concentration.gini_district.toFixed(4)}). This suggests moderate inequality in both dimensions.`;
+                
+                // Chi-square Results
+                const chiSquare = document.getElementById('chi-square-results');
+                const chiData = data.independence_test;
+                chiSquare.innerHTML = `
+                    <div class="evidence-card">
+                        <h4>Chi-square Statistic</h4>
+                        <div class="metric">${chiData.chi_square.toFixed(2)}</div>
+                        <div class="interpretation">Very high value indicates strong deviation from independence</div>
+                    </div>
+                    <div class="evidence-card">
+                        <h4>P-value</h4>
+                        <div class="metric">${chiData.p_value.toExponential(2)}</div>
+                        <div class="interpretation">
+                            <span class="result-badge ${chiData.significant ? 'significant' : 'not-significant'}">
+                                ${chiData.significant ? '✓ SIGNIFICANT' : '✗ NOT SIGNIFICANT'}
+                            </span>
+                        </div>
+                    </div>
+                    <div class="evidence-card">
+                        <h4>Cramér's V</h4>
+                        <div class="metric">${chiData.cramers_v.toFixed(4)}</div>
+                        <div class="interpretation">
+                            <span class="result-badge strong">
+                                ${getCramersVType(chiData.cramers_v)} ASSOCIATION
+                            </span>
+                        </div>
+                    </div>
+                `;
+                
+                // Chi Interpretation
+                document.getElementById('chi-interpretation').textContent = 
+                    `Contractors and districts are STRONGLY DEPENDENT (Cramér's V = ${chiData.cramers_v.toFixed(4)}). ` +
+                    `This means contractor selection is NOT independent of district assignment. ` +
+                    `Certain contractors tend to work in specific districts, showing geographical specialization patterns.`;
+                
+                // Correlation Results
+                const corrResults = document.getElementById('correlation-results');
+                const corrData = data.correlation;
+                corrResults.innerHTML = `
+                    <div class="evidence-card">
+                        <h4>Pearson Correlation</h4>
+                        <div class="metric">${corrData.pearson_r.toFixed(4)}</div>
+                        <div class="interpretation">
+                            P-value: ${corrData.pearson_p.toFixed(6)}<br>
+                            <span class="result-badge ${corrData.significant ? 'significant' : 'not-significant'}">
+                                ${corrData.significant ? '✓ SIGNIFICANT' : '✗ NOT SIGNIFICANT'}
+                            </span>
+                        </div>
+                    </div>
+                    <div class="evidence-card">
+                        <h4>Spearman Correlation</h4>
+                        <div class="metric">${corrData.spearman_r.toFixed(4)}</div>
+                        <div class="interpretation">
+                            P-value: ${corrData.spearman_p.toFixed(6)}<br>
+                            <span class="result-badge ${corrData.significant ? 'significant' : 'not-significant'}">
+                                ${corrData.significant ? '✓ SIGNIFICANT' : '✗ NOT SIGNIFICANT'}
+                            </span>
+                        </div>
+                    </div>
+                `;
+                
+                // Correlation Interpretation
+                document.getElementById('correlation-interpretation').textContent = 
+                    `No significant correlation found (r = ${corrData.pearson_r.toFixed(4)}, p = ${corrData.pearson_p.toFixed(3)}). ` +
+                    `This means that contractor concentration patterns and district concentration patterns are NOT similar. ` +
+                    `The concentration happens in opposite directions: contractors specialize in few districts, while districts have many contractors.`;
+                
+                // Evidence Summary
+                const evidenceSummary = document.getElementById('evidence-summary');
+                const tests = [
+                    {
+                        name: 'HHI Similarity',
+                        result: Math.abs(avgHHIDistrict - avgHHIContractor) < 500,
+                        detail: `Δ = ${Math.abs(avgHHIDistrict - avgHHIContractor).toFixed(0)}`
+                    },
+                    {
+                        name: 'Gini Similarity',
+                        result: Math.abs(data.concentration.gini_contractor - data.concentration.gini_district) < 0.1,
+                        detail: `Δ = ${Math.abs(data.concentration.gini_contractor - data.concentration.gini_district).toFixed(4)}`
+                    },
+                    {
+                        name: 'Chi-square (Dependence)',
+                        result: chiData.significant,
+                        detail: `Cramér's V = ${chiData.cramers_v.toFixed(4)}`
+                    },
+                    {
+                        name: 'Correlation',
+                        result: corrData.significant,
+                        detail: `r = ${corrData.pearson_r.toFixed(4)}`
+                    }
+                ];
+                
+                const supportCount = tests.filter(t => t.result).length;
+                
+                evidenceSummary.innerHTML = tests.map(test => `
+                    <div class="evidence-card">
+                        <h4>${test.name}</h4>
+                        <div class="metric">${test.detail}</div>
+                        <div class="interpretation">
+                            <span class="result-badge ${test.result ? 'significant' : 'not-significant'}">
+                                ${test.result ? '✓ SUPPORTS' : '✗ DOES NOT SUPPORT'}
+                            </span>
+                        </div>
+                    </div>
+                `).join('');
+                
+                // Verdict
+                const verdictBox = document.getElementById('verdict-box');
+                if (supportCount >= 3) {
+                    verdictBox.className = 'verdict supported';
+                    verdictBox.textContent = `✅ HYPOTHESIS SUPPORTED (${supportCount}/4 tests support)`;
+                } else if (supportCount >= 2) {
+                    verdictBox.className = 'verdict partial';
+                    verdictBox.textContent = `⚠️ HYPOTHESIS PARTIALLY SUPPORTED (${supportCount}/4 tests support)`;
+                } else {
+                    verdictBox.className = 'verdict not-supported';
+                    verdictBox.textContent = `❌ HYPOTHESIS NOT SUPPORTED (${supportCount}/4 tests support)`;
+                }
+                
+                // Top Districts Table
+                const districtsTable = document.getElementById('top-districts-table').getElementsByTagName('tbody')[0];
+                const topDistricts = Object.entries(data.concentration.hhi_by_district).slice(0, 10);
+                districtsTable.innerHTML = topDistricts.map(([district, hhi], idx) => `
+                    <tr>
+                        <td><strong>${idx + 1}</strong></td>
+                        <td>${district}</td>
+                        <td><strong>${hhi.toFixed(2)}</strong></td>
+                        <td>${getHHIType(hhi)}</td>
+                    </tr>
+                `).join('');
+                
+                // Top Contractors Table
+                const contractorsTable = document.getElementById('top-contractors-table').getElementsByTagName('tbody')[0];
+                const topContractors = Object.entries(data.concentration.hhi_by_contractor).slice(0, 10);
+                contractorsTable.innerHTML = topContractors.map(([contractor, hhi], idx) => `
+                    <tr>
+                        <td><strong>${idx + 1}</strong></td>
+                        <td>${contractor}</td>
+                        <td><strong>${hhi.toFixed(2)}</strong></td>
+                        <td>${getSpecializationType(hhi)}</td>
+                    </tr>
+                `).join('');
+                
+            } catch (error) {
+                document.getElementById('loading').textContent = 'Error loading data: ' + error.message;
+            }
+        }
+        
+        function getHHIType(hhi) {
+            if (hhi < 1500) return 'Competitive Market';
+            if (hhi < 2500) return 'Moderate Concentration';
+            return 'High Concentration';
+        }
+        
+        function getGiniType(gini) {
+            if (gini < 0.3) return 'Low Inequality';
+            if (gini < 0.5) return 'Moderate Inequality';
+            if (gini < 0.7) return 'High Inequality';
+            return 'Very High Inequality';
+        }
+        
+        function getCramersVType(v) {
+            if (v < 0.1) return 'WEAK';
+            if (v < 0.3) return 'MODERATE';
+            return 'STRONG';
+        }
+        
+        function getSpecializationType(hhi) {
+            if (hhi >= 10000) return 'Single District';
+            if (hhi >= 5000) return 'Highly Specialized';
+            if (hhi >= 2500) return 'Specialized';
+            return 'Diversified';
+        }
+        
+        // Load data on page load
+        document.addEventListener('DOMContentLoaded', loadCorrelationData);
+    </script>
+</body>
+</html>
+

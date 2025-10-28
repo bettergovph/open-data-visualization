@@ -182,6 +182,25 @@ async fn flood_dime_correlation(_req: HttpRequest) -> Result<HttpResponse, Actix
     Ok(HttpResponse::Ok().content_type("text/html").body(rendered))
 }
 
+// Contractor-District Correlation Page
+async fn contractor_district_correlation(_req: HttpRequest) -> Result<HttpResponse, ActixError> {
+    let tera = Tera::new("templates/**/*").map_err(|e| actix_web::error::ErrorInternalServerError(e))?;
+    let mut context = Context::new();
+
+    add_frontend_env_to_context(&mut context);
+
+    context.insert("title", "Contractor-District Correlation Analysis - BetterGovPH");
+    context.insert("company_name", "BetterGovPH");
+    context.insert("platform", "BetterGovPH");
+    context.insert("SITE_NAME", "BetterGovPH Data Visualizations");
+    context.insert("SITE_URL", "https://visualizations.bettergov.ph");
+
+    let template_name = "contractor_district_correlation.html";
+
+    let rendered = tera.render(template_name, &context).map_err(|e| actix_web::error::ErrorInternalServerError(e))?;
+    Ok(HttpResponse::Ok().content_type("text/html").body(rendered))
+}
+
 // Contractors Page
 async fn contractors(_req: HttpRequest) -> Result<HttpResponse, ActixError> {
     let tera = Tera::new("templates/**/*").map_err(|e| actix_web::error::ErrorInternalServerError(e))?;
@@ -346,6 +365,7 @@ async fn main() -> std::io::Result<()> {
             .service(web::resource("/budget-nep-correlation").to(budget_nep_correlation))
             .service(web::resource("/budget-flood-correlation").to(budget_flood_correlation))
             .service(web::resource("/flood-dime-correlation").to(flood_dime_correlation))
+            .service(web::resource("/contractor-district-correlation").to(contractor_district_correlation))
             .service(web::resource("/eogo").to(eogo))
             .service(web::resource("/sources").to(sources))
             .service(web::resource("/circles").to(circles))
