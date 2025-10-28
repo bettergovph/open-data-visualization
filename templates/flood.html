@@ -7841,6 +7841,11 @@ document.addEventListener('DOMContentLoaded', function() {
             setTimeout(() => {
                 console.log('🔄 Initializing charts for Charts sub-tab...');
                 // Initialize all charts
+                if (typeof createContractorDistributionChart === 'function') {
+                    createContractorDistributionChart();
+                } else {
+                    console.warn('createContractorDistributionChart function not found');
+                }
                 if (typeof createContractorScatterChart === 'function') {
                     createContractorScatterChart();
                 } else {
@@ -7900,6 +7905,11 @@ document.addEventListener('DOMContentLoaded', function() {
         if (chartsContent && chartsContent.classList.contains('active')) {
             console.log('🔄 Initializing charts for default Charts sub-tab...');
             // Check if functions exist before calling them
+            if (typeof createContractorDistributionChart === 'function') {
+                createContractorDistributionChart();
+            } else {
+                console.warn('createContractorDistributionChart function not found');
+            }
             if (typeof createContractorScatterChart === 'function') {
                 createContractorScatterChart();
             } else {
