@@ -4316,6 +4316,11 @@ function getContractorSecStatusSync(contractorName) {
         return;
     }
 
+    // Destroy existing chart if it exists
+    if (window.expensiveProjectsChart) {
+        window.expensiveProjectsChart.destroy();
+    }
+
     // Extract city/province names from project descriptions and prepare chart data
     const expensiveProjects = allTableProjects
         .filter(project => project.ContractCost && project.ContractCost > 0)
@@ -4379,7 +4384,7 @@ function getContractorSecStatusSync(contractorName) {
             return acc;
         }, []);
 
-    new Chart(expensiveProjectsCtx, {
+    window.expensiveProjectsChart = new Chart(expensiveProjectsCtx, {
         type: 'bar',
         data: {
             labels: expensiveProjects.map(item => item.location),
