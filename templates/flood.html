@@ -4686,73 +4686,31 @@ function getContractorSecStatusSync(contractorName) {
             console.warn('Error in final chart check:', error);
         }
         
-        // Extract city/province names from project descriptions and prepare chart data
+        // Use project descriptions as-is from Meilisearch, truncate if too long
     const expensiveProjects = allTableProjects
         .filter(project => project.ContractCost && project.ContractCost > 0)
         .sort((a, b) => parseFloat(b.ContractCost) - parseFloat(a.ContractCost))
         .slice(0, 10) // Take top 10 most expensive
         .map(project => {
-            // Extract location from project name (look for city/province names)
-            let location = project.Region || 'Unknown';
-            
-            // Try to extract city/province from project name
-            const projectName = project.ProjectDescription || '';
-            if (projectName.includes('Tarlac')) location = 'Tarlac';
-            else if (projectName.includes('Occidental Mindoro')) location = 'Occidental Mindoro';
-            else if (projectName.includes('Ilocos Sur')) location = 'Ilocos Sur';
-            else if (projectName.includes('La Union')) location = 'La Union';
-            else if (projectName.includes('Palawan')) location = 'Palawan';
-            else if (projectName.includes('Zambales')) location = 'Zambales';
-            else if (projectName.includes('Bataraza')) location = 'Bataraza';
-            else if (projectName.includes('Puerto Princesa')) location = 'Puerto Princesa';
-            else if (projectName.includes('Aborlan')) location = 'Aborlan';
-            else if (projectName.includes('Narra')) location = 'Narra';
-            else if (projectName.includes('Brooke\'s Point')) location = 'Brooke\'s Point';
+            const projectDescription = project.ProjectDescription || 'Unknown Project';
+            // Truncate long descriptions with ...
+            const maxLength = 60;
+            const truncatedDescription = projectDescription.length > maxLength 
+                ? projectDescription.substring(0, maxLength) + '...'
+                : projectDescription;
             
             return {
-                location: location,
+                label: truncatedDescription,
+                fullDescription: projectDescription,
                 cost: parseFloat(project.ContractCost) / 1000000, // Convert to millions
-                originalCost: project.ContractCost,
-                projectName: projectName,
-                projectDescription: projectName
+                originalCost: project.ContractCost
             };
-        })
-        .reduce((acc, project) => {
-            // Handle duplicates by adding unique words from description (max 3 words total)
-            let finalLocation = project.location;
-            let counter = 1;
-            
-            // Check if location already exists
-            while (acc.some(existing => existing.location === finalLocation)) {
-                // Extract unique words from project description (prefer common nouns like dike, bridge, canal, etc.)
-                const words = project.projectDescription
-                    ?.toLowerCase()
-                    ?.replace(/[^\w\s]/g, ' ')
-                    ?.split(/\s+/) || []
-                    .filter(word => word.length > 3 && !['project', 'flood', 'control', 'protection', 'river', 'bank', 'shore', 'road', 'works', 'system', 'structure', 'construction', 'development', 'improvement', 'rehabilitation', 'repair', 'maintenance'].includes(word));
-                
-                if (words.length > 0 && counter <= words.length) {
-                    // Limit to 2 additional words max (3 total including province)
-                    const additionalWords = words.slice(0, 2);
-                    finalLocation = `${project.location} (${additionalWords.join(' ')})`;
-                } else {
-                    finalLocation = `${project.location} (${counter})`;
-                }
-                counter++;
-            }
-            
-            acc.push({
-                ...project,
-                location: finalLocation
-            });
-            
-            return acc;
-        }, []);
+        });
 
     window.expensiveProjectsChart = new Chart(expensiveProjectsCtx, {
         type: 'bar',
         data: {
-            labels: expensiveProjects.map(item => item.location),
+            labels: expensiveProjects.map(item => item.label),
             datasets: [{
                 label: 'Cost (₱M)',
                 data: expensiveProjects.map(item => item.cost),
@@ -4774,6 +4732,10 @@ function getContractorSecStatusSync(contractorName) {
                     titleColor: 'white',
                     bodyColor: 'white',
                     callbacks: {
+                        title: function(context) {
+                            const project = expensiveProjects[context[0].dataIndex];
+                            return project.fullDescription;
+                        },
                         label: function(context) {
                             const project = expensiveProjects[context.dataIndex];
                             return `Cost: ₱${project.originalCost.toLocaleString('en-PH')}`;
@@ -6880,7 +6842,30 @@ function switchTab(tabName, updateHash = true) {
             break;
         case 'visual':
             // Load visual data if needed
-            console.log('📊 Visual tab activated');
+            console.log('📊 Visual tab activated - initializing charts');
+            setTimeout(() => {
+                loadChartData();
+                
+                // Initialize specialized charts
+                setTimeout(() => {
+                    if (typeof createContractorDistributionChart === 'function') {
+                        createContractorDistributionChart();
+                    }
+                    if (typeof createContractorScatterChart === 'function') {
+                        createContractorScatterChart();
+                    }
+                    if (typeof createExpensiveProjectsChart === 'function') {
+                        createExpensiveProjectsChart();
+                    }
+                }, 300);
+            }, 200);
+            break;
+        case 'heatmap':
+            // Load heatmap
+            console.log('🗺️ Heatmap tab activated - loading heatmap');
+            setTimeout(() => {
+                loadChartData(); // This loads the regions heatmap
+            }, 200);
             break;
         case 'table':
             // Load table data if needed
