@@ -7920,18 +7920,34 @@ async function copyChartToClipboard(containerId, buttonId) {
             button.style.display = '';
         }
         
-        // Show error feedback
+        // Show error feedback with specific message
         const originalText = button.innerHTML;
-        button.innerHTML = '❌ Failed';
+        let errorMessage = '❌ Failed';
+        
+        // Check for specific error types
+        if (error.name === 'NotAllowedError') {
+            errorMessage = '⚠️ Click to retry';
+            // Show a brief toast-style notification
+            const toast = document.createElement('div');
+            toast.style.cssText = 'position: fixed; top: 20px; right: 20px; background: #f59e0b; color: white; padding: 15px 20px; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.2); z-index: 10000; font-size: 14px;';
+            toast.textContent = '⚠️ Please click the button again to copy the chart';
+            document.body.appendChild(toast);
+            
+            setTimeout(() => {
+                toast.remove();
+            }, 3000);
+        }
+        
+        button.innerHTML = errorMessage;
         button.classList.remove('bg-blue-500', 'hover:bg-blue-600');
         button.classList.add('bg-red-500');
         
-        // Reset button after 2 seconds
+        // Reset button after 3 seconds
         setTimeout(() => {
             button.innerHTML = originalText;
             button.classList.remove('bg-red-500');
             button.classList.add('bg-blue-500', 'hover:bg-blue-600');
-        }, 2000);
+        }, 3000);
     }
 }
 </script>
