@@ -7802,6 +7802,18 @@ document.addEventListener('DOMContentLoaded', function() {
         activeContent.style.display = 'block';
         inactiveContent.classList.remove('active');
         inactiveContent.style.display = 'none';
+        
+        // Initialize charts when Charts sub-tab is shown
+        if (activeContent.id === 'sub-tab-charts') {
+            setTimeout(() => {
+                console.log('🔄 Initializing charts for Charts sub-tab...');
+                // Initialize all charts
+                createContractorDistributionChart();
+                createContractorScatterChart();
+                createExpensiveProjectsChart();
+                // Add other chart initialization calls here
+            }, 100);
+        }
     }
     
     function switchTab(activeTab, inactiveTab, activeContent, inactiveContent) {
@@ -7842,6 +7854,16 @@ document.addEventListener('DOMContentLoaded', function() {
             switchSubTab(heatmapSubTab, chartsSubTab, heatmapSubContent, chartsContent);
         });
     }
+    
+    // Initialize charts for the default active Charts sub-tab
+    setTimeout(() => {
+        if (chartsContent && chartsContent.classList.contains('active')) {
+            console.log('🔄 Initializing charts for default Charts sub-tab...');
+            createContractorDistributionChart();
+            createContractorScatterChart();
+            createExpensiveProjectsChart();
+        }
+    }, 500);
 });
 </script>
 
