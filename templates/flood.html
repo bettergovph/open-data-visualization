@@ -4424,7 +4424,7 @@ function getContractorSecStatusSync(contractorName) {
             createScatterChart();
         }, 50);
         
-        function createScatterChart() {
+        async function createScatterChart() {
             try {
             // Load contractor project counts data
             const response = await fetch('/static/data/contractor_project_counts.json');
@@ -7842,7 +7842,6 @@ document.addEventListener('DOMContentLoaded', function() {
             setTimeout(() => {
                 console.log('🔄 Initializing charts for Charts sub-tab...');
                 // Initialize all charts
-                createContractorDistributionChart();
                 createContractorScatterChart();
                 createExpensiveProjectsChart();
                 // Add other chart initialization calls here
@@ -7893,7 +7892,6 @@ document.addEventListener('DOMContentLoaded', function() {
     setTimeout(() => {
         if (chartsContent && chartsContent.classList.contains('active')) {
             console.log('🔄 Initializing charts for default Charts sub-tab...');
-            createContractorDistributionChart();
             createContractorScatterChart();
             createExpensiveProjectsChart();
         }
