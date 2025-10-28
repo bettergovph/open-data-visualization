@@ -4419,7 +4419,13 @@ function getContractorSecStatusSync(contractorName) {
         const ctx = scatterCtx.getContext('2d');
         ctx.clearRect(0, 0, scatterCtx.width, scatterCtx.height);
         
-        try {
+        // Small delay to ensure destruction completes
+        setTimeout(() => {
+            createScatterChart();
+        }, 50);
+        
+        function createScatterChart() {
+            try {
             // Load contractor project counts data
             const response = await fetch('/static/data/contractor_project_counts.json');
             if (!response.ok) {
@@ -4541,6 +4547,7 @@ function getContractorSecStatusSync(contractorName) {
             console.log('✅ Contractor scatter plot created');
         } catch (error) {
             console.error('❌ Failed to create contractor scatter plot:', error);
+        }
         }
     }
 
