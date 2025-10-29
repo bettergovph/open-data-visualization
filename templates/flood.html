@@ -4369,75 +4369,126 @@ function getContractorSecStatusSync(contractorName) {
             }
             
             const data = await response.json();
+            console.log('📊 Loaded contractor standard deviation data:', data);
+            
             const analysis = data.analysis;
             
-            if (!analysis || !analysis.distribution_stats) {
+            if (!analysis || !analysis.distribution) {
                 console.log('⚠️ Standard deviation analysis data not available');
+                console.log('Available analysis keys:', analysis ? Object.keys(analysis) : 'No analysis');
                 return;
             }
             
-            const distribution = analysis.distribution_stats;
-            const basicStats = analysis.basic_stats;
+            const distribution = analysis.distribution;
+            const costAggregation = analysis.cost_aggregation;
+            
+            console.log('📊 Distribution data:', distribution);
+            console.log('💰 Cost aggregation data:', costAggregation);
             
             // Update distribution stats display if elements exist
             const avgElement = document.getElementById('dist-avg-projects');
             const stdElement = document.getElementById('dist-std-dev');
             const outliersElement = document.getElementById('dist-beyond-3sd');
             
-            if (avgElement) avgElement.textContent = basicStats.mean.toFixed(1);
-            if (stdElement) stdElement.textContent = basicStats.standard_deviation.toFixed(1);
-            if (outliersElement) outliersElement.textContent = distribution.outliers.count;
+            if (avgElement) avgElement.textContent = analysis.mean_projects.toFixed(1);
+            if (stdElement) stdElement.textContent = analysis.standard_deviation.toFixed(1);
+            if (outliersElement) outliersElement.textContent = distribution.beyond_3sd;
             
-            // Create distribution chart with standard deviation bars
+            // Create distribution chart with standard deviation bars and cost line overlay
+            const datasets = [{
+                label: 'Number of Contractors',
+                data: [
+                    distribution.within_1sd,
+                    distribution.within_2sd,
+                    distribution.within_3sd,
+                    distribution.within_4sd,
+                    distribution.beyond_1sd,
+                    distribution.beyond_2sd,
+                    distribution.beyond_3sd,
+                    distribution.beyond_4sd
+                ],
+                backgroundColor: [
+                    '#28a745', // Green - 1SD
+                    '#ffc107', // Yellow - 2SD
+                    '#fd7e14', // Orange - 3SD
+                    '#dc3545', // Red - 4SD
+                    '#6f42c1', // Purple - Beyond 1SD
+                    '#e83e8c', // Pink - Beyond 2SD
+                    '#20c997', // Teal - Beyond 3SD
+                    '#6c757d'  // Gray - Beyond 4SD
+                ],
+                borderColor: [
+                    '#1e7e34',
+                    '#d39e00',
+                    '#dc6903',
+                    '#c82333',
+                    '#5a2d91',
+                    '#c2185b',
+                    '#1a9b7a',
+                    '#495057'
+                ],
+                borderWidth: 2,
+                yAxisID: 'y'
+            }];
+
+            // Add cost line overlay if cost data is available
+            if (costAggregation) {
+                const costData = [
+                    costAggregation.within_1sd * 1000 / 1000000000, // Convert to billions
+                    costAggregation.within_2sd * 1000 / 1000000000,
+                    costAggregation.within_3sd * 1000 / 1000000000,
+                    costAggregation.within_4sd * 1000 / 1000000000,
+                    costAggregation.beyond_1sd * 1000 / 1000000000,
+                    costAggregation.beyond_2sd * 1000 / 1000000000,
+                    costAggregation.beyond_3sd * 1000 / 1000000000,
+                    costAggregation.beyond_4sd * 1000 / 1000000000
+                ];
+                console.log('💰 Cost data for line overlay:', costData);
+                
+                datasets.push({
+                    label: 'Total Contract Cost (₱B)',
+                    data: costData,
+                    type: 'line',
+                    borderColor: '#dc3545',
+                    backgroundColor: 'rgba(220, 53, 69, 0.1)',
+                    borderWidth: 3,
+                    pointRadius: 6,
+                    pointHoverRadius: 8,
+                    fill: false,
+                    tension: 0.1,
+                    yAxisID: 'y1'
+                });
+            } else {
+                console.log('⚠️ No cost aggregation data available');
+            }
+
+            console.log('📊 Creating chart with datasets:', datasets);
+            
             window.contractorDistributionChart = new Chart(distCtx, {
                 type: 'bar',
                 data: {
                     labels: [
-                        '1 Standard Deviation\n(68% of contractors)',
-                        '1.5 Standard Deviations\n(87% of contractors)', 
-                        '2 Standard Deviations\n(95% of contractors)',
-                        '2.5 Standard Deviations\n(99% of contractors)',
-                        '3 Standard Deviations\n(99.7% of contractors)',
-                        'Outliers\n(Beyond 3SD)'
+                        'Within 1SD',
+                        'Within 2SD',
+                        'Within 3SD',
+                        'Within 4SD',
+                        'Beyond 1SD',
+                        'Beyond 2SD',
+                        'Beyond 3SD',
+                        'Beyond 4SD'
                     ],
-                    datasets: [{
-                        label: 'Number of Contractors',
-                        data: [
-                            distribution.within_1sd.count,
-                            distribution.within_1_5sd.count,
-                            distribution.within_2sd.count,
-                            distribution.within_2_5sd.count,
-                            distribution.within_3sd.count,
-                            distribution.outliers.count
-                        ],
-                        backgroundColor: [
-                            '#28a745', // Green - 1SD
-                            '#ffc107', // Yellow - 1.5SD
-                            '#fd7e14', // Orange - 2SD
-                            '#dc3545', // Red - 2.5SD
-                            '#6f42c1', // Purple - 3SD
-                            '#e83e8c'  // Pink - Outliers
-                        ],
-                        borderColor: [
-                            '#1e7e34',
-                            '#d39e00',
-                            '#dc6903',
-                            '#c82333',
-                            '#5a2d91',
-                            '#c2185b'
-                        ],
-                        borderWidth: 2
-                    }]
+                    datasets: datasets
                 },
                 options: {
                     responsive: true,
                     plugins: {
                         legend: {
-                            display: false
+                            display: true,
+                            position: 'top'
                         },
                         title: {
                             display: true,
-                            text: `Mean: ${basicStats.mean.toFixed(1)} projects | Standard Deviation: ${basicStats.standard_deviation.toFixed(1)}`,
+                            text: `Mean: ${analysis.mean_projects.toFixed(1)} projects | Standard Deviation: ${analysis.standard_deviation.toFixed(1)}`,
                             font: {
                                 size: 12
                             },
@@ -4461,6 +4512,9 @@ function getContractorSecStatusSync(contractorName) {
                     },
                     scales: {
                         y: {
+                            type: 'linear',
+                            display: true,
+                            position: 'left',
                             beginAtZero: true,
                             title: {
                                 display: true,
@@ -4469,6 +4523,22 @@ function getContractorSecStatusSync(contractorName) {
                                     weight: 'bold'
                                 }
                             }
+                        },
+                        y1: {
+                            type: 'linear',
+                            display: costAggregation ? true : false,
+                            position: 'right',
+                            beginAtZero: true,
+                            title: {
+                                display: true,
+                                text: 'Total Contract Cost (₱B)',
+                                font: {
+                                    weight: 'bold'
+                                }
+                            },
+                            grid: {
+                                drawOnChartArea: false,
+                            },
                         },
                         x: {
                             ticks: {
