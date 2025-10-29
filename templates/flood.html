@@ -4396,7 +4396,7 @@ function getContractorSecStatusSync(contractorName) {
         try {
             console.log('📡 Fetching /static/data/contractor_standard_deviation.json...');
             // Load standard deviation analysis
-            const response = await fetch('/static/data/contractor_standard_deviation.json');
+            const response = await fetch('/static/data/contractor_standard_deviation.json?v=' + Date.now());
             console.log('📡 Response status:', response.status, response.statusText);
             
             if (!response.ok) {
