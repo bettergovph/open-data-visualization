@@ -4606,53 +4606,94 @@ function getContractorSecStatusSync(contractorName) {
         const scatterCtx = document.getElementById('contractorScatterChart');
         if (!scatterCtx) return;
         
-        // Robust chart destruction - destroy any existing chart on this canvas
-        try {
-            const existingChart = Chart.getChart('contractorScatterChart');
-            if (existingChart) {
-                console.log('🗑️ Destroying existing scatter chart');
-                existingChart.destroy();
-            }
-        } catch (error) {
-            console.warn('Error destroying existing Chart.js scatter instance:', error);
-        }
-        
-        // Also check window variable
-        if (window.contractorScatterChart) {
+        // More aggressive chart destruction
+        const destroyAllCharts = () => {
             try {
-                console.log('🗑️ Destroying window scatter chart');
-                if (typeof window.contractorScatterChart.destroy === 'function') {
-                    window.contractorScatterChart.destroy();
+                // Method 1: Get chart by canvas ID
+                const existingChart = Chart.getChart('contractorScatterChart');
+                if (existingChart) {
+                    console.log('🗑️ Destroying existing scatter chart (Method 1)');
+                    existingChart.destroy();
                 }
-                window.contractorScatterChart = null;
             } catch (error) {
-                console.warn('Error destroying window scatter chart:', error);
+                console.warn('Error destroying chart (Method 1):', error);
             }
-        }
-        
-        // Also try to destroy by canvas element
-        try {
-            const canvas = document.getElementById('contractorScatterChart');
-            if (canvas && canvas.chart) {
-                console.log('🗑️ Destroying canvas chart');
-                canvas.chart.destroy();
-                canvas.chart = null;
+            
+            try {
+                // Method 2: Get chart by canvas element
+                const canvas = document.getElementById('contractorScatterChart');
+                if (canvas) {
+                    const chart = Chart.getChart(canvas);
+                    if (chart) {
+                        console.log('🗑️ Destroying existing scatter chart (Method 2)');
+                        chart.destroy();
+                    }
+                }
+            } catch (error) {
+                console.warn('Error destroying chart (Method 2):', error);
             }
-        } catch (error) {
-            console.warn('Error destroying canvas chart:', error);
-        }
+            
+            try {
+                // Method 3: Window variable
+                if (window.contractorScatterChart) {
+                    console.log('🗑️ Destroying window scatter chart (Method 3)');
+                    if (typeof window.contractorScatterChart.destroy === 'function') {
+                        window.contractorScatterChart.destroy();
+                    }
+                    window.contractorScatterChart = null;
+                }
+            } catch (error) {
+                console.warn('Error destroying chart (Method 3):', error);
+            }
+            
+            try {
+                // Method 4: Canvas chart property
+                const canvas = document.getElementById('contractorScatterChart');
+                if (canvas && canvas.chart) {
+                    console.log('🗑️ Destroying canvas chart (Method 4)');
+                    canvas.chart.destroy();
+                    canvas.chart = null;
+                }
+            } catch (error) {
+                console.warn('Error destroying chart (Method 4):', error);
+            }
+            
+            // Method 5: Clear all Chart.js instances (nuclear option)
+            try {
+                if (Chart.instances) {
+                    Object.keys(Chart.instances).forEach(key => {
+                        const instance = Chart.instances[key];
+                        if (instance && instance.canvas && instance.canvas.id === 'contractorScatterChart') {
+                            console.log('🗑️ Destroying chart instance (Method 5)');
+                            instance.destroy();
+                        }
+                    });
+                }
+            } catch (error) {
+                console.warn('Error destroying chart (Method 5):', error);
+            }
+        };
         
-        // Longer delay to ensure destruction completes
+        // Destroy all charts
+        destroyAllCharts();
+        
+        // Wait longer and destroy again to be sure
         setTimeout(() => {
-            createScatterChart();
-        }, 200);
+            destroyAllCharts();
+            setTimeout(() => {
+                createScatterChart();
+            }, 100);
+        }, 300);
         
         async function createScatterChart() {
             try {
-            // Double-check for any existing chart before creating
+            // Final check for any existing chart before creating
             const existingChart = Chart.getChart('contractorScatterChart');
             if (existingChart) {
+                console.log('⚠️ Found existing chart during creation, destroying it');
                 existingChart.destroy();
+                // Wait a bit more
+                await new Promise(resolve => setTimeout(resolve, 50));
             }
             // Load contractor project counts data
             const response = await fetch('/static/data/contractor_project_counts.json');
