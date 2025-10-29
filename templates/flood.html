@@ -8012,6 +8012,15 @@ async function copyChartToClipboard(containerId, buttonId) {
         
         // Copy to clipboard
         console.log('Writing to clipboard...');
+        
+        // Ensure document is focused before clipboard operation
+        if (document.hasFocus && !document.hasFocus()) {
+            console.log('⚠️ Document not focused, attempting to focus...');
+            window.focus();
+            // Small delay to ensure focus is established
+            await new Promise(resolve => setTimeout(resolve, 100));
+        }
+        
         await navigator.clipboard.write([
             new ClipboardItem({
                 'image/png': blob
@@ -8048,6 +8057,17 @@ async function copyChartToClipboard(containerId, buttonId) {
         
         // Check for specific error types
         if (error.name === 'NotAllowedError') {
+            errorMessage = '⚠️ Click to retry';
+            // Show a brief toast-style notification
+            const toast = document.createElement('div');
+            toast.style.cssText = 'position: fixed; top: 20px; right: 20px; background: #f59e0b; color: white; padding: 15px 20px; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.2); z-index: 10000; font-size: 14px;';
+            toast.textContent = '⚠️ Please click the button again to copy the chart';
+            document.body.appendChild(toast);
+            
+            setTimeout(() => {
+                toast.remove();
+            }, 3000);
+        } else if (error.message.includes('Document is not focused')) {
             errorMessage = '⚠️ Click to retry';
             // Show a brief toast-style notification
             const toast = document.createElement('div');
