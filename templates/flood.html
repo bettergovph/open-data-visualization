@@ -4435,38 +4435,23 @@ function getContractorSecStatusSync(contractorName) {
                 label: 'Number of Contractors',
                 data: [
                     distribution.within_1sd,
-                    distribution.within_1_5sd,
-                    distribution.within_2sd,
-                    distribution.within_2_5sd,
-                    distribution.within_3sd,
-                    distribution.beyond_1sd,
-                    distribution.beyond_1_5sd,
-                    distribution.beyond_2sd,
-                    distribution.beyond_2_5sd,
-                    distribution.beyond_3sd
+                    distribution.within_1_5sd - distribution.within_1sd, // 1.5SD range only
+                    distribution.within_2sd - distribution.within_1_5sd, // 2SD range only
+                    distribution.within_2_5sd - distribution.within_2sd, // 2.5SD range only
+                    distribution.beyond_2_5sd // 3SD+ (beyond 2.5SD)
                 ],
                 backgroundColor: [
                     '#28a745', // Green - 1SD
-                    '#32cd32', // Lime Green - 1.5SD
-                    '#ffc107', // Yellow - 2SD
-                    '#ff8c00', // Dark Orange - 2.5SD
-                    '#fd7e14', // Orange - 3SD
-                    '#6f42c1', // Purple - Beyond 1SD
-                    '#9c27b0', // Deep Purple - Beyond 1.5SD
-                    '#e83e8c', // Pink - Beyond 2SD
-                    '#ff5722', // Deep Orange - Beyond 2.5SD
-                    '#dc3545'  // Red - Beyond 3SD
+                    '#32cd32', // Lime Green - 1.5SD range
+                    '#ffc107', // Yellow - 2SD range
+                    '#ff8c00', // Dark Orange - 2.5SD range
+                    '#dc3545'  // Red - 3SD+
                 ],
                 borderColor: [
                     '#1e7e34',
                     '#228b22',
                     '#d39e00',
                     '#ff7f00',
-                    '#dc6903',
-                    '#5a2d91',
-                    '#7b1fa2',
-                    '#c2185b',
-                    '#d84315',
                     '#c82333'
                 ],
                 borderWidth: 2,
@@ -4477,15 +4462,10 @@ function getContractorSecStatusSync(contractorName) {
             if (costAggregation) {
                 const costData = [
                     costAggregation.within_1sd * 1000 / 1000000000, // Convert to billions
-                    costAggregation.within_1_5sd * 1000 / 1000000000,
-                    costAggregation.within_2sd * 1000 / 1000000000,
-                    costAggregation.within_2_5sd * 1000 / 1000000000,
-                    costAggregation.within_3sd * 1000 / 1000000000,
-                    costAggregation.beyond_1sd * 1000 / 1000000000,
-                    costAggregation.beyond_1_5sd * 1000 / 1000000000,
-                    costAggregation.beyond_2sd * 1000 / 1000000000,
-                    costAggregation.beyond_2_5sd * 1000 / 1000000000,
-                    costAggregation.beyond_3sd * 1000 / 1000000000
+                    (costAggregation.within_1_5sd - costAggregation.within_1sd) * 1000 / 1000000000, // 1.5SD range only
+                    (costAggregation.within_2sd - costAggregation.within_1_5sd) * 1000 / 1000000000, // 2SD range only
+                    (costAggregation.within_2_5sd - costAggregation.within_2sd) * 1000 / 1000000000, // 2.5SD range only
+                    costAggregation.beyond_2_5sd * 1000 / 1000000000 // 3SD+ (beyond 2.5SD)
                 ];
                 console.log('💰 Cost data for line overlay:', costData);
                 
@@ -4516,11 +4496,6 @@ function getContractorSecStatusSync(contractorName) {
                         '1.5SD',
                         '2SD',
                         '2.5SD',
-                        '3SD',
-                        'Beyond 1SD',
-                        'Beyond 1.5SD',
-                        'Beyond 2SD',
-                        'Beyond 2.5SD',
                         '3SD+'
                     ],
                     datasets: datasets
