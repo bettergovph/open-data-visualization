@@ -3353,9 +3353,20 @@ async function loadRegionsChart() {
         
         const ctx = canvas.getContext('2d');
         
-        // Get data for multiple years (2020-2025)
-        const years = [2020, 2021, 2022, 2023, 2024, 2025];
-        const regionData = {};
+        // Load data from static JSON file
+        console.log('🔍 Loading budget regions data from static JSON...');
+        const response = await fetch('/static/data/budget_regions.json?v=' + Date.now());
+        const data = await response.json();
+        
+        if (!data || !data.yearly_data) {
+            console.error('❌ Invalid budget regions data structure');
+            return;
+        }
+        
+        console.log('📊 Loaded budget regions data:', data);
+        
+        // Get years from metadata
+        const years = data.metadata.years_analyzed || [2020, 2021, 2022, 2023, 2024, 2025];
         const regionColors = [
             '#0038A8', '#CE1126', '#28a745', '#ffc107',
             '#dc3545', '#6f42c1', '#fd7e14', '#20c997',
@@ -3363,29 +3374,31 @@ async function loadRegionsChart() {
             '#20c997', '#6f42c1', '#ffc107', '#28a745'
         ];
         
-        // Fetch data for each year
-        for (const year of years) {
-            try {
-                const response = await fetch(`/api/budget/regions?year=${year}&limit=100`);
-                const result = await response.json();
-                
-                if (result.success && result.data) {
-                    result.data.forEach(region => {
-                        const regionId = region.uacs_reg_id || 'Unknown';
-                        if (!regionData[regionId]) {
-                            regionData[regionId] = {
-                                name: `Region ${regionId}`,
-                                data: new Array(years.length).fill(0)
-                            };
-                        }
-                        const yearIndex = years.indexOf(year);
-                        regionData[regionId].data[yearIndex] = (region.total_amount || 0) * 1000 / 1000000000; // Convert to billions
-                    });
+        // Process the data for Chart.js
+        const regionData = {};
+        
+        // Initialize all regions with zero data
+        Object.keys(data.regions_summary).forEach(regionId => {
+            regionData[regionId] = {
+                name: `Region ${regionId}`,
+                data: new Array(years.length).fill(0)
+            };
+        });
+        
+        // Fill in the actual data
+        years.forEach((year, yearIndex) => {
+            const yearData = data.yearly_data[year] || [];
+            yearData.forEach(region => {
+                const regionId = region.uacs_reg_id;
+                if (regionData[regionId]) {
+                    const amount = (region.total_amount || 0) * 1000 / 1000000000; // Convert to billions
+                    regionData[regionId].data[yearIndex] = amount;
+                    console.log(`📈 Region ${regionId} for year ${year}: ₱${amount.toFixed(2)}B`);
                 }
-            } catch (error) {
-                console.warn(`Failed to fetch data for year ${year}:`, error);
-            }
-        }
+            });
+        });
+        
+        console.log('📊 Processed region data structure:', regionData);
         
         // Convert to datasets for Chart.js
         const datasets = [];

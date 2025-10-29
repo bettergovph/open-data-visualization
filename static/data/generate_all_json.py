@@ -116,6 +116,12 @@ class JSONGenerator:
                 'category': 'summary_data',
                 'dependencies': ['Budget API endpoint']
             },
+            'budget_regions.json': {
+                'script': 'static/data/generate_budget_regions.py',
+                'description': 'Budget data by region over multiple years for stacked area chart',
+                'category': 'budget_data',
+                'dependencies': ['Budget database', 'BudgetAnalyzer']
+            },
             'nep_summary.json': {
                 'script': 'utils/generate_summary_stats.py',
                 'description': 'NEP summary statistics',

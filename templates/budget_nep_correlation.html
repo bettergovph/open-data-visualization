@@ -427,33 +427,37 @@
                 const ctx = document.getElementById(`programChartCanvas${index}`).getContext('2d');
                 
                 new Chart(ctx, {
-                    type: 'bar',
+                    type: 'line',
                     data: {
                         labels: sortedYears,
                     datasets: [
                         {
                             label: 'NEP Database',
                             data: nepAmounts,
-                            backgroundColor: 'rgba(16, 185, 129, 0.8)', // Green
+                            backgroundColor: 'rgba(16, 185, 129, 0.5)', // Green with transparency
                             borderColor: 'rgba(16, 185, 129, 1)',
-                            borderWidth: 1,
-                            borderRadius: 4,
-                            borderSkipped: false,
+                            borderWidth: 2,
+                            fill: true,
+                            tension: 0.4
                         },
                         {
                             label: 'Budget Database',
                             data: budgetAmounts,
-                            backgroundColor: 'rgba(59, 130, 246, 0.8)', // Blue
+                            backgroundColor: 'rgba(59, 130, 246, 0.5)', // Blue with transparency
                             borderColor: 'rgba(59, 130, 246, 1)',
-                            borderWidth: 1,
-                            borderRadius: 4,
-                            borderSkipped: false,
+                            borderWidth: 2,
+                            fill: true,
+                            tension: 0.4
                         }
                     ]
                     },
                     options: {
                         responsive: true,
                         maintainAspectRatio: false,
+                        interaction: {
+                            mode: 'index',
+                            intersect: false,
+                        },
                         plugins: {
                             legend: {
                                 display: true,
@@ -486,6 +490,7 @@
                         },
                         scales: {
                             x: {
+                                stacked: false,
                                 title: {
                                     display: true,
                                     text: 'Fiscal Year',
@@ -499,6 +504,7 @@
                                 }
                             },
                             y: {
+                                stacked: false,
                                 title: {
                                     display: true,
                                     text: 'Amount (₱)',
@@ -522,11 +528,6 @@
                                 grid: {
                                     color: 'rgba(0, 0, 0, 0.1)'
                                 }
-                            }
-                        },
-                        elements: {
-                            bar: {
-                                borderRadius: 4,
                             }
                         },
                         animation: {
@@ -571,37 +572,41 @@
             const ctx = document.getElementById('budgetNepChart').getContext('2d');
 
             budgetNepChart = new Chart(ctx, {
-                type: 'bar',
+                type: 'line',
                 data: {
                     labels: years,
                     datasets: [
                         {
                             label: 'NEP Database',
                             data: nepData,
-                            backgroundColor: 'rgba(16, 185, 129, 0.8)', // Green
+                            backgroundColor: 'rgba(16, 185, 129, 0.5)', // Green with transparency
                             borderColor: 'rgba(16, 185, 129, 1)',
-                            borderWidth: 1,
-                            borderRadius: 4,
-                            borderSkipped: false,
+                            borderWidth: 2,
+                            fill: true,
+                            tension: 0.4
                         },
                         {
                             label: 'Budget Database',
                             data: budgetData,
-                            backgroundColor: 'rgba(59, 130, 246, 0.8)', // Blue
+                            backgroundColor: 'rgba(59, 130, 246, 0.5)', // Blue with transparency
                             borderColor: 'rgba(59, 130, 246, 1)',
-                            borderWidth: 1,
-                            borderRadius: 4,
-                            borderSkipped: false,
+                            borderWidth: 2,
+                            fill: true,
+                            tension: 0.4
                         }
                     ]
                 },
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
+                    interaction: {
+                        mode: 'index',
+                        intersect: false,
+                    },
                     plugins: {
                         title: {
                             display: true,
-                            text: 'Budget vs NEP Annual Expenditures (₱)',
+                            text: 'Budget vs NEP Annual Expenditures (₱) - Stacked Area Chart',
                             font: {
                                 size: 16,
                                 weight: 'bold'
@@ -639,6 +644,7 @@
                     },
                     scales: {
                         x: {
+                            stacked: false,
                             title: {
                                 display: true,
                                 text: 'Fiscal Year',
@@ -652,6 +658,7 @@
                             }
                         },
                         y: {
+                            stacked: false,
                             title: {
                                 display: true,
                                 text: 'Total Expenditure (₱)',
@@ -675,11 +682,6 @@
                             grid: {
                                 color: 'rgba(0, 0, 0, 0.1)'
                             }
-                        }
-                    },
-                    elements: {
-                        bar: {
-                            borderRadius: 4,
                         }
                     },
                     animation: {
