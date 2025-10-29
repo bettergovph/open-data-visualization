@@ -6,34 +6,39 @@
     "standard_deviation": 7.5,
     "distribution": {
       "within_1sd": 2232,
+      "within_1_5sd": 2276,
       "within_2sd": 2317,
+      "within_2_5sd": 2333,
       "within_3sd": 2359,
-      "within_4sd": 2379,
       "beyond_1sd": 177,
+      "beyond_1_5sd": 133,
       "beyond_2sd": 92,
-      "beyond_3sd": 50,
-      "beyond_4sd": 30
+      "beyond_2_5sd": 76,
+      "beyond_3sd": 50
     },
     "ranges": {
       "1sd_range": "-3.4 to 11.6 projects",
+      "1_5sd_range": "-7.1 to 15.3 projects",
       "2sd_range": "-10.9 to 19.1 projects",
-      "3sd_range": "-18.4 to 26.6 projects",
-      "4sd_range": "-25.9 to 34.1 projects"
+      "2_5sd_range": "-14.6 to 22.8 projects",
+      "3sd_range": "-18.4 to 26.6 projects"
     },
     "cost_aggregation": {
       "within_1sd": 253228129920.2,
+      "within_1_5sd": 286377846431.86,
       "within_2sd": 326283419609.3,
+      "within_2_5sd": 350267540474.9,
       "within_3sd": 393155980154.92,
-      "within_4sd": 435082029768.38,
       "beyond_1sd": 294375367184.94,
+      "beyond_1_5sd": 261225650673.28,
       "beyond_2sd": 221320077495.84,
+      "beyond_2_5sd": 197335956630.24,
       "beyond_3sd": 154447516950.22,
-      "beyond_4sd": 112521467336.76,
       "total_cost": 547603497105.14,
       "multiplier_note": "Frontend should multiply all cost values by 1000 for display"
     }
   },
-  "generated_at": "2025-10-29T20:44:15.098394",
+  "generated_at": "2025-10-29T20:50:28.362093",
   "description": "Standard deviation analysis of contractor project counts with cost aggregation per SD group",
   "data_source": "Meilisearch (live data)",
   "cost_data_available": true,

@@ -243,23 +243,26 @@ def calculate_standard_deviation_stats(project_counts, contractor_costs=None, co
     
     # Calculate distribution within standard deviations
     within_1sd = len([count for count in project_counts if abs(count - mean_projects) <= std_dev])
+    within_1_5sd = len([count for count in project_counts if abs(count - mean_projects) <= 1.5 * std_dev])
     within_2sd = len([count for count in project_counts if abs(count - mean_projects) <= 2 * std_dev])
+    within_2_5sd = len([count for count in project_counts if abs(count - mean_projects) <= 2.5 * std_dev])
     within_3sd = len([count for count in project_counts if abs(count - mean_projects) <= 3 * std_dev])
-    within_4sd = len([count for count in project_counts if abs(count - mean_projects) <= 4 * std_dev])
     
     total_contractors = len(project_counts)
     
     # Calculate beyond ranges
     beyond_1sd = total_contractors - within_1sd
+    beyond_1_5sd = total_contractors - within_1_5sd
     beyond_2sd = total_contractors - within_2sd
+    beyond_2_5sd = total_contractors - within_2_5sd
     beyond_3sd = total_contractors - within_3sd
-    beyond_4sd = total_contractors - within_4sd
     
     # Calculate ranges
     range_1sd = f"{mean_projects - std_dev:.1f} to {mean_projects + std_dev:.1f} projects"
+    range_1_5sd = f"{mean_projects - 1.5*std_dev:.1f} to {mean_projects + 1.5*std_dev:.1f} projects"
     range_2sd = f"{mean_projects - 2*std_dev:.1f} to {mean_projects + 2*std_dev:.1f} projects"
+    range_2_5sd = f"{mean_projects - 2.5*std_dev:.1f} to {mean_projects + 2.5*std_dev:.1f} projects"
     range_3sd = f"{mean_projects - 3*std_dev:.1f} to {mean_projects + 3*std_dev:.1f} projects"
-    range_4sd = f"{mean_projects - 4*std_dev:.1f} to {mean_projects + 4*std_dev:.1f} projects"
     
     # Calculate cost aggregation per SD group if cost data is available
     cost_aggregation = {}
@@ -280,13 +283,15 @@ def calculate_standard_deviation_stats(project_counts, contractor_costs=None, co
         # Group contractors by SD ranges and sum their actual costs
         sd_groups = {
             "within_1sd": [],
+            "within_1_5sd": [],
             "within_2sd": [],
+            "within_2_5sd": [],
             "within_3sd": [],
-            "within_4sd": [],
             "beyond_1sd": [],
+            "beyond_1_5sd": [],
             "beyond_2sd": [],
-            "beyond_3sd": [],
-            "beyond_4sd": []
+            "beyond_2_5sd": [],
+            "beyond_3sd": []
         }
         
         for contractor in contractor_data:
@@ -295,31 +300,37 @@ def calculate_standard_deviation_stats(project_counts, contractor_costs=None, co
             
             if abs(z_score) <= 1:
                 sd_groups["within_1sd"].append(cost)
+            if abs(z_score) <= 1.5:
+                sd_groups["within_1_5sd"].append(cost)
             if abs(z_score) <= 2:
                 sd_groups["within_2sd"].append(cost)
+            if abs(z_score) <= 2.5:
+                sd_groups["within_2_5sd"].append(cost)
             if abs(z_score) <= 3:
                 sd_groups["within_3sd"].append(cost)
-            if abs(z_score) <= 4:
-                sd_groups["within_4sd"].append(cost)
             if abs(z_score) > 1:
                 sd_groups["beyond_1sd"].append(cost)
+            if abs(z_score) > 1.5:
+                sd_groups["beyond_1_5sd"].append(cost)
             if abs(z_score) > 2:
                 sd_groups["beyond_2sd"].append(cost)
+            if abs(z_score) > 2.5:
+                sd_groups["beyond_2_5sd"].append(cost)
             if abs(z_score) > 3:
                 sd_groups["beyond_3sd"].append(cost)
-            if abs(z_score) > 4:
-                sd_groups["beyond_4sd"].append(cost)
         
         # Calculate actual cost totals for each SD group
         cost_aggregation = {
             "within_1sd": round(sum(sd_groups["within_1sd"]), 2),
+            "within_1_5sd": round(sum(sd_groups["within_1_5sd"]), 2),
             "within_2sd": round(sum(sd_groups["within_2sd"]), 2),
+            "within_2_5sd": round(sum(sd_groups["within_2_5sd"]), 2),
             "within_3sd": round(sum(sd_groups["within_3sd"]), 2),
-            "within_4sd": round(sum(sd_groups["within_4sd"]), 2),
             "beyond_1sd": round(sum(sd_groups["beyond_1sd"]), 2),
+            "beyond_1_5sd": round(sum(sd_groups["beyond_1_5sd"]), 2),
             "beyond_2sd": round(sum(sd_groups["beyond_2sd"]), 2),
+            "beyond_2_5sd": round(sum(sd_groups["beyond_2_5sd"]), 2),
             "beyond_3sd": round(sum(sd_groups["beyond_3sd"]), 2),
-            "beyond_4sd": round(sum(sd_groups["beyond_4sd"]), 2),
             "total_cost": round(sum(contractor_costs.values()), 2),
             "multiplier_note": "Frontend should multiply all cost values by 1000 for display"
         }
@@ -334,13 +345,15 @@ def calculate_standard_deviation_stats(project_counts, contractor_costs=None, co
         total_cost = sum(contractor_costs.values())
         cost_aggregation = {
             "within_1sd": round((within_1sd / total_contractors) * total_cost, 2),
+            "within_1_5sd": round((within_1_5sd / total_contractors) * total_cost, 2),
             "within_2sd": round((within_2sd / total_contractors) * total_cost, 2),
+            "within_2_5sd": round((within_2_5sd / total_contractors) * total_cost, 2),
             "within_3sd": round((within_3sd / total_contractors) * total_cost, 2),
-            "within_4sd": round((within_4sd / total_contractors) * total_cost, 2),
             "beyond_1sd": round((beyond_1sd / total_contractors) * total_cost, 2),
+            "beyond_1_5sd": round((beyond_1_5sd / total_contractors) * total_cost, 2),
             "beyond_2sd": round((beyond_2sd / total_contractors) * total_cost, 2),
+            "beyond_2_5sd": round((beyond_2_5sd / total_contractors) * total_cost, 2),
             "beyond_3sd": round((beyond_3sd / total_contractors) * total_cost, 2),
-            "beyond_4sd": round((beyond_4sd / total_contractors) * total_cost, 2),
             "total_cost": round(total_cost, 2),
             "multiplier_note": "Frontend should multiply all cost values by 1000 for display"
         }
@@ -353,19 +366,22 @@ def calculate_standard_deviation_stats(project_counts, contractor_costs=None, co
         "standard_deviation": round(std_dev, 1),
         "distribution": {
             "within_1sd": within_1sd,
+            "within_1_5sd": within_1_5sd,
             "within_2sd": within_2sd,
+            "within_2_5sd": within_2_5sd,
             "within_3sd": within_3sd,
-            "within_4sd": within_4sd,
             "beyond_1sd": beyond_1sd,
+            "beyond_1_5sd": beyond_1_5sd,
             "beyond_2sd": beyond_2sd,
-            "beyond_3sd": beyond_3sd,
-            "beyond_4sd": beyond_4sd
+            "beyond_2_5sd": beyond_2_5sd,
+            "beyond_3sd": beyond_3sd
         },
         "ranges": {
             "1sd_range": range_1sd,
+            "1_5sd_range": range_1_5sd,
             "2sd_range": range_2sd,
-            "3sd_range": range_3sd,
-            "4sd_range": range_4sd
+            "2_5sd_range": range_2_5sd,
+            "3sd_range": range_3sd
         }
     }
     
