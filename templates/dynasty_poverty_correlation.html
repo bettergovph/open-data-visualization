@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Contractor-District Correlation Analysis - BetterGovPH</title>
+    <title>Dynasty-Poverty Correlation Analysis - BetterGovPH</title>
     
     <!-- Google Fonts - Inter -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
@@ -14,8 +14,8 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     
     <!-- BetterGovPH Metadata -->
-    <meta name="description" content="Statistical analysis of contractor and district correlation patterns in Philippine infrastructure projects">
-    <meta name="keywords" content="contractors, districts, correlation, HHI, statistical analysis, Philippines, infrastructure">
+    <meta name="description" content="Statistical analysis of political dynasty and poverty correlation patterns in Philippine provinces">
+    <meta name="keywords" content="dynasties, poverty, correlation, HHI, statistical analysis, Philippines, provinces">
     <meta name="author" content="BetterGovPH">
 
     <style>
@@ -297,36 +297,6 @@
             border-bottom: none;
         }
         
-        .hhi-scale {
-            display: flex;
-            gap: 15px;
-            margin: 20px 0;
-            flex-wrap: wrap;
-        }
-        
-        .hhi-scale-item {
-            flex: 1;
-            min-width: 200px;
-            padding: 15px;
-            border-radius: 8px;
-            text-align: center;
-        }
-        
-        .hhi-competitive {
-            background: #d1fae5;
-            border: 2px solid #10b981;
-        }
-        
-        .hhi-moderate {
-            background: #fef3c7;
-            border: 2px solid #f59e0b;
-        }
-        
-        .hhi-concentrated {
-            background: #fee2e2;
-            border: 2px solid #ef4444;
-        }
-        
         .key-finding {
             background: linear-gradient(135deg, #ffeaa7 0%, #fdcb6e 100%);
             padding: 25px 30px;
@@ -495,10 +465,10 @@ function toggleMobileMenu() {
     <div class="page-container">
         <!-- Hero Section -->
         <div class="hero-section">
-            <h1 class="hero-title">📊 Contractor-District Correlation Analysis</h1>
+            <h1 class="hero-title">🏛️ Dynasty-Poverty Correlation Analysis</h1>
             <p class="hero-subtitle">
-                A comprehensive statistical analysis examining the relationship and concentration patterns 
-                between government contractors and district engineering offices in Philippine infrastructure projects
+                A comprehensive statistical analysis examining the relationship and correlation patterns 
+                between political dynasties and poverty rates across Philippine provinces
             </p>
         </div>
 
@@ -514,7 +484,7 @@ function toggleMobileMenu() {
             <div class="hypothesis-box">
                 <h2 class="hypothesis-title">🎯 Hypothesis Test</h2>
                 <p class="hypothesis-text">
-                    "Projects are concentrated similarly across contractors and districts"
+                    "Provinces with stronger political dynasties show higher poverty rates"
                 </p>
                 <div id="verdict-box" class="verdict"></div>
             </div>
@@ -531,26 +501,11 @@ function toggleMobileMenu() {
 
             <!-- Concentration Analysis (HHI) -->
             <div class="section-card">
-                <h2 class="section-title"><span class="icon">🎯</span>Concentration Analysis (HHI)</h2>
+                <h2 class="section-title"><span class="icon">🎯</span>Dynasty Concentration Analysis (HHI)</h2>
                 <p class="section-subtitle">
-                    The Herfindahl-Hirschman Index (HHI) measures market concentration. 
-                    Higher values indicate greater concentration (less competition).
+                    The Herfindahl-Hirschman Index (HHI) measures dynasty concentration by province. 
+                    Higher values indicate greater dynasty dominance (less political competition).
                 </p>
-                
-                <div class="hhi-scale">
-                    <div class="hhi-scale-item hhi-competitive">
-                        <strong>&lt; 1,500</strong><br>
-                        Competitive Market
-                    </div>
-                    <div class="hhi-scale-item hhi-moderate">
-                        <strong>1,500 - 2,500</strong><br>
-                        Moderate Concentration
-                    </div>
-                    <div class="hhi-scale-item hhi-concentrated">
-                        <strong>&gt; 2,500</strong><br>
-                        High Concentration
-                    </div>
-                </div>
                 
                 <div class="stats-grid" id="hhi-stats">
                     <!-- Populated by JavaScript -->
@@ -559,11 +514,6 @@ function toggleMobileMenu() {
                 <div class="interpretation-box">
                     <h4>📊 Key Interpretation</h4>
                     <p id="hhi-interpretation"></p>
-                </div>
-
-                <div class="key-finding">
-                    <h4>💡 Key Finding</h4>
-                    <p id="concentration-finding"></p>
                 </div>
             </div>
 
@@ -585,28 +535,11 @@ function toggleMobileMenu() {
                 </div>
             </div>
 
-            <!-- Association Test (Chi-square) -->
-            <div class="section-card">
-                <h2 class="section-title"><span class="icon">🔗</span>Independence Test (Chi-square)</h2>
-                <p class="section-subtitle">
-                    Tests whether contractor selection and district assignment are independent variables.
-                </p>
-                
-                <div class="evidence-grid" id="chi-square-results">
-                    <!-- Populated by JavaScript -->
-                </div>
-                
-                <div class="interpretation-box">
-                    <h4>📊 What This Means</h4>
-                    <p id="chi-interpretation"></p>
-                </div>
-            </div>
-
             <!-- Correlation Analysis -->
             <div class="section-card">
-                <h2 class="section-title"><span class="icon">📈</span>Concentration Pattern Correlation</h2>
+                <h2 class="section-title"><span class="icon">📈</span>Dynasty-Poverty Correlation</h2>
                 <p class="section-subtitle">
-                    Correlates HHI values between contractors and districts to test if concentration patterns are similar.
+                    Statistical correlation between dynasty strength (dynasty count) and poverty rates.
                 </p>
                 
                 <!-- Scatter Plot Visualization -->
@@ -627,62 +560,27 @@ function toggleMobileMenu() {
             <!-- Evidence Summary -->
             <div class="section-card">
                 <h2 class="section-title"><span class="icon">🔍</span>Evidence Summary</h2>
-                <p class="section-subtitle">Breakdown of all four statistical tests</p>
+                <p class="section-subtitle">Breakdown of statistical tests</p>
                 
                 <div class="evidence-grid" id="evidence-summary">
                     <!-- Populated by JavaScript -->
                 </div>
-                
-                <!-- Explanation of Adjustments -->
-                <div class="interpretation-box" style="margin-top: 30px;">
-                    <h4>📋 Test Criteria & Adjustments</h4>
-                    <p>
-                        <strong>1. HHI Similarity Test:</strong> Tests if average district HHI and contractor HHI are within 500 points of each other. 
-                        This threshold (500) was chosen to allow for moderate differences while still indicating similar concentration levels.
-                        <strong>Adjustment:</strong> The 500-point threshold accounts for the inherently different scales - districts naturally have lower HHI 
-                        (more contractors per district) while contractors have higher HHI (fewer districts per contractor).
-                    </p>
-                    <p>
-                        <strong>2. Gini Similarity Test:</strong> Tests if the Gini coefficients for contractors and districts are within 0.1 of each other. 
-                        This threshold allows for moderate inequality differences while identifying similar distribution patterns.
-                        <strong>Adjustment:</strong> The 0.1 threshold balances statistical rigor with practical significance - smaller differences 
-                        indicate similar inequality structures even if not identical.
-                    </p>
-                    <p>
-                        <strong>3. Chi-square (Dependence) Test:</strong> Uses standard significance threshold (p &lt; 0.05) to test if contractor 
-                        selection and district assignment are independent. Cramér's V measures effect size.
-                        <strong>Adjustment:</strong> Standard statistical threshold - no adjustment needed. This test shows strong dependence, 
-                        indicating contractors are NOT randomly distributed across districts.
-                    </p>
-                    <p>
-                        <strong>4. Correlation Test:</strong> Uses standard significance threshold (p &lt; 0.05) to test if district HHI values 
-                        correlate with contractor HHI values.
-                        <strong>Adjustment:</strong> Standard statistical threshold - no adjustment needed. The lack of correlation suggests 
-                        concentration patterns operate differently: contractors specialize geographically while districts maintain competitive markets.
-                    </p>
-                    <p style="margin-top: 15px; font-weight: 600;">
-                        <strong>Result:</strong> 2 out of 4 tests support the hypothesis, leading to a "PARTIALLY SUPPORTED" verdict. 
-                        The hypothesis is partially true: while contractors and districts show dependence (Chi-square) and similar inequality 
-                        patterns (Gini similarity), they differ in concentration levels (HHI similarity fails) and do not correlate in concentration 
-                        patterns (Correlation fails). This suggests concentration happens in opposite directions - contractors concentrate in few 
-                        districts, while districts maintain competitive contractor markets.
-                    </p>
-                </div>
             </div>
 
-            <!-- Top Concentrated Districts -->
+            <!-- Top Provinces by Dynasty Concentration -->
             <div class="section-card">
-                <h2 class="section-title"><span class="icon">🏆</span>Top 10 Most Concentrated Districts</h2>
-                <p class="section-subtitle">Districts with the highest contractor concentration (HHI)</p>
+                <h2 class="section-title"><span class="icon">🏆</span>Top 10 Provinces by Dynasty Concentration</h2>
+                <p class="section-subtitle">Provinces with the highest dynasty concentration (HHI)</p>
                 
                 <div class="table-container">
-                    <table class="data-table" id="top-districts-table">
+                    <table class="data-table" id="top-dynasties-table">
                         <thead>
                             <tr>
                                 <th>Rank</th>
-                                <th>District Engineering Office</th>
-                                <th>HHI Score</th>
-                                <th>Market Type</th>
+                                <th>Province</th>
+                                <th>Top Dynasty</th>
+                                <th>Dynasty Count</th>
+                                <th>Poverty Rate</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -692,19 +590,20 @@ function toggleMobileMenu() {
                 </div>
             </div>
 
-            <!-- Top Concentrated Contractors -->
+            <!-- Top Provinces by Poverty Rate -->
             <div class="section-card">
-                <h2 class="section-title"><span class="icon">🏆</span>Top 10 Most Concentrated Contractors</h2>
-                <p class="section-subtitle">Contractors with the highest district concentration (HHI)</p>
+                <h2 class="section-title"><span class="icon">🏆</span>Top 10 Provinces by Poverty Rate</h2>
+                <p class="section-subtitle">Provinces with the highest poverty rates</p>
                 
                 <div class="table-container">
-                    <table class="data-table" id="top-contractors-table">
+                    <table class="data-table" id="top-poverty-table">
                         <thead>
                             <tr>
                                 <th>Rank</th>
-                                <th>Contractor Name</th>
-                                <th>HHI Score</th>
-                                <th>Specialization</th>
+                                <th>Province</th>
+                                <th>Poverty Rate (%)</th>
+                                <th>Top Dynasty</th>
+                                <th>Dynasty Count</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -718,12 +617,11 @@ function toggleMobileMenu() {
             <div class="methodology-section">
                 <h4>📚 Statistical Methods Used</h4>
                 <ul class="methodology-list">
-                    <li><strong>Herfindahl-Hirschman Index (HHI):</strong> Measures market concentration by summing the squares of market shares</li>
-                    <li><strong>Gini Coefficient:</strong> Measures statistical dispersion representing inequality in distribution</li>
-                    <li><strong>Chi-square Test of Independence:</strong> Tests whether two categorical variables are independent</li>
-                    <li><strong>Cramér's V:</strong> Effect size measure for categorical association (0 to 1 scale)</li>
-                    <li><strong>Pearson Correlation:</strong> Measures linear relationship between two continuous variables</li>
+                    <li><strong>Herfindahl-Hirschman Index (HHI):</strong> Measures dynasty concentration by summing the squares of dynasty market shares within provinces</li>
+                    <li><strong>Gini Coefficient:</strong> Measures statistical dispersion representing inequality in dynasty or poverty distribution</li>
+                    <li><strong>Pearson Correlation:</strong> Measures linear relationship between dynasty strength and poverty rates</li>
                     <li><strong>Spearman Correlation:</strong> Non-parametric measure of rank correlation</li>
+                    <li><strong>Simple Linear Regression:</strong> Tests if dynasty strength predicts poverty rates</li>
                 </ul>
             </div>
 
@@ -731,11 +629,253 @@ function toggleMobileMenu() {
     </div>
 
     <script>
+        // Statistical helper functions
+        function calculateHHI(values) {
+            const total = values.reduce((sum, val) => sum + val, 0);
+            if (total === 0) return 0;
+            const shares = values.map(val => val / total);
+            return shares.reduce((sum, share) => sum + (share * share), 0) * 10000;
+        }
+        
+        function calculateGini(values) {
+            if (values.length === 0) return 0;
+            const sorted = [...values].sort((a, b) => a - b);
+            const n = sorted.length;
+            const mean = sorted.reduce((sum, val) => sum + val, 0) / n;
+            if (mean === 0) return 0;
+            
+            let numerator = 0;
+            for (let i = 0; i < n; i++) {
+                for (let j = 0; j < n; j++) {
+                    numerator += Math.abs(sorted[i] - sorted[j]);
+                }
+            }
+            return numerator / (2 * n * n * mean);
+        }
+        
+        function calculateCorrelation(x, y) {
+            const n = x.length;
+            if (n === 0 || n < 3) return { r: 0, p: 1, significant: false };
+            
+            const meanX = x.reduce((sum, val) => sum + val, 0) / n;
+            const meanY = y.reduce((sum, val) => sum + val, 0) / n;
+            
+            let numerator = 0;
+            let sumSqX = 0;
+            let sumSqY = 0;
+            
+            for (let i = 0; i < n; i++) {
+                const dx = x[i] - meanX;
+                const dy = y[i] - meanY;
+                numerator += dx * dy;
+                sumSqX += dx * dx;
+                sumSqY += dy * dy;
+            }
+            
+            const denominator = Math.sqrt(sumSqX * sumSqY);
+            if (denominator === 0) return { r: 0, p: 1, significant: false };
+            
+            const r = numerator / denominator;
+            
+            // Calculate p-value using t-distribution
+            // t = r * sqrt((n-2) / (1-r^2))
+            if (n <= 2 || Math.abs(r) >= 1) {
+                return { r, p: r === 0 ? 1 : 0, significant: false };
+            }
+            
+            const t = r * Math.sqrt((n - 2) / (1 - r * r));
+            const df = n - 2;
+            
+            // Approximate p-value from t-statistic (two-tailed test)
+            // Using simplified approximation: p ≈ 2 * (1 - t_cdf(abs(t), df))
+            // For large df, use normal approximation
+            let p;
+            if (df > 30) {
+                // Normal approximation for large sample
+                const z = Math.abs(t);
+                p = 2 * (1 - approximateNormalCDF(z));
+            } else {
+                // Simplified t-distribution approximation
+                const absT = Math.abs(t);
+                p = 2 * (1 - approximateTCDF(absT, df));
+            }
+            
+            // Clamp p-value between 0 and 1
+            p = Math.max(0, Math.min(1, p));
+            
+            return { r, p, significant: p < 0.05 };
+        }
+        
+        // Approximation functions for statistical distributions
+        function approximateNormalCDF(z) {
+            // Abramowitz and Stegun approximation
+            const t = 1 / (1 + 0.2316419 * z);
+            const d = 0.3989423 * Math.exp(-z * z / 2);
+            const p = d * t * (0.3193815 + t * (-0.3565638 + t * (1.781478 + t * (-1.821256 + t * 1.330274))));
+            return 1 - p;
+        }
+        
+        function approximateTCDF(t, df) {
+            // Simplified t-distribution CDF approximation
+            // For small df, use a rough approximation
+            if (df <= 1) return 0.5;
+            const z = t / Math.sqrt(df);
+            return approximateNormalCDF(z);
+        }
+        
+        function calculateSpearmanCorrelation(x, y) {
+            const n = x.length;
+            if (n === 0) return { r: 0, p: 1 };
+            
+            // Create ranked arrays
+            const rankX = getRanks(x);
+            const rankY = getRanks(y);
+            
+            return calculateCorrelation(rankX, rankY);
+        }
+        
+        function getRanks(values) {
+            const indexed = values.map((val, idx) => ({ val, idx }));
+            indexed.sort((a, b) => a.val - b.val);
+            
+            const ranks = new Array(values.length);
+            indexed.forEach((item, rank) => {
+                ranks[item.idx] = rank + 1;
+            });
+            
+            return ranks;
+        }
+        
         // Load and display the correlation data
         async function loadCorrelationData() {
             try {
-                const response = await fetch('/static/data/contractor_district_correlation.json');
-                const data = await response.json();
+                // Load dynasty data
+                console.log('🏛️ Loading dynasty data...');
+                const dynastyResponse = await fetch('/api/dynasty/provinces');
+                if (!dynastyResponse.ok) {
+                    throw new Error(`Failed to load dynasty data: ${dynastyResponse.status}`);
+                }
+                const dynastyData = await dynastyResponse.json();
+                
+                if (!dynastyData.success || !dynastyData.data) {
+                    throw new Error('Invalid dynasty data format');
+                }
+                
+                // Load poverty data
+                console.log('💰 Loading poverty data...');
+                const povertyResponse = await fetch('/static/data/poverty_correlation_cache.json');
+                if (!povertyResponse.ok) {
+                    throw new Error(`Failed to load poverty data: ${povertyResponse.status}`);
+                }
+                const povertyDataRaw = await povertyResponse.json();
+                const povertyData = Array.isArray(povertyDataRaw.data) ? povertyDataRaw.data : (Array.isArray(povertyDataRaw) ? povertyDataRaw : []);
+                
+                if (!Array.isArray(povertyData) || povertyData.length === 0) {
+                    throw new Error('Poverty data is not in expected format or is empty');
+                }
+                
+                console.log(`💰 Loaded ${povertyData.length} poverty records`);
+                
+                // Normalize province names for matching
+                function normalizeProvince(name) {
+                    return name.toUpperCase().trim();
+                }
+                
+                // Create province mapping: dynasty surname -> dynasty count
+                const dynastyMap = {};
+                if (!Array.isArray(dynastyData.data)) {
+                    throw new Error('Dynasty data is not in expected format');
+                }
+                
+                dynastyData.data.forEach(provinceData => {
+                    const province = normalizeProvince(provinceData.province);
+                    if (provinceData.surnames && Array.isArray(provinceData.surnames) && provinceData.surnames.length > 0) {
+                        // Sort surnames by dynasty_count descending to get top dynasty
+                        const sortedSurnames = [...provinceData.surnames].sort((a, b) => (b.dynasty_count || 0) - (a.dynasty_count || 0));
+                        const topDynasty = sortedSurnames[0];
+                        dynastyMap[province] = {
+                            surname: topDynasty.surname,
+                            count: topDynasty.dynasty_count || 0
+                        };
+                    }
+                });
+                
+                console.log(`🏛️ Loaded ${Object.keys(dynastyMap).length} provinces with dynasty data`);
+                
+                // Combine data
+                const combinedData = [];
+                povertyData.forEach(item => {
+                    const province = normalizeProvince(item.province);
+                    const dynasty = dynastyMap[province];
+                    if (dynasty) {
+                        combinedData.push({
+                            province: item.province,
+                            povertyRate: parseFloat(item.poverty_rate) || 0,
+                            dynastySurname: dynasty.surname,
+                            dynastyCount: dynasty.count
+                        });
+                    }
+                });
+                
+                console.log(`✅ Combined ${combinedData.length} provinces with both dynasty and poverty data`);
+                
+                if (combinedData.length === 0) {
+                    throw new Error('No matching provinces found between dynasty and poverty data');
+                }
+                
+                // Calculate statistics
+                const dynastyCounts = combinedData.map(d => d.dynastyCount);
+                const povertyRates = combinedData.map(d => d.povertyRate);
+                
+                // Calculate HHI for dynasty concentration
+                const hhiDynasty = calculateHHI(dynastyCounts);
+                
+                // Calculate Gini coefficients
+                const giniDynasty = calculateGini(dynastyCounts);
+                const giniPoverty = calculateGini(povertyRates);
+                
+                // Calculate correlations
+                const pearsonCorr = calculateCorrelation(dynastyCounts, povertyRates);
+                const spearmanCorr = calculateSpearmanCorrelation(dynastyCounts, povertyRates);
+                
+                // Debug: Log sample data for visual inspection
+                console.log('📊 Sample Data Points (first 10):');
+                combinedData.slice(0, 10).forEach((item, idx) => {
+                    console.log(`  ${idx + 1}. ${item.province}: Dynasty=${item.dynastyCount}, Poverty=${item.povertyRate.toFixed(1)}%`);
+                });
+                console.log(`📊 Correlation Results: Pearson r=${pearsonCorr.r.toFixed(4)}, p=${pearsonCorr.p.toFixed(6)}, Significant=${pearsonCorr.significant}`);
+                console.log(`📊 Spearman Results: r=${spearmanCorr.r.toFixed(4)}, p=${spearmanCorr.p.toFixed(6)}, Significant=${spearmanCorr.significant}`);
+                
+                // Create scatter plot
+                createScatterPlot(combinedData, pearsonCorr);
+                
+                // Prepare data structure similar to contractor-district format
+                const analysisData = {
+                    metadata: {
+                        total_provinces: combinedData.length,
+                        unique_dynasties: new Set(combinedData.map(d => d.dynastySurname)).size,
+                        avg_poverty_rate: povertyRates.reduce((sum, r) => sum + r, 0) / povertyRates.length,
+                        avg_dynasty_count: dynastyCounts.reduce((sum, c) => sum + c, 0) / dynastyCounts.length
+                    },
+                    concentration: {
+                        hhi_dynasty: hhiDynasty,
+                        gini_dynasty: giniDynasty,
+                        gini_poverty: giniPoverty
+                    },
+                    correlation: {
+                        pearson_r: pearsonCorr.r,
+                        pearson_p: pearsonCorr.p,
+                        spearman_r: spearmanCorr.r,
+                        spearman_p: spearmanCorr.p,
+                        significant: pearsonCorr.significant
+                    },
+                    top_provinces: combinedData
+                        .sort((a, b) => b.dynastyCount - a.dynastyCount)
+                        .slice(0, 10),
+                    top_poverty: combinedData
+                        .sort((a, b) => b.povertyRate - a.povertyRate)
+                        .slice(0, 10)
+                };
                 
                 // Hide loading, show content
                 document.getElementById('loading').style.display = 'none';
@@ -745,176 +885,113 @@ function toggleMobileMenu() {
                 const overallStats = document.getElementById('overall-stats');
                 overallStats.innerHTML = `
                     <div class="stat-card">
-                        <h3>Total Projects</h3>
-                        <div class="value">${data.metadata.total_projects.toLocaleString()}</div>
-                        <div class="description">Infrastructure projects analyzed</div>
+                        <h3>Total Provinces</h3>
+                        <div class="value">${analysisData.metadata.total_provinces.toLocaleString()}</div>
+                        <div class="description">Provinces analyzed</div>
                     </div>
                     <div class="stat-card">
-                        <h3>Unique Contractors</h3>
-                        <div class="value">${data.metadata.unique_contractors.toLocaleString()}</div>
-                        <div class="description">Different contractors identified</div>
+                        <h3>Unique Dynasties</h3>
+                        <div class="value">${analysisData.metadata.unique_dynasties.toLocaleString()}</div>
+                        <div class="description">Different dynasty surnames</div>
                     </div>
                     <div class="stat-card">
-                        <h3>Unique Districts</h3>
-                        <div class="value">${data.metadata.unique_districts.toLocaleString()}</div>
-                        <div class="description">District Engineering Offices</div>
+                        <h3>Avg. Poverty Rate</h3>
+                        <div class="value">${analysisData.metadata.avg_poverty_rate.toFixed(1)}%</div>
+                        <div class="description">Average poverty rate</div>
                     </div>
                     <div class="stat-card">
-                        <h3>Avg. Projects/Contractor</h3>
-                        <div class="value">${(data.metadata.total_projects / data.metadata.unique_contractors).toFixed(1)}</div>
-                        <div class="description">Average project count</div>
+                        <h3>Avg. Dynasty Count</h3>
+                        <div class="value">${analysisData.metadata.avg_dynasty_count.toFixed(1)}</div>
+                        <div class="description">Average dynasty members</div>
                     </div>
                 `;
                 
                 // Populate HHI Statistics
                 const hhiStats = document.getElementById('hhi-stats');
-                const avgHHIDistrict = data.concentration.avg_hhi_district;
-                const avgHHIContractor = data.concentration.avg_hhi_contractor;
-                
                 hhiStats.innerHTML = `
                     <div class="stat-card">
-                        <h3>Average HHI - Districts</h3>
-                        <div class="value">${avgHHIDistrict.toFixed(0)}</div>
-                        <div class="description">${getHHIType(avgHHIDistrict)}</div>
-                    </div>
-                    <div class="stat-card">
-                        <h3>Average HHI - Contractors</h3>
-                        <div class="value">${avgHHIContractor.toFixed(0)}</div>
-                        <div class="description">${getHHIType(avgHHIContractor)}</div>
+                        <h3>Dynasty HHI</h3>
+                        <div class="value">${hhiDynasty.toFixed(0)}</div>
+                        <div class="description">${getHHIType(hhiDynasty)}</div>
                     </div>
                 `;
                 
                 // HHI Interpretation
                 document.getElementById('hhi-interpretation').textContent = 
-                    `Districts show ${getHHIType(avgHHIDistrict).toLowerCase()} with an average HHI of ${avgHHIDistrict.toFixed(0)}, ` +
-                    `while contractors exhibit ${getHHIType(avgHHIContractor).toLowerCase()} with an average HHI of ${avgHHIContractor.toFixed(0)}. ` +
-                    `This indicates that contractors work in very focused geographic areas, but districts maintain competitive contractor markets.`;
-                
-                // Concentration Finding
-                const hhiDiff = Math.abs(avgHHIDistrict - avgHHIContractor);
-                document.getElementById('concentration-finding').textContent = 
-                    `Concentration levels are DIFFERENT (Δ = ${hhiDiff.toFixed(0)}). ` +
-                    `Contractors are highly specialized to specific districts (HHI: ${avgHHIContractor.toFixed(0)}), ` +
-                    `but districts maintain competitive markets among multiple contractors (HHI: ${avgHHIDistrict.toFixed(0)}).`;
+                    `Dynasties show ${getHHIType(hhiDynasty).toLowerCase()} with an HHI of ${hhiDynasty.toFixed(0)}. ` +
+                    `This indicates the level of dynasty concentration across provinces.`;
                 
                 // Populate Gini Statistics
                 const giniStats = document.getElementById('gini-stats');
                 giniStats.innerHTML = `
                     <div class="stat-card">
-                        <h3>Gini - Contractor Distribution</h3>
-                        <div class="value">${data.concentration.gini_contractor.toFixed(4)}</div>
-                        <div class="description">${getGiniType(data.concentration.gini_contractor)}</div>
+                        <h3>Gini - Dynasty Distribution</h3>
+                        <div class="value">${giniDynasty.toFixed(4)}</div>
+                        <div class="description">${getGiniType(giniDynasty)}</div>
                     </div>
                     <div class="stat-card">
-                        <h3>Gini - District Distribution</h3>
-                        <div class="value">${data.concentration.gini_district.toFixed(4)}</div>
-                        <div class="description">${getGiniType(data.concentration.gini_district)}</div>
+                        <h3>Gini - Poverty Distribution</h3>
+                        <div class="value">${giniPoverty.toFixed(4)}</div>
+                        <div class="description">${getGiniType(giniPoverty)}</div>
                     </div>
                 `;
                 
                 // Gini Interpretation
                 document.getElementById('gini-interpretation').textContent = 
-                    `Projects are distributed with ${getGiniType(data.concentration.gini_contractor).toLowerCase()} among contractors ` +
-                    `(Gini: ${data.concentration.gini_contractor.toFixed(4)}) and ${getGiniType(data.concentration.gini_district).toLowerCase()} ` +
-                    `among districts (Gini: ${data.concentration.gini_district.toFixed(4)}). This suggests moderate inequality in both dimensions.`;
-                
-                // Chi-square Results
-                const chiSquare = document.getElementById('chi-square-results');
-                const chiData = data.independence_test;
-                chiSquare.innerHTML = `
-                    <div class="evidence-card">
-                        <h4>Chi-square Statistic</h4>
-                        <div class="metric">${chiData.chi_square.toFixed(2)}</div>
-                        <div class="interpretation">Very high value indicates strong deviation from independence</div>
-                    </div>
-                    <div class="evidence-card">
-                        <h4>P-value</h4>
-                        <div class="metric">${chiData.p_value.toExponential(2)}</div>
-                        <div class="interpretation">
-                            <span class="result-badge ${chiData.significant ? 'significant' : 'not-significant'}">
-                                ${chiData.significant ? '✓ SIGNIFICANT' : '✗ NOT SIGNIFICANT'}
-                            </span>
-                        </div>
-                    </div>
-                    <div class="evidence-card">
-                        <h4>Cramér's V</h4>
-                        <div class="metric">${chiData.cramers_v.toFixed(4)}</div>
-                        <div class="interpretation">
-                            <span class="result-badge strong">
-                                ${getCramersVType(chiData.cramers_v)} ASSOCIATION
-                            </span>
-                        </div>
-                    </div>
-                `;
-                
-                // Chi Interpretation
-                document.getElementById('chi-interpretation').textContent = 
-                    `Contractors and districts are STRONGLY DEPENDENT (Cramér's V = ${chiData.cramers_v.toFixed(4)}). ` +
-                    `This means contractor selection is NOT independent of district assignment. ` +
-                    `Certain contractors tend to work in specific districts, showing geographical specialization patterns.`;
+                    `Dynasty distribution shows ${getGiniType(giniDynasty).toLowerCase()} ` +
+                    `(Gini: ${giniDynasty.toFixed(4)}) and poverty distribution shows ${getGiniType(giniPoverty).toLowerCase()} ` +
+                    `(Gini: ${giniPoverty.toFixed(4)}).`;
                 
                 // Correlation Results
                 const corrResults = document.getElementById('correlation-results');
-                const corrData = data.correlation;
-                
-                // Prepare data for scatter plot
-                const districtHHIs = Object.values(data.concentration.hhi_by_district);
-                const contractorHHIs = Object.values(data.concentration.hhi_by_contractor);
-                
-                // Create scatter plot
-                createScatterPlot(districtHHIs, contractorHHIs, corrData);
-                
                 corrResults.innerHTML = `
                     <div class="evidence-card">
                         <h4>Pearson Correlation</h4>
-                        <div class="metric">${corrData.pearson_r.toFixed(4)}</div>
+                        <div class="metric">${pearsonCorr.r.toFixed(4)}</div>
                         <div class="interpretation">
-                            P-value: ${corrData.pearson_p.toFixed(6)}<br>
-                            <span class="result-badge ${corrData.significant ? 'significant' : 'not-significant'}">
-                                ${corrData.significant ? '✓ SIGNIFICANT' : '✗ NOT SIGNIFICANT'}
+                            P-value: ${pearsonCorr.p.toFixed(6)}<br>
+                            <span class="result-badge ${pearsonCorr.significant ? 'significant' : 'not-significant'}">
+                                ${pearsonCorr.significant ? '✓ SIGNIFICANT' : '✗ NOT SIGNIFICANT'}
                             </span>
                         </div>
                     </div>
                     <div class="evidence-card">
                         <h4>Spearman Correlation</h4>
-                        <div class="metric">${corrData.spearman_r.toFixed(4)}</div>
+                        <div class="metric">${spearmanCorr.r.toFixed(4)}</div>
                         <div class="interpretation">
-                            P-value: ${corrData.spearman_p.toFixed(6)}<br>
-                            <span class="result-badge ${corrData.significant ? 'significant' : 'not-significant'}">
-                                ${corrData.significant ? '✓ SIGNIFICANT' : '✗ NOT SIGNIFICANT'}
+                            P-value: ${spearmanCorr.p.toFixed(6)}<br>
+                            <span class="result-badge ${spearmanCorr.significant ? 'significant' : 'not-significant'}">
+                                ${spearmanCorr.significant ? '✓ SIGNIFICANT' : '✗ NOT SIGNIFICANT'}
                             </span>
                         </div>
                     </div>
                 `;
                 
                 // Correlation Interpretation
+                const correlationStrength = Math.abs(pearsonCorr.r);
+                let strengthText = 'weak';
+                if (correlationStrength >= 0.7) strengthText = 'strong';
+                else if (correlationStrength >= 0.4) strengthText = 'moderate';
+                
+                const direction = pearsonCorr.r > 0 ? 'positive' : 'negative';
                 document.getElementById('correlation-interpretation').textContent = 
-                    `No significant correlation found (r = ${corrData.pearson_r.toFixed(4)}, p = ${corrData.pearson_p.toFixed(3)}). ` +
-                    `This means that contractor concentration patterns and district concentration patterns are NOT similar. ` +
-                    `The concentration happens in opposite directions: contractors specialize in few districts, while districts have many contractors.`;
+                    `${strengthText.charAt(0).toUpperCase() + strengthText.slice(1)} ${direction} correlation found ` +
+                    `(r = ${pearsonCorr.r.toFixed(4)}, p = ${pearsonCorr.p.toFixed(3)}). ` +
+                    `This ${pearsonCorr.significant ? 'suggests' : 'does not suggest'} a significant relationship ` +
+                    `between dynasty strength and poverty rates.`;
                 
                 // Evidence Summary
                 const evidenceSummary = document.getElementById('evidence-summary');
                 const tests = [
                     {
-                        name: 'HHI Similarity',
-                        result: Math.abs(avgHHIDistrict - avgHHIContractor) < 500,
-                        detail: `Δ = ${Math.abs(avgHHIDistrict - avgHHIContractor).toFixed(0)}`
+                        name: 'Pearson Correlation',
+                        result: pearsonCorr.significant,
+                        detail: `r = ${pearsonCorr.r.toFixed(4)}`
                     },
                     {
-                        name: 'Gini Similarity',
-                        result: Math.abs(data.concentration.gini_contractor - data.concentration.gini_district) < 0.1,
-                        detail: `Δ = ${Math.abs(data.concentration.gini_contractor - data.concentration.gini_district).toFixed(4)}`
-                    },
-                    {
-                        name: 'Chi-square (Dependence)',
-                        result: chiData.significant,
-                        detail: `Cramér's V = ${chiData.cramers_v.toFixed(4)}`
-                    },
-                    {
-                        name: 'Correlation',
-                        result: corrData.significant,
-                        detail: `r = ${corrData.pearson_r.toFixed(4)}`
+                        name: 'Spearman Correlation',
+                        result: spearmanCorr.significant,
+                        detail: `r = ${spearmanCorr.r.toFixed(4)}`
                     }
                 ];
                 
@@ -934,48 +1011,64 @@ function toggleMobileMenu() {
                 
                 // Verdict
                 const verdictBox = document.getElementById('verdict-box');
-                if (supportCount >= 3) {
+                if (supportCount >= 1) {
                     verdictBox.className = 'verdict supported';
-                    verdictBox.textContent = `✅ HYPOTHESIS SUPPORTED (${supportCount}/4 tests support)`;
-                } else if (supportCount >= 2) {
-                    verdictBox.className = 'verdict partial';
-                    verdictBox.textContent = `⚠️ HYPOTHESIS PARTIALLY SUPPORTED (${supportCount}/4 tests support)`;
+                    verdictBox.textContent = `✅ HYPOTHESIS SUPPORTED (${supportCount}/2 tests support)`;
                 } else {
                     verdictBox.className = 'verdict not-supported';
-                    verdictBox.textContent = `❌ HYPOTHESIS NOT SUPPORTED (${supportCount}/4 tests support)`;
+                    verdictBox.textContent = `❌ HYPOTHESIS NOT SUPPORTED (${supportCount}/2 tests support)`;
                 }
                 
-                // Top Districts Table
-                const districtsTable = document.getElementById('top-districts-table').getElementsByTagName('tbody')[0];
-                const topDistricts = Object.entries(data.concentration.hhi_by_district).slice(0, 10);
-                districtsTable.innerHTML = topDistricts.map(([district, hhi], idx) => `
+                // Top Dynasties Table
+                const dynastiesTable = document.getElementById('top-dynasties-table').getElementsByTagName('tbody')[0];
+                dynastiesTable.innerHTML = analysisData.top_provinces.map((item, idx) => `
                     <tr>
                         <td><strong>${idx + 1}</strong></td>
-                        <td>${district}</td>
-                        <td><strong>${hhi.toFixed(2)}</strong></td>
-                        <td>${getHHIType(hhi)}</td>
+                        <td>${item.province}</td>
+                        <td><strong>${item.dynastySurname}</strong></td>
+                        <td>${item.dynastyCount}</td>
+                        <td>${item.povertyRate.toFixed(1)}%</td>
                     </tr>
                 `).join('');
                 
-                // Top Contractors Table
-                const contractorsTable = document.getElementById('top-contractors-table').getElementsByTagName('tbody')[0];
-                const topContractors = Object.entries(data.concentration.hhi_by_contractor).slice(0, 10);
-                contractorsTable.innerHTML = topContractors.map(([contractor, hhi], idx) => `
+                // Top Poverty Table
+                const povertyTable = document.getElementById('top-poverty-table').getElementsByTagName('tbody')[0];
+                povertyTable.innerHTML = analysisData.top_poverty.map((item, idx) => `
                     <tr>
                         <td><strong>${idx + 1}</strong></td>
-                        <td>${contractor}</td>
-                        <td><strong>${hhi.toFixed(2)}</strong></td>
-                        <td>${getSpecializationType(hhi)}</td>
+                        <td>${item.province}</td>
+                        <td><strong>${item.povertyRate.toFixed(1)}%</strong></td>
+                        <td>${item.dynastySurname}</td>
+                        <td>${item.dynastyCount}</td>
                     </tr>
                 `).join('');
                 
             } catch (error) {
-                document.getElementById('loading').textContent = 'Error loading data: ' + error.message;
+                console.error('Error loading correlation data:', error);
+                const loadingDiv = document.getElementById('loading');
+                const contentDiv = document.getElementById('content');
+                
+                loadingDiv.style.display = 'block';
+                loadingDiv.innerHTML = `
+                    <div style="color: #dc3545; text-align: center;">
+                        <h3 style="margin-bottom: 15px;">❌ Error Loading Data</h3>
+                        <p style="font-size: 1.1em; margin-bottom: 10px;"><strong>Error:</strong> ${error.message}</p>
+                        <p style="font-size: 0.9em; color: #666; margin-top: 20px;">
+                            Please check the browser console for more details.
+                        </p>
+                        <button onclick="location.reload()" style="margin-top: 20px; padding: 10px 20px; background: #667eea; color: white; border: none; border-radius: 8px; cursor: pointer; font-size: 1em;">
+                            Retry
+                        </button>
+                    </div>
+                `;
+                if (contentDiv) {
+                    contentDiv.style.display = 'none';
+                }
             }
         }
         
         function getHHIType(hhi) {
-            if (hhi < 1500) return 'Competitive Market';
+            if (hhi < 1500) return 'Competitive';
             if (hhi < 2500) return 'Moderate Concentration';
             return 'High Concentration';
         }
@@ -987,20 +1080,7 @@ function toggleMobileMenu() {
             return 'Very High Inequality';
         }
         
-        function getCramersVType(v) {
-            if (v < 0.1) return 'WEAK';
-            if (v < 0.3) return 'MODERATE';
-            return 'STRONG';
-        }
-        
-        function getSpecializationType(hhi) {
-            if (hhi >= 10000) return 'Single District';
-            if (hhi >= 5000) return 'Highly Specialized';
-            if (hhi >= 2500) return 'Specialized';
-            return 'Diversified';
-        }
-        
-        function createScatterPlot(districtHHIs, contractorHHIs, correlation) {
+        function createScatterPlot(data, correlation) {
             const ctx = document.getElementById('correlationScatterChart');
             if (!ctx) return;
             
@@ -1009,23 +1089,12 @@ function toggleMobileMenu() {
                 window.scatterChart.destroy();
             }
             
-            // Prepare data points - we'll plot district HHI vs contractor HHI
-            // Since we have arrays of HHI values, we'll create pairs by matching indices
-            // Or we can plot them as separate distributions
-            // For meaningful correlation, we need matched pairs - let's use sorted values
-            const sortedDistricts = [...districtHHIs].sort((a, b) => a - b);
-            const sortedContractors = [...contractorHHIs].sort((a, b) => a - b);
-            
-            // Create scatter data - match by rank percentile
-            const scatterData = sortedDistricts.map((districtHHI, idx) => {
-                // Match by percentile rank
-                const contractorIdx = Math.floor((idx / sortedDistricts.length) * sortedContractors.length);
-                return {
-                    x: districtHHI,
-                    y: sortedContractors[contractorIdx] || 0,
-                    label: `District ${idx + 1}`
-                };
-            });
+            // Prepare data points
+            const scatterData = data.map(item => ({
+                x: item.dynastyCount,
+                y: item.povertyRate,
+                label: item.province
+            }));
             
             // Calculate regression line
             const xValues = scatterData.map(d => d.x);
@@ -1036,10 +1105,10 @@ function toggleMobileMenu() {
             
             let slope = 0;
             let intercept = meanY;
-            if (correlation.pearson_r !== 0) {
+            if (correlation.r !== 0) {
                 const sx = Math.sqrt(xValues.reduce((sum, val) => sum + Math.pow(val - meanX, 2), 0) / n);
                 const sy = Math.sqrt(yValues.reduce((sum, val) => sum + Math.pow(val - meanY, 2), 0) / n);
-                slope = correlation.pearson_r * (sy / sx);
+                slope = correlation.r * (sy / sx);
                 intercept = meanY - slope * meanX;
             }
             
@@ -1055,12 +1124,12 @@ function toggleMobileMenu() {
                 data: {
                     datasets: [
                         {
-                            label: 'District-Contractor HHI Pairs',
+                            label: 'Provinces',
                             data: scatterData,
                             backgroundColor: 'rgba(102, 126, 234, 0.6)',
                             borderColor: 'rgba(102, 126, 234, 0.8)',
-                            pointRadius: 4,
-                            pointHoverRadius: 6
+                            pointRadius: 5,
+                            pointHoverRadius: 7
                         },
                         {
                             label: 'Regression Line',
@@ -1077,11 +1146,11 @@ function toggleMobileMenu() {
                 options: {
                     responsive: true,
                     maintainAspectRatio: true,
-                    aspectRatio: 2,
+                    aspectRatio: 1.5,
                     plugins: {
                         title: {
                             display: true,
-                            text: `District HHI vs Contractor HHI (r = ${correlation.pearson_r.toFixed(4)}, p = ${correlation.pearson_p.toFixed(4)})`,
+                            text: `Dynasty Count vs Poverty Rate (r = ${correlation.r.toFixed(4)}, p = ${correlation.p.toFixed(4)})`,
                             font: {
                                 size: 16,
                                 weight: 'bold'
@@ -1092,7 +1161,7 @@ function toggleMobileMenu() {
                                 label: function(context) {
                                     if (context.datasetIndex === 0) {
                                         const point = scatterData[context.dataIndex];
-                                        return `District HHI: ${point.x.toFixed(0)}, Contractor HHI: ${point.y.toFixed(0)}`;
+                                        return `${point.label}: Dynasty=${point.x}, Poverty=${point.y.toFixed(1)}%`;
                                     }
                                     return '';
                                 }
@@ -1107,7 +1176,7 @@ function toggleMobileMenu() {
                         x: {
                             title: {
                                 display: true,
-                                text: 'District HHI (Concentration)',
+                                text: 'Dynasty Count (Number of Dynasty Members)',
                                 font: {
                                     size: 14,
                                     weight: 'bold'
@@ -1118,7 +1187,7 @@ function toggleMobileMenu() {
                         y: {
                             title: {
                                 display: true,
-                                text: 'Contractor HHI (Concentration)',
+                                text: 'Poverty Rate (%)',
                                 font: {
                                     size: 14,
                                     weight: 'bold'
