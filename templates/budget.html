@@ -3352,51 +3352,110 @@ async function loadRegionsChart() {
             
             const ctx = canvas.getContext('2d');
             
+            // Sort regions by budget amount (descending) for better area chart visualization
+            const sortedRegions = regions.sort((a, b) => (b.total_amount || 0) - (a.total_amount || 0));
+            
             new Chart(ctx, {
-                type: 'pie',
+                type: 'line',
                 data: {
-                    labels: regions.map(r => `Region ${r.uacs_reg_id}` || 'Unknown'),
+                    labels: sortedRegions.map(r => `Region ${r.uacs_reg_id}` || 'Unknown'),
                     datasets: [{
-                        data: regions.map(r => (r.total_amount || 0) * 1000),
-                        backgroundColor: [
-                            '#0038A8', '#CE1126', '#28a745', '#ffc107',
-                            '#dc3545', '#6f42c1', '#fd7e14', '#20c997'
-                        ],
-                        borderWidth: 2,
-                        borderColor: '#fff'
+                        label: 'Budget Amount (₱B)',
+                        data: sortedRegions.map(r => (r.total_amount || 0) * 1000 / 1000000000), // Convert to billions
+                        backgroundColor: 'rgba(0, 56, 168, 0.3)',
+                        borderColor: '#0038A8',
+                        borderWidth: 3,
+                        fill: true, // This makes it an area chart
+                        tension: 0.4, // Smooth curves
+                        pointBackgroundColor: '#0038A8',
+                        pointBorderColor: '#fff',
+                        pointBorderWidth: 2,
+                        pointRadius: 6,
+                        pointHoverRadius: 8
                     }]
                 },
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
+                    interaction: {
+                        intersect: false,
+                        mode: 'index'
+                    },
                     plugins: {
                         legend: {
-                            position: 'bottom',
+                            display: true,
+                            position: 'top',
                             labels: {
-                                padding: 8,
-                                usePointStyle: true,
-                                font: { size: 10 },
-                                maxWidth: 200,
-                                generateLabels: function(chart) {
-                                    const data = chart.data;
-                                    if (data.labels.length && data.datasets.length) {
-                                        return data.labels.map((label, i) => {
-                                            const dataset = data.datasets[0];
-                                            const value = dataset.data[i];
-                                            return {
-                                                text: `${label}: ₱${(value / 1000000000).toFixed(1)}B`,
-                                                fillStyle: dataset.backgroundColor[i] || dataset.backgroundColor,
-                                                strokeStyle: dataset.borderColor || '#fff',
-                                                lineWidth: dataset.borderWidth || 0,
-                                                pointStyle: 'circle',
-                                                hidden: false,
-                                                index: i
-                                            };
-                                        });
-                                    }
-                                    return [];
+                                padding: 20,
+                                font: { size: 12, weight: 'bold' },
+                                usePointStyle: true
+                            }
+                        },
+                        tooltip: {
+                            backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                            titleColor: '#fff',
+                            bodyColor: '#fff',
+                            borderColor: '#0038A8',
+                            borderWidth: 1,
+                            callbacks: {
+                                title: function(context) {
+                                    return context[0].label;
+                                },
+                                label: function(context) {
+                                    const value = context.parsed.y;
+                                    return `Budget: ₱${value.toFixed(2)}B`;
                                 }
                             }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            display: true,
+                            title: {
+                                display: true,
+                                text: 'Regions',
+                                font: { size: 14, weight: 'bold' },
+                                color: '#333'
+                            },
+                            ticks: {
+                                font: { size: 11 },
+                                color: '#666',
+                                maxRotation: 45,
+                                minRotation: 0
+                            },
+                            grid: {
+                                display: true,
+                                color: 'rgba(0, 0, 0, 0.1)'
+                            }
+                        },
+                        y: {
+                            display: true,
+                            title: {
+                                display: true,
+                                text: 'Budget Amount (₱B)',
+                                font: { size: 14, weight: 'bold' },
+                                color: '#333'
+                            },
+                            ticks: {
+                                font: { size: 11 },
+                                color: '#666',
+                                callback: function(value) {
+                                    return '₱' + value.toFixed(1) + 'B';
+                                }
+                            },
+                            grid: {
+                                display: true,
+                                color: 'rgba(0, 0, 0, 0.1)'
+                            },
+                            beginAtZero: true
+                        }
+                    },
+                    layout: {
+                        padding: {
+                            top: 20,
+                            bottom: 20,
+                            left: 20,
+                            right: 20
                         }
                     }
                 }
