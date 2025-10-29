@@ -188,6 +188,25 @@ function toggleMobileMenu() {
                             </div>
                         </div>
                         
+                        <!-- Budget by Region - Full Row (First Chart) -->
+                        <div class="charts-grid" style="display: grid; grid-template-columns: 1fr; gap: 20px; margin-bottom: 30px;">
+                            <div id="regionsChartContainer" class="chart-container relative" style="background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); overflow: hidden; width: 100%;">
+                                <button 
+                                    id="copyRegionsBtn" 
+                                    style="position: absolute; top: 20px; right: 20px;"
+                                    class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded text-base transition-colors duration-200 flex items-center gap-2"
+                                    onclick="copyChartToClipboard('regionsChartContainer', 'copyRegionsBtn')"
+                                    title="Copy chart image to clipboard"
+                                >
+                                    📋 Copy
+                                </button>
+                                <h3 style="color: #0038A8; margin: 0 0 15px 0;">🗺️ Budget by Region Over Time</h3>
+                                <div style="position: relative; height: 500px; overflow: hidden; width: 100%;">
+                                    <canvas id="regionsChart" style="width: 100%; height: 100%;"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                        
                         <!-- Charts Section -->
                         <div class="charts-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 30px;">
                             <!-- Department Chart -->
@@ -207,21 +226,9 @@ function toggleMobileMenu() {
                                 </div>
                             </div>
                             
-                            <!-- Region Chart -->
-                            <div id="regionsChartContainer" class="chart-container relative" style="background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); overflow: hidden;">
-                                <button 
-                                    id="copyRegionsBtn" 
-                                    style="position: absolute; top: 20px; right: 20px;"
-                                    class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded text-base transition-colors duration-200 flex items-center gap-2"
-                                    onclick="copyChartToClipboard('regionsChartContainer', 'copyRegionsBtn')"
-                                    title="Copy chart image to clipboard"
-                                >
-                                    📋 Copy
-                                </button>
-                                <h3 style="color: #0038A8; margin: 0 0 15px 0;">🗺️ Budget by Region</h3>
-                                <div style="position: relative; height: 400px; overflow: hidden;">
-                                    <canvas id="regionsChart" width="400" height="400"></canvas>
-                                </div>
+                            <!-- Placeholder for second chart or other content -->
+                            <div style="background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); display: flex; align-items: center; justify-content: center; color: #666;">
+                                <p>Additional chart or content can be placed here</p>
                             </div>
                         </div>
                         
@@ -3333,135 +3340,170 @@ async function loadExpenseCategoriesChart() {
 
 async function loadRegionsChart() {
     try {
-        const apiYear = getApiYear();
-        const response = await fetch(`/api/budget/regions?year=${apiYear}&limit=100`);
-        const result = await response.json();
+        const canvas = document.getElementById('regionsChart');
+        if (!canvas) {
+            return;
+        }
         
-        if (result.success && result.data) {
-            const regions = result.data;
-            const canvas = document.getElementById('regionsChart');
-            if (!canvas) {
-                return;
+        // Clear any existing chart
+        const existingChart = Chart.getChart(canvas);
+        if (existingChart) {
+            existingChart.destroy();
+        }
+        
+        const ctx = canvas.getContext('2d');
+        
+        // Get data for multiple years (2020-2025)
+        const years = [2020, 2021, 2022, 2023, 2024, 2025];
+        const regionData = {};
+        const regionColors = [
+            '#0038A8', '#CE1126', '#28a745', '#ffc107',
+            '#dc3545', '#6f42c1', '#fd7e14', '#20c997',
+            '#17a2b8', '#6c757d', '#e83e8c', '#fd7e14',
+            '#20c997', '#6f42c1', '#ffc107', '#28a745'
+        ];
+        
+        // Fetch data for each year
+        for (const year of years) {
+            try {
+                const response = await fetch(`/api/budget/regions?year=${year}&limit=100`);
+                const result = await response.json();
+                
+                if (result.success && result.data) {
+                    result.data.forEach(region => {
+                        const regionId = region.uacs_reg_id || 'Unknown';
+                        if (!regionData[regionId]) {
+                            regionData[regionId] = {
+                                name: `Region ${regionId}`,
+                                data: new Array(years.length).fill(0)
+                            };
+                        }
+                        const yearIndex = years.indexOf(year);
+                        regionData[regionId].data[yearIndex] = (region.total_amount || 0) * 1000 / 1000000000; // Convert to billions
+                    });
+                }
+            } catch (error) {
+                console.warn(`Failed to fetch data for year ${year}:`, error);
             }
-            
-            // Clear any existing chart
-            const existingChart = Chart.getChart(canvas);
-            if (existingChart) {
-                existingChart.destroy();
-            }
-            
-            const ctx = canvas.getContext('2d');
-            
-            // Sort regions by budget amount (descending) for better area chart visualization
-            const sortedRegions = regions.sort((a, b) => (b.total_amount || 0) - (a.total_amount || 0));
-            
-            new Chart(ctx, {
-                type: 'line',
-                data: {
-                    labels: sortedRegions.map(r => `Region ${r.uacs_reg_id}` || 'Unknown'),
-                    datasets: [{
-                        label: 'Budget Amount (₱B)',
-                        data: sortedRegions.map(r => (r.total_amount || 0) * 1000 / 1000000000), // Convert to billions
-                        backgroundColor: 'rgba(0, 56, 168, 0.3)',
-                        borderColor: '#0038A8',
-                        borderWidth: 3,
-                        fill: true, // This makes it an area chart
-                        tension: 0.4, // Smooth curves
-                        pointBackgroundColor: '#0038A8',
-                        pointBorderColor: '#fff',
-                        pointBorderWidth: 2,
-                        pointRadius: 6,
-                        pointHoverRadius: 8
-                    }]
+        }
+        
+        // Convert to datasets for Chart.js
+        const datasets = [];
+        const regionIds = Object.keys(regionData);
+        
+        regionIds.forEach((regionId, index) => {
+            const region = regionData[regionId];
+            datasets.push({
+                label: region.name,
+                data: region.data,
+                backgroundColor: regionColors[index % regionColors.length] + '40', // Add transparency
+                borderColor: regionColors[index % regionColors.length],
+                borderWidth: 2,
+                fill: true,
+                tension: 0.1,
+                pointRadius: 3,
+                pointHoverRadius: 5
+            });
+        });
+        
+        new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: years.map(year => year.toString()),
+                datasets: datasets
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                interaction: {
+                    intersect: false,
+                    mode: 'index'
                 },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    interaction: {
-                        intersect: false,
-                        mode: 'index'
-                    },
-                    plugins: {
-                        legend: {
-                            display: true,
-                            position: 'top',
-                            labels: {
-                                padding: 20,
-                                font: { size: 12, weight: 'bold' },
-                                usePointStyle: true
-                            }
-                        },
-                        tooltip: {
-                            backgroundColor: 'rgba(0, 0, 0, 0.8)',
-                            titleColor: '#fff',
-                            bodyColor: '#fff',
-                            borderColor: '#0038A8',
-                            borderWidth: 1,
-                            callbacks: {
-                                title: function(context) {
-                                    return context[0].label;
-                                },
-                                label: function(context) {
-                                    const value = context.parsed.y;
-                                    return `Budget: ₱${value.toFixed(2)}B`;
-                                }
-                            }
+                plugins: {
+                    legend: {
+                        display: true,
+                        position: 'top',
+                        labels: {
+                            padding: 15,
+                            font: { size: 11 },
+                            usePointStyle: true,
+                            boxWidth: 12
                         }
                     },
-                    scales: {
-                        x: {
-                            display: true,
-                            title: {
-                                display: true,
-                                text: 'Regions',
-                                font: { size: 14, weight: 'bold' },
-                                color: '#333'
+                    tooltip: {
+                        backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                        titleColor: '#fff',
+                        bodyColor: '#fff',
+                        borderColor: '#0038A8',
+                        borderWidth: 1,
+                        callbacks: {
+                            title: function(context) {
+                                return `Year ${context[0].label}`;
                             },
-                            ticks: {
-                                font: { size: 11 },
-                                color: '#666',
-                                maxRotation: 45,
-                                minRotation: 0
+                            label: function(context) {
+                                const value = context.parsed.y;
+                                return `${context.dataset.label}: ₱${value.toFixed(2)}B`;
                             },
-                            grid: {
-                                display: true,
-                                color: 'rgba(0, 0, 0, 0.1)'
+                            footer: function(tooltipItems) {
+                                const total = tooltipItems.reduce((sum, item) => sum + item.parsed.y, 0);
+                                return `Total: ₱${total.toFixed(2)}B`;
                             }
-                        },
-                        y: {
-                            display: true,
-                            title: {
-                                display: true,
-                                text: 'Budget Amount (₱B)',
-                                font: { size: 14, weight: 'bold' },
-                                color: '#333'
-                            },
-                            ticks: {
-                                font: { size: 11 },
-                                color: '#666',
-                                callback: function(value) {
-                                    return '₱' + value.toFixed(1) + 'B';
-                                }
-                            },
-                            grid: {
-                                display: true,
-                                color: 'rgba(0, 0, 0, 0.1)'
-                            },
-                            beginAtZero: true
-                        }
-                    },
-                    layout: {
-                        padding: {
-                            top: 20,
-                            bottom: 20,
-                            left: 20,
-                            right: 20
                         }
                     }
+                },
+                scales: {
+                    x: {
+                        display: true,
+                        title: {
+                            display: true,
+                            text: 'Year',
+                            font: { size: 14, weight: 'bold' },
+                            color: '#333'
+                        },
+                        ticks: {
+                            font: { size: 12 },
+                            color: '#666'
+                        },
+                        grid: {
+                            display: true,
+                            color: 'rgba(0, 0, 0, 0.1)'
+                        }
+                    },
+                    y: {
+                        display: true,
+                        title: {
+                            display: true,
+                            text: 'Budget Amount (₱B)',
+                            font: { size: 14, weight: 'bold' },
+                            color: '#333'
+                        },
+                        ticks: {
+                            font: { size: 12 },
+                            color: '#666',
+                            callback: function(value) {
+                                return '₱' + value.toFixed(1) + 'B';
+                            }
+                        },
+                        grid: {
+                            display: true,
+                            color: 'rgba(0, 0, 0, 0.1)'
+                        },
+                        beginAtZero: true,
+                        stacked: true // This makes it a stacked area chart
+                    }
+                },
+                layout: {
+                    padding: {
+                        top: 20,
+                        bottom: 20,
+                        left: 20,
+                        right: 20
+                    }
                 }
-            });
-        }
+            }
+        });
     } catch (error) {
+        console.error('Error loading regions chart:', error);
     }
 }
 
