@@ -69,24 +69,46 @@ def load_flood_data():
     return None, None
 
 def extract_project_counts(data, source):
-    """Extract project counts from the data."""
+    """Extract project counts and contractor names from the data."""
     project_counts = []
+    contractor_names = []
     
     if source == "contractors_top.json":
         contractors = data.get("data", {}).get("contractors", [])
-        project_counts = [c.get("count", 0) for c in contractors if c.get("count")]
+        for c in contractors:
+            count = c.get("count", 0)
+            name = c.get("contractor", "")
+            if count and name:
+                project_counts.append(count)
+                contractor_names.append(name)
     elif source == "flood_hidden_contractors_cached.json":
         contractors = data.get("data", {}).get("contractors", [])
-        project_counts = [c.get("project_count", 0) for c in contractors if c.get("project_count")]
+        for c in contractors:
+            count = c.get("project_count", 0)
+            name = c.get("contractor", "")
+            if count and name:
+                project_counts.append(count)
+                contractor_names.append(name)
     elif source == "contractors_sec.json":
         contractors = data.get("contractors", [])
-        project_counts = [c.get("project_count", 0) for c in contractors if c.get("project_count")]
+        for c in contractors:
+            count = c.get("project_count", 0)
+            name = c.get("contractor", "")
+            if count and name:
+                project_counts.append(count)
+                contractor_names.append(name)
     
     # Filter out zero counts and ensure we have valid numbers
-    project_counts = [count for count in project_counts if isinstance(count, (int, float)) and count > 0]
+    valid_data = [(count, name) for count, name in zip(project_counts, contractor_names) 
+                  if isinstance(count, (int, float)) and count > 0 and name]
     
-    print(f"📊 Extracted {len(project_counts)} project counts from {source}")
-    return project_counts
+    if valid_data:
+        project_counts, contractor_names = zip(*valid_data)
+        project_counts = list(project_counts)
+        contractor_names = list(contractor_names)
+    
+    print(f"📊 Extracted {len(project_counts)} project counts and contractor names from {source}")
+    return project_counts, contractor_names
 
 def extract_contractor_costs(flood_data, source):
     """Extract contractor cost data from flood control data."""
@@ -117,7 +139,7 @@ def extract_contractor_costs(flood_data, source):
     print(f"📊 Extracted cost data for {len(contractor_costs)} contractors from {source}")
     return contractor_costs
 
-def calculate_standard_deviation_stats(project_counts, contractor_costs=None):
+def calculate_standard_deviation_stats(project_counts, contractor_costs=None, contractor_names=None):
     """Calculate standard deviation statistics with cost aggregation per SD group."""
     if not project_counts:
         print("❌ No project counts available for analysis")
@@ -152,10 +174,21 @@ def calculate_standard_deviation_stats(project_counts, contractor_costs=None):
     
     # Calculate cost aggregation per SD group if cost data is available
     cost_aggregation = {}
-    if contractor_costs:
-        print("💰 Calculating cost aggregation per SD group...")
+    if contractor_costs and contractor_names and len(contractor_names) == len(project_counts):
+        print("💰 Calculating cost aggregation per SD group using actual contractor-cost mapping...")
         
-        # Group contractors by SD ranges and sum their costs
+        # Map each contractor to their project count and cost
+        contractor_data = []
+        for i, (name, count) in enumerate(zip(contractor_names, project_counts)):
+            cost = contractor_costs.get(name, 0)
+            contractor_data.append({
+                'name': name,
+                'project_count': count,
+                'cost': cost,
+                'z_score': (count - mean_projects) / std_dev
+            })
+        
+        # Group contractors by SD ranges and sum their actual costs
         sd_groups = {
             "within_1sd": [],
             "within_2sd": [],
@@ -167,32 +200,63 @@ def calculate_standard_deviation_stats(project_counts, contractor_costs=None):
             "beyond_4sd": []
         }
         
-        # Note: We need to map project counts back to contractor names for cost calculation
-        # This is a simplified approach - in practice, you'd need to maintain the mapping
-        # For now, we'll calculate based on the distribution counts
+        for contractor in contractor_data:
+            z_score = contractor['z_score']
+            cost = contractor['cost']
+            
+            if abs(z_score) <= 1:
+                sd_groups["within_1sd"].append(cost)
+            if abs(z_score) <= 2:
+                sd_groups["within_2sd"].append(cost)
+            if abs(z_score) <= 3:
+                sd_groups["within_3sd"].append(cost)
+            if abs(z_score) <= 4:
+                sd_groups["within_4sd"].append(cost)
+            if abs(z_score) > 1:
+                sd_groups["beyond_1sd"].append(cost)
+            if abs(z_score) > 2:
+                sd_groups["beyond_2sd"].append(cost)
+            if abs(z_score) > 3:
+                sd_groups["beyond_3sd"].append(cost)
+            if abs(z_score) > 4:
+                sd_groups["beyond_4sd"].append(cost)
         
-        # Calculate total cost for each SD group
-        # This is a simplified calculation - in practice, you'd need the actual contractor-to-cost mapping
-        total_cost = sum(contractor_costs.values()) if contractor_costs else 0
+        # Calculate actual cost totals for each SD group
+        cost_aggregation = {
+            "within_1sd": round(sum(sd_groups["within_1sd"]), 2),
+            "within_2sd": round(sum(sd_groups["within_2sd"]), 2),
+            "within_3sd": round(sum(sd_groups["within_3sd"]), 2),
+            "within_4sd": round(sum(sd_groups["within_4sd"]), 2),
+            "beyond_1sd": round(sum(sd_groups["beyond_1sd"]), 2),
+            "beyond_2sd": round(sum(sd_groups["beyond_2sd"]), 2),
+            "beyond_3sd": round(sum(sd_groups["beyond_3sd"]), 2),
+            "beyond_4sd": round(sum(sd_groups["beyond_4sd"]), 2),
+            "total_cost": round(sum(contractor_costs.values()), 2),
+            "multiplier_note": "Frontend should multiply all cost values by 1000 for display"
+        }
         
-        if total_cost > 0:
-            # Distribute costs proportionally based on contractor counts
-            # Store raw values (frontend will multiply by 1000 for display)
-            cost_aggregation = {
-                "within_1sd": round((within_1sd / total_contractors) * total_cost, 2),
-                "within_2sd": round((within_2sd / total_contractors) * total_cost, 2),
-                "within_3sd": round((within_3sd / total_contractors) * total_cost, 2),
-                "within_4sd": round((within_4sd / total_contractors) * total_cost, 2),
-                "beyond_1sd": round((beyond_1sd / total_contractors) * total_cost, 2),
-                "beyond_2sd": round((beyond_2sd / total_contractors) * total_cost, 2),
-                "beyond_3sd": round((beyond_3sd / total_contractors) * total_cost, 2),
-                "beyond_4sd": round((beyond_4sd / total_contractors) * total_cost, 2),
-                "total_cost": round(total_cost, 2),
-                "multiplier_note": "Frontend should multiply all cost values by 1000 for display"
-            }
-            print(f"💰 Total cost aggregated: ₱{total_cost:,.2f} (raw values - frontend will multiply by 1000)")
-        else:
-            print("⚠️ No cost data available for aggregation")
+        print(f"💰 Total cost aggregated: ₱{cost_aggregation['total_cost']:,.2f} (raw values - frontend will multiply by 1000)")
+        print(f"💰 Within 1SD cost: ₱{cost_aggregation['within_1sd']:,.2f} from {len(sd_groups['within_1sd'])} contractors")
+        print(f"💰 Beyond 3SD cost: ₱{cost_aggregation['beyond_3sd']:,.2f} from {len(sd_groups['beyond_3sd'])} contractors")
+        
+    elif contractor_costs:
+        print("⚠️ Cost data available but contractor names don't match project counts - using proportional distribution")
+        # Fallback to proportional distribution
+        total_cost = sum(contractor_costs.values())
+        cost_aggregation = {
+            "within_1sd": round((within_1sd / total_contractors) * total_cost, 2),
+            "within_2sd": round((within_2sd / total_contractors) * total_cost, 2),
+            "within_3sd": round((within_3sd / total_contractors) * total_cost, 2),
+            "within_4sd": round((within_4sd / total_contractors) * total_cost, 2),
+            "beyond_1sd": round((beyond_1sd / total_contractors) * total_cost, 2),
+            "beyond_2sd": round((beyond_2sd / total_contractors) * total_cost, 2),
+            "beyond_3sd": round((beyond_3sd / total_contractors) * total_cost, 2),
+            "beyond_4sd": round((beyond_4sd / total_contractors) * total_cost, 2),
+            "total_cost": round(total_cost, 2),
+            "multiplier_note": "Frontend should multiply all cost values by 1000 for display"
+        }
+    else:
+        print("⚠️ No cost data available for aggregation")
     
     result = {
         "total_contractors": total_contractors,
@@ -238,13 +302,13 @@ def generate_standard_deviation_json():
     if flood_data:
         contractor_costs = extract_contractor_costs(flood_data, flood_source)
     
-    # Extract project counts
-    project_counts = extract_project_counts(data, source)
+    # Extract project counts and contractor names
+    project_counts, contractor_names = extract_project_counts(data, source)
     if not project_counts:
         return False
     
     # Calculate statistics with cost aggregation
-    stats = calculate_standard_deviation_stats(project_counts, contractor_costs)
+    stats = calculate_standard_deviation_stats(project_counts, contractor_costs, contractor_names)
     if not stats:
         return False
     

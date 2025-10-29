@@ -21,19 +21,19 @@
       "4sd_range": "-455.7 to 1070.9 projects"
     },
     "cost_aggregation": {
-      "within_1sd": 505639424.54,
-      "within_2sd": 533421810.51,
-      "within_3sd": 544534764.89,
-      "within_4sd": 544534764.89,
-      "beyond_1sd": 50008294.74,
-      "beyond_2sd": 22225908.77,
-      "beyond_3sd": 11112954.39,
-      "beyond_4sd": 11112954.39,
+      "within_1sd": 48248598.38,
+      "within_2sd": 48248598.38,
+      "within_3sd": 48248598.38,
+      "within_4sd": 48248598.38,
+      "beyond_1sd": 0,
+      "beyond_2sd": 0,
+      "beyond_3sd": 0,
+      "beyond_4sd": 0,
       "total_cost": 555647719.28,
       "multiplier_note": "Frontend should multiply all cost values by 1000 for display"
     }
   },
-  "generated_at": "2025-10-29T20:02:35.098983",
+  "generated_at": "2025-10-29T20:39:55.555572",
   "description": "Standard deviation analysis of contractor project counts with cost aggregation per SD group",
   "data_source": "contractors_top.json",
   "flood_data_source": "flood_control_data.json",
