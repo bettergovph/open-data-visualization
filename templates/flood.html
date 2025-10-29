@@ -4610,6 +4610,7 @@ function getContractorSecStatusSync(contractorName) {
         try {
             const existingChart = Chart.getChart('contractorScatterChart');
             if (existingChart) {
+                console.log('🗑️ Destroying existing scatter chart');
                 existingChart.destroy();
             }
         } catch (error) {
@@ -4619,6 +4620,7 @@ function getContractorSecStatusSync(contractorName) {
         // Also check window variable
         if (window.contractorScatterChart) {
             try {
+                console.log('🗑️ Destroying window scatter chart');
                 if (typeof window.contractorScatterChart.destroy === 'function') {
                     window.contractorScatterChart.destroy();
                 }
@@ -4628,10 +4630,22 @@ function getContractorSecStatusSync(contractorName) {
             }
         }
         
-        // Small delay to ensure destruction completes
+        // Also try to destroy by canvas element
+        try {
+            const canvas = document.getElementById('contractorScatterChart');
+            if (canvas && canvas.chart) {
+                console.log('🗑️ Destroying canvas chart');
+                canvas.chart.destroy();
+                canvas.chart = null;
+            }
+        } catch (error) {
+            console.warn('Error destroying canvas chart:', error);
+        }
+        
+        // Longer delay to ensure destruction completes
         setTimeout(() => {
             createScatterChart();
-        }, 100);
+        }, 200);
         
         async function createScatterChart() {
             try {
@@ -4752,7 +4766,7 @@ function getContractorSecStatusSync(contractorName) {
                 return '#28a745'; // Green - 1SD
             });
             
-            // Assign chart to window variable for future destruction
+            // Assign chart to window variable and canvas for future destruction
             window.contractorScatterChart = new Chart(scatterCtx, {
                 type: 'scatter',
                 data: {
@@ -4841,6 +4855,9 @@ function getContractorSecStatusSync(contractorName) {
                     }
                 }
             });
+            
+            // Also assign to canvas for future destruction
+            scatterCtx.chart = window.contractorScatterChart;
             
             console.log('✅ Contractor scatter plot created');
         } catch (error) {
