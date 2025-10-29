@@ -12,10 +12,99 @@ from pathlib import Path
 from datetime import datetime
 import statistics
 import numpy as np
+from meilisearch import Client
+from dotenv import load_dotenv
 
 # Add project root to path
 project_root = Path(__file__).parent.parent
 sys.path.append(str(project_root))
+
+# Load environment variables
+load_dotenv()
+
+def get_meilisearch_client():
+    """Get Meilisearch client with environment variables."""
+    meili_addr = os.getenv('MEILI_HTTP_ADDR', 'http://localhost:7700')
+    meili_key = os.getenv('MEILI_MASTER_KEY', '')
+    
+    if not meili_key:
+        print("❌ MEILI_MASTER_KEY not found in environment")
+        return None
+    
+    # Ensure the address has the protocol
+    if not meili_addr.startswith('http'):
+        meili_addr = f'http://{meili_addr}'
+    
+    try:
+        client = Client(meili_addr, meili_key)
+        # Test connection
+        client.health()
+        print(f"✅ Connected to Meilisearch at {meili_addr}")
+        return client
+    except Exception as e:
+        print(f"❌ Failed to connect to Meilisearch: {e}")
+        return None
+
+def get_contractor_data_from_meilisearch():
+    """Get contractor data directly from Meilisearch."""
+    client = get_meilisearch_client()
+    if not client:
+        return None, None
+    
+    try:
+        print("📡 Fetching contractor data from Meilisearch...")
+        
+        # Get all contractors with their project counts and costs
+        response = client.index('bettergov_flood_control').search('', {
+            'limit': 10000,  # Get all records
+            'attributesToRetrieve': ['Contractor', 'ContractCost'],
+            'facets': ['Contractor']
+        })
+        
+        # Process the data
+        contractor_stats = {}
+        
+        for hit in response['hits']:
+            contractor = hit.get('Contractor', '').strip()
+            cost = hit.get('ContractCost', 0)
+            
+            if contractor:
+                if contractor not in contractor_stats:
+                    contractor_stats[contractor] = {
+                        'project_count': 0,
+                        'total_cost': 0
+                    }
+                
+                contractor_stats[contractor]['project_count'] += 1
+                
+                if cost:
+                    try:
+                        # Convert cost to float if it's a string
+                        if isinstance(cost, str):
+                            cost = float(cost.replace("₱", "").replace(",", "").replace(" ", ""))
+                        contractor_stats[contractor]['total_cost'] += cost
+                    except (ValueError, TypeError):
+                        continue
+        
+        # Convert to lists for analysis
+        project_counts = []
+        contractor_names = []
+        contractor_costs = {}
+        
+        for contractor, stats in contractor_stats.items():
+            if stats['project_count'] > 0:
+                project_counts.append(stats['project_count'])
+                contractor_names.append(contractor)
+                contractor_costs[contractor] = stats['total_cost']
+        
+        print(f"📊 Found {len(project_counts)} contractors with {sum(project_counts)} total projects")
+        print(f"💰 Total contract value: ₱{sum(contractor_costs.values()):,.2f}")
+        
+        return (project_counts, contractor_names), contractor_costs
+        
+    except Exception as e:
+        print(f"❌ Error fetching data from Meilisearch: {e}")
+        return None, None
 
 def load_contractor_data():
     """Load contractor data from available sources."""
@@ -291,21 +380,32 @@ def generate_standard_deviation_json():
     print("🚀 Generating Contractor Standard Deviation Analysis")
     print("=" * 50)
     
-    # Load contractor data
-    data, source = load_contractor_data()
-    if not data:
-        return False
-    
-    # Load flood data for cost information
-    flood_data, flood_source = load_flood_data()
-    contractor_costs = None
-    if flood_data:
-        contractor_costs = extract_contractor_costs(flood_data, flood_source)
-    
-    # Extract project counts and contractor names
-    project_counts, contractor_names = extract_project_counts(data, source)
-    if not project_counts:
-        return False
+    # Get live data from Meilisearch
+    meilisearch_data = get_contractor_data_from_meilisearch()
+    if meilisearch_data[0] is None:
+        print("❌ Failed to get data from Meilisearch, falling back to cached data...")
+        # Fallback to cached data
+        data, source = load_contractor_data()
+        if not data:
+            return False
+        
+        # Load flood data for cost information
+        flood_data, flood_source = load_flood_data()
+        contractor_costs = None
+        if flood_data:
+            contractor_costs = extract_contractor_costs(flood_data, flood_source)
+        
+        # Extract project counts and contractor names
+        project_counts, contractor_names = extract_project_counts(data, source)
+        if not project_counts:
+            return False
+        data_source = source
+    else:
+        # Use live Meilisearch data
+        (project_counts, contractor_names), contractor_costs = meilisearch_data
+        if not project_counts:
+            return False
+        data_source = "Meilisearch (live data)"
     
     # Calculate statistics with cost aggregation
     stats = calculate_standard_deviation_stats(project_counts, contractor_costs, contractor_names)
@@ -318,8 +418,7 @@ def generate_standard_deviation_json():
         "analysis": stats,
         "generated_at": datetime.now().isoformat(),
         "description": "Standard deviation analysis of contractor project counts with cost aggregation per SD group",
-        "data_source": source,
-        "flood_data_source": flood_source if flood_data else None,
+        "data_source": data_source,
         "cost_data_available": contractor_costs is not None,
         "cache_version": "1.0"
     }

@@ -1,42 +1,41 @@
 {
   "success": true,
   "analysis": {
-    "total_contractors": 100,
-    "mean_projects": 307.6,
-    "standard_deviation": 190.8,
+    "total_contractors": 2409,
+    "mean_projects": 4.1,
+    "standard_deviation": 7.5,
     "distribution": {
-      "within_1sd": 91,
-      "within_2sd": 96,
-      "within_3sd": 98,
-      "within_4sd": 98,
-      "beyond_1sd": 9,
-      "beyond_2sd": 4,
-      "beyond_3sd": 2,
-      "beyond_4sd": 2
+      "within_1sd": 2232,
+      "within_2sd": 2317,
+      "within_3sd": 2359,
+      "within_4sd": 2379,
+      "beyond_1sd": 177,
+      "beyond_2sd": 92,
+      "beyond_3sd": 50,
+      "beyond_4sd": 30
     },
     "ranges": {
-      "1sd_range": "116.8 to 498.4 projects",
-      "2sd_range": "-74.1 to 689.3 projects",
-      "3sd_range": "-264.9 to 880.1 projects",
-      "4sd_range": "-455.7 to 1070.9 projects"
+      "1sd_range": "-3.4 to 11.6 projects",
+      "2sd_range": "-10.9 to 19.1 projects",
+      "3sd_range": "-18.4 to 26.6 projects",
+      "4sd_range": "-25.9 to 34.1 projects"
     },
     "cost_aggregation": {
-      "within_1sd": 48248598.38,
-      "within_2sd": 48248598.38,
-      "within_3sd": 48248598.38,
-      "within_4sd": 48248598.38,
-      "beyond_1sd": 0,
-      "beyond_2sd": 0,
-      "beyond_3sd": 0,
-      "beyond_4sd": 0,
-      "total_cost": 555647719.28,
+      "within_1sd": 253228129920.2,
+      "within_2sd": 326283419609.3,
+      "within_3sd": 393155980154.92,
+      "within_4sd": 435082029768.38,
+      "beyond_1sd": 294375367184.94,
+      "beyond_2sd": 221320077495.84,
+      "beyond_3sd": 154447516950.22,
+      "beyond_4sd": 112521467336.76,
+      "total_cost": 547603497105.14,
       "multiplier_note": "Frontend should multiply all cost values by 1000 for display"
     }
   },
-  "generated_at": "2025-10-29T20:39:55.555572",
+  "generated_at": "2025-10-29T20:44:15.098394",
   "description": "Standard deviation analysis of contractor project counts with cost aggregation per SD group",
-  "data_source": "contractors_top.json",
-  "flood_data_source": "flood_control_data.json",
+  "data_source": "Meilisearch (live data)",
   "cost_data_available": true,
   "cache_version": "1.0"
 }
