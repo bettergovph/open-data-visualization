@@ -4546,7 +4546,7 @@ function getContractorSecStatusSync(contractorName) {
                             borderWidth: 1,
                             callbacks: {
                                 label: function(context) {
-                                    const total = basicStats.total_contractors;
+                                    const total = analysis.total_contractors;
                                     const value = context.parsed.y;
                                     const percentage = ((value / total) * 100).toFixed(1);
                                     return `${value} contractors (${percentage}%)`;
