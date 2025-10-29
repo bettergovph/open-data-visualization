@@ -4484,7 +4484,7 @@ function getContractorSecStatusSync(contractorName) {
                 ];
                 console.log('💰 Cost data for line overlay:', costData);
                 
-                datasets.push({
+                datasets.unshift({
                     label: 'Total Contract Cost (₱B)',
                     data: costData,
                     type: 'line',
