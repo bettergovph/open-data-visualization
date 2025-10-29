@@ -373,6 +373,25 @@ class ContractorDistrictAnalyzer:
         chi_results = self.chi_square_test(contingency_table)
         corr_results = self.correlation_analysis(hhi_by_district, hhi_by_contractor)
         
+        # Generate sample pairs for scatter plot (limit to avoid huge JSON)
+        pairs_for_plot = []
+        pair_count = 0
+        max_pairs_for_plot = 1000  # Limit pairs for visualization performance
+        for contractor in self.contractor_district_matrix:
+            for district in self.contractor_district_matrix[contractor]:
+                if pair_count >= max_pairs_for_plot:
+                    break
+                count = self.contractor_district_matrix[contractor].get(district, 0)
+                if count > 0:
+                    pairs_for_plot.append({
+                        'district_hhi': float(hhi_by_district.get(district, 0)),
+                        'contractor_hhi': float(hhi_by_contractor.get(contractor, 0)),
+                        'projects': count
+                    })
+                    pair_count += 1
+            if pair_count >= max_pairs_for_plot:
+                break
+        
         # Build comprehensive results
         results = {
             'metadata': {
@@ -387,7 +406,7 @@ class ContractorDistrictAnalyzer:
                 'gini_contractor': float(self.calculate_gini(list(self.contractor_totals.values()))),
                 'gini_district': float(self.calculate_gini(list(self.district_totals.values()))),
                 'hhi_by_district': {k: float(v) for k, v in sorted(hhi_by_district.items(), key=lambda x: x[1], reverse=True)},
-                'hhi_by_contractor': {k: float(v) for k, v in sorted(hhi_by_contractor.items(), key=lambda x: x[1], reverse=True)[:100]}  # Top 100 only
+                'hhi_by_contractor': {k: float(v) for k, v in sorted(hhi_by_contractor.items(), key=lambda x: x[1], reverse=True)}  # All contractors
             },
             'independence_test': {
                 'chi_square': float(chi_results['chi2']),
@@ -400,7 +419,9 @@ class ContractorDistrictAnalyzer:
                 'pearson_p': float(corr_results['pearson_p_value']),
                 'spearman_r': float(corr_results['spearman_correlation']),
                 'spearman_p': float(corr_results['spearman_p_value']),
-                'significant': bool(corr_results['significant'])
+                'significant': bool(corr_results['significant']),
+                'sample_size': int(corr_results['sample_size']),
+                'pairs_for_plot': pairs_for_plot[:max_pairs_for_plot]  # Sample pairs for scatter plot
             }
         }
         

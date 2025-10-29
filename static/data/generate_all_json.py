@@ -260,6 +260,12 @@ class JSONGenerator:
                 'category': 'analysis_data',
                 'dependencies': ['MeiliSearch flood control data']
             },
+            'contractor_standard_deviation.json': {
+                'script': 'analysis/generate_contractor_standard_deviation.py',
+                'description': 'Contractor standard deviation analysis with cost aggregation per SD group',
+                'category': 'analysis_data',
+                'dependencies': ['Contractor data', 'Flood control data']
+            },
             'contractors_with_costs.json': {
                 'script': 'sec_scraper/generate_contractors_with_costs.py',
                 'description': 'Contractor data with costs and suspicion scores from MeiliSearch',
@@ -487,7 +493,13 @@ class JSONGenerator:
             'Contractor Project Counts for Scatter Plot'
         )
         
-        return success1 and success2
+        # Generate contractor standard deviation analysis with cost aggregation
+        success3, output3 = await self.run_script(
+            'analysis/generate_contractor_standard_deviation.py',
+            'Contractor Standard Deviation Analysis with Cost Aggregation'
+        )
+        
+        return success1 and success2 and success3
     
     async def generate_nep_data(self):
         """Generate NEP 2026 analysis JSON files."""

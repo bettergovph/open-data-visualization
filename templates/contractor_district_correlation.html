@@ -534,7 +534,8 @@ function toggleMobileMenu() {
                 <h2 class="section-title"><span class="icon">🎯</span>Concentration Analysis (HHI)</h2>
                 <p class="section-subtitle">
                     The Herfindahl-Hirschman Index (HHI) measures market concentration. 
-                    Higher values indicate greater concentration (less competition).
+                    <strong>District HHI</strong> measures how concentrated contractors are <em>within each district</em> (HHI=10,000 = one contractor serves that district exclusively - monopoly risk). 
+                    <strong>Contractor HHI</strong> measures how concentrated districts are <em>within each contractor's portfolio</em> (HHI=10,000 = contractor works in only one district - specialization, not necessarily concerning).
                 </p>
                 
                 <div class="hhi-scale">
@@ -612,6 +613,11 @@ function toggleMobileMenu() {
                 <!-- Scatter Plot Visualization -->
                 <div style="margin: 30px 0; display: flex; justify-content: center;">
                     <canvas id="correlationScatterChart" style="max-width: 800px; max-height: 400px;"></canvas>
+                </div>
+                
+                <!-- Critical Finding Alert (will be populated by JavaScript if detected) -->
+                <div id="critical-finding-alert" style="display: none;">
+                    <!-- Populated by JavaScript -->
                 </div>
                 
                 <div class="evidence-grid" id="correlation-results">
@@ -784,18 +790,53 @@ function toggleMobileMenu() {
                     </div>
                 `;
                 
-                // HHI Interpretation
-                document.getElementById('hhi-interpretation').textContent = 
-                    `Districts show ${getHHIType(avgHHIDistrict).toLowerCase()} with an average HHI of ${avgHHIDistrict.toFixed(0)}, ` +
-                    `while contractors exhibit ${getHHIType(avgHHIContractor).toLowerCase()} with an average HHI of ${avgHHIContractor.toFixed(0)}. ` +
-                    `This indicates that contractors work in very focused geographic areas, but districts maintain competitive contractor markets.`;
+                // HHI Interpretation - Focus on District HHI (the actual monopoly risk)
+                const districtHHIs = Object.values(data.concentration.hhi_by_district || {});
+                const monopolyDistricts = districtHHIs.filter(hhi => hhi >= 10000).length;
+                const perfectMonopolyDistricts = districtHHIs.filter(hhi => hhi === 10000).length;
+                const monopolyDistPercent = districtHHIs.length > 0 ? (monopolyDistricts / districtHHIs.length * 100).toFixed(1) : '0.0';
+                const perfectMonopolyDistPercent = districtHHIs.length > 0 ? (perfectMonopolyDistricts / districtHHIs.length * 100).toFixed(1) : '0.0';
                 
-                // Concentration Finding
+                document.getElementById('hhi-interpretation').innerHTML = 
+                    `<strong>District HHI (Market Competition Risk):</strong> Average of ${avgHHIDistrict.toFixed(0)} (${getHHIType(avgHHIDistrict).toLowerCase()}). ` +
+                    `${monopolyDistricts} districts (${monopolyDistPercent}%) have HHI ≥ 10,000, indicating high contractor concentration. ` +
+                    `${perfectMonopolyDistricts} districts (${perfectMonopolyDistPercent}%) have HHI = 10,000, meaning they are served by only ONE contractor each (monopoly risk).<br><br>` +
+                    `<strong>Contractor HHI (Portfolio Specialization):</strong> Average of ${avgHHIContractor.toFixed(0)} (${getHHIType(avgHHIContractor).toLowerCase()}). ` +
+                    `This indicates contractors tend to specialize in specific districts, which is not inherently concerning - small contractors may only have capacity for one district, ` +
+                    `or they may focus geographically. The key indicator of anti-competitive behavior is District HHI (whether districts have monopolies), not Contractor HHI (whether contractors specialize).`;
+                
+                // Concentration Finding - Focus on District HHI, not Contractor HHI
                 const hhiDiff = Math.abs(avgHHIDistrict - avgHHIContractor);
-                document.getElementById('concentration-finding').textContent = 
-                    `Concentration levels are DIFFERENT (Δ = ${hhiDiff.toFixed(0)}). ` +
-                    `Contractors are highly specialized to specific districts (HHI: ${avgHHIContractor.toFixed(0)}), ` +
-                    `but districts maintain competitive markets among multiple contractors (HHI: ${avgHHIDistrict.toFixed(0)}).`;
+                const contractorHHIs = Object.values(data.concentration.hhi_by_contractor);
+                const contractorsOneDistrict = contractorHHIs.filter(hhi => hhi === 10000).length;
+                const contractorsOneDistPercent = (contractorsOneDistrict / contractorHHIs.length * 100).toFixed(1);
+                
+                // Check if District HHI shows monopoly risk
+                const isDistrictMonopolyRisk = parseFloat(monopolyDistPercent) > 10 || parseFloat(perfectMonopolyDistPercent) > 5;
+                
+                if (isDistrictMonopolyRisk) {
+                    document.getElementById('concentration-finding').innerHTML = 
+                        `<strong style="font-size: 1.1em; color: #dc3545;">⚠️ District Monopoly Risk:</strong> ` +
+                        `<strong>${perfectMonopolyDistricts} districts (${perfectMonopolyDistPercent}%) have HHI = 10,000</strong>, meaning they are served by only ONE contractor each. ` +
+                        `${monopolyDistricts} districts (${monopolyDistPercent}%) have HHI ≥ 10,000, indicating high contractor concentration. ` +
+                        `This suggests potential anti-competitive practices or territorial arrangements. ` +
+                        `The concentration difference (Δ = ${hhiDiff.toFixed(0)}) reflects that contractors specialize (Contractor HHI: ${avgHHIContractor.toFixed(0)}), ` +
+                        `while districts maintain varying levels of competition (District HHI: ${avgHHIDistrict.toFixed(0)}).`;
+                    
+                    const keyFindingBox = document.getElementById('concentration-finding').parentElement;
+                    keyFindingBox.style.background = 'linear-gradient(135deg, #fff3cd 0%, #ffeaa7 100%)';
+                    keyFindingBox.style.color = '#856404';
+                    keyFindingBox.style.borderLeft = '4px solid #ffc107';
+                } else {
+                    document.getElementById('concentration-finding').innerHTML = 
+                        `<strong>District Competition:</strong> Average District HHI of ${avgHHIDistrict.toFixed(0)} indicates ${getHHIType(avgHHIDistrict).toLowerCase()} in districts. ` +
+                        `${perfectMonopolyDistricts} districts (${perfectMonopolyDistPercent}%) have HHI = 10,000 (served by one contractor).<br><br>` +
+                        `<strong>Contractor Specialization:</strong> Average Contractor HHI of ${avgHHIContractor.toFixed(0)} means contractors tend to focus on specific districts. ` +
+                        `${contractorsOneDistrict.toLocaleString()} contractors (${contractorsOneDistPercent}%) work in only one district, which is not inherently concerning - ` +
+                        `it may reflect legitimate specialization, limited capacity, or geographic focus. ` +
+                        `The key finding is that districts generally maintain competitive markets (low District HHI), ` +
+                        `while contractors show geographic specialization (high Contractor HHI).`;
+                }
                 
                 // Populate Gini Statistics
                 const giniStats = document.getElementById('gini-stats');
@@ -857,12 +898,12 @@ function toggleMobileMenu() {
                 const corrResults = document.getElementById('correlation-results');
                 const corrData = data.correlation;
                 
-                // Prepare data for scatter plot
-                const districtHHIs = Object.values(data.concentration.hhi_by_district);
-                const contractorHHIs = Object.values(data.concentration.hhi_by_contractor);
+                // Prepare data for scatter plot (reuse contractorHHIs from HHI section above)
+                const districtHHIsForPlot = Object.values(data.concentration.hhi_by_district || []);
+                const pairsForPlot = corrData.pairs_for_plot || [];
                 
                 // Create scatter plot
-                createScatterPlot(districtHHIs, contractorHHIs, corrData);
+                createScatterPlot(districtHHIsForPlot, contractorHHIs, corrData, pairsForPlot);
                 
                 corrResults.innerHTML = `
                     <div class="evidence-card">
@@ -887,11 +928,16 @@ function toggleMobileMenu() {
                     </div>
                 `;
                 
-                // Correlation Interpretation
-                document.getElementById('correlation-interpretation').textContent = 
-                    `No significant correlation found (r = ${corrData.pearson_r.toFixed(4)}, p = ${corrData.pearson_p.toFixed(3)}). ` +
-                    `This means that contractor concentration patterns and district concentration patterns are NOT similar. ` +
-                    `The concentration happens in opposite directions: contractors specialize in few districts, while districts have many contractors.`;
+                // Correlation Interpretation - Scientific, no alarmist language
+                let interpretationText = `No significant correlation found (r = ${corrData.pearson_r.toFixed(4)}, p = ${corrData.pearson_p.toFixed(3)}). ` +
+                    `This means that District HHI (contractor concentration within districts) and Contractor HHI (district concentration within contractors) are independent. ` +
+                    `In other words, whether a contractor works in one or many districts (Contractor HHI) does not predict whether a district is served by one or many contractors (District HHI). ` +
+                    `This pattern is expected in a market where contractors may specialize geographically while districts maintain competitive bidding processes, ` +
+                    `though District HHI values should be monitored for anti-competitive patterns (districts with HHI approaching 10,000).`;
+                document.getElementById('correlation-interpretation').innerHTML = interpretationText;
+                
+                // Hide the critical alert box - tone down the alarmist messaging
+                // The information is already displayed in the interpretation section
                 
                 // Evidence Summary
                 const evidenceSummary = document.getElementById('evidence-summary');
@@ -1000,7 +1046,7 @@ function toggleMobileMenu() {
             return 'Diversified';
         }
         
-        function createScatterPlot(districtHHIs, contractorHHIs, correlation) {
+        function createScatterPlot(districtHHIs, contractorHHIs, correlation, pairsForPlot) {
             const ctx = document.getElementById('correlationScatterChart');
             if (!ctx) return;
             
@@ -1009,23 +1055,36 @@ function toggleMobileMenu() {
                 window.scatterChart.destroy();
             }
             
-            // Prepare data points - we'll plot district HHI vs contractor HHI
-            // Since we have arrays of HHI values, we'll create pairs by matching indices
-            // Or we can plot them as separate distributions
-            // For meaningful correlation, we need matched pairs - let's use sorted values
-            const sortedDistricts = [...districtHHIs].sort((a, b) => a - b);
-            const sortedContractors = [...contractorHHIs].sort((a, b) => a - b);
+            // Use actual contractor-district pairs if available, otherwise fall back to sampling
+            let scatterData;
+            if (pairsForPlot && pairsForPlot.length > 0) {
+                // Use actual pairs from correlation analysis
+                scatterData = pairsForPlot.map(pair => ({
+                    x: pair.district_hhi,
+                    y: pair.contractor_hhi,
+                    label: `${pair.projects} projects`
+                }));
+            } else {
+                // Fallback: sample contractors and pair with districts
+                const maxPoints = 500;
+                const sampleSize = contractorHHIs.length > maxPoints ? maxPoints : contractorHHIs.length;
+                const step = Math.floor(contractorHHIs.length / sampleSize);
+                const sampledContractorHHIs = contractorHHIs.filter((_, idx) => idx % step === 0).slice(0, maxPoints);
+                
+                scatterData = sampledContractorHHIs.map((contractorHHI, idx) => {
+                    const districtIdx = idx % districtHHIs.length;
+                    return {
+                        x: districtHHIs[districtIdx],
+                        y: contractorHHI,
+                        label: `Contractor ${idx + 1}`
+                    };
+                });
+            }
             
-            // Create scatter data - match by rank percentile
-            const scatterData = sortedDistricts.map((districtHHI, idx) => {
-                // Match by percentile rank
-                const contractorIdx = Math.floor((idx / sortedDistricts.length) * sortedContractors.length);
-                return {
-                    x: districtHHI,
-                    y: sortedContractors[contractorIdx] || 0,
-                    label: `District ${idx + 1}`
-                };
-            });
+            // Check for high monopoly concentration
+            const perfectMonopolyCount = contractorHHIs.filter(hhi => hhi === 10000).length;
+            const perfectMonopolyPercent = (perfectMonopolyCount / contractorHHIs.length * 100).toFixed(1);
+            const isHighMonopoly = perfectMonopolyPercent >= 50;
             
             // Calculate regression line
             const xValues = scatterData.map(d => d.x);
@@ -1036,11 +1095,13 @@ function toggleMobileMenu() {
             
             let slope = 0;
             let intercept = meanY;
-            if (correlation.pearson_r !== 0) {
+            if (correlation.pearson_r !== 0 && Math.abs(correlation.pearson_r) < 1) {
                 const sx = Math.sqrt(xValues.reduce((sum, val) => sum + Math.pow(val - meanX, 2), 0) / n);
                 const sy = Math.sqrt(yValues.reduce((sum, val) => sum + Math.pow(val - meanY, 2), 0) / n);
-                slope = correlation.pearson_r * (sy / sx);
-                intercept = meanY - slope * meanX;
+                if (sx > 0 && sy > 0) {
+                    slope = correlation.pearson_r * (sy / sx);
+                    intercept = meanY - slope * meanX;
+                }
             }
             
             const minX = Math.min(...xValues);
@@ -1050,12 +1111,15 @@ function toggleMobileMenu() {
                 { x: maxX, y: slope * maxX + intercept }
             ];
             
+            // Chart title
+            const chartTitle = `District HHI vs Contractor HHI (r = ${correlation.pearson_r.toFixed(4)}, p = ${correlation.pearson_p.toFixed(4)})`;
+            
             window.scatterChart = new Chart(ctx, {
                 type: 'scatter',
                 data: {
                     datasets: [
                         {
-                            label: 'District-Contractor HHI Pairs',
+                            label: 'District HHI vs Avg Contractor HHI',
                             data: scatterData,
                             backgroundColor: 'rgba(102, 126, 234, 0.6)',
                             borderColor: 'rgba(102, 126, 234, 0.8)',
@@ -1081,11 +1145,12 @@ function toggleMobileMenu() {
                     plugins: {
                         title: {
                             display: true,
-                            text: `District HHI vs Contractor HHI (r = ${correlation.pearson_r.toFixed(4)}, p = ${correlation.pearson_p.toFixed(4)})`,
+                            text: chartTitle,
                             font: {
                                 size: 16,
                                 weight: 'bold'
-                            }
+                            },
+                            color: '#333'
                         },
                         tooltip: {
                             callbacks: {
@@ -1124,7 +1189,8 @@ function toggleMobileMenu() {
                                     weight: 'bold'
                                 }
                             },
-                            beginAtZero: true
+                            beginAtZero: true,
+                            max: undefined
                         }
                     }
                 }
