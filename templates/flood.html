@@ -4695,8 +4695,8 @@ function getContractorSecStatusSync(contractorName) {
                 // Wait a bit more
                 await new Promise(resolve => setTimeout(resolve, 50));
             }
-            // Load contractor project counts data
-            const response = await fetch('/static/data/contractor_project_counts.json');
+            // Load contractor project counts data (now includes names and costs)
+            const response = await fetch('/static/data/contractor_project_counts.json?v=' + Date.now());
             if (!response.ok) {
                 console.log('⚠️ Contractor project counts not available');
                 return;
@@ -4705,51 +4705,28 @@ function getContractorSecStatusSync(contractorName) {
             const data = await response.json();
             const projectCounts = data.project_counts || [];
             const contractorNames = data.contractor_names || [];
+            const contractorCosts = data.contractor_costs || [];
             
             if (projectCounts.length === 0) {
                 console.log('⚠️ No project counts data available');
                 return;
             }
             
-            // Try to load cost data from the contractor standard deviation data
-            let contractorCosts = {};
-            try {
-                const costResponse = await fetch('/static/data/contractor_standard_deviation.json?v=' + Date.now());
-                if (costResponse.ok) {
-                    const costData = await costResponse.json();
-                    if (costData && costData.analysis && costData.analysis.cost_aggregation) {
-                        // We need to get individual contractor costs, not aggregated by SD groups
-                        // Let's try to fetch from the flood control data directly
-                        const floodResponse = await fetch('/static/data/flood_control_data.json?v=' + Date.now());
-                        if (floodResponse.ok) {
-                            const floodData = await floodResponse.json();
-                            if (floodData && floodData.data && floodData.data.projects) {
-                                // Aggregate costs by contractor
-                                floodData.data.projects.forEach(project => {
-                                    const contractor = project.Contractor || '';
-                                    const cost = parseFloat(project.ContractCost) || 0;
-                                    if (contractor && cost > 0) {
-                                        contractorCosts[contractor] = (contractorCosts[contractor] || 0) + cost;
-                                    }
-                                });
-                                console.log('✅ Loaded contractor costs from flood control data:', Object.keys(contractorCosts).length, 'contractors');
-                            }
-                        }
-                    }
-                }
-            } catch (error) {
-                console.log('⚠️ Could not load cost data, proceeding without cost sizing:', error);
-            }
+            console.log('✅ Loaded contractor data:', {
+                totalContractors: projectCounts.length,
+                totalCost: data.metadata?.total_cost || 0,
+                sampleNames: contractorNames.slice(0, 3),
+                sampleCosts: contractorCosts.slice(0, 3)
+            });
             
-            // Calculate basic statistics
-            const mean = projectCounts.reduce((sum, count) => sum + count, 0) / projectCounts.length;
-            const variance = projectCounts.reduce((sum, count) => sum + Math.pow(count - mean, 2), 0) / projectCounts.length;
-            const standardDeviation = Math.sqrt(variance);
+            // Use pre-calculated statistics from JSON
+            const mean = data.metadata?.mean_projects_per_contractor || 0;
+            const standardDeviation = data.metadata?.standard_deviation || 0;
             
             // Create scatter plot data points with cost information
             const scatterData = projectCounts.map((count, index) => {
                 const contractorName = contractorNames[index] || '';
-                const cost = contractorCosts[contractorName] || 0;
+                const cost = contractorCosts[index] || 0; // Use array index instead of lookup
                 return {
                     x: index + 1, // Contractor index
                     y: count,     // Number of projects

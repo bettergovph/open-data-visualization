@@ -40,20 +40,49 @@ async def generate_contractor_project_counts():
         projects, metadata = await client.search_projects("", limit=10000)
         print(f"📊 Found {len(projects)} projects")
         
-        # Count projects per contractor
+        # Count projects per contractor and calculate costs
         contractor_counts = defaultdict(int)
+        contractor_costs = defaultdict(float)
         total_projects = 0
+        total_cost = 0.0
         
         for project in projects:
             contractor = project.Contractor
             if contractor and contractor.strip():
                 contractor_counts[contractor] += 1
                 total_projects += 1
+                
+                # Calculate cost
+                if project.ContractCost:
+                    try:
+                        # Parse cost string (remove ₱, commas, spaces)
+                        cost_str = str(project.ContractCost).replace('₱', '').replace(',', '').replace(' ', '')
+                        cost = float(cost_str)
+                        contractor_costs[contractor] += cost
+                        total_cost += cost
+                    except (ValueError, TypeError):
+                        pass  # Skip invalid cost values
         
         print(f"📈 Analyzed {total_projects} projects from {len(contractor_counts)} contractors")
+        print(f"💰 Total contract value: ₱{total_cost:,.2f}")
         
-        # Convert to list of project counts (sorted for better visualization)
-        project_counts = sorted([count for count in contractor_counts.values()], reverse=True)
+        # Create contractor data with both counts and costs
+        contractor_data = []
+        for contractor, count in contractor_counts.items():
+            cost = contractor_costs.get(contractor, 0.0)
+            contractor_data.append({
+                'contractor': contractor,
+                'project_count': count,
+                'total_cost': cost
+            })
+        
+        # Sort by project count (descending) for better visualization
+        contractor_data.sort(key=lambda x: x['project_count'], reverse=True)
+        
+        # Extract arrays for scatter plot
+        project_counts = [item['project_count'] for item in contractor_data]
+        contractor_names = [item['contractor'] for item in contractor_data]
+        contractor_costs_array = [item['total_cost'] for item in contractor_data]
         
         # Calculate basic statistics
         mean = sum(project_counts) / len(project_counts) if project_counts else 0
@@ -69,19 +98,23 @@ async def generate_contractor_project_counts():
                 "generated_at": datetime.now().isoformat(),
                 "total_contractors": len(contractor_counts),
                 "total_projects": total_projects,
+                "total_cost": round(total_cost, 2),
                 "mean_projects_per_contractor": round(mean, 2),
                 "standard_deviation": round(standard_deviation, 2),
                 "outliers_count": len(outliers),
                 "outliers_threshold": round(mean + 3 * standard_deviation, 2)
             },
             "project_counts": project_counts,
+            "contractor_names": contractor_names,
+            "contractor_costs": contractor_costs_array,
             "contractor_details": [
                 {
-                    "contractor": contractor,
-                    "project_count": count,
-                    "z_score": round(abs(count - mean) / standard_deviation, 2) if standard_deviation > 0 else 0
+                    "contractor": item['contractor'],
+                    "project_count": item['project_count'],
+                    "total_cost": round(item['total_cost'], 2),
+                    "z_score": round(abs(item['project_count'] - mean) / standard_deviation, 2) if standard_deviation > 0 else 0
                 }
-                for contractor, count in sorted(contractor_counts.items(), key=lambda x: x[1], reverse=True)
+                for item in contractor_data
             ]
         }
         
