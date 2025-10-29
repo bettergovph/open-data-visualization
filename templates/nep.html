@@ -7607,11 +7607,6 @@ async function copyChartToClipboard(containerId, buttonId) {
         try {
             console.log('📊 Loading NEP 2026 Analysis charts...');
             
-            // DISABLED: Red flag data file not available
-            console.warn('⚠️ Red flag analysis disabled - data file not available');
-            return;
-            
-            /*
             // Load red flag data
             const redFlagResponse = await fetch('/static/data/nep_2026_red_flag.json');
             
@@ -7619,7 +7614,6 @@ async function copyChartToClipboard(containerId, buttonId) {
                 console.warn('⚠️ Red flag data file not found - skipping red flag chart');
                 return;
             }
-            */
             
             const redFlagData = await redFlagResponse.json();
             
@@ -7793,20 +7787,15 @@ async function copyChartToClipboard(containerId, buttonId) {
                                 callbacks: {
                                     title: function(context) {
                                         const idx = context[0].dataIndex;
-                                        return `${actualBaselineData.years[idx]} - ${actualBaselineData.regions[idx]}`;
+                                        const year = yearsArray[idx];
+                                        return `Year: ${year}`;
                                     },
                                     label: function(context) {
                                         const idx = context.dataIndex;
-                                        const budget = actualBaselineData.budgets_millions[idx];
-                                        const projects = actualBaselineData.project_counts[idx];
-                                        const growth = actualBaselineData.growth_rates[idx];
+                                        const year = yearsArray[idx];
+                                        const projects = actualBaselineData.years[year];
                                         
-                                        let label = `Budget: ₱${budget.toLocaleString()}M\n`;
-                                        label += `Projects: ${projects}\n`;
-                                        if (growth) {
-                                            label += `Growth: +${growth}%`;
-                                        }
-                                        return label.split('\n');
+                                        return `Projects: ${projects.toLocaleString()}`;
                                     }
                                 }
                             }

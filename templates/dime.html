@@ -2082,6 +2082,18 @@ fetch('/static/data/dime_summary.json')
         }
     }
 
+    // Load barangays data (defaults to investment sub-tab)
+    async function loadBarangaysData() {
+        // Ensure investment sub-tab is visible
+        document.querySelectorAll('.barangay-subtab-panel').forEach(panel => {
+            panel.style.display = 'none';
+        });
+        document.getElementById('subtab-investment').style.display = 'block';
+        
+        // Load investment data
+        loadBarangayAggregates();
+    }
+
     // Load barangay aggregates
     async function loadBarangayAggregates() {
         try {
