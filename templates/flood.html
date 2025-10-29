@@ -560,6 +560,7 @@ function toggleMobileMenu() {
                         <div class="mt-4 text-sm text-gray-600">
                             <p class="my-1"><strong>Each point represents one contractor</strong></p>
                             <p class="my-1"><strong>Color coding:</strong> Green (normal), Yellow/Orange (suspicious), Red/Purple/Pink (outliers)</p>
+                            <p class="my-1"><strong>Circle size:</strong> Larger circles indicate higher total contract cost per contractor</p>
                             <p class="my-1"><strong>Hover over points to see contractor details</strong></p>
                         </div>
                     </div>
@@ -4648,10 +4649,41 @@ function getContractorSecStatusSync(contractorName) {
             
             const data = await response.json();
             const projectCounts = data.project_counts || [];
+            const contractorNames = data.contractor_names || [];
             
             if (projectCounts.length === 0) {
                 console.log('⚠️ No project counts data available');
                 return;
+            }
+            
+            // Try to load cost data from the contractor standard deviation data
+            let contractorCosts = {};
+            try {
+                const costResponse = await fetch('/static/data/contractor_standard_deviation.json?v=' + Date.now());
+                if (costResponse.ok) {
+                    const costData = await costResponse.json();
+                    if (costData && costData.analysis && costData.analysis.cost_aggregation) {
+                        // We need to get individual contractor costs, not aggregated by SD groups
+                        // Let's try to fetch from the flood control data directly
+                        const floodResponse = await fetch('/static/data/flood_control_data.json?v=' + Date.now());
+                        if (floodResponse.ok) {
+                            const floodData = await floodResponse.json();
+                            if (floodData && floodData.data && floodData.data.projects) {
+                                // Aggregate costs by contractor
+                                floodData.data.projects.forEach(project => {
+                                    const contractor = project.Contractor || '';
+                                    const cost = parseFloat(project.ContractCost) || 0;
+                                    if (contractor && cost > 0) {
+                                        contractorCosts[contractor] = (contractorCosts[contractor] || 0) + cost;
+                                    }
+                                });
+                                console.log('✅ Loaded contractor costs from flood control data:', Object.keys(contractorCosts).length, 'contractors');
+                            }
+                        }
+                    }
+                }
+            } catch (error) {
+                console.log('⚠️ Could not load cost data, proceeding without cost sizing:', error);
             }
             
             // Calculate basic statistics
@@ -4659,12 +4691,55 @@ function getContractorSecStatusSync(contractorName) {
             const variance = projectCounts.reduce((sum, count) => sum + Math.pow(count - mean, 2), 0) / projectCounts.length;
             const standardDeviation = Math.sqrt(variance);
             
-            // Create scatter plot data points
-            const scatterData = projectCounts.map((count, index) => ({
-                x: index + 1, // Contractor index
-                y: count,     // Number of projects
-                contractorCount: count
-            }));
+            // Create scatter plot data points with cost information
+            const scatterData = projectCounts.map((count, index) => {
+                const contractorName = contractorNames[index] || '';
+                const cost = contractorCosts[contractorName] || 0;
+                return {
+                    x: index + 1, // Contractor index
+                    y: count,     // Number of projects
+                    contractorCount: count,
+                    contractorName: contractorName,
+                    cost: cost
+                };
+            });
+            
+            // Calculate point sizes based on cost (normalize to 3-20 radius)
+            const costs = scatterData.map(d => d.cost).filter(c => c > 0);
+            console.log('💰 Cost data for scatter plot:', {
+                totalContractors: scatterData.length,
+                contractorsWithCost: costs.length,
+                costRange: costs.length > 0 ? `${Math.min(...costs).toFixed(0)} - ${Math.max(...costs).toFixed(0)}` : 'No cost data',
+                sampleCosts: costs.slice(0, 5).map(c => c.toFixed(0))
+            });
+            
+            let pointRadius = scatterData.map(() => 4); // Default radius
+            
+            if (costs.length > 0) {
+                const minCost = Math.min(...costs);
+                const maxCost = Math.max(...costs);
+                const costRange = maxCost - minCost;
+                
+                console.log('📊 Cost normalization:', { minCost, maxCost, costRange });
+                
+                // Normalize cost to radius (3-20)
+                pointRadius = scatterData.map(d => {
+                    if (d.cost > 0 && costRange > 0) {
+                        const normalized = (d.cost - minCost) / costRange;
+                        const radius = 3 + (normalized * 17); // Scale from 3 to 20
+                        return radius;
+                    }
+                    return 4; // Default for contractors without cost data
+                });
+                
+                console.log('🔍 Point radius range:', {
+                    min: Math.min(...pointRadius).toFixed(1),
+                    max: Math.max(...pointRadius).toFixed(1),
+                    sample: pointRadius.slice(0, 5).map(r => r.toFixed(1))
+                });
+            } else {
+                console.log('⚠️ No cost data available - using default radius for all points');
+            }
             
             // Color points based on standard deviation
             const backgroundColor = projectCounts.map(count => {
@@ -4687,8 +4762,8 @@ function getContractorSecStatusSync(contractorName) {
                         backgroundColor: backgroundColor,
                         borderColor: backgroundColor.map(color => color.replace('0.8', '1')),
                         borderWidth: 1,
-                        pointRadius: 4,
-                        pointHoverRadius: 6
+                        pointRadius: pointRadius,
+                        pointHoverRadius: pointRadius.map(r => Math.min(r * 1.5, 25))
                     }]
                 },
                 options: {
@@ -4718,7 +4793,17 @@ function getContractorSecStatusSync(contractorName) {
                                 label: function(context) {
                                     const projectCount = context.parsed.y;
                                     const zScore = Math.abs(projectCount - mean) / standardDeviation;
-                                    return `Projects: ${projectCount} (Z-score: ${zScore.toFixed(1)})`;
+                                    const dataPoint = scatterData[context.dataIndex];
+                                    const cost = dataPoint.cost || 0;
+                                    
+                                    let labelText = `Projects: ${projectCount} (Z-score: ${zScore.toFixed(1)})`;
+                                    if (cost > 0) {
+                                        labelText += `\nTotal Cost: ₱${(cost / 1000000).toFixed(2)}M`;
+                                    }
+                                    if (dataPoint.contractorName) {
+                                        labelText = `${dataPoint.contractorName}\n${labelText}`;
+                                    }
+                                    return labelText;
                                 }
                             }
                         }
