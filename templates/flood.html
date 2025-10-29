@@ -4435,33 +4435,39 @@ function getContractorSecStatusSync(contractorName) {
                 label: 'Number of Contractors',
                 data: [
                     distribution.within_1sd,
+                    distribution.within_1_5sd,
                     distribution.within_2sd,
+                    distribution.within_2_5sd,
                     distribution.within_3sd,
-                    distribution.within_4sd,
                     distribution.beyond_1sd,
+                    distribution.beyond_1_5sd,
                     distribution.beyond_2sd,
-                    distribution.beyond_3sd,
-                    distribution.beyond_4sd
+                    distribution.beyond_2_5sd,
+                    distribution.beyond_3sd
                 ],
                 backgroundColor: [
                     '#28a745', // Green - 1SD
+                    '#32cd32', // Lime Green - 1.5SD
                     '#ffc107', // Yellow - 2SD
+                    '#ff8c00', // Dark Orange - 2.5SD
                     '#fd7e14', // Orange - 3SD
-                    '#dc3545', // Red - 4SD
                     '#6f42c1', // Purple - Beyond 1SD
+                    '#9c27b0', // Deep Purple - Beyond 1.5SD
                     '#e83e8c', // Pink - Beyond 2SD
-                    '#20c997', // Teal - Beyond 3SD
-                    '#6c757d'  // Gray - Beyond 4SD
+                    '#ff5722', // Deep Orange - Beyond 2.5SD
+                    '#dc3545'  // Red - Beyond 3SD
                 ],
                 borderColor: [
                     '#1e7e34',
+                    '#228b22',
                     '#d39e00',
+                    '#ff7f00',
                     '#dc6903',
-                    '#c82333',
                     '#5a2d91',
+                    '#7b1fa2',
                     '#c2185b',
-                    '#1a9b7a',
-                    '#495057'
+                    '#d84315',
+                    '#c82333'
                 ],
                 borderWidth: 2,
                 yAxisID: 'y'
@@ -4471,13 +4477,15 @@ function getContractorSecStatusSync(contractorName) {
             if (costAggregation) {
                 const costData = [
                     costAggregation.within_1sd * 1000 / 1000000000, // Convert to billions
+                    costAggregation.within_1_5sd * 1000 / 1000000000,
                     costAggregation.within_2sd * 1000 / 1000000000,
+                    costAggregation.within_2_5sd * 1000 / 1000000000,
                     costAggregation.within_3sd * 1000 / 1000000000,
-                    costAggregation.within_4sd * 1000 / 1000000000,
                     costAggregation.beyond_1sd * 1000 / 1000000000,
+                    costAggregation.beyond_1_5sd * 1000 / 1000000000,
                     costAggregation.beyond_2sd * 1000 / 1000000000,
-                    costAggregation.beyond_3sd * 1000 / 1000000000,
-                    costAggregation.beyond_4sd * 1000 / 1000000000
+                    costAggregation.beyond_2_5sd * 1000 / 1000000000,
+                    costAggregation.beyond_3sd * 1000 / 1000000000
                 ];
                 console.log('💰 Cost data for line overlay:', costData);
                 
@@ -4504,14 +4512,16 @@ function getContractorSecStatusSync(contractorName) {
                 type: 'bar',
                 data: {
                     labels: [
-                        'Within 1SD',
-                        'Within 2SD',
-                        'Within 3SD',
-                        'Within 4SD',
+                        '1SD',
+                        '1.5SD',
+                        '2SD',
+                        '2.5SD',
+                        '3SD',
                         'Beyond 1SD',
+                        'Beyond 1.5SD',
                         'Beyond 2SD',
-                        'Beyond 3SD',
-                        'Beyond 4SD'
+                        'Beyond 2.5SD',
+                        '3SD+'
                     ],
                     datasets: datasets
                 },
