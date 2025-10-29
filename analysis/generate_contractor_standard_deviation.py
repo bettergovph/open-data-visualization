@@ -177,6 +177,7 @@ def calculate_standard_deviation_stats(project_counts, contractor_costs=None):
         
         if total_cost > 0:
             # Distribute costs proportionally based on contractor counts
+            # Store raw values (frontend will multiply by 1000 for display)
             cost_aggregation = {
                 "within_1sd": round((within_1sd / total_contractors) * total_cost, 2),
                 "within_2sd": round((within_2sd / total_contractors) * total_cost, 2),
@@ -186,9 +187,10 @@ def calculate_standard_deviation_stats(project_counts, contractor_costs=None):
                 "beyond_2sd": round((beyond_2sd / total_contractors) * total_cost, 2),
                 "beyond_3sd": round((beyond_3sd / total_contractors) * total_cost, 2),
                 "beyond_4sd": round((beyond_4sd / total_contractors) * total_cost, 2),
-                "total_cost": round(total_cost, 2)
+                "total_cost": round(total_cost, 2),
+                "multiplier_note": "Frontend should multiply all cost values by 1000 for display"
             }
-            print(f"💰 Total cost aggregated: ₱{total_cost:,.2f}")
+            print(f"💰 Total cost aggregated: ₱{total_cost:,.2f} (raw values - frontend will multiply by 1000)")
         else:
             print("⚠️ No cost data available for aggregation")
     
