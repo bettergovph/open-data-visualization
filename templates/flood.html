@@ -4175,6 +4175,31 @@ function getContractorSecStatusSync(contractorName) {
     createContractorScatterChart();
     }
     
+    // Test function to debug JSON data loading (can be called from browser console)
+    window.testContractorData = async function() {
+        console.log('🧪 Testing contractor standard deviation data loading...');
+        try {
+            const response = await fetch('/static/data/contractor_standard_deviation.json');
+            console.log('📡 Response status:', response.status, response.statusText);
+            
+            if (!response.ok) {
+                console.log('❌ Response not ok:', response.status, response.statusText);
+                return;
+            }
+            
+            const data = await response.json();
+            console.log('📊 Full JSON data:', data);
+            console.log('📊 Analysis object:', data.analysis);
+            console.log('📊 Distribution data:', data.analysis?.distribution);
+            console.log('📊 Cost aggregation:', data.analysis?.cost_aggregation);
+            
+            return data;
+        } catch (error) {
+            console.error('❌ Error loading data:', error);
+            return null;
+        }
+    };
+    
     // Function to update visual contractors pagination (global scope)
     function updateVisualContractorsPagination() {
         const pageInfo = document.getElementById('visual-contractors-page-info');
@@ -4347,24 +4372,35 @@ function getContractorSecStatusSync(contractorName) {
     }
     
     async function createContractorDistributionChart() {
+        console.log('🚀 Starting createContractorDistributionChart function');
+        
         const distCtx = document.getElementById('contractorDistributionChart');
-        if (!distCtx) return;
+        if (!distCtx) {
+            console.log('❌ contractorDistributionChart canvas not found');
+            return;
+        }
+        
+        console.log('✅ contractorDistributionChart canvas found');
         
         // Destroy any existing chart on this canvas
         try {
             const existingChart = Chart.getChart('contractorDistributionChart');
             if (existingChart) {
                 existingChart.destroy();
+                console.log('🗑️ Destroyed existing chart');
             }
         } catch (error) {
             console.warn('Error destroying existing distribution chart:', error);
         }
         
         try {
+            console.log('📡 Fetching /static/data/contractor_standard_deviation.json...');
             // Load standard deviation analysis
             const response = await fetch('/static/data/contractor_standard_deviation.json');
+            console.log('📡 Response status:', response.status, response.statusText);
+            
             if (!response.ok) {
-                console.log('⚠️ Standard deviation analysis not available');
+                console.log('❌ Standard deviation analysis not available - response not ok');
                 return;
             }
             
