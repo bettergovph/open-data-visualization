@@ -4421,6 +4421,21 @@ function getContractorSecStatusSync(contractorName) {
             console.log('📊 Distribution data:', distribution);
             console.log('💰 Cost aggregation data:', costAggregation);
             
+            // Debug: Calculate the 5 groups
+            const group1 = distribution.within_1sd;
+            const group2 = distribution.within_1_5sd - distribution.within_1sd;
+            const group3 = distribution.within_2sd - distribution.within_1_5sd;
+            const group4 = distribution.within_2_5sd - distribution.within_2sd;
+            const group5 = distribution.beyond_2_5sd;
+            
+            console.log('🔍 Calculated 5 groups:', {
+                '1SD': group1,
+                '1.5SD range': group2,
+                '2SD range': group3,
+                '2.5SD range': group4,
+                '3SD+': group5
+            });
+            
             // Update distribution stats display if elements exist
             const avgElement = document.getElementById('dist-avg-projects');
             const stdElement = document.getElementById('dist-std-dev');
@@ -4487,6 +4502,14 @@ function getContractorSecStatusSync(contractorName) {
             }
 
             console.log('📊 Creating chart with datasets:', datasets);
+            console.log('📊 Chart data array length:', datasets[0].data.length);
+            console.log('📊 Chart labels length:', [
+                '1SD',
+                '1.5SD',
+                '2SD',
+                '2.5SD',
+                '3SD+'
+            ].length);
             
             window.contractorDistributionChart = new Chart(distCtx, {
                 type: 'bar',
