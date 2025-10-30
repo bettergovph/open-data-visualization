@@ -3569,7 +3569,7 @@ async def get_contractor_projects_frontend(contractor_name: str):
 @app.get("/api/dynasty/relationship-chains")
 async def dynasty_relationship_chains_api(
     chain_length: int = Query(2, ge=2, le=10, description="Minimum chain length to find"),
-    max_chains: int = Query(20, ge=1, le=100, description="Maximum number of chains to return")
+    max_chains: int = Query(100, ge=1, le=200, description="Maximum number of chains to return")
 ):
     """Get relationship chains from JSON cache"""
     try:

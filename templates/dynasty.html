@@ -387,7 +387,7 @@ function toggleMobileMenu() {
                         <a href="#visual" class="dynasty-tab-btn" data-tab="visual">📈 Visual</a>
                         <a href="#table" class="dynasty-tab-btn" data-tab="table">🏛️ Officials</a>
                         <a href="#poverty" class="dynasty-tab-btn" data-tab="poverty">💰 Poverty</a>
-                        <a href="#conflicts" class="dynasty-tab-btn" data-tab="conflicts">⚔️ Relationship Chains</a>
+                        <a href="#conflicts" class="dynasty-tab-btn" data-tab="conflicts">🕸️ Officials Network</a>
                         <a href="#animation" class="dynasty-tab-btn" data-tab="animation">🎬 Animation</a>
                     </div>
                 
@@ -769,14 +769,14 @@ function toggleMobileMenu() {
 
                     <!-- Conflicts Tab -->
                     <div id="tab-conflicts" class="dynasty-tab-panel">
-                        <h3 class="dynasty-section-title">⚔️ Relationship Chains</h3>
+                        <h3 class="dynasty-section-title">⚔️ Relationship Constellations</h3>
                         <p class="dynasty-section-desc">Visualize the longest relationship chains connecting different political families</p>
                         
                         <!-- Conflicts Tab Loading Spinner -->
                         <div id="conflictsTabLoadingSpinner" class="tab-loading-spinner">
                             <div class="tab-loading-content">
                                 <div class="tab-spinner"></div>
-                                <p class="tab-loading-text">⚔️ Loading Relationship Chains</p>
+                                <p class="tab-loading-text">⚔️ Loading Relationship Constellations</p>
                                 <p class="tab-loading-subtext">Analyzing political family connections...</p>
                             </div>
                         </div>
@@ -787,8 +787,8 @@ function toggleMobileMenu() {
                                 <div>
                                     <label style="display: block; margin-bottom: 5px; font-weight: 600; color: #333;">Chain Length:</label>
                                     <select id="chainLengthFilter" style="padding: 8px 12px; border: 1px solid #ddd; border-radius: 4px; width: 120px;">
-                                        <option value="2" selected>2+ connections</option>
-                                        <option value="3">3+ connections</option>
+                                        <option value="2">2+ connections</option>
+                                        <option value="3" selected>3+ connections</option>
                                         <option value="4">4+ connections</option>
                                         <option value="5">5+ connections</option>
                                         <option value="6">6+ connections</option>
@@ -796,10 +796,13 @@ function toggleMobileMenu() {
                                 </div>
                                 <div>
                                     <label style="display: block; margin-bottom: 5px; font-weight: 600; color: #333;">Max Chains:</label>
-                                    <select id="maxChainsFilter" style="padding: 8px 12px; border: 1px solid #ddd; border-radius: 4px; width: 120px;">
+                                    <select id="maxChainsFilter" style="padding: 8px 12px; border: 1px solid #ddd; border-radius: 4px; width: 140px;">
                                         <option value="10">Top 10</option>
-                                        <option value="20" selected>Top 20</option>
-                                        <option value="50">Top 50</option>
+                                        <option value="20">Top 20</option>
+                                        <option value="50" selected>Top 50</option>
+                                        <option value="100">Top 100</option>
+                                        <option value="150">Top 150</option>
+                                        <option value="200">Top 200</option>
                                     </select>
                                 </div>
                                 <div>
@@ -807,17 +810,12 @@ function toggleMobileMenu() {
                                         🔍 Apply Filters
                                     </button>
                                 </div>
-                                <div>
-                                    <button onclick="clearConflictsFilters()" style="padding: 8px 16px; background: #6c757d; color: white; border: none; border-radius: 4px; cursor: pointer;">
-                                        Clear Filters
-                                    </button>
-                                </div>
                             </div>
                         </div>
 
-                        <!-- Conflicts Network -->
+                        <!-- Relationship Constellations -->
                         <div class="conflicts-visualization" style="background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); margin-bottom: 20px;">
-                            <h4 style="color: #0038A8; margin-bottom: 15px;">🕸️ Conflicts Network</h4>
+                            <h4 style="color: #0038A8; margin-bottom: 15px;">🕸️ Relationship Constellations</h4>
                             <div id="conflictsNetwork" style="width: 100%; height: 600px; border: 1px solid #ddd; border-radius: 4px; position: relative;">
                                 <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); text-align: center; color: #6c757d;">
                                     <div style="font-size: 2em; margin-bottom: 10px;">🕸️</div>
@@ -828,7 +826,23 @@ function toggleMobileMenu() {
 
                         <!-- Conflicts Table -->
                         <div class="conflicts-table" style="background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
-                            <h4 style="color: #0038A8; margin-bottom: 15px;">📊 Relationship Chain Details</h4>
+                            <h4 style="color: #0038A8; margin-bottom: 15px;">📊 Relationship Constellation Details</h4>
+                            <div id="conflictsTableControls" style="display: flex; gap: 12px; align-items: center; justify-content: space-between; margin-bottom: 10px;">
+                                <div>
+                                    <label style="margin-right: 8px; color: #333; font-weight: 600;">Rows per page:</label>
+                                    <select id="conflictsRowsPerPage" style="padding: 6px 10px; border: 1px solid #ddd; border-radius: 4px; width: 100px;">
+                                        <option value="10">10</option>
+                                        <option value="25" selected>25</option>
+                                        <option value="50">50</option>
+                                        <option value="100">100</option>
+                                    </select>
+                                </div>
+                                <div id="conflictsPagination" style="display: flex; gap: 8px; align-items: center;">
+                                    <button id="conflictsPrevPage" style="padding: 6px 10px; border: 1px solid #ddd; background: #f8f9fa; border-radius: 4px; cursor: pointer;">◀ Prev</button>
+                                    <span id="conflictsPageInfo" style="min-width: 140px; text-align: center; color: #555;"></span>
+                                    <button id="conflictsNextPage" style="padding: 6px 10px; border: 1px solid #ddd; background: #f8f9fa; border-radius: 4px; cursor: pointer;">Next ▶</button>
+                                </div>
+                            </div>
                             <div style="overflow-x: auto;">
                                 <table style="width: 100%; border-collapse: collapse; font-size: 14px;">
                                     <thead>
@@ -1048,6 +1062,7 @@ function initializeDynastyPage() {
                     // Automatically load conflicts data
                     loadConflictsData();
                     // Set up filter change listeners
+                    setupConflictsFilters();
                 } else {
                     console.error('❌ D3.js is not available in conflicts tab');
                 }
@@ -3065,7 +3080,10 @@ document.addEventListener('DOMContentLoaded', function() {
 
 // Conflicts Tab Functions
 let conflictsData = [];
+let fullConflictsData = [];
 let conflictsNetwork = null;
+let conflictsRowsPerPage = 25;
+let conflictsCurrentPage = 1;
 
 function loadConflictsData() {
     console.log('🚀 loadConflictsData function called!');
@@ -3097,7 +3115,7 @@ function loadConflictsData() {
     
     console.log('✅ D3.js is available:', d3.version);
     
-    // Fetch conflicts data
+    // Fetch conflicts data (limited for network)
     fetch(`/api/dynasty/relationship-chains?chain_length=${chainLength}&max_chains=${maxChains}`)
         .then(response => {
             console.log('📡 API Response status:', response.status);
@@ -3110,7 +3128,25 @@ function loadConflictsData() {
                 console.log('✅ Conflicts data loaded:', conflictsData.length, 'chains');
                 console.log('🔍 First chain data:', conflictsData[0]);
                 displayConflictsNetwork();
-                displayConflictsTable();
+                // Load full cached JSON for the table (all chains) and paginate client-side
+                fetch('/static/data/relationship_chains_cache.json?v=' + Date.now())
+                    .then(res => res.json())
+                    .then(cache => {
+                        const allChains = cache && cache.chains ? cache.chains : [];
+                        // Filter by chain length only; table should access all chains
+                        fullConflictsData = allChains.filter(c => c.length >= parseInt(chainLength));
+                        conflictsCurrentPage = 1;
+                        displayConflictsTable();
+                        updateConflictsPaginationControls();
+                    })
+                    .catch(err => {
+                        console.error('❌ Failed to load cached relationship chains JSON:', err);
+                        // Fallback to limited data if cache fails
+                        fullConflictsData = conflictsData.slice();
+                        conflictsCurrentPage = 1;
+                        displayConflictsTable();
+                        updateConflictsPaginationControls();
+                    });
                 
                 // Hide conflicts tab loading spinner
                 hideTabLoadingSpinner('conflicts');
@@ -3355,8 +3391,9 @@ function displayConflictsNetwork() {
 
 function displayConflictsTable() {
     const tbody = document.getElementById('conflictsTableBody');
+    const pageInfo = document.getElementById('conflictsPageInfo');
     
-    if (!conflictsData || conflictsData.length === 0) {
+    if (!fullConflictsData || fullConflictsData.length === 0) {
         tbody.innerHTML = `
             <tr>
                 <td colspan="5" style="padding: 20px; text-align: center; color: #6c757d;">
@@ -3367,11 +3404,28 @@ function displayConflictsTable() {
                 </td>
             </tr>
         `;
+        if (pageInfo) pageInfo.textContent = '0 of 0';
         return;
     }
     
+    // Ensure consistent ordering with API/network: sort by length desc, then start/end surname
+    const sorted = fullConflictsData.slice().sort((a, b) => {
+        if (b.length !== a.length) return b.length - a.length;
+        const aStart = (a.path[0]?.last_name || '').localeCompare(b.path[0]?.last_name || '');
+        if (aStart !== 0) return aStart;
+        const aEnd = (a.path[a.path.length - 1]?.last_name || '').localeCompare(b.path[b.path.length - 1]?.last_name || '');
+        return aEnd;
+    });
+    
+    const totalItems = sorted.length;
+    const totalPages = Math.max(1, Math.ceil(totalItems / conflictsRowsPerPage));
+    conflictsCurrentPage = Math.min(conflictsCurrentPage, totalPages);
+    const startIdx = (conflictsCurrentPage - 1) * conflictsRowsPerPage;
+    const endIdx = Math.min(startIdx + conflictsRowsPerPage, totalItems);
+    const pageItems = sorted.slice(startIdx, endIdx);
+    
     let html = '';
-    conflictsData.forEach((chain, index) => {
+    pageItems.forEach((chain) => {
         const familyA = chain.path[0];
         const familyB = chain.path[chain.path.length - 1];
         const connectingPath = chain.path.slice(1, -1).map(p => p.last_name).join(' → ');
@@ -3389,12 +3443,16 @@ function displayConflictsTable() {
     });
     
     tbody.innerHTML = html;
+    if (pageInfo) pageInfo.textContent = `Page ${conflictsCurrentPage} of ${totalPages}`;
 }
 
 function setupConflictsFilters() {
     // Set up filter change listeners for automatic updates
     const chainLengthFilter = document.getElementById('chainLengthFilter');
     const maxChainsFilter = document.getElementById('maxChainsFilter');
+    const rowsPerPage = document.getElementById('conflictsRowsPerPage');
+    const prevBtn = document.getElementById('conflictsPrevPage');
+    const nextBtn = document.getElementById('conflictsNextPage');
     
     if (chainLengthFilter) {
         chainLengthFilter.addEventListener('change', function() {
@@ -3409,12 +3467,42 @@ function setupConflictsFilters() {
             loadConflictsData();
         });
     }
+
+    if (rowsPerPage) {
+        rowsPerPage.addEventListener('change', function() {
+            conflictsRowsPerPage = parseInt(this.value);
+            conflictsCurrentPage = 1;
+            displayConflictsTable();
+            updateConflictsPaginationControls();
+        });
+    }
+    if (prevBtn) {
+        prevBtn.addEventListener('click', function() {
+            if (conflictsCurrentPage > 1) {
+                conflictsCurrentPage -= 1;
+                displayConflictsTable();
+                updateConflictsPaginationControls();
+            }
+        });
+    }
+    if (nextBtn) {
+        nextBtn.addEventListener('click', function() {
+            const totalItems = fullConflictsData ? fullConflictsData.length : 0;
+            const totalPages = Math.max(1, Math.ceil(totalItems / conflictsRowsPerPage));
+            if (conflictsCurrentPage < totalPages) {
+                conflictsCurrentPage += 1;
+                displayConflictsTable();
+                updateConflictsPaginationControls();
+            }
+        });
+    }
 }
 
 function clearConflictsFilters() {
     document.getElementById('chainLengthFilter').value = '2';
-    document.getElementById('maxChainsFilter').value = '20';
+    document.getElementById('maxChainsFilter').value = '100';
     conflictsData = [];
+    fullConflictsData = [];
     document.getElementById('conflictsNetwork').innerHTML = `
         <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); text-align: center; color: #6c757d;">
             <div style="font-size: 2em; margin-bottom: 10px;">🕸️</div>
@@ -3431,6 +3519,17 @@ function clearConflictsFilters() {
             </td>
         </tr>
     `;
+    const pageInfo = document.getElementById('conflictsPageInfo');
+    if (pageInfo) pageInfo.textContent = '';
+}
+
+function updateConflictsPaginationControls() {
+    const prevBtn = document.getElementById('conflictsPrevPage');
+    const nextBtn = document.getElementById('conflictsNextPage');
+    const totalItems = fullConflictsData ? fullConflictsData.length : 0;
+    const totalPages = Math.max(1, Math.ceil(totalItems / conflictsRowsPerPage));
+    if (prevBtn) prevBtn.disabled = conflictsCurrentPage <= 1;
+    if (nextBtn) nextBtn.disabled = conflictsCurrentPage >= totalPages;
 }
 
 // Animation Tab Functions

@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Generate relationship chains cache for relationship visualization
+Generate relationship constellations cache for relationship visualization
 """
 
 import asyncio
@@ -9,8 +9,8 @@ import json
 import os
 from datetime import datetime
 
-async def generate_relationship_chains_cache():
-    """Generate JSON cache of relationship chains between different political families"""
+async def generate_relationship_constellations_cache():
+    """Generate JSON cache of relationship constellations between different political families"""
     
     # Database connection
     conn = await asyncpg.connect(
@@ -22,7 +22,7 @@ async def generate_relationship_chains_cache():
     )
     
     try:
-        print("🔍 Generating relationship chains cache...")
+        print("🔍 Generating relationship constellations cache...")
         
         # Query to find longer relationship chains using recursive CTE
         query = """
@@ -96,7 +96,7 @@ async def generate_relationship_chains_cache():
         """
         
         chains = await conn.fetch(query)
-        print(f"📊 Found {len(chains)} relationship chains")
+        print(f"📊 Found {len(chains)} relationship constellations")
         
         # Format the data
         formatted_chains = []
@@ -142,7 +142,7 @@ async def generate_relationship_chains_cache():
                     })
             
             formatted_chains.append({
-                "length": len(path_details),  # Actual number of people in chain
+                "length": len(path_details),
                 "start_surname": chain['start_surname'],
                 "end_surname": chain['end_surname'],
                 "path": path_details,
@@ -154,7 +154,7 @@ async def generate_relationship_chains_cache():
             "summary": {
                 "total_chains": len(formatted_chains),
                 "last_updated": datetime.now().isoformat(),
-                "description": "Relationship chains between different political families"
+                "description": "Relationship constellations between different political families"
             },
             "chains": formatted_chains
         }
@@ -168,8 +168,8 @@ async def generate_relationship_chains_cache():
         with open(cache_file, 'w', encoding='utf-8') as f:
             json.dump(cache_data, f, indent=2, ensure_ascii=False)
         
-        print(f"✅ Cache generated: {cache_file}")
-        print(f"📊 Total chains: {len(formatted_chains)}")
+        print(f"✅ Constellations cache generated: {cache_file}")
+        print(f"📊 Total constellations: {len(formatted_chains)}")
         
         return cache_data
         
@@ -177,4 +177,6 @@ async def generate_relationship_chains_cache():
         await conn.close()
 
 if __name__ == "__main__":
-    asyncio.run(generate_relationship_chains_cache())
+    asyncio.run(generate_relationship_constellations_cache())
+
+

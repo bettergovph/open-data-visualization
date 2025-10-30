@@ -302,6 +302,18 @@ class JSONGenerator:
                 'category': 'dynasty_data',
                 'dependencies': ['PostgreSQL dynasty database']
             },
+            'relationship_chains_cache.json': {
+                'script': 'scripts/database/generate_relationship_constellations_cache.py',
+                'description': 'Relationship constellations between different political families',
+                'category': 'dynasty_data',
+                'dependencies': ['PostgreSQL dynasty database']
+            },
+            'dynasty_flags_cache.json': {
+                'script': 'scripts/generate_dynasty_flags.py',
+                'description': 'Dynasty flags assigned by surname+province',
+                'category': 'dynasty_data',
+                'dependencies': ['PostgreSQL dynasty database']
+            },
             
             # Dynasty Animation Cache Files
             'dynasty_animation_master.json': {
@@ -546,8 +558,8 @@ class JSONGenerator:
         return success
     
     async def generate_dynasty_data(self):
-        """Generate Dynasty analysis JSON files."""
-        print("\n👑 Generating Dynasty Data...")
+        """Generate dynasty-related JSON files."""
+        print("\n🏛️ Generating Dynasty Data...")
         print("=" * 40)
         
         # Generate dynasty surnames cache
@@ -561,8 +573,20 @@ class JSONGenerator:
             'cache_dynasty_animation.py',
             'Dynasty Animation Cache (All Years + Master Index)'
         )
+
+        # Generate relationship constellations cache
+        success3, output3 = await self.run_script(
+            'scripts/database/generate_relationship_constellations_cache.py',
+            'Relationship Constellations Cache'
+        )
+
+        # Generate dynasty flags cache
+        success4, output4 = await self.run_script(
+            'scripts/generate_dynasty_flags.py',
+            'Dynasty Flags Cache'
+        )
         
-        return success1 and success2
+        return success1 and success2 and success3 and success4
     
     async def generate_eogo_data(self):
         """Generate EOGO Corruption Risk Analysis JSON files."""
