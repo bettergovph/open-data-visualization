@@ -387,6 +387,7 @@ function toggleMobileMenu() {
                         <a href="#visual" class="dynasty-tab-btn" data-tab="visual">📈 Visual</a>
                         <a href="#table" class="dynasty-tab-btn" data-tab="table">🏛️ Officials</a>
                         <a href="#poverty" class="dynasty-tab-btn" data-tab="poverty">💰 Poverty</a>
+                        <a href="#poverty-visual" class="dynasty-tab-btn" data-tab="poverty-visual">💹 Poverty Visual</a>
                         <a href="#conflicts" class="dynasty-tab-btn" data-tab="conflicts">🕸️ Officials Network</a>
                         <a href="#animation" class="dynasty-tab-btn" data-tab="animation">🎬 Animation</a>
                     </div>
@@ -767,6 +768,59 @@ function toggleMobileMenu() {
                         </div>
                     </div>
 
+                    <!-- Poverty Visual Tab -->
+                    <div id="tab-poverty-visual" class="dynasty-tab-panel">
+                        <h3 class="dynasty-section-title">💹 Poverty Visual</h3>
+                        <p class="dynasty-section-desc">Scatter plots relating dynasty metrics and poverty by province</p>
+
+                        <!-- Poverty Visual Tab Loading Spinner -->
+                        <div id="poverty-visualTabLoadingSpinner" class="tab-loading-spinner" style="display: none;">
+                            <div class="tab-loading-content">
+                                <div class="tab-spinner"></div>
+                                <p class="tab-loading-text">📊 Loading Poverty Visuals</p>
+                                <p class="tab-loading-subtext">Preparing scatter plots...</p>
+                            </div>
+                        </div>
+
+                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(420px, 1fr)); gap: 20px;">
+                            <!-- Provinces by Dynasty Concentration (size = clan diameter) -->
+                            <div id="dynastyConcentrationScatterContainer" class="chart-container relative" style="background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); height: 560px;">
+                                <h4 style="margin: 0 0 10px 0; color: #0038A8;">🏛️ Provinces by Dynasty Concentration</h4>
+                                <p style="margin: 0 0 10px 0; color: #6b7280; font-size: 12px;">Circle diameter scales with size of top clan in province</p>
+                                <button 
+                                    id="copyDynastyConcentrationBtn" 
+                                    style="position: absolute; top: 20px; right: 20px; z-index: 10;"
+                                    class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded text-base transition-colors duration-200 flex items-center gap-2"
+                                    onclick="copyChartToClipboard('dynastyConcentrationScatterContainer', 'copyDynastyConcentrationBtn')"
+                                    title="Copy chart image to clipboard"
+                                >
+                                    📋 Copy
+                                </button>
+                                <div style="height: calc(100% - 50px); position: relative;">
+                                    <canvas id="dynastyConcentrationScatter" style="width: 100%; height: 100%;"></canvas>
+                                </div>
+                            </div>
+
+                            <!-- Provinces by Poverty Rate (size = number of families) -->
+                            <div id="povertyRateScatterContainer" class="chart-container relative" style="background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); height: 560px;">
+                                <h4 style="margin: 0 0 10px 0; color: #0038A8;">💰 Provinces by Poverty Rate</h4>
+                                <p style="margin: 0 0 10px 0; color: #6b7280; font-size: 12px;">Circle diameter scales with number of dynasty families in province</p>
+                                <button 
+                                    id="copyPovertyRateBtn" 
+                                    style="position: absolute; top: 20px; right: 20px; z-index: 10;"
+                                    class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded text-base transition-colors duration-200 flex items-center gap-2"
+                                    onclick="copyChartToClipboard('povertyRateScatterContainer', 'copyPovertyRateBtn')"
+                                    title="Copy chart image to clipboard"
+                                >
+                                    📋 Copy
+                                </button>
+                                <div style="height: calc(100% - 50px); position: relative;">
+                                    <canvas id="povertyRateScatter" style="width: 100%; height: 100%;"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
                     <!-- Conflicts Tab -->
                     <div id="tab-conflicts" class="dynasty-tab-panel">
                         <h3 class="dynasty-section-title">⚔️ Relationship Constellations</h3>
@@ -1052,6 +1106,9 @@ function initializeDynastyPage() {
                 showTabLoadingSpinner('poverty');
                 loadPovertyDynastyData();
                 loadPovertyData();
+            } else if (tabName === 'poverty-visual') {
+                showTabLoadingSpinner('poverty-visual');
+                loadPovertyVisualCharts();
             } else if (tabName === 'conflicts') {
                 showTabLoadingSpinner('conflicts');
                 // Initialize conflicts tab
@@ -2871,6 +2928,232 @@ async function loadPovertyData() {
         
         // Hide poverty tab loading spinner on error
         hideTabLoadingSpinner('poverty');
+    }
+}
+
+// Poverty Visual: Scatter Plots
+let _dynastyProvinceStatsCache = null;
+let _povertyDataCache = null;
+
+function normalizeProvinceName(name) {
+    if (!name) return '';
+    const n = String(name).toUpperCase().trim()
+        .replace(/\s+PROVINCE$/,'')
+        .replace(/^NCR,\s*/,'NCR, ')
+        .replace(/^NATIONAL CAPITAL REGION\s*-\s*/,'NCR, ')
+        .replace(/\s+/g,' ')
+        .replace(/TAWI TAWI/,'TAWI-TAWI');
+    return n;
+}
+
+async function loadDynastyProvinceStats() {
+    if (_dynastyProvinceStatsCache) return _dynastyProvinceStatsCache;
+    const resp = await fetch('/static/data/dynasty_surnames_cache.json');
+    if (!resp.ok) throw new Error('Failed loading dynasty_surnames_cache.json');
+    const data = await resp.json();
+    const statsByProvince = {};
+    if (Array.isArray(data.surnames)) {
+        data.surnames.forEach(item => {
+            const province = normalizeProvinceName(item.province);
+            if (!province) return;
+            if (!statsByProvince[province]) {
+                statsByProvince[province] = {
+                    province,
+                    totalCount: 0,
+                    dynastyCount: 0,
+                    families: new Set(),
+                    topClanSize: 0
+                };
+            }
+            const s = statsByProvince[province];
+            const total = Number(item.total_count) || 0;
+            const dynasty = Number(item.dynasty_count) || 0;
+            s.totalCount += total;
+            s.dynastyCount += dynasty;
+            s.families.add(item.surname);
+            if (total > s.topClanSize) s.topClanSize = total;
+        });
+    }
+    // finalize
+    Object.values(statsByProvince).forEach(s => {
+        s.numFamilies = s.families.size;
+        delete s.families;
+        s.dynastyConcentration = s.totalCount > 0 ? (s.dynastyCount / s.totalCount) * 100.0 : 0;
+    });
+    _dynastyProvinceStatsCache = statsByProvince;
+    return statsByProvince;
+}
+
+async function loadPovertyJson() {
+    if (_povertyDataCache) return _povertyDataCache;
+    const resp = await fetch('/static/data/poverty_correlation_cache.json');
+    if (!resp.ok) throw new Error('Failed loading poverty_correlation_cache.json');
+    const data = await resp.json();
+    _povertyDataCache = Array.isArray(data.data) ? data.data : [];
+    return _povertyDataCache;
+}
+
+function computeSizeScale(values, minPx, maxPx) {
+    const minV = Math.min(...values);
+    const maxV = Math.max(...values);
+    if (!isFinite(minV) || !isFinite(maxV) || maxV <= minV) {
+        return () => (minPx + maxPx) / 2;
+    }
+    return v => {
+        const t = (v - minV) / (maxV - minV);
+        return minPx + t * (maxPx - minPx);
+    };
+}
+
+function renderScatterChart(canvasId, points, xLabel, yLabel) {
+    const ctx = document.getElementById(canvasId).getContext('2d');
+    const diameters = points.map(p => p.diameter);
+    const toPx = computeSizeScale(diameters, 6, 28); // diameter in px; radius computed below
+    const dataPoints = points.map(p => ({
+        x: p.x,
+        y: p.y,
+        _province: p.province,
+        _diameter: p.diameter,
+        _radiusPx: toPx(p.diameter) / 2
+    }));
+
+    // Determine top 10 by diameter (descending) and assign rank
+    const sorted = dataPoints
+        .map((p, i) => ({ i, d: p._diameter }))
+        .sort((a, b) => b.d - a.d);
+    const topCount = Math.min(25, sorted.length);
+    for (let r = 0; r < topCount; r++) {
+        const idx = sorted[r].i;
+        dataPoints[idx]._rank = r + 1; // 1..25
+    }
+
+    const palette = [
+        '#ef4444', '#f59e0b', '#10b981', '#3b82f6', '#8b5cf6',
+        '#ec4899', '#22c55e', '#eab308', '#06b6d4', '#f97316',
+        '#7c3aed', '#14b8a6', '#84cc16', '#a855f7', '#0ea5e9',
+        '#dc2626', '#d97706', '#059669', '#2563eb', '#6d28d9',
+        '#be185d', '#16a34a', '#ca8a04', '#0891b2', '#ea580c'
+    ];
+    const defaultFill = 'rgba(156, 163, 175, 0.35)'; // gray-400 with alpha
+    const defaultStroke = 'rgba(156, 163, 175, 0.8)';
+
+    const chart = new Chart(ctx, {
+        type: 'scatter',
+        data: {
+            datasets: [{
+                label: yLabel,
+                data: dataPoints,
+                backgroundColor: c => {
+                    const r = c.raw;
+                    if (r && r._rank && r._rank <= 25) return palette[r._rank - 1];
+                    return defaultFill;
+                },
+                borderColor: c => {
+                    const r = c.raw;
+                    if (r && r._rank && r._rank <= 25) return palette[r._rank - 1];
+                    return defaultStroke;
+                },
+                borderWidth: 1,
+                pointRadius: ctx => ctx.raw? ctx.raw._radiusPx : 6,
+                pointHoverRadius: ctx => ctx.raw? Math.max(6, ctx.raw._radiusPx + 2) : 8
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            parsing: false,
+            scales: {
+                x: {
+                    title: { display: true, text: xLabel },
+                    ticks: { callback: v => v },
+                    grid: { color: 'rgba(0,0,0,0.05)' }
+                },
+                y: {
+                    title: { display: true, text: yLabel },
+                    grid: { color: 'rgba(0,0,0,0.05)' }
+                }
+            },
+            plugins: {
+                tooltip: {
+                    callbacks: {
+                        label: (ctx) => {
+                            const r = ctx.raw;
+                            return `${r._province}: ${yLabel} = ${ctx.parsed.y.toFixed(2)} | size = ${r._diameter}`;
+                        }
+                    }
+                },
+                legend: { display: false }
+            }
+        }
+    });
+
+    return chart;
+}
+
+async function loadPovertyVisualCharts() {
+    try {
+        const [provStats, povertyRows] = await Promise.all([
+            loadDynastyProvinceStats(),
+            loadPovertyJson()
+        ]);
+
+        // Build province list intersection and numeric x-axis index
+        const pointsConcentration = [];
+        const pointsPoverty = [];
+
+        // Map provinces to an index for x axis to keep ordering stable
+        const joined = [];
+        povertyRows.forEach(row => {
+            const p = normalizeProvinceName(row.province);
+            const stat = provStats[p];
+            if (stat) {
+                joined.push({
+                    province: p,
+                    poverty_rate: Number(row.poverty_rate) || 0,
+                    dynastyConcentration: stat.dynastyConcentration,
+                    topClanSize: stat.topClanSize,
+                    numFamilies: stat.numFamilies
+                });
+            }
+        });
+
+        // Sort provinces alphabetically for consistent x positions
+        joined.sort((a,b) => a.province.localeCompare(b.province));
+        const xIndex = new Map(joined.map((r,i) => [r.province, i + 1]));
+
+        joined.forEach(r => {
+            pointsConcentration.push({
+                province: r.province,
+                x: xIndex.get(r.province),
+                y: r.dynastyConcentration,
+                diameter: r.topClanSize
+            });
+            pointsPoverty.push({
+                province: r.province,
+                x: xIndex.get(r.province),
+                y: r.poverty_rate,
+                diameter: r.numFamilies
+            });
+        });
+
+        // Render charts
+        renderScatterChart(
+            'dynastyConcentrationScatter',
+            pointsConcentration,
+            'Province (index)',
+            'Dynasty Concentration (%)'
+        );
+
+        renderScatterChart(
+            'povertyRateScatter',
+            pointsPoverty,
+            'Province (index)',
+            'Poverty Rate (%)'
+        );
+    } catch (err) {
+        console.error('❌ Error loading Poverty Visual charts:', err);
+    } finally {
+        hideTabLoadingSpinner('poverty-visual');
     }
 }
 
