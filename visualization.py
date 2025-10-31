@@ -2805,12 +2805,25 @@ async def dynasty_data_api(
             database=os.getenv('POSTGRES_DB_DYNASTY', 'dynasty')
         )
         
-        # Build WHERE clause for filtering
-        where_conditions = []
+        # Filter positions: elected positions only (President, Vice President, Senator, Mayor, Congressmen, Councilor, Governor) with max 2 words
+        where_conditions = [
+            "position IS NOT NULL AND position != ''",
+            # Position must match elected positions AND have max 2 words
+            """(
+                (
+                    UPPER(position) ILIKE ANY(ARRAY['%PRESIDENT%', '%VICE PRESIDENT%', '%SENATOR%', '%MAYOR%', 
+                                                      '%CONGRESSMEN%', '%CONGRESSMAN%', '%COUNCILOR%', '%GOVERNOR%'])
+                )
+                AND 
+                (
+                    LENGTH(position) - LENGTH(REPLACE(position, ' ', '')) + 1 <= 2
+                )
+            )"""
+        ]
         params = []
         param_count = 0
         
-        # Precise name filters (take precedence when provided)
+        # Precise name filters (additional refinement on top of top 500 filter)
         if first_name:
             param_count += 1
             where_conditions.append(f"first_name ILIKE ${param_count}")
@@ -2939,8 +2952,8 @@ async def dynasty_positions_api(
     region: str = Query("", description="Optional region filter to align suggestions"),
     dynasty: str = Query("", description="Optional dynasty filter (dynasty/non-dynasty) to align suggestions")
 ):
-    """Return distinct positions that have at least one record matching current UI filters,
-    filtered by prefix, sorted alphabetically."""
+    """Return distinct elected positions (President, Vice President, Senator, Mayor, Congressmen, Councilor, Governor)
+    with max 2 words, filtered by prefix, sorted alphabetically."""
     try:
         import asyncpg
         conn = await asyncpg.connect(
@@ -2950,13 +2963,23 @@ async def dynasty_positions_api(
             password=os.getenv('POSTGRES_PASSWORD', ''),
             database=os.getenv('POSTGRES_DB_DYNASTY', 'dynasty')
         )
+        
         params = []
         where_conditions = [
             "position IS NOT NULL AND position != ''",
-            "position NOT ILIKE 'OTHER'",
-            "position NOT ILIKE 'UNKNOWN'",
-            "( (first_name IS NOT NULL AND TRIM(first_name) != '') OR (last_name IS NOT NULL AND TRIM(last_name) != '') )"
+            # Position must match elected positions AND have max 2 words
+            """(
+                (
+                    UPPER(position) ILIKE ANY(ARRAY['%PRESIDENT%', '%VICE PRESIDENT%', '%SENATOR%', '%MAYOR%', 
+                                                      '%CONGRESSMEN%', '%CONGRESSMAN%', '%COUNCILOR%', '%GOVERNOR%'])
+                )
+                AND 
+                (
+                    LENGTH(position) - LENGTH(REPLACE(position, ' ', '')) + 1 <= 2
+                )
+            )"""
         ]
+        
         param_idx = 0
         if q:
             param_idx += 1
@@ -3110,7 +3133,7 @@ async def dynasty_top_surnames_api(
 
 @app.get("/api/dynasty/stats")
 async def dynasty_stats_api():
-    """Get dynasty dashboard statistics"""
+    """Get dynasty dashboard statistics filtered by elected positions only (President, Vice President, Senator, Mayor, Congressmen, Councilor, Governor, max 2 words)"""
     try:
         import asyncpg
         import os
@@ -3119,38 +3142,45 @@ async def dynasty_stats_api():
         conn = await asyncpg.connect(
             host=os.getenv('POSTGRES_HOST', 'localhost'),
             port=int(os.getenv('POSTGRES_PORT', 5432)),
-            user=os.getenv('POSTGRES_USER', 'postgres'),
+            user=os.getenv('POSTGRES_USER', 'budget_admin'),
             password=os.getenv('POSTGRES_PASSWORD', ''),
             database=os.getenv('POSTGRES_DB_DYNASTY', 'dynasty')
         )
         
-        # Check if there are any winners first
-        winners_count = await conn.fetchval("SELECT COUNT(*) FROM political_dynasties WHERE winner = true")
-        if winners_count == 0:
-            await conn.close()
-            return JSONResponse({
-                "success": True,
-                "data": {
-                    "total_records": 0,
-                    "dynasty_members": 0,
-                    "non_dynasty_members": 0,
-                    "unique_politicians": 0
-                },
-                "message": "No winning candidates found yet. The election data import is still in progress."
-            })
+        # Position filter: elected positions only (President, Vice President, Senator, Mayor, Congressmen, Councilor, Governor) with max 2 words
+        position_filter = """(
+            position IS NOT NULL AND position != ''
+            AND (
+                (
+                    UPPER(position) ILIKE ANY(ARRAY['%PRESIDENT%', '%VICE PRESIDENT%', '%SENATOR%', '%MAYOR%', 
+                                                      '%CONGRESSMEN%', '%CONGRESSMAN%', '%COUNCILOR%', '%GOVERNOR%'])
+                )
+                AND 
+                (
+                    LENGTH(position) - LENGTH(REPLACE(position, ' ', '')) + 1 <= 2
+                )
+            )
+        )"""
         
-        # Get total records (winners only)
-        # Total records query reflects applied filters
-        # (computed below via count_query)
+        # Get total records
+        total_records = await conn.fetchval(
+            f"SELECT COUNT(*) FROM political_dynasties WHERE {position_filter}"
+        )
         
-        # Get dynasty members (fat = 1, winners only)
-        dynasty_members = await conn.fetchval("SELECT COUNT(*) FROM political_dynasties WHERE fat = 1 AND winner = true")
+        # Get dynasty members (fat = 1)
+        dynasty_members = await conn.fetchval(
+            f"SELECT COUNT(*) FROM political_dynasties WHERE fat = 1 AND {position_filter}"
+        )
         
-        # Get non-dynasty members (fat = 0, winners only)
-        non_dynasty_members = await conn.fetchval("SELECT COUNT(*) FROM political_dynasties WHERE fat = 0 AND winner = true")
+        # Get non-dynasty members (fat = 0)
+        non_dynasty_members = await conn.fetchval(
+            f"SELECT COUNT(*) FROM political_dynasties WHERE fat = 0 AND {position_filter}"
+        )
         
-        # Get unique politicians (distinct first_name + last_name, winners only)
-        unique_politicians = await conn.fetchval("SELECT COUNT(DISTINCT CONCAT(first_name, ' ', last_name)) FROM political_dynasties WHERE winner = true")
+        # Get unique politicians (distinct first_name + last_name)
+        unique_politicians = await conn.fetchval(
+            f"SELECT COUNT(DISTINCT CONCAT(first_name, ' ', last_name)) FROM political_dynasties WHERE {position_filter}"
+        )
         
         await conn.close()
         
@@ -3798,7 +3828,8 @@ async def get_contractor_projects_frontend(contractor_name: str):
 @app.get("/api/dynasty/relationship-chains")
 async def dynasty_relationship_chains_api(
     chain_length: int = Query(2, ge=2, le=10, description="Minimum chain length to find"),
-    max_chains: int = Query(100, ge=1, le=200, description="Maximum number of chains to return")
+    max_chains: int = Query(50, ge=25, le=1000, description="Maximum number of constellations to return"),
+    contractor_only: bool = Query(False, description="Only return constellations with contractor connections")
 ):
     """Get relationship chains from JSON cache"""
     try:
@@ -3813,17 +3844,54 @@ async def dynasty_relationship_chains_api(
         with open(cache_file, 'r', encoding='utf-8') as f:
             cache_data = json.load(f)
         
-        # Filter chains by minimum length and limit results
+        # Filter chains by minimum length
         all_chains = cache_data.get('chains', [])
         filtered_chains = [chain for chain in all_chains if chain['length'] >= chain_length]
-        limited_chains = filtered_chains[:max_chains]
+        
+        # Filter by contractor-only if requested
+        if contractor_only:
+            filtered_chains = [chain for chain in filtered_chains 
+                             if chain.get('contractor_connection') and chain.get('contractor_connection', {}).get('contractor_name')]
+            
+            # Diversify results across different contractors to avoid showing only one contractor
+            # Group chains by contractor and sample from each group
+            from collections import defaultdict
+            chains_by_contractor = defaultdict(list)
+            for chain in filtered_chains:
+                contractor_name = chain.get('contractor_connection', {}).get('contractor_name', 'Unknown')
+                chains_by_contractor[contractor_name].append(chain)
+            
+            # Sort contractors by number of chains (descending) to prioritize those with more connections
+            sorted_contractors = sorted(chains_by_contractor.items(), key=lambda x: len(x[1]), reverse=True)
+            
+            # Distribute max_chains across contractors (at least 1 per contractor, then distribute remaining)
+            limited_chains = []
+            num_contractors = len(sorted_contractors)
+            if num_contractors > 0:
+                # Ensure at least one chain per contractor (if max_chains allows)
+                chains_per_contractor = max(1, max_chains // num_contractors)
+                remaining_chains = max_chains - (chains_per_contractor * num_contractors)
+                
+                for i, (contractor_name, contractor_chains) in enumerate(sorted_contractors):
+                    if len(limited_chains) >= max_chains:
+                        break
+                    # Take more chains from first few contractors if there's remainder
+                    take_count = chains_per_contractor + (1 if i < remaining_chains else 0)
+                    limited_chains.extend(contractor_chains[:take_count])
+                    
+                    if len(limited_chains) >= max_chains:
+                        limited_chains = limited_chains[:max_chains]
+                        break
+        else:
+            # For non-contractor-only, just limit directly
+            limited_chains = filtered_chains[:max_chains]
         
         return JSONResponse({
             "success": True,
             "data": limited_chains,
-            "total_chains": len(limited_chains),
-            "min_chain_length": chain_length,
-            "max_chains_returned": max_chains,
+            "total_constellations": len(limited_chains),
+            "min_constellation_stars": chain_length,
+            "max_constellations_returned": max_chains,
             "cache_info": {
                 "last_updated": cache_data.get('summary', {}).get('last_updated'),
                 "total_cached": cache_data.get('summary', {}).get('total_chains', 0)

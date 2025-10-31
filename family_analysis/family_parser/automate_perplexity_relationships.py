@@ -314,29 +314,40 @@ class EnvLLMCSVProcessor(BaseLLMCSVProcessor):
 
 
 def build_prompt(names: List[Dict], prompt_num: int, names_per_prompt: int) -> str:
-    name_list = [n['full_name'] for n in names]
+    # Build name list with party information if available
+    name_entries = []
+    for n in names:
+        name_entry = n['full_name']
+        party_info = []
+        if n.get('party') and n['party'].strip():
+            party_info.append(f"Party: {n['party'].strip()}")
+        if n.get('province') and n['province'].strip():
+            party_info.append(f"Province: {n['province'].strip()}")
+        if party_info:
+            name_entry += f" ({', '.join(party_info)})"
+        name_entries.append(name_entry)
 
-    prompt = f"""# Political Dynasty Relationship Analysis Prompt
+    prompt = f"""# Philippine Political Dynasty Family Relationship Analysis Prompt
 
-You are a political research analyst specializing in Philippine political dynasties. Your task is to analyze the relationships between the following political figures and return the findings in CSV format.
+You are a political research analyst specializing in Philippine political dynasties. Your task is to analyze the FAMILY RELATIONSHIPS (biological and marriage) between the following political figures and return the findings in CSV format.
 
-## Names to Analyze:
+## Names to Analyze (with party affiliation and province if available):
 """
 
-    for i in range(0, len(name_list), 10):
-        batch_names = name_list[i:i+10]
+    for i in range(0, len(name_entries), 10):
+        batch_names = name_entries[i:i+10]
         prompt += "\n".join(batch_names) + "\n"
 
     prompt += f"""
 ## Your Task:
-1. Research each name using web sources to find:
-   - Family relationships (parent-child, siblings, spouses)
-   - Political connections and alliances
-   - Marriage connections between dynasties
-   - Succession patterns within families
-   - Cross-dynasty relationships
+1. Research each name using web sources to find VERIFIABLE FAMILY RELATIONSHIPS:
+   - Biological relationships (parent-child, siblings, grandparents, cousins)
+   - Marriage relationships (spouses, in-laws)
+   - Focus on relationships WITHIN political families/dynasties
+   
+2. PRIORITY: Focus on biological and marriage relationships. Only include political/business relationships if they are clearly documented and relevant to dynasty connections.
 
-2. Return results as CSV text with EXACTLY these columns (in this order):
+3. Return results as CSV text with EXACTLY these columns (in this order):
    - person1_name
    - person2_name  
    - relationship_type
@@ -354,74 +365,115 @@ STRICT OUTPUT RULES:
 - If no relationships are found, output ONLY the header row (no data rows).
 
 COVERAGE REQUIREMENT:
-- You MUST consider ALL {names_per_prompt} names listed above. If a specific name has no verifiable relationships, simply do not emit any row for that name.
-
-OPTIONAL DOWNLOAD LINK:
-- If you can also provide a direct HTTP(S) URL to download the same CSV file, print exactly one line AFTER the code block:
-  CSV_DOWNLOAD_URL: https://example.com/path/to/file.csv
-  Otherwise, do not print anything after the code block.
+- You MUST consider ALL {names_per_prompt} names listed above. If a specific name has no verifiable family relationships, simply do not emit any row for that name.
 
 ## Example Output (format ONLY):
 ```csv
 person1_name,person2_name,relationship_type,relationship_description,dynasty1,dynasty2,source_url,confidence_level
 "JUAN DELA CRUZ","MARIA DELA CRUZ","Husband/Wife","Married couple within the DELA CRUZ dynasty","DELA CRUZ","DELA CRUZ","https://example.org/source1",9
 "ALFRED TAN","STEPHANY TAN","Brother/Sister","Siblings in TAN dynasty","TAN","TAN","https://example.org/source2",8
+"JOSE GARCIA","CARLOS GARCIA","Father/Son","Father-son relationship in GARCIA political dynasty","GARCIA","GARCIA","https://example.org/source3",9
 ```
 
-## Relationship Types to Identify:
-- Father/Mother
-- Son/Daughter
-- Husband/Wife
-- Brother/Sister
-- Uncle/Aunt
-- Nephew/Niece
-- Cousin
+## Relationship Types to Identify (FAMILY FOCUS):
+- Father/Mother (biological or adoptive)
+- Son/Daughter (biological or adoptive)
+- Husband/Wife (married couple)
+- Brother/Sister (siblings)
+- Uncle/Aunt (parent's sibling)
+- Nephew/Niece (sibling's child)
+- Cousin (parent's sibling's child)
 - Grandfather/Grandmother
 - Grandson/Granddaughter
 - Father-in-law/Mother-in-law
 - Son-in-law/Daughter-in-law
-- Political Ally
-- Business Partner
-- Successor/Predecessor
+- Brother-in-law/Sister-in-law
+
+NOTE: Only include Political Ally or Business Partner relationships if they are explicitly documented as part of dynasty connections. Focus primarily on biological and marriage relationships.
 """
 
     return prompt
 
 
-async def fetch_all_names(conn, limit: int) -> List[Dict]:
-    rows = await conn.fetch(
-        """
-        SELECT DISTINCT
-            CONCAT(first_name, ' ', last_name) AS full_name,
-            province,
-            position,
-            year
-        FROM political_dynasties
-        WHERE first_name IS NOT NULL AND first_name <> ''
-          AND last_name IS NOT NULL AND last_name <> ''
-          AND (
-            position ILIKE '%SENATOR%'
-            OR position ILIKE '%CONGRESS%'
-            OR position ILIKE '%REPRESENTATIVE%'
-            OR position ILIKE '%GOVERNOR%'
-            OR position ILIKE '%VICE-GOVERNOR%'
-            OR position ILIKE '%VICE GOVERNOR%'
-            OR position ILIKE '%MAYOR%'
-            OR position ILIKE '%VICE MAYOR%'
-            OR position ILIKE '%COUNCILOR%'
-            OR position ILIKE '%COUNCILLOR%'
-            OR position ILIKE '%SANGGUNI%'
-            OR position ILIKE '%BOARD MEMBER%'
-          )
-          AND CONCAT(first_name, ' ', last_name) NOT IN (
-            SELECT full_name FROM llm_processed_names
-          )
-        ORDER BY full_name, year DESC
+def normalize_name_for_query(full_name: str) -> str:
+    """Normalize name by removing middle initials and extra spaces for deduplication"""
+    if not full_name:
+        return ""
+    # Remove PH-style middle initials like "A." or "A.B." and collapse spaces
+    name = re.sub(r"\b([A-Z])\.(?:\s*([A-Z])\.)?\b", " ", full_name.upper())
+    name = re.sub(r"\s+", " ", name).strip()
+    return name
+
+
+async def fetch_top_names(conn, limit: int) -> List[Dict]:
+    """
+    Fetch top priority engineer and BAC member names.
+    Prioritizes by: frequency + recency.
+    Returns exactly 'limit' unique normalized names (deduplicated by removing middle initials).
+    """
+    # Get top engineers and BAC members based on priority scoring:
+    # - Frequency (how many times they appear in database = influence)
+    # - Recency (most recent year)
+    # - Excludes already processed names
+    
+    name_rows = await conn.fetch("""
+        WITH name_stats AS (
+            SELECT 
+                CONCAT(first_name, ' ', last_name) AS full_name,
+                COUNT(*) as position_count,
+                MAX(year) as max_year,
+                MIN(year) as min_year,
+                COUNT(DISTINCT position) as unique_positions,
+                -- Get most recent record details
+                (array_agg(id ORDER BY year DESC))[1] as best_id,
+                (array_agg(province ORDER BY year DESC))[1] as best_province,
+                (array_agg(position ORDER BY year DESC))[1] as best_position,
+                (array_agg(party ORDER BY year DESC))[1] as best_party
+            FROM political_dynasties
+            WHERE first_name IS NOT NULL AND first_name <> ''
+              AND last_name IS NOT NULL AND last_name <> ''
+              AND (
+                position ILIKE '%ENGINEER%'
+                OR position ILIKE '%BAC%'
+                OR position ILIKE '%BIDS AND AWARDS%'
+                OR position ILIKE '%DISTRICT ENGINEER%'
+              )
+              AND CONCAT(first_name, ' ', last_name) NOT IN (
+                SELECT full_name FROM llm_processed_names
+              )
+            GROUP BY CONCAT(first_name, ' ', last_name)
+        )
+        SELECT 
+            best_id as id,
+            full_name,
+            best_province as province,
+            best_position as position,
+            max_year as year,
+            best_party as party,
+            -- Calculate priority score (higher = more important)
+            -- Frequency + unique positions + recency
+            (position_count * 10 + 
+             unique_positions * 5 +
+             max_year - 1900) as priority_score
+        FROM name_stats
+        ORDER BY priority_score DESC
         LIMIT $1
         """,
-        limit,
+        limit * 3,  # Get more to account for deduplication (some may be duplicates after normalization)
     )
-    return [dict(r) for r in rows]
+    
+    # Normalize and deduplicate in Python
+    seen_normalized = set()
+    unique_names = []
+    for row in name_rows:
+        normalized = normalize_name_for_query(row['full_name'])
+        if normalized and normalized not in seen_normalized:
+            seen_normalized.add(normalized)
+            unique_names.append(dict(row))
+            if len(unique_names) >= limit:
+                break
+    
+    return unique_names
 
 
 async def get_db_connection():
@@ -505,9 +557,11 @@ def extract_csv_from_reply(reply: str) -> str:
 async def main():
     load_dotenv()
 
-    names_per_prompt = int(os.getenv('NAMES_PER_PROMPT', '30'))
+    names_per_list = int(os.getenv('NAMES_PER_LIST', '40'))
+    target_total = int(os.getenv('TARGET_TOTAL_NAMES', '400'))  # Default: 400 names from top positions
+    max_batches = (target_total + names_per_list - 1) // names_per_list  # Calculate batches needed
 
-    # 1) Connect and fetch names (test first prompt only)
+    # 1) Connect and fetch names (prioritize top names by influence/importance)
     conn = await get_db_connection()
     async def ensure_processed_table():
         await conn.execute(
@@ -524,8 +578,6 @@ async def main():
         if not full_names:
             return
         # Use ON CONFLICT to avoid duplicates
-        values = ",".join(["($1::text)" for _ in full_names])
-        # asyncpg doesn't support variadic for bulk tuples easily; insert one-by-one safely
         for fn in full_names:
             await conn.execute(
                 """
@@ -562,19 +614,50 @@ async def main():
 
     batch_index = get_next_batch_index()
     total_created = 0
+    batches_processed = 0
+    total_names_processed = 0
+    
     while True:
         # Stop if we have reached the CSV cap
         existing_csvs = list_existing_csvs()
         if len(existing_csvs) >= max_csv:
             print(f"✅ Reached MAX_CSV_FILES limit ({max_csv}). Stopping.")
             break
-        all_names = await fetch_all_names(conn, names_per_prompt)
-        if not all_names:
-            print("✅ No more names to process. Done.")
+        
+        # Stop if we've processed the desired number of names (default: 400)
+        if total_names_processed >= target_total:
+            print(f"✅ Processed {total_names_processed} top priority engineers/BAC members (target: {target_total}). Stopping.")
+            break
+        
+        # Stop if we've processed the maximum batches
+        if batches_processed >= max_batches:
+            print(f"✅ Processed {batches_processed} batches ({total_names_processed} names total). Stopping.")
+            break
+        
+        # Fetch exactly 40 unique normalized names from top positions per list
+        remaining_needed = target_total - total_names_processed
+        batch_limit = min(names_per_list, remaining_needed)
+        
+        top_names = await fetch_top_names(conn, batch_limit)
+        if not top_names:
+            print("✅ No more engineers/BAC members to process. Done.")
             break
 
+        if len(top_names) < batch_limit:
+            print(f"⚠️  Only found {len(top_names)} unique engineers/BAC members (requested {batch_limit})")
+
+        # Show position breakdown for this batch
+        positions = {}
+        for n in top_names:
+            pos = n.get('position', 'Unknown')
+            positions[pos] = positions.get(pos, 0) + 1
+        
+        print(f"📋 Processing batch {batch_index}: {len(top_names)} unique normalized top priority engineers/BAC members")
+        print(f"   Position breakdown: {', '.join([f'{pos}({cnt})' for pos, cnt in sorted(positions.items(), key=lambda x: -x[1])[:5]])}")
+        total_names_processed += len(top_names)
+
         # 2) Build prompt
-        prompt = build_prompt(all_names, prompt_num=batch_index, names_per_prompt=names_per_prompt)
+        prompt = build_prompt(top_names, prompt_num=batch_index, names_per_prompt=len(top_names))
 
         # 3) Call Perplexity
         print(f"🚀 Sending prompt to LLM (batch {batch_index})...")
@@ -584,7 +667,7 @@ async def main():
         csv_text = extract_csv_from_reply(reply)
         if not csv_text or ',' not in csv_text:
             print("❌ Could not extract CSV from reply; marking names as processed to avoid repeats")
-            await mark_processed([n['full_name'] for n in all_names])
+            await mark_processed([n['full_name'] for n in top_names])
             batch_index += 1
             continue
 
@@ -605,8 +688,9 @@ async def main():
             await processor.close()
 
         # 7) Mark these names as processed to save LLM cost
-        await mark_processed([n['full_name'] for n in all_names])
+        await mark_processed([n['full_name'] for n in top_names])
 
+        batches_processed += 1
         batch_index += 1
 
     await conn.close()

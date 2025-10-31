@@ -1,0 +1,67 @@
+================================================================================
+DYNASTY JSON CACHE REGENERATION SUMMARY
+================================================================================
+Generated: $(date)
+
+After cleaning the database (removing non-person entities, long names, etc.),
+all dynasty-related JSON cache files have been regenerated.
+
+SUCCESSFULLY REGENERATED:
+================================================================================
+
+1. ✅ Dynasty Surnames Cache
+   File: static/data/dynasty_surnames_cache.json
+   Used by: Charts, visualizations, surname listings
+   Stats: 374 surnames, 2,147 politicians, 2,031 dynasty members
+
+2. ✅ Dynasty Animation Cache
+   Files: static/data/dynasty_animation_cache/dynasty_animation_*.json
+   Used by: Animation tab (year-by-year progression)
+   Stats: 8 year files (2004-2025) + master index, 5,043 families
+
+3. ✅ Relationship Constellations Cache
+   File: static/data/relationship_chains_cache.json
+   Used by: Network/conflicts visualization
+   Stats: 226 relationship constellations
+
+4. ✅ Dynasty Flags Cache
+   File: static/data/dynasty_flags_cache.json
+   Used by: Map visualizations with dynasty flags
+   Stats: 40,048 dynasty-location combinations, 38,459 dynasties
+
+PARTIALLY REGENERATED:
+================================================================================
+
+5. ⚠️ Poverty Correlation Cache
+   File: static/data/poverty_correlation_cache.json
+   Status: FAILED (division by zero - likely due to filtered data)
+   Note: This is part of EOGO analysis, may need adjustment for filtered positions
+
+STATIC FILES (Not regenerated):
+================================================================================
+
+- static/data/dynasty_province_mapping.json
+  Status: Static mapping file (manual updates if needed)
+
+- static/data/philippines-provinces.json
+  Status: GeoJSON file (external source)
+
+- static/data/philippines-regions.json
+  Status: GeoJSON file (external source)
+
+NEXT STEPS:
+================================================================================
+
+1. The dashboard should now reflect cleaned data in:
+   - Dynasty map visualizations
+   - Surname charts
+   - Animation timeline
+   - Relationship networks
+
+2. All filtered positions (elected only, max 2 words) are now properly
+   reflected in all visualizations.
+
+3. If poverty correlation cache is needed, the script needs to be updated
+   to handle empty/filtered data scenarios.
+
+================================================================================

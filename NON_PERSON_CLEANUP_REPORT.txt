@@ -1,0 +1,106 @@
+================================================================================
+NON-PERSON ENTITY CLEANUP REPORT
+================================================================================
+Generated: 2025-10-31 09:57:21
+
+SUMMARY
+--------------------------------------------------------------------------------
+Total Records in Database: 311,019
+Unique Name Combinations: 63,131
+
+Cleanup Actions Performed:
+  - Removed 1,775 clear non-person name combinations
+  - Deleted 4,318 total records
+  - Applied to ALL records in database (not limited to top 500)
+
+FILTERING APPLIED TO DASHBOARD/TABLE
+--------------------------------------------------------------------------------
+Only showing elected positions with max 2 words:
+  - President
+  - Vice President
+  - Senator
+  - Mayor
+  - Congressmen/Congressman
+  - Councilor
+  - Governor
+
+All positions must match one of the above patterns AND have <= 2 words
+
+TOP 20 FILTERED POSITIONS (by count)
+--------------------------------------------------------------------------------
+ 1. SENATOR                                  (96,094 records)
+ 2. COUNCILOR                                (95,434 records)
+ 3. MAYOR                                    (26,971 records)
+ 4. GOVERNOR                                 (5,917 records)
+ 5. PRESIDENT                                (158 records)
+ 6. MAYOR OFFICE                             (2 records)
+ 7. PRESIDENT OFFICE                         (1 records)
+
+TOP 50 NAME COMBINATIONS (after cleanup)
+--------------------------------------------------------------------------------
+ 1. ERNESTO                   ARELLANO                  (2,033 occurrences)
+ 2. NUR-ANA                   SAHIDULLA                 (2,032 occurrences)
+ 3. ERIC                      MARTINEZ                  (2,031 occurrences)
+ 4. FRANCIS                   TOLENTINO                 (2,030 occurrences)
+ 5. HEIDI                     MENDOZA                   (2,030 occurrences)
+ 6. AMIRAH                    LIDASAN                   (2,030 occurrences)
+ 7. WILSON                    AMAD                      (2,030 occurrences)
+ 8. RODANTE                   MARCOLETA                 (2,030 occurrences)
+ 9. ATTY.                     RODRIGUEZ                 (2,029 occurrences)
+10. ERWIN                     TULFO                     (2,029 occurrences)
+11. SUBAIR                    MUSTAPHA                  (2,029 occurrences)
+12. RAUL                      LAMBINO                   (2,029 occurrences)
+13. WILLIE                    REVILLAME                 (2,029 occurrences)
+14. NANAY                     DORINGO                   (2,029 occurrences)
+15. MAR                       VALBUENA                  (2,029 occurrences)
+16. PHILLIP                   SALVADOR                  (2,029 occurrences)
+17. BEN                       TULFO                     (2,029 occurrences)
+18. TEDDY                     CASIÑO                    (2,029 occurrences)
+19. ARLENE                    BROSAS                    (2,028 occurrences)
+20. DOC                       MATA                      (2,028 occurrences)
+21. MICHAEL                   TAPADO                    (2,028 occurrences)
+22. APOLLO                    QUIBOLOY                  (2,028 occurrences)
+23. IMEE                      MARCOS                    (2,028 occurrences)
+24. PIA                       CAYETANO                  (2,028 occurrences)
+25. LEANDRO                   VERCELES                  (2,028 occurrences)
+26. LUKE                      ESPIRITU                  (2,028 occurrences)
+27. ALLEN                     CAPUYAN                   (2,028 occurrences)
+28. CAMILLE                   VILLAR                    (2,028 occurrences)
+29. JAYVEE                    HINLO                     (2,028 occurrences)
+30. BONG                      GO                        (2,028 occurrences)
+31. KIKO                      PANGILINAN                (2,028 occurrences)
+32. ATTY.                     MATULA                    (2,027 occurrences)
+33. NARS                      ANDAMO                    (2,027 occurrences)
+34. LIZA                      MAZA                      (2,027 occurrences)
+35. MANOY                     LEE                       (2,027 occurrences)
+36. DANILO                    RAMOS                     (2,027 occurrences)
+37. ABBY                      BINAY                     (2,027 occurrences)
+38. JIMMY                     BONDOC                    (2,027 occurrences)
+39. TEACHER                   CASTRO                    (2,027 occurrences)
+40. LITO                      LAPID                     (2,027 occurrences)
+41. ROBERTO                   BALLON                    (2,027 occurrences)
+42. JOEY                      MONTEMAYOR                (2,027 occurrences)
+43. DE                        ALBAN,ATTORNEY ANGELO     (2,027 occurrences)
+44. KA                        DE GUZMAN                 (2,027 occurrences)
+45. DOC                       ONG                       (2,027 occurrences)
+46. COLONEL                   BOSITA                    (2,027 occurrences)
+47. GRINGO                    HONASAN                   (2,027 occurrences)
+48. JOSE                      OLIVAR                    (2,027 occurrences)
+49. NORBERTO                  GONZALES                  (2,027 occurrences)
+50. ROY                       CABONEGRO                 (2,027 occurrences)
+
+REMAINING WORK
+--------------------------------------------------------------------------------
+224 ambiguous entries remain for manual review:
+  - Names starting with 'THE' (may be real names like 'THEODORE' or 'THELMA')
+  - Names starting with 'MAIL' (may be real names like 'MAILAH' or document fragments)
+  - Location names followed by actual names (parsing errors)
+  - Long document text fragments that were parsed as names
+
+These ambiguous entries should be reviewed manually to determine if they are:
+  1. Real person names (keep)
+  2. Document parsing errors (remove)
+
+================================================================================
+Report saved to: /home/joebert/open-data-visualization/NON_PERSON_CLEANUP_REPORT.txt
+================================================================================
