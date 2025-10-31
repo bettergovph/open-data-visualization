@@ -79,9 +79,11 @@ log "✅ Working directory verified"
 log "📥 Step 2: Pulling latest changes from git..."
 # Stash any local changes first
 git stash
-# Pull latest changes
-if ! git pull; then
-    error "Git pull failed"
+# Fetch latest changes
+git fetch origin
+# Reset to match remote exactly (handles force pushes and history rewrites)
+if ! git reset --hard origin/main; then
+    error "Git reset failed"
     exit 1
 fi
 log "✅ Git pull completed"
