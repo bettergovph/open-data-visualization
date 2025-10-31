@@ -149,7 +149,7 @@ async def generate_relationship_constellations_cache():
                 ON UPPER(TRIM(p2.first_name)) = UPPER(TRIM(cdm2.dynasty_first_name))
                 AND UPPER(TRIM(p2.last_name)) = UPPER(TRIM(cdm2.dynasty_last_name))
             WHERE p1.id != p2.id
-                AND p1.last_name != p2.last_name  -- Different families
+                -- Allow same-family connections (e.g., brothers via shared contractor)
         )
         SELECT 
             p1.id as start_person,
@@ -203,9 +203,109 @@ async def generate_relationship_constellations_cache():
                 'relationship_type': cc['relationship_type']
             })
         
-        # Combine direct relationships and contractor connections
-        all_chains = list(chains) + contractor_relationships
-        print(f"📊 Total constellations: {len(all_chains)} ({len(chains)} direct + {len(contractor_relationships)} contractor-mediated)")
+        # Add party-list mediated relationships
+        print("🔗 Checking party-list relationships...")
+        
+        # Find politicians who are members of the same party-list
+        # Party-list entries were moved from political_dynasties where first_name was code and last_name was party_name
+        # We need to find politicians whose records indicate party-list membership
+        party_list_relationships_query = """
+        WITH party_list_members AS (
+            -- Find politicians who have party-list related positions or names matching party-list entries
+            SELECT DISTINCT
+                p.id as person_id,
+                p.first_name,
+                p.last_name,
+                p.position,
+                pl.code as party_code,
+                pl.party_name,
+                CONCAT(pl.code, ', ', pl.party_name) as party_full_name
+            FROM political_dynasties p
+            CROSS JOIN party_list pl
+            WHERE (
+                -- Check if position contains party-list name
+                UPPER(p.position) LIKE '%' || UPPER(pl.party_name) || '%'
+                OR UPPER(p.position) LIKE '%PARTY-LIST%'
+                OR UPPER(p.position) LIKE '%PARTY LIST%'
+                -- Check if first/last name matches party-list pattern
+                OR (UPPER(p.first_name) = pl.code AND UPPER(p.last_name) = UPPER(pl.party_name))
+            )
+            AND p.id IS NOT NULL
+        ),
+        party_list_connections AS (
+            SELECT DISTINCT
+                plm1.person_id as person1_id,
+                plm1.first_name as person1_first,
+                plm1.last_name as person1_last,
+                plm1.position as person1_position,
+                plm2.person_id as person2_id,
+                plm2.first_name as person2_first,
+                plm2.last_name as person2_last,
+                plm2.position as person2_position,
+                plm1.party_code,
+                plm1.party_name,
+                plm1.party_full_name,
+                'Party-List Membership' as relationship_type
+            FROM party_list_members plm1
+            JOIN party_list_members plm2
+                ON plm1.party_code = plm2.party_code
+                AND plm1.party_name = plm2.party_name
+                AND plm1.person_id != plm2.person_id
+            JOIN political_dynasties p1 ON plm1.person_id = p1.id
+            JOIN political_dynasties p2 ON plm2.person_id = p2.id
+            WHERE p1.last_name != p2.last_name  -- Different families
+        )
+        SELECT 
+            plc.person1_id as start_person,
+            plc.person2_id as end_person,
+            plc.party_code,
+            plc.party_name,
+            plc.party_full_name,
+            plc.relationship_type,
+            p1.first_name as start_first_name,
+            p1.last_name as start_last_name,
+            p1.position as start_position,
+            p2.first_name as end_first_name,
+            p2.last_name as end_last_name,
+            p2.position as end_position,
+            p1.last_name as start_surname,
+            p2.last_name as end_surname
+        FROM party_list_connections plc
+        JOIN political_dynasties p1 ON plc.person1_id = p1.id
+        JOIN political_dynasties p2 ON plc.person2_id = p2.id
+        WHERE p1.id != p2.id
+        ORDER BY plc.party_name, p1.last_name, p2.last_name
+        """
+        
+        party_list_chains = await conn.fetch(party_list_relationships_query)
+        print(f"📊 Found {len(party_list_chains)} party-list-mediated connections")
+        
+        # Convert party-list connections to same format as relationship chains
+        party_list_relationships = []
+        for plc in party_list_chains:
+            party_list_relationships.append({
+                'start_person': plc['start_person'],
+                'end_person': plc['end_person'],
+                'chain_length': 2,  # Person -> Party-List -> Person (2 hops)
+                'start_surname': plc['start_surname'],
+                'end_surname': plc['end_surname'],
+                'start_first_name': plc['start_first_name'],
+                'start_last_name': plc['start_last_name'],
+                'start_position': plc['start_position'],
+                'end_first_name': plc['end_first_name'],
+                'end_last_name': plc['end_last_name'],
+                'end_position': plc['end_position'],
+                'path_string': f"{plc['start_person']},{plc['end_person']}",
+                'relationship_string': f"Connected via {plc['party_full_name']}",
+                'party_code': plc['party_code'],
+                'party_name': plc['party_name'],
+                'party_full_name': plc['party_full_name'],
+                'relationship_type': plc['relationship_type']
+            })
+        
+        # Combine direct relationships, contractor connections, and party-list connections
+        all_chains = list(chains) + contractor_relationships + party_list_relationships
+        print(f"📊 Total constellations: {len(all_chains)} ({len(chains)} direct + {len(contractor_relationships)} contractor-mediated + {len(party_list_relationships)} party-list-mediated)")
         
         # Format the data
         formatted_chains = []
@@ -272,19 +372,30 @@ async def generate_relationship_constellations_cache():
                     "end_company_role": end_role
                 }
             
+            # Add party-list info for party-list-mediated connections
+            if 'party_name' in chain and chain['party_name']:
+                chain_data["party_list_connection"] = {
+                    "party_code": chain.get('party_code'),
+                    "party_name": chain['party_name'],
+                    "party_full_name": chain.get('party_full_name'),
+                    "relationship_type": chain.get('relationship_type', 'Party-List Membership')
+                }
+            
             formatted_chains.append(chain_data)
         
         # Create cache data structure
         direct_count = len(chains)
         contractor_count = len(contractor_relationships)
+        party_list_count = len(party_list_relationships)
         
         cache_data = {
             "summary": {
                 "total_chains": len(formatted_chains),
                 "direct_relationships": direct_count,
                 "contractor_mediated": contractor_count,
+                "party_list_mediated": party_list_count,
                 "last_updated": datetime.now().isoformat(),
-                "description": "Relationship constellations between different political families (includes contractor-mediated connections)"
+                "description": "Relationship constellations between different political families (includes contractor-mediated and party-list-mediated connections)"
             },
             "chains": formatted_chains
         }

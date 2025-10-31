@@ -241,7 +241,7 @@ class CRIAnalyzer:
             'total_provinces': len(political_hhi),
             'data': political_hhi,
             'statistics': {
-                'average_hhi': round(sum(p['hhi'] for p in political_hhi) / len(political_hhi), 1),
+                'average_hhi': round(sum(p['hhi'] for p in political_hhi) / len(political_hhi), 1) if political_hhi else 0,
                 'highest_hhi': political_hhi[0]['hhi'] if political_hhi else 0,
                 'high_risk_count': len([p for p in political_hhi if p['hhi'] > 50])
             }
@@ -254,7 +254,7 @@ class CRIAnalyzer:
             'total_provinces': len(contractor_hhi),
             'data': contractor_hhi,
             'statistics': {
-                'average_hhi': round(sum(c['hhi'] for c in contractor_hhi) / len(contractor_hhi), 1),
+                'average_hhi': round(sum(c['hhi'] for c in contractor_hhi) / len(contractor_hhi), 1) if contractor_hhi else 0,
                 'highest_hhi': contractor_hhi[0]['hhi'] if contractor_hhi else 0,
                 'high_risk_count': len([c for c in contractor_hhi if c['hhi'] > 30])
             }
@@ -267,7 +267,7 @@ class CRIAnalyzer:
             'total_provinces': len(poverty_processed),
             'data': poverty_processed,
             'statistics': {
-                'average_poverty': round(sum(p['poverty_rate'] for p in poverty_processed) / len(poverty_processed), 1),
+                'average_poverty': round(sum(p['poverty_rate'] for p in poverty_processed) / len(poverty_processed), 1) if poverty_processed else 0,
                 'highest_poverty': poverty_processed[0]['poverty_rate'] if poverty_processed else 0,
                 'high_poverty_count': len([p for p in poverty_processed if p['poverty_rate'] > 20])
             }
@@ -280,7 +280,7 @@ class CRIAnalyzer:
             'total_provinces': len(cri_analysis),
             'data': cri_analysis,
             'statistics': {
-                'average_cri': round(sum(c['cri_score'] for c in cri_analysis) / len(cri_analysis), 1),
+                'average_cri': round(sum(c['cri_score'] for c in cri_analysis) / len(cri_analysis), 1) if cri_analysis else 0,
                 'highest_cri': cri_analysis[0]['cri_score'] if cri_analysis else 0,
                 'high_risk_count': len([c for c in cri_analysis if c['cri_score'] > 50])
             }

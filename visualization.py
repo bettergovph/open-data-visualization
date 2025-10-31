@@ -2806,16 +2806,26 @@ async def dynasty_data_api(
         )
         
         # Filter positions: elected positions only (President, Vice President, Senator, Mayor, Congressmen, Councilor, Governor) with max 2 words
+        # OR BAC positions (any word count)
+        # OR ENGINEER positions (max 2 words)
         where_conditions = [
             "position IS NOT NULL AND position != ''",
-            # Position must match elected positions AND have max 2 words
+            # Position must match elected positions (max 2 words) OR BAC positions (any word count) OR ENGINEER positions (max 2 words)
             """(
                 (
                     UPPER(position) ILIKE ANY(ARRAY['%PRESIDENT%', '%VICE PRESIDENT%', '%SENATOR%', '%MAYOR%', 
                                                       '%CONGRESSMEN%', '%CONGRESSMAN%', '%COUNCILOR%', '%GOVERNOR%'])
+                    AND 
+                    LENGTH(position) - LENGTH(REPLACE(position, ' ', '')) + 1 <= 2
                 )
-                AND 
+                OR
                 (
+                    UPPER(position) LIKE '%BAC%'
+                )
+                OR
+                (
+                    UPPER(position) LIKE '%ENGINEER%'
+                    AND 
                     LENGTH(position) - LENGTH(REPLACE(position, ' ', '')) + 1 <= 2
                 )
             )"""
@@ -2952,7 +2962,7 @@ async def dynasty_positions_api(
     region: str = Query("", description="Optional region filter to align suggestions"),
     dynasty: str = Query("", description="Optional dynasty filter (dynasty/non-dynasty) to align suggestions")
 ):
-    """Return distinct elected positions (President, Vice President, Senator, Mayor, Congressmen, Councilor, Governor)
+    """Return distinct positions (elected positions, BAC positions, or ENGINEER positions)
     with max 2 words, filtered by prefix, sorted alphabetically."""
     try:
         import asyncpg
@@ -2967,14 +2977,22 @@ async def dynasty_positions_api(
         params = []
         where_conditions = [
             "position IS NOT NULL AND position != ''",
-            # Position must match elected positions AND have max 2 words
+            # Position must match elected positions (max 2 words) OR BAC positions (any word count) OR ENGINEER positions (max 2 words)
             """(
                 (
                     UPPER(position) ILIKE ANY(ARRAY['%PRESIDENT%', '%VICE PRESIDENT%', '%SENATOR%', '%MAYOR%', 
                                                       '%CONGRESSMEN%', '%CONGRESSMAN%', '%COUNCILOR%', '%GOVERNOR%'])
+                    AND 
+                    LENGTH(position) - LENGTH(REPLACE(position, ' ', '')) + 1 <= 2
                 )
-                AND 
+                OR
                 (
+                    UPPER(position) LIKE '%BAC%'
+                )
+                OR
+                (
+                    UPPER(position) LIKE '%ENGINEER%'
+                    AND 
                     LENGTH(position) - LENGTH(REPLACE(position, ' ', '')) + 1 <= 2
                 )
             )"""
@@ -3133,7 +3151,7 @@ async def dynasty_top_surnames_api(
 
 @app.get("/api/dynasty/stats")
 async def dynasty_stats_api():
-    """Get dynasty dashboard statistics filtered by elected positions only (President, Vice President, Senator, Mayor, Congressmen, Councilor, Governor, max 2 words)"""
+    """Get dynasty dashboard statistics filtered by elected positions, BAC positions, or ENGINEER positions"""
     try:
         import asyncpg
         import os
@@ -3148,15 +3166,25 @@ async def dynasty_stats_api():
         )
         
         # Position filter: elected positions only (President, Vice President, Senator, Mayor, Congressmen, Councilor, Governor) with max 2 words
+        # OR BAC positions (any word count)
+        # OR ENGINEER positions (max 2 words)
         position_filter = """(
             position IS NOT NULL AND position != ''
             AND (
                 (
                     UPPER(position) ILIKE ANY(ARRAY['%PRESIDENT%', '%VICE PRESIDENT%', '%SENATOR%', '%MAYOR%', 
                                                       '%CONGRESSMEN%', '%CONGRESSMAN%', '%COUNCILOR%', '%GOVERNOR%'])
+                    AND 
+                    LENGTH(position) - LENGTH(REPLACE(position, ' ', '')) + 1 <= 2
                 )
-                AND 
+                OR
                 (
+                    UPPER(position) LIKE '%BAC%'
+                )
+                OR
+                (
+                    UPPER(position) LIKE '%ENGINEER%'
+                    AND 
                     LENGTH(position) - LENGTH(REPLACE(position, ' ', '')) + 1 <= 2
                 )
             )
@@ -3828,8 +3856,9 @@ async def get_contractor_projects_frontend(contractor_name: str):
 @app.get("/api/dynasty/relationship-chains")
 async def dynasty_relationship_chains_api(
     chain_length: int = Query(2, ge=2, le=10, description="Minimum chain length to find"),
-    max_chains: int = Query(50, ge=25, le=1000, description="Maximum number of constellations to return"),
-    contractor_only: bool = Query(False, description="Only return constellations with contractor connections")
+    max_chains: int = Query(50, ge=25, le=5000, description="Maximum number of constellations to return"),
+    contractor_only: bool = Query(False, description="Only return constellations with contractor connections"),
+    party_list_only: bool = Query(False, description="Only return constellations with party-list connections")
 ):
     """Get relationship chains from JSON cache"""
     try:
@@ -3848,7 +3877,7 @@ async def dynasty_relationship_chains_api(
         all_chains = cache_data.get('chains', [])
         filtered_chains = [chain for chain in all_chains if chain['length'] >= chain_length]
         
-        # Filter by contractor-only if requested
+        # Filter by connection type if requested
         if contractor_only:
             filtered_chains = [chain for chain in filtered_chains 
                              if chain.get('contractor_connection') and chain.get('contractor_connection', {}).get('contractor_name')]
@@ -3882,14 +3911,49 @@ async def dynasty_relationship_chains_api(
                     if len(limited_chains) >= max_chains:
                         limited_chains = limited_chains[:max_chains]
                         break
+            
+            filtered_chains = limited_chains
+        elif party_list_only:
+            filtered_chains = [chain for chain in filtered_chains 
+                             if chain.get('party_list_connection') and chain.get('party_list_connection', {}).get('party_name')]
+            
+            # Diversify results across different party-lists
+            from collections import defaultdict
+            chains_by_party_list = defaultdict(list)
+            for chain in filtered_chains:
+                party_name = chain.get('party_list_connection', {}).get('party_name', 'Unknown')
+                chains_by_party_list[party_name].append(chain)
+            
+            # Sort party-lists by number of chains (descending)
+            sorted_party_lists = sorted(chains_by_party_list.items(), key=lambda x: len(x[1]), reverse=True)
+            
+            # Distribute max_chains across party-lists
+            limited_chains = []
+            num_party_lists = len(sorted_party_lists)
+            if num_party_lists > 0:
+                chains_per_party_list = max(1, max_chains // num_party_lists)
+                remaining = max_chains - (chains_per_party_list * num_party_lists)
+                
+                for i, (party_name, party_list_chains) in enumerate(sorted_party_lists):
+                    if len(limited_chains) >= max_chains:
+                        break
+                    take_count = chains_per_party_list + (1 if i < remaining else 0)
+                    limited_chains.extend(party_list_chains[:take_count])
+                    
+                    if len(limited_chains) >= max_chains:
+                        limited_chains = limited_chains[:max_chains]
+                        break
+            
+            filtered_chains = limited_chains
         else:
-            # For non-contractor-only, just limit directly
+            # For non-filtered views, just limit directly
             limited_chains = filtered_chains[:max_chains]
+            filtered_chains = limited_chains
         
         return JSONResponse({
             "success": True,
-            "data": limited_chains,
-            "total_constellations": len(limited_chains),
+            "data": filtered_chains,
+            "total_constellations": len(filtered_chains),
             "min_constellation_stars": chain_length,
             "max_constellations_returned": max_chains,
             "cache_info": {
