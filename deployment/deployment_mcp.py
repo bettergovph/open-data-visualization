@@ -230,6 +230,18 @@ class DeploymentMCPServer:
                 self, "default_working_dir", "/home/joebert/open-data-visualization"
             )
 
+            # First, fix git state if there are divergent branches (handle force-pushed history)
+            logger.info("🔧 Step 0: Fixing git state (if needed)...")
+            git_fix_command = f"cd {working_dir} && git fetch origin && git reset --hard origin/main"
+            stdin, stdout, stderr = self.ssh_client.exec_command(git_fix_command)
+            git_output = stdout.read().decode("utf-8").strip()
+            git_error = stderr.read().decode("utf-8").strip()
+            git_exit = stdout.channel.recv_exit_status()
+            if git_exit == 0:
+                logger.info(f"✅ Git state fixed: {git_output}")
+            else:
+                logger.warning(f"⚠️ Git fix warning (may be normal if already in sync): {git_error}")
+
             # If custom command is specified, execute it directly
             if custom_command:
                 logger.info("🔧 Executing custom command directly...")
