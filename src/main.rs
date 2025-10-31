@@ -11,6 +11,12 @@ use utils::*;
 // Route handlers
 
 // BetterGovPH Homepage
+async fn favicon() -> Result<fs::NamedFile, ActixError> {
+    fs::NamedFile::open("static/favicon.ico").map_err(|e| actix_web::error::ErrorNotFound(e))
+}
+async fn robots() -> Result<fs::NamedFile, ActixError> {
+    fs::NamedFile::open("static/robots.txt").map_err(|e| actix_web::error::ErrorNotFound(e))
+}
 async fn home(_req: HttpRequest) -> Result<HttpResponse, ActixError> {
     let tera = Tera::new("templates/**/*").map_err(|e| actix_web::error::ErrorInternalServerError(e))?;
     let mut context = Context::new();
@@ -372,6 +378,8 @@ async fn main() -> std::io::Result<()> {
         App::new()
             .wrap(cors)
             .service(fs::Files::new("/static", "./static/"))
+            .service(web::resource("/favicon.ico").route(web::get().to(favicon)))
+            .service(web::resource("/robots.txt").route(web::get().to(robots)))
             .service(web::resource("/").to(home))
             .service(web::resource("/budget").to(budget))
             .service(web::resource("/flood").to(flood))

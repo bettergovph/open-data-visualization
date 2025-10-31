@@ -12,6 +12,8 @@ package-lock.json
 tailwindcss
 database/contracts_export_ALL_DATA.csv
 database/*.xlsx
+database/[PBC]*.xlsx
+database/A Call for an End to Pork Barrel Politics in the Budget.docx
 
 # Analysis files - keep local only
 analysis/EOGO_Corruption Risk and Dynasties-1.pdf
@@ -24,3 +26,17 @@ dpwh_archive/
 *.xml
 data_summary.json
 dpwh_analysis_report.html
+
+# PBC Source documents (do not commit)
+analysis/**/[PBC]*.xlsx
+analysis/**/[PBC]*.docx
+analysis/**/*.doc
+analysis/**/*.docx
+analysis/**/*.pdf
+analysis/**/*.xls
+analysis/**/*.xlsx
+database/**/*.doc
+database/**/*.docx
+database/**/*.pdf
+database/**/*.xls
+database/**/*.xlsx

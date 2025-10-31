@@ -20,6 +20,8 @@ from budget_client import (
     get_budget_duplicates_count,
     get_budget_total_items_count
 )
+from nep_postgres_client import get_db_connection as get_nep_db_connection
+import asyncpg
 from nep_postgres_client import (
     get_budget_overview_stats as get_nep_overview_stats,
     get_budget_departments as get_nep_departments,
@@ -50,6 +52,101 @@ async def root():
 @app.get("/api/budget/files")
 async def budget_list_files_api():
     """List uploaded Budget documents"""
+
+@app.get("/api/pbc/gab-2026/sheets")
+async def list_pbc_gab_2026_sheets() -> JSONResponse:
+    try:
+        conn = await get_nep_db_connection()
+    except Exception:
+        conn = None
+    if not conn:
+        return JSONResponse(status_code=500, content={"status": "error", "error": "DB connection failed"})
+    try:
+        try:
+            rows = await conn.fetch("SELECT DISTINCT sheet_name FROM pbc_gab_2026_rows ORDER BY sheet_name")
+            sheets = [r[0] for r in rows]
+        except Exception as e:
+            # Table may not exist yet or other error; return empty list gracefully
+            sheets = []
+        return JSONResponse(content={"status": "ok", "data": {"sheets": sheets}})
+    finally:
+        await conn.close()
+
+@app.get("/api/pbc/gab-2026/sheet")
+async def get_pbc_gab_2026_sheet(name: str = Query(..., alias="name"), limit: int = 200) -> JSONResponse:
+    try:
+        conn = await get_nep_db_connection()
+    except Exception:
+        conn = None
+    if not conn:
+        return JSONResponse(status_code=500, content={"status": "error", "error": "DB connection failed"})
+    try:
+        try:
+            rows = await conn.fetch(
+                "SELECT row_index, data FROM pbc_gab_2026_rows WHERE sheet_name=$1 ORDER BY row_index LIMIT $2",
+                name,
+                limit,
+            )
+            data = [{"row_index": r[0], **(r[1] or {})} for r in rows]
+        except Exception as e:
+            data = []
+        return JSONResponse(content={"status": "ok", "data": {"rows": data}})
+    finally:
+        await conn.close()
+
+@app.get("/api/pbc/gab-2026/headings")
+async def get_pbc_gab_2026_headings() -> JSONResponse:
+    try:
+        conn = await get_nep_db_connection()
+    except Exception:
+        conn = None
+    if not conn:
+        return JSONResponse(status_code=500, content={"status": "error", "error": "DB connection failed"})
+    try:
+        # Fetch first sheet present in headings table
+        rows = await conn.fetch(
+            "SELECT sheet_name, label, data FROM pbc_gab_2026_headings ORDER BY sheet_name, id"
+        )
+        items = []
+        for r in rows:
+            items.append({"sheet_name": r[0], "label": r[1], "data": r[2] or {}})
+        return JSONResponse(content={"status": "ok", "data": {"items": items}})
+    except Exception:
+        return JSONResponse(content={"status": "ok", "data": {"items": []}})
+    finally:
+        await conn.close()
+
+@app.get("/api/pbc/gab-2026/headings_detail")
+async def get_pbc_gab_2026_headings_detail() -> JSONResponse:
+    try:
+        conn = await get_nep_db_connection()
+    except Exception:
+        conn = None
+    if not conn:
+        return JSONResponse(status_code=500, content={"status": "error", "error": "DB connection failed"})
+    try:
+        rows = await conn.fetch(
+            """
+            SELECT sheet_name, label, original, hgab, delta
+            FROM pbc_gab_2026_headings_detail
+            WHERE sheet_name = (SELECT sheet_name FROM pbc_gab_2026_headings_detail LIMIT 1)
+            ORDER BY COALESCE(hgab, 0) DESC, label ASC
+            """
+        )
+        items = []
+        for r in rows:
+            items.append({
+                "sheet_name": r[0],
+                "label": r[1],
+                "original": float(r[2]) if r[2] is not None else None,
+                "hgab": float(r[3]) if r[3] is not None else None,
+                "delta": float(r[4]) if r[4] is not None else None,
+            })
+        return JSONResponse(content={"status": "ok", "data": {"items": items}})
+    except Exception:
+        return JSONResponse(content={"status": "ok", "data": {"items": []}})
+    finally:
+        await conn.close()
     try:
         result = await get_budget_files()
         return JSONResponse(result)
@@ -2691,7 +2788,9 @@ async def dynasty_data_api(
     search: str = Query("", description="Search term for filtering"),
     position: str = Query("", description="Filter by position"),
     region: str = Query("", description="Filter by region"),
-    dynasty: str = Query("", description="Filter by dynasty status (dynasty/non-dynasty)")
+    dynasty: str = Query("", description="Filter by dynasty status (dynasty/non-dynasty)"),
+    first_name: str = Query("", description="Filter by first name"),
+    last_name: str = Query("", description="Filter by last name")
 ):
     """Get paginated political dynasty data with search and filtering"""
     try:
@@ -2711,8 +2810,18 @@ async def dynasty_data_api(
         params = []
         param_count = 0
         
-        # Search filter
-        if search:
+        # Precise name filters (take precedence when provided)
+        if first_name:
+            param_count += 1
+            where_conditions.append(f"first_name ILIKE ${param_count}")
+            params.append(f"%{first_name}%")
+        if last_name:
+            param_count += 1
+            where_conditions.append(f"last_name ILIKE ${param_count}")
+            params.append(f"%{last_name}%")
+
+        # Generic search filter (fallback)
+        if search and not (first_name or last_name):
             param_count += 1
             where_conditions.append(f"""
                 (first_name ILIKE ${param_count} OR 
@@ -2743,29 +2852,14 @@ async def dynasty_data_api(
         elif dynasty.lower() == "non-dynasty":
             where_conditions.append("fat = 0")
         
-        # Always filter by winners only (when available)
-        where_conditions.append("winner = true")
+        # Note: Do not force winners-only so appointed roles (e.g., BAC) can be returned
         
         # Build complete WHERE clause
         where_clause = ""
         if where_conditions:
             where_clause = "WHERE " + " AND ".join(where_conditions)
         
-        # Check if there are any winners first
-        winners_count = await conn.fetchval("SELECT COUNT(*) FROM political_dynasties WHERE winner = true")
-        if winners_count == 0:
-            await conn.close()
-            return JSONResponse({
-                "success": True,
-                "data": [],
-                "pagination": {
-                    "total_records": 0,
-                    "total_pages": 0,
-                    "current_page": page,
-                    "limit": limit
-                },
-                "message": "No winning candidates found yet. The election data import is still in progress."
-            })
+        # Do not short-circuit when there are no winners; allow appointed/non-winner records
         
         # Get total count
         count_query = f"SELECT COUNT(*) FROM political_dynasties {where_clause}"
@@ -2833,6 +2927,140 @@ async def dynasty_data_api(
             }
         })
         
+    except Exception as e:
+        return JSONResponse({"success": False, "error": str(e)})
+
+@app.get("/api/dynasty/positions")
+async def dynasty_positions_api(
+    q: str = Query("", description="Optional prefix filter for positions"),
+    limit: int = Query(500, ge=1, le=2000),
+    first_name: str = Query("", description="Optional first name filter to align suggestions"),
+    last_name: str = Query("", description="Optional last name filter to align suggestions"),
+    region: str = Query("", description="Optional region filter to align suggestions"),
+    dynasty: str = Query("", description="Optional dynasty filter (dynasty/non-dynasty) to align suggestions")
+):
+    """Return distinct positions that have at least one record matching current UI filters,
+    filtered by prefix, sorted alphabetically."""
+    try:
+        import asyncpg
+        conn = await asyncpg.connect(
+            host=os.getenv('POSTGRES_HOST', 'localhost'),
+            port=int(os.getenv('POSTGRES_PORT', 5432)),
+            user=os.getenv('POSTGRES_USER', 'budget_admin'),
+            password=os.getenv('POSTGRES_PASSWORD', ''),
+            database=os.getenv('POSTGRES_DB_DYNASTY', 'dynasty')
+        )
+        params = []
+        where_conditions = [
+            "position IS NOT NULL AND position != ''",
+            "position NOT ILIKE 'OTHER'",
+            "position NOT ILIKE 'UNKNOWN'",
+            "( (first_name IS NOT NULL AND TRIM(first_name) != '') OR (last_name IS NOT NULL AND TRIM(last_name) != '') )"
+        ]
+        param_idx = 0
+        if q:
+            param_idx += 1
+            where_conditions.append(f"position ILIKE ${param_idx}")
+            params.append(f"{q}%")
+        if first_name:
+            param_idx += 1
+            where_conditions.append(f"first_name ILIKE ${param_idx}")
+            params.append(f"%{first_name}%")
+        if last_name:
+            param_idx += 1
+            where_conditions.append(f"last_name ILIKE ${param_idx}")
+            params.append(f"%{last_name}%")
+        if region:
+            param_idx += 1
+            where_conditions.append(f"region ILIKE ${param_idx}")
+            params.append(f"%{region}%")
+        if dynasty.lower() == 'dynasty':
+            where_conditions.append("fat = 1")
+        elif dynasty.lower() == 'non-dynasty':
+            where_conditions.append("fat = 0")
+
+        where_clause = "WHERE " + " AND ".join(where_conditions)
+        query = f"""
+            SELECT DISTINCT position
+            FROM political_dynasties
+            {where_clause}
+            ORDER BY position ASC
+            LIMIT {limit}
+        """
+        rows = await conn.fetch(query, *params)
+        await conn.close()
+        return JSONResponse({
+            "success": True,
+            "data": [r['position'] for r in rows]
+        })
+    except Exception as e:
+        return JSONResponse({"success": False, "error": str(e)})
+
+@app.get("/api/dynasty/autocomplete/first-names")
+async def dynasty_first_names_autocomplete(q: str = Query("", description="Optional prefix for first name"), limit: int = Query(200, ge=1, le=1000)):
+    """Autocomplete for first names among winners."""
+    try:
+        import asyncpg
+        conn = await asyncpg.connect(
+            host=os.getenv('POSTGRES_HOST', 'localhost'),
+            port=int(os.getenv('POSTGRES_PORT', 5432)),
+            user=os.getenv('POSTGRES_USER', 'budget_admin'),
+            password=os.getenv('POSTGRES_PASSWORD', ''),
+            database=os.getenv('POSTGRES_DB_DYNASTY', 'dynasty')
+        )
+        params = []
+        where_clause = "WHERE winner = true AND first_name IS NOT NULL AND first_name != ''"
+        if q:
+            where_clause += " AND first_name ILIKE $1"
+            params.append(f"{q}%")
+        query = f"""
+            SELECT first_name, COUNT(*) as cnt
+            FROM political_dynasties
+            {where_clause}
+            GROUP BY first_name
+            ORDER BY cnt DESC, first_name ASC
+            LIMIT {limit}
+        """
+        rows = await conn.fetch(query, *params)
+        await conn.close()
+        return JSONResponse({
+            "success": True,
+            "data": [r['first_name'] for r in rows]
+        })
+    except Exception as e:
+        return JSONResponse({"success": False, "error": str(e)})
+
+@app.get("/api/dynasty/autocomplete/last-names")
+async def dynasty_last_names_autocomplete(q: str = Query("", description="Optional prefix for last name"), limit: int = Query(200, ge=1, le=1000)):
+    """Autocomplete for last names among winners."""
+    try:
+        import asyncpg
+        conn = await asyncpg.connect(
+            host=os.getenv('POSTGRES_HOST', 'localhost'),
+            port=int(os.getenv('POSTGRES_PORT', 5432)),
+            user=os.getenv('POSTGRES_USER', 'budget_admin'),
+            password=os.getenv('POSTGRES_PASSWORD', ''),
+            database=os.getenv('POSTGRES_DB_DYNASTY', 'dynasty')
+        )
+        params = []
+        where_clause = "WHERE winner = true AND last_name IS NOT NULL AND last_name != ''"
+        if q:
+            where_clause += " AND last_name ILIKE $1"
+            params.append(f"{q}%")
+        query = f"""
+            SELECT last_name, COUNT(*) as cnt
+            FROM political_dynasties
+            {where_clause}
+            GROUP BY last_name
+            ORDER BY cnt DESC, last_name ASC
+            LIMIT {limit}
+        """
+        rows = await conn.fetch(query, *params)
+        await conn.close()
+        return JSONResponse({
+            "success": True,
+            "data": [r['last_name'] for r in rows]
+        })
     except Exception as e:
         return JSONResponse({"success": False, "error": str(e)})
 
@@ -2912,7 +3140,8 @@ async def dynasty_stats_api():
             })
         
         # Get total records (winners only)
-        total_records = winners_count
+        # Total records query reflects applied filters
+        # (computed below via count_query)
         
         # Get dynasty members (fat = 1, winners only)
         dynasty_members = await conn.fetchval("SELECT COUNT(*) FROM political_dynasties WHERE fat = 1 AND winner = true")

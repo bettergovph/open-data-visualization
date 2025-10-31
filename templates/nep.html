@@ -117,6 +117,7 @@ function toggleMobileMenu() {
                     <a href="#visual" class="budget-tab-btn active" data-tab="visual">📊 Visual</a>
                     <a href="#browser" class="budget-tab-btn" data-tab="browser">📋 Data Browser</a>
                     <a href="#analysis" class="budget-tab-btn" data-tab="analysis">🚨 NEP 2026 Analysis</a>
+                    <a href="#gab2026" class="budget-tab-btn" data-tab="gab2026">📕 GAB 2026</a>
                 </div>
                 
                 <div class="budget-tab-content">
@@ -338,6 +339,24 @@ function toggleMobileMenu() {
                 </div>
             </div>
                     
+                    <!-- GAB 2026 (PBC) Tab -->
+                    <div id="tab-gab2026" class="budget-tab-panel" style="width: 100%;">
+                        <h3 class="budget-section-title">📕 GAB 2026 (PBC)</h3>
+                        <p class="budget-section-desc">Automated first-sheet chart preview.</p>
+                        <div id="gab2026ChartContainer" class="relative" style="background:white; padding: 16px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.06); width: 100%;">
+                            <button 
+                                id="copyGabBtn" 
+                                style="position: absolute; top: 16px; right: 16px;"
+                                class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded text-base transition-colors duration-200 flex items-center gap-2"
+                                onclick="copyChartToClipboard('gab2026ChartContainer', 'copyGabBtn')"
+                                title="Copy chart image to clipboard"
+                            >
+                                📋 Copy
+                            </button>
+                            <canvas id="pbcChart" style="width: 100% !important;"></canvas>
+                        </div>
+                    </div>
+
                     <!-- NEP 2026 Analysis Tab -->
                     <div id="tab-analysis" class="budget-tab-panel">
                         <h3 class="budget-section-title">🚨 NEP 2026 Analysis: Flood Control Pattern Detection</h3>
@@ -7835,6 +7854,264 @@ async function copyChartToClipboard(containerId, buttonId) {
             console.error('❌ Error loading analysis charts:', error);
         }
     }
+
+    // GAB 2026 (PBC) Tab Logic
+    function formatPHPBillions(n) {
+        const v = (typeof n === 'number' ? n : parseFloat(n));
+        if (!isFinite(v)) return '₱0B';
+        return `₱${(v/1e9).toFixed(1)}B`;
+    }
+
+    async function loadPBCSheets() {
+        try {
+            // Prefer pre-extracted headings detail for accurate server-side parsing
+            const res = await fetch('/api/pbc/gab-2026/headings_detail');
+            if (res && res.ok) {
+                const json = await res.json();
+                if (json && json.status === 'ok' && json.data && Array.isArray(json.data.items) && json.data.items.length) {
+                    const itemsRaw = json.data.items;
+                    // Remove first two largest rows (TOTAL NEW APPROPRIATIONS, DEPARTMENTS)
+                    const items = itemsRaw.slice(2);
+                    const labels = items.map(it => it.label);
+                    const original = items.map(it => it.original || 0);
+                    const delta = items.map(it => (it.delta != null ? it.delta : ((it.hgab||0) - (it.original||0))));
+                    const deltaColors = delta.map(v => v >= 0 ? '#2ca02c' : '#d62728');
+                    // Build asymmetric ticks: 10B steps on negative side, 200B on positive
+                    const negMin = Math.min(0, ...delta.filter(v => v < 0));
+                    const posMax = Math.max(0, ...items.map(it => it.hgab || 0), ...original);
+                    const buildTicks = () => {
+                        const ticks = [];
+                        const stepNeg = 1e10; // 10B
+                        const stepPos = 2e11; // 200B
+                        // Negatives from negMin to 0
+                        let v = Math.floor(negMin / stepNeg) * stepNeg;
+                        for (; v < 0; v += stepNeg) ticks.push(v);
+                        ticks.push(0);
+                        // Positives from 0 to posMax
+                        let p = 0;
+                        for (; p <= posMax + stepPos; p += stepPos) ticks.push(p);
+                        return ticks;
+                    };
+                    const datasets = [
+                        {
+                            label: 'GAB Original',
+                            data: original,
+                            backgroundColor: '#1f77b4'
+                        },
+                        {
+                            label: 'Change (HGAB - GAB)',
+                            data: delta,
+                            backgroundColor: deltaColors
+                        }
+                    ];
+
+                // If still no data or all zeros, fall back to raw sheet method
+                const totalSum = datasets.reduce((acc, ds) => acc + ds.data.reduce((a,b)=>a+(b||0),0), 0);
+                if (datasets.length === 0 || totalSum === 0) {
+                    const res2 = await fetch('/api/pbc/gab-2026/sheets');
+                    const json2 = await res2.json();
+                    const sheets = (json2 && json2.status === 'ok' && json2.data && Array.isArray(json2.data.sheets)) ? json2.data.sheets : [];
+                    if (sheets.length > 0) {
+                        await loadPBCSheetData(sheets[0]);
+                        return;
+                    }
+                }
+                const container = document.getElementById('gab2026ChartContainer');
+                const canvas = document.getElementById('pbcChart');
+                // Dynamic height: 28px per bar + 160px padding for legend/margins
+                const dynHeight = Math.max(600, (labels.length * 28) + 160);
+                container.style.height = dynHeight + 'px';
+                canvas.height = dynHeight - 40;
+                const ctx = canvas.getContext('2d');
+                    if (window.pbcChartInstance) window.pbcChartInstance.destroy();
+                window.pbcChartInstance = new Chart(ctx, {
+                    type: 'bar',
+                    data: { labels, datasets },
+                    options: {
+                        indexAxis: 'y',
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: { display: true, position: 'top' },
+                            tooltip: {
+                                callbacks: {
+                                    label: (ctx) => {
+                                        const label = ctx.dataset.label || '';
+                                        const v = ctx.parsed.x;
+                                        return `${label}: ${formatPHPBillions(v || 0)}`;
+                                    },
+                                    footer: (items) => {
+                                        // Sum stacked values per bar to show HGAB total
+                                        const sum = items.reduce((a, it) => a + (it.parsed?.x || 0), 0);
+                                        return `HGAB Total: ${formatPHPBillions(sum)}`;
+                                    }
+                                }
+                            }
+                        },
+                        scales: {
+                            x: {
+                                stacked: true,
+                                beginAtZero: true,
+                                ticks: {
+                                    callback: (v) => formatPHPBillions(v)
+                                },
+                                title: { display: true, text: 'Amount (₱ billions)' },
+                                afterBuildTicks: () => buildTicks()
+                            },
+                            y: { stacked: true, ticks: { autoSkip: false, maxRotation: 0 } }
+                        }
+                    }
+                });
+                    return;
+                }
+            }
+            // If non-OK or empty, fall back to raw sheet
+            const res2 = await fetch('/api/pbc/gab-2026/sheets');
+            const json2 = await res2.json();
+            const sheets = (json2 && json2.status === 'ok' && json2.data && Array.isArray(json2.data.sheets)) ? json2.data.sheets : [];
+            if (sheets.length > 0) {
+                await loadPBCSheetData(sheets[0]);
+            }
+        } catch (e) {
+            // Any failure: fall back to raw sheet method
+            try {
+                const res2 = await fetch('/api/pbc/gab-2026/sheets');
+                const json2 = await res2.json();
+                const sheets = (json2 && json2.status === 'ok' && json2.data && Array.isArray(json2.data.sheets)) ? json2.data.sheets : [];
+                if (sheets.length > 0) {
+                    await loadPBCSheetData(sheets[0]);
+                }
+            } catch (e2) {
+                console.warn('Failed loading PBC sheets fallback', e2);
+            }
+        }
+    }
+
+    async function loadPBCSheetData(name) {
+        // no preview table; chart only
+        try {
+            const res = await fetch(`/api/pbc/gab-2026/sheet?name=${encodeURIComponent(name)}&limit=100`);
+            const json = await res.json();
+            if (json.status !== 'ok' || !json.data || !Array.isArray(json.data.rows)) return;
+            const rows = json.data.rows;
+            if (!rows.length) return;
+            const keys = Object.keys(rows[0]).filter(k => k !== 'row_index');
+            // Heuristic: pick first categorical column for labels and strongest numeric column for values
+            const isNumericCol = (k) => {
+                let numCount = 0, total = 0;
+                for (const r of rows) {
+                    const v = r[k];
+                    if (v === null || v === '' || v === undefined) continue;
+                    total++;
+                    const n = typeof v === 'number' ? v : parseFloat(String(v).replace(/[,\s]/g, ''));
+                    if (!Number.isNaN(n)) numCount++;
+                }
+                return total > 0 && numCount / total >= 0.7;
+            };
+            const numericCols = keys.filter(isNumericCol);
+            const categoricalCols = keys.filter(k => !numericCols.includes(k));
+            const labelCol = categoricalCols[0] || keys[0];
+            const ctx = document.getElementById('pbcChart').getContext('2d');
+            if (window.pbcChartInstance) window.pbcChartInstance.destroy();
+
+            if (numericCols.length > 0) {
+                // Select top 5 components by total
+                const sums = numericCols.map(k => {
+                    let s = 0;
+                    for (const r of rows) {
+                        const v = r[k];
+                        if (v === null || v === '' || v === undefined) continue;
+                        const n = typeof v === 'number' ? v : parseFloat(String(v).replace(/[\,\s]/g, ''));
+                        if (!Number.isNaN(n)) s += n;
+                    }
+                    return { key: k, sum: s };
+                }).sort((a,b) => b.sum - a.sum).slice(0, 5);
+                const componentCols = sums.map(x => x.key);
+
+                // Top 10 labels by total across components
+                const totalsByLabel = new Map();
+                for (const r of rows) {
+                    const label = (r[labelCol] == null ? '' : String(r[labelCol])).trim();
+                    if (!label) continue;
+                    let t = totalsByLabel.get(label) || 0;
+                    for (const k of componentCols) {
+                        const v = r[k];
+                        const n = v == null ? NaN : (typeof v === 'number' ? v : parseFloat(String(v).replace(/[\,\s]/g, '')));
+                        if (!Number.isNaN(n)) t += n;
+                    }
+                    totalsByLabel.set(label, t);
+                }
+                const topLabels = Array.from(totalsByLabel.entries()).sort((a,b) => b[1]-a[1]).slice(0, 10).map(x => x[0]);
+
+                const datasets = componentCols.map((k, i) => {
+                    const data = topLabels.map(label => {
+                        let s = 0;
+                        for (const r of rows) {
+                            const rLabel = (r[labelCol] == null ? '' : String(r[labelCol])).trim();
+                            if (rLabel !== label) continue;
+                            const v = r[k];
+                            const n = v == null ? NaN : (typeof v === 'number' ? v : parseFloat(String(v).replace(/[\,\s]/g, '')));
+                            if (!Number.isNaN(n)) s += n;
+                        }
+                        return s;
+                    });
+                    const colors = ['#1f77b4','#ff7f0e','#2ca02c','#d62728','#9467bd'];
+                    return { label: k, data, backgroundColor: colors[i % colors.length] };
+                });
+
+                window.pbcChartInstance = new Chart(ctx, {
+                    type: 'bar',
+                    data: { labels: topLabels, datasets },
+                    options: {
+                        responsive: true,
+                        plugins: { legend: { display: true, position: 'top' } },
+                        scales: {
+                            x: { stacked: true, ticks: { autoSkip: false, maxRotation: 45, minRotation: 0 } },
+                            y: { stacked: true, beginAtZero: true }
+                        }
+                    }
+                });
+            } else {
+                // Fallback: frequency bar
+                const freq = new Map();
+                for (const r of rows) {
+                    const label = (r[labelCol] == null ? '' : String(r[labelCol])).trim();
+                    if (!label) continue;
+                    freq.set(label, (freq.get(label) || 0) + 1);
+                }
+                const sorted = Array.from(freq.entries()).sort((a,b) => b[1]-a[1]).slice(0, 10);
+                const labels = sorted.map(x => x[0]);
+                const values = sorted.map(x => x[1]);
+                const php = new Intl.NumberFormat('en-PH', { style: 'currency', currency: 'PHP', maximumFractionDigits: 0 });
+                const container2 = document.getElementById('gab2026ChartContainer');
+                const canvas2 = document.getElementById('pbcChart');
+                const dynHeight2 = Math.max(600, (labels.length * 28) + 160);
+                container2.style.height = dynHeight2 + 'px';
+                canvas2.height = dynHeight2 - 40;
+                const ctx2 = canvas2.getContext('2d');
+                if (window.pbcChartInstance) window.pbcChartInstance.destroy();
+                window.pbcChartInstance = new Chart(ctx2, {
+                    type: 'bar',
+                    data: { labels, datasets: [{ label: `Rows by ${labelCol}`, data: values, backgroundColor: 'rgba(0,0,0,0.75)' }] },
+                    options: { indexAxis: 'y', responsive: true, maintainAspectRatio: false, plugins: { legend: { display: true } }, scales: { x: { beginAtZero: true, ticks: { callback: (v) => formatPHPBillions(v) }, title: { display: true, text: 'Amount (₱ billions)' } }, y: { ticks: { autoSkip: false } } } }
+                });
+            }
+        } catch (e) {
+            console.warn('Failed loading PBC sheet data', e);
+        }
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+        loadPBCSheets();
+        const btn = document.getElementById('pbcLoadBtn');
+        const sel = document.getElementById('pbcSheetSelect');
+        if (btn && sel) {
+            btn.addEventListener('click', () => {
+                const name = sel.value;
+                if (name) loadPBCSheetData(name);
+            });
+        }
+    });
     </script>
     
     {% include "footer.html" %}

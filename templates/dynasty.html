@@ -556,25 +556,30 @@ function toggleMobileMenu() {
 
                     <!-- Table Tab -->
                     <div id="tab-table" class="dynasty-tab-panel">
-                        <h3 class="dynasty-section-title">📊 Dynasty Data Browser</h3>
+                        <h3 class="dynasty-section-title">📊 Officials Data Browser</h3>
                         <p class="dynasty-section-desc">Search and explore political dynasty records (2004-2025)</p>
                         
                         <!-- Search and Filters -->
                         <div class="mb-6">
                             <div class="flex flex-col sm:flex-row gap-4 mb-4">
-                                <div class="flex-1">
-                                    <input type="text" id="searchInput" placeholder="Search by name, party, region, position..." 
-                                           class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                                <div class="flex-1 flex flex-row gap-2">
+                                    <div class="flex-1">
+                                        <input type="text" id="firstNameInput" placeholder="First name (autocomplete)" list="firstNameOptions"
+                                               class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                                        <datalist id="firstNameOptions"></datalist>
+                                    </div>
+                                    <div class="flex-1">
+                                        <input type="text" id="lastNameInput" placeholder="Last name (autocomplete)" list="lastNameOptions"
+                                               class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                                        <datalist id="lastNameOptions"></datalist>
+                                    </div>
                                 </div>
                                 <div class="flex gap-2">
-                                    <select id="positionFilter" class="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
-                                        <option value="">All Positions</option>
-                                        <option value="MAYOR">Mayor</option>
-                                        <option value="VICE MAYOR">Vice Mayor</option>
-                                        <option value="COUNCILOR">Councilor</option>
-                                        <option value="PROVINCIAL BOARD MEMBER">Provincial Board Member</option>
-                                        <option value="MEMBER, HOUSE OF REPRESENTATIVES">House Representative</option>
-                                    </select>
+                                    <div>
+                                        <input type="text" id="positionInput" placeholder="Position (autocomplete)" list="positionOptions"
+                                               class="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                                        <datalist id="positionOptions"></datalist>
+                                    </div>
                                     <select id="regionFilter" class="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
                                         <option value="">All Regions</option>
                                     </select>
@@ -870,7 +875,7 @@ function toggleMobileMenu() {
                         <!-- Relationship Constellations -->
                         <div class="conflicts-visualization" style="background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); margin-bottom: 20px;">
                             <h4 style="color: #0038A8; margin-bottom: 15px;">🕸️ Relationship Constellations</h4>
-                            <div id="conflictsNetwork" style="width: 100%; height: 600px; border: 1px solid #ddd; border-radius: 4px; position: relative;">
+                            <div id="conflictsNetwork" style="width: 100%; height: 900px; border: 1px solid #ddd; border-radius: 4px; position: relative;">
                                 <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); text-align: center; color: #6c757d;">
                                     <div style="font-size: 2em; margin-bottom: 10px;">🕸️</div>
                                     <div>Loading relationship networks...</div>
@@ -1133,14 +1138,26 @@ function initializeDynastyPage() {
         });
     });
 
-    // Set up search and filters
+    // Set up filters
     document.getElementById('applyFilters').addEventListener('click', applyFilters);
-    document.getElementById('searchInput').addEventListener('keypress', function(e) {
-        if (e.key === 'Enter') {
-            applyFilters();
-        }
+    const firstNameInput = document.getElementById('firstNameInput');
+    const lastNameInput = document.getElementById('lastNameInput');
+    [firstNameInput, lastNameInput].forEach(el => {
+        el.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                applyFilters();
+            }
+        });
     });
 
+    // Populate dynamic positions (for autocomplete)
+    populatePositions();
+
+    // Wire up autocomplete for names
+    setupNameAutocomplete();
+
+    // Wire up autocomplete for positions
+    setupPositionAutocomplete();
 
     // Set up pagination
     document.getElementById('prevPage').addEventListener('click', function() {
@@ -1231,13 +1248,100 @@ function loadRegionOptions() {
 
 function applyFilters() {
     currentFilters = {
-        search: document.getElementById('searchInput').value,
-        position: document.getElementById('positionFilter').value,
+        first_name: document.getElementById('firstNameInput').value,
+        last_name: document.getElementById('lastNameInput').value,
+        position: document.getElementById('positionInput').value,
         region: document.getElementById('regionFilter').value,
         dynasty: document.getElementById('dynastyFilter').value
     };
     currentPage = 1;
     loadDynastyData();
+}
+
+async function populatePositions() {
+    try {
+        const resp = await fetch('/api/dynasty/positions');
+        const json = await resp.json();
+        if (!json.success) return;
+        const list = document.getElementById('positionOptions');
+        list.innerHTML = '';
+        (json.data || []).forEach(pos => {
+            const opt = document.createElement('option');
+            opt.value = pos;
+            list.appendChild(opt);
+        });
+    } catch (e) {
+        console.error('Failed to load positions:', e);
+    }
+}
+
+function setupPositionAutocomplete() {
+    const positionInput = document.getElementById('positionInput');
+    const list = document.getElementById('positionOptions');
+    const debounce = (fn, delay) => { let t; return (...a) => { clearTimeout(t); t = setTimeout(() => fn(...a), delay); }; };
+
+    const fetchPositions = debounce(async () => {
+        const q = positionInput.value.trim();
+        const firstName = document.getElementById('firstNameInput').value;
+        const lastName = document.getElementById('lastNameInput').value;
+        const region = document.getElementById('regionFilter').value;
+        const dynasty = document.getElementById('dynastyFilter').value;
+        const params = new URLSearchParams({ q, first_name: firstName, last_name: lastName, region, dynasty });
+        try {
+            const resp = await fetch(`/api/dynasty/positions?${params.toString()}`);
+            const json = await resp.json();
+            if (!json.success) return;
+            list.innerHTML = '';
+            (json.data || []).forEach(pos => {
+                const opt = document.createElement('option');
+                opt.value = pos;
+                list.appendChild(opt);
+            });
+        } catch (e) {}
+    }, 200);
+
+    positionInput.addEventListener('input', fetchPositions);
+}
+
+function setupNameAutocomplete() {
+    const firstNameInput = document.getElementById('firstNameInput');
+    const lastNameInput = document.getElementById('lastNameInput');
+    const firstNameList = document.getElementById('firstNameOptions');
+    const lastNameList = document.getElementById('lastNameOptions');
+
+    const debounce = (fn, delay) => {
+        let t; return (...args) => { clearTimeout(t); t = setTimeout(() => fn(...args), delay); };
+    };
+
+    const fillOptions = (listEl, items) => {
+        listEl.innerHTML = '';
+        (items || []).forEach(v => {
+            const opt = document.createElement('option');
+            opt.value = v;
+            listEl.appendChild(opt);
+        });
+    };
+
+    const fetchFirst = debounce(async () => {
+        const q = firstNameInput.value.trim();
+        try {
+            const resp = await fetch(`/api/dynasty/autocomplete/first-names?q=${encodeURIComponent(q)}`);
+            const json = await resp.json();
+            if (json.success) fillOptions(firstNameList, json.data);
+        } catch (e) { /* ignore */ }
+    }, 200);
+
+    const fetchLast = debounce(async () => {
+        const q = lastNameInput.value.trim();
+        try {
+            const resp = await fetch(`/api/dynasty/autocomplete/last-names?q=${encodeURIComponent(q)}`);
+            const json = await resp.json();
+            if (json.success) fillOptions(lastNameList, json.data);
+        } catch (e) { /* ignore */ }
+    }, 200);
+
+    firstNameInput.addEventListener('input', fetchFirst);
+    lastNameInput.addEventListener('input', fetchLast);
 }
 
 async function loadDynastyData() {

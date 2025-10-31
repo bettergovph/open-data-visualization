@@ -172,7 +172,7 @@ function toggleMobileMenu() {
                 </div>
                 
                 <!-- Hierarchy Chart Container (Default visible) -->
-                <div id="hierarchyChart" class="bg-white border border-gray-200 rounded-lg p-6 min-h-96 overflow-auto">
+                <div id="hierarchyChart" class="bg-white border border-gray-200 rounded-lg p-6 min-h-48 overflow-auto">
                     <div class="text-center py-8">
                         <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-800 mx-auto"></div>
                         <p class="mt-2 text-gray-500">Loading hierarchy chart...</p>
@@ -568,9 +568,9 @@ function toggleMobileMenu() {
                 });
                 return Object.keys(groupedMembers).length;
             }));
-            const requiredWidth = (maxRectangles * (160 + 20)) - 20 + 200; // Add padding
-            const width = Math.max(requiredWidth, container.clientWidth || 1000);
-            const height = Math.max(600, levels.length * 200 + 100);
+            const requiredWidth = (maxRectangles * (160 + 20)) - 20 + 40; // Reduced padding to minimize horizontal scroll
+            const width = Math.min(requiredWidth, container.clientWidth || requiredWidth);
+            const height = Math.max(300, levels.length * 160 + 80);
             
             const svg = d3.select(container)
                 .append('svg')
@@ -597,7 +597,7 @@ function toggleMobileMenu() {
                 .style('opacity', 0);
             
             // Create manual layout for proper org chart
-            const levelHeight = 180;
+            const levelHeight = 180; // doubled vertical spacing between levels
             const nodeWidth = 160;
             const nodeHeight = 80;
             const nodeSpacing = 20;
@@ -613,8 +613,8 @@ function toggleMobileMenu() {
             // Set initial zoom and pan to show the chart content
             const initialScale = 0.4; // Start at 40% zoom (zoomed in 1 level)
             // Dynamic pan based on chart content - maintain ratio for different rectangle counts
-            const panX = Math.max(200, maxWidth * 0.12); // Pan right based on chart width (moved a little left)
-            const panY = Math.max(300, levels.length * 50); // Pan down based on chart height
+            const panX = Math.max(40, maxWidth * 0.06);
+            const panY = Math.max(300, levels.length * 50);
             svg.call(zoom.transform, d3.zoomIdentity.translate(panX, panY).scale(initialScale));
             
             // Calculate positions for each level - group same people together
@@ -1596,10 +1596,10 @@ function toggleMobileMenu() {
             });
             
             const levels = Object.keys(membersByLevel).map(Number).sort((a, b) => a - b);
-            const levelHeight = 120;
+            const levelHeight = 120; // year view unchanged vertically
             const nodeWidth = 160;
             const nodeHeight = 80;
-            const nodeSpacing = 20;
+            const nodeSpacing = 20; // revert horizontal spacing in year view
             
             // Calculate positions for each level
             const nodePositions = [];
