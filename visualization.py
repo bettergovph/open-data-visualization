@@ -3276,7 +3276,7 @@ async def dynasty_family_api(
                     fat,
                     nickname
                 FROM political_dynasties 
-                WHERE last_name = $1 AND province = $2 AND winner = true
+                WHERE UPPER(last_name) = UPPER($1) AND province = $2 AND winner = true
                 ORDER BY year DESC, first_name
             """, surname, province)
             
@@ -3304,7 +3304,7 @@ async def dynasty_family_api(
                                 year,
                                 fat
                             FROM political_dynasties 
-                            WHERE last_name = $1 AND municipality_city IN ({placeholders})
+                            WHERE UPPER(last_name) = UPPER($1) AND municipality_city IN ({placeholders})
                             ORDER BY year DESC, first_name
                         """, surname, *cities)
                 except Exception as e:
@@ -3322,7 +3322,7 @@ async def dynasty_family_api(
                     fat,
                     nickname
                 FROM political_dynasties 
-                WHERE last_name = $1 AND winner = true
+                WHERE UPPER(last_name) = UPPER($1) AND winner = true
                 ORDER BY year DESC, first_name
             """, surname)
         
@@ -3419,7 +3419,7 @@ async def dynasty_family_api(
                         WHERE CONCAT(first_name, ' ', last_name) NOT IN (
                             SELECT CONCAT(first_name, ' ', last_name) 
                             FROM political_dynasties 
-                            WHERE last_name = $2 AND province = $3
+                            WHERE UPPER(last_name) = UPPER($2) AND province = $3
                         )
                         ORDER BY year DESC, first_name
                     """
@@ -3855,8 +3855,9 @@ async def get_contractor_projects_frontend(contractor_name: str):
 
 @app.get("/api/dynasty/relationship-chains")
 async def dynasty_relationship_chains_api(
-    chain_length: int = Query(2, ge=2, le=10, description="Minimum chain length to find"),
-    max_chains: int = Query(50, ge=25, le=5000, description="Maximum number of constellations to return"),
+    chain_length_min: int = Query(2, ge=2, le=10, description="Minimum chain length to find"),
+    chain_length_max: int = Query(7, ge=2, le=10, description="Maximum chain length to find"),
+    max_constellations: str = Query("10", description="Maximum number of unique constellations to return (number or 'ALL')"),
     contractor_only: bool = Query(False, description="Only return constellations with contractor connections"),
     party_list_only: bool = Query(False, description="Only return constellations with party-list connections")
 ):
@@ -3873,92 +3874,92 @@ async def dynasty_relationship_chains_api(
         with open(cache_file, 'r', encoding='utf-8') as f:
             cache_data = json.load(f)
         
-        # Filter chains by minimum length
+        # Validate min <= max
+        if chain_length_min > chain_length_max:
+            return JSONResponse({"success": False, "error": "chain_length_min must be <= chain_length_max"})
+        
+        # Parse max_constellations - can be a number or "ALL"
+        max_constellations_int = None
+        if max_constellations.upper() == "ALL":
+            max_constellations_int = None  # No limit
+        else:
+            try:
+                max_constellations_int = int(max_constellations)
+                if max_constellations_int < 1:
+                    max_constellations_int = None
+            except (ValueError, TypeError):
+                return JSONResponse({"success": False, "error": f"Invalid max_constellations value: {max_constellations}. Must be a number or 'ALL'."})
+        
+        # Filter chains by length range
+        # Note: chain_length_max >= 10 means no upper limit (treat as 10+)
         all_chains = cache_data.get('chains', [])
-        filtered_chains = [chain for chain in all_chains if chain['length'] >= chain_length]
+        if chain_length_max >= 10:
+            # No upper limit - only filter by minimum
+            filtered_chains = [chain for chain in all_chains 
+                              if chain_length_min <= chain.get('length', 0)]
+        else:
+            # Filter by both min and max
+            filtered_chains = [chain for chain in all_chains 
+                              if chain_length_min <= chain.get('length', 0) <= chain_length_max]
         
         # Filter by connection type if requested
         if contractor_only:
             filtered_chains = [chain for chain in filtered_chains 
                              if chain.get('contractor_connection') and chain.get('contractor_connection', {}).get('contractor_name')]
-            
-            # Diversify results across different contractors to avoid showing only one contractor
-            # Group chains by contractor and sample from each group
-            from collections import defaultdict
-            chains_by_contractor = defaultdict(list)
-            for chain in filtered_chains:
-                contractor_name = chain.get('contractor_connection', {}).get('contractor_name', 'Unknown')
-                chains_by_contractor[contractor_name].append(chain)
-            
-            # Sort contractors by number of chains (descending) to prioritize those with more connections
-            sorted_contractors = sorted(chains_by_contractor.items(), key=lambda x: len(x[1]), reverse=True)
-            
-            # Distribute max_chains across contractors (at least 1 per contractor, then distribute remaining)
-            limited_chains = []
-            num_contractors = len(sorted_contractors)
-            if num_contractors > 0:
-                # Ensure at least one chain per contractor (if max_chains allows)
-                chains_per_contractor = max(1, max_chains // num_contractors)
-                remaining_chains = max_chains - (chains_per_contractor * num_contractors)
-                
-                for i, (contractor_name, contractor_chains) in enumerate(sorted_contractors):
-                    if len(limited_chains) >= max_chains:
-                        break
-                    # Take more chains from first few contractors if there's remainder
-                    take_count = chains_per_contractor + (1 if i < remaining_chains else 0)
-                    limited_chains.extend(contractor_chains[:take_count])
-                    
-                    if len(limited_chains) >= max_chains:
-                        limited_chains = limited_chains[:max_chains]
-                        break
-            
-            filtered_chains = limited_chains
         elif party_list_only:
             filtered_chains = [chain for chain in filtered_chains 
                              if chain.get('party_list_connection') and chain.get('party_list_connection', {}).get('party_name')]
-            
-            # Diversify results across different party-lists
-            from collections import defaultdict
-            chains_by_party_list = defaultdict(list)
-            for chain in filtered_chains:
-                party_name = chain.get('party_list_connection', {}).get('party_name', 'Unknown')
-                chains_by_party_list[party_name].append(chain)
-            
-            # Sort party-lists by number of chains (descending)
-            sorted_party_lists = sorted(chains_by_party_list.items(), key=lambda x: len(x[1]), reverse=True)
-            
-            # Distribute max_chains across party-lists
-            limited_chains = []
-            num_party_lists = len(sorted_party_lists)
-            if num_party_lists > 0:
-                chains_per_party_list = max(1, max_chains // num_party_lists)
-                remaining = max_chains - (chains_per_party_list * num_party_lists)
-                
-                for i, (party_name, party_list_chains) in enumerate(sorted_party_lists):
-                    if len(limited_chains) >= max_chains:
-                        break
-                    take_count = chains_per_party_list + (1 if i < remaining else 0)
-                    limited_chains.extend(party_list_chains[:take_count])
-                    
-                    if len(limited_chains) >= max_chains:
-                        limited_chains = limited_chains[:max_chains]
-                        break
-            
-            filtered_chains = limited_chains
+        
+        # Group chains by unique constellation (family pairs)
+        # A constellation is a unique connection between two families (regardless of path direction or length)
+        from collections import defaultdict
+        chains_by_constellation = defaultdict(list)
+        for chain in filtered_chains:
+            start_family = chain.get('start_surname', '').upper().strip()
+            end_family = chain.get('end_surname', '').upper().strip()
+            if start_family and end_family and start_family != end_family:
+                # Normalize: use sorted tuple so A->B and B->A are the same constellation
+                constellation_key = tuple(sorted([start_family, end_family]))
+                chains_by_constellation[constellation_key].append(chain)
+        
+        # Sort constellations by number of chains (more paths = more interesting)
+        sorted_constellations = sorted(chains_by_constellation.items(), key=lambda x: len(x[1]), reverse=True)
+        
+        # Take up to max_constellations unique constellations, including all chains for each
+        limited_chains = []
+        if max_constellations_int is None:
+            # "ALL" - return all constellations
+            for constellation_key, constellation_chains in sorted_constellations:
+                limited_chains.extend(constellation_chains)
         else:
-            # For non-filtered views, just limit directly
-            limited_chains = filtered_chains[:max_chains]
-            filtered_chains = limited_chains
+            # Limit to requested number of constellations
+            for constellation_key, constellation_chains in sorted_constellations[:max_constellations_int]:
+                limited_chains.extend(constellation_chains)
+        
+        filtered_chains = limited_chains
+        
+        # Count unique constellations in the filtered result
+        result_constellations = set()
+        for chain in filtered_chains:
+            start_family = chain.get('start_surname', '').upper().strip()
+            end_family = chain.get('end_surname', '').upper().strip()
+            if start_family and end_family and start_family != end_family:
+                constellation_key = tuple(sorted([start_family, end_family]))
+                result_constellations.add(constellation_key)
         
         return JSONResponse({
             "success": True,
             "data": filtered_chains,
-            "total_constellations": len(filtered_chains),
-            "min_constellation_stars": chain_length,
-            "max_constellations_returned": max_chains,
+            "total_constellations": len(result_constellations),
+            "total_chains": len(filtered_chains),
+            "min_constellation_stars": chain_length_min,
+            "max_constellation_stars": chain_length_max,
+            "max_constellations_requested": max_constellations,
             "cache_info": {
                 "last_updated": cache_data.get('summary', {}).get('last_updated'),
-                "total_cached": cache_data.get('summary', {}).get('total_chains', 0)
+                "total_cached_chains": cache_data.get('summary', {}).get('total_chains', 0),
+                "total_cached_constellations": cache_data.get('summary', {}).get('total_constellations', 0),
+                "constellation_mapping": cache_data.get('summary', {}).get('constellation_mapping', {})
             }
         })
         

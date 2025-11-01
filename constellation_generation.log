@@ -1,0 +1,22 @@
+🔍 Generating relationship constellations cache...
+Traceback (most recent call last):
+  File "/home/joebert/open-data-visualization/scripts/database/generate_relationship_constellations_cache.py", line 494, in <module>
+    asyncio.run(generate_relationship_constellations_cache())
+  File "/usr/lib/python3.10/asyncio/runners.py", line 44, in run
+    return loop.run_until_complete(main)
+  File "/usr/lib/python3.10/asyncio/base_events.py", line 649, in run_until_complete
+    return future.result()
+  File "/home/joebert/open-data-visualization/scripts/database/generate_relationship_constellations_cache.py", line 177, in generate_relationship_constellations_cache
+    chains = await conn.fetch(query)
+  File "/home/joebert/.local/lib/python3.10/site-packages/asyncpg/connection.py", line 690, in fetch
+    return await self._execute(
+  File "/home/joebert/.local/lib/python3.10/site-packages/asyncpg/connection.py", line 1864, in _execute
+    result, _ = await self.__execute(
+  File "/home/joebert/.local/lib/python3.10/site-packages/asyncpg/connection.py", line 1961, in __execute
+    result, stmt = await self._do_execute(
+  File "/home/joebert/.local/lib/python3.10/site-packages/asyncpg/connection.py", line 2004, in _do_execute
+    stmt = await self._get_statement(
+  File "/home/joebert/.local/lib/python3.10/site-packages/asyncpg/connection.py", line 432, in _get_statement
+    statement = await self._protocol.prepare(
+  File "asyncpg/protocol/protocol.pyx", line 165, in prepare
+asyncpg.exceptions.InvalidRecursionError: recursive reference to query "relationship_chains" must not appear within its non-recursive term

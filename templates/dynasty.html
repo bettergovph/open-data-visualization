@@ -847,28 +847,42 @@ function toggleMobileMenu() {
                         
                         <!-- Conflicts Controls -->
                         <div class="conflicts-controls" style="background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); margin-bottom: 20px;">
-                            <div style="display: flex; gap: 15px; margin-bottom: 15px; flex-wrap: wrap; align-items: center;">
+                            <div style="display: flex; gap: 20px; margin-bottom: 15px; flex-wrap: wrap; align-items: center;">
                                 <div>
-                                    <label style="display: block; margin-bottom: 5px; font-weight: 600; color: #333;">Constellation Stars:</label>
-                                    <select id="chainLengthFilter" style="padding: 8px 12px; border: 1px solid #ddd; border-radius: 4px; width: 140px;">
-                                        <option value="2" selected>2+ stars</option>
-                                        <option value="3">3+ stars</option>
-                                        <option value="4">4+ stars</option>
-                                        <option value="5">5+ stars</option>
-                                        <option value="6">6+ stars</option>
-                                    </select>
+                                    <label style="display: block; margin-bottom: 5px; font-weight: 600; color: #333;">Number of Stars:</label>
+                                    <div style="display: flex; gap: 8px; align-items: center;">
+                                        <select id="chainLengthMinFilter" style="padding: 8px 12px; border: 1px solid #ddd; border-radius: 4px; width: 70px;">
+                                            <option value="2" selected>2</option>
+                                            <option value="3">3</option>
+                                            <option value="4">4</option>
+                                            <option value="5">5</option>
+                                            <option value="6">6</option>
+                                            <option value="7">7</option>
+                                        </select>
+                                        <span style="font-weight: 600; color: #666;">to</span>
+                                        <select id="chainLengthMaxFilter" style="padding: 8px 12px; border: 1px solid #ddd; border-radius: 4px; width: 70px;">
+                                            <option value="2">2</option>
+                                            <option value="3">3</option>
+                                            <option value="4">4</option>
+                                            <option value="5">5</option>
+                                            <option value="6">6</option>
+                                            <option value="7" selected>7+</option>
+                                        </select>
+                                    </div>
                                 </div>
                                 <div>
-                                    <label style="display: block; margin-bottom: 5px; font-weight: 600; color: #333;">Max Lines:</label>
-                                    <select id="maxChainsFilter" style="padding: 8px 12px; border: 1px solid #ddd; border-radius: 4px; width: 160px;" title="Maximum number of lines (relationship chains) to display. Each line is one path connecting families.">
-                                        <option value="25" selected>25 Lines</option>
-                                        <option value="50">50 Lines</option>
-                                        <option value="100">100 Lines</option>
-                                        <option value="250">250 Lines</option>
-                                        <option value="500">500 Lines</option>
-                                        <option value="1000">1000 Lines</option>
-                                        <option value="2500">2500 Lines</option>
-                                        <option value="5000">5000 Lines</option>
+                                    <label style="display: block; margin-bottom: 5px; font-weight: 600; color: #333;">Number of Constellations:</label>
+                                    <select id="maxChainsFilter" style="padding: 8px 12px; border: 1px solid #ddd; border-radius: 4px; width: 180px;" title="Number of unique constellations (family pairs) to display">
+                                        <option value="1">1</option>
+                                        <option value="2">2</option>
+                                        <option value="5">5</option>
+                                        <option value="10" selected>10</option>
+                                        <option value="20">20</option>
+                                        <option value="50">50</option>
+                                        <option value="100">100</option>
+                                        <option value="120">120</option>
+                                        <option value="150">150</option>
+                                        <option value="ALL">ALL</option>
                                     </select>
                                 </div>
                                 <div style="padding-top: 22px;">
@@ -887,11 +901,6 @@ function toggleMobileMenu() {
                                             <span>Show party-list only</span>
                                         </label>
                                     </div>
-                                </div>
-                                <div>
-                                    <button onclick="loadConflictsData()" style="padding: 8px 16px; background: #0038A8; color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: 600;">
-                                        🔍 Apply Filters
-                                    </button>
                                 </div>
                             </div>
                         </div>
@@ -916,6 +925,18 @@ function toggleMobileMenu() {
                                     <div style="display: flex; align-items: center; gap: 5px;">
                                         <div style="width: 2px; height: 20px; background: #F59E0B; border: none;"></div>
                                         <span>Contractor link</span>
+                                    </div>
+                                    <div style="display: flex; align-items: center; gap: 5px;">
+                                        <div style="width: 12px; height: 12px; border-radius: 50%; background: #9333EA; border: 3px solid #7C3AED;"></div>
+                                        <span>🔮 Party-List</span>
+                                    </div>
+                                    <div style="display: flex; align-items: center; gap: 5px;">
+                                        <div style="width: 12px; height: 12px; border-radius: 50%; background: #9333EA; border: 2px dashed #E9D5FF;"></div>
+                                        <span>Party-list-connected</span>
+                                    </div>
+                                    <div style="display: flex; align-items: center; gap: 5px;">
+                                        <div style="width: 2px; height: 20px; background: #9333EA; border: none;"></div>
+                                        <span>Party-list link</span>
                                     </div>
                                 </div>
                             </div>
@@ -3520,13 +3541,25 @@ let conflictsCurrentPage = 1;
 function loadConflictsData() {
     console.log('🚀 loadConflictsData function called!');
     
-    const chainLength = document.getElementById('chainLengthFilter').value;
-    const maxChains = document.getElementById('maxChainsFilter').value;
+    const chainLengthMin = parseInt(document.getElementById('chainLengthMinFilter').value);
+    let chainLengthMax = parseInt(document.getElementById('chainLengthMaxFilter').value);
+    const maxConstellations = document.getElementById('maxChainsFilter').value; // Actually represents constellations
     const connectionTypeFilter = document.querySelector('input[name="connectionTypeFilter"]:checked')?.value || 'all';
     
-    // maxChains = maximum number of LINES (relationship chains) to display, NOT stars/nodes
-    // Each line is one relationship path between families
-    console.log('🔍 Loading conflicts data with min stars:', chainLength, 'max lines (not stars):', maxChains, 'connection type:', connectionTypeFilter);
+    // Handle "7+" as no upper limit (use 10 which backend treats as unlimited)
+    if (chainLengthMax === 7 || document.getElementById('chainLengthMaxFilter').value === '7+') {
+        chainLengthMax = 10; // Use max allowed value to represent "no limit" (backend treats >= 10 as unlimited)
+    }
+    
+    // Validate min <= max
+    if (chainLengthMin > chainLengthMax) {
+        alert('Minimum constellation stars must be less than or equal to maximum. Please adjust your selection.');
+        // Auto-correct: set max to min
+        document.getElementById('chainLengthMaxFilter').value = chainLengthMin;
+        return;
+    }
+    
+    console.log('🔍 Loading conflicts data with constellation stars range:', chainLengthMin, 'to', chainLengthMax, 'max constellations:', maxConstellations, 'connection type:', connectionTypeFilter);
     
     // Show loading state
     document.getElementById('conflictsNetwork').innerHTML = `
@@ -3558,7 +3591,7 @@ function loadConflictsData() {
     } else if (connectionTypeFilter === 'party-list') {
         connectionParam = '&party_list_only=true';
     }
-    fetch(`/api/dynasty/relationship-chains?chain_length=${chainLength}&max_chains=${maxChains}${connectionParam}`)
+    fetch(`/api/dynasty/relationship-chains?chain_length_min=${chainLengthMin}&chain_length_max=${chainLengthMax}&max_constellations=${maxConstellations}${connectionParam}`)
         .then(response => {
             console.log('📡 API Response status:', response.status);
             return response.json();
@@ -3593,8 +3626,15 @@ function loadConflictsData() {
                     .then(res => res.json())
                     .then(cache => {
                         const allChains = cache && cache.chains ? cache.chains : [];
-                        // Filter by minimum constellation stars and connection type
-                        let filtered = allChains.filter(c => c.length >= parseInt(chainLength));
+                        // Filter by constellation stars range and connection type
+                        // Note: chainLengthMax >= 10 means no upper limit
+                        let filtered = allChains.filter(c => {
+                            const chainLength = c.length || 0;
+                            if (chainLengthMax >= 10) {
+                                return chainLength >= chainLengthMin; // 10+ means no upper limit
+                            }
+                            return chainLength >= chainLengthMin && chainLength <= chainLengthMax;
+                        });
                         
                         if (connectionTypeFilter === 'contractor') {
                             filtered = filtered.filter(c => c.contractor_connection && c.contractor_connection.contractor_name);
@@ -3614,18 +3654,29 @@ function loadConflictsData() {
                                     .sort((a, b) => b[1].length - a[1].length);
                                 
                                 const diversified = [];
-                                const maxChainsNum = parseInt(maxChains);
-                                const numContractors = sortedContractors.length;
-                                const chainsPerContractor = Math.max(1, Math.floor(maxChainsNum / numContractors));
-                                const remaining = maxChainsNum - (chainsPerContractor * numContractors);
+                                // Group by constellation (family pairs) for fallback
+                                const chainsByConstellation = {};
+                                filtered.forEach(c => {
+                                    const startFamily = (c.start_surname || '').toUpperCase().trim();
+                                    const endFamily = (c.end_surname || '').toUpperCase().trim();
+                                    if (startFamily && endFamily && startFamily !== endFamily) {
+                                        const constellationKey = [startFamily, endFamily].sort().join('|');
+                                        if (!chainsByConstellation[constellationKey]) {
+                                            chainsByConstellation[constellationKey] = [];
+                                        }
+                                        chainsByConstellation[constellationKey].push(c);
+                                    }
+                                });
                                 
-                                for (let i = 0; i < sortedContractors.length && diversified.length < maxChainsNum; i++) {
-                                    const [contractorName, contractorChains] = sortedContractors[i];
-                                    const takeCount = chainsPerContractor + (i < remaining ? 1 : 0);
-                                    diversified.push(...contractorChains.slice(0, takeCount));
+                                const sortedConstellations = Object.entries(chainsByConstellation)
+                                    .sort((a, b) => b[1].length - a[1].length);
+                                
+                                const maxConstNum = maxConstellations === 'ALL' ? Infinity : parseInt(maxConstellations);
+                                for (let i = 0; i < Math.min(sortedConstellations.length, maxConstNum); i++) {
+                                    diversified.push(...sortedConstellations[i][1]);
                                 }
                                 
-                                filtered = diversified.slice(0, maxChainsNum);
+                                filtered = diversified;
                             }
                         } else if (connectionTypeFilter === 'party-list') {
                             filtered = filtered.filter(c => c.party_list_connection && c.party_list_connection.party_name);
@@ -3645,22 +3696,55 @@ function loadConflictsData() {
                                     .sort((a, b) => b[1].length - a[1].length);
                                 
                                 const diversified = [];
-                                const maxChainsNum = parseInt(maxChains);
-                                const numPartyLists = sortedPartyLists.length;
-                                const chainsPerPartyList = Math.max(1, Math.floor(maxChainsNum / numPartyLists));
-                                const remaining = maxChainsNum - (chainsPerPartyList * numPartyLists);
+                                // Group by constellation (family pairs) for fallback
+                                const chainsByConstellation = {};
+                                filtered.forEach(c => {
+                                    const startFamily = (c.start_surname || '').toUpperCase().trim();
+                                    const endFamily = (c.end_surname || '').toUpperCase().trim();
+                                    if (startFamily && endFamily && startFamily !== endFamily) {
+                                        const constellationKey = [startFamily, endFamily].sort().join('|');
+                                        if (!chainsByConstellation[constellationKey]) {
+                                            chainsByConstellation[constellationKey] = [];
+                                        }
+                                        chainsByConstellation[constellationKey].push(c);
+                                    }
+                                });
                                 
-                                for (let i = 0; i < sortedPartyLists.length && diversified.length < maxChainsNum; i++) {
-                                    const [partyName, partyListChains] = sortedPartyLists[i];
-                                    const takeCount = chainsPerPartyList + (i < remaining ? 1 : 0);
-                                    diversified.push(...partyListChains.slice(0, takeCount));
+                                const sortedConstellations = Object.entries(chainsByConstellation)
+                                    .sort((a, b) => b[1].length - a[1].length);
+                                
+                                const maxConstNum = maxConstellations === 'ALL' ? Infinity : parseInt(maxConstellations);
+                                for (let i = 0; i < Math.min(sortedConstellations.length, maxConstNum); i++) {
+                                    diversified.push(...sortedConstellations[i][1]);
                                 }
                                 
-                                filtered = diversified.slice(0, maxChainsNum);
+                                filtered = diversified;
                             }
                         } else {
-                            // Show all - just limit by max chains
-                            filtered = filtered.slice(0, parseInt(maxChains));
+                            // Group by constellation (family pairs) and limit
+                            const chainsByConstellation = {};
+                            filtered.forEach(c => {
+                                const startFamily = (c.start_surname || '').toUpperCase().trim();
+                                const endFamily = (c.end_surname || '').toUpperCase().trim();
+                                if (startFamily && endFamily && startFamily !== endFamily) {
+                                    const constellationKey = [startFamily, endFamily].sort().join('|');
+                                    if (!chainsByConstellation[constellationKey]) {
+                                        chainsByConstellation[constellationKey] = [];
+                                    }
+                                    chainsByConstellation[constellationKey].push(c);
+                                }
+                            });
+                            
+                            const sortedConstellations = Object.entries(chainsByConstellation)
+                                .sort((a, b) => b[1].length - a[1].length);
+                            
+                            const diversified = [];
+                            const maxConstNum = maxConstellations === 'ALL' ? Infinity : parseInt(maxConstellations);
+                            for (let i = 0; i < Math.min(sortedConstellations.length, maxConstNum); i++) {
+                                diversified.push(...sortedConstellations[i][1]);
+                            }
+                            
+                            filtered = diversified;
                         }
                         
                         fullConflictsData = filtered;
@@ -3758,10 +3842,18 @@ function displayConflictsNetwork() {
     function normalizeNameForDedup(firstName, lastName) {
         if (!firstName || !lastName) return '';
         // Remove middle initials, extra spaces, convert to uppercase
+        // This helps match "YEDDA ROMUALDEZ" with "YEDDA MARIE K ROMUALDEZ"
         const normalized = `${firstName} ${lastName}`.toUpperCase()
-            .replace(/\b[A-Z]\.\s*/g, ' ')
-            .replace(/\s+/g, ' ')
+            .replace(/\b[A-Z]\.\s*/g, ' ')  // Remove single letter initials with dots (K.)
+            .replace(/\b[A-Z]\s+/g, ' ')    // Remove standalone single letters (K, M)
+            .replace(/\b(MARIE|MA|M)\s+/gi, ' ')  // Remove common middle names
+            .replace(/\s+/g, ' ')           // Collapse multiple spaces
             .trim();
+        // Extract just first and last name for matching
+        const parts = normalized.split(/\s+/);
+        if (parts.length >= 2) {
+            return `${parts[0]} ${parts[parts.length - 1]}`;  // First name + Last name
+        }
         return normalized;
     }
     
@@ -3835,7 +3927,8 @@ function displayConflictsNetwork() {
             nodeMap.set(nodeId, {
                 id: nodeId,
                 originalIds: [person.id], // Track all original IDs for this normalized name
-                name: `${person.first_name} ${person.last_name}`,
+                name: person.full_name || person.canonical_name || 
+                      `${person.first_name || ''} ${person.middle_name || ''} ${person.last_name || ''} ${person.suffix || ''}`.trim().replace(/\s+/g, ' '),
                 surname: person.last_name,
                 position: person.position, // Will merge positions if multiple
                 positions: [person.position], // Track all positions for this person
@@ -3950,7 +4043,7 @@ function displayConflictsNetwork() {
             links.push({
                 source: firstPersonNodeId,
                 target: partyListId,
-                relationship: `Connected via ${partyListInfo.party_full_name || partyListInfo.party_name}`,
+                relationship: `Connected via ${partyListInfo.party_name || partyListInfo.party_full_name}`,
                 chainIndex: chainIndex,
                 partyListInfo: partyListInfo,
                 isPartyListLink: true
@@ -3960,7 +4053,7 @@ function displayConflictsNetwork() {
             links.push({
                 source: partyListId,
                 target: lastPersonNodeId,
-                relationship: `Connected via ${partyListInfo.party_full_name || partyListInfo.party_name}`,
+                relationship: `Connected via ${partyListInfo.party_name || partyListInfo.party_full_name}`,
                 chainIndex: chainIndex,
                 partyListInfo: partyListInfo,
                 isPartyListLink: true
@@ -3990,6 +4083,88 @@ function displayConflictsNetwork() {
         if (nodeConnections.has(sourceId)) nodeConnections.get(sourceId).add(targetId);
         if (nodeConnections.has(targetId)) nodeConnections.get(targetId).add(sourceId);
     });
+    
+    // Add implicit family connections: connect nodes with the same surname (last name)
+    // This helps connect family members even if they're in separate chains
+    const surnameToNodes = new Map();
+    nodes.forEach(node => {
+        // Extract surname from node - could be in surname field or parsed from name
+        let surname = '';
+        if (node.surname) {
+            surname = String(node.surname).toUpperCase().trim();
+        } else if (node.name) {
+            // Extract surname from full name (last word)
+            const nameParts = String(node.name).trim().split(/\s+/);
+            if (nameParts.length > 0) {
+                surname = nameParts[nameParts.length - 1].toUpperCase().trim();
+            }
+        }
+        
+        if (surname && !node.isContractor && !node.isPartyList) {
+            if (!surnameToNodes.has(surname)) {
+                surnameToNodes.set(surname, []);
+            }
+            surnameToNodes.get(surname).push(node.id);
+        }
+    });
+    
+    // Create implicit links between nodes with the same surname
+    surnameToNodes.forEach((nodeIds, surname) => {
+        if (nodeIds.length > 1) {
+            // Connect all nodes with the same surname to each other
+            for (let i = 0; i < nodeIds.length; i++) {
+                for (let j = i + 1; j < nodeIds.length; j++) {
+                    const node1 = nodeIds[i];
+                    const node2 = nodeIds[j];
+                    
+                    // Add bidirectional connection
+                    if (!nodeConnections.has(node1)) {
+                        nodeConnections.set(node1, new Set());
+                    }
+                    if (!nodeConnections.has(node2)) {
+                        nodeConnections.set(node2, new Set());
+                    }
+                    nodeConnections.get(node1).add(node2);
+                    nodeConnections.get(node2).add(node1);
+                    
+                    // Skip if link already exists (avoid duplicates)
+                    const linkExists = links.some(l => {
+                        const lSource = typeof l.source === 'object' ? l.source.id : l.source;
+                        const lTarget = typeof l.target === 'object' ? l.target.id : l.target;
+                        return (lSource === node1 && lTarget === node2) || (lSource === node2 && lTarget === node1);
+                    });
+                    
+                    if (!linkExists) {
+                        // Add implicit link to visualization (as a lighter/dashed link)
+                        links.push({
+                            source: node1,
+                            target: node2,
+                            relationship: `Family connection (same surname: ${surname})`,
+                            chainIndex: -1, // Special marker for implicit links
+                            isFamilyLink: true,
+                            isImplicit: true
+                        });
+                    }
+                }
+            }
+        }
+    });
+    
+    const totalFamilyLinks = Array.from(surnameToNodes.values())
+        .reduce((sum, nodeIds) => sum + (nodeIds.length * (nodeIds.length - 1) / 2), 0);
+    console.log(`🔗 Added ${surnameToNodes.size} surname-based family connections`);
+    console.log(`🔗 Created ${totalFamilyLinks} implicit family links`);
+    console.log(`🔗 Total links (before family): ${links.length - totalFamilyLinks}, after: ${links.length}`);
+    
+    // Debug: Check Romualdez connections specifically
+    if (surnameToNodes.has('ROMUALDEZ')) {
+        const romualdezNodes = surnameToNodes.get('ROMUALDEZ');
+        console.log(`👥 Romualdez family nodes (${romualdezNodes.length}):`, romualdezNodes);
+    }
+    if (surnameToNodes.has('MARCOS')) {
+        const marcosNodes = surnameToNodes.get('MARCOS');
+        console.log(`👥 Marcos family nodes (${marcosNodes.length}):`, marcosNodes);
+    }
     
     // BFS to find connected components
     const visited = new Set();
@@ -4068,6 +4243,10 @@ function displayConflictsNetwork() {
             if (d.isPartyListLink) {
                 return '#9333EA'; // Purple for party-list links
             }
+            // Light gray for implicit family connections (same surname)
+            if (d.isFamilyLink || d.isImplicit) {
+                return '#D1D5DB'; // Light gray for family links
+            }
             // Color by contractor for contractor-mediated connections
             if (d.contractorInfo && d.contractorInfo.contractor_name) {
                 const contractorColors = {
@@ -4085,10 +4264,8 @@ function displayConflictsNetwork() {
                 const contractorName = d.contractorInfo.contractor_name;
                 return contractorColors[contractorName] || '#DC2626'; // Default red
             }
-            // Purple for party-list-mediated connections
-            if (d.partyListInfo && d.partyListInfo.party_name) {
-                return '#9333EA'; // Purple for party-list connections
-            }
+            // Don't color person nodes purple just because they're connected via party-list
+            // Only party-list organization nodes themselves are purple
             const colors = ['#059669', '#7C3AED', '#D97706', '#DB2777', '#0891B2', '#CA8A04'];
             return colors[d.chainIndex % colors.length];
         })
@@ -4099,11 +4276,19 @@ function displayConflictsNetwork() {
             if (d.isPartyListLink) {
                 return 3; // Thicker for party-list links
             }
-            return (d.contractorInfo && d.contractorInfo.contractor_name) ? 2.5 : 
-                   (d.partyListInfo && d.partyListInfo.party_name) ? 2.5 : 1.5;
+            if (d.isFamilyLink || d.isImplicit) {
+                return 1; // Thinner for implicit family links
+            }
+            // Person nodes connected via party-list should have normal stroke width
+            return (d.contractorInfo && d.contractorInfo.contractor_name) ? 2.5 : 1.5;
         })
-        .attr('stroke-opacity', 0.7)
-        .attr('stroke-dasharray', d => d.chainIndex % 2 === 0 ? '3,3' : '0') // Alternating dashed lines
+        .attr('stroke-opacity', d => (d.isFamilyLink || d.isImplicit) ? 0.3 : 0.7)
+        .attr('stroke-dasharray', d => {
+            if (d.isFamilyLink || d.isImplicit) {
+                return '2,2'; // Dashed for implicit family links
+            }
+            return d.chainIndex % 2 === 0 ? '3,3' : '0'; // Alternating dashed lines for regular links
+        })
         .style('cursor', 'pointer')
         .on('mouseover', function(event, d) {
             if (d.contractorInfo && d.contractorInfo.contractor_name) {
@@ -4228,7 +4413,7 @@ function displayConflictsNetwork() {
                 
                 tooltip.html(`
                     <div style="font-weight: 600; margin-bottom: 4px;">🏛️ Party-List Connection</div>
-                    <div style="font-size: 13px; margin-bottom: 2px;">${d.partyListInfo.party_full_name || d.partyListInfo.party_name}</div>
+                    <div style="font-size: 13px; margin-bottom: 2px;">${d.partyListInfo.party_name || d.partyListInfo.party_full_name}</div>
                     <div style="font-size: 11px; color: #f3e8ff;">${d.partyListInfo.relationship_type || 'Party-List Membership'}</div>
                     ${linkDetails}
                 `);
@@ -4257,9 +4442,10 @@ function displayConflictsNetwork() {
                     if (d.isContractorLink || (d.contractorInfo && d.contractorInfo.contractor_name)) {
                         return 2.5;
                     }
-                    if (d.isPartyListLink || (d.partyListInfo && d.partyListInfo.party_name)) {
+                    if (d.isPartyListLink) {
                         return 2.5;
                     }
+                    // Regular links should have normal stroke width
                     return 1.5;
                 })
                 .attr('stroke-opacity', 0.7);
@@ -4284,9 +4470,8 @@ function displayConflictsNetwork() {
                 return d.isConnector ? 12 : 30; // Larger for contractor-connected nodes
             }
             // Make party-list-connected nodes larger and more visible
-            if (d.partyListInfo && d.partyListInfo.party_name) {
-                return d.isConnector ? 12 : 30; // Larger for party-list-connected nodes
-            }
+            // Don't make person nodes larger just because they're connected via party-list
+            // Only party-list organization nodes themselves are larger
             return d.isConnector ? 10 : 25;
         })
         .attr('fill', d => {
@@ -4317,10 +4502,8 @@ function displayConflictsNetwork() {
                     const contractorName = d.contractorInfo.contractor_name;
                     return contractorColors[contractorName] || '#DC2626'; // Default red
                 }
-                // Highlight connector nodes that are part of party-list chains
-                if (d.partyListInfo && d.partyListInfo.party_name) {
-                    return '#9333EA'; // Purple for party-list-connected connectors
-                }
+                // Don't color connector nodes purple just because they're in party-list chains
+                // They should use regular colors
                 return '#6c757d'; // Gray for regular connectors
             } else {
                 // Highlight family nodes that are part of contractor chains
@@ -4341,10 +4524,8 @@ function displayConflictsNetwork() {
                     const contractorName = d.contractorInfo.contractor_name;
                     return contractorColors[contractorName] || '#DC2626'; // Default red
                 }
-                // Highlight family nodes that are part of party-list chains
-                if (d.partyListInfo && d.partyListInfo.party_name) {
-                    return '#9333EA'; // Purple for party-list-connected nodes
-                }
+                // Don't color family nodes purple just because they're in party-list chains
+                // They should use regular colors
                 const colors = ['#059669', '#7C3AED', '#D97706', '#DB2777', '#0891B2', '#CA8A04', '#EC4899'];
                 return colors[d.chainIndex % colors.length];
             }
@@ -4363,9 +4544,7 @@ function displayConflictsNetwork() {
                 return '#FEE2E2'; // Light red border
             }
             // Add distinctive border for party-list-connected nodes
-            if (d.partyListInfo && d.partyListInfo.party_name) {
-                return '#F3E8FF'; // Light purple border
-            }
+            // Don't add purple border to person nodes just because they're connected via party-list
             return '#fff';
         })
         .attr('stroke-width', d => {
@@ -4378,9 +4557,7 @@ function displayConflictsNetwork() {
             if (d.contractorInfo && d.contractorInfo.contractor_name) {
                 return d.isConnector ? 2 : 4; // Thicker border for contractor-connected nodes
             }
-            if (d.partyListInfo && d.partyListInfo.party_name) {
-                return d.isConnector ? 2 : 4; // Thicker border for party-list-connected nodes
-            }
+            // Don't add thicker border to person nodes just because they're connected via party-list
             return d.isConnector ? 1 : 3;
         })
         .attr('stroke-dasharray', d => {
@@ -4397,9 +4574,7 @@ function displayConflictsNetwork() {
                 return '5,2';
             }
             // Add dashed border for party-list-connected nodes to make them stand out
-            if (d.partyListInfo && d.partyListInfo.party_name) {
-                return '5,2';
-            }
+            // Don't add dashed border to person nodes just because they're connected via party-list
             return '0';
         })
         .attr('filter', d => {
@@ -4704,16 +4879,57 @@ function displayConflictsTable() {
 
 function setupConflictsFilters() {
     // Set up filter change listeners for automatic updates
-    const chainLengthFilter = document.getElementById('chainLengthFilter');
+    const chainLengthMinFilter = document.getElementById('chainLengthMinFilter');
+    const chainLengthMaxFilter = document.getElementById('chainLengthMaxFilter');
     const maxChainsFilter = document.getElementById('maxChainsFilter');
-    const contractorOnlyFilter = document.getElementById('contractorOnlyFilter');
     const rowsPerPage = document.getElementById('conflictsRowsPerPage');
     const prevBtn = document.getElementById('conflictsPrevPage');
     const nextBtn = document.getElementById('conflictsNextPage');
     
-    if (chainLengthFilter) {
-        chainLengthFilter.addEventListener('change', function() {
-            console.log('🔧 Constellation stars filter changed to:', this.value);
+    // Function to validate and update max filter options
+    function updateMaxFilterOptions() {
+        if (!chainLengthMinFilter || !chainLengthMaxFilter) return;
+        
+        const minValue = parseInt(chainLengthMinFilter.value);
+        const maxOptions = [2, 3, 4, 5, 6, 7];
+        const currentMaxValue = parseInt(chainLengthMaxFilter.value);
+        
+        // Update max filter to only show values >= min
+        chainLengthMaxFilter.innerHTML = '';
+        maxOptions.forEach(val => {
+            if (val >= minValue) {
+                const option = document.createElement('option');
+                option.value = val;
+                option.textContent = val === 7 ? '7+' : val;
+                if ((val === currentMaxValue && val >= minValue) || (val === 7 && currentMaxValue > 7 && minValue <= 7)) {
+                    option.selected = true;
+                } else if (val === Math.max(...maxOptions.filter(v => v >= minValue)) && !chainLengthMaxFilter.querySelector('option[selected]')) {
+                    option.selected = true;
+                }
+                chainLengthMaxFilter.appendChild(option);
+            }
+        });
+        
+        // If current max < min, set max to min or the smallest available option >= min
+        const newMaxValue = parseInt(chainLengthMaxFilter.value);
+        if (newMaxValue < minValue) {
+            const smallestValid = Math.min(...maxOptions.filter(v => v >= minValue));
+            chainLengthMaxFilter.value = smallestValid;
+        }
+    }
+    
+    // Initialize max filter options on page load
+    if (chainLengthMinFilter && chainLengthMaxFilter) {
+        updateMaxFilterOptions();
+        
+        chainLengthMinFilter.addEventListener('change', function() {
+            console.log('🔧 Constellation stars min filter changed to:', this.value);
+            updateMaxFilterOptions();
+            loadConflictsData();
+        });
+        
+        chainLengthMaxFilter.addEventListener('change', function() {
+            console.log('🔧 Constellation stars max filter changed to:', this.value);
             loadConflictsData();
         });
     }
@@ -4765,8 +4981,12 @@ function setupConflictsFilters() {
 }
 
 function clearConflictsFilters() {
-    document.getElementById('chainLengthFilter').value = '2';
+    document.getElementById('chainLengthMinFilter').value = '2';
+    document.getElementById('chainLengthMaxFilter').value = '7';
     document.getElementById('maxChainsFilter').value = '25';
+    // Reset connection type to "all"
+    const allRadio = document.querySelector('input[name="connectionTypeFilter"][value="all"]');
+    if (allRadio) allRadio.checked = true;
     conflictsData = [];
     fullConflictsData = [];
     document.getElementById('conflictsNetwork').innerHTML = `

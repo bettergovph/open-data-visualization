@@ -1,0 +1,37 @@
+NAME VARIATION PATTERNS FOR REVIEW
+================================================================================
+
+Based on Marcos/Romualdez corrections, watch for:
+
+  • Nickname variations (Bongbong → Ferdinand Jr.)
+  • Middle initial variations (Ferdinand R. Marcos → Ferdinand Marcos)
+  • Jr./Sr. suffix inconsistencies
+  • Misspellings (Imeelda → Imelda)
+  • Shortened versions (Ime → Imee)
+
+
+SQL Query to Find Similar Issues:
+
+
+-- Find names with Jr. but no Sr.
+SELECT last_name, COUNT(*) as jr_count
+FROM political_dynasties
+WHERE suffix = 'JR.' OR first_name LIKE '%JR%' OR last_name LIKE '%JR%'
+GROUP BY last_name
+HAVING COUNT(*) > 1;
+
+-- Find names with nickname variations (common Filipino nicknames)
+SELECT first_name, last_name, COUNT(*) as count
+FROM political_dynasties  
+WHERE first_name IN ('BONGBONG', 'BONG', 'NOYNOY', 'NENE', 'BING', 'JUN', 'BOY')
+GROUP BY first_name, last_name
+HAVING COUNT(*) > 0;
+
+-- Find potential misspellings (very similar names)
+SELECT p1.first_name as name1, p2.first_name as name2, p1.last_name
+FROM political_dynasties p1
+JOIN political_dynasties p2 ON p1.last_name = p2.last_name 
+WHERE p1.id < p2.id
+  AND levenshtein(p1.first_name, p2.first_name) <= 2
+  AND p1.first_name != p2.first_name
+LIMIT 50;
