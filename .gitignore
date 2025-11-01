@@ -52,3 +52,26 @@ PERPLEXITY_REQUERY_COMPARISON_*.txt
 database/dynasty_dump.sql
 scripts/static/data/relationship_chains_cache.json
 static/data/relationship_chains_cache.json
+
+# HuggingFace integration outputs
+chroma_philippine_data/
+huggingface_potential_relationships.txt
+huggingface_integration_report.txt
+
+# HuggingFace datasets cache (can be very large - multiple GB)
+.cache/
+databases/*.parquet
+databases/persons.parquet
+databases/memberships.parquet
+databases/documents.parquet
+databases/data.duckdb
+datasets/
+
+# HuggingFace hub cache
+.huggingface/
+huggingface_hub/
+
+# Integration logs and error files
+*_integration.log
+*_errors.log
+huggingface_*.log
