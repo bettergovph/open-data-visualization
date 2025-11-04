@@ -4679,12 +4679,16 @@ function displayConflictsNetwork() {
                         uniquePeopleMap.set(p.name, p);
                     }
                 });
-                const uniquePeople = Array.from(uniquePeopleMap.values());
+                
+                // Filter to only show people who have a companyRole (owners/officers)
+                // People without companyRole are connected via family relationships, not as company officers
+                const uniquePeople = Array.from(uniquePeopleMap.values())
+                    .filter(p => p.companyRole !== null && p.companyRole !== undefined);
                 
                 let peopleList = '';
                 if (uniquePeople.length > 0) {
                     peopleList = '<div style="margin-top: 8px; padding-top: 8px; border-top: 1px solid rgba(255,255,255,0.2);">';
-                    peopleList += '<div style="font-weight: 600; margin-bottom: 4px; color: #FCD34D;">Connected People:</div>';
+                    peopleList += '<div style="font-weight: 600; margin-bottom: 4px; color: #FCD34D;">Connected People (Owners/Officers):</div>';
                     uniquePeople.slice(0, 10).forEach(person => {
                         // Top: Political Position (e.g., "Mayor"), Bottom: Company Role (e.g., "President")
                         peopleList += `<div style="font-size: 11px; margin-bottom: 4px; padding-bottom: 3px; border-bottom: 1px solid rgba(255,255,255,0.1);">`;
@@ -4694,9 +4698,6 @@ function displayConflictsNetwork() {
                         }
                         if (person.companyRole) {
                             peopleList += `<div style="color: #d1d5db; font-size: 9px; margin-top: 1px; font-style: italic;">Company Role: ${person.companyRole}</div>`;
-                        } else {
-                            // Show placeholder if no company role is available
-                            peopleList += `<div style="color: #9ca3af; font-size: 9px; margin-top: 1px; font-style: italic;">Company Role: Not available</div>`;
                         }
                         peopleList += `</div>`;
                     });

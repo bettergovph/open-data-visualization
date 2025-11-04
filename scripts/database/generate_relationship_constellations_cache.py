@@ -869,8 +869,35 @@ async def generate_relationship_constellations_cache():
             # Add contractor info for contractor-mediated connections
             if 'contractor_name' in chain and chain['contractor_name']:
                 # Get company roles for start and end persons
-                start_role = chain.get('start_company_role')
-                end_role = chain.get('end_company_role')
+                # Only set roles if the person is actually in contractor_dynasty_matches
+                start_role = None
+                end_role = None
+                
+                # Check if start_person is in contractor_dynasty_matches for this contractor
+                if path_details and len(path_details) > 0:
+                    start_person_id = path_details[0].get('id')
+                    if start_person_id:
+                        start_role_db = await conn.fetchval("""
+                            SELECT role FROM contractor_dynasty_matches
+                            WHERE company_name = $1
+                              AND dynasty_first_name = (SELECT first_name FROM political_dynasties WHERE id = $2)
+                              AND dynasty_last_name = (SELECT last_name FROM political_dynasties WHERE id = $2)
+                            LIMIT 1
+                        """, chain['contractor_name'], start_person_id)
+                        start_role = start_role_db
+                
+                # Check if end_person is in contractor_dynasty_matches for this contractor
+                if path_details and len(path_details) > 0:
+                    end_person_id = path_details[-1].get('id')
+                    if end_person_id:
+                        end_role_db = await conn.fetchval("""
+                            SELECT role FROM contractor_dynasty_matches
+                            WHERE company_name = $1
+                              AND dynasty_first_name = (SELECT first_name FROM political_dynasties WHERE id = $2)
+                              AND dynasty_last_name = (SELECT last_name FROM political_dynasties WHERE id = $2)
+                            LIMIT 1
+                        """, chain['contractor_name'], end_person_id)
+                        end_role = end_role_db
                 
                 chain_data["contractor_connection"] = {
                     "contractor_name": chain['contractor_name'],
