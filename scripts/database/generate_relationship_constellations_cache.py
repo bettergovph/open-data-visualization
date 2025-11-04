@@ -66,6 +66,8 @@ async def generate_relationship_constellations_cache():
             OR p.party LIKE '%' || pl.code || ', ' || UPPER(pl.party_name) || '%'
             OR (p.party LIKE '%' || UPPER(pl.party_name) || '%' AND p.position LIKE '%PARTY-LIST%')
             OR (p.party LIKE '%' || UPPER(pl.party_name) || '%' AND p.position LIKE '%PARTY LIST%')
+            OR (p.position LIKE '%' || UPPER(pl.party_name) || '%PARTY-LIST%')
+            OR (p.position LIKE '%' || UPPER(pl.party_name) || '%PARTY LIST%')
         )
         WHERE p.id IS NOT NULL
           AND pl.party_list_number IS NOT NULL  -- Only include actual party-list entries (numeric codes)
@@ -91,10 +93,45 @@ async def generate_relationship_constellations_cache():
                 party_to_members[party_key] = []
             party_to_members[party_key].append(person_id)
         
-        # TREE-BASED BFS APPROACH: Build chains level by level like a tree
-        # Level 0: Start with direct relationships (only in one direction: person_id < related_person_id)
-        print("\n🌳 Building relationship tree level by level...", flush=True)
+        # Get contractor connections for contractor extensions
+        contractor_members_query = """
+        SELECT DISTINCT
+            p.id as person_id,
+            cdm.company_name as contractor_name,
+            cdm.role as contractor_role
+        FROM contractor_dynasty_matches cdm
+        JOIN political_dynasties p ON (
+            (UPPER(TRIM(p.first_name)) = UPPER(TRIM(cdm.dynasty_first_name))
+             AND UPPER(TRIM(p.last_name)) = UPPER(TRIM(cdm.dynasty_last_name)))
+            OR
+            (UPPER(p.first_name) LIKE '%' || UPPER(TRIM(cdm.dynasty_first_name)) || '%'
+             AND UPPER(TRIM(p.last_name)) = UPPER(TRIM(cdm.dynasty_last_name)))
+        )
+        WHERE p.id IS NOT NULL
+        """
+        contractor_members_data = await conn.fetch(contractor_members_query)
+        print(f"📊 Found {len(contractor_members_data)} contractor connections", flush=True)
         
+        # Build contractor lookup maps
+        person_to_contractors = {}  # person_id -> list of contractor_name
+        contractor_to_members = {}  # contractor_name -> list of person_ids
+        
+        for cm in contractor_members_data:
+            person_id = cm['person_id']
+            contractor_name = cm['contractor_name']
+            
+            if person_id not in person_to_contractors:
+                person_to_contractors[person_id] = []
+            person_to_contractors[person_id].append(contractor_name)
+            
+            if contractor_name not in contractor_to_members:
+                contractor_to_members[contractor_name] = []
+            contractor_to_members[contractor_name].append(person_id)
+        
+        # RECURSIVE TRAVERSAL APPROACH: Recursively extend chains until we hit duplicate nodes
+        print("\n🌳 Building relationship tree recursively...", flush=True)
+        
+        # Get all starting relationships (level 0)
         level0_query = """
         SELECT 
             r.person_id as start_person,
@@ -144,286 +181,246 @@ async def generate_relationship_constellations_cache():
         )
         """
         
-        current_level = await conn.fetch(level0_query)
-        all_chains = list(current_level)
+        initial_chains = await conn.fetch(level0_query)
+        all_chains = []
+        seen_paths = set()
         
-        # Track globally rendered nodes - nodes we've already extended through
-        # Once a node is rendered, we stop any chain that would re-render it
-        rendered_nodes = set()
+        # Global list of nodes we've encountered (leaf nodes) - stop recursion when we hit these
+        global_rendered_nodes = set()
         
-        # Track rendered party-lists - party-lists we've already used as extension points
-        # This prevents duplicate party-list nodes in the visualization
-        rendered_party_lists = set()  # Set of (party_list_number, party_name) tuples
+        # Track rendered party-lists and contractors
+        rendered_party_lists = set()
+        rendered_contractors = set()
         
-        # Queue of chains to extend (DFS approach - extend each chain as long as possible)
-        # We'll process chains depth-first, prioritizing longer chains
-        chains_to_extend = list(current_level)  # Start with level 0 chains
+        print(f"  Starting with {len(initial_chains)} initial chains", flush=True)
         
-        # Sort chains by length (longer first) to prioritize extending longest chains
-        chains_to_extend.sort(key=lambda c: len(c['path_string'].split(',')))
-        
-        print(f"  Level 0: {len(current_level)} chains", flush=True)
-        
-        max_depth = 6
-        seen_paths = {c['path_string'] for c in all_chains}
-        
-        # Track chains at start of each iteration to identify newly created ones
-        chains_at_start_of_iteration = {c['path_string'] for c in all_chains}
-        
-        # Process chains depth-first: extend each chain as far as possible before moving to next
-        # Group chains by depth and process all chains at depth N before moving to depth N+1
-        from collections import defaultdict
-        
-        while chains_to_extend:
-            # Update tracking at start of iteration
-            chains_at_start_of_iteration = {c['path_string'] for c in all_chains}
-            # Group chains by depth
-            chains_by_depth = defaultdict(list)
-            for chain in chains_to_extend:
-                depth = len(chain['path_string'].split(',')) - 1
-                if depth < max_depth:
-                    chains_by_depth[depth].append(chain)
+        async def recursive_extend(chain, depth=0):
+            """Recursively extend a chain until we hit a duplicate node (leaf)"""
+            path = [int(x) for x in chain['path_string'].split(',')]
+            last_person = path[-1]
+            visited_in_chain = set(path)
             
-            if not chains_by_depth:
-                break
+            # Add this chain to results (if not already seen)
+            # This ensures ALL chains (including all 2-node chains) are captured
+            if chain['path_string'] not in seen_paths:
+                all_chains.append(chain)
+                seen_paths.add(chain['path_string'])
             
-            # Process each depth level, starting with the deepest
-            for current_depth in sorted(chains_by_depth.keys(), reverse=True):
-                level_chains = chains_by_depth[current_depth]
+            # STOPPING CONDITION: If the last node is already in global_rendered_nodes, stop recursion
+            # This means we've reached a node that was already extended from by another chain
+            # BUT we've already added the chain ending at this node, so we've captured it
+            if last_person in global_rendered_nodes:
+                # This is a duplicate leaf - we've reached a node already processed
+                return
+            
+            # Mark this node as processed (added to global list) - future chains will stop here
+            # We mark it BEFORE extending so that if multiple chains reach this node,
+            # only the first one will extend from it, but all chains ending at it are captured
+            global_rendered_nodes.add(last_person)
+            
+            # Extension type 1: Direct relationships
+            ext1_query = """
+            SELECT 
+                r.related_person_id as next_person_id,
+                r.relationship_description,
+                p2.last_name,
+                p2.first_name,
+                p2.position
+            FROM relationships r
+            JOIN political_dynasties p2 ON r.related_person_id = p2.id
+            WHERE r.person_id = $1
+              AND r.related_person_id != ALL($2::int[])
+              AND (
+                  UPPER(p2.last_name) != UPPER($3)
+                  OR
+                  (UPPER(p2.last_name) = UPPER($3) AND EXISTS (
+                      SELECT 1 FROM relationships r2
+                      JOIN political_dynasties p3 ON (r2.person_id = p3.id AND r2.related_person_id = r.related_person_id)
+                               OR (r2.related_person_id = p3.id AND r2.person_id = r.related_person_id)
+                      WHERE (r2.person_id = r.related_person_id OR r2.related_person_id = r.related_person_id)
+                        AND UPPER(p3.last_name) != UPPER($3)
+                  ))
+              )
+            
+            UNION ALL
+            
+            SELECT 
+                r.person_id as next_person_id,
+                r.relationship_description,
+                p1.last_name,
+                p1.first_name,
+                p1.position
+            FROM relationships r
+            JOIN political_dynasties p1 ON r.person_id = p1.id
+            WHERE r.related_person_id = $1
+              AND r.person_id != ALL($2::int[])
+              AND (
+                  UPPER(p1.last_name) != UPPER($3)
+                  OR
+                  (UPPER(p1.last_name) = UPPER($3) AND EXISTS (
+                      SELECT 1 FROM relationships r2
+                      JOIN political_dynasties p3 ON (r2.person_id = p3.id AND r2.related_person_id = r.person_id)
+                               OR (r2.related_person_id = p3.id AND r2.person_id = r.person_id)
+                      WHERE (r2.person_id = r.person_id OR r2.related_person_id = r.person_id)
+                        AND UPPER(p3.last_name) != UPPER($3)
+                  ))
+              )
+            """
+            
+            extensions = await conn.fetch(ext1_query, last_person, path, chain['start_surname'])
+            
+            for ext in extensions:
+                next_person_id = ext['next_person_id']
                 
-                # Sort by length (longest first) to prioritize extending longest chains
-                level_chains.sort(key=lambda c: len(c['path_string'].split(',')), reverse=True)
+                # Skip if already in current path (avoid cycles)
+                if next_person_id in visited_in_chain:
+                    continue
                 
-                print(f"  Depth {current_depth}: Processing {len(level_chains)} chains...", flush=True)
-                nodes_rendered_this_iteration = set()
+                new_path = path + [next_person_id]
+                new_path_string = ','.join(str(p) for p in new_path)
                 
-                # Process each chain individually - extend it as far as possible
-                for chain in level_chains:
-                    path = [int(x) for x in chain['path_string'].split(',')]
-                    last_person = path[-1]
-                    visited_in_chain = set(path)
+                if new_path_string not in seen_paths:
+                    new_chain = {
+                        'start_person': chain['start_person'],
+                        'end_person': next_person_id,
+                        'path_string': new_path_string,
+                        'relationship_string': chain['relationship_string'] + ',' + ext['relationship_description'],
+                        'chain_length': len(new_path),
+                        'start_surname': chain['start_surname'],
+                        'end_surname': ext['last_name'],
+                        'start_first_name': chain['start_first_name'],
+                        'start_last_name': chain['start_last_name'],
+                        'start_position': chain['start_position'],
+                        'end_first_name': ext['first_name'],
+                        'end_last_name': ext['last_name'],
+                        'end_position': ext['position'],
+                        'party_code': chain.get('party_code'),
+                        'party_list_number': chain.get('party_list_number'),
+                        'party_name': chain.get('party_name'),
+                        'party_full_name': chain.get('party_full_name')
+                    }
                     
-                    # Skip if last node is already rendered
-                    if last_person in rendered_nodes:
+                    # Recursively extend this new chain
+                    await recursive_extend(new_chain, depth + 1)
+            
+            # Extension type 2: Party-list connections
+            if last_person in person_to_parties:
+                for party_key in person_to_parties[last_person]:
+                    if party_key in rendered_party_lists:
                         continue
                     
-                    extensions_found = False
-                    party_list_extensions_found = False
+                    party_list_number, party_name = party_key
+                    party_full_name = f"{party_list_number}, {party_name}" if party_list_number else party_name
                     
-                    # Extension type 1: Direct relationships (both directions)
-                    # Allow same-family connections if the target person connects to different families
-                    ext1_query = """
-                    SELECT 
-                        r.related_person_id as next_person_id,
-                        r.relationship_description,
-                        p2.last_name,
-                        p2.first_name,
-                        p2.position
-                    FROM relationships r
-                    JOIN political_dynasties p2 ON r.related_person_id = p2.id
-                    WHERE r.person_id = $1
-                      AND r.related_person_id != ALL($2::int[])  -- Not in current chain path
-                      AND r.related_person_id NOT IN (SELECT unnest($3::int[]))  -- Not already rendered
-                      AND (
-                          -- Different family (original logic) - case-insensitive
-                          UPPER(p2.last_name) != UPPER($4)
-                          OR
-                          -- Same family BUT the target person connects to different families - case-insensitive
-                          (UPPER(p2.last_name) = UPPER($4) AND EXISTS (
-                              SELECT 1 FROM relationships r2
-                              JOIN political_dynasties p3 ON (r2.person_id = p3.id AND r2.related_person_id = r.related_person_id)
-                                       OR (r2.related_person_id = p3.id AND r2.person_id = r.related_person_id)
-                              WHERE (r2.person_id = r.related_person_id OR r2.related_person_id = r.related_person_id)
-                                AND UPPER(p3.last_name) != UPPER($4)
-                          ))
-                      )
-                    
-                    UNION ALL
-                    
-                    SELECT 
-                        r.person_id as next_person_id,
-                        r.relationship_description,
-                        p1.last_name,
-                        p1.first_name,
-                        p1.position
-                    FROM relationships r
-                    JOIN political_dynasties p1 ON r.person_id = p1.id
-                    WHERE r.related_person_id = $1
-                      AND r.person_id != ALL($2::int[])  -- Not in current chain path
-                      AND r.person_id NOT IN (SELECT unnest($3::int[]))  -- Not already rendered
-                      AND (
-                          -- Different family (original logic)
-                          UPPER(p1.last_name) != UPPER($4)
-                          OR
-                          -- Same family BUT the target person connects to different families
-                          (UPPER(p1.last_name) = UPPER($4) AND EXISTS (
-                              SELECT 1 FROM relationships r2
-                              JOIN political_dynasties p3 ON (r2.person_id = p3.id AND r2.related_person_id = r.person_id)
-                                       OR (r2.related_person_id = p3.id AND r2.person_id = r.person_id)
-                              WHERE (r2.person_id = r.person_id OR r2.related_person_id = r.person_id)
-                                AND UPPER(p3.last_name) != UPPER($4)
-                          ))
-                      )
-                    """
-                    
-                    extensions = await conn.fetch(ext1_query, last_person, path, list(rendered_nodes), chain['start_surname'])
-                    
-                    for ext in extensions:
-                        if ext['next_person_id'] in rendered_nodes:
+                    for other_member_id in party_to_members[party_key]:
+                        if other_member_id in visited_in_chain:
                             continue
                         
-                        new_path = path + [ext['next_person_id']]
+                        other_person = await conn.fetchrow("""
+                            SELECT last_name, first_name, position 
+                            FROM political_dynasties 
+                            WHERE id = $1
+                        """, other_member_id)
+                        
+                        if not other_person:
+                            continue
+                        
+                        new_path = path + [other_member_id]
                         new_path_string = ','.join(str(p) for p in new_path)
                         
                         if new_path_string not in seen_paths:
                             new_chain = {
                                 'start_person': chain['start_person'],
-                                'end_person': ext['next_person_id'],
+                                'end_person': other_member_id,
                                 'path_string': new_path_string,
-                                'relationship_string': chain['relationship_string'] + ',' + ext['relationship_description'],
+                                'relationship_string': chain['relationship_string'] + ',Connected via ' + party_name,
                                 'chain_length': len(new_path),
                                 'start_surname': chain['start_surname'],
-                                'end_surname': ext['last_name'],
+                                'end_surname': other_person['last_name'],
                                 'start_first_name': chain['start_first_name'],
                                 'start_last_name': chain['start_last_name'],
                                 'start_position': chain['start_position'],
-                                'end_first_name': ext['first_name'],
-                                'end_last_name': ext['last_name'],
-                                'end_position': ext['position'],
-                                # Preserve party-list information if this chain was extended via party-list
-                                'party_code': chain.get('party_code'),
-                                'party_list_number': chain.get('party_list_number'),
-                                'party_name': chain.get('party_name'),
-                                'party_full_name': chain.get('party_full_name')
+                                'end_first_name': other_person['first_name'],
+                                'end_last_name': other_person['last_name'],
+                                'end_position': other_person['position'],
+                                'party_code': str(party_list_number) if party_list_number else None,
+                                'party_list_number': party_list_number,
+                                'party_name': party_name,
+                                'party_full_name': party_full_name
                             }
-                            all_chains.append(new_chain)
-                            seen_paths.add(new_path_string)
-                            chains_to_extend.append(new_chain)  # Continue extending this chain
-                            extensions_found = True
+                            
+                            # Recursively extend this new chain
+                            await recursive_extend(new_chain, depth + 1)
+            
+            # Extension type 3: Contractor connections
+            if last_person in person_to_contractors:
+                for contractor_name in person_to_contractors[last_person]:
+                    # Note: We don't skip contractors that have been rendered
+                    # This allows multiple chains to extend via the same contractor
+                    # (similar to how we handle direct relationships)
                     
-                    # Extension type 2: Party-list connections
-                    # Check party-list extensions BEFORE terminating the node
-                    # This allows chains to extend via party-list even when direct relationships are exhausted
-                    if last_person in person_to_parties:
-                        for party_key in person_to_parties[last_person]:
-                            party_list_number, party_name = party_key
-                            
-                            # Skip if this party-list was already rendered (to avoid duplicate party-list nodes)
-                            if party_key in rendered_party_lists:
-                                continue
-                            
-                            party_full_name = f"{party_list_number}, {party_name}" if party_list_number else party_name
-                            
-                            # Try to extend via party-list members
-                            # Allow extensions even if other_member is same family (since party-list can connect families)
-                            for other_member_id in party_to_members[party_key]:
-                                if other_member_id in rendered_nodes or other_member_id in visited_in_chain:
-                                    continue
-                                
-                                other_person = await conn.fetchrow("""
-                                    SELECT last_name, first_name, position 
-                                    FROM political_dynasties 
-                                    WHERE id = $1
-                                """, other_member_id)
-                                
-                                if not other_person:
-                                    continue
-                                
-                                # Allow same-family connections via party-list (they can still extend the chain)
-                                # Only require different families if we want to strictly enforce inter-family connections
-                                # But for party-list extensions, we allow same-family since party-list connects to different families overall
-                                new_path = path + [other_member_id]
-                                new_path_string = ','.join(str(p) for p in new_path)
-                                
-                                if new_path_string not in seen_paths:
-                                    new_chain = {
-                                        'start_person': chain['start_person'],
-                                        'end_person': other_member_id,
-                                        'path_string': new_path_string,
-                                        'relationship_string': chain['relationship_string'] + ',Connected via ' + party_name,
-                                        'chain_length': len(new_path),
-                                        'start_surname': chain['start_surname'],
-                                        'end_surname': other_person['last_name'],
-                                        'start_first_name': chain['start_first_name'],
-                                        'start_last_name': chain['start_last_name'],
-                                        'start_position': chain['start_position'],
-                                        'end_first_name': other_person['first_name'],
-                                        'end_last_name': other_person['last_name'],
-                                        'end_position': other_person['position'],
-                                        'party_code': str(party_list_number) if party_list_number else None,
-                                        'party_list_number': party_list_number,
-                                        'party_name': party_name,
-                                        'party_full_name': party_full_name
-                                    }
-                                    all_chains.append(new_chain)
-                                    seen_paths.add(new_path_string)
-                                    chains_to_extend.append(new_chain)  # Continue extending this chain via direct relationships
-                                    party_list_extensions_found = True
-                                    extensions_found = True
-                                    
-                                    # IMPORTANT: After extending via party-list, mark the party-list connection as established
-                                    # so we can continue extending from the new member to non-party-list persons via direct relationships
-                                    # The extension logic will handle this in the next iteration
+                    # Get contractor role for the current person
+                    current_person_role = await conn.fetchval("""
+                        SELECT role FROM contractor_dynasty_matches
+                        WHERE company_name = $1
+                          AND dynasty_first_name = (SELECT first_name FROM political_dynasties WHERE id = $2)
+                          AND dynasty_last_name = (SELECT last_name FROM political_dynasties WHERE id = $2)
+                        LIMIT 1
+                    """, contractor_name, last_person)
                     
-                    # Mark node as rendered only if we couldn't extend further via direct relationships OR party-list
-                    # This ensures we try all possible extensions (direct and party-list) before giving up on a node
-                    if not extensions_found:
-                        nodes_rendered_this_iteration.add(last_person)
+                    for other_member_id in contractor_to_members[contractor_name]:
+                        if other_member_id in visited_in_chain:
+                            continue
                         
-                        # Mark party-lists as rendered if we tried them but found no extensions
-                        # (This prevents trying the same party-list again from the same person)
-                        if last_person in person_to_parties:
-                            for party_key in person_to_parties[last_person]:
-                                # Only mark as rendered if we actually checked it (not if it was already rendered)
-                                if party_key not in rendered_party_lists:
-                                    # Check if this party-list had any valid extensions
-                                    party_list_number, party_name = party_key
-                                    had_valid_extensions = False
-                                    for other_member_id in party_to_members[party_key]:
-                                        if other_member_id not in rendered_nodes and other_member_id not in visited_in_chain:
-                                            other_person = await conn.fetchrow("""
-                                                SELECT last_name FROM political_dynasties WHERE id = $1
-                                            """, other_member_id)
-                                            if other_person:
-                                                new_path_test = path + [other_member_id]
-                                                new_path_string_test = ','.join(str(p) for p in new_path_test)
-                                                if new_path_string_test not in seen_paths:
-                                                    had_valid_extensions = True
-                                                    break
-                                    
-                                    # Only mark as rendered if no valid extensions were found
-                                    if not had_valid_extensions:
-                                        rendered_party_lists.add(party_key)
-            
-                # Mark nodes as rendered after processing all chains at this depth
-                rendered_nodes.update(nodes_rendered_this_iteration)
-                
-                chains_at_next_depth = len([c for c in all_chains if len(c['path_string'].split(',')) == current_depth + 2])
-                print(f"    Added {chains_at_next_depth} new chains, {len(nodes_rendered_this_iteration)} nodes exhausted (total chains: {len(all_chains)}, total rendered: {len(rendered_nodes)})", flush=True)
-            
-            # Update chains_to_extend for next iteration - only get newly created chains
-            # that can still be extended (haven't reached max_depth and end node not rendered)
-            chains_at_end_of_iteration = {c['path_string'] for c in all_chains}
-            chains_to_extend = []
-            for chain in all_chains:
-                # Skip if this chain existed at the start of this iteration (already processed)
-                if chain['path_string'] in chains_at_start_of_iteration:
-                    continue
-                    
-                path = chain['path_string'].split(',')
-                depth = len(path) - 1
-                end_node = int(path[-1])
-                
-                # Only include newly created chains that can still be extended
-                if depth < max_depth and end_node not in rendered_nodes:
-                    chains_to_extend.append(chain)
-            
-            # Remove duplicates by path_string
-            seen = set()
-            chains_to_extend = [c for c in chains_to_extend if c['path_string'] not in seen and not seen.add(c['path_string'])]
-            
-            # Update tracking for next iteration
-            chains_at_start_of_iteration = chains_at_end_of_iteration
+                        other_person = await conn.fetchrow("""
+                            SELECT last_name, first_name, position 
+                            FROM political_dynasties 
+                            WHERE id = $1
+                        """, other_member_id)
+                        
+                        if not other_person:
+                            continue
+                        
+                        # Get contractor role for the other person
+                        other_person_role = await conn.fetchval("""
+                            SELECT role FROM contractor_dynasty_matches
+                            WHERE company_name = $1
+                              AND dynasty_first_name = (SELECT first_name FROM political_dynasties WHERE id = $2)
+                              AND dynasty_last_name = (SELECT last_name FROM political_dynasties WHERE id = $2)
+                            LIMIT 1
+                        """, contractor_name, other_member_id)
+                        
+                        new_path = path + [other_member_id]
+                        new_path_string = ','.join(str(p) for p in new_path)
+                        
+                        if new_path_string not in seen_paths:
+                            new_chain = {
+                                'start_person': chain['start_person'],
+                                'end_person': other_member_id,
+                                'path_string': new_path_string,
+                                'relationship_string': chain['relationship_string'] + ',Connected via ' + contractor_name,
+                                'chain_length': len(new_path),
+                                'start_surname': chain['start_surname'],
+                                'end_surname': other_person['last_name'],
+                                'start_first_name': chain['start_first_name'],
+                                'start_last_name': chain['start_last_name'],
+                                'start_position': chain['start_position'],
+                                'end_first_name': other_person['first_name'],
+                                'end_last_name': other_person['last_name'],
+                                'end_position': other_person['position'],
+                                'contractor_name': contractor_name,
+                                'start_company_role': current_person_role,
+                                'end_company_role': other_person_role
+                            }
+                            
+                            # Recursively extend this new chain
+                            await recursive_extend(new_chain, depth + 1)
+        
+        # Start recursive traversal from each initial chain
+        for i, initial_chain in enumerate(initial_chains):
+            if (i + 1) % 50 == 0:
+                print(f"  Processing chain {i+1}/{len(initial_chains)} (found {len(all_chains)} chains so far, {len(global_rendered_nodes)} nodes rendered)...", flush=True)
+            await recursive_extend(initial_chain)
         
         chains = all_chains
         end_time = datetime.datetime.now()

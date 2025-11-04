@@ -858,6 +858,9 @@ function toggleMobileMenu() {
                                             <option value="5">5</option>
                                             <option value="6">6</option>
                                             <option value="7">7</option>
+                                            <option value="8">8</option>
+                                            <option value="9">9</option>
+                                            <option value="10">10</option>
                                         </select>
                                         <span style="font-weight: 600; color: #666;">to</span>
                                         <select id="chainLengthMaxFilter" style="padding: 8px 12px; border: 1px solid #ddd; border-radius: 4px; width: 70px;">
@@ -866,7 +869,10 @@ function toggleMobileMenu() {
                                             <option value="4">4</option>
                                             <option value="5">5</option>
                                             <option value="6">6</option>
-                                            <option value="7" selected>7+</option>
+                                            <option value="7">7</option>
+                                            <option value="8">8</option>
+                                            <option value="9">9</option>
+                                            <option value="10" selected>10+</option>
                                         </select>
                                     </div>
                                 </div>
@@ -3546,8 +3552,8 @@ function loadConflictsData() {
     const maxConstellations = document.getElementById('maxChainsFilter').value; // Actually represents constellations
     const connectionTypeFilter = document.querySelector('input[name="connectionTypeFilter"]:checked')?.value || 'all';
     
-    // Handle "7+" as no upper limit (use 10 which backend treats as unlimited)
-    if (chainLengthMax === 7 || document.getElementById('chainLengthMaxFilter').value === '7+') {
+    // Handle "10+" as no upper limit (use 10 which backend treats as unlimited)
+    if (chainLengthMax === 10 || document.getElementById('chainLengthMaxFilter').value === '10+') {
         chainLengthMax = 10; // Use max allowed value to represent "no limit" (backend treats >= 10 as unlimited)
     }
     
@@ -3839,11 +3845,14 @@ function displayConflictsNetwork() {
     const contractorMap = new Map();
     
     // Helper function to normalize names for deduplication
-    function normalizeNameForDedup(firstName, lastName) {
+    // Note: suffix is included to distinguish Sr. from Jr. (e.g., FERDINAND MARCOS SR vs JR)
+    function normalizeNameForDedup(firstName, lastName, suffix) {
         if (!firstName || !lastName) return '';
         // Remove middle initials, extra spaces, convert to uppercase
         // This helps match "YEDDA ROMUALDEZ" with "YEDDA MARIE K ROMUALDEZ"
-        const normalized = `${firstName} ${lastName}`.toUpperCase()
+        // But keep suffix to distinguish Sr. from Jr.
+        const suffixPart = suffix ? ` ${suffix.toUpperCase().replace(/\./g, '')}` : '';
+        const normalized = `${firstName} ${lastName}${suffixPart}`.toUpperCase()
             .replace(/\b[A-Z]\.\s*/g, ' ')  // Remove single letter initials with dots (K.)
             .replace(/\b[A-Z]\s+/g, ' ')    // Remove standalone single letters (K, M)
             .replace(/\b(MARIE|MA|M)\s+/gi, ' ')  // Remove common middle names
@@ -3909,7 +3918,8 @@ function displayConflictsNetwork() {
         
         chain.path.forEach((person, personIndex) => {
             // Use normalized name as key instead of person.id to deduplicate same person across years/positions
-            const normalizedName = normalizeNameForDedup(person.first_name, person.last_name);
+            // Include suffix to distinguish Sr. from Jr. (e.g., FERDINAND MARCOS SR vs JR)
+            const normalizedName = normalizeNameForDedup(person.first_name, person.last_name, person.suffix);
             const nodeId = normalizedName || person.id; // Fallback to ID if name normalization fails
             
         if (!nodeMap.has(nodeId)) {
@@ -3985,8 +3995,8 @@ function displayConflictsNetwork() {
         for (let i = 0; i < chain.path.length - 1; i++) {
             const sourcePerson = chain.path[i];
             const targetPerson = chain.path[i + 1];
-            const sourceNodeId = normalizeNameForDedup(sourcePerson.first_name, sourcePerson.last_name) || sourcePerson.id;
-            const targetNodeId = normalizeNameForDedup(targetPerson.first_name, targetPerson.last_name) || targetPerson.id;
+            const sourceNodeId = normalizeNameForDedup(sourcePerson.first_name, sourcePerson.last_name, sourcePerson.suffix) || sourcePerson.id;
+            const targetNodeId = normalizeNameForDedup(targetPerson.first_name, targetPerson.last_name, targetPerson.suffix) || targetPerson.id;
             
             links.push({
                 source: sourceNodeId,
@@ -4005,8 +4015,8 @@ function displayConflictsNetwork() {
             const lastPerson = chain.path[chain.path.length - 1];
             
             // Use normalized names for person nodes
-            const firstPersonNodeId = normalizeNameForDedup(firstPerson.first_name, firstPerson.last_name) || firstPerson.id;
-            const lastPersonNodeId = normalizeNameForDedup(lastPerson.first_name, lastPerson.last_name) || lastPerson.id;
+            const firstPersonNodeId = normalizeNameForDedup(firstPerson.first_name, firstPerson.last_name, firstPerson.suffix) || firstPerson.id;
+            const lastPersonNodeId = normalizeNameForDedup(lastPerson.first_name, lastPerson.last_name, lastPerson.suffix) || lastPerson.id;
             
             // Link first person to contractor
             links.push({
@@ -4036,8 +4046,8 @@ function displayConflictsNetwork() {
             const lastPerson = chain.path[chain.path.length - 1];
             
             // Use normalized names for person nodes
-            const firstPersonNodeId = normalizeNameForDedup(firstPerson.first_name, firstPerson.last_name) || firstPerson.id;
-            const lastPersonNodeId = normalizeNameForDedup(lastPerson.first_name, lastPerson.last_name) || lastPerson.id;
+            const firstPersonNodeId = normalizeNameForDedup(firstPerson.first_name, firstPerson.last_name, firstPerson.suffix) || firstPerson.id;
+            const lastPersonNodeId = normalizeNameForDedup(lastPerson.first_name, lastPerson.last_name, lastPerson.suffix) || lastPerson.id;
             
             // Link first person to party-list
             links.push({
@@ -4891,7 +4901,7 @@ function setupConflictsFilters() {
         if (!chainLengthMinFilter || !chainLengthMaxFilter) return;
         
         const minValue = parseInt(chainLengthMinFilter.value);
-        const maxOptions = [2, 3, 4, 5, 6, 7];
+        const maxOptions = [2, 3, 4, 5, 6, 7, 8, 9, 10];
         const currentMaxValue = parseInt(chainLengthMaxFilter.value);
         
         // Update max filter to only show values >= min
@@ -4900,8 +4910,8 @@ function setupConflictsFilters() {
             if (val >= minValue) {
                 const option = document.createElement('option');
                 option.value = val;
-                option.textContent = val === 7 ? '7+' : val;
-                if ((val === currentMaxValue && val >= minValue) || (val === 7 && currentMaxValue > 7 && minValue <= 7)) {
+                option.textContent = val === 10 ? '10+' : val;
+                if ((val === currentMaxValue && val >= minValue) || (val === 10 && currentMaxValue > 10 && minValue <= 10)) {
                     option.selected = true;
                 } else if (val === Math.max(...maxOptions.filter(v => v >= minValue)) && !chainLengthMaxFilter.querySelector('option[selected]')) {
                     option.selected = true;
@@ -4982,7 +4992,7 @@ function setupConflictsFilters() {
 
 function clearConflictsFilters() {
     document.getElementById('chainLengthMinFilter').value = '2';
-    document.getElementById('chainLengthMaxFilter').value = '7';
+    document.getElementById('chainLengthMaxFilter').value = '10';
     document.getElementById('maxChainsFilter').value = '25';
     // Reset connection type to "all"
     const allRadio = document.querySelector('input[name="connectionTypeFilter"][value="all"]');

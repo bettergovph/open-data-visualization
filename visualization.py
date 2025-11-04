@@ -3856,7 +3856,7 @@ async def get_contractor_projects_frontend(contractor_name: str):
 @app.get("/api/dynasty/relationship-chains")
 async def dynasty_relationship_chains_api(
     chain_length_min: int = Query(2, ge=2, le=10, description="Minimum chain length to find"),
-    chain_length_max: int = Query(7, ge=2, le=10, description="Maximum chain length to find"),
+    chain_length_max: int = Query(10, ge=2, le=10, description="Maximum chain length to find (10 means 10+)"),
     max_constellations: str = Query("10", description="Maximum number of unique constellations to return (number or 'ALL')"),
     contractor_only: bool = Query(False, description="Only return constellations with contractor connections"),
     party_list_only: bool = Query(False, description="Only return constellations with party-list connections")
