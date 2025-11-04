@@ -52,25 +52,17 @@ async def generate_relationship_constellations_cache():
         print(f"[{start_time.strftime('%Y-%m-%d %H:%M:%S')}] Starting tree-based BFS chain generation...", flush=True)
         
         # Get party-list memberships for party-list extensions
+        # Use party_list_members table directly (database-level connections)
         party_list_members_query = """
         SELECT DISTINCT
-            p.id as person_id,
-            pl.code as party_code,
-            pl.party_list_number,
-            pl.party_name,
-            COALESCE(pl.party_list_number::text || ', ', '') || pl.party_name as party_full_name
-        FROM political_dynasties p
-        JOIN party_list pl ON (
-            p.party LIKE pl.code || ', ' || UPPER(pl.party_name)
-            OR p.party LIKE pl.code || ',' || UPPER(pl.party_name)
-            OR p.party LIKE '%' || pl.code || ', ' || UPPER(pl.party_name) || '%'
-            OR (p.party LIKE '%' || UPPER(pl.party_name) || '%' AND p.position LIKE '%PARTY-LIST%')
-            OR (p.party LIKE '%' || UPPER(pl.party_name) || '%' AND p.position LIKE '%PARTY LIST%')
-            OR (p.position LIKE '%' || UPPER(pl.party_name) || '%PARTY-LIST%')
-            OR (p.position LIKE '%' || UPPER(pl.party_name) || '%PARTY LIST%')
-        )
-        WHERE p.id IS NOT NULL
-          AND pl.party_list_number IS NOT NULL  -- Only include actual party-list entries (numeric codes)
+            plm.person_id,
+            plm.party_code,
+            plm.party_list_number,
+            plm.party_name,
+            COALESCE(plm.party_list_number::text || ', ', '') || plm.party_name as party_full_name
+        FROM party_list_members plm
+        JOIN political_dynasties p ON plm.person_id = p.id
+        WHERE plm.party_list_number IS NOT NULL
         """
         party_list_members_data = await conn.fetch(party_list_members_query)
         print(f"📊 Found {len(party_list_members_data)} party-list memberships", flush=True)
@@ -486,6 +478,68 @@ async def generate_relationship_constellations_cache():
         contractor_chains = await conn.fetch(contractor_relationships_query)
         print(f"📊 Found {len(contractor_chains)} contractor-mediated connections", flush=True)
         
+        # Also add single-person contractors (contractors with only 1 person connected)
+        # These won't show up in the JOIN above but should still appear in the constellation
+        single_person_contractors_query = """
+        WITH contractor_person_counts AS (
+            SELECT 
+                company_name,
+                COUNT(DISTINCT dynasty_full_name) as person_count
+            FROM contractor_dynasty_matches
+            GROUP BY company_name
+        ),
+        single_person_contractors AS (
+            SELECT cpc.company_name
+            FROM contractor_person_counts cpc
+            WHERE cpc.person_count = 1
+        ),
+        single_contractor_people AS (
+            SELECT DISTINCT
+                cdm.company_name,
+                cdm.dynasty_full_name,
+                cdm.dynasty_first_name,
+                cdm.dynasty_last_name,
+                cdm.role,
+                p.id as person_id
+            FROM contractor_dynasty_matches cdm
+            JOIN single_person_contractors spc ON cdm.company_name = spc.company_name
+            JOIN political_dynasties p ON (
+                (UPPER(TRIM(p.first_name)) = UPPER(TRIM(cdm.dynasty_first_name))
+                 AND UPPER(TRIM(p.last_name)) = UPPER(TRIM(cdm.dynasty_last_name)))
+                OR
+                (UPPER(p.first_name) LIKE '%' || UPPER(TRIM(cdm.dynasty_first_name)) || '%'
+                 AND UPPER(TRIM(p.last_name)) = UPPER(TRIM(cdm.dynasty_last_name)))
+            )
+            WHERE p.id IS NOT NULL
+        )
+        SELECT 
+            scp.person_id as start_person,
+            scp.person_id as end_person,
+            scp.company_name as contractor_name,
+            'Business/Contractor Connection' as relationship_type,
+            scp.role as person1_role,
+            scp.role as person2_role,
+            p.first_name as start_first_name,
+            p.last_name as start_last_name,
+            p.position as start_position,
+            p.first_name as end_first_name,
+            p.last_name as end_last_name,
+            p.position as end_position,
+            p.last_name as start_surname,
+            p.last_name as end_surname
+        FROM single_contractor_people scp
+        JOIN political_dynasties p ON p.id = scp.person_id
+        WHERE NOT EXISTS (
+            -- Don't include if already in contractor_chains (has multiple people)
+            SELECT 1 FROM contractor_dynasty_matches cdm2
+            WHERE cdm2.company_name = scp.company_name
+              AND cdm2.dynasty_full_name != scp.dynasty_full_name
+        )
+        """
+        
+        single_person_chains = await conn.fetch(single_person_contractors_query)
+        print(f"📊 Found {len(single_person_chains)} single-person contractor connections", flush=True)
+        
         # Convert contractor connections to same format as relationship chains
         contractor_relationships = []
         for cc in contractor_chains:
@@ -513,25 +567,21 @@ async def generate_relationship_constellations_cache():
         # These create new constellations, but we still want to show them
         print("🔗 Checking standalone party-list relationships (families only connected via party-list)...")
         
+        # Use party_list_members table directly (database-level connections)
         party_list_standalone_query = """
         WITH party_list_members AS (
             SELECT DISTINCT
-                p.id as person_id,
+                plm.person_id,
                 p.first_name,
                 p.last_name,
                 p.position,
-                pl.code as party_code,
-                pl.party_list_number,
-                pl.party_name,
-                COALESCE(pl.party_list_number::text || ', ', '') || pl.party_name as party_full_name
-            FROM political_dynasties p
-            JOIN party_list pl ON (
-                p.party LIKE pl.code || ', ' || UPPER(pl.party_name)
-                OR p.party LIKE pl.code || ',' || UPPER(pl.party_name)
-                OR (p.party LIKE '%' || UPPER(pl.party_name) || '%' AND p.position LIKE '%PARTY-LIST%')
-            )
-            WHERE p.id IS NOT NULL
-              AND pl.party_list_number IS NOT NULL
+                plm.party_code,
+                plm.party_list_number,
+                plm.party_name,
+                COALESCE(plm.party_list_number::text || ', ', '') || plm.party_name as party_full_name
+            FROM party_list_members plm
+            JOIN political_dynasties p ON plm.person_id = p.id
+            WHERE plm.party_list_number IS NOT NULL
         ),
         party_list_connections AS (
             SELECT DISTINCT
@@ -585,6 +635,73 @@ async def generate_relationship_constellations_cache():
         party_list_standalone_chains = await conn.fetch(party_list_standalone_query)
         print(f"📊 Found {len(party_list_standalone_chains)} standalone party-list connections (families only connected via party-list)", flush=True)
         
+        # Also add single-person party-list connections (party-lists with only 1 person)
+        # Party-lists are nodes themselves, so Person → Party-list is a 2-node chain
+        # Use party_list_members table directly (database-level connections)
+        single_person_party_list_query = """
+        WITH party_list_person_counts AS (
+            SELECT 
+                plm.party_code,
+                plm.party_list_number,
+                plm.party_name,
+                COUNT(DISTINCT plm.person_id) as person_count
+            FROM party_list_members plm
+            WHERE plm.party_list_number IS NOT NULL
+            GROUP BY plm.party_code, plm.party_list_number, plm.party_name
+        ),
+        single_person_party_lists AS (
+            SELECT plpc.party_code, plpc.party_list_number, plpc.party_name
+            FROM party_list_person_counts plpc
+            WHERE plpc.person_count = 1
+        ),
+        single_party_list_people AS (
+            SELECT DISTINCT
+                sppl.party_code,
+                sppl.party_list_number,
+                sppl.party_name,
+                COALESCE(sppl.party_list_number::text || ', ', '') || sppl.party_name as party_full_name,
+                p.id as person_id,
+                p.first_name,
+                p.last_name,
+                p.position
+            FROM single_person_party_lists sppl
+            JOIN party_list_members plm ON (
+                plm.party_code = sppl.party_code
+                AND plm.party_list_number = sppl.party_list_number
+                AND plm.party_name = sppl.party_name
+            )
+            JOIN political_dynasties p ON plm.person_id = p.id
+            WHERE NOT EXISTS (
+                  -- Don't include if already in party_list_standalone_chains (has multiple people)
+                  SELECT 1 FROM party_list_person_counts plpc2
+                  WHERE plpc2.party_code = sppl.party_code
+                    AND plpc2.party_list_number = sppl.party_list_number
+                    AND plpc2.party_name = sppl.party_name
+                    AND plpc2.person_count > 1
+              )
+        )
+        SELECT 
+            spp.person_id as start_person,
+            spp.person_id as end_person,
+            spp.party_code,
+            spp.party_list_number,
+            spp.party_name,
+            spp.party_full_name,
+            'Party-List Membership' as relationship_type,
+            spp.first_name as start_first_name,
+            spp.last_name as start_last_name,
+            spp.position as start_position,
+            spp.first_name as end_first_name,
+            spp.last_name as end_last_name,
+            spp.position as end_position,
+            spp.last_name as start_surname,
+            spp.last_name as end_surname
+        FROM single_party_list_people spp
+        """
+        
+        single_person_party_list_chains = await conn.fetch(single_person_party_list_query)
+        print(f"📊 Found {len(single_person_party_list_chains)} single-person party-list connections", flush=True)
+        
         # Convert standalone party-list connections to same format
         party_list_standalone = []
         for plc in party_list_standalone_chains:
@@ -607,6 +724,53 @@ async def generate_relationship_constellations_cache():
                 'party_name': plc['party_name'],
                 'party_full_name': plc['party_full_name'],
                 'relationship_type': plc['relationship_type']
+            })
+        
+        # Add single-person party-list chains
+        # Party-lists are nodes themselves, so Person → Party-list is a 2-node chain
+        for sp in single_person_party_list_chains:
+            party_list_standalone.append({
+                'start_person': sp['start_person'],
+                'end_person': sp['start_person'],  # Same person, but party-list is the node
+                'chain_length': 2,  # Person → Party-list (party-list is a node)
+                'start_surname': sp['start_surname'],
+                'end_surname': sp['end_surname'],
+                'start_first_name': sp['start_first_name'],
+                'start_last_name': sp['start_last_name'],
+                'start_position': sp['start_position'],
+                'end_first_name': sp['end_first_name'],
+                'end_last_name': sp['end_last_name'],
+                'end_position': sp['end_position'],
+                'path_string': f"{sp['start_person']}",  # Person ID, party-list node added in formatting
+                'relationship_string': f"Connected via {sp['party_name']}",
+                'party_code': sp['party_code'],
+                'party_list_number': sp['party_list_number'],
+                'party_name': sp['party_name'],
+                'party_full_name': sp['party_full_name'],
+                'relationship_type': sp['relationship_type']
+            })
+        
+        # Add single-person contractor chains
+        # Contractors are nodes themselves, so Person → Contractor is a 2-node chain
+        for sc in single_person_chains:
+            contractor_relationships.append({
+                'start_person': sc['start_person'],
+                'end_person': sc['start_person'],  # Same person, but contractor is the node
+                'chain_length': 2,  # Person → Contractor (contractor is a node)
+                'start_surname': sc['start_surname'],
+                'end_surname': sc['end_surname'],
+                'start_first_name': sc['start_first_name'],
+                'start_last_name': sc['start_last_name'],
+                'start_position': sc['start_position'],
+                'start_company_role': sc.get('person1_role'),
+                'end_first_name': sc['end_first_name'],
+                'end_last_name': sc['end_last_name'],
+                'end_position': sc['end_position'],
+                'end_company_role': sc.get('person2_role'),
+                'path_string': f"{sc['start_person']}",  # Person ID, contractor node added in formatting
+                'relationship_string': f"Connected via {sc['contractor_name']}",
+                'contractor_name': sc['contractor_name'],
+                'relationship_type': sc['relationship_type']
             })
         
         # Combine direct relationships, contractor connections, and standalone party-list connections
@@ -681,8 +845,21 @@ async def generate_relationship_constellations_cache():
                 pass
             
             # Add contractor information if this is a contractor-mediated connection
+            # For contractors, length includes the contractor node (Person → Contractor = 2 nodes)
+            # For single-person contractors, path_details has 1 person but length should be 2 (Person + Contractor node)
+            chain_length = len(path_details)
+            if 'contractor_name' in chain and chain.get('contractor_name'):
+                # Contractor is a node itself, so length is person count + 1 contractor node
+                # But if it's a single-person contractor (path_details = 1), length should be 2
+                if len(path_details) == 1 and chain.get('chain_length') == 2:
+                    chain_length = 2  # Person → Contractor node
+                elif len(path_details) > 1:
+                    chain_length = len(path_details) + 1  # People + Contractor node
+                else:
+                    chain_length = len(path_details) + 1  # Default: add contractor node
+            
             chain_data = {
-                "length": len(path_details),
+                "length": chain_length,
                 "start_surname": chain['start_surname'],
                 "end_surname": chain['end_surname'],
                 "path": path_details,
@@ -704,6 +881,7 @@ async def generate_relationship_constellations_cache():
             
             # Add party-list info for party-list-mediated connections
             # This includes both standalone party-list chains AND recursively extended chains
+            # For party-lists, length includes the party-list node (Person → Party-list = 2 nodes)
             if 'party_name' in chain and chain.get('party_name'):
                 party_list_number = chain.get('party_list_number')
                 party_name = chain['party_name']
@@ -714,6 +892,15 @@ async def generate_relationship_constellations_cache():
                     else:
                         party_full_name = party_name
                 
+                # Party-list is a node itself, so adjust length if needed
+                if len(path_details) == 1 and chain.get('chain_length') == 2:
+                    chain_length = 2  # Person → Party-list node
+                elif len(path_details) > 1:
+                    chain_length = len(path_details) + 1  # People + Party-list node
+                else:
+                    chain_length = len(path_details) + 1  # Default: add party-list node
+                
+                chain_data["length"] = chain_length
                 chain_data["party_list_connection"] = {
                     "party_code": chain.get('party_code'),
                     "party_list_number": party_list_number,

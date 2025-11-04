@@ -3912,15 +3912,26 @@ async def dynasty_relationship_chains_api(
         
         # Group chains by unique constellation (family pairs)
         # A constellation is a unique connection between two families (regardless of path direction or length)
+        # Include single-person chains (Person → Contractor/Party-list node) where start_family == end_family
         from collections import defaultdict
         chains_by_constellation = defaultdict(list)
+        single_person_chains = []  # Store single-person chains separately (Person → Contractor/Party-list node)
+        
         for chain in filtered_chains:
             start_family = chain.get('start_surname', '').upper().strip()
             end_family = chain.get('end_surname', '').upper().strip()
-            if start_family and end_family and start_family != end_family:
+            chain_length = chain.get('length', 0)
+            
+            # Single-person chains: same family with length 2 = Person → Contractor/Party-list node
+            if start_family and end_family and start_family == end_family and chain_length == 2:
+                single_person_chains.append(chain)
+            elif start_family and end_family and start_family != end_family:
                 # Normalize: use sorted tuple so A->B and B->A are the same constellation
                 constellation_key = tuple(sorted([start_family, end_family]))
                 chains_by_constellation[constellation_key].append(chain)
+            else:
+                # Other edge cases (e.g., same family but length > 2)
+                single_person_chains.append(chain)
         
         # Sort constellations by number of chains (more paths = more interesting)
         sorted_constellations = sorted(chains_by_constellation.items(), key=lambda x: len(x[1]), reverse=True)
@@ -3931,6 +3942,8 @@ async def dynasty_relationship_chains_api(
             # "ALL" - return all constellations
             for constellation_key, constellation_chains in sorted_constellations:
                 limited_chains.extend(constellation_chains)
+            # Add all single-person chains
+            limited_chains.extend(single_person_chains)
         else:
             # Limit to requested number of constellations
             for constellation_key, constellation_chains in sorted_constellations[:max_constellations_int]:

@@ -3661,16 +3661,24 @@ function loadConflictsData() {
                                 
                                 const diversified = [];
                                 // Group by constellation (family pairs) for fallback
+                                // Include single-person contractor chains (same surname = Person → Contractor node)
                                 const chainsByConstellation = {};
+                                const singlePersonChains = []; // Store single-person contractor chains separately
                                 filtered.forEach(c => {
                                     const startFamily = (c.start_surname || '').toUpperCase().trim();
                                     const endFamily = (c.end_surname || '').toUpperCase().trim();
-                                    if (startFamily && endFamily && startFamily !== endFamily) {
+                                    // Single-person contractor chain: same surname = Person → Contractor node
+                                    if (startFamily && endFamily && startFamily === endFamily && c.length === 2) {
+                                        singlePersonChains.push(c);
+                                    } else if (startFamily && endFamily && startFamily !== endFamily) {
                                         const constellationKey = [startFamily, endFamily].sort().join('|');
                                         if (!chainsByConstellation[constellationKey]) {
                                             chainsByConstellation[constellationKey] = [];
                                         }
                                         chainsByConstellation[constellationKey].push(c);
+                                    } else {
+                                        // Other chains (e.g., same surname but length > 2)
+                                        singlePersonChains.push(c);
                                     }
                                 });
                                 
@@ -3681,6 +3689,9 @@ function loadConflictsData() {
                                 for (let i = 0; i < Math.min(sortedConstellations.length, maxConstNum); i++) {
                                     diversified.push(...sortedConstellations[i][1]);
                                 }
+                                
+                                // Add single-person contractor chains
+                                diversified.push(...singlePersonChains);
                                 
                                 filtered = diversified;
                             }
@@ -3703,16 +3714,24 @@ function loadConflictsData() {
                                 
                                 const diversified = [];
                                 // Group by constellation (family pairs) for fallback
+                                // Include single-person party-list chains (same surname = Person → Party-list node)
                                 const chainsByConstellation = {};
+                                const singlePersonChains = []; // Store single-person party-list chains separately
                                 filtered.forEach(c => {
                                     const startFamily = (c.start_surname || '').toUpperCase().trim();
                                     const endFamily = (c.end_surname || '').toUpperCase().trim();
-                                    if (startFamily && endFamily && startFamily !== endFamily) {
+                                    // Single-person party-list chain: same surname = Person → Party-list node
+                                    if (startFamily && endFamily && startFamily === endFamily && c.length === 2) {
+                                        singlePersonChains.push(c);
+                                    } else if (startFamily && endFamily && startFamily !== endFamily) {
                                         const constellationKey = [startFamily, endFamily].sort().join('|');
                                         if (!chainsByConstellation[constellationKey]) {
                                             chainsByConstellation[constellationKey] = [];
                                         }
                                         chainsByConstellation[constellationKey].push(c);
+                                    } else {
+                                        // Other chains (e.g., same surname but length > 2)
+                                        singlePersonChains.push(c);
                                     }
                                 });
                                 
@@ -3723,6 +3742,9 @@ function loadConflictsData() {
                                 for (let i = 0; i < Math.min(sortedConstellations.length, maxConstNum); i++) {
                                     diversified.push(...sortedConstellations[i][1]);
                                 }
+                                
+                                // Add single-person party-list chains
+                                diversified.push(...singlePersonChains);
                                 
                                 filtered = diversified;
                             }
