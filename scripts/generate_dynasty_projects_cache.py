@@ -303,6 +303,33 @@ class DynastyProjectsCacheGenerator:
                         if not excluded and 'JSG' in contractor_name_upper:
                             return (congressman_name, "contractor", 50)
                     
+                    # Pattern-based matching for specific contractors (check if pattern appears in both DB contractor and project contractor)
+                    # These patterns can appear in various forms in project contractor names
+                    # Use word boundary matching (spaces or start/end of string) to avoid false matches
+                    for pattern in ['SUNWEST', 'ROVING PREMIER', 'VIRKAR', 'GARDIOLA', 'NEWINGTON', 'S-ANG']:
+                        if pattern in contractor_upper:
+                            # Check if pattern appears in project contractor with word boundaries
+                            # Pattern should be at start, end, or surrounded by spaces/punctuation
+                            pattern_upper = pattern.upper()
+                            if pattern_upper in contractor_name_upper:
+                                # Verify it's a word boundary match (not substring like "ASUNWEST" or "SUNWESTB")
+                                pattern_pos = contractor_name_upper.find(pattern_upper)
+                                if pattern_pos >= 0:
+                                    # Check if it's at start, end, or has space/punctuation before/after
+                                    is_start = pattern_pos == 0
+                                    is_end = pattern_pos + len(pattern_upper) == len(contractor_name_upper)
+                                    has_space_before = pattern_pos > 0 and contractor_name_upper[pattern_pos - 1] in [' ', '-', '_', ',', '.', '(', '/']
+                                    has_space_after = (pattern_pos + len(pattern_upper) < len(contractor_name_upper) and 
+                                                      contractor_name_upper[pattern_pos + len(pattern_upper)] in [' ', '-', '_', ',', '.', ')', '/'])
+                                    
+                                    if is_start or is_end or has_space_before or has_space_after:
+                                        return (congressman_name, "contractor", 50)
+                    
+                    # For A.D. GONZALES: Match contractor names containing "A.D. GONZALES"
+                    if 'A.D. GONZALES' in contractor_upper:
+                        if 'A.D. GONZALES' in contractor_name_upper:
+                            return (congressman_name, "contractor", 50)
+                    
                     # For all other contractors: check if contractor name (or key parts) appears in project contractor
                     # Extract key identifier from contractor name (remove common suffixes)
                     contractor_key = contractor_upper
@@ -311,9 +338,34 @@ class DynastyProjectsCacheGenerator:
                         if contractor_key.endswith(suffix):
                             contractor_key = contractor_key[:-len(suffix)].strip()
                     
-                    # Check if contractor key or full contractor name appears in project contractor name
-                    if contractor_key in contractor_name_upper or contractor_upper in contractor_name_upper:
-                        return (congressman_name, "contractor", 50)
+                    # Helper function to check word boundary match (spaces, start, end, punctuation)
+                    def has_word_boundary_match(text, pattern):
+                        """Check if pattern appears in text with word boundaries to avoid false matches"""
+                        if pattern not in text:
+                            return False
+                        pos = text.find(pattern)
+                        if pos < 0:
+                            return False
+                        # Check boundaries: must be at start, end, or have space/punctuation before/after
+                        is_start = pos == 0
+                        is_end = pos + len(pattern) == len(text)
+                        has_boundary_before = pos > 0 and text[pos - 1] in [' ', '-', '_', ',', '.', '(', '/']
+                        has_boundary_after = (pos + len(pattern) < len(text) and 
+                                             text[pos + len(pattern)] in [' ', '-', '_', ',', '.', ')', '/'])
+                        return is_start or is_end or has_boundary_before or has_boundary_after
+                    
+                    # For contractors with multiple words, check if key parts match with word boundaries
+                    # For single-word contractors, use simpler substring matching
+                    if ' ' in contractor_key or '-' in contractor_key:
+                        # Multi-word contractor: use word boundary matching
+                        if has_word_boundary_match(contractor_name_upper, contractor_key) or has_word_boundary_match(contractor_name_upper, contractor_upper):
+                            return (congressman_name, "contractor", 50)
+                    else:
+                        # Single-word contractor: simple substring match (but check it's not a false match)
+                        if contractor_key in contractor_name_upper or contractor_upper in contractor_name_upper:
+                            # Verify it's a word boundary match to avoid false positives
+                            if has_word_boundary_match(contractor_name_upper, contractor_key) or has_word_boundary_match(contractor_name_upper, contractor_upper):
+                                return (congressman_name, "contractor", 50)
                     
                     # Also check if project contractor name appears in congressman's contractor name
                     # (e.g., "NEWINGTON BUILDERS, INC." matches "NEWINGTON BUILDERS, INC. (FOR: E. GARDIOLA CONSTRUC")
