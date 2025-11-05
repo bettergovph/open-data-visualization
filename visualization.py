@@ -5,6 +5,7 @@ from fastapi.responses import JSONResponse
 import os
 import json
 from datetime import datetime
+from pathlib import Path
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -55,6 +56,18 @@ async def budget_list_files_api():
 
 @app.get("/api/pbc/gab-2026/sheets")
 async def list_pbc_gab_2026_sheets() -> JSONResponse:
+    # Try to load from cache first
+    cache_file = Path("static/data/gab_2026_sheets.json")
+    if cache_file.exists():
+        try:
+            with open(cache_file, 'r') as f:
+                cache_data = json.load(f)
+                print(f"✅ [GAB 2026] sheets: loaded from cache ({len(cache_data.get('data', {}).get('sheets', []))} sheets)")
+                return JSONResponse(content=cache_data)
+        except Exception as e:
+            print(f"⚠️ [GAB 2026] Error loading cache, falling back to DB: {e}")
+    
+    # Fallback to database
     try:
         conn = await get_nep_db_connection()
     except Exception as e:
@@ -83,6 +96,25 @@ async def list_pbc_gab_2026_sheets() -> JSONResponse:
 
 @app.get("/api/pbc/gab-2026/sheet")
 async def get_pbc_gab_2026_sheet(name: str = Query(..., alias="name"), limit: int = 200) -> JSONResponse:
+    # Try to load from cache first
+    # Sanitize filename
+    safe_filename = "".join(c for c in name if c.isalnum() or c in (' ', '-', '_')).strip()
+    safe_filename = safe_filename.replace(' ', '_')
+    cache_file = Path(f"static/data/gab_2026_sheets/{safe_filename}.json")
+    
+    if cache_file.exists():
+        try:
+            with open(cache_file, 'r') as f:
+                cache_data = json.load(f)
+                # Apply limit if needed
+                if limit < 200 and cache_data.get('data', {}).get('rows'):
+                    cache_data['data']['rows'] = cache_data['data']['rows'][:limit]
+                print(f"✅ [GAB 2026] sheet '{name}': loaded from cache ({len(cache_data.get('data', {}).get('rows', []))} rows)")
+                return JSONResponse(content=cache_data)
+        except Exception as e:
+            print(f"⚠️ [GAB 2026] Error loading cache, falling back to DB: {e}")
+    
+    # Fallback to database
     try:
         conn = await get_nep_db_connection()
     except Exception as e:
@@ -135,6 +167,18 @@ async def get_pbc_gab_2026_headings() -> JSONResponse:
 
 @app.get("/api/pbc/gab-2026/headings_detail")
 async def get_pbc_gab_2026_headings_detail() -> JSONResponse:
+    # Try to load from cache first
+    cache_file = Path("static/data/gab_2026_headings_detail.json")
+    if cache_file.exists():
+        try:
+            with open(cache_file, 'r') as f:
+                cache_data = json.load(f)
+                print(f"✅ [GAB 2026] headings_detail: loaded from cache ({len(cache_data.get('data', {}).get('items', []))} items)")
+                return JSONResponse(content=cache_data)
+        except Exception as e:
+            print(f"⚠️ [GAB 2026] Error loading cache, falling back to DB: {e}")
+    
+    # Fallback to database
     try:
         conn = await get_nep_db_connection()
     except Exception as e:
