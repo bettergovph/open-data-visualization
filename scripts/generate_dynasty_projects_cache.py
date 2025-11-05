@@ -291,26 +291,34 @@ class DynastyProjectsCacheGenerator:
                 for contractor in contractors:
                     contractor_upper = contractor.upper()
                     
-                    # For Co: Match contractor names containing "SUNWEST"
-                    if 'SUNWEST' in contractor_upper:
-                        if 'SUNWEST' in contractor_name_upper:
-                            return (congressman_name, "contractor", 50)
-                    
-                    # For JSG: Match JSG but NOT JSGCRAFT
+                    # For JSG: Match JSG but NOT JSGCRAFT (exclusion check)
                     if 'JSG' in contractor_upper:
-                        if 'JSG' in contractor_name_upper and 'JSGCRAFT' not in contractor_name_upper:
+                        # Check exclusions
+                        excluded = False
+                        if contractor_exclusions.get('JSG'):
+                            for exclude_pattern in contractor_exclusions['JSG']:
+                                if exclude_pattern.upper() in contractor_name_upper:
+                                    excluded = True
+                                    break
+                        if not excluded and 'JSG' in contractor_name_upper:
                             return (congressman_name, "contractor", 50)
                     
-                    # For A.D. GONZALES: Match contractor names containing "A.D. GONZALES" or "A.D. GONZALES JR"
-                    if 'A.D. GONZALES' in contractor_upper:
-                        if 'A.D. GONZALES' in contractor_name_upper:
-                            return (congressman_name, "contractor", 50)
+                    # For all other contractors: check if contractor name (or key parts) appears in project contractor
+                    # Extract key identifier from contractor name (remove common suffixes)
+                    contractor_key = contractor_upper
+                    # Remove common suffixes for matching
+                    for suffix in [' INC.', ' INC', ' CORPORATION', ' CORP.', ' CORP', ', INC.', ', INC', ' CONSTRUCTION', ' CONSTRUCTION & GENERAL TRADING']:
+                        if contractor_key.endswith(suffix):
+                            contractor_key = contractor_key[:-len(suffix)].strip()
                     
-                    # For other patterns, check if pattern is in contractor name
-                    for pattern in ['ROVING PREMIER', 'VIRKAR', 'GARDIOLA']:
-                        if pattern in contractor_upper:
-                            if pattern in contractor_name_upper:
-                                return (congressman_name, "contractor", 50)
+                    # Check if contractor key or full contractor name appears in project contractor name
+                    if contractor_key in contractor_name_upper or contractor_upper in contractor_name_upper:
+                        return (congressman_name, "contractor", 50)
+                    
+                    # Also check if project contractor name appears in congressman's contractor name
+                    # (e.g., "NEWINGTON BUILDERS, INC." matches "NEWINGTON BUILDERS, INC. (FOR: E. GARDIOLA CONSTRUC")
+                    if contractor_name_upper in contractor_upper:
+                        return (congressman_name, "contractor", 50)
         
         # 3. Get district identifier (province or city name)
         # If no district identifier, return None (unless we already matched via contractor above)
