@@ -278,28 +278,39 @@ class DynastyProjectsCacheGenerator:
         contractors = congressman_data.get('contractors', [])
         contractor_exclusions = congressman_data.get('contractor_exclusions', {})
         
-        if contractors and contractor_name:
+        if contractor_name:
             contractor_name_upper = contractor_name.upper()
             
-            # Check if this congressman has contractors that match
-            for contractor in contractors:
-                contractor_upper = contractor.upper()
-                
-                # For Co: Match contractor names containing "SUNWEST"
-                if 'SUNWEST' in contractor_upper:
-                    if 'SUNWEST' in contractor_name_upper:
-                        return (congressman_name, "contractor", 50)
-                
-                # For JSG: Match JSG but NOT JSGCRAFT
-                if 'JSG' in contractor_upper:
-                    if 'JSG' in contractor_name_upper and 'JSGCRAFT' not in contractor_name_upper:
-                        return (congressman_name, "contractor", 50)
-                
-                # For other patterns, check if pattern is in contractor name
-                for pattern in ['ROVING PREMIER', 'VIRKAR', 'GARDIOLA']:
-                    if pattern in contractor_upper:
-                        if pattern in contractor_name_upper:
+            # For Gonzales: Match contractor names containing "A.D. GONZALES" (even if not in DB contractors list)
+            if 'GONZALES' in congressman_name.upper():
+                if 'A.D. GONZALES' in contractor_name_upper:
+                    return (congressman_name, "contractor", 50)
+            
+            if contractors:
+                # Check if this congressman has contractors that match
+                for contractor in contractors:
+                    contractor_upper = contractor.upper()
+                    
+                    # For Co: Match contractor names containing "SUNWEST"
+                    if 'SUNWEST' in contractor_upper:
+                        if 'SUNWEST' in contractor_name_upper:
                             return (congressman_name, "contractor", 50)
+                    
+                    # For JSG: Match JSG but NOT JSGCRAFT
+                    if 'JSG' in contractor_upper:
+                        if 'JSG' in contractor_name_upper and 'JSGCRAFT' not in contractor_name_upper:
+                            return (congressman_name, "contractor", 50)
+                    
+                    # For A.D. GONZALES: Match contractor names containing "A.D. GONZALES" or "A.D. GONZALES JR"
+                    if 'A.D. GONZALES' in contractor_upper:
+                        if 'A.D. GONZALES' in contractor_name_upper:
+                            return (congressman_name, "contractor", 50)
+                    
+                    # For other patterns, check if pattern is in contractor name
+                    for pattern in ['ROVING PREMIER', 'VIRKAR', 'GARDIOLA']:
+                        if pattern in contractor_upper:
+                            if pattern in contractor_name_upper:
+                                return (congressman_name, "contractor", 50)
         
         # 3. Get district identifier (province or city name)
         # If no district identifier, return None (unless we already matched via contractor above)
