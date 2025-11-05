@@ -210,6 +210,25 @@ function toggleMobileMenu() {
                         <h3 class="budget-section-title">📊 Visual Analysis</h3>
                         <p class="budget-section-desc">Project statistics for target congressmen</p>
                         
+                        <!-- Dashboard Statistics -->
+                        <div id="dashboard-stats" style="display: none; margin-top: 30px; margin-bottom: 20px; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px;">
+                            <div style="background: white; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); padding: 20px; text-align: center;">
+                                <div style="font-size: 14px; color: #666; margin-bottom: 8px;">Total Project Cost</div>
+                                <div id="dashboard-total-cost" style="font-size: 24px; font-weight: 700; color: #333;">₱0</div>
+                                <div id="dashboard-total-projects" style="font-size: 12px; color: #999; margin-top: 5px;">0 projects</div>
+                            </div>
+                            <div style="background: white; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); padding: 20px; text-align: center;">
+                                <div style="font-size: 14px; color: #666; margin-bottom: 8px;">District Projects</div>
+                                <div id="dashboard-district-cost" style="font-size: 24px; font-weight: 700; color: #1565c0;">₱0</div>
+                                <div id="dashboard-district-count" style="font-size: 12px; color: #999; margin-top: 5px;">0 projects</div>
+                            </div>
+                            <div style="background: white; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); padding: 20px; text-align: center;">
+                                <div style="font-size: 14px; color: #666; margin-bottom: 8px;">Contractor Projects</div>
+                                <div id="dashboard-contractor-cost" style="font-size: 24px; font-weight: 700; color: #7b1fa2;">₱0</div>
+                                <div id="dashboard-contractor-count" style="font-size: 12px; color: #999; margin-top: 5px;">0 projects</div>
+                            </div>
+                        </div>
+                        
                         <div style="margin-top: 30px; background: white; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); padding: 20px; position: relative;">
                             <button id="copy-chart-btn" style="position: absolute; top: 20px; right: 20px; padding: 10px 20px; background: #333; color: white; border: 2px solid #333; border-radius: 6px; font-size: 14px; font-weight: 600; cursor: pointer; transition: all 0.3s ease; box-shadow: 0 4px 12px rgba(0,0,0,0.2); z-index: 10;" onmouseover="this.style.background='#667eea'; this.style.borderColor='#667eea'; this.style.transform='translateY(-2px)'; this.style.boxShadow='0 6px 16px rgba(102, 126, 234, 0.4)';" onmouseout="this.style.background='#333'; this.style.borderColor='#333'; this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 12px rgba(0,0,0,0.2)';">📋 Copy Chart</button>
                             <canvas id="combinedChart" style="max-height: 500px;"></canvas>
@@ -617,6 +636,18 @@ async function loadVisualData() {
             // Use pre-calculated chart data from cache
             const statsArray = data.chart_data;
             
+            // Update dashboard statistics
+            if (data.dashboard_stats) {
+                const stats = data.dashboard_stats;
+                document.getElementById('dashboard-total-cost').textContent = formatCurrency(stats.total_cost_all);
+                document.getElementById('dashboard-total-projects').textContent = `${stats.total_projects} projects`;
+                document.getElementById('dashboard-district-cost').textContent = formatCurrency(stats.district_cost);
+                document.getElementById('dashboard-district-count').textContent = `${stats.district_count} projects`;
+                document.getElementById('dashboard-contractor-cost').textContent = formatCurrency(stats.contractor_cost);
+                document.getElementById('dashboard-contractor-count').textContent = `${stats.contractor_count} projects`;
+                document.getElementById('dashboard-stats').style.display = 'grid';
+            }
+            
             // Prepare chart data
             const labels = statsArray.map(s => {
                 // Shorten long names for display
@@ -634,6 +665,11 @@ async function loadVisualData() {
         } else if (data.success && data.projects) {
             // Fallback: calculate from projects if chart_data not available
             const congressmanStats = {};
+            let totalCost = 0;
+            let districtCount = 0;
+            let districtCost = 0;
+            let contractorCount = 0;
+            let contractorCost = 0;
             
             data.projects.forEach(project => {
                 const congressman = project.congressman || 'Unknown';
@@ -647,7 +683,26 @@ async function loadVisualData() {
                 congressmanStats[congressman].count++;
                 const amount = parseFloat(project.amount) || 0;
                 congressmanStats[congressman].totalCost += amount;
+                totalCost += amount;
+                
+                // Count by match type
+                if (project.match_type === 'district') {
+                    districtCount++;
+                    districtCost += amount;
+                } else if (project.match_type === 'contractor') {
+                    contractorCount++;
+                    contractorCost += amount;
+                }
             });
+            
+            // Update dashboard in fallback case
+            document.getElementById('dashboard-total-cost').textContent = formatCurrency(totalCost);
+            document.getElementById('dashboard-total-projects').textContent = `${data.projects.length} projects`;
+            document.getElementById('dashboard-district-cost').textContent = formatCurrency(districtCost);
+            document.getElementById('dashboard-district-count').textContent = `${districtCount} projects`;
+            document.getElementById('dashboard-contractor-cost').textContent = formatCurrency(contractorCost);
+            document.getElementById('dashboard-contractor-count').textContent = `${contractorCount} projects`;
+            document.getElementById('dashboard-stats').style.display = 'grid';
             
             // Convert to array and sort by count
             const statsArray = Object.values(congressmanStats).sort((a, b) => b.count - a.count);

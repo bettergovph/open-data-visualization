@@ -723,12 +723,48 @@ class DynastyProjectsCacheGenerator:
                 reverse=True
             )
             
+            # Helper function to parse amount consistently
+            def parse_amount(amount):
+                if isinstance(amount, (int, float)):
+                    return float(amount) if amount else 0
+                elif isinstance(amount, str):
+                    amount_str = amount.replace('₱', '').replace(',', '').strip()
+                    try:
+                        return float(amount_str) if amount_str else 0
+                    except (ValueError, AttributeError):
+                        return 0
+                else:
+                    return 0
+            
+            # Calculate dashboard statistics
+            total_cost_all = sum(stat["total_cost"] for stat in chart_data)
+            district_count = summary['district_projects']
+            contractor_count = summary['contractor_projects']
+            district_cost = sum(
+                parse_amount(proj.get('amount', 0))
+                for proj in unique_projects if proj.get('match_type') == 'district'
+            )
+            contractor_cost = sum(
+                parse_amount(proj.get('amount', 0))
+                for proj in unique_projects if proj.get('match_type') == 'contractor'
+            )
+            
+            dashboard_stats = {
+                "total_cost_all": total_cost_all,
+                "total_projects": summary['total'],
+                "district_count": district_count,
+                "district_cost": district_cost,
+                "contractor_count": contractor_count,
+                "contractor_cost": contractor_cost
+            }
+            
             # Save to cache file
             cache_data = {
                 "success": True,
                 "projects": unique_projects,
                 "summary": summary,
                 "chart_data": chart_data,
+                "dashboard_stats": dashboard_stats,
                 "generated_at": datetime.now().isoformat(),
                 "cache_version": "1.0"
             }
@@ -743,6 +779,10 @@ class DynastyProjectsCacheGenerator:
             print(f"   Total projects: {summary['total']}")
             print(f"   District matches: {summary['district_projects']}")
             print(f"   Contractor matches: {summary['contractor_projects']}")
+            print(f"   Dashboard stats:")
+            print(f"     - Total cost: ₱{dashboard_stats['total_cost_all']:,.2f}")
+            print(f"     - District cost: ₱{dashboard_stats['district_cost']:,.2f}")
+            print(f"     - Contractor cost: ₱{dashboard_stats['contractor_cost']:,.2f}")
             
         finally:
             await dynasty_conn.close()
