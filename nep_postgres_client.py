@@ -2560,14 +2560,19 @@ async def get_budget_scored_duplicates_fallback(year: str = "2025", limit: int =
         
         table_name = f"budget_{year}"
         
-        # Check if table exists first
-        table_exists = await conn.fetchval("""
-            SELECT EXISTS (
-                SELECT FROM information_schema.tables 
-                WHERE table_schema = 'public' 
-                AND table_name = $1
-            )
-        """, table_name)
+        # Check if table exists first - wrap in try/except in case the check itself fails
+        try:
+            table_exists = await conn.fetchval("""
+                SELECT EXISTS (
+                    SELECT FROM information_schema.tables 
+                    WHERE table_schema = 'public' 
+                    AND table_name = $1
+                )
+            """, table_name)
+        except Exception as check_error:
+            print(f"⚠️ [PostgreSQL] Error checking table existence: {check_error}")
+            await conn.close()
+            return []
         
         if not table_exists:
             print(f"⚠️ [PostgreSQL] Table {table_name} does not exist, returning empty duplicates")
