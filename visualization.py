@@ -3979,5 +3979,400 @@ async def dynasty_relationship_chains_api(
     except Exception as e:
         return JSONResponse({"success": False, "error": str(e)})
 
+@app.get("/api/dynasty-projects/all")
+async def dynasty_projects_all_api(
+    page: int = Query(1, ge=1, description="Page number"),
+    limit: int = Query(50, ge=1, le=10000, description="Number of records per page")
+):
+    """Get all projects for all 6 congressmen from cached JSON"""
+    try:
+        import json
+        from pathlib import Path
+        
+        # Load cached JSON file
+        cache_file = Path(__file__).parent / 'static' / 'data' / 'dynasty-projects-cache.json'
+        
+        if not cache_file.exists():
+            return JSONResponse({
+                "success": False,
+                "error": "Cached data not found. Please run scripts/generate_dynasty_projects_cache.py",
+                "projects": [],
+                "summary": {"total": 0, "ssp": 0, "dime": 0, "philgeps": 0, "district_projects": 0, "contractor_projects": 0}
+            })
+        
+        # Load cached data
+        with open(cache_file, 'r', encoding='utf-8') as f:
+            cache_data = json.load(f)
+        
+        if not cache_data.get('success', False):
+            return JSONResponse({
+                "success": False,
+                "error": cache_data.get('error', 'Unknown error'),
+                "projects": [],
+                "summary": cache_data.get('summary', {"total": 0, "ssp": 0, "dime": 0, "philgeps": 0, "district_projects": 0, "contractor_projects": 0})
+            })
+        
+        # Get projects from cache
+        unique_projects = cache_data.get('projects', [])
+        
+        # Paginate
+        total_pages = (len(unique_projects) + limit - 1) // limit
+        offset = (page - 1) * limit
+        paginated_projects = unique_projects[offset:offset + limit]
+        
+        return JSONResponse({
+            "success": True,
+            "projects": paginated_projects,
+            "summary": cache_data.get('summary', {}),
+            "page": page,
+            "total": len(unique_projects),
+            "total_pages": total_pages,
+            "generated_at": cache_data.get('generated_at'),
+            "cache_version": cache_data.get('cache_version', '1.0')
+        })
+        
+    except Exception as e:
+        print(f"Error in dynasty_projects_all_api: {e}")
+        import traceback
+        traceback.print_exc()
+        return JSONResponse({
+            "success": False,
+            "error": str(e),
+            "projects": [],
+            "summary": {"total": 0, "ssp": 0, "dime": 0, "philgeps": 0, "district_projects": 0, "contractor_projects": 0}
+        })
+
+@app.get("/api/dynasty-projects/congressmen")
+async def dynasty_projects_congressmen_api():
+    """Get list of all 6 congressmen with their districts and contractors"""
+    try:
+        import asyncpg
+        
+        # Connect to dynasty database
+        dynasty_conn = await asyncpg.connect(
+            host=os.getenv('POSTGRES_HOST', 'localhost'),
+            port=int(os.getenv('POSTGRES_PORT', 5432)),
+            user=os.getenv('POSTGRES_USER', 'budget_admin'),
+            password=os.getenv('POSTGRES_PASSWORD', ''),
+            database=os.getenv('POSTGRES_DB_DYNASTY', 'dynasty')
+        )
+        
+        # List of target congressmen
+        target_names = [
+            ("MARTIN", "ROMUALDEZ"),
+            ("ELIZALDY", "CO"),  # Zaldy Co (merged name)
+            ("DAVID", "SUAREZ"),
+            ("AURELIO", "GONZALES"),
+            ("MANNIX", "DALIPE"),
+            ("EDWIN", "GARDIOLA")
+        ]
+        
+        congressmen_list = []
+        
+        for first_name_pattern, last_name_pattern in target_names:
+            # Search for congressman
+            person = await dynasty_conn.fetchrow('''
+                SELECT id, first_name, last_name, province, municipality_city, region, party
+                FROM political_dynasties
+                WHERE (UPPER(position) LIKE '%CONGRESSMAN%' OR UPPER(position) LIKE '%CONGRESSMEN%' OR UPPER(position) LIKE '%MEMBER, HOUSE OF REPRESENTATIVES%')
+                  AND (UPPER(first_name) LIKE $1 AND UPPER(last_name) LIKE $2)
+                LIMIT 1
+            ''', f"%{first_name_pattern}%", f"%{last_name_pattern}%")
+            
+            if person:
+                # Get direct contractors
+                direct_contractors = await dynasty_conn.fetch('''
+                    SELECT DISTINCT company_name, role
+                    FROM contractor_dynasty_matches
+                    WHERE dynasty_first_name = $1 AND dynasty_last_name = $2
+                ''', person['first_name'], person['last_name'])
+                
+                # Get party-list connections
+                party_lists = await dynasty_conn.fetch('''
+                    SELECT pl.party_list_number, pl.party_name
+                    FROM party_list_members plm
+                    JOIN party_list pl ON plm.party_list_number = pl.party_list_number
+                    WHERE plm.person_id = $1
+                ''', person['id'])
+                
+                # Get party-list contractors
+                party_list_contractors = []
+                for pl in party_lists:
+                    pl_contractors = await dynasty_conn.fetch('''
+                        SELECT DISTINCT cdm.company_name, cdm.role
+                        FROM party_list_members plm2
+                        JOIN political_dynasties pd ON plm2.person_id = pd.id
+                        JOIN contractor_dynasty_matches cdm ON cdm.dynasty_first_name = pd.first_name 
+                                                               AND cdm.dynasty_last_name = pd.last_name
+                        WHERE plm2.party_list_number = $1
+                    ''', pl['party_list_number'])
+                    party_list_contractors.extend([c['company_name'] for c in pl_contractors])
+                
+                # Combine contractors
+                all_contractors = [c['company_name'] for c in direct_contractors] + party_list_contractors
+                all_contractors = list(set(all_contractors))
+                
+                congressmen_list.append({
+                    "name": f"{person['first_name']} {person['last_name']}",
+                    "province": person['province'],
+                    "municipality": person['municipality_city'],
+                    "region": person['region'],
+                    "party": person['party'],
+                    "contractors": all_contractors,
+                    "party_lists": [{"number": pl['party_list_number'], "name": pl['party_name']} for pl in party_lists]
+                })
+        
+        await dynasty_conn.close()
+        
+        return JSONResponse({
+            "success": True,
+            "congressmen": congressmen_list
+        })
+        
+    except Exception as e:
+        print(f"Error in dynasty_projects_congressmen_api: {e}")
+        import traceback
+        traceback.print_exc()
+        return JSONResponse({
+            "success": False,
+            "error": str(e),
+            "congressmen": []
+        })
+
+@app.get("/api/dynasty-projects/search")
+async def dynasty_projects_search_api(
+    congressman: str = Query(..., description="Congressman name to search"),
+    page: int = Query(1, ge=1, description="Page number"),
+    limit: int = Query(50, ge=1, le=100, description="Number of records per page")
+):
+    """Search projects by congressman name across MeiliSearch, DIME, and PhilGEPS
+    Includes district projects AND contractor projects (direct + party-list contractors)"""
+    try:
+        import asyncpg
+        from flood_client import FloodControlClient
+        
+        # Connect to dynasty database to find congressman
+        dynasty_conn = await asyncpg.connect(
+            host=os.getenv('POSTGRES_HOST', 'localhost'),
+            port=int(os.getenv('POSTGRES_PORT', 5432)),
+            user=os.getenv('POSTGRES_USER', 'budget_admin'),
+            password=os.getenv('POSTGRES_PASSWORD', ''),
+            database=os.getenv('POSTGRES_DB_DYNASTY', 'dynasty')
+        )
+        
+        # Search for congressman in dynasty database - get full person info
+        congressman_query = """
+            SELECT id, first_name, last_name, province, municipality_city, region, party
+            FROM political_dynasties
+            WHERE (UPPER(position) LIKE '%CONGRESSMAN%' OR UPPER(position) LIKE '%CONGRESSMEN%' OR UPPER(position) LIKE '%MEMBER, HOUSE OF REPRESENTATIVES%')
+              AND (UPPER(first_name || ' ' || last_name) LIKE $1 OR UPPER(last_name || ', ' || first_name) LIKE $1)
+            LIMIT 1
+        """
+        search_pattern = f"%{congressman.upper()}%"
+        person = await dynasty_conn.fetchrow(congressman_query, search_pattern)
+        
+        if not person:
+            await dynasty_conn.close()
+            return JSONResponse({
+                "success": False,
+                "error": f"No congressman found matching '{congressman}'",
+                "congressman_info": None,
+                "projects": [],
+                "summary": {"total": 0, "ssp": 0, "dime": 0, "philgeps": 0}
+            })
+        
+        # Get district info
+        provinces = [person['province']] if person['province'] else []
+        municipalities = [person['municipality_city']] if person['municipality_city'] else []
+        
+        # Get direct contractor connections
+        direct_contractors = await dynasty_conn.fetch('''
+            SELECT DISTINCT company_name, role
+            FROM contractor_dynasty_matches
+            WHERE dynasty_first_name = $1 AND dynasty_last_name = $2
+        ''', person['first_name'], person['last_name'])
+        contractor_names = [c['company_name'] for c in direct_contractors]
+        
+        # Get party-list connections and their contractors
+        party_lists = await dynasty_conn.fetch('''
+            SELECT pl.party_list_number, pl.party_name
+            FROM party_list_members plm
+            JOIN party_list pl ON plm.party_list_number = pl.party_list_number
+            WHERE plm.person_id = $1
+        ''', person['id'])
+        
+        party_list_info = []
+        for pl in party_lists:
+            # Get all contractors for this party-list (all members' contractors)
+            pl_contractors = await dynasty_conn.fetch('''
+                SELECT DISTINCT cdm.company_name, cdm.role
+                FROM party_list_members plm2
+                JOIN political_dynasties pd ON plm2.person_id = pd.id
+                JOIN contractor_dynasty_matches cdm ON cdm.dynasty_first_name = pd.first_name 
+                                                       AND cdm.dynasty_last_name = pd.last_name
+                WHERE plm2.party_list_number = $1
+            ''', pl['party_list_number'])
+            pl_contractor_names = [c['company_name'] for c in pl_contractors]
+            contractor_names.extend(pl_contractor_names)
+            party_list_info.append({
+                "number": pl['party_list_number'],
+                "name": pl['party_name'],
+                "contractors": pl_contractor_names
+            })
+        
+        contractor_names = list(set(contractor_names))
+        
+        await dynasty_conn.close()
+        
+        # Now query projects from all 3 databases
+        # This is a simplified version - in production, you'd want to use the cached JSON
+        # For now, we'll use the search endpoint which queries the cache
+        # But this endpoint should redirect to the cached data filtered by congressman
+        
+        return JSONResponse({
+            "success": True,
+            "congressman_info": {
+                "name": f"{person['first_name']} {person['last_name']}",
+                "province": person['province'],
+                "municipality": person['municipality_city'],
+                "region": person['region'],
+                "party": person['party'],
+                "contractors": contractor_names,
+                "party_lists": party_list_info
+            },
+            "projects": [],
+            "summary": {"total": 0, "ssp": 0, "dime": 0, "philgeps": 0},
+            "message": "This endpoint is deprecated. Use /api/dynasty-projects/all and filter by congressman client-side."
+        })
+        
+    except Exception as e:
+        print(f"Error in dynasty_projects_search_api: {e}")
+        import traceback
+        traceback.print_exc()
+        return JSONResponse({
+            "success": False,
+            "error": str(e),
+            "congressman_info": None,
+            "projects": [],
+            "summary": {"total": 0, "ssp": 0, "dime": 0, "philgeps": 0}
+        })
+
+@app.get("/api/dynasty-projects/search")
+async def dynasty_projects_search_api(
+    congressman: str = Query(..., description="Congressman name to search"),
+    page: int = Query(1, ge=1, description="Page number"),
+    limit: int = Query(50, ge=1, le=100, description="Number of records per page")
+):
+    """Search projects by congressman name - DEPRECATED: Use /api/dynasty-projects/all and filter client-side"""
+    try:
+        import asyncpg
+        from flood_client import FloodControlClient
+        
+        # Connect to dynasty database to find congressman
+        dynasty_conn = await asyncpg.connect(
+            host=os.getenv('POSTGRES_HOST', 'localhost'),
+            port=int(os.getenv('POSTGRES_PORT', 5432)),
+            user=os.getenv('POSTGRES_USER', 'budget_admin'),
+            password=os.getenv('POSTGRES_PASSWORD', ''),
+            database=os.getenv('POSTGRES_DB_DYNASTY', 'dynasty')
+        )
+        
+        # Search for congressman in dynasty database - get full person info
+        congressman_query = """
+            SELECT id, first_name, last_name, province, municipality_city, region, party
+            FROM political_dynasties
+            WHERE (UPPER(position) LIKE '%CONGRESSMAN%' OR UPPER(position) LIKE '%CONGRESSMEN%' OR UPPER(position) LIKE '%MEMBER, HOUSE OF REPRESENTATIVES%')
+              AND (UPPER(first_name || ' ' || last_name) LIKE $1 OR UPPER(last_name || ', ' || first_name) LIKE $1)
+            LIMIT 1
+        """
+        search_pattern = f"%{congressman.upper()}%"
+        person = await dynasty_conn.fetchrow(congressman_query, search_pattern)
+        
+        if not person:
+            await dynasty_conn.close()
+            return JSONResponse({
+                "success": False,
+                "error": f"No congressman found matching '{congressman}'",
+                "congressman_info": None,
+                "projects": [],
+                "summary": {"total": 0, "ssp": 0, "dime": 0, "philgeps": 0}
+            })
+        
+        # Get district info
+        provinces = [person['province']] if person['province'] else []
+        municipalities = [person['municipality_city']] if person['municipality_city'] else []
+        
+        # Get direct contractor connections
+        direct_contractors = await dynasty_conn.fetch('''
+            SELECT DISTINCT company_name, role
+            FROM contractor_dynasty_matches
+            WHERE dynasty_first_name = $1 AND dynasty_last_name = $2
+        ''', person['first_name'], person['last_name'])
+        contractor_names = [c['company_name'] for c in direct_contractors]
+        
+        # Get party-list connections and their contractors
+        party_lists = await dynasty_conn.fetch('''
+            SELECT pl.party_list_number, pl.party_name
+            FROM party_list_members plm
+            JOIN party_list pl ON plm.party_list_number = pl.party_list_number
+            WHERE plm.person_id = $1
+        ''', person['id'])
+        
+        party_list_info = []
+        for pl in party_lists:
+            # Get all contractors for this party-list (all members' contractors)
+            pl_contractors = await dynasty_conn.fetch('''
+                SELECT DISTINCT cdm.company_name, cdm.role
+                FROM party_list_members plm2
+                JOIN political_dynasties pd ON plm2.person_id = pd.id
+                JOIN contractor_dynasty_matches cdm ON cdm.dynasty_first_name = pd.first_name 
+                                                       AND cdm.dynasty_last_name = pd.last_name
+                WHERE plm2.party_list_number = $1
+            ''', pl['party_list_number'])
+            pl_contractor_names = [c['company_name'] for c in pl_contractors]
+            contractor_names.extend(pl_contractor_names)
+            party_list_info.append({
+                "number": pl['party_list_number'],
+                "name": pl['party_name'],
+                "contractors": pl_contractor_names
+            })
+        
+        contractor_names = list(set(contractor_names))
+        
+        await dynasty_conn.close()
+        
+        # Now query projects from all 3 databases
+        # This is a simplified version - in production, you'd want to use the cached JSON
+        # For now, we'll use the search endpoint which queries the cache
+        # But this endpoint should redirect to the cached data filtered by congressman
+        
+        return JSONResponse({
+            "success": True,
+            "congressman_info": {
+                "name": f"{person['first_name']} {person['last_name']}",
+                "province": person['province'],
+                "municipality": person['municipality_city'],
+                "region": person['region'],
+                "party": person['party'],
+                "contractors": contractor_names,
+                "party_lists": party_list_info
+            },
+            "projects": [],
+            "summary": {"total": 0, "ssp": 0, "dime": 0, "philgeps": 0},
+            "message": "This endpoint is deprecated. Use /api/dynasty-projects/all and filter by congressman client-side."
+        })
+        
+    except Exception as e:
+        print(f"Error in dynasty_projects_search_api: {e}")
+        import traceback
+        traceback.print_exc()
+        return JSONResponse({
+            "success": False,
+            "error": str(e),
+            "congressman_info": None,
+            "projects": [],
+            "summary": {"total": 0, "ssp": 0, "dime": 0, "philgeps": 0}
+        })
+
 if __name__ == "__main__":
     uvicorn.run(app, host="127.0.0.1", port=8000)

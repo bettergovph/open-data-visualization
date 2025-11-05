@@ -1,0 +1,142 @@
+{
+  "metadata": {
+    "purpose": "Documentation of 6 test congressmen for /dynasty-projects page",
+    "date": "2025-01-XX",
+    "note": "These 6 congressmen are used to test the /dynasty-projects capabilities before full launch for all politicians"
+  },
+  "congressmen": [
+    {
+      "test_number": 1,
+      "display_name": "Ferdinand Martin Gomez Romualdez",
+      "db_id": 4161091,
+      "province": "Leyte",
+      "municipality": "Tacloban",
+      "district": "Leyte 1st District",
+      "district_type": "municipalities",
+      "district_data": {
+        "municipalities": [
+          "Tacloban",
+          "Alangalang",
+          "Babatngon",
+          "Palo",
+          "San Miguel",
+          "Santa Fe",
+          "Tanauan",
+          "Tolosa"
+        ]
+      },
+      "contractors": [],
+      "matching_logic": "District-based (must have 'Leyte' in location/project name + municipality match)",
+      "will_be_processed": true
+    },
+    {
+      "test_number": 2,
+      "display_name": "Elizaldy Salcedo Co",
+      "db_id": 4145240,
+      "province": null,
+      "municipality": null,
+      "district": "Party-List Representative (AKO BICOL)",
+      "district_type": "party-list",
+      "contractors": [
+        "SUNWEST CONSTRUCTION AND DEVELOPMENT CORPORATION",
+        "Sunwest Construction"
+      ],
+      "matching_logic": "Contractor-based (Sunwest projects)",
+      "will_be_processed": true
+    },
+    {
+      "test_number": 3,
+      "display_name": "Aurelio Dueñas Gonzales Jr.",
+      "db_id": 4148110,
+      "province": "Pampanga",
+      "municipality": "San Fernando City",
+      "district": "Pampanga 3rd District",
+      "district_type": "municipalities",
+      "district_data": {
+        "municipalities": [
+          "San Fernando City",
+          "Bacolor",
+          "Mexico"
+        ]
+      },
+      "contractors": [],
+      "matching_logic": "District-based (must have 'Pampanga' in location/project name + municipality match)",
+      "will_be_processed": true
+    },
+    {
+      "test_number": 4,
+      "display_name": "Tirso Edwin Loleng Gardiola",
+      "db_id": 4162452,
+      "province": null,
+      "municipality": null,
+      "district": "CWS Party-List Representative",
+      "district_type": "party-list",
+      "contractors": [
+        "JSG Construction",
+        "MBB Global Properties",
+        "Virkar Realty Corporation"
+      ],
+      "matching_logic": "Contractor-based (JSG, MBB, Virkar projects - excludes JSGCRAFT)",
+      "will_be_processed": true
+    },
+    {
+      "test_number": 5,
+      "display_name": "Manuel Jose Mendoza Dalipe",
+      "db_id": 4157807,
+      "province": "Zamboanga City",
+      "municipality": "Zamboanga City",
+      "district": "Zamboanga City 2nd District",
+      "district_type": "barangays",
+      "district_data": {
+        "barangays_count": 60,
+        "note": "60 barangays from 2nd-district-zamboanga-city.json"
+      },
+      "contractors": [],
+      "matching_logic": "Barangay-based (2nd district barangays = score 100, no barangay info = score 1, barangay mentioned but not in 2nd district = excluded)",
+      "will_be_processed": true
+    },
+    {
+      "test_number": 6,
+      "display_name": "David Catarina Suarez",
+      "db_id": 4162463,
+      "province": "Quezon",
+      "municipality": "Lucena",
+      "district": "Quezon 2nd District",
+      "district_type": "municipalities",
+      "district_data": {
+        "municipalities": [
+          "Lucena",
+          "Candelaria",
+          "Dolores",
+          "San Antonio",
+          "Sariaya",
+          "Tiaong"
+        ]
+      },
+      "contractors": [],
+      "matching_logic": "District-based (must have 'Quezon' in location/project name + municipality match)",
+      "will_be_processed": true
+    }
+  ],
+  "summary": {
+    "total_congressmen": 6,
+    "all_ready": true,
+    "matching_strategies": {
+      "district_based": 4,
+      "contractor_based": 2,
+      "barangay_based": 1
+    },
+    "databases_used": [
+      "SSP (MeiliSearch)",
+      "DIME",
+      "PhilGEPS"
+    ],
+    "scoring_system": {
+      "score_100": "Exact district match (barangay/district municipality)",
+      "score_50": "Contractor match OR municipality match",
+      "score_10": "Province-only match (with province name requirement)",
+      "score_1": "Zamboanga City without barangay info (lowest confidence)",
+      "cross_db_bonus": "+10 points per additional database (max +20 for 3 databases)"
+    }
+  }
+}

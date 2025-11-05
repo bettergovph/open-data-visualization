@@ -1,0 +1,166 @@
+{
+  "metadata": {
+    "source": "Perplexity AI (Sonar-Pro)",
+    "date": "2025-11-05",
+    "note": "Congressional district mappings for Philippine locations"
+  },
+  "districts": {
+    "Pampanga": {
+      "municipalities": {
+        "San Fernando City": "3rd District",
+        "San Fernando": "3rd District",
+        "Bacolor": "3rd District",
+        "Mexico": "3rd District",
+        "Porac": "2nd District"
+      },
+      "all_districts": [
+        "1st District",
+        "2nd District",
+        "3rd District",
+        "4th District"
+      ],
+      "representatives": {
+        "3rd District": "Aurelio Gonzales Jr. (2016-2025), Bong Rivera (2025-)",
+        "2nd District": "Gloria Macapagal Arroyo"
+      }
+    },
+    "Leyte": {
+      "municipalities": {
+        "Tacloban": "1st District",
+        "Alangalang": "1st District",
+        "Babatngon": "1st District",
+        "Palo": "1st District",
+        "San Miguel": "1st District",
+        "Santa Fe": "1st District",
+        "Tanauan": "1st District",
+        "Tolosa": "1st District",
+        "Carigara": "2nd District",
+        "Liloan": "2nd District",
+        "Isabel": "3rd District",
+        "Palompon": "3rd District"
+      },
+      "all_districts": [
+        "1st District",
+        "2nd District",
+        "3rd District",
+        "4th District",
+        "5th District",
+        "6th District"
+      ],
+      "representatives": {
+        "1st District": "Martin Romualdez"
+      }
+    },
+    "Quezon": {
+      "municipalities": {
+        "Lucena": "2nd District",
+        "Candelaria": "2nd District",
+        "Dolores": "2nd District",
+        "San Antonio": "2nd District",
+        "Sariaya": "2nd District",
+        "Tiaong": "2nd District"
+      },
+      "all_districts": [
+        "1st District",
+        "2nd District",
+        "3rd District",
+        "4th District"
+      ]
+    },
+    "Zamboanga City": {
+      "all_districts": [
+        "1st District",
+        "2nd District"
+      ],
+      "barangays": {
+        "2nd District": [
+          "Arena Blanco",
+          "Boalan",
+          "Bolong",
+          "Buenavista",
+          "Bunguiao",
+          "Busay",
+          "Cabaluay",
+          "Cacao",
+          "Calabasa",
+          "Culianan",
+          "Curuan",
+          "Dita",
+          "Divisoria",
+          "Dulian",
+          "Guisao",
+          "Guiwan",
+          "Kasanyangan",
+          "Lamisahan",
+          "Landang Gua",
+          "Landang Laum",
+          "Lanzones",
+          "Lapakan",
+          "Latuan",
+          "Licomo",
+          "Limaong",
+          "Lubigan",
+          "Lumayang",
+          "Lumbangan",
+          "Lunzuran",
+          "Mampang",
+          "Manalipa",
+          "Mangusu",
+          "Manicahan",
+          "Mercedes",
+          "Muti",
+          "Pangapuyan",
+          "Panubigan",
+          "Pasilmanta",
+          "Pasobolong",
+          "Putik",
+          "Quiniput",
+          "Salaan",
+          "Sangali",
+          "Santa Catalina",
+          "Sibulao",
+          "Tagasilay",
+          "Taguiti",
+          "Talabaan",
+          "Talon-Talon",
+          "Taluksangay",
+          "Tetuan",
+          "Tictapul",
+          "Tigbalabag",
+          "Tictabon",
+          "Tolosa",
+          "Tugbungan",
+          "Tumalutap",
+          "Tumitus",
+          "Victoria",
+          "Vitali",
+          "Zambowood"
+        ]
+      }
+    },
+    "Albay": {
+      "all_districts": [
+        "1st District",
+        "2nd District",
+        "3rd District"
+      ]
+    }
+  },
+  "key_findings": {
+    "Mexico_Porac": {
+      "Mexico, Pampanga": "3rd District",
+      "Porac, Pampanga": "2nd District",
+      "same_district": false,
+      "note": "Mexico and Porac are in different districts - Mexico is 3rd District (Aurelio Gonzales Jr.), Porac is 2nd District (Gloria Macapagal Arroyo)"
+    }
+  },
+  "validation": {
+    "Aurelio_Gonzales_Jr": {
+      "district": "Pampanga 3rd District",
+      "municipalities_in_district": [
+        "Mexico"
+      ],
+      "note": "Porac is NOT in his district - it's in 2nd District"
+    }
+  }
+}

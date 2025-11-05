@@ -1,0 +1,89 @@
+{
+  "metadata": {
+    "source": "Manual configuration for /dynasty-projects page",
+    "date": "2025-01-05",
+    "note": "Test congressmen for /dynasty-projects capabilities before full launch"
+  },
+  "target_congressmen": [
+    {
+      "id": 1,
+      "first_name_pattern": "FERDINAND MARTIN",
+      "last_name_pattern": "ROMUALDEZ",
+      "display_name": "Ferdinand Martin Gomez Romualdez",
+      "province": "Leyte",
+      "district_number": "1st District",
+      "is_city_district": false,
+      "barangays": []
+    },
+    {
+      "id": 2,
+      "first_name_pattern": "ELIZALDY",
+      "last_name_pattern": "CO",
+      "display_name": "Elizaldy Salcedo Co",
+      "province": null,
+      "district_number": null,
+      "is_city_district": false,
+      "barangays": [],
+      "note": "Party-List representative with Sunwest contractor"
+    },
+    {
+      "id": 3,
+      "first_name_pattern": "AURELIO",
+      "last_name_pattern": "GONZALES",
+      "display_name": "Aurelio Dueñas Gonzales Jr.",
+      "province": "Pampanga",
+      "district_number": "3rd District",
+      "is_city_district": false,
+      "barangays": []
+    },
+    {
+      "id": 4,
+      "first_name_pattern": "EDWIN",
+      "last_name_pattern": "GARDIOLA",
+      "display_name": "Tirso Edwin Loleng Gardiola",
+      "province": null,
+      "district_number": null,
+      "is_city_district": false,
+      "barangays": [],
+      "note": "CWS Party-List representative with JSG, MBB, Virkar contractors"
+    },
+    {
+      "id": 5,
+      "first_name_pattern": "MANNIX",
+      "last_name_pattern": "DALIPE",
+      "display_name": "Manuel Jose Mendoza Dalipe",
+      "province": "Zamboanga City",
+      "district_number": "2nd District",
+      "is_city_district": true,
+      "barangays_file": "2nd-district-zamboanga-city.json"
+    },
+    {
+      "id": 6,
+      "first_name_pattern": "DAVID",
+      "last_name_pattern": "SUAREZ",
+      "display_name": "David Catarina Suarez",
+      "province": "Quezon",
+      "district_number": "2nd District",
+      "is_city_district": false,
+      "barangays": []
+    }
+  ],
+  "verified_contractors": {
+    "note": "Contractors verified through Rappler/Perplexity evidence",
+    "patterns": [
+      "MBB",
+      "ROVING PREMIER",
+      "VIRKAR",
+      "JSG",
+      "SUNWEST",
+      "GARDIOLA"
+    ],
+    "exclusions": [
+      {
+        "pattern": "JSG",
+        "exclude": "JSGCRAFT"
+      }
+    ]
+  }
+}
+

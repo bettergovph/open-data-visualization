@@ -212,53 +212,53 @@ async def generate_relationship_constellations_cache():
             
             # Extension type 1: Direct relationships
             ext1_query = """
-            SELECT 
-                r.related_person_id as next_person_id,
-                r.relationship_description,
-                p2.last_name,
-                p2.first_name,
-                p2.position
-            FROM relationships r
-            JOIN political_dynasties p2 ON r.related_person_id = p2.id
-            WHERE r.person_id = $1
+                    SELECT 
+                        r.related_person_id as next_person_id,
+                        r.relationship_description,
+                        p2.last_name,
+                        p2.first_name,
+                        p2.position
+                    FROM relationships r
+                    JOIN political_dynasties p2 ON r.related_person_id = p2.id
+                    WHERE r.person_id = $1
               AND r.related_person_id != ALL($2::int[])
-              AND (
+                      AND (
                   UPPER(p2.last_name) != UPPER($3)
-                  OR
+                          OR
                   (UPPER(p2.last_name) = UPPER($3) AND EXISTS (
-                      SELECT 1 FROM relationships r2
-                      JOIN political_dynasties p3 ON (r2.person_id = p3.id AND r2.related_person_id = r.related_person_id)
-                               OR (r2.related_person_id = p3.id AND r2.person_id = r.related_person_id)
-                      WHERE (r2.person_id = r.related_person_id OR r2.related_person_id = r.related_person_id)
+                              SELECT 1 FROM relationships r2
+                              JOIN political_dynasties p3 ON (r2.person_id = p3.id AND r2.related_person_id = r.related_person_id)
+                                       OR (r2.related_person_id = p3.id AND r2.person_id = r.related_person_id)
+                              WHERE (r2.person_id = r.related_person_id OR r2.related_person_id = r.related_person_id)
                         AND UPPER(p3.last_name) != UPPER($3)
-                  ))
-              )
-            
-            UNION ALL
-            
-            SELECT 
-                r.person_id as next_person_id,
-                r.relationship_description,
-                p1.last_name,
-                p1.first_name,
-                p1.position
-            FROM relationships r
-            JOIN political_dynasties p1 ON r.person_id = p1.id
-            WHERE r.related_person_id = $1
+                          ))
+                      )
+                    
+                    UNION ALL
+                    
+                    SELECT 
+                        r.person_id as next_person_id,
+                        r.relationship_description,
+                        p1.last_name,
+                        p1.first_name,
+                        p1.position
+                    FROM relationships r
+                    JOIN political_dynasties p1 ON r.person_id = p1.id
+                    WHERE r.related_person_id = $1
               AND r.person_id != ALL($2::int[])
-              AND (
+                      AND (
                   UPPER(p1.last_name) != UPPER($3)
-                  OR
+                          OR
                   (UPPER(p1.last_name) = UPPER($3) AND EXISTS (
-                      SELECT 1 FROM relationships r2
-                      JOIN political_dynasties p3 ON (r2.person_id = p3.id AND r2.related_person_id = r.person_id)
-                               OR (r2.related_person_id = p3.id AND r2.person_id = r.person_id)
-                      WHERE (r2.person_id = r.person_id OR r2.related_person_id = r.person_id)
+                              SELECT 1 FROM relationships r2
+                              JOIN political_dynasties p3 ON (r2.person_id = p3.id AND r2.related_person_id = r.person_id)
+                                       OR (r2.related_person_id = p3.id AND r2.person_id = r.person_id)
+                              WHERE (r2.person_id = r.person_id OR r2.related_person_id = r.person_id)
                         AND UPPER(p3.last_name) != UPPER($3)
-                  ))
-              )
-            """
-            
+                          ))
+                      )
+                    """
+                    
             extensions = await conn.fetch(ext1_query, last_person, path, chain['start_surname'])
             
             for ext in extensions:
@@ -294,7 +294,7 @@ async def generate_relationship_constellations_cache():
                     
                     # Recursively extend this new chain
                     await recursive_extend(new_chain, depth + 1)
-            
+                    
             # Extension type 2: Party-list connections
             if last_person in person_to_parties:
                 for party_key in person_to_parties[last_person]:

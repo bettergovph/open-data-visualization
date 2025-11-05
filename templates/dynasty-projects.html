@@ -1,0 +1,557 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dynasty Projects - BetterGovPH</title>
+
+    <!-- Google Fonts - Inter -->
+    <!-- Tailwind CSS -->
+    <link rel="stylesheet" href="/static/css/tailwind.css">
+    <!-- Tailwind CSS (Production) -->
+    <link rel="stylesheet" href="/static/css/tailwind.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Shared Visualizations CSS (for tabs) -->
+    <link rel="stylesheet" href="/static/css/visualizations-shared.css">
+
+
+    <script src="/static/js/chart.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+
+    <!-- Cache Control -->
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="-1">
+
+    <!-- BetterGovPH Metadata -->
+    <meta name="description" content="Dynasty Projects - Congressional District Project Analysis">
+    <meta name="keywords" content="government data, congressional projects, district projects, public data, transparency">
+    <meta name="author" content="BetterGovPH">
+
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="{{ og_url | default(value='https://visualizations.bettergov.ph/') }}">
+    <meta property="og:title" content="Dynasty Projects - BetterGovPH">
+    <meta property="og:description" content="Government Data Analysis Platform for Congressional District Projects">
+    <meta property="og:image" content="/static/images/gov_logo.png">
+
+    <!-- Twitter -->
+    <meta property="twitter:card" content="summary_large_image">
+    <meta property="twitter:url" content="https://visualizations.bettergov.ph/">
+    <meta property="twitter:title" content="Dynasty Projects - BetterGovPH">
+    <meta property="twitter:description" content="Government Data Analysis Platform for Congressional District Projects">
+    <meta property="twitter:image" content="/static/images/gov_logo.png">
+
+    <style>
+        body {
+            font-family: 'Inter', sans-serif !important;
+            margin: 0;
+            padding: 0;
+            background: white !important;
+            color: black !important;
+            min-height: 100vh;
+        }
+        /* Override blue tab styling */
+        .budget-tab-btn.active {
+            background: white !important;
+            color: #333 !important;
+            border-color: #333 !important;
+        }
+        .budget-tab-btn:hover:not(.disabled) {
+            background: #f8f9fa !important;
+            color: #333 !important;
+        }
+    </style>
+</head>
+<body>
+<!-- Navigation - BetterGov Theme -->
+<nav class="visualizations-nav py-4 px-6 bg-white border-b border-gray-200">
+    <div class="max-w-7xl mx-auto flex items-center justify-between">
+        <div class="flex items-center">
+            <a href="https://bettergov.ph" class="flex items-center">
+                <img src="https://raw.githubusercontent.com/bettergovph/logo/main/png/BetterGov_Horizontal-Black.png"
+                     alt="BetterGov.ph"
+                     class="h-12 mr-3">
+                
+            </a>
+            <a href="/" class="text-xl font-bold text-black hover:text-gray-600">Data Visualizations</a>
+        </div>
+        <div class="hidden md:flex space-x-6">
+            <a href="/nep" class="text-black hover:text-gray-600 font-medium transition">NEP</a>
+            <a href="/budget" class="text-black hover:text-gray-600 font-medium transition">Budget</a>
+            <a href="/flood" class="text-black hover:text-gray-600 font-medium transition">Flood Control</a>
+            <a href="/dime" class="text-black hover:text-gray-600 font-medium transition">DIME</a>
+            <a href="/map" class="text-black hover:text-gray-600 font-medium transition">Map</a>
+            <a href="/philgeps" class="text-black hover:text-gray-600 font-medium transition">PhilGEPS</a>
+            <a href="/dynasty" class="text-black hover:text-gray-600 font-medium transition">Dynasties</a>
+            <a href="/dynasty-projects" class="text-black hover:text-gray-600 font-medium transition border-b-2 border-black">Dynasty Projects</a>
+            <a href="/eogo" class="text-black hover:text-gray-600 font-medium transition">EOGO</a>
+            <a href="/sources" class="text-black hover:text-gray-600 font-medium transition">Sources</a>
+        </div>
+        <div class="md:hidden">
+            <button class="text-black focus:outline-none" onclick="toggleMobileMenu()">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+                </svg>
+            </button>
+        </div>
+    </div>
+    <!-- Mobile menu (hidden by default) -->
+    <div id="mobileMenu" class="hidden mt-4 px-4 space-y-2">
+        <a href="/nep" class="block text-black hover:text-gray-600 font-medium py-2">NEP</a>
+        <a href="/budget" class="block text-black hover:text-gray-600 font-medium py-2">Budget</a>
+        <a href="/flood" class="block text-black hover:text-gray-600 font-medium py-2">Flood Control</a>
+        <a href="/dime" class="block text-black hover:text-gray-600 font-medium py-2">DIME</a>
+        <a href="/map" class="block text-black hover:text-gray-600 font-medium py-2">Map</a>
+        <a href="/philgeps" class="block text-black hover:text-gray-600 font-medium py-2">PhilGEPS</a>
+        <a href="/dynasty" class="block text-black hover:text-gray-600 font-medium py-2">Dynasties</a>
+        <a href="/dynasty-projects" class="block text-black hover:text-gray-600 font-medium py-2 border-b-2 border-black">Dynasty Projects</a>
+        <a href="/eogo" class="block text-black hover:text-gray-600 font-medium py-2">EOGO</a>
+        <a href="/sources" class="block text-black hover:text-gray-600 font-medium py-2">Sources</a>
+    </div>
+</nav>
+
+<script>
+function toggleMobileMenu() {
+    const menu = document.getElementById('mobileMenu');
+    menu.classList.toggle('hidden');
+}
+</script>
+
+<!-- Dynasty Projects Section -->
+<div style="padding: 6rem;">
+<section class="budget-section">
+    <div class="budget-container">
+        <div class="budget-header">
+            <h1 class="budget-title">🏛️ Dynasty Projects</h1>
+            <p class="budget-subtitle">Congressional District Project Analysis</p>
+        </div>
+
+        <div class="budget-content">
+            <!-- Tabs -->
+            <div class="budget-tabs">
+                <div class="budget-tab-nav">
+                    <a href="#table" class="budget-tab-btn active" data-tab="table">📋 Table</a>
+                    <a href="#visual" class="budget-tab-btn" data-tab="visual">📊 Visual</a>
+                </div>
+                
+                <div class="budget-tab-content">
+                    <!-- Visual Tab -->
+                    <div id="tab-visual" class="budget-tab-panel">
+                        <h3 class="budget-section-title">📊 Visual Analysis</h3>
+                        <p class="budget-section-desc">Visualizations coming soon...</p>
+                    </div>
+                    
+                    <!-- Table Tab -->
+                    <div id="tab-table" class="budget-tab-panel active">
+                        <h3 class="budget-section-title">📋 Project Data Table</h3>
+                        <p class="budget-section-desc">Unified project data from SSP, DIME, and PhilGEPS databases</p>
+                        
+                        <!-- Filters -->
+                        <div style="margin-bottom: 20px; padding: 15px; background: white; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
+                            <div style="display: flex; align-items: center; gap: 15px; flex-wrap: wrap;">
+                                <label style="font-weight: 600; color: #333; white-space: nowrap;">Filter by Congressman:</label>
+                                <select id="congressman-filter" style="padding: 8px 12px; border: 1px solid #dee2e6; border-radius: 4px; font-size: 14px; min-width: 250px; background: white; color: #333; cursor: pointer;">
+                                    <option value="all">All Congressmen</option>
+                                    <option value="Ferdinand Martin Gomez Romualdez">Ferdinand Martin Gomez Romualdez</option>
+                                    <option value="Elizaldy Salcedo Co">Elizaldy Salcedo Co</option>
+                                    <option value="Aurelio Dueñas Gonzales Jr.">Aurelio Dueñas Gonzales Jr.</option>
+                                    <option value="Tirso Edwin Loleng Gardiola">Tirso Edwin Loleng Gardiola</option>
+                                    <option value="Manuel Jose Mendoza Dalipe">Manuel Jose Mendoza Dalipe</option>
+                                    <option value="David Catarina Suarez" selected>David Catarina Suarez</option>
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <!-- Data Source Legend -->
+                        <div style="margin-bottom: 20px; padding: 15px; background: #f8f9fa; border-radius: 8px; border: 1px solid #dee2e6;">
+                            <h4 style="margin: 0 0 10px 0; color: #333; font-size: 14px; font-weight: 600;">Data Sources:</h4>
+                            <div style="display: flex; flex-wrap: wrap; gap: 20px; font-size: 13px; align-items: center;">
+                                <div style="display: flex; align-items: center; gap: 8px;">
+                                    <span style="padding: 4px 8px; border-radius: 4px; font-size: 12px; font-weight: 600; 
+                                        background: #e3f2fd; color: #1565c0; border: 1px solid #90caf9; white-space: nowrap;">SSP</span>
+                                    <span style="color: #666;">Sumbong sa Pangulo</span>
+                                </div>
+                                <div style="display: flex; align-items: center; gap: 8px;">
+                                    <span style="padding: 4px 8px; border-radius: 4px; font-size: 12px; font-weight: 600; 
+                                        background: #f3e5f5; color: #7b1fa2; border: 1px solid #ba68c8; white-space: nowrap;">DIME</span>
+                                    <span style="color: #666;">Database of Infrastructure Monitoring and Evaluation</span>
+                                </div>
+                                <div style="display: flex; align-items: center; gap: 8px;">
+                                    <span style="padding: 4px 8px; border-radius: 4px; font-size: 12px; font-weight: 600; 
+                                        background: #fff3e0; color: #e65100; border: 1px solid #ffb74d; white-space: nowrap;">PhilGEPS</span>
+                                    <span style="color: #666;">Philippine Government Electronic Procurement System</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Loading Spinner -->
+                        <div id="table-loading" style="text-align: center; padding: 40px;">
+                            <div style="display: inline-block; width: 40px; height: 40px; border: 4px solid #f3f3f3; border-top: 4px solid #333; border-radius: 50%; animation: spin 1s linear infinite;"></div>
+                            <p style="color: #666; margin-top: 15px;">Loading projects...</p>
+                        </div>
+                        
+                        <!-- Results Summary -->
+                        <div id="results-summary" style="display: none; margin-bottom: 20px; padding: 15px; background: white; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
+                            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 15px;">
+                                <div>
+                                    <strong style="color: #333;">Total Projects:</strong>
+                                    <span id="total-projects" style="color: #666;">0</span>
+                                </div>
+                                <div>
+                                    <strong style="color: #333;">District:</strong>
+                                    <span id="district-count" style="color: #666;">0</span>
+                                </div>
+                                <div>
+                                    <strong style="color: #333;">Contractor:</strong>
+                                    <span id="contractor-count" style="color: #666;">0</span>
+                                </div>
+                                <div>
+                                    <strong style="color: #333;">SSP:</strong>
+                                    <span id="ssp-count" style="color: #666;">0</span>
+                                </div>
+                                <div>
+                                    <strong style="color: #333;">DIME:</strong>
+                                    <span id="dime-count" style="color: #666;">0</span>
+                                </div>
+                                <div>
+                                    <strong style="color: #333;">PhilGEPS:</strong>
+                                    <span id="philgeps-count" style="color: #666;">0</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Projects Table -->
+                        <div style="background: white; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); overflow-x: auto;">
+                            <table id="projects-table" style="width: 100%; border-collapse: collapse;">
+                                <thead>
+                                    <tr style="background: #f8f9fa; border-bottom: 2px solid #dee2e6;">
+                                        <th style="padding: 12px; text-align: left; font-weight: 600; color: #333;">Congressman</th>
+                                        <th style="padding: 12px; text-align: left; font-weight: 600; color: #333; white-space: nowrap;">Source / Match Type</th>
+                                        <th style="padding: 12px; text-align: left; font-weight: 600; color: #333;">Project Name/Title</th>
+                                        <th style="padding: 12px; text-align: left; font-weight: 600; color: #333;">Contractor</th>
+                                        <th style="padding: 12px; text-align: right; font-weight: 600; color: #333;">Amount</th>
+                                        <th style="padding: 12px; text-align: left; font-weight: 600; color: #333;">Location</th>
+                                        <th style="padding: 12px; text-align: left; font-weight: 600; color: #333;">Year</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="projects-tbody">
+                                    <tr>
+                                        <td colspan="7" style="padding: 40px; text-align: center; color: #666;">
+                                            Loading projects...
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        
+                        <!-- Pagination -->
+                        <div id="pagination" style="display: none; margin-top: 20px; text-align: center;">
+                            <button id="prev-page" style="padding: 8px 16px; margin: 0 5px; background: #f8f9fa; border: 1px solid #ddd; border-radius: 4px; cursor: pointer;">Previous</button>
+                            <span id="page-info" style="margin: 0 15px; color: #666;">Page 1 of 1</span>
+                            <button id="next-page" style="padding: 8px 16px; margin: 0 5px; background: #f8f9fa; border: 1px solid #ddd; border-radius: 4px; cursor: pointer;">Next</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+</div>
+
+<script>
+// Tab switching
+document.querySelectorAll('.budget-tab-btn').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+        e.preventDefault();
+        const tabName = btn.getAttribute('data-tab');
+        
+        // Update active tab button
+        document.querySelectorAll('.budget-tab-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        
+        // Update active tab panel
+        document.querySelectorAll('.budget-tab-panel').forEach(p => p.classList.remove('active'));
+        document.getElementById(`tab-${tabName}`).classList.add('active');
+    });
+});
+
+// Format currency
+function formatCurrency(amount) {
+    if (!amount) return 'N/A';
+    const num = typeof amount === 'string' ? parseFloat(amount.replace(/[,\s]/g, '')) : amount;
+    if (isNaN(num)) return 'N/A';
+    return new Intl.NumberFormat('en-PH', { 
+        style: 'currency', 
+        currency: 'PHP',
+        maximumFractionDigits: 0 
+    }).format(num);
+}
+
+// Load all projects
+let currentPage = 1;
+let pageSize = 25; // Pagination size
+let allProjectsData = []; // Store all projects
+let filteredData = []; // Filtered projects based on congressman selection
+
+async function loadAllProjects() {
+    document.getElementById('table-loading').style.display = 'block';
+    document.getElementById('results-summary').style.display = 'none';
+    document.getElementById('projects-tbody').innerHTML = '<tr><td colspan="8" style="padding: 20px; text-align: center;">Loading...</td></tr>';
+    
+    try {
+        // Load all projects (use large limit to get all for filtering)
+        const response = await fetch(`/api/dynasty-projects/all?page=1&limit=10000`);
+        const data = await response.json();
+        
+        document.getElementById('table-loading').style.display = 'none';
+        
+        if (data.success && data.projects) {
+            allProjectsData = data.projects;
+            applyFilter();
+        } else {
+            document.getElementById('projects-tbody').innerHTML = 
+                `<tr><td colspan="8" style="padding: 40px; text-align: center; color: #dc3545;">${data.error || 'No projects found'}</td></tr>`;
+        }
+    } catch (error) {
+        document.getElementById('table-loading').style.display = 'none';
+        document.getElementById('projects-tbody').innerHTML = 
+            `<tr><td colspan="8" style="padding: 40px; text-align: center; color: #dc3545;">Error: ${error.message}</td></tr>`;
+    }
+}
+
+function applyFilter() {
+    const filterValue = document.getElementById('congressman-filter').value;
+    
+    if (filterValue === 'all') {
+        filteredData = allProjectsData;
+    } else {
+        filteredData = allProjectsData.filter(project => project.congressman === filterValue);
+    }
+    
+    // Reset to first page when filter changes
+    currentPage = 1;
+    updateDisplay();
+}
+
+function updateDisplay() {
+    // Calculate pagination
+    const totalPages = Math.ceil(filteredData.length / pageSize);
+    const startIndex = (currentPage - 1) * pageSize;
+    const endIndex = startIndex + pageSize;
+    const paginatedData = filteredData.slice(startIndex, endIndex);
+    
+    // Update display
+    displayProjects(paginatedData);
+    
+    // Update summary based on ALL filtered data (not just current page)
+    const summary = calculateSummary(filteredData);
+    updateSummary(summary);
+    
+    // Update pagination
+    updatePagination(filteredData.length, currentPage, totalPages);
+}
+
+function calculateSummary(projects) {
+    const summary = {
+        total: projects.length,
+        ssp: 0,
+        dime: 0,
+        philgeps: 0,
+        district_projects: 0,
+        contractor_projects: 0
+    };
+    
+    projects.forEach(project => {
+        const sources = project.sources_list || [project.source || 'Unknown'];
+        sources.forEach(src => {
+            if (src === 'SSP') summary.ssp++;
+            if (src === 'DIME') summary.dime++;
+            if (src === 'PhilGEPS') summary.philgeps++;
+        });
+        
+        if (project.match_type === 'district') summary.district_projects++;
+        if (project.match_type === 'contractor') summary.contractor_projects++;
+    });
+    
+    return summary;
+}
+
+// Load on page load
+document.addEventListener('DOMContentLoaded', () => {
+    loadAllProjects();
+    
+    // Add filter change listener
+    document.getElementById('congressman-filter').addEventListener('change', () => {
+        applyFilter();
+    });
+});
+
+function displayProjects(projects) {
+    const tbody = document.getElementById('projects-tbody');
+    
+    if (projects.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="8" style="padding: 40px; text-align: center; color: #666;">No projects found</td></tr>';
+        return;
+    }
+    
+    tbody.innerHTML = projects.map(project => {
+        const congressman = project.congressman || 'N/A';
+        const source = project.source || 'Unknown';
+        const matchType = project.match_type || 'province';
+        const matchScore = project.match_score || 0;
+        
+        // Determine match type display
+        let matchTypeDisplay = '';
+        let matchTypeEmoji = '';
+        if (matchType === 'district') {
+            matchTypeDisplay = '📍 District';
+            matchTypeEmoji = '📍';
+        } else if (matchType === 'municipality') {
+            matchTypeDisplay = '🏘️ Municipality';
+            matchTypeEmoji = '🏘️';
+        } else if (matchType === 'contractor') {
+            matchTypeDisplay = '🏢 Contractor';
+            matchTypeEmoji = '🏢';
+        } else {
+            matchTypeDisplay = '🗺️ Province';
+            matchTypeEmoji = '🗺️';
+        }
+        const name = project.project_name || project.award_title || project.title || 'N/A';
+        const contractor = project.contractor || project.awardee_name || project.contractors || 'N/A';
+        const amount = formatCurrency(project.amount || project.contract_cost || project.contract_amount || project.cost);
+        const location = project.location || `${project.province || ''}${project.province && project.municipality ? ', ' : ''}${project.municipality || ''}`.trim() || 'N/A';
+        const year = project.year || project.infra_year || project.award_date?.substring(0, 4) || 'N/A';
+        
+        return `
+            <tr style="border-bottom: 1px solid #e9ecef;">
+                <td style="padding: 12px; font-weight: 600; color: #333;">${congressman}</td>
+                <td style="padding: 12px; white-space: nowrap;">
+                    ${(project.sources_list || [source]).map(src => {
+                        const sourceLabels = {
+                            'SSP': 'SSP',
+                            'DIME': 'DIME',
+                            'PhilGEPS': 'PhilGEPS'
+                        };
+                        const label = sourceLabels[src] || src;
+                        
+                        // Different colors for each source
+                        let badgeBg, badgeColor, badgeBorder;
+                        if (src === 'SSP') {
+                            badgeBg = '#e3f2fd';
+                            badgeColor = '#1565c0';
+                            badgeBorder = '#90caf9';
+                        } else if (src === 'DIME') {
+                            badgeBg = '#f3e5f5';
+                            badgeColor = '#7b1fa2';
+                            badgeBorder = '#ba68c8';
+                        } else if (src === 'PhilGEPS') {
+                            badgeBg = '#fff3e0';
+                            badgeColor = '#e65100';
+                            badgeBorder = '#ffb74d';
+                        } else {
+                            badgeBg = '#f8f9fa';
+                            badgeColor = '#333';
+                            badgeBorder = '#dee2e6';
+                        }
+                        
+                        return `<span style="padding: 4px 8px; border-radius: 4px; font-size: 12px; font-weight: 600; 
+                            background: ${badgeBg};
+                            color: ${badgeColor};
+                            border: 1px solid ${badgeBorder};
+                            margin-right: 4px;
+                            display: inline-block;
+                            white-space: nowrap;">${label}</span>`;
+                    }).join('')}
+                    <br/>
+                    <span style="padding: 4px 8px; border-radius: 4px; font-size: 11px; font-weight: 600;
+                        background: #f8f9fa;
+                        color: #333;
+                        border: 1px solid #dee2e6;
+                        white-space: nowrap;
+                        display: inline-block;
+                        margin-top: 4px;">
+                        ${matchTypeDisplay}
+                    </span>
+                    <br/>
+                    <span style="padding: 4px 8px; border-radius: 4px; font-size: 11px; font-weight: 600;
+                        background: ${matchScore >= 100 ? '#d4edda' : matchScore >= 50 ? '#fff3cd' : '#f8d7da'};
+                        color: ${matchScore >= 100 ? '#155724' : matchScore >= 50 ? '#856404' : '#721c24'};
+                        border: 1px solid ${matchScore >= 100 ? '#c3e6cb' : matchScore >= 50 ? '#ffeaa7' : '#f5c6cb'};
+                        white-space: nowrap;
+                        display: inline-block;
+                        margin-top: 4px;">
+                        Score: ${matchScore}
+                    </span>
+                </td>
+                <td style="padding: 12px;">${name}</td>
+                <td style="padding: 12px;">${contractor}</td>
+                <td style="padding: 12px; text-align: right;">${amount}</td>
+                <td style="padding: 12px;">${location}</td>
+                <td style="padding: 12px;">${year}</td>
+            </tr>
+        `;
+    }).join('');
+}
+
+function updateSummary(summary) {
+    if (summary) {
+        document.getElementById('total-projects').textContent = summary.total || 0;
+        document.getElementById('district-count').textContent = summary.district_projects || 0;
+        document.getElementById('contractor-count').textContent = summary.contractor_projects || 0;
+        document.getElementById('ssp-count').textContent = summary.ssp || 0;
+        document.getElementById('dime-count').textContent = summary.dime || 0;
+        document.getElementById('philgeps-count').textContent = summary.philgeps || 0;
+        document.getElementById('results-summary').style.display = 'block';
+    }
+}
+
+
+function updatePagination(total, page, totalPages) {
+    const paginationDiv = document.getElementById('pagination');
+    const pageInfo = document.getElementById('page-info');
+    const prevBtn = document.getElementById('prev-page');
+    const nextBtn = document.getElementById('next-page');
+    
+    if (totalPages > 1) {
+        paginationDiv.style.display = 'block';
+        pageInfo.textContent = `Page ${page} of ${totalPages} (${total} total)`;
+        
+        if (prevBtn && nextBtn) {
+            prevBtn.disabled = page === 1;
+            nextBtn.disabled = page === totalPages;
+            
+            prevBtn.onclick = () => {
+                if (page > 1) {
+                    currentPage = page - 1;
+                    updateDisplay();
+                }
+            };
+            
+            nextBtn.onclick = () => {
+                if (page < totalPages) {
+                    currentPage = page + 1;
+                    updateDisplay();
+                }
+            };
+        }
+    } else {
+        paginationDiv.style.display = 'none';
+    }
+}
+</script>
+
+<style>
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+</style>
+
+    {% include "footer.html" %}
+</section>
+</div>
+
+</body>
+</html>
+
