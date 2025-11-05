@@ -3862,9 +3862,21 @@ function switchToTab(tabName, updateHash = true) {
             setTimeout(loadAnalysisCharts, 100);
         } else if (tabName === 'gab2026') {
             // Load GAB 2026 (PBC) charts
-            if (typeof loadPBCSheets === 'function') {
-                setTimeout(loadPBCSheets, 100);
-            }
+            // Wait a bit for the function to be available, then load
+            setTimeout(() => {
+                if (typeof loadPBCSheets === 'function') {
+                    loadPBCSheets();
+                } else {
+                    console.warn('⚠️ loadPBCSheets function not available yet, retrying...');
+                    setTimeout(() => {
+                        if (typeof loadPBCSheets === 'function') {
+                            loadPBCSheets();
+                        } else {
+                            console.error('❌ loadPBCSheets function not found');
+                        }
+                    }, 500);
+                }
+            }, 200);
         } else if (tabName === 'trends') {
             // Load trends data when tab is activated (v2.0 - 2025-01-05)
             loadDepartmentTrends();
@@ -7869,6 +7881,15 @@ async function copyChartToClipboard(containerId, buttonId) {
 
     async function loadPBCSheets() {
         try {
+            // Check if chart container exists
+            const container = document.getElementById('gab2026ChartContainer');
+            const canvas = document.getElementById('pbcChart');
+            if (!container || !canvas) {
+                console.warn('⚠️ GAB 2026 chart container not found, retrying...');
+                setTimeout(loadPBCSheets, 500);
+                return;
+            }
+            
             // Prefer pre-extracted headings detail for accurate server-side parsing
             const res = await fetch('/api/pbc/gab-2026/headings_detail');
             if (res && res.ok) {
@@ -8107,7 +8128,11 @@ async function copyChartToClipboard(containerId, buttonId) {
     }
 
     document.addEventListener('DOMContentLoaded', () => {
-        loadPBCSheets();
+        // Only auto-load if we're on the gab2026 tab
+        const hash = window.location.hash.substring(1);
+        if (hash === 'gab2026') {
+            loadPBCSheets();
+        }
         const btn = document.getElementById('pbcLoadBtn');
         const sel = document.getElementById('pbcSheetSelect');
         if (btn && sel) {
