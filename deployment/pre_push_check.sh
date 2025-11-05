@@ -47,7 +47,7 @@ log "✅ Rust code compiles successfully"
 
 # Check 3: Verify Python syntax for core application files only
 log "🐍 Checking Python syntax for core application files..."
-core_python_files=("visualization.py" "flood_client.py")
+core_python_files=("visualization.py" "flood_client.py" "nep_postgres_client.py" "budget_postgres_client.py")
 for file in "${core_python_files[@]}"; do
     if [ -f "$file" ]; then
         if ! python3 -m py_compile "$file" 2>/dev/null; then

@@ -219,25 +219,65 @@ async def get_budget_columns_comparison():
 async def get_budget_columns(year: str = "2025"):
     """Get all available columns from budget data for a specific year"""
     try:
-        print(f"🔍 [PostgreSQL] Getting budget columns for {year}")
+        # Validate year format
+        if not year.isdigit() or len(year) != 4:
+            return {"success": False, "error": "Invalid year format"}
+        
+        # Try to load from JSON cache first
+        import json
+        from pathlib import Path
+        import os
+        
+        # Get project root (where this file is located)
+        project_root = Path(__file__).parent
+        cache_file = project_root / "static" / "data" / "budget_columns_cache.json"
+        if cache_file.exists():
+            try:
+                with open(cache_file, 'r') as f:
+                    cache_data = json.load(f)
+                    if year in cache_data and cache_data[year].get("success"):
+                        print(f"✅ [Cache] Loaded budget columns for {year} from cache")
+                        return cache_data[year]
+            except Exception as e:
+                print(f"⚠️ [Cache] Error loading cache: {e}, falling back to database")
+        
+        # Fallback to database
+        print(f"🔍 [PostgreSQL] Getting budget columns for {year} from database")
         
         conn = await get_db_connection()
         if not conn:
             return {"success": False, "error": "Database connection failed"}
         
-        # Get column information from the year-specific table (validate year to prevent injection)
-        if not year.isdigit() or len(year) != 4:
-            return {"success": False, "error": "Invalid year format"}
-        
         table_name = f"budget_{year}"
         columns_view = f"{table_name}_columns_metadata"
-        columns_query = f"""
-        SELECT column_name, data_type, is_nullable
-        FROM {columns_view}
-        ORDER BY ordinal_position
-        """
         
-        rows = await conn.fetch(columns_query)
+        # Check if metadata view exists, otherwise fallback to information_schema
+        view_exists = await conn.fetchval("""
+            SELECT EXISTS (
+                SELECT FROM information_schema.views 
+                WHERE table_schema = 'public' 
+                AND table_name = $1
+            )
+        """, columns_view)
+        
+        if view_exists:
+            columns_query = f"""
+            SELECT column_name, data_type, is_nullable
+            FROM {columns_view}
+            ORDER BY ordinal_position
+            """
+            rows = await conn.fetch(columns_query)
+        else:
+            # Fallback: query information_schema directly
+            print(f"⚠️ [PostgreSQL] View {columns_view} not found, using information_schema fallback")
+            columns_query = """
+            SELECT column_name, data_type, is_nullable, ordinal_position
+            FROM information_schema.columns 
+            WHERE table_name = $1 AND table_schema = 'public'
+            AND column_name NOT IN ('id', 'source_file', 'created_at', 'updated_at')
+            ORDER BY ordinal_position
+            """
+            rows = await conn.fetch(columns_query, table_name)
         
         # Column mapping for descriptions
         column_descriptions = {
@@ -2519,6 +2559,20 @@ async def get_budget_scored_duplicates_fallback(year: str = "2025", limit: int =
             return []
         
         table_name = f"budget_{year}"
+        
+        # Check if table exists first
+        table_exists = await conn.fetchval("""
+            SELECT EXISTS (
+                SELECT FROM information_schema.tables 
+                WHERE table_schema = 'public' 
+                AND table_name = $1
+            )
+        """, table_name)
+        
+        if not table_exists:
+            print(f"⚠️ [PostgreSQL] Table {table_name} does not exist, returning empty duplicates")
+            await conn.close()
+            return []
         
         # Simple duplicate detection: find rows with same description and amount
         query = f"""

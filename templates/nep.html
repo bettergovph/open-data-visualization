@@ -3860,6 +3860,11 @@ function switchToTab(tabName, updateHash = true) {
         } else if (tabName === 'analysis') {
             // Load NEP 2026 Analysis charts
             setTimeout(loadAnalysisCharts, 100);
+        } else if (tabName === 'gab2026') {
+            // Load GAB 2026 (PBC) charts
+            if (typeof loadPBCSheets === 'function') {
+                setTimeout(loadPBCSheets, 100);
+            }
         } else if (tabName === 'trends') {
             // Load trends data when tab is activated (v2.0 - 2025-01-05)
             loadDepartmentTrends();
@@ -5408,14 +5413,14 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Check for hash in URL and switch to that tab
     const hash = window.location.hash.substring(1); // Remove the # character
-    if (hash && ['visual', 'browser'].includes(hash)) {
+    if (hash && ['visual', 'browser', 'analysis', 'gab2026'].includes(hash)) {
         switchToTab(hash, false); // Don't update hash since we're reading from it
     }
 
     // Listen for hash changes
     window.addEventListener('hashchange', function() {
         const newHash = window.location.hash.substring(1);
-        if (newHash && ['visual', 'browser'].includes(newHash)) {
+        if (newHash && ['visual', 'browser', 'analysis', 'gab2026'].includes(newHash)) {
             switchToTab(newHash, false);
         }
     });
