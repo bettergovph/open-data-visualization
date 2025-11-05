@@ -78,6 +78,69 @@
         .source-link:hover {
             color: #1d4ed8;
         }
+        
+        /* Source Popup Card */
+        .source-popup {
+            position: absolute;
+            background: white;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            padding: 16px;
+            min-width: 300px;
+            max-width: 500px;
+            max-height: 400px;
+            overflow-y: auto;
+            z-index: 1000;
+            display: none;
+            font-size: 14px;
+        }
+        
+        .source-popup.show {
+            display: block;
+        }
+        
+        .source-popup h4 {
+            font-size: 16px;
+            font-weight: 600;
+            margin: 0 0 12px 0;
+            color: #1f2937;
+            border-bottom: 2px solid #e5e7eb;
+            padding-bottom: 8px;
+        }
+        
+        .source-popup-item {
+            margin-bottom: 12px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid #f3f4f6;
+        }
+        
+        .source-popup-item:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+            padding-bottom: 0;
+        }
+        
+        .source-popup-item a {
+            color: #2563eb;
+            text-decoration: none;
+            display: block;
+            margin-bottom: 4px;
+        }
+        
+        .source-popup-item a:hover {
+            text-decoration: underline;
+        }
+        
+        .source-popup-item .source-date {
+            font-size: 12px;
+            color: #6b7280;
+        }
+        
+        .source-link-with-popup {
+            position: relative;
+            cursor: pointer;
+        }
     </style>
 </head>
 <body>
@@ -233,7 +296,7 @@ function toggleMobileMenu() {
                 <li>
                     <strong>Contractor-Dynasty Relationship Data:</strong><br>
                     <span class="text-gray-700">Investigative data on construction companies and contractors linked to political dynasties. Used in: Dynasty Analysis, Relationship Constellations, Contractor Connections.</span><br>
-                    <span class="text-gray-600">Credit: <a href="https://www.rappler.com/" target="_blank" rel="noopener noreferrer" class="source-link">Rappler</a>, <a href="https://www.gmanetwork.com/news/" target="_blank" rel="noopener noreferrer" class="source-link">GMA News Online</a>, <a href="https://www.philstar.com/" target="_blank" rel="noopener noreferrer" class="source-link">Philstar</a>, <a href="https://www.inquirer.net/" target="_blank" rel="noopener noreferrer" class="source-link">Inquirer</a> - Investigative reporting on contractor-dynasty connections</span>
+                    <span class="text-gray-600">Credit: <a href="https://www.inquirer.net/" target="_blank" rel="noopener noreferrer" class="source-link source-link-with-popup" data-source="Inquirer">Inquirer</a>, <a href="https://www.manilatimes.net/" target="_blank" rel="noopener noreferrer" class="source-link source-link-with-popup" data-source="Manila Times">Manila Times</a>, <a href="https://www.philstar.com/" target="_blank" rel="noopener noreferrer" class="source-link source-link-with-popup" data-source="Philippine STAR">Philippine STAR</a>, <a href="https://www.facebook.com/vovph" target="_blank" rel="noopener noreferrer" class="source-link source-link-with-popup" data-source="VOV Philippines">VOV Philippines</a>, <a href="https://kwebanibarok.com/" target="_blank" rel="noopener noreferrer" class="source-link source-link-with-popup" data-source="Kwebanibarok">Kwebanibarok</a> - Investigative reporting on contractor-dynasty connections</span>
                 </li>
             </ul>
         </div>
@@ -331,6 +394,188 @@ function toggleMobileMenu() {
     const menu = document.getElementById('mobileMenu');
     menu.classList.toggle('hidden');
 }
+
+// Sources data from database/sources.csv
+const SOURCES_DATA = {
+  "Wikipedia": [
+    {"title": "Edwin Gardiola - Wikipedia", "url": "https://en.wikipedia.org/wiki/Edwin_Gardiola", "date": "2025-03-12"},
+    {"title": "Mannix Dalipe - Wikipedia", "url": "https://en.wikipedia.org/wiki/Mannix_Dalipe", "date": "2025-02-05"},
+    {"title": "David Suarez (politician) - Wikipedia", "url": "https://en.wikipedia.org/wiki/David_Suarez_(politician)", "date": "2016-06-01"},
+    {"title": "Quezon's 2nd congressional district - Wikipedia", "url": "https://en.wikipedia.org/wiki/Quezon's_2nd_congressional_district", "date": "2020-04-20"},
+    {"title": "Aurelio Gonzales Jr. - Wikipedia", "url": "https://en.wikipedia.org/wiki/Aurelio_Gonzales_Jr.", "date": "2016-09-20"},
+    {"title": "Martin Romualdez - Wikipedia", "url": "https://en.wikipedia.org/wiki/Martin_Romualdez", "date": "2015-02-24"}
+  ],
+  "VOV Philippines": [
+    {"title": "Contractor-turned-congressman Tirso Edwin Loleng Gardiola - VOV Philippines", "url": "https://www.facebook.com/vovph/posts/contractor-turned-congressman-tirso-edwin-loleng-gardiola-allocated-400-million-/1242081721297565", "date": ""}
+  ],
+  "Reddit": [
+    {"title": "Party-List Representatives of the 20th Congress - Reddit", "url": "https://www.reddit.com/r/Philippines/comments/1m7xen9/partylist_representatives_of_the_20th_congress/", "date": "2025-07-24"}
+  ],
+  "PeoPlaid": [
+    {"title": "Tirso Edwin Gardiola Biography - PeoPlaid", "url": "https://peoplaid.com/2023/03/30/tirso-edwin-gardiola/", "date": "2023-03-29"},
+    {"title": "Manuel Jose Dalipe Biography - PeoPlaid", "url": "https://peoplaid.com/2019/11/30/manuel-jose-dalipe/", "date": "2019-11-29"}
+  ],
+  "DOF Philippines": [
+    {"title": "Purchaser of luxury cars rides tax evasion net - DOF Philippines", "url": "https://www.dof.gov.ph/purchaser-of-luxury-cars-rides-tax-evasion-net/", "date": "2012-02-29"}
+  ],
+  "Inquirer": [
+    {"title": "Dalipe questions timing of graft complaint vs House leaders - Inquirer News", "url": "https://newsinfo.inquirer.net/2033384/dalipe-questions-timing-of-graft-complaint-vs-house-leaders", "date": "2025-02-09"},
+    {"title": "Pampanga lawmaker faces graft case for P 612M worth of projects - Inquirer News", "url": "https://newsinfo.inquirer.net/1837158/pampanga-lawmaker-faces-graft-case-for-p-612m-projects/", "date": "2023-09-26"},
+    {"title": "Romualdezes leave EEI in buyout deal with top exec - Business Inquirer.net", "url": "https://business.inquirer.net/513889/romualdezes-leave-eei-in-buyout-deal-with-top-exec", "date": "2025-03-19"}
+  ],
+  "PDP Laban": [
+    {"title": "AURELIO DONG GONZALES - PDP Laban", "url": "https://pdplaban.org.ph/aurelio-dong-gonzales/", "date": ""}
+  ],
+  "Manila Standard": [
+    {"title": "Senior Deputy Speaker Aurelio 'Dong' D. Gonzales Jr. - Manila Standard", "url": "https://manilastandard.net/?p=314475383", "date": "2024-09-02"}
+  ],
+  "Kwebanibarok": [
+    {"title": "Pampanga's Flood of Favors: Gonzales & Sons - Kwebanibarok.com", "url": "https://kwebanibarok.com/2025/09/04/pampangas-flood-of-favors-gonzales-sons-public-works-profiteers/", "date": "2025-09-03"}
+  ],
+  "Wikiwand": [
+    {"title": "Leyte's 1st congressional district - Wikiwand", "url": "https://www.wikiwand.com/en/articles/Leyte's_1st_congressional_district", "date": "1995-06-29"}
+  ],
+  "Aviso Zamboanga": [
+    {"title": "DALIPE: WEALTH SURGES AS DPWH BUDGET BLOWS UP! - Aviso Zamboanga", "url": "https://www.facebook.com/avisozamboanga/posts/dalipe-wealth-surges-as-dpwh-budget-blows-upas-the-department-of-public-works-an/1229083155898201", "date": ""}
+  ],
+  "Manila Times": [
+    {"title": "The crooks who might get away - Manila Times", "url": "https://www.manilatimes.net/2025/10/08/opinion/columns/the-crooks-who-might-get-away/2196121", "date": "2025-10-08"}
+  ],
+  "Philippine STAR": [
+    {"title": "Twelve to 15 congressmen are facing prosecution - Philippine STAR Facebook", "url": "https://www.facebook.com/PhilippineSTAR/posts/twelve-to-15-congressmen-are-facing-prosecution-for-doubling-as-contractors-for-/1291640842999792", "date": ""}
+  ]
+};
+
+// Filter out Facebook/YouTube links if not from legitimate news sources
+function isValidNewsSource(url, sourceName) {
+    if (url.includes('facebook.com') || url.includes('youtube.com')) {
+        // Only allow Facebook/YouTube from these legitimate sources
+        const legitSources = ['VOV Philippines', 'Philippine STAR', 'Aviso Zamboanga'];
+        return legitSources.some(legit => sourceName.includes(legit));
+    }
+    return true;
+}
+
+// Create and show popup
+function showSourcePopup(sourceName, linkElement) {
+    const sources = SOURCES_DATA[sourceName];
+    if (!sources || sources.length === 0) return;
+    
+    // Filter valid sources
+    const validSources = sources.filter(s => isValidNewsSource(s.url, sourceName));
+    if (validSources.length === 0) return;
+    
+    // Remove existing popup
+    const existingPopup = document.querySelector('.source-popup');
+    if (existingPopup) {
+        existingPopup.remove();
+    }
+    
+    // Create popup
+    const popup = document.createElement('div');
+    popup.className = 'source-popup show';
+    popup.innerHTML = `<h4>${sourceName} Articles</h4>`;
+    
+    const list = document.createElement('div');
+    validSources.forEach(source => {
+        const item = document.createElement('div');
+        item.className = 'source-popup-item';
+        const link = document.createElement('a');
+        link.href = source.url;
+        link.target = '_blank';
+        link.rel = 'noopener noreferrer';
+        link.textContent = source.title;
+        item.appendChild(link);
+        if (source.date) {
+            const date = document.createElement('div');
+            date.className = 'source-date';
+            date.textContent = `Published: ${source.date}`;
+            item.appendChild(date);
+        }
+        list.appendChild(item);
+    });
+    popup.appendChild(list);
+    
+    // Position popup
+    document.body.appendChild(popup);
+    const rect = linkElement.getBoundingClientRect();
+    const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+    const scrollLeft = window.pageXOffset || document.documentElement.scrollLeft;
+    
+    popup.style.top = (rect.bottom + scrollTop + 5) + 'px';
+    popup.style.left = (rect.left + scrollLeft) + 'px';
+    
+    // Adjust if popup goes off screen
+    const popupRect = popup.getBoundingClientRect();
+    if (popupRect.right > window.innerWidth) {
+        popup.style.left = (window.innerWidth - popupRect.width - 10) + 'px';
+    }
+    if (popupRect.bottom > window.innerHeight) {
+        popup.style.top = (rect.top + scrollTop - popupRect.height - 5) + 'px';
+    }
+}
+
+// Hide popup
+function hideSourcePopup() {
+    const popup = document.querySelector('.source-popup');
+    if (popup) {
+        popup.remove();
+    }
+}
+
+// Initialize popup functionality
+document.addEventListener('DOMContentLoaded', function() {
+    const sourceLinks = document.querySelectorAll('.source-link-with-popup');
+    
+    sourceLinks.forEach(link => {
+        const sourceName = link.getAttribute('data-source');
+        
+        link.addEventListener('mouseenter', function(e) {
+            showSourcePopup(sourceName, link);
+        });
+        
+        link.addEventListener('mouseleave', function(e) {
+            // Delay hiding to allow moving to popup
+            setTimeout(() => {
+                const popup = document.querySelector('.source-popup');
+                if (popup && !popup.matches(':hover')) {
+                    hideSourcePopup();
+                }
+            }, 200);
+        });
+    });
+    
+    // Keep popup visible when hovering over it
+    document.addEventListener('mouseenter', function(e) {
+        const target = e.target;
+        if (!target || typeof target.closest !== 'function') return;
+        
+        if (target.closest('.source-popup')) {
+            // Keep popup visible
+            return;
+        }
+    }, true);
+    
+    // Hide popup when mouse leaves both link and popup
+    document.addEventListener('mouseleave', function(e) {
+        const target = e.target;
+        if (!target || typeof target.closest !== 'function') return;
+        
+        const isOverLink = target.closest('.source-link-with-popup');
+        const isOverPopup = target.closest('.source-popup');
+        
+        if (isOverLink || isOverPopup) {
+            // Check if mouse is still over link or popup
+            setTimeout(() => {
+                const hoveredLink = document.querySelector('.source-link-with-popup:hover');
+                const hoveredPopup = document.querySelector('.source-popup:hover');
+                if (!hoveredLink && !hoveredPopup) {
+                    hideSourcePopup();
+                }
+            }, 300);
+        }
+    }, true);
+});
 </script>
 
 </body>
