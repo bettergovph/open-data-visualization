@@ -109,6 +109,12 @@ log "✅ Systemd daemon reloaded"
 # Step 6: Restart services
 log "⚙️ Step 6: Restarting services..."
 
+# Clear Python bytecode cache to ensure fresh code is loaded
+log "🧹 Clearing Python bytecode cache..."
+find . -type d -name __pycache__ -exec rm -r {} + 2>/dev/null || true
+find . -name "*.pyc" -delete 2>/dev/null || true
+log "✅ Python cache cleared"
+
 # Stop services first
 log "🛑 Stopping visualization.service..."
 sudo systemctl stop visualization.service || warning "Failed to stop visualization.service"
