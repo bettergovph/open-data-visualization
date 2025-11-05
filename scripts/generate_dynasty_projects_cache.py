@@ -679,11 +679,45 @@ class DynastyProjectsCacheGenerator:
                 "contractor_projects": len([p for p in unique_projects if p.get('match_type') == 'contractor'])
             }
             
+            # Calculate congressman statistics for charts
+            congressman_stats = {}
+            for proj in unique_projects:
+                congressman = proj.get('congressman', 'Unknown')
+                if not congressman_stats.get(congressman):
+                    congressman_stats[congressman] = {
+                        "name": congressman,
+                        "count": 0,
+                        "total_cost": 0
+                    }
+                
+                congressman_stats[congressman]["count"] += 1
+                
+                # Parse amount
+                amount = proj.get('amount', 0)
+                if isinstance(amount, str):
+                    amount_str = amount.replace('₱', '').replace(',', '').strip()
+                    try:
+                        amount = float(amount_str)
+                    except (ValueError, AttributeError):
+                        amount = 0
+                else:
+                    amount = float(amount) if amount else 0
+                
+                congressman_stats[congressman]["total_cost"] += amount
+            
+            # Convert to sorted array for chart data
+            chart_data = sorted(
+                list(congressman_stats.values()),
+                key=lambda x: x["count"],
+                reverse=True
+            )
+            
             # Save to cache file
             cache_data = {
                 "success": True,
                 "projects": unique_projects,
                 "summary": summary,
+                "chart_data": chart_data,
                 "generated_at": datetime.now().isoformat(),
                 "cache_version": "1.0"
             }
