@@ -261,12 +261,12 @@ async def get_budget_columns(year: str = "2025"):
         """, columns_view)
         
         if view_exists:
-            columns_query = f"""
-            SELECT column_name, data_type, is_nullable
-            FROM {columns_view}
-            ORDER BY ordinal_position
-            """
-            rows = await conn.fetch(columns_query)
+        columns_query = f"""
+        SELECT column_name, data_type, is_nullable
+        FROM {columns_view}
+        ORDER BY ordinal_position
+        """
+        rows = await conn.fetch(columns_query)
         else:
             # Fallback: query information_schema directly
             print(f"⚠️ [PostgreSQL] View {columns_view} not found, using information_schema fallback")
