@@ -2652,6 +2652,12 @@ async def get_budget_scored_duplicates_fallback(year: str = "2025", limit: int =
         return duplicates
         
     except Exception as e:
+        error_msg = str(e)
+        # Don't log errors for non-existent tables - we already check for that
+        if "does not exist" in error_msg or "relation" in error_msg.lower():
+            # Table doesn't exist - return empty list silently
+            return []
+        # Other errors - log them
         print(f"💥 [PostgreSQL] Error in get_budget_scored_duplicates_fallback: {e}")
         return []
 

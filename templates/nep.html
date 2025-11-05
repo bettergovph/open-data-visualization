@@ -7891,16 +7891,43 @@ async function copyChartToClipboard(containerId, buttonId) {
             }
             
             // Prefer pre-extracted headings detail for accurate server-side parsing
+            console.log('🔍 [GAB 2026] Starting loadPBCSheets...');
             const res = await fetch('/api/pbc/gab-2026/headings_detail');
+            console.log('🔍 [GAB 2026] headings_detail fetch response:', res.status, res.statusText, res.ok);
+            
             if (res && res.ok) {
                 const json = await res.json();
+                console.log('📊 [GAB 2026] headings_detail JSON structure:', {
+                    hasStatus: !!json.status,
+                    status: json.status,
+                    hasData: !!json.data,
+                    hasItems: !!json.data?.items,
+                    itemsIsArray: Array.isArray(json.data?.items),
+                    itemsLength: json.data?.items?.length || 0,
+                    firstItem: json.data?.items?.[0] || null,
+                    fullResponse: json
+                });
+                
                 if (json && json.status === 'ok' && json.data && Array.isArray(json.data.items) && json.data.items.length) {
+                    console.log('✅ [GAB 2026] headings_detail has valid data, processing...');
                     const itemsRaw = json.data.items;
+                    console.log('📊 [GAB 2026] itemsRaw length:', itemsRaw.length, 'First item structure:', itemsRaw[0]);
+                    
                     // Remove first two largest rows (TOTAL NEW APPROPRIATIONS, DEPARTMENTS)
                     const items = itemsRaw.slice(2);
+                    console.log('📊 [GAB 2026] After slicing (removed first 2):', items.length, 'items');
+                    
                     const labels = items.map(it => it.label);
                     const original = items.map(it => it.original || 0);
                     const delta = items.map(it => (it.delta != null ? it.delta : ((it.hgab||0) - (it.original||0))));
+                    
+                    console.log('📊 [GAB 2026] Extracted data:', {
+                        labelsCount: labels.length,
+                        labelsSample: labels.slice(0, 3),
+                        originalSample: original.slice(0, 3),
+                        deltaSample: delta.slice(0, 3),
+                        hasAllFields: items.every(it => it.hasOwnProperty('label') && it.hasOwnProperty('original') && it.hasOwnProperty('hgab'))
+                    });
                     const deltaColors = delta.map(v => v >= 0 ? '#2ca02c' : '#d62728');
                     // Build asymmetric ticks: 10B steps on negative side, 200B on positive
                     const negMin = Math.min(0, ...delta.filter(v => v < 0));
@@ -7933,23 +7960,58 @@ async function copyChartToClipboard(containerId, buttonId) {
 
                 // If still no data or all zeros, fall back to raw sheet method
                 const totalSum = datasets.reduce((acc, ds) => acc + ds.data.reduce((a,b)=>a+(b||0),0), 0);
+                console.log('📊 [GAB 2026] Dataset check:', {
+                    datasetsCount: datasets.length,
+                    totalSum: totalSum,
+                    needsFallback: datasets.length === 0 || totalSum === 0
+                });
+                
                 if (datasets.length === 0 || totalSum === 0) {
+                    console.warn('⚠️ [GAB 2026] Datasets empty or zero sum, falling back to sheets API');
                     const res2 = await fetch('/api/pbc/gab-2026/sheets');
                     const json2 = await res2.json();
+                    console.log('📊 [GAB 2026] sheets fallback response:', {
+                        status: json2.status,
+                        hasData: !!json2.data,
+                        hasSheets: !!json2.data?.sheets,
+                        sheetsIsArray: Array.isArray(json2.data?.sheets),
+                        sheetsLength: json2.data?.sheets?.length || 0
+                    });
                     const sheets = (json2 && json2.status === 'ok' && json2.data && Array.isArray(json2.data.sheets)) ? json2.data.sheets : [];
                     if (sheets.length > 0) {
+                        console.log('📊 [GAB 2026] Loading sheet data:', sheets[0]);
                         await loadPBCSheetData(sheets[0]);
                         return;
+                    } else {
+                        console.warn('⚠️ [GAB 2026] No sheets available in fallback');
                     }
                 }
                 const container = document.getElementById('gab2026ChartContainer');
                 const canvas = document.getElementById('pbcChart');
+                
+                if (!container || !canvas) {
+                    console.error('❌ [GAB 2026] Container or canvas not found after data processing');
+                    return;
+                }
+                
                 // Dynamic height: 28px per bar + 160px padding for legend/margins
                 const dynHeight = Math.max(600, (labels.length * 28) + 160);
                 container.style.height = dynHeight + 'px';
                 canvas.height = dynHeight - 40;
                 const ctx = canvas.getContext('2d');
-                    if (window.pbcChartInstance) window.pbcChartInstance.destroy();
+                
+                console.log('📊 [GAB 2026] Creating chart with:', {
+                    labelsCount: labels.length,
+                    datasetsCount: datasets.length,
+                    canvasHeight: canvas.height,
+                    containerHeight: container.style.height
+                });
+                
+                if (window.pbcChartInstance) {
+                    console.log('🔄 [GAB 2026] Destroying existing chart instance');
+                    window.pbcChartInstance.destroy();
+                }
+                
                 window.pbcChartInstance = new Chart(ctx, {
                     type: 'bar',
                     data: { labels, datasets },
@@ -7988,27 +8050,73 @@ async function copyChartToClipboard(containerId, buttonId) {
                         }
                     }
                 });
-                    return;
+                
+                console.log('✅ [GAB 2026] Chart created successfully');
+                return;
+                } else {
+                    console.warn('⚠️ [GAB 2026] headings_detail response missing or invalid:', {
+                        hasJson: !!json,
+                        status: json?.status,
+                        hasData: !!json?.data,
+                        hasItems: !!json?.data?.items,
+                        itemsIsArray: Array.isArray(json?.data?.items),
+                        itemsLength: json?.data?.items?.length || 0
+                    });
                 }
             }
             // If non-OK or empty, fall back to raw sheet
+            console.warn('⚠️ [GAB 2026] Falling back to sheets API');
             const res2 = await fetch('/api/pbc/gab-2026/sheets');
+            if (!res2 || !res2.ok) {
+                console.error('❌ [GAB 2026] sheets API failed:', res2?.status, res2?.statusText);
+                return;
+            }
             const json2 = await res2.json();
+            console.log('📊 [GAB 2026] sheets response structure:', {
+                status: json2.status,
+                hasData: !!json2.data,
+                hasSheets: !!json2.data?.sheets,
+                sheetsIsArray: Array.isArray(json2.data?.sheets),
+                sheetsLength: json2.data?.sheets?.length || 0,
+                sheetsSample: json2.data?.sheets?.slice(0, 3),
+                fullResponse: json2
+            });
             const sheets = (json2 && json2.status === 'ok' && json2.data && Array.isArray(json2.data.sheets)) ? json2.data.sheets : [];
             if (sheets.length > 0) {
+                console.log('📊 [GAB 2026] Loading sheet data:', sheets[0]);
                 await loadPBCSheetData(sheets[0]);
+            } else {
+                console.warn('⚠️ [GAB 2026] No sheets available');
             }
         } catch (e) {
+            console.error('❌ [GAB 2026] Error in loadPBCSheets:', e);
+            console.error('❌ [GAB 2026] Error stack:', e.stack);
+            
             // Any failure: fall back to raw sheet method
             try {
+                console.log('🔄 [GAB 2026] Attempting fallback to sheets API');
                 const res2 = await fetch('/api/pbc/gab-2026/sheets');
+                if (!res2 || !res2.ok) {
+                    console.error('❌ [GAB 2026] Fallback sheets API failed:', res2?.status, res2?.statusText);
+                    return;
+                }
                 const json2 = await res2.json();
+                console.log('📊 [GAB 2026] Fallback sheets response:', {
+                    status: json2.status,
+                    hasData: !!json2.data,
+                    hasSheets: !!json2.data?.sheets,
+                    sheetsLength: json2.data?.sheets?.length || 0
+                });
                 const sheets = (json2 && json2.status === 'ok' && json2.data && Array.isArray(json2.data.sheets)) ? json2.data.sheets : [];
                 if (sheets.length > 0) {
+                    console.log('📊 [GAB 2026] Fallback loading sheet:', sheets[0]);
                     await loadPBCSheetData(sheets[0]);
+                } else {
+                    console.warn('⚠️ [GAB 2026] Fallback: No sheets available');
                 }
             } catch (e2) {
-                console.warn('Failed loading PBC sheets fallback', e2);
+                console.error('❌ [GAB 2026] Fallback error:', e2);
+                console.error('❌ [GAB 2026] Fallback error stack:', e2.stack);
             }
         }
     }
@@ -8016,9 +8124,33 @@ async function copyChartToClipboard(containerId, buttonId) {
     async function loadPBCSheetData(name) {
         // no preview table; chart only
         try {
-            const res = await fetch(`/api/pbc/gab-2026/sheet?name=${encodeURIComponent(name)}&limit=100`);
+            console.log('🔍 [GAB 2026] loadPBCSheetData called with:', name);
+            const url = `/api/pbc/gab-2026/sheet?name=${encodeURIComponent(name)}&limit=100`;
+            console.log('🔍 [GAB 2026] Fetching from URL:', url);
+            
+            const res = await fetch(url);
+            console.log('🔍 [GAB 2026] sheet fetch response:', res.status, res.statusText, res.ok);
+            
             const json = await res.json();
-            if (json.status !== 'ok' || !json.data || !Array.isArray(json.data.rows)) return;
+            console.log('📊 [GAB 2026] sheet JSON structure:', {
+                status: json.status,
+                hasData: !!json.data,
+                hasRows: !!json.data?.rows,
+                rowsIsArray: Array.isArray(json.data?.rows),
+                rowsLength: json.data?.rows?.length || 0,
+                firstRow: json.data?.rows?.[0] || null,
+                firstRowKeys: json.data?.rows?.[0] ? Object.keys(json.data.rows[0]) : null,
+                fullResponse: json
+            });
+            
+            if (json.status !== 'ok' || !json.data || !Array.isArray(json.data.rows)) {
+                console.warn('⚠️ [GAB 2026] sheet response invalid:', {
+                    statusOk: json.status === 'ok',
+                    hasData: !!json.data,
+                    rowsIsArray: Array.isArray(json.data?.rows)
+                });
+                return;
+            }
             const rows = json.data.rows;
             if (!rows.length) return;
             const keys = Object.keys(rows[0]).filter(k => k !== 'row_index');

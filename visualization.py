@@ -57,28 +57,39 @@ async def budget_list_files_api():
 async def list_pbc_gab_2026_sheets() -> JSONResponse:
     try:
         conn = await get_nep_db_connection()
-    except Exception:
+    except Exception as e:
+        print(f"💥 [GAB 2026] DB connection error: {e}")
         conn = None
     if not conn:
+        print("💥 [GAB 2026] DB connection failed")
         return JSONResponse(status_code=500, content={"status": "error", "error": "DB connection failed"})
     try:
         try:
             rows = await conn.fetch("SELECT DISTINCT sheet_name FROM pbc_gab_2026_rows ORDER BY sheet_name")
             sheets = [r[0] for r in rows]
+            print(f"✅ [GAB 2026] sheets: {len(sheets)} sheets found")
         except Exception as e:
+            error_msg = str(e)
+            print(f"💥 [GAB 2026] Error querying pbc_gab_2026_rows: {error_msg}")
+            # Check if table doesn't exist
+            if "does not exist" in error_msg or "relation" in error_msg.lower():
+                print("⚠️ [GAB 2026] Table pbc_gab_2026_rows does not exist")
             # Table may not exist yet or other error; return empty list gracefully
             sheets = []
         return JSONResponse(content={"status": "ok", "data": {"sheets": sheets}})
     finally:
-        await conn.close()
+        if conn:
+            await conn.close()
 
 @app.get("/api/pbc/gab-2026/sheet")
 async def get_pbc_gab_2026_sheet(name: str = Query(..., alias="name"), limit: int = 200) -> JSONResponse:
     try:
         conn = await get_nep_db_connection()
-    except Exception:
+    except Exception as e:
+        print(f"💥 [GAB 2026] DB connection error: {e}")
         conn = None
     if not conn:
+        print("💥 [GAB 2026] DB connection failed")
         return JSONResponse(status_code=500, content={"status": "error", "error": "DB connection failed"})
     try:
         try:
@@ -88,11 +99,17 @@ async def get_pbc_gab_2026_sheet(name: str = Query(..., alias="name"), limit: in
                 limit,
             )
             data = [{"row_index": r[0], **(r[1] or {})} for r in rows]
+            print(f"✅ [GAB 2026] sheet '{name}': {len(data)} rows")
         except Exception as e:
+            error_msg = str(e)
+            print(f"💥 [GAB 2026] Error querying sheet '{name}': {error_msg}")
+            if "does not exist" in error_msg or "relation" in error_msg.lower():
+                print("⚠️ [GAB 2026] Table pbc_gab_2026_rows does not exist")
             data = []
         return JSONResponse(content={"status": "ok", "data": {"rows": data}})
     finally:
-        await conn.close()
+        if conn:
+            await conn.close()
 
 @app.get("/api/pbc/gab-2026/headings")
 async def get_pbc_gab_2026_headings() -> JSONResponse:
@@ -120,9 +137,11 @@ async def get_pbc_gab_2026_headings() -> JSONResponse:
 async def get_pbc_gab_2026_headings_detail() -> JSONResponse:
     try:
         conn = await get_nep_db_connection()
-    except Exception:
+    except Exception as e:
+        print(f"💥 [GAB 2026] DB connection error: {e}")
         conn = None
     if not conn:
+        print("💥 [GAB 2026] DB connection failed")
         return JSONResponse(status_code=500, content={"status": "error", "error": "DB connection failed"})
     try:
         rows = await conn.fetch(
@@ -142,16 +161,18 @@ async def get_pbc_gab_2026_headings_detail() -> JSONResponse:
                 "hgab": float(r[3]) if r[3] is not None else None,
                 "delta": float(r[4]) if r[4] is not None else None,
             })
+        print(f"✅ [GAB 2026] headings_detail: {len(items)} items")
         return JSONResponse(content={"status": "ok", "data": {"items": items}})
-    except Exception:
+    except Exception as e:
+        error_msg = str(e)
+        print(f"💥 [GAB 2026] Error querying pbc_gab_2026_headings_detail: {error_msg}")
+        # Check if table doesn't exist
+        if "does not exist" in error_msg or "relation" in error_msg.lower():
+            print("⚠️ [GAB 2026] Table pbc_gab_2026_headings_detail does not exist")
         return JSONResponse(content={"status": "ok", "data": {"items": []}})
     finally:
-        await conn.close()
-    try:
-        result = await get_budget_files()
-        return JSONResponse(result)
-    except Exception as e:
-        return JSONResponse({"success": False, "error": str(e)})
+        if conn:
+            await conn.close()
 
 @app.get("/api/budget/total-items/count")
 async def budget_total_items_count_api():
