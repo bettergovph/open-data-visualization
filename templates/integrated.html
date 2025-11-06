@@ -1934,12 +1934,21 @@ async function loadProvinceVisualData() {
                 return;
             }
             
-            // Also update the provinces chart with the current province (in case it wasn't updated immediately)
-            await loadTopProvincesChart(selectedProvince);
-            
             // Load province projects from API
             const response = await fetch(`/api/province-projects/all?page=1&limit=10000&province=${encodeURIComponent(selectedProvince)}`);
             const data = await response.json();
+            
+            // Get the exact province name from API response (same approach as municipalities use filterOptions)
+            // The API returns the exact province name it recognized/used
+            let exactProvinceName = selectedProvince;
+            if (data.province) {
+                // Use the exact province name from the API response
+                exactProvinceName = data.province;
+                console.log('✅ [Province Visual] Using exact province name from API response:', exactProvinceName);
+            }
+            
+            // Update the provinces chart with the exact province name from API
+            await loadTopProvincesChart(exactProvinceName);
             
             // Update dashboard
             const dashboard = document.getElementById('province-visual-dashboard');
@@ -2397,23 +2406,63 @@ async function loadTopProvincesChart(selectedProvince = null) {
                 
                 // Find the selected province's index
                 let selectedIndex = -1;
+                let exactMatchIndex = -1;
+                let partialMatchIndex = -1;
+                
                 for (let i = 0; i < data.provinces.length; i++) {
                     const province = data.provinces[i];
                     const normalizedProvince = normalizeName(province.name);
                     
                     // Try exact match first
                     if (normalizedProvince === normalizedSelected) {
-                        selectedIndex = i;
+                        exactMatchIndex = i;
                         console.log('✅ [Provinces Chart] Found exact match at index:', i, 'province:', province.name);
                         break;
                     }
-                    // Try if one contains the other
-                    if (normalizedProvince.includes(normalizedSelected) || normalizedSelected.includes(normalizedProvince)) {
-                        selectedIndex = i;
-                        console.log('✅ [Provinces Chart] Found partial match at index:', i, 'province:', province.name);
-                        break;
+                }
+                
+                // If no exact match, try partial match but be very strict
+                // Only match if the selected name is longer and starts with the province name
+                // This prevents "Samar" from matching "Eastern Samar" or "Northern Samar"
+                // Example: "Eastern Samar" selected can match "Eastern Samar" in data
+                // But "Samar" selected should NOT match "Eastern Samar" in data
+                if (exactMatchIndex === -1) {
+                    for (let i = 0; i < data.provinces.length; i++) {
+                        const province = data.provinces[i];
+                        const normalizedProvince = normalizeName(province.name);
+                        
+                        // Only match if the selected name is longer and starts with the province name
+                        // OR if the province name is longer and starts with the selected name
+                        // But NOT if a short name like "Samar" could match a longer name like "Eastern Samar"
+                        if (normalizedSelected.length > normalizedProvince.length) {
+                            // Selected is longer: "Eastern Samar" looking for "Eastern Samar" or "Samar"
+                            // Only match if selected starts with province (e.g., "Eastern Samar" starts with "Eastern")
+                            // But we want exact or very close matches, so check if province is a significant part
+                            if (normalizedSelected.startsWith(normalizedProvince)) {
+                                // Additional safety: if province name is very short (like "Samar" = 5),
+                                // and selected is much longer (like "Eastern Samar" = 13),
+                                // only match if the province name is at least 8 chars or difference is small
+                                const lengthDiff = normalizedSelected.length - normalizedProvince.length;
+                                if (normalizedProvince.length >= 8 || lengthDiff <= 2) {
+                                    partialMatchIndex = i;
+                                    console.log('✅ [Provinces Chart] Found partial match (selected longer) at index:', i, 'province:', province.name);
+                                    break;
+                                }
+                            }
+                        } else if (normalizedProvince.length > normalizedSelected.length) {
+                            // Province is longer: "Eastern Samar" in data, selected is "Eastern Samar" or "Samar"
+                            // Only match if province starts with selected AND selected is long enough
+                            // This prevents "Samar" (5) from matching "Eastern Samar" (13)
+                            if (normalizedProvince.startsWith(normalizedSelected) && normalizedSelected.length >= 8) {
+                                partialMatchIndex = i;
+                                console.log('✅ [Provinces Chart] Found partial match (province longer) at index:', i, 'province:', province.name);
+                                break;
+                            }
+                        }
                     }
                 }
+                
+                selectedIndex = exactMatchIndex !== -1 ? exactMatchIndex : partialMatchIndex;
                 
                 if (selectedIndex !== -1) {
                     // Center the selected province with 5 provinces above and below
@@ -2486,15 +2535,49 @@ function createProvincesChart(provincesData, selectedProvince = null) {
     let selectedIndex = -1;
     if (selectedProvince && selectedProvince.trim().length > 0) {
         const normalizedSelected = normalizeName(selectedProvince);
+        let exactMatchIndex = -1;
+        let partialMatchIndex = -1;
+        
+        // First, try exact match
         for (let i = 0; i < labels.length; i++) {
             const normalizedLabel = normalizeName(labels[i]);
-            if (normalizedLabel === normalizedSelected || 
-                normalizedLabel.includes(normalizedSelected) || 
-                normalizedSelected.includes(normalizedLabel)) {
-                selectedIndex = i;
+            if (normalizedLabel === normalizedSelected) {
+                exactMatchIndex = i;
                 break;
             }
         }
+        
+        // If no exact match, try partial match but be very strict
+        // Only match if the selected name is longer and starts with the label name
+        // This prevents "Samar" from matching "Eastern Samar" or "Northern Samar"
+        if (exactMatchIndex === -1) {
+            for (let i = 0; i < labels.length; i++) {
+                const normalizedLabel = normalizeName(labels[i]);
+                
+                // Only match if the selected name is longer and starts with the label name
+                // OR if the label name is longer and starts with the selected name (but selected must be long enough)
+                // This prevents "Samar" (5) from matching "Eastern Samar" (13)
+                if (normalizedSelected.length > normalizedLabel.length) {
+                    // Selected is longer: "Eastern Samar" looking for "Eastern Samar" or "Samar"
+                    if (normalizedSelected.startsWith(normalizedLabel)) {
+                        const lengthDiff = normalizedSelected.length - normalizedLabel.length;
+                        if (normalizedLabel.length >= 8 || lengthDiff <= 2) {
+                            partialMatchIndex = i;
+                            break;
+                        }
+                    }
+                } else if (normalizedLabel.length > normalizedSelected.length) {
+                    // Label is longer: "Eastern Samar" in data, selected is "Eastern Samar" or "Samar"
+                    // Only match if label starts with selected AND selected is long enough
+                    if (normalizedLabel.startsWith(normalizedSelected) && normalizedSelected.length >= 8) {
+                        partialMatchIndex = i;
+                        break;
+                    }
+                }
+            }
+        }
+        
+        selectedIndex = exactMatchIndex !== -1 ? exactMatchIndex : partialMatchIndex;
     }
     
     // Create arrays for bar colors and borders to highlight selected province
