@@ -4352,6 +4352,194 @@ async def dynasty_projects_search_api(
             "summary": {"total": 0, "ssp": 0, "dime": 0, "philgeps": 0}
         })
 
+@app.get("/api/province-projects/all")
+async def province_projects_all_api(
+    page: int = Query(1, ge=1, description="Page number"),
+    limit: int = Query(50, ge=1, le=10000, description="Number of records per page"),
+    province: str = Query("Cebu", description="Province name"),
+    contractor: str = Query(None, description="Contractor name (optional)")
+):
+    """Get all projects for a specific province from cached JSON (per contractor cache files)"""
+    try:
+        import json
+        from pathlib import Path
+        
+        # Load summary file first
+        cache_dir = Path(__file__).parent / 'static' / 'data' / f'province-projects-{province.lower().replace(" ", "-")}'
+        summary_file = cache_dir / 'summary.json'
+        
+        # Fallback to old cache file structure if new structure doesn't exist
+        old_cache_file = Path(__file__).parent / 'static' / 'data' / f'province-projects-{province.lower().replace(" ", "-")}-cache.json'
+        
+        if summary_file.exists():
+            # New structure: load from per-contractor cache files
+            with open(summary_file, 'r', encoding='utf-8') as f:
+                summary_data = json.load(f)
+            
+            unique_projects = []
+            province_cache_filter_options = None  # Initialize for filter_options
+            
+            if contractor and contractor != 'all' and contractor != 'All Contractors':
+                # Load specific contractor cache file
+                contractor_normalized = contractor.lower().replace(" ", "-").replace("/", "-")
+                contractor_cache_file = cache_dir / f'{contractor_normalized}-cache.json'
+                
+                if contractor_cache_file.exists():
+                    with open(contractor_cache_file, 'r', encoding='utf-8') as f:
+                        contractor_data = json.load(f)
+                    unique_projects = contractor_data.get('projects', [])
+                else:
+                    # Check if contractor is in small contractors cache
+                    small_contractors_cache_file = cache_dir / 'small-contractors-cache.json'
+                    if small_contractors_cache_file.exists():
+                        with open(small_contractors_cache_file, 'r', encoding='utf-8') as f:
+                            small_contractors_data = json.load(f)
+                        projects_by_contractor = small_contractors_data.get('projects_by_contractor', {})
+                        if contractor in projects_by_contractor:
+                            unique_projects = projects_by_contractor[contractor]
+                        else:
+                            # Contractor not found
+                            return JSONResponse({
+                                "success": False,
+                                "error": f"Contractor '{contractor}' not found for {province}",
+                                "projects": [],
+                                "summary": summary_data.get('summary', {"total": 0, "ssp": 0, "dime": 0, "philgeps": 0}),
+                                "total_cost": 0
+                            })
+                    else:
+                        # Contractor not found
+                        return JSONResponse({
+                            "success": False,
+                            "error": f"Contractor '{contractor}' not found for {province}",
+                            "projects": [],
+                            "summary": summary_data.get('summary', {"total": 0, "ssp": 0, "dime": 0, "philgeps": 0}),
+                            "total_cost": 0
+                        })
+            else:
+                # Load all projects - use province-level cache if available (more efficient)
+                province_cache_file = cache_dir / 'all-projects-cache.json'
+                if province_cache_file.exists():
+                    with open(province_cache_file, 'r', encoding='utf-8') as f:
+                        province_cache_data = json.load(f)
+                    unique_projects = province_cache_data.get('projects', [])
+                    province_cache_filter_options = province_cache_data.get('filter_options')
+                else:
+                    # Fallback: Load all contractor cache files
+                    contractors = summary_data.get('contractors', {})
+                    small_contractors_loaded = False
+                    
+                    for contractor_name, contractor_info in contractors.items():
+                        # Check if this is a small contractor (already loaded from combined cache)
+                        if contractor_info.get('is_small_contractor', False) and not small_contractors_loaded:
+                            # Load small contractors cache once
+                            small_contractors_cache_file = cache_dir / 'small-contractors-cache.json'
+                            if small_contractors_cache_file.exists():
+                                with open(small_contractors_cache_file, 'r', encoding='utf-8') as f:
+                                    small_contractors_data = json.load(f)
+                                projects_by_contractor = small_contractors_data.get('projects_by_contractor', {})
+                                for small_contractor, small_projects in projects_by_contractor.items():
+                                    unique_projects.extend(small_projects)
+                                small_contractors_loaded = True
+                            continue
+                        elif contractor_info.get('is_small_contractor', False):
+                            # Skip small contractors as they're already loaded
+                            continue
+                        
+                        # Load individual contractor cache file
+                        cache_file_path = Path(__file__).parent / 'static' / 'data' / contractor_info['cache_file']
+                        if cache_file_path.exists():
+                            with open(cache_file_path, 'r', encoding='utf-8') as f:
+                                contractor_data = json.load(f)
+                            unique_projects.extend(contractor_data.get('projects', []))
+            
+            # Sort by cost descending
+            unique_projects.sort(key=lambda x: float(x.get('amount', 0) or 0), reverse=True)
+            
+            # Paginate
+            total_pages = (len(unique_projects) + limit - 1) // limit
+            offset = (page - 1) * limit
+            paginated_projects = unique_projects[offset:offset + limit]
+            
+            # Use filter_options from province cache if available, otherwise from summary
+            filter_options = province_cache_filter_options if province_cache_filter_options else summary_data.get('filter_options', {"contractors": [], "municipalities": []})
+            
+            return JSONResponse({
+                "success": True,
+                "province": summary_data.get('province', province),
+                "projects": paginated_projects,
+                "summary": summary_data.get('summary', {}),
+                "total_cost": summary_data.get('total_cost', 0),
+                "filter_options": filter_options,
+                "page": page,
+                "total": len(unique_projects),
+                "total_pages": total_pages,
+                "generated_at": summary_data.get('generated_at'),
+                "cache_version": summary_data.get('cache_version', '1.0')
+            })
+        
+        elif old_cache_file.exists():
+            # Old structure: single cache file (backward compatibility)
+            with open(old_cache_file, 'r', encoding='utf-8') as f:
+                cache_data = json.load(f)
+            
+            if not cache_data.get('success', False):
+                return JSONResponse({
+                    "success": False,
+                    "error": cache_data.get('error', 'Unknown error'),
+                    "projects": [],
+                    "summary": cache_data.get('summary', {"total": 0, "ssp": 0, "dime": 0, "philgeps": 0}),
+                    "total_cost": 0
+                })
+            
+            unique_projects = cache_data.get('projects', [])
+            
+            # Filter by contractor if specified
+            if contractor and contractor != 'all' and contractor != 'All Contractors':
+                unique_projects = [
+                    p for p in unique_projects 
+                    if (p.get('contractor', '').strip() or 'Unknown') == contractor
+                ]
+            
+            # Paginate
+            total_pages = (len(unique_projects) + limit - 1) // limit
+            offset = (page - 1) * limit
+            paginated_projects = unique_projects[offset:offset + limit]
+            
+            return JSONResponse({
+                "success": True,
+                "province": cache_data.get('province', province),
+                "projects": paginated_projects,
+                "summary": cache_data.get('summary', {}),
+                "total_cost": cache_data.get('total_cost', 0),
+                "filter_options": cache_data.get('filter_options', {"contractors": [], "municipalities": []}),
+                "page": page,
+                "total": len(unique_projects),
+                "total_pages": total_pages,
+                "generated_at": cache_data.get('generated_at'),
+                "cache_version": cache_data.get('cache_version', '1.0')
+            })
+        
+        else:
+            return JSONResponse({
+                "success": False,
+                "error": f"Cached data not found for {province}. Please run scripts/generate_province_projects_cache.py",
+                "projects": [],
+                "summary": {"total": 0, "ssp": 0, "dime": 0, "philgeps": 0},
+                "total_cost": 0
+            })
+        
+    except Exception as e:
+        print(f"Error in province_projects_all_api: {e}")
+        import traceback
+        traceback.print_exc()
+        return JSONResponse({
+            "success": False,
+            "error": str(e),
+            "projects": [],
+            "summary": {"total": 0, "ssp": 0, "dime": 0, "philgeps": 0},
+            "total_cost": 0
+        })
+
 @app.get("/api/dynasty-projects/search")
 async def dynasty_projects_search_api(
     congressman: str = Query(..., description="Congressman name to search"),
