@@ -546,7 +546,7 @@ function toggleMobileMenu() {
                         
                         <!-- Top 10 Provinces Chart -->
                         <div style="margin-top: 30px; background: white; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); padding: 20px; position: relative;">
-                            <h4 style="margin: 0 0 20px 0; color: #333; font-size: 18px; font-weight: 600;">Top 10 Provinces by Project Count</h4>
+                            <h4 style="margin: 0 0 20px 0; color: #333; font-size: 18px; font-weight: 600;">Provinces by Project Count</h4>
                             <button id="copy-provinces-chart-btn" style="position: absolute; top: 20px; right: 20px; padding: 10px 20px; background: #333; color: white; border: 2px solid #333; border-radius: 6px; font-size: 14px; font-weight: 600; cursor: pointer; transition: all 0.3s ease; box-shadow: 0 4px 12px rgba(0,0,0,0.2); z-index: 10;" onmouseover="this.style.background='#667eea'; this.style.borderColor='#667eea'; this.style.transform='translateY(-2px)'; this.style.boxShadow='0 6px 16px rgba(102, 126, 234, 0.4)';" onmouseout="this.style.background='#333'; this.style.borderColor='#333'; this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 12px rgba(0,0,0,0.2)';">📋 Copy Chart</button>
                             <canvas id="provincesChart" style="max-height: 500px;"></canvas>
                         </div>
@@ -1839,15 +1839,44 @@ function handleProvinceVisualBlur() {
 }
 
 async function loadProvinceVisualData() {
-    // Load top 10 provinces chart (always shown, not filtered by province)
-    await loadTopProvincesChart();
+    // Get selected province from filter
+    const provinceSelect = document.getElementById('province-visual-filter');
+    let selectedProvince = provinceSelect ? provinceSelect.value.trim() : null;
+    
+    // Try to match with datalist options to get full province name
+    const datalist = document.getElementById('province-visual-list');
+    if (datalist && selectedProvince) {
+        const options = Array.from(datalist.options);
+        const matchingOption = options.find(opt => {
+            const optValue = opt.value.toLowerCase();
+            const inputValue = selectedProvince.toLowerCase();
+            return optValue === inputValue || optValue.startsWith(inputValue);
+        });
+        
+        if (matchingOption) {
+            selectedProvince = matchingOption.value;
+        }
+    }
+    
+    // Normalize province name (fix common typos)
+    if (selectedProvince) {
+        if (selectedProvince.toLowerCase() === 'iloil' || selectedProvince.toLowerCase() === 'iloi' || selectedProvince.toLowerCase() === 'ilo') {
+            selectedProvince = 'Iloilo';
+        } else if (selectedProvince.toLowerCase() === 'compostela valley') {
+            selectedProvince = 'Davao de Oro';
+        }
+    }
+    
+    // Load provinces chart (centered on selected province if provided, otherwise top 10)
+    // This runs immediately when province changes
+    await loadTopProvincesChart(selectedProvince || null);
     
     // Clear existing debounce timer
     if (provinceVisualDebounceTimer) {
         clearTimeout(provinceVisualDebounceTimer);
     }
     
-    // Debounce the function call
+    // Debounce the function call for municipality and contractor charts
     provinceVisualDebounceTimer = setTimeout(async () => {
         const loading = document.getElementById('province-visual-loading');
         const municipalityChartContainer = document.getElementById('municipalityChart')?.parentElement;
@@ -1859,7 +1888,7 @@ async function loadProvinceVisualData() {
         loading.style.display = 'block';
         
         try {
-            // Get selected province from filter
+            // Get selected province from filter (re-fetch to ensure we have the latest value)
             const provinceSelect = document.getElementById('province-visual-filter');
             let selectedProvince = provinceSelect ? provinceSelect.value.trim() : 'Cebu';
             
@@ -1904,6 +1933,9 @@ async function loadProvinceVisualData() {
                 console.log('Province name too short, skipping API call');
                 return;
             }
+            
+            // Also update the provinces chart with the current province (in case it wasn't updated immediately)
+            await loadTopProvincesChart(selectedProvince);
             
             // Load province projects from API
             const response = await fetch(`/api/province-projects/all?page=1&limit=10000&province=${encodeURIComponent(selectedProvince)}`);
@@ -2335,12 +2367,74 @@ function calculateMunicipalityStats(projects, province = 'Cebu', filterOptions =
 }
 
 // Load top 10 provinces chart
-async function loadTopProvincesChart() {
+async function loadTopProvincesChart(selectedProvince = null) {
     try {
-        const response = await fetch('/api/province-projects/top-provinces');
+        // If a province is selected, fetch all provinces to center on it
+        // Otherwise, fetch top 10
+        const url = selectedProvince 
+            ? '/api/province-projects/top-provinces?all=true'
+            : '/api/province-projects/top-provinces';
+        
+        const response = await fetch(url);
         const data = await response.json();
         
         if (data.success && data.provinces && data.provinces.length > 0) {
+            let provincesToShow = data.provinces;
+            
+            // If a province is selected, center the chart on it
+            if (selectedProvince && selectedProvince.trim().length > 0) {
+                // Normalize province name for matching
+                const normalizeName = (name) => {
+                    if (!name) return '';
+                    return name.toLowerCase().trim()
+                        .replace(/\s+/g, ' ') // Normalize whitespace
+                        .replace(/province$/, '') // Remove "province" suffix
+                        .trim();
+                };
+                const normalizedSelected = normalizeName(selectedProvince);
+                
+                console.log('🔍 [Provinces Chart] Looking for province:', selectedProvince, 'normalized:', normalizedSelected);
+                
+                // Find the selected province's index
+                let selectedIndex = -1;
+                for (let i = 0; i < data.provinces.length; i++) {
+                    const province = data.provinces[i];
+                    const normalizedProvince = normalizeName(province.name);
+                    
+                    // Try exact match first
+                    if (normalizedProvince === normalizedSelected) {
+                        selectedIndex = i;
+                        console.log('✅ [Provinces Chart] Found exact match at index:', i, 'province:', province.name);
+                        break;
+                    }
+                    // Try if one contains the other
+                    if (normalizedProvince.includes(normalizedSelected) || normalizedSelected.includes(normalizedProvince)) {
+                        selectedIndex = i;
+                        console.log('✅ [Provinces Chart] Found partial match at index:', i, 'province:', province.name);
+                        break;
+                    }
+                }
+                
+                if (selectedIndex !== -1) {
+                    // Center the selected province with 5 provinces above and below
+                    const provincesAbove = 5;
+                    const provincesBelow = 5;
+                    const startIndex = Math.max(0, selectedIndex - provincesAbove);
+                    const endIndex = Math.min(data.provinces.length, selectedIndex + provincesBelow + 1);
+                    provincesToShow = data.provinces.slice(startIndex, endIndex);
+                    console.log('📊 [Provinces Chart] Centering on province at index', selectedIndex, 'showing', provincesToShow.length, 'provinces (indices', startIndex, 'to', endIndex - 1, ')');
+                } else {
+                    // If province not found, show top 10
+                    console.warn('⚠️ [Provinces Chart] Province not found:', selectedProvince, 'showing top 10 instead');
+                    console.log('Available provinces:', data.provinces.map(p => p.name).slice(0, 20));
+                    provincesToShow = data.provinces.slice(0, 10);
+                }
+            } else {
+                // Default: show top 10
+                console.log('📊 [Provinces Chart] No province selected, showing top 10');
+                provincesToShow = data.provinces.slice(0, 10);
+            }
+            
             // Destroy existing chart if it exists
             if (provincesChart) {
                 provincesChart.destroy();
@@ -2348,7 +2442,7 @@ async function loadTopProvincesChart() {
             }
             
             // Create chart
-            createProvincesChart(data.provinces);
+            createProvincesChart(provincesToShow);
         } else {
             console.error('Failed to load top provinces data:', data.error || 'No data');
             const chartContainer = document.getElementById('provincesChart')?.parentElement;

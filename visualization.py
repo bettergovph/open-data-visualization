@@ -4549,8 +4549,8 @@ async def province_projects_all_api(
         })
 
 @app.get("/api/province-projects/top-provinces")
-async def top_provinces_api():
-    """Get top 10 provinces by project count and total cost"""
+async def top_provinces_api(all: bool = Query(default=False, description="Return all provinces instead of top 10")):
+    """Get top 10 provinces by project count and total cost, or all provinces if all=true"""
     try:
         import json
         from pathlib import Path
@@ -4581,13 +4581,18 @@ async def top_provinces_api():
                 print(f"Error reading {province_dir}: {e}")
                 continue
         
-        # Sort by project count descending and take top 10
+        # Sort by project count descending
         province_stats.sort(key=lambda x: x['count'], reverse=True)
-        top_10 = province_stats[:10]
+        
+        # Return all provinces if requested, otherwise top 10
+        if all:
+            result = province_stats
+        else:
+            result = province_stats[:10]
         
         return JSONResponse({
             "success": True,
-            "provinces": top_10
+            "provinces": result
         })
         
     except Exception as e:
