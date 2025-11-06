@@ -22,7 +22,7 @@
     <meta http-equiv="Expires" content="-1">
 
     <!-- BetterGovPH Metadata -->
-    <meta name="description" content="Integrated - Province Project Analysis">
+    <meta name="description" content="Integrated Project Analysis - Combined data from Flood Control (SSP), DIME Infrastructure, and PhilGEPS Procurement databases">
     <meta name="keywords" content="government data, congressional projects, district projects, public data, transparency">
     <meta name="author" content="BetterGovPH">
 
@@ -30,14 +30,14 @@
     <meta property="og:type" content="website">
     <meta property="og:url" content="{{ og_url | default(value='https://visualizations.bettergov.ph/') }}">
     <meta property="og:title" content="Integrated - BetterGovPH">
-    <meta property="og:description" content="Government Data Analysis Platform for Congressional District Projects">
+    <meta property="og:description" content="Integrated Project Analysis - Combined data from Flood Control (SSP), DIME Infrastructure, and PhilGEPS Procurement databases">
     <meta property="og:image" content="/static/images/gov_logo.png">
 
     <!-- Twitter -->
     <meta property="twitter:card" content="summary_large_image">
     <meta property="twitter:url" content="https://visualizations.bettergov.ph/">
     <meta property="twitter:title" content="Integrated - BetterGovPH">
-    <meta property="twitter:description" content="Government Data Analysis Platform for Congressional District Projects">
+    <meta property="twitter:description" content="Integrated Project Analysis - Combined data from Flood Control (SSP), DIME Infrastructure, and PhilGEPS Procurement databases">
     <meta property="twitter:image" content="/static/images/gov_logo.png">
 
     <style>
@@ -154,7 +154,6 @@
             <a href="/philgeps" class="text-black hover:text-gray-600 font-medium transition">PhilGEPS</a>
             <a href="/dynasty" class="text-black hover:text-gray-600 font-medium transition">Dynasties</a>
             <a href="/integrated" class="text-black hover:text-gray-600 font-medium transition border-b-2 border-black">Integrated</a>
-            <a href="/eogo" class="text-black hover:text-gray-600 font-medium transition">EOGO</a>
             <a href="/sources" class="text-black hover:text-gray-600 font-medium transition">Sources</a>
         </div>
         <div class="md:hidden">
@@ -175,7 +174,6 @@
         <a href="/philgeps" class="block text-black hover:text-gray-600 font-medium py-2">PhilGEPS</a>
         <a href="/dynasty" class="block text-black hover:text-gray-600 font-medium py-2">Dynasties</a>
         <a href="/integrated" class="block text-black hover:text-gray-600 font-medium py-2 border-b-2 border-black">Integrated</a>
-        <a href="/eogo" class="block text-black hover:text-gray-600 font-medium py-2">EOGO</a>
         <a href="/sources" class="block text-black hover:text-gray-600 font-medium py-2">Sources</a>
     </div>
 </nav>
@@ -192,21 +190,22 @@ function toggleMobileMenu() {
 <section class="budget-section">
     <div class="budget-container">
         <div class="budget-header">
-            <h1 class="budget-title">🏛️ Deputy Speakers</h1>
-            <p class="budget-subtitle">Congressional District Project Analysis</p>
+            <h1 class="budget-title">🔗 Integrated Project Analysis</h1>
+            <p class="budget-subtitle">Combined data from Flood Control (SSP), DIME Infrastructure, and PhilGEPS Procurement databases</p>
         </div>
 
         <!-- Disclaimer -->
-        <div style="background: #fff3cd; border-left: 4px solid #ffc107; border-radius: 4px; padding: 16px; margin: 20px 0; margin-bottom: 30px;">
+        <div style="background: #e7f3ff; border-left: 4px solid #2196F3; border-radius: 4px; padding: 16px; margin: 20px 0; margin-bottom: 30px;">
             <div style="display: flex; align-items: flex-start;">
-                <span style="font-size: 20px; margin-right: 12px;">⚠️</span>
+                <span style="font-size: 20px; margin-right: 12px;">ℹ️</span>
                 <div style="flex: 1;">
-                    <strong style="display: block; margin-bottom: 8px; color: #856404;">Data Disclaimer</strong>
-                    <p style="margin: 0; color: #856404; font-size: 14px; line-height: 1.6;">
-                        This analysis is based on publicly available data from government databases (SSP/DIME/PhilGEPS) and investigative reporting. 
-                        Project matches are determined by district boundaries, contractor names, and location data. 
-                        For complete information about data sources, methodology, and limitations, please visit our 
-                        <a href="/sources" style="color: #856404; text-decoration: underline; font-weight: 600;" target="_blank">Data Sources</a> page.
+                    <strong style="display: block; margin-bottom: 8px; color: #1565C0;">Data Sources</strong>
+                    <p style="margin: 0; color: #1565C0; font-size: 14px; line-height: 1.6;">
+                        This analysis combines publicly available data from government databases: Flood Control projects from SSP (Sumbong sa Pangulo), 
+                        infrastructure projects from DIME (Database of Infrastructure Monitoring and Evaluation), and procurement data from PhilGEPS 
+                        (Philippine Government Electronic Procurement System). Projects are matched and analyzed by province, municipality, contractor, 
+                        and location data. For complete information about data sources, methodology, and coverage, please visit our 
+                        <a href="/sources" style="color: #1565C0; text-decoration: underline; font-weight: 600;" target="_blank">Data Sources</a> page.
                     </p>
                 </div>
             </div>
