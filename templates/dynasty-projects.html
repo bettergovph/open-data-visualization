@@ -595,7 +595,7 @@ function toggleMobileMenu() {
                         <div style="margin-bottom: 20px; padding: 20px; background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%); border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); border: 2px solid #333;">
                             <div style="display: flex; flex-direction: column; align-items: center; gap: 15px;">
                                 <label style="font-weight: 700; color: #333; font-size: 16px; text-transform: uppercase; letter-spacing: 0.5px;">Filter by Province</label>
-                                <input type="text" id="province-visual-filter" list="province-visual-list" placeholder="Type to search province..." value="Cebu" style="padding: 12px 16px; border: 2px solid #333; border-radius: 6px; font-size: 16px; font-weight: 600; min-width: 350px; background: white; color: #333; box-shadow: 0 2px 8px rgba(0,0,0,0.1); transition: all 0.3s ease;" onmouseover="this.style.borderColor='#667eea'; this.style.boxShadow='0 4px 12px rgba(102, 126, 234, 0.3)';" onmouseout="this.style.borderColor='#333'; this.style.boxShadow='0 2px 8px rgba(0,0,0,0.1)';" onchange="loadProvinceVisualData()" oninput="loadProvinceVisualData()">
+                                <input type="text" id="province-visual-filter" list="province-visual-list" placeholder="Type to search province..." value="Cebu" style="padding: 12px 16px; border: 2px solid #333; border-radius: 6px; font-size: 16px; font-weight: 600; min-width: 350px; background: white; color: #333; box-shadow: 0 2px 8px rgba(0,0,0,0.1); transition: all 0.3s ease;" onmouseover="this.style.borderColor='#667eea'; this.style.boxShadow='0 4px 12px rgba(102, 126, 234, 0.3)';" onmouseout="this.style.borderColor='#333'; this.style.boxShadow='0 2px 8px rgba(0,0,0,0.1)';" onchange="handleProvinceVisualChange()" oninput="handleProvinceVisualInput()" onblur="handleProvinceVisualBlur()">
                                 <datalist id="province-visual-list">
                                     <option value="Abra">Abra</option>
                                     <option value="Agusan del Norte">Agusan del Norte</option>
@@ -683,6 +683,13 @@ function toggleMobileMenu() {
                                     <option value="Zamboanga Sibugay">Zamboanga Sibugay</option>
                                 </datalist>
                             </div>
+                        </div>
+                        
+                        <!-- Top 10 Provinces Chart -->
+                        <div style="margin-top: 30px; background: white; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); padding: 20px; position: relative;">
+                            <h4 style="margin: 0 0 20px 0; color: #333; font-size: 18px; font-weight: 600;">Top 10 Provinces by Project Count</h4>
+                            <button id="copy-provinces-chart-btn" style="position: absolute; top: 20px; right: 20px; padding: 10px 20px; background: #333; color: white; border: 2px solid #333; border-radius: 6px; font-size: 14px; font-weight: 600; cursor: pointer; transition: all 0.3s ease; box-shadow: 0 4px 12px rgba(0,0,0,0.2); z-index: 10;" onmouseover="this.style.background='#667eea'; this.style.borderColor='#667eea'; this.style.transform='translateY(-2px)'; this.style.boxShadow='0 6px 16px rgba(102, 126, 234, 0.4)';" onmouseout="this.style.background='#333'; this.style.borderColor='#333'; this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 12px rgba(0,0,0,0.2)';">📋 Copy Chart</button>
+                            <canvas id="provincesChart" style="max-height: 500px;"></canvas>
                         </div>
                         
                         <!-- Top Municipalities/Cities Chart -->
@@ -1167,9 +1174,6 @@ function createCharts(labels, fullNames, counts, costs) {
                     title: {
                         display: true,
                         text: 'Number of Projects'
-                    },
-                    ticks: {
-                        stepSize: 1
                     }
                 },
                 y1: {
@@ -1924,6 +1928,7 @@ document.getElementById('province-export-csv-btn').addEventListener('click', fun
 });
 
 // Province Visual Tab Variables
+let provincesChart = null;
 let municipalityChart = null;
 let contractorChart = null;
 
@@ -1931,7 +1936,72 @@ let contractorChart = null;
 // Debounce timer for province visual filter
 let provinceVisualDebounceTimer = null;
 
+// Handle province visual filter change (when option is selected from datalist)
+function handleProvinceVisualChange() {
+    const input = document.getElementById('province-visual-filter');
+    if (!input) return;
+    
+    // When an option is selected, ensure we get the full value
+    const value = input.value.trim();
+    const datalist = document.getElementById('province-visual-list');
+    
+    if (datalist && value) {
+        // Check if the value matches any option in the datalist
+        const options = Array.from(datalist.options);
+        const matchingOption = options.find(opt => opt.value.toLowerCase() === value.toLowerCase() || opt.value.toLowerCase().startsWith(value.toLowerCase()));
+        
+        if (matchingOption && matchingOption.value !== value) {
+            // Update input with the full value from the option
+            input.value = matchingOption.value;
+        }
+    }
+    
+    // Load data with the corrected value
+    loadProvinceVisualData();
+}
+
+// Handle province visual filter input (while typing)
+function handleProvinceVisualInput() {
+    // Debounce the input to avoid too many API calls while typing
+    if (provinceVisualDebounceTimer) {
+        clearTimeout(provinceVisualDebounceTimer);
+    }
+    
+    provinceVisualDebounceTimer = setTimeout(() => {
+        loadProvinceVisualData();
+    }, 500); // Wait 500ms after user stops typing
+}
+
+// Handle province visual filter blur (when input loses focus)
+function handleProvinceVisualBlur() {
+    const input = document.getElementById('province-visual-filter');
+    if (!input) return;
+    
+    const value = input.value.trim();
+    const datalist = document.getElementById('province-visual-list');
+    
+    if (datalist && value) {
+        // Find the best matching option
+        const options = Array.from(datalist.options);
+        const matchingOption = options.find(opt => {
+            const optValue = opt.value.toLowerCase();
+            const inputValue = value.toLowerCase();
+            return optValue === inputValue || optValue.startsWith(inputValue);
+        });
+        
+        if (matchingOption) {
+            // Update input with the full value from the option
+            input.value = matchingOption.value;
+            // Load data with the corrected value
+            loadProvinceVisualData();
+        }
+    }
+}
+
 async function loadProvinceVisualData() {
+    // Load top 10 provinces chart (always shown, not filtered by province)
+    await loadTopProvincesChart();
+    
     // Clear existing debounce timer
     if (provinceVisualDebounceTimer) {
         clearTimeout(provinceVisualDebounceTimer);
@@ -1951,11 +2021,47 @@ async function loadProvinceVisualData() {
         try {
             // Get selected province from filter
             const provinceSelect = document.getElementById('province-visual-filter');
-            const selectedProvince = provinceSelect ? provinceSelect.value.trim() : 'Cebu';
+            let selectedProvince = provinceSelect ? provinceSelect.value.trim() : 'Cebu';
+            
+            // Try to match with datalist options to get full province name
+            const datalist = document.getElementById('province-visual-list');
+            if (datalist && selectedProvince) {
+                const options = Array.from(datalist.options);
+                const matchingOption = options.find(opt => {
+                    const optValue = opt.value.toLowerCase();
+                    const inputValue = selectedProvince.toLowerCase();
+                    return optValue === inputValue || optValue.startsWith(inputValue);
+                });
+                
+                if (matchingOption) {
+                    selectedProvince = matchingOption.value;
+                    // Update input with full value
+                    if (provinceSelect) {
+                        provinceSelect.value = selectedProvince;
+                    }
+                }
+            }
+            
+            // Normalize province name (fix common typos)
+            if (selectedProvince.toLowerCase() === 'iloil' || selectedProvince.toLowerCase() === 'iloi' || selectedProvince.toLowerCase() === 'ilo') {
+                selectedProvince = 'Iloilo';
+            } else if (selectedProvince.toLowerCase() === 'compostela valley') {
+                selectedProvince = 'Davao de Oro';
+            }
             
             // Validate province is not empty
             if (!selectedProvince || selectedProvince === '') {
                 console.warn('No province selected');
+                return;
+            }
+            
+            // Don't make API call if province name is too short (likely partial input)
+            // But allow if it's a known short province name
+            const shortProvinces = ['iloilo', 'cebu', 'leyte', 'samar', 'bohol', 'aklan', 'capiz', 'antique', 'guimaras', 'negros', 'masbate', 'sorsogon', 'albay', 'catanduanes', 'camarines', 'cagayan', 'isabela', 'nueva', 'quirino', 'ifugao', 'kalinga', 'mountain', 'abra', 'apayao', 'benguet', 'la union', 'ilocos', 'pangasinan', 'aurora', 'bataan', 'bulacan', 'nueva ecija', 'pampanga', 'tarlac', 'zambales', 'batangas', 'cavite', 'laguna', 'quezon', 'rizal', 'metro manila', 'marinduque', 'occidental mindoro', 'oriental mindoro', 'palawan', 'romblon', 'biliran', 'eastern samar', 'northern samar', 'southern leyte', 'western samar', 'camiguin', 'misamis', 'bukidnon', 'lanao', 'sultan kudarat', 'maguindanao', 'cotabato', 'sarangani', 'sulu', 'tawi-tawi', 'basilan', 'zamboanga', 'agusan', 'surigao', 'dinagat', 'davao', 'compostela'];
+            const isShortProvince = shortProvinces.some(p => selectedProvince.toLowerCase().startsWith(p));
+            
+            if (selectedProvince.length < 3 && !isShortProvince) {
+                console.log('Province name too short, skipping API call');
                 return;
             }
             
@@ -1964,8 +2070,96 @@ async function loadProvinceVisualData() {
             const data = await response.json();
             
             if (data.success && data.projects && data.projects.length > 0) {
+                // Show charts first
+                if (municipalityChartContainer) municipalityChartContainer.style.display = 'block';
+                if (contractorChartContainer) contractorChartContainer.style.display = 'block';
+                
+                // Remove any error messages and show canvas
+                const municipalityCanvas = document.getElementById('municipalityChart');
+                const contractorCanvas = document.getElementById('contractorChart');
+                
+                if (municipalityCanvas) {
+                    municipalityCanvas.style.display = 'block';
+                    // Remove error messages
+                    const errorMsgs = municipalityChartContainer.querySelectorAll('p[style*="color: #dc3545"]');
+                    errorMsgs.forEach(el => el.remove());
+                }
+                if (contractorCanvas) {
+                    contractorCanvas.style.display = 'block';
+                    // Remove error messages
+                    const errorMsgs = contractorChartContainer.querySelectorAll('p[style*="color: #dc3545"]');
+                    errorMsgs.forEach(el => el.remove());
+                }
+                
+                // Restore chart containers if they were replaced with error messages
+                if (municipalityChartContainer && !document.getElementById('municipalityChart')) {
+                    municipalityChartContainer.innerHTML = '<h4 style="margin: 0 0 20px 0; color: #333; font-size: 18px; font-weight: 600;">Top Municipalities/Cities</h4><button id="copy-municipality-chart-btn" style="position: absolute; top: 20px; right: 20px; padding: 10px 20px; background: #333; color: white; border: 2px solid #333; border-radius: 6px; font-size: 14px; font-weight: 600; cursor: pointer; transition: all 0.3s ease; box-shadow: 0 4px 12px rgba(0,0,0,0.2); z-index: 10;" onmouseover="this.style.background=\'#667eea\'; this.style.borderColor=\'#667eea\'; this.style.transform=\'translateY(-2px)\'; this.style.boxShadow=\'0 6px 16px rgba(102, 126, 234, 0.4)\';" onmouseout="this.style.background=\'#333\'; this.style.borderColor=\'#333\'; this.style.transform=\'translateY(0)\'; this.style.boxShadow=\'0 4px 12px rgba(0,0,0,0.2)\';">📋 Copy Chart</button><canvas id="municipalityChart" style="max-height: 500px;"></canvas>';
+                    // Re-attach copy button event listener
+                    const copyBtn = document.getElementById('copy-municipality-chart-btn');
+                    if (copyBtn && !copyBtn.hasAttribute('data-listener-attached')) {
+                        copyBtn.setAttribute('data-listener-attached', 'true');
+                        copyBtn.addEventListener('click', async function() {
+                            const btn = this;
+                            const originalText = btn.textContent;
+                            try {
+                                btn.textContent = 'Copying...';
+                                btn.disabled = true;
+                                const chartContainer = document.getElementById('municipalityChart').parentElement;
+                                const canvas = await html2canvas(chartContainer, { backgroundColor: '#ffffff', scale: 2 });
+                                canvas.toBlob(function(blob) {
+                                    navigator.clipboard.write([new ClipboardItem({ 'image/png': blob })]).then(() => {
+                                        btn.textContent = '✓ Copied!';
+                                        setTimeout(() => { btn.textContent = originalText; btn.disabled = false; }, 2000);
+                                    }).catch(err => {
+                                        console.error('Failed to copy:', err);
+                                        btn.textContent = 'Error';
+                                        setTimeout(() => { btn.textContent = originalText; btn.disabled = false; }, 2000);
+                                    });
+                                });
+                            } catch (error) {
+                                console.error('Error copying chart:', error);
+                                btn.textContent = 'Error';
+                                setTimeout(() => { btn.textContent = originalText; btn.disabled = false; }, 2000);
+                            }
+                        });
+                    }
+                }
+                if (contractorChartContainer && !document.getElementById('contractorChart')) {
+                    contractorChartContainer.innerHTML = '<h4 style="margin: 0 0 20px 0; color: #333; font-size: 18px; font-weight: 600;">Top Contractors</h4><button id="copy-contractor-chart-btn" style="position: absolute; top: 20px; right: 20px; padding: 10px 20px; background: #333; color: white; border: 2px solid #333; border-radius: 6px; font-size: 14px; font-weight: 600; cursor: pointer; transition: all 0.3s ease; box-shadow: 0 4px 12px rgba(0,0,0,0.2); z-index: 10;" onmouseover="this.style.background=\'#667eea\'; this.style.borderColor=\'#667eea\'; this.style.transform=\'translateY(-2px)\'; this.style.boxShadow=\'0 6px 16px rgba(102, 126, 234, 0.4)\';" onmouseout="this.style.background=\'#333\'; this.style.borderColor=\'#333\'; this.style.transform=\'translateY(0)\'; this.style.boxShadow=\'0 4px 12px rgba(0,0,0,0.2)\';">📋 Copy Chart</button><canvas id="contractorChart" style="max-height: 500px;"></canvas>';
+                    // Re-attach copy button event listener
+                    const copyBtn = document.getElementById('copy-contractor-chart-btn');
+                    if (copyBtn && !copyBtn.hasAttribute('data-listener-attached')) {
+                        copyBtn.setAttribute('data-listener-attached', 'true');
+                        copyBtn.addEventListener('click', async function() {
+                            const btn = this;
+                            const originalText = btn.textContent;
+                            try {
+                                btn.textContent = 'Copying...';
+                                btn.disabled = true;
+                                const chartContainer = document.getElementById('contractorChart').parentElement;
+                                const canvas = await html2canvas(chartContainer, { backgroundColor: '#ffffff', scale: 2 });
+                                canvas.toBlob(function(blob) {
+                                    navigator.clipboard.write([new ClipboardItem({ 'image/png': blob })]).then(() => {
+                                        btn.textContent = '✓ Copied!';
+                                        setTimeout(() => { btn.textContent = originalText; btn.disabled = false; }, 2000);
+                                    }).catch(err => {
+                                        console.error('Failed to copy:', err);
+                                        btn.textContent = 'Error';
+                                        setTimeout(() => { btn.textContent = originalText; btn.disabled = false; }, 2000);
+                                    });
+                                });
+                            } catch (error) {
+                                console.error('Error copying chart:', error);
+                                btn.textContent = 'Error';
+                                setTimeout(() => { btn.textContent = originalText; btn.disabled = false; }, 2000);
+                            }
+                        });
+                    }
+                }
+                
                 // Calculate municipality statistics
-                const municipalityStats = calculateMunicipalityStats(data.projects, selectedProvince);
+                // Use filter_options from API if available, otherwise use hardcoded lists
+                const municipalityStats = calculateMunicipalityStats(data.projects, selectedProvince, data.filter_options);
                 
                 // Calculate contractor statistics
                 const contractorStats = calculateContractorStats(data.projects);
@@ -1980,22 +2174,71 @@ async function loadProvinceVisualData() {
                     contractorChart = null;
                 }
                 
-                // Create charts
-                createMunicipalityChart(municipalityStats);
-                createContractorChart(contractorStats);
-                
-                // Show charts
-                if (municipalityChartContainer) municipalityChartContainer.style.display = 'block';
-                if (contractorChartContainer) contractorChartContainer.style.display = 'block';
+                // Create charts (after containers are visible and restored)
+                setTimeout(() => {
+                    const municipalityCanvas = document.getElementById('municipalityChart');
+                    const contractorCanvas = document.getElementById('contractorChart');
+                    
+                    if (municipalityCanvas) {
+                        createMunicipalityChart(municipalityStats);
+                    } else {
+                        console.error('Municipality chart canvas still not found after restoration');
+                    }
+                    
+                    if (contractorCanvas) {
+                        createContractorChart(contractorStats);
+                    } else {
+                        console.error('Contractor chart canvas still not found after restoration');
+                    }
+                }, 200);
             } else {
                 console.error('Failed to load province visual data:', data.error || 'No projects found');
-                // Show error message
+                // Destroy charts if they exist
+                if (municipalityChart) {
+                    municipalityChart.destroy();
+                    municipalityChart = null;
+                }
+                if (contractorChart) {
+                    contractorChart.destroy();
+                    contractorChart = null;
+                }
+                // Show error message but preserve canvas structure
                 if (municipalityChartContainer) {
-                    municipalityChartContainer.innerHTML = '<p style="padding: 20px; text-align: center; color: #dc3545;">No data available for this province</p>';
+                    const canvas = document.getElementById('municipalityChart');
+                    if (!canvas) {
+                        // Only replace if canvas doesn't exist
+                        municipalityChartContainer.innerHTML = '<h4 style="margin: 0 0 20px 0; color: #333; font-size: 18px; font-weight: 600;">Top Municipalities/Cities</h4><p style="padding: 20px; text-align: center; color: #dc3545;">No data available for this province</p><canvas id="municipalityChart" style="max-height: 500px; display: none;"></canvas>';
+                    } else {
+                        // Show error message above canvas
+                        const errorMsg = document.createElement('p');
+                        errorMsg.style.cssText = 'padding: 20px; text-align: center; color: #dc3545; margin: 0;';
+                        errorMsg.textContent = data.error || 'No data available for this province';
+                        // Remove existing error messages
+                        const existingErrors = municipalityChartContainer.querySelectorAll('p[style*="color: #dc3545"]');
+                        existingErrors.forEach(el => el.remove());
+                        // Insert error before canvas
+                        canvas.parentNode.insertBefore(errorMsg, canvas);
+                        canvas.style.display = 'none';
+                    }
                     municipalityChartContainer.style.display = 'block';
                 }
                 if (contractorChartContainer) {
-                    contractorChartContainer.innerHTML = '<p style="padding: 20px; text-align: center; color: #dc3545;">No data available for this province</p>';
+                    const canvas = document.getElementById('contractorChart');
+                    if (!canvas) {
+                        // Only replace if canvas doesn't exist
+                        contractorChartContainer.innerHTML = '<h4 style="margin: 0 0 20px 0; color: #333; font-size: 18px; font-weight: 600;">Top Contractors</h4><p style="padding: 20px; text-align: center; color: #dc3545;">No data available for this province</p><canvas id="contractorChart" style="max-height: 500px; display: none;"></canvas>';
+                    } else {
+                        // Show error message above canvas
+                        const errorMsg = document.createElement('p');
+                        errorMsg.style.cssText = 'padding: 20px; text-align: center; color: #dc3545; margin: 0;';
+                        errorMsg.textContent = data.error || 'No data available for this province';
+                        // Remove existing error messages
+                        const existingErrors = contractorChartContainer.querySelectorAll('p[style*="color: #dc3545"]');
+                        existingErrors.forEach(el => el.remove());
+                        // Insert error before canvas
+                        canvas.parentNode.insertBefore(errorMsg, canvas);
+                        canvas.style.display = 'none';
+                    }
                     contractorChartContainer.style.display = 'block';
                 }
             }
@@ -2019,7 +2262,8 @@ async function loadProvinceVisualData() {
 }
 
 // Calculate municipality statistics
-function calculateMunicipalityStats(projects, province = 'Cebu') {
+function calculateMunicipalityStats(projects, province = 'Cebu', filterOptions = null) {
+    console.log(`📊 [Municipality Stats] Calculating for ${province}, projects: ${projects.length}, has filterOptions: ${!!filterOptions}`);
     const stats = {};
     
     // Province-specific municipalities/cities
@@ -2027,68 +2271,93 @@ function calculateMunicipalityStats(projects, province = 'Cebu') {
     let cityName = null;
     let cityPatterns = [];
     
+    // If filter_options provided, use municipalities from there
+    if (filterOptions && filterOptions.municipalities && Array.isArray(filterOptions.municipalities)) {
+        knownMunicipalities = filterOptions.municipalities
+            .map(m => m.name.toUpperCase())
+            .filter(name => name !== 'UNKNOWN');
+        
+        // Check if there's a city (e.g., "Iloilo City", "Cebu City")
+        const cityOption = filterOptions.municipalities.find(m => 
+            m.name.toLowerCase().includes('city') && !m.name.toLowerCase().includes('unknown')
+        );
+        if (cityOption) {
+            cityName = cityOption.name;
+            cityPatterns = [cityOption.name.toUpperCase(), cityOption.name.toUpperCase().replace(' ', ' ')];
+        }
+    }
+    
     const provinceUpper = province.toUpperCase();
-    if (provinceUpper === 'CEBU') {
-        knownMunicipalities = [
-            'TALISAY', 'MANDAUE', 'LILOAN', 'LAPU-LAPU', 'CONSOLACION',
-            'MINGLANILLA', 'NAGA', 'TOLEDO', 'DANAO', 'COMPOSTELA', 'CORDOVA',
-            'SAN FERNANDO', 'CARCAR', 'ARGAO', 'DALAGUETE', 'OSLOB', 'SAMBOAN',
-            'BADIAN', 'MOALBOAL', 'ALCANTARA', 'RONDA', 'DUMANJUG', 'BARILI',
-            'ALOGUINSAN', 'PINAMUNGAJAN', 'TUBURAN', 'ASTURIAS', 'BALAMBAN',
-            'BORBON', 'SOGOD', 'CATMON', 'CARMEN', 'SIBONGA'
-        ];
-        cityName = 'Cebu City';
-        cityPatterns = ['CEBU CITY', 'CITY OF CEBU'];
-    } else if (provinceUpper === 'DAVAO DEL NORTE') {
-        knownMunicipalities = [
-            'PANABO', 'TAGUM', 'SAMAL', 'ISLAND GARDEN CITY OF SAMAL',
-            'ASUNCION', 'BRAULIO E. DUJALI', 'CARMEN', 'KAPALONG',
-            'NEW CORELLA', 'SAN VICENTE', 'SANTO TOMAS', 'TALAINGOD'
-        ];
-        cityName = null; // Davao City handled separately
-        cityPatterns = [];
-    } else if (provinceUpper === 'DAVAO DEL SUR') {
-        knownMunicipalities = [
-            'DIGOS', 'STA. CRUZ', 'BANSALAN', 'MAGSAYSAY', 'HAGONOY',
-            'PADADA', 'KIBLAWAN', 'MALALAG', 'SULOP', 'MATANAO'
-        ];
-        cityName = null; // Davao City handled separately
-        cityPatterns = [];
-    } else if (provinceUpper === 'DAVAO ORIENTAL') {
-        knownMunicipalities = [
-            'MATI', 'BANAYBANAY', 'LUPON', 'SAN ISIDRO', 'GOVERNOR GENEROSO',
-            'TARRAGONA', 'MANAY', 'CARAGA', 'BAGANGA', 'CATEEL', 'BOSTON'
-        ];
-        cityName = null; // Davao City handled separately
-        cityPatterns = [];
-    } else if (provinceUpper === 'DAVAO DE ORO' || provinceUpper === 'DAVAO DE ORO (COMPOSTELA VALLEY)') {
-        knownMunicipalities = [
-            'NABUNTURAN', 'MONKAYO', 'MACO', 'MABINI', 'PANTUKAN',
-            'MAWAB', 'COMPOSTELA', 'NEW BATAAN', 'MARAGUSAN', 'LAAK'
-        ];
-        cityName = null; // Davao City handled separately
-        cityPatterns = [];
-    } else if (provinceUpper === 'DAVAO OCCIDENTAL') {
-        knownMunicipalities = [
-            'MALITA', 'SANTA MARIA', 'DON MARCELINO', 'JOSE ABAD SANTOS', 'SARANGANI'
-        ];
-        cityName = null; // Davao City handled separately
-        cityPatterns = [];
-    } else if (provinceUpper.startsWith('DAVAO')) {
-        // Generic Davao (fallback)
-        knownMunicipalities = [
-            'PANABO', 'TAGUM', 'DIGOS', 'MATI', 'SAMAL', 'ISLAND GARDEN CITY OF SAMAL',
-            'STA. CRUZ', 'BANSALAN', 'MAGSAYSAY', 'HAGONOY', 'PADADA', 'KIBLAWAN',
-            'MACO', 'MABINI', 'PANTUKAN', 'MAWAB', 'NABUNTURAN', 'MONKAYO',
-            'COMPOSTELA', 'NEW BATAAN', 'MARAGUSAN', 'LAAK', 'BANAYBANAY', 'LUPON',
-            'SAN ISIDRO', 'GOVERNOR GENEROSO', 'TARRAGONA', 'MANAY', 'CARAGA', 'BAGANGA',
-            'CATEEL', 'BOSTON', 'LORETO', 'MONTEVISTA', 'NEW CORELLA', 'CARMEN',
-            'KAPALONG', 'SAN VICENTE', 'TALAINGOD', 'ASUNCION', 'BRAULIO E. DUJALI',
-            'SANTO TOMAS', 'DUJALI', 'MALITA', 'SANTA MARIA', 'DON MARCELINO',
-            'JOSE ABAD SANTOS', 'SARANGANI'
-        ];
-        cityName = null; // Davao City handled separately
-        cityPatterns = [];
+    
+    // Only use hardcoded lists if filterOptions not provided (for backward compatibility)
+    if (!filterOptions || !filterOptions.municipalities || filterOptions.municipalities.length === 0) {
+        if (provinceUpper === 'CEBU') {
+            knownMunicipalities = [
+                'TALISAY', 'MANDAUE', 'LILOAN', 'LAPU-LAPU', 'CONSOLACION',
+                'MINGLANILLA', 'NAGA', 'TOLEDO', 'DANAO', 'COMPOSTELA', 'CORDOVA',
+                'SAN FERNANDO', 'CARCAR', 'ARGAO', 'DALAGUETE', 'OSLOB', 'SAMBOAN',
+                'BADIAN', 'MOALBOAL', 'ALCANTARA', 'RONDA', 'DUMANJUG', 'BARILI',
+                'ALOGUINSAN', 'PINAMUNGAJAN', 'TUBURAN', 'ASTURIAS', 'BALAMBAN',
+                'BORBON', 'SOGOD', 'CATMON', 'CARMEN', 'SIBONGA'
+            ];
+            cityName = 'Cebu City';
+            cityPatterns = ['CEBU CITY', 'CITY OF CEBU'];
+        } else if (provinceUpper === 'DAVAO DEL NORTE') {
+            knownMunicipalities = [
+                'PANABO', 'TAGUM', 'SAMAL', 'ISLAND GARDEN CITY OF SAMAL',
+                'ASUNCION', 'BRAULIO E. DUJALI', 'CARMEN', 'KAPALONG',
+                'NEW CORELLA', 'SAN VICENTE', 'SANTO TOMAS', 'TALAINGOD'
+            ];
+            cityName = null; // Davao City handled separately
+            cityPatterns = [];
+        } else if (provinceUpper === 'DAVAO DEL SUR') {
+            knownMunicipalities = [
+                'DIGOS', 'STA. CRUZ', 'BANSALAN', 'MAGSAYSAY', 'HAGONOY',
+                'PADADA', 'KIBLAWAN', 'MALALAG', 'SULOP', 'MATANAO'
+            ];
+            cityName = null; // Davao City handled separately
+            cityPatterns = [];
+        } else if (provinceUpper === 'DAVAO ORIENTAL') {
+            knownMunicipalities = [
+                'MATI', 'BANAYBANAY', 'LUPON', 'SAN ISIDRO', 'GOVERNOR GENEROSO',
+                'TARRAGONA', 'MANAY', 'CARAGA', 'BAGANGA', 'CATEEL', 'BOSTON'
+            ];
+            cityName = null; // Davao City handled separately
+            cityPatterns = [];
+        } else if (provinceUpper === 'DAVAO DE ORO' || provinceUpper === 'DAVAO DE ORO (COMPOSTELA VALLEY)') {
+            knownMunicipalities = [
+                'NABUNTURAN', 'MONKAYO', 'MACO', 'MABINI', 'PANTUKAN',
+                'MAWAB', 'COMPOSTELA', 'NEW BATAAN', 'MARAGUSAN', 'LAAK'
+            ];
+            cityName = null; // Davao City handled separately
+            cityPatterns = [];
+        } else if (provinceUpper === 'DAVAO OCCIDENTAL') {
+            knownMunicipalities = [
+                'MALITA', 'SANTA MARIA', 'DON MARCELINO', 'JOSE ABAD SANTOS', 'SARANGANI'
+            ];
+            cityName = null; // Davao City handled separately
+            cityPatterns = [];
+        } else if (provinceUpper.startsWith('DAVAO')) {
+            // Generic Davao (fallback)
+            knownMunicipalities = [
+                'PANABO', 'TAGUM', 'DIGOS', 'MATI', 'SAMAL', 'ISLAND GARDEN CITY OF SAMAL',
+                'STA. CRUZ', 'BANSALAN', 'MAGSAYSAY', 'HAGONOY', 'PADADA', 'KIBLAWAN',
+                'MACO', 'MABINI', 'PANTUKAN', 'MAWAB', 'NABUNTURAN', 'MONKAYO',
+                'COMPOSTELA', 'NEW BATAAN', 'MARAGUSAN', 'LAAK', 'BANAYBANAY', 'LUPON',
+                'SAN ISIDRO', 'GOVERNOR GENEROSO', 'TARRAGONA', 'MANAY', 'CARAGA', 'BAGANGA',
+                'CATEEL', 'BOSTON', 'LORETO', 'MONTEVISTA', 'NEW CORELLA', 'CARMEN',
+                'KAPALONG', 'SAN VICENTE', 'TALAINGOD', 'ASUNCION', 'BRAULIO E. DUJALI',
+                'SANTO TOMAS', 'DUJALI', 'MALITA', 'SANTA MARIA', 'DON MARCELINO',
+                'JOSE ABAD SANTOS', 'SARANGANI'
+            ];
+            cityName = null; // Davao City handled separately
+            cityPatterns = [];
+        }
+    }
+    
+    console.log(`📊 [Municipality Stats] Using ${knownMunicipalities.length} known municipalities for ${province}`);
+    if (filterOptions && filterOptions.municipalities) {
+        console.log(`📊 [Municipality Stats] Filter options municipalities:`, filterOptions.municipalities.map(m => m.name));
     }
     
     projects.forEach(project => {
@@ -2120,19 +2389,37 @@ function calculateMunicipalityStats(projects, province = 'Cebu') {
         }
         
         // Check for other known municipalities
-        if (!matchedMunicipality) {
+        if (!matchedMunicipality && knownMunicipalities.length > 0) {
             for (const mun of knownMunicipalities) {
                 const pattern = new RegExp('\\b' + mun.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '\\b');
                 if (pattern.test(combinedText)) {
-                    // Convert to proper case
-                    matchedMunicipality = mun.split(' ').map(word => {
-                        // Handle special cases like "DEL", "DE", "STA."
-                        const specialWords = ['DEL', 'DE', 'STA.', 'OF'];
-                        if (specialWords.includes(word)) {
-                            return word;
+                    // If we have filterOptions, use the exact name from there to preserve casing
+                    if (filterOptions && filterOptions.municipalities) {
+                        const exactMatch = filterOptions.municipalities.find(m => 
+                            m.name.toUpperCase() === mun
+                        );
+                        if (exactMatch) {
+                            matchedMunicipality = exactMatch.name;
+                        } else {
+                            // Convert to proper case
+                            matchedMunicipality = mun.split(' ').map(word => {
+                                const specialWords = ['DEL', 'DE', 'STA.', 'OF'];
+                                if (specialWords.includes(word)) {
+                                    return word;
+                                }
+                                return word.charAt(0) + word.slice(1).toLowerCase();
+                            }).join(' ');
                         }
-                        return word.charAt(0) + word.slice(1).toLowerCase();
-                    }).join(' ');
+                    } else {
+                        // Convert to proper case
+                        matchedMunicipality = mun.split(' ').map(word => {
+                            const specialWords = ['DEL', 'DE', 'STA.', 'OF'];
+                            if (specialWords.includes(word)) {
+                                return word;
+                            }
+                            return word.charAt(0) + word.slice(1).toLowerCase();
+                        }).join(' ');
+                    }
                     break;
                 }
             }
@@ -2159,6 +2446,142 @@ function calculateMunicipalityStats(projects, province = 'Cebu') {
     return Object.values(stats)
         .sort((a, b) => b.count - a.count)
         .slice(0, 20);
+}
+
+// Load top 10 provinces chart
+async function loadTopProvincesChart() {
+    try {
+        const response = await fetch('/api/province-projects/top-provinces');
+        const data = await response.json();
+        
+        if (data.success && data.provinces && data.provinces.length > 0) {
+            // Destroy existing chart if it exists
+            if (provincesChart) {
+                provincesChart.destroy();
+                provincesChart = null;
+            }
+            
+            // Create chart
+            createProvincesChart(data.provinces);
+        } else {
+            console.error('Failed to load top provinces data:', data.error || 'No data');
+            const chartContainer = document.getElementById('provincesChart')?.parentElement;
+            if (chartContainer) {
+                chartContainer.innerHTML = '<p style="padding: 20px; text-align: center; color: #dc3545;">No data available</p>';
+            }
+        }
+    } catch (error) {
+        console.error('Error loading top provinces data:', error);
+        const chartContainer = document.getElementById('provincesChart')?.parentElement;
+        if (chartContainer) {
+            chartContainer.innerHTML = '<p style="padding: 20px; text-align: center; color: #dc3545;">Error loading data: ' + error.message + '</p>';
+        }
+    }
+}
+
+// Create provinces chart (dual axes: project count on left, total cost on right)
+function createProvincesChart(provincesData) {
+    const ctx = document.getElementById('provincesChart');
+    if (!ctx) return;
+    
+    // Destroy existing chart if it exists
+    if (provincesChart) {
+        provincesChart.destroy();
+    }
+    
+    const labels = provincesData.map(p => p.name);
+    const counts = provincesData.map(p => p.count);
+    const costs = provincesData.map(p => p.total_cost / 1_000_000); // Convert to millions
+    
+    provincesChart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: labels,
+            datasets: [
+                {
+                    label: 'Number of Projects',
+                    data: counts,
+                    backgroundColor: '#1565c0',
+                    borderColor: '#0d47a1',
+                    borderWidth: 1,
+                    yAxisID: 'y'
+                },
+                {
+                    label: 'Total Cost (₱M)',
+                    data: costs,
+                    backgroundColor: '#7b1fa2',
+                    borderColor: '#4a148c',
+                    borderWidth: 1,
+                    yAxisID: 'y1'
+                }
+            ]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: true,
+            interaction: {
+                mode: 'index',
+                intersect: false,
+            },
+            plugins: {
+                legend: {
+                    display: true,
+                    position: 'top'
+                },
+                tooltip: {
+                    callbacks: {
+                        title: function(context) {
+                            return context[0].label;
+                        },
+                        label: function(context) {
+                            if (context.datasetIndex === 0) {
+                                return `Projects: ${context.parsed.y.toLocaleString()}`;
+                            } else {
+                                return `Total Cost: ₱${context.parsed.y.toFixed(2)}M`;
+                            }
+                        }
+                    }
+                }
+            },
+            scales: {
+                x: {
+                    display: true,
+                    title: {
+                        display: true,
+                        text: 'Province'
+                    }
+                },
+                y: {
+                    type: 'linear',
+                    display: true,
+                    position: 'left',
+                    beginAtZero: true,
+                    title: {
+                        display: true,
+                        text: 'Number of Projects'
+                    }
+                },
+                y1: {
+                    type: 'linear',
+                    display: true,
+                    position: 'right',
+                    beginAtZero: true,
+                    title: {
+                        display: true,
+                        text: 'Total Cost (₱M)'
+                    },
+                    ticks: {
+                        callback: function(value) {
+                            return '₱' + value.toFixed(0) + 'M';
+                        }
+                    },
+                    grid: {
+                        drawOnChartArea: false
+                    }
+                }
+            }
+        }
+    });
 }
 
 // Calculate contractor statistics
@@ -2209,9 +2632,15 @@ function calculateContractorStats(projects) {
 function createMunicipalityChart(statsArray) {
     const ctx = document.getElementById('municipalityChart');
     
+    if (!ctx) {
+        console.error('Municipality chart canvas not found');
+        return;
+    }
+    
     // Destroy existing chart if it exists
     if (municipalityChart) {
         municipalityChart.destroy();
+        municipalityChart = null;
     }
     
     // Filter out "Unknown" from the chart
@@ -2294,9 +2723,6 @@ function createMunicipalityChart(statsArray) {
                     title: {
                         display: true,
                         text: 'Number of Projects'
-                    },
-                    ticks: {
-                        stepSize: 1
                     }
                 },
                 y1: {
@@ -2326,9 +2752,15 @@ function createMunicipalityChart(statsArray) {
 function createContractorChart(statsArray) {
     const ctx = document.getElementById('contractorChart');
     
+    if (!ctx) {
+        console.error('Contractor chart canvas not found');
+        return;
+    }
+    
     // Destroy existing chart if it exists
     if (contractorChart) {
         contractorChart.destroy();
+        contractorChart = null;
     }
     
     const labels = statsArray.map(s => {
@@ -2408,9 +2840,6 @@ function createContractorChart(statsArray) {
                     title: {
                         display: true,
                         text: 'Number of Projects'
-                    },
-                    ticks: {
-                        stepSize: 1
                     }
                 },
                 y1: {
@@ -2446,6 +2875,49 @@ document.getElementById('copy-municipality-chart-btn').addEventListener('click',
         btn.disabled = true;
         
         const chartContainer = document.getElementById('municipalityChart').parentElement;
+        const canvas = await html2canvas(chartContainer, {
+            backgroundColor: '#ffffff',
+            scale: 2
+        });
+        
+        canvas.toBlob(function(blob) {
+            navigator.clipboard.write([
+                new ClipboardItem({ 'image/png': blob })
+            ]).then(() => {
+                btn.textContent = '✓ Copied!';
+                setTimeout(() => {
+                    btn.textContent = originalText;
+                    btn.disabled = false;
+                }, 2000);
+            }).catch(err => {
+                console.error('Failed to copy:', err);
+                btn.textContent = 'Error';
+                setTimeout(() => {
+                    btn.textContent = originalText;
+                    btn.disabled = false;
+                }, 2000);
+            });
+        });
+    } catch (error) {
+        console.error('Error copying chart:', error);
+        btn.textContent = 'Error';
+        setTimeout(() => {
+            btn.textContent = originalText;
+            btn.disabled = false;
+        }, 2000);
+    }
+});
+
+// Copy provinces chart to clipboard
+document.getElementById('copy-provinces-chart-btn').addEventListener('click', async function() {
+    const btn = this;
+    const originalText = btn.textContent;
+    
+    try {
+        btn.textContent = 'Copying...';
+        btn.disabled = true;
+        
+        const chartContainer = document.getElementById('provincesChart').parentElement;
         const canvas = await html2canvas(chartContainer, {
             backgroundColor: '#ffffff',
             scale: 2

@@ -4364,12 +4364,20 @@ async def province_projects_all_api(
         import json
         from pathlib import Path
         
+        # Normalize province name
+        province_normalized = province.strip()
+        # Fix common typos/normalization issues
+        if province_normalized.lower() == 'iloil':
+            province_normalized = 'Iloilo'
+        elif province_normalized.lower() == 'compostela valley':
+            province_normalized = 'Davao de Oro'
+        
         # Load summary file first
-        cache_dir = Path(__file__).parent / 'static' / 'data' / f'province-projects-{province.lower().replace(" ", "-")}'
+        cache_dir = Path(__file__).parent / 'static' / 'data' / f'province-projects-{province_normalized.lower().replace(" ", "-")}'
         summary_file = cache_dir / 'summary.json'
         
         # Fallback to old cache file structure if new structure doesn't exist
-        old_cache_file = Path(__file__).parent / 'static' / 'data' / f'province-projects-{province.lower().replace(" ", "-")}-cache.json'
+        old_cache_file = Path(__file__).parent / 'static' / 'data' / f'province-projects-{province_normalized.lower().replace(" ", "-")}-cache.json'
         
         if summary_file.exists():
             # New structure: load from per-contractor cache files
@@ -4522,7 +4530,7 @@ async def province_projects_all_api(
         else:
             return JSONResponse({
                 "success": False,
-                "error": f"Cached data not found for {province}. Please run scripts/generate_province_projects_cache.py",
+                "error": f"Cached data not found for {province_normalized}. Please run scripts/generate_province_projects_cache.py \"{province_normalized}\"",
                 "projects": [],
                 "summary": {"total": 0, "ssp": 0, "dime": 0, "philgeps": 0},
                 "total_cost": 0
@@ -4538,6 +4546,55 @@ async def province_projects_all_api(
             "projects": [],
             "summary": {"total": 0, "ssp": 0, "dime": 0, "philgeps": 0},
             "total_cost": 0
+        })
+
+@app.get("/api/province-projects/top-provinces")
+async def top_provinces_api():
+    """Get top 10 provinces by project count and total cost"""
+    try:
+        import json
+        from pathlib import Path
+        
+        cache_base_dir = Path(__file__).parent / 'static' / 'data'
+        province_stats = []
+        
+        # Iterate through all province cache directories
+        for province_dir in cache_base_dir.glob('province-projects-*/summary.json'):
+            try:
+                with open(province_dir, 'r', encoding='utf-8') as f:
+                    summary_data = json.load(f)
+                
+                province_name = province_dir.parent.name.replace('province-projects-', '').replace('-', ' ').title()
+                # Fix common province name issues
+                province_name = province_name.replace('Iloil', 'Iloilo').replace('Compostela Valley', 'Davao de Oro')
+                summary = summary_data.get('summary', {})
+                total_projects = summary.get('total', 0)
+                total_cost = summary_data.get('total_cost', 0)
+                
+                if total_projects > 0:
+                    province_stats.append({
+                        'name': province_name,
+                        'count': total_projects,
+                        'total_cost': total_cost
+                    })
+            except Exception as e:
+                print(f"Error reading {province_dir}: {e}")
+                continue
+        
+        # Sort by project count descending and take top 10
+        province_stats.sort(key=lambda x: x['count'], reverse=True)
+        top_10 = province_stats[:10]
+        
+        return JSONResponse({
+            "success": True,
+            "provinces": top_10
+        })
+        
+    except Exception as e:
+        return JSONResponse({
+            "success": False,
+            "error": str(e),
+            "provinces": []
         })
 
 @app.get("/api/dynasty-projects/search")
