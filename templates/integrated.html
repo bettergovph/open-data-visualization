@@ -2441,8 +2441,8 @@ async function loadTopProvincesChart(selectedProvince = null) {
                 provincesChart = null;
             }
             
-            // Create chart
-            createProvincesChart(provincesToShow);
+            // Create chart with selected province for highlighting
+            createProvincesChart(provincesToShow, selectedProvince);
         } else {
             console.error('Failed to load top provinces data:', data.error || 'No data');
             const chartContainer = document.getElementById('provincesChart')?.parentElement;
@@ -2460,7 +2460,7 @@ async function loadTopProvincesChart(selectedProvince = null) {
 }
 
 // Create provinces chart (dual axes: project count on left, total cost on right)
-function createProvincesChart(provincesData) {
+function createProvincesChart(provincesData, selectedProvince = null) {
     const ctx = document.getElementById('provincesChart');
     if (!ctx) return;
     
@@ -2473,25 +2473,90 @@ function createProvincesChart(provincesData) {
     const counts = provincesData.map(p => p.count);
     const costs = provincesData.map(p => p.total_cost / 1_000_000); // Convert to millions
     
+    // Normalize province name for matching
+    const normalizeName = (name) => {
+        if (!name) return '';
+        return name.toLowerCase().trim()
+            .replace(/\s+/g, ' ')
+            .replace(/province$/, '')
+            .trim();
+    };
+    
+    // Find the index of the selected province in the displayed data
+    let selectedIndex = -1;
+    if (selectedProvince && selectedProvince.trim().length > 0) {
+        const normalizedSelected = normalizeName(selectedProvince);
+        for (let i = 0; i < labels.length; i++) {
+            const normalizedLabel = normalizeName(labels[i]);
+            if (normalizedLabel === normalizedSelected || 
+                normalizedLabel.includes(normalizedSelected) || 
+                normalizedSelected.includes(normalizedLabel)) {
+                selectedIndex = i;
+                break;
+            }
+        }
+    }
+    
+    // Create arrays for bar colors and borders to highlight selected province
+    const projectBgColors = labels.map((_, i) => i === selectedIndex ? '#1565c0' : '#1565c0');
+    const projectBorderColors = labels.map((_, i) => i === selectedIndex ? '#ffd700' : '#0d47a1'); // Yellow for selected
+    const projectBorderWidths = labels.map((_, i) => i === selectedIndex ? 3 : 1); // Thicker border for selected
+    
+    const costBgColors = labels.map((_, i) => i === selectedIndex ? '#7b1fa2' : '#7b1fa2');
+    const costBorderColors = labels.map((_, i) => i === selectedIndex ? '#ffd700' : '#4a148c'); // Yellow for selected
+    const costBorderWidths = labels.map((_, i) => i === selectedIndex ? 3 : 1); // Thicker border for selected
+    
+    // Plugin to make selected province label bold
+    const boldLabelPlugin = {
+        id: 'boldSelectedLabel',
+        afterDraw: function(chart) {
+            if (selectedIndex !== -1) {
+                const ctx = chart.ctx;
+                const scale = chart.scales.x;
+                
+                if (scale && scale.ticks && scale.ticks.length > selectedIndex) {
+                    const tick = scale.ticks[selectedIndex];
+                    if (tick && tick.label) {
+                        ctx.save();
+                        ctx.font = 'bold 12px Arial';
+                        ctx.fillStyle = '#000000';
+                        ctx.textAlign = 'center';
+                        ctx.textBaseline = 'top';
+                        
+                        // Get the label position
+                        const labelX = tick.x || (scale.left + (selectedIndex + 0.5) * (scale.width / labels.length));
+                        const labelY = scale.bottom + 10;
+                        
+                        // Clear the area and redraw with bold
+                        ctx.clearRect(labelX - 60, labelY - 2, 120, 16);
+                        ctx.fillText(labels[selectedIndex], labelX, labelY);
+                        ctx.restore();
+                    }
+                }
+            }
+        }
+    };
+    
     provincesChart = new Chart(ctx, {
         type: 'bar',
+        plugins: [boldLabelPlugin],
         data: {
             labels: labels,
             datasets: [
                 {
                     label: 'Number of Projects',
                     data: counts,
-                    backgroundColor: '#1565c0',
-                    borderColor: '#0d47a1',
-                    borderWidth: 1,
+                    backgroundColor: projectBgColors,
+                    borderColor: projectBorderColors,
+                    borderWidth: projectBorderWidths,
                     yAxisID: 'y'
                 },
                 {
                     label: 'Total Cost (₱M)',
                     data: costs,
-                    backgroundColor: '#7b1fa2',
-                    borderColor: '#4a148c',
-                    borderWidth: 1,
+                    backgroundColor: costBgColors,
+                    borderColor: costBorderColors,
+                    borderWidth: costBorderWidths,
                     yAxisID: 'y1'
                 }
             ]
@@ -2529,6 +2594,15 @@ function createProvincesChart(provincesData) {
                     title: {
                         display: true,
                         text: 'Province'
+                    },
+                    ticks: {
+                        color: function(context) {
+                            // Make selected province label bold by using darker color
+                            if (context.index === selectedIndex && selectedIndex !== -1) {
+                                return '#000000'; // Black for selected
+                            }
+                            return '#666666'; // Gray for others
+                        }
                     }
                 },
                 y: {
