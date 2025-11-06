@@ -4597,6 +4597,60 @@ async def top_provinces_api():
             "provinces": []
         })
 
+@app.get("/api/province-projects/all-provinces-totals")
+async def all_provinces_totals_api():
+    """Get overall totals across all provinces (pre-computed)"""
+    try:
+        import json
+        from pathlib import Path
+        
+        cache_file = Path(__file__).parent / 'static' / 'data' / 'province-overall-totals.json'
+        
+        if cache_file.exists():
+            with open(cache_file, 'r', encoding='utf-8') as f:
+                cache_data = json.load(f)
+            
+            return JSONResponse(cache_data)
+        else:
+            # Fallback: calculate on the fly if cache doesn't exist
+            cache_base_dir = Path(__file__).parent / 'static' / 'data'
+            total_projects = 0
+            total_cost = 0
+            province_count = 0
+            
+            for province_dir in cache_base_dir.glob('province-projects-*/summary.json'):
+                try:
+                    with open(province_dir, 'r', encoding='utf-8') as f:
+                        summary_data = json.load(f)
+                    
+                    summary = summary_data.get('summary', {})
+                    province_projects = summary.get('total', 0)
+                    province_cost = summary_data.get('total_cost', 0)
+                    
+                    if province_projects > 0:
+                        total_projects += province_projects
+                        total_cost += province_cost
+                        province_count += 1
+                except Exception as e:
+                    print(f"Error reading {province_dir}: {e}")
+                    continue
+            
+            return JSONResponse({
+                "success": True,
+                "total_projects": total_projects,
+                "total_cost": total_cost,
+                "province_count": province_count,
+                "cache_version": "1.0"
+            })
+        
+    except Exception as e:
+        return JSONResponse({
+            "success": False,
+            "error": str(e),
+            "total_projects": 0,
+            "total_cost": 0
+        })
+
 @app.get("/api/dynasty-projects/search")
 async def dynasty_projects_search_api(
     congressman: str = Query(..., description="Congressman name to search"),

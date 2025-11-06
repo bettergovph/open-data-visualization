@@ -342,6 +342,25 @@ async fn dynasty_projects(_req: HttpRequest) -> Result<HttpResponse, ActixError>
     Ok(HttpResponse::Ok().content_type("text/html").body(rendered))
 }
 
+// Integrated Projects Page
+async fn integrated(_req: HttpRequest) -> Result<HttpResponse, ActixError> {
+    let tera = Tera::new("templates/**/*").map_err(|e| actix_web::error::ErrorInternalServerError(e))?;
+    let mut context = Context::new();
+
+    add_frontend_env_to_context(&mut context);
+
+    context.insert("title", "Integrated Projects - BetterGovPH");
+    context.insert("company_name", "BetterGovPH");
+    context.insert("platform", "BetterGovPH");
+    context.insert("SITE_NAME", "BetterGovPH Data Visualizations");
+    context.insert("SITE_URL", "https://visualizations.bettergov.ph");
+
+    let template_name = "integrated.html";
+
+    let rendered = tera.render(template_name, &context).map_err(|e| actix_web::error::ErrorInternalServerError(e))?;
+    Ok(HttpResponse::Ok().content_type("text/html").body(rendered))
+}
+
 // Family Details Page
 async fn family(req: HttpRequest) -> Result<HttpResponse, ActixError> {
     let tera = Tera::new("templates/**/*").map_err(|e| actix_web::error::ErrorInternalServerError(e))?;
@@ -408,6 +427,7 @@ async fn main() -> std::io::Result<()> {
         .service(web::resource("/philgeps").to(contractors))
         .service(web::resource("/dynasty").to(dynasty))
         .service(web::resource("/dynasty-projects").to(dynasty_projects))
+        .service(web::resource("/integrated").to(integrated))
         .service(web::resource("/family").to(family))
             .service(web::resource("/budget-nep-correlation").to(budget_nep_correlation))
             .service(web::resource("/budget-flood-correlation").to(budget_flood_correlation))
