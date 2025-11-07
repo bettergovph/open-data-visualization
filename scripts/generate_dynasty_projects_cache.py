@@ -444,34 +444,34 @@ class DynastyProjectsCacheGenerator:
             # Get congressman from database
             person = None
             if political_dynasties_available:
-            person = await dynasty_conn.fetchrow('''
-                SELECT id, first_name, last_name, middle_name, province, municipality_city, region, party
-                FROM political_dynasties
-                WHERE (
-                    UPPER(position) LIKE '%CONGRESSMAN%' 
-                    OR UPPER(position) LIKE '%CONGRESSMEN%' 
-                    OR UPPER(position) LIKE '%MEMBER, HOUSE OF REPRESENTATIVES%'
-                    OR UPPER(position) LIKE '%REPRESENTATIVE%PARTY-LIST%'
-                    OR UPPER(position) LIKE '%REPRESENTATIVE, %PARTY-LIST%'
-                    OR UPPER(position) LIKE '%PARTY-LIST%REPRESENTATIVE%'
-                    OR UPPER(position) LIKE '%DEPUTY SPEAKER%'
-                    OR UPPER(position) LIKE '%SPEAKER%'
+                person = await dynasty_conn.fetchrow('''
+                    SELECT id, first_name, last_name, middle_name, province, municipality_city, region, party
+                    FROM political_dynasties
+                    WHERE (
+                        UPPER(position) LIKE '%CONGRESSMAN%' 
+                        OR UPPER(position) LIKE '%CONGRESSMEN%' 
+                        OR UPPER(position) LIKE '%MEMBER, HOUSE OF REPRESENTATIVES%'
+                        OR UPPER(position) LIKE '%REPRESENTATIVE%PARTY-LIST%'
+                        OR UPPER(position) LIKE '%REPRESENTATIVE, %PARTY-LIST%'
+                        OR UPPER(position) LIKE '%PARTY-LIST%REPRESENTATIVE%'
+                        OR UPPER(position) LIKE '%DEPUTY SPEAKER%'
+                        OR UPPER(position) LIKE '%SPEAKER%'
+                    )
+                      AND (
+                        (UPPER(first_name) LIKE $1 AND UPPER(last_name) LIKE $2)
+                        OR (UPPER(first_name || ' ' || COALESCE(middle_name, '') || ' ' || last_name) LIKE $3)
+                        OR (UPPER(first_name || ' ' || COALESCE(middle_name, '')) LIKE $1 AND UPPER(last_name) LIKE $2)
+                        OR (UPPER(last_name) LIKE $2 AND UPPER(first_name) LIKE '%MANNIX%' AND 'MANNIX' = $4)
+                        OR (UPPER(last_name) LIKE $2 AND UPPER(first_name) LIKE '%MANUEL%' AND 'MANNIX' = $4)
+                      )
+                    ORDER BY id DESC
+                    LIMIT 1
+                ''', 
+                    f"{(first_name_pattern or '').upper()}%", 
+                    f"{(last_name_pattern or '').upper()}%",
+                    f"%{(first_name_pattern or '').upper()}% {(last_name_pattern or '').upper()}%",
+                    (first_name_pattern or '').upper()
                 )
-                  AND (
-                    (UPPER(first_name) LIKE $1 AND UPPER(last_name) LIKE $2)
-                    OR (UPPER(first_name || ' ' || COALESCE(middle_name, '') || ' ' || last_name) LIKE $3)
-                    OR (UPPER(first_name || ' ' || COALESCE(middle_name, '')) LIKE $1 AND UPPER(last_name) LIKE $2)
-                    OR (UPPER(last_name) LIKE $2 AND UPPER(first_name) LIKE '%MANNIX%' AND 'MANNIX' = $4)
-                    OR (UPPER(last_name) LIKE $2 AND UPPER(first_name) LIKE '%MANUEL%' AND 'MANNIX' = $4)
-                  )
-                ORDER BY id DESC
-                LIMIT 1
-            ''', 
-                f"%{first_name_pattern}%", 
-                f"%{last_name_pattern}%",
-                f"%{first_name_pattern}%{last_name_pattern}%",
-                first_name_pattern
-            )
             
             # Fallback when dynasty DB is missing or no match
             if not person:
@@ -737,16 +737,16 @@ class DynastyProjectsCacheGenerator:
 
                 # Skip if excluded
                 if _contractor_is_excluded(contractor_name_upper):
-                                    break
+                    break
 
                 # Direct substring match
-                            if pattern_upper in contractor_name_upper:
-                                        return (congressman_name, "contractor", 50)
-                    
+                if pattern_upper in contractor_name_upper:
+                    return (congressman_name, "contractor", 50)
+
                 # Normalized comparison (remove punctuation, collapse spaces)
                 normalized_pattern = _normalize_for_match(pattern)
                 if normalized_pattern and normalized_pattern in normalized_candidate:
-                            return (congressman_name, "contractor", 50)
+                    return (congressman_name, "contractor", 50)
                     
         # If contractor name not provided (e.g., Infrawatch text only), fall back to searching the combined text
         if contractor_patterns and not contractor_name:
@@ -770,13 +770,13 @@ class DynastyProjectsCacheGenerator:
 
                     if 'JSG' in contractor_upper and 'JSG' in contractor_name_upper:
                         if not _contractor_is_excluded(contractor_name_upper):
-                                return (congressman_name, "contractor", 50)
+                            return (congressman_name, "contractor", 50)
                     
                     for pattern in ['SUNWEST', 'ROVING PREMIER', 'VIRKAR', 'GARDIOLA', 'NEWINGTON', 'S-ANG']:
                         if pattern in contractor_upper:
                             pattern_upper = pattern.upper()
                             if pattern_upper in contractor_name_upper and not _contractor_is_excluded(contractor_name_upper):
-                        return (congressman_name, "contractor", 50)
+                                return (congressman_name, "contractor", 50)
             else:
                 # No explicit contractor name on the record, attempt to match patterns in combined text
                 normalized_text = _normalize_for_match(combined_text)
