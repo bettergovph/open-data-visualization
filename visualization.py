@@ -4579,24 +4579,24 @@ async def dynasty_projects_all_api(
         
         print(f"Loaded {len(all_projects)} total projects from all caches")
         
-        # Load pre-generated top-10 stats from cache
-        top_10_cache_file = data_dir / 'top-10-congressmen.json'
+        # Load pre-generated top-200 stats from cache
+        top_cache_file = data_dir / 'top-200-congressmen.json'
         chart_data = []
         dashboard_stats = {}
         
-        if top_10_cache_file.exists():
+        if top_cache_file.exists():
             try:
-                with open(top_10_cache_file, 'r', encoding='utf-8') as f:
-                    top_10_data = json.load(f)
-                    chart_data = top_10_data.get('chart_data', [])
-                    dashboard_stats = top_10_data.get('dashboard_stats', {})
-                    print(f"✅ Loaded pre-generated top-10 stats from cache")
+                with open(top_cache_file, 'r', encoding='utf-8') as f:
+                    top_cache_data = json.load(f)
+                    chart_data = top_cache_data.get('chart_data', [])
+                    dashboard_stats = top_cache_data.get('dashboard_stats', {})
+                    print("✅ Loaded pre-generated top-200 stats from cache")
             except Exception as e:
-                print(f"⚠️  Error loading top-10 cache: {e}")
+                print(f"⚠️  Error loading top-200 cache: {e}")
         
         # Fallback: calculate if cache doesn't exist
         if not chart_data or not dashboard_stats:
-            print("⚠️  Top-10 cache not found, calculating on-the-fly...")
+            print("⚠️  Top-200 cache not found, calculating on-the-fly...")
             congressman_stats = {}
             for proj in all_projects:
                 congressman = proj.get('congressman', 'Unknown')

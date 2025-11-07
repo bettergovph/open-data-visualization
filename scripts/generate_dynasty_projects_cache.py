@@ -37,6 +37,19 @@ class DynastyProjectsCacheGenerator:
         cpu_count = os.cpu_count() or 4
         self.max_workers = min(24, max(1, cpu_count))
 
+    def _regenerate_top_congressmen_cache(self) -> None:
+        """Refresh the top-200 cache so the integrated tab stays up to date."""
+        top_generator = Path(__file__).with_name('generate_top_200_congressmen.py')
+        if not top_generator.exists():
+            print("⚠️  Top-200 generator script not found; skipping refresh.")
+            return
+
+        try:
+            subprocess.run([sys.executable, str(top_generator)], check=True)
+            print("✅ Refreshed top-200-congressmen.json cache")
+        except subprocess.CalledProcessError as exc:
+            print(f"💥 Failed to refresh top-200 cache: {exc}")
+
     @staticmethod
     def _chunk_list(items: List[Any], max_chunks: int) -> List[List[Any]]:
         if not items:
@@ -1374,7 +1387,10 @@ class DynastyProjectsCacheGenerator:
                     print(f"   ✅ {congressman_name}: 0 projects (empty cache created)")
             
             print(f"\n✅ Individual cache files created for {len(all_congressmen_names)} congressmen")
-            
+
+            # Update aggregated leaderboard so the UI reflects the new cache immediately
+            self._regenerate_top_congressmen_cache()
+ 
         finally:
             await dynasty_conn.close()
             await dime_conn.close()
