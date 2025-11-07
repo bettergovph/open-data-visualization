@@ -204,7 +204,7 @@ function toggleMobileMenu() {
                 <div style="flex: 1;">
                     <strong style="display: block; margin-bottom: 8px; color: #856404;">Data Disclaimer</strong>
                     <p style="margin: 0; color: #856404; font-size: 14px; line-height: 1.6;">
-                        The visualizations map projects to congressional districts based on publicly available government datasets and do not, by themselves, indicate wrongdoing. Contractor associations are drawn only from published investigative or official sources and should not be treated as authoritative or exhaustive. Flood Control records from SSP (Sumbong sa Pangulo), infrastructure listings from DIME (Database of Infrastructure Monitoring and Evaluation), and procurement releases from PhilGEPS (Philippine Government Electronic Procurement System) are combined purely to show where projects fall within a congressman’s district footprint. Refer to our <a href="/sources" style="color: #856404; text-decoration: underline; font-weight: 600;" target="_blank">Data Sources</a> page for methodology, coverage, and citation details.
+                        The visualizations map projects to congressional districts based on publicly available government datasets and do not, by themselves, indicate wrongdoing. Contractor associations are drawn only from published investigative or official sources and should not be treated as authoritative or exhaustive. Flood Control records from SSP (Sumbong sa Pangulo), infrastructure listings from DIME (Database of Infrastructure Monitoring and Evaluation), and procurement releases from PhilGEPS (Philippine Government Electronic Procurement System) are combined purely to show where projects fall within a congressman's district footprint. Refer to our <a href="/sources" style="color: #856404; text-decoration: underline; font-weight: 600;" target="_blank">Data Sources</a> page for methodology, coverage, and citation details.
                     </p>
                     <p style="margin: 12px 0 0; color: #856404; font-size: 13px; line-height: 1.6;">
                         Coverage note: We are still processing congressional districts, and not all congressmen and district datasets are available yet. Congressman search currently reflects only the officials with available project caches while we ingest the remaining 2016–2025 records, so some filters may return limited or no matches and project-level data for certain names may still be in progress. <span id="integrated-coverage-counts" style="display: inline-block; margin-top: 6px; font-weight: 600;">Loading coverage summary...</span>
@@ -445,13 +445,6 @@ function toggleMobileMenu() {
                         <h3 class="budget-section-title">📊 Congressman Visual Analysis</h3>
                         <p class="budget-section-desc">Project statistics for target congressmen</p>
                         
-                        <!-- Congressman Visual Overview -->
-                        <div style="margin-bottom: 20px; padding: 20px; background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%); border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); border: 2px solid #333;">
-                            <p style="margin: 0; color: #333; font-size: 15px; line-height: 1.6; text-align: center;">
-                                <strong>Dual-Metric Analysis:</strong> Showing the combined top congressmen by <strong>project count</strong> and <strong>total cost</strong> (14 unique leaders). This reveals different infrastructure strategies: high-volume districts with many smaller projects vs. high-cost districts with fewer mega-projects. Totals combine district-aligned and contractor-linked matches across SSP, DIME, PhilGEPS, and Infrawatch datasets.
-                            </p>
-                        </div>
-                        
                         <!-- Dashboard Statistics -->
                         <div id="dashboard-stats" style="display: none; margin-top: 30px; margin-bottom: 20px; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px;">
                             <div style="background: white; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); padding: 20px; text-align: center;">
@@ -461,7 +454,7 @@ function toggleMobileMenu() {
                             </div>
                             <div style="background: white; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); padding: 20px; text-align: center;">
                                 <div style="font-size: 14px; color: #666; margin-bottom: 8px;">District Projects</div>
-                                <div id="dashboard-district-cost" style="font-size: 24px; font-weight: 700; color: #1565c0;">₱0</div>
+                                <div id="dashboard-district-cost" style="font-size: 24px; font-weight: 700; color: #333;">₱0</div>
                                 <div id="dashboard-district-count" style="font-size: 12px; color: #999; margin-top: 5px;">0 projects</div>
                             </div>
                             <div style="background: white; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); padding: 20px; text-align: center;">
@@ -471,40 +464,32 @@ function toggleMobileMenu() {
                             </div>
                         </div>
                         
-                        <!-- Key Insights Panel -->
-                        <div id="visual-insights" style="display: none; margin-top: 30px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.2); padding: 25px; color: white;">
-                            <h3 style="margin: 0 0 15px 0; font-size: 18px; font-weight: 700; display: flex; align-items: center;">
-                                <span style="font-size: 24px; margin-right: 10px;">💡</span>
-                                Key Insights: Dual-Metric Analysis
-                            </h3>
-                            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 15px; margin-top: 20px;">
-                                <div style="background: rgba(255,255,255,0.15); backdrop-filter: blur(10px); border-radius: 6px; padding: 15px; border: 1px solid rgba(255,255,255,0.2);">
-                                    <div style="font-size: 13px; opacity: 0.9; margin-bottom: 8px;">🔢 High-Volume Leader</div>
-                                    <div id="insight-high-volume" style="font-size: 16px; font-weight: 700; margin-bottom: 5px;">Loading...</div>
-                                    <div id="insight-high-volume-detail" style="font-size: 12px; opacity: 0.85;">Many smaller projects</div>
-                                </div>
-                                <div style="background: rgba(255,255,255,0.15); backdrop-filter: blur(10px); border-radius: 6px; padding: 15px; border: 1px solid rgba(255,255,255,0.2);">
-                                    <div style="font-size: 13px; opacity: 0.9; margin-bottom: 8px;">💰 High-Cost Leader</div>
-                                    <div id="insight-high-cost" style="font-size: 16px; font-weight: 700; margin-bottom: 5px;">Loading...</div>
-                                    <div id="insight-high-cost-detail" style="font-size: 12px; opacity: 0.85;">Fewer mega-projects</div>
-                                </div>
-                                <div style="background: rgba(255,255,255,0.15); backdrop-filter: blur(10px); border-radius: 6px; padding: 15px; border: 1px solid rgba(255,255,255,0.2);">
-                                    <div style="font-size: 13px; opacity: 0.9; margin-bottom: 8px;">🎯 Balanced Leaders</div>
-                                    <div id="insight-balanced" style="font-size: 16px; font-weight: 700; margin-bottom: 5px;">Loading...</div>
-                                    <div id="insight-balanced-detail" style="font-size: 12px; opacity: 0.85;">Appear in both top 10 lists</div>
-                                </div>
-                                <div style="background: rgba(255,255,255,0.15); backdrop-filter: blur(10px); border-radius: 6px; padding: 15px; border: 1px solid rgba(255,255,255,0.2);">
-                                    <div style="font-size: 13px; opacity: 0.9; margin-bottom: 8px;">📊 Spending Pattern</div>
-                                    <div id="insight-pattern" style="font-size: 16px; font-weight: 700; margin-bottom: 5px;">Loading...</div>
-                                    <div id="insight-pattern-detail" style="font-size: 12px; opacity: 0.85;">Different infrastructure strategies</div>
-                                </div>
+                        <div id="insight-table" style="display: none; margin-top: 10px; background: white; border-radius: 8px; box-shadow: 0 2px 12px rgba(0,0,0,0.08); overflow: hidden;">
+                            <div style="padding: 16px 20px; border-bottom: 1px solid #eee; background: linear-gradient(135deg, #f8f9fa 0%, #e8ebf2 100%);">
+                                <div style="font-size: 15px; font-weight: 700; color: #333;">Key Insights Revealed</div>
+                                <div style="font-size: 12px; color: #777; margin-top: 4px;">Contrasting high-volume districts versus high-spending mega-project districts</div>
                             </div>
+                            <div style="padding: 0 20px 16px 20px;">
+                                <div style="display: grid; grid-template-columns: minmax(160px, 1.5fr) repeat(3, minmax(120px, 1fr)); gap: 12px; padding: 14px 0; border-bottom: 1px solid #eee; color: #666; font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.04em;">
+                                    <div>Congressman</div>
+                                    <div>Projects</div>
+                                    <div>Total Cost</div>
+                                    <div>Strategy</div>
+                                </div>
+                                <div id="insight-rows" style="display: grid; gap: 10px;"></div>
+                            </div>
+                        </div>
+                        
+                        <div style="margin-bottom: 20px; padding: 20px; background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%); border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); border: 2px solid #333;">
+                            <p style="margin: 0; color: #333; font-size: 15px; line-height: 1.6; text-align: center;">
+                                <strong>Dual-Metric Analysis:</strong> Showing the combined top congressmen by <strong>project count</strong> and <strong>total cost</strong> (14 unique leaders). This reveals different infrastructure strategies: high-volume districts with many smaller projects vs. high-cost districts with fewer mega-projects. Totals combine district-aligned and contractor-linked matches across SSP, DIME, PhilGEPS, and Infrawatch datasets.
+                            </p>
                         </div>
                         
                         <div style="margin-top: 30px; background: white; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); padding: 20px; position: relative;">
                             <div style="position: absolute; top: 20px; right: 20px; display: flex; gap: 10px; z-index: 10;">
-                                <button id="sort-by-count-btn" style="padding: 10px 20px; background: #1565c0; color: white; border: 2px solid #1565c0; border-radius: 6px; font-size: 14px; font-weight: 600; cursor: pointer; transition: all 0.3s ease; box-shadow: 0 4px 12px rgba(0,0,0,0.2);" onclick="sortChartBy('count')">🔢 By Count</button>
-                                <button id="sort-by-cost-btn" style="padding: 10px 20px; background: #333; color: white; border: 2px solid #333; border-radius: 6px; font-size: 14px; font-weight: 600; cursor: pointer; transition: all 0.3s ease; box-shadow: 0 4px 12px rgba(0,0,0,0.2);" onclick="sortChartBy('cost')">💰 By Cost</button>
+                                <button id="sort-by-count-btn" style="padding: 10px 20px; background: #333; color: white; border: 2px solid #333; border-radius: 6px; font-size: 14px; font-weight: 600; cursor: pointer; transition: all 0.3s ease; box-shadow: 0 4px 12px rgba(0,0,0,0.2);" onclick="sortChartBy('count')">🔢 By Count</button>
+                                <button id="sort-by-cost-btn" style="padding: 10px 20px; background: #7b1fa2; color: white; border: 2px solid #7b1fa2; border-radius: 6px; font-size: 14px; font-weight: 600; cursor: pointer; transition: all 0.3s ease; box-shadow: 0 4px 12px rgba(0,0,0,0.2);" onclick="sortChartBy('cost')">💰 By Cost</button>
                                 <button id="copy-chart-btn" style="padding: 10px 20px; background: #333; color: white; border: 2px solid #333; border-radius: 6px; font-size: 14px; font-weight: 600; cursor: pointer; transition: all 0.3s ease; box-shadow: 0 4px 12px rgba(0,0,0,0.2);" onmouseover="this.style.background='#667eea'; this.style.borderColor='#667eea'; this.style.transform='translateY(-2px)'; this.style.boxShadow='0 6px 16px rgba(102, 126, 234, 0.4)';" onmouseout="this.style.background='#333'; this.style.borderColor='#333'; this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 12px rgba(0,0,0,0.2)';">📋 Copy</button>
                             </div>
                             <canvas id="combinedChart" style="max-height: 500px;"></canvas>
@@ -951,7 +936,8 @@ let integratedCoverageSummaryMessage = '';
 // Chart instance and data
 let combinedChart = null;
 let currentChartData = null;
-let currentSortMode = 'count';
+let currentSortMode = 'cost';
+let prefetchedVisualData = null;
 
 function normalizeCongressmanName(name) {
     return (name || '')
@@ -1308,17 +1294,14 @@ async function loadAllProjects() {
     document.getElementById('results-summary').style.display = 'none';
     document.getElementById('projects-tbody').innerHTML = '<tr><td colspan="8" style="padding: 20px; text-align: center;">Loading...</td></tr>';
     
-    // Also load visual data
-    loadVisualData();
-    
     try {
-        // Load all projects (use large limit to get all for filtering)
-        const response = await fetch(`/api/dynasty-projects/all?page=1&limit=10000`);
-        const data = await response.json();
+        const data = await fetchAllDynastyProjects();
+        prefetchedVisualData = data;
+        await loadVisualData(data);
         
         document.getElementById('table-loading').style.display = 'none';
         
-        if (data.success && data.projects) {
+        if (data.projects && data.projects.length > 0) {
             allProjectsData = data.projects;
             buildAvailableCongressmanNames();
             filterInitialCongressmanNames();
@@ -1332,6 +1315,7 @@ async function loadAllProjects() {
                 `<tr><td colspan="8" style="padding: 40px; text-align: center; color: #dc3545;">${data.error || 'No projects found'}</td></tr>`;
         }
     } catch (error) {
+        console.error('Error loading projects:', error);
         document.getElementById('table-loading').style.display = 'none';
         document.getElementById('projects-tbody').innerHTML = 
             `<tr><td colspan="8" style="padding: 40px; text-align: center; color: #dc3545;">Error: ${error.message}</td></tr>`;
@@ -1669,55 +1653,131 @@ function updateSummary(summary) {
 }
 
 function updateInsightsPanel(byCount, byCost) {
-    // Find who appears in both lists
+    if (!Array.isArray(byCount) || byCount.length === 0 || !Array.isArray(byCost) || byCost.length === 0) {
+        return;
+    }
+    
     const countNames = new Set(byCount.map(c => c.name));
     const costNames = new Set(byCost.map(c => c.name));
     const bothLists = [...countNames].filter(name => costNames.has(name));
     
-    // High-volume leader (most projects)
     const highVolume = byCount[0];
-    const avgCostVolume = highVolume.total_cost / highVolume.count;
-    document.getElementById('insight-high-volume').textContent = highVolume.name;
-    document.getElementById('insight-high-volume-detail').textContent = 
-        `${highVolume.count.toLocaleString()} projects @ ₱${(avgCostVolume / 1_000_000).toFixed(1)}M avg`;
-    
-    // High-cost leader (highest spending)
+    const avgCostVolume = highVolume.total_cost / Math.max(highVolume.count || 1, 1);
     const highCost = byCost[0];
-    const avgCostHigh = highCost.total_cost / highCost.count;
-    document.getElementById('insight-high-cost').textContent = highCost.name;
-    document.getElementById('insight-high-cost-detail').textContent = 
-        `₱${(highCost.total_cost / 1_000_000_000).toFixed(1)}B total @ ₱${(avgCostHigh / 1_000_000).toFixed(1)}M avg`;
+    const avgCostHigh = highCost.total_cost / Math.max(highCost.count || 1, 1);
     
-    // Balanced leaders
-    document.getElementById('insight-balanced').textContent = `${bothLists.length} congressmen`;
-    document.getElementById('insight-balanced-detail').textContent = 
-        bothLists.length === 6 ? 'High volume + High cost' : `${bothLists.length} in both top 10 lists`;
+    const highCostOutliers = byCost.filter(c => !countNames.has(c.name));
+    const balancedExample = bothLists.length > 0 ? byCount.find(item => bothLists.includes(item.name)) : null;
+    const outlierExample = highCostOutliers.length > 0 ? highCostOutliers[0] : null;
     
-    // Spending pattern insight
-    const highCostNotInCount = byCost.filter(c => !countNames.has(c.name));
-    if (highCostNotInCount.length > 0) {
-        const megaProject = highCostNotInCount[0];
-        const avgMega = megaProject.total_cost / megaProject.count;
-        document.getElementById('insight-pattern').textContent = 'Mega-project strategy';
-        document.getElementById('insight-pattern-detail').textContent = 
-            `${megaProject.name}: ₱${(avgMega / 1_000_000).toFixed(0)}M per project`;
-    } else {
-        document.getElementById('insight-pattern').textContent = 'Balanced distribution';
-        document.getElementById('insight-pattern-detail').textContent = 'Similar patterns across top 10';
+    const rows = [];
+    
+    if (highCost) {
+        rows.push({
+            name: highCost.name,
+            projects: highCost.count,
+            cost: highCost.total_cost,
+            strategy: `💰 High-cost (${(avgCostHigh / 1_000_000).toFixed(0)}M avg)`
+        });
+    }
+    if (highVolume && (!highCost || highVolume.name !== highCost.name)) {
+        rows.push({
+            name: highVolume.name,
+            projects: highVolume.count,
+            cost: highVolume.total_cost,
+            strategy: `🔢 High-volume (${(avgCostVolume / 1_000_000).toFixed(0)}M avg)`
+        });
+    }
+    if (balancedExample && (!highCost || balancedExample.name !== highCost.name) && (!highVolume || balancedExample.name !== highVolume.name)) {
+        const avgBalanced = balancedExample.total_cost / Math.max(balancedExample.count || 1, 1);
+        rows.push({
+            name: balancedExample.name,
+            projects: balancedExample.count,
+            cost: balancedExample.total_cost,
+            strategy: `🎯 Balanced (${(avgBalanced / 1_000_000).toFixed(0)}M avg)`
+        });
+    }
+    if (outlierExample) {
+        const avgOutlier = outlierExample.total_cost / Math.max(outlierExample.count || 1, 1);
+        rows.push({
+            name: outlierExample.name,
+            projects: outlierExample.count,
+            cost: outlierExample.total_cost,
+            strategy: `💰 Mega-projects (${(avgOutlier / 1_000_000).toFixed(0)}M avg)`
+        });
     }
     
-    // Show the insights panel
-    document.getElementById('visual-insights').style.display = 'block';
+    if (!balancedExample && bothLists.length > 1) {
+        const secondBalanced = byCost.find(item => bothLists.includes(item.name) && item.name !== highCost.name && (!highVolume || item.name !== highVolume.name));
+        if (secondBalanced) {
+            const avgSecond = secondBalanced.total_cost / Math.max(secondBalanced.count || 1, 1);
+            rows.push({
+                name: secondBalanced.name,
+                projects: secondBalanced.count,
+                cost: secondBalanced.total_cost,
+                strategy: `🎯 Balanced (${(avgSecond / 1_000_000).toFixed(0)}M avg)`
+            });
+        }
+    }
+    
+    if (!outlierExample && byCost.length > rows.length) {
+        const fallback = byCost.find(item => !rows.some(r => r.name === item.name));
+        if (fallback) {
+            const avgFallback = fallback.total_cost / Math.max(fallback.count || 1, 1);
+            rows.push({
+                name: fallback.name,
+                projects: fallback.count,
+                cost: fallback.total_cost,
+                strategy: `💼 Mega-projects (${(avgFallback / 1_000_000).toFixed(0)}M avg)`
+            });
+        }
+    }
+    
+    if (rows.length === 0) {
+        rows.push({
+            name: highCost.name,
+            projects: highCost.count,
+            cost: highCost.total_cost,
+            strategy: `💰 High-cost (${(avgCostHigh / 1_000_000).toFixed(0)}M avg)`
+        });
+    }
+    
+    const table = document.getElementById('insight-table');
+    const rowsContainer = document.getElementById('insight-rows');
+    if (table && rowsContainer) {
+        rowsContainer.innerHTML = rows.map(row => {
+            return `
+                <div style="display: grid; grid-template-columns: minmax(160px, 1.5fr) repeat(3, minmax(120px, 1fr)); gap: 12px; align-items: center; padding: 12px 0; border-bottom: 1px solid #f1f1f1;">
+                    <div style="font-size: 14px; font-weight: 600; color: #333;">${row.name}</div>
+                    <div style="font-size: 14px; color: #444;">${row.projects.toLocaleString()}</div>
+                    <div style="font-size: 14px; color: #444;">${formatCurrency(row.cost)}</div>
+                    <div style="font-size: 13px; color: #555; font-weight: 600;">${row.strategy}</div>
+                </div>
+            `;
+        }).join('');
+        table.style.display = 'block';
+    }
 }
 
 // Load and display visual data
-async function loadVisualData() {
+async function loadVisualData(prefetchedData = null) {
     const visualLoading = document.getElementById('visual-loading');
-    visualLoading.style.display = 'block';
+    if (visualLoading) {
+        visualLoading.style.display = 'block';
+    }
     
     try {
-        const response = await fetch('/api/dynasty-projects/all?page=1&limit=10000');
-        const data = await response.json();
+        let data = prefetchedData || prefetchedVisualData;
+        
+        if (!data) {
+            data = await fetchAllDynastyProjects();
+        } else {
+            prefetchedVisualData = data;
+        }
+        
+        if (!prefetchedVisualData) {
+            prefetchedVisualData = data;
+        }
         
         if (data.success && data.chart_data) {
             // Use pre-calculated chart data from cache (all combined unique congressmen)
@@ -1743,8 +1803,8 @@ async function loadVisualData() {
             // Store chart data for sorting
             currentChartData = statsArray;
             
-            // Create or update charts with initial sort by count
-            updateChartWithSort('count');
+            // Create or update charts with initial sort (default: cost emphasis)
+            sortChartBy('cost');
         } else if (data.success && data.projects) {
             // Fallback: calculate from projects if chart_data not available
             const congressmanStats = {};
@@ -1788,28 +1848,16 @@ async function loadVisualData() {
             document.getElementById('dashboard-stats').style.display = 'grid';
             
             // Convert to array and sort by count
-            const statsArray = Object.values(congressmanStats)
-                .sort((a, b) => b.count - a.count)
-                .slice(0, 10);
-            
-            // Prepare chart data
-            const labels = statsArray.map((s) => {
-                const name = s.name;
-                if (name.length > 20) {
-                    return name.split(' ').slice(0, 2).join(' ') + '...';
-                }
-                return name;
-            });
-            const counts = statsArray.map((s) => s.count);
-            const costs = statsArray.map((s) => s.totalCost / 1_000_000);
-            
-            // Create or update charts
-            createCharts(labels, statsArray.map((s) => s.name), counts, costs);
+            const statsArray = Object.values(congressmanStats);
+            currentChartData = statsArray;
+            sortChartBy('cost');
         }
     } catch (error) {
         console.error('Error loading visual data:', error);
     } finally {
-        visualLoading.style.display = 'none';
+        if (visualLoading) {
+            visualLoading.style.display = 'none';
+        }
     }
 }
 
@@ -4067,6 +4115,56 @@ document.getElementById('copy-contractor-chart-btn').addEventListener('click', a
         }, 2000);
     }
 });
+
+// ... existing code ...
+async function fetchAllDynastyProjects() {
+    const aggregated = {
+        success: true,
+        projects: [],
+        summary: {},
+        dashboard_stats: {},
+        chart_data: [],
+        chart_data_by_count: [],
+        chart_data_by_cost: []
+    };
+    
+    const limit = 10000;
+    let page = 1;
+    let totalPages = 1;
+    let firstPageData = null;
+    
+    while (page <= totalPages) {
+        const response = await fetch(`/api/dynasty-projects/all?page=${page}&limit=${limit}`);
+        const data = await response.json();
+        
+        if (!data.success) {
+            throw new Error(data.error || 'Unable to load dynasty projects');
+        }
+        
+        if (page === 1) {
+            firstPageData = data;
+            const totalItems = data.total || 0;
+            totalPages = data.total_pages || (totalItems > 0 ? Math.ceil(totalItems / limit) : 1);
+            if (!totalPages || totalPages < 1) {
+                totalPages = 1;
+            }
+            aggregated.summary = data.summary || {};
+            aggregated.dashboard_stats = data.dashboard_stats || {};
+            aggregated.chart_data = data.chart_data || [];
+            aggregated.chart_data_by_count = data.chart_data_by_count || data.chart_data || [];
+            aggregated.chart_data_by_cost = data.chart_data_by_cost || data.chart_data || [];
+        }
+        
+        if (Array.isArray(data.projects) && data.projects.length > 0) {
+            aggregated.projects.push(...data.projects);
+        }
+        
+        page += 1;
+    }
+    
+    return aggregated;
+}
+
 </script>
 
 <style>
