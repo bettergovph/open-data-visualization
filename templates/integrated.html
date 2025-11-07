@@ -401,6 +401,10 @@ function toggleMobileMenu() {
                                         <strong style="color: #333;">PhilGEPS:</strong>
                                         <span id="philgeps-count" style="color: #666;">0</span>
                                     </div>
+                                    <div>
+                                        <strong style="color: #333;">Microsite:</strong>
+                                        <span id="microsite-count" style="color: #666;">0</span>
+                                    </div>
                                 </div>
                                 <button id="export-csv-btn" style="padding: 12px 24px; background: #333; color: white; border: 2px solid #333; border-radius: 6px; font-size: 14px; font-weight: 700; cursor: pointer; transition: all 0.3s ease; box-shadow: 0 4px 12px rgba(0,0,0,0.2); white-space: nowrap; margin-left: 20px;" onmouseover="this.style.background='#667eea'; this.style.borderColor='#667eea'; this.style.transform='translateY(-2px)'; this.style.boxShadow='0 6px 16px rgba(102, 126, 234, 0.4)';" onmouseout="this.style.background='#333'; this.style.borderColor='#333'; this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 12px rgba(0,0,0,0.2)';">📥 Export CSV</button>
                             </div>
@@ -645,6 +649,10 @@ function toggleMobileMenu() {
                                     <div>
                                         <strong style="color: #333;">PhilGEPS:</strong>
                                         <span id="province-philgeps-count" style="color: #666;">0</span>
+                                    </div>
+                                    <div>
+                                        <strong style="color: #333;">Microsite:</strong>
+                                        <span id="province-microsite-count" style="color: #666;">0</span>
                                     </div>
                                 </div>
                                 <button id="province-export-csv-btn" style="padding: 12px 24px; background: #333; color: white; border: 2px solid #333; border-radius: 6px; font-size: 14px; font-weight: 700; cursor: pointer; transition: all 0.3s ease; box-shadow: 0 4px 12px rgba(0,0,0,0.2); white-space: nowrap; margin-left: 20px;" onmouseover="this.style.background='#667eea'; this.style.borderColor='#667eea'; this.style.transform='translateY(-2px)'; this.style.boxShadow='0 6px 16px rgba(102, 126, 234, 0.4)';" onmouseout="this.style.background='#333'; this.style.borderColor='#333'; this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 12px rgba(0,0,0,0.2)';">📥 Export CSV</button>
@@ -1447,6 +1455,7 @@ function calculateSummary(projects) {
         ssp: 0,
         dime: 0,
         philgeps: 0,
+        microsite: 0,
         district_projects: 0,
         contractor_projects: 0
     };
@@ -1460,6 +1469,7 @@ function calculateSummary(projects) {
             if (src === 'SSP') summary.ssp++;
             if (src === 'DIME') summary.dime++;
             if (src === 'PhilGEPS') summary.philgeps++;
+            if (src === 'Microsite') summary.microsite++;
         });
         
         if (project.match_type === 'district') summary.district_projects++;
@@ -1607,6 +1617,7 @@ function updateSummary(summary) {
         document.getElementById('ssp-count').textContent = summary.ssp || 0;
         document.getElementById('dime-count').textContent = summary.dime || 0;
         document.getElementById('philgeps-count').textContent = summary.philgeps || 0;
+        document.getElementById('microsite-count').textContent = summary.microsite || 0;
         document.getElementById('results-summary').style.display = 'block';
     }
 }
@@ -2398,7 +2409,8 @@ function provinceCalculateSummary(projects) {
         total: projects.length,
         ssp: 0,
         dime: 0,
-        philgeps: 0
+        philgeps: 0,
+        microsite: 0
     };
     
     projects.forEach(project => {
@@ -2407,6 +2419,7 @@ function provinceCalculateSummary(projects) {
             if (src === 'SSP') summary.ssp++;
             if (src === 'DIME') summary.dime++;
             if (src === 'PhilGEPS') summary.philgeps++;
+            if (src === 'Microsite') summary.microsite++;
         });
     });
     
@@ -2473,6 +2486,7 @@ function provinceUpdateSummary(summary) {
         document.getElementById('province-ssp-count').textContent = summary.ssp || 0;
         document.getElementById('province-dime-count').textContent = summary.dime || 0;
         document.getElementById('province-philgeps-count').textContent = summary.philgeps || 0;
+        document.getElementById('province-microsite-count').textContent = summary.microsite || 0;
         document.getElementById('province-results-summary').style.display = 'block';
     }
 }
