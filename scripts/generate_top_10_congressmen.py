@@ -80,18 +80,42 @@ def main():
         congressman_stats[congressman]["count"] += 1
         congressman_stats[congressman]["total_cost"] += parse_amount(proj.get('amount', 0))
     
-    # Convert to sorted array and get top 10
+    # Convert to sorted array
     all_chart_data = sorted(
         list(congressman_stats.values()),
         key=lambda x: x["count"],
         reverse=True
     )
     
-    top_10_chart_data = all_chart_data[:10]
+    # Get top 10 by project count
+    top_10_by_count = all_chart_data[:10]
+    
+    # Get top 10 by total cost
+    top_10_by_cost = sorted(
+        list(congressman_stats.values()),
+        key=lambda x: x["total_cost"],
+        reverse=True
+    )[:10]
+    
+    # Combine both lists (deduplicate)
+    combined_names = set()
+    combined_chart_data = []
+    
+    for stat in top_10_by_count + top_10_by_cost:
+        if stat['name'] not in combined_names:
+            combined_names.add(stat['name'])
+            combined_chart_data.append(stat)
+    
+    # Sort combined list by project count
+    combined_chart_data.sort(key=lambda x: x["count"], reverse=True)
     
     print(f"\n📈 Top 10 Congressmen by Project Count:")
-    for i, stat in enumerate(top_10_chart_data, 1):
+    for i, stat in enumerate(top_10_by_count, 1):
         print(f"   {i}. {stat['name']}: {stat['count']} projects, ₱{stat['total_cost']:,.2f}")
+    
+    print(f"\n💰 Top 10 Congressmen by Total Cost:")
+    for i, stat in enumerate(top_10_by_cost, 1):
+        print(f"   {i}. {stat['name']}: ₱{stat['total_cost']:,.2f} ({stat['count']} projects)")
     
     # Calculate dashboard statistics
     total_cost_all = sum(stat["total_cost"] for stat in all_chart_data)
@@ -119,12 +143,14 @@ def main():
     # Create output data
     output_data = {
         "success": True,
-        "chart_data": top_10_chart_data,
+        "chart_data": combined_chart_data,
+        "chart_data_by_count": top_10_by_count,
+        "chart_data_by_cost": top_10_by_cost,
         "dashboard_stats": dashboard_stats,
         "summary": total_summary,
         "total_congressmen": len(congressman_stats),
         "generated_at": datetime.utcnow().isoformat(),
-        "cache_version": "1.0"
+        "cache_version": "2.0"
     }
     
     # Save to file
