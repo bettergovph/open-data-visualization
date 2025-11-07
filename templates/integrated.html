@@ -1159,7 +1159,8 @@ function getFilteredCongressmenByMode() {
     if (!provinceValue) {
         return [];
     }
-    return configCongressmen.filter(item => (item.province || '').toLowerCase() === provinceValue.toLowerCase());
+    const aliases = getProvinceAliases(provinceValue);
+    return configCongressmen.filter(item => aliases.includes((item.province || '').trim().toLowerCase()));
 }
 
 function updateCongressmanFilterStatus(mode, filteredItems, availableNames, projectCount) {
@@ -1294,27 +1295,44 @@ function applyFilter() {
     
     if (mode === 'All') {
         filteredData = isAll ? allProjectsData : allProjectsData.filter(project => project.congressman === filterValue);
+        if (!isAll && filteredData.length === 0 && filterValue) {
+            filteredData = createPlaceholderProjects([filterValue], 'Project records are still being ingested for this congressman.');
+        }
     } else if (mode === 'Partylist') {
         const partylistNames = configCongressmen
             .filter(item => !item.province || !item.district_number)
             .map(item => item.display_name);
         if (isAll) {
             filteredData = allProjectsData.filter(project => partylistNames.includes(project.congressman));
+            if (filteredData.length === 0 && partylistNames.length > 0) {
+                filteredData = createPlaceholderProjects(partylistNames, 'Project records are still being ingested for these party-list representatives.');
+            }
         } else {
             filteredData = allProjectsData.filter(project => partylistNames.includes(project.congressman) && project.congressman === filterValue);
+            if (filteredData.length === 0 && filterValue) {
+                filteredData = createPlaceholderProjects([filterValue], 'Project records are still being ingested for this party-list representative.');
+            }
         }
     } else if (mode === 'Province') {
         const provinceInput = document.getElementById('congressman-province-input');
-        const provinceValue = provinceInput ? provinceInput.value.trim().toLowerCase() : '';
+        const provinceValueRaw = provinceInput ? provinceInput.value.trim() : '';
+        const provinceValue = provinceValueRaw.toLowerCase();
+        const aliases = getProvinceAliases(provinceValueRaw);
         const allowedNames = configCongressmen
-            .filter(item => (item.province || '').toLowerCase() === provinceValue && item.district_number)
+            .filter(item => aliases.includes((item.province || '').trim().toLowerCase()) && item.district_number)
             .map(item => item.display_name);
         if (!provinceValue || allowedNames.length === 0) {
             filteredData = [];
         } else if (isAll) {
             filteredData = allProjectsData.filter(project => allowedNames.includes(project.congressman));
+            if (filteredData.length === 0) {
+                filteredData = createPlaceholderProjects(allowedNames, `Project records are still being ingested for ${provinceValueRaw || 'this province'}.`);
+            }
         } else {
             filteredData = allProjectsData.filter(project => allowedNames.includes(project.congressman) && project.congressman === filterValue);
+            if (filteredData.length === 0 && allowedNames.includes(filterValue)) {
+                filteredData = createPlaceholderProjects([filterValue], 'Project records are still being ingested for this congressman.');
+            }
         }
     }
     
@@ -1438,6 +1456,9 @@ function calculateSummary(projects) {
     };
     
     projects.forEach(project => {
+        if (project.placeholder) {
+            return;
+        }
         const sources = project.sources_list || [project.source || 'Unknown'];
         sources.forEach(src => {
             if (src === 'SSP') summary.ssp++;
@@ -1510,7 +1531,7 @@ function displayProjects(projects) {
         const congressman = project.congressman || 'N/A';
         const source = project.source || 'Unknown';
         const matchType = project.match_type || 'province';
-        const matchScore = project.match_score || 0;
+        const matchScore = project.placeholder ? '—' : (project.match_score || 0);
         
         // Determine match type display
         let matchTypeDisplay = '';
@@ -1524,15 +1545,18 @@ function displayProjects(projects) {
         } else if (matchType === 'contractor') {
             matchTypeDisplay = '🏢 Contractor';
             matchTypeEmoji = '🏢';
+        } else if (matchType === 'placeholder') {
+            matchTypeDisplay = '🟠 Pending Coverage';
+            matchTypeEmoji = '🟠';
         } else {
             matchTypeDisplay = '🗺️ Province';
             matchTypeEmoji = '🗺️';
         }
         const name = project.project_name || project.award_title || project.title || 'N/A';
-        const contractor = project.contractor || project.awardee_name || project.contractors || 'N/A';
-        const amount = formatCurrency(project.amount || project.contract_cost || project.contract_amount || project.cost);
-        const location = project.location || `${project.province || ''}${project.province && project.municipality ? ', ' : ''}${project.municipality || ''}`.trim() || 'N/A';
-        const year = project.year || project.infra_year || project.award_date?.substring(0, 4) || 'N/A';
+        const contractor = project.contractor || project.awardee_name || project.contractors || '—';
+        const amount = project.placeholder ? '—' : formatCurrency(project.amount || project.contract_cost || project.contract_amount || project.cost);
+        const location = project.placeholder ? '—' : (project.location || `${project.province || ''}${project.province && project.municipality ? ', ' : ''}${project.municipality || ''}`.trim() || 'N/A');
+        const year = project.placeholder ? '—' : (project.year || project.infra_year || project.award_date?.substring(0, 4) || 'N/A');
         
         return `
             <tr style="border-bottom: 1px solid #e9ecef;">
@@ -1560,9 +1584,9 @@ function displayProjects(projects) {
                     </span>
                     <br/>
                     <span style="padding: 4px 8px; border-radius: 4px; font-size: 11px; font-weight: 600;
-                        background: ${matchScore >= 100 ? '#d4edda' : matchScore >= 50 ? '#fff3cd' : '#f8d7da'};
-                        color: ${matchScore >= 100 ? '#155724' : matchScore >= 50 ? '#856404' : '#721c24'};
-                        border: 1px solid ${matchScore >= 100 ? '#c3e6cb' : matchScore >= 50 ? '#ffeaa7' : '#f5c6cb'};
+                        background: ${matchScore !== '—' && matchScore >= 100 ? '#d4edda' : matchScore !== '—' && matchScore >= 50 ? '#fff3cd' : matchScore === '—' ? '#f8f9fa' : '#f8d7da'};
+                        color: ${matchScore !== '—' && matchScore >= 100 ? '#155724' : matchScore !== '—' && matchScore >= 50 ? '#856404' : matchScore === '—' ? '#333' : '#721c24'};
+                        border: 1px solid ${matchScore !== '—' && matchScore >= 100 ? '#c3e6cb' : matchScore !== '—' && matchScore >= 50 ? '#ffeaa7' : matchScore === '—' ? '#dee2e6' : '#f5c6cb'};
                         white-space: nowrap;
                         display: inline-block;
                         margin-top: 4px;">
@@ -4030,9 +4054,29 @@ function getProvinceAliases(value) {
     const normalized = (value || '').trim().toLowerCase();
     if (!normalized) return [];
     const aliasMap = {
-        'davao del sur': ['davao del sur', 'davao city']
+        'davao del sur': ['davao del sur', 'davao city'],
+        'davao city': ['davao city', 'davao del sur'],
+        'metro manila': ['metro manila', 'national capital region', 'ncr']
     };
     return aliasMap[normalized] || [normalized];
+}
+
+function createPlaceholderProjects(names, note) {
+    if (!Array.isArray(names) || names.length === 0) {
+        return [];
+    }
+    return names.map(name => ({
+        placeholder: true,
+        congressman: name,
+        project_name: note || 'Project records are still being ingested for this congressman.',
+        contractor: '—',
+        amount: null,
+        location: '—',
+        year: '—',
+        source: 'Placeholder',
+        match_type: 'placeholder',
+        match_score: null
+    }));
 }
 
 </script>
