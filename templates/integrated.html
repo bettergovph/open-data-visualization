@@ -502,7 +502,11 @@ function toggleMobileMenu() {
                         </div>
                         
                         <div style="margin-top: 30px; background: white; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); padding: 20px; position: relative;">
-                            <button id="copy-chart-btn" style="position: absolute; top: 20px; right: 20px; padding: 10px 20px; background: #333; color: white; border: 2px solid #333; border-radius: 6px; font-size: 14px; font-weight: 600; cursor: pointer; transition: all 0.3s ease; box-shadow: 0 4px 12px rgba(0,0,0,0.2); z-index: 10;" onmouseover="this.style.background='#667eea'; this.style.borderColor='#667eea'; this.style.transform='translateY(-2px)'; this.style.boxShadow='0 6px 16px rgba(102, 126, 234, 0.4)';" onmouseout="this.style.background='#333'; this.style.borderColor='#333'; this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 12px rgba(0,0,0,0.2)';">📋 Copy Chart</button>
+                            <div style="position: absolute; top: 20px; right: 20px; display: flex; gap: 10px; z-index: 10;">
+                                <button id="sort-by-count-btn" style="padding: 10px 20px; background: #1565c0; color: white; border: 2px solid #1565c0; border-radius: 6px; font-size: 14px; font-weight: 600; cursor: pointer; transition: all 0.3s ease; box-shadow: 0 4px 12px rgba(0,0,0,0.2);" onclick="sortChartBy('count')">🔢 By Count</button>
+                                <button id="sort-by-cost-btn" style="padding: 10px 20px; background: #333; color: white; border: 2px solid #333; border-radius: 6px; font-size: 14px; font-weight: 600; cursor: pointer; transition: all 0.3s ease; box-shadow: 0 4px 12px rgba(0,0,0,0.2);" onclick="sortChartBy('cost')">💰 By Cost</button>
+                                <button id="copy-chart-btn" style="padding: 10px 20px; background: #333; color: white; border: 2px solid #333; border-radius: 6px; font-size: 14px; font-weight: 600; cursor: pointer; transition: all 0.3s ease; box-shadow: 0 4px 12px rgba(0,0,0,0.2);" onmouseover="this.style.background='#667eea'; this.style.borderColor='#667eea'; this.style.transform='translateY(-2px)'; this.style.boxShadow='0 6px 16px rgba(102, 126, 234, 0.4)';" onmouseout="this.style.background='#333'; this.style.borderColor='#333'; this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 12px rgba(0,0,0,0.2)';">📋 Copy</button>
+                            </div>
                             <canvas id="combinedChart" style="max-height: 500px;"></canvas>
                         </div>
                         
@@ -944,8 +948,10 @@ let availableCongressmanNamesMap = new Map();
 let integratedCoverageSummaryData = null;
 let integratedCoverageSummaryMessage = '';
 
-// Chart instance
+// Chart instance and data
 let combinedChart = null;
+let currentChartData = null;
+let currentSortMode = 'count';
 
 function normalizeCongressmanName(name) {
     return (name || '')
@@ -1734,20 +1740,11 @@ async function loadVisualData() {
                 updateInsightsPanel(data.chart_data_by_count, data.chart_data_by_cost);
             }
             
-            // Prepare chart data
-            const labels = statsArray.map((s) => {
-                // Shorten long names for display
-                const name = s.name;
-                if (name.length > 20) {
-                    return name.split(' ').slice(0, 2).join(' ') + '...';
-                }
-                return name;
-            });
-            const counts = statsArray.map((s) => s.count);
-            const costs = statsArray.map((s) => s.total_cost / 1_000_000); // Convert to millions
+            // Store chart data for sorting
+            currentChartData = statsArray;
             
-            // Create or update charts
-            createCharts(labels, statsArray.map((s) => s.name), counts, costs);
+            // Create or update charts with initial sort by count
+            updateChartWithSort('count');
         } else if (data.success && data.projects) {
             // Fallback: calculate from projects if chart_data not available
             const congressmanStats = {};
@@ -1814,6 +1811,54 @@ async function loadVisualData() {
     } finally {
         visualLoading.style.display = 'none';
     }
+}
+
+function sortChartBy(mode) {
+    if (!currentChartData) return;
+    currentSortMode = mode;
+    updateChartWithSort(mode);
+    
+    // Update button styles
+    const countBtn = document.getElementById('sort-by-count-btn');
+    const costBtn = document.getElementById('sort-by-cost-btn');
+    
+    if (mode === 'count') {
+        countBtn.style.background = '#1565c0';
+        countBtn.style.borderColor = '#1565c0';
+        costBtn.style.background = '#333';
+        costBtn.style.borderColor = '#333';
+    } else {
+        countBtn.style.background = '#333';
+        countBtn.style.borderColor = '#333';
+        costBtn.style.background = '#7b1fa2';
+        costBtn.style.borderColor = '#7b1fa2';
+    }
+}
+
+function updateChartWithSort(mode) {
+    if (!currentChartData) return;
+    
+    // Sort data based on mode
+    let sortedData = [...currentChartData];
+    if (mode === 'count') {
+        sortedData.sort((a, b) => b.count - a.count);
+    } else {
+        sortedData.sort((a, b) => b.total_cost - a.total_cost);
+    }
+    
+    // Prepare chart data
+    const labels = sortedData.map((s) => {
+        const name = s.name;
+        if (name.length > 20) {
+            return name.split(' ').slice(0, 2).join(' ') + '...';
+        }
+        return name;
+    });
+    const fullNames = sortedData.map((s) => s.name);
+    const counts = sortedData.map((s) => s.count);
+    const costs = sortedData.map((s) => s.total_cost / 1_000_000);
+    
+    createCharts(labels, fullNames, counts, costs);
 }
 
 function createCharts(labels, fullNames, counts, costs) {
