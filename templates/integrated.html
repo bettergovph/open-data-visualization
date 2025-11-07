@@ -464,19 +464,34 @@ function toggleMobileMenu() {
                             </div>
                         </div>
                         
-                        <div id="insight-table" style="display: none; margin-top: 10px; background: white; border-radius: 8px; box-shadow: 0 2px 12px rgba(0,0,0,0.08); overflow: hidden;">
-                            <div style="padding: 16px 20px; border-bottom: 1px solid #eee; background: linear-gradient(135deg, #f8f9fa 0%, #e8ebf2 100%);">
-                                <div style="font-size: 15px; font-weight: 700; color: #333;">Key Insights Revealed</div>
-                                <div style="font-size: 12px; color: #777; margin-top: 4px;">Contrasting high-volume districts versus high-spending mega-project districts</div>
+                        <div id="insight-card-container" style="display: none; margin-top: 20px; display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 18px;">
+                            <div id="insight-card-volume" style="background: white; border-radius: 10px; box-shadow: 0 4px 14px rgba(21,101,192,0.12); padding: 18px 20px; border-top: 4px solid #1565c0;">
+                                <div style="font-size: 13px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; color: #1565c0; margin-bottom: 6px;">🔢 High-Volume Leader</div>
+                                <div id="insight-volume-name" style="font-size: 18px; font-weight: 700; color: #1f2a44;">—</div>
+                                <div style="margin-top: 10px; font-size: 13px; color: #4a5568;">Projects: <span id="insight-volume-projects" style="font-weight: 600; color: #1f2a44;">—</span></div>
+                                <div style="margin-top: 4px; font-size: 13px; color: #4a5568;">Total Cost: <span id="insight-volume-cost" style="font-weight: 600; color: #1f2a44;">—</span></div>
+                                <div id="insight-volume-note" style="margin-top: 8px; font-size: 12px; font-weight: 600; color: #2d3748;">—</div>
                             </div>
-                            <div style="padding: 0 20px 16px 20px;">
-                                <div style="display: grid; grid-template-columns: minmax(160px, 1.5fr) repeat(3, minmax(120px, 1fr)); gap: 12px; padding: 14px 0; border-bottom: 1px solid #eee; color: #666; font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.04em;">
-                                    <div>Congressman</div>
-                                    <div>Projects</div>
-                                    <div>Total Cost</div>
-                                    <div>Strategy</div>
-                                </div>
-                                <div id="insight-rows" style="display: grid; gap: 10px;"></div>
+                            <div id="insight-card-cost" style="background: white; border-radius: 10px; box-shadow: 0 4px 14px rgba(123,31,162,0.12); padding: 18px 20px; border-top: 4px solid #7b1fa2;">
+                                <div style="font-size: 13px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; color: #7b1fa2; margin-bottom: 6px;">💰 Highest Spend</div>
+                                <div id="insight-cost-name" style="font-size: 18px; font-weight: 700; color: #1f2a44;">—</div>
+                                <div style="margin-top: 10px; font-size: 13px; color: #4a5568;">Projects: <span id="insight-cost-projects" style="font-weight: 600; color: #1f2a44;">—</span></div>
+                                <div style="margin-top: 4px; font-size: 13px; color: #4a5568;">Total Cost: <span id="insight-cost-total" style="font-weight: 600; color: #1f2a44;">—</span></div>
+                                <div id="insight-cost-note" style="margin-top: 8px; font-size: 12px; font-weight: 600; color: #2d3748;">—</div>
+                            </div>
+                            <div id="insight-card-mega" style="background: white; border-radius: 10px; box-shadow: 0 4px 14px rgba(224,174,18,0.14); padding: 18px 20px; border-top: 4px solid #d69e2e;">
+                                <div style="font-size: 13px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; color: #b7791f; margin-bottom: 6px;">🏗️ Mega-Projects</div>
+                                <div id="insight-mega-name" style="font-size: 18px; font-weight: 700; color: #1f2a44;">—</div>
+                                <div style="margin-top: 10px; font-size: 13px; color: #4a5568;">Projects: <span id="insight-mega-projects" style="font-weight: 600; color: #1f2a44;">—</span></div>
+                                <div style="margin-top: 4px; font-size: 13px; color: #4a5568;">Total Cost: <span id="insight-mega-cost" style="font-weight: 600; color: #1f2a44;">—</span></div>
+                                <div id="insight-mega-note" style="margin-top: 8px; font-size: 12px; font-weight: 600; color: #2d3748;">—</div>
+                            </div>
+                            <div id="insight-card-outlier" style="background: white; border-radius: 10px; box-shadow: 0 4px 14px rgba(34,197,94,0.12); padding: 18px 20px; border-top: 4px solid #38a169;">
+                                <div style="font-size: 13px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; color: #2f855a; margin-bottom: 6px;">⚡ Ultra Mega-Projects</div>
+                                <div id="insight-outlier-name" style="font-size: 18px; font-weight: 700; color: #1f2a44;">—</div>
+                                <div style="margin-top: 10px; font-size: 13px; color: #4a5568;">Projects: <span id="insight-outlier-projects" style="font-weight: 600; color: #1f2a44;">—</span></div>
+                                <div style="margin-top: 4px; font-size: 13px; color: #4a5568;">Total Cost: <span id="insight-outlier-cost" style="font-weight: 600; color: #1f2a44;">—</span></div>
+                                <div id="insight-outlier-note" style="margin-top: 8px; font-size: 12px; font-weight: 600; color: #2d3748;">—</div>
                             </div>
                         </div>
                         
@@ -1652,111 +1667,60 @@ function updateSummary(summary) {
     }
 }
 
+function formatAverageMillions(amount) {
+    if (!amount || isNaN(amount)) return '₱0M avg';
+    return `₱${(amount / 1_000_000).toFixed(0)}M avg`;
+}
+
+function formatProjects(value) {
+    if (!value) return '0';
+    try {
+        return Number(value).toLocaleString();
+    } catch (error) {
+        return value;
+    }
+}
+
 function updateInsightsPanel(byCount, byCost) {
     if (!Array.isArray(byCount) || byCount.length === 0 || !Array.isArray(byCost) || byCost.length === 0) {
         return;
     }
     
     const countNames = new Set(byCount.map(c => c.name));
-    const costNames = new Set(byCost.map(c => c.name));
-    const bothLists = [...countNames].filter(name => costNames.has(name));
-    
     const highVolume = byCount[0];
-    const avgCostVolume = highVolume.total_cost / Math.max(highVolume.count || 1, 1);
-    const highCost = byCost[0];
-    const avgCostHigh = highCost.total_cost / Math.max(highCost.count || 1, 1);
+    const topCost = byCost[0];
+    const megaProject = byCost.find(entry => !countNames.has(entry.name) && entry.name !== topCost.name) || byCost[1] || byCost[0];
+    const ultraMega = byCost.find(entry => entry.count && entry.count < 500 && entry.name !== megaProject.name && entry.name !== topCost.name) || byCost.find(entry => !countNames.has(entry.name) && entry.name !== megaProject.name) || byCost[2] || byCost[0];
     
-    const highCostOutliers = byCost.filter(c => !countNames.has(c.name));
-    const balancedExample = bothLists.length > 0 ? byCount.find(item => bothLists.includes(item.name)) : null;
-    const outlierExample = highCostOutliers.length > 0 ? highCostOutliers[0] : null;
+    const volumeAvg = highVolume.total_cost / Math.max(highVolume.count || 1, 1);
+    const costAvg = topCost.total_cost / Math.max(topCost.count || 1, 1);
+    const megaAvg = megaProject.total_cost / Math.max(megaProject.count || 1, 1);
+    const ultraAvg = ultraMega.total_cost / Math.max(ultraMega.count || 1, 1);
     
-    const rows = [];
-    
-    if (highCost) {
-        rows.push({
-            name: highCost.name,
-            projects: highCost.count,
-            cost: highCost.total_cost,
-            strategy: `💰 High-cost (${(avgCostHigh / 1_000_000).toFixed(0)}M avg)`
-        });
-    }
-    if (highVolume && (!highCost || highVolume.name !== highCost.name)) {
-        rows.push({
-            name: highVolume.name,
-            projects: highVolume.count,
-            cost: highVolume.total_cost,
-            strategy: `🔢 High-volume (${(avgCostVolume / 1_000_000).toFixed(0)}M avg)`
-        });
-    }
-    if (balancedExample && (!highCost || balancedExample.name !== highCost.name) && (!highVolume || balancedExample.name !== highVolume.name)) {
-        const avgBalanced = balancedExample.total_cost / Math.max(balancedExample.count || 1, 1);
-        rows.push({
-            name: balancedExample.name,
-            projects: balancedExample.count,
-            cost: balancedExample.total_cost,
-            strategy: `🎯 Balanced (${(avgBalanced / 1_000_000).toFixed(0)}M avg)`
-        });
-    }
-    if (outlierExample) {
-        const avgOutlier = outlierExample.total_cost / Math.max(outlierExample.count || 1, 1);
-        rows.push({
-            name: outlierExample.name,
-            projects: outlierExample.count,
-            cost: outlierExample.total_cost,
-            strategy: `💰 Mega-projects (${(avgOutlier / 1_000_000).toFixed(0)}M avg)`
-        });
+    const container = document.getElementById('insight-card-container');
+    if (container) {
+        container.style.display = 'grid';
     }
     
-    if (!balancedExample && bothLists.length > 1) {
-        const secondBalanced = byCost.find(item => bothLists.includes(item.name) && item.name !== highCost.name && (!highVolume || item.name !== highVolume.name));
-        if (secondBalanced) {
-            const avgSecond = secondBalanced.total_cost / Math.max(secondBalanced.count || 1, 1);
-            rows.push({
-                name: secondBalanced.name,
-                projects: secondBalanced.count,
-                cost: secondBalanced.total_cost,
-                strategy: `🎯 Balanced (${(avgSecond / 1_000_000).toFixed(0)}M avg)`
-            });
-        }
-    }
+    document.getElementById('insight-volume-name').textContent = highVolume.name;
+    document.getElementById('insight-volume-projects').textContent = formatProjects(highVolume.count);
+    document.getElementById('insight-volume-cost').textContent = formatCurrency(highVolume.total_cost);
+    document.getElementById('insight-volume-note').textContent = `High-volume (${formatAverageMillions(volumeAvg)})`;
     
-    if (!outlierExample && byCost.length > rows.length) {
-        const fallback = byCost.find(item => !rows.some(r => r.name === item.name));
-        if (fallback) {
-            const avgFallback = fallback.total_cost / Math.max(fallback.count || 1, 1);
-            rows.push({
-                name: fallback.name,
-                projects: fallback.count,
-                cost: fallback.total_cost,
-                strategy: `💼 Mega-projects (${(avgFallback / 1_000_000).toFixed(0)}M avg)`
-            });
-        }
-    }
+    document.getElementById('insight-cost-name').textContent = topCost.name;
+    document.getElementById('insight-cost-projects').textContent = formatProjects(topCost.count);
+    document.getElementById('insight-cost-total').textContent = formatCurrency(topCost.total_cost);
+    document.getElementById('insight-cost-note').textContent = `Highest spend (${formatAverageMillions(costAvg)})`;
     
-    if (rows.length === 0) {
-        rows.push({
-            name: highCost.name,
-            projects: highCost.count,
-            cost: highCost.total_cost,
-            strategy: `💰 High-cost (${(avgCostHigh / 1_000_000).toFixed(0)}M avg)`
-        });
-    }
+    document.getElementById('insight-mega-name').textContent = megaProject.name;
+    document.getElementById('insight-mega-projects').textContent = formatProjects(megaProject.count);
+    document.getElementById('insight-mega-cost').textContent = formatCurrency(megaProject.total_cost);
+    document.getElementById('insight-mega-note').textContent = `Mega-projects (${formatAverageMillions(megaAvg)})`;
     
-    const table = document.getElementById('insight-table');
-    const rowsContainer = document.getElementById('insight-rows');
-    if (table && rowsContainer) {
-        rowsContainer.innerHTML = rows.map(row => {
-            return `
-                <div style="display: grid; grid-template-columns: minmax(160px, 1.5fr) repeat(3, minmax(120px, 1fr)); gap: 12px; align-items: center; padding: 12px 0; border-bottom: 1px solid #f1f1f1;">
-                    <div style="font-size: 14px; font-weight: 600; color: #333;">${row.name}</div>
-                    <div style="font-size: 14px; color: #444;">${row.projects.toLocaleString()}</div>
-                    <div style="font-size: 14px; color: #444;">${formatCurrency(row.cost)}</div>
-                    <div style="font-size: 13px; color: #555; font-weight: 600;">${row.strategy}</div>
-                </div>
-            `;
-        }).join('');
-        table.style.display = 'block';
-    }
+    document.getElementById('insight-outlier-name').textContent = ultraMega.name;
+    document.getElementById('insight-outlier-projects').textContent = formatProjects(ultraMega.count);
+    document.getElementById('insight-outlier-cost').textContent = formatCurrency(ultraMega.total_cost);
+    document.getElementById('insight-outlier-note').textContent = `Ultra mega-projects (${formatAverageMillions(ultraAvg)})`;
 }
 
 // Load and display visual data
