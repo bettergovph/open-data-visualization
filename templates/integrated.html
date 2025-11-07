@@ -464,36 +464,7 @@ function toggleMobileMenu() {
                             </div>
                         </div>
                         
-                        <div id="insight-card-container" style="display: none; margin-top: 20px; display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 18px;">
-                            <div id="insight-card-volume" style="background: white; border-radius: 10px; box-shadow: 0 4px 14px rgba(21,101,192,0.12); padding: 18px 20px; border-top: 4px solid #1565c0;">
-                                <div style="font-size: 13px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; color: #1565c0; margin-bottom: 6px;">🔢 High-Volume Leader</div>
-                                <div id="insight-volume-name" style="font-size: 18px; font-weight: 700; color: #1f2a44;">—</div>
-                                <div style="margin-top: 10px; font-size: 13px; color: #4a5568;">Projects: <span id="insight-volume-projects" style="font-weight: 600; color: #1f2a44;">—</span></div>
-                                <div style="margin-top: 4px; font-size: 13px; color: #4a5568;">Total Cost: <span id="insight-volume-cost" style="font-weight: 600; color: #1f2a44;">—</span></div>
-                                <div id="insight-volume-note" style="margin-top: 8px; font-size: 12px; font-weight: 600; color: #2d3748;">—</div>
-                            </div>
-                            <div id="insight-card-cost" style="background: white; border-radius: 10px; box-shadow: 0 4px 14px rgba(123,31,162,0.12); padding: 18px 20px; border-top: 4px solid #7b1fa2;">
-                                <div style="font-size: 13px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; color: #7b1fa2; margin-bottom: 6px;">💰 Highest Spend</div>
-                                <div id="insight-cost-name" style="font-size: 18px; font-weight: 700; color: #1f2a44;">—</div>
-                                <div style="margin-top: 10px; font-size: 13px; color: #4a5568;">Projects: <span id="insight-cost-projects" style="font-weight: 600; color: #1f2a44;">—</span></div>
-                                <div style="margin-top: 4px; font-size: 13px; color: #4a5568;">Total Cost: <span id="insight-cost-total" style="font-weight: 600; color: #1f2a44;">—</span></div>
-                                <div id="insight-cost-note" style="margin-top: 8px; font-size: 12px; font-weight: 600; color: #2d3748;">—</div>
-                            </div>
-                            <div id="insight-card-mega" style="background: white; border-radius: 10px; box-shadow: 0 4px 14px rgba(224,174,18,0.14); padding: 18px 20px; border-top: 4px solid #d69e2e;">
-                                <div style="font-size: 13px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; color: #b7791f; margin-bottom: 6px;">🏗️ Mega-Projects</div>
-                                <div id="insight-mega-name" style="font-size: 18px; font-weight: 700; color: #1f2a44;">—</div>
-                                <div style="margin-top: 10px; font-size: 13px; color: #4a5568;">Projects: <span id="insight-mega-projects" style="font-weight: 600; color: #1f2a44;">—</span></div>
-                                <div style="margin-top: 4px; font-size: 13px; color: #4a5568;">Total Cost: <span id="insight-mega-cost" style="font-weight: 600; color: #1f2a44;">—</span></div>
-                                <div id="insight-mega-note" style="margin-top: 8px; font-size: 12px; font-weight: 600; color: #2d3748;">—</div>
-                            </div>
-                            <div id="insight-card-outlier" style="background: white; border-radius: 10px; box-shadow: 0 4px 14px rgba(34,197,94,0.12); padding: 18px 20px; border-top: 4px solid #38a169;">
-                                <div style="font-size: 13px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; color: #2f855a; margin-bottom: 6px;">⚡ Ultra Mega-Projects</div>
-                                <div id="insight-outlier-name" style="font-size: 18px; font-weight: 700; color: #1f2a44;">—</div>
-                                <div style="margin-top: 10px; font-size: 13px; color: #4a5568;">Projects: <span id="insight-outlier-projects" style="font-weight: 600; color: #1f2a44;">—</span></div>
-                                <div style="margin-top: 4px; font-size: 13px; color: #4a5568;">Total Cost: <span id="insight-outlier-cost" style="font-weight: 600; color: #1f2a44;">—</span></div>
-                                <div id="insight-outlier-note" style="margin-top: 8px; font-size: 12px; font-weight: 600; color: #2d3748;">—</div>
-                            </div>
-                        </div>
+                        <div id="insight-card-container" style="display: none;"></div>
                         
                         <div style="margin-bottom: 20px; padding: 20px; background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%); border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); border: 2px solid #333;">
                             <p style="margin: 0; color: #333; font-size: 15px; line-height: 1.6; text-align: center;">
@@ -1656,45 +1627,7 @@ function formatProjects(value) {
 }
 
 function updateInsightsPanel(byCount, byCost) {
-    if (!Array.isArray(byCount) || byCount.length === 0 || !Array.isArray(byCost) || byCost.length === 0) {
-        return;
-    }
-    
-    const countNames = new Set(byCount.map(c => c.name));
-    const highVolume = byCount[0];
-    const topCost = byCost[0];
-    const megaProject = byCost.find(entry => !countNames.has(entry.name) && entry.name !== topCost.name) || byCost[1] || byCost[0];
-    const ultraMega = byCost.find(entry => entry.count && entry.count < 500 && entry.name !== megaProject.name && entry.name !== topCost.name) || byCost.find(entry => !countNames.has(entry.name) && entry.name !== megaProject.name) || byCost[2] || byCost[0];
-    
-    const volumeAvg = highVolume.total_cost / Math.max(highVolume.count || 1, 1);
-    const costAvg = topCost.total_cost / Math.max(topCost.count || 1, 1);
-    const megaAvg = megaProject.total_cost / Math.max(megaProject.count || 1, 1);
-    const ultraAvg = ultraMega.total_cost / Math.max(ultraMega.count || 1, 1);
-    
-    const container = document.getElementById('insight-card-container');
-    if (container) {
-        container.style.display = 'grid';
-    }
-    
-    document.getElementById('insight-volume-name').textContent = highVolume.name;
-    document.getElementById('insight-volume-projects').textContent = formatProjects(highVolume.count);
-    document.getElementById('insight-volume-cost').textContent = formatCurrency(highVolume.total_cost);
-    document.getElementById('insight-volume-note').textContent = `High-volume (${formatAverageMillions(volumeAvg)})`;
-    
-    document.getElementById('insight-cost-name').textContent = topCost.name;
-    document.getElementById('insight-cost-projects').textContent = formatProjects(topCost.count);
-    document.getElementById('insight-cost-total').textContent = formatCurrency(topCost.total_cost);
-    document.getElementById('insight-cost-note').textContent = `Highest spend (${formatAverageMillions(costAvg)})`;
-    
-    document.getElementById('insight-mega-name').textContent = megaProject.name;
-    document.getElementById('insight-mega-projects').textContent = formatProjects(megaProject.count);
-    document.getElementById('insight-mega-cost').textContent = formatCurrency(megaProject.total_cost);
-    document.getElementById('insight-mega-note').textContent = `Mega-projects (${formatAverageMillions(megaAvg)})`;
-    
-    document.getElementById('insight-outlier-name').textContent = ultraMega.name;
-    document.getElementById('insight-outlier-projects').textContent = formatProjects(ultraMega.count);
-    document.getElementById('insight-outlier-cost').textContent = formatCurrency(ultraMega.total_cost);
-    document.getElementById('insight-outlier-note').textContent = `Ultra mega-projects (${formatAverageMillions(ultraAvg)})`;
+    return;
 }
 
 // Load and display visual data
@@ -4112,6 +4045,15 @@ function getSourceDisplayMeta(source) {
             break;
     }
     return meta;
+}
+
+function getProvinceAliases(value) {
+    const normalized = (value || '').trim().toLowerCase();
+    if (!normalized) return [];
+    const aliasMap = {
+        'davao del sur': ['davao del sur', 'davao city']
+    };
+    return aliasMap[normalized] || [normalized];
 }
 
 </script>
