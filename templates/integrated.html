@@ -948,22 +948,11 @@ function buildAvailableCongressmanNames() {
 }
 
 function filterConfigByAvailableData() {
-    if (!Array.isArray(configCongressmen) || configCongressmen.length === 0) {
-        return;
-    }
-    configCongressmen = configCongressmen.filter(item => hasProjectDataForCongressman(item.display_name));
+    return;
 }
 
 function filterInitialCongressmanNames() {
-    if (!Array.isArray(initialCongressmanNames) || initialCongressmanNames.length === 0) {
-        return;
-    }
-    initialCongressmanNames = initialCongressmanNames.filter(name => {
-        if (name === 'All Congressmen') {
-            return true;
-        }
-        return hasProjectDataForCongressman(name);
-    });
+    return;
 }
 
 function dedupeCongressmanNames(names) {
