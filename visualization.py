@@ -4579,61 +4579,75 @@ async def dynasty_projects_all_api(
         
         print(f"Loaded {len(all_projects)} total projects from all caches")
         
-        # Calculate chart_data (congressman statistics)
-        congressman_stats = {}
-        for proj in all_projects:
-            congressman = proj.get('congressman', 'Unknown')
-            if congressman not in congressman_stats:
-                congressman_stats[congressman] = {
-                    "name": congressman,
-                    "count": 0,
-                    "total_cost": 0
-                }
+        # Load pre-generated top-10 stats from cache
+        top_10_cache_file = data_dir / 'top-10-congressmen.json'
+        chart_data = []
+        dashboard_stats = {}
+        
+        if top_10_cache_file.exists():
+            try:
+                with open(top_10_cache_file, 'r', encoding='utf-8') as f:
+                    top_10_data = json.load(f)
+                    chart_data = top_10_data.get('chart_data', [])
+                    dashboard_stats = top_10_data.get('dashboard_stats', {})
+                    print(f"✅ Loaded pre-generated top-10 stats from cache")
+            except Exception as e:
+                print(f"⚠️  Error loading top-10 cache: {e}")
+        
+        # Fallback: calculate if cache doesn't exist
+        if not chart_data or not dashboard_stats:
+            print("⚠️  Top-10 cache not found, calculating on-the-fly...")
+            congressman_stats = {}
+            for proj in all_projects:
+                congressman = proj.get('congressman', 'Unknown')
+                if congressman not in congressman_stats:
+                    congressman_stats[congressman] = {
+                        "name": congressman,
+                        "count": 0,
+                        "total_cost": 0
+                    }
+                
+                congressman_stats[congressman]["count"] += 1
+                
+                amount = proj.get('amount', 0)
+                if isinstance(amount, str):
+                    amount_str = amount.replace('₱', '').replace(',', '').strip()
+                    try:
+                        amount = float(amount_str) if amount_str else 0
+                    except (ValueError, AttributeError):
+                        amount = 0
+                else:
+                    amount = float(amount) if amount else 0
+                
+                congressman_stats[congressman]["total_cost"] += amount
             
-            congressman_stats[congressman]["count"] += 1
+            chart_data = sorted(
+                list(congressman_stats.values()),
+                key=lambda x: x["count"],
+                reverse=True
+            )[:10]
             
-            # Parse amount
-            amount = proj.get('amount', 0)
-            if isinstance(amount, str):
-                amount_str = amount.replace('₱', '').replace(',', '').strip()
-                try:
-                    amount = float(amount_str) if amount_str else 0
-                except (ValueError, AttributeError):
-                    amount = 0
-            else:
-                amount = float(amount) if amount else 0
+            total_cost_all = sum(stat["total_cost"] for stat in chart_data)
+            district_count = total_summary['district_projects']
+            contractor_count = total_summary['contractor_projects']
             
-            congressman_stats[congressman]["total_cost"] += amount
-        
-        # Convert to sorted array for chart data
-        chart_data = sorted(
-            list(congressman_stats.values()),
-            key=lambda x: x["count"],
-            reverse=True
-        )
-        
-        # Calculate dashboard statistics
-        total_cost_all = sum(stat["total_cost"] for stat in chart_data)
-        district_count = total_summary['district_projects']
-        contractor_count = total_summary['contractor_projects']
-        
-        district_cost = sum(
-            float(proj.get('amount', 0)) if isinstance(proj.get('amount', 0), (int, float)) else 0
-            for proj in all_projects if proj.get('match_type') == 'district'
-        )
-        contractor_cost = sum(
-            float(proj.get('amount', 0)) if isinstance(proj.get('amount', 0), (int, float)) else 0
-            for proj in all_projects if proj.get('match_type') == 'contractor'
-        )
-        
-        dashboard_stats = {
-            "total_cost_all": total_cost_all,
-            "total_projects": len(all_projects),
-            "district_count": district_count,
-            "district_cost": district_cost,
-            "contractor_count": contractor_count,
-            "contractor_cost": contractor_cost
-        }
+            district_cost = sum(
+                float(proj.get('amount', 0)) if isinstance(proj.get('amount', 0), (int, float)) else 0
+                for proj in all_projects if proj.get('match_type') == 'district'
+            )
+            contractor_cost = sum(
+                float(proj.get('amount', 0)) if isinstance(proj.get('amount', 0), (int, float)) else 0
+                for proj in all_projects if proj.get('match_type') == 'contractor'
+            )
+            
+            dashboard_stats = {
+                "total_cost_all": total_cost_all,
+                "total_projects": len(all_projects),
+                "district_count": district_count,
+                "district_cost": district_cost,
+                "contractor_count": contractor_count,
+                "contractor_cost": contractor_cost
+            }
         
         # Paginate
         total_pages = (len(all_projects) + limit - 1) // limit
