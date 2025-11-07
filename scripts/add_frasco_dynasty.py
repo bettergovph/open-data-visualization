@@ -6,6 +6,7 @@ Add Duke Frasco and family to the political dynasties database.
 import asyncio
 import asyncpg
 import os
+from datetime import date
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -45,7 +46,7 @@ async def add_frasco_dynasty():
             """,
                 "Vincent Franco", "Domingo", "Frasco", "Duke", None,
                 "Congressman, 5th District", "Cebu", "Liloan", "Region VII (Central Visayas)",
-                None, "Garcia-Frasco", "1980-10-27"
+                None, "Garcia-Frasco", date(1980, 10, 27)
             )
             print(f"✅ Added Duke Frasco (ID: {duke_id})")
         
@@ -71,7 +72,7 @@ async def add_frasco_dynasty():
             """,
                 "Christina", "Garcia", "Frasco", "Garcia", None,
                 "Secretary of Tourism; Former Mayor of Liloan (2016-2022)", "Cebu", "Liloan", "Region VII (Central Visayas)",
-                None, "Garcia-Frasco", "1981-12-25"
+                None, "Garcia-Frasco", date(1981, 12, 25)
             )
             print(f"✅ Added Christina Garcia Frasco (ID: {christina_id})")
         
