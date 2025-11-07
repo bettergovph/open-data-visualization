@@ -269,6 +269,12 @@ function toggleMobileMenu() {
                     <span class="text-gray-600 text-sm">Open source GeoJSON data formats for the Philippines, providing accurate province and regional boundaries for mapping</span>
                 </li>
                 <li>
+                    <strong>Congressional District Mappings:</strong><br>
+                    <span class="text-gray-700">Comprehensive congressional district mappings for Philippine provinces and cities. For provinces, municipalities are mapped to their respective congressional districts. For cities with districts, barangays are mapped to districts. Currently includes 12 major provinces and 5 cities with ~60 districts mapped. Status: In progress - expansion to all 81 provinces ongoing. Prioritized based on Deputy Speakers list (2016-2025) to ensure coverage of key legislative districts.</span><br>
+                    <span class="text-gray-600">Used in: District Analysis, Province-District Filtering, Municipality-District Mapping</span><br>
+                    <span class="text-gray-600">Credit: <a href="https://comelec.gov.ph" target="_blank" rel="noopener noreferrer" class="source-link source-link-with-popup" data-source="COMELEC">COMELEC</a>, <a href="https://www.congress.gov.ph" target="_blank" rel="noopener noreferrer" class="source-link source-link-with-popup" data-source="House of Representatives">House of Representatives</a> - Official congressional district boundaries, administrative data, and Deputy Speaker district assignments (17th-20th Congress, 2016-2025), <a href="https://psa.gov.ph" target="_blank" rel="noopener noreferrer" class="source-link source-link-with-popup" data-source="Philippine Statistics Authority">Philippine Statistics Authority</a> - Administrative and geographic data</span>
+                </li>
+                <li>
                     <strong>SEC (Securities and Exchange Commission):</strong><br>
                     <a href="https://checkwithsec.sec.gov.ph/check-with-sec/index" target="_blank" rel="noopener noreferrer" class="source-link">SEC Philippines - Check with SEC</a><br>
                     <span class="text-gray-600">Used in: SEC Contractors Database, Interactive Map</span>
@@ -297,9 +303,16 @@ function toggleMobileMenu() {
                     <span class="text-gray-600">Credit: inyongmaasahan (<a href="mailto:inyongmaaasahan@gmail.com" class="source-link">inyongmaaasahan@gmail.com</a>)</span>
                 </li>
                 <li>
+                    <strong>Rappler Politicontractors Tracker (2025):</strong><br>
+                    <a href="https://www.rappler.com/newsbreak/investigative/politicians-government-contractors-connections-map/" target="_blank" rel="noopener noreferrer" class="source-link">TRACKER: Public officials with links to government contractors</a><br>
+                    <span class="text-gray-600">Used in: Contractor verification for congressmen with zero-cache entries, cross-referencing beneficial ownership of firms such as A.D. Gonzales Jr. Construction, Sunwest Construction, and Quezon-based Suarez companies.</span><br>
+                    <span class="text-gray-600 text-sm">Investigative map maintained by Rappler that documents public officials and the construction firms owned by their families. Provides vetted leads for integrating contractor patterns into autocomplete filters and cache generation.</span>
+                </li>
+                <li>
                     <strong>Contractor-Dynasty Relationship Data:</strong><br>
                     <span class="text-gray-700">Investigative data on construction companies and contractors linked to political dynasties. Used in: Dynasty Analysis, Relationship Constellations, Contractor Connections.</span><br>
-                    <span class="text-gray-600">Credit: <a href="https://www.rappler.com/" target="_blank" rel="noopener noreferrer" class="source-link source-link-with-popup" data-source="Rappler">Rappler</a>, <a href="https://www.inquirer.net/" target="_blank" rel="noopener noreferrer" class="source-link source-link-with-popup" data-source="Inquirer">Inquirer</a>, <a href="https://www.manilatimes.net/" target="_blank" rel="noopener noreferrer" class="source-link source-link-with-popup" data-source="Manila Times">Manila Times</a>, <a href="https://www.philstar.com/" target="_blank" rel="noopener noreferrer" class="source-link source-link-with-popup" data-source="Philippine STAR">Philippine STAR</a>, <a href="https://www.facebook.com/vovph" target="_blank" rel="noopener noreferrer" class="source-link source-link-with-popup" data-source="VOV Philippines">VOV Philippines</a>, <a href="https://kwebanibarok.com/" target="_blank" rel="noopener noreferrer" class="source-link source-link-with-popup" data-source="Kwebanibarok">Kwebanibarok</a> - Investigative reporting on contractor-dynasty connections</span>
+                    <span class="text-gray-600">Credit: <a href="https://www.rappler.com/newsbreak/investigative/politicians-government-contractors-connections-map/" target="_blank" rel="noopener noreferrer" class="source-link source-link-with-popup" data-source="Rappler">Rappler</a> (Lian Buan, Dwight de Leon, Jairo Bolledo, Jodesz Gavilan, James Patrick Cruz)<br>
+                    <a href="https://www.inquirer.net/" target="_blank" rel="noopener noreferrer" class="source-link source-link-with-popup" data-source="Inquirer">Inquirer</a>, <a href="https://www.manilatimes.net/" target="_blank" rel="noopener noreferrer" class="source-link source-link-with-popup" data-source="Manila Times">Manila Times</a>, <a href="https://www.philstar.com/" target="_blank" rel="noopener noreferrer" class="source-link source-link-with-popup" data-source="Philippine STAR">Philippine STAR</a> - Investigative reporting on contractor-dynasty connections</span>
                 </li>
             </ul>
         </div>
@@ -315,6 +328,7 @@ function toggleMobileMenu() {
                 <li><strong>Contractor Data:</strong> Active SEC-registered contractors with government projects</li>
                 <li><strong>Raw Philippine Data:</strong> 2004-2016 political memberships, legislative documents (various congress sessions)</li>
                 <li><strong>Political Dynasty Data:</strong> 2004-2016 local government political dynasty records</li>
+                <li><strong>Congressional District Mappings:</strong> Current congressional districts (254 total) with municipality/barangay mappings for 12 provinces and 5 cities</li>
             </ul>
         </div>
 
@@ -331,6 +345,7 @@ function toggleMobileMenu() {
                 <li><strong>Raw Philippine Data:</strong> 45,400+ persons, 86,200+ political memberships, and legislative documents (Senate and House bills) available for semantic search and analysis</li>
                 <li><strong>Political Dynasty Records:</strong> 86,234 political dynasty records across all 82 provinces (2004-2016)</li>
                 <li><strong>GeoJSON Boundaries:</strong> Complete province and regional boundary data for interactive mapping</li>
+                <li><strong>Congressional District Mappings:</strong> ~60 districts mapped across 12 provinces and 5 cities, with municipality-to-district and barangay-to-district mappings (expansion to all 254 districts ongoing)</li>
             </ul>
         </div>
 
@@ -398,59 +413,27 @@ function toggleMobileMenu() {
     menu.classList.toggle('hidden');
 }
 
-// Sources data from database/sources.csv
-const SOURCES_DATA = {
-  "Rappler": [
-    {"title": "TRACKER: Public officials with links to government contractors", "url": "https://www.rappler.com/newsbreak/investigative/politicians-government-contractors-connections-map/", "date": "2025-09-03"}
-  ],
-  "Wikipedia": [
-    {"title": "Edwin Gardiola - Wikipedia", "url": "https://en.wikipedia.org/wiki/Edwin_Gardiola", "date": "2025-03-12"},
-    {"title": "Mannix Dalipe - Wikipedia", "url": "https://en.wikipedia.org/wiki/Mannix_Dalipe", "date": "2025-02-05"},
-    {"title": "David Suarez (politician) - Wikipedia", "url": "https://en.wikipedia.org/wiki/David_Suarez_(politician)", "date": "2016-06-01"},
-    {"title": "Quezon's 2nd congressional district - Wikipedia", "url": "https://en.wikipedia.org/wiki/Quezon's_2nd_congressional_district", "date": "2020-04-20"},
-    {"title": "Aurelio Gonzales Jr. - Wikipedia", "url": "https://en.wikipedia.org/wiki/Aurelio_Gonzales_Jr.", "date": "2016-09-20"},
-    {"title": "Martin Romualdez - Wikipedia", "url": "https://en.wikipedia.org/wiki/Martin_Romualdez", "date": "2015-02-24"}
-  ],
-  "VOV Philippines": [
-    {"title": "Contractor-turned-congressman Tirso Edwin Loleng Gardiola - VOV Philippines", "url": "https://www.facebook.com/vovph/posts/contractor-turned-congressman-tirso-edwin-loleng-gardiola-allocated-400-million-/1242081721297565", "date": ""}
-  ],
-  "Reddit": [
-    {"title": "Party-List Representatives of the 20th Congress - Reddit", "url": "https://www.reddit.com/r/Philippines/comments/1m7xen9/partylist_representatives_of_the_20th_congress/", "date": "2025-07-24"}
-  ],
-  "PeoPlaid": [
-    {"title": "Tirso Edwin Gardiola Biography - PeoPlaid", "url": "https://peoplaid.com/2023/03/30/tirso-edwin-gardiola/", "date": "2023-03-29"},
-    {"title": "Manuel Jose Dalipe Biography - PeoPlaid", "url": "https://peoplaid.com/2019/11/30/manuel-jose-dalipe/", "date": "2019-11-29"}
-  ],
-  "DOF Philippines": [
-    {"title": "Purchaser of luxury cars rides tax evasion net - DOF Philippines", "url": "https://www.dof.gov.ph/purchaser-of-luxury-cars-rides-tax-evasion-net/", "date": "2012-02-29"}
-  ],
-  "Inquirer": [
-    {"title": "Dalipe questions timing of graft complaint vs House leaders - Inquirer News", "url": "https://newsinfo.inquirer.net/2033384/dalipe-questions-timing-of-graft-complaint-vs-house-leaders", "date": "2025-02-09"},
-    {"title": "Pampanga lawmaker faces graft case for P 612M worth of projects - Inquirer News", "url": "https://newsinfo.inquirer.net/1837158/pampanga-lawmaker-faces-graft-case-for-p-612m-projects/", "date": "2023-09-26"},
-    {"title": "Romualdezes leave EEI in buyout deal with top exec - Business Inquirer.net", "url": "https://business.inquirer.net/513889/romualdezes-leave-eei-in-buyout-deal-with-top-exec", "date": "2025-03-19"}
-  ],
-  "PDP Laban": [
-    {"title": "AURELIO DONG GONZALES - PDP Laban", "url": "https://pdplaban.org.ph/aurelio-dong-gonzales/", "date": ""}
-  ],
-  "Manila Standard": [
-    {"title": "Senior Deputy Speaker Aurelio 'Dong' D. Gonzales Jr. - Manila Standard", "url": "https://manilastandard.net/?p=314475383", "date": "2024-09-02"}
-  ],
-  "Kwebanibarok": [
-    {"title": "Pampanga's Flood of Favors: Gonzales & Sons - Kwebanibarok.com", "url": "https://kwebanibarok.com/2025/09/04/pampangas-flood-of-favors-gonzales-sons-public-works-profiteers/", "date": "2025-09-03"}
-  ],
-  "Wikiwand": [
-    {"title": "Leyte's 1st congressional district - Wikiwand", "url": "https://www.wikiwand.com/en/articles/Leyte's_1st_congressional_district", "date": "1995-06-29"}
-  ],
-  "Aviso Zamboanga": [
-    {"title": "DALIPE: WEALTH SURGES AS DPWH BUDGET BLOWS UP! - Aviso Zamboanga", "url": "https://www.facebook.com/avisozamboanga/posts/dalipe-wealth-surges-as-dpwh-budget-blows-upas-the-department-of-public-works-an/1229083155898201", "date": ""}
-  ],
-  "Manila Times": [
-    {"title": "The crooks who might get away - Manila Times", "url": "https://www.manilatimes.net/2025/10/08/opinion/columns/the-crooks-who-might-get-away/2196121", "date": "2025-10-08"}
-  ],
-  "Philippine STAR": [
-    {"title": "Twelve to 15 congressmen are facing prosecution - Philippine STAR Facebook", "url": "https://www.facebook.com/PhilippineSTAR/posts/twelve-to-15-congressmen-are-facing-prosecution-for-doubling-as-contractors-for-/1291640842999792", "date": ""}
-  ]
-};
+// Sources data loaded from API (database/sources.csv)
+let SOURCES_DATA = {};
+
+// Load sources from API
+async function loadSourcesData() {
+    try {
+        const response = await fetch('/api/sources');
+        const data = await response.json();
+        
+        if (data.success && data.sources) {
+            SOURCES_DATA = data.sources;
+            console.log(`✅ Loaded ${data.total_sources} sources with ${data.total_articles} articles`);
+        } else {
+            console.warn('⚠️ Failed to load sources from API, using empty data');
+            SOURCES_DATA = {};
+        }
+    } catch (error) {
+        console.error('❌ Error loading sources:', error);
+        SOURCES_DATA = {};
+    }
+}
 
 // Filter out Facebook/YouTube links if not from legitimate news sources
 function isValidNewsSource(url, sourceName) {
@@ -530,7 +513,10 @@ function hideSourcePopup() {
 }
 
 // Initialize popup functionality
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', async function() {
+    // Load sources data first
+    await loadSourcesData();
+    
     const sourceLinks = document.querySelectorAll('.source-link-with-popup');
     
     sourceLinks.forEach(link => {

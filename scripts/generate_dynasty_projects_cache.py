@@ -9,6 +9,7 @@ import asyncpg
 import json
 import os
 import sys
+import re
 from pathlib import Path
 from datetime import datetime
 from typing import Dict, List, Any, Optional
@@ -173,6 +174,8 @@ class DynastyProjectsCacheGenerator:
                     continue
                 else:
                     print(f"ℹ️  Processing {display_name} via contractors only (no district data)")
+            elif district_municipalities:
+                print(f"✅ {display_name}: Loaded {len(district_municipalities)} municipalities for {config_district_number}: {district_municipalities[:3]}...")
             
             # Get barangays if needed
             barangays = []
@@ -213,6 +216,12 @@ class DynastyProjectsCacheGenerator:
         """
         combined_text = project_text.upper()
         congressman_name = congressman_data['name']
+
+        def contains_word(text: str, word: str) -> bool:
+            if not word:
+                return False
+            pattern = rf'(?<!\w){re.escape(word)}(?!\w)'
+            return re.search(pattern, text) is not None
         
         # 1. Check barangay match (highest priority)
         # For city districts, if a barangay is mentioned, it MUST be in the 2nd District list
@@ -244,7 +253,7 @@ class DynastyProjectsCacheGenerator:
                 # Check if any valid barangay is mentioned
                 valid_barangay_found = False
                 for valid_barangay in valid_barangays:
-                    if valid_barangay in combined_text:
+                    if contains_word(combined_text, valid_barangay):
                         valid_barangay_found = True
                         break
                 
@@ -253,7 +262,7 @@ class DynastyProjectsCacheGenerator:
                     # Common non-2nd-district barangays that should be excluded
                     invalid_barangays = ['TALISAYAN', 'LABUAN', 'AYALA', 'SINUNUC', 'BALIWASAN', 'PASONANCA', 'SINUBONG', 'RECODO', 'SAN RAMON', 'MAASIN', 'MENZI', 'CULIANAN']
                     for invalid_barangay in invalid_barangays:
-                        if invalid_barangay in combined_text:
+                        if contains_word(combined_text, invalid_barangay):
                             # Check if it's not a substring of a valid barangay
                             is_valid_substring = any(invalid_barangay in valid_b or valid_b in invalid_barangay for valid_b in valid_barangays)
                             if not is_valid_substring:
@@ -270,7 +279,7 @@ class DynastyProjectsCacheGenerator:
         # For non-city districts, check barangay matches
         elif congressman_data.get('barangays'):
             for barangay in congressman_data['barangays']:
-                if barangay and barangay.upper() in combined_text:
+                if barangay and contains_word(combined_text, barangay.upper()):
                     return (congressman_name, "district", 100)
         
         # 2. Check contractor match EARLY (for party-list representatives like Gardiola and Co)
@@ -384,7 +393,7 @@ class DynastyProjectsCacheGenerator:
         # 4. Exclusion check: If district identifier is a province name, exclude if the city with same name is mentioned
         # Example: "Quezon" (province) should NOT match "Quezon City" (Metro Manila)
         if district_identifier == "QUEZON":
-            if "QUEZON CITY" in combined_text:
+            if contains_word(combined_text, "QUEZON CITY"):
                 return (None, None, 0)  # This is Quezon City, not Quezon Province
         
         # 5. Pre-check: If project mentions a municipality from a DIFFERENT district, exclude it
@@ -402,19 +411,21 @@ class DynastyProjectsCacheGenerator:
                 municipalities_map = districts_info.get('municipalities', {})
                 congressman_district = congressman_data['district_number'].upper()
                 
-                # Check all municipalities in districts.json for this province
                 for mun_key, mun_district in municipalities_map.items():
                     mun_key_upper = mun_key.upper()
+                    # If municipality name is identical to the province name, skip exclusion checks to avoid false positives
+                    if mun_key_upper == province.upper():
+                        continue
                     # Use word boundary check to avoid partial matches (e.g., "Palompon" in "Palompon-Isabel")
                     # Check if municipality is mentioned as a whole word or with hyphen
-                    if mun_key_upper in combined_text:
+                    if contains_word(combined_text, mun_key_upper):
                         # Check if it belongs to a DIFFERENT district
                         if mun_district and mun_district.upper() != congressman_district:
                             # Municipality from different district is mentioned - exclude!
                             return (None, None, 0)
         
         # 6. Check if district identifier is in project text
-        if district_identifier not in combined_text:
+        if not contains_word(combined_text, district_identifier):
             return (None, None, 0)
         
         # 7. For city districts (like Zamboanga City), match all city projects
@@ -439,7 +450,7 @@ class DynastyProjectsCacheGenerator:
         district_municipalities = congressman_data.get('district_municipalities', [])
         if district_municipalities:
             for mun in district_municipalities:
-                if mun and mun.upper() in combined_text:
+                if mun and contains_word(combined_text, mun.upper()):
                     # Found BOTH district identifier AND municipality from that district - match!
                     return (congressman_name, "district", 100)
         
@@ -457,25 +468,25 @@ class DynastyProjectsCacheGenerator:
         # Process SSP/MeiliSearch projects
         try:
             client = FloodControlClient()
-            # Get all provinces from congressmen
-            all_provinces = set()
-            for cm_data in congressmen_data.values():
-                if cm_data.get('provinces'):
-                    all_provinces.update(cm_data['provinces'])
-            
-            for province in all_provinces:
-                if not province:
-                    continue
-                
-                # Query by province
-                filter_str = f'Province = "{province}"'
+            page_size = 1000
+            offset = 0
+            total_hits = None
+
+            while True:
                 projects, metadata = await client.search_projects(
-                    query=province,
-                    filters=filter_str,
-                    limit=1000,
-                    offset=0
+                    query="",
+                    filters=None,
+                    limit=page_size,
+                    offset=offset
                 )
-                
+
+                if total_hits is None:
+                    total_hits = metadata.get("totalHits") or metadata.get("estimatedTotalHits") or 0
+                    print(f"ℹ️  Fetching SSP projects via MeiliSearch: estimated {total_hits} records")
+
+                if not projects:
+                    break
+
                 for proj in projects:
                     proj_desc = (proj.ProjectDescription or '').upper()
                     proj_province = (proj.Province or '').upper()
@@ -483,28 +494,26 @@ class DynastyProjectsCacheGenerator:
                     proj_contractor = (proj.Contractor or '').upper()
                     # Include contractor in combined text for matching
                     combined_text = f'{proj_desc} {proj_province} {proj_municipality} {proj_contractor}'
-                    
-                    matched_congressman = None
-                    match_type = None
-                    match_score = 0
-                    
-                    # Try to match to each congressman (includes district and contractor matching)
+
+                    matches = []
                     for cm_name, cm_data in congressmen_data.items():
-                        cm_name_result, match_type_result, match_score_result = self.match_project(combined_text, cm_data, districts_data, proj_contractor)
-                        if cm_name_result:
-                            matched_congressman = cm_name_result
-                            match_type = match_type_result
-                            match_score = match_score_result
-                            break
-                    
-                    if matched_congressman and match_score > 0:
+                        cm_name_result, match_type_result, match_score_result = self.match_project(
+                            combined_text,
+                            cm_data,
+                            districts_data,
+                            proj_contractor
+                        )
+                        if cm_name_result and match_score_result > 0:
+                            matches.append((cm_name_result, match_type_result, match_score_result))
+
+                    if matches:
                         location_parts = []
                         if proj.Province:
                             location_parts.append(proj.Province)
                         if proj.Municipality:
                             location_parts.append(proj.Municipality)
                         location_str = ', '.join(location_parts).strip() or "N/A"
-                        
+
                         # Handle ContractCost (can be string or float)
                         amount = 0
                         if proj.ContractCost:
@@ -512,21 +521,28 @@ class DynastyProjectsCacheGenerator:
                                 amount = float(proj.ContractCost.replace(',', '').replace('₱', '').replace('PHP', '').strip() or 0)
                             else:
                                 amount = float(proj.ContractCost)
-                        
-                        all_projects.append({
-                            "congressman": matched_congressman,
-                            "source": "SSP",
-                            "meilisearch_id": proj.id if hasattr(proj, 'id') else None,
-                            "project_name": proj.ProjectDescription or "N/A",
-                            "contractor": proj.Contractor or "N/A",
-                            "amount": amount,
-                            "location": location_str,
-                            "year": proj.Year if hasattr(proj, 'Year') else "N/A",
-                            "status": proj.Status if hasattr(proj, 'Status') else "N/A",
-                            "match_type": match_type,
-                            "match_score": match_score,
-                            "is_city_wide": (match_score == 1 and match_type == "district")
-                        })
+
+                        for matched_congressman, match_type, match_score in matches:
+                            if matched_congressman == "Ferdinand Martin Gomez Romualdez":
+                                print(f"✅ Matched Romualdez (SSP): {proj.ProjectDescription[:80]}... -> {location_str} [{match_type}:{match_score}]")
+                            all_projects.append({
+                                "congressman": matched_congressman,
+                                "source": "SSP",
+                                "meilisearch_id": proj.id if hasattr(proj, 'id') else None,
+                                "project_name": proj.ProjectDescription or "N/A",
+                                "contractor": proj.Contractor or "N/A",
+                                "amount": amount,
+                                "location": location_str,
+                                "year": proj.Year if hasattr(proj, 'Year') else "N/A",
+                                "status": proj.Status if hasattr(proj, 'Status') else "N/A",
+                                "match_type": match_type,
+                                "match_score": match_score,
+                                "is_city_wide": (match_score == 1 and match_type == "district")
+                            })
+
+                offset += page_size
+                if total_hits and offset >= total_hits:
+                    break
         except Exception as e:
             print(f"Error processing SSP/MeiliSearch projects: {e}")
         
@@ -535,7 +551,6 @@ class DynastyProjectsCacheGenerator:
             dime_projects = await dime_conn.fetch('''
                 SELECT project_name, contractors, cost, province, city, barangay, status, date_started, meilisearch_id
                 FROM projects
-                LIMIT 10000
             ''')
             
             for proj in dime_projects:
@@ -544,11 +559,7 @@ class DynastyProjectsCacheGenerator:
                 proj_city = (proj.get('city') or '').upper()
                 proj_barangay = (proj.get('barangay') or '').upper()
                 combined_text = f'{proj_name} {proj_province} {proj_city} {proj_barangay}'
-                
-                matched_congressman = None
-                match_type = None
-                match_score = 0
-                
+
                 # Include contractor in combined text for matching
                 contractor_str = ''
                 if isinstance(proj.get('contractors'), list):
@@ -556,17 +567,19 @@ class DynastyProjectsCacheGenerator:
                 elif proj.get('contractors'):
                     contractor_str = str(proj['contractors']).upper()
                 combined_text = f'{combined_text} {contractor_str}'
-                
-                # Try to match to each congressman (includes district and contractor matching)
+
+                matches = []
                 for cm_name, cm_data in congressmen_data.items():
-                    cm_name_result, match_type_result, match_score_result = self.match_project(combined_text, cm_data, districts_data, contractor_str)
-                    if cm_name_result:
-                        matched_congressman = cm_name_result
-                        match_type = match_type_result
-                        match_score = match_score_result
-                        break  # Found match, stop checking other congressmen
-                
-                if matched_congressman and match_score > 0:
+                    cm_name_result, match_type_result, match_score_result = self.match_project(
+                        combined_text,
+                        cm_data,
+                        districts_data,
+                        contractor_str
+                    )
+                    if cm_name_result and match_score_result > 0:
+                        matches.append((cm_name_result, match_type_result, match_score_result))
+
+                if matches:
                     location_parts = []
                     if proj.get('province'):
                         location_parts.append(proj['province'])
@@ -575,21 +588,26 @@ class DynastyProjectsCacheGenerator:
                     if proj.get('barangay'):
                         location_parts.append(proj['barangay'])
                     location_str = ', '.join(location_parts).strip() or "N/A"
-                    
-                    all_projects.append({
-                        "congressman": matched_congressman,
-                        "source": "DIME",
-                        "meilisearch_id": proj.get('meilisearch_id'),
-                        "project_name": proj['project_name'] or "N/A",
-                        "contractor": contractor_str if contractor_str else "N/A",
-                        "amount": float(proj['cost']) if proj['cost'] else 0,
-                        "location": location_str,
-                        "year": proj['date_started'].year if proj['date_started'] else "N/A",
-                        "status": proj['status'] or "N/A",
-                        "match_type": match_type,
-                        "match_score": match_score,
-                        "is_city_wide": (match_score == 1 and match_type == "district")
-                    })
+
+                    amount = float(proj['cost']) if proj['cost'] else 0
+
+                    for matched_congressman, match_type, match_score in matches:
+                        if matched_congressman == "Ferdinand Martin Gomez Romualdez":
+                            print(f"✅ Matched Romualdez (DIME): {proj['project_name'][:80]}... -> {location_str} [{match_type}:{match_score}]")
+                        all_projects.append({
+                            "congressman": matched_congressman,
+                            "source": "DIME",
+                            "meilisearch_id": proj.get('meilisearch_id'),
+                            "project_name": proj['project_name'] or "N/A",
+                            "contractor": contractor_str if contractor_str else "N/A",
+                            "amount": amount,
+                            "location": location_str,
+                            "year": proj['date_started'].year if proj['date_started'] else "N/A",
+                            "status": proj['status'] or "N/A",
+                            "match_type": match_type,
+                            "match_score": match_score,
+                            "is_city_wide": (match_score == 1 and match_type == "district")
+                        })
         except Exception as e:
             print(f"Error processing DIME projects: {e}")
         
@@ -598,7 +616,6 @@ class DynastyProjectsCacheGenerator:
             philgeps_projects = await philgeps_conn.fetch('''
                 SELECT award_title, awardee_name, contract_amount, area_of_delivery, award_date, award_status, meilisearch_id
                 FROM contracts
-                LIMIT 10000
             ''')
             
             for contract in philgeps_projects:
@@ -614,15 +631,21 @@ class DynastyProjectsCacheGenerator:
                 
                 # Try to match to each congressman (includes district and contractor matching)
                 awardee_name = (contract.get('awardee_name') or '').upper()
+                # Check all congressmen and pick the BEST match (highest score) to prioritize district matches over contractor matches
+                best_match = None
+                best_score = 0
                 for cm_name, cm_data in congressmen_data.items():
                     cm_name_result, match_type_result, match_score_result = self.match_project(combined_text, cm_data, districts_data, awardee_name)
-                    if cm_name_result:
-                        matched_congressman = cm_name_result
-                        match_type = match_type_result
-                        match_score = match_score_result
-                        break
+                    if cm_name_result and match_score_result > best_score:
+                        best_match = (cm_name_result, match_type_result, match_score_result)
+                        best_score = match_score_result
+                
+                if best_match:
+                    matched_congressman, match_type, match_score = best_match
                 
                 if matched_congressman and match_score > 0:
+                    if matched_congressman == "Ferdinand Martin Gomez Romualdez":
+                        print(f"✅ Matched Romualdez (PhilGEPS): {contract.get('award_title','')[:80]}... -> {area_of_delivery} [{match_type}:{match_score}]")
                     all_projects.append({
                         "congressman": matched_congressman,
                         "source": "PhilGEPS",
@@ -685,6 +708,7 @@ class DynastyProjectsCacheGenerator:
             print(f"✅ Processed {len(all_projects)} projects")
             
             # Deduplicate and add cross-database bonus
+            # Original logic: deduplicate by project key, track all sources and all congressmen
             projects_by_key = {}
             for proj in all_projects:
                 key = proj.get('meilisearch_id') or f"{proj.get('project_name', '')}_{proj.get('amount', 0)}_{proj.get('location', '')}"
@@ -704,6 +728,9 @@ class DynastyProjectsCacheGenerator:
             for key, data in projects_by_key.items():
                 proj = data['project'].copy()
                 sources_count = len(data['sources'])
+                
+                # Preserve the congressmen set for individual cache creation
+                proj['_all_congressmen'] = list(data['congressmen'])
                 
                 # New scoring system:
                 # 1. Base score: 1 point per 2M (max 70)
@@ -736,6 +763,8 @@ class DynastyProjectsCacheGenerator:
                 proj['sources_count'] = sources_count
                 proj['sources_list'] = sorted(list(data['sources']))
                 
+                # Keep the original congressman from the first match for the combined cache
+                # But preserve all congressmen in _all_congressmen for individual cache creation
                 unique_projects.append(proj)
             
             # Sort by match_score descending, then by amount descending
@@ -818,7 +847,7 @@ class DynastyProjectsCacheGenerator:
                 "contractor_cost": contractor_cost
             }
             
-            # Save to cache file
+            # Save combined cache file (for "all congressmen" view)
             cache_data = {
                 "success": True,
                 "projects": unique_projects,
@@ -835,7 +864,7 @@ class DynastyProjectsCacheGenerator:
             with open(self.cache_file, 'w', encoding='utf-8') as f:
                 json.dump(cache_data, f, indent=2, ensure_ascii=False)
             
-            print(f"✅ Cache generated successfully: {self.cache_file}")
+            print(f"✅ Combined cache generated successfully: {self.cache_file}")
             print(f"   Total projects: {summary['total']}")
             print(f"   District matches: {summary['district_projects']}")
             print(f"   Contractor matches: {summary['contractor_projects']}")
@@ -843,6 +872,114 @@ class DynastyProjectsCacheGenerator:
             print(f"     - Total cost: ₱{dashboard_stats['total_cost_all']:,.2f}")
             print(f"     - District cost: ₱{dashboard_stats['district_cost']:,.2f}")
             print(f"     - Contractor cost: ₱{dashboard_stats['contractor_cost']:,.2f}")
+            
+            # Create individual cache files for each congressman
+            print(f"\n📁 Creating individual cache files for each congressman...")
+            cache_base_dir = Path(__file__).parent.parent / 'static' / 'data'
+            
+            # Get all congressmen from config (not just those with projects)
+            all_congressmen_names = set()
+            for cm_config in config_data.get('target_congressmen', []):
+                all_congressmen_names.add(cm_config.get('display_name'))
+            
+            # Also include any congressmen that have projects (in case they're not in config)
+            for proj in unique_projects:
+                if proj.get('congressman'):
+                    all_congressmen_names.add(proj.get('congressman'))
+            
+            # Also include all deputy speakers from CSV file
+            import csv
+            deputy_speakers_csv = Path(__file__).parent.parent / 'database' / 'Philippine_Deputy_Speakers_2016-2025.csv'
+            if deputy_speakers_csv.exists():
+                with open(deputy_speakers_csv, 'r', encoding='utf-8') as f:
+                    reader = csv.DictReader(f)
+                    for row in reader:
+                        name = row.get('Name', '').strip()
+                        if name:
+                            all_congressmen_names.add(name)
+            
+            for congressman_name in sorted(all_congressmen_names):
+                # Filter projects for this congressman
+                # Include projects where this congressman is in the _all_congressmen list (for projects matching multiple congressmen)
+                congressman_projects = []
+                for p in unique_projects:
+                    # Check if this congressman matches the project
+                    if p.get('congressman') == congressman_name:
+                        # Create a copy with this congressman as the primary congressman
+                        proj_copy = p.copy()
+                        proj_copy['congressman'] = congressman_name
+                        # Remove the internal _all_congressmen field before saving
+                        proj_copy.pop('_all_congressmen', None)
+                        congressman_projects.append(proj_copy)
+                    elif congressman_name in p.get('_all_congressmen', []):
+                        # This project matches multiple congressmen, create a copy for this one
+                        proj_copy = p.copy()
+                        proj_copy['congressman'] = congressman_name
+                        # Remove the internal _all_congressmen field before saving
+                        proj_copy.pop('_all_congressmen', None)
+                        congressman_projects.append(proj_copy)
+                
+                # Calculate congressman-specific statistics
+                congressman_total_cost = sum(parse_amount(p.get('amount', 0)) for p in congressman_projects)
+                congressman_district_count = len([p for p in congressman_projects if p.get('match_type') == 'district'])
+                congressman_contractor_count = len([p for p in congressman_projects if p.get('match_type') == 'contractor'])
+                congressman_district_cost = sum(parse_amount(p.get('amount', 0)) for p in congressman_projects if p.get('match_type') == 'district')
+                congressman_contractor_cost = sum(parse_amount(p.get('amount', 0)) for p in congressman_projects if p.get('match_type') == 'contractor')
+                
+                congressman_summary = {
+                    "total": len(congressman_projects),
+                    "dime": len([p for p in congressman_projects if 'DIME' in (p.get('sources_list', []))]),
+                    "philgeps": len([p for p in congressman_projects if 'PhilGEPS' in (p.get('sources_list', []))]),
+                    "district_projects": congressman_district_count,
+                    "contractor_projects": congressman_contractor_count
+                }
+                
+                congressman_dashboard_stats = {
+                    "total_cost_all": congressman_total_cost,
+                    "total_projects": len(congressman_projects),
+                    "district_count": congressman_district_count,
+                    "district_cost": congressman_district_cost,
+                    "contractor_count": congressman_contractor_count,
+                    "contractor_cost": congressman_contractor_cost
+                }
+                
+                # Normalize congressman name for directory name
+                congressman_normalized = congressman_name.lower().replace(" ", "-").replace(".", "").replace(",", "").replace("'", "")
+                congressman_cache_dir = cache_base_dir / f'congressman-projects-{congressman_normalized}'
+                congressman_cache_dir.mkdir(parents=True, exist_ok=True)
+                
+                # Save congressman-specific cache
+                congressman_cache_data = {
+                    "success": True,
+                    "congressman": congressman_name,
+                    "projects": congressman_projects,
+                    "summary": congressman_summary,
+                    "dashboard_stats": congressman_dashboard_stats,
+                    "generated_at": datetime.now().isoformat(),
+                    "cache_version": "1.0"
+                }
+                
+                congressman_cache_file = congressman_cache_dir / 'all-projects-cache.json'
+                with open(congressman_cache_file, 'w', encoding='utf-8') as f:
+                    json.dump(congressman_cache_data, f, indent=2, ensure_ascii=False)
+                
+                # Save summary.json for consistency with province cache structure
+                summary_data = {
+                    "congressman": congressman_name,
+                    "summary": congressman_summary,
+                    "total_cost": congressman_total_cost,
+                    "generated_at": datetime.now().isoformat()
+                }
+                summary_file = congressman_cache_dir / 'summary.json'
+                with open(summary_file, 'w', encoding='utf-8') as f:
+                    json.dump(summary_data, f, indent=2, ensure_ascii=False)
+                
+                if len(congressman_projects) > 0:
+                    print(f"   ✅ {congressman_name}: {len(congressman_projects)} projects, ₱{congressman_total_cost:,.2f}")
+                else:
+                    print(f"   ✅ {congressman_name}: 0 projects (empty cache created)")
+            
+            print(f"\n✅ Individual cache files created for {len(all_congressmen_names)} congressmen")
             
         finally:
             await dynasty_conn.close()

@@ -6,6 +6,10 @@ A comprehensive data pipeline by [BetterGov.PH](https://bettergov.ph/) that conv
 
 This project processes 6.8+ million budget records spanning fiscal years 2020-2026, along with comprehensive reference data including organizational hierarchies, geographic locations, funding sources, and expense classifications. The data is structured as a property graph to enable complex queries and relationship analysis.
 
+## 🚧 Infrawatch Infrastructure Projects Loader
+
+The `analysis/load_infrawatch_projects.py` script ingests the `2016-2025 PH Infrastructure Projects.xlsx` workbook into the Infrawatch PostgreSQL database. Configure database credentials via `POSTGRES_DB_INFRAWATCH` (defaults to `infrawatch`) alongside the existing `POSTGRES_HOST`, `POSTGRES_PORT`, `POSTGRES_USER`, and `POSTGRES_PASSWORD` variables. Optionally, override the source spreadsheet path with `INFRAWATCH_EXCEL_PATH`. After sourcing your `.env`, run `python analysis/load_infrawatch_projects.py` to create or refresh the `infrawatch_projects_rows`, `infrawatch_projects_columns`, and `infrawatch_projects_stats` tables.
+
 ### Data Scale
 
 - **6,858,701** total budget records (NEP + GAA 2020-2026)
