@@ -373,6 +373,9 @@ function toggleMobileMenu() {
                         <p style="color: #666; margin: 0 0 20px 0;">
                             Search for any contractor and view all their projects across Flood Control, DIME, and PhilGEPS databases
                         </p>
+                        <p style="color: #1f2937; background: #e0f2fe; border-left: 4px solid #0284c7; padding: 12px 16px; border-radius: 6px; margin: 0 0 24px 0;">
+                            ℹ️ <strong>Augmented dataset:</strong> Results now include unmatched entries from the 2016–2025 InfraWatch infrastructure tracker. These rows appear only when no PhilGEPS contract has been linked yet, giving you a fuller view of public works pipelines.
+                        </p>
                         
                         <!-- Data Quality Warning -->
                         <div style="background: #fff3cd; border: 2px solid #ffc107; border-radius: 6px; padding: 15px; margin-bottom: 25px;">
@@ -1657,6 +1660,7 @@ let projectSearchContractors = [];
 let currentFloodPage = 0;
 let currentDimePage = 0;
 let currentPhilgepsPage = 0;
+let currentInfrawatchPage = 0;
 let cachedSearchResults = null;
 
 // Setup autocomplete for project search
@@ -1730,6 +1734,7 @@ async function searchContractorProjects() {
     currentFloodPage = 0;
     currentDimePage = 0;
     currentPhilgepsPage = 0;
+    currentInfrawatchPage = 0;
     
     // Show loading
     resultsDiv.innerHTML = `
@@ -1776,13 +1781,24 @@ function changePhilgepsPage(direction) {
     displayProjectSearchResults(cachedSearchResults);
 }
 
+function changeInfrawatchPage(direction) {
+    const totalPages = Math.ceil(cachedSearchResults.projects.infrawatch.length / 5);
+    currentInfrawatchPage = Math.max(0, Math.min(totalPages - 1, currentInfrawatchPage + direction));
+    displayProjectSearchResults(cachedSearchResults);
+}
+
 function displayProjectSearchResults(data) {
     const resultsDiv = document.getElementById('projects-search-results');
     const summary = data.summary;
     const projects = data.projects;
     
     // Basic validation check: deduplicated total should be >= any single database
-    const maxSingleDB = Math.max(summary.flood.total_dedup, summary.dime.total_dedup, summary.philgeps.total_dedup);
+    const maxSingleDB = Math.max(
+        summary.flood.total_dedup,
+        summary.dime.total_dedup,
+        summary.philgeps.total_dedup,
+        summary.infrawatch ? summary.infrawatch.total_dedup : 0
+    );
     const hasValidationError = summary.total_value < maxSingleDB;
     
     if (hasValidationError) {
@@ -1862,6 +1878,12 @@ function displayProjectSearchResults(data) {
                     <div style="font-size: 0.9em; opacity: 0.9;">${summary.philgeps.count_dedup} unique</div>
                     ${summary.philgeps.count !== summary.philgeps.count_dedup ? `<div style="font-size: 0.75em; opacity: 0.7;">(${summary.philgeps.count} raw, ${summary.philgeps.count - summary.philgeps.count_dedup} dupes)</div>` : ''}
                     <div style="font-size: 0.85em; opacity: 0.8;">₱${summary.philgeps.total_dedup.toLocaleString('en-PH')}</div>
+                </div>
+                <div>
+                    <div style="font-size: 1.3em; font-weight: bold;">🟠 InfraWatch</div>
+                    <div style="font-size: 0.9em; opacity: 0.9;">${(summary.infrawatch?.count_dedup || 0)} unique</div>
+                    ${(summary.infrawatch && summary.infrawatch.count !== summary.infrawatch.count_dedup) ? `<div style="font-size: 0.75em; opacity: 0.7;">(${summary.infrawatch.count} raw, ${summary.infrawatch.count - summary.infrawatch.count_dedup} dupes)</div>` : ''}
+                    <div style="font-size: 0.85em; opacity: 0.8;">₱${(summary.infrawatch?.total_dedup || 0).toLocaleString('en-PH')}</div>
                 </div>
             </div>
         </div>
@@ -2003,6 +2025,59 @@ function displayProjectSearchResults(data) {
                                     <td style="padding: 12px; font-weight: 600; color: #F57C00;">₱${proj.amount.toLocaleString('en-PH')}</td>
                                     <td style="padding: 12px; font-size: 0.9em;">${proj.procuring_entity || 'N/A'}</td>
                                     <td style="padding: 12px;">${proj.award_date ? new Date(proj.award_date).toLocaleDateString('en-PH') : 'N/A'}</td>
+                                </tr>
+                            `).join('')}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        `;
+    }
+
+    if (projects.infrawatch && projects.infrawatch.length > 0) {
+        const infStart = currentInfrawatchPage * 5;
+        const infEnd = infStart + 5;
+        const infPaginated = projects.infrawatch.slice(infStart, infEnd);
+        const infTotalPages = Math.ceil(projects.infrawatch.length / 5);
+
+        html += `
+            <div style="background: white; padding: 25px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); margin-bottom: 25px; border-left: 5px solid #fb923c;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                    <div>
+                        <h3 style="color: #fb923c; margin: 0; font-size: 1.4em;">🟠 InfraWatch Projects (${projects.infrawatch.length})</h3>
+                        <p style="color: #92400e; margin: 4px 0 0 0; font-size: 0.85em;">Projects captured by InfraWatch (2016–2025) with no PhilGEPS link yet.</p>
+                    </div>
+                    <div style="display: flex; gap: 10px; align-items: center;">
+                        <span style="color: #666; font-size: 0.9em;">Page ${currentInfrawatchPage + 1} of ${infTotalPages}</span>
+                        <button onclick="changeInfrawatchPage(-1)" style="background: ${currentInfrawatchPage === 0 ? '#dee2e6' : '#fb923c'}; color: ${currentInfrawatchPage === 0 ? '#6c757d' : 'white'}; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-size: 0.85em;" ${currentInfrawatchPage === 0 ? 'disabled' : ''}>← Prev</button>
+                        <button onclick="changeInfrawatchPage(1)" style="background: ${currentInfrawatchPage >= infTotalPages - 1 ? '#dee2e6' : '#fb923c'}; color: ${currentInfrawatchPage >= infTotalPages - 1 ? '#6c757d' : 'white'}; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-size: 0.85em;" ${currentInfrawatchPage >= infTotalPages - 1 ? 'disabled' : ''}>Next →</button>
+                    </div>
+                </div>
+                <div style="overflow-x: auto;">
+                    <table style="width: 100%; border-collapse: collapse;">
+                        <thead>
+                            <tr style="background: #f3f4f6; border-bottom: 2px solid #fb923c;">
+                                <th style="padding: 12px; text-align: left; font-weight: 600;">#</th>
+                                <th style="padding: 12px; text-align: left; font-weight: 600;">Contract ID</th>
+                                <th style="padding: 12px; text-align: left; font-weight: 600;">Project Details</th>
+                                <th style="padding: 12px; text-align: left; font-weight: 600;">Contractor</th>
+                                <th style="padding: 12px; text-align: left; font-weight: 600;">Amount</th>
+                                <th style="padding: 12px; text-align: left; font-weight: 600;">Fund Source</th>
+                                <th style="padding: 12px; text-align: left; font-weight: 600;">Implementing Agency</th>
+                                <th style="padding: 12px; text-align: left; font-weight: 600;">Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${infPaginated.map((proj, idx) => `
+                                <tr style="border-bottom: 1px solid #e5e7eb;">
+                                    <td style="padding: 12px;">${infStart + idx + 1}</td>
+                                    <td style="padding: 12px; font-weight: 600;">${proj.contract_id || 'N/A'}</td>
+                                    <td style="padding: 12px;">${proj.description || 'N/A'}</td>
+                                    <td style="padding: 12px; font-size: 0.85em; color: #666;">${proj.contractor || 'N/A'}</td>
+                                    <td style="padding: 12px; font-weight: 600; color: #fb923c;">₱${proj.amount ? proj.amount.toLocaleString('en-PH') : '0.00'}</td>
+                                    <td style="padding: 12px; font-size: 0.85em;">${proj.fund_source || 'N/A'}</td>
+                                    <td style="padding: 12px; font-size: 0.85em;">${proj.implementing_agency || 'N/A'}</td>
+                                    <td style="padding: 12px;">${proj.status || 'N/A'}</td>
                                 </tr>
                             `).join('')}
                         </tbody>
