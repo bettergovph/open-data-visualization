@@ -930,6 +930,8 @@ let combinedChart = null;
 let currentChartData = null;
 let currentSortMode = 'cost';
 let prefetchedVisualData = null;
+let currentChartTop10ByCount = [];
+let currentChartTop10ByCost = [];
 
 function normalizeCongressmanName(name) {
     return (name || '')
@@ -1684,9 +1686,12 @@ async function loadVisualData(prefetchedData = null) {
             prefetchedVisualData = data;
         }
         
-        if (data.success && data.chart_data) {
+        currentChartTop10ByCount = Array.isArray(data.chart_data_by_count) ? data.chart_data_by_count : [];
+        currentChartTop10ByCost = Array.isArray(data.chart_data_by_cost) ? data.chart_data_by_cost : [];
+        
+        if (data.success && (data.chart_data_by_count || data.chart_data)) {
             // Use pre-calculated chart data from cache (all combined unique congressmen)
-            const statsArray = data.chart_data;
+            const statsArray = data.chart_data_by_count || data.chart_data || [];
             
             // Update dashboard statistics (use original data, not filtered)
             if (data.dashboard_stats) {
@@ -1725,12 +1730,14 @@ async function loadVisualData(prefetchedData = null) {
                     congressmanStats[congressman] = {
                         name: congressman,
                         count: 0,
-                        totalCost: 0
+                        totalCost: 0,
+                        total_cost: 0
                     };
                 }
                 congressmanStats[congressman].count++;
                 const amount = parseFloat(project.amount) || 0;
                 congressmanStats[congressman].totalCost += amount;
+                congressmanStats[congressman].total_cost += amount;
                 totalCost += amount;
                 
                 // Count by match type
@@ -1752,13 +1759,16 @@ async function loadVisualData(prefetchedData = null) {
             document.getElementById('dashboard-contractor-count').textContent = `${contractorCount} projects`;
             document.getElementById('dashboard-stats').style.display = 'grid';
             
-            // Convert to array and sort by count
             const statsArray = Object.values(congressmanStats);
             currentChartData = statsArray;
+            currentChartTop10ByCount = [...statsArray];
+            currentChartTop10ByCost = [...statsArray];
             sortChartBy('cost');
         }
     } catch (error) {
         console.error('Error loading visual data:', error);
+        currentChartTop10ByCount = [];
+        currentChartTop10ByCost = [];
     } finally {
         if (visualLoading) {
             visualLoading.style.display = 'none';
@@ -1791,25 +1801,39 @@ function sortChartBy(mode) {
 function updateChartWithSort(mode) {
     if (!currentChartData) return;
     
-    // Sort data based on mode
-    let sortedData = [...currentChartData];
+    const sourceData = (() => {
+        if (mode === 'count' && Array.isArray(currentChartTop10ByCount) && currentChartTop10ByCount.length) {
+            return [...currentChartTop10ByCount];
+        }
+        if (mode === 'cost' && Array.isArray(currentChartTop10ByCost) && currentChartTop10ByCost.length) {
+            return [...currentChartTop10ByCost];
+        }
+        return [...currentChartData];
+    })();
+
+    if (!sourceData.length) return;
+
+    // Sort data based on mode and trim to top 10
+    let sortedData = [...sourceData];
     if (mode === 'count') {
         sortedData.sort((a, b) => b.count - a.count);
     } else {
         sortedData.sort((a, b) => b.total_cost - a.total_cost);
     }
-    
+
+    const limitedData = sortedData.slice(0, 10);
+
     // Prepare chart data
-    const labels = sortedData.map((s) => {
+    const labels = limitedData.map((s) => {
         const name = s.name;
         if (name.length > 20) {
             return name.split(' ').slice(0, 2).join(' ') + '...';
         }
         return name;
     });
-    const fullNames = sortedData.map((s) => s.name);
-    const counts = sortedData.map((s) => s.count);
-    const costs = sortedData.map((s) => s.total_cost / 1_000_000);
+    const fullNames = limitedData.map((s) => s.name);
+    const counts = limitedData.map((s) => s.count);
+    const costs = limitedData.map((s) => (s.total_cost || 0) / 1_000_000);
     
     createCharts(labels, fullNames, counts, costs);
 }
