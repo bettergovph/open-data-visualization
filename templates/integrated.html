@@ -1296,7 +1296,8 @@ async function loadAllProjects() {
 
 function applyFilter() {
     const mode = document.querySelector('input[name="congressman-filter-mode"]:checked')?.value || 'All';
-    const filterValue = document.getElementById('congressman-filter').value.trim();
+    const filterInput = document.getElementById('congressman-filter');
+    const filterValue = filterInput ? filterInput.value.trim() : '';
     const isAll = filterValue === '' || filterValue.toLowerCase() === 'all congressmen';
     
     if (mode === 'All') {
@@ -1308,6 +1309,9 @@ function applyFilter() {
         const partylistNames = configCongressmen
             .filter(item => !item.province || !item.district_number)
             .map(item => item.display_name);
+        if (filterInput) {
+            filterInput.value = '';
+        }
         if (isAll) {
             filteredData = allProjectsData.filter(project => partylistNames.includes(project.congressman));
             if (filteredData.length === 0 && partylistNames.length > 0) {
@@ -1320,6 +1324,9 @@ function applyFilter() {
             }
         }
     } else if (mode === 'Province') {
+        if (filterInput) {
+            filterInput.value = '';
+        }
         const provinceInput = document.getElementById('congressman-province-input');
         const provinceValueRaw = provinceInput ? provinceInput.value.trim() : '';
         const provinceValue = provinceValueRaw.toLowerCase();
@@ -1383,6 +1390,10 @@ function handleModeChange(mode) {
 }
 
 function handleProvinceInputChange() {
+    const congressmanInput = document.getElementById('congressman-filter');
+    if (congressmanInput) {
+        congressmanInput.value = '';
+    }
     updateCongressmanDatalist();
     applyFilter();
 }
@@ -1397,6 +1408,10 @@ function handleProvinceBlur() {
         if (match) {
             provinceInput.value = match.value;
         }
+    }
+    const congressmanInput = document.getElementById('congressman-filter');
+    if (congressmanInput) {
+        congressmanInput.value = '';
     }
     updateCongressmanDatalist();
     applyFilter();
