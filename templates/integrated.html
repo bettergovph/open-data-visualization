@@ -479,17 +479,22 @@ function toggleMobileMenu() {
                         
                         <div style="margin-bottom: 20px; padding: 20px; background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%); border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); border: 2px solid #333;">
                             <p style="margin: 0; color: #333; font-size: 15px; line-height: 1.6; text-align: center;">
-                                <strong>Dual-Metric Analysis:</strong> Showing the combined top congressmen by <strong>project count</strong> and <strong>total cost</strong> (14 unique leaders). This reveals different infrastructure strategies: high-volume districts with many smaller projects vs. high-cost districts with fewer mega-projects. Totals combine district-aligned and contractor-linked matches across SSP, DIME, PhilGEPS, and DPWH Microsite datasets.
+                                <strong>Dual-Metric Analysis:</strong> Paging through the <strong>Top 200 congressmen</strong> (10 per view) by <strong>project count</strong> and <strong>total cost</strong>. Compare high-volume districts filled with numerous smaller builds versus high-cost areas driven by mega projects. Totals combine district-aligned and contractor-linked matches across SSP, DIME, PhilGEPS, and DPWH Microsite datasets.
                             </p>
                         </div>
                         
                         <div style="margin-top: 30px; background: white; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); padding: 20px; position: relative;">
-                            <div style="position: absolute; top: 20px; right: 20px; display: flex; gap: 10px; z-index: 10;">
+                            <div style="position: absolute; top: 20px; right: 20px; display: flex; flex-wrap: wrap; gap: 10px; align-items: center; justify-content: flex-end; z-index: 10;">
                                 <button id="sort-by-count-btn" style="padding: 10px 20px; background: #333; color: white; border: 2px solid #333; border-radius: 6px; font-size: 14px; font-weight: 600; cursor: pointer; transition: all 0.3s ease; box-shadow: 0 4px 12px rgba(0,0,0,0.2);" onclick="sortChartBy('count')">🔢 By Count</button>
                                 <button id="sort-by-cost-btn" style="padding: 10px 20px; background: #7b1fa2; color: white; border: 2px solid #7b1fa2; border-radius: 6px; font-size: 14px; font-weight: 600; cursor: pointer; transition: all 0.3s ease; box-shadow: 0 4px 12px rgba(0,0,0,0.2);" onclick="sortChartBy('cost')">💰 By Cost</button>
                                 <button id="copy-chart-btn" style="padding: 10px 20px; background: #333; color: white; border: 2px solid #333; border-radius: 6px; font-size: 14px; font-weight: 600; cursor: pointer; transition: all 0.3s ease; box-shadow: 0 4px 12px rgba(0,0,0,0.2);" onmouseover="this.style.background='#667eea'; this.style.borderColor='#667eea'; this.style.transform='translateY(-2px)'; this.style.boxShadow='0 6px 16px rgba(102, 126, 234, 0.4)';" onmouseout="this.style.background='#333'; this.style.borderColor='#333'; this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 12px rgba(0,0,0,0.2)';">📋 Copy</button>
+                                <div style="display: flex; gap: 8px; align-items: center; background: rgba(51,51,51,0.05); padding: 6px 12px; border-radius: 6px;">
+                                    <button id="chart-prev-page-btn" style="padding: 8px 16px; background: #333; color: white; border: 2px solid #333; border-radius: 6px; font-size: 13px; font-weight: 600; cursor: pointer; transition: all 0.3s ease;" onmouseover="if(!this.disabled){this.style.background='#667eea'; this.style.borderColor='#667eea'; this.style.transform='translateY(-2px)';}" onmouseout="if(!this.disabled){this.style.background='#333'; this.style.borderColor='#333'; this.style.transform='translateY(0)';}">⬅️ Prev</button>
+                                    <span id="chart-page-info" style="font-size: 13px; font-weight: 600; color: #333;">Page 1 of 1</span>
+                                    <button id="chart-next-page-btn" style="padding: 8px 16px; background: #333; color: white; border: 2px solid #333; border-radius: 6px; font-size: 13px; font-weight: 600; cursor: pointer; transition: all 0.3s ease;" onmouseover="if(!this.disabled){this.style.background='#667eea'; this.style.borderColor='#667eea'; this.style.transform='translateY(-2px)';}" onmouseout="if(!this.disabled){this.style.background='#333'; this.style.borderColor='#333'; this.style.transform='translateY(0)';}">Next ➡️</button>
+                                </div>
                             </div>
-                            <canvas id="combinedChart" style="max-height: 500px;"></canvas>
+                            <canvas id="combinedChart" style="width: 100%; height: 600px;"></canvas>
                         </div>
                         
                         <div id="visual-loading" style="text-align: center; padding: 40px; display: none;">
@@ -945,8 +950,12 @@ let combinedChart = null;
 let currentChartData = null;
 let currentSortMode = 'cost';
 let prefetchedVisualData = null;
-let currentChartTop10ByCount = null;
-let currentChartTop10ByCost = null;
+let currentChartTop200ByCount = null;
+let currentChartTop200ByCost = null;
+let currentChartSortedData = [];
+let chartPage = 1;
+let chartTotalPages = 1;
+const chartPageSize = 10;
 
 function normalizeCongressmanName(name) {
     return (name || '')
@@ -1691,12 +1700,20 @@ async function loadVisualData(prefetchedData = null) {
             prefetchedVisualData = data;
         }
         
-        currentChartTop10ByCount = Array.isArray(data.chart_data_by_count) ? data.chart_data_by_count : [];
-        currentChartTop10ByCost = Array.isArray(data.chart_data_by_cost) ? data.chart_data_by_cost : [];
+        const limitedChartCount = Array.isArray(data.chart_data_by_count)
+            ? data.chart_data_by_count.slice(0, 200)
+            : [];
+        const limitedChartCost = Array.isArray(data.chart_data_by_cost)
+            ? data.chart_data_by_cost.slice(0, 200)
+            : [];
+        currentChartTop200ByCount = limitedChartCount;
+        currentChartTop200ByCost = limitedChartCost;
         
         if (data.success && (data.chart_data_by_count || data.chart_data)) {
             // Use pre-calculated chart data from cache (all combined unique congressmen)
-            const statsArray = data.chart_data_by_count || data.chart_data || [];
+            const statsArray = limitedChartCount.length > 0
+                ? limitedChartCount
+                : (Array.isArray(data.chart_data) ? data.chart_data.slice(0, 200) : []);
             
             // Update dashboard statistics (use original data, not filtered)
             if (data.dashboard_stats) {
@@ -1765,15 +1782,23 @@ async function loadVisualData(prefetchedData = null) {
             document.getElementById('dashboard-stats').style.display = 'grid';
             
             const statsArray = Object.values(congressmanStats);
-            currentChartData = statsArray;
-            currentChartTop10ByCount = [...statsArray];
-            currentChartTop10ByCost = [...statsArray];
+            const sortedByCount = [...statsArray].sort((a, b) => b.count - a.count);
+            const sortedByCost = [...statsArray].sort((a, b) => b.total_cost - a.total_cost);
+            currentChartTop200ByCount = sortedByCount.slice(0, 200);
+            currentChartTop200ByCost = sortedByCost.slice(0, 200);
+            const combinedMap = new Map();
+            limitedChartCount.forEach(item => combinedMap.set(item.name, item));
+            limitedChartCost.forEach(item => combinedMap.set(item.name, item));
+            if (!combinedMap.size && Array.isArray(data.chart_data)) {
+                data.chart_data.slice(0, 200).forEach(item => combinedMap.set(item.name, item));
+            }
+            currentChartData = Array.from(combinedMap.values());
             sortChartBy('cost');
         }
     } catch (error) {
         console.error('Error loading visual data:', error);
-        currentChartTop10ByCount = [];
-        currentChartTop10ByCost = [];
+        currentChartTop200ByCount = [];
+        currentChartTop200ByCost = [];
     } finally {
         if (visualLoading) {
             visualLoading.style.display = 'none';
@@ -1784,6 +1809,7 @@ async function loadVisualData(prefetchedData = null) {
 function sortChartBy(mode) {
     if (!currentChartData) return;
     currentSortMode = mode;
+    chartPage = 1;
     updateChartWithSort(mode);
     
     // Update button styles
@@ -1807,55 +1833,69 @@ function updateChartWithSort(mode) {
     if (!currentChartData) return;
     
     const sourceData = (() => {
-        if (mode === 'count' && Array.isArray(currentChartTop10ByCount) && currentChartTop10ByCount.length) {
-            return [...currentChartTop10ByCount];
+        if (mode === 'count' && Array.isArray(currentChartTop200ByCount) && currentChartTop200ByCount.length) {
+            return [...currentChartTop200ByCount];
         }
-        if (mode === 'cost' && Array.isArray(currentChartTop10ByCost) && currentChartTop10ByCost.length) {
-            return [...currentChartTop10ByCost];
+        if (mode === 'cost' && Array.isArray(currentChartTop200ByCost) && currentChartTop200ByCost.length) {
+            return [...currentChartTop200ByCost];
         }
-        return [...currentChartData];
+        return Array.isArray(currentChartData) ? [...currentChartData] : [];
     })();
-
-    if (!sourceData.length) return;
-
-    // Sort data based on mode and trim to top 10
+ 
+    if (!sourceData.length) {
+        currentChartSortedData = [];
+        chartTotalPages = 1;
+        chartPage = 1;
+        if (combinedChart) {
+            combinedChart.destroy();
+            combinedChart = null;
+        }
+        updateChartPaginationControls();
+        return;
+    }
+ 
+    // Sort data based on mode and paginate (Top 200 cache, 10 entries per page)
     let sortedData = [...sourceData];
     if (mode === 'count') {
         sortedData.sort((a, b) => b.count - a.count);
     } else {
         sortedData.sort((a, b) => b.total_cost - a.total_cost);
     }
-
-    const limitedData = sortedData.slice(0, 10);
-
+ 
+    currentChartSortedData = sortedData;
+    chartTotalPages = Math.max(1, Math.ceil(sortedData.length / chartPageSize));
+    if (chartPage > chartTotalPages) chartPage = chartTotalPages;
+    if (chartPage < 1) chartPage = 1;
+ 
+    const startIndex = (chartPage - 1) * chartPageSize;
+    const limitedData = sortedData.slice(startIndex, startIndex + chartPageSize);
+ 
     // Prepare chart data
-    const labels = limitedData.map((s) => {
-        const name = s.name;
-        if (name.length > 20) {
-            return name.split(' ').slice(0, 2).join(' ') + '...';
-        }
-        return name;
-    });
+    const labels = limitedData.map((s) => s.name);
     const fullNames = limitedData.map((s) => s.name);
     const counts = limitedData.map((s) => s.count);
     const costs = limitedData.map((s) => (s.total_cost || 0) / 1_000_000);
-    
+     
     createCharts(labels, fullNames, counts, costs);
+    updateChartPaginationControls();
 }
 
 function createCharts(labels, fullNames, counts, costs) {
-    const ctx = document.getElementById('combinedChart');
-    
-    // Destroy existing chart if it exists
+    const canvas = document.getElementById('combinedChart');
+
     if (combinedChart) {
         combinedChart.destroy();
     }
-    
-    // Combined Chart with dual y-axes (bar chart for both)
-    combinedChart = new Chart(ctx, {
+
+    if (canvas) {
+        const desiredHeight = Math.max(600, labels.length * 40);
+        canvas.style.height = `${desiredHeight}px`;
+    }
+
+    combinedChart = new Chart(canvas, {
         type: 'bar',
         data: {
-            labels: labels,
+            labels,
             datasets: [
                 {
                     label: 'Number of Projects',
@@ -1863,7 +1903,7 @@ function createCharts(labels, fullNames, counts, costs) {
                     backgroundColor: '#1565c0',
                     borderColor: '#0d47a1',
                     borderWidth: 1,
-                    yAxisID: 'y'
+                    xAxisID: 'x'
                 },
                 {
                     label: 'Total Cost (₱M)',
@@ -1871,13 +1911,14 @@ function createCharts(labels, fullNames, counts, costs) {
                     backgroundColor: '#7b1fa2',
                     borderColor: '#4a148c',
                     borderWidth: 1,
-                    yAxisID: 'y1'
+                    xAxisID: 'x1'
                 }
             ]
         },
         options: {
+            indexAxis: 'y',
             responsive: true,
-            maintainAspectRatio: true,
+            maintainAspectRatio: false,
             interaction: {
                 mode: 'index',
                 intersect: false,
@@ -1889,50 +1930,47 @@ function createCharts(labels, fullNames, counts, costs) {
                 },
                 tooltip: {
                     callbacks: {
-                        title: function(context) {
+                        title(context) {
                             const index = context[0].dataIndex;
                             return fullNames[index];
                         },
-                        label: function(context) {
+                        label(context) {
+                            const value = context.parsed.x;
                             if (context.datasetIndex === 0) {
-                                return `Projects: ${context.parsed.y}`;
-                            } else {
-                                return `Total Cost: ₱${context.parsed.y.toFixed(2)}M`;
+                                return `Projects: ${value}`;
                             }
+                            return `Total Cost: ₱${value.toFixed(2)}M`;
                         }
                     }
                 }
             },
             scales: {
-                x: {
-                    display: true,
+                y: {
                     title: {
                         display: true,
                         text: 'Congressmen'
                     }
                 },
-                y: {
+                x: {
                     type: 'linear',
-                    display: true,
-                    position: 'left',
+                    position: 'bottom',
                     beginAtZero: true,
                     title: {
                         display: true,
                         text: 'Number of Projects'
                     }
                 },
-                y1: {
+                x1: {
                     type: 'linear',
-                    display: true,
-                    position: 'right',
+                    position: 'top',
                     beginAtZero: true,
                     title: {
                         display: true,
                         text: 'Total Cost (₱M)'
                     },
                     ticks: {
-                        callback: function(value) {
-                            return '₱' + value.toFixed(0) + 'M';
+                        callback(value) {
+                            return `₱${Number(value).toFixed(0)}M`;
                         }
                     },
                     grid: {
@@ -4170,6 +4208,64 @@ function provinceApplyFilter() {
     provinceCurrentPage = 1;
     provinceUpdateDisplay();
 }
+
+function updateChartPaginationControls() {
+    const pageInfo = document.getElementById('chart-page-info');
+    const prevBtn = document.getElementById('chart-prev-page-btn');
+    const nextBtn = document.getElementById('chart-next-page-btn');
+    const hasData = Array.isArray(currentChartSortedData) && currentChartSortedData.length > 0;
+
+    if (pageInfo) {
+        pageInfo.textContent = hasData ? `Page ${chartPage} of ${chartTotalPages}` : 'No data available';
+    }
+
+    const disablePrev = !hasData || chartPage <= 1;
+    const disableNext = !hasData || chartPage >= chartTotalPages;
+
+    if (prevBtn) {
+        prevBtn.disabled = disablePrev;
+        prevBtn.style.opacity = disablePrev ? '0.5' : '1';
+        prevBtn.style.cursor = disablePrev ? 'not-allowed' : 'pointer';
+        if (disablePrev) {
+            prevBtn.style.transform = 'translateY(0)';
+        }
+    }
+
+    if (nextBtn) {
+        nextBtn.disabled = disableNext;
+        nextBtn.style.opacity = disableNext ? '0.5' : '1';
+        nextBtn.style.cursor = disableNext ? 'not-allowed' : 'pointer';
+        if (disableNext) {
+            nextBtn.style.transform = 'translateY(0)';
+        }
+    }
+}
+
+function changeChartPage(delta) {
+    if (!Array.isArray(currentChartSortedData) || !currentChartSortedData.length) {
+        return;
+    }
+
+    const newPage = chartPage + delta;
+    if (newPage < 1 || newPage > chartTotalPages) {
+        return;
+    }
+
+    chartPage = newPage;
+    updateChartWithSort(currentSortMode);
+}
+
+const chartPrevBtn = document.getElementById('chart-prev-page-btn');
+if (chartPrevBtn) {
+    chartPrevBtn.addEventListener('click', () => changeChartPage(-1));
+}
+
+const chartNextBtn = document.getElementById('chart-next-page-btn');
+if (chartNextBtn) {
+    chartNextBtn.addEventListener('click', () => changeChartPage(1));
+}
+
+updateChartPaginationControls();
 
 </script>
 
