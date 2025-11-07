@@ -616,10 +616,12 @@ function toggleMobileMenu() {
                             <h4 style="margin: 0 0 10px 0; color: #333; font-size: 14px; font-weight: 600;">Data Sources:</h4>
                             <div style="display: flex; flex-wrap: wrap; gap: 10px;">
                                 <span style="padding: 6px 10px; border-radius: 20px; background: #e3f2fd; color: #0d47a1; font-size: 12px; font-weight: 600;">🔵 SSP Flood Control</span>
+                                <span style="color: #666;">Sumbong sa Pangulo</span>
                                 <span style="padding: 6px 10px; border-radius: 20px; background: #f3e5f5; color: #4a148c; font-size: 12px; font-weight: 600;">🟣 DIME Infrastructure</span>
-                                <span style="padding: 6px 10px; border-radius: 20px; background: #fff3e0; color: #e65100; border: 1px solid #ffb74d; white-space: nowrap;">PhilGEPS</span>
+                                <span style="color: #666;">Database of Infrastructure Monitoring and Evaluation</span>
+                                <span style="padding: 6px 10px; border-radius: 20px; background: #fff3e0; color: #e65100; border: 1px solid #ffb74d; white-space: nowrap;">🟡 PhilGEPS</span>
                                 <span style="color: #666;">Philippine Government Electronic Procurement System</span>
-                                <span style="padding: 6px 10px; border-radius: 20px; background: #fff4e6; color: #b45309; border: 1px solid #fbbf24; white-space: nowrap;">Microsite</span>
+                                <span style="padding: 6px 10px; border-radius: 20px; background: #fff4e6; color: #b45309; border: 1px solid #fbbf24; white-space: nowrap;">🟠 Microsite</span>
                                 <span style="color: #666;">DPWH Infrastructure Status Microsite</span>
                             </div>
                         </div>
@@ -1469,7 +1471,7 @@ function calculateSummary(projects) {
             if (src === 'SSP') summary.ssp++;
             if (src === 'DIME') summary.dime++;
             if (src === 'PhilGEPS') summary.philgeps++;
-            if (src === 'Microsite') summary.microsite++;
+            if (src === 'Microsite' || src === 'Infrawatch') summary.microsite++;
         });
         
         if (project.match_type === 'district') summary.district_projects++;
@@ -2419,7 +2421,7 @@ function provinceCalculateSummary(projects) {
             if (src === 'SSP') summary.ssp++;
             if (src === 'DIME') summary.dime++;
             if (src === 'PhilGEPS') summary.philgeps++;
-            if (src === 'Microsite') summary.microsite++;
+            if (src === 'Microsite' || src === 'Infrawatch') summary.microsite++;
         });
     });
     
