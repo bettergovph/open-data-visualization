@@ -497,7 +497,7 @@ function toggleMobileMenu() {
                         
                         <div style="margin-bottom: 20px; padding: 20px; background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%); border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); border: 2px solid #333;">
                             <p style="margin: 0; color: #333; font-size: 15px; line-height: 1.6; text-align: center;">
-                                <strong>Dual-Metric Analysis:</strong> Showing the combined top congressmen by <strong>project count</strong> and <strong>total cost</strong> (14 unique leaders). This reveals different infrastructure strategies: high-volume districts with many smaller projects vs. high-cost districts with fewer mega-projects. Totals combine district-aligned and contractor-linked matches across SSP, DIME, PhilGEPS, and Infrawatch datasets.
+                                <strong>Dual-Metric Analysis:</strong> Showing the combined top congressmen by <strong>project count</strong> and <strong>total cost</strong> (14 unique leaders). This reveals different infrastructure strategies: high-volume districts with many smaller projects vs. high-cost districts with fewer mega-projects. Totals combine district-aligned and contractor-linked matches across SSP, DIME, PhilGEPS, and DPWH Microsite datasets.
                             </p>
                         </div>
                         
@@ -1589,40 +1589,14 @@ function displayProjects(projects) {
                 <td style="padding: 12px; font-weight: 600; color: #333;">${congressman}</td>
                 <td style="padding: 12px; white-space: nowrap;">
                     ${(project.sources_list || [source]).map(src => {
-                        const sourceLabels = {
-                            'SSP': 'SSP',
-                            'DIME': 'DIME',
-                            'PhilGEPS': 'PhilGEPS'
-                        };
-                        const label = sourceLabels[src] || src;
-                        
-                        // Different colors for each source
-                        let badgeBg, badgeColor, badgeBorder;
-                        if (src === 'SSP') {
-                            badgeBg = '#e3f2fd';
-                            badgeColor = '#1565c0';
-                            badgeBorder = '#90caf9';
-                        } else if (src === 'DIME') {
-                            badgeBg = '#f3e5f5';
-                            badgeColor = '#7b1fa2';
-                            badgeBorder = '#ba68c8';
-                        } else if (src === 'PhilGEPS') {
-                            badgeBg = '#fff3e0';
-                            badgeColor = '#e65100';
-                            badgeBorder = '#ffb74d';
-                        } else {
-                            badgeBg = '#f8f9fa';
-                            badgeColor = '#333';
-                            badgeBorder = '#dee2e6';
-                        }
-                        
-                        return `<span style="padding: 4px 8px; border-radius: 4px; font-size: 12px; font-weight: 600; 
-                            background: ${badgeBg};
-                            color: ${badgeColor};
-                            border: 1px solid ${badgeBorder};
+                        const meta = getSourceDisplayMeta(src);
+                        return `<span style="padding: 4px 8px; border-radius: 4px; font-size: 12px; font-weight: 600;
+                            background: ${meta.background};
+                            color: ${meta.color};
+                            border: 1px solid ${meta.border};
                             margin-right: 4px;
                             display: inline-block;
-                            white-space: nowrap;">${label}</span>`;
+                            white-space: nowrap;">${meta.label}</span>`;
                     }).join('')}
                     <br/>
                     <span style="padding: 4px 8px; border-radius: 4px; font-size: 11px; font-weight: 600;
@@ -2531,40 +2505,14 @@ function provinceDisplayProjects(projects) {
             <tr style="border-bottom: 1px solid #e9ecef;">
                 <td style="padding: 12px; white-space: nowrap;">
                     ${(project.sources_list || [source]).map(src => {
-                        const sourceLabels = {
-                            'SSP': 'SSP',
-                            'DIME': 'DIME',
-                            'PhilGEPS': 'PhilGEPS'
-                        };
-                        const label = sourceLabels[src] || src;
-                        
-                        // Different colors for each source
-                        let badgeBg, badgeColor, badgeBorder;
-                        if (src === 'SSP') {
-                            badgeBg = '#e3f2fd';
-                            badgeColor = '#1565c0';
-                            badgeBorder = '#90caf9';
-                        } else if (src === 'DIME') {
-                            badgeBg = '#f3e5f5';
-                            badgeColor = '#7b1fa2';
-                            badgeBorder = '#ba68c8';
-                        } else if (src === 'PhilGEPS') {
-                            badgeBg = '#fff3e0';
-                            badgeColor = '#e65100';
-                            badgeBorder = '#ffb74d';
-                        } else {
-                            badgeBg = '#f8f9fa';
-                            badgeColor = '#333';
-                            badgeBorder = '#dee2e6';
-                        }
-                        
-                        return `<span style="padding: 4px 8px; border-radius: 4px; font-size: 12px; font-weight: 600; 
-                            background: ${badgeBg};
-                            color: ${badgeColor};
-                            border: 1px solid ${badgeBorder};
+                        const meta = getSourceDisplayMeta(src);
+                        return `<span style="padding: 4px 8px; border-radius: 4px; font-size: 12px; font-weight: 600;
+                            background: ${meta.background};
+                            color: ${meta.color};
+                            border: 1px solid ${meta.border};
                             margin-right: 4px;
                             display: inline-block;
-                            white-space: nowrap;">${label}</span>`;
+                            white-space: nowrap;">${meta.label}</span>`;
                     }).join('')}
                     <br/>
                     <span style="padding: 4px 8px; border-radius: 4px; font-size: 11px; font-weight: 600;
@@ -4127,6 +4075,43 @@ async function fetchAllDynastyProjects() {
     }
     
     return aggregated;
+}
+
+function getSourceDisplayMeta(source) {
+    const meta = {
+        label: source,
+        background: '#f8f9fa',
+        color: '#333',
+        border: '#dee2e6'
+    };
+    if (!source) {
+        return meta;
+    }
+    const normalized = source === 'Infrawatch' ? 'Microsite' : source;
+    meta.label = normalized;
+    switch (source) {
+        case 'SSP':
+            meta.background = '#e3f2fd';
+            meta.color = '#1565c0';
+            meta.border = '#90caf9';
+            break;
+        case 'DIME':
+            meta.background = '#f3e5f5';
+            meta.color = '#7b1fa2';
+            meta.border = '#ba68c8';
+            break;
+        case 'PhilGEPS':
+            meta.background = '#fff3e0';
+            meta.color = '#e65100';
+            meta.border = '#ffb74d';
+            break;
+        case 'Infrawatch':
+            meta.background = '#fff4e6';
+            meta.color = '#d97706';
+            meta.border = '#fbbf24';
+            break;
+    }
+    return meta;
 }
 
 </script>
