@@ -72,10 +72,23 @@ def _gather_congressman_cache_stats() -> Dict[str, Any]:
         "directories": 0,
         "unique_total": 0,
         "with_projects": 0,
+        "district_congressmen": 0,
+        "partylist_representatives": 0,
         "names": []
     }
     if not DATA_ROOT.exists():
         return stats
+
+    # Load config to identify party-list representatives
+    config_path = DATA_ROOT.parent / "dynasty-projects-config.json"
+    config_data = _read_json_file(config_path)
+    partylist_names = set()
+    if isinstance(config_data, dict):
+        for entry in config_data.get("target_congressmen", []):
+            if not entry.get("province"):
+                name = entry.get("display_name", "")
+                if name:
+                    partylist_names.add(_normalize_cache_name(name))
 
     unique_map: Dict[str, Dict[str, Any]] = {}
 
@@ -113,7 +126,11 @@ def _gather_congressman_cache_stats() -> Dict[str, Any]:
 
         normalized = _normalize_cache_name(name)
         if normalized not in unique_map:
-            unique_map[normalized] = {"name": name, "projects_total": 0}
+            unique_map[normalized] = {
+                "name": name,
+                "projects_total": 0,
+                "is_partylist": normalized in partylist_names
+            }
 
         entry = unique_map[normalized]
         if projects_total and projects_total > entry["projects_total"]:
@@ -121,6 +138,15 @@ def _gather_congressman_cache_stats() -> Dict[str, Any]:
 
     stats["unique_total"] = len(unique_map)
     stats["with_projects"] = sum(1 for entry in unique_map.values() if entry["projects_total"] > 0)
+    
+    # Count district vs party-list
+    for entry in unique_map.values():
+        if entry["projects_total"] > 0:
+            if entry["is_partylist"]:
+                stats["partylist_representatives"] += 1
+            else:
+                stats["district_congressmen"] += 1
+    
     stats["names"] = sorted(entry["name"] for entry in unique_map.values())
     return stats
 
@@ -246,14 +272,31 @@ def _pluralize(count: int, singular: str, plural: Optional[str] = None) -> str:
 
 
 def _compose_coverage_summary(congressmen_stats: Dict[str, Any], province_stats: Dict[str, Any], district_stats: Dict[str, Any]) -> Dict[str, Any]:
-    congressmen_processed = congressmen_stats.get("with_projects") or congressmen_stats.get("unique_total") or 0
-    districts_processed = district_stats.get("districts_matched") or district_stats.get("districts_total") or 0
+    # Count district congressmen and party-list separately
+    district_congressmen = congressmen_stats.get("district_congressmen", 0)
+    partylist_reps = congressmen_stats.get("partylist_representatives", 0)
+    total_congressmen = congressmen_stats.get("with_projects") or congressmen_stats.get("unique_total") or 0
+    
+    # Use districts_matched if available, otherwise use districts_total (all districts in districts.json)
+    districts_processed = district_stats.get("districts_matched", 0)
+    if districts_processed == 0:
+        districts_processed = district_stats.get("districts_total", 0)
+    
     provinces_processed = province_stats.get("unique_with_projects") or province_stats.get("with_projects") or province_stats.get("unique_total") or 0
 
-    if congressmen_processed or districts_processed or provinces_processed:
+    if total_congressmen or districts_processed or provinces_processed:
         parts = []
-        parts.append(_pluralize(congressmen_processed, "congressman cache"))
-        parts.append(_pluralize(districts_processed, "district listing"))
+        
+        # Break down congressmen into district and party-list
+        if district_congressmen > 0 and partylist_reps > 0:
+            parts.append(f"{district_congressmen} district {_pluralize(district_congressmen, 'congressman', 'congressmen').split()[1]}")
+            parts.append(f"{partylist_reps} party-list {_pluralize(partylist_reps, 'representative', 'representatives').split()[1]}")
+        elif total_congressmen > 0:
+            parts.append(_pluralize(total_congressmen, "congressman cache"))
+        
+        if districts_processed > 0:
+            parts.append(_pluralize(districts_processed, "district listing"))
+        
         if provinces_processed:
             parts.append(_pluralize(provinces_processed, "province cache"))
 
@@ -267,7 +310,9 @@ def _compose_coverage_summary(congressmen_stats: Dict[str, Any], province_stats:
         message = "Coverage stats are still being generated."
 
     return {
-        "congressmen_processed": int(congressmen_processed),
+        "congressmen_processed": int(total_congressmen),
+        "district_congressmen": int(district_congressmen),
+        "partylist_representatives": int(partylist_reps),
         "districts_processed": int(districts_processed),
         "provinces_processed": int(provinces_processed),
         "message": message
