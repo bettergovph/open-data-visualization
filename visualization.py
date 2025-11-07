@@ -4,9 +4,15 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 import os
 import json
-from datetime import datetime
+import csv
+import re
+import unicodedata
+from functools import lru_cache
+from datetime import datetime, timezone
 from pathlib import Path
+from typing import Any, Dict, Optional, Set
 from dotenv import load_dotenv
+from collections import defaultdict
 
 load_dotenv()
 from budget_client import (
@@ -37,6 +43,258 @@ from nep_postgres_client import (
     get_budget_total_items_count as get_nep_total_items_count
 )
 
+DATA_ROOT = Path(__file__).resolve().parent / "static" / "data"
+
+
+def _normalize_cache_name(name: str) -> str:
+    if not name:
+        return ""
+    normalized = unicodedata.normalize("NFD", name)
+    stripped = "".join(ch for ch in normalized if unicodedata.category(ch) != "Mn")
+    cleaned = re.sub(r"[^a-z0-9]+", " ", stripped.lower())
+    return cleaned.strip()
+
+
+def _read_json_file(path: Path) -> Any:
+    try:
+        with open(path, "r", encoding="utf-8") as f:
+            return json.load(f)
+    except FileNotFoundError:
+        return None
+    except Exception as exc:
+        print(f"⚠️ Failed to read JSON cache {path}: {exc}")
+        return None
+
+
+def _gather_congressman_cache_stats() -> Dict[str, Any]:
+    stats: Dict[str, Any] = {
+        "directories": 0,
+        "unique_total": 0,
+        "with_projects": 0,
+        "names": []
+    }
+    if not DATA_ROOT.exists():
+        return stats
+
+    unique_map: Dict[str, Dict[str, Any]] = {}
+
+    for cache_dir in DATA_ROOT.glob("congressman-projects-*"):
+        if not cache_dir.is_dir():
+            continue
+        stats["directories"] += 1
+
+        summary_path = cache_dir / "summary.json"
+        summary_data = _read_json_file(summary_path)
+
+        name = None
+        projects_total = 0
+        if isinstance(summary_data, dict):
+            name = summary_data.get("congressman")
+            summary_total = summary_data.get("summary", {}).get("total")
+            if summary_total is not None:
+                try:
+                    projects_total = int(summary_total)
+                except (TypeError, ValueError):
+                    projects_total = 0
+
+        if name is None:
+            all_projects_path = cache_dir / "all-projects-cache.json"
+            all_projects_data = _read_json_file(all_projects_path)
+            if isinstance(all_projects_data, dict):
+                name = all_projects_data.get("congressman")
+                projects = all_projects_data.get("projects")
+                if isinstance(projects, list):
+                    projects_total = max(projects_total, len(projects))
+
+        if not name:
+            slug = cache_dir.name.replace("congressman-projects-", "")
+            name = slug.replace("-", " ").title()
+
+        normalized = _normalize_cache_name(name)
+        if normalized not in unique_map:
+            unique_map[normalized] = {"name": name, "projects_total": 0}
+
+        entry = unique_map[normalized]
+        if projects_total and projects_total > entry["projects_total"]:
+            entry["projects_total"] = projects_total
+
+    stats["unique_total"] = len(unique_map)
+    stats["with_projects"] = sum(1 for entry in unique_map.values() if entry["projects_total"] > 0)
+    stats["names"] = sorted(entry["name"] for entry in unique_map.values())
+    return stats
+
+
+def _gather_province_cache_stats() -> Dict[str, Any]:
+    stats: Dict[str, Any] = {
+        "directories": 0,
+        "with_projects": 0,
+        "unique_total": 0,
+        "unique_with_projects": 0,
+        "names": [],
+        "names_with_projects": []
+    }
+    if not DATA_ROOT.exists():
+        return stats
+
+    province_names: Set[str] = set()
+    provinces_with_projects: Set[str] = set()
+
+    for cache_dir in DATA_ROOT.glob("province-projects-*"):
+        if not cache_dir.is_dir():
+            continue
+        stats["directories"] += 1
+
+        summary_path = cache_dir / "summary.json"
+        summary_data = _read_json_file(summary_path)
+        province_name = None
+        total_projects = 0
+
+        if isinstance(summary_data, dict):
+            province_name = summary_data.get("province")
+            summary_total = summary_data.get("summary", {}).get("total")
+            if summary_total is not None:
+                try:
+                    total_projects = int(summary_total)
+                except (TypeError, ValueError):
+                    total_projects = 0
+
+        if province_name:
+            province_names.add(province_name)
+
+        if total_projects and total_projects > 0:
+            stats["with_projects"] += 1
+            if province_name:
+                provinces_with_projects.add(province_name)
+
+    stats["unique_total"] = len(province_names) if province_names else stats["directories"]
+    stats["unique_with_projects"] = len(provinces_with_projects) if provinces_with_projects else stats["with_projects"]
+    stats["names"] = sorted(province_names)
+    stats["names_with_projects"] = sorted(provinces_with_projects)
+    return stats
+
+
+def _extract_district_names(area_payload: Dict[str, Any]) -> Set[str]:
+    district_names: Set[str] = set()
+    if not isinstance(area_payload, dict):
+        return district_names
+
+    all_districts = area_payload.get("all_districts")
+    if isinstance(all_districts, list):
+        for label in all_districts:
+            if label:
+                district_names.add(str(label))
+
+    municipalities = area_payload.get("municipalities")
+    if isinstance(municipalities, dict):
+        for label in municipalities.values():
+            if label:
+                district_names.add(str(label))
+
+    barangays = area_payload.get("barangays")
+    if isinstance(barangays, dict):
+        for district_label in barangays.keys():
+            if district_label:
+                district_names.add(str(district_label))
+
+    return district_names
+
+
+def _gather_district_cache_stats(provinces_with_projects: Set[str]) -> Dict[str, Any]:
+    stats: Dict[str, Any] = {
+        "entries_total": 0,
+        "districts_total": 0,
+        "entries_matched": 0,
+        "districts_matched": 0,
+        "areas": []
+    }
+
+    districts_path = DATA_ROOT / "districts.json"
+    payload = _read_json_file(districts_path)
+    if not isinstance(payload, dict):
+        return stats
+
+    districts_map = payload.get("districts")
+    if not isinstance(districts_map, dict):
+        return stats
+
+    stats["entries_total"] = len(districts_map)
+    province_lookup = {name.lower(): name for name in provinces_with_projects}
+
+    for area_name, area_payload in districts_map.items():
+        district_names = _extract_district_names(area_payload)
+        stats["districts_total"] += len(district_names)
+        stats["areas"].append({
+            "name": area_name,
+            "districts": sorted(district_names)
+        })
+
+        normalized_area = area_name.lower()
+        if normalized_area in province_lookup and district_names:
+            stats["entries_matched"] += 1
+            stats["districts_matched"] += len(district_names)
+
+    stats["areas"] = sorted(stats["areas"], key=lambda item: item.get("name", ""))
+    return stats
+
+
+def _pluralize(count: int, singular: str, plural: Optional[str] = None) -> str:
+    if plural is None:
+        plural = singular + "s"
+    word = singular if count == 1 else plural
+    return f"{count} {word}"
+
+
+def _compose_coverage_summary(congressmen_stats: Dict[str, Any], province_stats: Dict[str, Any], district_stats: Dict[str, Any]) -> Dict[str, Any]:
+    congressmen_processed = congressmen_stats.get("with_projects") or congressmen_stats.get("unique_total") or 0
+    districts_processed = district_stats.get("districts_matched") or district_stats.get("districts_total") or 0
+    provinces_processed = province_stats.get("unique_with_projects") or province_stats.get("with_projects") or province_stats.get("unique_total") or 0
+
+    if congressmen_processed or districts_processed or provinces_processed:
+        parts = []
+        parts.append(_pluralize(congressmen_processed, "congressman cache"))
+        parts.append(_pluralize(districts_processed, "district listing"))
+        if provinces_processed:
+            parts.append(_pluralize(provinces_processed, "province cache"))
+
+        if len(parts) == 1:
+            message = f"Currently covering {parts[0]}."
+        elif len(parts) == 2:
+            message = f"Currently covering {parts[0]} and {parts[1]}."
+        else:
+            message = f"Currently covering {', '.join(parts[:-1])}, and {parts[-1]}."
+    else:
+        message = "Coverage stats are still being generated."
+
+    return {
+        "congressmen_processed": int(congressmen_processed),
+        "districts_processed": int(districts_processed),
+        "provinces_processed": int(provinces_processed),
+        "message": message
+    }
+
+
+def _compute_integrated_coverage_snapshot() -> Dict[str, Any]:
+    congressmen_stats = _gather_congressman_cache_stats()
+    province_stats = _gather_province_cache_stats()
+    district_stats = _gather_district_cache_stats(set(province_stats.get("names_with_projects", [])))
+
+    summary = _compose_coverage_summary(congressmen_stats, province_stats, district_stats)
+
+    generated_at = datetime.now(timezone.utc).isoformat().replace("+00:00", "Z")
+
+    return {
+        "generated_at": generated_at,
+        "congressmen": congressmen_stats,
+        "provinces": province_stats,
+        "districts": district_stats,
+        "coverage_summary": summary
+    }
+
+
+@lru_cache(maxsize=1)
+def _cached_integrated_coverage_snapshot() -> Dict[str, Any]:
+    return _compute_integrated_coverage_snapshot()
+
 app = FastAPI(title="BetterGovPH API", version="1.0.0")
 
 app.add_middleware(
@@ -49,6 +307,14 @@ app.add_middleware(
 @app.get("/")
 async def root():
     return {"message": "BetterGovPH API", "status": "running"}
+
+
+@app.get("/api/integrated/coverage")
+async def get_integrated_coverage(refresh: bool = Query(False)) -> JSONResponse:
+    if refresh:
+        _cached_integrated_coverage_snapshot.cache_clear()
+    snapshot = _cached_integrated_coverage_snapshot()
+    return JSONResponse(content=snapshot)
 
 @app.get("/api/budget/files")
 async def budget_list_files_api():
@@ -4077,14 +4343,51 @@ async def dynasty_relationship_chains_api(
 @app.get("/api/dynasty-projects/all")
 async def dynasty_projects_all_api(
     page: int = Query(1, ge=1, description="Page number"),
-    limit: int = Query(50, ge=1, le=10000, description="Number of records per page")
+    limit: int = Query(50, ge=1, le=10000, description="Number of records per page"),
+    congressman: str = Query(None, description="Filter by congressman name (optional)")
 ):
-    """Get all projects for all 6 congressmen from cached JSON"""
+    """Get all projects from cached JSON, optionally filtered by congressman"""
     try:
         import json
         from pathlib import Path
         
-        # Load cached JSON file
+        # If congressman filter is provided, try to load from individual cache
+        if congressman and congressman.strip() and congressman.strip() != 'all' and congressman.strip() != 'All Congressmen':
+            congressman_normalized = congressman.strip().lower().replace(" ", "-").replace(".", "").replace(",", "").replace("'", "")
+            congressman_cache_dir = Path(__file__).parent / 'static' / 'data' / f'congressman-projects-{congressman_normalized}'
+            congressman_cache_file = congressman_cache_dir / 'all-projects-cache.json'
+            
+            if congressman_cache_file.exists():
+                # Load from individual congressman cache
+                with open(congressman_cache_file, 'r', encoding='utf-8') as f:
+                    cache_data = json.load(f)
+                
+                if cache_data.get('success', False):
+                    unique_projects = cache_data.get('projects', [])
+                    
+                    # Paginate
+                    total_pages = (len(unique_projects) + limit - 1) // limit
+                    offset = (page - 1) * limit
+                    paginated_projects = unique_projects[offset:offset + limit]
+                    
+                    return JSONResponse({
+                        "success": True,
+                        "projects": paginated_projects,
+                        "summary": cache_data.get('summary', {}),
+                        "chart_data": cache_data.get('chart_data', []),
+                        "dashboard_stats": cache_data.get('dashboard_stats', {}),
+                        "page": page,
+                        "total": len(unique_projects),
+                        "total_pages": total_pages,
+                        "congressman": congressman.strip(),
+                        "generated_at": cache_data.get('generated_at'),
+                        "cache_version": cache_data.get('cache_version', '1.0')
+                    })
+                else:
+                    # Fall through to combined cache
+                    pass
+        
+        # Load combined cached JSON file (for "all congressmen" or if individual cache not found)
         cache_file = Path(__file__).parent / 'static' / 'data' / 'dynasty-projects-cache.json'
         
         if not cache_file.exists():
@@ -4110,6 +4413,10 @@ async def dynasty_projects_all_api(
         # Get projects from cache
         unique_projects = cache_data.get('projects', [])
         
+        # Filter by congressman if provided (fallback if individual cache not found)
+        if congressman and congressman.strip() and congressman.strip() != 'all' and congressman.strip() != 'All Congressmen':
+            unique_projects = [p for p in unique_projects if p.get('congressman') == congressman.strip()]
+        
         # Paginate
         total_pages = (len(unique_projects) + limit - 1) // limit
         offset = (page - 1) * limit
@@ -4119,6 +4426,8 @@ async def dynasty_projects_all_api(
             "success": True,
             "projects": paginated_projects,
             "summary": cache_data.get('summary', {}),
+            "chart_data": cache_data.get('chart_data', []),
+            "dashboard_stats": cache_data.get('dashboard_stats', {}),
             "page": page,
             "total": len(unique_projects),
             "total_pages": total_pages,
@@ -4139,88 +4448,51 @@ async def dynasty_projects_all_api(
 
 @app.get("/api/dynasty-projects/congressmen")
 async def dynasty_projects_congressmen_api():
-    """Get list of all 6 congressmen with their districts and contractors"""
+    """Get list of all congressmen from JSON config with their districts"""
     try:
-        import asyncpg
+        # Load from dynasty-projects-config.json
+        config_path = Path(__file__).resolve().parent / "dynasty-projects-config.json"
+        if not config_path.exists():
+            config_path = Path(__file__).resolve().parent / "static" / "data" / "dynasty-projects-config.json"
         
-        # Connect to dynasty database
-        dynasty_conn = await asyncpg.connect(
-            host=os.getenv('POSTGRES_HOST', 'localhost'),
-            port=int(os.getenv('POSTGRES_PORT', 5432)),
-            user=os.getenv('POSTGRES_USER', 'budget_admin'),
-            password=os.getenv('POSTGRES_PASSWORD', ''),
-            database=os.getenv('POSTGRES_DB_DYNASTY', 'dynasty')
-        )
+        if not config_path.exists():
+            return JSONResponse({
+                "success": False,
+                "error": "dynasty-projects-config.json not found",
+                "congressmen": []
+            })
         
-        # List of target congressmen
-        target_names = [
-            ("MARTIN", "ROMUALDEZ"),
-            ("ELIZALDY", "CO"),  # Zaldy Co (merged name)
-            ("DAVID", "SUAREZ"),
-            ("AURELIO", "GONZALES"),
-            ("MANNIX", "DALIPE"),
-            ("EDWIN", "GARDIOLA")
-        ]
+        with open(config_path, 'r', encoding='utf-8') as f:
+            config_data = json.load(f)
+        
+        target_congressmen = config_data.get('target_congressmen', [])
         
         congressmen_list = []
+        seen_names = set()
         
-        for first_name_pattern, last_name_pattern in target_names:
-            # Search for congressman
-            person = await dynasty_conn.fetchrow('''
-                SELECT id, first_name, last_name, province, municipality_city, region, party
-                FROM political_dynasties
-                WHERE (UPPER(position) LIKE '%CONGRESSMAN%' OR UPPER(position) LIKE '%CONGRESSMEN%' OR UPPER(position) LIKE '%MEMBER, HOUSE OF REPRESENTATIVES%')
-                  AND (UPPER(first_name) LIKE $1 AND UPPER(last_name) LIKE $2)
-                LIMIT 1
-            ''', f"%{first_name_pattern}%", f"%{last_name_pattern}%")
+        for entry in target_congressmen:
+            display_name = entry.get('display_name') or entry.get('name')
+            if not display_name:
+                continue
             
-            if person:
-                # Get direct contractors
-                direct_contractors = await dynasty_conn.fetch('''
-                    SELECT DISTINCT company_name, role
-                    FROM contractor_dynasty_matches
-                    WHERE dynasty_first_name = $1 AND dynasty_last_name = $2
-                ''', person['first_name'], person['last_name'])
-                
-                # Get party-list connections
-                party_lists = await dynasty_conn.fetch('''
-                    SELECT pl.party_list_number, pl.party_name
-                    FROM party_list_members plm
-                    JOIN party_list pl ON plm.party_list_number = pl.party_list_number
-                    WHERE plm.person_id = $1
-                ''', person['id'])
-                
-                # Get party-list contractors
-                party_list_contractors = []
-                for pl in party_lists:
-                    pl_contractors = await dynasty_conn.fetch('''
-                        SELECT DISTINCT cdm.company_name, cdm.role
-                        FROM party_list_members plm2
-                        JOIN political_dynasties pd ON plm2.person_id = pd.id
-                        JOIN contractor_dynasty_matches cdm ON cdm.dynasty_first_name = pd.first_name 
-                                                               AND cdm.dynasty_last_name = pd.last_name
-                        WHERE plm2.party_list_number = $1
-                    ''', pl['party_list_number'])
-                    party_list_contractors.extend([c['company_name'] for c in pl_contractors])
-                
-                # Combine contractors
-                all_contractors = [c['company_name'] for c in direct_contractors] + party_list_contractors
-                all_contractors = list(set(all_contractors))
-                
-                congressmen_list.append({
-                    "name": f"{person['first_name']} {person['last_name']}",
-                    "province": person['province'],
-                    "municipality": person['municipality_city'],
-                    "region": person['region'],
-                    "party": person['party'],
-                    "contractors": all_contractors,
-                    "party_lists": [{"number": pl['party_list_number'], "name": pl['party_name']} for pl in party_lists]
-                })
-        
-        await dynasty_conn.close()
+            # Deduplicate by normalized name
+            normalized = display_name.strip().lower()
+            if normalized in seen_names:
+                continue
+            seen_names.add(normalized)
+            
+            congressmen_list.append({
+                "display_name": display_name,
+                "name": display_name,
+                "province": entry.get('province') or '',
+                "district_number": entry.get('district_number') or '',
+                "is_partylist": entry.get('is_partylist', False),
+                "id": entry.get('id')
+            })
         
         return JSONResponse({
             "success": True,
+            "source": "json_config",
             "congressmen": congressmen_list
         })
         
@@ -4771,6 +5043,104 @@ async def dynasty_projects_search_api(
             "congressman_info": None,
             "projects": [],
             "summary": {"total": 0, "ssp": 0, "dime": 0, "philgeps": 0}
+        })
+
+@app.get("/api/sources")
+async def get_sources_api():
+    """Get all sources from database/sources.csv grouped by source name"""
+    try:
+        csv_path = Path(__file__).parent / 'database' / 'sources.csv'
+        
+        if not csv_path.exists():
+            return JSONResponse({
+                "success": False,
+                "error": "Sources CSV file not found",
+                "sources": {}
+            })
+        
+        sources_by_name = defaultdict(list)
+        
+        with open(csv_path, 'r', encoding='utf-8') as f:
+            reader = csv.DictReader(f)
+            for row in reader:
+                if not row.get('Source_Name') or not row.get('URL'):
+                    continue
+                
+                source_name = row['Source_Name'].strip()
+                url = row['URL'].strip()
+                title = row.get('Source_Name', '').strip() or url
+                date = row.get('Publish_Date', '').strip() or ''
+                
+                # Extract source name from URL or use Source_Name
+                # Group by domain or known source names
+                domain = url.split('/')[2] if len(url.split('/')) > 2 else ''
+                
+                # Map domains to source names
+                source_mapping = {
+                    'www.rappler.com': 'Rappler',
+                    'rappler.com': 'Rappler',
+                    'newsinfo.inquirer.net': 'Inquirer',
+                    'business.inquirer.net': 'Inquirer',
+                    'inquirer.net': 'Inquirer',
+                    'www.manilatimes.net': 'Manila Times',
+                    'manilatimes.net': 'Manila Times',
+                    'www.philstar.com': 'Philippine STAR',
+                    'philstar.com': 'Philippine STAR',
+                    'www.facebook.com': None,  # Will be handled by source name
+                    'en.wikipedia.org': 'Wikipedia',
+                    'www.wikiwand.com': 'Wikiwand',
+                    'peoplaid.com': 'PeoPlaid',
+                    'kwebanibarok.com': 'Kwebanibarok',
+                    'www.dof.gov.ph': 'DOF Philippines',
+                    'pdplaban.org.ph': 'PDP Laban',
+                    'manilastandard.net': 'Manila Standard',
+                    'www.reddit.com': 'Reddit',
+                    'reddit.com': 'Reddit'
+                }
+                
+                # Determine source name
+                mapped_source = source_mapping.get(domain)
+                if mapped_source:
+                    source_key = mapped_source
+                elif 'facebook.com' in url:
+                    # Extract source from Facebook URL or use Source_Name
+                    if 'vovph' in url:
+                        source_key = 'VOV Philippines'
+                    elif 'avisozamboanga' in url:
+                        source_key = 'Aviso Zamboanga'
+                    elif 'PhilippineSTAR' in url or 'philstar' in url:
+                        source_key = 'Philippine STAR'
+                    else:
+                        # Try to extract from Source_Name
+                        source_key = source_name.split(' - ')[-1] if ' - ' in source_name else source_name
+                else:
+                    # Use Source_Name or extract from title
+                    source_key = source_name.split(' - ')[-1] if ' - ' in source_name else source_name
+                
+                sources_by_name[source_key].append({
+                    "title": title,
+                    "url": url,
+                    "date": date
+                })
+        
+        # Convert to regular dict and sort
+        result = {}
+        for source_name in sorted(sources_by_name.keys()):
+            result[source_name] = sources_by_name[source_name]
+        
+        return JSONResponse({
+            "success": True,
+            "sources": result,
+            "total_sources": len(result),
+            "total_articles": sum(len(articles) for articles in result.values())
+        })
+        
+    except Exception as e:
+        print(f"❌ Error loading sources: {e}")
+        return JSONResponse({
+            "success": False,
+            "error": str(e),
+            "sources": {}
         })
 
 if __name__ == "__main__":
