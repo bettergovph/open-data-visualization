@@ -1214,28 +1214,27 @@ function updateCongressmanDatalist() {
     const datalistIds = ['congressman-list', 'congressman-visual-list'];
     const mode = document.querySelector('input[name="congressman-filter-mode"]:checked')?.value || 'All';
     
-    // For party-list mode, show ALL party-list representatives regardless of project count
-    let filtered, names;
-    if (mode === 'Partylist') {
-        filtered = getFilteredCongressmenByMode(); // Don't filter by hasProjectDataForCongressman
-        names = filtered.map(item => item.display_name).filter(Boolean).sort((a, b) => a.localeCompare(b));
-    } else {
-        filtered = getFilteredCongressmenByMode().filter(item => hasProjectDataForCongressman(item.display_name));
-        names = filtered.map(item => item.display_name).filter(Boolean);
-        
-        if (mode === 'All') {
-            const mergedNames = new Set([...initialCongressmanNames.filter(name => name && name !== 'All Congressmen')]);
-            configCongressmen.forEach(item => {
-                if (item.display_name && hasProjectDataForCongressman(item.display_name)) {
-                    mergedNames.add(item.display_name);
-                }
-            });
-            names = Array.from(mergedNames).filter(name => hasProjectDataForCongressman(name)).sort((a, b) => a.localeCompare(b));
-        } else {
-            names = names.sort((a, b) => a.localeCompare(b));
-        }
+    let filteredEntries = getFilteredCongressmenByMode();
+    if (!Array.isArray(filteredEntries)) {
+        filteredEntries = [];
     }
-    names = dedupeCongressmanNames(names);
+    
+    let names;
+    if (mode === 'Partylist') {
+        names = filteredEntries.map(item => item.display_name).filter(Boolean);
+    } else if (mode === 'All') {
+        const mergedNames = new Set(initialCongressmanNames.filter(name => name && name !== 'All Congressmen'));
+        filteredEntries.forEach(item => {
+            if (item && item.display_name) {
+                mergedNames.add(item.display_name);
+            }
+        });
+        names = Array.from(mergedNames);
+    } else {
+        names = filteredEntries.map(item => item.display_name).filter(Boolean);
+    }
+    
+    names = dedupeCongressmanNames(names).sort((a, b) => a.localeCompare(b));
     
     datalistIds.forEach(id => {
         const datalist = document.getElementById(id);
@@ -1252,16 +1251,7 @@ function updateCongressmanDatalist() {
         });
     });
     
-    updateCongressmanFilterStatus(mode, filtered, names, Array.isArray(filteredData) ? filteredData.length : 0);
-
-    if (mode !== 'All') {
-        const congressmanInput = document.getElementById('congressman-filter');
-        const visualInput = document.getElementById('congressman-visual-filter');
-        if (congressmanInput) congressmanInput.value = '';
-        if (visualInput) visualInput.value = '';
-        filteredData = allProjectsData;
-        updateDisplay();
-    }
+    updateCongressmanFilterStatus(mode, filteredEntries, names, Array.isArray(filteredData) ? filteredData.length : 0);
 }
 
 async function loadAllProjects() {
