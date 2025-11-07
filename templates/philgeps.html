@@ -374,7 +374,7 @@ function toggleMobileMenu() {
                             Search for any contractor and view all their projects across Flood Control, DIME, and PhilGEPS databases
                         </p>
                         <p style="color: #1f2937; background: #e0f2fe; border-left: 4px solid #0284c7; padding: 12px 16px; border-radius: 6px; margin: 0 0 24px 0;">
-                            ℹ️ <strong>Augmented dataset:</strong> Results now include unmatched entries from the 2016–2025 InfraWatch infrastructure tracker. These rows appear only when no PhilGEPS contract has been linked yet, giving you a fuller view of public works pipelines.
+                            ℹ️ <strong>Augmented dataset:</strong> Results now include unmatched entries from the 2016–2025 DPWH Microsite infrastructure tracker. These rows appear only when no PhilGEPS contract has been linked yet, giving you a fuller view of public works pipelines.
                         </p>
                         
                         <!-- Data Quality Warning -->
@@ -1880,7 +1880,7 @@ function displayProjectSearchResults(data) {
                     <div style="font-size: 0.85em; opacity: 0.8;">₱${summary.philgeps.total_dedup.toLocaleString('en-PH')}</div>
                 </div>
                 <div>
-                    <div style="font-size: 1.3em; font-weight: bold;">🟠 InfraWatch</div>
+                    <div style="font-size: 1.3em; font-weight: bold;">🟠 Microsite</div>
                     <div style="font-size: 0.9em; opacity: 0.9;">${(summary.infrawatch?.count_dedup || 0)} unique</div>
                     ${(summary.infrawatch && summary.infrawatch.count !== summary.infrawatch.count_dedup) ? `<div style="font-size: 0.75em; opacity: 0.7;">(${summary.infrawatch.count} raw, ${summary.infrawatch.count - summary.infrawatch.count_dedup} dupes)</div>` : ''}
                     <div style="font-size: 0.85em; opacity: 0.8;">₱${(summary.infrawatch?.total_dedup || 0).toLocaleString('en-PH')}</div>
@@ -2044,8 +2044,8 @@ function displayProjectSearchResults(data) {
             <div style="background: white; padding: 25px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); margin-bottom: 25px; border-left: 5px solid #fb923c;">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
                     <div>
-                        <h3 style="color: #fb923c; margin: 0; font-size: 1.4em;">🟠 InfraWatch Projects (${projects.infrawatch.length})</h3>
-                        <p style="color: #92400e; margin: 4px 0 0 0; font-size: 0.85em;">Projects captured by InfraWatch (2016–2025) with no PhilGEPS link yet.</p>
+                        <h3 style="color: #fb923c; margin: 0; font-size: 1.4em;">🟠 Microsite Projects (${projects.infrawatch.length})</h3>
+                        <p style="color: #92400e; margin: 4px 0 0 0; font-size: 0.85em;">Projects captured by the DPWH Microsite (2016–2025) with no PhilGEPS link yet.</p>
                     </div>
                     <div style="display: flex; gap: 10px; align-items: center;">
                         <span style="color: #666; font-size: 0.9em;">Page ${currentInfrawatchPage + 1} of ${infTotalPages}</span>
