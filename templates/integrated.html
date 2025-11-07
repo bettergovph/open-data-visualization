@@ -1385,6 +1385,10 @@ function handleModeChange(mode) {
     if (mode !== 'Province' && provinceInput) {
         provinceInput.value = '';
     }
+    const congressmanInput = document.getElementById('congressman-filter');
+    if (congressmanInput && mode !== 'All') {
+        congressmanInput.value = '';
+    }
     updateCongressmanDatalist();
     applyFilter();
 }
@@ -1628,13 +1632,16 @@ function displayProjects(projects) {
 
 function updateSummary(summary) {
     if (summary) {
-        document.getElementById('total-projects').textContent = summary.total || 0;
-        document.getElementById('district-count').textContent = summary.district_projects || 0;
-        document.getElementById('contractor-count').textContent = summary.contractor_projects || 0;
-        document.getElementById('ssp-count').textContent = summary.ssp || 0;
-        document.getElementById('dime-count').textContent = summary.dime || 0;
-        document.getElementById('philgeps-count').textContent = summary.philgeps || 0;
-        document.getElementById('microsite-count').textContent = summary.microsite || 0;
+        const formatCount = (value) => formatProjects(value ?? 0);
+        const micrositeCount = summary.microsite ?? summary.infrawatch ?? 0;
+
+        document.getElementById('total-projects').textContent = formatCount(summary.total);
+        document.getElementById('district-count').textContent = formatCount(summary.district_projects);
+        document.getElementById('contractor-count').textContent = formatCount(summary.contractor_projects);
+        document.getElementById('ssp-count').textContent = formatCount(summary.ssp);
+        document.getElementById('dime-count').textContent = formatCount(summary.dime);
+        document.getElementById('philgeps-count').textContent = formatCount(summary.philgeps);
+        document.getElementById('microsite-count').textContent = formatCount(micrositeCount);
         document.getElementById('results-summary').style.display = 'block';
     }
 }
