@@ -1215,19 +1215,27 @@ function updateCongressmanFilterStatus(mode, filteredItems, availableNames, proj
 function updateCongressmanDatalist() {
     const datalistIds = ['congressman-list', 'congressman-visual-list'];
     const mode = document.querySelector('input[name="congressman-filter-mode"]:checked')?.value || 'All';
-    const filtered = getFilteredCongressmenByMode().filter(item => hasProjectDataForCongressman(item.display_name));
-    let names = filtered.map(item => item.display_name).filter(Boolean);
     
-    if (mode === 'All') {
-        const mergedNames = new Set([...initialCongressmanNames.filter(name => name && name !== 'All Congressmen')]);
-        configCongressmen.forEach(item => {
-            if (item.display_name && hasProjectDataForCongressman(item.display_name)) {
-                mergedNames.add(item.display_name);
-            }
-        });
-        names = Array.from(mergedNames).filter(name => hasProjectDataForCongressman(name)).sort((a, b) => a.localeCompare(b));
+    // For party-list mode, show ALL party-list representatives regardless of project count
+    let filtered, names;
+    if (mode === 'Partylist') {
+        filtered = getFilteredCongressmenByMode(); // Don't filter by hasProjectDataForCongressman
+        names = filtered.map(item => item.display_name).filter(Boolean).sort((a, b) => a.localeCompare(b));
     } else {
-        names = names.sort((a, b) => a.localeCompare(b));
+        filtered = getFilteredCongressmenByMode().filter(item => hasProjectDataForCongressman(item.display_name));
+        names = filtered.map(item => item.display_name).filter(Boolean);
+        
+        if (mode === 'All') {
+            const mergedNames = new Set([...initialCongressmanNames.filter(name => name && name !== 'All Congressmen')]);
+            configCongressmen.forEach(item => {
+                if (item.display_name && hasProjectDataForCongressman(item.display_name)) {
+                    mergedNames.add(item.display_name);
+                }
+            });
+            names = Array.from(mergedNames).filter(name => hasProjectDataForCongressman(name)).sort((a, b) => a.localeCompare(b));
+        } else {
+            names = names.sort((a, b) => a.localeCompare(b));
+        }
     }
     names = dedupeCongressmanNames(names);
     
