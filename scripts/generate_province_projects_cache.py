@@ -458,7 +458,7 @@ class ProvinceProjectsCacheGenerator:
                 proj['sources_count'] = len(sources_list)
                 entry_id = id(proj)
                 if entry_id not in seen_entries:
-                    unique_projects.append(proj)
+                unique_projects.append(proj)
                     seen_entries.add(entry_id)
             
             # Sort by amount descending

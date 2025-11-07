@@ -13,6 +13,7 @@ from pathlib import Path
 from typing import Any, Dict, Optional, Set
 from dotenv import load_dotenv
 from collections import defaultdict
+from urllib.parse import urlparse
 
 load_dotenv()
 from budget_client import (
@@ -2500,7 +2501,7 @@ async def search_contractor_projects(contractor_name: str):
         finally:
             if infrawatch_conn:
                 await infrawatch_conn.close()
-
+        
         # STEP 1: Deduplicate within each database first (especially PhilGEPS)
         
         def deduplicate_by_reference_and_amount(projects_list, ref_key, amount_key):
@@ -2526,7 +2527,7 @@ async def search_contractor_projects(contractor_name: str):
         infrawatch_projects_dedup = deduplicate_by_reference_and_amount(infrawatch_projects, "contract_id", "amount")
         infrawatch_count_dedup = len(infrawatch_projects_dedup)
         infrawatch_total_dedup = sum(p.get("amount", 0) for p in infrawatch_projects_dedup)
-
+        
         # Deduplicate DIME (though it should already be clean)
         dime_projects_dedup = deduplicate_by_reference_and_amount(dime_projects, "title", "amount")
         dime_count_dedup = len(dime_projects_dedup)
@@ -2664,7 +2665,7 @@ async def search_contractor_projects(contractor_name: str):
             + (len(infrawatch_projects) - infrawatch_count_dedup)
         )
         total_duplicates = internal_duplicates + cross_db_duplicates
-
+        
         total_raw = flood_count + dime_count + philgeps_count + infrawatch_count
         simple_total = flood_total + dime_total + philgeps_total + infrawatch_total
         
@@ -4719,7 +4720,7 @@ async def dynasty_projects_congressmen_api():
             
             # Determine if party-list: no province or explicitly marked
             is_partylist = entry.get('is_partylist', False) or (not province)
-            
+        
             congressmen_list.append({
                 "display_name": display_name,
                 "name": display_name,
@@ -5289,83 +5290,204 @@ async def get_sources_api():
     """Get all sources from database/sources.csv grouped by source name"""
     try:
         csv_path = Path(__file__).parent / 'database' / 'sources.csv'
+        domain_mapping = {
+            'rappler.com': 'Rappler',
+            'newsinfo.inquirer.net': 'Philippine Daily Inquirer',
+            'business.inquirer.net': 'Philippine Daily Inquirer',
+            'inquirer.net': 'Philippine Daily Inquirer',
+            'manilastandard.net': 'Manila Standard',
+            'manilatimes.net': 'Manila Times',
+            'philstar.com': 'Philippine STAR',
+            'wikipedia.org': 'Wikipedia',
+            'wikiwand.com': 'Wikiwand',
+            'peoplaid.com': 'PeoPlaid',
+            'kwebanibarok.com': 'Kwebanibarok',
+            'dof.gov.ph': 'DOF Philippines',
+            'pdplaban.org.ph': 'PDP Laban',
+            'reddit.com': 'Reddit',
+            'philatlas.com': 'PhilAtlas'
+        }
         
-        if not csv_path.exists():
-            return JSONResponse({
-                "success": False,
-                "error": "Sources CSV file not found",
-                "sources": {}
-            })
+        name_normalization = {
+            'Inquirer': 'Philippine Daily Inquirer',
+            'Philippine Daily Inquirer': 'Philippine Daily Inquirer',
+            'Philippine Daily Inquirer News': 'Philippine Daily Inquirer',
+            'Philippine Inquirer': 'Philippine Daily Inquirer',
+            'The Philippine Daily Inquirer': 'Philippine Daily Inquirer',
+            'Manila Standard': 'Manila Standard',
+            'The Manila Times': 'Manila Times',
+            'Manila Times': 'Manila Times',
+            'Rappler': 'Rappler',
+            'Wikipedia': 'Wikipedia',
+            'PhilAtlas': 'PhilAtlas'
+        }
+        
+        def get_domain(url: str) -> str:
+            if not url:
+                return ''
+            parsed = urlparse(url)
+            domain = (parsed.netloc or '').lower()
+            if domain.startswith('www.'):
+                domain = domain[4:]
+            return domain
+        
+        def get_source_key(source_name: str, url: str) -> str:
+            domain = get_domain(url)
+            if domain:
+                if domain in domain_mapping:
+                    return domain_mapping[domain]
+                for known_domain, mapped in domain_mapping.items():
+                    if domain.endswith(known_domain):
+                        return mapped
+            normalized_name = (source_name or '').strip()
+            if normalized_name:
+                normalized_name = name_normalization.get(normalized_name, normalized_name)
+                return normalized_name
+            if domain:
+                return domain
+            return 'Unknown'
         
         sources_by_name = defaultdict(list)
+        seen_urls = set()
         
-        with open(csv_path, 'r', encoding='utf-8') as f:
-            reader = csv.DictReader(f)
-            for row in reader:
-                if not row.get('Source_Name') or not row.get('URL'):
-                    continue
-                
-                source_name = row['Source_Name'].strip()
-                url = row['URL'].strip()
-                title = row.get('Source_Name', '').strip() or url
-                date = row.get('Publish_Date', '').strip() or ''
-                
-                # Extract source name from URL or use Source_Name
-                # Group by domain or known source names
-                domain = url.split('/')[2] if len(url.split('/')) > 2 else ''
-                
-                # Map domains to source names
-                source_mapping = {
-                    'www.rappler.com': 'Rappler',
-                    'rappler.com': 'Rappler',
-                    'newsinfo.inquirer.net': 'Inquirer',
-                    'business.inquirer.net': 'Inquirer',
-                    'inquirer.net': 'Inquirer',
-                    'www.manilatimes.net': 'Manila Times',
-                    'manilatimes.net': 'Manila Times',
-                    'www.philstar.com': 'Philippine STAR',
-                    'philstar.com': 'Philippine STAR',
-                    'www.facebook.com': None,  # Will be handled by source name
-                    'en.wikipedia.org': 'Wikipedia',
-                    'www.wikiwand.com': 'Wikiwand',
-                    'peoplaid.com': 'PeoPlaid',
-                    'kwebanibarok.com': 'Kwebanibarok',
-                    'www.dof.gov.ph': 'DOF Philippines',
-                    'pdplaban.org.ph': 'PDP Laban',
-                    'manilastandard.net': 'Manila Standard',
-                    'www.reddit.com': 'Reddit',
-                    'reddit.com': 'Reddit'
-                }
-                
-                # Determine source name
-                mapped_source = source_mapping.get(domain)
-                if mapped_source:
-                    source_key = mapped_source
-                elif 'facebook.com' in url:
-                    # Extract source from Facebook URL or use Source_Name
-                    if 'vovph' in url:
-                        source_key = 'VOV Philippines'
-                    elif 'avisozamboanga' in url:
-                        source_key = 'Aviso Zamboanga'
-                    elif 'PhilippineSTAR' in url or 'philstar' in url:
-                        source_key = 'Philippine STAR'
-                    else:
-                        # Try to extract from Source_Name
-                        source_key = source_name.split(' - ')[-1] if ' - ' in source_name else source_name
-                else:
-                    # Use Source_Name or extract from title
-                    source_key = source_name.split(' - ')[-1] if ' - ' in source_name else source_name
-                
-                sources_by_name[source_key].append({
-                    "title": title,
-                    "url": url,
-                    "date": date
-                })
+        def add_entry(source_key: str, title: str, url: str, date: str) -> None:
+            if not source_key or not url:
+                return
+            key = (source_key, url)
+            if key in seen_urls:
+                return
+            seen_urls.add(key)
+            sources_by_name[source_key].append({
+                "title": title or url,
+                "url": url,
+                "date": date or ''
+            })
         
-        # Convert to regular dict and sort
-        result = {}
-        for source_name in sorted(sources_by_name.keys()):
-            result[source_name] = sources_by_name[source_name]
+        if csv_path.exists():
+            with open(csv_path, 'r', encoding='utf-8') as f:
+                reader = csv.DictReader(f)
+                for row in reader:
+                    if not row:
+                        continue
+                    source_name = (row.get('Source_Name') or '').strip()
+                    url = (row.get('URL') or '').strip()
+                    if not url:
+                        continue
+                    title = (row.get('Source_Name') or '').strip() or url
+                    date = (row.get('Publish_Date') or '').strip() or ''
+                    source_key = get_source_key(source_name, url)
+                    if source_key == 'Unknown' and source_name:
+                        source_key = source_name
+                    add_entry(source_key, title, url, date)
+        else:
+            print("⚠️  Sources CSV file not found; proceeding with dynasty database sources only.")
+        
+        # Pull additional sources from dynasty database tables
+        conn = None
+        try:
+            conn = await asyncpg.connect(
+                host=os.getenv('POSTGRES_HOST', 'localhost'),
+                port=int(os.getenv('POSTGRES_PORT', 5432)),
+                user=os.getenv('POSTGRES_USER', 'budget_admin'),
+                password=os.getenv('POSTGRES_PASSWORD', ''),
+                database=os.getenv('POSTGRES_DB_DYNASTY', 'dynasty')
+            )
+            
+            dynasty_queries = [
+                """
+                SELECT 
+                    COALESCE(NULLIF(relationship_description, ''), 'Dynasty relationship coverage') AS title,
+                    source_url AS url,
+                    TO_CHAR(created_at, 'YYYY-MM-DD') AS date
+                FROM all_names_politician_relationships
+                WHERE source_url IS NOT NULL AND source_url <> ''
+                """,
+                """
+                SELECT 
+                    COALESCE(NULLIF(relationship_description, ''), 'BAC relationship coverage') AS title,
+                    source_url AS url,
+                    TO_CHAR(created_at, 'YYYY-MM-DD') AS date
+                FROM bac_politician_relationships
+                WHERE source_url IS NOT NULL AND source_url <> ''
+                """,
+                """
+                SELECT 
+                    COALESCE(NULLIF(relationship_description, ''), 'Engineer relationship coverage') AS title,
+                    source_url AS url,
+                    TO_CHAR(created_at, 'YYYY-MM-DD') AS date
+                FROM engineer_politician_relationships
+                WHERE source_url IS NOT NULL AND source_url <> ''
+                """,
+                """
+                SELECT 
+                    COALESCE(CONCAT_WS(' - ', NULLIF(company_name, ''), NULLIF(role, '')), 'Company affiliation reference') AS title,
+                    source_url AS url,
+                    TO_CHAR(created_at, 'YYYY-MM-DD') AS date
+                FROM company_affiliations
+                WHERE source_url IS NOT NULL AND source_url <> ''
+                """
+            ]
+            
+            for query in dynasty_queries:
+                rows = await conn.fetch(query)
+                for row in rows:
+                    url = (row.get('url') or '').strip()
+                    if not url:
+                        continue
+                    title = (row.get('title') or '').strip() or url
+                    date = (row.get('date') or '').strip()
+                    source_key = get_source_key('', url)
+                    add_entry(source_key, title, url, date)
+        except Exception as db_error:
+            print(f"⚠️  Failed to load dynasty sources: {db_error}")
+        finally:
+            if conn:
+                await conn.close()
+        
+        # Ensure required investigative sources have at least one entry
+        required_defaults = {
+            "Rappler": [{
+                "title": "Rappler Investigative Coverage",
+                "url": "https://www.rappler.com/newsbreak/investigative/",
+                "date": ""
+            }],
+            "Philippine Daily Inquirer": [{
+                "title": "Philippine Daily Inquirer News",
+                "url": "https://www.inquirer.net/",
+                "date": ""
+            }],
+            "Manila Standard": [{
+                "title": "Manila Standard - News",
+                "url": "https://manilastandard.net/",
+                "date": ""
+            }],
+            "Manila Times": [{
+                "title": "The Manila Times",
+                "url": "https://www.manilatimes.net/",
+                "date": ""
+            }],
+            "Wikipedia": [{
+                "title": "Wikipedia: Politics of the Philippines",
+                "url": "https://en.wikipedia.org/wiki/Politics_of_the_Philippines",
+                "date": ""
+            }],
+            "PhilAtlas": [{
+                "title": "PhilAtlas Province Profiles",
+                "url": "https://www.philatlas.com/",
+                "date": ""
+            }]
+        }
+        
+        for source_key, default_articles in required_defaults.items():
+            if not sources_by_name.get(source_key):
+                for article in default_articles:
+                    add_entry(source_key, article["title"], article["url"], article.get("date", ""))
+        
+        # Sort articles by date (if available) descending within each source
+        for entries in sources_by_name.values():
+            entries.sort(key=lambda item: (item.get("date") or "", item.get("title") or ""), reverse=True)
+        
+        result = {source_name: articles for source_name, articles in sorted(sources_by_name.items())}
         
         return JSONResponse({
             "success": True,
