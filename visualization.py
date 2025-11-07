@@ -42,6 +42,7 @@ from nep_postgres_client import (
     get_budget_anomalies_count as get_nep_anomalies_count,
     get_budget_total_items_count as get_nep_total_items_count
 )
+from infrawatch_postgres_client import get_infrawatch_connection
 
 DATA_ROOT = Path(__file__).resolve().parent / "static" / "data"
 
@@ -2376,6 +2377,85 @@ async def search_contractor_projects(contractor_name: str):
         except Exception as e:
             print(f"Error querying PhilGEPS database: {e}")
         
+        # Connect to Infrawatch database (unmatched projects only)
+        infrawatch_projects = []
+        infrawatch_total = 0.0
+        infrawatch_count = 0
+        infrawatch_conn = None
+        try:
+            infrawatch_conn = await get_infrawatch_connection()
+            if infrawatch_conn:
+                infrawatch_results = await infrawatch_conn.fetch(
+                    """
+                    SELECT data
+                    FROM infrawatch_projects_rows
+                    WHERE philgeps_contract_id IS NULL
+                      AND (
+                        COALESCE(data->>'Contractor', '') ILIKE $1 OR
+                        COALESCE(data->>'Contractor Name', '') ILIKE $1
+                      )
+                    ORDER BY COALESCE((data->>'Contract Price')::numeric, 0) DESC NULLS LAST
+                    LIMIT 200
+                    """,
+                    search_pattern
+                )
+
+                for row in infrawatch_results:
+                    record = row["data"]
+                    if isinstance(record, str):
+                        try:
+                            record = json.loads(record)
+                        except json.JSONDecodeError:
+                            continue
+                    if not isinstance(record, dict):
+                        continue
+
+                    contractor_value = (
+                        record.get("Contractor")
+                        or record.get("Contractor Name")
+                        or record.get("Contractor_Name")
+                        or ""
+                    )
+                    if not contractor_value:
+                        continue
+
+                    amount_raw = (
+                        record.get("Contract Price")
+                        or record.get("Contract Amount")
+                        or record.get("Amount")
+                    )
+
+                    amount_value = 0.0
+                    if isinstance(amount_raw, (int, float)):
+                        amount_value = float(amount_raw)
+                    elif amount_raw:
+                        try:
+                            amount_value = float(str(amount_raw).replace("₱", "").replace(",", "").strip())
+                        except Exception:
+                            amount_value = 0.0
+
+                    if amount_value:
+                        infrawatch_total += amount_value
+                    infrawatch_count += 1
+
+                    infrawatch_projects.append({
+                        "contract_id": record.get("Contract ID") or record.get("Contract No"),
+                        "description": record.get("Contract Details") or record.get("Project Description") or "",
+                        "contractor": contractor_value,
+                        "contractor_raw": contractor_value,
+                        "amount": amount_value,
+                        "fund_source": record.get("Fund Source"),
+                        "status": record.get("Contract Status"),
+                        "implementing_agency": record.get("Implementing Agency"),
+                        "effectivity_date": record.get("Contract Effectivity Date"),
+                        "expiry_date": record.get("Contract Expiry Date")
+                    })
+        except Exception as e:
+            print(f"Error querying Infrawatch database: {e}")
+        finally:
+            if infrawatch_conn:
+                await infrawatch_conn.close()
+
         # STEP 1: Deduplicate within each database first (especially PhilGEPS)
         
         def deduplicate_by_reference_and_amount(projects_list, ref_key, amount_key):
@@ -2398,6 +2478,10 @@ async def search_contractor_projects(contractor_name: str):
         philgeps_count_dedup = len(philgeps_projects_dedup)
         philgeps_total_dedup = sum(p.get("amount", 0) for p in philgeps_projects_dedup)
         
+        infrawatch_projects_dedup = deduplicate_by_reference_and_amount(infrawatch_projects, "contract_id", "amount")
+        infrawatch_count_dedup = len(infrawatch_projects_dedup)
+        infrawatch_total_dedup = sum(p.get("amount", 0) for p in infrawatch_projects_dedup)
+
         # Deduplicate DIME (though it should already be clean)
         dime_projects_dedup = deduplicate_by_reference_and_amount(dime_projects, "title", "amount")
         dime_count_dedup = len(dime_projects_dedup)
@@ -2412,6 +2496,7 @@ async def search_contractor_projects(contractor_name: str):
         print(f"  Flood: {len(flood_projects)} → {flood_count_dedup} ({len(flood_projects) - flood_count_dedup} internal dupes)")
         print(f"  DIME: {len(dime_projects)} → {dime_count_dedup} ({len(dime_projects) - dime_count_dedup} internal dupes)")
         print(f"  PhilGEPS: {len(philgeps_projects)} → {philgeps_count_dedup} ({len(philgeps_projects) - philgeps_count_dedup} internal dupes)")
+        print(f"  Infrawatch: {len(infrawatch_projects)} → {infrawatch_count_dedup} ({len(infrawatch_projects) - infrawatch_count_dedup} internal dupes)")
         
         # STEP 2: Deduplicate across databases using correlation logic
         
@@ -2469,6 +2554,14 @@ async def search_contractor_projects(contractor_name: str):
                 "province": "",
                 "region": ""
             })
+
+        for proj in infrawatch_projects_dedup:
+            all_projects.append({
+                "source": "infrawatch",
+                "amount": proj.get("amount", 0),
+                "province": "",
+                "region": ""
+            })
         
         # Cross-database deduplication
         unique_projects = []
@@ -2491,6 +2584,9 @@ async def search_contractor_projects(contractor_name: str):
                 
                 # Only check cross-database (not within same database)
                 if proj1["source"] == proj2["source"]:
+                    continue
+
+                if "infrawatch" in (proj1["source"], proj2["source"]):
                     continue
                 
                 is_duplicate = False
@@ -2516,11 +2612,16 @@ async def search_contractor_projects(contractor_name: str):
         unique_total = sum(p["amount"] for p in unique_projects)
         
         # Total duplicates = internal + cross-database
-        internal_duplicates = (len(flood_projects) - flood_count_dedup) + (len(dime_projects) - dime_count_dedup) + (len(philgeps_projects) - philgeps_count_dedup)
+        internal_duplicates = (
+            (len(flood_projects) - flood_count_dedup)
+            + (len(dime_projects) - dime_count_dedup)
+            + (len(philgeps_projects) - philgeps_count_dedup)
+            + (len(infrawatch_projects) - infrawatch_count_dedup)
+        )
         total_duplicates = internal_duplicates + cross_db_duplicates
-        
-        total_raw = flood_count + dime_count + philgeps_count
-        simple_total = flood_total + dime_total + philgeps_total
+
+        total_raw = flood_count + dime_count + philgeps_count + infrawatch_count
+        simple_total = flood_total + dime_total + philgeps_total + infrawatch_total
         
         print(f"🔍 Cross-database deduplication:")
         print(f"  Internal duplicates: {internal_duplicates}")
@@ -2530,8 +2631,8 @@ async def search_contractor_projects(contractor_name: str):
         print(f"  Unique total: ₱{unique_total:,.2f}")
         
         # BASIC CHECK: Ensure deduplicated total >= max single database
-        max_single_db_total = max(flood_total_dedup, dime_total_dedup, philgeps_total_dedup)
-        max_single_db_count = max(flood_count_dedup, dime_count_dedup, philgeps_count_dedup)
+        max_single_db_total = max(flood_total_dedup, dime_total_dedup, philgeps_total_dedup, infrawatch_total_dedup)
+        max_single_db_count = max(flood_count_dedup, dime_count_dedup, philgeps_count_dedup, infrawatch_count_dedup)
         
         validation_passed = unique_total >= max_single_db_total
         
@@ -2571,12 +2672,19 @@ async def search_contractor_projects(contractor_name: str):
                     "total": philgeps_total,
                     "count_dedup": philgeps_count_dedup,
                     "total_dedup": philgeps_total_dedup
+                },
+                "infrawatch": {
+                    "count": infrawatch_count,
+                    "total": infrawatch_total,
+                    "count_dedup": infrawatch_count_dedup,
+                    "total_dedup": infrawatch_total_dedup
                 }
             },
             "projects": {
                 "flood": flood_projects_dedup,  # Return deduplicated lists
                 "dime": dime_projects_dedup,
-                "philgeps": philgeps_projects_dedup
+                "philgeps": philgeps_projects_dedup,
+                "infrawatch": infrawatch_projects_dedup
             }
         })
     except Exception as e:
@@ -4346,10 +4454,11 @@ async def dynasty_projects_all_api(
     limit: int = Query(50, ge=1, le=10000, description="Number of records per page"),
     congressman: str = Query(None, description="Filter by congressman name (optional)")
 ):
-    """Get all projects from cached JSON, optionally filtered by congressman"""
+    """Get all projects from cached JSON, loading from all individual congressman caches"""
     try:
         import json
         from pathlib import Path
+        import glob
         
         # If congressman filter is provided, try to load from individual cache
         if congressman and congressman.strip() and congressman.strip() != 'all' and congressman.strip() != 'All Congressmen':
@@ -4383,56 +4492,63 @@ async def dynasty_projects_all_api(
                         "generated_at": cache_data.get('generated_at'),
                         "cache_version": cache_data.get('cache_version', '1.0')
                     })
-                else:
-                    # Fall through to combined cache
-                    pass
         
-        # Load combined cached JSON file (for "all congressmen" or if individual cache not found)
-        cache_file = Path(__file__).parent / 'static' / 'data' / 'dynasty-projects-cache.json'
+        # Load from ALL individual congressman caches
+        data_dir = Path(__file__).parent / 'static' / 'data'
+        all_projects = []
+        total_summary = {
+            "total": 0,
+            "dime": 0,
+            "philgeps": 0,
+            "ssp": 0,
+            "district_projects": 0,
+            "contractor_projects": 0
+        }
         
-        if not cache_file.exists():
-            return JSONResponse({
-                "success": False,
-                "error": "Cached data not found. Please run scripts/generate_dynasty_projects_cache.py",
-                "projects": [],
-                "summary": {"total": 0, "ssp": 0, "dime": 0, "philgeps": 0, "district_projects": 0, "contractor_projects": 0}
-            })
+        # Find all congressman cache directories
+        congressman_cache_pattern = str(data_dir / 'congressman-projects-*' / 'all-projects-cache.json')
+        cache_files = glob.glob(congressman_cache_pattern)
         
-        # Load cached data
-        with open(cache_file, 'r', encoding='utf-8') as f:
-            cache_data = json.load(f)
+        print(f"Loading from {len(cache_files)} congressman caches...")
         
-        if not cache_data.get('success', False):
-            return JSONResponse({
-                "success": False,
-                "error": cache_data.get('error', 'Unknown error'),
-                "projects": [],
-                "summary": cache_data.get('summary', {"total": 0, "ssp": 0, "dime": 0, "philgeps": 0, "district_projects": 0, "contractor_projects": 0})
-            })
+        for cache_file_path in cache_files:
+            try:
+                with open(cache_file_path, 'r', encoding='utf-8') as f:
+                    cache_data = json.load(f)
+                
+                if cache_data.get('success', False):
+                    projects = cache_data.get('projects', [])
+                    all_projects.extend(projects)
+                    
+                    # Aggregate summary
+                    summary = cache_data.get('summary', {})
+                    total_summary['total'] += summary.get('total', 0)
+                    total_summary['dime'] += summary.get('dime', 0)
+                    total_summary['philgeps'] += summary.get('philgeps', 0)
+                    total_summary['ssp'] += summary.get('ssp', 0)
+                    total_summary['district_projects'] += summary.get('district_projects', 0)
+                    total_summary['contractor_projects'] += summary.get('contractor_projects', 0)
+            except Exception as e:
+                print(f"Error loading cache {cache_file_path}: {e}")
+                continue
         
-        # Get projects from cache
-        unique_projects = cache_data.get('projects', [])
-        
-        # Filter by congressman if provided (fallback if individual cache not found)
-        if congressman and congressman.strip() and congressman.strip() != 'all' and congressman.strip() != 'All Congressmen':
-            unique_projects = [p for p in unique_projects if p.get('congressman') == congressman.strip()]
+        print(f"Loaded {len(all_projects)} total projects from all caches")
         
         # Paginate
-        total_pages = (len(unique_projects) + limit - 1) // limit
+        total_pages = (len(all_projects) + limit - 1) // limit
         offset = (page - 1) * limit
-        paginated_projects = unique_projects[offset:offset + limit]
+        paginated_projects = all_projects[offset:offset + limit]
         
         return JSONResponse({
             "success": True,
             "projects": paginated_projects,
-            "summary": cache_data.get('summary', {}),
-            "chart_data": cache_data.get('chart_data', []),
-            "dashboard_stats": cache_data.get('dashboard_stats', {}),
+            "summary": total_summary,
             "page": page,
-            "total": len(unique_projects),
+            "total": len(all_projects),
             "total_pages": total_pages,
-            "generated_at": cache_data.get('generated_at'),
-            "cache_version": cache_data.get('cache_version', '1.0')
+            "generated_at": datetime.utcnow().isoformat(),
+            "cache_version": "2.0",
+            "source": "individual_caches"
         })
         
     except Exception as e:
