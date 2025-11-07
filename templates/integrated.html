@@ -1299,7 +1299,8 @@ async function loadAllProjects() {
 function applyFilter() {
     const mode = document.querySelector('input[name="congressman-filter-mode"]:checked')?.value || 'All';
     const filterInput = document.getElementById('congressman-filter');
-    const filterValue = filterInput ? filterInput.value.trim() : '';
+    const originalValue = filterInput ? filterInput.value : '';
+    const filterValue = originalValue.trim();
     const isAll = filterValue === '' || filterValue.toLowerCase() === 'all congressmen';
     
     if (mode === 'All') {
@@ -1311,9 +1312,6 @@ function applyFilter() {
         const partylistNames = configCongressmen
             .filter(item => !item.province || !item.district_number)
             .map(item => item.display_name);
-        if (filterInput) {
-            filterInput.value = '';
-        }
         if (isAll) {
             filteredData = allProjectsData.filter(project => partylistNames.includes(project.congressman));
             if (filteredData.length === 0 && partylistNames.length > 0) {
@@ -1326,22 +1324,18 @@ function applyFilter() {
             }
         }
     } else if (mode === 'Province') {
-        if (filterInput) {
-            filterInput.value = '';
-        }
         const provinceInput = document.getElementById('congressman-province-input');
         const provinceValueRaw = provinceInput ? provinceInput.value.trim() : '';
-        const provinceValue = provinceValueRaw.toLowerCase();
         const aliases = getProvinceAliases(provinceValueRaw);
         const allowedNames = configCongressmen
             .filter(item => aliases.includes((item.province || '').trim().toLowerCase()) && item.district_number)
             .map(item => item.display_name);
-        if (!provinceValue || allowedNames.length === 0) {
+        if (!provinceValueRaw || allowedNames.length === 0) {
             filteredData = [];
         } else if (isAll) {
             filteredData = allProjectsData.filter(project => allowedNames.includes(project.congressman));
             if (filteredData.length === 0) {
-                filteredData = createPlaceholderProjects(allowedNames, `Project records are still being ingested for ${provinceValueRaw || 'this province'}.`);
+                filteredData = createPlaceholderProjects(allowedNames, `Project records are still being ingested for ${provinceValueRaw}.`);
             }
         } else {
             filteredData = allProjectsData.filter(project => allowedNames.includes(project.congressman) && project.congressman === filterValue);
@@ -1368,9 +1362,9 @@ function applyFilter() {
     }
     updateCongressmanFilterStatus(mode, Array.isArray(filteredConfig) ? filteredConfig : [], statusNames, filteredData.length);
 
-    // Reset to first page when filter changes
-    currentPage = 1;
-    updateDisplay();
+    if (filterInput && mode === 'All') {
+        filterInput.value = originalValue;
+    }
 }
 
 // Handle congressman filter change
@@ -1396,10 +1390,6 @@ function handleModeChange(mode) {
 }
 
 function handleProvinceInputChange() {
-    const congressmanInput = document.getElementById('congressman-filter');
-    if (congressmanInput) {
-        congressmanInput.value = '';
-    }
     updateCongressmanDatalist();
     applyFilter();
 }
@@ -1414,10 +1404,6 @@ function handleProvinceBlur() {
         if (match) {
             provinceInput.value = match.value;
         }
-    }
-    const congressmanInput = document.getElementById('congressman-filter');
-    if (congressmanInput) {
-        congressmanInput.value = '';
     }
     updateCongressmanDatalist();
     applyFilter();
