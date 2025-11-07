@@ -12,6 +12,7 @@ import os
 import re
 import subprocess
 import sys
+from collections import defaultdict
 from datetime import datetime
 from pathlib import Path
 from typing import Any, Dict, List, Optional
@@ -36,27 +37,44 @@ class DynastyProjectsCacheGenerator:
         self.districts_file = Path(__file__).parent.parent / 'districts.json'
         cpu_count = os.cpu_count() or 4
         self.max_workers = min(24, max(1, cpu_count))
+        self.verbose = os.getenv('DYNASTY_CACHE_VERBOSE', '0') == '1'
+        self.chart_limit = 200
+
+    def _log(self, message: str, *, verbose_only: bool = False) -> None:
+        if verbose_only and not self.verbose:
+            return
+        print(message)
+
+    def _atomic_write_json(self, path: Path, payload: Dict[str, Any]) -> None:
+        path.parent.mkdir(parents=True, exist_ok=True)
+        temp_path = path.with_suffix(path.suffix + '.tmp')
+        with open(temp_path, 'w', encoding='utf-8') as handle:
+            json.dump(payload, handle, indent=2, ensure_ascii=False)
+        os.replace(temp_path, path)
 
     def _regenerate_top_congressmen_cache(self) -> None:
         """Refresh the top-200 cache so the integrated tab stays up to date."""
         top_generator = Path(__file__).with_name('generate_top_200_congressmen.py')
         if not top_generator.exists():
-            print("⚠️  Top-200 generator script not found; skipping refresh.")
+            self._log("⚠️  Top-200 generator script not found; skipping refresh.")
             return
 
         try:
             subprocess.run([sys.executable, str(top_generator)], check=True)
-            print("✅ Refreshed top-200-congressmen.json cache")
+            self._log("✅ Refreshed top-200-congressmen.json cache")
         except subprocess.CalledProcessError as exc:
-            print(f"💥 Failed to refresh top-200 cache: {exc}")
+            self._log(f"💥 Failed to refresh top-200 cache: {exc}")
 
     @staticmethod
     def _chunk_list(items: List[Any], max_chunks: int) -> List[List[Any]]:
         if not items:
             return []
-        if max_chunks <= 1:
+        if max_chunks <= 1 or len(items) <= 50:
             return [items]
-        chunk_size = max(1, math.ceil(len(items) / max_chunks))
+
+        # Aim for smaller, more even work units to avoid long-tail chunks.
+        target_chunks = min(len(items), max_chunks * 3)
+        chunk_size = max(25, math.ceil(len(items) / target_chunks))
         return [items[i:i + chunk_size] for i in range(0, len(items), chunk_size)]
 
     @staticmethod
@@ -347,7 +365,7 @@ class DynastyProjectsCacheGenerator:
                     "is_city_wide": (match_score == 1 and match_type == "district")
                 })
         return chunk_results
-    
+        
     async def load_config(self) -> Dict:
         """Load configuration files"""
         config_data = {}
@@ -369,6 +387,51 @@ class DynastyProjectsCacheGenerator:
         
         target_congressmen = config_data.get('target_congressmen', [])
         
+        def _name_key(first: Optional[str], last: Optional[str]) -> tuple[str, str]:
+            return ((first or '').strip().upper(), (last or '').strip().upper())
+
+        contractor_lookup: Dict[tuple[str, str], List[asyncpg.Record]] = defaultdict(list)
+        party_memberships_by_person: Dict[int, List[Any]] = defaultdict(list)
+        party_memberships_by_name: Dict[tuple[str, str], List[Any]] = defaultdict(list)
+        party_memberships_by_party: Dict[Any, set[tuple[str, str]]] = defaultdict(set)
+        party_contractors: Dict[Any, set[str]] = defaultdict(set)
+
+        if political_dynasties_available:
+            contractor_rows = await dynasty_conn.fetch(
+                """
+                SELECT dynasty_first_name, dynasty_last_name, company_name, role
+                FROM contractor_dynasty_matches
+                """
+            )
+            for row in contractor_rows:
+                key = _name_key(row['dynasty_first_name'], row['dynasty_last_name'])
+                contractor_lookup[key].append(row)
+
+            party_rows = await dynasty_conn.fetch(
+                """
+                SELECT plm.person_id, plm.party_list_number, pd.first_name, pd.last_name
+                FROM party_list_members plm
+                JOIN political_dynasties pd ON plm.person_id = pd.id
+                """
+            )
+
+            for row in party_rows:
+                party_number = row['party_list_number']
+                person_id = row['person_id']
+                key = _name_key(row['first_name'], row['last_name'])
+                if person_id is not None:
+                    party_memberships_by_person[person_id].append(party_number)
+                party_memberships_by_name[key].append(party_number)
+                party_memberships_by_party[party_number].add(key)
+
+            for party_number, member_keys in party_memberships_by_party.items():
+                party_set = party_contractors[party_number]
+                for member_key in member_keys:
+                    for contractor_row in contractor_lookup.get(member_key, []):
+                        company_name = contractor_row.get('company_name')
+                        if company_name:
+                            party_set.add(company_name)
+
         for congressman_config in target_congressmen:
             first_name_pattern = congressman_config.get('first_name_pattern', '')
             last_name_pattern = congressman_config.get('last_name_pattern', '')
@@ -381,35 +444,35 @@ class DynastyProjectsCacheGenerator:
             # Get congressman from database
             person = None
             if political_dynasties_available:
-                person = await dynasty_conn.fetchrow('''
-                    SELECT id, first_name, last_name, middle_name, province, municipality_city, region, party
-                    FROM political_dynasties
-                    WHERE (
-                        UPPER(position) LIKE '%CONGRESSMAN%' 
-                        OR UPPER(position) LIKE '%CONGRESSMEN%' 
-                        OR UPPER(position) LIKE '%MEMBER, HOUSE OF REPRESENTATIVES%'
-                        OR UPPER(position) LIKE '%REPRESENTATIVE%PARTY-LIST%'
-                        OR UPPER(position) LIKE '%REPRESENTATIVE, %PARTY-LIST%'
-                        OR UPPER(position) LIKE '%PARTY-LIST%REPRESENTATIVE%'
-                        OR UPPER(position) LIKE '%DEPUTY SPEAKER%'
-                        OR UPPER(position) LIKE '%SPEAKER%'
-                    )
-                      AND (
-                        (UPPER(first_name) LIKE $1 AND UPPER(last_name) LIKE $2)
-                        OR (UPPER(first_name || ' ' || COALESCE(middle_name, '') || ' ' || last_name) LIKE $3)
-                        OR (UPPER(first_name || ' ' || COALESCE(middle_name, '')) LIKE $1 AND UPPER(last_name) LIKE $2)
-                        OR (UPPER(last_name) LIKE $2 AND UPPER(first_name) LIKE '%MANNIX%' AND 'MANNIX' = $4)
-                        OR (UPPER(last_name) LIKE $2 AND UPPER(first_name) LIKE '%MANUEL%' AND 'MANNIX' = $4)
-                      )
-                    ORDER BY id DESC
-                    LIMIT 1
-                ''', 
-                    f"%{first_name_pattern}%", 
-                    f"%{last_name_pattern}%",
-                    f"%{first_name_pattern}%{last_name_pattern}%",
-                    first_name_pattern
+            person = await dynasty_conn.fetchrow('''
+                SELECT id, first_name, last_name, middle_name, province, municipality_city, region, party
+                FROM political_dynasties
+                WHERE (
+                    UPPER(position) LIKE '%CONGRESSMAN%' 
+                    OR UPPER(position) LIKE '%CONGRESSMEN%' 
+                    OR UPPER(position) LIKE '%MEMBER, HOUSE OF REPRESENTATIVES%'
+                    OR UPPER(position) LIKE '%REPRESENTATIVE%PARTY-LIST%'
+                    OR UPPER(position) LIKE '%REPRESENTATIVE, %PARTY-LIST%'
+                    OR UPPER(position) LIKE '%PARTY-LIST%REPRESENTATIVE%'
+                    OR UPPER(position) LIKE '%DEPUTY SPEAKER%'
+                    OR UPPER(position) LIKE '%SPEAKER%'
                 )
-
+                  AND (
+                    (UPPER(first_name) LIKE $1 AND UPPER(last_name) LIKE $2)
+                    OR (UPPER(first_name || ' ' || COALESCE(middle_name, '') || ' ' || last_name) LIKE $3)
+                    OR (UPPER(first_name || ' ' || COALESCE(middle_name, '')) LIKE $1 AND UPPER(last_name) LIKE $2)
+                    OR (UPPER(last_name) LIKE $2 AND UPPER(first_name) LIKE '%MANNIX%' AND 'MANNIX' = $4)
+                    OR (UPPER(last_name) LIKE $2 AND UPPER(first_name) LIKE '%MANUEL%' AND 'MANNIX' = $4)
+                  )
+                ORDER BY id DESC
+                LIMIT 1
+            ''', 
+                f"%{first_name_pattern}%", 
+                f"%{last_name_pattern}%",
+                f"%{first_name_pattern}%{last_name_pattern}%",
+                first_name_pattern
+            )
+            
             # Fallback when dynasty DB is missing or no match
             if not person:
                 person = {
@@ -422,7 +485,7 @@ class DynastyProjectsCacheGenerator:
                     'region': None,
                     'party': None
                 }
-
+            
             person_key = f"{person['first_name']} {person['last_name']}"
             if person_key in processed_congressmen:
                 continue
@@ -449,17 +512,10 @@ class DynastyProjectsCacheGenerator:
                         if mun_district and mun_district.upper() == config_district_number.upper():
                             district_municipalities.append(mun_key)
             
-            # Get contractors
-            contractor_names = []
-            contractor_patterns = []
-            direct_contractors = []
+            name_key = _name_key(person['first_name'], person['last_name'])
             if political_dynasties_available:
-                direct_contractors = await dynasty_conn.fetch('''
-                    SELECT DISTINCT company_name, role
-                    FROM contractor_dynasty_matches
-                    WHERE dynasty_first_name = $1 AND dynasty_last_name = $2
-                ''', person['first_name'], person['last_name'])
-
+                direct_contractors = contractor_lookup.get(name_key, [])
+            
             verified_patterns = config_data.get('verified_contractors', {}).get('patterns', [])
             contractor_exclusions = {}
             for exclusion in config_data.get('verified_contractors', {}).get('exclusions', []):
@@ -496,6 +552,8 @@ class DynastyProjectsCacheGenerator:
                         final.add(clean)
                 return [p for p in final if len(p) >= 3]
 
+            contractor_names = []
+            contractor_patterns = []
             for contractor in direct_contractors:
                 company_name = contractor['company_name']
                 if not company_name:
@@ -508,35 +566,23 @@ class DynastyProjectsCacheGenerator:
                     if not any(pattern.upper() in upper_name for pattern in verified_patterns):
                         # Allow inclusion even if pattern not found, to keep politicontractors coverage
                         pass
-                contractor_names.append(company_name)
+                    contractor_names.append(company_name)
                 contractor_patterns.extend(_expand_patterns(company_name))
 
-            # Get party-list contractors
-            party_lists = []
-            if political_dynasties_available and person.get('id') is not None:
-                party_lists = await dynasty_conn.fetch('''
-                    SELECT pl.party_list_number, pl.party_name
-                    FROM party_list_members plm
-                    JOIN party_list pl ON plm.party_list_number = pl.party_list_number
-                    WHERE plm.person_id = $1
-                ''', person['id'])
+            party_numbers: List[Any] = []
+            if political_dynasties_available:
+                if person.get('id') is not None:
+                    party_numbers.extend(party_memberships_by_person.get(person['id'], []))
+                if not party_numbers:
+                    party_numbers.extend(party_memberships_by_name.get(name_key, []))
 
-            for pl in party_lists:
-                pl_contractors = await dynasty_conn.fetch('''
-                    SELECT DISTINCT cdm.company_name, cdm.role
-                    FROM party_list_members plm2
-                    JOIN political_dynasties pd ON plm2.person_id = pd.id
-                    JOIN contractor_dynasty_matches cdm ON cdm.dynasty_first_name = pd.first_name
-                                                           AND cdm.dynasty_last_name = pd.last_name
-                    WHERE plm2.party_list_number = $1
-                ''', pl['party_list_number'])
-                for contractor in pl_contractors:
-                    company_name = contractor['company_name']
+            for party_number in party_numbers:
+                for company_name in party_contractors.get(party_number, set()):
                     if not company_name or _should_exclude(company_name):
                         continue
-                    contractor_names.append(company_name)
+                        contractor_names.append(company_name)
                     contractor_patterns.extend(_expand_patterns(company_name))
-
+            
             contractor_names = sorted(set(name for name in contractor_names if name))
             contractor_patterns = sorted(set(p for p in contractor_patterns if p))
             
@@ -662,7 +708,7 @@ class DynastyProjectsCacheGenerator:
         contractors = congressman_data.get('contractors', [])
         contractor_patterns = congressman_data.get('contractor_patterns', [])
         contractor_exclusions = congressman_data.get('contractor_exclusions', {})
-
+        
         def _contractor_is_excluded(candidate_upper: str) -> bool:
             for base, exclusions in contractor_exclusions.items():
                 if base in candidate_upper:
@@ -682,7 +728,7 @@ class DynastyProjectsCacheGenerator:
             if 'GONZALES' in congressman_name.upper() and 'A.D. GONZALES' in contractor_name_upper:
                 if not _contractor_is_excluded(contractor_name_upper):
                     return (congressman_name, "contractor", 50)
-
+            
             # Dynamic contractor pattern matching
             for pattern in contractor_patterns:
                 pattern_upper = pattern.upper()
@@ -691,17 +737,17 @@ class DynastyProjectsCacheGenerator:
 
                 # Skip if excluded
                 if _contractor_is_excluded(contractor_name_upper):
-                    break
+                                    break
 
                 # Direct substring match
-                if pattern_upper in contractor_name_upper:
-                    return (congressman_name, "contractor", 50)
-
+                            if pattern_upper in contractor_name_upper:
+                                        return (congressman_name, "contractor", 50)
+                    
                 # Normalized comparison (remove punctuation, collapse spaces)
                 normalized_pattern = _normalize_for_match(pattern)
                 if normalized_pattern and normalized_pattern in normalized_candidate:
-                    return (congressman_name, "contractor", 50)
-
+                            return (congressman_name, "contractor", 50)
+                    
         # If contractor name not provided (e.g., Infrawatch text only), fall back to searching the combined text
         if contractor_patterns and not contractor_name:
             normalized_text = _normalize_for_match(combined_text)
@@ -724,13 +770,13 @@ class DynastyProjectsCacheGenerator:
 
                     if 'JSG' in contractor_upper and 'JSG' in contractor_name_upper:
                         if not _contractor_is_excluded(contractor_name_upper):
-                            return (congressman_name, "contractor", 50)
-
+                                return (congressman_name, "contractor", 50)
+                    
                     for pattern in ['SUNWEST', 'ROVING PREMIER', 'VIRKAR', 'GARDIOLA', 'NEWINGTON', 'S-ANG']:
                         if pattern in contractor_upper:
                             pattern_upper = pattern.upper()
                             if pattern_upper in contractor_name_upper and not _contractor_is_excluded(contractor_name_upper):
-                                return (congressman_name, "contractor", 50)
+                        return (congressman_name, "contractor", 50)
             else:
                 # No explicit contractor name on the record, attempt to match patterns in combined text
                 normalized_text = _normalize_for_match(combined_text)
@@ -990,7 +1036,7 @@ class DynastyProjectsCacheGenerator:
 
         for result in await asyncio.gather(*tasks):
             projects.extend(result)
-
+        
         return projects
     
     async def generate_cache(self):
@@ -999,7 +1045,7 @@ class DynastyProjectsCacheGenerator:
 
         # Ensure latest districts and congressmen config are pulled from DB
         self._refresh_source_json()
-
+        
         # Load config
         config_data, districts_data = await self.load_config()
         print(f"✅ Loaded config with {len(config_data.get('target_congressmen', []))} congressmen")
@@ -1016,12 +1062,12 @@ class DynastyProjectsCacheGenerator:
             **common_db_kwargs,
             "database": os.getenv('POSTGRES_DB_DYNASTY', 'dynasty')
         })
-
+        
         dime_conn = await asyncpg.connect(**{
             **common_db_kwargs,
             "database": os.getenv('POSTGRES_DB_DIME', 'dime')
         })
-
+        
         philgeps_conn = await asyncpg.connect(**{
             **common_db_kwargs,
             "database": os.getenv('POSTGRES_DB_PHILGEPS', 'philgeps')
@@ -1071,7 +1117,7 @@ class DynastyProjectsCacheGenerator:
                 source_label = self._normalize_source_label(proj.get('source', 'Unknown'))
                 proj['source'] = source_label
                 key = proj.get('meilisearch_id') or self._build_project_key(proj)
-
+                
                 if key not in projects_by_key:
                     projects_by_key[key] = {
                         'project': proj.copy(),
@@ -1081,7 +1127,7 @@ class DynastyProjectsCacheGenerator:
                 else:
                     merged_project = self._merge_project_records(projects_by_key[key]['project'], proj)
                     projects_by_key[key]['project'] = merged_project
-
+                
                 projects_by_key[key]['sources'].add(source_label)
                 projects_by_key[key]['congressmen'].add(proj.get('congressman', 'Unknown'))
             
@@ -1390,7 +1436,7 @@ class DynastyProjectsCacheGenerator:
 
             # Update aggregated leaderboard so the UI reflects the new cache immediately
             self._regenerate_top_congressmen_cache()
- 
+            
         finally:
             await dynasty_conn.close()
             await dime_conn.close()
