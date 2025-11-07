@@ -5,9 +5,12 @@ This script fixes the matching logic and generates a cached JSON file.
 """
 
 import asyncio
+import functools
 import json
+import math
 import os
 import re
+import subprocess
 import sys
 from datetime import datetime
 from pathlib import Path
@@ -31,7 +34,18 @@ class DynastyProjectsCacheGenerator:
         self.cache_file = Path(__file__).parent.parent / 'static' / 'data' / 'dynasty-projects-cache.json'
         self.config_file = Path(__file__).parent.parent / 'dynasty-projects-config.json'
         self.districts_file = Path(__file__).parent.parent / 'districts.json'
-        
+        cpu_count = os.cpu_count() or 4
+        self.max_workers = min(24, max(1, cpu_count))
+
+    @staticmethod
+    def _chunk_list(items: List[Any], max_chunks: int) -> List[List[Any]]:
+        if not items:
+            return []
+        if max_chunks <= 1:
+            return [items]
+        chunk_size = max(1, math.ceil(len(items) / max_chunks))
+        return [items[i:i + chunk_size] for i in range(0, len(items), chunk_size)]
+
     @staticmethod
     def _normalize_source_label(source: str) -> str:
         if not source:
@@ -128,6 +142,198 @@ class DynastyProjectsCacheGenerator:
             merged['is_city_wide'] = incoming.get('is_city_wide', False)
 
         return merged
+
+    def _refresh_source_json(self) -> None:
+        exporter_path = Path(__file__).with_name('export_dynasty_json_from_db.py')
+        if not exporter_path.exists():
+            print("⚠️  Export script not found; skipping JSON refresh.")
+            return
+        try:
+            subprocess.run([sys.executable, str(exporter_path)], check=True)
+            print("✅ Refreshed districts.json and dynasty-projects-config.json from database")
+        except subprocess.CalledProcessError as exc:
+            print(f"💥 Failed to refresh JSON sources: {exc}")
+
+    def _process_dime_chunk(self, projects_chunk: List[Any], congressmen_data: Dict, districts_data: Dict) -> List[Dict]:
+        chunk_results: List[Dict] = []
+        for proj in projects_chunk:
+            proj_name = (proj.get('project_name') or '').upper()
+            proj_province = (proj.get('province') or '').upper()
+            proj_city = (proj.get('city') or '').upper()
+            proj_barangay = (proj.get('barangay') or '').upper()
+            combined_text = f'{proj_name} {proj_province} {proj_city} {proj_barangay}'
+
+            contractor_str = ''
+            contractors_field = proj.get('contractors')
+            if isinstance(contractors_field, list):
+                contractor_str = ', '.join(contractors_field).upper()
+            elif contractors_field:
+                contractor_str = str(contractors_field).upper()
+            combined_text = f'{combined_text} {contractor_str}'
+
+            matches = []
+            for cm_name, cm_data in congressmen_data.items():
+                cm_name_result, match_type_result, match_score_result = self.match_project(
+                    combined_text,
+                    cm_data,
+                    districts_data,
+                    contractor_str
+                )
+                if cm_name_result and match_score_result > 0:
+                    matches.append((cm_name_result, match_type_result, match_score_result))
+
+            if not matches:
+                continue
+
+            location_parts = []
+            if proj.get('province'):
+                location_parts.append(proj['province'])
+            if proj.get('city'):
+                location_parts.append(proj['city'])
+            if proj.get('barangay'):
+                location_parts.append(proj['barangay'])
+            location_str = ', '.join(location_parts).strip() or "N/A"
+
+            amount = float(proj['cost']) if proj['cost'] else 0
+
+            for matched_congressman, match_type, match_score in matches:
+                if matched_congressman == "Ferdinand Martin Gomez Romualdez":
+                    print(f"✅ Matched Romualdez (DIME): {proj['project_name'][:80]}... -> {location_str} [{match_type}:{match_score}]")
+                chunk_results.append({
+                    "congressman": matched_congressman,
+                    "source": self._normalize_source_label("DIME"),
+                    "meilisearch_id": proj.get('meilisearch_id'),
+                    "project_name": proj['project_name'] or "N/A",
+                    "contractor": contractor_str if contractor_str else "N/A",
+                    "amount": amount,
+                    "location": location_str,
+                    "year": proj['date_started'].year if proj['date_started'] else "N/A",
+                    "status": proj['status'] or "N/A",
+                    "match_type": match_type,
+                    "match_score": match_score,
+                    "is_city_wide": (match_score == 1 and match_type == "district")
+                })
+        return chunk_results
+
+    def _process_philgeps_chunk(self, contracts_chunk: List[Any], congressmen_data: Dict, districts_data: Dict) -> List[Dict]:
+        chunk_results: List[Dict] = []
+        for contract in contracts_chunk:
+            award_title = (contract.get('award_title') or '').upper()
+            area_of_delivery = (contract.get('area_of_delivery') or '').upper()
+            awardee_name = (contract.get('awardee_name') or '').upper()
+            combined_text = f'{award_title} {area_of_delivery} {awardee_name}'
+
+            best_match = None
+            best_score = 0
+            for cm_name, cm_data in congressmen_data.items():
+                cm_name_result, match_type_result, match_score_result = self.match_project(
+                    combined_text,
+                    cm_data,
+                    districts_data,
+                    awardee_name
+                )
+                if cm_name_result and match_score_result > best_score:
+                    best_match = (cm_name_result, match_type_result, match_score_result)
+                    best_score = match_score_result
+
+            if not best_match:
+                continue
+
+            matched_congressman, match_type, match_score = best_match
+            if matched_congressman == "Ferdinand Martin Gomez Romualdez":
+                print(f"✅ Matched Romualdez (PhilGEPS): {contract.get('award_title','')[:80]}... -> {area_of_delivery} [{match_type}:{match_score}]")
+
+            chunk_results.append({
+                "congressman": matched_congressman,
+                "source": self._normalize_source_label("PhilGEPS"),
+                "meilisearch_id": contract.get('meilisearch_id'),
+                "project_name": contract['award_title'] or "N/A",
+                "contractor": contract['awardee_name'] or "N/A",
+                "amount": float(contract['contract_amount']) if contract['contract_amount'] else 0,
+                "location": contract['area_of_delivery'] or "N/A",
+                "year": contract['award_date'].year if contract['award_date'] else "N/A",
+                "status": contract['award_status'] or "N/A",
+                "match_type": match_type,
+                "match_score": match_score,
+                "is_city_wide": (match_score == 1 and match_type == "district")
+            })
+        return chunk_results
+
+    def _process_infrawatch_chunk(self, rows_chunk: List[Any], congressmen_data: Dict, districts_data: Dict) -> List[Dict]:
+        chunk_results: List[Dict] = []
+        for row in rows_chunk:
+            if isinstance(row, dict):
+                record = row.get("data")
+            else:
+                record = row["data"] if "data" in row else row[0]
+            if isinstance(record, str):
+                try:
+                    record = json.loads(record)
+                except json.JSONDecodeError:
+                    continue
+            if not isinstance(record, dict):
+                continue
+
+            description = (record.get("Contract Details") or record.get("Project Description") or "").upper()
+            contractor_raw = (
+                record.get("Contractor")
+                or record.get("Contractor Name")
+                or record.get("Contractor_Name")
+                or ""
+            )
+            contractor = contractor_raw.upper()
+            agency = (record.get("Implementing Agency") or "").upper()
+            fund_source = (record.get("Fund Source") or "").upper()
+
+            combined_text = f"{description} {agency} {fund_source} {contractor}"
+
+            matches = []
+            for cm_name, cm_data in congressmen_data.items():
+                cm_name_result, match_type_result, match_score_result = self.match_project(
+                    combined_text,
+                    cm_data,
+                    districts_data,
+                    contractor
+                )
+                if cm_name_result and match_score_result > 0:
+                    matches.append((cm_name_result, match_type_result, match_score_result))
+
+            if not matches:
+                continue
+
+            amount_raw = (
+                record.get("Contract Price")
+                or record.get("Contract Amount")
+                or record.get("Amount")
+                or record.get("Constract Price")
+            )
+            amount = 0.0
+            if isinstance(amount_raw, (int, float)):
+                amount = float(amount_raw)
+            elif isinstance(amount_raw, str):
+                try:
+                    amount = float(amount_raw.replace("₱", "").replace(",", "").strip())
+                except ValueError:
+                    amount = 0.0
+
+            for matched_congressman, match_type, match_score in matches:
+                if matched_congressman == "Ferdinand Martin Gomez Romualdez":
+                    print(f"✅ Matched Romualdez (Infrawatch): {(record.get('Contract Details') or record.get('Project Description') or '')[:80]}... -> {(record.get('Implementing Agency') or record.get('Project Location') or 'N/A')} [{match_type}:{match_score}]")
+                chunk_results.append({
+                    "congressman": matched_congressman,
+                    "source": self._normalize_source_label("Infrawatch"),
+                    "meilisearch_id": None,
+                    "project_name": record.get("Contract Details") or record.get("Project Description") or "N/A",
+                    "contractor": contractor_raw or "N/A",
+                    "amount": amount,
+                    "location": record.get("Implementing Agency") or record.get("Project Location") or "N/A",
+                    "year": None,
+                    "status": record.get("Contract Status") or "N/A",
+                    "match_type": match_type,
+                    "match_score": match_score,
+                    "is_city_wide": (match_score == 1 and match_type == "district")
+                })
+        return chunk_results
     
     async def load_config(self) -> Dict:
         """Load configuration files"""
@@ -689,118 +895,45 @@ class DynastyProjectsCacheGenerator:
         
         # Process DIME projects
         try:
-            dime_projects = await dime_conn.fetch('''
+            dime_projects = list(await dime_conn.fetch('''
                 SELECT project_name, contractors, cost, province, city, barangay, status, date_started, meilisearch_id
                 FROM projects
-            ''')
-            
-            for proj in dime_projects:
-                proj_name = (proj.get('project_name') or '').upper()
-                proj_province = (proj.get('province') or '').upper()
-                proj_city = (proj.get('city') or '').upper()
-                proj_barangay = (proj.get('barangay') or '').upper()
-                combined_text = f'{proj_name} {proj_province} {proj_city} {proj_barangay}'
+            '''))
 
-                # Include contractor in combined text for matching
-                contractor_str = ''
-                if isinstance(proj.get('contractors'), list):
-                    contractor_str = ', '.join(proj['contractors']).upper()
-                elif proj.get('contractors'):
-                    contractor_str = str(proj['contractors']).upper()
-                combined_text = f'{combined_text} {contractor_str}'
-
-                matches = []
-                for cm_name, cm_data in congressmen_data.items():
-                    cm_name_result, match_type_result, match_score_result = self.match_project(
-                        combined_text,
-                        cm_data,
-                        districts_data,
-                        contractor_str
+            if dime_projects:
+                dime_chunks = self._chunk_list(dime_projects, self.max_workers)
+                loop = asyncio.get_running_loop()
+                dime_tasks = [
+                    loop.run_in_executor(
+                        None,
+                        functools.partial(self._process_dime_chunk, chunk, congressmen_data, districts_data)
                     )
-                    if cm_name_result and match_score_result > 0:
-                        matches.append((cm_name_result, match_type_result, match_score_result))
-
-                if matches:
-                    location_parts = []
-                    if proj.get('province'):
-                        location_parts.append(proj['province'])
-                    if proj.get('city'):
-                        location_parts.append(proj['city'])
-                    if proj.get('barangay'):
-                        location_parts.append(proj['barangay'])
-                    location_str = ', '.join(location_parts).strip() or "N/A"
-
-                    amount = float(proj['cost']) if proj['cost'] else 0
-
-                    for matched_congressman, match_type, match_score in matches:
-                        if matched_congressman == "Ferdinand Martin Gomez Romualdez":
-                            print(f"✅ Matched Romualdez (DIME): {proj['project_name'][:80]}... -> {location_str} [{match_type}:{match_score}]")
-                        all_projects.append({
-                            "congressman": matched_congressman,
-                            "source": self._normalize_source_label("DIME"),
-                            "meilisearch_id": proj.get('meilisearch_id'),
-                            "project_name": proj['project_name'] or "N/A",
-                            "contractor": contractor_str if contractor_str else "N/A",
-                            "amount": amount,
-                            "location": location_str,
-                            "year": proj['date_started'].year if proj['date_started'] else "N/A",
-                            "status": proj['status'] or "N/A",
-                            "match_type": match_type,
-                            "match_score": match_score,
-                            "is_city_wide": (match_score == 1 and match_type == "district")
-                        })
+                    for chunk in dime_chunks
+                ]
+                for result in await asyncio.gather(*dime_tasks):
+                    all_projects.extend(result)
         except Exception as e:
             print(f"Error processing DIME projects: {e}")
         
         # Process PhilGEPS projects (similar logic)
         try:
-            philgeps_projects = await philgeps_conn.fetch('''
+            philgeps_projects = list(await philgeps_conn.fetch('''
                 SELECT award_title, awardee_name, contract_amount, area_of_delivery, award_date, award_status, meilisearch_id
                 FROM contracts
-            ''')
-            
-            for contract in philgeps_projects:
-                award_title = (contract.get('award_title') or '').upper()
-                area_of_delivery = (contract.get('area_of_delivery') or '').upper()
-                awardee_name = (contract.get('awardee_name') or '').upper()
-                # Include contractor in combined text for matching
-                combined_text = f'{award_title} {area_of_delivery} {awardee_name}'
-                
-                matched_congressman = None
-                match_type = None
-                match_score = 0
-                
-                # Try to match to each congressman (includes district and contractor matching)
-                awardee_name = (contract.get('awardee_name') or '').upper()
-                # Check all congressmen and pick the BEST match (highest score) to prioritize district matches over contractor matches
-                best_match = None
-                best_score = 0
-                for cm_name, cm_data in congressmen_data.items():
-                    cm_name_result, match_type_result, match_score_result = self.match_project(combined_text, cm_data, districts_data, awardee_name)
-                    if cm_name_result and match_score_result > best_score:
-                        best_match = (cm_name_result, match_type_result, match_score_result)
-                        best_score = match_score_result
-                
-                if best_match:
-                    matched_congressman, match_type, match_score = best_match
-                
-                if matched_congressman and match_score > 0:
-                    if matched_congressman == "Ferdinand Martin Gomez Romualdez":
-                        print(f"✅ Matched Romualdez (PhilGEPS): {contract.get('award_title','')[:80]}... -> {area_of_delivery} [{match_type}:{match_score}]")
-                    all_projects.append({
-                        "congressman": matched_congressman,
-                        "source": self._normalize_source_label("PhilGEPS"),
-                        "meilisearch_id": contract.get('meilisearch_id'),
-                        "project_name": contract['award_title'] or "N/A",
-                        "contractor": contract['awardee_name'] or "N/A",
-                        "amount": float(contract['contract_amount']) if contract['contract_amount'] else 0,
-                        "location": contract['area_of_delivery'] or "N/A",
-                        "year": contract['award_date'].year if contract['award_date'] else "N/A",
-                        "status": contract['award_status'] or "N/A",
-                        "match_type": match_type,
-                        "match_score": match_score,
-                        "is_city_wide": (match_score == 1 and match_type == "district")
-                    })
+            '''))
+
+            if philgeps_projects:
+                philgeps_chunks = self._chunk_list(philgeps_projects, self.max_workers)
+                loop = asyncio.get_running_loop()
+                philgeps_tasks = [
+                    loop.run_in_executor(
+                        None,
+                        functools.partial(self._process_philgeps_chunk, chunk, congressmen_data, districts_data)
+                    )
+                    for chunk in philgeps_chunks
+                ]
+                for result in await asyncio.gather(*philgeps_tasks):
+                    all_projects.extend(result)
         except Exception as e:
             print(f"Error processing PhilGEPS projects: {e}")
         
@@ -821,92 +954,39 @@ class DynastyProjectsCacheGenerator:
         if not infrawatch_conn:
             return projects
 
-        rows = await infrawatch_conn.fetch(
+        rows = list(await infrawatch_conn.fetch(
             """
             SELECT data
             FROM infrawatch_projects_rows
             WHERE philgeps_contract_id IS NULL
             """
-        )
+        ))
 
-        for row in rows:
-            if isinstance(row, dict):
-                record = row.get("data")
-            else:
-                record = row["data"] if "data" in row else row[0]
-            if isinstance(record, str):
-                try:
-                    record = json.loads(record)
-                except json.JSONDecodeError:
-                    continue
-            if not isinstance(record, dict):
-                continue
+        if not rows:
+            return projects
 
-            description = (record.get("Contract Details") or record.get("Project Description") or "").upper()
-            contractor_raw = (
-                record.get("Contractor")
-                or record.get("Contractor Name")
-                or record.get("Contractor_Name")
-                or ""
+        rows_chunks = self._chunk_list(rows, self.max_workers)
+        loop = asyncio.get_running_loop()
+        tasks = [
+            loop.run_in_executor(
+                None,
+                functools.partial(self._process_infrawatch_chunk, chunk, congressmen_data, districts_data)
             )
-            contractor = contractor_raw.upper()
-            agency = (record.get("Implementing Agency") or "").upper()
-            fund_source = (record.get("Fund Source") or "").upper()
+            for chunk in rows_chunks
+        ]
 
-            combined_text = f"{description} {agency} {fund_source} {contractor}"
-
-            matches = []
-            for cm_name, cm_data in congressmen_data.items():
-                cm_name_result, match_type_result, match_score_result = self.match_project(
-                    combined_text,
-                    cm_data,
-                    districts_data,
-                    contractor
-                )
-                if cm_name_result and match_score_result > 0:
-                    matches.append((cm_name_result, match_type_result, match_score_result))
-
-            if not matches:
-                continue
-
-            # Parse amount
-            amount_raw = (
-                record.get("Contract Price")
-                or record.get("Contract Amount")
-                or record.get("Amount")
-                or record.get("Constract Price")
-            )
-            amount = 0.0
-            if isinstance(amount_raw, (int, float)):
-                amount = float(amount_raw)
-            elif isinstance(amount_raw, str):
-                try:
-                    amount = float(amount_raw.replace("₱", "").replace(",", "").strip())
-                except ValueError:
-                    amount = 0.0
-
-            for matched_congressman, match_type, match_score in matches:
-                projects.append({
-                    "congressman": matched_congressman,
-                    "source": self._normalize_source_label("Infrawatch"),
-                    "meilisearch_id": None,
-                    "project_name": record.get("Contract Details") or record.get("Project Description") or "N/A",
-                    "contractor": contractor_raw or "N/A",
-                    "amount": amount,
-                    "location": record.get("Implementing Agency") or record.get("Project Location") or "N/A",
-                    "year": None,
-                    "status": record.get("Contract Status") or "N/A",
-                    "match_type": match_type,
-                    "match_score": match_score,
-                    "is_city_wide": (match_score == 1 and match_type == "district")
-                })
+        for result in await asyncio.gather(*tasks):
+            projects.extend(result)
 
         return projects
     
     async def generate_cache(self):
         """Generate the cached JSON file"""
         print("🚀 Starting dynasty-projects cache generation...")
-        
+
+        # Ensure latest districts and congressmen config are pulled from DB
+        self._refresh_source_json()
+
         # Load config
         config_data, districts_data = await self.load_config()
         print(f"✅ Loaded config with {len(config_data.get('target_congressmen', []))} congressmen")

@@ -32,3 +32,4 @@ async def get_infrawatch_connection() -> Optional[asyncpg.Connection]:
 __all__ = ["INFRAWATCH_DB_CONFIG", "get_infrawatch_connection"]
 
 
+
