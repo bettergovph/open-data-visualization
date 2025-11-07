@@ -5,19 +5,21 @@ This script fixes the matching logic and generates a cached JSON file.
 """
 
 import asyncio
-import asyncpg
 import json
 import os
-import sys
 import re
-from pathlib import Path
+import sys
 from datetime import datetime
-from typing import Dict, List, Any, Optional
+from pathlib import Path
+from typing import Any, Dict, List, Optional
+
+import asyncpg
 from dotenv import load_dotenv
 
 # Add parent directory to path for imports
 sys.path.insert(0, str(Path(__file__).parent.parent))
 from flood_client import FloodControlClient
+from infrawatch_postgres_client import get_infrawatch_connection
 
 # Load environment variables
 load_dotenv()
@@ -30,6 +32,103 @@ class DynastyProjectsCacheGenerator:
         self.config_file = Path(__file__).parent.parent / 'dynasty-projects-config.json'
         self.districts_file = Path(__file__).parent.parent / 'districts.json'
         
+    @staticmethod
+    def _normalize_source_label(source: str) -> str:
+        if not source:
+            return "Unknown"
+        normalized = source.strip().lower()
+        if "microsite" in normalized or "infrawatch" in normalized:
+            return "Microsite"
+        if "ssp" in normalized or "flood" in normalized:
+            return "SSP"
+        if "dime" in normalized:
+            return "DIME"
+        if "philgeps" in normalized:
+            return "PhilGEPS"
+        return source.strip()
+
+    @staticmethod
+    def _normalize_text_for_key(value: Optional[str]) -> str:
+        if not value:
+            return ""
+        text = value.upper()
+        text = re.sub(r'\b(PROVINCE|CITY|MUNICIPALITY|MUNICIPALITY OF|CITY OF|BRGY|BARANGAY|PHILIPPINE|REPUBLIC|HIGHWAY|ROAD|RD|ST|STREET)\b', ' ', text)
+        text = re.sub(r'[^A-Z0-9]+', ' ', text)
+        return re.sub(r'\s+', ' ', text).strip()
+
+    @staticmethod
+    def _normalize_amount_for_key(amount: Any) -> int:
+        if amount is None:
+            return 0
+        if isinstance(amount, (int, float)):
+            return int(round(float(amount)))
+        if isinstance(amount, str):
+            cleaned = amount.replace('₱', '').replace(',', '').replace('PHP', '').strip()
+            try:
+                return int(round(float(cleaned))) if cleaned else 0
+            except ValueError:
+                return 0
+        return 0
+
+    def _build_project_key(self, proj: Dict[str, Any]) -> str:
+        project_name = self._normalize_text_for_key(proj.get('project_name'))
+        contractor = self._normalize_text_for_key(proj.get('contractor'))
+        location = self._normalize_text_for_key(proj.get('location'))
+        amount = self._normalize_amount_for_key(proj.get('amount'))
+        if not location:
+            return f"{project_name}|{contractor}|{amount}"
+        return f"{project_name}|{contractor}|{amount}|{location}"
+
+    @staticmethod
+    def _merge_project_records(primary: Dict[str, Any], incoming: Dict[str, Any]) -> Dict[str, Any]:
+        if not primary:
+            return incoming.copy()
+        merged = primary.copy()
+
+        # Prefer non-empty meilisearch_id
+        if not merged.get('meilisearch_id') and incoming.get('meilisearch_id'):
+            merged['meilisearch_id'] = incoming.get('meilisearch_id')
+
+        # Prefer more specific amount (>0)
+        primary_amount = DynastyProjectsCacheGenerator._normalize_amount_for_key(merged.get('amount'))
+        incoming_amount = DynastyProjectsCacheGenerator._normalize_amount_for_key(incoming.get('amount'))
+        if incoming_amount and (not primary_amount or incoming_amount != primary_amount and primary_amount == 0):
+            merged['amount'] = incoming.get('amount')
+
+        # Prefer more descriptive project name (longer string)
+        if len((incoming.get('project_name') or '')) > len((merged.get('project_name') or '')):
+            merged['project_name'] = incoming.get('project_name')
+
+        # Prefer more detailed contractor string
+        if len((incoming.get('contractor') or '')) > len((merged.get('contractor') or '')):
+            merged['contractor'] = incoming.get('contractor')
+
+        # Prefer more specific location (longer and not N/A)
+        merged_location = merged.get('location') or ''
+        incoming_location = incoming.get('location') or ''
+        if (incoming_location and incoming_location.upper() != 'N/A' and
+                (not merged_location or merged_location.upper() == 'N/A' or len(incoming_location) > len(merged_location))):
+            merged['location'] = incoming_location
+
+        # Prefer year/status if missing
+        if not merged.get('year') or merged.get('year') in ('N/A', None):
+            if incoming.get('year') not in ('N/A', None):
+                merged['year'] = incoming.get('year')
+
+        if not merged.get('status') or merged.get('status') in ('N/A', None):
+            if incoming.get('status') not in ('N/A', None):
+                merged['status'] = incoming.get('status')
+
+        # Track match_type/is_city_wide prioritizing higher score matches
+        primary_score = primary.get('match_score', 0)
+        incoming_score = incoming.get('match_score', 0)
+        if incoming_score > primary_score:
+            merged['match_type'] = incoming.get('match_type')
+            merged['match_score'] = incoming_score
+            merged['is_city_wide'] = incoming.get('is_city_wide', False)
+
+        return merged
+    
     async def load_config(self) -> Dict:
         """Load configuration files"""
         config_data = {}
@@ -44,7 +143,7 @@ class DynastyProjectsCacheGenerator:
         
         return config_data, districts_data
     
-    async def get_congressmen_data(self, dynasty_conn, config_data: Dict, districts_data: Dict) -> Dict:
+    async def get_congressmen_data(self, dynasty_conn, config_data: Dict, districts_data: Dict, political_dynasties_available: bool) -> Dict:
         """Get congressmen data from database"""
         congressmen_data = {}
         processed_congressmen = set()
@@ -61,38 +160,50 @@ class DynastyProjectsCacheGenerator:
             congressman_id = congressman_config.get('id')
             
             # Get congressman from database
-            person = await dynasty_conn.fetchrow('''
-                SELECT id, first_name, last_name, middle_name, province, municipality_city, region, party
-                FROM political_dynasties
-                WHERE (
-                    UPPER(position) LIKE '%CONGRESSMAN%' 
-                    OR UPPER(position) LIKE '%CONGRESSMEN%' 
-                    OR UPPER(position) LIKE '%MEMBER, HOUSE OF REPRESENTATIVES%'
-                    OR UPPER(position) LIKE '%REPRESENTATIVE%PARTY-LIST%'
-                    OR UPPER(position) LIKE '%REPRESENTATIVE, %PARTY-LIST%'
-                    OR UPPER(position) LIKE '%PARTY-LIST%REPRESENTATIVE%'
-                    OR UPPER(position) LIKE '%DEPUTY SPEAKER%'
-                    OR UPPER(position) LIKE '%SPEAKER%'
+            person = None
+            if political_dynasties_available:
+                person = await dynasty_conn.fetchrow('''
+                    SELECT id, first_name, last_name, middle_name, province, municipality_city, region, party
+                    FROM political_dynasties
+                    WHERE (
+                        UPPER(position) LIKE '%CONGRESSMAN%' 
+                        OR UPPER(position) LIKE '%CONGRESSMEN%' 
+                        OR UPPER(position) LIKE '%MEMBER, HOUSE OF REPRESENTATIVES%'
+                        OR UPPER(position) LIKE '%REPRESENTATIVE%PARTY-LIST%'
+                        OR UPPER(position) LIKE '%REPRESENTATIVE, %PARTY-LIST%'
+                        OR UPPER(position) LIKE '%PARTY-LIST%REPRESENTATIVE%'
+                        OR UPPER(position) LIKE '%DEPUTY SPEAKER%'
+                        OR UPPER(position) LIKE '%SPEAKER%'
+                    )
+                      AND (
+                        (UPPER(first_name) LIKE $1 AND UPPER(last_name) LIKE $2)
+                        OR (UPPER(first_name || ' ' || COALESCE(middle_name, '') || ' ' || last_name) LIKE $3)
+                        OR (UPPER(first_name || ' ' || COALESCE(middle_name, '')) LIKE $1 AND UPPER(last_name) LIKE $2)
+                        OR (UPPER(last_name) LIKE $2 AND UPPER(first_name) LIKE '%MANNIX%' AND 'MANNIX' = $4)
+                        OR (UPPER(last_name) LIKE $2 AND UPPER(first_name) LIKE '%MANUEL%' AND 'MANNIX' = $4)
+                      )
+                    ORDER BY id DESC
+                    LIMIT 1
+                ''', 
+                    f"%{first_name_pattern}%", 
+                    f"%{last_name_pattern}%",
+                    f"%{first_name_pattern}%{last_name_pattern}%",
+                    first_name_pattern
                 )
-                  AND (
-                    (UPPER(first_name) LIKE $1 AND UPPER(last_name) LIKE $2)
-                    OR (UPPER(first_name || ' ' || COALESCE(middle_name, '') || ' ' || last_name) LIKE $3)
-                    OR (UPPER(first_name || ' ' || COALESCE(middle_name, '')) LIKE $1 AND UPPER(last_name) LIKE $2)
-                    OR (UPPER(last_name) LIKE $2 AND UPPER(first_name) LIKE '%MANNIX%' AND 'MANNIX' = $4)
-                    OR (UPPER(last_name) LIKE $2 AND UPPER(first_name) LIKE '%MANUEL%' AND 'MANNIX' = $4)
-                  )
-                ORDER BY id DESC
-                LIMIT 1
-            ''', 
-                f"%{first_name_pattern}%", 
-                f"%{last_name_pattern}%",
-                f"%{first_name_pattern}%{last_name_pattern}%",
-                first_name_pattern
-            )
-            
+
+            # Fallback when dynasty DB is missing or no match
             if not person:
-                continue
-            
+                person = {
+                    'id': congressman_id,
+                    'first_name': first_name_pattern or display_name.split(' ')[0],
+                    'last_name': last_name_pattern or display_name.split(' ')[-1],
+                    'middle_name': None,
+                    'province': config_province,
+                    'municipality_city': None,
+                    'region': None,
+                    'party': None
+                }
+
             person_key = f"{person['first_name']} {person['last_name']}"
             if person_key in processed_congressmen:
                 continue
@@ -121,50 +232,94 @@ class DynastyProjectsCacheGenerator:
             
             # Get contractors
             contractor_names = []
-            direct_contractors = await dynasty_conn.fetch('''
-                SELECT DISTINCT company_name, role
-                FROM contractor_dynasty_matches
-                WHERE dynasty_first_name = $1 AND dynasty_last_name = $2
-            ''', person['first_name'], person['last_name'])
-            
+            contractor_patterns = []
+            direct_contractors = []
+            if political_dynasties_available:
+                direct_contractors = await dynasty_conn.fetch('''
+                    SELECT DISTINCT company_name, role
+                    FROM contractor_dynasty_matches
+                    WHERE dynasty_first_name = $1 AND dynasty_last_name = $2
+                ''', person['first_name'], person['last_name'])
+
             verified_patterns = config_data.get('verified_contractors', {}).get('patterns', [])
             contractor_exclusions = {}
             for exclusion in config_data.get('verified_contractors', {}).get('exclusions', []):
                 pattern = exclusion.get('pattern')
                 exclude = exclusion.get('exclude')
                 if pattern and exclude:
-                    if pattern not in contractor_exclusions:
-                        contractor_exclusions[pattern] = []
-                    contractor_exclusions[pattern].append(exclude)
-            
+                    contractor_exclusions.setdefault(pattern.upper(), []).append(exclude.upper())
+
+            def _should_exclude(name: str) -> bool:
+                upper_name = name.upper()
+                for pattern, exclusions in contractor_exclusions.items():
+                    if pattern in upper_name:
+                        for exclusion_value in exclusions:
+                            if exclusion_value in upper_name:
+                                return True
+                return False
+
+            def _expand_patterns(name: str) -> list[str]:
+                import re
+                base_upper = name.upper().strip()
+                patterns = {base_upper}
+                # Remove parenthetical segments
+                patterns.add(re.sub(r'\([^)]*\)', '', base_upper).strip())
+                # Split on common separators
+                for part in re.split(r'[\\/]', base_upper):
+                    part = part.strip()
+                    if len(part) >= 3:
+                        patterns.add(part)
+                # Collapse multiple spaces
+                final = set()
+                for pattern in patterns:
+                    clean = re.sub(r'\s+', ' ', pattern).strip()
+                    if clean:
+                        final.add(clean)
+                return [p for p in final if len(p) >= 3]
+
             for contractor in direct_contractors:
                 company_name = contractor['company_name']
-                if company_name and any(pattern.upper() in company_name.upper() for pattern in verified_patterns):
-                    contractor_names.append(company_name)
-            
+                if not company_name:
+                    continue
+                if _should_exclude(company_name):
+                    continue
+                # If verified_patterns provided, prefer matches that include them, but otherwise include everything
+                if verified_patterns:
+                    upper_name = company_name.upper()
+                    if not any(pattern.upper() in upper_name for pattern in verified_patterns):
+                        # Allow inclusion even if pattern not found, to keep politicontractors coverage
+                        pass
+                contractor_names.append(company_name)
+                contractor_patterns.extend(_expand_patterns(company_name))
+
             # Get party-list contractors
-            party_lists = await dynasty_conn.fetch('''
-                SELECT pl.party_list_number, pl.party_name
-                FROM party_list_members plm
-                JOIN party_list pl ON plm.party_list_number = pl.party_list_number
-                WHERE plm.person_id = $1
-            ''', person['id'])
-            
+            party_lists = []
+            if political_dynasties_available and person.get('id') is not None:
+                party_lists = await dynasty_conn.fetch('''
+                    SELECT pl.party_list_number, pl.party_name
+                    FROM party_list_members plm
+                    JOIN party_list pl ON plm.party_list_number = pl.party_list_number
+                    WHERE plm.person_id = $1
+                ''', person['id'])
+
             for pl in party_lists:
                 pl_contractors = await dynasty_conn.fetch('''
                     SELECT DISTINCT cdm.company_name, cdm.role
                     FROM party_list_members plm2
                     JOIN political_dynasties pd ON plm2.person_id = pd.id
-                    JOIN contractor_dynasty_matches cdm ON cdm.dynasty_first_name = pd.first_name 
+                    JOIN contractor_dynasty_matches cdm ON cdm.dynasty_first_name = pd.first_name
                                                            AND cdm.dynasty_last_name = pd.last_name
                     WHERE plm2.party_list_number = $1
                 ''', pl['party_list_number'])
                 for contractor in pl_contractors:
                     company_name = contractor['company_name']
-                    if company_name and any(pattern.upper() in company_name.upper() for pattern in verified_patterns):
-                        contractor_names.append(company_name)
-            
-            contractor_names = list(set(contractor_names))
+                    if not company_name or _should_exclude(company_name):
+                        continue
+                    contractor_names.append(company_name)
+                    contractor_patterns.extend(_expand_patterns(company_name))
+
+            contractor_names = sorted(set(name for name in contractor_names if name))
+            contractor_patterns = sorted(set(p for p in contractor_patterns if p))
             
             # If we don't have district_municipalities from districts.json, skip UNLESS congressman has contractors
             # (Party-list representatives like Gardiola match via contractors, not districts)
@@ -196,6 +351,7 @@ class DynastyProjectsCacheGenerator:
                 "district_number": config_district_number,
                 "is_city_district": config_is_city_district,
                 "contractors": contractor_names,
+                "contractor_patterns": contractor_patterns,
                 "contractor_exclusions": contractor_exclusions,
                 "barangays": barangays,
             }
@@ -285,101 +441,86 @@ class DynastyProjectsCacheGenerator:
         # 2. Check contractor match EARLY (for party-list representatives like Gardiola and Co)
         # This must happen before district checks, as some congressmen have no districts
         contractors = congressman_data.get('contractors', [])
+        contractor_patterns = congressman_data.get('contractor_patterns', [])
         contractor_exclusions = congressman_data.get('contractor_exclusions', {})
-        
+
+        def _contractor_is_excluded(candidate_upper: str) -> bool:
+            for base, exclusions in contractor_exclusions.items():
+                if base in candidate_upper:
+                    for exclusion_value in exclusions:
+                        if exclusion_value in candidate_upper:
+                            return True
+            return False
+
+        def _normalize_for_match(value: str) -> str:
+            return re.sub(r'[^A-Z0-9]+', ' ', value.upper()).strip()
+
         if contractor_name:
             contractor_name_upper = contractor_name.upper()
-            
-            # For Gonzales: Match contractor names containing "A.D. GONZALES" (even if not in DB contractors list)
-            if 'GONZALES' in congressman_name.upper():
-                if 'A.D. GONZALES' in contractor_name_upper:
+            normalized_candidate = _normalize_for_match(contractor_name)
+
+            # Special-case Gonzales legacy rule
+            if 'GONZALES' in congressman_name.upper() and 'A.D. GONZALES' in contractor_name_upper:
+                if not _contractor_is_excluded(contractor_name_upper):
                     return (congressman_name, "contractor", 50)
-            
-            if contractors:
-                # Check if this congressman has contractors that match
+
+            # Dynamic contractor pattern matching
+            for pattern in contractor_patterns:
+                pattern_upper = pattern.upper()
+                if not pattern_upper or len(pattern_upper) < 3:
+                    continue
+
+                # Skip if excluded
+                if _contractor_is_excluded(contractor_name_upper):
+                    break
+
+                # Direct substring match
+                if pattern_upper in contractor_name_upper:
+                    return (congressman_name, "contractor", 50)
+
+                # Normalized comparison (remove punctuation, collapse spaces)
+                normalized_pattern = _normalize_for_match(pattern)
+                if normalized_pattern and normalized_pattern in normalized_candidate:
+                    return (congressman_name, "contractor", 50)
+
+        # If contractor name not provided (e.g., Infrawatch text only), fall back to searching the combined text
+        if contractor_patterns and not contractor_name:
+            normalized_text = _normalize_for_match(combined_text)
+            for pattern in contractor_patterns:
+                normalized_pattern = _normalize_for_match(pattern)
+                if normalized_pattern and normalized_pattern in normalized_text:
+                    if not _contractor_is_excluded(normalized_text):
+                        return (congressman_name, "contractor", 40)
+
+        if contractors:
+            # Legacy handling for specific patterns
+            if contractor_name:
+                contractor_name_upper = contractor_name.upper()
+            else:
+                contractor_name_upper = ''
+
+            if contractor_name_upper:
                 for contractor in contractors:
                     contractor_upper = contractor.upper()
-                    
-                    # For JSG: Match JSG but NOT JSGCRAFT (exclusion check)
-                    if 'JSG' in contractor_upper:
-                        # Check exclusions
-                        excluded = False
-                        if contractor_exclusions.get('JSG'):
-                            for exclude_pattern in contractor_exclusions['JSG']:
-                                if exclude_pattern.upper() in contractor_name_upper:
-                                    excluded = True
-                                    break
-                        if not excluded and 'JSG' in contractor_name_upper:
+
+                    if 'JSG' in contractor_upper and 'JSG' in contractor_name_upper:
+                        if not _contractor_is_excluded(contractor_name_upper):
                             return (congressman_name, "contractor", 50)
-                    
-                    # Pattern-based matching for specific contractors (check if pattern appears in both DB contractor and project contractor)
-                    # These patterns can appear in various forms in project contractor names
-                    # Use word boundary matching (spaces or start/end of string) to avoid false matches
+
                     for pattern in ['SUNWEST', 'ROVING PREMIER', 'VIRKAR', 'GARDIOLA', 'NEWINGTON', 'S-ANG']:
                         if pattern in contractor_upper:
-                            # Check if pattern appears in project contractor with word boundaries
-                            # Pattern should be at start, end, or surrounded by spaces/punctuation
                             pattern_upper = pattern.upper()
-                            if pattern_upper in contractor_name_upper:
-                                # Verify it's a word boundary match (not substring like "ASUNWEST" or "SUNWESTB")
-                                pattern_pos = contractor_name_upper.find(pattern_upper)
-                                if pattern_pos >= 0:
-                                    # Check if it's at start, end, or has space/punctuation before/after
-                                    is_start = pattern_pos == 0
-                                    is_end = pattern_pos + len(pattern_upper) == len(contractor_name_upper)
-                                    has_space_before = pattern_pos > 0 and contractor_name_upper[pattern_pos - 1] in [' ', '-', '_', ',', '.', '(', '/']
-                                    has_space_after = (pattern_pos + len(pattern_upper) < len(contractor_name_upper) and 
-                                                      contractor_name_upper[pattern_pos + len(pattern_upper)] in [' ', '-', '_', ',', '.', ')', '/'])
-                                    
-                                    if is_start or is_end or has_space_before or has_space_after:
-                                        return (congressman_name, "contractor", 50)
-                    
-                    # For A.D. GONZALES: Match contractor names containing "A.D. GONZALES"
-                    if 'A.D. GONZALES' in contractor_upper:
-                        if 'A.D. GONZALES' in contractor_name_upper:
-                            return (congressman_name, "contractor", 50)
-                    
-                    # For all other contractors: check if contractor name (or key parts) appears in project contractor
-                    # Extract key identifier from contractor name (remove common suffixes)
-                    contractor_key = contractor_upper
-                    # Remove common suffixes for matching
-                    for suffix in [' INC.', ' INC', ' CORPORATION', ' CORP.', ' CORP', ', INC.', ', INC', ' CONSTRUCTION', ' CONSTRUCTION & GENERAL TRADING']:
-                        if contractor_key.endswith(suffix):
-                            contractor_key = contractor_key[:-len(suffix)].strip()
-                    
-                    # Helper function to check word boundary match (spaces, start, end, punctuation)
-                    def has_word_boundary_match(text, pattern):
-                        """Check if pattern appears in text with word boundaries to avoid false matches"""
-                        if pattern not in text:
-                            return False
-                        pos = text.find(pattern)
-                        if pos < 0:
-                            return False
-                        # Check boundaries: must be at start, end, or have space/punctuation before/after
-                        is_start = pos == 0
-                        is_end = pos + len(pattern) == len(text)
-                        has_boundary_before = pos > 0 and text[pos - 1] in [' ', '-', '_', ',', '.', '(', '/']
-                        has_boundary_after = (pos + len(pattern) < len(text) and 
-                                             text[pos + len(pattern)] in [' ', '-', '_', ',', '.', ')', '/'])
-                        return is_start or is_end or has_boundary_before or has_boundary_after
-                    
-                    # For contractors with multiple words, check if key parts match with word boundaries
-                    # For single-word contractors, use simpler substring matching
-                    if ' ' in contractor_key or '-' in contractor_key:
-                        # Multi-word contractor: use word boundary matching
-                        if has_word_boundary_match(contractor_name_upper, contractor_key) or has_word_boundary_match(contractor_name_upper, contractor_upper):
-                            return (congressman_name, "contractor", 50)
-                    else:
-                        # Single-word contractor: simple substring match (but check it's not a false match)
-                        if contractor_key in contractor_name_upper or contractor_upper in contractor_name_upper:
-                            # Verify it's a word boundary match to avoid false positives
-                            if has_word_boundary_match(contractor_name_upper, contractor_key) or has_word_boundary_match(contractor_name_upper, contractor_upper):
+                            if pattern_upper in contractor_name_upper and not _contractor_is_excluded(contractor_name_upper):
                                 return (congressman_name, "contractor", 50)
-                    
-                    # Also check if project contractor name appears in congressman's contractor name
-                    # (e.g., "NEWINGTON BUILDERS, INC." matches "NEWINGTON BUILDERS, INC. (FOR: E. GARDIOLA CONSTRUC")
-                    if contractor_name_upper in contractor_upper:
-                        return (congressman_name, "contractor", 50)
+            else:
+                # No explicit contractor name on the record, attempt to match patterns in combined text
+                normalized_text = _normalize_for_match(combined_text)
+                for contractor in contractors:
+                    contractor_upper = contractor.upper()
+                    for pattern in ['SUNWEST', 'ROVING PREMIER', 'VIRKAR', 'GARDIOLA', 'NEWINGTON', 'S-ANG', 'JSG']:
+                        if pattern in contractor_upper and pattern in normalized_text:
+                            if not _contractor_is_excluded(normalized_text):
+                                return (congressman_name, "contractor", 40)
         
         # 3. Get district identifier (province or city name)
         # If no district identifier, return None (unless we already matched via contractor above)
@@ -461,7 +602,7 @@ class DynastyProjectsCacheGenerator:
         
         return (None, None, 0)
     
-    async def process_projects(self, dynasty_conn, dime_conn, philgeps_conn, congressmen_data: Dict, districts_data: Dict) -> List[Dict]:
+    async def process_projects(self, dynasty_conn, dime_conn, philgeps_conn, infrawatch_conn, congressmen_data: Dict, districts_data: Dict) -> List[Dict]:
         """Process projects from all databases"""
         all_projects = []
         
@@ -527,7 +668,7 @@ class DynastyProjectsCacheGenerator:
                                 print(f"✅ Matched Romualdez (SSP): {proj.ProjectDescription[:80]}... -> {location_str} [{match_type}:{match_score}]")
                             all_projects.append({
                                 "congressman": matched_congressman,
-                                "source": "SSP",
+                                "source": self._normalize_source_label("SSP"),
                                 "meilisearch_id": proj.id if hasattr(proj, 'id') else None,
                                 "project_name": proj.ProjectDescription or "N/A",
                                 "contractor": proj.Contractor or "N/A",
@@ -596,7 +737,7 @@ class DynastyProjectsCacheGenerator:
                             print(f"✅ Matched Romualdez (DIME): {proj['project_name'][:80]}... -> {location_str} [{match_type}:{match_score}]")
                         all_projects.append({
                             "congressman": matched_congressman,
-                            "source": "DIME",
+                            "source": self._normalize_source_label("DIME"),
                             "meilisearch_id": proj.get('meilisearch_id'),
                             "project_name": proj['project_name'] or "N/A",
                             "contractor": contractor_str if contractor_str else "N/A",
@@ -648,7 +789,7 @@ class DynastyProjectsCacheGenerator:
                         print(f"✅ Matched Romualdez (PhilGEPS): {contract.get('award_title','')[:80]}... -> {area_of_delivery} [{match_type}:{match_score}]")
                     all_projects.append({
                         "congressman": matched_congressman,
-                        "source": "PhilGEPS",
+                        "source": self._normalize_source_label("PhilGEPS"),
                         "meilisearch_id": contract.get('meilisearch_id'),
                         "project_name": contract['award_title'] or "N/A",
                         "contractor": contract['awardee_name'] or "N/A",
@@ -663,7 +804,104 @@ class DynastyProjectsCacheGenerator:
         except Exception as e:
             print(f"Error processing PhilGEPS projects: {e}")
         
+        # Process Infrawatch projects (unmatched rows only)
+        try:
+            infrawatch_projects = await self.process_infrawatch_projects(infrawatch_conn, congressmen_data, districts_data)
+            if infrawatch_projects:
+                print(f"✅ Processed {len(infrawatch_projects)} Infrawatch projects")
+                all_projects.extend(infrawatch_projects)
+        except Exception as e:
+            print(f"Error processing Infrawatch projects: {e}")
+        
         return all_projects
+
+    async def process_infrawatch_projects(self, infrawatch_conn, congressmen_data: Dict, districts_data: Dict) -> List[Dict]:
+        """Match Infrawatch (unlinked) projects to congressmen."""
+        projects: List[Dict] = []
+        if not infrawatch_conn:
+            return projects
+
+        rows = await infrawatch_conn.fetch(
+            """
+            SELECT data
+            FROM infrawatch_projects_rows
+            WHERE philgeps_contract_id IS NULL
+            """
+        )
+
+        for row in rows:
+            if isinstance(row, dict):
+                record = row.get("data")
+            else:
+                record = row["data"] if "data" in row else row[0]
+            if isinstance(record, str):
+                try:
+                    record = json.loads(record)
+                except json.JSONDecodeError:
+                    continue
+            if not isinstance(record, dict):
+                continue
+
+            description = (record.get("Contract Details") or record.get("Project Description") or "").upper()
+            contractor_raw = (
+                record.get("Contractor")
+                or record.get("Contractor Name")
+                or record.get("Contractor_Name")
+                or ""
+            )
+            contractor = contractor_raw.upper()
+            agency = (record.get("Implementing Agency") or "").upper()
+            fund_source = (record.get("Fund Source") or "").upper()
+
+            combined_text = f"{description} {agency} {fund_source} {contractor}"
+
+            matches = []
+            for cm_name, cm_data in congressmen_data.items():
+                cm_name_result, match_type_result, match_score_result = self.match_project(
+                    combined_text,
+                    cm_data,
+                    districts_data,
+                    contractor
+                )
+                if cm_name_result and match_score_result > 0:
+                    matches.append((cm_name_result, match_type_result, match_score_result))
+
+            if not matches:
+                continue
+
+            # Parse amount
+            amount_raw = (
+                record.get("Contract Price")
+                or record.get("Contract Amount")
+                or record.get("Amount")
+                or record.get("Constract Price")
+            )
+            amount = 0.0
+            if isinstance(amount_raw, (int, float)):
+                amount = float(amount_raw)
+            elif isinstance(amount_raw, str):
+                try:
+                    amount = float(amount_raw.replace("₱", "").replace(",", "").strip())
+                except ValueError:
+                    amount = 0.0
+
+            for matched_congressman, match_type, match_score in matches:
+                projects.append({
+                    "congressman": matched_congressman,
+                    "source": self._normalize_source_label("Infrawatch"),
+                    "meilisearch_id": None,
+                    "project_name": record.get("Contract Details") or record.get("Project Description") or "N/A",
+                    "contractor": contractor_raw or "N/A",
+                    "amount": amount,
+                    "location": record.get("Implementing Agency") or record.get("Project Location") or "N/A",
+                    "year": None,
+                    "status": record.get("Contract Status") or "N/A",
+                    "match_type": match_type,
+                    "match_score": match_score,
+                    "is_city_wide": (match_score == 1 and match_type == "district")
+                })
+
+        return projects
     
     async def generate_cache(self):
         """Generate the cached JSON file"""
@@ -674,53 +912,84 @@ class DynastyProjectsCacheGenerator:
         print(f"✅ Loaded config with {len(config_data.get('target_congressmen', []))} congressmen")
         
         # Connect to databases
-        dynasty_conn = await asyncpg.connect(
-            host=os.getenv('POSTGRES_HOST', 'localhost'),
-            port=int(os.getenv('POSTGRES_PORT', 5432)),
-            user=os.getenv('POSTGRES_USER', 'budget_admin'),
-            password=os.getenv('POSTGRES_PASSWORD', ''),
-            database=os.getenv('POSTGRES_DB_DYNASTY', 'dynasty')
-        )
-        
-        dime_conn = await asyncpg.connect(
-            host=os.getenv('POSTGRES_HOST', 'localhost'),
-            port=int(os.getenv('POSTGRES_PORT', 5432)),
-            user=os.getenv('POSTGRES_USER', 'budget_admin'),
-            password=os.getenv('POSTGRES_PASSWORD', ''),
-            database=os.getenv('POSTGRES_DB_DIME', 'dime')
-        )
-        
-        philgeps_conn = await asyncpg.connect(
-            host=os.getenv('POSTGRES_HOST', 'localhost'),
-            port=int(os.getenv('POSTGRES_PORT', 5432)),
-            user=os.getenv('POSTGRES_USER', 'budget_admin'),
-            password=os.getenv('POSTGRES_PASSWORD', ''),
-            database=os.getenv('POSTGRES_DB_PHILGEPS', 'philgeps')
-        )
+        common_db_kwargs = {
+            "host": os.getenv('POSTGRES_HOST', 'localhost'),
+            "port": int(os.getenv('POSTGRES_PORT', 5432)),
+            "user": os.getenv('POSTGRES_USER', 'budget_admin'),
+            "password": os.getenv('POSTGRES_PASSWORD', '')
+        }
+
+        dynasty_conn = await asyncpg.connect(**{
+            **common_db_kwargs,
+            "database": os.getenv('POSTGRES_DB_DYNASTY', 'dynasty')
+        })
+
+        dime_conn = await asyncpg.connect(**{
+            **common_db_kwargs,
+            "database": os.getenv('POSTGRES_DB_DIME', 'dime')
+        })
+
+        philgeps_conn = await asyncpg.connect(**{
+            **common_db_kwargs,
+            "database": os.getenv('POSTGRES_DB_PHILGEPS', 'philgeps')
+        })
+
+        infrawatch_conn = await get_infrawatch_connection()
         
         try:
+            political_dynasties_available = True
+            try:
+                exists_query = """
+                    SELECT EXISTS (
+                        SELECT 1 FROM information_schema.tables
+                        WHERE table_schema = 'public' AND table_name = 'political_dynasties'
+                    )
+                """
+                political_dynasties_available = await dynasty_conn.fetchval(exists_query)
+            except Exception:
+                political_dynasties_available = False
+            if not political_dynasties_available:
+                print("⚠️  Dynasty DB missing political_dynasties table. Using config-only data.")
+
             # Get congressmen data
-            congressmen_data = await self.get_congressmen_data(dynasty_conn, config_data, districts_data)
+            congressmen_data = await self.get_congressmen_data(
+                dynasty_conn,
+                config_data,
+                districts_data,
+                political_dynasties_available
+            )
             print(f"✅ Loaded {len(congressmen_data)} congressmen")
             
             # Process projects
-            all_projects = await self.process_projects(dynasty_conn, dime_conn, philgeps_conn, congressmen_data, districts_data)
+            all_projects = await self.process_projects(
+                dynasty_conn,
+                dime_conn,
+                philgeps_conn,
+                infrawatch_conn,
+                congressmen_data,
+                districts_data
+            )
             print(f"✅ Processed {len(all_projects)} projects")
             
             # Deduplicate and add cross-database bonus
             # Original logic: deduplicate by project key, track all sources and all congressmen
             projects_by_key = {}
             for proj in all_projects:
-                key = proj.get('meilisearch_id') or f"{proj.get('project_name', '')}_{proj.get('amount', 0)}_{proj.get('location', '')}"
-                
+                source_label = self._normalize_source_label(proj.get('source', 'Unknown'))
+                proj['source'] = source_label
+                key = proj.get('meilisearch_id') or self._build_project_key(proj)
+
                 if key not in projects_by_key:
                     projects_by_key[key] = {
-                        'project': proj,
+                        'project': proj.copy(),
                         'sources': set(),
                         'congressmen': set()
                     }
-                
-                projects_by_key[key]['sources'].add(proj.get('source', 'Unknown'))
+                else:
+                    merged_project = self._merge_project_records(projects_by_key[key]['project'], proj)
+                    projects_by_key[key]['project'] = merged_project
+
+                projects_by_key[key]['sources'].add(source_label)
                 projects_by_key[key]['congressmen'].add(proj.get('congressman', 'Unknown'))
             
             # Build unique projects list
@@ -733,7 +1002,7 @@ class DynastyProjectsCacheGenerator:
                 proj['_all_congressmen'] = list(data['congressmen'])
                 
                 # New scoring system:
-                # 1. Base score: 1 point per 2M (max 70)
+                # 1. Base score: 1 point per 2M (max 60)
                 amount = proj.get('amount', 0)
                 if isinstance(amount, str):
                     # Handle string amounts like "₱270,194,706"
@@ -744,20 +1013,20 @@ class DynastyProjectsCacheGenerator:
                         amount = 0
                 
                 amount_in_millions = amount / 1_000_000
-                base_score = min(70, int(amount_in_millions / 2))  # 1 point per 2M, max 70
+                base_score = min(60, int(amount_in_millions / 2))  # 1 point per 2M, max 60
                 
-                # 2. Add +10 per database
-                db_bonus = sources_count * 10
+                # 2. Add +10 per database (capped per project)
+                db_bonus = min(40, sources_count * 10)
                 
                 # 3. Calculate total score
                 current_score = base_score + db_bonus
                 
-                # 4. For city-type districts: penalize city-wide matches (no barangay) by -50
+                # 4. For city-type districts: penalize city-wide matches (no barangay) by -40
                 # Check if this was a city-wide match using the is_city_wide flag
                 is_city_wide = proj.get('is_city_wide', False)
                 if is_city_wide:
-                    # City-wide match - apply -50 penalty
-                    current_score = max(0, current_score - 50)
+                    # City-wide match - apply -40 penalty
+                    current_score = max(0, current_score - 40)
                 
                 proj['match_score'] = current_score
                 proj['sources_count'] = sources_count
@@ -771,10 +1040,15 @@ class DynastyProjectsCacheGenerator:
             unique_projects.sort(key=lambda x: (x.get('match_score', 0), x.get('amount', 0)), reverse=True)
             
             # Calculate summary
+            ssp_count = len([p for p in unique_projects if 'SSP' in (p.get('sources_list', []))])
+            microsite_count = len([p for p in unique_projects if 'Microsite' in (p.get('sources_list', []))])
             summary = {
                 "total": len(unique_projects),
                 "dime": len([p for p in unique_projects if 'DIME' in (p.get('sources_list', []))]),
                 "philgeps": len([p for p in unique_projects if 'PhilGEPS' in (p.get('sources_list', []))]),
+                "ssp": ssp_count,
+                "infrawatch": microsite_count,
+                "microsite": microsite_count,
                 "district_projects": len([p for p in unique_projects if p.get('match_type') == 'district']),
                 "contractor_projects": len([p for p in unique_projects if p.get('match_type') == 'contractor'])
             }
@@ -809,6 +1083,39 @@ class DynastyProjectsCacheGenerator:
             chart_data = sorted(
                 list(congressman_stats.values()),
                 key=lambda x: x["count"],
+                reverse=True
+            )
+            chart_top10_by_count = chart_data[:10]
+            chart_top10_by_cost = sorted(
+                list(congressman_stats.values()),
+                key=lambda x: x["total_cost"],
+                reverse=True
+            )[:10]
+
+            # Calculate totals for chart_data
+            for stat in chart_data:
+                stat["average_cost"] = stat["total_cost"] / stat["count"] if stat["count"] else 0
+
+            # Prepare chart data for counts and costs
+            chart_data_by_count = [
+                {
+                    "name": stat["name"],
+                    "count": stat["count"],
+                    "total_cost": stat["total_cost"]
+                }
+                for stat in chart_data
+            ]
+
+            chart_data_by_cost = sorted(
+                [
+                    {
+                        "name": stat["name"],
+                        "count": stat["count"],
+                        "total_cost": stat["total_cost"]
+                    }
+                    for stat in chart_data
+                ],
+                key=lambda x: x["total_cost"],
                 reverse=True
             )
             
@@ -853,6 +1160,10 @@ class DynastyProjectsCacheGenerator:
                 "projects": unique_projects,
                 "summary": summary,
                 "chart_data": chart_data,
+                "chart_data_by_count": chart_data_by_count,
+                "chart_data_by_cost": chart_data_by_cost,
+                "chart_top10_by_count": chart_top10_by_count,
+                "chart_top10_by_cost": chart_top10_by_cost,
                 "dashboard_stats": dashboard_stats,
                 "generated_at": datetime.now().isoformat(),
                 "cache_version": "1.0"
@@ -930,6 +1241,9 @@ class DynastyProjectsCacheGenerator:
                     "total": len(congressman_projects),
                     "dime": len([p for p in congressman_projects if 'DIME' in (p.get('sources_list', []))]),
                     "philgeps": len([p for p in congressman_projects if 'PhilGEPS' in (p.get('sources_list', []))]),
+                    "ssp": len([p for p in congressman_projects if 'SSP' in (p.get('sources_list', []))]),
+                    "infrawatch": len([p for p in congressman_projects if 'Infrawatch' in (p.get('sources_list', []))]),
+                    "microsite": len([p for p in congressman_projects if 'Infrawatch' in (p.get('sources_list', []))]),
                     "district_projects": congressman_district_count,
                     "contractor_projects": congressman_contractor_count
                 }
@@ -985,6 +1299,8 @@ class DynastyProjectsCacheGenerator:
             await dynasty_conn.close()
             await dime_conn.close()
             await philgeps_conn.close()
+            if infrawatch_conn:
+                await infrawatch_conn.close()
 
 async def main():
     generator = DynastyProjectsCacheGenerator()

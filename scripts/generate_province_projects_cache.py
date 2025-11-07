@@ -21,6 +21,48 @@ from flood_client import FloodControlClient
 # Load environment variables
 load_dotenv()
 
+SOURCE_PRIORITY = ["SSP", "DIME", "PhilGEPS", "Microsite"]
+
+
+def normalize_source_label(source: Optional[str]) -> str:
+    if not source:
+        return "Unknown"
+    normalized = str(source).strip()
+    lower = normalized.lower()
+    if lower in {"microsite", "dpwh microsite", "infrawatch"}:
+        return "Microsite"
+    return normalized
+
+
+def sort_sources_list(sources: List[str]) -> List[str]:
+    unique = []
+    for src in sources:
+        label = normalize_source_label(src)
+        if label not in unique:
+            unique.append(label)
+    return sorted(unique, key=lambda label: SOURCE_PRIORITY.index(label) if label in SOURCE_PRIORITY else len(SOURCE_PRIORITY))
+
+
+def normalize_text_for_key(value: Optional[str]) -> str:
+    if not value:
+        return ""
+    return " ".join(str(value).strip().lower().split())
+
+
+def normalize_amount_for_key(value: Any) -> str:
+    if value is None:
+        return "0.00"
+    if isinstance(value, (int, float)):
+        return f"{float(value):.2f}"
+    cleaned = str(value)
+    for ch in ["₱", ",", "PHP", "php"]:
+        cleaned = cleaned.replace(ch, "")
+    try:
+        return f"{float(cleaned.strip() or 0):.2f}"
+    except ValueError:
+        return cleaned.strip().lower()
+
+
 class ProvinceProjectsCacheGenerator:
     """Generate cached JSON for province-projects (Cebu)"""
     
@@ -329,30 +371,95 @@ class ProvinceProjectsCacheGenerator:
             all_projects = ssp_projects + dime_projects + philgeps_projects
             print(f"✅ Total projects found: {len(all_projects)}")
             
-            # Deduplicate projects
-            projects_by_key = {}
+            # Deduplicate projects across sources
+            projects_by_key: Dict[str, Dict[str, Any]] = {}
+            fallback_by_contractor_amount: Dict[str, Dict[str, Any]] = {}
+            generic_titles = {
+                "construction project",
+                "maintenance project",
+                "repair project",
+                "rehabilitation project"
+            }
+
             for proj in all_projects:
-                # Create a unique key based on project name, amount, and location
-                key = f"{proj.get('project_name', '')}_{proj.get('amount', 0)}_{proj.get('location', '')}"
-                
-                if key not in projects_by_key:
-                    projects_by_key[key] = {
-                        'project': proj,
-                        'sources': set(),
+                base_project = proj.copy()
+                base_project['source'] = normalize_source_label(base_project.get('source'))
+                base_project['amount'] = float(base_project.get('amount', 0) or 0)
+                base_project.setdefault('location', 'N/A')
+                base_project.setdefault('province', 'N/A')
+                base_project.setdefault('municipality', 'N/A')
+                base_project.setdefault('status', 'N/A')
+                base_project.setdefault('year', 'N/A')
+
+                primary_key = "|".join([
+                    normalize_text_for_key(base_project.get('project_name') or base_project.get('award_title') or ''),
+                    normalize_text_for_key(base_project.get('contractor') or base_project.get('awardee_name') or ''),
+                    normalize_amount_for_key(base_project.get('amount', 0))
+                ])
+                contractor_amount_key = "|".join([
+                    normalize_text_for_key(base_project.get('contractor') or base_project.get('awardee_name') or ''),
+                    normalize_amount_for_key(base_project.get('amount', 0))
+                ])
+
+                entry = projects_by_key.get(primary_key)
+                if entry is None and contractor_amount_key:
+                    entry = fallback_by_contractor_amount.get(contractor_amount_key)
+
+                if entry is None:
+                    entry = {
+                        'project': base_project,
+                        'sources': set([base_project['source']])
                     }
-                
-                projects_by_key[key]['sources'].add(proj.get('source', 'Unknown'))
+                else:
+                    existing = entry['project']
+                    entry['sources'].add(base_project['source'])
+
+                    # Prefer richer project name when PhilGEPS title is generic
+                    existing_name = existing.get('project_name') or existing.get('award_title') or ''
+                    new_name = base_project.get('project_name') or base_project.get('award_title') or ''
+                    existing_name_norm = existing_name.strip().lower()
+                    new_name_norm = new_name.strip().lower()
+                    if (existing_name_norm in generic_titles or len(existing_name_norm) < 10) and len(new_name_norm) > len(existing_name_norm):
+                        existing['project_name'] = new_name
+
+                    # Prefer richer location information
+                    if base_project.get('location') and (existing.get('location') in (None, '', 'N/A') or len(base_project['location']) > len(existing.get('location', ''))):
+                        existing['location'] = base_project['location']
+
+                    # Fill missing province/municipality/barangay
+                    for field in ['province', 'municipality', 'barangay']:
+                        if base_project.get(field) and (existing.get(field) in (None, '', 'N/A')):
+                            existing[field] = base_project[field]
+
+                    # Prefer known status/year values
+                    if base_project.get('status') and base_project['status'] not in (None, '', 'N/A') and existing.get('status') in (None, '', 'N/A'):
+                        existing['status'] = base_project['status']
+                    if base_project.get('year') and base_project['year'] not in (None, '', 'N/A') and existing.get('year') in (None, '', 'N/A'):
+                        existing['year'] = base_project['year']
+
+                    # Keep source with highest priority as primary
+                    current_source = existing.get('source', 'Unknown')
+                    sources_sorted = sort_sources_list([current_source, base_project['source']])
+                    existing['source'] = sources_sorted[0] if sources_sorted else current_source
+                    entry['sources'].update(sources_sorted)
+
+                # Update indices for this entry
+                projects_by_key[primary_key] = entry
+                if contractor_amount_key:
+                    fallback_by_contractor_amount[contractor_amount_key] = entry
             
             # Build unique projects list
             unique_projects = []
-            for key, data in projects_by_key.items():
-                proj = data['project'].copy()
-                sources_count = len(data['sources'])
-                
-                proj['sources_count'] = sources_count
-                proj['sources_list'] = sorted(list(data['sources']))
-                
-                unique_projects.append(proj)
+            seen_entries = set()
+            for entry in projects_by_key.values():
+                proj = entry['project']
+                sources_list = sort_sources_list(list(entry['sources']))
+                proj['sources_list'] = sources_list
+                proj['sources_count'] = len(sources_list)
+                entry_id = id(proj)
+                if entry_id not in seen_entries:
+                    unique_projects.append(proj)
+                    seen_entries.add(entry_id)
             
             # Sort by amount descending
             unique_projects.sort(key=lambda x: x.get('amount', 0), reverse=True)
@@ -478,6 +585,7 @@ class ProvinceProjectsCacheGenerator:
                 "ssp": len([p for p in unique_projects if 'SSP' in (p.get('sources_list', []))]),
                 "dime": len([p for p in unique_projects if 'DIME' in (p.get('sources_list', []))]),
                 "philgeps": len([p for p in unique_projects if 'PhilGEPS' in (p.get('sources_list', []))]),
+                "microsite": len([p for p in unique_projects if 'Microsite' in (p.get('sources_list', []))]),
             }
             
             # Calculate total cost
@@ -521,6 +629,7 @@ class ProvinceProjectsCacheGenerator:
                     "ssp": len([p for p in contractor_projects if 'SSP' in (p.get('sources_list', []))]),
                     "dime": len([p for p in contractor_projects if 'DIME' in (p.get('sources_list', []))]),
                     "philgeps": len([p for p in contractor_projects if 'PhilGEPS' in (p.get('sources_list', []))]),
+                    "microsite": len([p for p in contractor_projects if 'Microsite' in (p.get('sources_list', []))]),
                 }
                 
                 contractor_total_cost = sum(
@@ -588,7 +697,7 @@ class ProvinceProjectsCacheGenerator:
                 small_contractors_projects = {}
                 small_contractors_total = 0
                 small_contractors_total_cost = 0
-                small_contractors_summary = {"total": 0, "ssp": 0, "dime": 0, "philgeps": 0}
+                small_contractors_summary = {"total": 0, "ssp": 0, "dime": 0, "philgeps": 0, "microsite": 0}
                 
                 for contractor, contractor_projects in small_contractors.items():
                     small_contractors_projects[contractor] = contractor_projects
@@ -606,6 +715,7 @@ class ProvinceProjectsCacheGenerator:
                             small_contractors_summary["dime"] += 1
                         if 'PhilGEPS' in sources_list:
                             small_contractors_summary["philgeps"] += 1
+                        small_contractors_summary["microsite"] += len([p for p in contractor_projects if 'Microsite' in (p.get('sources_list', []))])
                 
                 small_contractors_summary["total"] = small_contractors_total
                 

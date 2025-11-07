@@ -341,28 +341,30 @@ function toggleMobileMenu() {
                         </div>
                         
                         <!-- Data Source Legend -->
-                        <div style="margin-bottom: 20px; padding: 15px; background: #f8f9fa; border-radius: 8px; border: 1px solid #dee2e6;">
-                            <h4 style="margin: 0 0 10px 0; color: #333; font-size: 14px; font-weight: 600;">Data Sources:</h4>
-                            <div style="display: flex; flex-wrap: wrap; gap: 20px; font-size: 13px; align-items: center;">
-                                <div style="display: flex; align-items: center; gap: 8px;">
-                                    <span style="padding: 4px 8px; border-radius: 4px; font-size: 12px; font-weight: 600; 
-                                        background: #e3f2fd; color: #1565c0; border: 1px solid #90caf9; white-space: nowrap;">SSP</span>
-                                    <span style="color: #666;">Sumbong sa Pangulo</span>
+                        <div style="margin-bottom: 24px; padding: 18px; border-radius: 10px; border: 1px solid rgba(51, 65, 85, 0.08); background: linear-gradient(135deg, rgba(255,255,255,0.95) 0%, rgba(248,250,252,0.95) 100%); box-shadow: 0 8px 24px rgba(15, 23, 42, 0.08);">
+                            <div style="display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap; margin-bottom: 16px;">
+                                <h4 style="margin: 0; color: #0f172a; font-size: 15px; font-weight: 700; letter-spacing: 0.6px; text-transform: uppercase;">Data Sources</h4>
+                                <span style="display: inline-flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 600; color: #475569; background: rgba(148, 163, 184, 0.15); padding: 6px 10px; border-radius: 999px;">
+                                    <span style="display: inline-block; width: 8px; height: 8px; border-radius: 999px; background: #14b8a6; box-shadow: 0 0 0 3px rgba(20, 184, 166, 0.15);"></span>
+                                    Unified Pipeline
+                                </span>
+                            </div>
+                            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 18px; font-size: 13px;">
+                                <div style="display: flex; align-items: center; gap: 12px; padding: 12px 14px; border-radius: 8px; background: rgba(59, 130, 246, 0.08); border: 1px solid rgba(59, 130, 246, 0.2);">
+                                    <span style="display: inline-flex; align-items: center; justify-content: center; min-width: 54px; height: 28px; padding: 0 12px; border-radius: 999px; font-size: 12px; font-weight: 700; letter-spacing: 0.5px; color: #1d4ed8; background: rgba(191, 219, 254, 0.6); border: 1px solid rgba(59, 130, 246, 0.3);">SSP</span>
+                                    <span style="color: #1e293b; font-weight: 600;">Sumbong sa Pangulo flood-control intake</span>
                                 </div>
-                                <div style="display: flex; align-items: center; gap: 8px;">
-                                    <span style="padding: 4px 8px; border-radius: 4px; font-size: 12px; font-weight: 600; 
-                                        background: #f3e5f5; color: #7b1fa2; border: 1px solid #ba68c8; white-space: nowrap;">DIME</span>
-                                    <span style="color: #666;">Database of Infrastructure Monitoring and Evaluation</span>
+                                <div style="display: flex; align-items: center; gap: 12px; padding: 12px 14px; border-radius: 8px; background: rgba(168, 85, 247, 0.08); border: 1px solid rgba(139, 92, 246, 0.2);">
+                                    <span style="display: inline-flex; align-items: center; justify-content: center; min-width: 54px; height: 28px; padding: 0 12px; border-radius: 999px; font-size: 12px; font-weight: 700; letter-spacing: 0.5px; color: #6b21a8; background: rgba(233, 213, 255, 0.6); border: 1px solid rgba(139, 92, 246, 0.3);">DIME</span>
+                                    <span style="color: #1e293b; font-weight: 600;">DPWH DIME civil-works tracker</span>
                                 </div>
-                                <div style="display: flex; align-items: center; gap: 8px;">
-                                    <span style="padding: 4px 8px; border-radius: 4px; font-size: 12px; font-weight: 600; 
-                                        background: #fff3e0; color: #e65100; border: 1px solid #ffb74d; white-space: nowrap;">PhilGEPS</span>
-                                    <span style="color: #666;">Philippine Government Electronic Procurement System</span>
+                                <div style="display: flex; align-items: center; gap: 12px; padding: 12px 14px; border-radius: 8px; background: rgba(249, 115, 22, 0.08); border: 1px solid rgba(234, 88, 12, 0.2);">
+                                    <span style="display: inline-flex; align-items: center; justify-content: center; min-width: 54px; height: 28px; padding: 0 12px; border-radius: 999px; font-size: 12px; font-weight: 700; letter-spacing: 0.5px; color: #9a3412; background: rgba(253, 186, 116, 0.6); border: 1px solid rgba(249, 115, 22, 0.3);">PhilGEPS</span>
+                                    <span style="color: #1e293b; font-weight: 600;">PhilGEPS award notices & abstracts</span>
                                 </div>
-                                <div style="display: flex; align-items: center; gap: 8px;">
-                                    <span style="padding: 4px 8px; border-radius: 4px; font-size: 12px; font-weight: 600; 
-                                        background: #fff4e6; color: #b45309; border: 1px solid #fbbf24; white-space: nowrap;">Microsite</span>
-                                    <span style="color: #666;">DPWH Infrastructure Status Microsite</span>
+                                <div style="display: flex; align-items: center; gap: 12px; padding: 12px 14px; border-radius: 8px; background: rgba(236, 72, 153, 0.08); border: 1px solid rgba(219, 39, 119, 0.2);">
+                                    <span style="display: inline-flex; align-items: center; justify-content: center; min-width: 54px; height: 28px; padding: 0 12px; border-radius: 999px; font-size: 12px; font-weight: 700; letter-spacing: 0.5px; color: #be185d; background: rgba(244, 114, 182, 0.6); border: 1px solid rgba(236, 72, 153, 0.3);">Microsite</span>
+                                    <span style="color: #1e293b; font-weight: 600;">DPWH Microsite submissions</span>
                                 </div>
                             </div>
                         </div>
@@ -508,7 +510,6 @@ function toggleMobileMenu() {
                                     <label style="font-weight: 700; color: #333; font-size: 14px; text-transform: uppercase; letter-spacing: 0.5px;">Filter by Province</label>
                                     <input type="text" id="province-filter" list="province-list" placeholder="Type to search province..." value="Cebu" style="padding: 12px 16px; border: 2px solid #333; border-radius: 6px; font-size: 14px; font-weight: 600; background: white; color: #333; box-shadow: 0 2px 8px rgba(0,0,0,0.1); transition: all 0.3s ease;" onmouseover="this.style.borderColor='#667eea'; this.style.boxShadow='0 4px 12px rgba(102, 126, 234, 0.3)';" onmouseout="this.style.borderColor='#333'; this.style.boxShadow='0 2px 8px rgba(0,0,0,0.1)';" onchange="handleProvinceFilterChange()" oninput="handleProvinceFilterChange()">
                                     <datalist id="province-list">
-                                        <option value="All Provinces">All Provinces</option>
                                         <option value="Abra">Abra</option>
                                         <option value="Agusan del Norte">Agusan del Norte</option>
                                         <option value="Agusan del Sur">Agusan del Sur</option>
@@ -612,17 +613,31 @@ function toggleMobileMenu() {
                         </div>
                         
                         <!-- Data Source Legend -->
-                        <div style="margin-bottom: 20px; padding: 15px; background: #f8f9fa; border-radius: 8px; border: 1px solid #dee2e6;">
-                            <h4 style="margin: 0 0 10px 0; color: #333; font-size: 14px; font-weight: 600;">Data Sources:</h4>
-                            <div style="display: flex; flex-wrap: wrap; gap: 10px;">
-                                <span style="padding: 6px 10px; border-radius: 20px; background: #e3f2fd; color: #0d47a1; font-size: 12px; font-weight: 600;">🔵 SSP Flood Control</span>
-                                <span style="color: #666;">Sumbong sa Pangulo</span>
-                                <span style="padding: 6px 10px; border-radius: 20px; background: #f3e5f5; color: #4a148c; font-size: 12px; font-weight: 600;">🟣 DIME Infrastructure</span>
-                                <span style="color: #666;">Database of Infrastructure Monitoring and Evaluation</span>
-                                <span style="padding: 6px 10px; border-radius: 20px; background: #fff3e0; color: #e65100; border: 1px solid #ffb74d; white-space: nowrap;">🟡 PhilGEPS</span>
-                                <span style="color: #666;">Philippine Government Electronic Procurement System</span>
-                                <span style="padding: 6px 10px; border-radius: 20px; background: #fff4e6; color: #b45309; border: 1px solid #fbbf24; white-space: nowrap;">🟠 Microsite</span>
-                                <span style="color: #666;">DPWH Infrastructure Status Microsite</span>
+                        <div style="margin-bottom: 24px; padding: 18px; border-radius: 10px; border: 1px solid rgba(51, 65, 85, 0.08); background: linear-gradient(135deg, rgba(255,255,255,0.95) 0%, rgba(248,250,252,0.95) 100%); box-shadow: 0 8px 24px rgba(15, 23, 42, 0.08);">
+                            <div style="display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap; margin-bottom: 16px;">
+                                <h4 style="margin: 0; color: #0f172a; font-size: 15px; font-weight: 700; letter-spacing: 0.6px; text-transform: uppercase;">Data Sources</h4>
+                                <span style="display: inline-flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 600; color: #475569; background: rgba(148, 163, 184, 0.15); padding: 6px 10px; border-radius: 999px;">
+                                    <span style="display: inline-block; width: 8px; height: 8px; border-radius: 999px; background: #14b8a6; box-shadow: 0 0 0 3px rgba(20, 184, 166, 0.15);"></span>
+                                    Unified Pipeline
+                                </span>
+                            </div>
+                            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 18px; font-size: 13px;">
+                                <div style="display: flex; align-items: center; gap: 12px; padding: 12px 14px; border-radius: 8px; background: rgba(59, 130, 246, 0.08); border: 1px solid rgba(59, 130, 246, 0.2);">
+                                    <span style="display: inline-flex; align-items: center; justify-content: center; min-width: 54px; height: 28px; padding: 0 12px; border-radius: 999px; font-size: 12px; font-weight: 700; letter-spacing: 0.5px; color: #1d4ed8; background: rgba(191, 219, 254, 0.6); border: 1px solid rgba(59, 130, 246, 0.3);">SSP</span>
+                                    <span style="color: #1e293b; font-weight: 600;">Sumbong sa Pangulo flood-control intake</span>
+                                </div>
+                                <div style="display: flex; align-items: center; gap: 12px; padding: 12px 14px; border-radius: 8px; background: rgba(168, 85, 247, 0.08); border: 1px solid rgba(139, 92, 246, 0.2);">
+                                    <span style="display: inline-flex; align-items: center; justify-content: center; min-width: 54px; height: 28px; padding: 0 12px; border-radius: 999px; font-size: 12px; font-weight: 700; letter-spacing: 0.5px; color: #6b21a8; background: rgba(233, 213, 255, 0.6); border: 1px solid rgba(139, 92, 246, 0.3);">DIME</span>
+                                    <span style="color: #1e293b; font-weight: 600;">DPWH DIME civil-works tracker</span>
+                                </div>
+                                <div style="display: flex; align-items: center; gap: 12px; padding: 12px 14px; border-radius: 8px; background: rgba(249, 115, 22, 0.08); border: 1px solid rgba(234, 88, 12, 0.2);">
+                                    <span style="display: inline-flex; align-items: center; justify-content: center; min-width: 54px; height: 28px; padding: 0 12px; border-radius: 999px; font-size: 12px; font-weight: 700; letter-spacing: 0.5px; color: #9a3412; background: rgba(253, 186, 116, 0.6); border: 1px solid rgba(249, 115, 22, 0.3);">PhilGEPS</span>
+                                    <span style="color: #1e293b; font-weight: 600;">PhilGEPS award notices & abstracts</span>
+                                </div>
+                                <div style="display: flex; align-items: center; gap: 12px; padding: 12px 14px; border-radius: 8px; background: rgba(236, 72, 153, 0.08); border: 1px solid rgba(219, 39, 119, 0.2);">
+                                    <span style="display: inline-flex; align-items: center; justify-content: center; min-width: 54px; height: 28px; padding: 0 12px; border-radius: 999px; font-size: 12px; font-weight: 700; letter-spacing: 0.5px; color: #be185d; background: rgba(244, 114, 182, 0.6); border: 1px solid rgba(236, 72, 153, 0.3);">Microsite</span>
+                                    <span style="color: #1e293b; font-weight: 600;">DPWH Microsite submissions</span>
+                                </div>
                             </div>
                         </div>
                         
@@ -930,8 +945,8 @@ let combinedChart = null;
 let currentChartData = null;
 let currentSortMode = 'cost';
 let prefetchedVisualData = null;
-let currentChartTop10ByCount = [];
-let currentChartTop10ByCost = [];
+let currentChartTop10ByCount = null;
+let currentChartTop10ByCost = null;
 
 function normalizeCongressmanName(name) {
     return (name || '')
@@ -1365,6 +1380,10 @@ function applyFilter() {
     if (filterInput && mode === 'All') {
         filterInput.value = originalValue;
     }
+
+    // Reset pagination and refresh results after filtering
+    currentPage = 1;
+    updateDisplay();
 }
 
 // Handle congressman filter change
@@ -1478,7 +1497,7 @@ function calculateSummary(projects) {
             if (src === 'SSP') summary.ssp++;
             if (src === 'DIME') summary.dime++;
             if (src === 'PhilGEPS') summary.philgeps++;
-            if (src === 'Microsite' || src === 'Infrawatch') summary.microsite++;
+            if (src === 'Microsite') summary.microsite++;
         });
         
         if (project.match_type === 'district') summary.district_projects++;
@@ -1494,7 +1513,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (congressmanList && initialCongressmanNames.length === 0) {
         initialCongressmanNames = Array.from(congressmanList.options)
             .map(opt => (opt.value || '').trim())
-            .filter(value => value.length > 0);
+            .filter(value => value && value.trim().length > 0);
     }
     await loadIntegratedCoverageSummary();
     sortCongressmanOptions();
@@ -2096,112 +2115,91 @@ let provinceAllProjectsData = []; // Store all Cebu projects
 let provinceFilteredData = []; // Filtered projects (for now, same as all since both options show Cebu)
 
 // Load Cebu province projects
-async function loadProvinceProjects() {
-    console.log('🔄 [Province Tab] loadProvinceProjects() called');
-    document.getElementById('province-loading').style.display = 'block';
-    document.getElementById('province-results-summary').style.display = 'none';
-    document.getElementById('province-projects-tbody').innerHTML = '<tr><td colspan="6" style="padding: 20px; text-align: center;">Loading...</td></tr>';
+async function loadProvinceProjects(prefetchedData = null) {
+    const provinceSelect = document.getElementById('province-filter');
+    let selectedProvince = provinceSelect ? provinceSelect.value : '';
+    if (!selectedProvince) {
+        if (provinceSelect && provinceSelect.options.length > 0) {
+            const firstOption = Array.from(provinceSelect.options).find(opt => opt.value && opt.value.trim().length > 0);
+            selectedProvince = firstOption ? firstOption.value : 'Cebu';
+            provinceSelect.value = selectedProvince;
+        } else {
+            selectedProvince = 'Cebu';
+        }
+    }
+
+    const province = selectedProvince;
     
-    try {
-        // Get selected province from filter
-        const provinceSelect = document.getElementById('province-filter');
-        const selectedProvince = provinceSelect ? provinceSelect.value : 'Cebu';
+    console.log(`🌐 [Province Tab] Fetching data for province: "${province}"`);
+    
+    // Load province projects from API (already filtered and sorted by cost descending)
+    const apiUrl = `/api/province-projects/all?page=1&limit=10000&province=${encodeURIComponent(province)}`;
+    console.log(`📡 [Province Tab] API URL: ${apiUrl}`);
+    
+    const response = await fetch(apiUrl);
+    
+    if (!response.ok) {
+        throw new Error(`API returned ${response.status}: ${response.statusText}`);
+    }
+    
+    const data = await response.json();
+    console.log(`📦 [Province Tab] API response:`, { success: data.success, projectsCount: data.projects?.length, hasFilterOptions: !!data.filter_options, error: data.error });
+    
+    document.getElementById('province-loading').style.display = 'none';
+    
+    if (data.success && data.projects) {
+        console.log(`🗺️ [Province Tab] Loaded ${data.projects.length} ${province} projects from cache`);
         
-        console.log(`📍 [Province Tab] Selected province: "${selectedProvince}"`);
-        
-        // If "All Provinces" is selected, we need to handle it differently
-        // For now, default to Cebu if "all" is selected
-        const province = selectedProvince === 'all' || selectedProvince === 'All Provinces' ? 'Cebu' : selectedProvince;
-        
-        if (!province || province.trim() === '') {
-            console.error('❌ [Province Tab] Empty province name, aborting');
+        if (data.projects.length === 0) {
+            // Show helpful message if no projects found
+            document.getElementById('province-projects-tbody').innerHTML = 
+                `<tr><td colspan="6" style="padding: 40px; text-align: center; color: #666;">
+                    <div style="margin-bottom: 10px;">No projects found for ${province}.</div>
+                    <div style="font-size: 12px; color: #999;">Please run scripts/generate_province_projects_cache.py to generate the cache.</div>
+                </td></tr>`;
+            document.getElementById('province-loading').style.display = 'none';
+            document.getElementById('province-results-summary').style.display = 'none';
             return;
         }
         
-        console.log(`🌐 [Province Tab] Fetching data for province: "${province}"`);
+        // Projects are already sorted by cost descending from the cache
+        provinceAllProjectsData = data.projects;
         
-        // Load province projects from API (already filtered and sorted by cost descending)
-        const apiUrl = `/api/province-projects/all?page=1&limit=10000&province=${encodeURIComponent(province)}`;
-        console.log(`📡 [Province Tab] API URL: ${apiUrl}`);
-        
-        const response = await fetch(apiUrl);
-        
-        if (!response.ok) {
-            throw new Error(`API returned ${response.status}: ${response.statusText}`);
+        // Update title and description based on selected province
+        const provinceTabTitle = document.querySelector('#tab-province .budget-section-title');
+        const provinceTabDesc = document.querySelector('#tab-province .budget-section-desc');
+        if (provinceTabTitle) {
+            provinceTabTitle.textContent = `🗺️ ${province} Province Projects`;
+        }
+        if (provinceTabDesc) {
+            provinceTabDesc.textContent = `Projects for ${province}, sorted by cost descending`;
         }
         
-        const data = await response.json();
-        console.log(`📦 [Province Tab] API response:`, { success: data.success, projectsCount: data.projects?.length, hasFilterOptions: !!data.filter_options, error: data.error });
-        
-        document.getElementById('province-loading').style.display = 'none';
-        
-        if (data.success && data.projects) {
-            console.log(`🗺️ [Province Tab] Loaded ${data.projects.length} ${province} projects from cache`);
-            
-            if (data.projects.length === 0) {
-                // Show helpful message if no projects found
-                document.getElementById('province-projects-tbody').innerHTML = 
-                    `<tr><td colspan="6" style="padding: 40px; text-align: center; color: #666;">
-                        <div style="margin-bottom: 10px;">No projects found for ${province}.</div>
-                        <div style="font-size: 12px; color: #999;">Please run scripts/generate_province_projects_cache.py to generate the cache.</div>
-                    </td></tr>`;
-                document.getElementById('province-loading').style.display = 'none';
-                document.getElementById('province-results-summary').style.display = 'none';
-                return;
-            }
-            
-            // Projects are already sorted by cost descending from the cache
-            provinceAllProjectsData = data.projects;
-            
-            // Update title and description based on selected province
-            const provinceTabTitle = document.querySelector('#tab-province .budget-section-title');
-            const provinceTabDesc = document.querySelector('#tab-province .budget-section-desc');
-            if (provinceTabTitle) {
-                provinceTabTitle.textContent = `🗺️ ${province} Province Projects`;
-            }
-            if (provinceTabDesc) {
-                provinceTabDesc.textContent = `Projects for ${province}, sorted by cost descending`;
-            }
-            
-            // Load filter options and repopulate municipality filter based on selected province
-            if (data.filter_options) {
-                console.log(`📋 [Province Tab] Filter options received:`, data.filter_options);
-                populateFilterOptions(data.filter_options, province);
-            } else {
-                console.warn(`⚠️ [Province Tab] No filter_options in API response`);
-                // Clear municipality filter if no options available
-                const municipalitySelect = document.getElementById('municipality-filter');
-                if (municipalitySelect) {
-                    municipalitySelect.innerHTML = '<option value="all" selected>All Municipalities/Cities</option>';
-                    console.warn(`⚠️ [Province Tab] Cleared municipality filter - no options available`);
-                }
-            }
-            
-            // Reset filters to "all" when province changes
-            document.getElementById('contractor-filter').value = '';
-            document.getElementById('municipality-filter').value = 'all';
-            
-            provinceApplyFilter();
+        // Load filter options and repopulate municipality filter based on selected province
+        if (data.filter_options) {
+            console.log(`📋 [Province Tab] Filter options received:`, data.filter_options);
+            populateFilterOptions(data.filter_options, province);
         } else {
-            console.error(`❌ [Province Tab] API returned error:`, data.error || 'No projects found');
-            document.getElementById('province-projects-tbody').innerHTML = 
-                `<tr><td colspan="6" style="padding: 40px; text-align: center; color: #dc3545;">
-                    <div style="margin-bottom: 10px;">${data.error || 'No projects found'}</div>
-                    <div style="font-size: 12px; color: #999;">Please run: python3 scripts/generate_province_projects_cache.py "${province}"</div>
-                </td></tr>`;
+            console.warn(`⚠️ [Province Tab] No filter_options in API response`);
+            // Clear municipality filter if no options available
+            const municipalitySelect = document.getElementById('municipality-filter');
+            if (municipalitySelect) {
+                municipalitySelect.innerHTML = '<option value="all" selected>All Municipalities/Cities</option>';
+                console.warn(`⚠️ [Province Tab] Cleared municipality filter - no options available`);
+            }
         }
-    } catch (error) {
-        console.error(`❌ [Province Tab] Error in loadProvinceProjects:`, error);
-        // Get province name for error message
-        const provinceSelect = document.getElementById('province-filter');
-        const selectedProvince = provinceSelect ? provinceSelect.value : 'Cebu';
-        const province = selectedProvince === 'all' || selectedProvince === 'All Provinces' ? 'Cebu' : selectedProvince;
         
-        document.getElementById('province-loading').style.display = 'none';
+        // Reset filters to "all" when province changes
+        document.getElementById('contractor-filter').value = '';
+        document.getElementById('municipality-filter').value = 'all';
+        
+        provinceApplyFilter();
+    } else {
+        console.error(`❌ [Province Tab] API returned error:`, data.error || 'No projects found');
         document.getElementById('province-projects-tbody').innerHTML = 
             `<tr><td colspan="6" style="padding: 40px; text-align: center; color: #dc3545;">
-                <div style="margin-bottom: 10px;">Error: ${error.message}</div>
-                <div style="font-size: 12px; color: #999;">Please run: python3 scripts/generate_province_projects_cache.py "${province || 'ProvinceName'}"</div>
+                <div style="margin-bottom: 10px;">${data.error || 'No projects found'}</div>
+                <div style="font-size: 12px; color: #999;">Please run: python3 scripts/generate_province_projects_cache.py "${province}"</div>
             </td></tr>`;
     }
 }
@@ -2217,7 +2215,10 @@ function handleMunicipalityFilterChange() {
     // Recompute contractors based on selected municipality
     updateContractorFilterFromProjects();
     // Reset contractor filter to empty when municipality changes
-    document.getElementById('contractor-filter').value = '';
+    const contractorInput = document.getElementById('contractor-filter');
+    if (contractorInput) {
+        contractorInput.value = '';
+    }
     // Apply filters
     provinceApplyFilter();
 }
@@ -2362,21 +2363,34 @@ function populateFilterOptions(filterOptions, province) {
     
     const municipalities = filterOptions.municipalities || [];
     
+    const normalizeMunicipalityLabel = (label) => {
+        if (!label) return '';
+        const value = String(label).trim();
+        if (value.toUpperCase() === 'CANLAON CITY (NEGROS ORIENTAL)') {
+            return 'Canlaon City';
+        }
+        return value;
+    };
+    
     // Clear existing options
     municipalitySelect.innerHTML = '';
     
-    // Add "All" option first
     const allOption = document.createElement('option');
     allOption.value = 'all';
-    allOption.selected = true;
     allOption.textContent = 'All Municipalities/Cities';
     municipalitySelect.appendChild(allOption);
     
-    // Add municipality options
-    municipalities.forEach(municipality => {
+    const sortedMunicipalities = municipalities
+        .map(m => ({
+            name: normalizeMunicipalityLabel(m.name),
+            count: m.count
+        }))
+        .sort((a, b) => b.count - a.count);
+    
+    sortedMunicipalities.forEach(item => {
         const option = document.createElement('option');
-        option.value = municipality.name;
-        option.textContent = `${municipality.name} (${municipality.count} projects)`;
+        option.value = item.name;
+        option.textContent = `${item.name} (${item.count} projects)`;
         municipalitySelect.appendChild(option);
     });
     
@@ -2453,7 +2467,7 @@ function provinceCalculateSummary(projects) {
             if (src === 'SSP') summary.ssp++;
             if (src === 'DIME') summary.dime++;
             if (src === 'PhilGEPS') summary.philgeps++;
-            if (src === 'Microsite' || src === 'Infrawatch') summary.microsite++;
+            if (src === 'Microsite') summary.microsite++;
         });
     });
     
@@ -4085,7 +4099,7 @@ function getSourceDisplayMeta(source) {
             meta.color = '#e65100';
             meta.border = '#ffb74d';
             break;
-        case 'Infrawatch':
+        case 'Microsite':
             meta.background = '#fff4e6';
             meta.color = '#d97706';
             meta.border = '#fbbf24';
@@ -4121,6 +4135,40 @@ function createPlaceholderProjects(names, note) {
         match_type: 'placeholder',
         match_score: null
     }));
+}
+
+function provinceApplyFilter() {
+    const locationFilter = document.getElementById('province-filter').value;
+    const contractorFilter = document.getElementById('contractor-filter').value;
+    const municipalityFilter = document.getElementById('municipality-filter').value;
+    
+    // Start with all projects
+    provinceFilteredData = provinceAllProjectsData;
+    
+    // Apply contractor filter
+    if (contractorFilter && contractorFilter !== 'all' && contractorFilter !== 'All Contractors') {
+        provinceFilteredData = provinceFilteredData.filter(project => {
+            const contractor = (project.contractor || '').trim();
+            
+            // Handle "Unknown" contractor
+            if (contractorFilter === 'Unknown') {
+                return !contractor || contractor === 'N/A' || contractor === '';
+            }
+            
+            return contractor === contractorFilter;
+        });
+    }
+    
+    // Apply municipality filter
+    if (municipalityFilter !== 'all') {
+        provinceFilteredData = provinceFilteredData.filter(project => 
+            projectMatchesMunicipality(project, municipalityFilter)
+        );
+    }
+    
+    // Reset to first page when filter changes
+    provinceCurrentPage = 1;
+    provinceUpdateDisplay();
 }
 
 </script>
