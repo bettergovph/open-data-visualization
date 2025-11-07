@@ -4714,12 +4714,18 @@ async def dynasty_projects_congressmen_api():
                 continue
             seen_names.add(normalized)
             
+            province = entry.get('province') or ''
+            district_number = entry.get('district_number') or ''
+            
+            # Determine if party-list: no province or explicitly marked
+            is_partylist = entry.get('is_partylist', False) or (not province)
+            
             congressmen_list.append({
                 "display_name": display_name,
                 "name": display_name,
-                "province": entry.get('province') or '',
-                "district_number": entry.get('district_number') or '',
-                "is_partylist": entry.get('is_partylist', False),
+                "province": province,
+                "district_number": district_number,
+                "is_partylist": is_partylist,
                 "id": entry.get('id')
             })
         

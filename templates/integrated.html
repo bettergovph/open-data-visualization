@@ -1154,7 +1154,8 @@ function getFilteredCongressmenByMode() {
         return configCongressmen;
     }
     if (mode === 'Partylist') {
-        return configCongressmen.filter(item => !item.province || !item.district_number);
+        // Filter for party-list: use is_partylist flag OR no province
+        return configCongressmen.filter(item => item.is_partylist === true || !item.province || item.province === '');
     }
     const provinceInput = document.getElementById('congressman-province-input');
     const provinceValue = provinceInput ? provinceInput.value.trim() : '';
