@@ -4579,6 +4579,62 @@ async def dynasty_projects_all_api(
         
         print(f"Loaded {len(all_projects)} total projects from all caches")
         
+        # Calculate chart_data (congressman statistics)
+        congressman_stats = {}
+        for proj in all_projects:
+            congressman = proj.get('congressman', 'Unknown')
+            if congressman not in congressman_stats:
+                congressman_stats[congressman] = {
+                    "name": congressman,
+                    "count": 0,
+                    "total_cost": 0
+                }
+            
+            congressman_stats[congressman]["count"] += 1
+            
+            # Parse amount
+            amount = proj.get('amount', 0)
+            if isinstance(amount, str):
+                amount_str = amount.replace('₱', '').replace(',', '').strip()
+                try:
+                    amount = float(amount_str) if amount_str else 0
+                except (ValueError, AttributeError):
+                    amount = 0
+            else:
+                amount = float(amount) if amount else 0
+            
+            congressman_stats[congressman]["total_cost"] += amount
+        
+        # Convert to sorted array for chart data
+        chart_data = sorted(
+            list(congressman_stats.values()),
+            key=lambda x: x["count"],
+            reverse=True
+        )
+        
+        # Calculate dashboard statistics
+        total_cost_all = sum(stat["total_cost"] for stat in chart_data)
+        district_count = total_summary['district_projects']
+        contractor_count = total_summary['contractor_projects']
+        
+        district_cost = sum(
+            float(proj.get('amount', 0)) if isinstance(proj.get('amount', 0), (int, float)) else 0
+            for proj in all_projects if proj.get('match_type') == 'district'
+        )
+        contractor_cost = sum(
+            float(proj.get('amount', 0)) if isinstance(proj.get('amount', 0), (int, float)) else 0
+            for proj in all_projects if proj.get('match_type') == 'contractor'
+        )
+        
+        dashboard_stats = {
+            "total_cost_all": total_cost_all,
+            "total_projects": len(all_projects),
+            "district_count": district_count,
+            "district_cost": district_cost,
+            "contractor_count": contractor_count,
+            "contractor_cost": contractor_cost
+        }
+        
         # Paginate
         total_pages = (len(all_projects) + limit - 1) // limit
         offset = (page - 1) * limit
@@ -4588,6 +4644,8 @@ async def dynasty_projects_all_api(
             "success": True,
             "projects": paginated_projects,
             "summary": total_summary,
+            "chart_data": chart_data,
+            "dashboard_stats": dashboard_stats,
             "page": page,
             "total": len(all_projects),
             "total_pages": total_pages,
