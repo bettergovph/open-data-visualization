@@ -1319,7 +1319,7 @@ function updateCongressmanDatalist() {
 async function loadAllProjects() {
     document.getElementById('table-loading').style.display = 'block';
     document.getElementById('results-summary').style.display = 'none';
-    document.getElementById('projects-tbody').innerHTML = '<tr><td colspan="8" style="padding: 20px; text-align: center;">Loading...</td></tr>';
+    document.getElementById('projects-tbody').innerHTML = '<tr><td colspan="8" style="padding: 20px; text-align: center;">Loading first page...</td></tr>';
     
     try {
         const data = await fetchAllDynastyProjects();
@@ -1337,6 +1337,11 @@ async function loadAllProjects() {
             populateProvinceFilter();
             updateCongressmanDatalist();
             applyFilter();
+            
+            // Show background loading indicator if more pages are being fetched
+            if (dynastyProjectsMetadata && dynastyProjectsMetadata.total_pages > 1) {
+                showBackgroundLoadingIndicator();
+            }
         } else {
             document.getElementById('projects-tbody').innerHTML = 
                 `<tr><td colspan="8" style="padding: 40px; text-align: center; color: #dc3545;">${data.error || 'No projects found'}</td></tr>`;
@@ -4409,9 +4414,17 @@ async function fetchRemainingPagesInBackground(totalPages) {
                 dynastyProjectsCache.set(page, data.projects);
                 console.log(`✅ Background fetch complete: page ${page}/${totalPages}`);
                 
-                // Update allData if it exists (for filtering)
-                if (window.allData && Array.isArray(window.allData)) {
-                    window.allData.push(...data.projects);
+                // Update allProjectsData for filtering
+                if (window.allProjectsData && Array.isArray(window.allProjectsData)) {
+                    window.allProjectsData.push(...data.projects);
+                    
+                    // Update the loading indicator
+                    updateBackgroundLoadingIndicator(page, totalPages);
+                    
+                    // Refresh filters and display with new data
+                    buildAvailableCongressmanNames();
+                    updateCongressmanDatalist();
+                    applyFilter(); // Re-apply current filter with more data
                 }
             }
         } catch (error) {
@@ -4421,6 +4434,7 @@ async function fetchRemainingPagesInBackground(totalPages) {
     
     allProjectsLoaded = true;
     console.log(`✅ All ${totalPages} pages loaded and cached`);
+    hideBackgroundLoadingIndicator();
 }
 
 async function fetchDynastyProjectsPage(page) {
@@ -4444,6 +4458,82 @@ async function fetchDynastyProjectsPage(page) {
     dynastyProjectsCache.set(page, data.projects || []);
     
     return data.projects || [];
+}
+
+function showBackgroundLoadingIndicator() {
+    // Create a floating indicator at the top of the page
+    const indicator = document.createElement('div');
+    indicator.id = 'background-loading-indicator';
+    indicator.style.cssText = `
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 15px 25px;
+        border-radius: 8px;
+        box-shadow: 0 4px 20px rgba(102, 126, 234, 0.4);
+        z-index: 10000;
+        font-size: 14px;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        animation: slideInRight 0.3s ease-out;
+    `;
+    
+    indicator.innerHTML = `
+        <div style="width: 20px; height: 20px; border: 3px solid rgba(255,255,255,0.3); border-top-color: white; border-radius: 50%; animation: spin 1s linear infinite;"></div>
+        <span id="loading-progress-text">Loading additional data... Page 1/${dynastyProjectsMetadata.total_pages}</span>
+    `;
+    
+    // Add animation styles
+    const style = document.createElement('style');
+    style.textContent = `
+        @keyframes slideInRight {
+            from {
+                transform: translateX(400px);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        @keyframes fadeOut {
+            from {
+                opacity: 1;
+                transform: translateX(0);
+            }
+            to {
+                opacity: 0;
+                transform: translateX(400px);
+            }
+        }
+    `;
+    document.head.appendChild(style);
+    
+    document.body.appendChild(indicator);
+}
+
+function updateBackgroundLoadingIndicator(currentPage, totalPages) {
+    const progressText = document.getElementById('loading-progress-text');
+    if (progressText) {
+        progressText.textContent = `Loading additional data... Page ${currentPage}/${totalPages}`;
+    }
+}
+
+function hideBackgroundLoadingIndicator() {
+    const indicator = document.getElementById('background-loading-indicator');
+    if (indicator) {
+        indicator.style.animation = 'fadeOut 0.3s ease-out forwards';
+        setTimeout(() => {
+            indicator.remove();
+        }, 300);
+    }
 }
 
 function getSourceDisplayMeta(source) {
