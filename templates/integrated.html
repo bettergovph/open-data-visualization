@@ -253,7 +253,10 @@ function toggleMobileMenu() {
                                     </div>
                                     <div style="display: flex; flex-direction: column; gap: 12px;">
                                         <label style="font-weight: 700; color: #333; font-size: 16px; text-transform: uppercase; letter-spacing: 0.5px; text-align: left;">Type to Search Congressman</label>
-                                        <input type="text" id="congressman-filter" list="congressman-list" placeholder="Start typing a congressman..." value="" style="padding: 12px 16px; border: 2px solid #333; border-radius: 6px; font-size: 16px; font-weight: 600; min-width: 320px; background: white; color: #333; box-shadow: 0 2px 8px rgba(0,0,0,0.1); transition: all 0.3s ease;" onmouseover="this.style.borderColor='#667eea'; this.style.boxShadow='0 4px 12px rgba(102, 126, 234, 0.3)';" onmouseout="this.style.borderColor='#333'; this.style.boxShadow='0 2px 8px rgba(0,0,0,0.1)';" onchange="handleCongressmanFilterChange()" oninput="handleCongressmanFilterChange()" onblur="handleCongressmanFilterBlur()">
+                                        <div style="display: flex; gap: 12px; align-items: center;">
+                                            <input type="text" id="congressman-filter" list="congressman-list" placeholder="Start typing a congressman..." value="" style="padding: 12px 16px; border: 2px solid #333; border-radius: 6px; font-size: 16px; font-weight: 600; min-width: 320px; background: white; color: #333; box-shadow: 0 2px 8px rgba(0,0,0,0.1); transition: all 0.3s ease;" onmouseover="this.style.borderColor='#667eea'; this.style.boxShadow='0 4px 12px rgba(102, 126, 234, 0.3)';" onmouseout="this.style.borderColor='#333'; this.style.boxShadow='0 2px 8px rgba(0,0,0,0.1)';" onchange="handleCongressmanFilterChange()" oninput="handleCongressmanFilterChange()" onblur="handleCongressmanFilterBlur()">
+                                            <button id="view-congressman-btn" style="display: none; padding: 12px 20px; background: #667eea; color: white; border: 2px solid #667eea; border-radius: 6px; font-size: 14px; font-weight: 600; cursor: pointer; transition: all 0.3s ease; box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);" onmouseover="this.style.background='#5a67d8'; this.style.transform='translateY(-2px)';" onmouseout="this.style.background='#667eea'; this.style.transform='translateY(0)';">👁️ View Visual</button>
+                                        </div>
                                     </div>
                                 </div>
                                 <datalist id="congressman-list">
@@ -486,7 +489,7 @@ function toggleMobileMenu() {
                             </div>
                                 </div>
                                 <div id="combinedChart-container" style="width: 100%; max-height: 760px; overflow-y: auto;">
-                                    <canvas id="combinedChart" style="width: 100%; min-height: 480px; height: auto;"></canvas>
+                                    <canvas id="combinedChart" style="width: 100%; min-height: 480px; height: auto; cursor: pointer;"></canvas>
                                 </div>
                             </div>
                         </div>
@@ -1575,6 +1578,15 @@ async function applyFilter() {
 // Handle congressman filter change
 function handleCongressmanFilterChange() {
     applyFilter().catch(error => console.error('Filter update failed:', error));
+
+    // Show/hide View Visual button based on congressman selection
+    const filterInput = document.getElementById('congressman-filter');
+    const viewBtn = document.getElementById('view-congressman-btn');
+    if (filterInput && viewBtn) {
+        const filterValue = filterInput.value.trim();
+        const isAll = filterValue === '' || filterValue.toLowerCase() === 'all congressmen';
+        viewBtn.style.display = isAll ? 'none' : 'inline-block';
+    }
 }
 
 function handleModeChange(mode) {
@@ -1711,6 +1723,29 @@ document.addEventListener('DOMContentLoaded', async () => {
         // The onchange and oninput handlers are already set in the HTML
         // This is just a backup in case the HTML handlers don't work
         congressmanFilter.addEventListener('change', handleCongressmanFilterChange);
+    }
+
+    // Add view congressman button listener
+    const viewCongressmanBtn = document.getElementById('view-congressman-btn');
+    if (viewCongressmanBtn) {
+        viewCongressmanBtn.addEventListener('click', () => {
+            const filterInput = document.getElementById('congressman-filter');
+            if (filterInput) {
+                const congressmanName = filterInput.value.trim();
+                if (congressmanName && congressmanName.toLowerCase() !== 'all congressmen') {
+                    // Switch to visual tab
+                    switchTab('visual');
+
+                    // Set the focus input in the visual tab to the selected congressman
+                    const focusInput = document.getElementById('chart-focus-input');
+                    if (focusInput) {
+                        focusInput.value = congressmanName;
+                        // Trigger the focus functionality
+                        handleChartFocusInput();
+                    }
+                }
+            }
+        });
     }
     
     // Add province filter change listener
@@ -2130,6 +2165,24 @@ function createCharts(labels, fullNames, counts, costs) {
                                 return `Projects: ${value}`;
                             }
                             return `Total Cost: ₱${value.toFixed(2)}M`;
+                        }
+                    }
+                }
+            },
+            onClick: (event, elements) => {
+                if (elements.length > 0) {
+                    const index = elements[0].index;
+                    const congressmanName = fullNames[index];
+                    if (congressmanName) {
+                        // Switch to table tab
+                        switchTab('table');
+
+                        // Set the congressman filter to the clicked congressman
+                        const congressmanFilter = document.getElementById('congressman-filter');
+                        if (congressmanFilter) {
+                            congressmanFilter.value = congressmanName;
+                            // Trigger the filter change
+                            handleCongressmanFilterChange();
                         }
                     }
                 }
