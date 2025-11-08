@@ -1345,20 +1345,23 @@ class DynastyProjectsCacheGenerator:
                 "cache_version": "1.0"
             }
             
+            # NOTE: Combined cache file generation disabled - file is too large and unused by application
             # Ensure directory exists
-            self.cache_file.parent.mkdir(parents=True, exist_ok=True)
-            
-            with open(self.cache_file, 'w', encoding='utf-8') as f:
-                json.dump(cache_data, f, indent=2, ensure_ascii=False)
-            
-            print(f"✅ Combined cache generated successfully: {self.cache_file}")
-            print(f"   Total projects: {summary['total']}")
-            print(f"   District matches: {summary['district_projects']}")
-            print(f"   Contractor matches: {summary['contractor_projects']}")
-            print(f"   Dashboard stats:")
-            print(f"     - Total cost: ₱{dashboard_stats['total_cost_all']:,.2f}")
-            print(f"     - District cost: ₱{dashboard_stats['district_cost']:,.2f}")
-            print(f"     - Contractor cost: ₱{dashboard_stats['contractor_cost']:,.2f}")
+            # self.cache_file.parent.mkdir(parents=True, exist_ok=True)
+            #
+            # with open(self.cache_file, 'w', encoding='utf-8') as f:
+            #     json.dump(cache_data, f, indent=2, ensure_ascii=False)
+            #
+            # print(f"✅ Combined cache generated successfully: {self.cache_file}")
+            # print(f"   Total projects: {summary['total']}")
+            # print(f"   District matches: {summary['district_projects']}")
+            # print(f"   Contractor matches: {summary['contractor_projects']}")
+            # print(f"   Dashboard stats:")
+            # print(f"     - Total cost: ₱{dashboard_stats['total_cost_all']:,.2f}")
+            # print(f"     - District cost: ₱{dashboard_stats['district_cost']:,.2f}")
+            # print(f"     - Contractor cost: ₱{dashboard_stats['contractor_cost']:,.2f}")
+
+            print("ℹ️  Combined cache file generation skipped (file too large and unused)")
             
             # Create individual cache files for each congressman
             print(f"\n📁 Creating individual cache files for each congressman...")
