@@ -1,0 +1,35 @@
+{
+  "description": "List of base province names that are substrings of other provinces. These require exact word boundary matching to avoid false positives when filtering projects.",
+  "substring_provinces": [
+    "agusan",
+    "camarines",
+    "cotabato",
+    "davao",
+    "ilocos",
+    "lanao",
+    "leyte",
+    "mindoro",
+    "misamis",
+    "negros",
+    "samar",
+    "surigao",
+    "zamboanga"
+  ],
+  "examples": {
+    "agusan": ["Agusan del Norte", "Agusan del Sur"],
+    "camarines": ["Camarines Norte", "Camarines Sur"],
+    "cotabato": ["North Cotabato", "South Cotabato"],
+    "davao": ["Davao de Oro", "Davao del Norte", "Davao del Sur", "Davao Oriental", "Davao Occidental"],
+    "ilocos": ["Ilocos Norte", "Ilocos Sur"],
+    "lanao": ["Lanao del Norte", "Lanao del Sur"],
+    "leyte": ["Leyte", "Southern Leyte"],
+    "mindoro": ["Occidental Mindoro", "Oriental Mindoro"],
+    "misamis": ["Misamis Occidental", "Misamis Oriental"],
+    "negros": ["Negros Occidental", "Negros Oriental"],
+    "samar": ["Samar", "Eastern Samar", "Northern Samar"],
+    "surigao": ["Surigao del Norte", "Surigao del Sur"],
+    "zamboanga": ["Zamboanga del Norte", "Zamboanga del Sur", "Zamboanga Sibugay"]
+  },
+  "note": "When searching for projects, if a province name contains any of these base names, use word boundary matching (\\b) to ensure exact matches only."
+}
+

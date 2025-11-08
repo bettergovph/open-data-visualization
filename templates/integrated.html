@@ -842,9 +842,15 @@ function toggleMobileMenu() {
                         </div>
                         
                         <!-- Top 10 Provinces Chart -->
-                        <div style="margin-top: 30px; background: white; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); padding: 20px; position: relative;">
-                            <h4 style="margin: 0 0 20px 0; color: #333; font-size: 18px; font-weight: 600;">Provinces by Project Count</h4>
-                            <button id="copy-provinces-chart-btn" style="position: absolute; top: 20px; right: 20px; padding: 10px 20px; background: #333; color: white; border: 2px solid #333; border-radius: 6px; font-size: 14px; font-weight: 600; cursor: pointer; transition: all 0.3s ease; box-shadow: 0 4px 12px rgba(0,0,0,0.2); z-index: 10;" onmouseover="this.style.background='#667eea'; this.style.borderColor='#667eea'; this.style.transform='translateY(-2px)'; this.style.boxShadow='0 6px 16px rgba(102, 126, 234, 0.4)';" onmouseout="this.style.background='#333'; this.style.borderColor='#333'; this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 12px rgba(0,0,0,0.2)';">📋 Copy Chart</button>
+                        <div style="margin-top: 30px; background: white; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); padding: 20px;">
+                            <div style="display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 16px; margin-bottom: 20px;">
+                                <h4 style="margin: 0; color: #333; font-size: 18px; font-weight: 600;">Provinces by Project Count & Total Cost</h4>
+                                <div style="display: flex; flex-wrap: wrap; gap: 10px; align-items: center;">
+                                    <button id="sort-provinces-by-cost-btn" style="padding: 10px 20px; background: #7b1fa2; color: white; border: 2px solid #7b1fa2; border-radius: 6px; font-size: 14px; font-weight: 600; cursor: pointer; transition: all 0.3s ease; box-shadow: 0 4px 12px rgba(0,0,0,0.2);" onclick="sortProvincesChartBy('cost')">💰 By Cost</button>
+                                    <button id="sort-provinces-by-count-btn" style="padding: 10px 20px; background: #333; color: white; border: 2px solid #333; border-radius: 6px; font-size: 14px; font-weight: 600; cursor: pointer; transition: all 0.3s ease; box-shadow: 0 4px 12px rgba(0,0,0,0.2);" onclick="sortProvincesChartBy('count')">🔢 By Count</button>
+                                    <button id="copy-provinces-chart-btn" style="padding: 10px 20px; background: #333; color: white; border: 2px solid #333; border-radius: 6px; font-size: 14px; font-weight: 600; cursor: pointer; transition: all 0.3s ease; box-shadow: 0 4px 12px rgba(0,0,0,0.2);" onmouseover="this.style.background='#667eea'; this.style.borderColor='#667eea'; this.style.transform='translateY(-2px)'; this.style.boxShadow='0 6px 16px rgba(102, 126, 234, 0.4)';" onmouseout="this.style.background='#333'; this.style.borderColor='#333'; this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 12px rgba(0,0,0,0.2)';">📋 Copy</button>
+                                </div>
+                            </div>
                             <canvas id="provincesChart" style="max-height: 500px;"></canvas>
                         </div>
                         
@@ -2821,6 +2827,8 @@ document.getElementById('province-export-csv-btn').addEventListener('click', fun
 let provincesChart = null;
 let municipalityChart = null;
 let contractorChart = null;
+let currentProvincesSortMode = 'cost'; // Default to cost
+let provincesChartData = null; // Store full data for re-sorting
 
 // Load province visual data
 // Debounce timer for province visual filter
@@ -3428,17 +3436,25 @@ function calculateMunicipalityStats(projects, province = 'Cebu', filterOptions =
 // Load top 10 provinces chart
 async function loadTopProvincesChart(selectedProvince = null) {
     try {
-        // If a province is selected, fetch all provinces to center on it
-        // Otherwise, fetch top 10
-        const url = selectedProvince 
-            ? '/api/province-projects/top-provinces?all=true'
-            : '/api/province-projects/top-provinces';
+        // Always fetch all provinces to support sorting
+        const url = '/api/province-projects/top-provinces?all=true';
         
         const response = await fetch(url);
         const data = await response.json();
         
         if (data.success && data.provinces && data.provinces.length > 0) {
-            let provincesToShow = data.provinces;
+            // Store the full data for re-sorting
+            provincesChartData = data.provinces;
+            
+            // Sort based on current mode (default: cost)
+            let sortedProvinces = [...provincesChartData];
+            if (currentProvincesSortMode === 'cost') {
+                sortedProvinces.sort((a, b) => b.total_cost - a.total_cost);
+            } else {
+                sortedProvinces.sort((a, b) => b.count - a.count);
+            }
+            
+            let provincesToShow = sortedProvinces;
             
             // If a province is selected, center the chart on it
             if (selectedProvince && selectedProvince.trim().length > 0) {
@@ -3454,13 +3470,13 @@ async function loadTopProvincesChart(selectedProvince = null) {
                 
                 console.log('🔍 [Provinces Chart] Looking for province:', selectedProvince, 'normalized:', normalizedSelected);
                 
-                // Find the selected province's index
+                // Find the selected province's index in the sorted list
                 let selectedIndex = -1;
                 let exactMatchIndex = -1;
                 let partialMatchIndex = -1;
                 
-                for (let i = 0; i < data.provinces.length; i++) {
-                    const province = data.provinces[i];
+                for (let i = 0; i < sortedProvinces.length; i++) {
+                    const province = sortedProvinces[i];
                     const normalizedProvince = normalizeName(province.name);
                     
                     // Try exact match first
@@ -3477,8 +3493,8 @@ async function loadTopProvincesChart(selectedProvince = null) {
                 // Example: "Eastern Samar" selected can match "Eastern Samar" in data
                 // But "Samar" selected should NOT match "Eastern Samar" in data
                 if (exactMatchIndex === -1) {
-                    for (let i = 0; i < data.provinces.length; i++) {
-                        const province = data.provinces[i];
+                    for (let i = 0; i < sortedProvinces.length; i++) {
+                        const province = sortedProvinces[i];
                         const normalizedProvince = normalizeName(province.name);
                         
                         // Only match if the selected name is longer and starts with the province name
@@ -3520,19 +3536,19 @@ async function loadTopProvincesChart(selectedProvince = null) {
                     const provincesAbove = 5;
                     const provincesBelow = 5;
                     const startIndex = Math.max(0, selectedIndex - provincesAbove);
-                    const endIndex = Math.min(data.provinces.length, selectedIndex + provincesBelow + 1);
-                    provincesToShow = data.provinces.slice(startIndex, endIndex);
+                    const endIndex = Math.min(sortedProvinces.length, selectedIndex + provincesBelow + 1);
+                    provincesToShow = sortedProvinces.slice(startIndex, endIndex);
                     console.log('📊 [Provinces Chart] Centering on province at index', selectedIndex, 'showing', provincesToShow.length, 'provinces (indices', startIndex, 'to', endIndex - 1, ')');
                 } else {
                     // If province not found, show top 10
                     console.warn('⚠️ [Provinces Chart] Province not found:', selectedProvince, 'showing top 10 instead');
-                    console.log('Available provinces:', data.provinces.map(p => p.name).slice(0, 20));
-                    provincesToShow = data.provinces.slice(0, 10);
+                    console.log('Available provinces:', sortedProvinces.map(p => p.name).slice(0, 20));
+                    provincesToShow = sortedProvinces.slice(0, 10);
                 }
             } else {
                 // Default: show top 10
                 console.log('📊 [Provinces Chart] No province selected, showing top 10');
-                provincesToShow = data.provinces.slice(0, 10);
+                provincesToShow = sortedProvinces.slice(0, 10);
             }
             
             // Destroy existing chart if it exists
@@ -4096,6 +4112,34 @@ document.getElementById('copy-municipality-chart-btn').addEventListener('click',
         }, 2000);
     }
 });
+
+// Sort provinces chart by cost or count
+function sortProvincesChartBy(mode) {
+    currentProvincesSortMode = mode;
+    
+    // Update button styles
+    const costBtn = document.getElementById('sort-provinces-by-cost-btn');
+    const countBtn = document.getElementById('sort-provinces-by-count-btn');
+    
+    if (mode === 'cost') {
+        costBtn.style.background = '#7b1fa2';
+        costBtn.style.borderColor = '#7b1fa2';
+        countBtn.style.background = '#333';
+        countBtn.style.borderColor = '#333';
+    } else {
+        costBtn.style.background = '#333';
+        costBtn.style.borderColor = '#333';
+        countBtn.style.background = '#1565c0';
+        countBtn.style.borderColor = '#1565c0';
+    }
+    
+    // Get current selected province from filter
+    const provinceFilter = document.getElementById('province-visual-filter');
+    const selectedProvince = provinceFilter ? provinceFilter.value.trim() : null;
+    
+    // Reload chart with new sort mode
+    loadTopProvincesChart(selectedProvince);
+}
 
 // Copy provinces chart to clipboard
 document.getElementById('copy-provinces-chart-btn').addEventListener('click', async function() {
