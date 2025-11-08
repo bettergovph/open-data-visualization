@@ -3503,7 +3503,8 @@ async function loadTopProvincesChart(selectedProvince = null) {
                             // Province is longer: "Eastern Samar" in data, selected is "Eastern Samar" or "Samar"
                             // Only match if province starts with selected AND selected is long enough
                             // This prevents "Samar" (5) from matching "Eastern Samar" (13)
-                            if (normalizedProvince.startsWith(normalizedSelected) && normalizedSelected.length >= 8) {
+                            // Lower threshold to 6 to allow "Iloilo" (6 chars) to match
+                            if (normalizedProvince.startsWith(normalizedSelected) && normalizedSelected.length >= 6) {
                                 partialMatchIndex = i;
                                 console.log('✅ [Provinces Chart] Found partial match (province longer) at index:', i, 'province:', province.name);
                                 break;
@@ -3619,7 +3620,8 @@ function createProvincesChart(provincesData, selectedProvince = null) {
                 } else if (normalizedLabel.length > normalizedSelected.length) {
                     // Label is longer: "Eastern Samar" in data, selected is "Eastern Samar" or "Samar"
                     // Only match if label starts with selected AND selected is long enough
-                    if (normalizedLabel.startsWith(normalizedSelected) && normalizedSelected.length >= 8) {
+                    // Lower threshold to 6 to allow "Iloilo" (6 chars) to match
+                    if (normalizedLabel.startsWith(normalizedSelected) && normalizedSelected.length >= 6) {
                         partialMatchIndex = i;
                         break;
                     }
