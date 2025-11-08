@@ -40,9 +40,9 @@ class DavaoCityCongressmenFixer:
         pattern = rf'(?<!\w){re.escape(word)}(?!\w)'
         return re.search(pattern, text) is not None
 
-    def match_project(self, project_text: str, congressman_data: Dict, districts_data: Dict, contractor_name: str = '') -> Tuple[Optional[str], Optional[str], int]:
+    def match_project(self, project_text: str, congressman_data: Dict, districts_data: Dict, contractor_name: str = '', project_year: Optional[int] = None) -> Tuple[Optional[str], Optional[str], int]:
         """
-        Match a project to a congressman using strict district matching for Davao City + contractor matching.
+        Match a project to a congressman using strict district matching for Davao City + contractor matching + term checking.
         Returns: (congressman_name, match_type, match_score) or (None, None, 0)
         """
         combined_text = project_text.upper()
@@ -80,8 +80,23 @@ class DavaoCityCongressmenFixer:
                     if not _contractor_is_excluded(contractor_name_upper):
                         return (congressman_name, "contractor", 90)
 
-        # 2. For Davao City districts, require barangay-level matching
+        # 2. For Davao City districts, require barangay-level matching + term checking
         if congressman_data.get('is_city_district') and congressman_data.get('provinces') and congressman_data['provinces'][0] == 'Davao City':
+            # Check if project year falls within congressman's terms
+            if project_year is not None:
+                terms = congressman_data.get('terms', [])
+                year_in_terms = False
+
+                for term in terms:
+                    term_start = term.get('start')
+                    term_end = term.get('end')
+                    if term_start and term_end and term_start <= project_year <= term_end:
+                        year_in_terms = True
+                        break
+
+                if not year_in_terms:
+                    return (None, None, 0)  # Project year doesn't match congressman's terms
+
             # Get valid barangays for this specific district
             valid_barangays = []
             if districts_data:
@@ -133,6 +148,14 @@ class DavaoCityCongressmenFixer:
             print(f"❌ Could not find configuration for {congressman_name}")
             return
 
+        # Parse terms - they might be stored as JSON string or already as list
+        terms_raw = congressman_config.get('terms', [])
+        if isinstance(terms_raw, str):
+            try:
+                terms_raw = json.loads(terms_raw)
+            except (json.JSONDecodeError, TypeError):
+                terms_raw = []
+
         congressman_data = {
             "name": congressman_name,
             "provinces": [congressman_config.get('province', 'Davao City')],
@@ -142,7 +165,8 @@ class DavaoCityCongressmenFixer:
             "contractors": congressman_config.get('contractors', []),
             "contractor_patterns": congressman_config.get('contractor_patterns', []),
             "contractor_exclusions": congressman_config.get('contractor_exclusions', {}),
-            "barangays": congressman_config.get('barangays', [])
+            "barangays": congressman_config.get('barangays', []),
+            "terms": terms_raw
         }
 
         # Debug: show what barangays we're using
@@ -200,9 +224,17 @@ class DavaoCityCongressmenFixer:
                 project_text = str(project)
                 contractor_name = None
 
-            # Test match with strict district matching
+            # Get project year for term checking
+            project_year = project.get('year')
+            if isinstance(project_year, str):
+                try:
+                    project_year = int(project_year)
+                except (ValueError, TypeError):
+                    project_year = None
+
+            # Test match with strict district matching + term checking
             matched_congressman, match_type, match_score = self.match_project(
-                project_text, congressman_data, districts_data, contractor_name
+                project_text, congressman_data, districts_data, contractor_name, project_year
             )
 
             if matched_congressman == congressman_name:
