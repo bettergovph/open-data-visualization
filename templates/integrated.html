@@ -187,7 +187,6 @@ function toggleMobileMenu() {
     menu.classList.toggle('hidden');
 }
 </script>
-
 <!-- Integrated Projects Section -->
 <div style="padding: 6rem;">
 <section class="budget-section">
@@ -344,7 +343,7 @@ function toggleMobileMenu() {
                                     <span style="display: inline-block; width: 8px; height: 8px; border-radius: 999px; background: #14b8a6; box-shadow: 0 0 0 3px rgba(20, 184, 166, 0.15);"></span>
                                     Unified Pipeline
                                 </span>
-                            </div>
+                                </div>
                             <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 18px; font-size: 13px;">
                                 <div style="display: flex; align-items: center; gap: 12px; padding: 12px 14px; border-radius: 8px; background: rgba(59, 130, 246, 0.08); border: 1px solid rgba(59, 130, 246, 0.2);">
                                     <span style="display: inline-flex; align-items: center; justify-content: center; min-width: 54px; height: 28px; padding: 0 12px; border-radius: 999px; font-size: 12px; font-weight: 700; letter-spacing: 0.5px; color: #1565c0; background: #e3f2fd; border: 1px solid #90caf9;">SSP</span>
@@ -370,7 +369,6 @@ function toggleMobileMenu() {
                             <div style="display: inline-block; width: 40px; height: 40px; border: 4px solid #f3f3f3; border-top: 4px solid #333; border-radius: 50%; animation: spin 1s linear infinite;"></div>
                             <p style="color: #666; margin-top: 15px;">Loading projects...</p>
                         </div>
-                        
                         <!-- Results Summary -->
                         <div id="results-summary" style="display: none; margin-bottom: 20px; padding: 15px; background: white; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
                             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
@@ -481,12 +479,12 @@ function toggleMobileMenu() {
                                         <div style="display: flex; gap: 8px; align-items: center; background: rgba(250, 204, 21, 0.14); padding: 6px 12px; border-radius: 6px; border: 1px solid rgba(250, 204, 21, 0.4);">
                                             <input id="chart-focus-input" list="congressman-list" placeholder="Focus on congressman..." style="padding: 8px 12px; border: 2px solid #facc15; border-radius: 6px; font-size: 13px; font-weight: 600; min-width: 220px;" />
                                             <button id="chart-focus-clear-btn" style="padding: 8px 14px; background: white; color: #92400e; border: 2px solid #facc15; border-radius: 6px; font-size: 13px; font-weight: 600; cursor: pointer; transition: all 0.3s ease;" onmouseover="this.style.background='#fef3c7'; this.style.transform='translateY(-2px)';" onmouseout="this.style.background='white'; this.style.transform='translateY(0)';">↺ Reset Top 10</button>
-                                        </div>
-                                        <button id="sort-by-count-btn" style="padding: 10px 20px; background: #333; color: white; border: 2px solid #333; border-radius: 6px; font-size: 14px; font-weight: 600; cursor: pointer; transition: all 0.3s ease; box-shadow: 0 4px 12px rgba(0,0,0,0.2);" onclick="sortChartBy('count')">🔢 By Count</button>
-                                        <button id="sort-by-cost-btn" style="padding: 10px 20px; background: #7b1fa2; color: white; border: 2px solid #7b1fa2; border-radius: 6px; font-size: 14px; font-weight: 600; cursor: pointer; transition: all 0.3s ease; box-shadow: 0 4px 12px rgba(0,0,0,0.2);" onclick="sortChartBy('cost')">💰 By Cost</button>
-                                        <button id="copy-chart-btn" style="padding: 10px 20px; background: #333; color: white; border: 2px solid #333; border-radius: 6px; font-size: 14px; font-weight: 600; cursor: pointer; transition: all 0.3s ease; box-shadow: 0 4px 12px rgba(0,0,0,0.2);" onmouseover="this.style.background='#667eea'; this.style.borderColor='#667eea'; this.style.transform='translateY(-2px)'; this.style.boxShadow='0 6px 16px rgba(102, 126, 234, 0.4)';" onmouseout="this.style.background='#333'; this.style.borderColor='#333'; this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 12px rgba(0,0,0,0.2)';">📋 Copy</button>
+                        </div>
+                                <button id="sort-by-count-btn" style="padding: 10px 20px; background: #333; color: white; border: 2px solid #333; border-radius: 6px; font-size: 14px; font-weight: 600; cursor: pointer; transition: all 0.3s ease; box-shadow: 0 4px 12px rgba(0,0,0,0.2);" onclick="sortChartBy('count')">🔢 By Count</button>
+                                <button id="sort-by-cost-btn" style="padding: 10px 20px; background: #7b1fa2; color: white; border: 2px solid #7b1fa2; border-radius: 6px; font-size: 14px; font-weight: 600; cursor: pointer; transition: all 0.3s ease; box-shadow: 0 4px 12px rgba(0,0,0,0.2);" onclick="sortChartBy('cost')">💰 By Cost</button>
+                                <button id="copy-chart-btn" style="padding: 10px 20px; background: #333; color: white; border: 2px solid #333; border-radius: 6px; font-size: 14px; font-weight: 600; cursor: pointer; transition: all 0.3s ease; box-shadow: 0 4px 12px rgba(0,0,0,0.2);" onmouseover="this.style.background='#667eea'; this.style.borderColor='#667eea'; this.style.transform='translateY(-2px)'; this.style.boxShadow='0 6px 16px rgba(102, 126, 234, 0.4)';" onmouseout="this.style.background='#333'; this.style.borderColor='#333'; this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 12px rgba(0,0,0,0.2)';">📋 Copy</button>
                                         <button id="chart-reset-btn" style="padding: 8px 16px; background: #fffbea; color: #92400e; border: 2px solid #f59e0b; border-radius: 6px; font-size: 13px; font-weight: 600; cursor: pointer; transition: all 0.3s ease; box-shadow: 0 4px 12px rgba(245, 158, 11, 0.2);" onmouseover="this.style.background='#fef3c7'; this.style.transform='translateY(-2px)';" onmouseout="this.style.background='#fffbea'; this.style.transform='translateY(0)';">↺ Reset Top 10 view</button>
-                                    </div>
+                            </div>
                                 </div>
                                 <div id="combinedChart-container" style="width: 100%; max-height: 760px; overflow-y: auto;">
                                     <canvas id="combinedChart" style="width: 100%; min-height: 480px; height: auto;"></canvas>
@@ -622,7 +620,7 @@ function toggleMobileMenu() {
                                     <span style="display: inline-block; width: 8px; height: 8px; border-radius: 999px; background: #14b8a6; box-shadow: 0 0 0 3px rgba(20, 184, 166, 0.15);"></span>
                                     Unified Pipeline
                                 </span>
-                            </div>
+                                </div>
                             <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 18px; font-size: 13px;">
                                 <div style="display: flex; align-items: center; gap: 12px; padding: 12px 14px; border-radius: 8px; background: rgba(59, 130, 246, 0.08); border: 1px solid rgba(59, 130, 246, 0.2);">
                                     <span style="display: inline-flex; align-items: center; justify-content: center; min-width: 54px; height: 28px; padding: 0 12px; border-radius: 999px; font-size: 12px; font-weight: 700; letter-spacing: 0.5px; color: #1565c0; background: #e3f2fd; border: 1px solid #90caf9;">SSP</span>
@@ -720,12 +718,19 @@ function toggleMobileMenu() {
                     <div id="tab-province-visual" class="budget-tab-panel">
                         <h3 class="budget-section-title">📈 Province Visual Analysis</h3>
                         <p class="budget-section-desc">Visual charts for province projects by municipality/city and contractor</p>
-                        
                         <!-- Province Filter -->
                         <div style="margin-bottom: 20px; padding: 20px; background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%); border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); border: 2px solid #333;">
-                            <div style="display: flex; flex-direction: column; align-items: center; gap: 15px;">
-                                <label style="font-weight: 700; color: #333; font-size: 16px; text-transform: uppercase; letter-spacing: 0.5px;">Filter by Province</label>
-                                <input type="text" id="province-visual-filter" list="province-visual-list" placeholder="Type to search province..." value="Cebu" style="padding: 12px 16px; border: 2px solid #333; border-radius: 6px; font-size: 16px; font-weight: 600; min-width: 350px; background: white; color: #333; box-shadow: 0 2px 8px rgba(0,0,0,0.1); transition: all 0.3s ease;" onmouseover="this.style.borderColor='#667eea'; this.style.boxShadow='0 4px 12px rgba(102, 126, 234, 0.3)';" onmouseout="this.style.borderColor='#333'; this.style.boxShadow='0 2px 8px rgba(0,0,0,0.1)';" onchange="handleProvinceVisualChange()" oninput="handleProvinceVisualInput()" onblur="handleProvinceVisualBlur()">
+                            <div style="display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: center; gap: 24px;">
+                                <div style="display: flex; flex-direction: column; gap: 10px; min-width: 280px;">
+                                    <label for="province-visual-filter" style="font-weight: 700; color: #333; font-size: 16px; text-transform: uppercase; letter-spacing: 0.5px;">Filter by Province</label>
+                                    <input type="text" id="province-visual-filter" list="province-visual-list" placeholder="Type to search province..." value="Cebu" style="padding: 12px 16px; border: 2px solid #333; border-radius: 6px; font-size: 16px; font-weight: 600; min-width: 280px; background: white; color: #333; box-shadow: 0 2px 8px rgba(0,0,0,0.1); transition: all 0.3s ease;" onmouseover="this.style.borderColor='#667eea'; this.style.boxShadow='0 4px 12px rgba(102, 126, 234, 0.3)';" onmouseout="this.style.borderColor='#333'; this.style.boxShadow='0 2px 8px rgba(0,0,0,0.1)';" onchange="handleProvinceVisualChange()" oninput="handleProvinceVisualInput()" onblur="handleProvinceVisualBlur()">
+                                </div>
+                                <div style="display: flex; flex-direction: column; gap: 10px; min-width: 240px;">
+                                    <label for="province-visual-municipality-filter" style="font-weight: 700; color: #333; font-size: 16px; text-transform: uppercase; letter-spacing: 0.5px;">Filter by Municipality/City</label>
+                                    <select id="province-visual-municipality-filter" style="padding: 12px 16px; border: 2px solid #333; border-radius: 6px; font-size: 15px; font-weight: 600; background: white; color: #333; cursor: pointer; box-shadow: 0 2px 8px rgba(0,0,0,0.1); transition: all 0.3s ease; min-width: 240px;" onmouseover="this.style.borderColor='#667eea'; this.style.boxShadow='0 4px 12px rgba(102, 126, 234, 0.3)';" onmouseout="this.style.borderColor='#333'; this.style.boxShadow='0 2px 8px rgba(0,0,0,0.1)';" onchange="handleProvinceVisualMunicipalityChange()">
+                                        <option value="all" selected>All Municipalities/Cities</option>
+                                    </select>
+                                </div>
                                 <datalist id="province-visual-list">
                                     <option value="Abra">Abra</option>
                                     <option value="Agusan del Norte">Agusan del Norte</option>
@@ -817,14 +822,18 @@ function toggleMobileMenu() {
                         
                         <!-- Province Dashboard -->
                         <div id="province-visual-dashboard" style="margin-top: 20px; display: none; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.2); padding: 30px;">
+                            <div style="display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 20px;">
+                                <span style="font-size: 18px; font-weight: 700; color: #f8fafc; letter-spacing: 0.6px; text-transform: uppercase;">Municipality/City Dashboard</span>
+                                <span id="province-dashboard-scope" style="display: inline-flex; align-items: center; gap: 6px; padding: 6px 14px; border-radius: 999px; background: rgba(255, 255, 255, 0.22); color: #f8fafc; font-size: 13px; font-weight: 700; letter-spacing: 0.4px; text-transform: uppercase;">All Municipalities/Cities</span>
+                            </div>
                             <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px;">
                                 <div style="background: rgba(255, 255, 255, 0.95); border-radius: 8px; padding: 25px; text-align: center; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
-                                    <div style="font-size: 14px; color: #666; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 10px;">Province Total Projects</div>
+                                    <div style="font-size: 14px; color: #666; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 10px;">Municipality/City Total Projects</div>
                                     <div id="province-total-projects-dashboard" style="font-size: 36px; font-weight: 700; color: #333; line-height: 1.2; margin-bottom: 8px;">0</div>
                                     <div style="font-size: 12px; color: #999; font-weight: 500; margin-top: 8px; padding-top: 8px; border-top: 1px solid #e0e0e0;">Total Projects: <span id="total-projects-dashboard" style="color: #666; font-weight: 600;">0</span></div>
                                 </div>
                                 <div style="background: rgba(255, 255, 255, 0.95); border-radius: 8px; padding: 25px; text-align: center; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
-                                    <div style="font-size: 14px; color: #666; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 10px;">Province Total Project Cost</div>
+                                    <div style="font-size: 14px; color: #666; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 10px;">Municipality/City Total Project Cost</div>
                                     <div id="province-total-cost-dashboard" style="font-size: 36px; font-weight: 700; color: #333; line-height: 1.2; margin-bottom: 8px;">₱0.00</div>
                                     <div style="font-size: 12px; color: #999; font-weight: 500; margin-top: 8px; padding-top: 8px; border-top: 1px solid #e0e0e0;">Total Project Cost: <span id="total-cost-dashboard" style="color: #666; font-weight: 600;">₱0.00</span></div>
                                 </div>
@@ -846,12 +855,14 @@ function toggleMobileMenu() {
                         
                         <!-- Top Municipalities/Cities Chart -->
                         <div style="margin-top: 30px; background: white; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); padding: 20px;">
-                            <div style="display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 16px; margin-bottom: 20px;">
-                                <h4 style="margin: 0; color: #333; font-size: 18px; font-weight: 600;">Top Municipalities/Cities</h4>
-                                <div style="display: flex; flex-wrap: wrap; gap: 10px; align-items: center;">
-                                    <button id="sort-municipalities-by-cost-btn" style="padding: 10px 20px; background: #7b1fa2; color: white; border: 2px solid #7b1fa2; border-radius: 6px; font-size: 14px; font-weight: 600; cursor: pointer; transition: all 0.3s ease; box-shadow: 0 4px 12px rgba(0,0,0,0.2);" onclick="sortMunicipalitiesChartBy('cost')">💰 By Cost</button>
-                                    <button id="sort-municipalities-by-count-btn" style="padding: 10px 20px; background: #333; color: white; border: 2px solid #333; border-radius: 6px; font-size: 14px; font-weight: 600; cursor: pointer; transition: all 0.3s ease; box-shadow: 0 4px 12px rgba(0,0,0,0.2);" onclick="sortMunicipalitiesChartBy('count')">🔢 By Count</button>
-                                    <button id="copy-municipality-chart-btn" style="padding: 10px 20px; background: #333; color: white; border: 2px solid #333; border-radius: 6px; font-size: 14px; font-weight: 600; cursor: pointer; transition: all 0.3s ease; box-shadow: 0 4px 12px rgba(0,0,0,0.2);" onmouseover="this.style.background='#667eea'; this.style.borderColor='#667eea'; this.style.transform='translateY(-2px)'; this.style.boxShadow='0 6px 16px rgba(102, 126, 234, 0.4)';" onmouseout="this.style.background='#333'; this.style.borderColor='#333'; this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 12px rgba(0,0,0,0.2)';">📋 Copy</button>
+                            <div style="display: flex; flex-direction: column; gap: 16px; margin-bottom: 20px;">
+                                <div style="display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 16px;">
+                                    <h4 style="margin: 0; color: #333; font-size: 18px; font-weight: 600;">Top Municipalities/Cities</h4>
+                                    <div style="display: flex; flex-wrap: wrap; gap: 10px; align-items: center;">
+                                        <button id="sort-municipalities-by-cost-btn" style="padding: 10px 20px; background: #7b1fa2; color: white; border: 2px solid #7b1fa2; border-radius: 6px; font-size: 14px; font-weight: 600; cursor: pointer; transition: all 0.3s ease; box-shadow: 0 4px 12px rgba(0,0,0,0.2);" onclick="sortMunicipalitiesChartBy('cost')">💰 By Cost</button>
+                                        <button id="sort-municipalities-by-count-btn" style="padding: 10px 20px; background: #333; color: white; border: 2px solid #333; border-radius: 6px; font-size: 14px; font-weight: 600; cursor: pointer; transition: all 0.3s ease; box-shadow: 0 4px 12px rgba(0,0,0,0.2);" onclick="sortMunicipalitiesChartBy('count')">🔢 By Count</button>
+                                        <button id="copy-municipality-chart-btn" style="padding: 10px 20px; background: #333; color: white; border: 2px solid #333; border-radius: 6px; font-size: 14px; font-weight: 600; cursor: pointer; transition: all 0.3s ease; box-shadow: 0 4px 12px rgba(0,0,0,0.2);" onmouseover="this.style.background='#667eea'; this.style.borderColor='#667eea'; this.style.transform='translateY(-2px)'; this.style.boxShadow='0 6px 16px rgba(102, 126, 234, 0.4)';" onmouseout="this.style.background='#333'; this.style.borderColor='#333'; this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 12px rgba(0,0,0,0.2)';">📋 Copy</button>
+                                    </div>
                                 </div>
                             </div>
                             <canvas id="municipalityChart" style="max-height: 500px;"></canvas>
@@ -859,12 +870,12 @@ function toggleMobileMenu() {
                         
                         <!-- Top Contractors Chart -->
                         <div style="margin-top: 30px; background: white; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); padding: 20px;">
-                            <div style="display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 16px; margin-bottom: 20px;">
-                                <h4 style="margin: 0; color: #333; font-size: 18px; font-weight: 600;">Top Contractors</h4>
+                            <div style="display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-bottom: 20px;">
+                                <h4 style="margin: 0; color: #333; font-size: 18px; font-weight: 600;">Top Contractors <span id="contractor-chart-scope" style="display: inline-flex; align-items: center; padding: 4px 10px; margin-left: 10px; border-radius: 999px; background: rgba(107, 114, 128, 0.15); color: #374151; font-size: 12px; font-weight: 700; letter-spacing: 0.4px; text-transform: uppercase;">All Municipalities/Cities</span></h4>
                                 <div style="display: flex; flex-wrap: wrap; gap: 10px; align-items: center;">
                                     <button id="sort-contractors-by-cost-btn" style="padding: 10px 20px; background: #7b1fa2; color: white; border: 2px solid #7b1fa2; border-radius: 6px; font-size: 14px; font-weight: 600; cursor: pointer; transition: all 0.3s ease; box-shadow: 0 4px 12px rgba(0,0,0,0.2);" onclick="sortContractorsChartBy('cost')">💰 By Cost</button>
                                     <button id="sort-contractors-by-count-btn" style="padding: 10px 20px; background: #333; color: white; border: 2px solid #333; border-radius: 6px; font-size: 14px; font-weight: 600; cursor: pointer; transition: all 0.3s ease; box-shadow: 0 4px 12px rgba(0,0,0,0.2);" onclick="sortContractorsChartBy('count')">🔢 By Count</button>
-                                    <button id="copy-contractor-chart-btn" style="padding: 10px 20px; background: #333; color: white; border: 2px solid #333; border-radius: 6px; font-size: 14px; font-weight: 600; cursor: pointer; transition: all 0.3s ease; box-shadow: 0 4px 12px rgba(0,0,0,0.2);" onmouseover="this.style.background='#667eea'; this.style.borderColor='#667eea'; this.style.transform='translateY(-2px)'; this.style.boxShadow='0 6px 16px rgba(102, 126, 234, 0.4)';" onmouseout="this.style.background='#333'; this.style.borderColor='#333'; this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 12px rgba(0,0,0,0.2)';">📋 Copy</button>
+                                    <button id="copy-contractor-chart-btn" style="padding: 10px 20px; background: #333; color: white; border: 2px solid #333; border-radius: 6px; font-size: 14px; font-weight: 600; cursor: pointer; transition: all 0.3s ease; box-shadow: 0 4px 12px rgba(0,0,0,0.2);" onmouseover="this.style.background='#667eea'; this.style.borderColor='#667eea'; this.style.transform='translateY(-2px)'; this.style.boxShadow='0 6px 16px rgba(102, 126, 234, 0.4)';" onmouseout="this.style.background='#333'; this.style.borderColor='#333'; this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 12px rgba(0,0,0,0.2);" onclick="copyContractorChart()">📋 Copy</button>
                                 </div>
                             </div>
                             <canvas id="contractorChart" style="max-height: 500px;"></canvas>
@@ -909,7 +920,6 @@ document.querySelectorAll('.budget-tab-btn').forEach(btn => {
         }
     });
 });
-
 // Format currency
 function formatCurrency(amount) {
     if (!amount) return 'N/A';
@@ -976,6 +986,8 @@ let chartTotalPages = 1;
 const chartPageSize = 10;
 let selectedChartName = '';
 let selectedChartNameDisplay = '';
+let dynastyOverviewCache = null;
+let dynastyOverviewPromise = null;
 
 function normalizeCongressmanName(name) {
     return (name || '')
@@ -1073,6 +1085,38 @@ function formatCoverageSummaryText(summary) {
     return `Currently covering ${parts.slice(0, -1).join(', ')}, and ${parts[parts.length - 1]}.`;
 }
 
+async function copyContractorChart() {
+    const btn = document.getElementById('copy-contractor-chart-btn');
+    if (!btn) return;
+
+    const originalText = btn.textContent;
+    try {
+        btn.textContent = 'Copying...';
+        btn.disabled = true;
+
+        const chartContainer = document.getElementById('contractorChart').parentElement;
+        const canvas = await html2canvas(chartContainer, {
+            backgroundColor: '#ffffff',
+            scale: 2
+        });
+
+        canvas.toBlob(function(blob) {
+            navigator.clipboard.write([new ClipboardItem({ 'image/png': blob })]).then(() => {
+                btn.textContent = '✓ Copied!';
+                setTimeout(() => { btn.textContent = originalText; btn.disabled = false; }, 2000);
+            }).catch(err => {
+                console.error('Failed to copy:', err);
+                btn.textContent = 'Error';
+                setTimeout(() => { btn.textContent = originalText; btn.disabled = false; }, 2000);
+            });
+        });
+    } catch (error) {
+        console.error('Error copying chart:', error);
+        btn.textContent = 'Error';
+        setTimeout(() => { btn.textContent = originalText; btn.disabled = false; }, 2000);
+    }
+}
+
 async function loadIntegratedCoverageSummary() {
     const coverageSpan = document.getElementById('integrated-coverage-counts');
     if (!coverageSpan) {
@@ -1100,7 +1144,6 @@ async function loadIntegratedCoverageSummary() {
         coverageSpan.textContent = integratedCoverageSummaryMessage;
     }
 }
-
 async function loadConfigCongressmen() {
     if (configCongressmen.length > 0) {
         return;
@@ -1117,7 +1160,18 @@ async function loadConfigCongressmen() {
         }
         
         const merged = new Map();
-        
+
+        const normalizeCongressmanSlug = (name) => {
+            if (!name) return "";
+            // Normalize unicode characters and strip accents/diacritics
+            const normalized = name.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+            let slug = normalized.toLowerCase();
+            slug = slug.replace(/\s+/g, "-");
+            slug = slug.replace(/[^\w\-]/g, "");
+            slug = slug.replace(/-{2,}/g, "-");
+            return slug.replace(/^-+|-+$/g, "");
+        };
+
         const mergeEntries = (entries) => {
             if (!Array.isArray(entries)) return;
             entries.forEach(item => {
@@ -1129,7 +1183,7 @@ async function loadConfigCongressmen() {
                     province: item.province || '',
                     district_number: item.district_number || '',
                     is_partylist: item.is_partylist !== undefined
-                ? item.is_partylist
+                        ? item.is_partylist
                 : (!item.province || !item.district_number),
             slug: item.slug || normalizeCongressmanSlug(name),
             summary: item.summary || null,
@@ -1268,7 +1322,6 @@ function updateCongressmanFilterStatus(mode, filteredItems, availableNames, proj
         status.style.display = 'block';
     }
 }
-
 function updateCongressmanDatalist() {
     const datalistIds = ['congressman-list', 'congressman-visual-list'];
     const mode = document.querySelector('input[name="congressman-filter-mode"]:checked')?.value || 'All';
@@ -1285,13 +1338,13 @@ function updateCongressmanDatalist() {
         const mergedNames = new Set(initialCongressmanNames.filter(name => name && name !== 'All Congressmen'));
         filteredEntries.forEach(item => {
             if (item && item.display_name) {
-                mergedNames.add(item.display_name);
-            }
-        });
+                    mergedNames.add(item.display_name);
+                }
+            });
         names = Array.from(mergedNames);
-    } else {
+        } else {
         names = filteredEntries.map(item => item.display_name).filter(Boolean);
-    }
+        }
     
     names = dedupeCongressmanNames(names).sort((a, b) => a.localeCompare(b));
     
@@ -1329,10 +1382,10 @@ async function loadAllProjects() {
 
     try {
         await loadDynastyOverview();
-        await loadConfigCongressmen();
-        filterConfigByAvailableData();
-        populateProvinceFilter();
-        updateCongressmanDatalist();
+            await loadConfigCongressmen();
+            filterConfigByAvailableData();
+            populateProvinceFilter();
+            updateCongressmanDatalist();
 
         allProjectsData = [];
         filteredData = [];
@@ -1403,27 +1456,27 @@ async function applyFilter() {
         }
 
         let targetNames = [];
-
-        if (mode === 'All') {
+    
+    if (mode === 'All') {
             targetNames = [filterValue];
-        } else if (mode === 'Partylist') {
-            const partylistNames = configCongressmen
+    } else if (mode === 'Partylist') {
+        const partylistNames = configCongressmen
                 .filter(item => item.is_partylist === true || !item.province || !item.district_number)
-                .map(item => item.display_name);
+            .map(item => item.display_name);
             if (filterValue && partylistNames.length && !partylistNames.includes(filterValue)) {
                 targetNames = [filterValue];
             } else if (filterValue) {
                 targetNames = [filterValue];
-            } else {
+        } else {
                 targetNames = partylistNames;
-            }
-        } else if (mode === 'Province') {
-            const provinceInput = document.getElementById('congressman-province-input');
+        }
+    } else if (mode === 'Province') {
+        const provinceInput = document.getElementById('congressman-province-input');
             const provinceValueRaw = provinceInput ? provinceInput.value.trim() : '';
             const aliases = getProvinceAliases(provinceValueRaw);
-            const allowedNames = configCongressmen
+        const allowedNames = configCongressmen
                 .filter(item => aliases.includes((item.province || '').trim().toLowerCase()) && item.district_number)
-                .map(item => item.display_name);
+            .map(item => item.display_name);
             if (filterValue && allowedNames.includes(filterValue)) {
                 targetNames = [filterValue];
             } else if (filterValue && !allowedNames.includes(filterValue)) {
@@ -1434,7 +1487,7 @@ async function applyFilter() {
 
             if (targetNames.length === 0) {
                 allProjectsData = [];
-                filteredData = [];
+            filteredData = [];
                 currentProjectsMessage = `No districts from ${provinceValueRaw} are in the cache yet. Coverage for 2016–2025 is still underway.`;
                 updateSummary(null);
                 updateDisplay();
@@ -1450,7 +1503,6 @@ async function applyFilter() {
             updateDisplay();
             return;
         }
-
         if (targetNames.length === 1) {
             const result = await fetchCongressmanProjects(targetNames[0]);
             const projects = Array.isArray(result.projects) ? result.projects : [];
@@ -1495,7 +1547,7 @@ async function applyFilter() {
     if (filteredData && filteredData.length > 0) {
         currentProjectsMessage = '';
     }
-
+    
     const filteredConfig = getFilteredCongressmenByMode();
     let statusNames = Array.isArray(filteredConfig) ? filteredConfig.map(item => item.display_name).filter(Boolean) : [];
     if (mode === 'All') {
@@ -1641,7 +1693,6 @@ function calculateSummary(projects) {
     
     return summary;
 }
-
 // Load on page load
 document.addEventListener('DOMContentLoaded', async () => {
     const congressmanList = document.getElementById('congressman-list');
@@ -1834,21 +1885,20 @@ function formatProjects(value) {
 function updateInsightsPanel(byCount, byCost) {
     return;
 }
-
 // Load and display visual data
 async function loadVisualData(prefetchedData = null) {
     const visualLoading = document.getElementById('visual-loading');
     if (visualLoading) {
         visualLoading.style.display = 'block';
     }
-
+    
     try {
         let data = prefetchedData || prefetchedVisualData;
-
+        
         if (!data) {
             data = await loadDynastyOverview();
         }
-        prefetchedVisualData = data;
+            prefetchedVisualData = data;
 
         rankingByCount = Array.isArray(data.chart_data_by_count) ? data.chart_data_by_count : [];
         rankingByCost = Array.isArray(data.chart_data_by_cost) ? data.chart_data_by_cost : rankingByCount;
@@ -1859,17 +1909,17 @@ async function loadVisualData(prefetchedData = null) {
             ? data.chart_data_top_10_by_cost
             : rankingByCost.slice(0, chartPageSize);
 
-        if (data.dashboard_stats) {
-            const stats = data.dashboard_stats;
-            document.getElementById('dashboard-total-cost').textContent = formatCurrency(stats.total_cost_all);
-            document.getElementById('dashboard-total-projects').textContent = `${stats.total_projects} projects`;
-            document.getElementById('dashboard-district-cost').textContent = formatCurrency(stats.district_cost);
-            document.getElementById('dashboard-district-count').textContent = `${stats.district_count} projects`;
-            document.getElementById('dashboard-contractor-cost').textContent = formatCurrency(stats.contractor_cost);
-            document.getElementById('dashboard-contractor-count').textContent = `${stats.contractor_count} projects`;
-            document.getElementById('dashboard-stats').style.display = 'grid';
-        }
-
+            if (data.dashboard_stats) {
+                const stats = data.dashboard_stats;
+                document.getElementById('dashboard-total-cost').textContent = formatCurrency(stats.total_cost_all);
+                document.getElementById('dashboard-total-projects').textContent = `${stats.total_projects} projects`;
+                document.getElementById('dashboard-district-cost').textContent = formatCurrency(stats.district_cost);
+                document.getElementById('dashboard-district-count').textContent = `${stats.district_count} projects`;
+                document.getElementById('dashboard-contractor-cost').textContent = formatCurrency(stats.contractor_cost);
+                document.getElementById('dashboard-contractor-count').textContent = `${stats.contractor_count} projects`;
+                document.getElementById('dashboard-stats').style.display = 'grid';
+            }
+            
         currentChartData = topTenByCost;
         currentChartSortedData = rankingByCost;
         chartPage = 1;
@@ -1877,7 +1927,7 @@ async function loadVisualData(prefetchedData = null) {
         selectedChartName = '';
         selectedChartNameDisplay = '';
 
-        sortChartBy('cost');
+            sortChartBy('cost');
     } catch (error) {
         console.error('Error loading visual data:', error);
         rankingByCount = [];
@@ -1955,7 +2005,7 @@ function updateChartWithSort(mode) {
                 startIndex: 0,
                 endIndex: limitedData.length,
             });
-        } else {
+    } else {
             const windowSize = chartPageSize;
             const halfWindow = Math.floor(windowSize / 2);
             let startIndex = selectedIndex - halfWindow;
@@ -2010,17 +2060,16 @@ function updateChartWithSort(mode) {
     const fullNames = limitedData.map((s) => s.name);
     const counts = limitedData.map((s) => s.count);
     const costs = limitedData.map((s) => (s.total_cost || 0) / 1_000_000);
-
+    
     createCharts(labels, fullNames, counts, costs);
 }
-
 function createCharts(labels, fullNames, counts, costs) {
     const canvas = document.getElementById('combinedChart');
-
+    
     if (combinedChart) {
         combinedChart.destroy();
     }
-
+    
     if (canvas) {
         const desiredHeight = Math.max(600, labels.length * 40);
         canvas.style.height = `${desiredHeight}px`;
@@ -2211,7 +2260,6 @@ function updatePagination(total, page, totalPages) {
     updatePaginationSet(paginationDiv, pageInfo, prevBtn, nextBtn);
     updatePaginationSet(paginationDivTop, pageInfoTop, prevBtnTop, nextBtnTop);
 }
-
 // Copy chart to clipboard
 const copyChartBtn = document.getElementById('copy-chart-btn');
 if (copyChartBtn) {
@@ -2320,7 +2368,7 @@ let provinceFilteredData = []; // Filtered projects (for now, same as all since 
 
 // Load Cebu province projects
 async function loadProvinceProjects(prefetchedData = null) {
-    const provinceSelect = document.getElementById('province-filter');
+        const provinceSelect = document.getElementById('province-filter');
     let selectedProvince = provinceSelect ? provinceSelect.value : '';
     if (!selectedProvince) {
         if (provinceSelect && provinceSelect.options.length > 0) {
@@ -2333,88 +2381,86 @@ async function loadProvinceProjects(prefetchedData = null) {
     }
 
     const province = selectedProvince;
-    
-    console.log(`🌐 [Province Tab] Fetching data for province: "${province}"`);
-    
-    // Load province projects from API (already filtered and sorted by cost descending)
-    const apiUrl = `/api/province-projects/all?page=1&limit=10000&province=${encodeURIComponent(province)}`;
-    console.log(`📡 [Province Tab] API URL: ${apiUrl}`);
-    
-    const response = await fetch(apiUrl);
-    
-    if (!response.ok) {
-        throw new Error(`API returned ${response.status}: ${response.statusText}`);
-    }
-    
-    const data = await response.json();
-    console.log(`📦 [Province Tab] API response:`, { success: data.success, projectsCount: data.projects?.length, hasFilterOptions: !!data.filter_options, error: data.error });
-    
-    document.getElementById('province-loading').style.display = 'none';
-    
-    if (data.success && data.projects) {
-        console.log(`🗺️ [Province Tab] Loaded ${data.projects.length} ${province} projects from cache`);
         
-        if (data.projects.length === 0) {
-            // Show helpful message if no projects found
-            document.getElementById('province-projects-tbody').innerHTML = 
-                `<tr><td colspan="6" style="padding: 40px; text-align: center; color: #666;">
-                    <div style="margin-bottom: 10px;">No projects found for ${province}.</div>
-                    <div style="font-size: 12px; color: #999;">Please run scripts/generate_province_projects_cache.py to generate the cache.</div>
-                </td></tr>`;
-            document.getElementById('province-loading').style.display = 'none';
-            document.getElementById('province-results-summary').style.display = 'none';
-            return;
+        console.log(`🌐 [Province Tab] Fetching data for province: "${province}"`);
+        
+        // Load province projects from API (already filtered and sorted by cost descending)
+        const apiUrl = `/api/province-projects/all?page=1&limit=10000&province=${encodeURIComponent(province)}`;
+        console.log(`📡 [Province Tab] API URL: ${apiUrl}`);
+        
+        const response = await fetch(apiUrl);
+        
+        if (!response.ok) {
+            throw new Error(`API returned ${response.status}: ${response.statusText}`);
         }
         
-        // Projects are already sorted by cost descending from the cache
-        provinceAllProjectsData = data.projects;
+        const data = await response.json();
+        console.log(`📦 [Province Tab] API response:`, { success: data.success, projectsCount: data.projects?.length, hasFilterOptions: !!data.filter_options, error: data.error });
         
-        // Update title and description based on selected province
-        const provinceTabTitle = document.querySelector('#tab-province .budget-section-title');
-        const provinceTabDesc = document.querySelector('#tab-province .budget-section-desc');
-        if (provinceTabTitle) {
-            provinceTabTitle.textContent = `🗺️ ${province} Province Projects`;
-        }
-        if (provinceTabDesc) {
-            provinceTabDesc.textContent = `Projects for ${province}, sorted by cost descending`;
-        }
+        document.getElementById('province-loading').style.display = 'none';
         
-        // Load filter options and repopulate municipality filter based on selected province
-        if (data.filter_options) {
-            console.log(`📋 [Province Tab] Filter options received:`, data.filter_options);
-            populateFilterOptions(data.filter_options, province);
-        } else {
-            console.warn(`⚠️ [Province Tab] No filter_options in API response`);
-            // Clear municipality filter if no options available
-            const municipalitySelect = document.getElementById('municipality-filter');
-            if (municipalitySelect) {
-                municipalitySelect.innerHTML = '<option value="all" selected>All Municipalities/Cities</option>';
-                console.warn(`⚠️ [Province Tab] Cleared municipality filter - no options available`);
+        if (data.success && data.projects) {
+            console.log(`🗺️ [Province Tab] Loaded ${data.projects.length} ${province} projects from cache`);
+            
+            if (data.projects.length === 0) {
+                // Show helpful message if no projects found
+                document.getElementById('province-projects-tbody').innerHTML = 
+                    `<tr><td colspan="6" style="padding: 40px; text-align: center; color: #666;">
+                        <div style="margin-bottom: 10px;">No projects found for ${province}.</div>
+                        <div style="font-size: 12px; color: #999;">Please run scripts/generate_province_projects_cache.py to generate the cache.</div>
+                    </td></tr>`;
+                document.getElementById('province-loading').style.display = 'none';
+                document.getElementById('province-results-summary').style.display = 'none';
+                return;
             }
+            
+            // Projects are already sorted by cost descending from the cache
+            provinceAllProjectsData = data.projects;
+            
+            // Update title and description based on selected province
+            const provinceTabTitle = document.querySelector('#tab-province .budget-section-title');
+            const provinceTabDesc = document.querySelector('#tab-province .budget-section-desc');
+            if (provinceTabTitle) {
+                provinceTabTitle.textContent = `🗺️ ${province} Province Projects`;
+            }
+            if (provinceTabDesc) {
+                provinceTabDesc.textContent = `Projects for ${province}, sorted by cost descending`;
+            }
+            
+            // Load filter options and repopulate municipality filter based on selected province
+            if (data.filter_options) {
+                console.log(`📋 [Province Tab] Filter options received:`, data.filter_options);
+                populateFilterOptions(data.filter_options, province);
+            } else {
+                console.warn(`⚠️ [Province Tab] No filter_options in API response`);
+                // Clear municipality filter if no options available
+                const municipalitySelect = document.getElementById('municipality-filter');
+                if (municipalitySelect) {
+                    municipalitySelect.innerHTML = '<option value="all" selected>All Municipalities/Cities</option>';
+                    console.warn(`⚠️ [Province Tab] Cleared municipality filter - no options available`);
+                }
+            }
+            
+            // Reset filters to "all" when province changes
+            document.getElementById('contractor-filter').value = '';
+            document.getElementById('municipality-filter').value = 'all';
+            
+            provinceApplyFilter();
+        } else {
+            console.error(`❌ [Province Tab] API returned error:`, data.error || 'No projects found');
+            document.getElementById('province-projects-tbody').innerHTML = 
+                `<tr><td colspan="6" style="padding: 40px; text-align: center; color: #dc3545;">
+                    <div style="margin-bottom: 10px;">${data.error || 'No projects found'}</div>
+                    <div style="font-size: 12px; color: #999;">Please run: python3 scripts/generate_province_projects_cache.py "${province}"</div>
+                </td></tr>`;
         }
-        
-        // Reset filters to "all" when province changes
-        document.getElementById('contractor-filter').value = '';
-        document.getElementById('municipality-filter').value = 'all';
-        
-        provinceApplyFilter();
-    } else {
-        console.error(`❌ [Province Tab] API returned error:`, data.error || 'No projects found');
-        document.getElementById('province-projects-tbody').innerHTML = 
-            `<tr><td colspan="6" style="padding: 40px; text-align: center; color: #dc3545;">
-                <div style="margin-bottom: 10px;">${data.error || 'No projects found'}</div>
-                <div style="font-size: 12px; color: #999;">Please run: python3 scripts/generate_province_projects_cache.py "${province}"</div>
-            </td></tr>`;
-    }
 }
-
 // Handle province filter change
 function handleProvinceFilterChange() {
     console.log('🔄 [Province Tab] handleProvinceFilterChange() called');
     // Reload projects for the selected province
     loadProvinceProjects();
 }
-
 function handleMunicipalityFilterChange() {
     // Recompute contractors based on selected municipality
     updateContractorFilterFromProjects();
@@ -2603,7 +2649,6 @@ function populateFilterOptions(filterOptions, province) {
     
     console.log(`📋 [Province Tab] Populated ${municipalities.length} municipalities/cities in dropdown`);
 }
-
 function provinceApplyFilter() {
     const locationFilter = document.getElementById('province-filter').value;
     const contractorFilter = document.getElementById('contractor-filter').value;
@@ -2800,12 +2845,10 @@ function provinceUpdatePagination(total, page, totalPages) {
             paginationEl.style.display = 'none';
         }
     };
-    
     // Update both top and bottom pagination
     updatePaginationSet(paginationDiv, pageInfo, prevBtn, nextBtn);
     updatePaginationSet(paginationDivTop, pageInfoTop, prevBtnTop, nextBtnTop);
 }
-
 // Export to CSV for province tab
 document.getElementById('province-export-csv-btn').addEventListener('click', function() {
     if (!provinceFilteredData || provinceFilteredData.length === 0) {
@@ -2872,6 +2915,9 @@ let currentMunicipalitySortMode = 'cost';
 let municipalityChartData = [];
 let currentContractorSortMode = 'cost';
 let contractorChartData = [];
+let currentProvinceMunicipalityFilter = 'all';
+let provinceVisualProjects = [];
+let currentProvinceVisualName = '';
 
 // Load province visual data
 // Debounce timer for province visual filter
@@ -2976,7 +3022,6 @@ async function loadProvinceVisualData() {
     if (provinceVisualDebounceTimer) {
         clearTimeout(provinceVisualDebounceTimer);
     }
-    
     // Debounce the function call for municipality and contractor charts
     provinceVisualDebounceTimer = setTimeout(async () => {
         const loading = document.getElementById('province-visual-loading');
@@ -3053,8 +3098,6 @@ async function loadProvinceVisualData() {
             
             // Update dashboard
             const dashboard = document.getElementById('province-visual-dashboard');
-            const provinceTotalProjectsEl = document.getElementById('province-total-projects-dashboard');
-            const provinceTotalCostEl = document.getElementById('province-total-cost-dashboard');
             const totalProjectsEl = document.getElementById('total-projects-dashboard');
             const totalCostEl = document.getElementById('total-cost-dashboard');
             
@@ -3080,24 +3123,16 @@ async function loadProvinceVisualData() {
             }
             
             if (data.success && data.projects && data.projects.length > 0) {
-                // Calculate province-specific totals
-                const provinceTotalProjects = data.projects.length;
-                const provinceTotalCost = data.projects.reduce((sum, project) => {
-                    const amount = parseFloat(project.amount || project.contract_cost || project.contract_amount || project.cost || 0);
-                    return sum + amount;
-                }, 0);
-                
-                // Update province dashboard
-                if (provinceTotalProjectsEl) {
-                    provinceTotalProjectsEl.textContent = provinceTotalProjects.toLocaleString();
+                provinceVisualProjects = Array.isArray(data.projects) ? data.projects : [];
+                currentProvinceMunicipalityFilter = 'all';
+                currentProvinceVisualName = exactProvinceName || selectedProvince;
+                const scopeLabel = currentProvinceVisualName ? `All Municipalities/Cities (${currentProvinceVisualName})` : 'All Municipalities/Cities';
+                updateProvinceVisualDashboardProjects(provinceVisualProjects, scopeLabel);
+                const municipalityFilterSelect = document.getElementById('province-visual-municipality-filter');
+                if (municipalityFilterSelect) {
+                    municipalityFilterSelect.value = 'all';
                 }
-                if (provinceTotalCostEl) {
-                    provinceTotalCostEl.textContent = formatCurrency(provinceTotalCost);
-                }
-                if (dashboard) {
-                    dashboard.style.display = 'block';
-                }
-                
+
                 // Show charts first
                 if (municipalityChartContainer) municipalityChartContainer.style.display = 'block';
                 if (contractorChartContainer) contractorChartContainer.style.display = 'block';
@@ -3121,7 +3156,7 @@ async function loadProvinceVisualData() {
                 
                 // Restore chart containers if they were replaced with error messages
                 if (municipalityChartContainer && !document.getElementById('municipalityChart')) {
-                        municipalityChartContainer.innerHTML = '<div style="display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 16px; margin-bottom: 20px;"><h4 style="margin: 0; color: #333; font-size: 18px; font-weight: 600;">Top Municipalities/Cities</h4><div style="display: flex; flex-wrap: wrap; gap: 10px; align-items: center;"><button id="sort-municipalities-by-cost-btn" style="padding: 10px 20px; background: #7b1fa2; color: white; border: 2px solid #7b1fa2; border-radius: 6px; font-size: 14px; font-weight: 600; cursor: pointer; transition: all 0.3s ease; box-shadow: 0 4px 12px rgba(0,0,0,0.2);" onclick="sortMunicipalitiesChartBy(\\\'cost\\\')">💰 By Cost</button><button id="sort-municipalities-by-count-btn" style="padding: 10px 20px; background: #333; color: white; border: 2px solid #333; border-radius: 6px; font-size: 14px; font-weight: 600; cursor: pointer; transition: all 0.3s ease; box-shadow: 0 4px 12px rgba(0,0,0,0.2);" onclick="sortMunicipalitiesChartBy(\\\'count\\\')">🔢 By Count</button><button id="copy-municipality-chart-btn" style="padding: 10px 20px; background: #333; color: white; border: 2px solid #333; border-radius: 6px; font-size: 14px; font-weight: 600; cursor: pointer; transition: all 0.3s ease; box-shadow: 0 4px 12px rgba(0,0,0,0.2);" onmouseover="this.style.background=\\\'#667eea\\\'; this.style.borderColor=\\\'#667eea\\\'; this.style.transform=\\\'translateY(-2px)\\\'; this.style.boxShadow=\\\'0 6px 16px rgba(102, 126, 234, 0.4)\\\';" onmouseout="this.style.background=\\\'#333\\\'; this.style.borderColor=\\\'#333\\\'; this.style.transform=\\\'translateY(0)\\\'; this.style.boxShadow=\\\'0 4px 12px rgba(0,0,0,0.2)\\\';">📋 Copy</button></div></div><canvas id="municipalityChart" style="max-height: 500px;"></canvas>';
+                        municipalityChartContainer.innerHTML = '<div style="display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-bottom: 20px;"><h4 style="margin: 0; color: #333; font-size: 18px; font-weight: 600;">Top Municipalities/Cities</h4><div style="display: flex; flex-wrap: wrap; gap: 10px; align-items: center;"><button id="sort-municipalities-by-cost-btn" style="padding: 10px 20px; background: #7b1fa2; color: white; border: 2px solid #7b1fa2; border-radius: 6px; font-size: 14px; font-weight: 600; cursor: pointer; transition: all 0.3s ease; box-shadow: 0 4px 12px rgba(0,0,0,0.2);" onclick="sortMunicipalitiesChartBy\\(\'cost\'\\)">💰 By Cost</button><button id="sort-municipalities-by-count-btn" style="padding: 10px 20px; background: #333; color: white; border: 2px solid #333; border-radius: 6px; font-size: 14px; font-weight: 600; cursor: pointer; transition: all 0.3s ease; box-shadow: 0 4px 12px rgba(0,0,0,0.2);" onclick="sortMunicipalitiesChartBy\\(\'count\'\\)">🔢 By Count</button><button id="copy-municipality-chart-btn" style="padding: 10px 20px; background: #333; color: white; border: 2px solid #333; border-radius: 6px; font-size: 14px; font-weight: 600; cursor: pointer; transition: all 0.3s ease; box-shadow: 0 4px 12px rgba(0,0,0,0.2);" onmouseover="this.style.background\=\'#667eea\'; this.style.borderColor\=\'#667eea\'; this.style.transform\=\'translateY(-2px)\'; this.style.boxShadow\=\'0 6px 16px rgba\(102, 126, 234, 0.4\)\';" onmouseout="this.style.background\=\'#333\'; this.style.borderColor\=\'#333\'; this.style.transform\=\'translateY(0)\'; this.style.boxShadow\=\'0 4px 12px rgba\(0,0,0,0.2\)\';">📋 Copy</button></div></div><p style="padding: 20px; text-align: center; color: #dc3545;">No data available for this province</p><canvas id="municipalityChart" style="max-height: 500px; display: none;"></canvas>';
                     // Re-attach copy button event listener
                     const copyBtn = document.getElementById('copy-municipality-chart-btn');
                     if (copyBtn && !copyBtn.hasAttribute('data-listener-attached')) {
@@ -3153,44 +3188,18 @@ async function loadProvinceVisualData() {
                     }
                 }
                 if (contractorChartContainer && !document.getElementById('contractorChart')) {
-                    contractorChartContainer.innerHTML = '<h4 style="margin: 0 0 20px 0; color: #333; font-size: 18px; font-weight: 600;">Top Contractors</h4><button id="copy-contractor-chart-btn" style="position: absolute; top: 20px; right: 20px; padding: 10px 20px; background: #333; color: white; border: 2px solid #333; border-radius: 6px; font-size: 14px; font-weight: 600; cursor: pointer; transition: all 0.3s ease; box-shadow: 0 4px 12px rgba(0,0,0,0.2); z-index: 10;" onmouseover="this.style.background=\'#667eea\'; this.style.borderColor=\'#667eea\'; this.style.transform=\'translateY(-2px)\'; this.style.boxShadow=\'0 6px 16px rgba(102, 126, 234, 0.4)\';" onmouseout="this.style.background=\'#333\'; this.style.borderColor=\'#333\'; this.style.transform=\'translateY(0)\'; this.style.boxShadow=\'0 4px 12px rgba(0,0,0,0.2)\';">📋 Copy Chart</button><canvas id="contractorChart" style="max-height: 500px;"></canvas>';
-                    // Re-attach copy button event listener
-                    const copyBtn = document.getElementById('copy-contractor-chart-btn');
-                    if (copyBtn && !copyBtn.hasAttribute('data-listener-attached')) {
-                        copyBtn.setAttribute('data-listener-attached', 'true');
-                        copyBtn.addEventListener('click', async function() {
-                            const btn = this;
-                            const originalText = btn.textContent;
-                            try {
-                                btn.textContent = 'Copying...';
-                                btn.disabled = true;
-                                const chartContainer = document.getElementById('contractorChart').parentElement;
-                                const canvas = await html2canvas(chartContainer, { backgroundColor: '#ffffff', scale: 2 });
-                                canvas.toBlob(function(blob) {
-                                    navigator.clipboard.write([new ClipboardItem({ 'image/png': blob })]).then(() => {
-                                        btn.textContent = '✓ Copied!';
-                                        setTimeout(() => { btn.textContent = originalText; btn.disabled = false; }, 2000);
-                                    }).catch(err => {
-                                        console.error('Failed to copy:', err);
-                                        btn.textContent = 'Error';
-                                        setTimeout(() => { btn.textContent = originalText; btn.disabled = false; }, 2000);
-                                    });
-                                });
-                            } catch (error) {
-                                console.error('Error copying chart:', error);
-                                btn.textContent = 'Error';
-                                setTimeout(() => { btn.textContent = originalText; btn.disabled = false; }, 2000);
-                            }
-                        });
-                    }
+                    contractorChartContainer.innerHTML = '<div style="display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-bottom: 20px;"><h4 style="margin: 0; color: #333; font-size: 18px; font-weight: 600;">Top Contractors <span id="contractor-chart-scope" style="display: inline-flex; align-items: center; padding: 4px 10px; margin-left: 10px; border-radius: 999px; background: rgba(107, 114, 128, 0.15); color: #374151; font-size: 12px; font-weight: 700; letter-spacing: 0.4px; text-transform: uppercase;">All Municipalities/Cities</span></h4><div style="display: flex; flex-wrap: wrap; gap: 10px; align-items: center;"><button id="sort-contractors-by-cost-btn" style="padding: 10px 20px; background: #7b1fa2; color: white; border: 2px solid #7b1fa2; border-radius: 6px; font-size: 14px; font-weight: 600; cursor: pointer; transition: all 0.3s ease; box-shadow: 0 4px 12px rgba(0,0,0,0.2);" onclick="sortContractorsChartBy(\'cost\')">💰 By Cost</button><button id="sort-contractors-by-count-btn" style="padding: 10px 20px; background: #333; color: white; border: 2px solid #333; border-radius: 6px; font-size: 14px; font-weight: 600; cursor: pointer; transition: all 0.3s ease; box-shadow: 0 4px 12px rgba(0,0,0,0.2);" onclick="sortContractorsChartBy(\'count\')">🔢 By Count</button><button id="copy-contractor-chart-btn" style="padding: 10px 20px; background: #333; color: white; border: 2px solid #333; border-radius: 6px; font-size: 14px; font-weight: 600; cursor: pointer; transition: all 0.3s ease; box-shadow: 0 4px 12px rgba(0,0,0,0.2);" onmouseover="this.style.background=\'#667eea\'; this.style.borderColor=\'#667eea\'; this.style.transform=\'translateY(-2px)\'; this.style.boxShadow=\'0 6px 16px rgba(102, 126, 234, 0.4)\';" onmouseout="this.style.background=\'#333\'; this.style.borderColor=\'#333\'; this.style.transform=\'translateY(0)\'; this.style.boxShadow=\'0 4px 12px rgba(0,0,0,0.2);" onclick="copyContractorChart()">📋 Copy</button></div></div><canvas id="contractorChart" style="max-height: 500px;"></canvas>';
+                    // Copy button uses onclick handler in HTML
                 }
                 
                 // Calculate municipality statistics
                 // Use filter_options from API if available, otherwise use hardcoded lists
                 municipalityChartData = calculateMunicipalityStats(data.projects, selectedProvince, data.filter_options);
+                populateProvinceVisualMunicipalityFilter(data.filter_options, municipalityChartData);
                 
-                // Calculate contractor statistics
-                contractorChartData = calculateContractorStats(data.projects);
+                // Calculate contractor statistics (respecting municipality filter)
+                const contractorSourceProjects = getProvinceVisualMunicipalityProjects('all');
+                contractorChartData = calculateContractorStats(contractorSourceProjects);
                 
                 // Destroy existing charts before creating new ones
                 if (municipalityChart) {
@@ -3225,6 +3234,21 @@ async function loadProvinceVisualData() {
                 }, 200);
             } else {
                 console.error('Failed to load province visual data:', data.error || 'No projects found');
+                provinceVisualProjects = [];
+                if (dashboard) {
+                    dashboard.style.display = 'none';
+                }
+                const scopeEl = document.getElementById('province-dashboard-scope');
+                if (scopeEl) {
+                    scopeEl.textContent = 'All Municipalities/Cities';
+                }
+                const municipalityFilterSelect = document.getElementById('province-visual-municipality-filter');
+                if (municipalityFilterSelect) {
+                    municipalityFilterSelect.innerHTML = '<option value="all" selected>All Municipalities/Cities</option>';
+                    municipalityFilterSelect.value = 'all';
+                }
+                currentProvinceMunicipalityFilter = 'all';
+                updateContractorChartScopeLabel();
                 // Destroy charts if they exist
                 if (municipalityChart) {
                     municipalityChart.destroy();
@@ -3239,7 +3263,7 @@ async function loadProvinceVisualData() {
                     const canvas = document.getElementById('municipalityChart');
                     if (!canvas) {
                         // Only replace if canvas doesn't exist
-                        municipalityChartContainer.innerHTML = '<div style="display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 16px; margin-bottom: 20px;"><h4 style="margin: 0; color: #333; font-size: 18px; font-weight: 600;">Top Municipalities/Cities</h4><div style="display: flex; flex-wrap: wrap; gap: 10px; align-items: center;"><button id="sort-municipalities-by-cost-btn" style="padding: 10px 20px; background: #7b1fa2; color: white; border: 2px solid #7b1fa2; border-radius: 6px; font-size: 14px; font-weight: 600; cursor: pointer; transition: all 0.3s ease; box-shadow: 0 4px 12px rgba(0,0,0,0.2);" onclick="sortMunicipalitiesChartBy(\\\'cost\\\')">💰 By Cost</button><button id="sort-municipalities-by-count-btn" style="padding: 10px 20px; background: #333; color: white; border: 2px solid #333; border-radius: 6px; font-size: 14px; font-weight: 600; cursor: pointer; transition: all 0.3s ease; box-shadow: 0 4px 12px rgba(0,0,0,0.2);" onclick="sortMunicipalitiesChartBy(\\\'count\\\')">🔢 By Count</button><button id="copy-municipality-chart-btn" style="padding: 10px 20px; background: #333; color: white; border: 2px solid #333; border-radius: 6px; font-size: 14px; font-weight: 600; cursor: pointer; transition: all 0.3s ease; box-shadow: 0 4px 12px rgba(0,0,0,0.2);" onmouseover="this.style.background=\\\'#667eea\\\'; this.style.borderColor=\\\'#667eea\\\'; this.style.transform=\\\'translateY(-2px)\\\'; this.style.boxShadow=\\\'0 6px 16px rgba(102, 126, 234, 0.4)\\\';" onmouseout="this.style.background=\\\'#333\\\'; this.style.borderColor=\\\'#333\\\'; this.style.transform=\\\'translateY(0)\\\'; this.style.boxShadow=\\\'0 4px 12px rgba(0,0,0,0.2)\\\';">📋 Copy</button></div></div><p style="padding: 20px; text-align: center; color: #dc3545;">No data available for this province</p><canvas id="municipalityChart" style="max-height: 500px; display: none;"></canvas>';
+                        municipalityChartContainer.innerHTML = '<div style="display: flex; flex-direction: column; gap: 16px; margin-bottom: 20px;"><div style="display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 16px;"><h4 style="margin: 0; color: #333; font-size: 18px; font-weight: 600;">Top Municipalities/Cities</h4><div style="display: flex; flex-wrap: wrap; gap: 10px; align-items: center;"><button id="sort-municipalities-by-cost-btn" style="padding: 10px 20px; background: #7b1fa2; color: white; border: 2px solid #7b1fa2; border-radius: 6px; font-size: 14px; font-weight: 600; cursor: pointer; transition: all 0.3s ease; box-shadow: 0 4px 12px rgba(0,0,0,0.2);" onclick="sortMunicipalitiesChartBy(\'cost\')">💰 By Cost</button><button id="sort-municipalities-by-count-btn" style="padding: 10px 20px; background: #333; color: white; border: 2px solid #333; border-radius: 6px; font-size: 14px; font-weight: 600; cursor: pointer; transition: all 0.3s ease; box-shadow: 0 4px 12px rgba(0,0,0,0.2);" onclick="sortMunicipalitiesChartBy(\'count\')">🔢 By Count</button><button id="copy-municipality-chart-btn" style="padding: 10px 20px; background: #333; color: white; border: 2px solid #333; border-radius: 6px; font-size: 14px; font-weight: 600; cursor: pointer; transition: all 0.3s ease; box-shadow: 0 4px 12px rgba(0,0,0,0.2);" onmouseover="this.style.background=\'#667eea\'; this.style.borderColor=\'#667eea\'; this.style.transform=\'translateY(-2px)\'; this.style.boxShadow=\'0 6px 16px rgba(102, 126, 234, 0.4)\';" onmouseout="this.style.background=\'#333\'; this.style.borderColor=\'#333\'; this.style.transform=\'translateY(0)\'; this.style.boxShadow=\'0 4px 12px rgba(0,0,0,0.2)\';">📋 Copy</button></div></div><div style="display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px; margin-top: 4px;"><label for="province-visual-municipality-filter" style="font-weight: 700; color: #333; font-size: 13px; text-transform: uppercase; letter-spacing: 0.5px;">Filter by Municipality/City</label><select id="province-visual-municipality-filter" style="padding: 10px 14px; border: 2px solid #333; border-radius: 6px; font-size: 13px; font-weight: 600; background: white; color: #333; cursor: pointer; box-shadow: 0 2px 8px rgba(0,0,0,0.1); transition: all 0.3s ease; min-width: 220px;" onmouseover="this.style.borderColor=\'#667eea\'; this.style.boxShadow=\'0 4px 12px rgba(102, 126, 234, 0.3)\';" onmouseout="this.style.borderColor=\'#333\'; this.style.boxShadow=\'0 2px 8px rgba(0,0,0,0.1)\';" onchange="handleProvinceVisualMunicipalityChange()"><option value="all" selected>All Municipalities/Cities</option></select></div></div><p style="padding: 20px; text-align: center; color: #dc3545;">No data available for this province</p><canvas id="municipalityChart" style="max-height: 500px; display: none;"></canvas>';;
                     } else {
                         // Show error message above canvas
                         const errorMsg = document.createElement('p');
@@ -3258,7 +3282,7 @@ async function loadProvinceVisualData() {
                     const canvas = document.getElementById('contractorChart');
                     if (!canvas) {
                         // Only replace if canvas doesn't exist
-                        contractorChartContainer.innerHTML = '<div style="display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 16px; margin-bottom: 20px;"><h4 style="margin: 0; color: #333; font-size: 18px; font-weight: 600;">Top Contractors</h4><div style="display: flex; flex-wrap: wrap; gap: 10px; align-items: center;"><button id="sort-contractors-by-cost-btn" style="padding: 10px 20px; background: #7b1fa2; color: white; border: 2px solid #7b1fa2; border-radius: 6px; font-size: 14px; font-weight: 600; cursor: pointer; transition: all 0.3s ease; box-shadow: 0 4px 12px rgba(0,0,0,0.2);" onclick="sortContractorsChartBy(\\\'cost\\\')">💰 By Cost</button><button id="sort-contractors-by-count-btn" style="padding: 10px 20px; background: #333; color: white; border: 2px solid #333; border-radius: 6px; font-size: 14px; font-weight: 600; cursor: pointer; transition: all 0.3s ease; box-shadow: 0 4px 12px rgba(0,0,0,0.2);" onclick="sortContractorsChartBy(\\\'count\\\')">🔢 By Count</button><button id="copy-contractor-chart-btn" style="padding: 10px 20px; background: #333; color: white; border: 2px solid #333; border-radius: 6px; font-size: 14px; font-weight: 600; cursor: pointer; transition: all 0.3s ease; box-shadow: 0 4px 12px rgba(0,0,0,0.2);" onmouseover="this.style.background=\\\'#667eea\\\'; this.style.borderColor=\\\'#667eea\\\'; this.style.transform=\\\'translateY(-2px)\\\'; this.style.boxShadow=\\\'0 6px 16px rgba(102, 126, 234, 0.4)\\\';" onmouseout="this.style.background=\\\'#333\\\'; this.style.borderColor=\\\'#333\\\'; this.style.transform=\\\'translateY(0)\\\'; this.style.boxShadow=\\\'0 4px 12px rgba(0,0,0,0.2)\\\';">📋 Copy</button></div></div><p style="padding: 20px; text-align: center; color: #dc3545;">No data available for this province</p><canvas id="contractorChart" style="max-height: 500px; display: none;"></canvas>';
+                        contractorChartContainer.innerHTML = '<div style="display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 16px; margin-bottom: 20px;"><h4 style="margin: 0; color: #333; font-size: 18px; font-weight: 600;">Top Contractors <span id="contractor-chart-scope" style="display: inline-flex; align-items: center; padding: 4px 10px; margin-left: 10px; border-radius: 999px; background: rgba(107, 114, 128, 0.15); color: #374151; font-size: 12px; font-weight: 700; letter-spacing: 0.4px; text-transform: uppercase;">All Municipalities/Cities</span></h4><div style="display: flex; flex-wrap: wrap; gap: 10px; align-items: center;"><button id="sort-contractors-by-cost-btn" style="padding: 10px 20px; background: #7b1fa2; color: white; border: 2px solid #7b1fa2; border-radius: 6px; font-size: 14px; font-weight: 600; cursor: pointer; transition: all 0.3s ease; box-shadow: 0 4px 12px rgba(0,0,0,0.2);" onclick="sortContractorsChartBy(\'cost\')">💰 By Cost</button><button id="sort-contractors-by-count-btn" style="padding: 10px 20px; background: #333; color: white; border: 2px solid #333; border-radius: 6px; font-size: 14px; font-weight: 600; cursor: pointer; transition: all 0.3s ease; box-shadow: 0 4px 12px rgba(0,0,0,0.2);" onclick="sortContractorsChartBy(\'count\')">🔢 By Count</button><button id="copy-contractor-chart-btn" style="padding: 10px 20px; background: #333; color: white; border: 2px solid #333; border-radius: 6px; font-size: 14px; font-weight: 600; cursor: pointer; transition: all 0.3s ease; box-shadow: 0 4px 12px rgba(0,0,0,0.2);" onmouseover="this.style.background=\'#667eea\'; this.style.borderColor=\'#667eea\'; this.style.transform=\'translateY(-2px)\'; this.style.boxShadow=\'0 6px 16px rgba(102, 126, 234, 0.4)\';" onmouseout="this.style.background=\'#333\'; this.style.borderColor=\'#333\'; this.style.transform=\'translateY(0)\'; this.style.boxShadow=\'0 4px 12px rgba(0,0,0,0.2);" onclick="copyContractorChart()">📋 Copy</button></div></div><canvas id="contractorChart" style="max-height: 500px;"></canvas>';
                     } else {
                         // Show error message above canvas
                         const errorMsg = document.createElement('p');
@@ -3279,6 +3303,22 @@ async function loadProvinceVisualData() {
             // Show error message
             const municipalityChartContainer = document.getElementById('municipalityChart')?.parentElement;
             const contractorChartContainer = document.getElementById('contractorChart')?.parentElement;
+            provinceVisualProjects = [];
+            currentProvinceMunicipalityFilter = 'all';
+            const dashboard = document.getElementById('province-visual-dashboard');
+            if (dashboard) {
+                dashboard.style.display = 'none';
+            }
+            const scopeEl = document.getElementById('province-dashboard-scope');
+            if (scopeEl) {
+                scopeEl.textContent = 'All Municipalities/Cities';
+            }
+            const filterSelect = document.getElementById('province-visual-municipality-filter');
+            if (filterSelect) {
+                filterSelect.innerHTML = '<option value="all" selected>All Municipalities/Cities</option>';
+                filterSelect.value = 'all';
+            }
+            updateContractorChartScopeLabel();
             if (municipalityChartContainer) {
                 municipalityChartContainer.innerHTML = '<p style="padding: 20px; text-align: center; color: #dc3545;">Error loading data: ' + error.message + '</p>';
                 municipalityChartContainer.style.display = 'block';
@@ -3292,7 +3332,6 @@ async function loadProvinceVisualData() {
         }
     }, 300); // 300ms debounce
 }
-
 // Calculate municipality statistics
 function calculateMunicipalityStats(projects, province = 'Cebu', filterOptions = null) {
     console.log(`📊 [Municipality Stats] Calculating for ${province}, projects: ${projects.length}, has filterOptions: ${!!filterOptions}`);
@@ -3318,9 +3357,7 @@ function calculateMunicipalityStats(projects, province = 'Cebu', filterOptions =
             cityPatterns = [cityOption.name.toUpperCase(), cityOption.name.toUpperCase().replace(' ', ' ')];
         }
     }
-    
     const provinceUpper = province.toUpperCase();
-    
     // Only use hardcoded lists if filterOptions not provided (for backward compatibility)
     if (!filterOptions || !filterOptions.municipalities || filterOptions.municipalities.length === 0) {
         if (provinceUpper === 'CEBU') {
@@ -3466,17 +3503,18 @@ function calculateMunicipalityStats(projects, province = 'Cebu', filterOptions =
             stats[matchedMunicipality] = {
                 name: matchedMunicipality,
                 count: 0,
-                totalCost: 0
+                totalCost: 0,
+                projects: []
             };
         }
         
         stats[matchedMunicipality].count++;
         stats[matchedMunicipality].totalCost += amount;
+        stats[matchedMunicipality].projects.push(project);
     });
     
     return Object.values(stats);
 }
-
 // Load top 10 provinces chart
 async function loadTopProvincesChart(selectedProvince = null) {
     try {
@@ -3641,7 +3679,6 @@ function createProvincesChart(provincesData, selectedProvince = null) {
             .replace(/province$/, '')
             .trim();
     };
-    
     // Find the index of the selected province in the displayed data
     let selectedIndex = -1;
     if (selectedProvince && selectedProvince.trim().length > 0) {
@@ -3832,7 +3869,6 @@ function createProvincesChart(provincesData, selectedProvince = null) {
         }
     });
 }
-
 // Calculate contractor statistics
 function calculateContractorStats(projects) {
     const stats = {};
@@ -4032,7 +4068,6 @@ function renderMunicipalityChart() {
     createMunicipalityChart(topStats);
     updateMunicipalitySortButtons();
 }
-
 function sortMunicipalitiesChartBy(mode) {
     if (mode !== 'cost' && mode !== 'count') return;
     currentMunicipalitySortMode = mode;
@@ -4177,8 +4212,23 @@ function updateContractorSortButtons() {
 }
 
 function renderContractorChart() {
+    updateContractorChartScopeLabel();
+    const contractorCanvas = document.getElementById('contractorChart');
+    const contractorContainer = contractorCanvas ? contractorCanvas.parentElement : null;
+    const emptyMessageId = 'contractor-chart-empty-message';
+    
     if (!Array.isArray(contractorChartData)) {
         console.warn('No contractor chart data available to render.');
+        if (contractorCanvas) {
+            contractorCanvas.style.display = 'none';
+        }
+        if (contractorContainer && !document.getElementById(emptyMessageId)) {
+            const message = document.createElement('p');
+            message.id = emptyMessageId;
+            message.textContent = 'No contractor data available for this selection.';
+            message.style.cssText = 'margin: 0 0 12px 0; padding: 12px; border-radius: 6px; background: rgba(220, 53, 69, 0.08); color: #b91c1c; font-weight: 600;';
+            contractorContainer.insertBefore(message, contractorCanvas || contractorContainer.firstChild);
+        }
         return;
     }
     
@@ -4192,372 +4242,36 @@ function renderContractorChart() {
     
     const filtered = sorted.filter(item => (item.name || '').trim().toLowerCase() !== 'unknown');
     const topStats = filtered.slice(0, 15);
+
+    if (contractorContainer) {
+        const existingMessage = document.getElementById(emptyMessageId);
+        if (existingMessage) {
+            existingMessage.remove();
+        }
+    }
+
+    if (contractorCanvas) {
+        contractorCanvas.style.display = topStats.length === 0 ? 'none' : 'block';
+    }
+
+    if (topStats.length === 0) {
+        if (contractorChart) {
+            contractorChart.destroy();
+            contractorChart = null;
+        }
+        if (contractorContainer && !document.getElementById(emptyMessageId)) {
+            const message = document.createElement('p');
+            message.id = emptyMessageId;
+            message.textContent = 'No contractor data available for this selection.';
+            message.style.cssText = 'margin: 0 0 12px 0; padding: 12px; border-radius: 6px; background: rgba(220, 53, 69, 0.08); color: #b91c1c; font-weight: 600;';
+            contractorContainer.insertBefore(message, contractorCanvas || contractorContainer.firstChild);
+        }
+        updateContractorSortButtons();
+        return;
+    }
     createContractorChart(topStats);
     updateContractorSortButtons();
 }
-
-function sortContractorsChartBy(mode) {
-    if (mode !== 'cost' && mode !== 'count') return;
-    currentContractorSortMode = mode;
-    updateContractorSortButtons();
-    renderContractorChart();
-}
-
-// Copy municipality chart to clipboard (event delegation to handle dynamic replacements)
-document.addEventListener('click', async function(event) {
-    if (!event.target || event.target.id !== 'copy-municipality-chart-btn') {
-        return;
-    }
-    const btn = event.target;
-    const originalText = btn.textContent;
-    
-    try {
-        btn.textContent = 'Copying...';
-        btn.disabled = true;
-        
-        const chartContainer = document.getElementById('municipalityChart').parentElement;
-        const canvas = await html2canvas(chartContainer, {
-            backgroundColor: '#ffffff',
-            scale: 2
-        });
-        
-        canvas.toBlob(function(blob) {
-            navigator.clipboard.write([
-                new ClipboardItem({ 'image/png': blob })
-            ]).then(() => {
-                btn.textContent = '✓ Copied!';
-                setTimeout(() => {
-                    btn.textContent = originalText;
-                    btn.disabled = false;
-                }, 2000);
-            }).catch(err => {
-                console.error('Failed to copy:', err);
-                btn.textContent = 'Error';
-                setTimeout(() => {
-                    btn.textContent = originalText;
-                    btn.disabled = false;
-                }, 2000);
-            });
-        });
-    } catch (error) {
-        console.error('Error copying chart:', error);
-        btn.textContent = 'Error';
-        setTimeout(() => {
-            btn.textContent = originalText;
-            btn.disabled = false;
-        }, 2000);
-    }
-});
-
-// Sort provinces chart by cost or count
-function sortProvincesChartBy(mode) {
-    currentProvincesSortMode = mode;
-    
-    // Update button styles
-    const costBtn = document.getElementById('sort-provinces-by-cost-btn');
-    const countBtn = document.getElementById('sort-provinces-by-count-btn');
-    
-    if (mode === 'cost') {
-        costBtn.style.background = '#7b1fa2';
-        costBtn.style.borderColor = '#7b1fa2';
-        countBtn.style.background = '#333';
-        countBtn.style.borderColor = '#333';
-    } else {
-        costBtn.style.background = '#333';
-        costBtn.style.borderColor = '#333';
-        countBtn.style.background = '#1565c0';
-        countBtn.style.borderColor = '#1565c0';
-    }
-    
-    // Get current selected province from filter
-    const provinceFilter = document.getElementById('province-visual-filter');
-    const selectedProvince = provinceFilter ? provinceFilter.value.trim() : null;
-    
-    // Reload chart with new sort mode
-    loadTopProvincesChart(selectedProvince);
-}
-
-// Copy provinces chart to clipboard
-document.getElementById('copy-provinces-chart-btn').addEventListener('click', async function() {
-    const btn = this;
-    const originalText = btn.textContent;
-    
-    try {
-        btn.textContent = 'Copying...';
-        btn.disabled = true;
-        
-        const chartContainer = document.getElementById('provincesChart').parentElement;
-        const canvas = await html2canvas(chartContainer, {
-            backgroundColor: '#ffffff',
-            scale: 2
-        });
-        
-        canvas.toBlob(function(blob) {
-            navigator.clipboard.write([
-                new ClipboardItem({ 'image/png': blob })
-            ]).then(() => {
-                btn.textContent = '✓ Copied!';
-                setTimeout(() => {
-                    btn.textContent = originalText;
-                    btn.disabled = false;
-                }, 2000);
-            }).catch(err => {
-                console.error('Failed to copy:', err);
-                btn.textContent = 'Error';
-                setTimeout(() => {
-                    btn.textContent = originalText;
-                    btn.disabled = false;
-                }, 2000);
-            });
-        });
-    } catch (error) {
-        console.error('Error copying chart:', error);
-        btn.textContent = 'Error';
-        setTimeout(() => {
-            btn.textContent = originalText;
-            btn.disabled = false;
-        }, 2000);
-    }
-});
-
-// Copy contractor chart to clipboard (event delegation to handle dynamic replacements)
-document.addEventListener('click', async function(event) {
-    if (!event.target || event.target.id !== 'copy-contractor-chart-btn') {
-        return;
-    }
-    const btn = event.target;
-    const originalText = btn.textContent;
-    
-    try {
-        btn.textContent = 'Copying...';
-        btn.disabled = true;
-        
-        const chartContainer = document.getElementById('contractorChart').parentElement;
-        const canvas = await html2canvas(chartContainer, {
-            backgroundColor: '#ffffff',
-            scale: 2
-        });
-        
-        canvas.toBlob(function(blob) {
-            navigator.clipboard.write([
-                new ClipboardItem({ 'image/png': blob })
-            ]).then(() => {
-                btn.textContent = '✓ Copied!';
-                setTimeout(() => {
-                    btn.textContent = originalText;
-                    btn.disabled = false;
-                }, 2000);
-            }).catch(err => {
-                console.error('Failed to copy:', err);
-                btn.textContent = 'Error';
-                setTimeout(() => {
-                    btn.textContent = originalText;
-                    btn.disabled = false;
-                }, 2000);
-            });
-        });
-    } catch (error) {
-        console.error('Error copying chart:', error);
-        btn.textContent = 'Error';
-        setTimeout(() => {
-            btn.textContent = originalText;
-            btn.disabled = false;
-        }, 2000);
-    }
-});
-
-// ... existing code ...
-// Cache per-congressman responses to avoid redundant fetches
-const congressmanProjectsCache = new Map();
-const congressmanProjectsRequests = new Map();
-let dynastyOverviewData = null;
-let currentSummaryOverride = null;
-
-function normalizeCongressmanSlug(name) {
-    if (!name) return '';
-    const normalized = name.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
-    let slug = normalized.toLowerCase()
-        .replace(/['".()]/g, '')
-        .replace(/\s+/g, '-')
-        .replace(/[^a-z0-9-]/g, '-')
-        .replace(/-+/g, '-');
-    return slug.replace(/^-+|-+$/g, '');
-}
-
-function getSlugForCongressman(name) {
-    if (!name) return '';
-    const normalized = normalizeCongressmanName(name);
-    const match = configCongressmen.find(item => normalizeCongressmanName(item.display_name) === normalized);
-    if (match && match.slug) {
-        return match.slug;
-    }
-    return normalizeCongressmanSlug(name);
-}
-
-async function loadDynastyOverview(force = false) {
-    if (!force && dynastyOverviewData) {
-        return dynastyOverviewData;
-    }
-    const response = await fetch('/api/dynasty-projects/overview');
-    const data = await response.json();
-    if (!response.ok || !data.success) {
-        throw new Error(data.error || 'Unable to load dynasty overview');
-    }
-    dynastyOverviewData = data;
-    prefetchedVisualData = data;
-    return data;
-}
-
-async function fetchCongressmanProjects(name, { force = false, includeProjects = true } = {}) {
-    if (!name) {
-        throw new Error('Congressman name is required');
-    }
-    const normalized = normalizeCongressmanName(name);
-    const slug = getSlugForCongressman(name);
-    const cacheKey = slug ? `${normalized}::${slug}` : normalized;
-
-    if (!force && congressmanProjectsCache.has(cacheKey)) {
-        return congressmanProjectsCache.get(cacheKey);
-    }
-    if (!force && congressmanProjectsRequests.has(cacheKey)) {
-        return congressmanProjectsRequests.get(cacheKey);
-    }
-
-    const params = new URLSearchParams({ limit: '25000' });
-    params.set('name', name);
-    if (slug) {
-        params.set('slug', slug);
-    }
-    if (!includeProjects) {
-        params.set('include_projects', 'false');
-    }
-
-    const requestPromise = (async () => {
-        const response = await fetch(`/api/dynasty-projects/congressman?${params.toString()}`);
-        const data = await response.json();
-        if (!response.ok || !data.success) {
-            throw new Error(data.error || `Unable to load projects for ${name}`);
-        }
-        congressmanProjectsCache.set(cacheKey, data);
-        return data;
-    })()
-        .catch(error => {
-            console.error(`Failed to load projects for ${name}:`, error);
-            throw error;
-        })
-        .finally(() => {
-            congressmanProjectsRequests.delete(cacheKey);
-        });
-
-    congressmanProjectsRequests.set(cacheKey, requestPromise);
-    return requestPromise;
-}
-
-function mergeSummaries(summaryList) {
-    if (!Array.isArray(summaryList) || summaryList.length === 0) {
-        return null;
-    }
-    const merged = {
-        total: 0,
-        ssp: 0,
-        dime: 0,
-        philgeps: 0,
-        microsite: 0,
-        district_projects: 0,
-        contractor_projects: 0
-    };
-    summaryList.forEach(summary => {
-        if (!summary) return;
-        merged.total += Number(summary.total || 0);
-        merged.ssp += Number(summary.ssp || 0);
-        merged.dime += Number(summary.dime || 0);
-        merged.philgeps += Number(summary.philgeps || 0);
-        const micrositeValue = summary.microsite !== undefined ? summary.microsite : summary.infrawatch;
-        merged.microsite += Number(micrositeValue || 0);
-        merged.district_projects += Number(summary.district_projects || 0);
-        merged.contractor_projects += Number(summary.contractor_projects || 0);
-    });
-    return merged;
-}
-
-function mergeDashboardStats(statsList) {
-    if (!Array.isArray(statsList) || statsList.length === 0) {
-        return null;
-    }
-    const merged = {
-        total_cost_all: 0,
-        total_projects: 0,
-        district_count: 0,
-        district_cost: 0,
-        contractor_count: 0,
-        contractor_cost: 0
-    };
-    statsList.forEach(stats => {
-        if (!stats) return;
-        merged.total_cost_all += Number(stats.total_cost_all || 0);
-        merged.total_projects += Number(stats.total_projects || 0);
-        merged.district_count += Number(stats.district_count || 0);
-        merged.district_cost += Number(stats.district_cost || 0);
-        merged.contractor_count += Number(stats.contractor_count || 0);
-        merged.contractor_cost += Number(stats.contractor_cost || 0);
-    });
-    return merged;
-}
-
-async function fetchMultipleCongressmanProjects(names) {
-    const uniqueNames = Array.from(new Set((names || []).map(name => (name || '').trim()).filter(Boolean)));
-    if (uniqueNames.length === 0) {
-        return {
-            success: true,
-            projects: [],
-            summary: null,
-            dashboard_stats: null,
-            details: []
-        };
-    }
-
-    const results = await Promise.all(uniqueNames.map(async (name) => {
-        try {
-            const data = await fetchCongressmanProjects(name);
-            return { name, data };
-        } catch (error) {
-            return { name, error };
-        }
-    }));
-
-    const combinedProjects = [];
-    const summaries = [];
-    const dashboardStatsList = [];
-    const errors = [];
-
-    results.forEach(result => {
-        if (result.error) {
-            errors.push({ name: result.name, error: result.error });
-            return;
-        }
-        const data = result.data || {};
-        if (Array.isArray(data.projects)) {
-            combinedProjects.push(...data.projects);
-        }
-        const summary = data.congressman?.summary || data.summary;
-        if (summary) {
-            summaries.push(summary);
-        }
-        const stats = data.congressman?.dashboard_stats || data.dashboard_stats;
-        if (stats) {
-            dashboardStatsList.push(stats);
-        }
-    });
-
-    return {
-        success: errors.length === 0,
-        projects: combinedProjects,
-        summary: mergeSummaries(summaries),
-        dashboard_stats: mergeDashboardStats(dashboardStatsList),
-        errors
-    };
-}
-
 function getSourceDisplayMeta(source) {
     const meta = {
         label: source,
@@ -4595,67 +4309,75 @@ function getSourceDisplayMeta(source) {
     return meta;
 }
 
-function getProvinceAliases(value) {
-    const normalized = (value || '').trim().toLowerCase();
-    if (!normalized) return [];
-    const aliasMap = {
-        'davao del sur': ['davao del sur', 'davao city'],
-        'davao city': ['davao city', 'davao del sur'],
-        'metro manila': ['metro manila', 'national capital region', 'ncr']
-    };
-    return aliasMap[normalized] || [normalized];
-}
-
-function createPlaceholderProjects(names, note) {
-    if (!Array.isArray(names) || names.length === 0) {
+function getProvinceVisualMunicipalityProjects(filterValue = currentProvinceMunicipalityFilter) {
+    if (!Array.isArray(provinceVisualProjects)) {
         return [];
     }
-    return names.map(name => ({
-        placeholder: true,
-        congressman: name,
-        project_name: note || 'Project records are still being ingested for this congressman.',
-        contractor: '—',
-        amount: null,
-        location: '—',
-        year: '—',
-        source: 'Placeholder',
-        match_type: 'placeholder',
-        match_score: null
-    }));
+
+    const target = (filterValue || 'all').trim();
+    if (target === 'all') {
+        return provinceVisualProjects;
+    }
+
+    const targetUpper = target.toUpperCase();
+
+    if (Array.isArray(municipalityChartData)) {
+        const matchedEntry = municipalityChartData.find(entry => {
+            if (!entry || !entry.name) {
+                return false;
+            }
+            return String(entry.name).toUpperCase() === targetUpper;
+        });
+
+        if (matchedEntry && Array.isArray(matchedEntry.projects) && matchedEntry.projects.length > 0) {
+            return matchedEntry.projects;
+        }
+    }
+
+    return provinceVisualProjects.filter(project => {
+        const location = (project.location || '').toUpperCase();
+        const projectName = (project.project_name || '').toUpperCase();
+        const municipality = (project.municipality || '').toUpperCase();
+        const city = (project.city || '').toUpperCase();
+        const combined = [location, projectName, municipality, city].join(' ');
+        return combined.includes(targetUpper);
+    });
 }
 
-function provinceApplyFilter() {
-    const locationFilter = document.getElementById('province-filter').value;
-    const contractorFilter = document.getElementById('contractor-filter').value;
-    const municipalityFilter = document.getElementById('municipality-filter').value;
-    
-    // Start with all projects
-    provinceFilteredData = provinceAllProjectsData;
-    
-    // Apply contractor filter
-    if (contractorFilter && contractorFilter !== 'all' && contractorFilter !== 'All Contractors') {
-        provinceFilteredData = provinceFilteredData.filter(project => {
-            const contractor = (project.contractor || '').trim();
-            
-            // Handle "Unknown" contractor
-            if (contractorFilter === 'Unknown') {
-                return !contractor || contractor === 'N/A' || contractor === '';
-            }
-            
-            return contractor === contractorFilter;
-        });
+function updateContractorChartScopeLabel() {
+    const scopeLabel = document.getElementById('contractor-chart-scope');
+    if (!scopeLabel) {
+        return;
     }
-    
-    // Apply municipality filter
-    if (municipalityFilter !== 'all') {
-        provinceFilteredData = provinceFilteredData.filter(project => 
-            projectMatchesMunicipality(project, municipalityFilter)
-        );
+
+    if (!currentProvinceMunicipalityFilter || currentProvinceMunicipalityFilter === 'all') {
+        scopeLabel.textContent = 'All Municipalities/Cities';
+        scopeLabel.style.background = 'rgba(107, 114, 128, 0.15)';
+        scopeLabel.style.color = '#374151';
+        return;
     }
-    
-    // Reset to first page when filter changes
-    provinceCurrentPage = 1;
-    provinceUpdateDisplay();
+
+    scopeLabel.textContent = currentProvinceMunicipalityFilter;
+    scopeLabel.style.background = 'rgba(124, 58, 237, 0.15)';
+    scopeLabel.style.color = '#5b21b6';
+}
+
+function handleProvinceVisualMunicipalityChange() {
+    const select = document.getElementById('province-visual-municipality-filter');
+    if (!select) {
+        return;
+    }
+
+    currentProvinceMunicipalityFilter = select.value || 'all';
+
+    const filteredProjects = getProvinceVisualMunicipalityProjects(currentProvinceMunicipalityFilter);
+    contractorChartData = calculateContractorStats(filteredProjects);
+    renderContractorChart();
+
+    const scopeLabel = currentProvinceMunicipalityFilter === 'all'
+        ? (currentProvinceVisualName ? `All Municipalities/Cities (${currentProvinceVisualName})` : 'All Municipalities/Cities')
+        : currentProvinceMunicipalityFilter;
+    updateProvinceVisualDashboardProjects(filteredProjects, scopeLabel);
 }
 
 function updateChartPaginationControls(options = {}) {
@@ -4734,7 +4456,6 @@ updateChartPaginationControls();
 function updateChartFocusOptions() {
     // Autocomplete list reuses the primary congressman datalist.
 }
-
 function findChartFocusMatch(value) {
     if (!value) return null;
     const datalist = document.getElementById('congressman-list');
@@ -4782,7 +4503,6 @@ function handleChartFocusInput() {
         }
     }
 }
-
 function handleChartFocusChange() {
     const focusInput = document.getElementById('chart-focus-input');
     if (!focusInput) return;
@@ -4885,19 +4605,156 @@ function clearChartFocus({ resetInput = true } = {}) {
     }
 }
 
-</script>
-
-<style>
-@keyframes spin {
-    0% { transform: rotate(0deg); }
-    100% { transform: rotate(360deg); }
+function handleProvinceVisualBlur() {
+    const input = document.getElementById('province-visual-filter');
+    if (!input) return;
+    
+    const value = input.value.trim();
+    const datalist = document.getElementById('province-visual-list');
+    
+    if (datalist && value) {
+        // Find the best matching option
+        const options = Array.from(datalist.options);
+        const matchingOption = options.find(opt => {
+            const optValue = opt.value.toLowerCase();
+            const inputValue = value.toLowerCase();
+            return optValue === inputValue || optValue.startsWith(inputValue);
+        });
+        
+        if (matchingOption) {
+            // Update input with the full value from the option
+            input.value = matchingOption.value;
+            // Load data with the corrected value
+            loadProvinceVisualData();
+        }
+    }
 }
-</style>
+function populateProvinceVisualMunicipalityFilter(filterOptions, statsArray) {
+    const select = document.getElementById('province-visual-municipality-filter');
+    if (!select) {
+        return;
+    }
 
-    {% include "footer.html" %}
-</section>
-</div>
+    const previousValue = currentProvinceMunicipalityFilter || 'all';
+    const namesSet = new Set();
+    const addName = (name) => {
+        if (!name) return;
+        const trimmed = String(name).trim();
+        if (!trimmed) return;
+        if (!namesSet.has(trimmed)) {
+            namesSet.add(trimmed);
+        }
+    };
 
+    if (filterOptions && Array.isArray(filterOptions.municipalities)) {
+        filterOptions.municipalities.forEach(entry => {
+            if (entry && entry.name) {
+                addName(entry.name);
+            }
+        });
+    }
+
+    if (Array.isArray(statsArray)) {
+        statsArray.forEach(entry => {
+            if (entry && entry.name) {
+                addName(entry.name);
+            }
+        });
+    }
+
+    const sortedNames = Array.from(namesSet).filter(name => name && name.toUpperCase() !== 'UNKNOWN').sort((a, b) => a.localeCompare(b));
+    const hasUnknown = namesSet.has('Unknown') || namesSet.has('UNKNOWN');
+
+    select.innerHTML = '';
+
+    const appendOption = (value, label) => {
+        const option = document.createElement('option');
+        option.value = value;
+        option.textContent = label;
+        select.appendChild(option);
+    };
+
+    appendOption('all', 'All Municipalities/Cities');
+    sortedNames.forEach(name => appendOption(name, name));
+    if (hasUnknown) {
+        appendOption('Unknown', 'Unknown');
+    }
+
+    if (previousValue && previousValue !== 'all') {
+        const hasPrevious = Array.from(select.options).some(option => option.value === previousValue);
+        select.value = hasPrevious ? previousValue : 'all';
+    } else {
+        select.value = 'all';
+    }
+
+    currentProvinceMunicipalityFilter = select.value || 'all';
+}
+
+async function loadDynastyOverview(forceRefresh = false) {
+    if (!forceRefresh && dynastyOverviewCache) {
+        return dynastyOverviewCache;
+    }
+
+    if (!forceRefresh && dynastyOverviewPromise) {
+        try {
+            return await dynastyOverviewPromise;
+        } catch (error) {
+            dynastyOverviewPromise = null;
+            throw error;
+        }
+    }
+
+    dynastyOverviewPromise = (async () => {
+        const response = await fetch('/api/dynasty-projects/overview');
+        if (!response.ok) {
+            throw new Error(`Failed to load overview (status ${response.status})`);
+        }
+        const data = await response.json();
+        if (!data || data.success === false) {
+            const message = data && data.error ? data.error : 'Overview response was not successful';
+            throw new Error(message);
+        }
+        dynastyOverviewCache = data;
+        return data;
+    })();
+
+    try {
+        const resolved = await dynastyOverviewPromise;
+        dynastyOverviewPromise = null;
+        return resolved;
+    } catch (error) {
+        dynastyOverviewPromise = null;
+        throw error;
+    }
+}
+
+function updateProvinceVisualDashboardProjects(projects, scopeLabel = 'All Municipalities/Cities') {
+    const dashboard = document.getElementById('province-visual-dashboard');
+    const scopeEl = document.getElementById('province-dashboard-scope');
+    const totalProjectsEl = document.getElementById('province-total-projects-dashboard');
+    const totalCostEl = document.getElementById('province-total-cost-dashboard');
+
+    if (!dashboard || !totalProjectsEl || !totalCostEl) {
+        return;
+    }
+
+    const list = Array.isArray(projects) ? projects : [];
+    const projectCount = list.length;
+    const totalCost = list.reduce((sum, project) => {
+        const amount = parseFloat(project.amount || project.contract_cost || project.contract_amount || project.cost || 0);
+        return sum + (isNaN(amount) ? 0 : amount);
+    }, 0);
+
+    totalProjectsEl.textContent = projectCount.toLocaleString();
+    totalCostEl.textContent = formatCurrency(totalCost);
+
+    if (scopeEl) {
+        scopeEl.textContent = scopeLabel;
+    }
+
+    dashboard.style.display = 'block';
+}
+
+</script>
 </body>
 </html>
-
