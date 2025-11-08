@@ -50,7 +50,6 @@ def _build_phrase_patterns(phrases: Iterable[str]) -> List[Tuple[str, re.Pattern
 
     Returns a list of tuples (phrase_lower, pattern) so we can treat very short aliases specially.
     """
-    patterns: List[re.Pattern] = []
     results: List[Tuple[str, re.Pattern]] = []
     seen: Set[str] = set()
     for phrase in phrases:
@@ -63,6 +62,26 @@ def _build_phrase_patterns(phrases: Iterable[str]) -> List[Tuple[str, re.Pattern
         pattern = re.compile(r'\b' + re.escape(phrase_lower) + r'\b')
         results.append((phrase_lower, pattern))
     return results
+
+
+def build_ilike_clause(columns: List[str], terms: Iterable[str], start_index: int = 1) -> Tuple[str, List[str]]:
+    """Build a SQL ILIKE clause for the provided columns and search terms."""
+    conditions: List[str] = []
+    params: List[str] = []
+    idx = start_index
+    for term in terms:
+        if term is None:
+            continue
+        trimmed = str(term).strip()
+        if not trimmed:
+            continue
+        like_value = f"%{trimmed}%"
+        for column in columns:
+            conditions.append(f"{column} ILIKE ${idx}")
+            params.append(like_value)
+            idx += 1
+    clause = " OR ".join(conditions) if conditions else "FALSE"
+    return clause, params
 
 
 def load_metropolitan_manila_config() -> Dict[str, Any]:
@@ -109,33 +128,50 @@ def load_metropolitan_manila_config() -> Dict[str, Any]:
         except Exception as exc:
             print(f"⚠️  Warning: Could not load metropolitan-manila-cities.json ({exc}); using defaults.")
 
-    province_aliases = set()
-    province_aliases.add((data.get('province') or 'Metropolitan Manila').strip().lower())
+    province_aliases_raw: Set[str] = set()
+    province_aliases_lower: Set[str] = set()
+
+    province_value = (data.get('province') or 'Metropolitan Manila').strip()
+    province_aliases_raw.add(province_value)
+    province_aliases_lower.add(province_value.lower())
+
     for alias in data.get('aliases', []):
-        if alias:
-            province_aliases.add(alias.strip().lower())
+        if not alias:
+            continue
+        trimmed = str(alias).strip()
+        province_aliases_raw.add(trimmed)
+        province_aliases_lower.add(trimmed.lower())
 
-    province_patterns = _build_phrase_patterns(province_aliases)
+    province_patterns = _build_phrase_patterns(province_aliases_lower)
 
-    city_aliases: Set[str] = set()
+    city_aliases_raw: Set[str] = set()
+    city_aliases_lower: Set[str] = set()
     for city_entry in data.get('cities', []):
         if not isinstance(city_entry, dict):
             continue
-        names = []
+        names: List[str] = []
         if city_entry.get('name'):
-            names.append(city_entry['name'])
+            names.append(str(city_entry['name']))
         aliases = city_entry.get('aliases', []) or []
         names.extend(aliases)
         for alias in names:
-            if alias:
-                city_aliases.add(alias.strip().lower())
+            if not alias:
+                continue
+            trimmed = str(alias).strip()
+            city_aliases_raw.add(trimmed)
+            city_aliases_lower.add(trimmed.lower())
 
-    city_patterns = _build_phrase_patterns(city_aliases)
+    city_patterns = _build_phrase_patterns(city_aliases_lower)
+
+    search_terms: Set[str] = set()
+    search_terms.update(province_aliases_raw)
+    search_terms.update(city_aliases_raw)
 
     return {
-        "province_aliases": province_aliases,
+        "province_aliases": province_aliases_lower,
         "province_patterns": province_patterns,
-        "city_patterns": city_patterns
+        "city_patterns": city_patterns,
+        "search_terms": sorted(search_terms)
     }
 
 
@@ -236,6 +272,14 @@ class ProvinceProjectsCacheGenerator:
             'Davao de Oro': 'ph.davao-region-region-xi.compostela-valley',
             'Davao Occidental': 'ph.davao-region-region-xi.davao-occidental'
         }
+
+        province_lower = self.province_name.lower()
+        if province_lower in METRO_MANILA_CONFIG["province_aliases"]:
+            self.search_terms = METRO_MANILA_CONFIG["search_terms"]
+        else:
+            self.search_terms = [self.province_name]
+
+        self.search_terms = sorted({str(term).strip() for term in self.search_terms if str(term).strip()})
     
     def get_municipalities_from_geoph(self) -> Tuple[List[str], List[str]]:
         """Get list of municipalities and cities for the province from geoph data"""
@@ -320,7 +364,8 @@ class ProvinceProjectsCacheGenerator:
                 if len(alias) <= 2:
                     if re.search(r'\b' + re.escape(alias) + r'\b', text):
                         return True
-                if pattern.search(text_lower):
+                else:
+                    if pattern.search(text_lower):
                         return True
             return False
         
@@ -354,45 +399,60 @@ class ProvinceProjectsCacheGenerator:
         
         try:
             print(f"🔍 Searching SSP/MeiliSearch for {self.province_name} projects...")
-            
-            # Query by province
-            filter_str = f'Province = "{self.province_name}"'
-            projects, metadata = await client.search_projects(
-                query=self.province_name,
-                filters=filter_str,
-                limit=10000,
-                offset=0
-            )
-            
-            print(f"   Found {len(projects)} projects from SSP/MeiliSearch")
-            
-            for proj in projects:
-                # Check if project matches province in various fields
-                proj_desc = proj.ProjectDescription or ''
-                proj_province = proj.Province or ''
-                proj_municipality = proj.Municipality or ''
-                proj_location = f'{proj_province} {proj_municipality}'.strip()
-                
-                # Check if province name appears in description, province, or municipality
-                if (self.matches_province(proj_desc) or 
-                    self.matches_province(proj_province) or 
-                    self.matches_province(proj_municipality)):
-                    
+            seen_keys: Set[Tuple[Any, ...]] = set()
+            total_records = 0
+
+            for term in self.search_terms:
+                term = term.strip()
+                if not term:
+                    continue
+
+                filter_str = None
+                if term.lower() == self.province_name.lower():
+                    filter_str = f'Province = "{self.province_name}"'
+
+                projects, metadata = await client.search_projects(
+                    query=term,
+                    filters=filter_str,
+                    limit=10000,
+                    offset=0
+                )
+                total_records += len(projects)
+
+                for proj in projects:
+                    proj_desc = proj.ProjectDescription or ''
+                    proj_province = proj.Province or ''
+                    proj_municipality = proj.Municipality or ''
+
+                    if not (self.matches_province(proj_desc) or
+                            self.matches_province(proj_province) or
+                            self.matches_province(proj_municipality)):
+                        continue
+
+                    unique_key = (
+                        getattr(proj, 'id', None),
+                        proj.ProjectDescription,
+                        proj.Province,
+                        proj.Municipality
+                    )
+                    if unique_key in seen_keys:
+                        continue
+                    seen_keys.add(unique_key)
+
                     location_parts = []
                     if proj.Province:
                         location_parts.append(proj.Province)
                     if proj.Municipality:
                         location_parts.append(proj.Municipality)
                     location_str = ', '.join(location_parts).strip() or "N/A"
-                    
-                    # Handle ContractCost (can be string or float)
+
                     amount = 0
                     if proj.ContractCost:
                         if isinstance(proj.ContractCost, str):
                             amount = float(proj.ContractCost.replace(',', '').replace('₱', '').replace('PHP', '').strip() or 0)
                         else:
                             amount = float(proj.ContractCost)
-                    
+
                     all_projects.append({
                         "source": "SSP",
                         "meilisearch_id": proj.id if hasattr(proj, 'id') else None,
@@ -405,6 +465,8 @@ class ProvinceProjectsCacheGenerator:
                         "year": proj.Year if hasattr(proj, 'Year') else "N/A",
                         "status": proj.Status if hasattr(proj, 'Status') else "N/A",
                     })
+
+            print(f"   Processed {total_records} SSP/MeiliSearch records across {len(self.search_terms)} search terms")
         except Exception as e:
             print(f"❌ Error processing SSP/MeiliSearch projects: {e}")
             import traceback
@@ -419,15 +481,22 @@ class ProvinceProjectsCacheGenerator:
         try:
             print(f"🔍 Searching DIME for {self.province_name} projects...")
             
-            # Query DIME projects - get all and filter
-            dime_projects = await dime_conn.fetch('''
+            columns = [
+                "COALESCE(project_name, '')",
+                "COALESCE(province, '')",
+                "COALESCE(city, '')",
+                "COALESCE(barangay, '')"
+            ]
+            where_clause, params = build_ilike_clause(columns, self.search_terms)
+            query = f'''
                 SELECT project_name, contractors, cost, province, city, barangay, status, date_started, meilisearch_id
                 FROM projects
-                WHERE province ILIKE $1 OR city ILIKE $1 OR project_name ILIKE $1
+                WHERE {where_clause}
                 LIMIT 50000
-            ''', f'%{self.province_name}%')
+            '''
+            dime_projects = await dime_conn.fetch(query, *params)
             
-            print(f"   Found {len(dime_projects)} projects from DIME")
+            print(f"   Found {len(dime_projects)} projects from DIME across {len(self.search_terms)} search terms")
             
             for proj in dime_projects:
                 proj_name = proj.get('project_name') or ''
@@ -483,15 +552,21 @@ class ProvinceProjectsCacheGenerator:
         try:
             print(f"🔍 Searching PhilGEPS for {self.province_name} projects...")
             
-            # Query PhilGEPS projects - get all and filter
-            philgeps_projects = await philgeps_conn.fetch('''
+            columns = [
+                "COALESCE(award_title, '')",
+                "COALESCE(area_of_delivery, '')",
+                "COALESCE(awardee_name, '')"
+            ]
+            where_clause, params = build_ilike_clause(columns, self.search_terms)
+            query = f'''
                 SELECT award_title, awardee_name, contract_amount, area_of_delivery, award_date, award_status, meilisearch_id
                 FROM contracts
-                WHERE award_title ILIKE $1 OR area_of_delivery ILIKE $1
+                WHERE {where_clause}
                 LIMIT 50000
-            ''', f'%{self.province_name}%')
+            '''
+            philgeps_projects = await philgeps_conn.fetch(query, *params)
             
-            print(f"   Found {len(philgeps_projects)} projects from PhilGEPS")
+            print(f"   Found {len(philgeps_projects)} projects from PhilGEPS across {len(self.search_terms)} search terms")
             
             for contract in philgeps_projects:
                 award_title = contract.get('award_title') or ''
@@ -530,26 +605,27 @@ class ProvinceProjectsCacheGenerator:
         try:
             print(f"🔍 Searching Infrawatch for {self.province_name} projects...")
 
-            province_pattern = f"%{self.province_name}%"
-            query = """
+            columns = [
+                "COALESCE(data->>'Province', '')",
+                "COALESCE(data->>'Project Location', '')",
+                "COALESCE(data->>'Location', '')",
+                "COALESCE(data->>'City/Municipality', '')",
+                "COALESCE(data->>'City / Municipality', '')",
+                "COALESCE(data->>'Municipality', '')",
+                "COALESCE(data->>'Contract Details', '')",
+                "COALESCE(data->>'Project Description', '')",
+                "COALESCE(data->>'Name of Project', '')",
+                "COALESCE(data->>'Project', '')",
+                "COALESCE(data->>'Project Name', '')"
+            ]
+            where_clause, params = build_ilike_clause(columns, self.search_terms)
+            query = f"""
                 SELECT data
                 FROM infrawatch_projects_rows
-                WHERE (
-                      COALESCE(data->>'Province', '') ILIKE $1 OR
-                      COALESCE(data->>'Project Location', '') ILIKE $1 OR
-                      COALESCE(data->>'Location', '') ILIKE $1 OR
-                      COALESCE(data->>'City/Municipality', '') ILIKE $1 OR
-                      COALESCE(data->>'City / Municipality', '') ILIKE $1 OR
-                      COALESCE(data->>'Municipality', '') ILIKE $1 OR
-                      COALESCE(data->>'Contract Details', '') ILIKE $1 OR
-                      COALESCE(data->>'Project Description', '') ILIKE $1 OR
-                      COALESCE(data->>'Name of Project', '') ILIKE $1 OR
-                      COALESCE(data->>'Project', '') ILIKE $1 OR
-                      COALESCE(data->>'Project Name', '') ILIKE $1
-                  )
+                WHERE ({where_clause})
             """
-            rows = await infrawatch_conn.fetch(query, province_pattern)
-            print(f"   Found {len(rows)} projects from Infrawatch")
+            rows = await infrawatch_conn.fetch(query, *params)
+            print(f"   Found {len(rows)} projects from Infrawatch across {len(self.search_terms)} search terms")
 
             def parse_amount(value: Any) -> float:
                 if value is None:
