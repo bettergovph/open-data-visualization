@@ -14,10 +14,10 @@
       "municipality": "N/A",
       "year": 2021,
       "status": "active",
-      "sources_count": 1,
       "sources_list": [
         "PhilGEPS"
-      ]
+      ],
+      "sources_count": 1
     },
     {
       "source": "DIME",
@@ -31,10 +31,10 @@
       "barangay": "N/A",
       "year": 2023,
       "status": "Completed",
-      "sources_count": 1,
       "sources_list": [
         "DIME"
-      ]
+      ],
+      "sources_count": 1
     },
     {
       "source": "PhilGEPS",
@@ -47,10 +47,10 @@
       "municipality": "N/A",
       "year": 2023,
       "status": "active",
-      "sources_count": 1,
       "sources_list": [
         "PhilGEPS"
-      ]
+      ],
+      "sources_count": 1
     },
     {
       "source": "PhilGEPS",
@@ -63,10 +63,10 @@
       "municipality": "N/A",
       "year": 2023,
       "status": "active",
-      "sources_count": 1,
       "sources_list": [
         "PhilGEPS"
-      ]
+      ],
+      "sources_count": 1
     },
     {
       "source": "PhilGEPS",
@@ -79,26 +79,10 @@
       "municipality": "N/A",
       "year": 2024,
       "status": "active",
-      "sources_count": 1,
       "sources_list": [
         "PhilGEPS"
-      ]
-    },
-    {
-      "source": "PhilGEPS",
-      "meilisearch_id": null,
-      "project_name": "23IL0014 CONSTRUCTION / MAINTENANCE OF FLOOD MITIG",
-      "contractor": "ST. TIMOTHY CONSTRUCTION CORPORATION",
-      "amount": 84354739.01,
-      "location": "Southern Leyte",
-      "province": "N/A",
-      "municipality": "N/A",
-      "year": 2023,
-      "status": "active",
-      "sources_count": 1,
-      "sources_list": [
-        "PhilGEPS"
-      ]
+      ],
+      "sources_count": 1
     },
     {
       "source": "DIME",
@@ -112,10 +96,10 @@
       "barangay": "N/A",
       "year": 2023,
       "status": "Completed",
-      "sources_count": 1,
       "sources_list": [
         "DIME"
-      ]
+      ],
+      "sources_count": 1
     },
     {
       "source": "PhilGEPS",
@@ -128,10 +112,10 @@
       "municipality": "N/A",
       "year": 2023,
       "status": "active",
-      "sources_count": 1,
       "sources_list": [
         "PhilGEPS"
-      ]
+      ],
+      "sources_count": 1
     },
     {
       "source": "PhilGEPS",
@@ -144,10 +128,10 @@
       "municipality": "N/A",
       "year": 2023,
       "status": "active",
-      "sources_count": 1,
       "sources_list": [
         "PhilGEPS"
-      ]
+      ],
+      "sources_count": 1
     },
     {
       "source": "PhilGEPS",
@@ -160,10 +144,10 @@
       "municipality": "N/A",
       "year": 2024,
       "status": "active",
-      "sources_count": 1,
       "sources_list": [
         "PhilGEPS"
-      ]
+      ],
+      "sources_count": 1
     },
     {
       "source": "DIME",
@@ -171,32 +155,17 @@
       "project_name": "Construction of Catublian Flood Control, Hinunangan, Southern Leyte",
       "contractor": "ST. TIMOTHY CONSTRUCTION CORPORATION",
       "amount": 49000000.0,
-      "location": "Southern Leyte, Hinunangan, Catublian",
+      "location": "HINUNANGAN (SOUTHERN LEYTE), SOUTHERN LEYTE, Region VIII",
       "province": "Southern Leyte",
       "municipality": "Hinunangan",
       "barangay": "Catublian",
       "year": 2022,
       "status": "Completed",
-      "sources_count": 1,
       "sources_list": [
-        "DIME"
-      ]
-    },
-    {
-      "source": "PhilGEPS",
-      "meilisearch_id": "d49f6e29-cd42-4af0-b9c9-68b02522f5bf",
-      "project_name": "Construction of Catublian Flood Control, Hinunangan, Southern Leyte",
-      "contractor": "ST. TIMOTHY CONSTRUCTION CORPORATION",
-      "amount": 49000000.0,
-      "location": "HINUNANGAN (SOUTHERN LEYTE), SOUTHERN LEYTE, Region VIII",
-      "province": "N/A",
-      "municipality": "N/A",
-      "year": 2022,
-      "status": "active",
-      "sources_count": 1,
-      "sources_list": [
+        "DIME",
         "PhilGEPS"
-      ]
+      ],
+      "sources_count": 2
     },
     {
       "source": "PhilGEPS",
@@ -209,27 +178,28 @@
       "municipality": "N/A",
       "year": 2022,
       "status": "active",
-      "sources_count": 1,
       "sources_list": [
         "PhilGEPS"
-      ]
+      ],
+      "sources_count": 1
     }
   ],
   "summary": {
-    "total": 13,
+    "total": 11,
     "ssp": 0,
     "dime": 3,
-    "philgeps": 10
+    "philgeps": 9,
+    "microsite": 0
   },
-  "total_cost": 965589912.51,
+  "total_cost": 832235173.5,
   "filter_options": {
     "municipalities": [
       {
         "name": "Unknown",
-        "count": 13
+        "count": 11
       }
     ]
   },
-  "generated_at": "2025-11-06T14:44:14.355224",
+  "generated_at": "2025-11-08T06:31:06.577066",
   "cache_version": "1.0"
 }

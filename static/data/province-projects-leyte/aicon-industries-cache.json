@@ -14,10 +14,10 @@
       "municipality": "N/A",
       "year": 2023,
       "status": "active",
-      "sources_count": 1,
       "sources_list": [
         "PhilGEPS"
-      ]
+      ],
+      "sources_count": 1
     },
     {
       "source": "PhilGEPS",
@@ -30,10 +30,10 @@
       "municipality": "N/A",
       "year": 2024,
       "status": "active",
-      "sources_count": 1,
       "sources_list": [
         "PhilGEPS"
-      ]
+      ],
+      "sources_count": 1
     },
     {
       "source": "PhilGEPS",
@@ -46,10 +46,10 @@
       "municipality": "N/A",
       "year": 2023,
       "status": "active",
-      "sources_count": 1,
       "sources_list": [
         "PhilGEPS"
-      ]
+      ],
+      "sources_count": 1
     },
     {
       "source": "PhilGEPS",
@@ -62,10 +62,10 @@
       "municipality": "N/A",
       "year": 2023,
       "status": "active",
-      "sources_count": 1,
       "sources_list": [
         "PhilGEPS"
-      ]
+      ],
+      "sources_count": 1
     },
     {
       "source": "SSP",
@@ -73,31 +73,16 @@
       "project_name": "Construction of Seawall, Sitio Lawis, Brgy. Tabgas, Albuera, Leyte",
       "contractor": "AICON INDUSTRIES",
       "amount": 28900007.47,
-      "location": "LEYTE, ALBUERA (LEYTE)",
+      "location": "ALBUERA (LEYTE), LEYTE, Region VIII",
       "province": "LEYTE",
       "municipality": "ALBUERA (LEYTE)",
-      "year": "N/A",
-      "status": "N/A",
-      "sources_count": 1,
-      "sources_list": [
-        "SSP"
-      ]
-    },
-    {
-      "source": "PhilGEPS",
-      "meilisearch_id": null,
-      "project_name": "Construction of Seawall, Sitio Lawis, Brgy. Tabgas, Albuera, Leyte",
-      "contractor": "AICON INDUSTRIES",
-      "amount": 28900007.47,
-      "location": "ALBUERA (LEYTE), LEYTE, Region VIII",
-      "province": "N/A",
-      "municipality": "N/A",
       "year": 2023,
       "status": "active",
-      "sources_count": 1,
       "sources_list": [
+        "SSP",
         "PhilGEPS"
-      ]
+      ],
+      "sources_count": 2
     },
     {
       "source": "DIME",
@@ -111,10 +96,10 @@
       "barangay": "Tabgas",
       "year": 2023,
       "status": "Completed",
-      "sources_count": 1,
       "sources_list": [
         "DIME"
-      ]
+      ],
+      "sources_count": 1
     },
     {
       "source": "DIME",
@@ -128,10 +113,10 @@
       "barangay": "San Joaquin",
       "year": 2022,
       "status": "Completed",
-      "sources_count": 1,
       "sources_list": [
         "DIME"
-      ]
+      ],
+      "sources_count": 1
     },
     {
       "source": "SSP",
@@ -139,48 +124,34 @@
       "project_name": "Construction of Storm Surge Protection: Tide Embankment, Subsection 5, Phase 10, Brgy. San Joaquin, Palo, Leyte",
       "contractor": "AICON INDUSTRIES",
       "amount": 25725438.95,
-      "location": "LEYTE, PALO (LEYTE)",
+      "location": "PALO (LEYTE), LEYTE, Region VIII",
       "province": "LEYTE",
       "municipality": "PALO (LEYTE)",
-      "year": "N/A",
-      "status": "N/A",
-      "sources_count": 1,
-      "sources_list": [
-        "SSP"
-      ]
-    },
-    {
-      "source": "PhilGEPS",
-      "meilisearch_id": null,
-      "project_name": "Construction of Storm Surge Protection: Tide Embankment, Subsection 5, Phase 10, Brgy. San Joaquin, Palo, Leyte",
-      "contractor": "AICON INDUSTRIES",
-      "amount": 25725438.95,
-      "location": "PALO (LEYTE), LEYTE, Region VIII",
-      "province": "N/A",
-      "municipality": "N/A",
       "year": 2023,
       "status": "active",
-      "sources_count": 1,
       "sources_list": [
+        "SSP",
         "PhilGEPS"
-      ]
+      ],
+      "sources_count": 2
     }
   ],
   "summary": {
-    "total": 10,
+    "total": 8,
     "ssp": 2,
     "dime": 2,
-    "philgeps": 6
+    "philgeps": 6,
+    "microsite": 0
   },
-  "total_cost": 559679012.12,
+  "total_cost": 505053565.7,
   "filter_options": {
     "municipalities": [
       {
         "name": "Unknown",
-        "count": 10
+        "count": 8
       }
     ]
   },
-  "generated_at": "2025-11-06T14:44:14.351238",
+  "generated_at": "2025-11-08T06:31:06.567758",
   "cache_version": "1.0"
 }
