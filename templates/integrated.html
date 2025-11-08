@@ -4340,52 +4340,110 @@ document.addEventListener('click', async function(event) {
 });
 
 // ... existing code ...
+// Cache for fetched pages to avoid re-fetching
+const dynastyProjectsCache = new Map();
+let dynastyProjectsMetadata = null; // Store summary, chart_data, etc.
+let allProjectsLoaded = false; // Track if all pages have been fetched
+
 async function fetchAllDynastyProjects() {
-    const aggregated = {
-        success: true,
-        projects: [],
-        summary: {},
-        dashboard_stats: {},
-        chart_data: [],
-        chart_data_by_count: [],
-        chart_data_by_cost: []
-    };
+    // OPTIMIZED LAZY LOADING:
+    // 1. Fetch only first page initially for fast load time
+    // 2. Fetch remaining pages in background
+    // 3. Cache all pages to avoid re-fetching
     
     const limit = 10000;
-    let page = 1;
-    let totalPages = 1;
-    let firstPageData = null;
+    const page = 1;
     
-    while (page <= totalPages) {
-        const response = await fetch(`/api/dynasty-projects/all?page=${page}&limit=${limit}`);
-        const data = await response.json();
-        
-        if (!data.success) {
-            throw new Error(data.error || 'Unable to load dynasty projects');
-        }
-        
-        if (page === 1) {
-            firstPageData = data;
-            const totalItems = data.total || 0;
-            totalPages = data.total_pages || (totalItems > 0 ? Math.ceil(totalItems / limit) : 1);
-            if (!totalPages || totalPages < 1) {
-                totalPages = 1;
-            }
-            aggregated.summary = data.summary || {};
-            aggregated.dashboard_stats = data.dashboard_stats || {};
-            aggregated.chart_data = data.chart_data || [];
-            aggregated.chart_data_by_count = data.chart_data_by_count || data.chart_data || [];
-            aggregated.chart_data_by_cost = data.chart_data_by_cost || data.chart_data || [];
-        }
-        
-        if (Array.isArray(data.projects) && data.projects.length > 0) {
-            aggregated.projects.push(...data.projects);
-        }
-        
-        page += 1;
+    const response = await fetch(`/api/dynasty-projects/all?page=${page}&limit=${limit}`);
+    const data = await response.json();
+    
+    if (!data.success) {
+        throw new Error(data.error || 'Unable to load dynasty projects');
     }
     
-    return aggregated;
+    // Cache the first page
+    dynastyProjectsCache.set(page, data.projects || []);
+    
+    // Store metadata (summary, charts, etc.) - only needs to be fetched once
+    dynastyProjectsMetadata = {
+        summary: data.summary || {},
+        dashboard_stats: data.dashboard_stats || {},
+        chart_data: data.chart_data || [],
+        chart_data_by_count: data.chart_data_by_count || data.chart_data || [],
+        chart_data_by_cost: data.chart_data_by_cost || data.chart_data || [],
+        total: data.total || 0,
+        total_pages: data.total_pages || 1
+    };
+    
+    // Fetch remaining pages in background (non-blocking)
+    if (dynastyProjectsMetadata.total_pages > 1) {
+        console.log(`📡 Fetching ${dynastyProjectsMetadata.total_pages - 1} additional pages in background...`);
+        fetchRemainingPagesInBackground(dynastyProjectsMetadata.total_pages);
+    } else {
+        allProjectsLoaded = true;
+    }
+    
+    return {
+        success: true,
+        projects: data.projects || [],
+        summary: dynastyProjectsMetadata.summary,
+        dashboard_stats: dynastyProjectsMetadata.dashboard_stats,
+        chart_data: dynastyProjectsMetadata.chart_data,
+        chart_data_by_count: dynastyProjectsMetadata.chart_data_by_count,
+        chart_data_by_cost: dynastyProjectsMetadata.chart_data_by_cost,
+        total: dynastyProjectsMetadata.total,
+        total_pages: dynastyProjectsMetadata.total_pages
+    };
+}
+
+async function fetchRemainingPagesInBackground(totalPages) {
+    // Fetch pages 2 through totalPages in background
+    const limit = 10000;
+    
+    for (let page = 2; page <= totalPages; page++) {
+        try {
+            const response = await fetch(`/api/dynasty-projects/all?page=${page}&limit=${limit}`);
+            const data = await response.json();
+            
+            if (data.success && Array.isArray(data.projects)) {
+                dynastyProjectsCache.set(page, data.projects);
+                console.log(`✅ Background fetch complete: page ${page}/${totalPages}`);
+                
+                // Update allData if it exists (for filtering)
+                if (window.allData && Array.isArray(window.allData)) {
+                    window.allData.push(...data.projects);
+                }
+            }
+        } catch (error) {
+            console.error(`❌ Failed to fetch page ${page}:`, error);
+        }
+    }
+    
+    allProjectsLoaded = true;
+    console.log(`✅ All ${totalPages} pages loaded and cached`);
+}
+
+async function fetchDynastyProjectsPage(page) {
+    // Check cache first
+    if (dynastyProjectsCache.has(page)) {
+        console.log(`✅ Using cached data for page ${page}`);
+        return dynastyProjectsCache.get(page);
+    }
+    
+    // Fetch from server if not cached
+    console.log(`📡 Fetching page ${page} from server...`);
+    const limit = 10000;
+    const response = await fetch(`/api/dynasty-projects/all?page=${page}&limit=${limit}`);
+    const data = await response.json();
+    
+    if (!data.success) {
+        throw new Error(data.error || 'Unable to load dynasty projects');
+    }
+    
+    // Cache the page
+    dynastyProjectsCache.set(page, data.projects || []);
+    
+    return data.projects || [];
 }
 
 function getSourceDisplayMeta(source) {
