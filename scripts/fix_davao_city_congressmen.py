@@ -25,7 +25,8 @@ class DavaoCityCongressmenFixer:
         self.target_congressmen = [
             "Paolo Duterte",
             "Mylene Garcia-Albano",
-            "Vincent Garcia"
+            "Vincent Garcia",
+            "Isidro Ungab"
         ]
 
     def _log(self, message: str) -> None:
