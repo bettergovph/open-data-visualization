@@ -896,30 +896,37 @@ function toggleMobileMenu() {
 </div>
 
 <script>
-// Tab switching
+// Tab switching function
+function switchTab(tabName) {
+    // Update active tab button
+    document.querySelectorAll('.budget-tab-btn').forEach(b => b.classList.remove('active'));
+    const targetBtn = document.querySelector(`.budget-tab-btn[data-tab="${tabName}"]`);
+    if (targetBtn) {
+        targetBtn.classList.add('active');
+    }
+
+    // Update active tab panel
+    document.querySelectorAll('.budget-tab-panel').forEach(p => p.classList.remove('active'));
+    document.getElementById(`tab-${tabName}`).classList.add('active');
+
+    // Load data for specific tabs
+    if (tabName === 'table') {
+        loadAllProjects();
+    } else if (tabName === 'visual') {
+        loadVisualData();
+    } else if (tabName === 'province') {
+        loadProvinceProjects();
+    } else if (tabName === 'province-visual') {
+        loadProvinceVisualData();
+    }
+}
+
+// Tab switching event listeners
 document.querySelectorAll('.budget-tab-btn').forEach(btn => {
     btn.addEventListener('click', (e) => {
         e.preventDefault();
         const tabName = btn.getAttribute('data-tab');
-        
-        // Update active tab button
-        document.querySelectorAll('.budget-tab-btn').forEach(b => b.classList.remove('active'));
-        btn.classList.add('active');
-        
-        // Update active tab panel
-        document.querySelectorAll('.budget-tab-panel').forEach(p => p.classList.remove('active'));
-        document.getElementById(`tab-${tabName}`).classList.add('active');
-        
-        // Load data for specific tabs
-        if (tabName === 'table') {
-            loadAllProjects();
-        } else if (tabName === 'visual') {
-            loadVisualData();
-        } else if (tabName === 'province') {
-            loadProvinceProjects();
-        } else if (tabName === 'province-visual') {
-            loadProvinceVisualData();
-        }
+        switchTab(tabName);
     });
 });
 // Format currency
@@ -1366,6 +1373,63 @@ function updateCongressmanDatalist() {
     });
     
     updateCongressmanFilterStatus(mode, filteredEntries, names, Array.isArray(filteredData) ? filteredData.length : 0);
+}
+
+// Fetch projects for a single congressman
+async function fetchCongressmanProjects(congressmanName) {
+    try {
+        const response = await fetch(`/api/dynasty-projects/congressman?name=${encodeURIComponent(congressmanName)}&limit=25000`);
+        if (!response.ok) {
+            throw new Error(`Failed to fetch congressman projects: ${response.status}`);
+        }
+        return await response.json();
+    } catch (error) {
+        console.error('Error fetching congressman projects:', error);
+        throw error;
+    }
+}
+
+// Fetch projects for multiple congressmen
+async function fetchMultipleCongressmanProjects(congressmanNames) {
+    try {
+        // For multiple congressmen, we'll use the /all endpoint with congressman filter
+        // Since the API might not support multiple congressmen in one call,
+        // we'll fetch them one by one and combine the results
+        const results = [];
+        const errors = [];
+
+        for (const name of congressmanNames) {
+            try {
+                const result = await fetchCongressmanProjects(name);
+                results.push(result);
+            } catch (error) {
+                errors.push({ congressman: name, error: error.message });
+                console.warn(`Failed to fetch projects for ${name}:`, error);
+            }
+        }
+
+        // Combine all projects
+        const allProjects = [];
+        const congressmen = [];
+
+        for (const result of results) {
+            if (result.success && result.projects) {
+                allProjects.push(...result.projects);
+                if (result.congressman) {
+                    congressmen.push(result.congressman);
+                }
+            }
+        }
+
+        return {
+            projects: allProjects,
+            congressmen: congressmen,
+            errors: errors
+        };
+    } catch (error) {
+        console.error('Error fetching multiple congressman projects:', error);
+        throw error;
+    }
 }
 
 async function loadAllProjects() {
