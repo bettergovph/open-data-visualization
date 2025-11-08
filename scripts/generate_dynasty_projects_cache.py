@@ -812,7 +812,7 @@ class DynastyProjectsCacheGenerator:
         if congressman_data.get('is_city_district') and congressman_data.get('provinces') and congressman_data['provinces'][0] == 'Davao City':
             # Term filtering logic:
             # - If project has a valid year: check if it falls within congressman's terms
-            # - If project has no year (None/null): give to ALL congressmen with score -50 (uncertain)
+            # - If project has no year: give to ALL congressmen (universal -50 penalty applied in scoring)
             match_score = 100  # Default high score
             should_include = False
 
@@ -826,9 +826,9 @@ class DynastyProjectsCacheGenerator:
                         should_include = True
                         break
             else:
-                # Project has no year - give to ALL congressmen with lower score (-50)
+                # Project has no year - give to ALL congressmen (universal -50 penalty will be applied in scoring)
                 should_include = True
-                match_score = -50  # Uncertain match due to missing year data
+                match_score = 100  # Normal score, universal penalty applied later
 
             if not should_include:
                 return (None, None, 0)  # Project doesn't match congressman's terms
@@ -1325,6 +1325,12 @@ class DynastyProjectsCacheGenerator:
                 if is_city_wide:
                     # City-wide match - apply -40 penalty
                     current_score = max(0, current_score - 40)
+
+                # 5. Penalize projects with null years by -50 (uncertain timeframe)
+                has_null_year = proj.get('year') is None or proj.get('year') == '' or proj.get('year') == 'null'
+                if has_null_year:
+                    # Null year - apply -50 penalty for uncertainty
+                    current_score = max(0, current_score - 50)
                 
                 proj['match_score'] = current_score
                 proj['sources_count'] = sources_count
