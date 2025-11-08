@@ -855,16 +855,28 @@ function toggleMobileMenu() {
                         </div>
                         
                         <!-- Top Municipalities/Cities Chart -->
-                        <div style="margin-top: 30px; background: white; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); padding: 20px; position: relative;">
-                            <h4 style="margin: 0 0 20px 0; color: #333; font-size: 18px; font-weight: 600;">Top Municipalities/Cities</h4>
-                            <button id="copy-municipality-chart-btn" style="position: absolute; top: 20px; right: 20px; padding: 10px 20px; background: #333; color: white; border: 2px solid #333; border-radius: 6px; font-size: 14px; font-weight: 600; cursor: pointer; transition: all 0.3s ease; box-shadow: 0 4px 12px rgba(0,0,0,0.2); z-index: 10;" onmouseover="this.style.background='#667eea'; this.style.borderColor='#667eea'; this.style.transform='translateY(-2px)'; this.style.boxShadow='0 6px 16px rgba(102, 126, 234, 0.4)';" onmouseout="this.style.background='#333'; this.style.borderColor='#333'; this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 12px rgba(0,0,0,0.2)';">📋 Copy Chart</button>
+                        <div style="margin-top: 30px; background: white; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); padding: 20px;">
+                            <div style="display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 16px; margin-bottom: 20px;">
+                                <h4 style="margin: 0; color: #333; font-size: 18px; font-weight: 600;">Top Municipalities/Cities</h4>
+                                <div style="display: flex; flex-wrap: wrap; gap: 10px; align-items: center;">
+                                    <button id="sort-municipalities-by-cost-btn" style="padding: 10px 20px; background: #7b1fa2; color: white; border: 2px solid #7b1fa2; border-radius: 6px; font-size: 14px; font-weight: 600; cursor: pointer; transition: all 0.3s ease; box-shadow: 0 4px 12px rgba(0,0,0,0.2);" onclick="sortMunicipalitiesChartBy('cost')">💰 By Cost</button>
+                                    <button id="sort-municipalities-by-count-btn" style="padding: 10px 20px; background: #333; color: white; border: 2px solid #333; border-radius: 6px; font-size: 14px; font-weight: 600; cursor: pointer; transition: all 0.3s ease; box-shadow: 0 4px 12px rgba(0,0,0,0.2);" onclick="sortMunicipalitiesChartBy('count')">🔢 By Count</button>
+                                    <button id="copy-municipality-chart-btn" style="padding: 10px 20px; background: #333; color: white; border: 2px solid #333; border-radius: 6px; font-size: 14px; font-weight: 600; cursor: pointer; transition: all 0.3s ease; box-shadow: 0 4px 12px rgba(0,0,0,0.2);" onmouseover="this.style.background='#667eea'; this.style.borderColor='#667eea'; this.style.transform='translateY(-2px)'; this.style.boxShadow='0 6px 16px rgba(102, 126, 234, 0.4)';" onmouseout="this.style.background='#333'; this.style.borderColor='#333'; this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 12px rgba(0,0,0,0.2)';">📋 Copy</button>
+                                </div>
+                            </div>
                             <canvas id="municipalityChart" style="max-height: 500px;"></canvas>
                         </div>
                         
                         <!-- Top Contractors Chart -->
-                        <div style="margin-top: 30px; background: white; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); padding: 20px; position: relative;">
-                            <h4 style="margin: 0 0 20px 0; color: #333; font-size: 18px; font-weight: 600;">Top Contractors</h4>
-                            <button id="copy-contractor-chart-btn" style="position: absolute; top: 20px; right: 20px; padding: 10px 20px; background: #333; color: white; border: 2px solid #333; border-radius: 6px; font-size: 14px; font-weight: 600; cursor: pointer; transition: all 0.3s ease; box-shadow: 0 4px 12px rgba(0,0,0,0.2); z-index: 10;" onmouseover="this.style.background='#667eea'; this.style.borderColor='#667eea'; this.style.transform='translateY(-2px)'; this.style.boxShadow='0 6px 16px rgba(102, 126, 234, 0.4)';" onmouseout="this.style.background='#333'; this.style.borderColor='#333'; this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 12px rgba(0,0,0,0.2)';">📋 Copy Chart</button>
+                        <div style="margin-top: 30px; background: white; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); padding: 20px;">
+                            <div style="display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 16px; margin-bottom: 20px;">
+                                <h4 style="margin: 0; color: #333; font-size: 18px; font-weight: 600;">Top Contractors</h4>
+                                <div style="display: flex; flex-wrap: wrap; gap: 10px; align-items: center;">
+                                    <button id="sort-contractors-by-cost-btn" style="padding: 10px 20px; background: #7b1fa2; color: white; border: 2px solid #7b1fa2; border-radius: 6px; font-size: 14px; font-weight: 600; cursor: pointer; transition: all 0.3s ease; box-shadow: 0 4px 12px rgba(0,0,0,0.2);" onclick="sortContractorsChartBy('cost')">💰 By Cost</button>
+                                    <button id="sort-contractors-by-count-btn" style="padding: 10px 20px; background: #333; color: white; border: 2px solid #333; border-radius: 6px; font-size: 14px; font-weight: 600; cursor: pointer; transition: all 0.3s ease; box-shadow: 0 4px 12px rgba(0,0,0,0.2);" onclick="sortContractorsChartBy('count')">🔢 By Count</button>
+                                    <button id="copy-contractor-chart-btn" style="padding: 10px 20px; background: #333; color: white; border: 2px solid #333; border-radius: 6px; font-size: 14px; font-weight: 600; cursor: pointer; transition: all 0.3s ease; box-shadow: 0 4px 12px rgba(0,0,0,0.2);" onmouseover="this.style.background='#667eea'; this.style.borderColor='#667eea'; this.style.transform='translateY(-2px)'; this.style.boxShadow='0 6px 16px rgba(102, 126, 234, 0.4)';" onmouseout="this.style.background='#333'; this.style.borderColor='#333'; this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 12px rgba(0,0,0,0.2)';">📋 Copy</button>
+                                </div>
+                            </div>
                             <canvas id="contractorChart" style="max-height: 500px;"></canvas>
                         </div>
                         
@@ -2829,6 +2841,10 @@ let municipalityChart = null;
 let contractorChart = null;
 let currentProvincesSortMode = 'cost'; // Default to cost
 let provincesChartData = null; // Store full data for re-sorting
+let currentMunicipalitySortMode = 'cost';
+let municipalityChartData = [];
+let currentContractorSortMode = 'cost';
+let contractorChartData = [];
 
 // Load province visual data
 // Debounce timer for province visual filter
@@ -3078,7 +3094,7 @@ async function loadProvinceVisualData() {
                 
                 // Restore chart containers if they were replaced with error messages
                 if (municipalityChartContainer && !document.getElementById('municipalityChart')) {
-                    municipalityChartContainer.innerHTML = '<h4 style="margin: 0 0 20px 0; color: #333; font-size: 18px; font-weight: 600;">Top Municipalities/Cities</h4><button id="copy-municipality-chart-btn" style="position: absolute; top: 20px; right: 20px; padding: 10px 20px; background: #333; color: white; border: 2px solid #333; border-radius: 6px; font-size: 14px; font-weight: 600; cursor: pointer; transition: all 0.3s ease; box-shadow: 0 4px 12px rgba(0,0,0,0.2); z-index: 10;" onmouseover="this.style.background=\'#667eea\'; this.style.borderColor=\'#667eea\'; this.style.transform=\'translateY(-2px)\'; this.style.boxShadow=\'0 6px 16px rgba(102, 126, 234, 0.4)\';" onmouseout="this.style.background=\'#333\'; this.style.borderColor=\'#333\'; this.style.transform=\'translateY(0)\'; this.style.boxShadow=\'0 4px 12px rgba(0,0,0,0.2)\';">📋 Copy Chart</button><canvas id="municipalityChart" style="max-height: 500px;"></canvas>';
+                        municipalityChartContainer.innerHTML = '<div style="display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 16px; margin-bottom: 20px;"><h4 style="margin: 0; color: #333; font-size: 18px; font-weight: 600;">Top Municipalities/Cities</h4><div style="display: flex; flex-wrap: wrap; gap: 10px; align-items: center;"><button id="sort-municipalities-by-cost-btn" style="padding: 10px 20px; background: #7b1fa2; color: white; border: 2px solid #7b1fa2; border-radius: 6px; font-size: 14px; font-weight: 600; cursor: pointer; transition: all 0.3s ease; box-shadow: 0 4px 12px rgba(0,0,0,0.2);" onclick="sortMunicipalitiesChartBy(\\\'cost\\\')">💰 By Cost</button><button id="sort-municipalities-by-count-btn" style="padding: 10px 20px; background: #333; color: white; border: 2px solid #333; border-radius: 6px; font-size: 14px; font-weight: 600; cursor: pointer; transition: all 0.3s ease; box-shadow: 0 4px 12px rgba(0,0,0,0.2);" onclick="sortMunicipalitiesChartBy(\\\'count\\\')">🔢 By Count</button><button id="copy-municipality-chart-btn" style="padding: 10px 20px; background: #333; color: white; border: 2px solid #333; border-radius: 6px; font-size: 14px; font-weight: 600; cursor: pointer; transition: all 0.3s ease; box-shadow: 0 4px 12px rgba(0,0,0,0.2);" onmouseover="this.style.background=\\\'#667eea\\\'; this.style.borderColor=\\\'#667eea\\\'; this.style.transform=\\\'translateY(-2px)\\\'; this.style.boxShadow=\\\'0 6px 16px rgba(102, 126, 234, 0.4)\\\';" onmouseout="this.style.background=\\\'#333\\\'; this.style.borderColor=\\\'#333\\\'; this.style.transform=\\\'translateY(0)\\\'; this.style.boxShadow=\\\'0 4px 12px rgba(0,0,0,0.2)\\\';">📋 Copy</button></div></div><canvas id="municipalityChart" style="max-height: 500px;"></canvas>';
                     // Re-attach copy button event listener
                     const copyBtn = document.getElementById('copy-municipality-chart-btn');
                     if (copyBtn && !copyBtn.hasAttribute('data-listener-attached')) {
@@ -3144,10 +3160,10 @@ async function loadProvinceVisualData() {
                 
                 // Calculate municipality statistics
                 // Use filter_options from API if available, otherwise use hardcoded lists
-                const municipalityStats = calculateMunicipalityStats(data.projects, selectedProvince, data.filter_options);
+                municipalityChartData = calculateMunicipalityStats(data.projects, selectedProvince, data.filter_options);
                 
                 // Calculate contractor statistics
-                const contractorStats = calculateContractorStats(data.projects);
+                contractorChartData = calculateContractorStats(data.projects);
                 
                 // Destroy existing charts before creating new ones
                 if (municipalityChart) {
@@ -3159,19 +3175,23 @@ async function loadProvinceVisualData() {
                     contractorChart = null;
                 }
                 
+                // Reset sort buttons to default state before rendering
+                currentMunicipalitySortMode = 'cost';
+                currentContractorSortMode = 'cost';
+                
                 // Create charts (after containers are visible and restored)
                 setTimeout(() => {
                     const municipalityCanvas = document.getElementById('municipalityChart');
                     const contractorCanvas = document.getElementById('contractorChart');
                     
                     if (municipalityCanvas) {
-                        createMunicipalityChart(municipalityStats);
+                        renderMunicipalityChart();
                     } else {
                         console.error('Municipality chart canvas still not found after restoration');
                     }
                     
                     if (contractorCanvas) {
-                        createContractorChart(contractorStats);
+                        renderContractorChart();
                     } else {
                         console.error('Contractor chart canvas still not found after restoration');
                     }
@@ -3192,7 +3212,7 @@ async function loadProvinceVisualData() {
                     const canvas = document.getElementById('municipalityChart');
                     if (!canvas) {
                         // Only replace if canvas doesn't exist
-                        municipalityChartContainer.innerHTML = '<h4 style="margin: 0 0 20px 0; color: #333; font-size: 18px; font-weight: 600;">Top Municipalities/Cities</h4><p style="padding: 20px; text-align: center; color: #dc3545;">No data available for this province</p><canvas id="municipalityChart" style="max-height: 500px; display: none;"></canvas>';
+                        municipalityChartContainer.innerHTML = '<div style="display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 16px; margin-bottom: 20px;"><h4 style="margin: 0; color: #333; font-size: 18px; font-weight: 600;">Top Municipalities/Cities</h4><div style="display: flex; flex-wrap: wrap; gap: 10px; align-items: center;"><button id="sort-municipalities-by-cost-btn" style="padding: 10px 20px; background: #7b1fa2; color: white; border: 2px solid #7b1fa2; border-radius: 6px; font-size: 14px; font-weight: 600; cursor: pointer; transition: all 0.3s ease; box-shadow: 0 4px 12px rgba(0,0,0,0.2);" onclick="sortMunicipalitiesChartBy(\\\'cost\\\')">💰 By Cost</button><button id="sort-municipalities-by-count-btn" style="padding: 10px 20px; background: #333; color: white; border: 2px solid #333; border-radius: 6px; font-size: 14px; font-weight: 600; cursor: pointer; transition: all 0.3s ease; box-shadow: 0 4px 12px rgba(0,0,0,0.2);" onclick="sortMunicipalitiesChartBy(\\\'count\\\')">🔢 By Count</button><button id="copy-municipality-chart-btn" style="padding: 10px 20px; background: #333; color: white; border: 2px solid #333; border-radius: 6px; font-size: 14px; font-weight: 600; cursor: pointer; transition: all 0.3s ease; box-shadow: 0 4px 12px rgba(0,0,0,0.2);" onmouseover="this.style.background=\\\'#667eea\\\'; this.style.borderColor=\\\'#667eea\\\'; this.style.transform=\\\'translateY(-2px)\\\'; this.style.boxShadow=\\\'0 6px 16px rgba(102, 126, 234, 0.4)\\\';" onmouseout="this.style.background=\\\'#333\\\'; this.style.borderColor=\\\'#333\\\'; this.style.transform=\\\'translateY(0)\\\'; this.style.boxShadow=\\\'0 4px 12px rgba(0,0,0,0.2)\\\';">📋 Copy</button></div></div><p style="padding: 20px; text-align: center; color: #dc3545;">No data available for this province</p><canvas id="municipalityChart" style="max-height: 500px; display: none;"></canvas>';
                     } else {
                         // Show error message above canvas
                         const errorMsg = document.createElement('p');
@@ -3211,7 +3231,7 @@ async function loadProvinceVisualData() {
                     const canvas = document.getElementById('contractorChart');
                     if (!canvas) {
                         // Only replace if canvas doesn't exist
-                        contractorChartContainer.innerHTML = '<h4 style="margin: 0 0 20px 0; color: #333; font-size: 18px; font-weight: 600;">Top Contractors</h4><p style="padding: 20px; text-align: center; color: #dc3545;">No data available for this province</p><canvas id="contractorChart" style="max-height: 500px; display: none;"></canvas>';
+                        contractorChartContainer.innerHTML = '<div style="display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 16px; margin-bottom: 20px;"><h4 style="margin: 0; color: #333; font-size: 18px; font-weight: 600;">Top Contractors</h4><div style="display: flex; flex-wrap: wrap; gap: 10px; align-items: center;"><button id="sort-contractors-by-cost-btn" style="padding: 10px 20px; background: #7b1fa2; color: white; border: 2px solid #7b1fa2; border-radius: 6px; font-size: 14px; font-weight: 600; cursor: pointer; transition: all 0.3s ease; box-shadow: 0 4px 12px rgba(0,0,0,0.2);" onclick="sortContractorsChartBy(\\\'cost\\\')">💰 By Cost</button><button id="sort-contractors-by-count-btn" style="padding: 10px 20px; background: #333; color: white; border: 2px solid #333; border-radius: 6px; font-size: 14px; font-weight: 600; cursor: pointer; transition: all 0.3s ease; box-shadow: 0 4px 12px rgba(0,0,0,0.2);" onclick="sortContractorsChartBy(\\\'count\\\')">🔢 By Count</button><button id="copy-contractor-chart-btn" style="padding: 10px 20px; background: #333; color: white; border: 2px solid #333; border-radius: 6px; font-size: 14px; font-weight: 600; cursor: pointer; transition: all 0.3s ease; box-shadow: 0 4px 12px rgba(0,0,0,0.2);" onmouseover="this.style.background=\\\'#667eea\\\'; this.style.borderColor=\\\'#667eea\\\'; this.style.transform=\\\'translateY(-2px)\\\'; this.style.boxShadow=\\\'0 6px 16px rgba(102, 126, 234, 0.4)\\\';" onmouseout="this.style.background=\\\'#333\\\'; this.style.borderColor=\\\'#333\\\'; this.style.transform=\\\'translateY(0)\\\'; this.style.boxShadow=\\\'0 4px 12px rgba(0,0,0,0.2)\\\';">📋 Copy</button></div></div><p style="padding: 20px; text-align: center; color: #dc3545;">No data available for this province</p><canvas id="contractorChart" style="max-height: 500px; display: none;"></canvas>';
                     } else {
                         // Show error message above canvas
                         const errorMsg = document.createElement('p');
@@ -3427,10 +3447,7 @@ function calculateMunicipalityStats(projects, province = 'Cebu', filterOptions =
         stats[matchedMunicipality].totalCost += amount;
     });
     
-    // Convert to array and sort by count descending, take top 20
-    return Object.values(stats)
-        .sort((a, b) => b.count - a.count)
-        .slice(0, 20);
+    return Object.values(stats);
 }
 
 // Load top 10 provinces chart
@@ -3827,10 +3844,7 @@ function calculateContractorStats(projects) {
         }
     });
     
-    // Convert to array and sort by count descending, take top 15
-    return Object.values(stats)
-        .sort((a, b) => b.count - a.count)
-        .slice(0, 15);
+    return Object.values(stats);
 }
 
 // Create municipality chart (dual axes like visual tab)
@@ -3953,6 +3967,52 @@ function createMunicipalityChart(statsArray) {
     });
 }
 
+function updateMunicipalitySortButtons() {
+    const costBtn = document.getElementById('sort-municipalities-by-cost-btn');
+    const countBtn = document.getElementById('sort-municipalities-by-count-btn');
+    
+    if (!costBtn || !countBtn) return;
+    
+    if (currentMunicipalitySortMode === 'cost') {
+        costBtn.style.background = '#7b1fa2';
+        costBtn.style.borderColor = '#7b1fa2';
+        countBtn.style.background = '#333';
+        countBtn.style.borderColor = '#333';
+    } else {
+        costBtn.style.background = '#333';
+        costBtn.style.borderColor = '#333';
+        countBtn.style.background = '#1565c0';
+        countBtn.style.borderColor = '#1565c0';
+    }
+}
+
+function renderMunicipalityChart() {
+    if (!Array.isArray(municipalityChartData)) {
+        console.warn('No municipality chart data available to render.');
+        return;
+    }
+    
+    const sorted = [...municipalityChartData];
+    
+    if (currentMunicipalitySortMode === 'cost') {
+        sorted.sort((a, b) => (b.totalCost || 0) - (a.totalCost || 0));
+    } else {
+        sorted.sort((a, b) => (b.count || 0) - (a.count || 0));
+    }
+    
+    const filtered = sorted.filter(item => (item.name || '').trim().toLowerCase() !== 'unknown');
+    const topStats = filtered.slice(0, 20);
+    createMunicipalityChart(topStats);
+    updateMunicipalitySortButtons();
+}
+
+function sortMunicipalitiesChartBy(mode) {
+    if (mode !== 'cost' && mode !== 'count') return;
+    currentMunicipalitySortMode = mode;
+    updateMunicipalitySortButtons();
+    renderMunicipalityChart();
+}
+
 // Create contractor chart (dual axes like municipality chart)
 function createContractorChart(statsArray) {
     const ctx = document.getElementById('contractorChart');
@@ -4070,9 +4130,58 @@ function createContractorChart(statsArray) {
     });
 }
 
-// Copy municipality chart to clipboard
-document.getElementById('copy-municipality-chart-btn').addEventListener('click', async function() {
-    const btn = this;
+function updateContractorSortButtons() {
+    const costBtn = document.getElementById('sort-contractors-by-cost-btn');
+    const countBtn = document.getElementById('sort-contractors-by-count-btn');
+    
+    if (!costBtn || !countBtn) return;
+    
+    if (currentContractorSortMode === 'cost') {
+        costBtn.style.background = '#7b1fa2';
+        costBtn.style.borderColor = '#7b1fa2';
+        countBtn.style.background = '#333';
+        countBtn.style.borderColor = '#333';
+    } else {
+        costBtn.style.background = '#333';
+        costBtn.style.borderColor = '#333';
+        countBtn.style.background = '#1565c0';
+        countBtn.style.borderColor = '#1565c0';
+    }
+}
+
+function renderContractorChart() {
+    if (!Array.isArray(contractorChartData)) {
+        console.warn('No contractor chart data available to render.');
+        return;
+    }
+    
+    const sorted = [...contractorChartData];
+    
+    if (currentContractorSortMode === 'cost') {
+        sorted.sort((a, b) => (b.totalCost || 0) - (a.totalCost || 0));
+    } else {
+        sorted.sort((a, b) => (b.count || 0) - (a.count || 0));
+    }
+    
+    const filtered = sorted.filter(item => (item.name || '').trim().toLowerCase() !== 'unknown');
+    const topStats = filtered.slice(0, 15);
+    createContractorChart(topStats);
+    updateContractorSortButtons();
+}
+
+function sortContractorsChartBy(mode) {
+    if (mode !== 'cost' && mode !== 'count') return;
+    currentContractorSortMode = mode;
+    updateContractorSortButtons();
+    renderContractorChart();
+}
+
+// Copy municipality chart to clipboard (event delegation to handle dynamic replacements)
+document.addEventListener('click', async function(event) {
+    if (!event.target || event.target.id !== 'copy-municipality-chart-btn') {
+        return;
+    }
+    const btn = event.target;
     const originalText = btn.textContent;
     
     try {
@@ -4184,9 +4293,12 @@ document.getElementById('copy-provinces-chart-btn').addEventListener('click', as
     }
 });
 
-// Copy contractor chart to clipboard
-document.getElementById('copy-contractor-chart-btn').addEventListener('click', async function() {
-    const btn = this;
+// Copy contractor chart to clipboard (event delegation to handle dynamic replacements)
+document.addEventListener('click', async function(event) {
+    if (!event.target || event.target.id !== 'copy-contractor-chart-btn') {
+        return;
+    }
+    const btn = event.target;
     const originalText = btn.textContent;
     
     try {
