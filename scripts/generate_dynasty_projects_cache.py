@@ -836,6 +836,7 @@ class DynastyProjectsCacheGenerator:
         
         # 7. For city districts (like Zamboanga City), match all city projects
         # BUT only if no barangay indicator was found, or if a valid barangay was found
+        # STRICT RULE: If project mentions "ROAD" (case insensitive), require "CITY" in project text
         if congressman_data.get('is_city_district') and district_identifier:
             # Check if barangay indicator exists
             has_barangay_indicator = any(indicator in combined_text for indicator in ['BARANGAY', 'BRGY', 'BRG', 'BR.', 'BRGY.'])
@@ -845,6 +846,13 @@ class DynastyProjectsCacheGenerator:
                 # If we reach here, it means no valid barangay was found and no invalid one was detected
                 # In this case, we should NOT match (better to exclude uncertain matches)
                 return (None, None, 0)
+            
+            # STRICT RULE: If project mentions "ROAD" (case insensitive), require "CITY" in project text
+            # This prevents generic matches like "Manila Road" from matching Manila city councilors
+            if re.search(r'\bROAD\b', combined_text, re.IGNORECASE):
+                if 'CITY' not in combined_text:
+                    # Project mentions ROAD but not CITY - exclude to avoid false matches
+                    return (None, None, 0)
             
             # No barangay indicator - city-wide match is OK, but with lower score (1)
             # This ONLY applies to city districts
