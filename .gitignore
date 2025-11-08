@@ -25,7 +25,6 @@ dpwh_archive/
 *.torrent
 *.sqlite
 *.xml
-data_summary.json
 dpwh_analysis_report.html
 
 # PBC Source documents (do not commit)
@@ -45,14 +44,12 @@ database/**/*.xlsx
 # Review reports (large files)
 CONTRACTOR_CONSTELLATIONS_REVIEW.txt
 CONTRACTOR_CONSTELLATIONS_REVIEW.json
-CONTRACTORS_FOR_REVIEW.json
 CONTRACTORS_FOR_REVIEW.txt
 PERPLEXITY_REQUERY_COMPARISON_*.txt
 
 # Large cache/dump files
 database/dynasty_dump.sql
 scripts/static/data/relationship_chains_cache.json
-static/data/relationship_chains_cache.json
 static/data/dynasty-projects-cache.json
 
 # HuggingFace integration outputs
