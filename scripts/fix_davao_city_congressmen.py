@@ -84,9 +84,9 @@ class DavaoCityCongressmenFixer:
         if congressman_data.get('is_city_district') and congressman_data.get('provinces') and congressman_data['provinces'][0] == 'Davao City':
             # Term filtering logic:
             # - If project has a valid year: check if it falls within congressman's terms
-            # - If project has no year (None/null): give to congressmen whose current terms include 2024-2025
-            #   (since we can't determine when the project was done, assume it's current)
-            should_include_based_on_terms = False
+            # - If project has no year (None/null): give to ALL congressmen with score -50 (uncertain)
+            match_score = 100  # Default high score
+            should_include = False
 
             if project_year is not None:
                 # Project has a year - check if it falls within any of the congressman's terms
@@ -95,19 +95,14 @@ class DavaoCityCongressmenFixer:
                     term_start = term.get('start')
                     term_end = term.get('end')
                     if term_start and term_end and term_start <= project_year <= term_end:
-                        should_include_based_on_terms = True
+                        should_include = True
                         break
             else:
-                # Project has no year - give to congressmen whose terms are current (include 2024-2025)
-                terms = congressman_data.get('terms', [])
-                for term in terms:
-                    term_start = term.get('start')
-                    term_end = term.get('end')
-                    if term_start and term_end and term_start <= 2025 and term_end >= 2024:
-                        should_include_based_on_terms = True
-                        break
+                # Project has no year - give to ALL congressmen with lower score (-50)
+                should_include = True
+                match_score = -50  # Uncertain match due to missing year data
 
-            if not should_include_based_on_terms:
+            if not should_include:
                 return (None, None, 0)  # Project doesn't match congressman's terms
 
             # Get valid barangays for this specific district
@@ -133,7 +128,7 @@ class DavaoCityCongressmenFixer:
             if valid_barangays:
                 has_barangay_match = any(barangay in combined_text for barangay in valid_barangays)
                 if has_barangay_match:
-                    return (congressman_name, "district", 100)
+                    return (congressman_name, "district", match_score)
 
             # If no barangay match found for Davao City, return no match
             return (None, None, 0)
