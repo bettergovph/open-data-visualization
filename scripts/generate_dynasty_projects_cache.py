@@ -834,35 +834,58 @@ class DynastyProjectsCacheGenerator:
         if not contains_word(combined_text, district_identifier):
             return (None, None, 0)
         
-        # 7. For city districts, be more strict about matching
+        # 7. For city districts - IMPROVED LOGIC FOR ALL CITIES, ESPECIALLY MANILA
         if congressman_data.get('is_city_district') and district_identifier:
-            # SPECIAL RULE: For Manila districts, require barangay-level matching since districts have specific barangays
-            # This prevents road codes like "K0578 + 800" from being misinterpreted as district matches
+            # Get valid barangays for this district
+            valid_barangays = []
+            if districts_data and congressman_data.get('provinces'):
+                province = congressman_data['provinces'][0]
+                province_key = None
+                for key in districts_data.get('districts', {}).keys():
+                    if key.upper() == province.upper():
+                        province_key = key
+                        break
+
+                if province_key:
+                    districts_info = districts_data.get('districts', {}).get(province_key, {})
+                    barangays_map = districts_info.get('barangays', {})
+                    district_number = congressman_data.get('district_number')
+
+                    if district_number and district_number in barangays_map:
+                        # Get both full names (Tondo I, Tondo II) and base names (Tondo)
+                        full_barangays = barangays_map[district_number]
+                        base_barangays = []
+                        for barangay in full_barangays:
+                            # Extract base name (e.g., "Tondo I" -> "Tondo")
+                            base_name = barangay.split()[0] if barangay.split() else barangay
+                            base_barangays.append(base_name)
+                        valid_barangays = [b.upper() for b in full_barangays + base_barangays]
+
+            # Check if project mentions valid barangay names
+            has_real_barangay = False
+            if valid_barangays:
+                has_real_barangay = any(barangay in combined_text for barangay in valid_barangays)
+
+            # SPECIAL RULE: For Manila districts, require barangay-level matching
+            # This prevents road codes and generic "Manila" mentions from matching
             if district_identifier == 'MANILA':
-                # For Manila, do NOT allow city-wide matches - require barangay matches
-                # Road codes and generic location references should not match Manila districts
-                return (None, None, 0)
+                if not has_real_barangay:
+                    return (None, None, 0)
+                return (congressman_name, "district", 100)  # Strong match for barangay mention
 
-            # Check if barangay indicator exists
-            has_barangay_indicator = any(indicator in combined_text for indicator in ['BARANGAY', 'BRGY', 'BRG', 'BR.', 'BRGY.'])
-
-            if has_barangay_indicator:
-                # If barangay indicator exists, we already checked for valid/invalid barangays above
-                # If we reach here, it means no valid barangay was found and no invalid one was detected
-                # In this case, we should NOT match (better to exclude uncertain matches)
-                return (None, None, 0)
-
-            # STRICT RULE: If project mentions "ROAD" (case insensitive), require "CITY" in project text
-            # This prevents generic matches like "Manila Road" from matching Manila city councilors
+            # For other city districts, allow city-wide matches but prefer barangay matches
+            # STRICT RULE: If project mentions "ROAD", require "CITY"
             if re.search(r'\bROAD\b', combined_text, re.IGNORECASE):
                 if 'CITY' not in combined_text:
-                    # Project mentions ROAD but not CITY - exclude to avoid false matches
                     return (None, None, 0)
 
-            # No barangay indicator - city-wide match is OK, but with lower score (1)
-            # This ONLY applies to other city districts (not Manila)
+            # If barangay is mentioned, it's a strong match
+            if has_real_barangay:
+                return (congressman_name, "district", 100)
+
+            # Otherwise, allow city-wide match with lower score
             if district_identifier in combined_text:
-                return (congressman_name, "district", 1)  # Low score for city-wide matches
+                return (congressman_name, "district", 1)
         
         # 8. For province districts: Check if any municipality from that district is in project text
         # For province districts, we MUST have a valid municipality match - no city-wide fallback
