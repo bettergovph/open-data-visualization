@@ -834,28 +834,33 @@ class DynastyProjectsCacheGenerator:
         if not contains_word(combined_text, district_identifier):
             return (None, None, 0)
         
-        # 7. For city districts (like Zamboanga City), match all city projects
-        # BUT only if no barangay indicator was found, or if a valid barangay was found
-        # STRICT RULE: If project mentions "ROAD" (case insensitive), require "CITY" in project text
+        # 7. For city districts, be more strict about matching
         if congressman_data.get('is_city_district') and district_identifier:
+            # SPECIAL RULE: For Manila districts, require barangay-level matching since districts have specific barangays
+            # This prevents road codes like "K0578 + 800" from being misinterpreted as district matches
+            if district_identifier == 'MANILA':
+                # For Manila, do NOT allow city-wide matches - require barangay matches
+                # Road codes and generic location references should not match Manila districts
+                return (None, None, 0)
+
             # Check if barangay indicator exists
             has_barangay_indicator = any(indicator in combined_text for indicator in ['BARANGAY', 'BRGY', 'BRG', 'BR.', 'BRGY.'])
-            
+
             if has_barangay_indicator:
                 # If barangay indicator exists, we already checked for valid/invalid barangays above
                 # If we reach here, it means no valid barangay was found and no invalid one was detected
                 # In this case, we should NOT match (better to exclude uncertain matches)
                 return (None, None, 0)
-            
+
             # STRICT RULE: If project mentions "ROAD" (case insensitive), require "CITY" in project text
             # This prevents generic matches like "Manila Road" from matching Manila city councilors
             if re.search(r'\bROAD\b', combined_text, re.IGNORECASE):
                 if 'CITY' not in combined_text:
                     # Project mentions ROAD but not CITY - exclude to avoid false matches
                     return (None, None, 0)
-            
+
             # No barangay indicator - city-wide match is OK, but with lower score (1)
-            # This ONLY applies to city districts
+            # This ONLY applies to other city districts (not Manila)
             if district_identifier in combined_text:
                 return (congressman_name, "district", 1)  # Low score for city-wide matches
         
