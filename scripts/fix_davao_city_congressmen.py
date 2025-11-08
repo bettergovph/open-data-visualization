@@ -82,20 +82,33 @@ class DavaoCityCongressmenFixer:
 
         # 2. For Davao City districts, require barangay-level matching + term checking
         if congressman_data.get('is_city_district') and congressman_data.get('provinces') and congressman_data['provinces'][0] == 'Davao City':
-            # Check if project year falls within congressman's terms
-            if project_year is not None:
-                terms = congressman_data.get('terms', [])
-                year_in_terms = False
+            # Term filtering logic:
+            # - If project has a valid year: check if it falls within congressman's terms
+            # - If project has no year (None/null): give to congressmen whose current terms include 2024-2025
+            #   (since we can't determine when the project was done, assume it's current)
+            should_include_based_on_terms = False
 
+            if project_year is not None:
+                # Project has a year - check if it falls within any of the congressman's terms
+                terms = congressman_data.get('terms', [])
                 for term in terms:
                     term_start = term.get('start')
                     term_end = term.get('end')
                     if term_start and term_end and term_start <= project_year <= term_end:
-                        year_in_terms = True
+                        should_include_based_on_terms = True
+                        break
+            else:
+                # Project has no year - give to congressmen whose terms are current (include 2024-2025)
+                terms = congressman_data.get('terms', [])
+                for term in terms:
+                    term_start = term.get('start')
+                    term_end = term.get('end')
+                    if term_start and term_end and term_start <= 2025 and term_end >= 2024:
+                        should_include_based_on_terms = True
                         break
 
-                if not year_in_terms:
-                    return (None, None, 0)  # Project year doesn't match congressman's terms
+            if not should_include_based_on_terms:
+                return (None, None, 0)  # Project doesn't match congressman's terms
 
             # Get valid barangays for this specific district
             valid_barangays = []
