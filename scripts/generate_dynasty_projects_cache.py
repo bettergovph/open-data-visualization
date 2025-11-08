@@ -865,6 +865,35 @@ class DynastyProjectsCacheGenerator:
         if district_municipalities:
             for mun in district_municipalities:
                 if mun and contains_word(combined_text, mun.upper()):
+                    # CRITICAL: Check for naming conflicts
+                    # If municipality name matches province/city name, require VERY strict validation
+                    # Example: "Leyte" municipality in Leyte province - need more context
+                    mun_upper = mun.upper()
+                    provinces = congressman_data.get('provinces', [])
+                    
+                    # Check if municipality name matches the province name
+                    is_naming_conflict = False
+                    for prov in provinces:
+                        if prov and mun_upper == prov.upper():
+                            is_naming_conflict = True
+                            break
+                    
+                    if is_naming_conflict:
+                        # STRICT: For naming conflicts, require explicit "MUNICIPALITY" or "MUNICIPAL" keyword
+                        # This prevents "Leyte province" from matching "Leyte municipality"
+                        has_municipality_keyword = any(keyword in combined_text for keyword in [
+                            'MUNICIPALITY OF ' + mun_upper,
+                            'MUNICIPAL ' + mun_upper,
+                            'MUNICIPIO',
+                            'LGU-' + mun_upper,
+                            'LGU ' + mun_upper
+                        ])
+                        
+                        if not has_municipality_keyword:
+                            # Log this for analysis
+                            print(f"    ⚠️  Skipping potential false match: '{mun}' (naming conflict with province/city)")
+                            continue  # Skip this municipality, check others
+                    
                     # Found BOTH district identifier AND municipality from that district - match!
                     return (congressman_name, "district", 100)
         
