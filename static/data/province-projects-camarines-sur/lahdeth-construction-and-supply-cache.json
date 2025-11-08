@@ -14,10 +14,10 @@
       "municipality": "N/A",
       "year": 2019,
       "status": "active",
-      "sources_count": 1,
       "sources_list": [
         "PhilGEPS"
-      ]
+      ],
+      "sources_count": 1
     },
     {
       "source": "PhilGEPS",
@@ -30,10 +30,10 @@
       "municipality": "N/A",
       "year": 2016,
       "status": "active",
-      "sources_count": 1,
       "sources_list": [
         "PhilGEPS"
-      ]
+      ],
+      "sources_count": 1
     },
     {
       "source": "PhilGEPS",
@@ -46,10 +46,10 @@
       "municipality": "N/A",
       "year": 2018,
       "status": "active",
-      "sources_count": 1,
       "sources_list": [
         "PhilGEPS"
-      ]
+      ],
+      "sources_count": 1
     },
     {
       "source": "PhilGEPS",
@@ -62,10 +62,10 @@
       "municipality": "N/A",
       "year": 2017,
       "status": "active",
-      "sources_count": 1,
       "sources_list": [
         "PhilGEPS"
-      ]
+      ],
+      "sources_count": 1
     },
     {
       "source": "PhilGEPS",
@@ -78,10 +78,10 @@
       "municipality": "N/A",
       "year": 2017,
       "status": "active",
-      "sources_count": 1,
       "sources_list": [
         "PhilGEPS"
-      ]
+      ],
+      "sources_count": 1
     },
     {
       "source": "PhilGEPS",
@@ -94,10 +94,10 @@
       "municipality": "N/A",
       "year": 2015,
       "status": "active",
-      "sources_count": 1,
       "sources_list": [
         "PhilGEPS"
-      ]
+      ],
+      "sources_count": 1
     },
     {
       "source": "SSP",
@@ -105,81 +105,36 @@
       "project_name": "Construction of Drainage, San Isidro, Magarao, Camarines Sur",
       "contractor": "LAHDETH CONSTRUCTION AND SUPPLY",
       "amount": 1489100.0,
-      "location": "CAMARINES SUR",
+      "location": "CAMARINES SUR, Region V",
       "province": "CAMARINES SUR",
-      "municipality": "N/A",
-      "year": "N/A",
-      "status": "N/A",
-      "sources_count": 1,
-      "sources_list": [
-        "SSP"
-      ]
-    },
-    {
-      "source": "DIME",
-      "meilisearch_id": "a25b543e-d624-4344-91ac-e77d7196de71",
-      "project_name": "Construction of Drainage, San Isidro, Magarao, Camarines Sur",
-      "contractor": "LAHDETH CONSTRUCTION AND SUPPLY",
-      "amount": 1489100.0,
-      "location": "Camarines Sur, Magarao",
-      "province": "Camarines Sur",
       "municipality": "Magarao",
-      "barangay": "N/A",
       "year": 2022,
       "status": "Completed",
-      "sources_count": 1,
+      "barangay": "N/A",
       "sources_list": [
-        "DIME"
-      ]
-    },
-    {
-      "source": "PhilGEPS",
-      "meilisearch_id": "a25b543e-d624-4344-91ac-e77d7196de71",
-      "project_name": "21FF0074",
-      "contractor": "LAHDETH CONSTRUCTION AND SUPPLY",
-      "amount": 1489100.0,
-      "location": "Camarines Sur",
-      "province": "N/A",
-      "municipality": "N/A",
-      "year": 2022,
-      "status": "active",
-      "sources_count": 1,
-      "sources_list": [
+        "SSP",
+        "DIME",
         "PhilGEPS"
-      ]
-    },
-    {
-      "source": "PhilGEPS",
-      "meilisearch_id": "a25b543e-d624-4344-91ac-e77d7196de71",
-      "project_name": "Construction of Drainage, San Isidro, Magarao, Camarines Sur",
-      "contractor": "LAHDETH CONSTRUCTION AND SUPPLY",
-      "amount": 1489100.0,
-      "location": "CAMARINES SUR, Region V",
-      "province": "N/A",
-      "municipality": "N/A",
-      "year": 2022,
-      "status": "active",
-      "sources_count": 1,
-      "sources_list": [
-        "PhilGEPS"
-      ]
+      ],
+      "sources_count": 3
     }
   ],
   "summary": {
-    "total": 10,
+    "total": 7,
     "ssp": 1,
     "dime": 1,
-    "philgeps": 8
+    "philgeps": 7,
+    "microsite": 0
   },
-  "total_cost": 43755833.43000001,
+  "total_cost": 39288533.43000001,
   "filter_options": {
     "municipalities": [
       {
         "name": "Unknown",
-        "count": 10
+        "count": 7
       }
     ]
   },
-  "generated_at": "2025-11-06T14:44:10.733783",
+  "generated_at": "2025-11-08T06:20:36.738254",
   "cache_version": "1.0"
 }

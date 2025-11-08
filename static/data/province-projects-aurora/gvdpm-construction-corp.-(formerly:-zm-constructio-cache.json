@@ -15,10 +15,10 @@
       "barangay": "N/A",
       "year": 2022,
       "status": "Completed",
-      "sources_count": 1,
       "sources_list": [
         "DIME"
-      ]
+      ],
+      "sources_count": 1
     },
     {
       "source": "DIME",
@@ -32,10 +32,10 @@
       "barangay": "N/A",
       "year": 2022,
       "status": "Completed",
-      "sources_count": 1,
       "sources_list": [
         "DIME"
-      ]
+      ],
+      "sources_count": 1
     },
     {
       "source": "DIME",
@@ -49,10 +49,10 @@
       "barangay": "N/A",
       "year": 2025,
       "status": "Ongoing",
-      "sources_count": 1,
       "sources_list": [
         "DIME"
-      ]
+      ],
+      "sources_count": 1
     },
     {
       "source": "DIME",
@@ -66,10 +66,10 @@
       "barangay": "N/A",
       "year": 2022,
       "status": "Completed",
-      "sources_count": 1,
       "sources_list": [
         "DIME"
-      ]
+      ],
+      "sources_count": 1
     },
     {
       "source": "DIME",
@@ -83,10 +83,10 @@
       "barangay": "N/A",
       "year": 2022,
       "status": "Completed",
-      "sources_count": 1,
       "sources_list": [
         "DIME"
-      ]
+      ],
+      "sources_count": 1
     },
     {
       "source": "DIME",
@@ -100,10 +100,10 @@
       "barangay": "N/A",
       "year": 2022,
       "status": "Completed",
-      "sources_count": 1,
       "sources_list": [
         "DIME"
-      ]
+      ],
+      "sources_count": 1
     },
     {
       "source": "SSP",
@@ -111,48 +111,18 @@
       "project_name": "Construction of Box Culvert, Brgy. Lobbot, Dipaculao, Aurora",
       "contractor": "GVDPM CONSTRUCTION CORP. (FORMERLY: ZM CONSTRUCTIO",
       "amount": 4798860.49,
-      "location": "AURORA, DIPACULAO (AURORA)",
+      "location": "DIPACULAO (AURORA), AURORA, Region III",
       "province": "AURORA",
       "municipality": "DIPACULAO (AURORA)",
-      "year": "N/A",
-      "status": "N/A",
-      "sources_count": 1,
-      "sources_list": [
-        "SSP"
-      ]
-    },
-    {
-      "source": "DIME",
-      "meilisearch_id": "7d1f30f7-1acc-4368-a804-7f8307accef6",
-      "project_name": "Construction of Box Culvert, Brgy. Lobbot, Dipaculao, Aurora",
-      "contractor": "GVDPM CONSTRUCTION CORP. (FORMERLY: ZM CONSTRUCTIO",
-      "amount": 4798860.49,
-      "location": "Aurora, Dipaculao, Lobbot",
-      "province": "Aurora",
-      "municipality": "Dipaculao",
-      "barangay": "Lobbot",
       "year": 2024,
       "status": "Completed",
-      "sources_count": 1,
+      "barangay": "Lobbot",
       "sources_list": [
-        "DIME"
-      ]
-    },
-    {
-      "source": "PhilGEPS",
-      "meilisearch_id": "7d1f30f7-1acc-4368-a804-7f8307accef6",
-      "project_name": "Construction of Box Culvert, Brgy. Lobbot, Dipaculao, Aurora",
-      "contractor": "GVDPM CONSTRUCTION CORP. (FORMERLY: ZM CONSTRUCTIO",
-      "amount": 4798860.49,
-      "location": "DIPACULAO (AURORA), AURORA, Region III",
-      "province": "N/A",
-      "municipality": "N/A",
-      "year": 2024,
-      "status": "active",
-      "sources_count": 1,
-      "sources_list": [
+        "SSP",
+        "DIME",
         "PhilGEPS"
-      ]
+      ],
+      "sources_count": 3
     },
     {
       "source": "DIME",
@@ -166,27 +136,28 @@
       "barangay": "N/A",
       "year": 2022,
       "status": "Completed",
-      "sources_count": 1,
       "sources_list": [
         "DIME"
-      ]
+      ],
+      "sources_count": 1
     }
   ],
   "summary": {
-    "total": 10,
+    "total": 8,
     "ssp": 1,
     "dime": 8,
-    "philgeps": 1
+    "philgeps": 1,
+    "microsite": 0
   },
-  "total_cost": 207799489.97000003,
+  "total_cost": 198201768.99,
   "filter_options": {
     "municipalities": [
       {
         "name": "Unknown",
-        "count": 10
+        "count": 8
       }
     ]
   },
-  "generated_at": "2025-11-06T14:44:08.856203",
+  "generated_at": "2025-11-08T06:16:02.108038",
   "cache_version": "1.0"
 }

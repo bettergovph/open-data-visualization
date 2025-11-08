@@ -14,10 +14,10 @@
       "municipality": "N/A",
       "year": 2023,
       "status": "active",
-      "sources_count": 1,
       "sources_list": [
         "PhilGEPS"
-      ]
+      ],
+      "sources_count": 1
     },
     {
       "source": "PhilGEPS",
@@ -30,10 +30,10 @@
       "municipality": "N/A",
       "year": 2022,
       "status": "active",
-      "sources_count": 1,
       "sources_list": [
         "PhilGEPS"
-      ]
+      ],
+      "sources_count": 1
     },
     {
       "source": "SSP",
@@ -41,48 +41,18 @@
       "project_name": "Construction of Slope Protection (Riprapping), Bell (Creek), Magarao, Camarines Sur",
       "contractor": "MRBAY CONSTRUCTION",
       "amount": 3959871.7,
-      "location": "CAMARINES SUR",
+      "location": "CAMARINES SUR, Region V",
       "province": "CAMARINES SUR",
-      "municipality": "N/A",
-      "year": "N/A",
-      "status": "N/A",
-      "sources_count": 1,
-      "sources_list": [
-        "SSP"
-      ]
-    },
-    {
-      "source": "DIME",
-      "meilisearch_id": "8fee6790-516a-4fc9-b4e6-ef5b7cfe4583",
-      "project_name": "Construction of Slope Protection (Riprapping), Bell (Creek), Magarao, Camarines Sur",
-      "contractor": "MRBAY CONSTRUCTION",
-      "amount": 3959871.7,
-      "location": "Camarines Sur, Magarao",
-      "province": "Camarines Sur",
       "municipality": "Magarao",
-      "barangay": "N/A",
       "year": 2022,
       "status": "Completed",
-      "sources_count": 1,
+      "barangay": "N/A",
       "sources_list": [
-        "DIME"
-      ]
-    },
-    {
-      "source": "PhilGEPS",
-      "meilisearch_id": "8fee6790-516a-4fc9-b4e6-ef5b7cfe4583",
-      "project_name": "Construction of Slope Protection (Riprapping), Bell (Creek), Magarao, Camarines Sur",
-      "contractor": "MRBAY CONSTRUCTION",
-      "amount": 3959871.7,
-      "location": "CAMARINES SUR, Region V",
-      "province": "N/A",
-      "municipality": "N/A",
-      "year": 2022,
-      "status": "active",
-      "sources_count": 1,
-      "sources_list": [
+        "SSP",
+        "DIME",
         "PhilGEPS"
-      ]
+      ],
+      "sources_count": 3
     },
     {
       "source": "PhilGEPS",
@@ -95,10 +65,10 @@
       "municipality": "N/A",
       "year": 2022,
       "status": "active",
-      "sources_count": 1,
       "sources_list": [
         "PhilGEPS"
-      ]
+      ],
+      "sources_count": 1
     },
     {
       "source": "PhilGEPS",
@@ -111,10 +81,10 @@
       "municipality": "N/A",
       "year": 2021,
       "status": "active",
-      "sources_count": 1,
       "sources_list": [
         "PhilGEPS"
-      ]
+      ],
+      "sources_count": 1
     },
     {
       "source": "PhilGEPS",
@@ -127,10 +97,10 @@
       "municipality": "N/A",
       "year": 2021,
       "status": "active",
-      "sources_count": 1,
       "sources_list": [
         "PhilGEPS"
-      ]
+      ],
+      "sources_count": 1
     },
     {
       "source": "PhilGEPS",
@@ -143,10 +113,10 @@
       "municipality": "N/A",
       "year": 2023,
       "status": "active",
-      "sources_count": 1,
       "sources_list": [
         "PhilGEPS"
-      ]
+      ],
+      "sources_count": 1
     },
     {
       "source": "PhilGEPS",
@@ -159,10 +129,10 @@
       "municipality": "N/A",
       "year": 2023,
       "status": "active",
-      "sources_count": 1,
       "sources_list": [
         "PhilGEPS"
-      ]
+      ],
+      "sources_count": 1
     },
     {
       "source": "PhilGEPS",
@@ -175,27 +145,28 @@
       "municipality": "N/A",
       "year": 2023,
       "status": "active",
-      "sources_count": 1,
       "sources_list": [
         "PhilGEPS"
-      ]
+      ],
+      "sources_count": 1
     }
   ],
   "summary": {
-    "total": 11,
+    "total": 9,
     "ssp": 1,
     "dime": 1,
-    "philgeps": 9
+    "philgeps": 9,
+    "microsite": 0
   },
-  "total_cost": 29923267.7,
+  "total_cost": 22003524.3,
   "filter_options": {
     "municipalities": [
       {
         "name": "Unknown",
-        "count": 11
+        "count": 9
       }
     ]
   },
-  "generated_at": "2025-11-06T14:44:10.736883",
+  "generated_at": "2025-11-08T06:20:36.747235",
   "cache_version": "1.0"
 }

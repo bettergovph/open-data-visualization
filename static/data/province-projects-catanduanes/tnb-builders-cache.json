@@ -14,10 +14,10 @@
       "municipality": "N/A",
       "year": 2019,
       "status": "active",
-      "sources_count": 1,
       "sources_list": [
         "PhilGEPS"
-      ]
+      ],
+      "sources_count": 1
     },
     {
       "source": "SSP",
@@ -25,48 +25,18 @@
       "project_name": "Construction of River Control Dike at Bagumbayan, Bato, Catanduanes",
       "contractor": "TNB BUILDERS",
       "amount": 4948753.5,
-      "location": "CATANDUANES, BATO (CATANDUANES)",
+      "location": "BATO (CATANDUANES), CATANDUANES, Region V",
       "province": "CATANDUANES",
       "municipality": "BATO (CATANDUANES)",
-      "year": "N/A",
-      "status": "N/A",
-      "sources_count": 1,
-      "sources_list": [
-        "SSP"
-      ]
-    },
-    {
-      "source": "DIME",
-      "meilisearch_id": "426b2267-ac01-4e5f-b5c6-8bf29fe1c256",
-      "project_name": "Construction of River Control Dike at Bagumbayan, Bato, Catanduanes",
-      "contractor": "TNB BUILDERS",
-      "amount": 4948753.5,
-      "location": "Catanduanes, Bato, Bagumbayan",
-      "province": "Catanduanes",
-      "municipality": "Bato",
-      "barangay": "Bagumbayan",
       "year": 2023,
       "status": "Completed",
-      "sources_count": 1,
+      "barangay": "Bagumbayan",
       "sources_list": [
-        "DIME"
-      ]
-    },
-    {
-      "source": "PhilGEPS",
-      "meilisearch_id": "426b2267-ac01-4e5f-b5c6-8bf29fe1c256",
-      "project_name": "Construction of River Control Dike at Bagumbayan, Bato, Catanduanes",
-      "contractor": "TNB BUILDERS",
-      "amount": 4948753.5,
-      "location": "BATO (CATANDUANES), CATANDUANES, Region V",
-      "province": "N/A",
-      "municipality": "N/A",
-      "year": 2023,
-      "status": "active",
-      "sources_count": 1,
-      "sources_list": [
+        "SSP",
+        "DIME",
         "PhilGEPS"
-      ]
+      ],
+      "sources_count": 3
     },
     {
       "source": "PhilGEPS",
@@ -79,10 +49,10 @@
       "municipality": "N/A",
       "year": 2023,
       "status": "active",
-      "sources_count": 1,
       "sources_list": [
         "PhilGEPS"
-      ]
+      ],
+      "sources_count": 1
     },
     {
       "source": "PhilGEPS",
@@ -95,10 +65,10 @@
       "municipality": "N/A",
       "year": 2022,
       "status": "active",
-      "sources_count": 1,
       "sources_list": [
         "PhilGEPS"
-      ]
+      ],
+      "sources_count": 1
     },
     {
       "source": "PhilGEPS",
@@ -111,10 +81,10 @@
       "municipality": "N/A",
       "year": 2017,
       "status": "active",
-      "sources_count": 1,
       "sources_list": [
         "PhilGEPS"
-      ]
+      ],
+      "sources_count": 1
     },
     {
       "source": "PhilGEPS",
@@ -127,10 +97,10 @@
       "municipality": "N/A",
       "year": 2014,
       "status": "active",
-      "sources_count": 1,
       "sources_list": [
         "PhilGEPS"
-      ]
+      ],
+      "sources_count": 1
     },
     {
       "source": "PhilGEPS",
@@ -143,10 +113,10 @@
       "municipality": "N/A",
       "year": 2014,
       "status": "active",
-      "sources_count": 1,
       "sources_list": [
         "PhilGEPS"
-      ]
+      ],
+      "sources_count": 1
     },
     {
       "source": "PhilGEPS",
@@ -159,27 +129,28 @@
       "municipality": "N/A",
       "year": 2022,
       "status": "active",
-      "sources_count": 1,
       "sources_list": [
         "PhilGEPS"
-      ]
+      ],
+      "sources_count": 1
     }
   ],
   "summary": {
-    "total": 10,
+    "total": 8,
     "ssp": 1,
     "dime": 1,
-    "philgeps": 8
+    "philgeps": 8,
+    "microsite": 0
   },
-  "total_cost": 48183161.79,
+  "total_cost": 38285654.79,
   "filter_options": {
     "municipalities": [
       {
         "name": "Unknown",
-        "count": 10
+        "count": 8
       }
     ]
   },
-  "generated_at": "2025-11-06T14:44:11.119263",
+  "generated_at": "2025-11-08T06:20:38.624705",
   "cache_version": "1.0"
 }

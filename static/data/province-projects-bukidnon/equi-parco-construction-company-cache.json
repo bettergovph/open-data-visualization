@@ -14,10 +14,10 @@
       "municipality": "N/A",
       "year": 2016,
       "status": "active",
-      "sources_count": 1,
       "sources_list": [
         "PhilGEPS"
-      ]
+      ],
+      "sources_count": 1
     },
     {
       "source": "PhilGEPS",
@@ -30,10 +30,10 @@
       "municipality": "N/A",
       "year": 2019,
       "status": "active",
-      "sources_count": 1,
       "sources_list": [
         "PhilGEPS"
-      ]
+      ],
+      "sources_count": 1
     },
     {
       "source": "PhilGEPS",
@@ -46,10 +46,10 @@
       "municipality": "N/A",
       "year": 2016,
       "status": "active",
-      "sources_count": 1,
       "sources_list": [
         "PhilGEPS"
-      ]
+      ],
+      "sources_count": 1
     },
     {
       "source": "PhilGEPS",
@@ -62,10 +62,10 @@
       "municipality": "N/A",
       "year": 2018,
       "status": "active",
-      "sources_count": 1,
       "sources_list": [
         "PhilGEPS"
-      ]
+      ],
+      "sources_count": 1
     },
     {
       "source": "SSP",
@@ -73,48 +73,18 @@
       "project_name": "Construction of Flood Control Structure along CDO City-Dominorog-Camp Kibaritan Road (Upstream & Downstream) of Tal-uban Bridge with Slope Protection, Sta. 0+000.00 - Sta. 0+420.00, Talakag, Bukidnon",
       "contractor": "EQUI-PARCO CONSTRUCTION COMPANY",
       "amount": 37728091.79,
-      "location": "BUKIDNON, TALAKAG (BUKIDNON)",
+      "location": "TALAKAG (BUKIDNON), BUKIDNON, Region X",
       "province": "BUKIDNON",
       "municipality": "TALAKAG (BUKIDNON)",
-      "year": "N/A",
-      "status": "N/A",
-      "sources_count": 1,
-      "sources_list": [
-        "SSP"
-      ]
-    },
-    {
-      "source": "DIME",
-      "meilisearch_id": "18fe061a-2552-48ee-88c2-9d893315eb6e",
-      "project_name": "Construction of Flood Control Structure along CDO City-Dominorog-Camp Kibaritan Road (Upstream & Downstream) of Tal-uban Bridge with Slope Protection, Sta. 0+000.00 - Sta. 0+420.00, Talakag, Bukidnon",
-      "contractor": "EQUI-PARCO CONSTRUCTION COMPANY",
-      "amount": 37728091.79,
-      "location": "Bukidnon, Talakag, Basak",
-      "province": "Bukidnon",
-      "municipality": "Talakag",
-      "barangay": "Basak",
       "year": 2022,
       "status": "Completed",
-      "sources_count": 1,
+      "barangay": "Basak",
       "sources_list": [
-        "DIME"
-      ]
-    },
-    {
-      "source": "PhilGEPS",
-      "meilisearch_id": "18fe061a-2552-48ee-88c2-9d893315eb6e",
-      "project_name": "Construction of Flood Control Structure along CDO City-Dominorog-Camp Kibaritan Road (Upstream & Downstream) of Tal-uban Bridge with Slope Protection, Sta. 0+000.00 - Sta. 0+420.00, Talakag, Bukidnon",
-      "contractor": "EQUI-PARCO CONSTRUCTION COMPANY",
-      "amount": 37728091.79,
-      "location": "TALAKAG (BUKIDNON), BUKIDNON, Region X",
-      "province": "N/A",
-      "municipality": "N/A",
-      "year": 2023,
-      "status": "active",
-      "sources_count": 1,
-      "sources_list": [
+        "SSP",
+        "DIME",
         "PhilGEPS"
-      ]
+      ],
+      "sources_count": 3
     },
     {
       "source": "PhilGEPS",
@@ -127,10 +97,10 @@
       "municipality": "N/A",
       "year": 2022,
       "status": "active",
-      "sources_count": 1,
       "sources_list": [
         "PhilGEPS"
-      ]
+      ],
+      "sources_count": 1
     },
     {
       "source": "PhilGEPS",
@@ -143,27 +113,28 @@
       "municipality": "N/A",
       "year": 2016,
       "status": "active",
-      "sources_count": 1,
       "sources_list": [
         "PhilGEPS"
-      ]
+      ],
+      "sources_count": 1
     }
   ],
   "summary": {
-    "total": 9,
+    "total": 7,
     "ssp": 1,
     "dime": 1,
-    "philgeps": 7
+    "philgeps": 7,
+    "microsite": 0
   },
-  "total_cost": 575359051.2400001,
+  "total_cost": 499902867.6600001,
   "filter_options": {
     "municipalities": [
       {
         "name": "Unknown",
-        "count": 9
+        "count": 7
       }
     ]
   },
-  "generated_at": "2025-11-06T14:44:10.002537",
+  "generated_at": "2025-11-08T06:20:33.686297",
   "cache_version": "1.0"
 }

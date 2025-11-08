@@ -14,10 +14,10 @@
       "municipality": "N/A",
       "year": 2023,
       "status": "active",
-      "sources_count": 1,
       "sources_list": [
         "PhilGEPS"
-      ]
+      ],
+      "sources_count": 1
     },
     {
       "source": "PhilGEPS",
@@ -30,10 +30,10 @@
       "municipality": "N/A",
       "year": 2023,
       "status": "active",
-      "sources_count": 1,
       "sources_list": [
         "PhilGEPS"
-      ]
+      ],
+      "sources_count": 1
     },
     {
       "source": "PhilGEPS",
@@ -46,10 +46,10 @@
       "municipality": "N/A",
       "year": 2025,
       "status": "active",
-      "sources_count": 1,
       "sources_list": [
         "PhilGEPS"
-      ]
+      ],
+      "sources_count": 1
     },
     {
       "source": "PhilGEPS",
@@ -62,10 +62,10 @@
       "municipality": "N/A",
       "year": 2025,
       "status": "active",
-      "sources_count": 1,
       "sources_list": [
         "PhilGEPS"
-      ]
+      ],
+      "sources_count": 1
     },
     {
       "source": "SSP",
@@ -73,48 +73,18 @@
       "project_name": "Construction of Flood Control Structure, Brgy. Bantay, Boac, Marinduque",
       "contractor": "ZUIDEN BUILDERS INC.",
       "amount": 19568537.1,
-      "location": "MARINDUQUE, BOAC (CAPITAL) (MARINDUQUE)",
+      "location": "BOAC (CAPITAL) (MARINDUQUE), MARINDUQUE, Region IV-B",
       "province": "MARINDUQUE",
       "municipality": "BOAC (CAPITAL) (MARINDUQUE)",
-      "year": "N/A",
-      "status": "N/A",
-      "sources_count": 1,
-      "sources_list": [
-        "SSP"
-      ]
-    },
-    {
-      "source": "DIME",
-      "meilisearch_id": "f98fb432-db5b-49ef-a6a4-4c855daf7aee",
-      "project_name": "Construction of Flood Control Structure, Brgy. Bantay, Boac, Marinduque",
-      "contractor": "ZUIDEN BUILDERS INC.",
-      "amount": 19568537.1,
-      "location": "Marinduque, Boac, Bantay",
-      "province": "Marinduque",
-      "municipality": "Boac",
-      "barangay": "Bantay",
       "year": 2022,
       "status": "Completed",
-      "sources_count": 1,
+      "barangay": "Bantay",
       "sources_list": [
-        "DIME"
-      ]
-    },
-    {
-      "source": "PhilGEPS",
-      "meilisearch_id": "f98fb432-db5b-49ef-a6a4-4c855daf7aee",
-      "project_name": "Construction of Flood Control Structure, Brgy. Bantay, Boac, Marinduque",
-      "contractor": "ZUIDEN BUILDERS INC.",
-      "amount": 19568537.1,
-      "location": "BOAC (CAPITAL) (MARINDUQUE), MARINDUQUE, Region IV-B",
-      "province": "N/A",
-      "municipality": "N/A",
-      "year": 2022,
-      "status": "active",
-      "sources_count": 1,
-      "sources_list": [
+        "SSP",
+        "DIME",
         "PhilGEPS"
-      ]
+      ],
+      "sources_count": 3
     },
     {
       "source": "PhilGEPS",
@@ -127,10 +97,10 @@
       "municipality": "N/A",
       "year": 2022,
       "status": "active",
-      "sources_count": 1,
       "sources_list": [
         "PhilGEPS"
-      ]
+      ],
+      "sources_count": 1
     },
     {
       "source": "PhilGEPS",
@@ -143,27 +113,28 @@
       "municipality": "N/A",
       "year": 2021,
       "status": "active",
-      "sources_count": 1,
       "sources_list": [
         "PhilGEPS"
-      ]
+      ],
+      "sources_count": 1
     }
   ],
   "summary": {
-    "total": 9,
+    "total": 7,
     "ssp": 1,
     "dime": 1,
-    "philgeps": 7
+    "philgeps": 7,
+    "microsite": 0
   },
-  "total_cost": 315232525.9,
+  "total_cost": 276095451.7,
   "filter_options": {
     "municipalities": [
       {
         "name": "Unknown",
-        "count": 9
+        "count": 7
       }
     ]
   },
-  "generated_at": "2025-11-06T14:44:14.651137",
+  "generated_at": "2025-11-08T06:20:54.179438",
   "cache_version": "1.0"
 }

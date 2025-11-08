@@ -14,10 +14,10 @@
       "municipality": "N/A",
       "year": 2025,
       "status": "active",
-      "sources_count": 1,
       "sources_list": [
         "PhilGEPS"
-      ]
+      ],
+      "sources_count": 1
     },
     {
       "source": "PhilGEPS",
@@ -30,10 +30,10 @@
       "municipality": "N/A",
       "year": 2018,
       "status": "active",
-      "sources_count": 1,
       "sources_list": [
         "PhilGEPS"
-      ]
+      ],
+      "sources_count": 1
     },
     {
       "source": "PhilGEPS",
@@ -46,10 +46,10 @@
       "municipality": "N/A",
       "year": 2023,
       "status": "active",
-      "sources_count": 1,
       "sources_list": [
         "PhilGEPS"
-      ]
+      ],
+      "sources_count": 1
     },
     {
       "source": "PhilGEPS",
@@ -62,10 +62,10 @@
       "municipality": "N/A",
       "year": 2021,
       "status": "active",
-      "sources_count": 1,
       "sources_list": [
         "PhilGEPS"
-      ]
+      ],
+      "sources_count": 1
     },
     {
       "source": "PhilGEPS",
@@ -78,10 +78,10 @@
       "municipality": "N/A",
       "year": 2023,
       "status": "active",
-      "sources_count": 1,
       "sources_list": [
         "PhilGEPS"
-      ]
+      ],
+      "sources_count": 1
     },
     {
       "source": "DIME",
@@ -95,10 +95,10 @@
       "barangay": "N/A",
       "year": 2023,
       "status": "Completed",
-      "sources_count": 1,
       "sources_list": [
         "DIME"
-      ]
+      ],
+      "sources_count": 1
     },
     {
       "source": "SSP",
@@ -106,31 +106,16 @@
       "project_name": "Construction of Flood Control Structures, Barangay Lorenzo, Rosario, Northern Samar",
       "contractor": "SAL CONSTRUCTION",
       "amount": 6853647.94,
-      "location": "NORTHERN SAMAR, ROSARIO (NORTHERN SAMAR)",
+      "location": "ROSARIO (NORTHERN SAMAR), NORTHERN SAMAR, Region VIII",
       "province": "NORTHERN SAMAR",
       "municipality": "ROSARIO (NORTHERN SAMAR)",
-      "year": "N/A",
-      "status": "N/A",
-      "sources_count": 1,
-      "sources_list": [
-        "SSP"
-      ]
-    },
-    {
-      "source": "PhilGEPS",
-      "meilisearch_id": null,
-      "project_name": "Construction of Flood Control Structures, Barangay Lorenzo, Rosario, Northern Samar",
-      "contractor": "SAL CONSTRUCTION",
-      "amount": 6853647.94,
-      "location": "ROSARIO (NORTHERN SAMAR), NORTHERN SAMAR, Region VIII",
-      "province": "N/A",
-      "municipality": "N/A",
       "year": 2023,
       "status": "active",
-      "sources_count": 1,
       "sources_list": [
+        "SSP",
         "PhilGEPS"
-      ]
+      ],
+      "sources_count": 2
     },
     {
       "source": "PhilGEPS",
@@ -143,10 +128,10 @@
       "municipality": "N/A",
       "year": 2024,
       "status": "active",
-      "sources_count": 1,
       "sources_list": [
         "PhilGEPS"
-      ]
+      ],
+      "sources_count": 1
     },
     {
       "source": "DIME",
@@ -160,10 +145,10 @@
       "barangay": "Layuhan",
       "year": 2022,
       "status": "Completed",
-      "sources_count": 1,
       "sources_list": [
         "DIME"
-      ]
+      ],
+      "sources_count": 1
     },
     {
       "source": "SSP",
@@ -171,64 +156,34 @@
       "project_name": "Construction of Drainage Canal, Barangay Layuhan, San Jose, Northern Samar",
       "contractor": "SAL CONSTRUCTION",
       "amount": 4801992.94,
-      "location": "NORTHERN SAMAR, SAN JOSE (NORTHERN SAMAR)",
+      "location": "SAN JOSE (NORTHERN SAMAR), NORTHERN SAMAR, Region VIII",
       "province": "NORTHERN SAMAR",
       "municipality": "SAN JOSE (NORTHERN SAMAR)",
-      "year": "N/A",
-      "status": "N/A",
-      "sources_count": 1,
-      "sources_list": [
-        "SSP"
-      ]
-    },
-    {
-      "source": "PhilGEPS",
-      "meilisearch_id": null,
-      "project_name": "Construction of Drainage Canal, Barangay Layuhan, San Jose, Northern Samar",
-      "contractor": "SAL CONSTRUCTION",
-      "amount": 4801992.94,
-      "location": "SAN JOSE (NORTHERN SAMAR), NORTHERN SAMAR, Region VIII",
-      "province": "N/A",
-      "municipality": "N/A",
       "year": 2022,
       "status": "active",
-      "sources_count": 1,
       "sources_list": [
+        "SSP",
         "PhilGEPS"
-      ]
-    },
-    {
-      "source": "PhilGEPS",
-      "meilisearch_id": null,
-      "project_name": "22IH0018",
-      "contractor": "SAL CONSTRUCTION",
-      "amount": 4801992.94,
-      "location": "Northern Samar",
-      "province": "N/A",
-      "municipality": "N/A",
-      "year": 2022,
-      "status": "active",
-      "sources_count": 1,
-      "sources_list": [
-        "PhilGEPS"
-      ]
+      ],
+      "sources_count": 2
     }
   ],
   "summary": {
-    "total": 13,
+    "total": 10,
     "ssp": 2,
     "dime": 2,
-    "philgeps": 9
+    "philgeps": 8,
+    "microsite": 0
   },
-  "total_cost": 196068734.61999997,
+  "total_cost": 179611100.79999998,
   "filter_options": {
     "municipalities": [
       {
         "name": "Unknown",
-        "count": 13
+        "count": 10
       }
     ]
   },
-  "generated_at": "2025-11-06T14:44:15.928996",
+  "generated_at": "2025-11-08T06:21:00.532496",
   "cache_version": "1.0"
 }

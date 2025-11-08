@@ -14,10 +14,10 @@
       "municipality": "N/A",
       "year": 2025,
       "status": "active",
-      "sources_count": 1,
       "sources_list": [
         "PhilGEPS"
-      ]
+      ],
+      "sources_count": 1
     },
     {
       "source": "PhilGEPS",
@@ -30,10 +30,10 @@
       "municipality": "N/A",
       "year": 2025,
       "status": "active",
-      "sources_count": 1,
       "sources_list": [
         "PhilGEPS"
-      ]
+      ],
+      "sources_count": 1
     },
     {
       "source": "PhilGEPS",
@@ -46,10 +46,10 @@
       "municipality": "N/A",
       "year": 2023,
       "status": "active",
-      "sources_count": 1,
       "sources_list": [
         "PhilGEPS"
-      ]
+      ],
+      "sources_count": 1
     },
     {
       "source": "SSP",
@@ -57,48 +57,18 @@
       "project_name": "Construction of Drainage System along Pallua, Tuguegarao City, Cagayan, Phase I",
       "contractor": "JTM CONSTRUCTION",
       "amount": 24125000.0,
-      "location": "CAGAYAN, TUGUEGARAO CITY (CAPITAL) (CAGAYAN)",
+      "location": "TUGUEGARAO CITY (CAPITAL) (CAGAYAN), CAGAYAN, Region II",
       "province": "CAGAYAN",
       "municipality": "TUGUEGARAO CITY (CAPITAL) (CAGAYAN)",
-      "year": "N/A",
-      "status": "N/A",
-      "sources_count": 1,
-      "sources_list": [
-        "SSP"
-      ]
-    },
-    {
-      "source": "DIME",
-      "meilisearch_id": "2c9b3cf1-8fe2-4ca7-82ea-9160f389faac",
-      "project_name": "Construction of Drainage System along Pallua, Tuguegarao City, Cagayan, Phase I",
-      "contractor": "JTM CONSTRUCTION",
-      "amount": 24125000.0,
-      "location": "Cagayan, Tuguegarao City",
-      "province": "Cagayan",
-      "municipality": "Tuguegarao City",
-      "barangay": "N/A",
       "year": 2022,
       "status": "Completed",
-      "sources_count": 1,
+      "barangay": "N/A",
       "sources_list": [
-        "DIME"
-      ]
-    },
-    {
-      "source": "PhilGEPS",
-      "meilisearch_id": "2c9b3cf1-8fe2-4ca7-82ea-9160f389faac",
-      "project_name": "Construction of Drainage System along Pallua, Tuguegarao City, Cagayan, Phase I",
-      "contractor": "JTM CONSTRUCTION",
-      "amount": 24125000.0,
-      "location": "TUGUEGARAO CITY (CAPITAL) (CAGAYAN), CAGAYAN, Region II",
-      "province": "N/A",
-      "municipality": "N/A",
-      "year": 2023,
-      "status": "active",
-      "sources_count": 1,
-      "sources_list": [
+        "SSP",
+        "DIME",
         "PhilGEPS"
-      ]
+      ],
+      "sources_count": 3
     },
     {
       "source": "PhilGEPS",
@@ -111,10 +81,10 @@
       "municipality": "N/A",
       "year": 2022,
       "status": "active",
-      "sources_count": 1,
       "sources_list": [
         "PhilGEPS"
-      ]
+      ],
+      "sources_count": 1
     },
     {
       "source": "SSP",
@@ -122,48 +92,18 @@
       "project_name": "Construction of Drainage along Bagay Road, Tuguegarao City, Phase III",
       "contractor": "JTM CONSTRUCTION",
       "amount": 19300000.0,
-      "location": "CAGAYAN, TUGUEGARAO CITY (CAPITAL) (CAGAYAN)",
+      "location": "TUGUEGARAO CITY (CAPITAL) (CAGAYAN), CAGAYAN, Region II",
       "province": "CAGAYAN",
       "municipality": "TUGUEGARAO CITY (CAPITAL) (CAGAYAN)",
-      "year": "N/A",
-      "status": "N/A",
-      "sources_count": 1,
-      "sources_list": [
-        "SSP"
-      ]
-    },
-    {
-      "source": "DIME",
-      "meilisearch_id": "71ff2cc0-b12c-4bdb-af21-25bc9f6e0a48",
-      "project_name": "Construction of Drainage along Bagay Road, Tuguegarao City, Phase III",
-      "contractor": "JTM CONSTRUCTION",
-      "amount": 19300000.0,
-      "location": "Cagayan, Tuguegarao City, Bagay",
-      "province": "Cagayan",
-      "municipality": "Tuguegarao City",
-      "barangay": "Bagay",
       "year": 2022,
       "status": "Completed",
-      "sources_count": 1,
+      "barangay": "Bagay",
       "sources_list": [
-        "DIME"
-      ]
-    },
-    {
-      "source": "PhilGEPS",
-      "meilisearch_id": "71ff2cc0-b12c-4bdb-af21-25bc9f6e0a48",
-      "project_name": "Construction of Drainage along Bagay Road, Tuguegarao City, Phase III",
-      "contractor": "JTM CONSTRUCTION",
-      "amount": 19300000.0,
-      "location": "TUGUEGARAO CITY (CAPITAL) (CAGAYAN), CAGAYAN, Region II",
-      "province": "N/A",
-      "municipality": "N/A",
-      "year": 2023,
-      "status": "active",
-      "sources_count": 1,
-      "sources_list": [
+        "SSP",
+        "DIME",
         "PhilGEPS"
-      ]
+      ],
+      "sources_count": 3
     },
     {
       "source": "PhilGEPS",
@@ -176,27 +116,28 @@
       "municipality": "N/A",
       "year": 2022,
       "status": "active",
-      "sources_count": 1,
       "sources_list": [
         "PhilGEPS"
-      ]
+      ],
+      "sources_count": 1
     }
   ],
   "summary": {
-    "total": 11,
+    "total": 7,
     "ssp": 2,
     "dime": 2,
-    "philgeps": 7
+    "philgeps": 7,
+    "microsite": 0
   },
-  "total_cost": 385827521.61,
+  "total_cost": 298977521.61,
   "filter_options": {
     "municipalities": [
       {
         "name": "Unknown",
-        "count": 11
+        "count": 7
       }
     ]
   },
-  "generated_at": "2025-11-06T14:44:10.409023",
+  "generated_at": "2025-11-08T06:20:35.289554",
   "cache_version": "1.0"
 }

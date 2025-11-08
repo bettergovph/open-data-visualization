@@ -1,6 +1,6 @@
 {
   "success": true,
-  "province": "Surigao del Sur",
+  "province": "Surigao Del Sur",
   "contractor": "ARQ BUILDERS",
   "projects": [
     {
@@ -14,10 +14,10 @@
       "municipality": "N/A",
       "year": 2024,
       "status": "active",
-      "sources_count": 1,
       "sources_list": [
         "PhilGEPS"
-      ]
+      ],
+      "sources_count": 1
     },
     {
       "source": "PhilGEPS",
@@ -30,10 +30,10 @@
       "municipality": "N/A",
       "year": 2024,
       "status": "active",
-      "sources_count": 1,
       "sources_list": [
         "PhilGEPS"
-      ]
+      ],
+      "sources_count": 1
     },
     {
       "source": "SSP",
@@ -41,48 +41,18 @@
       "project_name": "Construction of Dike Revetment along Liangan River, Lianga, Surigao del Sur",
       "contractor": "ARQ BUILDERS",
       "amount": 81722678.26,
-      "location": "SURIGAO DEL SUR",
+      "location": "SURIGAO DEL SUR, Region XIII",
       "province": "SURIGAO DEL SUR",
       "municipality": "N/A",
-      "year": "N/A",
-      "status": "N/A",
-      "sources_count": 1,
-      "sources_list": [
-        "SSP"
-      ]
-    },
-    {
-      "source": "DIME",
-      "meilisearch_id": "e684c417-1173-44a9-8132-83f324162189",
-      "project_name": "Construction of Dike Revetment along Liangan River, Lianga, Surigao del Sur",
-      "contractor": "ARQ BUILDERS",
-      "amount": 81722678.26,
-      "location": "N/A",
-      "province": "N/A",
-      "municipality": "N/A",
-      "barangay": "N/A",
       "year": 2022,
       "status": "Incomplete",
-      "sources_count": 1,
+      "barangay": "N/A",
       "sources_list": [
-        "DIME"
-      ]
-    },
-    {
-      "source": "PhilGEPS",
-      "meilisearch_id": "e684c417-1173-44a9-8132-83f324162189",
-      "project_name": "Construction of Dike Revetment along Liangan River, Lianga, Surigao del Sur",
-      "contractor": "ARQ BUILDERS",
-      "amount": 81722678.26,
-      "location": "SURIGAO DEL SUR, Region XIII",
-      "province": "N/A",
-      "municipality": "N/A",
-      "year": 2023,
-      "status": "active",
-      "sources_count": 1,
-      "sources_list": [
+        "SSP",
+        "DIME",
         "PhilGEPS"
-      ]
+      ],
+      "sources_count": 3
     },
     {
       "source": "PhilGEPS",
@@ -95,10 +65,10 @@
       "municipality": "N/A",
       "year": 2021,
       "status": "active",
-      "sources_count": 1,
       "sources_list": [
         "PhilGEPS"
-      ]
+      ],
+      "sources_count": 1
     },
     {
       "source": "PhilGEPS",
@@ -111,10 +81,10 @@
       "municipality": "N/A",
       "year": 2025,
       "status": "active",
-      "sources_count": 1,
       "sources_list": [
         "PhilGEPS"
-      ]
+      ],
+      "sources_count": 1
     },
     {
       "source": "PhilGEPS",
@@ -127,10 +97,10 @@
       "municipality": "N/A",
       "year": 2017,
       "status": "active",
-      "sources_count": 1,
       "sources_list": [
         "PhilGEPS"
-      ]
+      ],
+      "sources_count": 1
     },
     {
       "source": "PhilGEPS",
@@ -143,27 +113,28 @@
       "municipality": "N/A",
       "year": 2017,
       "status": "active",
-      "sources_count": 1,
       "sources_list": [
         "PhilGEPS"
-      ]
+      ],
+      "sources_count": 1
     }
   ],
   "summary": {
-    "total": 9,
+    "total": 7,
     "ssp": 1,
     "dime": 1,
-    "philgeps": 7
+    "philgeps": 7,
+    "microsite": 0
   },
-  "total_cost": 660196451.9999999,
+  "total_cost": 496751095.4799999,
   "filter_options": {
     "municipalities": [
       {
         "name": "Unknown",
-        "count": 9
+        "count": 7
       }
     ]
   },
-  "generated_at": "2025-11-06T14:44:19.125441",
+  "generated_at": "2025-11-08T06:21:15.039301",
   "cache_version": "1.0"
 }
