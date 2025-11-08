@@ -14,10 +14,10 @@
       "municipality": "N/A",
       "year": 2024,
       "status": "active",
-      "sources_count": 1,
       "sources_list": [
         "PhilGEPS"
-      ]
+      ],
+      "sources_count": 1
     },
     {
       "source": "PhilGEPS",
@@ -30,10 +30,10 @@
       "municipality": "N/A",
       "year": 2025,
       "status": "active",
-      "sources_count": 1,
       "sources_list": [
         "PhilGEPS"
-      ]
+      ],
+      "sources_count": 1
     },
     {
       "source": "SSP",
@@ -41,48 +41,18 @@
       "project_name": "Construction of Flood Control Structure, Barangay Pob 3, Pob 1, San Vicente I, San Vicente II, Silang, Cavite",
       "contractor": "CMMJ CONSTRUCTION",
       "amount": 9899185.43,
-      "location": "CAVITE, SILANG (CAVITE)",
+      "location": "SILANG (CAVITE), CAVITE, Region IV-A",
       "province": "CAVITE",
       "municipality": "SILANG (CAVITE)",
-      "year": "N/A",
-      "status": "N/A",
-      "sources_count": 1,
-      "sources_list": [
-        "SSP"
-      ]
-    },
-    {
-      "source": "DIME",
-      "meilisearch_id": "5c30bb56-315b-4174-b124-085acfb3a0bc",
-      "project_name": "Construction of Flood Control Structure, Barangay Pob 3, Pob 1, San Vicente I, San Vicente II, Silang, Cavite",
-      "contractor": "CMMJ CONSTRUCTION",
-      "amount": 9899185.43,
-      "location": "Cavite, Silang",
-      "province": "Cavite",
-      "municipality": "Silang",
-      "barangay": "N/A",
       "year": 2024,
       "status": "Completed",
-      "sources_count": 1,
+      "barangay": "N/A",
       "sources_list": [
-        "DIME"
-      ]
-    },
-    {
-      "source": "PhilGEPS",
-      "meilisearch_id": "5c30bb56-315b-4174-b124-085acfb3a0bc",
-      "project_name": "Construction of Flood Control Structure, Barangay Pob 3, Pob 1, San Vicente I, San Vicente II, Silang, Cavite",
-      "contractor": "CMMJ CONSTRUCTION",
-      "amount": 9899185.43,
-      "location": "SILANG (CAVITE), CAVITE, Region IV-A",
-      "province": "N/A",
-      "municipality": "N/A",
-      "year": 2024,
-      "status": "active",
-      "sources_count": 1,
-      "sources_list": [
+        "SSP",
+        "DIME",
         "PhilGEPS"
-      ]
+      ],
+      "sources_count": 3
     },
     {
       "source": "PhilGEPS",
@@ -95,10 +65,10 @@
       "municipality": "N/A",
       "year": 2024,
       "status": "active",
-      "sources_count": 1,
       "sources_list": [
         "PhilGEPS"
-      ]
+      ],
+      "sources_count": 1
     },
     {
       "source": "PhilGEPS",
@@ -111,10 +81,10 @@
       "municipality": "N/A",
       "year": 2024,
       "status": "active",
-      "sources_count": 1,
       "sources_list": [
         "PhilGEPS"
-      ]
+      ],
+      "sources_count": 1
     },
     {
       "source": "SSP",
@@ -122,48 +92,18 @@
       "project_name": "Construction of Flood Control, Tibig, Silang, Cavite",
       "contractor": "CMMJ CONSTRUCTION",
       "amount": 4949659.73,
-      "location": "CAVITE, SILANG (CAVITE)",
+      "location": "SILANG (CAVITE), CAVITE, Region IV-A",
       "province": "CAVITE",
       "municipality": "SILANG (CAVITE)",
-      "year": "N/A",
-      "status": "N/A",
-      "sources_count": 1,
-      "sources_list": [
-        "SSP"
-      ]
-    },
-    {
-      "source": "DIME",
-      "meilisearch_id": "a67cb83a-a28b-4902-9899-026c63fddbef",
-      "project_name": "Construction of Flood Control, Tibig, Silang, Cavite",
-      "contractor": "CMMJ CONSTRUCTION",
-      "amount": 4949659.73,
-      "location": "Cavite, Silang, Tibig",
-      "province": "Cavite",
-      "municipality": "Silang",
-      "barangay": "Tibig",
       "year": 2024,
       "status": "Completed",
-      "sources_count": 1,
+      "barangay": "Tibig",
       "sources_list": [
-        "DIME"
-      ]
-    },
-    {
-      "source": "PhilGEPS",
-      "meilisearch_id": "a67cb83a-a28b-4902-9899-026c63fddbef",
-      "project_name": "Construction of Flood Control, Tibig, Silang, Cavite",
-      "contractor": "CMMJ CONSTRUCTION",
-      "amount": 4949659.73,
-      "location": "SILANG (CAVITE), CAVITE, Region IV-A",
-      "province": "N/A",
-      "municipality": "N/A",
-      "year": 2024,
-      "status": "active",
-      "sources_count": 1,
-      "sources_list": [
+        "SSP",
+        "DIME",
         "PhilGEPS"
-      ]
+      ],
+      "sources_count": 3
     },
     {
       "source": "PhilGEPS",
@@ -176,27 +116,28 @@
       "municipality": "N/A",
       "year": 2024,
       "status": "active",
-      "sources_count": 1,
       "sources_list": [
         "PhilGEPS"
-      ]
+      ],
+      "sources_count": 1
     }
   ],
   "summary": {
-    "total": 11,
+    "total": 7,
     "ssp": 2,
     "dime": 2,
-    "philgeps": 7
+    "philgeps": 7,
+    "microsite": 0
   },
-  "total_cost": 108910040.66,
+  "total_cost": 79212350.34,
   "filter_options": {
     "municipalities": [
       {
         "name": "Unknown",
-        "count": 11
+        "count": 7
       }
     ]
   },
-  "generated_at": "2025-11-06T14:44:11.265481",
+  "generated_at": "2025-11-08T06:20:39.259694",
   "cache_version": "1.0"
 }

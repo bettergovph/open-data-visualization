@@ -14,10 +14,10 @@
       "municipality": "N/A",
       "year": 2025,
       "status": "active",
-      "sources_count": 1,
       "sources_list": [
         "PhilGEPS"
-      ]
+      ],
+      "sources_count": 1
     },
     {
       "source": "SSP",
@@ -25,31 +25,16 @@
       "project_name": "Construction of Drainage System, Barangay Dayao, Roxas City, Capiz",
       "contractor": "RCDG CONSTRUCTION CORPORATION",
       "amount": 4949423.38,
-      "location": "CAPIZ, ROXAS CITY (CAPITAL) (CAPIZ)",
+      "location": "ROXAS CITY (CAPITAL) (CAPIZ), CAPIZ, Region VI",
       "province": "CAPIZ",
       "municipality": "ROXAS CITY (CAPITAL) (CAPIZ)",
-      "year": "N/A",
-      "status": "N/A",
-      "sources_count": 1,
-      "sources_list": [
-        "SSP"
-      ]
-    },
-    {
-      "source": "PhilGEPS",
-      "meilisearch_id": null,
-      "project_name": "Construction of Drainage System, Barangay Dayao, Roxas City, Capiz",
-      "contractor": "RCDG CONSTRUCTION CORPORATION",
-      "amount": 4949423.38,
-      "location": "ROXAS CITY (CAPITAL) (CAPIZ), CAPIZ, Region VI",
-      "province": "N/A",
-      "municipality": "N/A",
       "year": 2022,
       "status": "active",
-      "sources_count": 1,
       "sources_list": [
+        "SSP",
         "PhilGEPS"
-      ]
+      ],
+      "sources_count": 2
     },
     {
       "source": "DIME",
@@ -63,10 +48,10 @@
       "barangay": "N/A",
       "year": 2022,
       "status": "Completed",
-      "sources_count": 1,
       "sources_list": [
         "DIME"
-      ]
+      ],
+      "sources_count": 1
     },
     {
       "source": "PhilGEPS",
@@ -79,10 +64,10 @@
       "municipality": "N/A",
       "year": 2022,
       "status": "active",
-      "sources_count": 1,
       "sources_list": [
         "PhilGEPS"
-      ]
+      ],
+      "sources_count": 1
     },
     {
       "source": "PhilGEPS",
@@ -95,10 +80,10 @@
       "municipality": "N/A",
       "year": 2023,
       "status": "active",
-      "sources_count": 1,
       "sources_list": [
         "PhilGEPS"
-      ]
+      ],
+      "sources_count": 1
     },
     {
       "source": "PhilGEPS",
@@ -111,27 +96,28 @@
       "municipality": "N/A",
       "year": 2023,
       "status": "active",
-      "sources_count": 1,
       "sources_list": [
         "PhilGEPS"
-      ]
+      ],
+      "sources_count": 1
     }
   ],
   "summary": {
-    "total": 7,
+    "total": 6,
     "ssp": 1,
     "dime": 1,
-    "philgeps": 5
+    "philgeps": 5,
+    "microsite": 0
   },
-  "total_cost": 119434333.61999999,
+  "total_cost": 114484910.24,
   "filter_options": {
     "municipalities": [
       {
         "name": "Unknown",
-        "count": 7
+        "count": 6
       }
     ]
   },
-  "generated_at": "2025-11-06T14:44:10.992073",
+  "generated_at": "2025-11-08T06:20:37.966904",
   "cache_version": "1.0"
 }

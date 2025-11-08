@@ -15,10 +15,10 @@
       "barangay": "N/A",
       "year": 2022,
       "status": "Completed",
-      "sources_count": 1,
       "sources_list": [
         "DIME"
-      ]
+      ],
+      "sources_count": 1
     },
     {
       "source": "DIME",
@@ -32,10 +32,10 @@
       "barangay": "N/A",
       "year": 2025,
       "status": "Ongoing",
-      "sources_count": 1,
       "sources_list": [
         "DIME"
-      ]
+      ],
+      "sources_count": 1
     },
     {
       "source": "DIME",
@@ -49,10 +49,10 @@
       "barangay": "N/A",
       "year": 2022,
       "status": "Completed",
-      "sources_count": 1,
       "sources_list": [
         "DIME"
-      ]
+      ],
+      "sources_count": 1
     },
     {
       "source": "DIME",
@@ -66,10 +66,10 @@
       "barangay": "N/A",
       "year": 2025,
       "status": "Ongoing",
-      "sources_count": 1,
       "sources_list": [
         "DIME"
-      ]
+      ],
+      "sources_count": 1
     },
     {
       "source": "DIME",
@@ -83,10 +83,10 @@
       "barangay": "N/A",
       "year": 2025,
       "status": "Ongoing",
-      "sources_count": 1,
       "sources_list": [
         "DIME"
-      ]
+      ],
+      "sources_count": 1
     },
     {
       "source": "DIME",
@@ -100,10 +100,10 @@
       "barangay": "N/A",
       "year": 2025,
       "status": "Ongoing",
-      "sources_count": 1,
       "sources_list": [
         "DIME"
-      ]
+      ],
+      "sources_count": 1
     },
     {
       "source": "SSP",
@@ -111,48 +111,18 @@
       "project_name": "Construction of Flood Control Project in Barangay Laon, Abucay, Bataan",
       "contractor": "HEBREWS BUILDERS AND CONSTRUCTION CORP.",
       "amount": 4949986.96,
-      "location": "BATAAN, ABUCAY (BATAAN)",
+      "location": "ABUCAY (BATAAN), BATAAN, Region III",
       "province": "BATAAN",
       "municipality": "ABUCAY (BATAAN)",
-      "year": "N/A",
-      "status": "N/A",
-      "sources_count": 1,
-      "sources_list": [
-        "SSP"
-      ]
-    },
-    {
-      "source": "DIME",
-      "meilisearch_id": "5f0641cb-645a-4a4e-abfc-a4a32985d0fc",
-      "project_name": "Construction of Flood Control Project in Barangay Laon, Abucay, Bataan",
-      "contractor": "HEBREWS BUILDERS AND CONSTRUCTION CORP.",
-      "amount": 4949986.96,
-      "location": "Bataan, Abucay",
-      "province": "Bataan",
-      "municipality": "Abucay",
-      "barangay": "N/A",
       "year": 2023,
       "status": "Completed",
-      "sources_count": 1,
+      "barangay": "N/A",
       "sources_list": [
-        "DIME"
-      ]
-    },
-    {
-      "source": "PhilGEPS",
-      "meilisearch_id": "5f0641cb-645a-4a4e-abfc-a4a32985d0fc",
-      "project_name": "Construction of Flood Control Project in Barangay Laon, Abucay, Bataan",
-      "contractor": "HEBREWS BUILDERS AND CONSTRUCTION CORP.",
-      "amount": 4949986.96,
-      "location": "ABUCAY (BATAAN), BATAAN, Region III",
-      "province": "N/A",
-      "municipality": "N/A",
-      "year": 2023,
-      "status": "active",
-      "sources_count": 1,
-      "sources_list": [
+        "SSP",
+        "DIME",
         "PhilGEPS"
-      ]
+      ],
+      "sources_count": 3
     },
     {
       "source": "PhilGEPS",
@@ -165,10 +135,10 @@
       "municipality": "N/A",
       "year": 2022,
       "status": "active",
-      "sources_count": 1,
       "sources_list": [
         "PhilGEPS"
-      ]
+      ],
+      "sources_count": 1
     },
     {
       "source": "PhilGEPS",
@@ -181,27 +151,28 @@
       "municipality": "N/A",
       "year": 2023,
       "status": "active",
-      "sources_count": 1,
       "sources_list": [
         "PhilGEPS"
-      ]
+      ],
+      "sources_count": 1
     }
   ],
   "summary": {
-    "total": 11,
+    "total": 9,
     "ssp": 1,
     "dime": 7,
-    "philgeps": 3
+    "philgeps": 3,
+    "microsite": 0
   },
-  "total_cost": 115383008.54999995,
+  "total_cost": 105483034.62999997,
   "filter_options": {
     "municipalities": [
       {
         "name": "Unknown",
-        "count": 11
+        "count": 9
       }
     ]
   },
-  "generated_at": "2025-11-06T14:44:09.119911",
+  "generated_at": "2025-11-08T06:20:29.658266",
   "cache_version": "1.0"
 }

@@ -14,10 +14,10 @@
       "municipality": "N/A",
       "year": 2025,
       "status": "active",
-      "sources_count": 1,
       "sources_list": [
         "PhilGEPS"
-      ]
+      ],
+      "sources_count": 1
     },
     {
       "source": "PhilGEPS",
@@ -30,10 +30,10 @@
       "municipality": "N/A",
       "year": 2022,
       "status": "active",
-      "sources_count": 1,
       "sources_list": [
         "PhilGEPS"
-      ]
+      ],
+      "sources_count": 1
     },
     {
       "source": "DIME",
@@ -47,10 +47,10 @@
       "barangay": "N/A",
       "year": 2023,
       "status": "Completed",
-      "sources_count": 1,
       "sources_list": [
         "DIME"
-      ]
+      ],
+      "sources_count": 1
     },
     {
       "source": "SSP",
@@ -58,47 +58,16 @@
       "project_name": "Construction of Flood Control Structure, Catubig River, Barangay Lenoy-ahan, Catubig, Northern Samar",
       "contractor": "MIK AND MEL CONSTRUCTION AND SUPPLY",
       "amount": 19403506.94,
-      "location": "NORTHERN SAMAR, CATUBIG (NORTHERN SAMAR)",
+      "location": "CATUBIG (NORTHERN SAMAR), NORTHERN SAMAR, Region VIII",
       "province": "NORTHERN SAMAR",
       "municipality": "CATUBIG (NORTHERN SAMAR)",
-      "year": "N/A",
-      "status": "N/A",
-      "sources_count": 1,
-      "sources_list": [
-        "SSP"
-      ]
-    },
-    {
-      "source": "PhilGEPS",
-      "meilisearch_id": null,
-      "project_name": "Construction of Flood Control Structure, Catubig River, Barangay Lenoy-ahan, Catubig, Northern Samar",
-      "contractor": "MIK AND MEL CONSTRUCTION AND SUPPLY",
-      "amount": 19403506.94,
-      "location": "CATUBIG (NORTHERN SAMAR), NORTHERN SAMAR, Region VIII",
-      "province": "N/A",
-      "municipality": "N/A",
       "year": 2024,
       "status": "active",
-      "sources_count": 1,
       "sources_list": [
+        "SSP",
         "PhilGEPS"
-      ]
-    },
-    {
-      "source": "PhilGEPS",
-      "meilisearch_id": null,
-      "project_name": "23II0021, Construction of Flood Control Structure",
-      "contractor": "MIK AND MEL CONSTRUCTION AND SUPPLY",
-      "amount": 19403506.94,
-      "location": "Northern Samar",
-      "province": "N/A",
-      "municipality": "N/A",
-      "year": 2023,
-      "status": "active",
-      "sources_count": 1,
-      "sources_list": [
-        "PhilGEPS"
-      ]
+      ],
+      "sources_count": 2
     },
     {
       "source": "SSP",
@@ -106,47 +75,16 @@
       "project_name": "Construction of Flood Control Structure, Catubig River, Barangay Canuctan, Catubig, Northern Samar",
       "contractor": "MIK AND MEL CONSTRUCTION AND SUPPLY",
       "amount": 19402210.15,
-      "location": "NORTHERN SAMAR, CATUBIG (NORTHERN SAMAR)",
+      "location": "CATUBIG (NORTHERN SAMAR), NORTHERN SAMAR, Region VIII",
       "province": "NORTHERN SAMAR",
       "municipality": "CATUBIG (NORTHERN SAMAR)",
-      "year": "N/A",
-      "status": "N/A",
-      "sources_count": 1,
-      "sources_list": [
-        "SSP"
-      ]
-    },
-    {
-      "source": "PhilGEPS",
-      "meilisearch_id": null,
-      "project_name": "Construction of Flood Control Structure, Catubig River, Barangay Canuctan, Catubig, Northern Samar",
-      "contractor": "MIK AND MEL CONSTRUCTION AND SUPPLY",
-      "amount": 19402210.15,
-      "location": "CATUBIG (NORTHERN SAMAR), NORTHERN SAMAR, Region VIII",
-      "province": "N/A",
-      "municipality": "N/A",
       "year": 2024,
       "status": "active",
-      "sources_count": 1,
       "sources_list": [
+        "SSP",
         "PhilGEPS"
-      ]
-    },
-    {
-      "source": "PhilGEPS",
-      "meilisearch_id": null,
-      "project_name": "23II0020, Construction of Flood Control Structure",
-      "contractor": "MIK AND MEL CONSTRUCTION AND SUPPLY",
-      "amount": 19402210.15,
-      "location": "Northern Samar",
-      "province": "N/A",
-      "municipality": "N/A",
-      "year": 2023,
-      "status": "active",
-      "sources_count": 1,
-      "sources_list": [
-        "PhilGEPS"
-      ]
+      ],
+      "sources_count": 2
     },
     {
       "source": "DIME",
@@ -160,27 +98,28 @@
       "barangay": "Canuctan",
       "year": 2023,
       "status": "Completed",
-      "sources_count": 1,
       "sources_list": [
         "DIME"
-      ]
+      ],
+      "sources_count": 1
     }
   ],
   "summary": {
-    "total": 10,
+    "total": 6,
     "ssp": 2,
     "dime": 2,
-    "philgeps": 6
+    "philgeps": 4,
+    "microsite": 0
   },
-  "total_cost": 252189287.28000003,
+  "total_cost": 174577853.10000002,
   "filter_options": {
     "municipalities": [
       {
         "name": "Unknown",
-        "count": 10
+        "count": 6
       }
     ]
   },
-  "generated_at": "2025-11-06T14:44:15.930882",
+  "generated_at": "2025-11-08T06:21:00.535850",
   "cache_version": "1.0"
 }

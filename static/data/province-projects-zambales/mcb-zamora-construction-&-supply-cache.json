@@ -14,59 +14,29 @@
       "municipality": "N/A",
       "year": 2025,
       "status": "active",
-      "sources_count": 1,
       "sources_list": [
         "PhilGEPS"
-      ]
+      ],
+      "sources_count": 1
     },
     {
       "source": "SSP",
       "meilisearch_id": null,
-      "project_name": "Rehabilitation of Cabaoangan Creek, Subic, Zambales",
-      "contractor": "MCB ZAMORA CONSTRUCTION & SUPPLY",
-      "amount": 77199858.11,
-      "location": "ZAMBALES, SUBIC (ZAMBALES)",
-      "province": "ZAMBALES",
-      "municipality": "SUBIC (ZAMBALES)",
-      "year": "N/A",
-      "status": "N/A",
-      "sources_count": 1,
-      "sources_list": [
-        "SSP"
-      ]
-    },
-    {
-      "source": "DIME",
-      "meilisearch_id": "8b6bb117-a34e-425b-9997-4b74934194c7",
-      "project_name": "Rehabilitation of Cabaoangan Creek, Subic, Zambales",
-      "contractor": "MCB ZAMORA CONSTRUCTION & SUPPLY",
-      "amount": 77199858.11,
-      "location": "Zambales, Subic",
-      "province": "Zambales",
-      "municipality": "Subic",
-      "barangay": "N/A",
-      "year": 2023,
-      "status": "Completed",
-      "sources_count": 1,
-      "sources_list": [
-        "DIME"
-      ]
-    },
-    {
-      "source": "PhilGEPS",
-      "meilisearch_id": "8b6bb117-a34e-425b-9997-4b74934194c7",
       "project_name": "Rehabilitation of Cabaoangan Creek, Subic, Zambales",
       "contractor": "MCB ZAMORA CONSTRUCTION & SUPPLY",
       "amount": 77199858.11,
       "location": "SUBIC (ZAMBALES), ZAMBALES, Region III",
-      "province": "N/A",
-      "municipality": "N/A",
+      "province": "ZAMBALES",
+      "municipality": "SUBIC (ZAMBALES)",
       "year": 2023,
-      "status": "active",
-      "sources_count": 1,
+      "status": "Completed",
+      "barangay": "N/A",
       "sources_list": [
+        "SSP",
+        "DIME",
         "PhilGEPS"
-      ]
+      ],
+      "sources_count": 3
     },
     {
       "source": "SSP",
@@ -74,48 +44,18 @@
       "project_name": "Construction of Maculcol River Dike, Upstream, North Approach, San Narciso, Zambales",
       "contractor": "MCB ZAMORA CONSTRUCTION & SUPPLY",
       "amount": 48999754.56,
-      "location": "ZAMBALES, SAN NARCISO (ZAMBALES)",
+      "location": "SAN NARCISO (ZAMBALES), ZAMBALES, Region III",
       "province": "ZAMBALES",
       "municipality": "SAN NARCISO (ZAMBALES)",
-      "year": "N/A",
-      "status": "N/A",
-      "sources_count": 1,
-      "sources_list": [
-        "SSP"
-      ]
-    },
-    {
-      "source": "DIME",
-      "meilisearch_id": "755e85db-4031-4287-a3b1-a7fbf76eff5a",
-      "project_name": "Construction of Maculcol River Dike, Upstream, North Approach, San Narciso, Zambales",
-      "contractor": "MCB ZAMORA CONSTRUCTION & SUPPLY",
-      "amount": 48999754.56,
-      "location": "Zambales, San Narciso",
-      "province": "Zambales",
-      "municipality": "San Narciso",
-      "barangay": "N/A",
       "year": 2022,
       "status": "Completed",
-      "sources_count": 1,
+      "barangay": "N/A",
       "sources_list": [
-        "DIME"
-      ]
-    },
-    {
-      "source": "PhilGEPS",
-      "meilisearch_id": "755e85db-4031-4287-a3b1-a7fbf76eff5a",
-      "project_name": "Construction of Maculcol River Dike, Upstream, North Approach, San Narciso, Zambales",
-      "contractor": "MCB ZAMORA CONSTRUCTION & SUPPLY",
-      "amount": 48999754.56,
-      "location": "SAN NARCISO (ZAMBALES), ZAMBALES, Region III",
-      "province": "N/A",
-      "municipality": "N/A",
-      "year": 2022,
-      "status": "active",
-      "sources_count": 1,
-      "sources_list": [
+        "SSP",
+        "DIME",
         "PhilGEPS"
-      ]
+      ],
+      "sources_count": 3
     },
     {
       "source": "DIME",
@@ -129,10 +69,10 @@
       "barangay": "N/A",
       "year": 2022,
       "status": "Completed",
-      "sources_count": 1,
       "sources_list": [
         "DIME"
-      ]
+      ],
+      "sources_count": 1
     },
     {
       "source": "PhilGEPS",
@@ -145,10 +85,10 @@
       "municipality": "N/A",
       "year": 2018,
       "status": "active",
-      "sources_count": 1,
       "sources_list": [
         "PhilGEPS"
-      ]
+      ],
+      "sources_count": 1
     },
     {
       "source": "DIME",
@@ -162,27 +102,28 @@
       "barangay": "N/A",
       "year": 2022,
       "status": "Completed",
-      "sources_count": 1,
       "sources_list": [
         "DIME"
-      ]
+      ],
+      "sources_count": 1
     }
   ],
   "summary": {
-    "total": 10,
+    "total": 6,
     "ssp": 2,
     "dime": 4,
-    "philgeps": 4
+    "philgeps": 4,
+    "microsite": 0
   },
-  "total_cost": 550410930.25,
+  "total_cost": 298011704.91,
   "filter_options": {
     "municipalities": [
       {
         "name": "Unknown",
-        "count": 10
+        "count": 6
       }
     ]
   },
-  "generated_at": "2025-11-06T14:44:19.544941",
+  "generated_at": "2025-11-08T06:16:50.520383",
   "cache_version": "1.0"
 }

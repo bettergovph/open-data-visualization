@@ -14,10 +14,10 @@
       "municipality": "N/A",
       "year": 2023,
       "status": "active",
-      "sources_count": 1,
       "sources_list": [
         "PhilGEPS"
-      ]
+      ],
+      "sources_count": 1
     },
     {
       "source": "PhilGEPS",
@@ -30,10 +30,10 @@
       "municipality": "N/A",
       "year": 2024,
       "status": "active",
-      "sources_count": 1,
       "sources_list": [
         "PhilGEPS"
-      ]
+      ],
+      "sources_count": 1
     },
     {
       "source": "PhilGEPS",
@@ -46,10 +46,10 @@
       "municipality": "N/A",
       "year": 2023,
       "status": "active",
-      "sources_count": 1,
       "sources_list": [
         "PhilGEPS"
-      ]
+      ],
+      "sources_count": 1
     },
     {
       "source": "PhilGEPS",
@@ -62,10 +62,10 @@
       "municipality": "N/A",
       "year": 2024,
       "status": "active",
-      "sources_count": 1,
       "sources_list": [
         "PhilGEPS"
-      ]
+      ],
+      "sources_count": 1
     },
     {
       "source": "SSP",
@@ -73,48 +73,18 @@
       "project_name": "Construction of Bagtang-Maroroy-Tagas Creek, Daraga, Albay",
       "contractor": "ALPHARD PRIMECON CONSTRUCTION",
       "amount": 29339615.74,
-      "location": "ALBAY, DARAGA (LOCSIN) (ALBAY)",
+      "location": "DARAGA (LOCSIN) (ALBAY), ALBAY, Region V",
       "province": "ALBAY",
       "municipality": "DARAGA (LOCSIN) (ALBAY)",
-      "year": "N/A",
-      "status": "N/A",
-      "sources_count": 1,
-      "sources_list": [
-        "SSP"
-      ]
-    },
-    {
-      "source": "DIME",
-      "meilisearch_id": "5a7ecdcc-0f3a-479c-b882-72480f7090ff",
-      "project_name": "Construction of Bagtang-Maroroy-Tagas Creek, Daraga, Albay",
-      "contractor": "ALPHARD PRIMECON CONSTRUCTION",
-      "amount": 29339615.74,
-      "location": "Albay, Daraga, Tagas",
-      "province": "Albay",
-      "municipality": "Daraga",
-      "barangay": "Tagas",
       "year": 2022,
       "status": "Completed",
-      "sources_count": 1,
+      "barangay": "Tagas",
       "sources_list": [
-        "DIME"
-      ]
-    },
-    {
-      "source": "PhilGEPS",
-      "meilisearch_id": "5a7ecdcc-0f3a-479c-b882-72480f7090ff",
-      "project_name": "Construction of Bagtang-Maroroy-Tagas Creek, Daraga, Albay",
-      "contractor": "ALPHARD PRIMECON CONSTRUCTION",
-      "amount": 29339615.74,
-      "location": "DARAGA (LOCSIN) (ALBAY), ALBAY, Region V",
-      "province": "N/A",
-      "municipality": "N/A",
-      "year": 2022,
-      "status": "active",
-      "sources_count": 1,
-      "sources_list": [
+        "SSP",
+        "DIME",
         "PhilGEPS"
-      ]
+      ],
+      "sources_count": 3
     },
     {
       "source": "PhilGEPS",
@@ -127,10 +97,10 @@
       "municipality": "N/A",
       "year": 2022,
       "status": "active",
-      "sources_count": 1,
       "sources_list": [
         "PhilGEPS"
-      ]
+      ],
+      "sources_count": 1
     },
     {
       "source": "DIME",
@@ -144,26 +114,11 @@
       "barangay": "N/A",
       "year": 2025,
       "status": "Ongoing",
-      "sources_count": 1,
       "sources_list": [
-        "DIME"
-      ]
-    },
-    {
-      "source": "PhilGEPS",
-      "meilisearch_id": "5a7ecdcc-0f3a-479c-b882-72480f7090ff",
-      "project_name": "Legazpi City-Punta de Jesus Rd - K0562 + 800 - K05",
-      "contractor": "ALPHARD PRIMECON CONSTRUCTION",
-      "amount": 26733368.55,
-      "location": "Albay",
-      "province": "N/A",
-      "municipality": "N/A",
-      "year": 2025,
-      "status": "active",
-      "sources_count": 1,
-      "sources_list": [
+        "DIME",
         "PhilGEPS"
-      ]
+      ],
+      "sources_count": 2
     },
     {
       "source": "PhilGEPS",
@@ -176,27 +131,28 @@
       "municipality": "N/A",
       "year": 2022,
       "status": "active",
-      "sources_count": 1,
       "sources_list": [
         "PhilGEPS"
-      ]
+      ],
+      "sources_count": 1
     }
   ],
   "summary": {
-    "total": 11,
+    "total": 8,
     "ssp": 1,
     "dime": 2,
-    "philgeps": 8
+    "philgeps": 8,
+    "microsite": 0
   },
-  "total_cost": 406521918.28000003,
+  "total_cost": 321109318.25,
   "filter_options": {
     "municipalities": [
       {
         "name": "Unknown",
-        "count": 11
+        "count": 8
       }
     ]
   },
-  "generated_at": "2025-11-06T14:44:08.441349",
+  "generated_at": "2025-11-08T06:20:26.596739",
   "cache_version": "1.0"
 }

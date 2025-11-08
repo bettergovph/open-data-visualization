@@ -14,10 +14,10 @@
       "municipality": "N/A",
       "year": 2023,
       "status": "active",
-      "sources_count": 1,
       "sources_list": [
         "PhilGEPS"
-      ]
+      ],
+      "sources_count": 1
     },
     {
       "source": "SSP",
@@ -25,64 +25,18 @@
       "project_name": "Construction of Seawall, Brgy Bonbon, Clarin, Bohol",
       "contractor": "SLP CONSTRUCTION",
       "amount": 13900320.0,
-      "location": "BOHOL, CLARIN (BOHOL)",
+      "location": "CLARIN (BOHOL), BOHOL, Region VII",
       "province": "BOHOL",
       "municipality": "CLARIN (BOHOL)",
-      "year": "N/A",
-      "status": "N/A",
-      "sources_count": 1,
-      "sources_list": [
-        "SSP"
-      ]
-    },
-    {
-      "source": "DIME",
-      "meilisearch_id": "f2747443-b21c-4e17-8d30-eb81af8706a1",
-      "project_name": "Construction of Seawall, Brgy Bonbon, Clarin, Bohol",
-      "contractor": "SLP CONSTRUCTION",
-      "amount": 13900320.0,
-      "location": "Bohol, Clarin, Bonbon",
-      "province": "Bohol",
-      "municipality": "Clarin",
-      "barangay": "Bonbon",
       "year": 2022,
       "status": "Completed",
-      "sources_count": 1,
+      "barangay": "Bonbon",
       "sources_list": [
-        "DIME"
-      ]
-    },
-    {
-      "source": "PhilGEPS",
-      "meilisearch_id": "f2747443-b21c-4e17-8d30-eb81af8706a1",
-      "project_name": "CONSTRUCTION PROJECT",
-      "contractor": "SLP CONSTRUCTION",
-      "amount": 13900320.0,
-      "location": "Bohol",
-      "province": "N/A",
-      "municipality": "N/A",
-      "year": 2022,
-      "status": "active",
-      "sources_count": 1,
-      "sources_list": [
+        "SSP",
+        "DIME",
         "PhilGEPS"
-      ]
-    },
-    {
-      "source": "PhilGEPS",
-      "meilisearch_id": "f2747443-b21c-4e17-8d30-eb81af8706a1",
-      "project_name": "Construction of Seawall, Brgy Bonbon, Clarin, Bohol",
-      "contractor": "SLP CONSTRUCTION",
-      "amount": 13900320.0,
-      "location": "CLARIN (BOHOL), BOHOL, Region VII",
-      "province": "N/A",
-      "municipality": "N/A",
-      "year": 2022,
-      "status": "active",
-      "sources_count": 1,
-      "sources_list": [
-        "PhilGEPS"
-      ]
+      ],
+      "sources_count": 3
     },
     {
       "source": "DIME",
@@ -96,10 +50,10 @@
       "barangay": "N/A",
       "year": 2025,
       "status": "Ongoing",
-      "sources_count": 1,
       "sources_list": [
         "DIME"
-      ]
+      ],
+      "sources_count": 1
     },
     {
       "source": "DIME",
@@ -113,10 +67,10 @@
       "barangay": "N/A",
       "year": 2025,
       "status": "Completed",
-      "sources_count": 1,
       "sources_list": [
         "DIME"
-      ]
+      ],
+      "sources_count": 1
     },
     {
       "source": "DIME",
@@ -130,10 +84,10 @@
       "barangay": "N/A",
       "year": 2025,
       "status": "Ongoing",
-      "sources_count": 1,
       "sources_list": [
         "DIME"
-      ]
+      ],
+      "sources_count": 1
     },
     {
       "source": "PhilGEPS",
@@ -146,27 +100,28 @@
       "municipality": "N/A",
       "year": 2022,
       "status": "active",
-      "sources_count": 1,
       "sources_list": [
         "PhilGEPS"
-      ]
+      ],
+      "sources_count": 1
     }
   ],
   "summary": {
-    "total": 9,
+    "total": 6,
     "ssp": 1,
     "dime": 4,
-    "philgeps": 4
+    "philgeps": 3,
+    "microsite": 0
   },
-  "total_cost": 136109880.0,
+  "total_cost": 94408920.0,
   "filter_options": {
     "municipalities": [
       {
         "name": "Unknown",
-        "count": 9
+        "count": 6
       }
     ]
   },
-  "generated_at": "2025-11-06T14:44:09.864772",
+  "generated_at": "2025-11-08T06:20:32.968455",
   "cache_version": "1.0"
 }

@@ -14,10 +14,10 @@
       "municipality": "N/A",
       "year": 2022,
       "status": "active",
-      "sources_count": 1,
       "sources_list": [
         "PhilGEPS"
-      ]
+      ],
+      "sources_count": 1
     },
     {
       "source": "PhilGEPS",
@@ -30,10 +30,10 @@
       "municipality": "N/A",
       "year": 2023,
       "status": "active",
-      "sources_count": 1,
       "sources_list": [
         "PhilGEPS"
-      ]
+      ],
+      "sources_count": 1
     },
     {
       "source": "SSP",
@@ -41,31 +41,16 @@
       "project_name": "Rehabilitation of Flood Control / Revetment Wall along Aklan River, Barangay Jumarap, Banga, Aklan",
       "contractor": "EC BUILDERS",
       "amount": 19583672.06,
-      "location": "AKLAN, BANGA (AKLAN)",
+      "location": "BANGA (AKLAN), AKLAN, Region VI",
       "province": "AKLAN",
       "municipality": "BANGA (AKLAN)",
-      "year": "N/A",
-      "status": "N/A",
-      "sources_count": 1,
-      "sources_list": [
-        "SSP"
-      ]
-    },
-    {
-      "source": "PhilGEPS",
-      "meilisearch_id": null,
-      "project_name": "Rehabilitation of Flood Control / Revetment Wall along Aklan River, Barangay Jumarap, Banga, Aklan",
-      "contractor": "EC BUILDERS",
-      "amount": 19583672.06,
-      "location": "BANGA (AKLAN), AKLAN, Region VI",
-      "province": "N/A",
-      "municipality": "N/A",
       "year": 2023,
       "status": "active",
-      "sources_count": 1,
       "sources_list": [
+        "SSP",
         "PhilGEPS"
-      ]
+      ],
+      "sources_count": 2
     },
     {
       "source": "DIME",
@@ -79,10 +64,10 @@
       "barangay": "Jumarap",
       "year": 2023,
       "status": "Completed",
-      "sources_count": 1,
       "sources_list": [
         "DIME"
-      ]
+      ],
+      "sources_count": 1
     },
     {
       "source": "SSP",
@@ -90,31 +75,16 @@
       "project_name": "Flood Control along Agbago-Aslum River, Ibajay, Aklan",
       "contractor": "EC BUILDERS",
       "amount": 14845000.06,
-      "location": "AKLAN, IBAJAY (AKLAN)",
+      "location": "IBAJAY (AKLAN), AKLAN, Region VI",
       "province": "AKLAN",
       "municipality": "IBAJAY (AKLAN)",
-      "year": "N/A",
-      "status": "N/A",
-      "sources_count": 1,
-      "sources_list": [
-        "SSP"
-      ]
-    },
-    {
-      "source": "PhilGEPS",
-      "meilisearch_id": null,
-      "project_name": "Flood Control along Agbago-Aslum River, Ibajay, Aklan",
-      "contractor": "EC BUILDERS",
-      "amount": 14845000.06,
-      "location": "IBAJAY (AKLAN), AKLAN, Region VI",
-      "province": "N/A",
-      "municipality": "N/A",
       "year": 2023,
       "status": "active",
-      "sources_count": 1,
       "sources_list": [
+        "SSP",
         "PhilGEPS"
-      ]
+      ],
+      "sources_count": 2
     },
     {
       "source": "DIME",
@@ -128,10 +98,10 @@
       "barangay": "Agbago",
       "year": 2022,
       "status": "Completed",
-      "sources_count": 1,
       "sources_list": [
         "DIME"
-      ]
+      ],
+      "sources_count": 1
     },
     {
       "source": "DIME",
@@ -145,10 +115,10 @@
       "barangay": " Caticlan",
       "year": 2024,
       "status": "Completed",
-      "sources_count": 1,
       "sources_list": [
         "DIME"
-      ]
+      ],
+      "sources_count": 1
     },
     {
       "source": "DIME",
@@ -162,10 +132,10 @@
       "barangay": " Linabuan Sur",
       "year": 2024,
       "status": "Completed",
-      "sources_count": 1,
       "sources_list": [
         "DIME"
-      ]
+      ],
+      "sources_count": 1
     },
     {
       "source": "PhilGEPS",
@@ -178,27 +148,28 @@
       "municipality": "N/A",
       "year": 2025,
       "status": "active",
-      "sources_count": 1,
       "sources_list": [
         "PhilGEPS"
-      ]
+      ],
+      "sources_count": 1
     }
   ],
   "summary": {
-    "total": 11,
+    "total": 9,
     "ssp": 2,
     "dime": 4,
-    "philgeps": 5
+    "philgeps": 5,
+    "microsite": 0
   },
-  "total_cost": 154183531.56,
+  "total_cost": 119754859.44000001,
   "filter_options": {
     "municipalities": [
       {
         "name": "Unknown",
-        "count": 11
+        "count": 9
       }
     ]
   },
-  "generated_at": "2025-11-06T14:44:08.274525",
+  "generated_at": "2025-11-08T06:20:25.907861",
   "cache_version": "1.0"
 }

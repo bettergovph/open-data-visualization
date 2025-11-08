@@ -14,10 +14,10 @@
       "municipality": "N/A",
       "year": 2025,
       "status": "active",
-      "sources_count": 1,
       "sources_list": [
         "PhilGEPS"
-      ]
+      ],
+      "sources_count": 1
     },
     {
       "source": "PhilGEPS",
@@ -30,10 +30,10 @@
       "municipality": "N/A",
       "year": 2025,
       "status": "active",
-      "sources_count": 1,
       "sources_list": [
         "PhilGEPS"
-      ]
+      ],
+      "sources_count": 1
     },
     {
       "source": "PhilGEPS",
@@ -46,10 +46,10 @@
       "municipality": "N/A",
       "year": 2022,
       "status": "active",
-      "sources_count": 1,
       "sources_list": [
         "PhilGEPS"
-      ]
+      ],
+      "sources_count": 1
     },
     {
       "source": "PhilGEPS",
@@ -62,10 +62,10 @@
       "municipality": "N/A",
       "year": 2023,
       "status": "active",
-      "sources_count": 1,
       "sources_list": [
         "PhilGEPS"
-      ]
+      ],
+      "sources_count": 1
     },
     {
       "source": "PhilGEPS",
@@ -78,10 +78,10 @@
       "municipality": "N/A",
       "year": 2022,
       "status": "active",
-      "sources_count": 1,
       "sources_list": [
         "PhilGEPS"
-      ]
+      ],
+      "sources_count": 1
     },
     {
       "source": "DIME",
@@ -89,32 +89,17 @@
       "project_name": "Construction of Cagayan River Flood Control Project, Dammang West, Echague, Isabela",
       "contractor": "JC PALOMO CONSTRUCTION & CONSTRUCTION SUPPLY",
       "amount": 46393200.0,
-      "location": "N/A",
+      "location": "ISABELA, Region II",
       "province": "N/A",
       "municipality": "N/A",
       "barangay": "N/A",
       "year": 2022,
       "status": "Completed",
-      "sources_count": 1,
       "sources_list": [
-        "DIME"
-      ]
-    },
-    {
-      "source": "PhilGEPS",
-      "meilisearch_id": "a4dc92db-58b6-4343-a0d2-cb898ff66ec5",
-      "project_name": "Construction of Cagayan River Flood Control Project, Dammang West,  Echague, Isabela",
-      "contractor": "JC PALOMO CONSTRUCTION & CONSTRUCTION SUPPLY",
-      "amount": 46393200.0,
-      "location": "ISABELA, Region II",
-      "province": "N/A",
-      "municipality": "N/A",
-      "year": 2022,
-      "status": "active",
-      "sources_count": 1,
-      "sources_list": [
+        "DIME",
         "PhilGEPS"
-      ]
+      ],
+      "sources_count": 2
     },
     {
       "source": "PhilGEPS",
@@ -127,10 +112,10 @@
       "municipality": "N/A",
       "year": 2022,
       "status": "active",
-      "sources_count": 1,
       "sources_list": [
         "PhilGEPS"
-      ]
+      ],
+      "sources_count": 1
     },
     {
       "source": "SSP",
@@ -138,48 +123,18 @@
       "project_name": "Construction of Drainage System at Camasi, Phase II, Peñablanca, Cagayan",
       "contractor": "JC PALOMO CONSTRUCTION & CONSTRUCTION SUPPLY",
       "amount": 29400000.0,
-      "location": "CAGAYAN, PEÑABLANCA (CAGAYAN)",
+      "location": "PEÑABLANCA (CAGAYAN), CAGAYAN, Region II",
       "province": "CAGAYAN",
       "municipality": "PEÑABLANCA (CAGAYAN)",
-      "year": "N/A",
-      "status": "N/A",
-      "sources_count": 1,
-      "sources_list": [
-        "SSP"
-      ]
-    },
-    {
-      "source": "DIME",
-      "meilisearch_id": "ef252910-e59f-41e3-9211-d6a95e3ebd6f",
-      "project_name": "Construction of Drainage System at Camasi, Phase II, Peñablanca, Cagayan",
-      "contractor": "JC PALOMO CONSTRUCTION & CONSTRUCTION SUPPLY",
-      "amount": 29400000.0,
-      "location": "Cagayan, Peñablanca, Camasi",
-      "province": "Cagayan",
-      "municipality": "Peñablanca",
-      "barangay": "Camasi",
       "year": 2023,
       "status": "Completed",
-      "sources_count": 1,
+      "barangay": "Camasi",
       "sources_list": [
-        "DIME"
-      ]
-    },
-    {
-      "source": "PhilGEPS",
-      "meilisearch_id": "ef252910-e59f-41e3-9211-d6a95e3ebd6f",
-      "project_name": "Construction of Drainage System at Camasi, Phase II, Peñablanca, Cagayan",
-      "contractor": "JC PALOMO CONSTRUCTION & CONSTRUCTION SUPPLY",
-      "amount": 29400000.0,
-      "location": "PEÑABLANCA (CAGAYAN), CAGAYAN, Region II",
-      "province": "N/A",
-      "municipality": "N/A",
-      "year": 2023,
-      "status": "active",
-      "sources_count": 1,
-      "sources_list": [
+        "SSP",
+        "DIME",
         "PhilGEPS"
-      ]
+      ],
+      "sources_count": 3
     },
     {
       "source": "PhilGEPS",
@@ -192,27 +147,28 @@
       "municipality": "N/A",
       "year": 2023,
       "status": "active",
-      "sources_count": 1,
       "sources_list": [
         "PhilGEPS"
-      ]
+      ],
+      "sources_count": 1
     }
   ],
   "summary": {
-    "total": 12,
+    "total": 9,
     "ssp": 1,
     "dime": 2,
-    "philgeps": 9
+    "philgeps": 9,
+    "microsite": 0
   },
-  "total_cost": 636651005.99,
+  "total_cost": 531457805.98999995,
   "filter_options": {
     "municipalities": [
       {
         "name": "Unknown",
-        "count": 12
+        "count": 9
       }
     ]
   },
-  "generated_at": "2025-11-06T14:44:10.408741",
+  "generated_at": "2025-11-08T06:16:08.944190",
   "cache_version": "1.0"
 }

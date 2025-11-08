@@ -14,10 +14,10 @@
       "municipality": "N/A",
       "year": 2021,
       "status": "active",
-      "sources_count": 1,
       "sources_list": [
         "PhilGEPS"
-      ]
+      ],
+      "sources_count": 1
     },
     {
       "source": "SSP",
@@ -25,48 +25,18 @@
       "project_name": "Construction of Hupi Flood Control, Barangay Hupi, Santa Cruz, Marinduque",
       "contractor": "RPE CONSTRUCTION",
       "amount": 9898092.96,
-      "location": "MARINDUQUE, SANTA CRUZ (MARINDUQUE)",
+      "location": "SANTA CRUZ (MARINDUQUE), MARINDUQUE, Region IV-B",
       "province": "MARINDUQUE",
       "municipality": "SANTA CRUZ (MARINDUQUE)",
-      "year": "N/A",
-      "status": "N/A",
-      "sources_count": 1,
-      "sources_list": [
-        "SSP"
-      ]
-    },
-    {
-      "source": "DIME",
-      "meilisearch_id": "28eee8d7-574c-4c1b-a669-a29a4119712d",
-      "project_name": "Construction of Hupi Flood Control, Barangay Hupi, Santa Cruz, Marinduque",
-      "contractor": "RPE CONSTRUCTION",
-      "amount": 9898092.96,
-      "location": "Marinduque, Santa Cruz, Hupi",
-      "province": "Marinduque",
-      "municipality": "Santa Cruz",
+      "year": 2022,
+      "status": "Completed",
       "barangay": "Hupi",
-      "year": 2022,
-      "status": "Completed",
-      "sources_count": 1,
       "sources_list": [
-        "DIME"
-      ]
-    },
-    {
-      "source": "PhilGEPS",
-      "meilisearch_id": "28eee8d7-574c-4c1b-a669-a29a4119712d",
-      "project_name": "Construction of Hupi Flood Control, Barangay Hupi, Santa Cruz, Marinduque",
-      "contractor": "RPE CONSTRUCTION",
-      "amount": 9898092.96,
-      "location": "SANTA CRUZ (MARINDUQUE), MARINDUQUE, Region IV-B",
-      "province": "N/A",
-      "municipality": "N/A",
-      "year": 2022,
-      "status": "active",
-      "sources_count": 1,
-      "sources_list": [
+        "SSP",
+        "DIME",
         "PhilGEPS"
-      ]
+      ],
+      "sources_count": 3
     },
     {
       "source": "SSP",
@@ -74,48 +44,18 @@
       "project_name": "Construction of Bagong Silang Flood Control Structure, Sta. Cruz, Marinduque",
       "contractor": "RPE CONSTRUCTION",
       "amount": 9799552.49,
-      "location": "MARINDUQUE, SANTA CRUZ (MARINDUQUE)",
+      "location": "SANTA CRUZ (MARINDUQUE), MARINDUQUE, Region IV-B",
       "province": "MARINDUQUE",
       "municipality": "SANTA CRUZ (MARINDUQUE)",
-      "year": "N/A",
-      "status": "N/A",
-      "sources_count": 1,
-      "sources_list": [
-        "SSP"
-      ]
-    },
-    {
-      "source": "DIME",
-      "meilisearch_id": "557ecc02-4ae2-47f5-9f51-8b0559b66f7a",
-      "project_name": "Construction of Bagong Silang Flood Control Structure, Sta. Cruz, Marinduque",
-      "contractor": "RPE CONSTRUCTION",
-      "amount": 9799552.49,
-      "location": "Marinduque, Santa Cruz",
-      "province": "Marinduque",
-      "municipality": "Santa Cruz",
-      "barangay": "N/A",
       "year": 2022,
       "status": "Completed",
-      "sources_count": 1,
+      "barangay": "N/A",
       "sources_list": [
-        "DIME"
-      ]
-    },
-    {
-      "source": "PhilGEPS",
-      "meilisearch_id": "557ecc02-4ae2-47f5-9f51-8b0559b66f7a",
-      "project_name": "Construction of Bagong Silang Flood Control Structure, Sta. Cruz, Marinduque",
-      "contractor": "RPE CONSTRUCTION",
-      "amount": 9799552.49,
-      "location": "SANTA CRUZ (MARINDUQUE), MARINDUQUE, Region IV-B",
-      "province": "N/A",
-      "municipality": "N/A",
-      "year": 2022,
-      "status": "active",
-      "sources_count": 1,
-      "sources_list": [
+        "SSP",
+        "DIME",
         "PhilGEPS"
-      ]
+      ],
+      "sources_count": 3
     },
     {
       "source": "PhilGEPS",
@@ -128,10 +68,10 @@
       "municipality": "N/A",
       "year": 2022,
       "status": "active",
-      "sources_count": 1,
       "sources_list": [
         "PhilGEPS"
-      ]
+      ],
+      "sources_count": 1
     },
     {
       "source": "PhilGEPS",
@@ -144,10 +84,10 @@
       "municipality": "N/A",
       "year": 2022,
       "status": "active",
-      "sources_count": 1,
       "sources_list": [
         "PhilGEPS"
-      ]
+      ],
+      "sources_count": 1
     },
     {
       "source": "PhilGEPS",
@@ -160,27 +100,28 @@
       "municipality": "N/A",
       "year": 2022,
       "status": "active",
-      "sources_count": 1,
       "sources_list": [
         "PhilGEPS"
-      ]
+      ],
+      "sources_count": 1
     }
   ],
   "summary": {
-    "total": 10,
+    "total": 6,
     "ssp": 2,
     "dime": 2,
-    "philgeps": 6
+    "philgeps": 6,
+    "microsite": 0
   },
-  "total_cost": 102780028.73000002,
+  "total_cost": 63384737.830000006,
   "filter_options": {
     "municipalities": [
       {
         "name": "Unknown",
-        "count": 10
+        "count": 6
       }
     ]
   },
-  "generated_at": "2025-11-06T14:44:14.652919",
+  "generated_at": "2025-11-08T06:20:54.183067",
   "cache_version": "1.0"
 }

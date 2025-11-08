@@ -14,10 +14,10 @@
       "municipality": "N/A",
       "year": 2022,
       "status": "active",
-      "sources_count": 1,
       "sources_list": [
         "PhilGEPS"
-      ]
+      ],
+      "sources_count": 1
     },
     {
       "source": "SSP",
@@ -25,48 +25,18 @@
       "project_name": "Construction of Flood Mitigation Structure, Barangay Lago, Glan, Sarangani",
       "contractor": "JAYSABB CONSTRUCTION AND SUPPLY",
       "amount": 4947996.36,
-      "location": "SARANGANI, GLAN (SARANGANI)",
+      "location": "GLAN (SARANGANI), SARANGANI, Region XII",
       "province": "SARANGANI",
       "municipality": "GLAN (SARANGANI)",
-      "year": "N/A",
-      "status": "N/A",
-      "sources_count": 1,
-      "sources_list": [
-        "SSP"
-      ]
-    },
-    {
-      "source": "DIME",
-      "meilisearch_id": "6b20af5d-e901-49a5-89f8-23a1c4d73fa2",
-      "project_name": "Construction of Flood Mitigation Structure, Barangay Lago, Glan, Sarangani",
-      "contractor": "JAYSABB CONSTRUCTION AND SUPPLY",
-      "amount": 4947996.36,
-      "location": "Sarangani, Glan, Lago",
-      "province": "Sarangani",
-      "municipality": "Glan",
-      "barangay": "Lago",
       "year": 2022,
       "status": "Completed",
-      "sources_count": 1,
+      "barangay": "Lago",
       "sources_list": [
-        "DIME"
-      ]
-    },
-    {
-      "source": "PhilGEPS",
-      "meilisearch_id": "6b20af5d-e901-49a5-89f8-23a1c4d73fa2",
-      "project_name": "Construction of Flood Mitigation Structure, Barangay Lago, Glan, Sarangani",
-      "contractor": "JAYSABB CONSTRUCTION AND SUPPLY",
-      "amount": 4947996.36,
-      "location": "GLAN (SARANGANI), SARANGANI, Region XII",
-      "province": "N/A",
-      "municipality": "N/A",
-      "year": 2022,
-      "status": "active",
-      "sources_count": 1,
-      "sources_list": [
+        "SSP",
+        "DIME",
         "PhilGEPS"
-      ]
+      ],
+      "sources_count": 3
     },
     {
       "source": "PhilGEPS",
@@ -79,10 +49,10 @@
       "municipality": "N/A",
       "year": 2022,
       "status": "active",
-      "sources_count": 1,
       "sources_list": [
         "PhilGEPS"
-      ]
+      ],
+      "sources_count": 1
     },
     {
       "source": "PhilGEPS",
@@ -95,10 +65,10 @@
       "municipality": "N/A",
       "year": 2021,
       "status": "active",
-      "sources_count": 1,
       "sources_list": [
         "PhilGEPS"
-      ]
+      ],
+      "sources_count": 1
     },
     {
       "source": "PhilGEPS",
@@ -111,10 +81,10 @@
       "municipality": "N/A",
       "year": 2022,
       "status": "active",
-      "sources_count": 1,
       "sources_list": [
         "PhilGEPS"
-      ]
+      ],
+      "sources_count": 1
     },
     {
       "source": "PhilGEPS",
@@ -127,27 +97,28 @@
       "municipality": "N/A",
       "year": 2020,
       "status": "active",
-      "sources_count": 1,
       "sources_list": [
         "PhilGEPS"
-      ]
+      ],
+      "sources_count": 1
     }
   ],
   "summary": {
-    "total": 8,
+    "total": 6,
     "ssp": 1,
     "dime": 1,
-    "philgeps": 6
+    "philgeps": 6,
+    "microsite": 0
   },
-  "total_cost": 44155134.849999994,
+  "total_cost": 34259142.13,
   "filter_options": {
     "municipalities": [
       {
         "name": "Unknown",
-        "count": 8
+        "count": 6
       }
     ]
   },
-  "generated_at": "2025-11-06T14:44:17.992894",
+  "generated_at": "2025-11-08T06:21:09.601044",
   "cache_version": "1.0"
 }

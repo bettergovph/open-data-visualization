@@ -14,10 +14,10 @@
       "municipality": "N/A",
       "year": 2024,
       "status": "active",
-      "sources_count": 1,
       "sources_list": [
         "PhilGEPS"
-      ]
+      ],
+      "sources_count": 1
     },
     {
       "source": "PhilGEPS",
@@ -30,10 +30,10 @@
       "municipality": "N/A",
       "year": 2025,
       "status": "active",
-      "sources_count": 1,
       "sources_list": [
         "PhilGEPS"
-      ]
+      ],
+      "sources_count": 1
     },
     {
       "source": "PhilGEPS",
@@ -46,10 +46,10 @@
       "municipality": "N/A",
       "year": 2025,
       "status": "active",
-      "sources_count": 1,
       "sources_list": [
         "PhilGEPS"
-      ]
+      ],
+      "sources_count": 1
     },
     {
       "source": "SSP",
@@ -57,48 +57,18 @@
       "project_name": "Construction of Flood Mitigation Structure Protecting Surigao del Sur Boundary - Davao Oriental Coastal Road (Dapnan Bridge), Baganga, Davao Oriental",
       "contractor": "LICSAL CONSTRUCTION CORPORATION",
       "amount": 48997746.86,
-      "location": "DAVAO ORIENTAL, BAGANGA (DAVAO ORIENTAL)",
+      "location": "BAGANGA (DAVAO ORIENTAL), DAVAO ORIENTAL, Region XI",
       "province": "DAVAO ORIENTAL",
       "municipality": "BAGANGA (DAVAO ORIENTAL)",
-      "year": "N/A",
-      "status": "N/A",
-      "sources_count": 1,
-      "sources_list": [
-        "SSP"
-      ]
-    },
-    {
-      "source": "DIME",
-      "meilisearch_id": "1023d0c1-0182-4a3d-be92-01bde2b356fa",
-      "project_name": "Construction of Flood Mitigation Structure Protecting Surigao del Sur Boundary - Davao Oriental Coastal Road (Dapnan Bridge), Baganga, Davao Oriental",
-      "contractor": "LICSAL CONSTRUCTION CORPORATION",
-      "amount": 48997746.86,
-      "location": "Davao Oriental, Baganga, Dapnan",
-      "province": "Davao Oriental",
-      "municipality": "Baganga",
-      "barangay": "Dapnan",
       "year": 2024,
       "status": "Completed",
-      "sources_count": 1,
+      "barangay": "Dapnan",
       "sources_list": [
-        "DIME"
-      ]
-    },
-    {
-      "source": "PhilGEPS",
-      "meilisearch_id": "1023d0c1-0182-4a3d-be92-01bde2b356fa",
-      "project_name": "Construction of Flood Mitigation Structure Protecting Surigao del Sur Boundary - Davao Oriental Coastal Road (Dapnan Bridge), Baganga, Davao Oriental",
-      "contractor": "LICSAL CONSTRUCTION CORPORATION",
-      "amount": 48997746.86,
-      "location": "BAGANGA (DAVAO ORIENTAL), DAVAO ORIENTAL, Region XI",
-      "province": "N/A",
-      "municipality": "N/A",
-      "year": 2024,
-      "status": "active",
-      "sources_count": 1,
-      "sources_list": [
+        "SSP",
+        "DIME",
         "PhilGEPS"
-      ]
+      ],
+      "sources_count": 3
     },
     {
       "source": "PhilGEPS",
@@ -111,10 +81,10 @@
       "municipality": "N/A",
       "year": 2024,
       "status": "active",
-      "sources_count": 1,
       "sources_list": [
         "PhilGEPS"
-      ]
+      ],
+      "sources_count": 1
     },
     {
       "source": "SSP",
@@ -122,65 +92,36 @@
       "project_name": "Construction of Cateel I IS River Bank Protection Dike along the Left Main Canal Service Road, Cateel, Davao Oriental",
       "contractor": "LICSAL CONSTRUCTION CORPORATION",
       "amount": 14699816.87,
-      "location": "DAVAO ORIENTAL, CATEEL (DAVAO ORIENTAL)",
+      "location": "CATEEL (DAVAO ORIENTAL), DAVAO ORIENTAL, Region XI",
       "province": "DAVAO ORIENTAL",
       "municipality": "CATEEL (DAVAO ORIENTAL)",
-      "year": "N/A",
-      "status": "N/A",
-      "sources_count": 1,
-      "sources_list": [
-        "SSP"
-      ]
-    },
-    {
-      "source": "DIME",
-      "meilisearch_id": "e681c2a0-e85a-49d9-b7b5-6f8814a34100",
-      "project_name": "Construction of Cateel I IS River Bank Protection Dike along the Left Main Canal Service Road, Cateel, Davao Oriental",
-      "contractor": "LICSAL CONSTRUCTION CORPORATION",
-      "amount": 14699816.87,
-      "location": "Davao Oriental, Cateel",
-      "province": "Davao Oriental",
-      "municipality": "Cateel",
-      "barangay": "N/A",
       "year": 2024,
       "status": "Completed",
-      "sources_count": 1,
+      "barangay": "N/A",
       "sources_list": [
-        "DIME"
-      ]
-    },
-    {
-      "source": "PhilGEPS",
-      "meilisearch_id": "e681c2a0-e85a-49d9-b7b5-6f8814a34100",
-      "project_name": "Construction of Cateel I IS River Bank Protection Dike along the Left Main Canal Service Road, Cateel, Davao Oriental",
-      "contractor": "LICSAL CONSTRUCTION CORPORATION",
-      "amount": 14699816.87,
-      "location": "CATEEL (DAVAO ORIENTAL), DAVAO ORIENTAL, Region XI",
-      "province": "N/A",
-      "municipality": "N/A",
-      "year": 2024,
-      "status": "active",
-      "sources_count": 1,
-      "sources_list": [
+        "SSP",
+        "DIME",
         "PhilGEPS"
-      ]
+      ],
+      "sources_count": 3
     }
   ],
   "summary": {
-    "total": 10,
+    "total": 6,
     "ssp": 2,
     "dime": 2,
-    "philgeps": 6
+    "philgeps": 6,
+    "microsite": 0
   },
-  "total_cost": 510823312.08000004,
+  "total_cost": 383428184.62,
   "filter_options": {
     "municipalities": [
       {
         "name": "Unknown",
-        "count": 10
+        "count": 6
       }
     ]
   },
-  "generated_at": "2025-11-06T14:44:12.078004",
+  "generated_at": "2025-11-08T06:20:43.351918",
   "cache_version": "1.0"
 }

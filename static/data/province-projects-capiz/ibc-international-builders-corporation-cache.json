@@ -9,31 +9,16 @@
       "project_name": "Construction of River Control along Panay River Basin, Brgy. Pagbunitan, Sigma, Capiz",
       "contractor": "IBC INTERNATIONAL BUILDERS CORPORATION",
       "amount": 55969699.01,
-      "location": "CAPIZ, SIGMA (CAPIZ)",
+      "location": "SIGMA (CAPIZ), CAPIZ, Region VI",
       "province": "CAPIZ",
       "municipality": "SIGMA (CAPIZ)",
-      "year": "N/A",
-      "status": "N/A",
-      "sources_count": 1,
-      "sources_list": [
-        "SSP"
-      ]
-    },
-    {
-      "source": "PhilGEPS",
-      "meilisearch_id": null,
-      "project_name": "Construction of River Control along Panay River Basin, Brgy. Pagbunitan, Sigma, Capiz",
-      "contractor": "IBC INTERNATIONAL BUILDERS CORPORATION",
-      "amount": 55969699.01,
-      "location": "SIGMA (CAPIZ), CAPIZ, Region VI",
-      "province": "N/A",
-      "municipality": "N/A",
       "year": 2023,
       "status": "active",
-      "sources_count": 1,
       "sources_list": [
+        "SSP",
         "PhilGEPS"
-      ]
+      ],
+      "sources_count": 2
     },
     {
       "source": "DIME",
@@ -47,10 +32,10 @@
       "barangay": "Pagbunitan",
       "year": 2022,
       "status": "Completed",
-      "sources_count": 1,
       "sources_list": [
         "DIME"
-      ]
+      ],
+      "sources_count": 1
     },
     {
       "source": "PhilGEPS",
@@ -63,10 +48,10 @@
       "municipality": "N/A",
       "year": 2016,
       "status": "active",
-      "sources_count": 1,
       "sources_list": [
         "PhilGEPS"
-      ]
+      ],
+      "sources_count": 1
     },
     {
       "source": "PhilGEPS",
@@ -79,10 +64,10 @@
       "municipality": "N/A",
       "year": 2015,
       "status": "active",
-      "sources_count": 1,
       "sources_list": [
         "PhilGEPS"
-      ]
+      ],
+      "sources_count": 1
     },
     {
       "source": "SSP",
@@ -90,48 +75,18 @@
       "project_name": "Construction of River Control along Panay River Basin, Brgy. Dolores, Dumalag, Capiz",
       "contractor": "IBC INTERNATIONAL BUILDERS CORPORATION",
       "amount": 42627858.0,
-      "location": "CAPIZ, DUMALAG (CAPIZ)",
+      "location": "DUMALAG (CAPIZ), CAPIZ, Region VI",
       "province": "CAPIZ",
       "municipality": "DUMALAG (CAPIZ)",
-      "year": "N/A",
-      "status": "N/A",
-      "sources_count": 1,
-      "sources_list": [
-        "SSP"
-      ]
-    },
-    {
-      "source": "DIME",
-      "meilisearch_id": "2e5bb31d-9f3c-4114-a7aa-0e86b2a07058",
-      "project_name": "Construction of River Control along Panay River Basin, Brgy. Dolores, Dumalag, Capiz",
-      "contractor": "IBC INTERNATIONAL BUILDERS CORPORATION",
-      "amount": 42627858.0,
-      "location": "Capiz, Dumalag, Dolores",
-      "province": "Capiz",
-      "municipality": "Dumalag",
-      "barangay": "Dolores",
       "year": 2022,
       "status": "Completed",
-      "sources_count": 1,
+      "barangay": "Dolores",
       "sources_list": [
-        "DIME"
-      ]
-    },
-    {
-      "source": "PhilGEPS",
-      "meilisearch_id": "2e5bb31d-9f3c-4114-a7aa-0e86b2a07058",
-      "project_name": "Construction of River Control along Panay River Basin, Brgy. Dolores, Dumalag, Capiz",
-      "contractor": "IBC INTERNATIONAL BUILDERS CORPORATION",
-      "amount": 42627858.0,
-      "location": "DUMALAG (CAPIZ), CAPIZ, Region VI",
-      "province": "N/A",
-      "municipality": "N/A",
-      "year": 2023,
-      "status": "active",
-      "sources_count": 1,
-      "sources_list": [
+        "SSP",
+        "DIME",
         "PhilGEPS"
-      ]
+      ],
+      "sources_count": 3
     },
     {
       "source": "PhilGEPS",
@@ -144,10 +99,10 @@
       "municipality": "N/A",
       "year": 2017,
       "status": "active",
-      "sources_count": 1,
       "sources_list": [
         "PhilGEPS"
-      ]
+      ],
+      "sources_count": 1
     },
     {
       "source": "PhilGEPS",
@@ -160,10 +115,10 @@
       "municipality": "N/A",
       "year": 2017,
       "status": "active",
-      "sources_count": 1,
       "sources_list": [
         "PhilGEPS"
-      ]
+      ],
+      "sources_count": 1
     },
     {
       "source": "PhilGEPS",
@@ -176,10 +131,10 @@
       "municipality": "N/A",
       "year": 2020,
       "status": "active",
-      "sources_count": 1,
       "sources_list": [
         "PhilGEPS"
-      ]
+      ],
+      "sources_count": 1
     },
     {
       "source": "PhilGEPS",
@@ -192,27 +147,28 @@
       "municipality": "N/A",
       "year": 2016,
       "status": "active",
-      "sources_count": 1,
       "sources_list": [
         "PhilGEPS"
-      ]
+      ],
+      "sources_count": 1
     }
   ],
   "summary": {
-    "total": 12,
+    "total": 9,
     "ssp": 2,
     "dime": 2,
-    "philgeps": 8
+    "philgeps": 8,
+    "microsite": 0
   },
-  "total_cost": 494362671.02,
+  "total_cost": 353137256.01,
   "filter_options": {
     "municipalities": [
       {
         "name": "Unknown",
-        "count": 12
+        "count": 9
       }
     ]
   },
-  "generated_at": "2025-11-06T14:44:10.992579",
+  "generated_at": "2025-11-08T06:20:37.970885",
   "cache_version": "1.0"
 }

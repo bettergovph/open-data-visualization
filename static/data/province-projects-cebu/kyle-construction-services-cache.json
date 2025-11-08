@@ -14,10 +14,10 @@
       "municipality": "N/A",
       "year": 2024,
       "status": "active",
-      "sources_count": 1,
       "sources_list": [
         "PhilGEPS"
-      ]
+      ],
+      "sources_count": 1
     },
     {
       "source": "PhilGEPS",
@@ -30,10 +30,10 @@
       "municipality": "N/A",
       "year": 2025,
       "status": "active",
-      "sources_count": 1,
       "sources_list": [
         "PhilGEPS"
-      ]
+      ],
+      "sources_count": 1
     },
     {
       "source": "PhilGEPS",
@@ -46,10 +46,10 @@
       "municipality": "N/A",
       "year": 2023,
       "status": "active",
-      "sources_count": 1,
       "sources_list": [
         "PhilGEPS"
-      ]
+      ],
+      "sources_count": 1
     },
     {
       "source": "SSP",
@@ -57,64 +57,18 @@
       "project_name": "Construction of Flood Control Structure along Pitogo River, Phase III, Consolacion, Cebu",
       "contractor": "KYLE CONSTRUCTION SERVICES",
       "amount": 14650900.0,
-      "location": "CEBU, CONSOLACION (CEBU)",
+      "location": "CONSOLACION (CEBU), CEBU, Region VII",
       "province": "CEBU",
       "municipality": "CONSOLACION (CEBU)",
-      "year": "N/A",
-      "status": "N/A",
-      "sources_count": 1,
-      "sources_list": [
-        "SSP"
-      ]
-    },
-    {
-      "source": "DIME",
-      "meilisearch_id": "b8a085c4-e9de-4578-b06b-957bf85dfba7",
-      "project_name": "Construction of Flood Control Structure along Pitogo River, Phase III, Consolacion, Cebu",
-      "contractor": "KYLE CONSTRUCTION SERVICES",
-      "amount": 14650900.0,
-      "location": "Cebu, Consolacion, Pitogo",
-      "province": "Cebu",
-      "municipality": "Consolacion",
-      "barangay": "Pitogo",
       "year": 2023,
       "status": "Completed",
-      "sources_count": 1,
+      "barangay": "Pitogo",
       "sources_list": [
-        "DIME"
-      ]
-    },
-    {
-      "source": "PhilGEPS",
-      "meilisearch_id": "b8a085c4-e9de-4578-b06b-957bf85dfba7",
-      "project_name": "Construction of Flood Control Structure along Pitogo River, Phase III, Consolacion, Cebu",
-      "contractor": "KYLE CONSTRUCTION SERVICES",
-      "amount": 14650900.0,
-      "location": "CONSOLACION (CEBU), CEBU, Region VII",
-      "province": "N/A",
-      "municipality": "N/A",
-      "year": 2023,
-      "status": "active",
-      "sources_count": 1,
-      "sources_list": [
+        "SSP",
+        "DIME",
         "PhilGEPS"
-      ]
-    },
-    {
-      "source": "PhilGEPS",
-      "meilisearch_id": null,
-      "project_name": "23HN0087",
-      "contractor": "KYLE CONSTRUCTION SERVICES",
-      "amount": 14650900.0,
-      "location": "Cebu",
-      "province": "N/A",
-      "municipality": "N/A",
-      "year": 2023,
-      "status": "active",
-      "sources_count": 1,
-      "sources_list": [
-        "PhilGEPS"
-      ]
+      ],
+      "sources_count": 3
     },
     {
       "source": "PhilGEPS",
@@ -127,10 +81,10 @@
       "municipality": "N/A",
       "year": 2024,
       "status": "active",
-      "sources_count": 1,
       "sources_list": [
         "PhilGEPS"
-      ]
+      ],
+      "sources_count": 1
     },
     {
       "source": "PhilGEPS",
@@ -143,10 +97,10 @@
       "municipality": "N/A",
       "year": 2025,
       "status": "active",
-      "sources_count": 1,
       "sources_list": [
         "PhilGEPS"
-      ]
+      ],
+      "sources_count": 1
     },
     {
       "source": "PhilGEPS",
@@ -159,27 +113,28 @@
       "municipality": "N/A",
       "year": 2023,
       "status": "active",
-      "sources_count": 1,
       "sources_list": [
         "PhilGEPS"
-      ]
+      ],
+      "sources_count": 1
     }
   ],
   "summary": {
-    "total": 10,
+    "total": 7,
     "ssp": 1,
     "dime": 1,
-    "philgeps": 8
+    "philgeps": 7,
+    "microsite": 0
   },
-  "total_cost": 357387476.14,
+  "total_cost": 313434776.14,
   "filter_options": {
     "municipalities": [
       {
         "name": "Unknown",
-        "count": 10
+        "count": 7
       }
     ]
   },
-  "generated_at": "2025-11-06T14:44:11.462927",
+  "generated_at": "2025-11-08T06:20:40.052341",
   "cache_version": "1.0"
 }

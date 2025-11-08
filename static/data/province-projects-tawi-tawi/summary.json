@@ -2,18 +2,36 @@
   "success": true,
   "province": "Tawi Tawi",
   "summary": {
-    "total": 0,
+    "total": 2,
     "ssp": 0,
     "dime": 0,
-    "philgeps": 0
+    "philgeps": 0,
+    "microsite": 2
   },
-  "total_cost": 0,
+  "total_cost": 304678353.55,
   "filter_options": {
-    "contractors": [],
-    "municipalities": []
+    "contractors": [
+      {
+        "name": "R.D. INTERIOR JUNIOR CONSTRUCTION (6483)",
+        "count": 2
+      }
+    ],
+    "municipalities": [
+      {
+        "name": "Unknown",
+        "count": 2
+      }
+    ]
   },
-  "contractors": {},
+  "contractors": {
+    "R.D. INTERIOR JUNIOR CONSTRUCTION (6483)": {
+      "count": 2,
+      "total_cost": 304678353.55,
+      "cache_file": "province-projects-tawi-tawi/small-contractors-cache.json",
+      "is_small_contractor": true
+    }
+  },
   "province_cache_file": "province-projects-tawi-tawi/all-projects-cache.json",
-  "generated_at": "2025-11-06T14:44:19.428466",
+  "generated_at": "2025-11-08T06:21:16.322102",
   "cache_version": "1.0"
 }
