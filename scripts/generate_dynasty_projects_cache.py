@@ -202,13 +202,22 @@ class DynastyProjectsCacheGenerator:
                 contractor_str = str(contractors_field).upper()
             combined_text = f'{combined_text} {contractor_str}'
 
+            # Extract project year for term filtering
+            project_year = None
+            if proj.get('date_started'):
+                try:
+                    project_year = proj['date_started'].year
+                except (AttributeError, TypeError):
+                    pass
+
             matches = []
             for cm_name, cm_data in congressmen_data.items():
                 cm_name_result, match_type_result, match_score_result = self.match_project(
                     combined_text,
                     cm_data,
                     districts_data,
-                    contractor_str
+                    contractor_str,
+                    project_year
                 )
                 if cm_name_result and match_score_result > 0:
                     matches.append((cm_name_result, match_type_result, match_score_result))
@@ -254,6 +263,14 @@ class DynastyProjectsCacheGenerator:
             awardee_name = (contract.get('awardee_name') or '').upper()
             combined_text = f'{award_title} {area_of_delivery} {awardee_name}'
 
+            # Extract project year for term filtering
+            project_year = None
+            if contract.get('award_date'):
+                try:
+                    project_year = contract['award_date'].year
+                except (AttributeError, TypeError):
+                    pass
+
             best_match = None
             best_score = 0
             for cm_name, cm_data in congressmen_data.items():
@@ -261,7 +278,8 @@ class DynastyProjectsCacheGenerator:
                     combined_text,
                     cm_data,
                     districts_data,
-                    awardee_name
+                    awardee_name,
+                    project_year
                 )
                 if cm_name_result and match_score_result > best_score:
                     best_match = (cm_name_result, match_type_result, match_score_result)
@@ -318,13 +336,17 @@ class DynastyProjectsCacheGenerator:
 
             combined_text = f"{description} {agency} {fund_source} {contractor}"
 
+            # Infrawatch doesn't have reliable date information, so pass None
+            project_year = None
+
             matches = []
             for cm_name, cm_data in congressmen_data.items():
                 cm_name_result, match_type_result, match_score_result = self.match_project(
                     combined_text,
                     cm_data,
                     districts_data,
-                    contractor
+                    contractor,
+                    project_year
                 )
                 if cm_name_result and match_score_result > 0:
                     matches.append((cm_name_result, match_type_result, match_score_result))
@@ -623,17 +645,16 @@ class DynastyProjectsCacheGenerator:
         
         return congressmen_data
     
-    def match_project(self, project_text: str, congressman_data: Dict, districts_data: Dict, contractor_name: str = '') -> tuple[Optional[str], Optional[str], int]:
+    def match_project(self, project_text: str, congressman_data: Dict, districts_data: Dict, contractor_name: str = '', project_year: Optional[int] = None) -> tuple[Optional[str], Optional[str], int]:
         """
         Match a project to a congressman.
         Returns: (congressman_name, match_type, match_score) or (None, None, 0)
-        
-        SIMPLE LOGIC:
-        1. Check barangay match (highest priority)
-        2. Check contractor match (for Gardiola/MBB and Co/Sunwest)
-        3. Check if BOTH district identifier AND municipality from that district are in project text
-        4. If both found, it's a match
-        5. Exclude cities with same name as province (e.g., "Quezon City" != "Quezon Province")
+
+        LOGIC:
+        1. Check contractor match (for party-list representatives)
+        2. For city districts: check term filtering, then barangay match
+        3. For province districts: check municipality matches
+        4. Term filtering: valid years checked against terms, null years get -50 score for all congressmen
         """
         combined_text = project_text.upper()
         congressman_name = congressman_data['name']
@@ -786,8 +807,72 @@ class DynastyProjectsCacheGenerator:
                         if pattern in contractor_upper and pattern in normalized_text:
                             if not _contractor_is_excluded(normalized_text):
                                 return (congressman_name, "contractor", 40)
-        
-        # 3. Get district identifier (province or city name)
+
+        # 3. Special handling for Davao City districts: term filtering + barangay match
+        if congressman_data.get('is_city_district') and congressman_data.get('provinces') and congressman_data['provinces'][0] == 'Davao City':
+            # Term filtering logic:
+            # - If project has a valid year: check if it falls within congressman's terms
+            # - If project has no year (None/null): give to ALL congressmen with score -50 (uncertain)
+            match_score = 100  # Default high score
+            should_include = False
+
+            if project_year is not None:
+                # Project has a year - check if it falls within any of the congressman's terms
+                terms = congressman_data.get('terms', [])
+                for term in terms:
+                    term_start = term.get('start')
+                    term_end = term.get('end')
+                    if term_start and term_end and term_start <= project_year <= term_end:
+                        should_include = True
+                        break
+            else:
+                # Project has no year - give to ALL congressmen with lower score (-50)
+                should_include = True
+                match_score = -50  # Uncertain match due to missing year data
+
+            if not should_include:
+                return (None, None, 0)  # Project doesn't match congressman's terms
+
+            # Check barangay match
+            valid_barangays = []
+            if districts_data and congressman_data.get('provinces'):
+                province = congressman_data['provinces'][0]
+                province_key = None
+                for key in districts_data.get('districts', {}).keys():
+                    if key.upper() == province.upper():
+                        province_key = key
+                        break
+
+                if province_key:
+                    districts_info = districts_data.get('districts', {}).get(province_key, {})
+                    barangays_map = districts_info.get('barangays', {})
+                    district_number = congressman_data.get('district_number')
+
+                    if district_number and district_number in barangays_map:
+                        # Get both full names and base names
+                        full_barangays = barangays_map[district_number]
+                        base_barangays = []
+                        for barangay in full_barangays:
+                            # Extract base name (remove numbers/suffixes)
+                            base_name = re.sub(r'\s+\d+$|.*\s+', '', barangay).strip()
+                            if base_name != barangay:  # Only add if different
+                                base_barangays.append(base_name)
+                        valid_barangays = [b.upper() for b in full_barangays + base_barangays]
+
+            # Also use barangays from congressman_data as fallback
+            if not valid_barangays:
+                valid_barangays = [b.upper() for b in congressman_data.get('barangays', []) if b]
+
+            # For Davao City, REQUIRE barangay match - no city-wide matching
+            if valid_barangays:
+                has_barangay_match = any(contains_word(combined_text, barangay) for barangay in valid_barangays)
+                if has_barangay_match:
+                    return (congressman_name, "district", match_score)
+
+            # If no barangay match found for Davao City, return no match
+            return (None, None, 0)
+
+        # 4. Get district identifier (province or city name)
         # If no district identifier, return None (unless we already matched via contractor above)
         district_identifier = None
         if congressman_data.get('provinces') and congressman_data['provinces']:
@@ -966,13 +1051,22 @@ class DynastyProjectsCacheGenerator:
                     # Include contractor in combined text for matching
                     combined_text = f'{proj_desc} {proj_province} {proj_municipality} {proj_contractor}'
 
+                    # Extract project year for term filtering
+                    project_year = None
+                    if hasattr(proj, 'Year') and proj.Year:
+                        try:
+                            project_year = int(proj.Year)
+                        except (ValueError, TypeError):
+                            pass
+
                     matches = []
                     for cm_name, cm_data in congressmen_data.items():
                         cm_name_result, match_type_result, match_score_result = self.match_project(
                             combined_text,
                             cm_data,
                             districts_data,
-                            proj_contractor
+                            proj_contractor,
+                            project_year
                         )
                         if cm_name_result and match_score_result > 0:
                             matches.append((cm_name_result, match_type_result, match_score_result))
