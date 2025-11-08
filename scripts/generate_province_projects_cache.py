@@ -12,7 +12,7 @@ import re
 import sys
 from pathlib import Path
 from datetime import datetime
-from typing import Dict, List, Any, Optional, Tuple, Set
+from typing import Dict, List, Any, Optional, Tuple, Set, Iterable
 from dotenv import load_dotenv
 
 # Add parent directory to path for imports
@@ -43,6 +43,103 @@ def load_substring_provinces() -> Set[str]:
         }
 
 SUBSTRING_PROVINCES = load_substring_provinces()
+
+
+def _build_phrase_patterns(phrases: Iterable[str]) -> List[Tuple[str, re.Pattern]]:
+    """Create compiled regex patterns that match complete phrases (case-insensitive).
+
+    Returns a list of tuples (phrase_lower, pattern) so we can treat very short aliases specially.
+    """
+    patterns: List[re.Pattern] = []
+    results: List[Tuple[str, re.Pattern]] = []
+    seen: Set[str] = set()
+    for phrase in phrases:
+        if not phrase:
+            continue
+        phrase_lower = phrase.strip().lower()
+        if not phrase_lower or phrase_lower in seen:
+            continue
+        seen.add(phrase_lower)
+        pattern = re.compile(r'\b' + re.escape(phrase_lower) + r'\b')
+        results.append((phrase_lower, pattern))
+    return results
+
+
+def load_metropolitan_manila_config() -> Dict[str, Any]:
+    """Load aliases and city mappings for Metropolitan Manila."""
+    default_data = {
+        "province": "Metropolitan Manila",
+        "aliases": [
+            "Metropolitan Manila",
+            "Metro Manila",
+            "National Capital Region",
+            "Manila Metropolitan Area",
+            "Greater Manila Area",
+            "NCR"
+        ],
+        "cities": [
+            {"name": "Caloocan City", "aliases": ["caloocan city", "city of caloocan", "caloocan"]},
+            {"name": "Las Piñas City", "aliases": ["las piñas city", "las pinas city", "city of las piñas", "city of las pinas", "las piñas", "las pinas"]},
+            {"name": "Makati City", "aliases": ["makati city", "city of makati", "makati"]},
+            {"name": "Malabon City", "aliases": ["malabon city", "city of malabon", "malabon"]},
+            {"name": "Mandaluyong City", "aliases": ["mandaluyong city", "city of mandaluyong", "mandaluyong"]},
+            {"name": "Manila", "aliases": ["manila", "manila city", "city of manila"]},
+            {"name": "Marikina City", "aliases": ["marikina city", "city of marikina", "marikina"]},
+            {"name": "Muntinlupa City", "aliases": ["muntinlupa city", "city of muntinlupa", "muntinlupa"]},
+            {"name": "Navotas City", "aliases": ["navotas city", "city of navotas", "navotas"]},
+            {"name": "Parañaque City", "aliases": ["parañaque city", "paranaque city", "city of parañaque", "city of paranaque", "parañaque", "paranaque"]},
+            {"name": "Pasay City", "aliases": ["pasay city", "city of pasay", "pasay"]},
+            {"name": "Pasig City", "aliases": ["pasig city", "city of pasig", "pasig"]},
+            {"name": "Quezon City", "aliases": ["quezon city", "city of quezon", "qc"]},
+            {"name": "San Juan City", "aliases": ["san juan city", "city of san juan", "san juan"]},
+            {"name": "Taguig City", "aliases": ["taguig city", "city of taguig", "taguig"]},
+            {"name": "Valenzuela City", "aliases": ["valenzuela city", "city of valenzuela", "valenzuela"]},
+            {"name": "Pateros", "aliases": ["pateros", "municipality of pateros", "pateros municipality"]}
+        ]
+    }
+
+    config_path = Path(__file__).parent.parent / 'metropolitan-manila-cities.json'
+    data = default_data
+    if config_path.exists():
+        try:
+            with open(config_path, 'r', encoding='utf-8') as f:
+                loaded = json.load(f)
+                if isinstance(loaded, dict):
+                    data = loaded
+        except Exception as exc:
+            print(f"⚠️  Warning: Could not load metropolitan-manila-cities.json ({exc}); using defaults.")
+
+    province_aliases = set()
+    province_aliases.add((data.get('province') or 'Metropolitan Manila').strip().lower())
+    for alias in data.get('aliases', []):
+        if alias:
+            province_aliases.add(alias.strip().lower())
+
+    province_patterns = _build_phrase_patterns(province_aliases)
+
+    city_aliases: Set[str] = set()
+    for city_entry in data.get('cities', []):
+        if not isinstance(city_entry, dict):
+            continue
+        names = []
+        if city_entry.get('name'):
+            names.append(city_entry['name'])
+        aliases = city_entry.get('aliases', []) or []
+        names.extend(aliases)
+        for alias in names:
+            if alias:
+                city_aliases.add(alias.strip().lower())
+
+    city_patterns = _build_phrase_patterns(city_aliases)
+
+    return {
+        "province_aliases": province_aliases,
+        "province_patterns": province_patterns,
+        "city_patterns": city_patterns
+    }
+
+
+METRO_MANILA_CONFIG = load_metropolitan_manila_config()
 
 
 def normalize_source_label(source: Optional[str]) -> str:
@@ -212,6 +309,20 @@ class ProvinceProjectsCacheGenerator:
             return False
         text_lower = text.lower()
         province_lower = self.province_name.lower()
+
+        # Special handling for Metropolitan Manila (NCR), which is composed of cities.
+        if province_lower in METRO_MANILA_CONFIG["province_aliases"]:
+            for alias, pattern in METRO_MANILA_CONFIG["province_patterns"]:
+                if pattern.search(text_lower):
+                    return True
+            for alias, pattern in METRO_MANILA_CONFIG["city_patterns"]:
+                # Very short aliases like "qc" can be noisy; require explicit word boundary plus uppercase match.
+                if len(alias) <= 2:
+                    if re.search(r'\b' + re.escape(alias) + r'\b', text):
+                        return True
+                if pattern.search(text_lower):
+                        return True
+            return False
         
         # Check if this province name contains any of the base names that need strict matching
         # (loaded from provinces-substring.json)
@@ -221,9 +332,21 @@ class ProvinceProjectsCacheGenerator:
             # Use word boundary matching to avoid cross-matching
             # e.g., "Samar" won't match "Northern Samar" or "Eastern Samar"
             pattern = r'\b' + re.escape(province_lower) + r'\b'
-            return bool(re.search(pattern, text_lower))
-        
-        return province_lower in text_lower
+            if not re.search(pattern, text_lower):
+                return False
+        else:
+            if province_lower not in text_lower:
+                return False
+
+        # Special-case guard for Quezon province vs Quezon City.
+        # Projects located in Quezon City should belong to Metro Manila caches.
+        if province_lower == 'quezon':
+            if re.search(r'\bquezon\s+city\b', text_lower) or re.search(r'\bcity\s+of\s+quezon\b', text_lower):
+                # Allow the match only when the text explicitly references the province.
+                if not re.search(r'\bprovince\s+of\s+quezon\b', text_lower) and not re.search(r'\bquezon\s+province\b', text_lower):
+                    return False
+
+        return True
     
     async def process_ssp_projects(self, client: FloodControlClient) -> List[Dict]:
         """Process SSP/MeiliSearch projects"""
