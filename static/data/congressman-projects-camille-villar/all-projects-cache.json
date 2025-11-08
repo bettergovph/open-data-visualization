@@ -24,6 +24,25 @@
     {
       "congressman": "Camille Villar",
       "source": "DIME",
+      "meilisearch_id": "087001f0-4208-4038-898a-8a030235dd88",
+      "project_name": "Construction of Road including Drainage, Tiongquiao, Las Piñas City",
+      "contractor": "I&E CONSTRUCTION CORPORATION (FORMERLY: I&E CONSTR",
+      "amount": 94086370.02,
+      "location": "Fourth District,  Las Piñas City",
+      "year": 2025,
+      "status": "Ongoing",
+      "match_type": "district",
+      "match_score": 27,
+      "is_city_wide": true,
+      "sources_count": 2,
+      "sources_list": [
+        "DIME",
+        "PhilGEPS"
+      ]
+    },
+    {
+      "congressman": "Camille Villar",
+      "source": "DIME",
       "meilisearch_id": null,
       "project_name": "Construction of Flood Control Structure, Zapote River Upstream and Its Tributaries, Las Piñas City",
       "contractor": "NO DATA AVAILABLE",
@@ -74,24 +93,6 @@
       "sources_count": 1,
       "sources_list": [
         "SSP"
-      ]
-    },
-    {
-      "congressman": "Camille Villar",
-      "source": "DIME",
-      "meilisearch_id": "087001f0-4208-4038-898a-8a030235dd88",
-      "project_name": "Construction of Road including Drainage, Tiongquiao, Las Piñas City",
-      "contractor": "I&E CONSTRUCTION CORPORATION (FORMERLY: I&E CONSTR",
-      "amount": 94086370.02,
-      "location": "Fourth District,  Las Piñas City",
-      "year": 2025,
-      "status": "Ongoing",
-      "match_type": "district",
-      "match_score": 17,
-      "is_city_wide": true,
-      "sources_count": 1,
-      "sources_list": [
-        "DIME"
       ]
     },
     {
@@ -700,14 +701,15 @@
       "contractor": "OMNICON BUILDERS",
       "amount": 31759279.38,
       "location": "Fourth District,  Las Piñas City",
-      "year": "N/A",
+      "year": 2025,
       "status": "Ongoing",
       "match_type": "district",
       "match_score": 0,
       "is_city_wide": true,
-      "sources_count": 1,
+      "sources_count": 2,
       "sources_list": [
-        "DIME"
+        "DIME",
+        "PhilGEPS"
       ]
     },
     {
@@ -733,17 +735,18 @@
       "source": "DIME",
       "meilisearch_id": "7165393e-e099-4597-8651-bb84c0922ad3",
       "project_name": "Construction of Flood Control Structure and Other improvements, Talon Creek, Las Piñas City",
-      "contractor": "NO DATA AVAILABLE",
+      "contractor": "PERSAN CONSTRUCTION, INC.",
       "amount": 30000000.0,
       "location": "Fourth District,  Las Piñas City,  Talon Dos",
-      "year": "N/A",
+      "year": 2023,
       "status": "Not Yet Started",
       "match_type": "district",
       "match_score": 0,
       "is_city_wide": true,
-      "sources_count": 1,
+      "sources_count": 2,
       "sources_list": [
-        "DIME"
+        "DIME",
+        "PhilGEPS"
       ]
     },
     {
@@ -863,14 +866,15 @@
       "contractor": "I&E CONSTRUCTION CORPORATION (FORMERLY: I&E CONSTR",
       "amount": 19305222.5,
       "location": "Fourth District,  Las Piñas City,  Pulang Lupa Uno",
-      "year": "N/A",
+      "year": 2024,
       "status": "Ongoing",
       "match_type": "district",
       "match_score": 0,
       "is_city_wide": true,
-      "sources_count": 1,
+      "sources_count": 2,
       "sources_list": [
-        "DIME"
+        "DIME",
+        "PhilGEPS"
       ]
     },
     {
@@ -886,9 +890,10 @@
       "match_type": "district",
       "match_score": 0,
       "is_city_wide": true,
-      "sources_count": 1,
+      "sources_count": 2,
       "sources_list": [
-        "DIME"
+        "DIME",
+        "PhilGEPS"
       ]
     },
     {
@@ -1005,7 +1010,7 @@
       "source": "DIME",
       "meilisearch_id": "1a08dcb7-a38b-4a6b-b9af-38e4cfb49fe0",
       "project_name": "Construction of Multi-Purpose Bldg., Talon 2, Las Pinas City Lone District Phase 2",
-      "contractor": "DAVHEZ TRADING & CONSTRUCTION",
+      "contractor": "JAP CONSTRUCTION & DEVELOPMENT CORPORATION",
       "amount": 4365354.06,
       "location": "Fourth District,  Las Piñas City,  Talon Dos",
       "year": 2025,
@@ -1013,9 +1018,10 @@
       "match_type": "district",
       "match_score": 0,
       "is_city_wide": true,
-      "sources_count": 1,
+      "sources_count": 2,
       "sources_list": [
-        "DIME"
+        "DIME",
+        "PhilGEPS"
       ]
     },
     {
@@ -1040,7 +1046,7 @@
   "summary": {
     "total": 57,
     "dime": 31,
-    "philgeps": 17,
+    "philgeps": 23,
     "ssp": 17,
     "infrawatch": 0,
     "microsite": 0,
@@ -1055,6 +1061,6 @@
     "contractor_count": 0,
     "contractor_cost": 0
   },
-  "generated_at": "2025-11-07T19:32:40.530817",
+  "generated_at": "2025-11-08T13:44:40.292815",
   "cache_version": "1.0"
 }
