@@ -57,6 +57,18 @@ def _normalize_cache_name(name: str) -> str:
     return cleaned.strip()
 
 
+def _normalize_congressman_slug(name: str) -> str:
+    if not name:
+        return ""
+    normalized = unicodedata.normalize("NFD", name)
+    stripped = "".join(ch for ch in normalized if unicodedata.category(ch) != "Mn")
+    slug = stripped.lower()
+    slug = slug.replace(" ", "-")
+    slug = re.sub(r"[^\w\-]", "", slug)
+    slug = re.sub(r"-{2,}", "-", slug)
+    return slug.strip("-")
+
+
 def _read_json_file(path: Path) -> Any:
     try:
         with open(path, "r", encoding="utf-8") as f:
@@ -66,6 +78,50 @@ def _read_json_file(path: Path) -> Any:
     except Exception as exc:
         print(f"⚠️ Failed to read JSON cache {path}: {exc}")
         return None
+
+
+def _get_dynasty_config_path() -> Path:
+    primary = DATA_ROOT.parent / "dynasty-projects-config.json"
+    if primary.exists():
+        return primary
+    fallback = DATA_ROOT / "dynasty-projects-config.json"
+    if fallback.exists():
+        return fallback
+    return primary
+
+
+@lru_cache(maxsize=1)
+def _load_dynasty_config() -> Dict[str, Any]:
+    config_path = _get_dynasty_config_path()
+    data = _read_json_file(config_path)
+    if isinstance(data, dict):
+        return data
+    return {}
+
+
+def _find_congressman_cache(identifier: str) -> Optional[Path]:
+    slug = _normalize_congressman_slug(identifier)
+    candidate = DATA_ROOT / f"congressman-projects-{slug}"
+    if candidate.exists():
+        return candidate
+
+    normalized_target = _normalize_cache_name(identifier)
+    for cache_dir in DATA_ROOT.glob("congressman-projects-*"):
+        if not cache_dir.is_dir():
+            continue
+        summary_data = _read_json_file(cache_dir / "summary.json")
+        display_name = None
+        if isinstance(summary_data, dict):
+            display_name = summary_data.get("congressman")
+        if not display_name:
+            all_cache = _read_json_file(cache_dir / "all-projects-cache.json")
+            if isinstance(all_cache, dict):
+                display_name = all_cache.get("congressman")
+        if display_name and _normalize_cache_name(display_name) == normalized_target:
+            return cache_dir
+    if candidate.exists():
+        return candidate
+    return None
 
 
 def _gather_congressman_cache_stats() -> Dict[str, Any]:
@@ -150,6 +206,28 @@ def _gather_congressman_cache_stats() -> Dict[str, Any]:
     
     stats["names"] = sorted(entry["name"] for entry in unique_map.values())
     return stats
+
+
+def _load_congressman_cache(slug_or_name: str) -> Optional[Dict[str, Any]]:
+    cache_dir = _find_congressman_cache(slug_or_name)
+    if not cache_dir:
+        return None
+    all_projects_path = cache_dir / "all-projects-cache.json"
+    cache_data = _read_json_file(all_projects_path)
+    if not isinstance(cache_data, dict):
+        return None
+
+    summary_path = cache_dir / "summary.json"
+    summary_data = _read_json_file(summary_path)
+    if isinstance(summary_data, dict):
+        cache_data.setdefault("summary", summary_data.get("summary") or {})
+        cache_data.setdefault("dashboard_stats", summary_data.get("dashboard_stats") or {})
+        cache_data.setdefault("generated_at", summary_data.get("generated_at"))
+        cache_data.setdefault("congressman", summary_data.get("congressman") or cache_data.get("congressman"))
+        cache_data.setdefault("total_cost", summary_data.get("total_cost"))
+    cache_data["cache_dir"] = str(cache_dir)
+    cache_data["slug"] = cache_dir.name.replace("congressman-projects-", "", 1)
+    return cache_data
 
 
 def _gather_province_cache_stats() -> Dict[str, Any]:
@@ -4682,69 +4760,203 @@ async def dynasty_projects_all_api(
 
 @app.get("/api/dynasty-projects/congressmen")
 async def dynasty_projects_congressmen_api():
-    """Get list of all congressmen from JSON config with their districts"""
+    """Get list of all congressmen from JSON config with cache metadata."""
     try:
-        # Load from dynasty-projects-config.json
-        config_path = Path(__file__).resolve().parent / "dynasty-projects-config.json"
-        if not config_path.exists():
-            config_path = Path(__file__).resolve().parent / "static" / "data" / "dynasty-projects-config.json"
-        
-        if not config_path.exists():
-            return JSONResponse({
-                "success": False,
-                "error": "dynasty-projects-config.json not found",
-                "congressmen": []
-            })
-        
-        with open(config_path, 'r', encoding='utf-8') as f:
-            config_data = json.load(f)
-        
-        target_congressmen = config_data.get('target_congressmen', [])
-        
+        config_data = _load_dynasty_config()
+        target_congressmen = config_data.get("target_congressmen", [])
+
         congressmen_list = []
-        seen_names = set()
-        
+        seen_names: Set[str] = set()
+
         for entry in target_congressmen:
-            display_name = entry.get('display_name') or entry.get('name')
+            display_name = entry.get("display_name") or entry.get("name")
             if not display_name:
                 continue
-            
-            # Deduplicate by normalized name
-            normalized = display_name.strip().lower()
-            if normalized in seen_names:
+
+            normalized_key = _normalize_cache_name(display_name)
+            if normalized_key in seen_names:
                 continue
-            seen_names.add(normalized)
-            
-            province = entry.get('province') or ''
-            district_number = entry.get('district_number') or ''
-            
-            # Determine if party-list: no province or explicitly marked
-            is_partylist = entry.get('is_partylist', False) or (not province)
-        
-            congressmen_list.append({
-                "display_name": display_name,
-                "name": display_name,
-                "province": province,
-                "district_number": district_number,
-                "is_partylist": is_partylist,
-                "id": entry.get('id')
-            })
-        
-        return JSONResponse({
-            "success": True,
-            "source": "json_config",
-            "congressmen": congressmen_list
-        })
-        
-    except Exception as e:
-        print(f"Error in dynasty_projects_congressmen_api: {e}")
+            seen_names.add(normalized_key)
+
+            cache_dir = _find_congressman_cache(display_name)
+            has_cache = cache_dir is not None
+            slug = (
+                cache_dir.name.replace("congressman-projects-", "", 1)
+                if has_cache
+                else _normalize_congressman_slug(display_name)
+            )
+
+            summary_data = {}
+            total_cost = None
+            generated_at = None
+            dashboard_stats = {}
+
+            if has_cache:
+                summary_path = cache_dir / "summary.json"
+                summary_file = _read_json_file(summary_path)
+                if isinstance(summary_file, dict):
+                    summary_data = summary_file.get("summary") or {}
+                    total_cost = summary_file.get("total_cost")
+                    generated_at = summary_file.get("generated_at")
+                else:
+                    all_cache_data = _read_json_file(cache_dir / "all-projects-cache.json")
+                    if isinstance(all_cache_data, dict):
+                        summary_data = all_cache_data.get("summary") or {}
+                        dashboard_stats = all_cache_data.get("dashboard_stats") or {}
+                        generated_at = all_cache_data.get("generated_at")
+                        total_cost = dashboard_stats.get("total_cost_all")
+
+            province = entry.get("province") or ""
+            district_number = entry.get("district_number") or ""
+            is_partylist = entry.get("is_partylist")
+            if is_partylist is None:
+                is_partylist = not province and not district_number
+
+            congressmen_list.append(
+                {
+                    "display_name": display_name,
+                    "name": display_name,
+                    "province": province,
+                    "district_number": district_number,
+                    "is_city_district": bool(entry.get("is_city_district")),
+                    "is_partylist": bool(is_partylist),
+                    "slug": slug,
+                    "cache_available": has_cache,
+                    "summary": summary_data,
+                    "dashboard_stats": dashboard_stats,
+                    "total_projects": summary_data.get("total"),
+                    "total_cost": total_cost,
+                    "generated_at": generated_at,
+                    "terms": entry.get("terms"),
+                    "barangays": entry.get("barangays", []),
+                    "id": entry.get("id"),
+                    "raw_entry": entry,
+                }
+            )
+
+        congressmen_list.sort(key=lambda item: item["display_name"])
+
+        return JSONResponse(
+            {
+                "success": True,
+                "source": "json_config",
+                "congressmen": congressmen_list,
+                "count": len(congressmen_list),
+                "generated_at": datetime.utcnow().isoformat(),
+            }
+        )
+
+    except Exception as exc:
+        print(f"Error in dynasty_projects_congressmen_api: {exc}")
         import traceback
+
         traceback.print_exc()
-        return JSONResponse({
-            "success": False,
-            "error": str(e),
-            "congressmen": []
-        })
+        return JSONResponse(
+            {
+                "success": False,
+                "error": str(exc),
+                "congressmen": [],
+            }
+        )
+
+
+@app.get("/api/dynasty-projects/congressman")
+async def dynasty_projects_congressman_detail_api(
+    name: Optional[str] = Query(None, description="Display name of the congressman"),
+    slug: Optional[str] = Query(None, description="Slug of the congressman cache directory"),
+    page: int = Query(1, ge=1, description="Page number"),
+    limit: int = Query(2500, ge=1, le=25000, description="Number of records per page"),
+    include_projects: bool = Query(True, description="Include project list in response"),
+):
+    """Load cached projects for a specific congressman."""
+    identifier = slug or name
+    if not identifier:
+        raise HTTPException(status_code=400, detail="name or slug query parameter is required")
+
+    cache_data = _load_congressman_cache(identifier)
+    if not cache_data:
+        raise HTTPException(status_code=404, detail=f"No cached projects found for '{identifier}'")
+
+    projects = cache_data.get("projects") or []
+    total_projects = len(projects)
+    total_pages = max(1, (total_projects + limit - 1) // limit)
+    offset = (page - 1) * limit
+    paginated_projects = projects[offset : offset + limit] if include_projects else []
+
+    summary = cache_data.get("summary") or {}
+    dashboard_stats = cache_data.get("dashboard_stats") or {}
+    generated_at = cache_data.get("generated_at")
+    congressman_name = cache_data.get("congressman") or name or slug
+    slug_value = cache_data.get("slug") or _normalize_congressman_slug(congressman_name)
+
+    config_data = _load_dynasty_config()
+    config_entry = None
+    normalized_target = _normalize_cache_name(congressman_name)
+    for entry in config_data.get("target_congressmen", []):
+        display_name = entry.get("display_name") or entry.get("name") or ""
+        if display_name and _normalize_cache_name(display_name) == normalized_target:
+            config_entry = entry
+            break
+
+    return JSONResponse(
+        {
+            "success": True,
+            "congressman": {
+                "name": congressman_name,
+                "slug": slug_value,
+                "summary": summary,
+                "dashboard_stats": dashboard_stats,
+                "generated_at": generated_at,
+                "total_projects": total_projects,
+                "config": config_entry,
+            },
+            "projects": paginated_projects,
+            "page": page,
+            "limit": limit,
+            "total": total_projects,
+            "total_pages": total_pages,
+            "cache_version": cache_data.get("cache_version", "1.0"),
+        }
+    )
+
+
+@app.get("/api/dynasty-projects/overview")
+async def dynasty_projects_overview_api():
+    """Return pre-computed overview statistics and chart data."""
+    ranking_path = DATA_ROOT / "congressman-ranking.json"
+    cache_data = _read_json_file(ranking_path)
+
+    if not isinstance(cache_data, dict):
+        return JSONResponse(
+            {
+                "success": False,
+                "error": "congressman-ranking cache not found; run cache generator first",
+            },
+            status_code=503,
+        )
+
+    ranking_by_count = cache_data.get("ranking_by_count") or []
+    ranking_by_cost = cache_data.get("ranking_by_cost") or ranking_by_count
+    top_10_by_cost = cache_data.get("top_10_by_cost") or ranking_by_cost[:10]
+    top_10_by_count = cache_data.get("top_10_by_count") or ranking_by_count[:10]
+
+    response = {
+        "success": True,
+        "summary": cache_data.get("summary") or {},
+        "dashboard_stats": cache_data.get("dashboard_stats") or {},
+        "chart_data": top_10_by_cost,
+        "chart_data_top_10_by_cost": top_10_by_cost,
+        "chart_data_top_10_by_count": top_10_by_count,
+        "chart_data_by_count": ranking_by_count,
+        "chart_data_by_cost": ranking_by_cost,
+        "total_congressmen": cache_data.get("total_congressmen"),
+        "generated_at": cache_data.get("generated_at"),
+        "cache_version": cache_data.get("cache_version", "3.0"),
+        "source": "congressman-ranking.json",
+    }
+
+    return JSONResponse(response)
+
 
 @app.get("/api/dynasty-projects/search")
 async def dynasty_projects_search_api(
