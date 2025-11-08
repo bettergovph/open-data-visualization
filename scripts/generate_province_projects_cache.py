@@ -12,7 +12,7 @@ import re
 import sys
 from pathlib import Path
 from datetime import datetime
-from typing import Dict, List, Any, Optional, Tuple
+from typing import Dict, List, Any, Optional, Tuple, Set
 from dotenv import load_dotenv
 
 # Add parent directory to path for imports
@@ -24,6 +24,25 @@ from infrawatch_postgres_client import get_infrawatch_connection
 load_dotenv()
 
 SOURCE_PRIORITY = ["SSP", "DIME", "PhilGEPS", "Microsite"]
+
+# Load substring provinces configuration
+def load_substring_provinces() -> Set[str]:
+    """Load the list of province names that need word boundary matching"""
+    config_path = Path(__file__).parent.parent / 'provinces-substring.json'
+    try:
+        with open(config_path, 'r', encoding='utf-8') as f:
+            config = json.load(f)
+            return set(config.get('substring_provinces', []))
+    except Exception as e:
+        print(f"⚠️  Warning: Could not load provinces-substring.json: {e}")
+        # Fallback to hardcoded list
+        return {
+            'agusan', 'camarines', 'cotabato', 'davao', 'ilocos', 
+            'lanao', 'leyte', 'mindoro', 'misamis', 'negros', 
+            'samar', 'surigao', 'zamboanga'
+        }
+
+SUBSTRING_PROVINCES = load_substring_provinces()
 
 
 def normalize_source_label(source: Optional[str]) -> str:
@@ -49,6 +68,41 @@ def normalize_text_for_key(value: Optional[str]) -> str:
     if not value:
         return ""
     return " ".join(str(value).strip().lower().split())
+
+
+def sanitize_filename(name: str) -> str:
+    """Sanitize a string to be used as a filename"""
+    if not name:
+        return "unknown"
+    
+    # Remove or replace problematic characters
+    # Replace newlines, tabs, and other whitespace with space
+    sanitized = re.sub(r'[\n\r\t]+', ' ', name)
+    
+    # Replace multiple spaces with single space
+    sanitized = re.sub(r'\s+', ' ', sanitized)
+    
+    # Remove or replace characters that are invalid in filenames
+    # Keep alphanumeric, spaces, hyphens, underscores, periods, and parentheses
+    sanitized = re.sub(r'[^\w\s\-\.\(\)]+', '-', sanitized)
+    
+    # Replace spaces with hyphens
+    sanitized = sanitized.replace(' ', '-')
+    
+    # Remove multiple consecutive hyphens
+    sanitized = re.sub(r'-+', '-', sanitized)
+    
+    # Remove leading/trailing hyphens
+    sanitized = sanitized.strip('-')
+    
+    # Lowercase for consistency
+    sanitized = sanitized.lower()
+    
+    # Limit length to avoid filesystem issues (max 200 chars)
+    if len(sanitized) > 200:
+        sanitized = sanitized[:200].rstrip('-')
+    
+    return sanitized or "unknown"
 
 
 def normalize_amount_for_key(value: Any) -> str:
@@ -159,10 +213,13 @@ class ProvinceProjectsCacheGenerator:
         text_lower = text.lower()
         province_lower = self.province_name.lower()
         
-        # For Davao provinces, use exact matching to avoid cross-matching
-        if 'davao' in province_lower:
-            # Use word boundary matching for Davao provinces
-            import re
+        # Check if this province name contains any of the base names that need strict matching
+        # (loaded from provinces-substring.json)
+        needs_strict_matching = any(base in province_lower for base in SUBSTRING_PROVINCES)
+        
+        if needs_strict_matching:
+            # Use word boundary matching to avoid cross-matching
+            # e.g., "Samar" won't match "Northern Samar" or "Eastern Samar"
             pattern = r'\b' + re.escape(province_lower) + r'\b'
             return bool(re.search(pattern, text_lower))
         
@@ -842,7 +899,7 @@ class ProvinceProjectsCacheGenerator:
                 ]
                 
                 # Create contractor cache file
-                contractor_cache_file = cache_dir / f'{contractor.lower().replace(" ", "-").replace("/", "-")}-cache.json'
+                contractor_cache_file = cache_dir / f'{sanitize_filename(contractor)}-cache.json'
                 contractor_cache_data = {
                     "success": True,
                     "province": self.province_name,
