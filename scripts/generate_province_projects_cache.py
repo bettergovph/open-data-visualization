@@ -8,6 +8,7 @@ import asyncio
 import asyncpg
 import json
 import os
+import re
 import sys
 from pathlib import Path
 from datetime import datetime
@@ -17,6 +18,7 @@ from dotenv import load_dotenv
 # Add parent directory to path for imports
 sys.path.insert(0, str(Path(__file__).parent.parent))
 from flood_client import FloodControlClient
+from infrawatch_postgres_client import get_infrawatch_connection
 
 # Load environment variables
 load_dotenv()
@@ -337,6 +339,178 @@ class ProvinceProjectsCacheGenerator:
             traceback.print_exc()
         
         return all_projects
+
+    async def process_infrawatch_projects(self, infrawatch_conn) -> List[Dict]:
+        """Process Infrawatch (Microsite) projects"""
+        projects: List[Dict] = []
+        if not infrawatch_conn:
+            print("⚠️  Skipping Infrawatch processing (no connection)")
+            return projects
+
+        try:
+            print(f"🔍 Searching Infrawatch for {self.province_name} projects...")
+
+            province_pattern = f"%{self.province_name}%"
+            query = """
+                SELECT data
+                FROM infrawatch_projects_rows
+                WHERE (
+                      COALESCE(data->>'Province', '') ILIKE $1 OR
+                      COALESCE(data->>'Project Location', '') ILIKE $1 OR
+                      COALESCE(data->>'Location', '') ILIKE $1 OR
+                      COALESCE(data->>'City/Municipality', '') ILIKE $1 OR
+                      COALESCE(data->>'City / Municipality', '') ILIKE $1 OR
+                      COALESCE(data->>'Municipality', '') ILIKE $1 OR
+                      COALESCE(data->>'Contract Details', '') ILIKE $1 OR
+                      COALESCE(data->>'Project Description', '') ILIKE $1 OR
+                      COALESCE(data->>'Name of Project', '') ILIKE $1 OR
+                      COALESCE(data->>'Project', '') ILIKE $1 OR
+                      COALESCE(data->>'Project Name', '') ILIKE $1
+                  )
+            """
+            rows = await infrawatch_conn.fetch(query, province_pattern)
+            print(f"   Found {len(rows)} projects from Infrawatch")
+
+            def parse_amount(value: Any) -> float:
+                if value is None:
+                    return 0.0
+                if isinstance(value, (int, float)):
+                    return float(value)
+                if isinstance(value, str):
+                    cleaned = re.sub(r"[^\d.\-]", "", value)
+                    if cleaned.strip() == "":
+                        return 0.0
+                    try:
+                        return float(cleaned)
+                    except ValueError:
+                        return 0.0
+                return 0.0
+
+            def detect_year(*values: Any) -> str:
+                for value in values:
+                    if value is None:
+                        continue
+                    if isinstance(value, (int, float)):
+                        year_int = int(value)
+                        if 1900 <= year_int <= 2100:
+                            return str(year_int)
+                    if isinstance(value, str):
+                        match = re.search(r"(20\d{2}|19\d{2})", value)
+                        if match:
+                            return match.group(1)
+                        cleaned = value.strip()
+                        if len(cleaned) >= 4:
+                            return cleaned
+                return "N/A"
+
+            for row in rows:
+                record = row.get("data")
+                if isinstance(record, str):
+                    try:
+                        record = json.loads(record)
+                    except json.JSONDecodeError:
+                        continue
+
+                if not isinstance(record, dict):
+                    continue
+
+                province_value = record.get("Province") or record.get("Province/Location")
+                municipality_value = (
+                    record.get("City/Municipality")
+                    or record.get("City / Municipality")
+                    or record.get("Municipality")
+                )
+                barangay_value = record.get("Barangay")
+                location_candidates = [
+                    record.get("Project Location"),
+                    record.get("Location"),
+                    record.get("Detailed Location"),
+                    record.get("Address"),
+                    province_value,
+                    municipality_value,
+                    barangay_value,
+                ]
+
+                # Ensure project is relevant to province
+                if not any(self.matches_province(str(val)) for val in location_candidates if val):
+                    description_fields = [
+                        record.get("Contract Details"),
+                        record.get("Project Description"),
+                        record.get("Name of Project"),
+                        record.get("Project"),
+                    ]
+                    if not any(self.matches_province(str(val)) for val in description_fields if val):
+                        continue
+
+                amount_value = parse_amount(
+                    record.get("Contract Price")
+                    or record.get("Contract Amount")
+                    or record.get("Amount")
+                    or record.get("Project Cost")
+                )
+
+                contractor_value = (
+                    record.get("Contractor")
+                    or record.get("Contractor Name")
+                    or record.get("Contractor_Name")
+                    or record.get("Supplier")
+                    or "N/A"
+                )
+
+                project_name = (
+                    record.get("Contract Details")
+                    or record.get("Project Description")
+                    or record.get("Project Name")
+                    or record.get("Name of Project")
+                    or "N/A"
+                )
+
+                status_value = (
+                    record.get("Contract Status")
+                    or record.get("Status")
+                    or record.get("Project Status")
+                    or "N/A"
+                )
+
+                year_value = detect_year(
+                    record.get("Contract Effectivity Date"),
+                    record.get("Contract Date"),
+                    record.get("Date of Award"),
+                    record.get("Year"),
+                    record.get("Year Awarded"),
+                )
+
+                location_parts = [
+                    part for part in [
+                        province_value,
+                        municipality_value,
+                        barangay_value,
+                        record.get("Project Location"),
+                        record.get("Location"),
+                    ] if part
+                ]
+                location_str = ", ".join(location_parts) if location_parts else "N/A"
+
+                projects.append({
+                    "source": "Infrawatch",
+                    "meilisearch_id": None,
+                    "project_name": project_name,
+                    "contractor": contractor_value,
+                    "amount": amount_value,
+                    "location": location_str,
+                    "province": province_value or "N/A",
+                    "municipality": municipality_value or "N/A",
+                    "barangay": barangay_value or "N/A",
+                    "year": year_value,
+                    "status": status_value,
+                })
+
+        except Exception as exc:
+            print(f"❌ Error processing Infrawatch projects: {exc}")
+            import traceback
+            traceback.print_exc()
+
+        return projects
     
     async def generate_cache(self):
         """Generate the cached JSON file"""
@@ -358,6 +532,7 @@ class ProvinceProjectsCacheGenerator:
             password=os.getenv('POSTGRES_PASSWORD', ''),
             database=os.getenv('POSTGRES_DB_PHILGEPS', 'philgeps')
         )
+        infrawatch_conn = await get_infrawatch_connection()
         
         try:
             # Initialize FloodControlClient for SSP/MeiliSearch
@@ -367,8 +542,9 @@ class ProvinceProjectsCacheGenerator:
             ssp_projects = await self.process_ssp_projects(client)
             dime_projects = await self.process_dime_projects(dime_conn)
             philgeps_projects = await self.process_philgeps_projects(philgeps_conn)
+            infrawatch_projects = await self.process_infrawatch_projects(infrawatch_conn)
             
-            all_projects = ssp_projects + dime_projects + philgeps_projects
+            all_projects = ssp_projects + dime_projects + philgeps_projects + infrawatch_projects
             print(f"✅ Total projects found: {len(all_projects)}")
             
             # Deduplicate projects across sources
@@ -458,7 +634,7 @@ class ProvinceProjectsCacheGenerator:
                 proj['sources_count'] = len(sources_list)
                 entry_id = id(proj)
                 if entry_id not in seen_entries:
-                unique_projects.append(proj)
+                    unique_projects.append(proj)
                     seen_entries.add(entry_id)
             
             # Sort by amount descending
@@ -797,6 +973,7 @@ class ProvinceProjectsCacheGenerator:
             print(f"   SSP: {summary['ssp']}")
             print(f"   DIME: {summary['dime']}")
             print(f"   PhilGEPS: {summary['philgeps']}")
+            print(f"   Microsite: {summary['microsite']}")
             print(f"   Total cost: ₱{total_cost:,.2f}")
             print(f"   Contractors: {len(contractor_summaries)}")
             print(f"   Province cache: {province_cache_file}")
@@ -805,6 +982,8 @@ class ProvinceProjectsCacheGenerator:
         finally:
             await dime_conn.close()
             await philgeps_conn.close()
+            if infrawatch_conn:
+                await infrawatch_conn.close()
 
 async def main():
     import sys
