@@ -53,17 +53,17 @@ class DynastyProjectsCacheGenerator:
         os.replace(temp_path, path)
 
     def _regenerate_top_congressmen_cache(self) -> None:
-        """Refresh the top-200 cache so the integrated tab stays up to date."""
-        top_generator = Path(__file__).with_name('generate_top_200_congressmen.py')
-        if not top_generator.exists():
-            self._log("⚠️  Top-200 generator script not found; skipping refresh.")
+        """Refresh the full ranking cache so the integrated tab stays up to date."""
+        ranking_generator = Path(__file__).with_name('generate_congressman_ranking.py')
+        if not ranking_generator.exists():
+            self._log("⚠️  Ranking generator script not found; skipping refresh.")
             return
 
         try:
-            subprocess.run([sys.executable, str(top_generator)], check=True)
-            self._log("✅ Refreshed top-200-congressmen.json cache")
+            subprocess.run([sys.executable, str(ranking_generator)], check=True)
+            self._log("✅ Refreshed congressman-ranking.json cache")
         except subprocess.CalledProcessError as exc:
-            self._log(f"💥 Failed to refresh top-200 cache: {exc}")
+            self._log(f"💥 Failed to refresh ranking cache: {exc}")
 
     @staticmethod
     def _chunk_list(items: List[Any], max_chunks: int) -> List[List[Any]]:

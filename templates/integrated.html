@@ -234,12 +234,8 @@ function toggleMobileMenu() {
                             <div style="display: flex; flex-direction: column; align-items: center; gap: 15px;">
                                 <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 20px; width: 100%; align-items: center;">
                                     <div style="display: flex; flex-direction: column; gap: 12px;">
-                                        <label style="font-weight: 700; color: #333; font-size: 16px; text-transform: uppercase; letter-spacing: 0.5px; text-align: left;">Filter by Province</label>
+                                        <label style="font-weight: 700; color: #333; font-size: 16px; text-transform: uppercase; letter-spacing: 0.5px; text-align: left;">Filter by Type</label>
                                         <div style="display: flex; align-items: center; gap: 18px; flex-wrap: wrap;">
-                                            <label style="display: flex; align-items: center; gap: 10px; font-weight: 600; color: #333; font-size: 15px; margin: 0;">
-                                                <input type="radio" name="congressman-filter-mode" value="All" checked onchange="handleModeChange(this.value)" style="accent-color: #333;">
-                                                All
-                                            </label>
                                             <label style="display: flex; align-items: center; gap: 10px; font-weight: 600; color: #333; font-size: 15px; margin: 0;">
                                                 <input type="radio" id="province-mode-radio" name="congressman-filter-mode" value="Province" onchange="handleModeChange(this.value)" style="accent-color: #333;">
                                                 Province
@@ -483,19 +479,13 @@ function toggleMobileMenu() {
                                     <h4 style="margin: 0; color: #333; font-size: 18px; font-weight: 600;">Congressmen by Project Count & Total Cost</h4>
                                     <div style="display: flex; flex-wrap: wrap; gap: 10px; align-items: center; justify-content: flex-end;">
                                         <div style="display: flex; gap: 8px; align-items: center; background: rgba(250, 204, 21, 0.14); padding: 6px 12px; border-radius: 6px; border: 1px solid rgba(250, 204, 21, 0.4);">
-                                            <input id="chart-focus-input" list="chart-focus-list" placeholder="Focus on congressman..." style="padding: 8px 12px; border: 2px solid #facc15; border-radius: 6px; font-size: 13px; font-weight: 600; min-width: 220px;" />
-                                            <button id="chart-focus-clear-btn" style="padding: 8px 14px; background: white; color: #92400e; border: 2px solid #facc15; border-radius: 6px; font-size: 13px; font-weight: 600; cursor: pointer; transition: all 0.3s ease;" onmouseover="this.style.background='#fef3c7'; this.style.transform='translateY(-2px)';" onmouseout="this.style.background='white'; this.style.transform='translateY(0)';">✖ Clear</button>
-                                            <datalist id="chart-focus-list"></datalist>
+                                            <input id="chart-focus-input" list="congressman-list" placeholder="Focus on congressman..." style="padding: 8px 12px; border: 2px solid #facc15; border-radius: 6px; font-size: 13px; font-weight: 600; min-width: 220px;" />
+                                            <button id="chart-focus-clear-btn" style="padding: 8px 14px; background: white; color: #92400e; border: 2px solid #facc15; border-radius: 6px; font-size: 13px; font-weight: 600; cursor: pointer; transition: all 0.3s ease;" onmouseover="this.style.background='#fef3c7'; this.style.transform='translateY(-2px)';" onmouseout="this.style.background='white'; this.style.transform='translateY(0)';">↺ Reset Top 10</button>
                                         </div>
                                         <button id="sort-by-count-btn" style="padding: 10px 20px; background: #333; color: white; border: 2px solid #333; border-radius: 6px; font-size: 14px; font-weight: 600; cursor: pointer; transition: all 0.3s ease; box-shadow: 0 4px 12px rgba(0,0,0,0.2);" onclick="sortChartBy('count')">🔢 By Count</button>
                                         <button id="sort-by-cost-btn" style="padding: 10px 20px; background: #7b1fa2; color: white; border: 2px solid #7b1fa2; border-radius: 6px; font-size: 14px; font-weight: 600; cursor: pointer; transition: all 0.3s ease; box-shadow: 0 4px 12px rgba(0,0,0,0.2);" onclick="sortChartBy('cost')">💰 By Cost</button>
                                         <button id="copy-chart-btn" style="padding: 10px 20px; background: #333; color: white; border: 2px solid #333; border-radius: 6px; font-size: 14px; font-weight: 600; cursor: pointer; transition: all 0.3s ease; box-shadow: 0 4px 12px rgba(0,0,0,0.2);" onmouseover="this.style.background='#667eea'; this.style.borderColor='#667eea'; this.style.transform='translateY(-2px)'; this.style.boxShadow='0 6px 16px rgba(102, 126, 234, 0.4)';" onmouseout="this.style.background='#333'; this.style.borderColor='#333'; this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 12px rgba(0,0,0,0.2)';">📋 Copy</button>
-                                        <div style="display: flex; gap: 8px; align-items: center; background: rgba(51,51,51,0.05); padding: 6px 12px; border-radius: 6px;">
-                                            <button id="chart-prev-page-btn" style="padding: 8px 16px; background: #333; color: white; border: 2px solid #333; border-radius: 6px; font-size: 13px; font-weight: 600; cursor: pointer; transition: all 0.3s ease;" onmouseover="if(!this.disabled){this.style.background='#667eea'; this.style.borderColor='#667eea'; this.style.transform='translateY(-2px)';}" onmouseout="if(!this.disabled){this.style.background='#333'; this.style.borderColor='#333'; this.style.transform='translateY(0)';}">⬅️ Prev</button>
-                                            <span id="chart-page-info" style="font-size: 13px; font-weight: 600; color: #333;">Page 1 of 1</span>
-                                            <button id="chart-next-page-btn" style="padding: 8px 16px; background: #333; color: white; border: 2px solid #333; border-radius: 6px; font-size: 13px; font-weight: 600; cursor: pointer; transition: all 0.3s ease;" onmouseover="if(!this.disabled){this.style.background='#667eea'; this.style.borderColor='#667eea'; this.style.transform='translateY(-2px)';}" onmouseout="if(!this.disabled){this.style.background='#333'; this.style.borderColor='#333'; this.style.transform='translateY(0)';}">Next ➡️</button>
-                                        </div>
-                                        <button id="chart-reset-btn" style="padding: 8px 16px; background: #fffbea; color: #92400e; border: 2px solid #f59e0b; border-radius: 6px; font-size: 13px; font-weight: 600; cursor: pointer; transition: all 0.3s ease; box-shadow: 0 4px 12px rgba(245, 158, 11, 0.2);" onmouseover="this.style.background='#fef3c7'; this.style.transform='translateY(-2px)';" onmouseout="this.style.background='#fffbea'; this.style.transform='translateY(0)';">↺ Reset Top 200</button>
+                                        <button id="chart-reset-btn" style="padding: 8px 16px; background: #fffbea; color: #92400e; border: 2px solid #f59e0b; border-radius: 6px; font-size: 13px; font-weight: 600; cursor: pointer; transition: all 0.3s ease; box-shadow: 0 4px 12px rgba(245, 158, 11, 0.2);" onmouseover="this.style.background='#fef3c7'; this.style.transform='translateY(-2px)';" onmouseout="this.style.background='#fffbea'; this.style.transform='translateY(0)';">↺ Reset Top 10 view</button>
                                     </div>
                                 </div>
                                 <div id="combinedChart-container" style="width: 100%; max-height: 760px; overflow-y: auto;">
@@ -969,14 +959,17 @@ let initialCongressmanNames = [];
 let availableCongressmanNamesMap = new Map();
 let integratedCoverageSummaryData = null;
 let integratedCoverageSummaryMessage = '';
+let currentProjectsMessage = '';
 
 // Chart instance and data
 let combinedChart = null;
-let currentChartData = null;
+let currentChartData = [];
 let currentSortMode = 'cost';
 let prefetchedVisualData = null;
-let currentChartTop200ByCount = null;
-let currentChartTop200ByCost = null;
+let rankingByCount = [];
+let rankingByCost = [];
+let topTenByCount = [];
+let topTenByCost = [];
 let currentChartSortedData = [];
 let chartPage = 1;
 let chartTotalPages = 1;
@@ -1136,8 +1129,12 @@ async function loadConfigCongressmen() {
                     province: item.province || '',
                     district_number: item.district_number || '',
                     is_partylist: item.is_partylist !== undefined
-                        ? item.is_partylist
-                        : (!item.province || !item.district_number)
+                ? item.is_partylist
+                : (!item.province || !item.district_number),
+            slug: item.slug || normalizeCongressmanSlug(name),
+            summary: item.summary || null,
+            dashboard_stats: item.dashboard_stats || null,
+            cache_available: item.cache_available || false
                 });
             });
         };
@@ -1317,92 +1314,188 @@ function updateCongressmanDatalist() {
 }
 
 async function loadAllProjects() {
-    document.getElementById('table-loading').style.display = 'block';
-    document.getElementById('results-summary').style.display = 'none';
-    document.getElementById('projects-tbody').innerHTML = '<tr><td colspan="8" style="padding: 20px; text-align: center;">Loading first page...</td></tr>';
-    
+    const loadingIndicator = document.getElementById('table-loading');
+    const summaryPanel = document.getElementById('results-summary');
+    const tbody = document.getElementById('projects-tbody');
+    if (loadingIndicator) {
+        loadingIndicator.style.display = 'block';
+    }
+    if (summaryPanel) {
+        summaryPanel.style.display = 'none';
+    }
+    if (tbody) {
+        tbody.innerHTML = '<tr><td colspan="8" style="padding: 20px; text-align: center;">Preparing congressman coverage…</td></tr>';
+    }
+
     try {
-        const data = await fetchAllDynastyProjects();
-        prefetchedVisualData = data;
-        await loadVisualData(data);
-        
-        document.getElementById('table-loading').style.display = 'none';
-        
-        if (data.projects && data.projects.length > 0) {
-            allProjectsData = data.projects;
-            buildAvailableCongressmanNames();
-            filterInitialCongressmanNames();
-            await loadConfigCongressmen();
-            filterConfigByAvailableData();
-            populateProvinceFilter();
-            updateCongressmanDatalist();
-            applyFilter();
-            
-            // Show background loading indicator if more pages are being fetched
-            if (dynastyProjectsMetadata && dynastyProjectsMetadata.total_pages > 1) {
-                showBackgroundLoadingIndicator();
-            }
-        } else {
-            document.getElementById('projects-tbody').innerHTML = 
-                `<tr><td colspan="8" style="padding: 40px; text-align: center; color: #dc3545;">${data.error || 'No projects found'}</td></tr>`;
+        await loadDynastyOverview();
+        await loadConfigCongressmen();
+        filterConfigByAvailableData();
+        populateProvinceFilter();
+        updateCongressmanDatalist();
+
+        allProjectsData = [];
+        filteredData = [];
+        currentSummaryOverride = null;
+
+        if (tbody) {
+            tbody.innerHTML = '<tr><td colspan="8" style="padding: 32px; text-align: center; color: #555;">Select a congressman, party-list, or province to load detailed project records.</td></tr>';
         }
+        updateSummary(null);
     } catch (error) {
         console.error('Error loading projects:', error);
-        document.getElementById('table-loading').style.display = 'none';
-        document.getElementById('projects-tbody').innerHTML = 
-            `<tr><td colspan="8" style="padding: 40px; text-align: center; color: #dc3545;">Error: ${error.message}</td></tr>`;
+        if (tbody) {
+            tbody.innerHTML = `<tr><td colspan="8" style="padding: 40px; text-align: center; color: #dc3545;">Error: ${error.message}</td></tr>`;
+        }
+        updateSummary(null);
+    } finally {
+        if (loadingIndicator) {
+            loadingIndicator.style.display = 'none';
+        }
     }
 }
 
-function applyFilter() {
+async function applyFilter() {
     const mode = document.querySelector('input[name="congressman-filter-mode"]:checked')?.value || 'All';
     const filterInput = document.getElementById('congressman-filter');
     const originalValue = filterInput ? filterInput.value : '';
     const filterValue = originalValue.trim();
     const isAll = filterValue === '' || filterValue.toLowerCase() === 'all congressmen';
-    
-    if (mode === 'All') {
-        filteredData = isAll ? allProjectsData : allProjectsData.filter(project => project.congressman === filterValue);
-        if (!isAll && filteredData.length === 0 && filterValue) {
-            filteredData = createPlaceholderProjects([filterValue], 'Project records are still being ingested for this congressman.');
-        }
-    } else if (mode === 'Partylist') {
-        const partylistNames = configCongressmen
-            .filter(item => !item.province || !item.district_number)
-            .map(item => item.display_name);
-        if (isAll) {
-            filteredData = allProjectsData.filter(project => partylistNames.includes(project.congressman));
-            if (filteredData.length === 0 && partylistNames.length > 0) {
-                filteredData = createPlaceholderProjects(partylistNames, 'Project records are still being ingested for these party-list representatives.');
-            }
-        } else {
-            filteredData = allProjectsData.filter(project => partylistNames.includes(project.congressman) && project.congressman === filterValue);
-            if (filteredData.length === 0 && filterValue) {
-                filteredData = createPlaceholderProjects([filterValue], 'Project records are still being ingested for this party-list representative.');
-            }
-        }
-    } else if (mode === 'Province') {
-        const provinceInput = document.getElementById('congressman-province-input');
-        const provinceValueRaw = provinceInput ? provinceInput.value.trim() : '';
-        const aliases = getProvinceAliases(provinceValueRaw);
-        const allowedNames = configCongressmen
-            .filter(item => aliases.includes((item.province || '').trim().toLowerCase()) && item.district_number)
-            .map(item => item.display_name);
-        if (!provinceValueRaw || allowedNames.length === 0) {
+    const loadingIndicator = document.getElementById('table-loading');
+
+    currentProjectsMessage = '';
+    currentSummaryOverride = null;
+
+    if (loadingIndicator) {
+        loadingIndicator.style.display = 'block';
+    }
+
+    try {
+        if (mode === 'All' && isAll) {
+            allProjectsData = [];
             filteredData = [];
-        } else if (isAll) {
-            filteredData = allProjectsData.filter(project => allowedNames.includes(project.congressman));
-            if (filteredData.length === 0) {
-                filteredData = createPlaceholderProjects(allowedNames, `Project records are still being ingested for ${provinceValueRaw}.`);
+            currentProjectsMessage = 'Select a congressman to load project records.';
+            updateSummary(null);
+            updateDisplay();
+            return;
+        }
+
+        if (mode === 'Partylist' && isAll) {
+            allProjectsData = [];
+            filteredData = [];
+            currentProjectsMessage = 'Select a party-list representative to view their projects.';
+            updateSummary(null);
+            updateDisplay();
+            return;
+        }
+
+        if (mode === 'Province') {
+            const provinceInput = document.getElementById('congressman-province-input');
+            const provinceValueRaw = provinceInput ? provinceInput.value.trim() : '';
+            if (!provinceValueRaw) {
+                allProjectsData = [];
+                filteredData = [];
+                currentProjectsMessage = 'Start by selecting a province to see which districts we have processed.';
+                updateSummary(null);
+                updateDisplay();
+                return;
             }
+        }
+
+        let targetNames = [];
+
+        if (mode === 'All') {
+            targetNames = [filterValue];
+        } else if (mode === 'Partylist') {
+            const partylistNames = configCongressmen
+                .filter(item => item.is_partylist === true || !item.province || !item.district_number)
+                .map(item => item.display_name);
+            if (filterValue && partylistNames.length && !partylistNames.includes(filterValue)) {
+                targetNames = [filterValue];
+            } else if (filterValue) {
+                targetNames = [filterValue];
+            } else {
+                targetNames = partylistNames;
+            }
+        } else if (mode === 'Province') {
+            const provinceInput = document.getElementById('congressman-province-input');
+            const provinceValueRaw = provinceInput ? provinceInput.value.trim() : '';
+            const aliases = getProvinceAliases(provinceValueRaw);
+            const allowedNames = configCongressmen
+                .filter(item => aliases.includes((item.province || '').trim().toLowerCase()) && item.district_number)
+                .map(item => item.display_name);
+            if (filterValue && allowedNames.includes(filterValue)) {
+                targetNames = [filterValue];
+            } else if (filterValue && !allowedNames.includes(filterValue)) {
+                targetNames = [filterValue];
+            } else {
+                targetNames = allowedNames;
+            }
+
+            if (targetNames.length === 0) {
+                allProjectsData = [];
+                filteredData = [];
+                currentProjectsMessage = `No districts from ${provinceValueRaw} are in the cache yet. Coverage for 2016–2025 is still underway.`;
+                updateSummary(null);
+                updateDisplay();
+                return;
+            }
+        }
+
+        if (targetNames.length === 0) {
+            allProjectsData = [];
+            filteredData = [];
+            currentProjectsMessage = 'No matching congressmen were found for the current selection.';
+            updateSummary(null);
+            updateDisplay();
+            return;
+        }
+
+        if (targetNames.length === 1) {
+            const result = await fetchCongressmanProjects(targetNames[0]);
+            const projects = Array.isArray(result.projects) ? result.projects : [];
+            allProjectsData = projects;
+            filteredData = projects.length ? projects : createPlaceholderProjects(targetNames, 'Project records are still being ingested for this congressman.');
+            currentSummaryOverride = result.congressman?.summary || result.summary || null;
         } else {
-            filteredData = allProjectsData.filter(project => allowedNames.includes(project.congressman) && project.congressman === filterValue);
-            if (filteredData.length === 0 && allowedNames.includes(filterValue)) {
-                filteredData = createPlaceholderProjects([filterValue], 'Project records are still being ingested for this congressman.');
+            const result = await fetchMultipleCongressmanProjects(targetNames);
+            const projects = Array.isArray(result.projects) ? result.projects : [];
+            allProjectsData = projects;
+            if (projects.length === 0) {
+                const provinceInput = document.getElementById('congressman-province-input');
+                const provinceValue = provinceInput ? provinceInput.value.trim() : '';
+                const label = mode === 'Partylist'
+                    ? 'These party-list representatives'
+                    : `Districts in ${provinceValue || 'this province'}`;
+                filteredData = createPlaceholderProjects(targetNames, `${label} are still being processed.`);
+            } else {
+                filteredData = projects;
             }
+            if (result.errors && result.errors.length) {
+                console.warn('Some congressman caches could not be loaded:', result.errors);
+            }
+            currentSummaryOverride = result.summary || null;
+        }
+    } catch (error) {
+        console.error('Failed to apply filter:', error);
+        allProjectsData = [];
+        filteredData = [];
+        currentProjectsMessage = `Error: ${error.message}`;
+        updateSummary(null);
+        updateDisplay();
+        return;
+    } finally {
+        if (loadingIndicator) {
+            loadingIndicator.style.display = 'none';
         }
     }
-    
+
+    buildAvailableCongressmanNames();
+
+    if (filteredData && filteredData.length > 0) {
+        currentProjectsMessage = '';
+    }
+
     const filteredConfig = getFilteredCongressmenByMode();
     let statusNames = Array.isArray(filteredConfig) ? filteredConfig.map(item => item.display_name).filter(Boolean) : [];
     if (mode === 'All') {
@@ -1424,14 +1517,13 @@ function applyFilter() {
         filterInput.value = originalValue;
     }
 
-    // Reset pagination and refresh results after filtering
     currentPage = 1;
     updateDisplay();
 }
 
 // Handle congressman filter change
 function handleCongressmanFilterChange() {
-    applyFilter();
+    applyFilter().catch(error => console.error('Filter update failed:', error));
 }
 
 function handleModeChange(mode) {
@@ -1448,12 +1540,12 @@ function handleModeChange(mode) {
         congressmanInput.value = '';
     }
     updateCongressmanDatalist();
-    applyFilter();
+    applyFilter().catch(error => console.error('Filter update failed:', error));
 }
 
 function handleProvinceInputChange() {
     updateCongressmanDatalist();
-    applyFilter();
+    applyFilter().catch(error => console.error('Filter update failed:', error));
 }
 
 function handleProvinceBlur() {
@@ -1468,7 +1560,7 @@ function handleProvinceBlur() {
         }
     }
     updateCongressmanDatalist();
-    applyFilter();
+    applyFilter().catch(error => console.error('Filter update failed:', error));
 }
 
 // Handle congressman filter blur (when input loses focus)
@@ -1490,7 +1582,7 @@ function handleCongressmanFilterBlur() {
         if (matchingOption) {
             // Update input with the full value from the option
             input.value = matchingOption.value;
-            applyFilter();
+            applyFilter().catch(error => console.error('Filter update failed:', error));
         } else if (value.length > 0) {
             // If no match found and user typed something, clear it or keep as is
             // For now, we'll keep it as is and let the filter work with partial matches
@@ -1498,7 +1590,7 @@ function handleCongressmanFilterBlur() {
     } else if (value === '' || value === 'All Congressmen') {
         // Clear filter if empty or "All Congressmen"
         input.value = '';
-        applyFilter();
+        applyFilter().catch(error => console.error('Filter update failed:', error));
     }
 }
 
@@ -1513,7 +1605,7 @@ function updateDisplay() {
     displayProjects(paginatedData);
     
     // Update summary based on ALL filtered data (not just current page)
-    const summary = calculateSummary(filteredData);
+    const summary = currentSummaryOverride || calculateSummary(filteredData);
     updateSummary(summary);
     
     // Update pagination
@@ -1622,7 +1714,8 @@ function displayProjects(projects) {
     const tbody = document.getElementById('projects-tbody');
     
     if (projects.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="8" style="padding: 40px; text-align: center; color: #666;">No projects found</td></tr>';
+        const message = currentProjectsMessage || 'No projects found';
+        tbody.innerHTML = `<tr><td colspan="8" style="padding: 40px; text-align: center; color: #666;">${message}</td></tr>`;
         return;
     }
     
@@ -1703,19 +1796,25 @@ function displayProjects(projects) {
 }
 
 function updateSummary(summary) {
-    if (summary) {
-        const formatCount = (value) => formatProjects(value ?? 0);
-        const micrositeCount = summary.microsite ?? summary.infrawatch ?? 0;
-
-        document.getElementById('total-projects').textContent = formatCount(summary.total);
-        document.getElementById('district-count').textContent = formatCount(summary.district_projects);
-        document.getElementById('contractor-count').textContent = formatCount(summary.contractor_projects);
-        document.getElementById('ssp-count').textContent = formatCount(summary.ssp);
-        document.getElementById('dime-count').textContent = formatCount(summary.dime);
-        document.getElementById('philgeps-count').textContent = formatCount(summary.philgeps);
-        document.getElementById('microsite-count').textContent = formatCount(micrositeCount);
-        document.getElementById('results-summary').style.display = 'block';
+    const summaryPanel = document.getElementById('results-summary');
+    if (!summaryPanel) {
+        return;
     }
+    if (!summary) {
+        summaryPanel.style.display = 'none';
+        return;
+    }
+    const formatCount = (value) => formatProjects(value ?? 0);
+    const micrositeCount = summary.microsite ?? summary.infrawatch ?? 0;
+
+    document.getElementById('total-projects').textContent = formatCount(summary.total);
+    document.getElementById('district-count').textContent = formatCount(summary.district_projects);
+    document.getElementById('contractor-count').textContent = formatCount(summary.contractor_projects);
+    document.getElementById('ssp-count').textContent = formatCount(summary.ssp);
+    document.getElementById('dime-count').textContent = formatCount(summary.dime);
+    document.getElementById('philgeps-count').textContent = formatCount(summary.philgeps);
+    document.getElementById('microsite-count').textContent = formatCount(micrositeCount);
+    summaryPanel.style.display = 'block';
 }
 
 function formatAverageMillions(amount) {
@@ -1742,121 +1841,55 @@ async function loadVisualData(prefetchedData = null) {
     if (visualLoading) {
         visualLoading.style.display = 'block';
     }
-    
+
     try {
         let data = prefetchedData || prefetchedVisualData;
-        
+
         if (!data) {
-            data = await fetchAllDynastyProjects();
-        } else {
-            prefetchedVisualData = data;
+            data = await loadDynastyOverview();
         }
-        
-        if (!prefetchedVisualData) {
-            prefetchedVisualData = data;
-        }
-        
-        const limitedChartCount = Array.isArray(data.chart_data_by_count)
-            ? data.chart_data_by_count.slice(0, 200)
-            : [];
-        const limitedChartCost = Array.isArray(data.chart_data_by_cost)
-            ? data.chart_data_by_cost.slice(0, 200)
-            : [];
-        currentChartTop200ByCount = limitedChartCount;
-        currentChartTop200ByCost = limitedChartCost;
-        
-        if (data.success && (data.chart_data_by_count || data.chart_data)) {
-            // Use pre-calculated chart data from cache (all combined unique congressmen)
-            const statsArray = limitedChartCount.length > 0
-                ? limitedChartCount
-                : (Array.isArray(data.chart_data) ? data.chart_data.slice(0, 200) : []);
-            
-            // Update dashboard statistics (use original data, not filtered)
-            if (data.dashboard_stats) {
-                const stats = data.dashboard_stats;
-                document.getElementById('dashboard-total-cost').textContent = formatCurrency(stats.total_cost_all);
-                document.getElementById('dashboard-total-projects').textContent = `${stats.total_projects} projects`;
-                document.getElementById('dashboard-district-cost').textContent = formatCurrency(stats.district_cost);
-                document.getElementById('dashboard-district-count').textContent = `${stats.district_count} projects`;
-                document.getElementById('dashboard-contractor-cost').textContent = formatCurrency(stats.contractor_cost);
-                document.getElementById('dashboard-contractor-count').textContent = `${stats.contractor_count} projects`;
-                document.getElementById('dashboard-stats').style.display = 'grid';
-            }
-            
-            // Update insights panel
-            if (data.chart_data_by_count && data.chart_data_by_cost) {
-                updateInsightsPanel(data.chart_data_by_count, data.chart_data_by_cost);
-            }
-            
-            // Store chart data for sorting
-            currentChartData = statsArray;
-            updateChartFocusOptions(currentChartData);
-            
-            // Create or update charts with initial sort (default: cost emphasis)
-            sortChartBy('cost');
-        } else if (data.success && data.projects) {
-            // Fallback: calculate from projects if chart_data not available
-            const congressmanStats = {};
-            let totalCost = 0;
-            let districtCount = 0;
-            let districtCost = 0;
-            let contractorCount = 0;
-            let contractorCost = 0;
-            
-            data.projects.forEach(project => {
-                const congressman = project.congressman || 'Unknown';
-                if (!congressmanStats[congressman]) {
-                    congressmanStats[congressman] = {
-                        name: congressman,
-                        count: 0,
-                        totalCost: 0,
-                        total_cost: 0
-                    };
-                }
-                congressmanStats[congressman].count++;
-                const amount = parseFloat(project.amount) || 0;
-                congressmanStats[congressman].totalCost += amount;
-                congressmanStats[congressman].total_cost += amount;
-                totalCost += amount;
-                
-                // Count by match type
-                if (project.match_type === 'district') {
-                    districtCount++;
-                    districtCost += amount;
-                } else if (project.match_type === 'contractor') {
-                    contractorCount++;
-                    contractorCost += amount;
-                }
-            });
-            
-            // Update dashboard in fallback case
-            document.getElementById('dashboard-total-cost').textContent = formatCurrency(totalCost);
-            document.getElementById('dashboard-total-projects').textContent = `${data.projects.length} projects`;
-            document.getElementById('dashboard-district-cost').textContent = formatCurrency(districtCost);
-            document.getElementById('dashboard-district-count').textContent = `${districtCount} projects`;
-            document.getElementById('dashboard-contractor-cost').textContent = formatCurrency(contractorCost);
-            document.getElementById('dashboard-contractor-count').textContent = `${contractorCount} projects`;
+        prefetchedVisualData = data;
+
+        rankingByCount = Array.isArray(data.chart_data_by_count) ? data.chart_data_by_count : [];
+        rankingByCost = Array.isArray(data.chart_data_by_cost) ? data.chart_data_by_cost : rankingByCount;
+        topTenByCount = Array.isArray(data.chart_data_top_10_by_count)
+            ? data.chart_data_top_10_by_count
+            : rankingByCount.slice(0, chartPageSize);
+        topTenByCost = Array.isArray(data.chart_data_top_10_by_cost)
+            ? data.chart_data_top_10_by_cost
+            : rankingByCost.slice(0, chartPageSize);
+
+        if (data.dashboard_stats) {
+            const stats = data.dashboard_stats;
+            document.getElementById('dashboard-total-cost').textContent = formatCurrency(stats.total_cost_all);
+            document.getElementById('dashboard-total-projects').textContent = `${stats.total_projects} projects`;
+            document.getElementById('dashboard-district-cost').textContent = formatCurrency(stats.district_cost);
+            document.getElementById('dashboard-district-count').textContent = `${stats.district_count} projects`;
+            document.getElementById('dashboard-contractor-cost').textContent = formatCurrency(stats.contractor_cost);
+            document.getElementById('dashboard-contractor-count').textContent = `${stats.contractor_count} projects`;
             document.getElementById('dashboard-stats').style.display = 'grid';
-            
-            const statsArray = Object.values(congressmanStats);
-            const sortedByCount = [...statsArray].sort((a, b) => b.count - a.count);
-            const sortedByCost = [...statsArray].sort((a, b) => b.total_cost - a.total_cost);
-            currentChartTop200ByCount = sortedByCount.slice(0, 200);
-            currentChartTop200ByCost = sortedByCost.slice(0, 200);
-            const combinedMap = new Map();
-            limitedChartCount.forEach(item => combinedMap.set(item.name, item));
-            limitedChartCost.forEach(item => combinedMap.set(item.name, item));
-            if (!combinedMap.size && Array.isArray(data.chart_data)) {
-                data.chart_data.slice(0, 200).forEach(item => combinedMap.set(item.name, item));
-            }
-            currentChartData = Array.from(combinedMap.values());
-            updateChartFocusOptions(currentChartData);
-            sortChartBy('cost');
         }
+
+        currentChartData = topTenByCost;
+        currentChartSortedData = rankingByCost;
+        chartPage = 1;
+        chartTotalPages = Math.max(1, Math.ceil(rankingByCost.length / chartPageSize));
+        selectedChartName = '';
+        selectedChartNameDisplay = '';
+
+        sortChartBy('cost');
     } catch (error) {
         console.error('Error loading visual data:', error);
-        currentChartTop200ByCount = [];
-        currentChartTop200ByCost = [];
+        rankingByCount = [];
+        rankingByCost = [];
+        topTenByCount = [];
+        topTenByCost = [];
+        currentChartData = [];
+        currentChartSortedData = [];
+        if (combinedChart) {
+            combinedChart.destroy();
+            combinedChart = null;
+        }
     } finally {
         if (visualLoading) {
             visualLoading.style.display = 'none';
@@ -1865,7 +1898,6 @@ async function loadVisualData(prefetchedData = null) {
 }
 
 function sortChartBy(mode) {
-    if (!currentChartData) return;
     currentSortMode = mode;
     chartPage = 1;
     updateChartWithSort(mode);
@@ -1888,22 +1920,13 @@ function sortChartBy(mode) {
 }
 
 function updateChartWithSort(mode) {
-    if (!currentChartData) return;
-    
-    const sourceData = (() => {
-        if (mode === 'count' && Array.isArray(currentChartTop200ByCount) && currentChartTop200ByCount.length) {
-            return [...currentChartTop200ByCount];
-        }
-        if (mode === 'cost' && Array.isArray(currentChartTop200ByCost) && currentChartTop200ByCost.length) {
-            return [...currentChartTop200ByCost];
-        }
-        return Array.isArray(currentChartData) ? [...currentChartData] : [];
-    })();
- 
-    if (!sourceData.length) {
+    const sourceData = mode === 'count' ? rankingByCount : rankingByCost;
+
+    if (!Array.isArray(sourceData) || sourceData.length === 0) {
         currentChartSortedData = [];
         chartTotalPages = 1;
         chartPage = 1;
+        currentChartData = [];
         if (combinedChart) {
             combinedChart.destroy();
             combinedChart = null;
@@ -1911,84 +1934,83 @@ function updateChartWithSort(mode) {
         updateChartPaginationControls();
         return;
     }
- 
-    // Sort data based on mode and paginate (Top 200 cache, 10 entries per page)
-    let sortedData = [...sourceData];
-    if (mode === 'count') {
-        sortedData.sort((a, b) => b.count - a.count);
-    } else {
-        sortedData.sort((a, b) => b.total_cost - a.total_cost);
-    }
- 
-    currentChartSortedData = sortedData;
-    chartTotalPages = Math.max(1, Math.ceil(sortedData.length / chartPageSize));
-    updateChartFocusOptions(sortedData);
+
+    currentChartSortedData = sourceData;
+    chartTotalPages = Math.max(1, Math.ceil(sourceData.length / chartPageSize));
 
     const normalizedSelected = selectedChartName ? normalizeCongressmanName(selectedChartName) : '';
-    let selectedIndex = -1;
-    if (normalizedSelected) {
-        selectedIndex = sortedData.findIndex(item => normalizeCongressmanName(item.name) === normalizedSelected);
-        if (selectedIndex === -1) {
-            // Selected name is no longer present in dataset, clear focus gracefully
-            selectedChartName = '';
-            selectedChartNameDisplay = '';
-        }
-    }
-
     let limitedData = [];
 
-    if (selectedChartName && selectedIndex !== -1) {
-        const windowSize = chartPageSize;
-        const halfWindow = Math.floor(windowSize / 2);
-        let startIndex = selectedIndex - halfWindow;
-        let endIndex = selectedIndex + halfWindow + 1;
+    if (normalizedSelected) {
+        const selectedIndex = sourceData.findIndex(item => normalizeCongressmanName(item.name) === normalizedSelected);
+        if (selectedIndex === -1) {
+            selectedChartName = '';
+            selectedChartNameDisplay = '';
+            chartPage = 1;
+            limitedData = (mode === 'count' ? topTenByCount : topTenByCost).slice(0, chartPageSize);
+            updateChartPaginationControls({
+                focusMode: false,
+                selectedName: mode === 'count' ? 'Top 10 by Count' : 'Top 10 by Cost',
+                total: limitedData.length,
+                startIndex: 0,
+                endIndex: limitedData.length,
+            });
+        } else {
+            const windowSize = chartPageSize;
+            const halfWindow = Math.floor(windowSize / 2);
+            let startIndex = selectedIndex - halfWindow;
+            let endIndex = selectedIndex + halfWindow + 1;
 
-        if (windowSize % 2 === 0) {
-            endIndex = selectedIndex + halfWindow + 1;
+            if (windowSize % 2 === 0) {
+                endIndex = selectedIndex + halfWindow + 1;
+            }
+            if (startIndex < 0) {
+                startIndex = 0;
+            }
+            if (endIndex <= startIndex) {
+                endIndex = startIndex + windowSize;
+            }
+            if (endIndex > sourceData.length) {
+                endIndex = sourceData.length;
+            }
+            if (endIndex - startIndex < windowSize && sourceData.length >= windowSize) {
+                startIndex = Math.max(0, endIndex - windowSize);
+            }
+
+            limitedData = sourceData.slice(startIndex, endIndex);
+            chartPage = Math.floor(startIndex / chartPageSize) + 1;
+
+            updateChartPaginationControls({
+                focusMode: true,
+                selectedName: selectedChartNameDisplay || selectedChartName,
+                selectedIndex,
+                total: sourceData.length,
+                startIndex,
+                endIndex
+            });
         }
-
-        if (startIndex < 0) {
-            startIndex = 0;
-        }
-
-        if (endIndex <= startIndex) {
-            endIndex = startIndex + windowSize;
-        }
-
-        if (endIndex > sortedData.length) {
-            endIndex = sortedData.length;
-        }
-
-        if (endIndex - startIndex < windowSize && sortedData.length >= windowSize) {
-            startIndex = Math.max(0, endIndex - windowSize);
-        }
-
-        limitedData = sortedData.slice(startIndex, endIndex);
-        chartPage = Math.floor(startIndex / chartPageSize) + 1;
-
-        updateChartPaginationControls({
-            focusMode: true,
-            selectedName: selectedChartNameDisplay || selectedChartName,
-            selectedIndex,
-            total: sortedData.length,
-            startIndex,
-            endIndex
-        });
     } else {
-        if (chartPage > chartTotalPages) chartPage = chartTotalPages;
-        if (chartPage < 1) chartPage = 1;
-
-        const startIndex = (chartPage - 1) * chartPageSize;
-        limitedData = sortedData.slice(startIndex, startIndex + chartPageSize);
-
-        updateChartPaginationControls();
+        const defaultList = mode === 'count' ? topTenByCount : topTenByCost;
+        limitedData = Array.isArray(defaultList) && defaultList.length
+            ? defaultList.slice(0, chartPageSize)
+            : sourceData.slice(0, chartPageSize);
+        chartPage = 1;
+        updateChartPaginationControls({
+            focusMode: false,
+            selectedName: mode === 'count' ? 'Top 10 by Count' : 'Top 10 by Cost',
+            total: Array.isArray(defaultList) && defaultList.length ? defaultList.length : sourceData.length,
+            startIndex: 0,
+            endIndex: limitedData.length,
+        });
     }
+
+    currentChartData = limitedData;
 
     const labels = limitedData.map((s) => s.name);
     const fullNames = limitedData.map((s) => s.name);
     const counts = limitedData.map((s) => s.count);
     const costs = limitedData.map((s) => (s.total_cost || 0) / 1_000_000);
-    
+
     createCharts(labels, fullNames, counts, costs);
 }
 
@@ -4345,195 +4367,195 @@ document.addEventListener('click', async function(event) {
 });
 
 // ... existing code ...
-// Cache for fetched pages to avoid re-fetching
-const dynastyProjectsCache = new Map();
-let dynastyProjectsMetadata = null; // Store summary, chart_data, etc.
-let allProjectsLoaded = false; // Track if all pages have been fetched
+// Cache per-congressman responses to avoid redundant fetches
+const congressmanProjectsCache = new Map();
+const congressmanProjectsRequests = new Map();
+let dynastyOverviewData = null;
+let currentSummaryOverride = null;
 
-async function fetchAllDynastyProjects() {
-    // OPTIMIZED LAZY LOADING:
-    // 1. Fetch only first page initially for fast load time
-    // 2. Fetch remaining pages in background
-    // 3. Cache all pages to avoid re-fetching
-    
-    const limit = 10000;
-    const page = 1;
-    
-    const response = await fetch(`/api/dynasty-projects/all?page=${page}&limit=${limit}`);
-    const data = await response.json();
-    
-    if (!data.success) {
-        throw new Error(data.error || 'Unable to load dynasty projects');
-    }
-    
-    // Cache the first page
-    dynastyProjectsCache.set(page, data.projects || []);
-    
-    // Store metadata (summary, charts, etc.) - only needs to be fetched once
-    dynastyProjectsMetadata = {
-        summary: data.summary || {},
-        dashboard_stats: data.dashboard_stats || {},
-        chart_data: data.chart_data || [],
-        chart_data_by_count: data.chart_data_by_count || data.chart_data || [],
-        chart_data_by_cost: data.chart_data_by_cost || data.chart_data || [],
-        total: data.total || 0,
-        total_pages: data.total_pages || 1
-    };
-    
-    // Fetch remaining pages in background (non-blocking)
-    if (dynastyProjectsMetadata.total_pages > 1) {
-        console.log(`📡 Fetching ${dynastyProjectsMetadata.total_pages - 1} additional pages in background...`);
-        fetchRemainingPagesInBackground(dynastyProjectsMetadata.total_pages);
-    } else {
-        allProjectsLoaded = true;
-    }
-    
-    return {
-        success: true,
-        projects: data.projects || [],
-        summary: dynastyProjectsMetadata.summary,
-        dashboard_stats: dynastyProjectsMetadata.dashboard_stats,
-        chart_data: dynastyProjectsMetadata.chart_data,
-        chart_data_by_count: dynastyProjectsMetadata.chart_data_by_count,
-        chart_data_by_cost: dynastyProjectsMetadata.chart_data_by_cost,
-        total: dynastyProjectsMetadata.total,
-        total_pages: dynastyProjectsMetadata.total_pages
-    };
+function normalizeCongressmanSlug(name) {
+    if (!name) return '';
+    const normalized = name.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+    let slug = normalized.toLowerCase()
+        .replace(/['".()]/g, '')
+        .replace(/\s+/g, '-')
+        .replace(/[^a-z0-9-]/g, '-')
+        .replace(/-+/g, '-');
+    return slug.replace(/^-+|-+$/g, '');
 }
 
-async function fetchRemainingPagesInBackground(totalPages) {
-    // Fetch pages 2 through totalPages in background
-    const limit = 10000;
-    
-    for (let page = 2; page <= totalPages; page++) {
+function getSlugForCongressman(name) {
+    if (!name) return '';
+    const normalized = normalizeCongressmanName(name);
+    const match = configCongressmen.find(item => normalizeCongressmanName(item.display_name) === normalized);
+    if (match && match.slug) {
+        return match.slug;
+    }
+    return normalizeCongressmanSlug(name);
+}
+
+async function loadDynastyOverview(force = false) {
+    if (!force && dynastyOverviewData) {
+        return dynastyOverviewData;
+    }
+    const response = await fetch('/api/dynasty-projects/overview');
+    const data = await response.json();
+    if (!response.ok || !data.success) {
+        throw new Error(data.error || 'Unable to load dynasty overview');
+    }
+    dynastyOverviewData = data;
+    prefetchedVisualData = data;
+    return data;
+}
+
+async function fetchCongressmanProjects(name, { force = false, includeProjects = true } = {}) {
+    if (!name) {
+        throw new Error('Congressman name is required');
+    }
+    const normalized = normalizeCongressmanName(name);
+    const slug = getSlugForCongressman(name);
+    const cacheKey = slug ? `${normalized}::${slug}` : normalized;
+
+    if (!force && congressmanProjectsCache.has(cacheKey)) {
+        return congressmanProjectsCache.get(cacheKey);
+    }
+    if (!force && congressmanProjectsRequests.has(cacheKey)) {
+        return congressmanProjectsRequests.get(cacheKey);
+    }
+
+    const params = new URLSearchParams({ limit: '25000' });
+    params.set('name', name);
+    if (slug) {
+        params.set('slug', slug);
+    }
+    if (!includeProjects) {
+        params.set('include_projects', 'false');
+    }
+
+    const requestPromise = (async () => {
+        const response = await fetch(`/api/dynasty-projects/congressman?${params.toString()}`);
+        const data = await response.json();
+        if (!response.ok || !data.success) {
+            throw new Error(data.error || `Unable to load projects for ${name}`);
+        }
+        congressmanProjectsCache.set(cacheKey, data);
+        return data;
+    })()
+        .catch(error => {
+            console.error(`Failed to load projects for ${name}:`, error);
+            throw error;
+        })
+        .finally(() => {
+            congressmanProjectsRequests.delete(cacheKey);
+        });
+
+    congressmanProjectsRequests.set(cacheKey, requestPromise);
+    return requestPromise;
+}
+
+function mergeSummaries(summaryList) {
+    if (!Array.isArray(summaryList) || summaryList.length === 0) {
+        return null;
+    }
+    const merged = {
+        total: 0,
+        ssp: 0,
+        dime: 0,
+        philgeps: 0,
+        microsite: 0,
+        district_projects: 0,
+        contractor_projects: 0
+    };
+    summaryList.forEach(summary => {
+        if (!summary) return;
+        merged.total += Number(summary.total || 0);
+        merged.ssp += Number(summary.ssp || 0);
+        merged.dime += Number(summary.dime || 0);
+        merged.philgeps += Number(summary.philgeps || 0);
+        const micrositeValue = summary.microsite !== undefined ? summary.microsite : summary.infrawatch;
+        merged.microsite += Number(micrositeValue || 0);
+        merged.district_projects += Number(summary.district_projects || 0);
+        merged.contractor_projects += Number(summary.contractor_projects || 0);
+    });
+    return merged;
+}
+
+function mergeDashboardStats(statsList) {
+    if (!Array.isArray(statsList) || statsList.length === 0) {
+        return null;
+    }
+    const merged = {
+        total_cost_all: 0,
+        total_projects: 0,
+        district_count: 0,
+        district_cost: 0,
+        contractor_count: 0,
+        contractor_cost: 0
+    };
+    statsList.forEach(stats => {
+        if (!stats) return;
+        merged.total_cost_all += Number(stats.total_cost_all || 0);
+        merged.total_projects += Number(stats.total_projects || 0);
+        merged.district_count += Number(stats.district_count || 0);
+        merged.district_cost += Number(stats.district_cost || 0);
+        merged.contractor_count += Number(stats.contractor_count || 0);
+        merged.contractor_cost += Number(stats.contractor_cost || 0);
+    });
+    return merged;
+}
+
+async function fetchMultipleCongressmanProjects(names) {
+    const uniqueNames = Array.from(new Set((names || []).map(name => (name || '').trim()).filter(Boolean)));
+    if (uniqueNames.length === 0) {
+        return {
+            success: true,
+            projects: [],
+            summary: null,
+            dashboard_stats: null,
+            details: []
+        };
+    }
+
+    const results = await Promise.all(uniqueNames.map(async (name) => {
         try {
-            const response = await fetch(`/api/dynasty-projects/all?page=${page}&limit=${limit}`);
-            const data = await response.json();
-            
-            if (data.success && Array.isArray(data.projects)) {
-                dynastyProjectsCache.set(page, data.projects);
-                console.log(`✅ Background fetch complete: page ${page}/${totalPages}`);
-                
-                // Update allProjectsData for filtering
-                if (window.allProjectsData && Array.isArray(window.allProjectsData)) {
-                    window.allProjectsData.push(...data.projects);
-                    
-                    // Update the loading indicator
-                    updateBackgroundLoadingIndicator(page, totalPages);
-                    
-                    // Refresh filters and display with new data
-                    buildAvailableCongressmanNames();
-                    updateCongressmanDatalist();
-                    applyFilter(); // Re-apply current filter with more data
-                }
-            }
+            const data = await fetchCongressmanProjects(name);
+            return { name, data };
         } catch (error) {
-            console.error(`❌ Failed to fetch page ${page}:`, error);
+            return { name, error };
         }
-    }
-    
-    allProjectsLoaded = true;
-    console.log(`✅ All ${totalPages} pages loaded and cached`);
-    hideBackgroundLoadingIndicator();
-}
+    }));
 
-async function fetchDynastyProjectsPage(page) {
-    // Check cache first
-    if (dynastyProjectsCache.has(page)) {
-        console.log(`✅ Using cached data for page ${page}`);
-        return dynastyProjectsCache.get(page);
-    }
-    
-    // Fetch from server if not cached
-    console.log(`📡 Fetching page ${page} from server...`);
-    const limit = 10000;
-    const response = await fetch(`/api/dynasty-projects/all?page=${page}&limit=${limit}`);
-    const data = await response.json();
-    
-    if (!data.success) {
-        throw new Error(data.error || 'Unable to load dynasty projects');
-    }
-    
-    // Cache the page
-    dynastyProjectsCache.set(page, data.projects || []);
-    
-    return data.projects || [];
-}
+    const combinedProjects = [];
+    const summaries = [];
+    const dashboardStatsList = [];
+    const errors = [];
 
-function showBackgroundLoadingIndicator() {
-    // Create a floating indicator at the top of the page
-    const indicator = document.createElement('div');
-    indicator.id = 'background-loading-indicator';
-    indicator.style.cssText = `
-        position: fixed;
-        top: 20px;
-        right: 20px;
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        color: white;
-        padding: 15px 25px;
-        border-radius: 8px;
-        box-shadow: 0 4px 20px rgba(102, 126, 234, 0.4);
-        z-index: 10000;
-        font-size: 14px;
-        font-weight: 600;
-        display: flex;
-        align-items: center;
-        gap: 10px;
-        animation: slideInRight 0.3s ease-out;
-    `;
-    
-    indicator.innerHTML = `
-        <div style="width: 20px; height: 20px; border: 3px solid rgba(255,255,255,0.3); border-top-color: white; border-radius: 50%; animation: spin 1s linear infinite;"></div>
-        <span id="loading-progress-text">Loading additional data... Page 1/${dynastyProjectsMetadata.total_pages}</span>
-    `;
-    
-    // Add animation styles
-    const style = document.createElement('style');
-    style.textContent = `
-        @keyframes slideInRight {
-            from {
-                transform: translateX(400px);
-                opacity: 0;
-            }
-            to {
-                transform: translateX(0);
-                opacity: 1;
-            }
+    results.forEach(result => {
+        if (result.error) {
+            errors.push({ name: result.name, error: result.error });
+            return;
         }
-        @keyframes spin {
-            to { transform: rotate(360deg); }
+        const data = result.data || {};
+        if (Array.isArray(data.projects)) {
+            combinedProjects.push(...data.projects);
         }
-        @keyframes fadeOut {
-            from {
-                opacity: 1;
-                transform: translateX(0);
-            }
-            to {
-                opacity: 0;
-                transform: translateX(400px);
-            }
+        const summary = data.congressman?.summary || data.summary;
+        if (summary) {
+            summaries.push(summary);
         }
-    `;
-    document.head.appendChild(style);
-    
-    document.body.appendChild(indicator);
-}
+        const stats = data.congressman?.dashboard_stats || data.dashboard_stats;
+        if (stats) {
+            dashboardStatsList.push(stats);
+        }
+    });
 
-function updateBackgroundLoadingIndicator(currentPage, totalPages) {
-    const progressText = document.getElementById('loading-progress-text');
-    if (progressText) {
-        progressText.textContent = `Loading additional data... Page ${currentPage}/${totalPages}`;
-    }
-}
-
-function hideBackgroundLoadingIndicator() {
-    const indicator = document.getElementById('background-loading-indicator');
-    if (indicator) {
-        indicator.style.animation = 'fadeOut 0.3s ease-out forwards';
-        setTimeout(() => {
-            indicator.remove();
-        }, 300);
-    }
+    return {
+        success: errors.length === 0,
+        projects: combinedProjects,
+        summary: mergeSummaries(summaries),
+        dashboard_stats: mergeDashboardStats(dashboardStatsList),
+        errors
+    };
 }
 
 function getSourceDisplayMeta(source) {
@@ -4709,29 +4731,13 @@ if (chartNextBtn) {
 
 updateChartPaginationControls();
 
-function updateChartFocusOptions(sourceData) {
-    const datalist = document.getElementById('chart-focus-list');
-    if (!datalist || !Array.isArray(sourceData)) {
-        return;
-    }
-
-    const uniqueNames = Array.from(new Set(
-        sourceData
-            .map(item => (item && item.name ? item.name.trim() : ''))
-            .filter(Boolean)
-    )).sort((a, b) => a.localeCompare(b));
-
-    datalist.innerHTML = '';
-    uniqueNames.forEach(name => {
-        const option = document.createElement('option');
-        option.value = name;
-        datalist.appendChild(option);
-    });
+function updateChartFocusOptions() {
+    // Autocomplete list reuses the primary congressman datalist.
 }
 
 function findChartFocusMatch(value) {
     if (!value) return null;
-    const datalist = document.getElementById('chart-focus-list');
+    const datalist = document.getElementById('congressman-list');
     if (!datalist) return null;
 
     const trimmed = value.trim();
@@ -4828,22 +4834,26 @@ function handleChartFocusBlur() {
 }
 
 function focusChartOnCongressman(name) {
-    if (!name || !Array.isArray(currentChartData) || !currentChartData.length) {
+    if (!name) {
+        return;
+    }
+
+    const dataset = currentSortMode === 'count' ? rankingByCount : rankingByCost;
+    if (!Array.isArray(dataset) || dataset.length === 0) {
         return;
     }
 
     const normalizedInput = normalizeCongressmanName(name);
-    if (!normalizedInput) {
-        return;
-    }
+    if (!normalizedInput) return;
 
-    const matchedEntry = currentChartData.find(item => normalizeCongressmanName(item.name) === normalizedInput);
-    if (!matchedEntry) {
-        console.warn('Congressman not found in chart data for focus:', name);
+    const matchedIndex = dataset.findIndex(item => normalizeCongressmanName(item.name) === normalizedInput);
+    if (matchedIndex === -1) {
+        console.warn('Congressman not found in ranking data for focus:', name);
         clearChartFocus({ resetInput: false });
         return;
     }
 
+    const matchedEntry = dataset[matchedIndex];
     selectedChartName = matchedEntry.name;
     selectedChartNameDisplay = matchedEntry.name;
 
@@ -4852,12 +4862,12 @@ function focusChartOnCongressman(name) {
         focusInput.value = matchedEntry.name;
     }
 
+    chartPage = Math.floor(matchedIndex / chartPageSize) + 1;
     updateChartWithSort(currentSortMode);
 }
 
 function clearChartFocus({ resetInput = true } = {}) {
     const hadSelection = Boolean(selectedChartName);
-    const previousPage = chartPage;
     selectedChartName = '';
     selectedChartNameDisplay = '';
     if (resetInput) {
@@ -4867,8 +4877,11 @@ function clearChartFocus({ resetInput = true } = {}) {
         }
     }
     chartPage = 1;
-    if (hadSelection || resetInput === false || previousPage !== 1) {
-        updateChartWithSort(currentSortMode);
+    currentSortMode = 'cost';
+    if (hadSelection) {
+        sortChartBy('cost');
+    } else {
+        updateChartWithSort('cost');
     }
 }
 
