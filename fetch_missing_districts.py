@@ -223,7 +223,7 @@ MISSING_DISTRICTS = {
 
 def update_districts_json():
     """Update districts.json with missing district data"""
-    districts_path = Path(__file__).parent / 'districts.json'
+    districts_path = Path(__file__).parent / 'static' / 'data' / 'districts.json'
     
     if not districts_path.exists():
         print(f"❌ Error: districts.json not found at {districts_path}")

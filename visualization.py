@@ -82,13 +82,7 @@ def _read_json_file(path: Path) -> Any:
 
 
 def _get_dynasty_config_path() -> Path:
-    primary = DATA_ROOT.parent / "dynasty-projects-config.json"
-    if primary.exists():
-        return primary
-    fallback = DATA_ROOT / "dynasty-projects-config.json"
-    if fallback.exists():
-        return fallback
-    return primary
+    return DATA_ROOT / "dynasty-projects-config.json"
 
 
 @lru_cache(maxsize=1)
@@ -138,7 +132,7 @@ def _gather_congressman_cache_stats() -> Dict[str, Any]:
         return stats
 
     # Load config to identify party-list representatives
-    config_path = DATA_ROOT.parent / "dynasty-projects-config.json"
+    config_path = DATA_ROOT / "dynasty-projects-config.json"
     config_data = _read_json_file(config_path)
     partylist_names = set()
     if isinstance(config_data, dict):
