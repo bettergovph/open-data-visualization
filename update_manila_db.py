@@ -119,6 +119,45 @@ async def update_district_entries():
 
     print("✅ Updated Leyte keywords in database")
 
+    # ROMBLON UPDATE (Lone District keywords)
+    romblon_result = await conn.fetchrow('SELECT data FROM district_entries WHERE name = $1', 'Romblon')
+    if romblon_result:
+        romblon_data = romblon_result['data']
+        if isinstance(romblon_data, str):
+            romblon_data = json.loads(romblon_data)
+    else:
+        romblon_data = {}
+
+    romblon_keywords = romblon_data.setdefault('keywords', {})
+    romblon_keywords['Lone District'] = {
+        'positive': [
+            'Romblon Lone',
+            'Romblon Single',
+            'Lone District',
+            '1st District Romblon',
+            'Romblon DEO',
+            'Romblon District Engineering Office'
+        ],
+        'negative': [
+            'Aklan',
+            'Antique',
+            'Capiz',
+            'Iloilo',
+            'Guimaras',
+            'Mindoro',
+            'Palawan',
+            'Masbate',
+            'Batangas'
+        ],
+    }
+
+    await conn.execute(
+        "UPDATE district_entries SET data = $1 WHERE name = $2",
+        json.dumps(romblon_data),
+        'Romblon'
+    )
+
+    print('✅ Updated Romblon keywords in database')
 
     # SAMAR UPDATE (1st District keywords)
     samar_result = await conn.fetchrow('SELECT data FROM district_entries WHERE name = $1', 'Samar')
