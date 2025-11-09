@@ -19,9 +19,10 @@ class DavaoCityCongressmenFixer:
     """Fix cache for Davao City congressmen with proper district matching"""
 
     def __init__(self):
-        self.cache_base_dir = Path(__file__).parent.parent / 'static' / 'data'
-        self.config_file = Path(__file__).parent.parent / 'dynasty-projects-config.json'
-        self.districts_file = Path(__file__).parent.parent / 'districts.json'
+        root_dir = Path(__file__).parent.parent
+        self.cache_base_dir = root_dir / 'static' / 'data'
+        self.config_file = self.cache_base_dir / 'dynasty-projects-config.json'
+        self.districts_file = self.cache_base_dir / 'districts.json'
         self.target_congressmen = [
             "Paolo Duterte",
             "Mylene Garcia-Albano",

@@ -14,8 +14,9 @@ from dotenv import load_dotenv
 
 
 ROOT_DIR = Path(__file__).resolve().parent.parent
-CONFIG_PATH = ROOT_DIR / "dynasty-projects-config.json"
-DISTRICTS_PATH = ROOT_DIR / "districts.json"
+STATIC_DATA_DIR = ROOT_DIR / "static" / "data"
+CONFIG_PATH = STATIC_DATA_DIR / "dynasty-projects-config.json"
+DISTRICTS_PATH = STATIC_DATA_DIR / "districts.json"
 
 
 async def _connect() -> asyncpg.Connection:

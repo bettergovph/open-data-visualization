@@ -33,7 +33,7 @@ async def main():
     print("✅ Connected to dynasty database\n")
     
     # Load districts.json to check what municipalities are available
-    districts_file = Path(__file__).parent.parent / 'districts.json'
+    districts_file = Path(__file__).parent.parent / 'static' / 'data' / 'districts.json'
     with open(districts_file, 'r') as f:
         districts_data = json.load(f)
     

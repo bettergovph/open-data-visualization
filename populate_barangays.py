@@ -81,7 +81,7 @@ def find_city_barangays(province_name, city_barangays_data):
 
 async def populate_barangays():
     # Load districts.json for provincial districts
-    districts_path = Path(__file__).parent / 'districts.json'
+    districts_path = Path(__file__).parent / 'static' / 'data' / 'districts.json'
     if not districts_path.exists():
         print(f"❌ Error: districts.json not found at {districts_path}")
         return

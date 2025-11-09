@@ -38,9 +38,11 @@ class DynastyProjectsCacheGenerator:
     """Generate cached JSON for dynasty-projects"""
     
     def __init__(self):
-        self.cache_file = Path(__file__).parent.parent / 'static' / 'data' / 'dynasty-projects-cache.json'
-        self.config_file = Path(__file__).parent.parent / 'dynasty-projects-config.json'
-        self.districts_file = Path(__file__).parent.parent / 'districts.json'
+        root_dir = Path(__file__).parent.parent
+        static_data_dir = root_dir / 'static' / 'data'
+        self.cache_file = static_data_dir / 'dynasty-projects-cache.json'
+        self.config_file = static_data_dir / 'dynasty-projects-config.json'
+        self.districts_file = static_data_dir / 'districts.json'
         cpu_count = os.cpu_count() or 4
         self.max_workers = min(24, max(1, cpu_count))
         self.verbose = os.getenv('DYNASTY_CACHE_VERBOSE', '0') == '1'

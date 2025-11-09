@@ -319,8 +319,9 @@ async def main():
     
     # Paths
     root_dir = Path(__file__).resolve().parent.parent
-    districts_path = root_dir / "districts.json"
-    config_path = root_dir / "dynasty-projects-config.json"
+    static_data_dir = root_dir / "static" / "data"
+    districts_path = static_data_dir / "districts.json"
+    config_path = static_data_dir / "dynasty-projects-config.json"
     output_dir = root_dir / "static" / "data"
     
     # Load data

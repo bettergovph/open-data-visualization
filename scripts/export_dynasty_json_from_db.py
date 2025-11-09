@@ -15,8 +15,9 @@ from dotenv import load_dotenv
 
 
 ROOT_DIR = Path(__file__).resolve().parent.parent
-DEFAULT_CONFIG_PATH = ROOT_DIR / "dynasty-projects-config.json"
-DEFAULT_DISTRICTS_PATH = ROOT_DIR / "districts.json"
+STATIC_DATA_DIR = ROOT_DIR / "static" / "data"
+DEFAULT_CONFIG_PATH = STATIC_DATA_DIR / "dynasty-projects-config.json"
+DEFAULT_DISTRICTS_PATH = STATIC_DATA_DIR / "districts.json"
 
 
 async def _connect() -> asyncpg.Connection:
@@ -139,6 +140,8 @@ async def main() -> None:
             data = json.loads(data)
         districts_payload["districts"][row["name"]] = data
 
+    args.config_output.parent.mkdir(parents=True, exist_ok=True)
+    args.districts_output.parent.mkdir(parents=True, exist_ok=True)
     _export_json(args.config_output, config_payload)
     _export_json(args.districts_output, districts_payload)
 

@@ -14,8 +14,8 @@ class LolitaJavierCacheFixer:
     def __init__(self) -> None:
         self.base_dir = Path(__file__).parent.parent
         self.cache_dir = self.base_dir / 'static' / 'data'
-        self.config_path = self.base_dir / 'dynasty-projects-config.json'
-        self.districts_path = self.base_dir / 'districts.json'
+        self.config_path = self.cache_dir / 'dynasty-projects-config.json'
+        self.districts_path = self.cache_dir / 'districts.json'
         self.target_name = 'Lolita Javier'
         self.slug = 'lolita-javier'
 
