@@ -88,6 +88,8 @@ class DavaoCityCongressmenFixer:
             match_score = 100  # Default high score
             should_include = False
 
+            allow_city_wide_null_year = False
+
             if project_year is not None:
                 # Project has a year - check if it falls within any of the congressman's terms
                 terms = congressman_data.get('terms', [])
@@ -98,9 +100,14 @@ class DavaoCityCongressmenFixer:
                         should_include = True
                         break
             else:
-                # Project has no year - give to ALL congressmen with lower score (-50)
-                should_include = True
-                match_score = -50  # Uncertain match due to missing year data
+                # Project has no year - assign to 1st District only, with lower score (-50)
+                district_number = (congressman_data.get('district_number') or '').strip()
+                if district_number == '1st District':
+                    should_include = True
+                    match_score = -50  # Uncertain match due to missing year data
+                    allow_city_wide_null_year = True
+                else:
+                    return (None, None, 0)
 
             if not should_include:
                 return (None, None, 0)  # Project doesn't match congressman's terms
@@ -125,6 +132,10 @@ class DavaoCityCongressmenFixer:
 
 
             # For Davao City, REQUIRE barangay match - no city-wide matching
+            if allow_city_wide_null_year:
+                # For null-year projects assigned to 1st District, allow city-wide match
+                return (congressman_name, "district", match_score)
+
             if valid_barangays:
                 has_barangay_match = any(barangay in combined_text for barangay in valid_barangays)
                 if has_barangay_match:
