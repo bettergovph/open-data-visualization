@@ -28,6 +28,12 @@ from infrawatch_postgres_client import get_infrawatch_connection
 # Load environment variables
 load_dotenv()
 
+# Manila-specific helpers
+BARANGAY_NUMBER_PATTERNS = [
+    re.compile(r'(?:BARANGAY|BRGY|BRG|BGY)\s*(?:NO\.?\s*)?(\d{1,4})', re.IGNORECASE),
+    re.compile(r'(?:BARANGAY|BRGY|BRG|BGY)\s*(?:NO\.?\s*)?(\d{1,4})\s*(?:[-–]|TO)\s*(\d{1,4})', re.IGNORECASE),
+]
+
 class DynastyProjectsCacheGenerator:
     """Generate cached JSON for dynasty-projects"""
     
@@ -38,6 +44,15 @@ class DynastyProjectsCacheGenerator:
         cpu_count = os.cpu_count() or 4
         self.max_workers = min(24, max(1, cpu_count))
         self.verbose = os.getenv('DYNASTY_CACHE_VERBOSE', '0') == '1'
+        self.manila_barangay_tokens: Dict[str, List[str]] = {}
+        self.manila_barangay_numbers: Dict[str, List[int]] = {}
+        self.manila_keyword_map: Dict[str, List[str]] = {}
+        self.leyte_second_municipalities: set[str] = set()
+        self.leyte_second_keywords: List[str] = []
+        self.leyte_second_negative_keywords: List[str] = []
+        self.samar_first_municipalities: set[str] = set()
+        self.samar_first_keywords: List[str] = []
+        self.samar_first_negative_keywords: List[str] = []
         self.chart_limit = 200
 
     def _log(self, message: str, *, verbose_only: bool = False) -> None:
@@ -399,8 +414,125 @@ class DynastyProjectsCacheGenerator:
         if self.districts_file.exists():
             with open(self.districts_file, 'r', encoding='utf-8') as f:
                 districts_data = json.load(f)
+
+        self._initialize_manila_tokens(districts_data)
         
         return config_data, districts_data
+
+    def _initialize_manila_tokens(self, districts_data: Dict) -> None:
+        """Pre-compute Manila barangay tokens and numbers from districts.json"""
+        self.manila_barangay_tokens.clear()
+        self.manila_barangay_numbers.clear()
+        self.manila_keyword_map.clear()
+        if not districts_data:
+            return
+
+        manila_info = districts_data.get('districts', {}).get('Manila')
+        if not manila_info:
+            return
+
+        barangay_map = manila_info.get('barangays', {})
+        for district_label, barangay_list in barangay_map.items():
+            tokens: set[str] = set()
+            numbers: set[int] = set()
+
+            for barangay in barangay_list or []:
+                if not barangay:
+                    continue
+                upper = barangay.upper().strip()
+                if upper:
+                    tokens.add(upper)
+
+                cleaned = upper.replace('NO.', '').replace('NO', '')
+                for part in re.split(r'[^0-9]+', cleaned):
+                    if not part:
+                        continue
+                    try:
+                        num = int(part)
+                    except ValueError:
+                        continue
+                    numbers.add(num)
+                    base = str(num)
+                    tokens.update({
+                        f'BARANGAY {base}',
+                        f'BARANGAY NO {base}',
+                        f'BARANGAY NO. {base}',
+                        f'BRGY {base}',
+                        f'BRGY. {base}',
+                        f'BRG {base}',
+                        f'BGY {base}',
+                    })
+
+            district_key = district_label.upper()
+            self.manila_barangay_tokens[district_key] = sorted(tokens)
+            self.manila_barangay_numbers[district_key] = sorted(numbers)
+            keyword_list = []
+            custom_keywords = manila_info.get('keywords', {}).get(district_label, [])
+            if custom_keywords:
+                keyword_list.extend([kw.upper() for kw in custom_keywords if kw])
+            else:
+                default_map = {
+                    '1ST DISTRICT': ['TONDO I', 'TONDO 1', 'TONDO'],
+                    '2ND DISTRICT': ['TONDO II', 'TONDO 2', 'TONDO'],
+                    '3RD DISTRICT': ['QUIAPO', 'BINONDO', 'SAN NICOLAS', 'STA. CRUZ', 'SANTA CRUZ'],
+                    '4TH DISTRICT': ['SAMPALOC'],
+                    '5TH DISTRICT': ['PACO', 'PANDACAN', 'SAN ANDRES', 'STA. ANA', 'SANTA ANA'],
+                    '6TH DISTRICT': ['ERMITA', 'MALATE', 'INTRAMUROS', 'SAN MIGUEL', 'PORT AREA'],
+                }
+                keyword_list.extend(default_map.get(district_key, []))
+            self.manila_keyword_map[district_key] = keyword_list
+
+        leyte_info = districts_data.get('districts', {}).get('Leyte', {})
+        keyword_info = leyte_info.get('keywords', {}).get('2nd District', {})
+        municipalities_map = leyte_info.get('municipalities', {})
+        self.leyte_second_municipalities = {
+            name.upper()
+            for name, district in municipalities_map.items()
+            if district.upper() == '2ND DISTRICT'
+        }
+        self.leyte_second_keywords = [kw.upper() for kw in keyword_info.get('positive', [])]
+        self.leyte_second_negative_keywords = [kw.upper() for kw in keyword_info.get('negative', [])]
+        if not self.leyte_second_keywords:
+            self.leyte_second_keywords = [
+                'LEYTE 2ND', '2ND LD', 'SECOND LD', '2ND LEGISLATIVE DISTRICT',
+                'SECOND LEGISLATIVE DISTRICT', '2ND DISTRICT ENGINEERING',
+                'LEYTE 2ND DEO', 'LEYTE II', '2ND DEO', '2ND LEGISLATIVE DIST.',
+                'LEYTE 2 DEO'
+            ]
+        if not self.leyte_second_negative_keywords:
+            self.leyte_second_negative_keywords = [
+                'LEYTE 1ST', 'LEYTE 3RD', 'LEYTE 4TH', 'LEYTE 5TH', 'LEYTE 6TH',
+                '1ST LD', '3RD LD', '4TH LD', '5TH LD', '6TH LD',
+                'SOUTHERN LEYTE', 'NORTHERN SAMAR', 'EASTERN SAMAR', 'WESTERN SAMAR',
+                'SAMAR PROVINCE', 'BILIRAN', 'ORMOC CITY', 'ORMOC', 'TACLOBAN',
+                'TAC. CITY', 'TAC CITY', 'LEYTE I DEO', 'LEYTE 1 DEO', 'LEYTE 3 DEO',
+                'LEYTE 4 DEO', 'LEYTE 5 DEO', 'LEYTE 6 DEO'
+            ]
+
+        samar_info = districts_data.get('districts', {}).get('Samar', {})
+        keyword_info = samar_info.get('keywords', {}).get('1st District', {})
+        municipalities_map = samar_info.get('municipalities', {})
+        self.samar_first_municipalities = {
+            name.upper()
+            for name, district in municipalities_map.items()
+            if district.upper() == '1ST DISTRICT'
+        }
+        self.samar_first_keywords = [kw.upper() for kw in keyword_info.get('positive', [])]
+        self.samar_first_negative_keywords = [kw.upper() for kw in keyword_info.get('negative', [])]
+        if not self.samar_first_keywords:
+            self.samar_first_keywords = [
+                'SAMAR 1ST', '1ST LD', 'FIRST LD', '1ST LEGISLATIVE DISTRICT',
+                'FIRST LEGISLATIVE DISTRICT', 'SAMAR 1ST DEO', 'SAMAR I',
+                'SAMAR 1ST ENGINEERING', '1ST DEO', 'SAMAR 1 DEO',
+                'CALBAYOG CITY DEO', 'CALBAYOG 1ST'
+            ]
+        if not self.samar_first_negative_keywords:
+            self.samar_first_negative_keywords = [
+                'SAMAR 2ND', 'SAMAR 3RD', 'SAMAR 4TH',
+                '2ND LD', 'SECOND LD', '3RD LD', 'THIRD LD',
+                'EASTERN SAMAR', 'NORTHERN SAMAR', 'WESTERN SAMAR',
+                'CATBALOGAN', 'SOUTHERN LEYTE'
+            ]
     
     async def get_congressmen_data(self, dynasty_conn, config_data: Dict, districts_data: Dict, political_dynasties_available: bool) -> Dict:
         """Get congressmen data from database"""
@@ -808,16 +940,15 @@ class DynastyProjectsCacheGenerator:
                             if not _contractor_is_excluded(normalized_text):
                                 return (congressman_name, "contractor", 40)
 
-        # 3. Special handling for Davao City districts: term filtering + barangay match
+        # 3. Special handling for Davao City districts: term filtering + barangay/city-wide rules
         if congressman_data.get('is_city_district') and congressman_data.get('provinces') and congressman_data['provinces'][0] == 'Davao City':
-            # Term filtering logic:
-            # - If project has a valid year: check if it falls within congressman's terms
-            # - If project has no year: give to ALL congressmen (universal -50 penalty applied in scoring)
-            match_score = 100  # Default high score
+            district_number = (congressman_data.get('district_number') or '').strip()
+            allow_city_wide = district_number == '1st District'
+
+            match_score = 100
             should_include = False
 
             if project_year is not None:
-                # Project has a year - check if it falls within any of the congressman's terms
                 terms = congressman_data.get('terms', [])
                 for term in terms:
                     term_start = term.get('start')
@@ -826,14 +957,15 @@ class DynastyProjectsCacheGenerator:
                         should_include = True
                         break
             else:
-                # Project has no year - give to ALL congressmen (universal -50 penalty will be applied in scoring)
-                should_include = True
-                match_score = 100  # Normal score, universal penalty applied later
+                if allow_city_wide:
+                    should_include = True
+                    match_score = 100
+                else:
+                    return (None, None, 0)
 
             if not should_include:
-                return (None, None, 0)  # Project doesn't match congressman's terms
+                return (None, None, 0)
 
-            # Check barangay match
             valid_barangays = []
             if districts_data and congressman_data.get('provinces'):
                 province = congressman_data['provinces'][0]
@@ -846,30 +978,27 @@ class DynastyProjectsCacheGenerator:
                 if province_key:
                     districts_info = districts_data.get('districts', {}).get(province_key, {})
                     barangays_map = districts_info.get('barangays', {})
-                    district_number = congressman_data.get('district_number')
 
                     if district_number and district_number in barangays_map:
-                        # Get both full names and base names
                         full_barangays = barangays_map[district_number]
                         base_barangays = []
                         for barangay in full_barangays:
-                            # Extract base name (remove numbers/suffixes)
                             base_name = re.sub(r'\s+\d+$|.*\s+', '', barangay).strip()
-                            if base_name != barangay:  # Only add if different
+                            if base_name != barangay:
                                 base_barangays.append(base_name)
                         valid_barangays = [b.upper() for b in full_barangays + base_barangays]
 
-            # Also use barangays from congressman_data as fallback
             if not valid_barangays:
                 valid_barangays = [b.upper() for b in congressman_data.get('barangays', []) if b]
 
-            # For Davao City, REQUIRE barangay match - no city-wide matching
             if valid_barangays:
                 has_barangay_match = any(contains_word(combined_text, barangay) for barangay in valid_barangays)
                 if has_barangay_match:
                     return (congressman_name, "district", match_score)
 
-            # If no barangay match found for Davao City, return no match
+            if allow_city_wide:
+                return (congressman_name, "district", match_score)
+
             return (None, None, 0)
 
         # 4. Get district identifier (province or city name)
@@ -887,6 +1016,16 @@ class DynastyProjectsCacheGenerator:
             if contains_word(combined_text, "QUEZON CITY"):
                 return (None, None, 0)  # This is Quezon City, not Quezon Province
         
+        is_leyte_second = (
+            district_identifier == 'LEYTE'
+            and (congressman_data.get('district_number') or '').strip().upper() == '2ND DISTRICT'
+        )
+        is_samar_first = (
+            district_identifier == 'SAMAR'
+            and (congressman_data.get('district_number') or '').strip().upper() == '1ST DISTRICT'
+        )
+
+        target_municipality_mentioned = False
         # 5. Pre-check: If project mentions a municipality from a DIFFERENT district, exclude it
         # This prevents Palompon (3rd District) from matching Romualdez (1st District)
         if districts_data and congressman_data.get('district_number') and congressman_data.get('provinces'):
@@ -914,6 +1053,12 @@ class DynastyProjectsCacheGenerator:
                         if mun_district and mun_district.upper() != congressman_district:
                             # Municipality from different district is mentioned - exclude!
                             return (None, None, 0)
+                        elif mun_district and mun_district.upper() == congressman_district:
+                            target_municipality_mentioned = True
+                        elif is_leyte_second and mun_key_upper in self.leyte_second_municipalities:
+                            target_municipality_mentioned = True
+                        elif is_samar_first and mun_key_upper in self.samar_first_municipalities:
+                            target_municipality_mentioned = True
         
         # 6. Check if district identifier is in project text
         if not contains_word(combined_text, district_identifier):
@@ -921,7 +1066,59 @@ class DynastyProjectsCacheGenerator:
         
         # 7. For city districts - IMPROVED LOGIC FOR ALL CITIES, ESPECIALLY MANILA
         if congressman_data.get('is_city_district') and district_identifier:
-            # Get valid barangays for this district
+            district_number_raw = (congressman_data.get('district_number') or '').strip()
+            district_number_upper = district_number_raw.upper()
+
+            if district_identifier == 'MANILA':
+                range_limits = MANILA_BARANGAY_RANGES.get(district_number_upper)
+
+                barangay_numbers_in_text: set[int] = set()
+                for pattern in BARANGAY_NUMBER_PATTERNS:
+                    for match in pattern.finditer(combined_text):
+                        groups = match.groups()
+                        if len(groups) >= 2 and groups[0] and groups[1]:
+                            try:
+                                start = int(groups[0])
+                                end = int(groups[1])
+                            except ValueError:
+                                continue
+                            if start > end:
+                                start, end = end, start
+                            barangay_numbers_in_text.update(range(start, end + 1))
+                        else:
+                            for group in groups:
+                                if not group:
+                                    continue
+                                try:
+                                    barangay_numbers_in_text.add(int(group))
+                                except ValueError:
+                                    continue
+
+                if barangay_numbers_in_text:
+                    valid_number_set = set(self.manila_barangay_numbers.get(district_number_upper, []))
+                    if valid_number_set:
+                        if all(num in valid_number_set for num in barangay_numbers_in_text):
+                            return (congressman_name, "district", 100)
+                    elif range_limits and all(range_limits[0] <= num <= range_limits[1] for num in barangay_numbers_in_text):
+                        return (congressman_name, "district", 100)
+                    return (None, None, 0)
+
+                tokens = set(self.manila_barangay_tokens.get(district_number_upper, []))
+                tokens.update(
+                    (barangay or '').upper().strip()
+                    for barangay in congressman_data.get('barangays', [])
+                    if barangay
+                )
+                keyword_list = self.manila_keyword_map.get(district_number_upper, [])
+                if tokens and any(token in combined_text for token in tokens if token):
+                    return (congressman_name, "district", 100)
+
+                if keyword_list and any(contains_word(combined_text, keyword) for keyword in keyword_list if keyword):
+                    return (congressman_name, "district", 80)
+
+                return (None, None, 0)
+
+            # For other city districts, allow city-wide matches but prefer barangay matches
             valid_barangays = []
             if districts_data and congressman_data.get('provinces'):
                 province = congressman_data['provinces'][0]
@@ -934,31 +1131,19 @@ class DynastyProjectsCacheGenerator:
                 if province_key:
                     districts_info = districts_data.get('districts', {}).get(province_key, {})
                     barangays_map = districts_info.get('barangays', {})
-                    district_number = congressman_data.get('district_number')
 
-                    if district_number and district_number in barangays_map:
-                        # Get both full names (Tondo I, Tondo II) and base names (Tondo)
-                        full_barangays = barangays_map[district_number]
+                    if district_number_raw and district_number_raw in barangays_map:
+                        full_barangays = barangays_map[district_number_raw]
                         base_barangays = []
                         for barangay in full_barangays:
-                            # Extract base name (e.g., "Tondo I" -> "Tondo")
                             base_name = barangay.split()[0] if barangay.split() else barangay
                             base_barangays.append(base_name)
                         valid_barangays = [b.upper() for b in full_barangays + base_barangays]
 
-            # Check if project mentions valid barangay names
             has_real_barangay = False
             if valid_barangays:
                 has_real_barangay = any(barangay in combined_text for barangay in valid_barangays)
 
-            # SPECIAL RULE: For Manila districts, require barangay-level matching
-            # This prevents road codes and generic "Manila" mentions from matching
-            if district_identifier == 'MANILA':
-                if not has_real_barangay:
-                    return (None, None, 0)
-                return (congressman_name, "district", 100)  # Strong match for barangay mention
-
-            # For other city districts, allow city-wide matches but prefer barangay matches
             # STRICT RULE: If project mentions "ROAD", require "CITY"
             if re.search(r'\bROAD\b', combined_text, re.IGNORECASE):
                 if 'CITY' not in combined_text:
@@ -1009,6 +1194,23 @@ class DynastyProjectsCacheGenerator:
                     
                     # Found BOTH district identifier AND municipality from that district - match!
                     return (congressman_name, "district", 100)
+
+        if target_municipality_mentioned:
+            return (congressman_name, "district", 100)
+
+        if is_leyte_second:
+            if any(keyword in combined_text for keyword in self.leyte_second_negative_keywords):
+                return (None, None, 0)
+            keyword_hit = any(keyword in combined_text for keyword in self.leyte_second_keywords)
+            if keyword_hit and 'LEYTE' in combined_text:
+                return (congressman_name, "district", 90)
+
+        if is_samar_first:
+            if any(keyword in combined_text for keyword in self.samar_first_negative_keywords):
+                return (None, None, 0)
+            keyword_hit = any(keyword in combined_text for keyword in self.samar_first_keywords)
+            if keyword_hit and 'SAMAR' in combined_text:
+                return (congressman_name, "district", 90)
         
         # For province districts, if we reach here without a municipality match, exclude it
         # (Only city districts allow city-wide matches)
@@ -1319,18 +1521,7 @@ class DynastyProjectsCacheGenerator:
                 # 3. Calculate total score
                 current_score = base_score + db_bonus
                 
-                # 4. For city-type districts: penalize city-wide matches (no barangay) by -40
-                # Check if this was a city-wide match using the is_city_wide flag
-                is_city_wide = proj.get('is_city_wide', False)
-                if is_city_wide:
-                    # City-wide match - apply -40 penalty
-                    current_score = max(0, current_score - 40)
-
-                # 5. Penalize projects with null years by -50 (uncertain timeframe)
-                has_null_year = proj.get('year') is None or proj.get('year') == '' or proj.get('year') == 'null'
-                if has_null_year:
-                    # Null year - apply -50 penalty for uncertainty
-                    current_score = max(0, current_score - 50)
+                # 4. City-wide and null-year matches retain full score (handled via district assignment rules)
                 
                 proj['match_score'] = current_score
                 proj['sources_count'] = sources_count
