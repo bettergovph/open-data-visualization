@@ -132,7 +132,12 @@ async def main() -> None:
     }
 
     for row in district_rows:
-        districts_payload["districts"][row["name"]] = row["data"]
+        # row["data"] is already parsed by the JSON codec, so it's a dict
+        data = row["data"]
+        # Handle case where data might still be a string (for backward compatibility)
+        if isinstance(data, str):
+            data = json.loads(data)
+        districts_payload["districts"][row["name"]] = data
 
     _export_json(args.config_output, config_payload)
     _export_json(args.districts_output, districts_payload)
