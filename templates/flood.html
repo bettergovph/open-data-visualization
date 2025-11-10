@@ -332,6 +332,32 @@ h1, h2, h3, h4, h5, h6 {
     overflow: hidden !important;
     text-overflow: ellipsis !important;
 }
+
+.flag-badge {
+    display: inline-block;
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    margin-right: 4px;
+    margin-bottom: 4px;
+    white-space: nowrap;
+}
+
+.flag-badge-red {
+    background: #dc2626;
+    color: #ffffff;
+}
+
+.flag-badge-green {
+    background: #16a34a;
+    color: #ffffff;
+}
+
+.flag-badge-none {
+    background: #e5e7eb;
+    color: #4b5563;
+}
 </style>
 
 <!-- Open Graph / Facebook -->
@@ -693,6 +719,14 @@ function toggleMobileMenu() {
                                     <option value="">All Types</option>
                                 </select>
                             </div>
+
+                            <!-- Flag Filter -->
+                            <div class="filter-group">
+                                <label style="display: block; margin-bottom: 5px; font-weight: 600; color: #333;">🚩 Flags</label>
+                                <select id="table-flag-filter" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px; font-size: 14px;">
+                                    <option value="">All Projects</option>
+                                </select>
+                            </div>
                             
                             <!-- Cost Range Filter -->
                             <div class="filter-group">
@@ -739,13 +773,14 @@ function toggleMobileMenu() {
                                     <th style="padding: 12px; text-align: left; border-bottom: 1px solid #ddd;">Region</th>
                                     <th style="padding: 12px; text-align: left; border-bottom: 1px solid #ddd;">Year</th>
                                     <th style="padding: 12px; text-align: left; border-bottom: 1px solid #ddd;">Type</th>
+                                    <th style="padding: 12px; text-align: left; border-bottom: 1px solid #ddd;" class="hide-mobile">Flags</th>
                                     <th style="padding: 12px; text-align: right; border-bottom: 1px solid #ddd;" class="hide-mobile">Cost</th>
                                     <th style="padding: 12px; text-align: left; border-bottom: 1px solid #ddd;" class="hide-mobile">Contractor</th>
                                 </tr>
                             </thead>
                             <tbody id="projects-table-body">
                                 <tr>
-                                    <td colspan="6" style="padding: 40px; text-align: center; color: #666;">
+                                    <td colspan="7" style="padding: 40px; text-align: center; color: #666;">
                                         <div style="display: flex; flex-direction: column; align-items: center; gap: 10px;">
                                             <div style="font-size: 24px; animation: spin 2s linear infinite;">⟳</div>
                                             <div>Loading data...</div>
@@ -1963,6 +1998,9 @@ function toggleMobileMenu() {
         const tableTypeFilter = document.getElementById('table-type-filter');
         if (tableTypeFilter) tableTypeFilter.addEventListener('change', () => { applyTableFilters(); renderTable(); });
         
+        const tableFlagFilter = document.getElementById('table-flag-filter');
+        if (tableFlagFilter) tableFlagFilter.addEventListener('change', () => { applyTableFilters(); renderTable(); });
+        
         // Cost range filters
         const tableCostMin = document.getElementById('table-cost-min');
         if (tableCostMin) tableCostMin.addEventListener('input', () => { applyTableFilters(); renderTable(); });
@@ -1982,6 +2020,7 @@ function toggleMobileMenu() {
                 document.getElementById('table-region-filter').value = '';
                 document.getElementById('table-year-filter').value = '';
                 document.getElementById('table-type-filter').value = '';
+                document.getElementById('table-flag-filter').value = '';
                 document.getElementById('table-cost-min').value = '';
                 document.getElementById('table-cost-max').value = '';
                 applyTableFilters();
@@ -2103,10 +2142,11 @@ function toggleMobileMenu() {
         const regionFilter = document.getElementById('table-region-filter')?.value || '';
         const yearFilter = document.getElementById('table-year-filter')?.value || '';
         const typeFilter = document.getElementById('table-type-filter')?.value || '';
+        const flagFilter = document.getElementById('table-flag-filter')?.value || '';
         const costMin = parseFloat(document.getElementById('table-cost-min')?.value) || 0;
         const costMax = parseFloat(document.getElementById('table-cost-max')?.value) || Infinity;
         
-        console.log('🔍 Applying filters:', { projectSearch, contractorFilter, regionFilter, yearFilter, typeFilter, costMin, costMax });
+        console.log('🔍 Applying filters:', { projectSearch, contractorFilter, regionFilter, yearFilter, typeFilter, flagFilter, costMin, costMax });
         
         console.log('📊 Total projects before filtering:', allTableProjects.length);
         if (yearFilter) {
@@ -2138,6 +2178,25 @@ function toggleMobileMenu() {
             // Type filter
             if (typeFilter && project.TypeofWork !== typeFilter) {
                 return false;
+            }
+            
+            // Flag filter
+            if (flagFilter) {
+                const flags = project.flags || {};
+                const redFlags = Array.isArray(flags.redFlags) ? flags.redFlags : [];
+                
+                if (flagFilter === 'Green_Flag') {
+                    // Show only green flag projects (no red flags)
+                    if (!flags.isGreenFlag) {
+                        return false;
+                    }
+                } else {
+                    // Specific red flag classification
+                    const hasThisFlag = redFlags.some(flag => flag && flag.classification === flagFilter);
+                    if (!hasThisFlag) {
+                        return false;
+                    }
+                }
             }
             
             // Cost range filter
@@ -2265,6 +2324,71 @@ function toggleMobileMenu() {
                 typeSelect.appendChild(option);
             });
         }
+
+        // Populate flag filter
+        const flagSelect = document.getElementById('table-flag-filter');
+        if (flagSelect) {
+            const currentValue = flagSelect.value;
+            flagSelect.innerHTML = '<option value="">All Projects</option>';
+            
+            // Add Green Flag option
+            const greenOption = document.createElement('option');
+            greenOption.value = 'Green_Flag';
+            greenOption.textContent = 'Green Flag';
+            flagSelect.appendChild(greenOption);
+            
+            // Collect all unique red flag classifications
+            const redFlags = new Set();
+            allTableProjects.forEach(project => {
+                const flags = project.flags || {};
+                const projectRedFlags = Array.isArray(flags.redFlags) ? flags.redFlags : [];
+                projectRedFlags.forEach(flag => {
+                    if (flag && flag.classification) {
+                        redFlags.add(flag.classification);
+                    }
+                });
+            });
+            
+            // Add red flag options sorted alphabetically
+            [...redFlags].sort().forEach(classification => {
+                const option = document.createElement('option');
+                option.value = classification;
+                option.textContent = classification.replace(/_/g, ' ');
+                flagSelect.appendChild(option);
+            });
+            
+            // Restore previous selection if it still exists
+            if (currentValue && Array.from(flagSelect.options).some(opt => opt.value === currentValue)) {
+                flagSelect.value = currentValue;
+            }
+        }
+    }
+    
+    function formatFlagLabel(value) {
+        if (!value) return '';
+        return value.replace(/_/g, ' ').replace(/\b\w/g, char => char.toUpperCase());
+    }
+
+    function renderFlagCell(project) {
+        const flags = project.flags || {};
+        const redFlags = Array.isArray(flags.redFlags) ? flags.redFlags : [];
+        const isGreen = Boolean(flags.isGreenFlag);
+
+        if (redFlags.length > 0) {
+            return redFlags
+                .map(flag => {
+                    const label = formatFlagLabel(flag?.classification || 'Red Flag');
+                    const tooltip = (flag?.reason || 'Flagged for investigation').replace(/"/g, '&quot;');
+                    return `<span class="flag-badge flag-badge-red" title="${tooltip}">${label}</span>`;
+                })
+                .join(' ');
+        }
+
+        if (isGreen) {
+            return '<span class="flag-badge flag-badge-green" title="Verified as green flag">Green Flag</span>';
+        }
+
+        return '<span class="flag-badge flag-badge-none">None</span>';
     }
     
     function renderTable() {
@@ -2306,7 +2430,7 @@ function toggleMobileMenu() {
         if (projectsToDisplay.length === 0) {
             html = `
                 <tr>
-                    <td colspan="6" style="padding: 40px; text-align: center; color: #dc3545;">
+                    <td colspan="7" style="padding: 40px; text-align: center; color: #dc3545;">
                         <div style="display: flex; flex-direction: column; align-items: center; gap: 10px;">
                             <div style="font-size: 24px;">⚠️</div>
                             <div>No projects found matching your criteria.</div>
@@ -2321,8 +2445,9 @@ function toggleMobileMenu() {
                     <td style="padding: 12px; border-bottom: 1px solid #eee;">${escapeHtml(project.Region || 'N/A')}</td>
                     <td style="padding: 12px; border-bottom: 1px solid #eee;">${escapeHtml(project.InfraYear || 'N/A')}</td>
                     <td style="padding: 12px; border-bottom: 1px solid #eee;">${escapeHtml(project.TypeofWork || 'N/A')}</td>
-                    <td style="padding: 12px; text-align: right; border-bottom: 1px solid #eee;">${project.ContractCost ? `₱${parseFloat(project.ContractCost).toLocaleString('en-PH')}` : 'N/A'}</td>
-                    <td style="padding: 12px; border-bottom: 1px solid #eee;">${escapeHtml(project.Contractor || 'N/A')}</td>
+                    <td style="padding: 12px; border-bottom: 1px solid #eee;" class="hide-mobile">${renderFlagCell(project)}</td>
+                    <td style="padding: 12px; text-align: right; border-bottom: 1px solid #eee;" class="hide-mobile">${project.ContractCost ? `₱${parseFloat(project.ContractCost).toLocaleString('en-PH')}` : 'N/A'}</td>
+                    <td style="padding: 12px; border-bottom: 1px solid #eee;" class="hide-mobile">${escapeHtml(project.Contractor || 'N/A')}</td>
                 </tr>
             `).join('');
         }
