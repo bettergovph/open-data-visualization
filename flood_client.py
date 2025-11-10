@@ -11,7 +11,7 @@ from typing import Dict, List, Optional, Any, Tuple
 from datetime import datetime
 import aiohttp
 import pandas as pd
-from dataclasses import dataclass, asdict
+from dataclasses import dataclass, asdict, fields
 from urllib.parse import urlencode
 from dotenv import load_dotenv
 
@@ -83,6 +83,7 @@ class FloodControlClient:
             "0jH6Q1HHOBgJ8j3ISMx415T+mOKvURP9RA9FFpjoeco="
         self.base_url = f"http://{self.meilisearch_host}:{self.meilisearch_port}"
         self.index_name = "bettergov_flood_control"
+        self._project_fields = {field.name for field in fields(FloodControlProject)}
         
         logger.info(f"🔍 MeiliSearch configured: {self.base_url} with index '{self.index_name}'")
         
@@ -136,10 +137,7 @@ class FloodControlClient:
             response = await self._make_request(f"indexes/{self.index_name}/search", 
                                               "POST", data=search_params)
             
-            projects = []
-            for hit in response.get("hits", []):
-                project = FloodControlProject(**hit)
-                projects.append(project)
+            projects = [self._build_project(hit) for hit in response.get("hits", [])]
             
             # Extract search metadata
             search_metadata = {
@@ -162,12 +160,29 @@ class FloodControlClient:
                                               "POST", data={
                 "q": "",
                 "filter": f"GlobalID = '{project_id}'",
-                "limit": 1
+                "limit": 1,
+                "attributesToRetrieve": [
+                    "GlobalID",
+                    "ProjectDescription",
+                    "InfraYear",
+                    "Region",
+                    "Province",
+                    "Municipality",
+                    "TypeofWork",
+                    "Contractor",
+                    "ContractCost",
+                    "DistrictEngineeringOffice",
+                    "LegislativeDistrict",
+                    "ContractID",
+                    "ProjectID",
+                    "Latitude",
+                    "Longitude",
+                ],
             })
             
             hits = response.get("hits", [])
             if hits:
-                return FloodControlProject(**hits[0])
+                return self._build_project(hits[0])
             return None
             
         except Exception as e:
@@ -383,6 +398,10 @@ class FloodControlClient:
         except Exception as e:
             logger.error(f"Health check failed: {e}")
             return False
+
+    def _build_project(self, payload: Dict[str, Any]) -> FloodControlProject:
+        filtered = {key: value for key, value in payload.items() if key in self._project_fields}
+        return FloodControlProject(**filtered)
 
 # Utility functions for filter building
 def build_filter_string(filters: Dict[str, str]) -> str:

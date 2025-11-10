@@ -11,7 +11,7 @@ import unicodedata
 from functools import lru_cache
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Any, Dict, Optional, Set
+from typing import Any, Dict, Optional, Set, List
 from dotenv import load_dotenv
 from collections import defaultdict
 from urllib.parse import urlparse
@@ -1379,9 +1379,14 @@ async def flood_projects_api(
             offset=offset
         )
         
+        # Attach flag metadata from the flood database
+        flag_metadata = await fetch_flood_flag_metadata([proj.GlobalID for proj in projects])
+
         # Convert projects to dictionaries
-        project_dicts = [
-            {
+        project_dicts = []
+        for proj in projects:
+            flags = flag_metadata.get(proj.GlobalID, {})
+            project_dicts.append({
                 "GlobalID": proj.GlobalID,
                 "ProjectDescription": proj.ProjectDescription,
                 "InfraYear": proj.InfraYear,
@@ -1396,10 +1401,14 @@ async def flood_projects_api(
                 "ContractID": proj.ContractID,
                 "ProjectID": proj.ProjectID,
                 "Latitude": proj.Latitude,
-                "Longitude": proj.Longitude
-            }
-            for proj in projects
-        ]
+                "Longitude": proj.Longitude,
+                "flags": {
+                    "hasRedFlags": bool(flags.get("has_red_flags", False)),
+                    "isGreenFlag": bool(flags.get("is_green_flag", False)),
+                    "redFlags": list(flags.get("red_flags", [])),
+                    "greenFlags": list(flags.get("green_flags", [])),
+                }
+            })
         
         return JSONResponse({
             "success": True,
@@ -3267,7 +3276,7 @@ async def hidden_flood_statistics_api():
                 port=int(os.getenv('POSTGRES_PORT', 5432)),
                 user=os.getenv('POSTGRES_USER', 'budget_admin'),
                 password=os.getenv('POSTGRES_PASSWORD', ''),
-                database=os.getenv('POSTGRES_DB_FLOOD', 'flood_control')
+                database=os.getenv('POSTGRES_DB_FLOOD', 'flood')
             )
             
             # Get the total count of flood control projects
@@ -5713,6 +5722,84 @@ async def get_sources_api():
             "error": str(e),
             "sources": {}
         })
+
+async def fetch_flood_flag_metadata(global_ids: List[str]) -> Dict[str, Dict[str, Any]]:
+    valid_ids = {gid for gid in global_ids if gid}
+    if not valid_ids:
+        return {}
+
+    conn = None
+    try:
+        conn = await asyncpg.connect(
+            host=os.getenv('POSTGRES_HOST', 'localhost'),
+            port=int(os.getenv('POSTGRES_PORT', 5432)),
+            user=os.getenv('POSTGRES_USER', 'budget_admin'),
+            password=os.getenv('POSTGRES_PASSWORD', ''),
+            database=os.getenv('POSTGRES_DB_FLOOD', 'flood')
+        )
+
+        id_list = list(valid_ids)
+
+        summary_rows = await conn.fetch(
+            """
+            SELECT project_global_id,
+                   COALESCE(is_green_flag, FALSE) AS is_green_flag,
+                   COALESCE(has_red_flags, FALSE) AS has_red_flags
+            FROM flagged_flood_projects
+            WHERE project_global_id = ANY($1::text[])
+            """,
+            id_list
+        )
+
+        classification_rows = await conn.fetch(
+            """
+            SELECT project_global_id,
+                   classification,
+                   classification_type,
+                   reason
+            FROM flood_project_flag_links
+            WHERE project_global_id = ANY($1::text[])
+            """,
+            id_list
+        )
+
+        metadata: Dict[str, Dict[str, Any]] = {}
+        for row in summary_rows:
+            metadata[row['project_global_id']] = {
+                "is_green_flag": bool(row['is_green_flag']),
+                "has_red_flags": bool(row['has_red_flags']),
+                "red_flags": [],
+                "green_flags": [],
+            }
+
+        for row in classification_rows:
+            entry = metadata.setdefault(
+                row['project_global_id'],
+                {
+                    "is_green_flag": False,
+                    "has_red_flags": False,
+                    "red_flags": [],
+                    "green_flags": [],
+                },
+            )
+            flag_record = {
+                "classification": row['classification'],
+                "reason": row['reason'],
+            }
+            if row['classification_type'] == 'red':
+                entry["red_flags"].append(flag_record)
+                entry["has_red_flags"] = True
+            elif row['classification_type'] == 'green':
+                entry["green_flags"].append(flag_record)
+                entry["is_green_flag"] = True
+
+        return metadata
+    except Exception as exc:
+        print(f"⚠️ [API] Failed to fetch flood flag metadata: {exc}")
+        return {}
+    finally:
+        if conn:
+            await conn.close()
 
 if __name__ == "__main__":
     uvicorn.run(app, host="127.0.0.1", port=8000)
