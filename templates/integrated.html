@@ -151,10 +151,7 @@
         <div class="hidden md:flex space-x-6">
             <a href="/nep" class="text-black hover:text-gray-600 font-medium transition">NEP</a>
             <a href="/budget" class="text-black hover:text-gray-600 font-medium transition">Budget</a>
-            <a href="/flood" class="text-black hover:text-gray-600 font-medium transition">Flood Control</a>
-            <a href="/dime" class="text-black hover:text-gray-600 font-medium transition">DIME</a>
             <a href="/map" class="text-black hover:text-gray-600 font-medium transition">Map</a>
-            <a href="/philgeps" class="text-black hover:text-gray-600 font-medium transition">PhilGEPS</a>
             <a href="/dynasty" class="text-black hover:text-gray-600 font-medium transition">Dynasties</a>
             <a href="/integrated" class="text-black hover:text-gray-600 font-medium transition border-b-2 border-black">Integrated</a>
             <a href="/sources" class="text-black hover:text-gray-600 font-medium transition">Sources</a>
@@ -171,10 +168,7 @@
     <div id="mobileMenu" class="hidden mt-4 px-4 space-y-2">
         <a href="/nep" class="block text-black hover:text-gray-600 font-medium py-2">NEP</a>
         <a href="/budget" class="block text-black hover:text-gray-600 font-medium py-2">Budget</a>
-        <a href="/flood" class="block text-black hover:text-gray-600 font-medium py-2">Flood Control</a>
-        <a href="/dime" class="block text-black hover:text-gray-600 font-medium py-2">DIME</a>
         <a href="/map" class="block text-black hover:text-gray-600 font-medium py-2">Map</a>
-        <a href="/philgeps" class="block text-black hover:text-gray-600 font-medium py-2">PhilGEPS</a>
         <a href="/dynasty" class="block text-black hover:text-gray-600 font-medium py-2">Dynasties</a>
         <a href="/integrated" class="block text-black hover:text-gray-600 font-medium py-2 border-b-2 border-black">Integrated</a>
         <a href="/sources" class="block text-black hover:text-gray-600 font-medium py-2">Sources</a>
@@ -210,6 +204,14 @@ function toggleMobileMenu() {
                     </p>
                 </div>
             </div>
+        </div>
+
+        <div style="margin: 0 0 24px 0; padding: 18px 22px; background: linear-gradient(135deg, rgba(13, 148, 136, 0.08) 0%, rgba(20, 184, 166, 0.12) 100%); border-radius: 10px; border: 1px solid rgba(13, 148, 136, 0.25); box-shadow: 0 6px 18px rgba(13, 148, 136, 0.18); display: flex; flex-direction: column; gap: 6px;">
+            <label style="display: inline-flex; align-items: center; gap: 12px; font-weight: 700; color: #0f172a; font-size: 15px; margin: 0;">
+                <input type="checkbox" id="flood-control-filter-global" data-flood-control-toggle style="accent-color: #0d9488;">
+                Show only projects tagged as Flood Control
+            </label>
+            <span style="font-size: 12px; color: #0f766e;">When enabled, tables, charts, and dashboards across all tabs only reflect Flood Control projects.</span>
         </div>
 
         <div class="budget-content">
@@ -348,18 +350,18 @@ function toggleMobileMenu() {
                                 </span>
                                 </div>
                             <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 18px; font-size: 13px;">
-                                <div style="display: flex; align-items: center; gap: 12px; padding: 12px 14px; border-radius: 8px; background: rgba(59, 130, 246, 0.08); border: 1px solid rgba(59, 130, 246, 0.2);">
+                                <a href="/flood" style="display: flex; align-items: center; gap: 12px; padding: 12px 14px; border-radius: 8px; background: rgba(59, 130, 246, 0.08); border: 1px solid rgba(59, 130, 246, 0.2); text-decoration: none;">
                                     <span style="display: inline-flex; align-items: center; justify-content: center; min-width: 54px; height: 28px; padding: 0 12px; border-radius: 999px; font-size: 12px; font-weight: 700; letter-spacing: 0.5px; color: #1565c0; background: #e3f2fd; border: 1px solid #90caf9;">SSP</span>
                                     <span style="color: #1e293b; font-weight: 600;">Sumbong sa Pangulo website</span>
-                                </div>
-                                <div style="display: flex; align-items: center; gap: 12px; padding: 12px 14px; border-radius: 8px; background: rgba(168, 85, 247, 0.08); border: 1px solid rgba(139, 92, 246, 0.2);">
+                                </a>
+                                <a href="/dime" style="display: flex; align-items: center; gap: 12px; padding: 12px 14px; border-radius: 8px; background: rgba(168, 85, 247, 0.08); border: 1px solid rgba(139, 92, 246, 0.2); text-decoration: none;">
                                     <span style="display: inline-flex; align-items: center; justify-content: center; min-width: 54px; height: 28px; padding: 0 12px; border-radius: 999px; font-size: 12px; font-weight: 700; letter-spacing: 0.5px; color: #7b1fa2; background: #f3e5f5; border: 1px solid #ba68c8;">DIME</span>
                                     <span style="color: #1e293b; font-weight: 600;">DBM Project DIME</span>
-                                </div>
-                                <div style="display: flex; align-items: center; gap: 12px; padding: 12px 14px; border-radius: 8px; background: rgba(249, 115, 22, 0.08); border: 1px solid rgba(234, 88, 12, 0.2);">
+                                </a>
+                                <a href="/philgeps" style="display: flex; align-items: center; gap: 12px; padding: 12px 14px; border-radius: 8px; background: rgba(249, 115, 22, 0.08); border: 1px solid rgba(234, 88, 12, 0.2); text-decoration: none;">
                                     <span style="display: inline-flex; align-items: center; justify-content: center; min-width: 54px; height: 28px; padding: 0 12px; border-radius: 999px; font-size: 12px; font-weight: 700; letter-spacing: 0.5px; color: #e65100; background: #fff3e0; border: 1px solid #ffb74d;">PhilGEPS</span>
                                     <span style="color: #1e293b; font-weight: 600;">PhilGEPS</span>
-                                </div>
+                                </a>
                                 <div style="display: flex; align-items: center; gap: 12px; padding: 12px 14px; border-radius: 8px; background: rgba(236, 72, 153, 0.08); border: 1px solid rgba(219, 39, 119, 0.2);">
                                     <span style="display: inline-flex; align-items: center; justify-content: center; min-width: 54px; height: 28px; padding: 0 12px; border-radius: 999px; font-size: 12px; font-weight: 700; letter-spacing: 0.5px; color: #d97706; background: #fff4e6; border: 1px solid #fbbf24;">Microsite</span>
                                     <span style="color: #1e293b; font-weight: 600;">DPWH Microsite</span>
@@ -403,6 +405,10 @@ function toggleMobileMenu() {
                                     <div>
                                         <strong style="color: #333;">Microsite:</strong>
                                         <span id="microsite-count" style="color: #666;">0</span>
+                                    </div>
+                                    <div>
+                                        <strong style="color: #333;">Flood Control:</strong>
+                                        <span id="flood-control-count" style="color: #666;">0</span>
                                     </div>
                                 </div>
                                 <button id="export-csv-btn" style="padding: 12px 24px; background: #333; color: white; border: 2px solid #333; border-radius: 6px; font-size: 14px; font-weight: 700; cursor: pointer; transition: all 0.3s ease; box-shadow: 0 4px 12px rgba(0,0,0,0.2); white-space: nowrap; margin-left: 20px;" onmouseover="this.style.background='#667eea'; this.style.borderColor='#667eea'; this.style.transform='translateY(-2px)'; this.style.boxShadow='0 6px 16px rgba(102, 126, 234, 0.4)';" onmouseout="this.style.background='#333'; this.style.borderColor='#333'; this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 12px rgba(0,0,0,0.2)';">📥 Export CSV</button>
@@ -469,6 +475,11 @@ function toggleMobileMenu() {
                                 <div style="font-size: 14px; color: #666; margin-bottom: 8px;">Contractor Projects</div>
                                 <div id="dashboard-contractor-cost" style="font-size: 24px; font-weight: 700; color: #7b1fa2;">₱0</div>
                                 <div id="dashboard-contractor-count" style="font-size: 12px; color: #999; margin-top: 5px;">0 projects</div>
+                            </div>
+                            <div style="background: white; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); padding: 20px; text-align: center;">
+                                <div style="font-size: 14px; color: #666; margin-bottom: 8px;">Flood Control Projects</div>
+                                <div id="dashboard-flood-cost" style="font-size: 24px; font-weight: 700; color: #0d9488;">₱0</div>
+                                <div id="dashboard-flood-count" style="font-size: 12px; color: #999; margin-top: 5px;">0 projects</div>
                             </div>
                         </div>
                         
@@ -624,18 +635,18 @@ function toggleMobileMenu() {
                                 </span>
                                 </div>
                             <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 18px; font-size: 13px;">
-                                <div style="display: flex; align-items: center; gap: 12px; padding: 12px 14px; border-radius: 8px; background: rgba(59, 130, 246, 0.08); border: 1px solid rgba(59, 130, 246, 0.2);">
+                                <a href="/flood" style="display: flex; align-items: center; gap: 12px; padding: 12px 14px; border-radius: 8px; background: rgba(59, 130, 246, 0.08); border: 1px solid rgba(59, 130, 246, 0.2); text-decoration: none;">
                                     <span style="display: inline-flex; align-items: center; justify-content: center; min-width: 54px; height: 28px; padding: 0 12px; border-radius: 999px; font-size: 12px; font-weight: 700; letter-spacing: 0.5px; color: #1565c0; background: #e3f2fd; border: 1px solid #90caf9;">SSP</span>
                                     <span style="color: #1e293b; font-weight: 600;">Sumbong sa Pangulo website</span>
-                                </div>
-                                <div style="display: flex; align-items: center; gap: 12px; padding: 12px 14px; border-radius: 8px; background: rgba(168, 85, 247, 0.08); border: 1px solid rgba(139, 92, 246, 0.2);">
+                                </a>
+                                <a href="/dime" style="display: flex; align-items: center; gap: 12px; padding: 12px 14px; border-radius: 8px; background: rgba(168, 85, 247, 0.08); border: 1px solid rgba(139, 92, 246, 0.2); text-decoration: none;">
                                     <span style="display: inline-flex; align-items: center; justify-content: center; min-width: 54px; height: 28px; padding: 0 12px; border-radius: 999px; font-size: 12px; font-weight: 700; letter-spacing: 0.5px; color: #7b1fa2; background: #f3e5f5; border: 1px solid #ba68c8;">DIME</span>
                                     <span style="color: #1e293b; font-weight: 600;">DBM Project DIME</span>
-                                </div>
-                                <div style="display: flex; align-items: center; gap: 12px; padding: 12px 14px; border-radius: 8px; background: rgba(249, 115, 22, 0.08); border: 1px solid rgba(234, 88, 12, 0.2);">
+                                </a>
+                                <a href="/philgeps" style="display: flex; align-items: center; gap: 12px; padding: 12px 14px; border-radius: 8px; background: rgba(249, 115, 22, 0.08); border: 1px solid rgba(234, 88, 12, 0.2); text-decoration: none;">
                                     <span style="display: inline-flex; align-items: center; justify-content: center; min-width: 54px; height: 28px; padding: 0 12px; border-radius: 999px; font-size: 12px; font-weight: 700; letter-spacing: 0.5px; color: #e65100; background: #fff3e0; border: 1px solid #ffb74d;">PhilGEPS</span>
                                     <span style="color: #1e293b; font-weight: 600;">PhilGEPS</span>
-                                </div>
+                                </a>
                                 <div style="display: flex; align-items: center; gap: 12px; padding: 12px 14px; border-radius: 8px; background: rgba(236, 72, 153, 0.08); border: 1px solid rgba(219, 39, 119, 0.2);">
                                     <span style="display: inline-flex; align-items: center; justify-content: center; min-width: 54px; height: 28px; padding: 0 12px; border-radius: 999px; font-size: 12px; font-weight: 700; letter-spacing: 0.5px; color: #d97706; background: #fff4e6; border: 1px solid #fbbf24;">Microsite</span>
                                     <span style="color: #1e293b; font-weight: 600;">DPWH Microsite</span>
@@ -672,6 +683,10 @@ function toggleMobileMenu() {
                                     <div>
                                         <strong style="color: #333;">Microsite:</strong>
                                         <span id="province-microsite-count" style="color: #666;">0</span>
+                                    </div>
+                                    <div>
+                                        <strong style="color: #333;">Flood Control:</strong>
+                                        <span id="province-flood-control-count" style="color: #666;">0</span>
                                     </div>
                                 </div>
                                 <button id="province-export-csv-btn" style="padding: 12px 24px; background: #333; color: white; border: 2px solid #333; border-radius: 6px; font-size: 14px; font-weight: 700; cursor: pointer; transition: all 0.3s ease; box-shadow: 0 4px 12px rgba(0,0,0,0.2); white-space: nowrap; margin-left: 20px;" onmouseover="this.style.background='#667eea'; this.style.borderColor='#667eea'; this.style.transform='translateY(-2px)'; this.style.boxShadow='0 6px 16px rgba(102, 126, 234, 0.4)';" onmouseout="this.style.background='#333'; this.style.borderColor='#333'; this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 12px rgba(0,0,0,0.2)';">📥 Export CSV</button>
@@ -979,12 +994,19 @@ let availableCongressmanNamesMap = new Map();
 let integratedCoverageSummaryData = null;
 let integratedCoverageSummaryMessage = '';
 let currentProjectsMessage = '';
+let floodControlOnly = false;
 
 // Chart instance and data
 let combinedChart = null;
 let currentChartData = [];
 let currentSortMode = 'cost';
 let prefetchedVisualData = null;
+let visualOverviewDataAll = null;
+let visualOverviewDataFlood = null;
+let visualDashboardOverallStats = { base: null, derived: null };
+let visualDashboardSelectionStats = { name: null, base: null, derived: null };
+let visualDashboardCurrentStats = null;
+let visualDashboardCurrentMode = 'overall';
 let rankingByCount = [];
 let rankingByCost = [];
 let topTenByCount = [];
@@ -1037,6 +1059,281 @@ function filterConfigByAvailableData() {
 
 function filterInitialCongressmanNames() {
     return;
+}
+
+function projectIsFloodControl(project) {
+    if (!project || project.placeholder) {
+        return false;
+    }
+    if (project.flood_control === true) {
+        return true;
+    }
+    const sources = Array.isArray(project.sources_list)
+        ? project.sources_list
+        : (project.source ? [project.source] : []);
+    return sources.some(source => {
+        if (typeof source !== 'string') {
+            return false;
+        }
+        const normalized = source.trim().toLowerCase();
+        return normalized === 'flood control';
+    });
+}
+
+function applyFloodControlFilter(projects) {
+    if (!Array.isArray(projects)) {
+        return [];
+    }
+    if (!floodControlOnly) {
+        return projects.slice();
+    }
+    return projects.filter(projectIsFloodControl);
+}
+
+function setVisualDashboardLoading(isLoading) {
+    const statsContainer = document.getElementById('dashboard-stats');
+    if (!statsContainer) {
+        return;
+    }
+    if (isLoading) {
+        const placeholders = [
+            ['dashboard-total-cost', 'Loading...'],
+            ['dashboard-district-cost', 'Loading...'],
+            ['dashboard-contractor-cost', 'Loading...'],
+            ['dashboard-flood-cost', 'Loading...']
+        ];
+        placeholders.forEach(([id, text]) => {
+            const el = document.getElementById(id);
+            if (el) {
+                el.textContent = text;
+            }
+        });
+        const totalProjectsEl = document.getElementById('dashboard-total-projects');
+        if (totalProjectsEl) {
+            totalProjectsEl.textContent = 'Loading...';
+        }
+        const districtCountEl = document.getElementById('dashboard-district-count');
+        if (districtCountEl) {
+            districtCountEl.textContent = 'Loading...';
+        }
+        const contractorCountEl = document.getElementById('dashboard-contractor-count');
+        if (contractorCountEl) {
+            contractorCountEl.textContent = 'Loading...';
+        }
+        const floodCountEl = document.getElementById('dashboard-flood-count');
+        if (floodCountEl) {
+            floodCountEl.textContent = 'Loading...';
+        }
+        statsContainer.style.display = 'grid';
+    }
+}
+
+function deriveVisualDashboardStats(baseStats, options = {}) {
+    if (!baseStats || typeof baseStats !== 'object') {
+        return null;
+    }
+    const floodOnly = options.floodOnly === true;
+    const parseNumber = (value) => {
+        if (typeof value === 'number' && Number.isFinite(value)) {
+            return value;
+        }
+        if (typeof value === 'string' && value.trim().length > 0) {
+            const cleaned = value.replace(/₱|,/g, '').replace(/PHP/gi, '').trim();
+            const parsed = parseFloat(cleaned);
+            return Number.isFinite(parsed) ? parsed : 0;
+        }
+        return 0;
+    };
+
+    const stats = {
+        totalCost: 0,
+        totalProjects: 0,
+        districtCost: 0,
+        districtCount: 0,
+        contractorCost: 0,
+        contractorCount: 0,
+        floodCost: 0,
+        floodCount: 0
+    };
+
+    if (floodOnly) {
+        stats.totalCost = parseNumber(baseStats.flood_control_cost);
+        stats.totalProjects = parseNumber(baseStats.flood_control_count);
+        stats.districtCost = parseNumber(baseStats.flood_control_district_cost);
+        stats.districtCount = parseNumber(baseStats.flood_control_district_count);
+        stats.contractorCost = parseNumber(baseStats.flood_control_contractor_cost);
+        stats.contractorCount = parseNumber(baseStats.flood_control_contractor_count);
+        stats.floodCost = stats.totalCost;
+        stats.floodCount = stats.totalProjects;
+    } else {
+        stats.totalCost = parseNumber(baseStats.total_cost_all);
+        stats.totalProjects = parseNumber(baseStats.total_projects);
+        stats.districtCost = parseNumber(baseStats.district_cost);
+        stats.districtCount = parseNumber(baseStats.district_count);
+        stats.contractorCost = parseNumber(baseStats.contractor_cost);
+        stats.contractorCount = parseNumber(baseStats.contractor_count);
+        stats.floodCost = parseNumber(baseStats.flood_control_cost);
+        stats.floodCount = parseNumber(baseStats.flood_control_count);
+    }
+
+    return stats;
+}
+
+function setVisualDashboardStats(stats, mode = 'overall') {
+    visualDashboardCurrentMode = mode;
+    visualDashboardCurrentStats = stats;
+    const statsContainer = document.getElementById('dashboard-stats');
+    if (!statsContainer) {
+        return;
+    }
+    if (!stats) {
+        statsContainer.style.display = 'none';
+        return;
+    }
+
+    const formatCount = (value) => formatProjects(value || 0);
+    const totalCostEl = document.getElementById('dashboard-total-cost');
+    const totalProjectsEl = document.getElementById('dashboard-total-projects');
+    const districtCostEl = document.getElementById('dashboard-district-cost');
+    const districtCountEl = document.getElementById('dashboard-district-count');
+    const contractorCostEl = document.getElementById('dashboard-contractor-cost');
+    const contractorCountEl = document.getElementById('dashboard-contractor-count');
+    const floodCostEl = document.getElementById('dashboard-flood-cost');
+    const floodCountEl = document.getElementById('dashboard-flood-count');
+
+    if (totalCostEl) totalCostEl.textContent = formatCurrency(stats.totalCost || 0);
+    if (totalProjectsEl) {
+        totalProjectsEl.textContent = `${formatCount(stats.totalProjects)} projects`;
+        totalProjectsEl.dataset.totalProjects = stats.totalProjects ?? 0;
+    }
+    if (districtCostEl) districtCostEl.textContent = formatCurrency(stats.districtCost || 0);
+    if (districtCountEl) districtCountEl.textContent = `${formatCount(stats.districtCount)} projects`;
+    if (contractorCostEl) contractorCostEl.textContent = formatCurrency(stats.contractorCost || 0);
+    if (contractorCountEl) contractorCountEl.textContent = `${formatCount(stats.contractorCount)} projects`;
+    if (floodCostEl) floodCostEl.textContent = formatCurrency(stats.floodCost || 0);
+    if (floodCountEl) floodCountEl.textContent = `${formatCount(stats.floodCount)} projects`;
+
+    statsContainer.style.display = 'grid';
+}
+
+async function updateVisualDashboardForSelection(congressmanName) {
+    if (!congressmanName) {
+        return;
+    }
+    const normalized = normalizeCongressmanName(congressmanName);
+    if (visualDashboardSelectionStats.base && visualDashboardSelectionStats.name === normalized) {
+        const derived = deriveVisualDashboardStats(visualDashboardSelectionStats.base, { floodOnly: floodControlOnly });
+        visualDashboardSelectionStats.derived = derived;
+        setVisualDashboardStats(derived, 'selection');
+        return;
+    }
+
+    try {
+        setVisualDashboardLoading(true);
+        const result = await fetchCongressmanProjects(congressmanName);
+        if (!result || result.success === false) {
+            throw new Error(result?.error || `Unable to load summary for ${congressmanName}`);
+        }
+        const dashboardStats = result.congressman?.dashboard_stats || result.dashboard_stats || {};
+        const summary = result.congressman?.summary || result.summary || {};
+        const statsBase = { ...dashboardStats };
+        if (statsBase.total_projects == null && summary && summary.total != null) {
+            statsBase.total_projects = summary.total;
+        }
+        if (statsBase.district_count == null && summary && summary.district_projects != null) {
+            statsBase.district_count = summary.district_projects;
+        }
+        if (statsBase.contractor_count == null && summary && summary.contractor_projects != null) {
+            statsBase.contractor_count = summary.contractor_projects;
+        }
+        if (statsBase.flood_control_count == null && summary && summary.flood_control != null) {
+            statsBase.flood_control_count = summary.flood_control;
+        }
+        if (statsBase.flood_control_cost == null && summary && summary.flood_control_cost != null) {
+            statsBase.flood_control_cost = summary.flood_control_cost;
+        }
+        const derived = deriveVisualDashboardStats(statsBase, { floodOnly: floodControlOnly });
+        if (!derived) {
+            throw new Error('Dashboard statistics unavailable');
+        }
+        visualDashboardSelectionStats = {
+            name: normalized,
+            base: statsBase,
+            derived
+        };
+        setVisualDashboardStats(derived, 'selection');
+    } catch (error) {
+        console.error('Failed to update visual dashboard for selection:', error);
+        visualDashboardSelectionStats = { base: null, derived: null, name: null };
+        if (visualDashboardOverallStats.derived) {
+            setVisualDashboardStats(visualDashboardOverallStats.derived, 'overall');
+        } else {
+            setVisualDashboardStats(null, 'overall');
+        }
+    } finally {
+        setVisualDashboardLoading(false);
+    }
+}
+
+function parseProjectAmount(project) {
+    if (!project) {
+        return 0;
+    }
+    const rawAmount = project.amount ?? project.contract_cost ?? project.contract_amount ?? project.cost ?? 0;
+    if (typeof rawAmount === 'number') {
+        return Number.isFinite(rawAmount) ? rawAmount : 0;
+    }
+    if (typeof rawAmount === 'string') {
+        const cleaned = rawAmount.replace(/₱|,/g, '').replace(/PHP/gi, '').trim();
+        const parsed = parseFloat(cleaned);
+        return Number.isFinite(parsed) ? parsed : 0;
+    }
+    return 0;
+}
+
+function synchronizeFloodControlCheckboxes(excludeElement = null) {
+    document.querySelectorAll('[data-flood-control-toggle]').forEach(element => {
+        if (excludeElement && element === excludeElement) {
+            return;
+        }
+        element.checked = floodControlOnly;
+    });
+}
+
+function setFloodControlOnly(value, sourceElement = null) {
+    const normalized = !!value;
+    if (floodControlOnly === normalized) {
+        synchronizeFloodControlCheckboxes(sourceElement);
+        return;
+    }
+    floodControlOnly = normalized;
+    synchronizeFloodControlCheckboxes(sourceElement);
+
+    if (Array.isArray(allProjectsData) && allProjectsData.length > 0) {
+        filteredData = applyFloodControlFilter(allProjectsData);
+        if (floodControlOnly && filteredData.length === 0) {
+            currentProjectsMessage = 'No flood control projects found for the current selection.';
+        } else if (!floodControlOnly) {
+            currentProjectsMessage = '';
+        }
+        updateDisplay();
+    }
+
+    if (Array.isArray(provinceAllProjectsData) && provinceAllProjectsData.length > 0) {
+        provinceApplyFilter();
+    }
+
+    if (Array.isArray(provinceVisualProjectsAll) && provinceVisualProjectsAll.length > 0) {
+        applyFloodFilterToProvinceVisual();
+    }
+
+    applyFloodFilterToVisualOverview();
+}
+
+function handleFloodControlCheckboxChange(event) {
+    const target = event?.target || null;
+    const checked = target ? target.checked : floodControlOnly;
+    setFloodControlOnly(checked, target);
 }
 
 function dedupeCongressmanNames(names) {
@@ -1573,7 +1870,14 @@ async function applyFilter() {
             const result = await fetchCongressmanProjects(targetNames[0]);
             const projects = Array.isArray(result.projects) ? result.projects : [];
             allProjectsData = projects;
-            filteredData = projects.length ? projects : createPlaceholderProjects(targetNames, 'Project records are still being ingested for this congressman.');
+            if (projects.length === 0) {
+                filteredData = createPlaceholderProjects(targetNames, 'Project records are still being ingested for this congressman.');
+            } else {
+                filteredData = applyFloodControlFilter(projects);
+                if (floodControlOnly && filteredData.length === 0) {
+                    currentProjectsMessage = 'No flood control projects found for this selection.';
+                }
+            }
             currentSummaryOverride = result.congressman?.summary || result.summary || null;
         } else {
             const result = await fetchMultipleCongressmanProjects(targetNames);
@@ -1587,7 +1891,10 @@ async function applyFilter() {
                     : `Districts in ${provinceValue || 'this province'}`;
                 filteredData = createPlaceholderProjects(targetNames, `${label} are still being processed.`);
             } else {
-                filteredData = projects;
+                filteredData = applyFloodControlFilter(projects);
+                if (floodControlOnly && filteredData.length === 0) {
+                    currentProjectsMessage = 'No flood control projects found for the current selection.';
+                }
             }
             if (result.errors && result.errors.length) {
                 console.warn('Some congressman caches could not be loaded:', result.errors);
@@ -1732,7 +2039,9 @@ function updateDisplay() {
     displayProjects(paginatedData);
     
     // Update summary based on ALL filtered data (not just current page)
-    const summary = currentSummaryOverride || calculateSummary(filteredData);
+    const summary = floodControlOnly
+        ? calculateSummary(filteredData)
+        : (currentSummaryOverride || calculateSummary(filteredData));
     updateSummary(summary);
     
     // Update pagination
@@ -1746,6 +2055,8 @@ function calculateSummary(projects) {
         dime: 0,
         philgeps: 0,
         microsite: 0,
+        flood_control: 0,
+        flood_control_cost: 0,
         district_projects: 0,
         contractor_projects: 0
     };
@@ -1764,6 +2075,10 @@ function calculateSummary(projects) {
         
         if (project.match_type === 'district') summary.district_projects++;
         if (project.match_type === 'contractor') summary.contractor_projects++;
+        if (projectIsFloodControl(project)) {
+            summary.flood_control++;
+            summary.flood_control_cost += parseProjectAmount(project);
+        }
     });
     
     return summary;
@@ -1847,6 +2162,11 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (chartFocusClearBtn) {
         chartFocusClearBtn.addEventListener('click', () => clearChartFocus());
     }
+
+    document.querySelectorAll('[data-flood-control-toggle]').forEach(element => {
+        element.addEventListener('change', handleFloodControlCheckboxChange);
+    });
+    synchronizeFloodControlCheckboxes();
 
 });
 
@@ -1954,6 +2274,10 @@ function updateSummary(summary) {
     document.getElementById('dime-count').textContent = formatCount(summary.dime);
     document.getElementById('philgeps-count').textContent = formatCount(summary.philgeps);
     document.getElementById('microsite-count').textContent = formatCount(micrositeCount);
+    const floodControlCountEl = document.getElementById('flood-control-count');
+    if (floodControlCountEl) {
+        floodControlCountEl.textContent = formatCount(summary.flood_control);
+    }
     summaryPanel.style.display = 'block';
 }
 
@@ -1974,6 +2298,160 @@ function formatProjects(value) {
 function updateInsightsPanel(byCount, byCost) {
     return;
 }
+
+function buildFloodOverviewData(data) {
+    if (!data || typeof data !== 'object') {
+        return null;
+    }
+
+    const transformEntry = (entry = {}) => {
+        const floodCount = entry.flood_control_count ?? 0;
+        const floodCost = entry.flood_control_cost ?? 0;
+        return {
+            ...entry,
+            count: floodCount,
+            total_cost: floodCost
+        };
+    };
+
+    const baseCount = Array.isArray(data.chart_data_by_count) ? data.chart_data_by_count : [];
+    const baseCost = Array.isArray(data.chart_data_by_cost) ? data.chart_data_by_cost : baseCount;
+
+    const rankingByCount = baseCount.map(transformEntry).filter(entry => (entry.count || 0) > 0);
+    rankingByCount.sort((a, b) => (b.count || 0) - (a.count || 0));
+
+    const rankingByCost = baseCost.map(transformEntry).filter(entry => (entry.total_cost || 0) > 0);
+    rankingByCost.sort((a, b) => (b.total_cost || 0) - (a.total_cost || 0));
+
+    const chartTop10ByCount = rankingByCount.slice(0, 10);
+    const chartTop10ByCost = rankingByCost.slice(0, 10);
+
+    const totalFloodProjects = rankingByCount.reduce((sum, entry) => sum + (entry.count || 0), 0);
+    const totalFloodCost = rankingByCost.reduce((sum, entry) => sum + (entry.total_cost || 0), 0);
+
+    const summary = {
+        ...(data.summary || {}),
+        total: totalFloodProjects,
+        flood_control: totalFloodProjects,
+        flood_control_cost: totalFloodCost
+    };
+
+    const stats = data.dashboard_stats || {};
+    const floodStats = {
+        total_cost_all: stats.flood_control_cost ?? totalFloodCost,
+        total_projects: stats.flood_control_count ?? totalFloodProjects,
+        district_count: stats.flood_control_district_count ?? 0,
+        district_cost: stats.flood_control_district_cost ?? 0,
+        contractor_count: stats.flood_control_contractor_count ?? 0,
+        contractor_cost: stats.flood_control_contractor_cost ?? 0,
+        flood_control_count: stats.flood_control_count ?? totalFloodProjects,
+        flood_control_cost: stats.flood_control_cost ?? totalFloodCost,
+        flood_control_district_count: stats.flood_control_district_count ?? 0,
+        flood_control_district_cost: stats.flood_control_district_cost ?? 0,
+        flood_control_contractor_count: stats.flood_control_contractor_count ?? 0,
+        flood_control_contractor_cost: stats.flood_control_contractor_cost ?? 0
+    };
+
+    return {
+        success: data.success,
+        summary,
+        dashboard_stats: floodStats,
+        chart_data: chartTop10ByCost,
+        chart_data_top_10_by_cost: chartTop10ByCost,
+        chart_data_top_10_by_count: chartTop10ByCount,
+        chart_data_by_count: rankingByCount,
+        chart_data_by_cost: rankingByCost,
+        total_congressmen: data.total_congressmen,
+        generated_at: data.generated_at,
+        cache_version: data.cache_version,
+        source: data.source
+    };
+}
+
+function applyVisualOverviewData(data, options = {}) {
+    const { preserveSort = false, resetSelection = true } = options;
+    const statsContainer = document.getElementById('dashboard-stats');
+
+    if (!data || data.success === false) {
+        rankingByCount = [];
+        rankingByCost = [];
+        topTenByCount = [];
+        topTenByCost = [];
+        currentChartData = [];
+        currentChartSortedData = [];
+        chartPage = 1;
+        chartTotalPages = 1;
+        selectedChartName = '';
+        selectedChartNameDisplay = '';
+        if (statsContainer) {
+            statsContainer.style.display = 'none';
+        }
+        if (combinedChart) {
+            combinedChart.destroy();
+            combinedChart = null;
+        }
+        updateChartPaginationControls();
+        return;
+    }
+
+    const countData = Array.isArray(data.chart_data_by_count) ? data.chart_data_by_count.slice() : [];
+    const costData = Array.isArray(data.chart_data_by_cost) ? data.chart_data_by_cost.slice() : countData.slice();
+
+    rankingByCount = countData;
+    rankingByCost = costData;
+
+    topTenByCount = Array.isArray(data.chart_data_top_10_by_count)
+        ? data.chart_data_top_10_by_count.slice()
+        : rankingByCount.slice(0, chartPageSize);
+    topTenByCost = Array.isArray(data.chart_data_top_10_by_cost)
+        ? data.chart_data_top_10_by_cost.slice()
+        : rankingByCost.slice(0, chartPageSize);
+
+    currentChartData = topTenByCost.slice();
+    currentChartSortedData = rankingByCost.slice();
+    chartPage = 1;
+    chartTotalPages = Math.max(1, Math.ceil(rankingByCost.length / chartPageSize));
+    if (resetSelection) {
+        selectedChartName = '';
+        selectedChartNameDisplay = '';
+    }
+
+    const stats = data.dashboard_stats || {};
+    const derivedOverallStats = deriveVisualDashboardStats(stats, { floodOnly: floodControlOnly });
+    visualDashboardOverallStats = {
+        base: stats,
+        derived: derivedOverallStats
+    };
+    if (!selectedChartName) {
+        setVisualDashboardStats(derivedOverallStats, 'overall');
+    }
+
+    const summary = data.summary || {};
+    if (!floodControlOnly && summary.total !== undefined) {
+        // ensure coverage summary reflects latest data for non-flood view
+        document.getElementById('dashboard-total-projects').dataset.totalProjects = summary.total;
+    }
+
+    if (preserveSort && (currentSortMode === 'count' || currentSortMode === 'cost')) {
+        updateChartWithSort(currentSortMode);
+    } else {
+        currentSortMode = 'cost';
+        sortChartBy('cost');
+    }
+}
+
+function applyFloodFilterToVisualOverview() {
+    if (!visualOverviewDataAll) {
+        return;
+    }
+    const source = floodControlOnly && visualOverviewDataFlood ? visualOverviewDataFlood : visualOverviewDataAll;
+    applyVisualOverviewData(source, { preserveSort: true, resetSelection: false });
+    if (selectedChartName) {
+        updateVisualDashboardForSelection(selectedChartName);
+    } else if (visualDashboardOverallStats.derived) {
+        setVisualDashboardStats(visualDashboardOverallStats.derived, 'overall');
+    }
+}
 // Load and display visual data
 async function loadVisualData(prefetchedData = null) {
     const visualLoading = document.getElementById('visual-loading');
@@ -1983,42 +2461,21 @@ async function loadVisualData(prefetchedData = null) {
     
     try {
         let data = prefetchedData || prefetchedVisualData;
-        
         if (!data) {
             data = await loadDynastyOverview();
         }
-            prefetchedVisualData = data;
-
-        rankingByCount = Array.isArray(data.chart_data_by_count) ? data.chart_data_by_count : [];
-        rankingByCost = Array.isArray(data.chart_data_by_cost) ? data.chart_data_by_cost : rankingByCount;
-        topTenByCount = Array.isArray(data.chart_data_top_10_by_count)
-            ? data.chart_data_top_10_by_count
-            : rankingByCount.slice(0, chartPageSize);
-        topTenByCost = Array.isArray(data.chart_data_top_10_by_cost)
-            ? data.chart_data_top_10_by_cost
-            : rankingByCost.slice(0, chartPageSize);
-
-            if (data.dashboard_stats) {
-                const stats = data.dashboard_stats;
-                document.getElementById('dashboard-total-cost').textContent = formatCurrency(stats.total_cost_all);
-                document.getElementById('dashboard-total-projects').textContent = `${stats.total_projects} projects`;
-                document.getElementById('dashboard-district-cost').textContent = formatCurrency(stats.district_cost);
-                document.getElementById('dashboard-district-count').textContent = `${stats.district_count} projects`;
-                document.getElementById('dashboard-contractor-cost').textContent = formatCurrency(stats.contractor_cost);
-                document.getElementById('dashboard-contractor-count').textContent = `${stats.contractor_count} projects`;
-                document.getElementById('dashboard-stats').style.display = 'grid';
-            }
-            
-        currentChartData = topTenByCost;
-        currentChartSortedData = rankingByCost;
-        chartPage = 1;
-        chartTotalPages = Math.max(1, Math.ceil(rankingByCost.length / chartPageSize));
-        selectedChartName = '';
-        selectedChartNameDisplay = '';
-
-            sortChartBy('cost');
+        prefetchedVisualData = data;
+        visualOverviewDataAll = data;
+        visualOverviewDataFlood = buildFloodOverviewData(data);
+        const source = floodControlOnly && visualOverviewDataFlood ? visualOverviewDataFlood : visualOverviewDataAll;
+        applyVisualOverviewData(source, { preserveSort: true, resetSelection: false });
+        if (selectedChartName) {
+            await updateVisualDashboardForSelection(selectedChartName);
+        }
     } catch (error) {
         console.error('Error loading visual data:', error);
+        visualOverviewDataAll = null;
+        visualOverviewDataFlood = null;
         rankingByCount = [];
         rankingByCost = [];
         topTenByCount = [];
@@ -2028,6 +2485,10 @@ async function loadVisualData(prefetchedData = null) {
         if (combinedChart) {
             combinedChart.destroy();
             combinedChart = null;
+        }
+        const statsContainer = document.getElementById('dashboard-stats');
+        if (statsContainer) {
+            statsContainer.style.display = 'none';
         }
     } finally {
         if (visualLoading) {
@@ -2784,6 +3245,8 @@ function provinceApplyFilter() {
             projectMatchesMunicipality(project, municipalityFilter)
         );
     }
+
+    provinceFilteredData = applyFloodControlFilter(provinceFilteredData);
     
     // Reset to first page when filter changes
     provinceCurrentPage = 1;
@@ -2814,7 +3277,9 @@ function provinceCalculateSummary(projects) {
         ssp: 0,
         dime: 0,
         philgeps: 0,
-        microsite: 0
+        microsite: 0,
+        flood_control: 0,
+        flood_control_cost: 0
     };
     
     projects.forEach(project => {
@@ -2825,6 +3290,10 @@ function provinceCalculateSummary(projects) {
             if (src === 'PhilGEPS') summary.philgeps++;
             if (src === 'Microsite') summary.microsite++;
         });
+        if (projectIsFloodControl(project)) {
+            summary.flood_control++;
+            summary.flood_control_cost += parseProjectAmount(project);
+        }
     });
     
     return summary;
@@ -2891,6 +3360,10 @@ function provinceUpdateSummary(summary) {
         document.getElementById('province-dime-count').textContent = summary.dime || 0;
         document.getElementById('province-philgeps-count').textContent = summary.philgeps || 0;
         document.getElementById('province-microsite-count').textContent = summary.microsite || 0;
+        const floodEl = document.getElementById('province-flood-control-count');
+        if (floodEl) {
+            floodEl.textContent = summary.flood_control || 0;
+        }
         document.getElementById('province-results-summary').style.display = 'block';
     }
 }
@@ -3023,7 +3496,9 @@ let municipalityChartData = [];
 let currentContractorSortMode = 'cost';
 let contractorChartData = [];
 let currentProvinceMunicipalityFilter = 'all';
+let provinceVisualProjectsAll = [];
 let provinceVisualProjects = [];
+let provinceVisualFilterOptions = null;
 let currentProvinceVisualName = '';
 
 // Load province visual data
@@ -3230,7 +3705,9 @@ async function loadProvinceVisualData() {
             }
             
             if (data.success && data.projects && data.projects.length > 0) {
-                provinceVisualProjects = Array.isArray(data.projects) ? data.projects : [];
+                provinceVisualProjectsAll = Array.isArray(data.projects) ? data.projects : [];
+                provinceVisualFilterOptions = data.filter_options || null;
+                provinceVisualProjects = applyFloodControlFilter(provinceVisualProjectsAll);
                 currentProvinceMunicipalityFilter = 'all';
                 currentProvinceVisualName = exactProvinceName || selectedProvince;
                 const scopeLabel = currentProvinceVisualName ? `All Municipalities/Cities (${currentProvinceVisualName})` : 'All Municipalities/Cities';
@@ -3301,7 +3778,7 @@ async function loadProvinceVisualData() {
                 
                 // Calculate municipality statistics
                 // Use filter_options from API if available, otherwise use hardcoded lists
-                municipalityChartData = calculateMunicipalityStats(data.projects, selectedProvince, data.filter_options);
+                municipalityChartData = calculateMunicipalityStats(provinceVisualProjects, selectedProvince, data.filter_options);
                 populateProvinceVisualMunicipalityFilter(data.filter_options, municipalityChartData);
                 
                 // Calculate contractor statistics (respecting municipality filter)
@@ -3341,7 +3818,9 @@ async function loadProvinceVisualData() {
                 }, 200);
             } else {
                 console.error('Failed to load province visual data:', data.error || 'No projects found');
+                provinceVisualProjectsAll = [];
                 provinceVisualProjects = [];
+                provinceVisualFilterOptions = null;
                 if (dashboard) {
                     dashboard.style.display = 'none';
                 }
@@ -3410,7 +3889,9 @@ async function loadProvinceVisualData() {
             // Show error message
             const municipalityChartContainer = document.getElementById('municipalityChart')?.parentElement;
             const contractorChartContainer = document.getElementById('contractorChart')?.parentElement;
+            provinceVisualProjectsAll = [];
             provinceVisualProjects = [];
+            provinceVisualFilterOptions = null;
             currentProvinceMunicipalityFilter = 'all';
             const dashboard = document.getElementById('province-visual-dashboard');
             if (dashboard) {
@@ -4412,6 +4893,11 @@ function getSourceDisplayMeta(source) {
             meta.color = '#d97706';
             meta.border = '#fbbf24';
             break;
+        case 'Flood Control':
+            meta.background = '#ccfbf1';
+            meta.color = '#0f766e';
+            meta.border = '#5eead4';
+            break;
     }
     return meta;
 }
@@ -4449,6 +4935,67 @@ function getProvinceVisualMunicipalityProjects(filterValue = currentProvinceMuni
         const combined = [location, projectName, municipality, city].join(' ');
         return combined.includes(targetUpper);
     });
+}
+
+function applyFloodFilterToProvinceVisual() {
+    if (!Array.isArray(provinceVisualProjectsAll) || provinceVisualProjectsAll.length === 0) {
+        provinceVisualProjects = [];
+        provinceVisualFilterOptions = null;
+        currentProvinceMunicipalityFilter = 'all';
+        const dashboard = document.getElementById('province-visual-dashboard');
+        if (dashboard) {
+            dashboard.style.display = 'none';
+        }
+        if (municipalityChart) {
+            municipalityChart.destroy();
+            municipalityChart = null;
+        }
+        if (contractorChart) {
+            contractorChart.destroy();
+            contractorChart = null;
+        }
+        return;
+    }
+
+    provinceVisualProjects = applyFloodControlFilter(provinceVisualProjectsAll);
+
+    if (!currentProvinceMunicipalityFilter) {
+        currentProvinceMunicipalityFilter = 'all';
+    }
+
+    const scopeLabel = currentProvinceMunicipalityFilter === 'all'
+        ? (currentProvinceVisualName ? `All Municipalities/Cities (${currentProvinceVisualName})` : 'All Municipalities/Cities')
+        : currentProvinceMunicipalityFilter || 'All Municipalities/Cities';
+
+    updateProvinceVisualDashboardProjects(provinceVisualProjects, scopeLabel);
+
+    municipalityChartData = calculateMunicipalityStats(
+        provinceVisualProjects,
+        currentProvinceVisualName || '',
+        provinceVisualFilterOptions
+    );
+    populateProvinceVisualMunicipalityFilter(provinceVisualFilterOptions, municipalityChartData);
+
+    const municipalitySelect = document.getElementById('province-visual-municipality-filter');
+    if (municipalitySelect) {
+        const desiredValue = currentProvinceMunicipalityFilter || 'all';
+        const hasOption = Array.from(municipalitySelect.options).some(option => option.value === desiredValue);
+        municipalitySelect.value = hasOption ? desiredValue : 'all';
+        if (!hasOption) {
+            currentProvinceMunicipalityFilter = 'all';
+        }
+    }
+
+    const filteredProjects = getProvinceVisualMunicipalityProjects(currentProvinceMunicipalityFilter || 'all');
+    contractorChartData = calculateContractorStats(filteredProjects);
+
+    if (municipalitySelect) {
+        municipalitySelect.dispatchEvent(new Event('change', { bubbles: true }));
+    } else {
+        renderMunicipalityChart();
+        renderContractorChart();
+        updateContractorChartScopeLabel();
+    }
 }
 
 function updateContractorChartScopeLabel() {
@@ -4689,6 +5236,8 @@ function focusChartOnCongressman(name) {
         focusInput.value = matchedEntry.name;
     }
 
+    updateVisualDashboardForSelection(matchedEntry.name);
+
     chartPage = Math.floor(matchedIndex / chartPageSize) + 1;
     updateChartWithSort(currentSortMode);
 }
@@ -4709,6 +5258,12 @@ function clearChartFocus({ resetInput = true } = {}) {
         sortChartBy('cost');
     } else {
         updateChartWithSort('cost');
+    }
+    visualDashboardSelectionStats = { name: null, base: null, derived: null };
+    if (visualDashboardOverallStats.derived) {
+        setVisualDashboardStats(visualDashboardOverallStats.derived, 'overall');
+    } else {
+        setVisualDashboardStats(null, 'overall');
     }
 }
 
