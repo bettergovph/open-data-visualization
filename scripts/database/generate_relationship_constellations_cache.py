@@ -272,11 +272,18 @@ async def generate_relationship_constellations_cache():
                 new_path_string = ','.join(str(p) for p in new_path)
                 
                 if new_path_string not in seen_paths:
+                    existing_relationships = chain.get('relationship_string') or ''
+                    extension_relationship = ext.get('relationship_description') or 'Unknown relationship'
+                    if existing_relationships:
+                        relationship_string = existing_relationships + ',' + extension_relationship
+                    else:
+                        relationship_string = extension_relationship
+                    
                     new_chain = {
                         'start_person': chain['start_person'],
                         'end_person': next_person_id,
                         'path_string': new_path_string,
-                        'relationship_string': chain['relationship_string'] + ',' + ext['relationship_description'],
+                        'relationship_string': relationship_string,
                         'chain_length': len(new_path),
                         'start_surname': chain['start_surname'],
                         'end_surname': ext['last_name'],
@@ -782,7 +789,11 @@ async def generate_relationship_constellations_cache():
         for chain in all_chains:
             # Parse the path string to get all person IDs
             person_ids = [int(id_str) for id_str in chain['path_string'].split(',')]
-            relationships = chain['relationship_string'].split(',')
+            relationship_string = chain.get('relationship_string')
+            if relationship_string and isinstance(relationship_string, str):
+                relationships = relationship_string.split(',')
+            else:
+                relationships = []
             
             # Get person details for each person in the chain
             path_details = []
