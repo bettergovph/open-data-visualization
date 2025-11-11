@@ -8,6 +8,7 @@ import json
 import csv
 import re
 import unicodedata
+import time
 from functools import lru_cache
 from datetime import datetime, timezone
 from pathlib import Path
@@ -49,6 +50,7 @@ from nep_postgres_client import (
     get_budget_total_items_count as get_nep_total_items_count
 )
 from infrawatch_postgres_client import get_infrawatch_connection
+from flood_db_client import search_flood_projects
 
 DATA_ROOT = Path(__file__).resolve().parent / "static" / "data"
 
@@ -1348,81 +1350,35 @@ async def flood_projects_api(
     contractor: str = Query(default=None, description="Filter by contractor"),
     district_office: str = Query(default=None, description="Filter by district engineering office"),
     legislative_district: str = Query(default=None, description="Filter by legislative district"),
-    limit: int = Query(default=20, ge=1, le=1000, description="Number of results"),
+    limit: int = Query(default=20, ge=1, le=20000, description="Number of results"),
     offset: int = Query(default=0, ge=0, description="Number to skip")
 ):
-    """Search flood control projects with optional filters - no authentication required"""
+    """Search flood control projects with optional filters - backed by PostgreSQL."""
     try:
-        client = get_flood_client()
-        
-        # Build filters dictionary
-        filters = {}
-        if region:
-            filters["Region"] = region
-        if province:
-            filters["Province"] = province
-        if year:
-            filters["InfraYear"] = year
-        if type_of_work:
-            filters["TypeofWork"] = type_of_work
-        if contractor:
-            filters["Contractor"] = contractor
-        if district_office:
-            filters["DistrictEngineeringOffice"] = district_office
-        if legislative_district:
-            filters["LegislativeDistrict"] = legislative_district
-        
-        # Build filter string for MeiliSearch
-        filter_string = build_filter_string(filters) if filters else None
-        
-        # Search projects
-        projects, metadata = await client.search_projects(
+        start_time = time.perf_counter()
+        projects, total_hits = await search_flood_projects(
             query=q,
-            filters=filter_string,
+            region=region,
+            province=province,
+            year=year,
+            type_of_work=type_of_work,
+            contractor=contractor,
+            district_office=district_office,
+            legislative_district=legislative_district,
             limit=limit,
-            offset=offset
+            offset=offset,
         )
-        
-        # Attach flag metadata from the flood database
-        flag_metadata = await fetch_flood_flag_metadata([proj.GlobalID for proj in projects])
+        duration_ms = int((time.perf_counter() - start_time) * 1000)
 
-        # Convert projects to dictionaries
-        project_dicts = []
-        for proj in projects:
-            flags = flag_metadata.get(proj.GlobalID, {})
-            project_dicts.append({
-                "GlobalID": proj.GlobalID,
-                "ProjectDescription": proj.ProjectDescription,
-                "InfraYear": proj.InfraYear,
-                "Region": proj.Region,
-                "Province": proj.Province,
-                "Municipality": proj.Municipality,
-                "TypeofWork": proj.TypeofWork,
-                "Contractor": proj.Contractor,
-                "ContractCost": proj.ContractCost,
-                "DistrictEngineeringOffice": proj.DistrictEngineeringOffice,
-                "LegislativeDistrict": proj.LegislativeDistrict,
-                "ContractID": proj.ContractID,
-                "ProjectID": proj.ProjectID,
-                "Latitude": proj.Latitude,
-                "Longitude": proj.Longitude,
-                "flags": {
-                    "hasRedFlags": bool(flags.get("has_red_flags", False)),
-                    "isGreenFlag": bool(flags.get("is_green_flag", False)),
-                    "redFlags": list(flags.get("red_flags", [])),
-                    "greenFlags": list(flags.get("green_flags", [])),
-                }
-            })
-        
         return JSONResponse({
             "success": True,
-            "projects": project_dicts,
-            "totalHits": metadata.get("totalHits", 0),
-            "processingTimeMs": metadata.get("processingTimeMs", 0),
-            "query": metadata.get("query", ""),
-            "facetsDistribution": metadata.get("facetsDistribution", {})
+            "projects": projects,
+            "totalHits": total_hits,
+            "processingTimeMs": duration_ms,
+            "query": q or "",
+            "facetsDistribution": {}
         })
-        
+
     except Exception as e:
         return JSONResponse({"success": False, "error": str(e), "projects": []})
 

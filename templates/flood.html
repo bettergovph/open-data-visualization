@@ -732,6 +732,20 @@ function toggleMobileMenu() {
                             </div>
                         </div>
                         
+                        <!-- Red Flag Legend -->
+                        <div style="background: #fff8f0; border: 1px solid #f5c2c7; border-radius: 8px; padding: 16px; margin: 10px 0 25px 0;">
+                            <h4 style="margin: 0 0 10px 0; color: #b91c1c; font-size: 0.95rem; display: flex; align-items: center; gap: 8px;">
+                                <span style="font-size: 1.1rem;">🚩</span>
+                                Red Flag Legend
+                            </h4>
+                            <ul style="margin: 0; padding-left: 20px; color: #7f1d1d; font-size: 0.9rem; line-height: 1.5;">
+                                <li><strong>Chop-chop</strong> — projects that are artificially segmented into phases.</li>
+                                <li><strong>Siyam-siyam</strong> — projects with unreasonably prolonged implementation.</li>
+                                <li><strong>Doppelganger</strong> — projects that are suspiciously similar in cost and/or duration.</li>
+                                <li><strong>Ghost projects</strong> — projects that might be non-existent.</li>
+                            </ul>
+                        </div>
+
                         <!-- Sort and Actions -->
                         <div style="display: flex; justify-content: space-between; align-items: center; gap: 15px;">
                             <div style="display: flex; gap: 15px; align-items: center;">
@@ -2074,12 +2088,13 @@ function toggleMobileMenu() {
         updateTableStatus('Loading data...');
         
         try {
-            const response = await fetch('/api/flood/projects?limit=1000'); // Start with 1000 projects
+            const response = await fetch('/api/flood/projects?limit=20000'); // Load full dataset from PostgreSQL
             if (response.ok) {
                 const data = await response.json();
                 allTableProjects = data.projects || [];
-                console.log('✅ Table data loaded from API:', allTableProjects.length, 'projects');
-                updateTableStatus(`Loaded ${allTableProjects.length} projects from API`);
+                actualTotalProjects = typeof data.totalHits === 'number' ? data.totalHits : allTableProjects.length;
+                console.log('✅ Table data loaded from API:', allTableProjects.length, 'projects (total:', actualTotalProjects, ')');
+                updateTableStatus(`Loaded ${allTableProjects.length.toLocaleString()} of ${actualTotalProjects.toLocaleString()} projects from PostgreSQL`);
                 createExpensiveProjectsChart();
             } else {
                 throw new Error(`API returned ${response.status}`);
@@ -2093,8 +2108,9 @@ function toggleMobileMenu() {
                 if (staticResponse.ok) {
                     const staticData = await staticResponse.json();
                     allTableProjects = staticData.projects || [];
+                    actualTotalProjects = allTableProjects.length;
                     console.log('✅ Table data loaded from static JV fallback:', allTableProjects.length, 'projects');
-                    updateTableStatus(`Loaded ${allTableProjects.length} projects from static JV data`);
+                    updateTableStatus(`Loaded ${allTableProjects.length.toLocaleString()} projects from static JV data`);
                     createExpensiveProjectsChart();
                 } else {
                     throw new Error('Static data also failed');
@@ -2449,7 +2465,7 @@ function toggleMobileMenu() {
 
         // Update pagination info
         const showingCount = Math.min(end, filteredTableProjects.length);
-        const totalCount = (filteredTableProjects.length === 1000) ? actualTotalProjects : filteredTableProjects.length;
+        const totalCount = filteredTableProjects.length;
         
         tableShowing.textContent = showingCount.toLocaleString('en-PH');
         tableTotal.textContent = totalCount.toLocaleString('en-PH');
