@@ -31,6 +31,10 @@ from budget_client import (
 )
 from nep_postgres_client import get_db_connection as get_nep_db_connection
 import asyncpg
+from relationship_sources_client import (
+    fetch_relationship_articles,
+    fetch_relationship_checklist,
+)
 from nep_postgres_client import (
     get_budget_overview_stats as get_nep_overview_stats,
     get_budget_departments as get_nep_departments,
@@ -5581,6 +5585,18 @@ async def get_sources_api():
                 "url": url,
                 "date": date or ''
             })
+        try:
+            relationship_articles = await fetch_relationship_articles()
+            for source_key, articles in relationship_articles.items():
+                for article in articles:
+                    add_entry(
+                        source_key,
+                        (article.get("title") or article.get("url") or "").strip(),
+                        (article.get("url") or "").strip(),
+                        (article.get("date") or "").strip()
+                    )
+        except Exception as rel_error:
+            print(f"⚠️  Failed to supplement relationship sources: {rel_error}")
         
         if csv_path.exists():
             with open(csv_path, 'r', encoding='utf-8') as f:
@@ -5722,6 +5738,23 @@ async def get_sources_api():
             "error": str(e),
             "sources": {}
         })
+
+
+@app.get("/api/relationship-sources/checklist")
+async def relationship_sources_checklist_api():
+    """Return checklist report for relationship entries and their source URLs."""
+    try:
+        report = await fetch_relationship_checklist()
+        return JSONResponse({
+            "success": True,
+            **report,
+        })
+    except Exception as exc:
+        print(f"❌ Error generating relationship checklist: {exc}")
+        return JSONResponse(
+            {"success": False, "error": str(exc)},
+            status_code=500,
+        )
 
 async def fetch_flood_flag_metadata(global_ids: List[str]) -> Dict[str, Dict[str, Any]]:
     valid_ids = {gid for gid in global_ids if gid}
