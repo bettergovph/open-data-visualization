@@ -4853,7 +4853,7 @@ function displayConflictsNetwork() {
     
     // Add zoom behavior
     const zoom = d3.zoom()
-        .scaleExtent([0.5, 3])
+        .scaleExtent([0.1, 4])
         .on('zoom', function(event) {
             svg.selectAll('g').attr('transform', event.transform);
         });
