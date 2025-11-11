@@ -1060,7 +1060,8 @@ function toggleMobileMenu() {
                     <div class="form-controls" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; flex-wrap: wrap; gap: 10px;">
                         <div style="display: flex; gap: 10px; align-items: center;">
                             <label for="network-search" style="font-weight: 600; color: #0038A8;">Search Company:</label>
-                            <input type="text" id="network-search" placeholder="Filter by company name..." style="padding: 8px 12px; border: 1px solid #ddd; border-radius: 4px; width: 250px;">
+                            <input type="text" id="network-search" list="network-search-suggestions" placeholder="Filter by company name..." style="padding: 8px 12px; border: 1px solid #ddd; border-radius: 4px; width: 250px;">
+                            <datalist id="network-search-suggestions"></datalist>
                             <button id="network-reset" style="background: #6c757d; color: white; border: none; padding: 8px 16px; border-radius: 4px; cursor: pointer;">🔄 Reset</button>
                         </div>
                         <div style="display: flex; gap: 10px; align-items: center;">
@@ -6954,7 +6955,7 @@ function switchTab(tabName, updateHash = true) {
             console.log('🕸️ Contractors Web tab activated via switchTab');
             if (networkData && networkData.nodes && networkData.nodes.length > 0) {
                 console.log('✅ Rendering network graph with existing data');
-                renderNetworkGraph(networkData);
+                renderNetworkGraph(networkData, { autoFit: true, initialScale: 0.05 });
             } else {
                 console.log('⚠️ Network data not ready, initializing from switchTab...');
                 // Initialize network data if not loaded
@@ -6962,7 +6963,7 @@ function switchTab(tabName, updateHash = true) {
                     console.log('Network init complete from switchTab');
                     if (networkData && networkData.nodes && networkData.nodes.length > 0) {
                         console.log('✅ Rendering network graph after init from switchTab');
-                        renderNetworkGraph(networkData);
+                        renderNetworkGraph(networkData, { autoFit: true, initialScale: 0.05 });
                     } else {
                         console.log('⚠️ No network data available - showing empty state');
                         // Show empty state or message
@@ -7038,13 +7039,13 @@ function switchTab(tabName, updateHash = true) {
             // Load contractors web data if needed
             console.log('🕸️ Contractors Web tab activated - rendering network');
             if (networkData && networkData.nodes && networkData.nodes.length > 0) {
-                renderNetworkGraph(networkData);
+                renderNetworkGraph(networkData, { autoFit: true, initialScale: 0.05 });
             } else {
                 console.log('⚠️ Network data not ready, initializing...');
                 initializeNetworkGraph().then(() => {
                     if (networkData && networkData.nodes && networkData.nodes.length > 0) {
                         console.log('✅ Rendering network graph after init from switchTab');
-                        renderNetworkGraph(networkData);
+                        renderNetworkGraph(networkData, { autoFit: true, initialScale: 0.05 });
                     } else {
                         console.error('❌ Network data still not available after init from switchTab');
                     }
@@ -7111,6 +7112,7 @@ async function initializeNetworkGraph() {
         
         // Update statistics
         updateJVStatistics(jointVentures, networkData);
+        populateNetworkSearchSuggestions();
         
         // Setup controls
         setupNetworkControls();
@@ -7328,7 +7330,15 @@ function buildNetworkData(jointVentures) {
     };
 }
 
-function renderNetworkGraph(data) {
+function renderNetworkGraph(data, options = {}) {
+    const {
+        focusNodes = null,
+        autoFit = true,
+        initialScale = null,
+        fitScaleMultiplier = 0.5,
+        initialTransform = null,
+        linkDistance = 100
+    } = options;
     console.log('🎨 Starting to render network graph with data:', {
         nodes: data.nodes ? data.nodes.length : 0,
         links: data.links ? data.links.length : 0
@@ -7357,18 +7367,22 @@ function renderNetworkGraph(data) {
     
     // Add zoom behavior
     const g = svg.append('g');
+    const zoomLimits = { min: 0.0002, max: 5 };
     const zoom = d3.zoom()
-        .scaleExtent([0.1, 4])
+        .scaleExtent([zoomLimits.min, zoomLimits.max])
         .on('zoom', (event) => {
             g.attr('transform', event.transform);
             zoomLevel = event.transform.k;
+            if (networkGraph) {
+                networkGraph.currentTransform = event.transform;
+            }
         });
     
     svg.call(zoom);
     
     // Create force simulation
     const simulation = d3.forceSimulation(data.nodes)
-        .force('link', d3.forceLink(data.links).id(d => d.id).distance(100))
+        .force('link', d3.forceLink(data.links).id(d => d.id).distance(linkDistance))
         .force('charge', d3.forceManyBody().strength(-300))
         .force('center', d3.forceCenter(width / 2, height / 2))
         .force('collision', d3.forceCollide().radius(d => Math.sqrt(d.value) / 500 + 20));
@@ -7445,6 +7459,84 @@ function renderNetworkGraph(data) {
         .on('mouseover', showTooltip)
         .on('mouseout', hideTooltip);
     
+    function fitGraphToView(targetNodesOverride) {
+        const nodesToFit = Array.isArray(targetNodesOverride) && targetNodesOverride.length
+            ? targetNodesOverride
+            : data.nodes;
+
+        if (!nodesToFit || nodesToFit.length === 0) {
+            return;
+        }
+
+        const finiteNodes = nodesToFit.filter(d => Number.isFinite(d.x) && Number.isFinite(d.y));
+        if (finiteNodes.length === 0) {
+            return;
+        }
+
+        const minX = d3.min(finiteNodes, d => d.x) ?? 0;
+        const maxX = d3.max(finiteNodes, d => d.x) ?? width;
+        const minY = d3.min(finiteNodes, d => d.y) ?? 0;
+        const maxY = d3.max(finiteNodes, d => d.y) ?? height;
+
+        if (!Number.isFinite(minX) || !Number.isFinite(maxX) || !Number.isFinite(minY) || !Number.isFinite(maxY)) {
+            return;
+        }
+
+        const padding = 150;
+        const contentWidth = Math.max(maxX - minX, 1);
+        const contentHeight = Math.max(maxY - minY, 1);
+
+        const scaleCandidate = Math.min(
+            width / (contentWidth + padding),
+            height / (contentHeight + padding),
+            zoomLimits.max
+        );
+
+        const scaleFactor = Math.min(
+            Math.max(scaleCandidate * fitScaleMultiplier, zoomLimits.min * 4),
+            zoomLimits.max
+        );
+
+        const centerX = minX + contentWidth / 2;
+        const centerY = minY + contentHeight / 2;
+
+        if (!Number.isFinite(centerX) || !Number.isFinite(centerY)) {
+            return;
+        }
+
+        const translateX = width / 2 - scaleFactor * centerX;
+        const translateY = height / 2 - scaleFactor * centerY;
+
+        const transform = d3.zoomIdentity
+            .translate(translateX, translateY)
+            .scale(scaleFactor);
+
+        if (networkGraph) {
+            networkGraph.currentTransform = transform;
+        }
+
+        svg.transition()
+            .duration(600)
+            .call(zoom.transform, transform)
+            .on('end', () => {
+                if (networkGraph) {
+                    networkGraph.currentTransform = transform;
+                }
+            });
+    }
+
+    simulation.on('end', () => {
+        requestAnimationFrame(() => {
+            if (autoFit) {
+                if (focusNodes && focusNodes.length) {
+                    fitGraphToView(focusNodes);
+                } else {
+                    fitGraphToView(data.nodes);
+                }
+            }
+        });
+    });
+
     // Create labels - full names, centered
     const labels = g.append('g')
         .selectAll('text')
@@ -7486,7 +7578,37 @@ function renderNetworkGraph(data) {
     });
     
     // Store for controls
-    networkGraph = { svg, g, simulation, zoom, labels, nodes: data.nodes };
+    networkGraph = {
+        svg,
+        g,
+        simulation,
+        zoom,
+        labels,
+        nodes: data.nodes,
+        fitToView: fitGraphToView,
+        zoomLimits,
+        focusNodes,
+        autoFit,
+        currentTransform: d3.zoomIdentity
+    };
+
+    if (initialTransform) {
+        svg.call(zoom.transform, initialTransform);
+        networkGraph.currentTransform = initialTransform;
+    } else if (initialScale && Number.isFinite(initialScale)) {
+        const boundedScale = Math.min(
+            Math.max(initialScale, zoomLimits.min),
+            zoomLimits.max
+        );
+        const translateX = width / 2;
+        const translateY = height / 2;
+        const transform = d3.zoomIdentity
+            .translate(translateX, translateY)
+            .scale(boundedScale)
+            .translate(-translateX, -translateY);
+        svg.call(zoom.transform, transform);
+        networkGraph.currentTransform = transform;
+    }
     
     // Drag functions
     function dragstarted(event, d) {
@@ -7567,46 +7689,121 @@ function updateJVStatistics(jointVentures, networkData) {
     document.getElementById('jv-avg-value').textContent = '₱' + (avgValue / 1e6).toFixed(2) + 'M';
 }
 
+function populateNetworkSearchSuggestions() {
+    const datalist = document.getElementById('network-search-suggestions');
+    if (!datalist) return;
+
+    datalist.innerHTML = '';
+
+    if (!networkData || !networkData.nodes) {
+        return;
+    }
+
+    const seen = new Set();
+    networkData.nodes.forEach(node => {
+        const label = node.id || node.contractor;
+        if (label && !seen.has(label)) {
+            seen.add(label);
+            const option = document.createElement('option');
+            option.value = label;
+            datalist.appendChild(option);
+        }
+    });
+}
+
 function setupNetworkControls() {
     // Search/filter
     const searchInput = document.getElementById('network-search');
-    if (searchInput) {
+    if (searchInput && !searchInput.dataset.listenerAttached) {
+        searchInput.dataset.listenerAttached = 'true';
         searchInput.addEventListener('input', (e) => {
-            const query = e.target.value.toLowerCase();
-            if (query.length < 3 && query.length > 0) return; // Wait for at least 3 characters
-            
-            if (query.length === 0) {
-                renderNetworkGraph(networkData); // Show all
-            } else {
-                // Filter nodes containing the search term
-                const filteredNodes = networkData.nodes.filter(n => 
-                    n.id.toLowerCase().includes(query)
-                );
-                const filteredNodeIds = new Set(filteredNodes.map(n => n.id));
-                
-                // Filter links that connect filtered nodes
-                const filteredLinks = networkData.links.filter(l => 
-                    filteredNodeIds.has(l.source.id || l.source) && 
-                    filteredNodeIds.has(l.target.id || l.target)
-                );
-                
-                renderNetworkGraph({ nodes: filteredNodes, links: filteredLinks });
+            const query = e.target.value.trim().toLowerCase();
+
+            if (!networkData || !networkData.nodes) {
+                console.warn('⚠️ Network data unavailable for search');
+                return;
             }
+
+            if (query.length === 0) {
+                renderNetworkGraph(networkData, { autoFit: true, initialScale: 0.08 });
+                return;
+            }
+
+            if (query.length < 3) {
+                return;
+            }
+
+            const filteredNodes = networkData.nodes.filter(n =>
+                (n.id || '').toLowerCase().includes(query)
+            );
+
+            if (filteredNodes.length === 0) {
+                const container = document.getElementById('network-graph');
+                if (container) {
+                    container.innerHTML = `
+                        <div style="text-align: center; padding: 40px; color: #666;">
+                            <div style="font-size: 24px; margin-bottom: 10px;">🔍</div>
+                            <div style="font-size: 18px; margin-bottom: 8px;">No matching contractors found</div>
+                            <div style="font-size: 14px;">Try a different search term or reset the filter.</div>
+                        </div>
+                    `;
+                }
+                return;
+            }
+
+            const filteredNodeIds = new Set(filteredNodes.map(n => n.id));
+            const nodeMap = new Map(networkData.nodes.map(n => [n.id, n]));
+            const displayNodeMap = new Map(filteredNodes.map(n => [n.id, n]));
+            const displayLinks = [];
+
+            networkData.links.forEach(l => {
+                const sourceId = typeof l.source === 'object' ? l.source.id : l.source;
+                const targetId = typeof l.target === 'object' ? l.target.id : l.target;
+
+                if (filteredNodeIds.has(sourceId) || filteredNodeIds.has(targetId)) {
+                    displayLinks.push(l);
+                    if (!displayNodeMap.has(sourceId) && nodeMap.has(sourceId)) {
+                        displayNodeMap.set(sourceId, nodeMap.get(sourceId));
+                    }
+                    if (!displayNodeMap.has(targetId) && nodeMap.has(targetId)) {
+                        displayNodeMap.set(targetId, nodeMap.get(targetId));
+                    }
+                }
+            });
+
+            const displayNodes = Array.from(displayNodeMap.values());
+            const existingTransform = networkGraph ? networkGraph.currentTransform : null;
+
+            renderNetworkGraph(
+                { nodes: displayNodes, links: displayLinks },
+                {
+                    focusNodes: filteredNodes,
+                    autoFit: false,
+                    initialTransform: existingTransform,
+                    linkDistance: 350,
+                    fitScaleMultiplier: 0.5
+                }
+            );
         });
     }
     
     // Reset button
     const resetBtn = document.getElementById('network-reset');
-    if (resetBtn) {
+    if (resetBtn && !resetBtn.dataset.listenerAttached) {
+        resetBtn.dataset.listenerAttached = 'true';
         resetBtn.addEventListener('click', () => {
-            document.getElementById('network-search').value = '';
-            renderNetworkGraph(networkData);
+            const input = document.getElementById('network-search');
+            if (input) {
+                input.value = '';
+            }
+            renderNetworkGraph(networkData, { autoFit: true, initialScale: 0.08 });
         });
     }
     
     // Show labels toggle
     const showLabelsCheckbox = document.getElementById('network-show-labels');
-    if (showLabelsCheckbox) {
+    if (showLabelsCheckbox && !showLabelsCheckbox.dataset.listenerAttached) {
+        showLabelsCheckbox.dataset.listenerAttached = 'true';
         showLabelsCheckbox.addEventListener('change', (e) => {
             const labels = document.querySelectorAll('.network-label');
             labels.forEach(label => {
@@ -7619,24 +7816,28 @@ function setupNetworkControls() {
     const zoomInBtn = document.getElementById('network-zoom-in');
     const zoomOutBtn = document.getElementById('network-zoom-out');
     
-    if (zoomInBtn && networkGraph) {
+    if (zoomInBtn && !zoomInBtn.dataset.listenerAttached) {
+        zoomInBtn.dataset.listenerAttached = 'true';
         zoomInBtn.addEventListener('click', () => {
+            if (!networkGraph) return;
             networkGraph.svg.transition().duration(300).call(
                 networkGraph.zoom.scaleBy, 1.3
             );
         });
     }
     
-    if (zoomOutBtn && networkGraph) {
+    if (zoomOutBtn && !zoomOutBtn.dataset.listenerAttached) {
+        zoomOutBtn.dataset.listenerAttached = 'true';
         zoomOutBtn.addEventListener('click', () => {
+            if (!networkGraph) return;
             networkGraph.svg.transition().duration(300).call(
-                networkGraph.zoom.scaleBy, 0.7
+                networkGraph.zoom.scaleBy, 0.25
             );
         });
     }
     
     // Render initial graph
-    renderNetworkGraph(networkData);
+    renderNetworkGraph(networkData, { autoFit: true, initialScale: 0.08 });
 }
 </script>
 
