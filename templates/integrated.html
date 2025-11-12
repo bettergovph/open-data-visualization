@@ -499,8 +499,14 @@ function toggleMobileMenu() {
                                 <button id="copy-chart-btn" style="padding: 10px 20px; background: #333; color: white; border: 2px solid #333; border-radius: 6px; font-size: 14px; font-weight: 600; cursor: pointer; transition: all 0.3s ease; box-shadow: 0 4px 12px rgba(0,0,0,0.2);" onmouseover="this.style.background='#667eea'; this.style.borderColor='#667eea'; this.style.transform='translateY(-2px)'; this.style.boxShadow='0 6px 16px rgba(102, 126, 234, 0.4)';" onmouseout="this.style.background='#333'; this.style.borderColor='#333'; this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 12px rgba(0,0,0,0.2)';">📋 Copy</button>
                             </div>
                                 </div>
-                                <div id="combinedChart-container" style="width: 100%; max-height: 760px; overflow-y: auto;">
-                                    <canvas id="combinedChart" style="width: 100%; min-height: 480px; height: auto; cursor: pointer;"></canvas>
+                                <div id="combinedChart-container" style="position: relative; width: 100%; max-height: 760px; overflow-y: auto;">
+                                    <canvas id="combinedChart" style="width: 100%; min-height: 480px; height: auto; cursor: default;"></canvas>
+                                    <div style="position: absolute; bottom: 96px; right: 16px; width: min(420px, 95%); background: rgba(255, 250, 235, 0.95); border: 1px solid rgba(146, 64, 14, 0.35); border-radius: 10px; padding: 10px 12px; box-shadow: 0 10px 30px rgba(146, 64, 14, 0.2);">
+                                        <div style="font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: #92400e; margin-bottom: 4px;">Disclaimer</div>
+                                        <p style="font-size: 10px; line-height: 1.4; color: #4b5563; margin: 0;">
+                                            DISCLAIMER: These charts cannot be used to conclude fraud or corruption because of data limitations. While efforts have been made to ensure accuracy, we cannot guarantee the completeness or correctness of the total figures. This data is derived from automated filtering based on temporal parameters, district, and municipality naming conventions only. Data may contain counting errors, misclassifications, or omissions due to system limitations. Manual verification is strongly recommended. Please consult government sources directly for proper validation.
+                                        </p>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -1015,6 +1021,7 @@ let currentChartSortedData = [];
 let chartPage = 1;
 let chartTotalPages = 1;
 const chartPageSize = 10;
+let combinedChartLabelMeta = [];
 let selectedChartName = '';
 let selectedChartNameDisplay = '';
 let dynastyOverviewCache = null;
@@ -1560,6 +1567,106 @@ function populateProvinceFilter() {
         const option = document.createElement('option');
         option.value = province;
         datalist.appendChild(option);
+    });
+}
+
+function getProvinceAliases(provinceName) {
+    if (!provinceName || typeof provinceName !== 'string') {
+        return [];
+    }
+    
+    const normalized = provinceName.trim().toLowerCase();
+    const aliases = new Set();
+    
+    if (!normalized) {
+        return [];
+    }
+    
+    const canonicalReplacements = {
+        'metro manila': 'metropolitan manila',
+        'manila': 'metropolitan manila',
+        'national capital region': 'metropolitan manila',
+        'ncr': 'metropolitan manila',
+        'davao de oro': 'compostela valley',
+        'compostela valley': 'davao de oro',
+        'maguindanao del norte': 'maguindanao',
+        'maguindanao del sur': 'maguindanao',
+        'dinagat islands province': 'dinagat islands',
+        'city of isabela': 'basilan',
+        'isabela city': 'basilan',
+        'occidental mindoro province': 'occidental mindoro',
+        'oriental mindoro province': 'oriental mindoro'
+    };
+    
+    aliases.add(normalized);
+    
+    const cleaned = normalized
+        .replace(/^province of\s+/i, '')
+        .replace(/\s+province$/i, '')
+        .replace(/^city of\s+/i, '')
+        .replace(/\s+city$/i, '')
+        .replace(/\s+/g, ' ')
+        .trim();
+    
+    if (cleaned) {
+        aliases.add(cleaned);
+    }
+    
+    const withoutHyphen = cleaned.replace(/-/g, ' ').trim();
+    if (withoutHyphen) {
+        aliases.add(withoutHyphen);
+    }
+    
+    if (canonicalReplacements[cleaned]) {
+        aliases.add(canonicalReplacements[cleaned]);
+    }
+    if (canonicalReplacements[normalized]) {
+        aliases.add(canonicalReplacements[normalized]);
+    }
+    
+    return Array.from(aliases);
+}
+
+window.getProvinceAliases = getProvinceAliases;
+
+function createPlaceholderProjects(names, message) {
+    const defaultMessage = message || 'Project records are still being ingested for this congressman.';
+    if (!Array.isArray(names) || names.length === 0) {
+        return [{
+            id: 'placeholder-generic',
+            placeholder: true,
+            congressman: 'Pending Coverage',
+            project_name: defaultMessage,
+            source: 'Pending Cache',
+            sources_list: ['Pending Cache'],
+            match_type: 'placeholder',
+            match_score: null,
+            contractor: '—',
+            amount: null,
+            location: null,
+            year: null
+        }];
+    }
+
+    return names.map((rawName, index) => {
+        const name = rawName || 'Unknown Congressman';
+        const normalized = typeof normalizeCongressmanName === 'function'
+            ? normalizeCongressmanName(name)
+            : name.toLowerCase().replace(/\s+/g, '-');
+        return {
+            id: `placeholder-${normalized}-${index}`,
+            placeholder: true,
+            congressman: name,
+            project_name: defaultMessage,
+            source: 'Pending Cache',
+            sources_list: ['Pending Cache'],
+            match_type: 'placeholder',
+            match_score: null,
+            contractor: '—',
+            amount: null,
+            location: null,
+            year: null
+        };
     });
 }
 
@@ -2613,6 +2720,77 @@ function updateChartWithSort(mode) {
     
     createCharts(labels, fullNames, counts, costs);
 }
+function getLabelIndexFromEvent(event, chart) {
+    if (!chart || !chart.scales || !chart.scales.y) {
+        return null;
+    }
+    const canvas = chart.canvas;
+    const rect = canvas.getBoundingClientRect();
+    const x = event.clientX - rect.left;
+    const y = event.clientY - rect.top;
+    const chartArea = chart.chartArea;
+    
+    if (!chartArea || x > chartArea.left) {
+        return null;
+    }
+    
+    const yScale = chart.scales.y;
+    if (!yScale || typeof yScale.getValueForPixel !== 'function') {
+        return null;
+    }
+    
+    const value = yScale.getValueForPixel(y);
+    if (value === undefined || value === null || Number.isNaN(value)) {
+        return null;
+    }
+    
+    const index = Math.round(value);
+    if (index < 0 || index >= combinedChartLabelMeta.length) {
+        return null;
+    }
+    
+    if (Math.abs(value - index) > 0.6) {
+        return null;
+    }
+    
+    return index;
+}
+
+function handleCombinedChartLabelClick(event) {
+    if (!combinedChart || !combinedChartLabelMeta || combinedChartLabelMeta.length === 0) {
+        return;
+    }
+    
+    const index = getLabelIndexFromEvent(event, combinedChart);
+    if (index === null) {
+        return;
+    }
+    
+    const entry = combinedChartLabelMeta[index];
+    if (!entry || !entry.name) {
+        return;
+    }
+    
+    switchTab('table');
+    const congressmanFilter = document.getElementById('congressman-filter');
+    if (congressmanFilter) {
+        congressmanFilter.value = entry.name;
+        handleCongressmanFilterChange();
+    }
+}
+
+function handleCombinedChartLabelHover(event) {
+    if (!combinedChart) {
+        return;
+    }
+    const canvas = combinedChart.canvas;
+    if (!canvas) {
+        return;
+    }
+    const index = getLabelIndexFromEvent(event, combinedChart);
+    canvas.style.cursor = index !== null ? 'pointer' : 'default';
+}
+
 function createCharts(labels, fullNames, counts, costs) {
     const canvas = document.getElementById('combinedChart');
     
@@ -2637,6 +2815,31 @@ function createCharts(labels, fullNames, counts, costs) {
     const costBackground = labels.map(() => '#7b1fa2');
     const costBorder = labels.map((_, idx) => highlightIndex === idx ? '#facc15' : '#4a148c');
     const costBorderWidth = labels.map((_, idx) => highlightIndex === idx ? 4 : 1);
+
+    const labelMeta = labels.map((name, idx) => ({
+        name,
+        count: counts[idx],
+        cost: costs[idx]
+    }));
+    combinedChartLabelMeta = labelMeta;
+
+    const currencyFormatter = new Intl.NumberFormat('en-PH', {
+        minimumFractionDigits: 0,
+        maximumFractionDigits: 1
+    });
+
+    const formatCostMillions = (value) => {
+        if (typeof value !== 'number' || isNaN(value)) {
+            return '₱0M';
+        }
+        const absValue = Math.abs(value);
+        const fractionDigits = absValue >= 100 ? 0 : absValue >= 10 ? 1 : 2;
+        const formatter = new Intl.NumberFormat('en-PH', {
+            minimumFractionDigits: fractionDigits,
+            maximumFractionDigits: fractionDigits
+        });
+        return `₱${formatter.format(value)}M`;
+    };
 
     combinedChart = new Chart(canvas, {
         type: 'bar',
@@ -2679,37 +2882,7 @@ function createCharts(labels, fullNames, counts, costs) {
                     position: 'top'
                 },
                 tooltip: {
-                    callbacks: {
-                        title(context) {
-                            const index = context[0].dataIndex;
-                            return fullNames[index];
-                        },
-                        label(context) {
-                            const value = context.parsed.x;
-                            if (context.datasetIndex === 0) {
-                                return `Projects: ${value}`;
-                            }
-                            return `Total Cost: ₱${value.toFixed(2)}M`;
-                        }
-                    }
-                }
-            },
-            onClick: (event, elements) => {
-                if (elements.length > 0) {
-                    const index = elements[0].index;
-                    const congressmanName = fullNames[index];
-                    if (congressmanName) {
-                        // Switch to table tab
-                        switchTab('table');
-
-                        // Set the congressman filter to the clicked congressman
-                        const congressmanFilter = document.getElementById('congressman-filter');
-                        if (congressmanFilter) {
-                            congressmanFilter.value = congressmanName;
-                            // Trigger the filter change
-                            handleCongressmanFilterChange();
-                        }
-                    }
+                    enabled: false
                 }
             },
             scales: {
@@ -2719,17 +2892,40 @@ function createCharts(labels, fullNames, counts, costs) {
                         text: 'Congressmen'
                     },
                     ticks: {
+                        callback: function(value, index) {
+                            const entry = labelMeta[index];
+                            if (!entry) {
+                                return value;
+                            }
+                            const detailsLine = `${entry.count ?? 0} projects • ${formatCostMillions(entry.cost ?? 0)}`;
+                            return [
+                                entry.name,
+                                detailsLine
+                            ];
+                        },
+                        onClick: (event, index) => {
+                            const entry = labelMeta[index];
+                            if (!entry || !entry.name) {
+                                return;
+                            }
+                            switchTab('table');
+                            const congressmanFilter = document.getElementById('congressman-filter');
+                            if (congressmanFilter) {
+                                congressmanFilter.value = entry.name;
+                                handleCongressmanFilterChange();
+                            }
+                        },
                         font: (context) => {
-                            const label = context.tick?.label || '';
-                            const isSelected = normalizedSelected && normalizeCongressmanName(label) === normalizedSelected;
+                            const idx = context.index;
+                            const isSelected = idx === highlightIndex;
                             return {
                                 weight: isSelected ? '700' : '500',
-                                size: isSelected ? 13 : 12
+                                size: isSelected ? 13 : 11
                             };
                         },
                         color: (context) => {
-                            const label = context.tick?.label || '';
-                            const isSelected = normalizedSelected && normalizeCongressmanName(label) === normalizedSelected;
+                            const idx = context.index;
+                            const isSelected = idx === highlightIndex;
                             return isSelected ? '#b45309' : '#333';
                         }
                     }
@@ -2763,6 +2959,15 @@ function createCharts(labels, fullNames, counts, costs) {
             }
         }
     });
+
+    if (canvas && !canvas.dataset.labelHandlersAttached) {
+        canvas.addEventListener('click', handleCombinedChartLabelClick);
+        canvas.addEventListener('mousemove', handleCombinedChartLabelHover);
+        canvas.addEventListener('mouseleave', () => {
+            canvas.style.cursor = 'default';
+        });
+        canvas.dataset.labelHandlersAttached = 'true';
+    }
 }
 
 
