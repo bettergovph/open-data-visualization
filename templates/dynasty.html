@@ -891,19 +891,13 @@ function toggleMobileMenu() {
                                     </div>
                                 </div>
                                 <div>
-                                    <label style="display: block; margin-bottom: 5px; font-weight: 600; color: #333;">Number of Constellations:</label>
-                                    <select id="maxChainsFilter" style="padding: 8px 12px; border: 1px solid #ddd; border-radius: 4px; width: 180px;" title="Number of unique constellations (family pairs) to display">
-                                        <option value="1">1</option>
-                                        <option value="2">2</option>
-                                        <option value="5">5</option>
-                                        <option value="10" selected>10</option>
-                                        <option value="20">20</option>
-                                        <option value="50">50</option>
-                                        <option value="100">100</option>
-                                        <option value="120">120</option>
-                                        <option value="150">150</option>
-                                        <option value="ALL">ALL</option>
-                                    </select>
+                                    <label style="display: block; margin-bottom: 5px; font-weight: 600; color: #333;">Search Name / Family:</label>
+                                    <input
+                                        id="conflictsNameFilter"
+                                        type="text"
+                                        placeholder="e.g., Gardiola or Co"
+                                        style="padding: 8px 12px; border: 1px solid #ddd; border-radius: 4px; width: 220px;"
+                                    />
                                 </div>
                                 <div style="padding-top: 22px;">
                                     <div style="font-weight: 600; color: #333; margin-bottom: 8px;">Connection Type:</div>
@@ -3563,7 +3557,6 @@ function loadConflictsData() {
     
     const chainLengthMin = parseInt(document.getElementById('chainLengthMinFilter').value);
     let chainLengthMax = parseInt(document.getElementById('chainLengthMaxFilter').value);
-    const maxConstellations = document.getElementById('maxChainsFilter').value; // Actually represents constellations
     const connectionTypeFilter = document.querySelector('input[name="connectionTypeFilter"]:checked')?.value || 'all';
     
     // Handle "10+" as no upper limit (use 10 which backend treats as unlimited)
@@ -3578,6 +3571,8 @@ function loadConflictsData() {
         document.getElementById('chainLengthMaxFilter').value = chainLengthMin;
         return;
     }
+    
+    const maxConstellations = 'ALL';
     
     console.log('🔍 Loading conflicts data with constellation stars range:', chainLengthMin, 'to', chainLengthMax, 'max constellations:', maxConstellations, 'connection type:', connectionTypeFilter);
     
@@ -3622,8 +3617,8 @@ function loadConflictsData() {
                 console.log('📊 Cache info:', data.cache_info);
                 
                 // Use API data for both table and visual
-                conflictsData = data.data;
-                fullConflictsData = data.data;
+                fullConflictsData = data.data || [];
+                conflictsData = filterConflictsByName(fullConflictsData);
                 conflictsCurrentPage = 1;
                 
                 // Display table first
@@ -3789,8 +3784,8 @@ function loadConflictsData() {
                             filtered = diversified;
                         }
                         
-                        fullConflictsData = filtered;
-                        conflictsData = filtered;
+                        fullConflictsData = filtered || [];
+                        conflictsData = filterConflictsByName(fullConflictsData);
                         conflictsCurrentPage = 1;
                         displayConflictsTable();
                         updateConflictsPaginationControls();
@@ -3807,6 +3802,111 @@ function loadConflictsData() {
             console.error('❌ API request failed:', apiErr);
             hideTabLoadingSpinner('conflicts');
         });
+}
+
+function filterConflictsByName(chains) {
+    const input = document.getElementById('conflictsNameFilter');
+    const filterValue = input ? input.value.trim().toLowerCase() : '';
+    
+    if (!Array.isArray(chains)) {
+        return [];
+    }
+    
+    if (!filterValue) {
+        return chains.slice();
+    }
+    
+    return chains.filter(chain => {
+        if (!chain) {
+            return false;
+        }
+        
+        const contractorName = chain.contractor_connection?.contractor_name || '';
+        if (contractorName.toLowerCase().includes(filterValue)) {
+            return true;
+        }
+        
+        const startSurname = (chain.start_surname || '').toLowerCase();
+        const endSurname = (chain.end_surname || '').toLowerCase();
+        if (startSurname.includes(filterValue) || endSurname.includes(filterValue)) {
+            return true;
+        }
+        
+        if (Array.isArray(chain.path)) {
+            for (const node of chain.path) {
+                if (!node) continue;
+                
+                const pieces = [
+                    node.first_name,
+                    node.middle_name,
+                    node.last_name,
+                    node.full_name
+                ]
+                    .filter(Boolean)
+                    .map(value => String(value).toLowerCase());
+                
+                if (pieces.some(value => value.includes(filterValue))) {
+                    return true;
+                }
+            }
+        }
+        
+        return false;
+    });
+}
+
+function focusOnFilteredNodes(zoom, svgSelection, nodeArray) {
+    if (!zoom || !svgSelection) {
+        return;
+    }
+    
+    const width = parseFloat(svgSelection.attr('width')) || svgSelection.node()?.clientWidth || 0;
+    const height = parseFloat(svgSelection.attr('height')) || svgSelection.node()?.clientHeight || 0;
+    if (!width || !height) {
+        return;
+    }
+    
+    const input = document.getElementById('conflictsNameFilter');
+    const filterValue = input ? input.value.trim().toLowerCase() : '';
+    
+    if (!Array.isArray(nodeArray) || nodeArray.length === 0) {
+        return;
+    }
+    
+    if (!filterValue) {
+        svgSelection.transition().duration(600).call(zoom.transform, d3.zoomIdentity);
+        return;
+    }
+    
+    const validNodes = nodeArray.filter(node => typeof node.x === 'number' && typeof node.y === 'number');
+    if (validNodes.length === 0) {
+        return;
+    }
+    
+    const minX = d3.min(validNodes, d => d.x);
+    const maxX = d3.max(validNodes, d => d.x);
+    const minY = d3.min(validNodes, d => d.y);
+    const maxY = d3.max(validNodes, d => d.y);
+    
+    const dx = (maxX - minX) || 1;
+    const dy = (maxY - minY) || 1;
+    const padding = 60;
+    const availableWidth = Math.max(50, width - padding * 2);
+    const availableHeight = Math.max(50, height - padding * 2);
+    
+    const centerX = (minX + maxX) / 2;
+    const centerY = (minY + maxY) / 2;
+    
+    const scale = Math.max(0.2, Math.min(4, 0.85 / Math.max(dx / availableWidth, dy / availableHeight)));
+    const translateX = width / 2 - scale * centerX;
+    const translateY = height / 2 - scale * centerY;
+    
+    svgSelection.transition()
+        .duration(700)
+        .call(
+            zoom.transform,
+            d3.zoomIdentity.translate(translateX, translateY).scale(scale)
+        );
 }
 
 function displayConflictsNetwork() {
@@ -4858,6 +4958,10 @@ function displayConflictsNetwork() {
             svg.selectAll('g').attr('transform', event.transform);
         });
     
+    simulation.on('end', () => {
+        focusOnFilteredNodes(zoom, svg, nodes);
+    });
+    
     svg.call(zoom);
 }
 
@@ -4865,7 +4969,7 @@ function displayConflictsTable() {
     const tbody = document.getElementById('conflictsTableBody');
     const pageInfo = document.getElementById('conflictsPageInfo');
     
-    if (!fullConflictsData || fullConflictsData.length === 0) {
+    if (!conflictsData || conflictsData.length === 0) {
         tbody.innerHTML = `
             <tr>
                 <td colspan="6" style="padding: 20px; text-align: center; color: #6c757d;">
@@ -4881,7 +4985,7 @@ function displayConflictsTable() {
     }
     
     // Ensure consistent ordering with API/network: sort by length desc, then start/end surname
-    const sorted = fullConflictsData.slice().sort((a, b) => {
+    const sorted = conflictsData.slice().sort((a, b) => {
         if (b.length !== a.length) return b.length - a.length;
         const aStart = (a.path[0]?.last_name || '').localeCompare(b.path[0]?.last_name || '');
         if (aStart !== 0) return aStart;
@@ -4928,10 +5032,10 @@ function setupConflictsFilters() {
     // Set up filter change listeners for automatic updates
     const chainLengthMinFilter = document.getElementById('chainLengthMinFilter');
     const chainLengthMaxFilter = document.getElementById('chainLengthMaxFilter');
-    const maxChainsFilter = document.getElementById('maxChainsFilter');
     const rowsPerPage = document.getElementById('conflictsRowsPerPage');
     const prevBtn = document.getElementById('conflictsPrevPage');
     const nextBtn = document.getElementById('conflictsNextPage');
+    const nameFilterInput = document.getElementById('conflictsNameFilter');
     
     // Function to validate and update max filter options
     function updateMaxFilterOptions() {
@@ -4981,13 +5085,6 @@ function setupConflictsFilters() {
         });
     }
     
-    if (maxChainsFilter) {
-        maxChainsFilter.addEventListener('change', function() {
-            console.log('🔧 Max lines filter changed to:', this.value);
-            loadConflictsData();
-        });
-    }
-    
     // Listen for changes to connection type radio buttons
     const connectionTypeFilters = document.querySelectorAll('input[name="connectionTypeFilter"]');
     connectionTypeFilters.forEach(radio => {
@@ -4996,6 +5093,23 @@ function setupConflictsFilters() {
             loadConflictsData();
         });
     });
+
+    if (nameFilterInput) {
+        let nameFilterTimeout;
+        nameFilterInput.addEventListener('input', function() {
+            clearTimeout(nameFilterTimeout);
+            nameFilterTimeout = setTimeout(() => {
+                if (!fullConflictsData) {
+                    return;
+                }
+                conflictsCurrentPage = 1;
+                conflictsData = filterConflictsByName(fullConflictsData);
+                displayConflictsTable();
+                updateConflictsPaginationControls();
+                displayConflictsNetwork();
+            }, 250);
+        });
+    }
 
     if (rowsPerPage) {
         rowsPerPage.addEventListener('change', function() {
@@ -5030,7 +5144,10 @@ function setupConflictsFilters() {
 function clearConflictsFilters() {
     document.getElementById('chainLengthMinFilter').value = '2';
     document.getElementById('chainLengthMaxFilter').value = '10';
-    document.getElementById('maxChainsFilter').value = '25';
+    const nameFilterInput = document.getElementById('conflictsNameFilter');
+    if (nameFilterInput) {
+        nameFilterInput.value = '';
+    }
     // Reset connection type to "all"
     const allRadio = document.querySelector('input[name="connectionTypeFilter"][value="all"]');
     if (allRadio) allRadio.checked = true;
@@ -5059,7 +5176,7 @@ function clearConflictsFilters() {
 function updateConflictsPaginationControls() {
     const prevBtn = document.getElementById('conflictsPrevPage');
     const nextBtn = document.getElementById('conflictsNextPage');
-    const totalItems = fullConflictsData ? fullConflictsData.length : 0;
+    const totalItems = conflictsData ? conflictsData.length : 0;
     const totalPages = Math.max(1, Math.ceil(totalItems / conflictsRowsPerPage));
     if (prevBtn) prevBtn.disabled = conflictsCurrentPage <= 1;
     if (nextBtn) nextBtn.disabled = conflictsCurrentPage >= totalPages;
