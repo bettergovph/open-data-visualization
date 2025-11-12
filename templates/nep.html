@@ -115,6 +115,7 @@ function toggleMobileMenu() {
                     <a href="#browser" class="budget-tab-btn" data-tab="browser">📋 Data Browser</a>
                     <a href="#analysis" class="budget-tab-btn" data-tab="analysis">🚨 NEP 2026 Analysis</a>
                     <a href="#gab2026" class="budget-tab-btn" data-tab="gab2026">📕 GAB 2026</a>
+                    <a href="#insertion" class="budget-tab-btn" data-tab="insertion">🧩 Insertions</a>
                 </div>
                 
                 <div class="budget-tab-content">
@@ -351,6 +352,74 @@ function toggleMobileMenu() {
                                 📋 Copy
                             </button>
                             <canvas id="pbcChart" style="width: 100% !important;"></canvas>
+                        </div>
+                    </div>
+
+                    <!-- Insertions Pivot Tab -->
+                    <div id="tab-insertion" class="budget-tab-panel">
+                        <h3 class="budget-section-title">🧩 NEP 2026 Insertions Pivot</h3>
+                        <p class="budget-section-desc">
+                            Aggregate insertions by program and district engineering office sourced from
+                            <strong>Citizens Budget Tracker (Flood Control 2018-2025)</strong> sheet <em>Insertion</em>.
+                        </p>
+                        <div id="insertion-meta" class="stat-card" style="background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.08); margin-bottom: 24px; display: none;">
+                            <div style="display: flex; flex-wrap: wrap; gap: 16px;">
+                                <div>
+                                    <div style="font-size: 0.85rem; color: #666;">Programs</div>
+                                    <div id="insertion-total-programs" style="font-size: 1.5rem; font-weight: 600; color: #0038A8;">0</div>
+                                </div>
+                                <div>
+                                    <div style="font-size: 0.85rem; color: #666;">Offices</div>
+                                    <div id="insertion-total-offices" style="font-size: 1.5rem; font-weight: 600; color: #0038A8;">0</div>
+                                </div>
+                                <div style="flex: 1; min-width: 220px;">
+                                    <div style="font-size: 0.85rem; color: #666; margin-bottom: 8px;">Top Offices by Insertions</div>
+                                    <ol id="insertion-top-offices" style="margin: 0; padding-left: 20px; max-height: 160px; overflow-y: auto;"></ol>
+                                </div>
+                                <div style="min-width: 220px;">
+                                    <div style="font-size: 0.85rem; color: #666;">Source</div>
+                                    <div style="font-size: 0.95rem; color: #333;">
+                                        FY 2026 insertions pivot snapshot<br>
+                                        <a href="/static/data/nep_insertion_pivot.json" target="_blank" rel="noopener" style="color: #0038A8; text-decoration: underline;">Download JSON</a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="insertion-controls" style="display: flex; flex-wrap: wrap; align-items: center; gap: 12px; margin-bottom: 20px;">
+                            <label for="insertion-district-input" style="font-weight: 600; color: #333;">Filter by district / D.E. office:</label>
+                            <div style="display: flex; gap: 8px; flex-wrap: wrap; align-items: center;">
+                                <input id="insertion-district-input" list="insertion-district-options"
+                                       placeholder="Start typing a district name..."
+                                       style="padding: 8px 12px; border: 1px solid #cbd5f5; border-radius: 6px; min-width: 260px; font-size: 0.9rem;">
+                                <datalist id="insertion-district-options"></datalist>
+                                <button id="insertion-clear-filter"
+                                        class="btn btn-secondary"
+                                        type="button"
+                                        style="padding: 8px 14px; border-radius: 6px; background: #f3f4f6; border: 1px solid #d1d5db; color: #374151; font-size: 0.85rem;">
+                                    Clear
+                                </button>
+                                <span id="insertion-filter-pill" style="display: none; background: #e0f2fe; color: #0369a1; padding: 6px 12px; border-radius: 999px; font-size: 0.85rem;">
+                                </span>
+                            </div>
+                        </div>
+                        <div id="insertion-chart-container" style="background: white; padding: 20px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.08); margin-bottom: 24px; display: none;">
+                            <h4 id="insertion-chart-title" style="margin: 0 0 16px 0; color: #0038A8;">Program Totals by Insertions - All Districts</h4>
+                            <div style="position: relative; height: 360px;">
+                                <canvas id="insertion-program-chart"></canvas>
+                            </div>
+                        </div>
+                        <div id="insertion-heatmap-wrapper" style="display: none; background: white; padding: 20px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.08); margin-bottom: 24px;">
+                            <h4 style="margin: 0 0 16px 0; color: #0038A8;">District Insertions Heatmap</h4>
+                            <div id="insertion-heatmap-grid" class="insertion-heatmap-grid"></div>
+                        </div>
+                        <div id="insertion-loading" class="loading-spinner" style="display: flex; justify-content: center; align-items: center; padding: 40px; margin: 20px 0;">
+                            <div style="display: flex; flex-direction: column; align-items: center; gap: 15px;">
+                                <div class="spinner" style="width: 40px; height: 40px; border: 4px solid #f3f3f3; border-top: 4px solid #0038A8; border-radius: 50%; animation: spin 1s linear infinite;"></div>
+                                <p style="color: #666; font-size: 14px; margin: 0;">Loading insertion pivot…</p>
+                            </div>
+                        </div>
+                        <div id="insertion-error" style="display: none; padding: 20px; background: #fff3cd; border-left: 4px solid #ffc107; border-radius: 8px; color: #856404; margin-top: 20px;">
+                            Unable to load insertion pivot data. Please try again later.
                         </div>
                     </div>
 
@@ -3092,6 +3161,15 @@ async function loadNEPYearOverYearChart() {
 
 let yearOverYearChartInstance = null;
 let topProgramsChartInstance = null;
+let insertionPivotLoaded = false;
+let insertionPivotData = null;
+let insertionProgramChart = null;
+let insertionDistrictFilter = '';
+let insertionFilterInitialized = false;
+let insertionDistrictTotals = [];
+const insertionDistrictTotalsMap = new Map();
+let insertionHeatmapMaxPositive = 0;
+let insertionHeatmapMaxNegative = 0;
 
 async function loadNEPTopProgramsChart(year = '2025') {
     try {
@@ -3874,6 +3952,10 @@ function switchToTab(tabName, updateHash = true) {
                     }, 500);
                 }
             }, 200);
+        } else if (tabName === 'insertion') {
+            setTimeout(() => {
+                loadInsertionPivot();
+            }, 150);
         } else if (tabName === 'trends') {
             // Load trends data when tab is activated (v2.0 - 2025-01-05)
             loadDepartmentTrends();
@@ -3881,6 +3963,459 @@ function switchToTab(tabName, updateHash = true) {
         
     } else {
     }
+}
+
+// Insertions pivot tab logic
+async function loadInsertionPivot(force = false) {
+    const spinner = document.getElementById('insertion-loading');
+    const errorEl = document.getElementById('insertion-error');
+    const metaCard = document.getElementById('insertion-meta');
+    const chartContainer = document.getElementById('insertion-chart-container');
+
+    if (!spinner || !errorEl || !chartContainer) {
+        console.warn('⚠️ [Insertion Pivot] Required DOM elements not found');
+        return;
+    }
+
+    if (insertionPivotLoaded && insertionPivotData && !force) {
+        spinner.style.display = 'none';
+        errorEl.style.display = 'none';
+        if (metaCard) {
+            metaCard.style.display = 'block';
+        }
+        chartContainer.style.display = 'block';
+        updateInsertionMeta(insertionPivotData);
+        prepareInsertionHeatmap(insertionPivotData);
+        populateInsertionDistrictOptions(insertionPivotData?.districts || []);
+        setupInsertionFilterControls();
+        renderInsertionProgramChart(insertionPivotData);
+        return;
+    }
+
+    spinner.style.display = 'flex';
+    errorEl.style.display = 'none';
+    chartContainer.style.display = 'none';
+    if (metaCard) {
+        metaCard.style.display = 'none';
+    }
+
+    try {
+        const response = await fetch('/static/data/nep_insertion_pivot.json', { cache: 'no-store' });
+        if (!response.ok) {
+            throw new Error(`HTTP ${response.status}`);
+        }
+
+        const payload = await response.json();
+        insertionPivotData = payload;
+        insertionPivotLoaded = true;
+
+        spinner.style.display = 'none';
+        chartContainer.style.display = 'block';
+        if (metaCard) {
+            metaCard.style.display = 'block';
+        }
+
+        updateInsertionMeta(payload);
+        prepareInsertionHeatmap(payload);
+        populateInsertionDistrictOptions(payload?.districts || []);
+        setupInsertionFilterControls();
+        renderInsertionProgramChart(payload);
+    } catch (error) {
+        console.error('❌ [Insertion Pivot] Failed to load pivot data:', error);
+        spinner.style.display = 'none';
+        errorEl.style.display = 'block';
+        if (metaCard) {
+            metaCard.style.display = 'none';
+        }
+        chartContainer.style.display = 'none';
+        const heatmapWrapper = document.getElementById('insertion-heatmap-wrapper');
+        if (heatmapWrapper) {
+            heatmapWrapper.style.display = 'none';
+        }
+    }
+}
+
+function updateInsertionMeta(payload) {
+    const metaCard = document.getElementById('insertion-meta');
+    const totalProgramsEl = document.getElementById('insertion-total-programs');
+    const totalOfficesEl = document.getElementById('insertion-total-offices');
+    const topOfficesList = document.getElementById('insertion-top-offices');
+
+    if (!metaCard || !totalProgramsEl || !totalOfficesEl || !topOfficesList) {
+        return;
+    }
+
+    const meta = payload?.meta || {};
+    const rows = Array.isArray(payload?.rows) ? payload.rows : [];
+    const columns = Array.isArray(payload?.columns) ? payload.columns : [];
+
+    const totalPrograms = meta.total_programs || rows.length || 0;
+    const totalOffices = meta.total_offices || Math.max(columns.length - 1, 0);
+
+    totalProgramsEl.textContent = totalPrograms.toLocaleString('en-US');
+    totalOfficesEl.textContent = totalOffices.toLocaleString('en-US');
+
+    const topOffices = Array.isArray(meta.top_offices_by_insertion) ? meta.top_offices_by_insertion : [];
+    if (topOffices.length) {
+        topOfficesList.innerHTML = topOffices.slice(0, 5).map((item) => {
+            const officeName = escapeHtml(item.office || 'Unknown office');
+            const formattedValue = formatInsertionValue(item.total_insertions ?? 0);
+            return `<li>${officeName}: <strong>${formattedValue}</strong></li>`;
+        }).join('');
+    } else {
+        topOfficesList.innerHTML = '<li>No office data available.</li>';
+    }
+}
+
+function formatInsertionValue(value) {
+    if (value === null || value === undefined || value === '') {
+        return '';
+    }
+
+    const num = Number(value);
+    if (!Number.isFinite(num)) {
+        return escapeHtml(String(value));
+    }
+
+    const abs = Math.abs(num);
+    if (abs >= 1_000_000_000) {
+        return `₱${(num / 1_000_000_000).toFixed(1)}B`;
+    }
+    if (abs >= 1_000_000) {
+        return `₱${(num / 1_000_000).toFixed(1)}M`;
+    }
+    if (abs >= 1_000) {
+        return `₱${num.toLocaleString('en-US', { maximumFractionDigits: 0 })}`;
+    }
+    return `₱${num.toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 2 })}`;
+}
+
+function populateInsertionDistrictOptions(districts) {
+    const datalist = document.getElementById('insertion-district-options');
+    if (!datalist || !Array.isArray(districts)) {
+        return;
+    }
+
+    const uniqueDistricts = Array.from(new Set(districts)).filter(Boolean).sort((a, b) => a.localeCompare(b));
+    datalist.innerHTML = uniqueDistricts.map((district) => `<option value="${escapeHtml(district)}"></option>`).join('');
+}
+
+function setupInsertionFilterControls() {
+    if (insertionFilterInitialized) {
+        return;
+    }
+
+    const inputEl = document.getElementById('insertion-district-input');
+    const clearBtn = document.getElementById('insertion-clear-filter');
+
+    if (inputEl) {
+        const applyFilter = () => {
+            if (!insertionPivotData) return;
+            const rawValue = inputEl.value || '';
+            const districts = Array.isArray(insertionPivotData.districts) ? insertionPivotData.districts : [];
+            const match = districts.find((district) => district.toLowerCase() === rawValue.trim().toLowerCase());
+            setInsertionDistrictFilter(match || '');
+        };
+
+        inputEl.addEventListener('change', applyFilter);
+        inputEl.addEventListener('blur', applyFilter);
+        inputEl.addEventListener('keydown', (event) => {
+            if (event.key === 'Enter') {
+                event.preventDefault();
+                applyFilter();
+            }
+        });
+    }
+
+    if (clearBtn) {
+        clearBtn.addEventListener('click', () => {
+            setInsertionDistrictFilter('');
+        });
+    }
+
+    insertionFilterInitialized = true;
+}
+
+function prepareInsertionHeatmap(payload) {
+    insertionDistrictTotals = [];
+    insertionDistrictTotalsMap.clear();
+    insertionHeatmapMaxPositive = 0;
+    insertionHeatmapMaxNegative = 0;
+
+    if (!payload) {
+        return;
+    }
+
+    const rows = Array.isArray(payload.rows) ? payload.rows : [];
+    if (!rows.length) {
+        return;
+    }
+
+    const districtColumns = Array.isArray(payload.districts) && payload.districts.length
+        ? payload.districts
+        : (Array.isArray(payload.columns) ? payload.columns.filter((col) => col !== 'Program') : []);
+
+    if (!districtColumns.length) {
+        return;
+    }
+
+    const totals = districtColumns.map((district) => {
+        const total = rows.reduce((sum, row) => sum + (Number(row[district]) || 0), 0);
+        return { office: district, total_insertions: total };
+    });
+
+    totals.sort((a, b) => b.total_insertions - a.total_insertions);
+
+    totals.sort((a, b) => {
+        const nameA = (a.office || '').toLowerCase();
+        const nameB = (b.office || '').toLowerCase();
+        if (nameA < nameB) return -1;
+        if (nameA > nameB) return 1;
+        return 0;
+    });
+
+    insertionDistrictTotals = totals;
+    totals.forEach((entry) => insertionDistrictTotalsMap.set(entry.office, entry.total_insertions));
+
+    insertionHeatmapMaxPositive = totals.reduce((max, entry) => entry.total_insertions > 0 ? Math.max(max, entry.total_insertions) : max, 0);
+    insertionHeatmapMaxNegative = totals.reduce((min, entry) => entry.total_insertions < 0 ? Math.min(min, entry.total_insertions) : min, 0);
+    if (!Number.isFinite(insertionHeatmapMaxPositive)) insertionHeatmapMaxPositive = 0;
+    if (!Number.isFinite(insertionHeatmapMaxNegative)) insertionHeatmapMaxNegative = 0;
+
+    const wrapper = document.getElementById('insertion-heatmap-wrapper');
+    if (wrapper) {
+        wrapper.style.display = totals.length ? 'block' : 'none';
+    }
+}
+
+function renderInsertionHeatmap() {
+    const wrapper = document.getElementById('insertion-heatmap-wrapper');
+    const grid = document.getElementById('insertion-heatmap-grid');
+    if (!wrapper || !grid) {
+        return;
+    }
+
+    if (!insertionDistrictTotals.length) {
+        wrapper.style.display = 'none';
+        return;
+    }
+
+    wrapper.style.display = 'block';
+
+    const tilesHtml = insertionDistrictTotals.map((entry) => {
+        const color = getInsertionHeatmapColor(entry.total_insertions);
+        const formatted = formatInsertionValue(entry.total_insertions) || '₱0';
+        const activeClass = insertionDistrictFilter && insertionDistrictFilter === entry.office ? ' insertion-heatmap-tile active' : ' insertion-heatmap-tile';
+        const ratio = getInsertionHeatmapRatio(entry.total_insertions);
+        const textColor = ratio > 0.55 ? '#ffffff' : '#0f172a';
+        return `
+            <div class="${activeClass}" data-district="${escapeHtml(entry.office)}" style="background:${color};color:${textColor};">
+                <div class="insertion-heatmap-district">${escapeHtml(entry.office)}</div>
+                <div class="insertion-heatmap-value">${formatted}</div>
+            </div>
+        `;
+    }).join('');
+
+    grid.innerHTML = tilesHtml;
+    grid.querySelectorAll('.insertion-heatmap-tile').forEach((tile) => {
+        tile.addEventListener('click', () => {
+            const district = tile.getAttribute('data-district') || '';
+            setInsertionDistrictFilter(district);
+        });
+    });
+}
+
+function getInsertionHeatmapColor(value) {
+    if (!Number.isFinite(value)) {
+        return '#f3f4f6';
+    }
+    if (value > 0) {
+        const ratio = insertionHeatmapMaxPositive > 0 ? Math.min(value / insertionHeatmapMaxPositive, 1) : 0;
+        const lightness = 90 - ratio * 45;
+        return `hsl(215, 85%, ${Math.max(35, lightness)}%)`;
+    }
+    if (value < 0) {
+        const ratio = insertionHeatmapMaxNegative < 0 ? Math.min(Math.abs(value) / Math.abs(insertionHeatmapMaxNegative), 1) : 0;
+        const lightness = 90 - ratio * 45;
+        return `hsl(0, 85%, ${Math.max(35, lightness)}%)`;
+    }
+    return '#f3f4f6';
+}
+
+function getInsertionHeatmapRatio(value) {
+    if (!Number.isFinite(value)) {
+        return 0;
+    }
+    if (value > 0 && insertionHeatmapMaxPositive > 0) {
+        return Math.min(Math.abs(value) / insertionHeatmapMaxPositive, 1);
+    }
+    if (value < 0 && insertionHeatmapMaxNegative < 0) {
+        return Math.min(Math.abs(value) / Math.abs(insertionHeatmapMaxNegative), 1);
+    }
+    return 0;
+}
+
+function setInsertionDistrictFilter(districtName) {
+    const sanitized = districtName ? districtName.trim() : '';
+    insertionDistrictFilter = sanitized;
+
+    const inputEl = document.getElementById('insertion-district-input');
+    if (inputEl) {
+        inputEl.value = insertionDistrictFilter;
+    }
+
+    if (insertionPivotData) {
+        renderInsertionProgramChart(insertionPivotData);
+        renderInsertionHeatmap();
+    }
+}
+
+function updateInsertionFilterPill() {
+    const pill = document.getElementById('insertion-filter-pill');
+    const inputEl = document.getElementById('insertion-district-input');
+
+    if (pill) {
+        if (insertionDistrictFilter) {
+            pill.textContent = `Showing: ${insertionDistrictFilter}`;
+            pill.style.display = 'inline-flex';
+        } else {
+            pill.textContent = '';
+            pill.style.display = 'none';
+        }
+    }
+
+    if (inputEl && insertionDistrictFilter) {
+        if (inputEl.value.toLowerCase() !== insertionDistrictFilter.toLowerCase()) {
+            inputEl.value = insertionDistrictFilter;
+        }
+    }
+}
+
+function renderInsertionProgramChart(payload) {
+    const chartContainer = document.getElementById('insertion-chart-container');
+    const canvas = document.getElementById('insertion-program-chart');
+    const titleEl = document.getElementById('insertion-chart-title');
+
+    if (!chartContainer || !canvas) {
+        return;
+    }
+
+    const series = Array.isArray(payload?.program_totals) ? payload.program_totals : [];
+    if (!series.length) {
+        chartContainer.style.display = 'none';
+        if (insertionProgramChart) {
+            insertionProgramChart.destroy();
+            insertionProgramChart = null;
+        }
+        if (titleEl) {
+            titleEl.textContent = 'Program Totals by Insertions - All Districts';
+        }
+        updateInsertionFilterPill();
+        return;
+    }
+
+    const rows = Array.isArray(payload?.rows) ? payload.rows : [];
+    const columns = Array.isArray(payload?.columns) ? payload.columns : [];
+    const normalizedFilter = insertionDistrictFilter ? insertionDistrictFilter.toLowerCase() : '';
+    const matchedColumn = normalizedFilter
+        ? columns.find((col) => col.toLowerCase() === normalizedFilter)
+        : '';
+
+    const labels = rows.map((row) => row.Program || row.Program === 0 ? row.Program : 'N/A');
+    let values = [];
+
+    if (matchedColumn) {
+        values = rows.map((row) => Number(row[matchedColumn]) || 0);
+        insertionDistrictFilter = matchedColumn;
+    } else {
+        insertionDistrictFilter = '';
+        const totalsByProgram = new Map();
+        if (series.length) {
+            series.forEach((entry) => {
+                totalsByProgram.set(entry.program, Number(entry.total_insertions) || 0);
+            });
+        }
+        values = rows.map((row) => {
+            const program = row.Program;
+            if (totalsByProgram.has(program)) {
+                return totalsByProgram.get(program);
+            }
+            const districtColumns = payload?.districts || columns.filter((col) => col !== 'Program');
+            const sum = districtColumns.reduce((acc, col) => acc + (Number(row[col]) || 0), 0);
+            return sum;
+        });
+    }
+
+    if (titleEl) {
+        const suffix = insertionDistrictFilter ? insertionDistrictFilter : 'All Districts';
+        titleEl.textContent = `Program Totals by Insertions - ${suffix}`;
+    }
+    updateInsertionFilterPill();
+
+    const backgroundColors = values.map((value) => value >= 0 ? '#2563eb' : '#dc2626');
+
+    if (insertionProgramChart) {
+        insertionProgramChart.destroy();
+    }
+
+    const ctx = canvas.getContext('2d');
+    insertionProgramChart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels,
+            datasets: [{
+                label: 'Total Insertions',
+                data: values,
+                backgroundColor: backgroundColors
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                x: {
+                    ticks: {
+                        color: '#1f2937',
+                        font: { size: 12 }
+                    },
+                    grid: {
+                        display: false
+                    }
+                },
+                y: {
+                    ticks: {
+                        color: '#1f2937',
+                        callback: function(value) {
+                            const num = Number(value);
+                            if (Math.abs(num) >= 1_000_000_000) {
+                                return `₱${(num / 1_000_000_000).toFixed(1)}B`;
+                            }
+                            if (Math.abs(num) >= 1_000_000) {
+                                return `₱${(num / 1_000_000).toFixed(1)}M`;
+                            }
+                            return `₱${num.toLocaleString('en-US')}`;
+                        }
+                    }
+                }
+            },
+            plugins: {
+                legend: {
+                    display: false
+                },
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            const value = context.parsed.y;
+                            return formatInsertionValue(value);
+                        }
+                    }
+                }
+            }
+        }
+    });
+
+    chartContainer.style.display = 'block';
+    renderInsertionHeatmap();
 }
 
 // Year filter event listeners (moved to main DOMContentLoaded)
@@ -5422,14 +5957,14 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Check for hash in URL and switch to that tab
     const hash = window.location.hash.substring(1); // Remove the # character
-    if (hash && ['visual', 'browser', 'analysis', 'gab2026'].includes(hash)) {
+    if (hash && ['visual', 'browser', 'analysis', 'gab2026', 'insertion'].includes(hash)) {
         switchToTab(hash, false); // Don't update hash since we're reading from it
     }
 
     // Listen for hash changes
     window.addEventListener('hashchange', function() {
         const newHash = window.location.hash.substring(1);
-        if (newHash && ['visual', 'browser', 'analysis', 'gab2026'].includes(newHash)) {
+        if (newHash && ['visual', 'browser', 'analysis', 'gab2026', 'insertion'].includes(newHash)) {
             switchToTab(newHash, false);
         }
     });
@@ -7162,11 +7697,123 @@ async function copyChartToClipboard(containerId, buttonId) {
     width: 60px;
 }
 
+.insertion-table {
+    font-size: 0.72rem;
+    border-collapse: collapse;
+    width: 100%;
+}
+
+.insertion-table thead tr {
+    background: #0038A8;
+    color: white;
+}
+
+.insertion-table th,
+.insertion-table td {
+    padding: 8px 10px;
+    border: 1px solid #e2e8f0;
+    text-align: right;
+    white-space: nowrap;
+}
+
+.insertion-table th {
+    position: sticky;
+    top: 0;
+    z-index: 5;
+    font-weight: 600;
+}
+
+.insertion-table th:first-child {
+    text-align: left;
+    background: #002c7f;
+    color: #ffffff;
+    font-weight: 600;
+    position: sticky;
+    left: 0;
+    z-index: 15;
+}
+
+.insertion-table td:first-child {
+    text-align: left;
+    background: #f8fafc;
+    color: #0f172a;
+    font-weight: 600;
+    position: sticky;
+    left: 0;
+    z-index: 10;
+}
+
+.insertion-table tbody tr:nth-child(even) {
+    background: #ffffff;
+}
+
+.insertion-table tbody tr:nth-child(odd) {
+    background: #f8fafc;
+}
+
+.insertion-table tbody tr:hover {
+    background: #e2e8f0;
+}
+
 .loading-spinner {
     text-align: center;
     padding: 2rem;
     color: #666;
     font-style: italic;
+}
+
+.insertion-heatmap-grid {
+    display: grid;
+    grid-template-columns: repeat(12, minmax(0, 1fr));
+    grid-auto-rows: 1fr;
+    gap: 6px;
+}
+
+.insertion-heatmap-tile {
+    padding: 8px;
+    border-radius: 8px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    gap: 4px;
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+    cursor: pointer;
+    border: 1px solid rgba(15, 23, 42, 0.08);
+    aspect-ratio: 1 / 1;
+    min-width: 0;
+    height: 100%;
+    box-sizing: border-box;
+}
+
+.insertion-heatmap-tile:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 14px rgba(15, 23, 42, 0.15);
+}
+
+.insertion-heatmap-tile.active {
+    outline: 3px solid #2563eb;
+    box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.2);
+}
+
+.insertion-heatmap-district {
+    font-weight: 600;
+    font-size: 0.7rem;
+    line-height: 1.2;
+    word-break: break-word;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-height: 2.4em;
+    width: 100%;
+}
+
+.insertion-heatmap-value {
+    font-size: 0.65rem;
+    width: 100%;
 }
 
 /* Autocomplete styles for speed and efficiency */
