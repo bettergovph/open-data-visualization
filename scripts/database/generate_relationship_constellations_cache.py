@@ -56,7 +56,7 @@ async def fetch_people(conn):
 
 async def generate_relationship_constellations_cache():
     """Generate JSON cache of relationship constellations between different political families"""
-    MAX_CHAIN_DEPTH = 3
+    MAX_CHAIN_DEPTH = 2
     load_env_from_dotenv()
     load_dotenv()
     
