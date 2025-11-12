@@ -30,9 +30,33 @@ def load_env_from_dotenv():
             os.environ[k] = v
 
 
+async def fetch_people(conn):
+    rows = await conn.fetch(
+        """
+        SELECT id, first_name, middle_name, last_name, suffix, canonical_name, position, region, province, municipality_city
+        FROM political_dynasties
+        """
+    )
+    people = {}
+    for row in rows:
+        people[row["id"]] = {
+            "id": row["id"],
+            "first_name": row["first_name"],
+            "middle_name": row["middle_name"],
+            "last_name": row["last_name"],
+            "suffix": row["suffix"],
+            "canonical_name": row["canonical_name"],
+            "position": row["position"],
+            "region": row["region"],
+            "province": row["province"],
+            "municipality_city": row["municipality_city"],
+        }
+    return people
+
+
 async def generate_relationship_constellations_cache():
     """Generate JSON cache of relationship constellations between different political families"""
-    
+    MAX_CHAIN_DEPTH = 3
     load_env_from_dotenv()
     load_dotenv()
     
@@ -100,6 +124,11 @@ async def generate_relationship_constellations_cache():
              AND UPPER(TRIM(p.last_name)) = UPPER(TRIM(cdm.dynasty_last_name)))
         )
         WHERE p.id IS NOT NULL
+          AND EXISTS (
+                SELECT 1
+                FROM politician_contractors pc
+                WHERE UPPER(TRIM(pc.contractor_name)) = UPPER(TRIM(cdm.company_name))
+          )
         """
         contractor_members_data = await conn.fetch(contractor_members_query)
         print(f"📊 Found {len(contractor_members_data)} contractor connections", flush=True)
@@ -197,7 +226,11 @@ async def generate_relationship_constellations_cache():
             if chain['path_string'] not in seen_paths:
                 all_chains.append(chain)
                 seen_paths.add(chain['path_string'])
-            
+
+            # Enforce maximum chain depth
+            if len(path) >= MAX_CHAIN_DEPTH:
+                return
+
             # STOPPING CONDITION: If the last node is already in global_rendered_nodes, stop recursion
             # This means we've reached a node that was already extended from by another chain
             # BUT we've already added the chain ending at this node, so we've captured it
@@ -431,34 +464,29 @@ async def generate_relationship_constellations_cache():
         print("🔗 Checking contractor-dynasty relationships...", flush=True)
         
         contractor_relationships_query = """
-        WITH contractor_connections AS (
+        WITH normalized_matches AS (
             SELECT DISTINCT
-                cdm1.dynasty_full_name as person1_name,
-                cdm1.dynasty_first_name as person1_first,
-                cdm1.dynasty_last_name as person1_last,
-                cdm1.role as person1_role,
-                cdm2.dynasty_full_name as person2_name,
-                cdm2.dynasty_first_name as person2_first,
-                cdm2.dynasty_last_name as person2_last,
-                cdm2.role as person2_role,
-                cdm1.company_name as contractor_name,
-                'Business/Contractor Connection' as relationship_type
-            FROM contractor_dynasty_matches cdm1
-            JOIN contractor_dynasty_matches cdm2 
-                ON cdm1.company_name = cdm2.company_name
-                AND cdm1.dynasty_full_name != cdm2.dynasty_full_name
-            JOIN political_dynasties p1 
-                ON UPPER(TRIM(p1.first_name)) = UPPER(TRIM(cdm1.dynasty_first_name))
-                AND UPPER(TRIM(p1.last_name)) = UPPER(TRIM(cdm1.dynasty_last_name))
-            JOIN political_dynasties p2 
-                ON UPPER(TRIM(p2.first_name)) = UPPER(TRIM(cdm2.dynasty_first_name))
-                AND UPPER(TRIM(p2.last_name)) = UPPER(TRIM(cdm2.dynasty_last_name))
-            WHERE p1.id != p2.id
-                -- Allow same-family connections (e.g., brothers via shared contractor)
+                pc.contractor_name AS company_name,
+                pc.politician_id AS person_id,
+                COALESCE(pc.notes, 'Listed in Rappler Politicontractors tracker') AS role
+            FROM politician_contractors pc
+        ),
+        contractor_connections AS (
+            SELECT
+                LEAST(m1.person_id, m2.person_id) AS person1_id,
+                GREATEST(m1.person_id, m2.person_id) AS person2_id,
+                m1.role AS person1_role,
+                m2.role AS person2_role,
+                m1.company_name AS contractor_name,
+                'Business/Contractor Connection' AS relationship_type
+            FROM normalized_matches m1
+            JOIN normalized_matches m2
+              ON m1.company_name = m2.company_name
+             AND m1.person_id < m2.person_id
         )
         SELECT 
-            p1.id as start_person,
-            p2.id as end_person,
+            cc.person1_id as start_person,
+            cc.person2_id as end_person,
             cc.contractor_name,
             cc.relationship_type,
             cc.person1_role,
@@ -472,12 +500,8 @@ async def generate_relationship_constellations_cache():
             p1.last_name as start_surname,
             p2.last_name as end_surname
         FROM contractor_connections cc
-        JOIN political_dynasties p1 
-            ON UPPER(TRIM(p1.first_name)) = UPPER(TRIM(cc.person1_first))
-            AND UPPER(TRIM(p1.last_name)) = UPPER(TRIM(cc.person1_last))
-        JOIN political_dynasties p2 
-            ON UPPER(TRIM(p2.first_name)) = UPPER(TRIM(cc.person2_first))
-            AND UPPER(TRIM(p2.last_name)) = UPPER(TRIM(cc.person2_last))
+        JOIN political_dynasties p1 ON p1.id = cc.person1_id
+        JOIN political_dynasties p2 ON p2.id = cc.person2_id
         WHERE p1.id != p2.id
         ORDER BY cc.contractor_name, p1.last_name, p2.last_name
         """
@@ -487,42 +511,30 @@ async def generate_relationship_constellations_cache():
         
         # Also add single-person contractors (contractors with only 1 person connected)
         # These won't show up in the JOIN above but should still appear in the constellation
+        print("🔗 Checking single-person contractor connections...", flush=True)
+        
         single_person_contractors_query = """
-        WITH contractor_person_counts AS (
-            SELECT 
-                company_name,
-                COUNT(DISTINCT dynasty_full_name) as person_count
-            FROM contractor_dynasty_matches
-            GROUP BY company_name
-        ),
-        single_person_contractors AS (
-            SELECT cpc.company_name
-            FROM contractor_person_counts cpc
-            WHERE cpc.person_count = 1
+        WITH company_person_counts AS (
+            SELECT
+                contractor_name,
+                COUNT(DISTINCT politician_id) AS person_count
+            FROM politician_contractors
+            GROUP BY contractor_name
         ),
         single_contractor_people AS (
-            SELECT DISTINCT
-                cdm.company_name,
-                cdm.dynasty_full_name,
-                cdm.dynasty_first_name,
-                cdm.dynasty_last_name,
-                cdm.role,
-                p.id as person_id
-            FROM contractor_dynasty_matches cdm
-            JOIN single_person_contractors spc ON cdm.company_name = spc.company_name
-            JOIN political_dynasties p ON (
-                (UPPER(TRIM(p.first_name)) = UPPER(TRIM(cdm.dynasty_first_name))
-                 AND UPPER(TRIM(p.last_name)) = UPPER(TRIM(cdm.dynasty_last_name)))
-                OR
-                (UPPER(p.first_name) LIKE '%' || UPPER(TRIM(cdm.dynasty_first_name)) || '%'
-                 AND UPPER(TRIM(p.last_name)) = UPPER(TRIM(cdm.dynasty_last_name)))
-            )
-            WHERE p.id IS NOT NULL
+            SELECT
+                pc.contractor_name,
+                pc.politician_id,
+                COALESCE(pc.notes, 'Listed in Rappler Politicontractors tracker') AS role
+            FROM politician_contractors pc
+            JOIN company_person_counts cpc
+              ON pc.contractor_name = cpc.contractor_name
+            WHERE cpc.person_count = 1
         )
         SELECT 
-            scp.person_id as start_person,
-            scp.person_id as end_person,
-            scp.company_name as contractor_name,
+            scp.politician_id as start_person,
+            scp.politician_id as end_person,
+            scp.contractor_name as contractor_name,
             'Business/Contractor Connection' as relationship_type,
             scp.role as person1_role,
             scp.role as person2_role,
@@ -535,13 +547,7 @@ async def generate_relationship_constellations_cache():
             p.last_name as start_surname,
             p.last_name as end_surname
         FROM single_contractor_people scp
-        JOIN political_dynasties p ON p.id = scp.person_id
-        WHERE NOT EXISTS (
-            -- Don't include if already in contractor_chains (has multiple people)
-            SELECT 1 FROM contractor_dynasty_matches cdm2
-            WHERE cdm2.company_name = scp.company_name
-              AND cdm2.dynasty_full_name != scp.dynasty_full_name
-        )
+        JOIN political_dynasties p ON p.id = scp.politician_id
         """
         
         single_person_chains = await conn.fetch(single_person_contractors_query)
@@ -757,13 +763,12 @@ async def generate_relationship_constellations_cache():
                 'relationship_type': sp['relationship_type']
             })
         
-        # Add single-person contractor chains
         # Contractors are nodes themselves, so Person → Contractor is a 2-node chain
         for sc in single_person_chains:
             contractor_relationships.append({
                 'start_person': sc['start_person'],
-                'end_person': sc['start_person'],  # Same person, but contractor is the node
-                'chain_length': 2,  # Person → Contractor (contractor is a node)
+                'end_person': sc['start_person'],
+                'chain_length': 2,
                 'start_surname': sc['start_surname'],
                 'end_surname': sc['end_surname'],
                 'start_first_name': sc['start_first_name'],
@@ -774,7 +779,7 @@ async def generate_relationship_constellations_cache():
                 'end_last_name': sc['end_last_name'],
                 'end_position': sc['end_position'],
                 'end_company_role': sc.get('person2_role'),
-                'path_string': f"{sc['start_person']}",  # Person ID, contractor node added in formatting
+                'path_string': f"{sc['start_person']}",
                 'relationship_string': f"Connected via {sc['contractor_name']}",
                 'contractor_name': sc['contractor_name'],
                 'relationship_type': sc['relationship_type']
@@ -784,6 +789,8 @@ async def generate_relationship_constellations_cache():
         # (Party-list extensions during tree traversal are already included in chains)
         all_chains = list(chains) + contractor_relationships + party_list_standalone
         
+        people_cache = await fetch_people(conn)
+
         # Format the data
         formatted_chains = []
         for chain in all_chains:
@@ -798,13 +805,7 @@ async def generate_relationship_constellations_cache():
             # Get person details for each person in the chain
             path_details = []
             for i, person_id in enumerate(person_ids):
-                # Get person details from database
-                person_query = """
-                SELECT id, first_name, middle_name, last_name, suffix, canonical_name, position, region, province, municipality_city
-                FROM political_dynasties 
-                WHERE id = $1
-                """
-                person = await conn.fetchrow(person_query, person_id)
+                person = people_cache.get(person_id)
                 
                 if person:
                     # Person found - add to path
@@ -830,7 +831,7 @@ async def generate_relationship_constellations_cache():
                     location = ', '.join(location_parts) if location_parts else 'Location unknown'
                     
                     path_details.append({
-                        "id": person['id'],
+                        "id": person_id,
                         "first_name": person['first_name'],
                         "middle_name": person.get('middle_name'),
                         "last_name": person['last_name'],
