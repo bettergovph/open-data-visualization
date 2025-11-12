@@ -1,5 +1,5 @@
 import uvicorn
-from fastapi import FastAPI, HTTPException, Query
+from fastapi import FastAPI, HTTPException, Query, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from fastapi.staticfiles import StaticFiles
@@ -12,7 +12,7 @@ import time
 from functools import lru_cache
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Any, Dict, Optional, Set, List
+from typing import Any, Dict, Optional, Set, List, Tuple
 from dotenv import load_dotenv
 from collections import defaultdict
 from urllib.parse import urlparse
@@ -53,6 +53,56 @@ from infrawatch_postgres_client import get_infrawatch_connection
 from flood_db_client import search_flood_projects
 
 DATA_ROOT = Path(__file__).resolve().parent / "static" / "data"
+
+_PHILGEPS_COORD_COLUMNS: Optional[Tuple[str, str]] = None
+_PHILGEPS_COORD_CACHE: Dict[str, Optional[Dict[str, Any]]] = {}
+_INFRAWATCH_COORD_CACHE: Dict[str, Optional[Dict[str, Any]]] = {}
+_INFRAWATCH_TABLE_META: Optional[Dict[str, Any]] = None
+_INFRAWATCH_LAT_KEYS = [
+    "Latitude",
+    "LATITUDE",
+    "latitude",
+    "Lat",
+    "Lat (decimal degrees)",
+    "Latitude (decimal)",
+    "Latitude (DD)",
+]
+_INFRAWATCH_LNG_KEYS = [
+    "Longitude",
+    "LONGITUDE",
+    "longitude",
+    "Lon",
+    "Long",
+    "Lng",
+    "Long (decimal degrees)",
+    "Longitude (decimal)",
+    "Longitude (DD)",
+]
+_INFRAWATCH_COORDINATE_FALLBACK_KEYS = [
+    "Coordinates",
+    "Coordinate",
+    "GPS Coordinates",
+    "GPS",
+]
+_INFRAWATCH_TITLE_KEYS = [
+    "Project Name",
+    "Project",
+    "Project Title",
+    "Project Description",
+    "Contract Details",
+    "Project Location",
+]
+_INFRAWATCH_PROVINCE_KEYS = [
+    "Province",
+    "Province/Location",
+    "Location",
+]
+_INFRAWATCH_CITY_KEYS = [
+    "City/Municipality",
+    "City / Municipality",
+    "Municipality",
+    "City",
+]
 
 
 def _normalize_cache_name(name: str) -> str:
@@ -1737,7 +1787,8 @@ from dime_client import (
     get_dime_barangay_aggregates,
     get_dime_barangay_aggregates_by_count,
     get_dime_projects,
-    get_dime_suggestions
+    get_dime_suggestions,
+    find_dime_project_coordinates
 )
 
 @app.get("/api/dime/statistics")
@@ -5266,7 +5317,13 @@ async def top_provinces_api(all: bool = Query(default=False, description="Return
                     province_stats.append({
                         'name': province_name,
                         'count': total_projects,
-                        'total_cost': total_cost
+                        'total_cost': total_cost,
+                        'sources': {
+                            'ssp': summary.get('ssp', 0),
+                            'dime': summary.get('dime', 0),
+                            'philgeps': summary.get('philgeps', 0),
+                            'microsite': summary.get('microsite', 0)
+                        }
                     })
             except Exception as e:
                 print(f"Error reading {province_dir}: {e}")
@@ -5789,6 +5846,594 @@ async def fetch_flood_flag_metadata(global_ids: List[str]) -> Dict[str, Dict[str
     finally:
         if conn:
             await conn.close()
+
+@app.post("/api/province-projects/coordinates")
+async def province_project_coordinates_api(request: Request):
+    try:
+        payload = await request.json()
+    except Exception as exc:
+        raise HTTPException(status_code=400, detail=f"Invalid JSON payload: {exc}") from exc
+
+    province = payload.get("province")
+    project_inputs = payload.get("projects") or []
+    coordinates: List[Dict[str, Any]] = []
+
+    for project in project_inputs:
+        project_name = project.get("project_name") or ""
+        if not project_name:
+            continue
+
+        primary_source = (project.get("source") or "").lower()
+        candidate_sources: List[str] = []
+        if primary_source:
+            candidate_sources.append(primary_source)
+
+        for src in project.get("sources") or []:
+            lower = (src or "").lower()
+            if lower and lower not in candidate_sources:
+                candidate_sources.append(lower)
+
+        province_hint = project.get("province") or province
+        city_hint = project.get("municipality") or project.get("city")
+
+        found = False
+        for candidate in candidate_sources:
+            try:
+                if candidate == "ssp":
+                    matches, _ = await search_flood_projects(
+                        query=project_name,
+                        province=province_hint,
+                        limit=1,
+                        offset=0,
+                    )
+                    if matches:
+                        match = matches[0]
+                        lat = match.get("Latitude")
+                        lng = match.get("Longitude")
+                        try:
+                            lat_val = float(lat)
+                            lng_val = float(lng)
+                        except (TypeError, ValueError):
+                            lat_val = lng_val = None
+                        if lat_val is not None and lng_val is not None:
+                            coordinates.append({
+                                "project_name": project_name,
+                                "source": candidate,
+                                "original_source": primary_source,
+                                "latitude": lat_val,
+                                "longitude": lng_val,
+                                "status": match.get("Status") or match.get("status"),
+                                "matched_source": "ssp",
+                                "flags": match.get("flags")
+                            })
+                            found = True
+                            break
+                elif candidate == "dime":
+                    dime_match = await find_dime_project_coordinates(project_name, province_hint, city_hint)
+                    if dime_match:
+                        coordinates.append({
+                            "project_name": project_name,
+                            "source": candidate,
+                            "original_source": primary_source,
+                            "latitude": dime_match["latitude"],
+                            "longitude": dime_match["longitude"],
+                            "status": dime_match.get("status"),
+                            "matched_source": "dime"
+                        })
+                        found = True
+                        break
+                elif candidate == "philgeps":
+                    province_hint = project.get("province") or province
+                    city_hint = project.get("municipality") or project.get("city")
+                    philgeps_match = await find_philgeps_project_coordinates(
+                        project_name,
+                        province_hint=province_hint,
+                        city_hint=city_hint,
+                        amount_hint=project.get("amount")
+                    )
+                    if philgeps_match and philgeps_match.get("latitude") is not None and philgeps_match.get("longitude") is not None:
+                        coordinates.append({
+                            "project_name": project_name,
+                            "source": candidate,
+                            "original_source": primary_source,
+                            "latitude": float(philgeps_match["latitude"]),
+                            "longitude": float(philgeps_match["longitude"]),
+                            "status": None,
+                            "matched_source": "philgeps",
+                            "metadata": {k: philgeps_match.get(k) for k in ("reference_id", "contract_no", "award_title", "area_of_delivery") if philgeps_match.get(k) is not None}
+                        })
+                        found = True
+                        break
+                elif candidate in ("microsite", "infrawatch"):
+                    province_hint = project.get("province") or province
+                    city_hint = project.get("municipality") or project.get("city")
+                    infrawatch_match = await find_infrawatch_project_coordinates(
+                        project_name,
+                        province_hint=province_hint,
+                        city_hint=city_hint,
+                        amount_hint=project.get("amount")
+                    )
+                    if infrawatch_match and infrawatch_match.get("latitude") is not None and infrawatch_match.get("longitude") is not None:
+                        coordinates.append({
+                            "project_name": project_name,
+                            "source": candidate,
+                            "original_source": primary_source,
+                            "latitude": float(infrawatch_match["latitude"]),
+                            "longitude": float(infrawatch_match["longitude"]),
+                            "status": None,
+                            "matched_source": "microsite",
+                            "metadata": infrawatch_match.get("raw_record")
+                        })
+                        found = True
+                        break
+                # PhilGEPS and Microsite coordinate lookups are not yet implemented
+            except Exception as exc:
+                print(f"⚠️ Coordinate lookup failed for {project_name} ({candidate}): {exc}")
+
+        if found:
+            continue
+
+    return JSONResponse({
+        "success": True,
+        "province": province,
+        "coordinates": coordinates
+    })
+
+def _coerce_float(value: Any) -> Optional[float]:
+    if value is None:
+        return None
+    if isinstance(value, (int, float)):
+        if value != value:  # NaN check
+            return None
+        return float(value)
+    text = str(value).strip()
+    if not text:
+        return None
+    match = re.findall(r"-?\d+(?:\.\d+)?", text.replace(",", " "))
+    if not match:
+        return None
+    try:
+        return float(match[0])
+    except ValueError:
+        return None
+
+
+def _amounts_close(amount_hint: Optional[Any], candidate: Optional[Any]) -> bool:
+    hint = _coerce_float(amount_hint)
+    candidate_val = _coerce_float(candidate)
+    if hint is None or candidate_val is None:
+        return True
+    tolerance = max(500000.0, hint * 0.1)
+    return abs(hint - candidate_val) <= tolerance
+
+
+def _coordinate_cache_key(*parts: Optional[str]) -> str:
+    normalized = [part.lower().strip() for part in parts if isinstance(part, str) and part.strip()]
+    return "|".join(normalized)
+
+
+def _extract_coordinate_pair_from_record(record: Dict[str, Any]) -> Optional[Tuple[float, float]]:
+    for lat_key in _INFRAWATCH_LAT_KEYS:
+        lat = _coerce_float(record.get(lat_key))
+        if lat is None:
+            continue
+        for lng_key in _INFRAWATCH_LNG_KEYS:
+            lng = _coerce_float(record.get(lng_key))
+            if lng is not None:
+                return lat, lng
+    for coord_key in _INFRAWATCH_COORDINATE_FALLBACK_KEYS:
+        raw = record.get(coord_key)
+        if not raw:
+            continue
+        text = str(raw)
+        numeric = re.findall(r"-?\d+(?:\.\d+)?", text.replace(",", " "))
+        if len(numeric) >= 2:
+            lat = _coerce_float(numeric[0])
+            lng = _coerce_float(numeric[1])
+            if lat is not None and lng is not None:
+                return lat, lng
+    return None
+
+async def _get_philgeps_coordinate_columns(conn: asyncpg.Connection) -> Optional[Tuple[str, str]]:
+    global _PHILGEPS_COORD_COLUMNS
+    if _PHILGEPS_COORD_COLUMNS:
+        return _PHILGEPS_COORD_COLUMNS
+    try:
+        rows = await conn.fetch(
+            """
+            SELECT column_name
+            FROM information_schema.columns
+            WHERE table_schema = 'public'
+              AND table_name = 'contracts'
+            """
+        )
+    except Exception as exc:
+        print(f"⚠️ Failed to inspect PhilGEPS columns: {exc}")
+        _PHILGEPS_COORD_COLUMNS = None
+        return None
+
+    lat_column = None
+    lng_column = None
+    for row in rows:
+        column_name = row.get("column_name")
+        if not column_name:
+            continue
+        lowered = column_name.lower()
+        if lat_column is None and "lat" in lowered:
+            lat_column = column_name
+        elif lng_column is None and ("long" in lowered or "lng" in lowered):
+            lng_column = column_name
+        if lat_column and lng_column:
+            break
+
+    if lat_column and lng_column:
+        _PHILGEPS_COORD_COLUMNS = (lat_column, lng_column)
+    else:
+        _PHILGEPS_COORD_COLUMNS = None
+    return _PHILGEPS_COORD_COLUMNS
+
+
+async def find_philgeps_project_coordinates(
+    project_name: Optional[str],
+    province_hint: Optional[str] = None,
+    city_hint: Optional[str] = None,
+    amount_hint: Optional[Any] = None,
+) -> Optional[Dict[str, Any]]:
+    cache_key = _coordinate_cache_key(project_name, province_hint, city_hint)
+    if cache_key in _PHILGEPS_COORD_CACHE:
+        return _PHILGEPS_COORD_CACHE[cache_key]
+
+    if not project_name:
+        _PHILGEPS_COORD_CACHE[cache_key] = None
+        return None
+
+    try:
+        conn = await asyncpg.connect(
+            host=os.getenv('POSTGRES_HOST', 'localhost'),
+            port=int(os.getenv('POSTGRES_PORT', 5432)),
+            user=os.getenv('POSTGRES_USER', 'budget_admin'),
+            password=os.getenv('POSTGRES_PASSWORD', ''),
+            database=os.getenv('POSTGRES_DB_PHILGEPS', 'philgeps')
+        )
+    except Exception as exc:
+        print(f"⚠️ PhilGEPS connection failed: {exc}")
+        _PHILGEPS_COORD_CACHE[cache_key] = None
+        return None
+
+    try:
+        columns = await _get_philgeps_coordinate_columns(conn)
+        if not columns:
+            _PHILGEPS_COORD_CACHE[cache_key] = None
+            return None
+        lat_column, lng_column = columns
+        conditions = ["award_title ILIKE $1"]
+        params: List[Any] = [f"%{project_name}%"]
+        param_index = 2
+
+        if city_hint:
+            conditions.append(f"(area_of_delivery ILIKE ${param_index} OR organization_name ILIKE ${param_index})")
+            params.append(f"%{city_hint}%")
+            param_index += 1
+        if province_hint:
+            conditions.append(f"(area_of_delivery ILIKE ${param_index} OR organization_name ILIKE ${param_index})")
+            params.append(f"%{province_hint}%")
+            param_index += 1
+
+        where_clause = " AND ".join(conditions)
+        sql = f"""
+            SELECT "{lat_column}" AS lat_value,
+                   "{lng_column}" AS lng_value,
+                   award_title,
+                   area_of_delivery,
+                   contract_amount,
+                   reference_id,
+                   contract_no
+            FROM contracts
+            WHERE {where_clause}
+            ORDER BY contract_amount DESC NULLS LAST
+            LIMIT 40
+        """
+        try:
+            rows = await conn.fetch(sql, *params)
+        except Exception as exc:
+            print(f"⚠️ PhilGEPS coordinate query failed: {exc}")
+            _PHILGEPS_COORD_CACHE[cache_key] = None
+            return None
+
+        for row in rows:
+            lat = _coerce_float(row.get("lat_value"))
+            lng = _coerce_float(row.get("lng_value"))
+            if lat is None or lng is None:
+                continue
+            if not _amounts_close(amount_hint, row.get("contract_amount")):
+                continue
+            result = {
+                "latitude": lat,
+                "longitude": lng,
+                "matched_source": "philgeps",
+                "reference_id": row.get("reference_id"),
+                "contract_no": row.get("contract_no"),
+                "award_title": row.get("award_title"),
+                "area_of_delivery": row.get("area_of_delivery")
+            }
+            _PHILGEPS_COORD_CACHE[cache_key] = result
+            return result
+
+        _PHILGEPS_COORD_CACHE[cache_key] = None
+        return None
+    finally:
+        await conn.close()
+
+
+async def find_infrawatch_project_coordinates(
+    project_name: Optional[str],
+    province_hint: Optional[str] = None,
+    city_hint: Optional[str] = None,
+    amount_hint: Optional[Any] = None,
+) -> Optional[Dict[str, Any]]:
+    cache_key = _coordinate_cache_key("infrawatch", project_name, province_hint, city_hint)
+    if cache_key in _INFRAWATCH_COORD_CACHE:
+        return _INFRAWATCH_COORD_CACHE[cache_key]
+
+    if not project_name:
+        _INFRAWATCH_COORD_CACHE[cache_key] = None
+        return None
+
+    conn = await get_infrawatch_connection()
+    if not conn:
+        _INFRAWATCH_COORD_CACHE[cache_key] = None
+        return None
+
+    try:
+        meta = await _get_infrawatch_table_meta(conn)
+        if not meta or meta.get("table") is None:
+            _INFRAWATCH_COORD_CACHE[cache_key] = None
+            return None
+
+        if meta.get("mode") == "structured":
+            params: List[Any] = []
+            conditions: List[str] = []
+            param_index = 1
+
+            title_cols = meta.get("title_cols") or []
+            if title_cols:
+                title_predicates = [f"\"{col}\" ILIKE ${param_index}" for col in title_cols]
+                params.append(f"%{project_name}%")
+                conditions.append("(" + " OR ".join(title_predicates) + ")")
+                param_index += 1
+            else:
+                conditions.append("TRUE")
+
+            if city_hint and meta.get("city_cols"):
+                city_predicates = [f"\"{col}\" ILIKE ${param_index}" for col in meta.get("city_cols", [])]
+                params.append(f"%{city_hint}%")
+                conditions.append("(" + " OR ".join(city_predicates) + ")")
+                param_index += 1
+
+            if province_hint and meta.get("province_cols"):
+                province_predicates = [f"\"{col}\" ILIKE ${param_index}" for col in meta.get("province_cols", [])]
+                params.append(f"%{province_hint}%")
+                conditions.append("(" + " OR ".join(province_predicates) + ")")
+                param_index += 1
+
+            if not conditions:
+                conditions.append("TRUE")
+
+            amount_cols = meta.get("amount_cols") or []
+            amount_column = amount_cols[0] if amount_cols else None
+
+            select_parts: List[str] = [
+                f"\"{meta['lat_col']}\" AS lat_value",
+                f"\"{meta['lng_col']}\" AS lng_value",
+            ]
+            if amount_column:
+                select_parts.append(f"\"{amount_column}\" AS amount_value")
+            metadata_cols: List[str] = []
+            for col in meta.get("metadata_cols", []):
+                if col in (meta['lat_col'], meta['lng_col'], amount_column):
+                    continue
+                select_parts.append(f"\"{col}\"")
+                metadata_cols.append(col)
+
+            order_clause = ""
+            if amount_column:
+                order_clause = f" ORDER BY \"{amount_column}\" DESC NULLS LAST"
+
+            sql = f"""
+                SELECT {", ".join(select_parts)}
+                FROM {meta['table']}
+                WHERE {' AND '.join(conditions)}
+                {order_clause}
+                LIMIT 60
+            """
+            try:
+                rows = await conn.fetch(sql, *params)
+            except Exception as exc:
+                print(f"⚠️ Infrawatch structured coordinate query failed: {exc}")
+                rows = []
+
+            for row in rows:
+                lat = _coerce_float(row.get("lat_value"))
+                lng = _coerce_float(row.get("lng_value"))
+                if lat is None or lng is None:
+                    continue
+                if amount_column and not _amounts_close(amount_hint, row.get("amount_value")):
+                    continue
+                raw_record = {col: row.get(col) for col in metadata_cols if col in row.keys()}
+                for identifier in meta.get("id_cols", []):
+                    if identifier not in raw_record and identifier in row.keys():
+                        raw_record[identifier] = row.get(identifier)
+                result = {
+                    "latitude": lat,
+                    "longitude": lng,
+                    "matched_source": "microsite",
+                    "record_id": raw_record.get("contract_id") or raw_record.get("project_id"),
+                    "raw_record": raw_record,
+                }
+                _INFRAWATCH_COORD_CACHE[cache_key] = result
+                return result
+
+        # Fallback to JSON rows model when structured lookup misses
+        params = []
+        conditions = []
+        param_index = 1
+
+        title_predicates = []
+        for key in _INFRAWATCH_TITLE_KEYS:
+            title_predicates.append(f"data->>'{key}' ILIKE ${param_index}")
+        params.append(f"%{project_name}%")
+        conditions.append("(" + " OR ".join(title_predicates) + ")")
+        param_index += 1
+
+        if city_hint:
+            city_predicates = [f"data->>'{key}' ILIKE ${param_index}" for key in _INFRAWATCH_CITY_KEYS]
+            params.append(f"%{city_hint}%")
+            conditions.append("(" + " OR ".join(city_predicates) + ")")
+            param_index += 1
+
+        if province_hint:
+            province_predicates = [f"data->>'{key}' ILIKE ${param_index}" for key in _INFRAWATCH_PROVINCE_KEYS]
+            params.append(f"%{province_hint}%")
+            conditions.append("(" + " OR ".join(province_predicates) + ")")
+            param_index += 1
+
+        table_name = meta.get("table", "infrawatch_projects_rows")
+        where_clause = " AND ".join(conditions)
+        sql = f"""
+            SELECT data
+            FROM {table_name}
+            WHERE {where_clause}
+            LIMIT 60
+        """
+        try:
+            rows = await conn.fetch(sql, *params)
+        except Exception as exc:
+            print(f"⚠️ Infrawatch coordinate query failed: {exc}")
+            _INFRAWATCH_COORD_CACHE[cache_key] = None
+            return None
+
+        for row in rows:
+            raw_record = row.get("data")
+            if isinstance(raw_record, str):
+                try:
+                    record = json.loads(raw_record)
+                except json.JSONDecodeError:
+                    continue
+            else:
+                record = raw_record
+            if not isinstance(record, dict):
+                continue
+
+            coords = _extract_coordinate_pair_from_record(record)
+            if not coords:
+                continue
+            lat, lng = coords
+            if province_hint:
+                province_text = " ".join(str(record.get(key, "")) for key in _INFRAWATCH_PROVINCE_KEYS)
+                if province_hint.lower() not in province_text.lower():
+                    continue
+            if city_hint:
+                city_text = " ".join(str(record.get(key, "")) for key in _INFRAWATCH_CITY_KEYS)
+                if city_hint.lower() not in city_text.lower():
+                    continue
+            if not _amounts_close(amount_hint, record.get("Contract Amount")):
+                continue
+            result = {
+                "latitude": lat,
+                "longitude": lng,
+                "matched_source": "microsite",
+                "record_id": record.get("Contract ID") or record.get("Reference Number"),
+                "raw_record": {k: record.get(k) for k in ("Project Name", "Project", "Project Description", "City/Municipality", "Municipality", "Province")}
+            }
+            _INFRAWATCH_COORD_CACHE[cache_key] = result
+            return result
+
+        _INFRAWATCH_COORD_CACHE[cache_key] = None
+        return None
+    finally:
+        await conn.close()
+
+async def _get_infrawatch_table_meta(conn: asyncpg.Connection) -> Dict[str, Any]:
+    global _INFRAWATCH_TABLE_META
+    if _INFRAWATCH_TABLE_META is not None:
+        return _INFRAWATCH_TABLE_META
+
+    async def inspect_table(table_name: str) -> Optional[List[str]]:
+        exists = await conn.fetchval("SELECT to_regclass($1)", f"public.{table_name}")
+        if not exists:
+            return None
+        rows = await conn.fetch(
+            """
+            SELECT column_name
+            FROM information_schema.columns
+            WHERE table_schema = 'public'
+              AND table_name = $1
+            """,
+            table_name,
+        )
+        columns = [row.get("column_name") for row in rows if row.get("column_name")]
+        return columns or None
+
+    structured_columns = await inspect_table("infrawatch_projects")
+    if structured_columns:
+        lowered = {col: col.lower() for col in structured_columns}
+
+        def find_column(priority_keywords: List[str]) -> Optional[str]:
+            for keywords in priority_keywords:
+                if isinstance(keywords, str):
+                    keywords = [keywords]
+                for col, lower in lowered.items():
+                    if all(keyword in lower for keyword in keywords):
+                        return col
+            return None
+
+        def collect_columns(keywords: List[str]) -> List[str]:
+            result: List[str] = []
+            seen: Set[str] = set()
+            for col, lower in lowered.items():
+                if any(keyword in lower for keyword in keywords):
+                    if col not in seen:
+                        seen.add(col)
+                        result.append(col)
+            return result
+
+        lat_col = find_column([["lat"]])
+        lng_col = find_column([["long"], ["lng"]])
+
+        if lat_col and lng_col:
+            title_cols = collect_columns(["project_name", "project title", "project", "name", "description"])
+            if not title_cols and "title" in lowered.values():
+                title_cols = collect_columns(["title"])
+            city_cols = collect_columns(["municipality", "city"])
+            province_cols = collect_columns(["province"])
+            amount_cols = collect_columns(["contract_amount", "project_cost", "amount", "cost", "value"]) or []
+            id_cols = collect_columns(["contract_id", "project_id", "id"]) or []
+            metadata_cols = list(dict.fromkeys(title_cols + city_cols + province_cols + id_cols))
+
+            _INFRAWATCH_TABLE_META = {
+                "mode": "structured",
+                "table": "infrawatch_projects",
+                "lat_col": lat_col,
+                "lng_col": lng_col,
+                "title_cols": title_cols,
+                "city_cols": city_cols,
+                "province_cols": province_cols,
+                "amount_cols": amount_cols,
+                "metadata_cols": metadata_cols,
+                "id_cols": id_cols,
+            }
+            return _INFRAWATCH_TABLE_META
+
+    rows_columns = await inspect_table("infrawatch_projects_rows")
+    if rows_columns:
+        _INFRAWATCH_TABLE_META = {
+            "mode": "json",
+            "table": "infrawatch_projects_rows",
+        }
+        return _INFRAWATCH_TABLE_META
+
+    _INFRAWATCH_TABLE_META = {"mode": "none", "table": None}
+    return _INFRAWATCH_TABLE_META
 
 if __name__ == "__main__":
     uvicorn.run(app, host="127.0.0.1", port=8000)

@@ -46,6 +46,173 @@
             margin: 13px 19px !important;
             overflow: visible !important;
         }
+
+        .integrated-marker-wrapper {
+            pointer-events: auto;
+        }
+
+        .integrated-marker {
+            width: 28px;
+            height: 28px;
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            grid-template-rows: repeat(2, 1fr);
+            gap: 2px;
+            padding: 2px;
+            border-radius: 10px;
+            background: rgba(255, 255, 255, 0.92);
+            border: 1px solid rgba(15, 23, 42, 0.18);
+            box-shadow: 0 6px 18px rgba(15, 23, 42, 0.18);
+        }
+
+        .integrated-marker:hover {
+            box-shadow: 0 10px 22px rgba(15, 23, 42, 0.24);
+        }
+
+        .project-marker-wrapper {
+            pointer-events: auto;
+        }
+
+        .project-marker {
+            position: relative;
+            width: 18px;
+            height: 18px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.6rem;
+            font-weight: 700;
+            color: #fff;
+            background: #94a3b8;
+            border-radius: 4px;
+            border: 1px solid rgba(15, 23, 42, 0.25);
+            transform: scale(var(--scale, 1));
+            transition: transform 0.2s ease, opacity 0.2s ease;
+            pointer-events: none;
+        }
+
+        .project-marker.flag-red::after,
+        .project-marker.flag-green::after {
+            content: '';
+            position: absolute;
+            top: -6px;
+            right: -3px;
+            width: 10px;
+            height: 7px;
+            clip-path: polygon(0 0, 100% 25%, 100% 75%, 0 100%);
+            border-radius: 1px;
+            box-shadow: 0 0 2px rgba(15, 23, 42, 0.25);
+        }
+
+        .project-marker.flag-red::before,
+        .project-marker.flag-green::before {
+            content: '';
+            position: absolute;
+            top: -6px;
+            right: -6px;
+            width: 2px;
+            height: 12px;
+            background: #e2e8f0;
+            border-radius: 1px;
+            box-shadow: 0 0 1px rgba(15, 23, 42, 0.25);
+        }
+
+        .project-marker.flag-red::after {
+            background: #ef4444;
+            border: 1px solid #b91c1c;
+        }
+
+        .project-marker.flag-green::after {
+            background: #16a34a;
+            border: 1px solid #166534;
+        }
+
+        .project-marker.unknown {
+            opacity: 0.5;
+            box-shadow: 0 0 0 2px #f87171;
+        }
+
+        .project-marker.empty {
+            opacity: 0.25;
+        }
+
+        .project-marker.circle {
+            background: var(--fill-color, #6b7280);
+            border-radius: 999px;
+            box-shadow: 0 0 0 2px var(--outline-color, #374151);
+        }
+
+        .project-marker.square {
+            background: var(--fill-color, #6366f1);
+            border-radius: 3px;
+            box-shadow: 0 0 0 2px var(--outline-color, #4338ca);
+        }
+
+        .project-marker.hex {
+            background: var(--fill-color, #f59e0b);
+            clip-path: polygon(25% 0%, 75% 0%, 100% 50%, 75% 100%, 25% 100%, 0% 50%);
+            box-shadow: 0 0 0 2px var(--outline-color, #b45309);
+        }
+
+        .project-marker.star {
+            background: var(--fill-color, #f43f5e);
+            clip-path: polygon(50% 0%, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%);
+            box-shadow: 0 0 0 2px var(--outline-color, #be123c);
+        }
+
+        .integrated-shape {
+            position: relative;
+            width: 12px;
+            height: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.6rem;
+            font-weight: 700;
+            color: #fff;
+            background: #94a3b8;
+            border-radius: 4px;
+            border: 1px solid rgba(15, 23, 42, 0.25);
+            transform: scale(var(--scale, 1));
+            transition: transform 0.2s ease, opacity 0.2s ease;
+            pointer-events: none;
+        }
+
+        .integrated-shape.empty {
+            opacity: 0.25;
+        }
+
+        .integrated-shape:not(.empty) {
+            pointer-events: auto;
+        }
+
+        .integrated-shape.circle {
+            border-radius: 999px;
+            background: #6b7280;
+            border-color: #374151;
+        }
+
+        .integrated-shape.square {
+            border-radius: 4px;
+            background: #6366f1;
+            border-color: #4338ca;
+        }
+
+        .integrated-shape.hex {
+            background: #f59e0b;
+            border-color: #b45309;
+            clip-path: polygon(25% 0%, 75% 0%, 100% 50%, 75% 100%, 25% 100%, 0% 50%);
+        }
+
+        .integrated-shape.star {
+            background: #f43f5e;
+            border-color: #be123c;
+            clip-path: polygon(50% 0%, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%);
+        }
+
+        .integrated-count-label {
+            pointer-events: none;
+        }
     </style>
 
     <!-- BetterGovPH Metadata -->
@@ -128,79 +295,44 @@
             <!-- Map Instructions -->
             <div class="bg-blue-50 p-4 rounded-lg mb-4 border-l-4 border-blue-500">
                 <div class="text-sm text-blue-800 font-medium">
-                    💡 <strong>Tip:</strong> Click on a region directly on the map to explore projects in that specific areas.
+                    💡 <strong>Tip:</strong> Provincial boundaries are now highlighted. Click a province to zoom in, then use the province card to load its detailed projects.
                 </div>
             </div>
 
-            <!-- DIME Status Legend -->
+            <!-- Legend -->
             <div class="bg-gray-50 p-4 rounded-lg mb-4 border border-gray-200">
-                <div class="text-sm font-medium text-gray-700 mb-2">📊 Map Legend (with PhilGEPS Contracts & SEC Registration)</div>
-                
-                <!-- Shape Legend -->
-                <div class="mb-3 pb-3 border-b border-gray-300">
-                    <div class="text-xs font-semibold text-gray-600 mb-2">Project Source:</div>
-                    <div class="grid grid-cols-2 gap-2 text-xs">
-                        <div class="flex items-center gap-2">
-                            <div class="w-4 h-4 rounded-full bg-gray-400 border-2 border-gray-600"></div>
-                            <span><strong>Circles:</strong> Flood Control projects</span>
+                <div class="text-sm font-semibold text-gray-700 mb-3">📊 Map Legend</div>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs text-slate-600">
+                    <div class="space-y-2">
+                        <div class="font-semibold text-slate-500 uppercase tracking-wide">Project Source</div>
+                        <div class="flex items-center gap-2"><div class="w-4 h-4 rounded-full bg-gray-400 border-2 border-gray-600"></div><span>Circles · SSP Flood Control</span></div>
+                        <div class="flex items-center gap-2"><div class="w-4 h-4 bg-indigo-500 border-2 border-indigo-700"></div><span>Squares · DIME Infrastructure</span></div>
+                        <div class="flex items-center gap-2"><div class="w-4 h-4 bg-amber-400 border-2 border-amber-600" style="clip-path: polygon(25% 0%, 75% 0%, 100% 50%, 75% 100%, 25% 100%, 0% 50%);"></div><span>Hexagons · PhilGEPS Procurement</span></div>
+                        <div class="flex items-center gap-2"><div class="w-4 h-4 bg-rose-400 border-2 border-rose-600" style="clip-path: polygon(50% 0%, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%);"></div><span>Stars · DPWH Microsite Field Data</span></div>
                         </div>
+                    <div class="space-y-2">
+                        <div class="font-semibold text-slate-500 uppercase tracking-wide">NCPAGkilatis Flags</div>
                         <div class="flex items-center gap-2">
-                            <div class="w-4 h-4 bg-indigo-500 border-2 border-indigo-700"></div>
-                            <span><strong>Squares:</strong> DIME-only projects</span>
+                            <span style="position:relative; display:inline-flex; align-items:flex-start; justify-content:center; width:14px; height:14px;">
+                                <span style="position:absolute; top:-2px; right:1px; width:8px; height:6px; clip-path: polygon(0 0, 100% 25%, 100% 75%, 0 100%); background:#ef4444; border:1px solid #b91c1c; border-radius:1px; box-shadow:0 0 2px rgba(15,23,42,0.25);"></span>
+                                <span style="position:absolute; bottom:-1px; left:4px; width:2px; height:9px; background:#e2e8f0; border-radius:1px; box-shadow:0 0 1px rgba(15,23,42,0.25);"></span>
+                            </span>
+                            <span>Red flag concern</span>
                         </div>
-                    </div>
-                </div>
-                
-                <!-- Status Colors -->
-                <div class="text-xs font-semibold text-gray-600 mb-2">DIME Status Colors:</div>
-                <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-2 text-xs">
                     <div class="flex items-center gap-2">
-                        <div class="w-3 h-3 rounded-full bg-[#28a745]"></div>
-                        <span>Completed</span>
+                            <span style="position:relative; display:inline-flex; align-items:flex-start; justify-content:center; width:14px; height:14px;">
+                                <span style="position:absolute; top:-2px; right:1px; width:8px; height:6px; clip-path: polygon(0 0, 100% 25%, 100% 75%, 0 100%); background:#16a34a; border:1px solid #166534; border-radius:1px; box-shadow:0 0 2px rgba(15,23,42,0.25);"></span>
+                                <span style="position:absolute; bottom:-1px; left:4px; width:2px; height:9px; background:#e2e8f0; border-radius:1px; box-shadow:0 0 1px rgba(15,23,42,0.25);"></span>
+                            </span>
+                            <span>Green flag assurance</span>
                     </div>
-                    <div class="flex items-center gap-2">
-                        <div class="w-3 h-3 rounded-full bg-[#ffc107]"></div>
-                        <span>Ongoing</span>
+                        <div class="text-[11px] text-slate-500 mt-3">Marker size corresponds to project cost (larger marker → higher amount).</div>
                     </div>
-                    <div class="flex items-center gap-2">
-                        <div class="w-3 h-3 rounded-full bg-[#dc3545]"></div>
-                        <span>Incomplete</span>
-                    </div>
-                    <div class="flex items-center gap-2">
-                        <div class="w-3 h-3 rounded-full bg-[#6c757d]"></div>
-                        <span>Suspended</span>
-                    </div>
-                    <div class="flex items-center gap-2">
-                        <div class="w-3 h-3 rounded-full bg-[#17a2b8]"></div>
-                        <span>Not Yet Started</span>
-                    </div>
-                    <div class="flex items-center gap-2">
-                        <div class="w-3 h-3 rounded-full bg-black"></div>
-                        <span>No DIME Match</span>
-                    </div>
-                </div>
-                <div class="text-xs text-gray-500 mt-2">
-                    Size represents project cost (larger = higher cost)
                 </div>
             </div>
 
             <div id="map" class="w-full h-96 rounded-lg border border-gray-300 mb-6" style="height: 600px;"></div>
 
-            <!-- Show All Button (Advanced Feature) -->
-            <details class="border border-gray-200 rounded-lg p-4 bg-gray-50">
-                <summary class="cursor-pointer text-sm text-gray-600 font-medium">Advanced: Load all projects</summary>
-                <div class="mt-3 pt-3 border-t border-gray-200">
-                    <p class="text-sm text-red-600 mb-3">
-                        ⚠️ Warning: Loading all 9,855 Flood Control projects plus DIME-only squares may overwhelm your browser and cause it to freeze. Only use this on powerful devices.
-                    </p>
-                    <p class="text-sm text-gray-600 mb-3">
-                        💡 By default, the map loads 10 projects initially, then progressively loads more. DIME-only squares load 10 initially, then 10 per batch.
-                    </p>
-                    <button id="show-all-map" class="bg-gray-600 text-white px-4 py-2 rounded-lg text-sm hover:bg-gray-700 transition">
-                        Load All Projects
-                    </button>
-                </div>
-            </details>
         </div>
     </div>
 </section>
@@ -212,65 +344,318 @@ function toggleMobileMenu() {
 }
 </script>
 
+
 <script>
-// Copy of flood page map implementation - simplified for standalone map page
+// Integrated data map rendering (aggregated by province)
+const SOURCE_ORDER = ['ssp', 'dime', 'philgeps', 'microsite'];
+const SOURCE_META = {
+    ssp: { label: 'Flood Control (SSP)', shortLabel: 'SSP', className: 'circle' },
+    dime: { label: 'DIME Infrastructure', shortLabel: 'DIME', className: 'square' },
+    philgeps: { label: 'PhilGEPS Procurement', shortLabel: 'PhilGEPS', className: 'hex' },
+    microsite: { label: 'DPWH Microsite', shortLabel: 'Microsite', className: 'star' }
+};
+const PROVINCE_PAGE_SIZE = 25;
+const PROVINCE_KEY_OVERRIDES = {
+    'davaodeoro': 'compostelavalley',
+    'metropolitanmanila': 'metromanila',
+    'nationalcapitalregion': 'metromanila',
+    'ncrcityofmanilafirstdistrict': 'metromanila',
+    'ncrseconddistrict': 'metromanila',
+    'ncrthirddistrict': 'metromanila',
+    'ncrfourthdistrict': 'metromanila'
+};
 
-// Global map variables
+const PROVINCE_SLUG_OVERRIDES = {
+    'compostelavalley': 'davao-de-oro',
+    'metromanila': 'metropolitan-manila',
+    'manila': 'ncr-city-of-manila-first-district'
+};
+
+const PROVINCE_GEOJSON_FILES = [
+    'ph.cagayan-valley-region-ii.cagayan.any.any.geo.json',
+    'ph.cagayan-valley-region-ii.isabela.any.any.geo.json',
+    'ph.cagayan-valley-region-ii.nueva-vizcaya.any.any.geo.json',
+    'ph.cagayan-valley-region-ii.quirino.any.any.geo.json',
+    'ph.cagayan-valley-region-ii.batanes.any.any.geo.json',
+    'ph.central-luzon-region-iii.bulacan.any.any.geo.json',
+    'ph.central-luzon-region-iii.nueva-ecija.any.any.geo.json',
+    'ph.central-luzon-region-iii.pampanga.any.any.geo.json',
+    'ph.central-luzon-region-iii.tarlac.any.any.geo.json',
+    'ph.central-luzon-region-iii.zambales.any.any.geo.json',
+    'ph.central-luzon-region-iii.aurora.any.any.geo.json',
+    'ph.central-luzon-region-iii.bataan.any.any.geo.json',
+    'ph.calabarzon-region-iv-a.laguna.any.any.geo.json',
+    'ph.calabarzon-region-iv-a.cavite.any.any.geo.json',
+    'ph.calabarzon-region-iv-a.batangas.any.any.geo.json',
+    'ph.calabarzon-region-iv-a.quezon.any.any.geo.json',
+    'ph.calabarzon-region-iv-a.rizal.any.any.geo.json',
+    'ph.national-capital-region.metropolitan-manila.any.any.geo.json',
+    'ph.central-visayas-region-vii.cebu.any.any.geo.json',
+    'ph.central-visayas-region-vii.bohol.any.any.geo.json',
+    'ph.central-visayas-region-vii.negros-oriental.any.any.geo.json',
+    'ph.central-visayas-region-vii.siquijor.any.any.geo.json',
+    'ph.western-visayas-region-vi.iloilo.any.any.geo.json',
+    'ph.western-visayas-region-vi.negros-occidental.any.any.geo.json',
+    'ph.western-visayas-region-vi.capiz.any.any.geo.json',
+    'ph.western-visayas-region-vi.aklan.any.any.geo.json',
+    'ph.western-visayas-region-vi.antique.any.any.geo.json',
+    'ph.western-visayas-region-vi.guimaras.any.any.geo.json',
+    'ph.eastern-visayas-region-viii.leyte.any.any.geo.json',
+    'ph.eastern-visayas-region-viii.samar.any.any.geo.json',
+    'ph.eastern-visayas-region-viii.northern-samar.any.any.geo.json',
+    'ph.eastern-visayas-region-viii.eastern-samar.any.any.geo.json',
+    'ph.eastern-visayas-region-viii.southern-leyte.any.any.geo.json',
+    'ph.eastern-visayas-region-viii.biliran.any.any.geo.json',
+    'ph.bicol-region-region-v.camarines-sur.any.any.geo.json',
+    'ph.bicol-region-region-v.camarines-norte.any.any.geo.json',
+    'ph.bicol-region-region-v.albay.any.any.geo.json',
+    'ph.bicol-region-region-v.sorsogon.any.any.geo.json',
+    'ph.bicol-region-region-v.catanduanes.any.any.geo.json',
+    'ph.bicol-region-region-v.masbate.any.any.geo.json',
+    'ph.mimaropa-region-iv-b.oriental-mindoro.any.any.geo.json',
+    'ph.mimaropa-region-iv-b.occidental-mindoro.any.any.geo.json',
+    'ph.mimaropa-region-iv-b.marinduque.any.any.geo.json',
+    'ph.mimaropa-region-iv-b.romblon.any.any.geo.json',
+    'ph.mimaropa-region-iv-b.palawan.any.any.geo.json',
+    'ph.cordillera-administrative-region-car.abra.any.any.geo.json',
+    'ph.cordillera-administrative-region-car.benguet.any.any.geo.json',
+    'ph.cordillera-administrative-region-car.ifugao.any.any.geo.json',
+    'ph.cordillera-administrative-region-car.kalinga.any.any.geo.json',
+    'ph.cordillera-administrative-region-car.mountain-province.any.any.geo.json',
+    'ph.cordillera-administrative-region-car.apayao.any.any.geo.json',
+    'ph.ilocos-region-region-i.ilocos-norte.any.any.geo.json',
+    'ph.ilocos-region-region-i.ilocos-sur.any.any.geo.json',
+    'ph.ilocos-region-region-i.la-union.any.any.geo.json',
+    'ph.ilocos-region-region-i.pangasinan.any.any.geo.json',
+    'ph.northern-mindanao-region-x.bukidnon.any.any.geo.json',
+    'ph.northern-mindanao-region-x.camiguin.any.any.geo.json',
+    'ph.northern-mindanao-region-x.lanao-del-norte.any.any.geo.json',
+    'ph.northern-mindanao-region-x.misamis-occidental.any.any.geo.json',
+    'ph.northern-mindanao-region-x.misamis-oriental.any.any.geo.json',
+    'ph.davao-region-region-xi.davao-del-norte.any.any.geo.json',
+    'ph.davao-region-region-xi.davao-del-sur.any.any.geo.json',
+    'ph.davao-region-region-xi.davao-oriental.any.any.geo.json',
+    'ph.davao-region-region-xi.compostela-valley.any.any.geo.json',
+    'ph.soccsksargen-region-xii.north-cotabato.any.any.geo.json',
+    'ph.soccsksargen-region-xii.south-cotabato.any.any.geo.json',
+    'ph.soccsksargen-region-xii.sultan-kudarat.any.any.geo.json',
+    'ph.soccsksargen-region-xii.sarangani.any.any.geo.json',
+    'ph.caraga-region-xiii.agusan-del-norte.any.any.geo.json',
+    'ph.caraga-region-xiii.agusan-del-sur.any.any.geo.json',
+    'ph.caraga-region-xiii.surigao-del-norte.any.any.geo.json',
+    'ph.caraga-region-xiii.surigao-del-sur.any.any.geo.json',
+    'ph.caraga-region-xiii.dinagat-islands.any.any.geo.json',
+    'ph.zamboanga-peninsula-region-ix.zamboanga-del-norte.any.any.geo.json',
+    'ph.zamboanga-peninsula-region-ix.zamboanga-del-sur.any.any.geo.json',
+    'ph.zamboanga-peninsula-region-ix.zamboanga-sibugay.any.any.geo.json',
+    'ph.autonomous-region-of-muslim-mindanao-armm.basilan.any.any.geo.json',
+    'ph.autonomous-region-of-muslim-mindanao-armm.lanao-del-sur.any.any.geo.json',
+    'ph.autonomous-region-of-muslim-mindanao-armm.maguindanao.any.any.geo.json',
+    'ph.autonomous-region-of-muslim-mindanao-armm.sulu.any.any.geo.json',
+    'ph.autonomous-region-of-muslim-mindanao-armm.tawi-tawi.any.any.geo.json'
+];
+
+function toSlug(name) {
+    if (!name) return '';
+    const cleaned = name
+        .toLowerCase()
+        .replace(/province of\s+/g, '')
+        .replace(/city of\s+/g, '')
+        .replace(/&/g, 'and')
+        .replace(/[^a-z0-9\s-]/g, '')
+        .trim()
+        .replace(/\s+/g, '-');
+    return cleaned;
+}
+
+function getProvinceSlug(provinceName) {
+    const key = normalizeProvinceKey(provinceName);
+    if (PROVINCE_SLUG_OVERRIDES[key]) {
+        return PROVINCE_SLUG_OVERRIDES[key];
+    }
+    return toSlug(provinceName);
+}
+
 let mapInstance = null;
-let mapMarkers = [];
-let loadedProjects = [];
-let globalOffset = 0;
-let isLoadingMore = false;
-let progressiveInterval = null;
-let progressiveLoadingStarted = false;
-let progressiveLoadingCancelled = false;
-let regionProgressiveLoadingCancelled = false;
-let showAllMode = false;
-let initialLoadDone = false;
-let isLoading = false;
-let regionMapping = null;
-let regionGeoJSONLayer = null;
-let regionData = null;
-let currentZoomLevel = 6;
+let provinceGeoJSONLayer = null;
 
-// Map status display
+const provinceCenters = new Map();
+const provinceSummaryLookup = new Map();
+const provinceMarkers = new Map();
+const provinceLayers = new Map();
+const activeProjectMarkers = [];
+const hiddenProvinceMarkers = new Set();
+const pendingSummaryQueue = [];
+let summaryQueueBusy = false;
+let activeProvinceKey = null;
+const provinceGeometryCache = new Map();
+
+function hashString(value) {
+    let hash = 0;
+    if (!value) return hash;
+    for (let i = 0; i < value.length; i += 1) {
+        hash = ((hash << 5) - hash) + value.charCodeAt(i);
+        hash |= 0;
+    }
+    return Math.abs(hash);
+}
+
+function getProvinceGeometry(key) {
+    if (provinceGeometryCache.has(key)) {
+        return provinceGeometryCache.get(key);
+    }
+    const layer = provinceLayers.get(key);
+    if (!layer) {
+        return null;
+    }
+    const geo = layer.toGeoJSON?.();
+    const geometry = geo?.geometry || null;
+    if (geometry) {
+        provinceGeometryCache.set(key, geometry);
+    }
+    return geometry;
+}
+
+function ringContainsPoint(ring, lat, lng) {
+    if (!Array.isArray(ring) || ring.length < 3) {
+        return false;
+    }
+    let inside = false;
+    const y = lat;
+    const x = lng;
+    for (let i = 0, j = ring.length - 1; i < ring.length; j = i, i += 1) {
+        const xi = ring[i][0];
+        const yi = ring[i][1];
+        const xj = ring[j][0];
+        const yj = ring[j][1];
+        const intersects = ((yi > y) !== (yj > y)) && (x < ((xj - xi) * (y - yi)) / (yj - yi + 1e-12) + xi);
+        if (intersects) inside = !inside;
+    }
+    return inside;
+}
+
+function polygonContainsPoint(polygon, lat, lng) {
+    if (!Array.isArray(polygon) || !polygon.length) {
+        return false;
+    }
+    const outer = polygon[0];
+    if (!ringContainsPoint(outer, lat, lng)) {
+        return false;
+    }
+    for (let i = 1; i < polygon.length; i += 1) {
+        if (ringContainsPoint(polygon[i], lat, lng)) {
+            return false;
+        }
+    }
+    return true;
+}
+
+function geometryContainsPoint(geometry, lat, lng) {
+    if (!geometry) {
+        return true;
+    }
+    const { type, coordinates } = geometry;
+    if (!coordinates) {
+        return true;
+    }
+    if (type === 'Polygon') {
+        return polygonContainsPoint(coordinates, lat, lng);
+    }
+    if (type === 'MultiPolygon') {
+        for (let i = 0; i < coordinates.length; i += 1) {
+            if (polygonContainsPoint(coordinates[i], lat, lng)) {
+                return true;
+            }
+        }
+        return false;
+    }
+    return true;
+}
+
+function generateFallbackCoordinate(provinceKey, sourceKey, center, projectKey) {
+    if (!center) {
+        return null;
+    }
+    const layer = provinceLayers.get(provinceKey);
+    const bounds = layer?.getBounds?.();
+    const geometry = getProvinceGeometry(provinceKey);
+    const latSpan = bounds ? Math.max(Math.abs(bounds.getNorth() - bounds.getSouth()), 1e-3) : 0.6;
+    const lngSpan = bounds ? Math.max(Math.abs(bounds.getEast() - bounds.getWest()), 1e-3) : 0.6;
+    const span = Math.max(latSpan, lngSpan);
+    const sourceBias = (sourceKey === 'philgeps' || sourceKey === 'microsite') ? 0.35 : 0.18;
+    const baseRadius = span * sourceBias;
+    const seed = hashString(`${provinceKey}:${projectKey}:${sourceKey}`);
+    const maxAttempts = 24;
+
+    for (let attempt = 0; attempt < maxAttempts; attempt += 1) {
+        const angleDeg = (seed + attempt * 57) % 360;
+        const angleRad = angleDeg * (Math.PI / 180);
+        const variance = ((seed >> (attempt % 16)) & 0xff) / 255;
+        const radiusFactor = 0.25 + (variance * 0.75);
+        const shrink = Math.max(0.25, 1 - (attempt / maxAttempts) * 0.7);
+        const radius = baseRadius * radiusFactor * shrink;
+        const latOffset = Math.sin(angleRad) * radius;
+        const lngOffset = Math.cos(angleRad) * radius * Math.cos(center.lat * (Math.PI / 180));
+        const candidateLat = center.lat + latOffset;
+        const candidateLng = center.lng + lngOffset;
+        if (!geometry || geometryContainsPoint(geometry, candidateLat, candidateLng)) {
+            return { latitude: candidateLat, longitude: candidateLng };
+        }
+    }
+
+    return { latitude: center.lat, longitude: center.lng };
+}
+
 function updateMapStatus(message) {
     console.log(`🗺️ ${message}`);
 }
 
-// Update circle sizes when zoom changes
-function updateCircleSizes() {
-    mapMarkers.forEach((marker, index) => {
-        if (marker && loadedProjects[index]) {
-            const project = loadedProjects[index];
-            const cost = project.ContractCost;
-            const newRadius = calculateCircleRadius(cost, currentZoomLevel);
-
-            // Update the circle radius
-            marker.setRadius(newRadius);
+function clearActiveProjectMarkers(restoreProvinceMarkers = true) {
+    activeProjectMarkers.forEach(marker => {
+        try {
+            mapInstance?.removeLayer(marker);
+        } catch (error) {
+            console.warn('Failed to remove project marker:', error);
         }
     });
-    console.log(`🔍 Updated circle sizes for zoom level ${currentZoomLevel}`);
+    activeProjectMarkers.length = 0;
+    if (restoreProvinceMarkers) {
+        restoreHiddenProvinceMarkers();
+    }
 }
 
-// Initialize the map
-function initializeMap() {
+function normalizeProvinceKey(name) {
+    if (!name) return '';
+    const cleaned = name
+        .toLowerCase()
+        .replace(/province of\s+/g, '')
+        .replace(/city of\s+/g, '')
+        .replace(/\band\b/g, '&')
+        .replace(/[^a-z0-9]/g, '');
+    return PROVINCE_KEY_OVERRIDES[cleaned] || cleaned;
+}
+
+const defaultProvinceStyle = {
+    color: '#0F172A',
+    weight: 1.5,
+    opacity: 0.8,
+    fillColor: '#0F172A',
+    fillOpacity: 0.05
+};
+
+async function initializeMap() {
     const mapContainer = document.getElementById('map');
-    if (mapContainer) {
-        // Ensure container is visible and has dimensions
-        if (mapContainer.offsetWidth === 0 || mapContainer.offsetHeight === 0) {
-            console.warn('Map container has no dimensions, retrying in 100ms...');
-            setTimeout(initializeMap, 100);
+    if (!mapContainer) {
             return;
         }
 
-        // Initialize Leaflet map centered on Philippines with optimal view for wider container
         mapInstance = L.map('map', {
             preferCanvas: false,
             renderer: L.canvas()
-        }).setView([12.2, 121.8], 6.2);
+    });
 
-        // Add OpenStreetMap tiles with proper configuration for better loading
+    mapInstance.setView([12.2, 121.8], 6.2);
+
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
             attribution: '© OpenStreetMap contributors',
             maxZoom: 19,
@@ -279,1430 +664,1175 @@ function initializeMap() {
             tileSize: 256,
             zoomOffset: 0,
             crossOrigin: true,
-            bounds: [[4.5, 116], [21, 127]], // Philippines bounds
-            maxBounds: [[4.5, 116], [21, 127]] // Restrict panning to Philippines area
+        bounds: [[4.5, 116], [21, 127]],
+        maxBounds: [[4.5, 116], [21, 127]]
         }).addTo(mapInstance);
 
-        // Set map bounds to fit Philippines properly in larger container
         mapInstance.fitBounds([[4.5, 116], [21, 127]], {
             padding: [30, 30],
-            maxZoom: 6.5
-        });
+        maxZoom: 7
+    });
 
-        // Add error handling for tile loading
-        mapInstance.on('tileerror', function(e) {
-            console.warn('Tile loading error:', e);
-        });
-
-        // Add zoom event handler to update circle sizes
-        mapInstance.on('zoomend', function() {
-            currentZoomLevel = mapInstance.getZoom();
-            updateCircleSizes();
-        });
-
-        // Show initial state
-        updateMapStatus('Map initialized. Loading initial data...');
-
-        // Force map to resize and invalidate size
-        setTimeout(() => {
-            if (mapInstance) {
-                mapInstance.invalidateSize();
-                console.log('✅ Map invalidated and resized');
-            }
-        }, 100);
-
-        // Add region click functionality with accurate boundaries
-        addRegionClickFunctionality();
-
-        // Load initial map data (10 projects with progressive loading)
-        loadInitialMapData();
+    try {
+        await addProvinceBoundaries();
+        setTimeout(() => mapInstance.invalidateSize(), 150);
+    } catch (error) {
+        console.error('Failed to initialize map:', error);
     }
 }
 
-// Add region click functionality with accurate boundaries (copied from flood.html)
-async function addRegionClickFunctionality() {
-    if (!mapInstance) return;
-
-    try {
-        // Load region mapping data
-        const mappingResponse = await fetch('/static/data/region-mapping.json');
-        if (mappingResponse.ok) {
-            const mappingData = await mappingResponse.json();
-            regionMapping = mappingData.regionMapping;
-            console.log('📍 Region mapping loaded:', regionMapping);
+function extractProvinceDisplayName(geoData, filename) {
+    if (!geoData) return filename;
+    if (geoData.properties) {
+        if (geoData.properties.province_name) {
+            return geoData.properties.province_name;
         }
+        if (geoData.properties.name) {
+            return geoData.properties.name;
+        }
+        if (geoData.properties.PROVINCE) {
+            return geoData.properties.PROVINCE;
+        }
+    }
+    if (geoData.features && geoData.features.length > 0) {
+        const feature = geoData.features[0];
+        if (feature.properties?.province_name) {
+            return feature.properties.province_name;
+        }
+        if (feature.properties?.name) {
+            return feature.properties.name;
+        }
+        if (feature.properties?.PROVINCE) {
+            return feature.properties.PROVINCE;
+        }
+    }
+    const parts = filename.split('.');
+    if (parts.length >= 3) {
+        const raw = parts[2].replace(/-/g, ' ');
+        return raw.replace(/\b\w/g, char => char.toUpperCase());
+    }
+    return filename;
+}
 
-        // Load accurate GeoJSON boundaries
-        const geoJsonResponse = await fetch('/static/data/philippines-regions.json');
-        if (geoJsonResponse.ok) {
-            const geoJsonData = await geoJsonResponse.json();
+async function loadProvinceGeometry(filename, batchIndex) {
+    const response = await fetch(`/static/data/${filename}`);
+    if (!response.ok) {
+        throw new Error(`Failed to load ${filename}`);
+    }
+    const geoData = await response.json();
+    const displayName = extractProvinceDisplayName(geoData, filename);
+    const key = normalizeProvinceKey(displayName);
 
-            // Add GeoJSON layer with accurate boundaries
-            regionGeoJSONLayer = L.geoJSON(geoJsonData, {
-                style: {
-                    color: '#0038A8',
-                    weight: 2,
-                    opacity: 0.8,
-                    fillColor: '#0038A8',
-                    fillOpacity: 0.1
-                },
-                onEachFeature: function(feature, layer) {
-                    const regionName = feature.properties.name;
-                    const meilisearchRegion = regionMapping[regionName] || regionName;
-
-                    // Bind tooltip
-                    layer.bindTooltip(`Click ${regionName}`, {
+    const geoLayer = L.geoJSON(geoData, {
+        style: () => ({ ...defaultProvinceStyle }),
+        onEachFeature: (_, featureLayer) => {
+            featureLayer.bindTooltip(`Click ${displayName}`, {
                         permanent: false,
                         direction: 'center',
-                        className: 'region-tooltip'
-                    });
+                className: 'province-tooltip'
+            });
 
-                    // Add click handler
-                    layer.on('click', function(e) {
-                        console.log(`🗺️ Region clicked: ${regionName} (${meilisearchRegion})`);
-                        loadRegionProjects(meilisearchRegion);
-                    });
-
-                    // Add hover effects
-                    layer.on('mouseover', function(e) {
-                        this.setStyle({
-                            fillOpacity: 0.3,
-                            weight: 3
-                        });
-                    });
-
-                    layer.on('mouseout', function(e) {
-                        this.setStyle({
-                            fillOpacity: 0.1,
-                            weight: 2
-                        });
+            featureLayer.on('click', () => {
+                const center = provinceCenters.get(key)?.center;
+                if (center && !provinceMarkers.has(key)) {
+                    createProvinceMarker(key, center, displayName, provinceSummaryLookup.get(key) || null);
+                }
+                handleProvinceClick(displayName, key);
+            });
+            featureLayer.on('mouseover', () => {
+                if (activeProvinceKey !== key) {
+                    featureLayer.setStyle({
+                        ...defaultProvinceStyle,
+                        fillOpacity: 0.2,
+                        weight: 2.5
                     });
                 }
-            }).addTo(mapInstance);
-
-            console.log('✅ Accurate region boundaries loaded');
-        } else {
-            console.error('Failed to load GeoJSON data');
-        }
-    } catch (error) {
-        console.error('Error loading region data:', error);
-    }
-}
-
-// Load region projects when a region is clicked
-async function loadRegionProjects(regionName) {
-    console.log(`🗺️ Loading projects for region: ${regionName}`);
-
-    // Cancel global progressive loading when region is clicked
-    progressiveLoadingCancelled = true;
-
-    // Update status
-    updateMapStatus(`Loading projects for ${regionName}...`);
-
-    // Clear existing markers
-    mapMarkers.forEach(marker => mapInstance.removeLayer(marker));
-    mapMarkers = [];
-
-    // Stop any existing progressive loading
-    if (progressiveInterval) {
-        clearInterval(progressiveInterval);
-        progressiveInterval = null;
-    }
-
-    // Reset progressive loading state
-    progressiveLoadingStarted = false;
-    progressiveLoadingCancelled = false;
-    regionProgressiveLoadingCancelled = false;
-    globalOffset = 0;
-    isLoadingMore = false;
-    loadedProjects = [];
-
-    try {
-        // Load initial batch of 100 projects for the region
-        const response = await fetch(`/api/flood/projects?region=${encodeURIComponent(regionName)}&limit=100&offset=0`);
-        if (response.ok) {
-            const data = await response.json();
-            const projects = data.projects || [];
-
-            console.log(`✅ Loaded initial ${projects.length} projects for ${regionName}`);
-            loadedProjects = projects;
-
-            // Add markers for initial projects
-            processProjects(projects);
-
-            // Load region totals for progressive loading
-            if (!regionData) {
-                try {
-                    const mappingResponse = await fetch('/static/data/region-mapping.json');
-                    if (mappingResponse.ok) {
-                        regionData = await mappingResponse.json();
-                        console.log('🗺️ Region data loaded:', regionData);
-                    }
-                } catch (error) {
-                    console.error('Failed to load region mapping:', error);
+            });
+            featureLayer.on('mouseout', () => {
+                if (activeProvinceKey !== key) {
+                    featureLayer.setStyle({ ...defaultProvinceStyle });
                 }
-            }
-
-            // Start progressive loading if we got a full batch and there are more
-            const regionTotalHits = regionData?.regionTotals?.[regionName] || data.totalHits || 1000;
-            const regionTotalPages = Math.ceil(regionTotalHits / 100);
-
-            console.log(`🗺️ Region ${regionName}: ${projects.length} loaded, ${regionTotalHits} total, ${regionTotalPages} pages`);
-
-            if (projects.length === 100 && regionTotalPages > 1 && regionTotalHits > 100 && !progressiveLoadingStarted) {
-                console.log(`🗺️ Starting progressive loading for ${regionName}`);
-                startRegionProgressiveLoading(regionName, regionTotalPages, regionTotalHits);
-            }
-            
-            // Also load DIME squares for this region
-            loadDimeSquaresForRegion(regionName);
-
-        } else {
-            throw new Error(`API returned ${response.status}`);
+            });
         }
-    } catch (error) {
-        console.error('❌ Failed to load region projects:', error);
-        updateMapStatus('Error loading region projects');
+    });
+
+    geoLayer.addTo(provinceGeoJSONLayer);
+
+    const bounds = geoLayer.getBounds();
+    if (bounds.isValid()) {
+        provinceCenters.set(key, {
+            center: bounds.getCenter(),
+            displayName
+        });
     }
+
+    provinceLayers.set(key, geoLayer);
+
+    const existingSummary = provinceSummaryLookup.get(key) || null;
+    const centerEntry = provinceCenters.get(key);
+    if (centerEntry?.center) {
+        createProvinceMarker(key, centerEntry.center, displayName, existingSummary);
+    }
+
+    enqueueProvinceSummaryLoad(key, displayName);
+
+    return { key, displayName };
 }
 
-// Start region-specific progressive loading
-function startRegionProgressiveLoading(regionName, totalPages, totalHits) {
-    if (progressiveLoadingStarted) return;
+async function addProvinceBoundaries() {
+    if (!mapInstance) return;
 
-    progressiveLoadingStarted = true;
-    let regionPage = 2; // Start from page 2 (since we already have page 1)
+    if (provinceGeoJSONLayer) {
+        provinceGeoJSONLayer.remove();
+    }
 
-    const loadMoreRegion = async () => {
-        console.log(`🗺️ loadMoreRegion called for ${regionName}: page ${regionPage}/${totalPages}, isLoadingMore: ${isLoadingMore}, regionProgressiveLoadingCancelled: ${regionProgressiveLoadingCancelled}`);
-
-        if (isLoadingMore || regionProgressiveLoadingCancelled) {
-            console.log(`🗺️ loadMoreRegion early return: isLoadingMore=${isLoadingMore}, regionProgressiveLoadingCancelled=${regionProgressiveLoadingCancelled}`);
-            return;
-        }
-
-        console.log(`🗺️ Starting loadMoreRegion with regionPage=${regionPage}`);
-        setIsLoadingMore(true);
-
+    provinceGeoJSONLayer = L.layerGroup().addTo(mapInstance);
+    provinceCenters.clear();
+    provinceLayers.clear();
+    provinceGeometryCache.clear();
+    provinceMarkers.forEach(marker => {
         try {
-            const response = await fetch(`/api/flood/projects?region=${encodeURIComponent(regionName)}&limit=100&offset=${(regionPage - 1) * 100}`);
-            const data = await response.json();
-            const newProjects = data.projects || [];
+            mapInstance?.removeLayer(marker);
+                } catch (error) {
+            console.warn('Failed to remove province marker while resetting layers:', error);
+        }
+    });
+    provinceMarkers.clear();
+    clearActiveProjectMarkers();
 
-            console.log(`🗺️ Loading page ${regionPage}/${totalPages} for ${regionName}: ${newProjects.length} projects, total loaded: ${loadedProjects.length}/${totalHits}`);
+    const batchSize = 8;
+    let loaded = 0;
 
-            // Use JSON totals as source of truth, not API response
-            if (regionPage >= totalPages || loadedProjects.length >= totalHits) {
-                // Reached region limits, stopping progressive loading
-                console.log(`🗺️ Stopping progressive loading for ${regionName}: page ${regionPage}/${totalPages}, loaded ${loadedProjects.length}/${totalHits}`);
-                updateMapStatus(`${loadedProjects.length} projects loaded for ${regionName} (complete)`);
-            } else if (regionPage === totalPages) {
-                // Special handling for last page - might have fewer than 100 items
-                loadedProjects = [...loadedProjects, ...newProjects];
-                await processProjects(newProjects);
-                console.log(`🗺️ Last page loaded for ${regionName}: ${loadedProjects.length} total`);
-                updateMapStatus(`${loadedProjects.length} projects loaded for ${regionName} (complete)`);
-            } else {
-                loadedProjects = [...loadedProjects, ...newProjects];
-                await processProjects(newProjects);
-                regionPage += 1; // Move to next page sequentially
-
-                console.log(`🗺️ Continuing progressive loading for ${regionName}: next page ${regionPage}`);
-                // Schedule next load (with minimal delay)
-                console.log(`🗺️ Scheduling next region loadMoreRegion call...`);
-                setIsLoadingMore(false); // Reset flag before recursive call
-                setTimeout(() => {
-                    if (!regionProgressiveLoadingCancelled) {
-                        loadMoreRegion();
-                    }
-                }, 50); // Minimal delay to prevent interference
-                return; // Exit early to avoid finally block
+    for (let i = 0; i < PROVINCE_GEOJSON_FILES.length; i += batchSize) {
+        const batch = PROVINCE_GEOJSON_FILES.slice(i, i + batchSize);
+        const results = await Promise.allSettled(batch.map((file, idx) => loadProvinceGeometry(file, i + idx)));
+        results.forEach((result, index) => {
+            if (result.status !== 'fulfilled') {
+                console.warn(`Failed to load province geometry ${batch[index]}:`, result.reason);
             }
-        } catch (error) {
-            console.error('❌ Error loading more region projects:', error);
-        } finally {
-            setIsLoadingMore(false);
-        }
-    };
+        });
+        loaded += batch.length;
+        updateMapStatus(`Loaded ${Math.min(loaded, PROVINCE_GEOJSON_FILES.length)}/${PROVINCE_GEOJSON_FILES.length} province boundaries...`);
+    }
 
-    // Start the first progressive load
-    setTimeout(() => {
-        if (!regionProgressiveLoadingCancelled) {
-            loadMoreRegion();
-        }
-    }, 1000); // 1 second delay before starting progressive loading
+    updateMapStatus('Province boundaries ready. Click a province to fetch integrated data.');
 }
 
-// Helper function to set loading state
-function setIsLoadingMore(loading) {
-    isLoadingMore = loading;
-}
+function highlightProvinceLayer(key) {
+    if (!provinceGeoJSONLayer) return;
 
-// Load initial map data (copied exactly from working flood.html)
-async function loadInitialMapData() {
-    if (initialLoadDone || isLoading) return;
+    if (activeProvinceKey && provinceLayers.has(activeProvinceKey)) {
+        provinceLayers.get(activeProvinceKey).setStyle({ ...defaultProvinceStyle });
+    }
 
-    isLoading = true;
-    initialLoadDone = true;
-
-    try {
-        console.log('🔍 Loading initial map data...');
-        const response = await fetch('/api/flood/projects?limit=10&offset=0');
-        if (response.ok) {
-            const data = await response.json();
-            const projects = data.projects || [];
-
-            console.log(`✅ Loaded initial ${projects.length} projects`);
-            loadedProjects = projects;
-
-            // Add markers for initial projects
-            await processProjects(projects);
-
-            // Set offset to 1000 to start skipping
-            globalOffset = 1000;
-
-            updateMapStatus(`Map initialized with ${projects.length} projects. Loading more with 1000-skip...`);
-
-            // Auto-start progressive loading with 1000-skip
-            startProgressiveLoading();
-            
-            // Load DIME-only projects as triangles
-            setTimeout(() => loadDimeOnlyProjects(), 1000);
-
-        } else {
-            throw new Error(`API returned ${response.status}`);
-        }
-    } catch (error) {
-        console.error('❌ Failed to load initial map data:', error);
-        updateMapStatus('Loading initial map data...');
-    } finally {
-        isLoading = false;
+    activeProvinceKey = key;
+    const layer = provinceLayers.get(key);
+    if (layer) {
+        layer.setStyle({
+            ...defaultProvinceStyle,
+            fillOpacity: 0.35,
+            weight: 3
+        });
     }
 }
 
-// Calculate circle radius based on project cost with zoom scaling
-function calculateCircleRadius(cost, zoomLevel = 6) {
-    if (!cost || isNaN(parseFloat(cost))) {
-        return 1000; // Default radius for projects without cost data (decreased)
-    }
 
-    const numericCost = parseFloat(cost);
-
-    // Base radius calculation (meters at zoom level 6) - Slightly decreased
-    const minRadius = 250;
-    const maxRadius = 5500;
-    const minCost = 10000; // ₱10,000 minimum for scaling
-    const maxCost = 1000000000; // ₱1 billion maximum for scaling
-
-    // Clamp cost to reasonable bounds
-    const clampedCost = Math.max(minCost, Math.min(maxCost, numericCost));
-
-    // Logarithmic scaling: log(cost) mapped to radius range
-    const logMin = Math.log(minCost);
-    const logMax = Math.log(maxCost);
-    const logCost = Math.log(clampedCost);
-
-    const baseRadius = minRadius + ((logCost - logMin) / (logMax - logMin)) * (maxRadius - minRadius);
-
-    // Scale radius based on zoom level to maintain visibility
-    // At zoom 6: base radius, higher zoom = smaller circles, lower zoom = much larger circles when zoomed out
-    const zoomFactor = Math.pow(0.6, zoomLevel - 6); // More aggressive exponential scaling for bigger circles
-
-    return Math.round(baseRadius * zoomFactor);
-}
-
-// Cache for DIME status lookups to reduce API calls
-const dimeStatusCache = new Map();
-
-// Get project status from DIME data by MeiliSearch ID
-async function getProjectStatusFromDIME(floodProject) {
-    try {
-        // Use the GlobalID from MeiliSearch to find DIME status
-        const meiliId = floodProject.GlobalID;
-        if (!meiliId) {
-            return getWorkTypeColor(floodProject.TypeofWork);
-        }
-
-        // Check cache first
-        if (dimeStatusCache.has(meiliId)) {
-            return dimeStatusCache.get(meiliId);
-        }
-
-        const response = await fetch(`/api/dime/projects/${meiliId}/status`);
-        if (!response.ok) {
-            if (response.status === 404 || response.status === 502) {
-                // No DIME match found or backend overloaded, use fallback
-                const fallbackColor = getWorkTypeColor(floodProject.TypeofWork);
-                dimeStatusCache.set(meiliId, fallbackColor);
-                return fallbackColor;
-            }
-            throw new Error(`DIME API error: ${response.status}`);
-        }
-
-        const dimeData = await response.json();
-
-        if (dimeData.success && dimeData.status) {
-            const color = getStatusColor(dimeData.status);
-            dimeStatusCache.set(meiliId, color);
-            return color;
-        } else {
-            // No status in DIME, use fallback
-            const fallbackColor = getWorkTypeColor(floodProject.TypeofWork);
-            dimeStatusCache.set(meiliId, fallbackColor);
-            return fallbackColor;
-        }
-
-    } catch (error) {
-        // Fallback to black on any error (silent fail)
-        const fallbackColor = '#000000';
-        if (floodProject.GlobalID) {
-            dimeStatusCache.set(floodProject.GlobalID, fallbackColor);
-        }
-        return fallbackColor;
-    }
-}
-
-// Get color based on DIME project status
-function getStatusColor(status) {
-    const statusColors = {
-        'Completed': '#28a745',    // Green
-        'Ongoing': '#ffc107',      // Yellow/Amber (matches database)
-        'Incomplete': '#dc3545',   // Red (matches database)
-        'Not Yet Started': '#17a2b8', // Teal/Blue (matches database)
-        'Suspended': '#6c757d'     // Gray
-    };
-
-    return statusColors[status] || '#000000'; // Black for unknown status
-}
-
-// Fallback: Get color based on project type of work
-function getWorkTypeColor(typeofWork) {
-    // Use black for all fallback cases (no DIME status available)
-    return '#000000'; // Black
-}
-
-// Process projects and add to map
-async function processProjects(projects) {
-    for (let i = 0; i < projects.length; i++) {
-        const project = projects[i];
-        if (project.Latitude && project.Longitude) {
-            const lat = parseFloat(project.Latitude);
-            const lng = parseFloat(project.Longitude);
-
-            if (!isNaN(lat) && !isNaN(lng)) {
-                // Calculate circle properties based on cost, color based on DIME status
-                const cost = project.ContractCost;
-                const radius = calculateCircleRadius(cost, currentZoomLevel);
-                const color = await getProjectStatusFromDIME(project);
-                
-                // Add small delay every 10 projects to prevent overwhelming backend
-                if (i > 0 && i % 10 === 0) {
-                    await new Promise(resolve => setTimeout(resolve, 100));
-                }
-
-                // Create circle marker instead of pin marker
-                const circle = L.circle([lat, lng], {
-                    color: color,
-                    fillColor: color,
-                    fillOpacity: 0.6,
-                    weight: 2,
-                    radius: radius
-                });
-
-                // Create popup content
-                const costDisplay = cost ? `₱${parseFloat(cost).toLocaleString('en-PH', {minimumFractionDigits: 2, maximumFractionDigits: 2})}` : 'N/A';
-                const radiusKm = (radius / 1000).toFixed(1);
-                const statusBadge = project.TypeofWork ?
-                    `<span style="display: inline-block; padding: 2px 6px; border-radius: 3px; font-size: 0.8em; font-weight: 600; background: ${color}20; color: ${color}; border: 1px solid ${color}40;">${project.TypeofWork}</span>` :
-                    '<span style="color: #999;">Unknown Status</span>';
-
-                // Format infrastructure year
-                const yearDisplay = project.InfraYear ? `
-                    <div style="font-size: 0.9em; margin-bottom: 10px; color: #666;">
-                        <strong>Year:</strong> ${project.InfraYear}
-                    </div>
-                ` : '';
-                
-                const popupContent = `
-                    <div style="width: 900px; font-family: Arial, sans-serif; overflow-wrap: break-word; word-wrap: break-word;">
-                        <h4 style="margin: 0 0 10px 0; color: ${color}; font-size: 1.1em; overflow-wrap: break-word; word-wrap: break-word;">${project.ProjectDescription || 'Unnamed Project'}</h4>
-                        <div style="font-size: 0.95em; margin-bottom: 10px; overflow-wrap: break-word;">
-                            <strong>Location:</strong> ${project.Municipality || 'Unknown'}, ${project.Province || 'Unknown'}
-                        </div>
-                        <div style="font-size: 0.95em; margin-bottom: 10px;">
-                            <strong>Status:</strong> ${statusBadge}
-                        </div>
-                        ${yearDisplay}
-                        <div style="font-size: 0.95em; margin-bottom: 10px;">
-                            <strong>Cost:</strong> ${costDisplay}
-                        </div>
-                        <div style="font-size: 0.9em; margin-bottom: 10px; color: #666; overflow-wrap: break-word; word-wrap: break-word;">
-                            <strong>Contractor:</strong> ${project.Contractor || 'Unknown'}
-                        </div>
-                        <div id="philgeps-contracts-${project.GlobalID}" style="margin-top: 12px; padding-top: 12px; border-top: 1px solid #e0e0e0; overflow-wrap: break-word; word-wrap: break-word;">
-                            <div style="font-size: 0.85em; color: #666; font-style: italic;">
-                                Loading PhilGEPS contracts...
-                            </div>
-                        </div>
-                        <div id="sec-info-${project.GlobalID}" style="margin-top: 12px; padding-top: 12px; border-top: 1px solid #e0e0e0; overflow-wrap: break-word; word-wrap: break-word;">
-                            <div style="font-size: 0.85em; color: #666; font-style: italic;">
-                                Loading SEC info...
-                            </div>
-                        </div>
+function createIntegratedIcon(summary) {
+    const html = `
+        <div class="integrated-marker" title="${summary.name}">
+            ${SOURCE_ORDER.map(sourceKey => createShapeHTML(sourceKey, summary.counts[sourceKey] || 0)).join('')}
                     </div>
                 `;
 
-                circle.bindPopup(popupContent, {
-                    maxWidth: 9999,
-                    minWidth: 900,
-                    autoPan: true,
-                    keepInView: true
-                });
-                
-                // Fetch PhilGEPS contracts when popup opens
-                circle.on('popupopen', async function() {
-                    const philgepsContainer = document.getElementById(`philgeps-contracts-${project.GlobalID}`);
-                    if (!philgepsContainer) return;
-                    
-                    try {
-                        const response = await fetch(`/api/philgeps/contracts/${project.GlobalID}`);
-                        if (!response.ok) {
-                            throw new Error('Failed to fetch contracts');
-                        }
-                        
-                        const data = await response.json();
-                        
-                        if (data.success && data.contracts && data.contracts.length > 0) {
-                            let contractsHtml = `
-                                <div style="font-size: 0.9em; color: #0038A8; font-weight: 600; margin-bottom: 8px;">
-                                    📋 PhilGEPS Contracts (${data.count})
-                                </div>
-                            `;
-                            
-                            // Show up to 3 contracts
-                            const displayContracts = data.contracts.slice(0, 3);
-                            displayContracts.forEach((contract, idx) => {
-                                const amount = contract.contract_amount ? `₱${parseFloat(contract.contract_amount).toLocaleString('en-PH', {minimumFractionDigits: 2, maximumFractionDigits: 2})}` : 'N/A';
-                                const contractNo = contract.contract_no || contract.reference_id || 'N/A';
-                                const awardee = contract.awardee_name || 'Unknown';
-                                const org = contract.organization_name || 'Unknown';
-                                
-                                // Format award date
-                                let awardDateDisplay = '';
-                                if (contract.award_date) {
-                                    const date = new Date(contract.award_date);
-                                    awardDateDisplay = `<div style="color: #666; margin-bottom: 3px; font-size: 0.9em;">
-                                        <strong>Awarded:</strong> ${date.toLocaleDateString('en-PH', {year: 'numeric', month: 'short', day: 'numeric'})}
-                                    </div>`;
-                                }
-                                
-                                contractsHtml += `
-                                    <div style="font-size: 0.85em; padding: 8px; background: transparent; border-left: 3px solid #0038A8; margin-bottom: 6px; overflow-wrap: break-word; word-wrap: break-word; max-width: 100%;">
-                                        <div style="font-weight: 600; color: #0038A8; margin-bottom: 4px; overflow-wrap: break-word; word-wrap: break-word;">
-                                            Contract: ${contractNo}
-                                        </div>
-                                        ${awardDateDisplay}
-                                        <div style="color: #666; margin-bottom: 3px; font-size: 0.95em; overflow-wrap: break-word; word-wrap: break-word;">
-                                            <strong>Awardee:</strong> ${awardee}
-                                        </div>
-                                        <div style="color: #666; margin-bottom: 4px; font-size: 0.95em; overflow-wrap: break-word; word-wrap: break-word;">
-                                            <strong>Agency:</strong> ${org}
-                                        </div>
-                                        <div style="color: #28a745; font-weight: 600; font-size: 1em;">
-                                            ${amount}
-                                        </div>
-                                    </div>
-                                `;
-                            });
-                            
-                            if (data.count > 3) {
-                                contractsHtml += `
-                                    <div style="font-size: 0.8em; color: #666; font-style: italic; margin-top: 6px;">
-                                        + ${data.count - 3} more contract(s)
-                                    </div>
-                                `;
-                            }
-                            
-                            philgepsContainer.innerHTML = contractsHtml;
-                        } else {
-                            philgepsContainer.innerHTML = `
-                                <div style="font-size: 0.8em; color: #999; font-style: italic;">
-                                    No PhilGEPS contracts linked
-                                </div>
-                            `;
-                        }
-                    } catch (error) {
-                        console.error('Error fetching PhilGEPS contracts:', error);
-                        philgepsContainer.innerHTML = `
-                            <div style="font-size: 0.75em; color: #999; font-style: italic;">
-                                PhilGEPS data unavailable
-                            </div>
-                        `;
-                    }
-                    
-                    // Fetch SEC info for contractor
-                    const secContainer = document.getElementById(`sec-info-${project.GlobalID}`);
-                    if (!secContainer) return;
-                    
-                    try {
-                        // Load SEC database
-                        const secResponse = await fetch('/static/data/sec_contractors_database.json');
-                        if (!secResponse.ok) {
-                            throw new Error('Failed to load SEC database');
-                        }
-                        
-                        const secData = await secResponse.json();
-                        const contractors = secData.contractors || [];
-                        
-                        // Normalize contractor name for matching
-                        const normalizeContractorName = (name) => {
-                            if (!name) return '';
-                            return name.toUpperCase()
-                                .replace(/[^A-Z0-9]/g, '')
-                                .replace(/CORP(ORATION)?/g, '')
-                                .replace(/INC(ORPORATED)?/g, '')
-                                .replace(/LTD(LIMITED)?/g, '')
-                                .replace(/CO(MPANY)?/g, '');
-                        };
-                        
-                        const contractorName = project.Contractor || '';
-                        const normalizedContractorName = normalizeContractorName(contractorName);
-                        
-                        // Try to find matching contractor
-                        let matchingContractor = contractors.find(c => 
-                            normalizeContractorName(c.original_contractor_name || c.company_name) === normalizedContractorName
-                        );
-                        
-                        if (matchingContractor && matchingContractor.sec_number) {
-                            // Has SEC data
-                            const address = matchingContractor.registered_address || 'N/A';
-                            const status = matchingContractor.status || 'N/A';
-                            
-                            secContainer.innerHTML = `
-                                <div style="font-size: 0.9em; color: #0038A8; font-weight: 600; margin-bottom: 8px;">
-                                    🏛️ SEC Registration
-                                </div>
-                                <div style="font-size: 0.85em; padding: 8px; background: transparent; border-left: 3px solid #28a745; overflow-wrap: break-word; word-wrap: break-word; max-width: 100%;">
-                                    <div style="margin-bottom: 4px;">
-                                        <strong style="color: #155724;">SEC Number:</strong> <span style="color: #155724; font-weight: 600;">${matchingContractor.sec_number}</span>
-                                    </div>
-                                    <div style="margin-bottom: 4px; color: #666; font-size: 0.95em;">
-                                        <strong>Status:</strong> ${status}
-                                    </div>
-                                    ${matchingContractor.date_registered ? `
-                                    <div style="margin-bottom: 4px; color: #666; font-size: 0.95em;">
-                                        <strong>Registered:</strong> ${matchingContractor.date_registered}
-                                    </div>
-                                    ` : ''}
-                                    <div style="color: #666; font-size: 0.9em; overflow-wrap: break-word; word-wrap: break-word;">
-                                        <strong>Address:</strong> ${address}
-                                    </div>
-                                </div>
-                            `;
-                        } else if (matchingContractor && matchingContractor.status === 'NO_SEC_RESULTS') {
-                            // Suspicious - searched but no results
-                            secContainer.innerHTML = `
-                                <div style="font-size: 0.9em; color: #856404; font-weight: 600; margin-bottom: 8px;">
-                                    🏛️ SEC Registration
-                                </div>
-                                <div style="font-size: 0.85em; padding: 8px; background: transparent; border-left: 3px solid #ffc107; overflow-wrap: break-word; word-wrap: break-word; max-width: 100%;">
-                                    <div style="font-weight: 600; color: #856404; margin-bottom: 6px;">
-                                        ⚠️ NO SEC RESULTS - SUSPICIOUS
-                                    </div>
-                                    <div style="color: #856404; font-size: 0.9em; line-height: 1.4; overflow-wrap: break-word; word-wrap: break-word;">
-                                        This contractor was searched in the SEC database but yielded <strong>zero results</strong>. 
-                                        Government contractors should be SEC-registered.
-                                    </div>
-                                </div>
-                            `;
-                        } else {
-                            // Not yet processed
-                            secContainer.innerHTML = `
-                                <div style="font-size: 0.8em; color: #999; font-style: italic;">
-                                    SEC info not yet processed for this contractor
-                                </div>
-                            `;
-                        }
-                    } catch (error) {
-                        console.error('Error fetching SEC info:', error);
-                        secContainer.innerHTML = `
-                            <div style="font-size: 0.75em; color: #999; font-style: italic;">
-                                SEC data unavailable
-                            </div>
-                        `;
-                    }
-                });
-                circle.addTo(mapInstance);
-                mapMarkers.push(circle);
-            }
-        }
+    return L.divIcon({
+        className: 'integrated-marker-wrapper',
+        html,
+        iconSize: [28, 28],
+        iconAnchor: [14, 14]
+    });
+}
+
+function createShapeHTML(sourceKey, count) {
+    const meta = SOURCE_META[sourceKey];
+    const isEmpty = !count;
+    const scale = computeScale(count);
+    const countLabel = isEmpty ? '' : `<span class="integrated-count-label">${formatCount(count)}</span>`;
+    const tooltip = `${meta.label}: ${count.toLocaleString('en-PH')}`;
+
+    return `<div class="integrated-shape ${meta.className} ${isEmpty ? 'empty' : ''}" style="--scale:${scale};" title="${tooltip}">${countLabel}</div>`;
+}
+
+function computeScale(count) {
+    if (!count) return 0.6;
+    const log = Math.log10(count + 1);
+    return Math.min(1.4, 0.6 + log * 0.3);
+}
+
+function formatCount(count) {
+    if (count >= 1000000) {
+        return `${(count / 1000000).toFixed(1)}m`;
+    }
+    if (count >= 1000) {
+        const value = count / 1000;
+        return value >= 10 ? `${Math.round(value)}k` : `${value.toFixed(1)}k`;
+    }
+    return `${count}`;
+}
+
+function formatCurrency(value) {
+    const numericValue = Number(value);
+    if (!isFinite(numericValue)) {
+        return 'N/A';
+    }
+    return `₱${numericValue.toLocaleString('en-PH', { maximumFractionDigits: 0 })}`;
+}
+
+function computeMarkerScale(amount) {
+    const numeric = typeof amount === 'string'
+        ? Number(amount.replace(/[^0-9.\-]+/g, ''))
+        : Number(amount);
+    if (!isFinite(numeric) || numeric <= 0) {
+        return 0.4;
     }
 
-    updateMapStatus(`Loaded ${mapMarkers.length} projects`);
+    const millions = Math.max(numeric / 1000000, 0);
+    const logFactor = Math.log10(millions + 1);
+    const scale = 0.4 + logFactor * 0.6;
+    return Math.max(0.4, Math.min(scale, 2.4));
 }
 
-// Load and display DIME-only projects as squares (progressive loading: 10 initial, then 10 per batch)
-let dimeProjectsLoaded = [];
-let dimeGlobalOffset = 0; // Start at 0 to load first 10 initially
-let isDimeLoading = false;
-let allDimeProjectsCache = null;
+async function handleProvinceClick(provinceName, key) {
+    highlightProvinceLayer(key);
 
-// Helper function to process a batch of DIME projects as squares
-async function processDimeBatch(batch) {
-    for (const project of batch) {
-        if (project.latitude && project.longitude) {
-            const lat = parseFloat(project.latitude);
-            const lng = parseFloat(project.longitude);
-            
-            if (!isNaN(lat) && !isNaN(lng)) {
-                const color = getStatusColor(project.status);
-                const cost = project.cost || 0;
-                const radius = calculateCircleRadius(cost, currentZoomLevel);
-                
-                // Create square marker
-                // Use slightly larger fraction of radius for square size (in degrees)
-                const halfSize = (radius / 2.2) / 111000; // Convert meters to degrees
-                const square = L.rectangle([
-                    [lat - halfSize, lng - halfSize],  // Southwest corner
-                    [lat + halfSize, lng + halfSize]   // Northeast corner
-                ], {
-                    color: color,
-                    fillColor: color,
-                    fillOpacity: 0.6,
-                    weight: 2
-                });
-                
-                const costDisplay = cost ? `₱${parseFloat(cost).toLocaleString('en-PH', {minimumFractionDigits: 2, maximumFractionDigits: 2})}` : 'N/A';
-                
-                // Parse contractors from JSON array
-                let contractorsList = 'Unknown';
-                if (project.contractors && project.contractors.length > 0) {
-                    try {
-                        const contractorNames = project.contractors.map(c => {
-                            if (typeof c === 'string') {
-                                // Parse JSON string
-                                const parsed = JSON.parse(c);
-                                return parsed.name || 'Unknown';
-                            }
-                            return c.name || 'Unknown';
-                        });
-                        contractorsList = contractorNames.join(', ');
-                    } catch (e) {
-                        contractorsList = project.contractors.join(', ');
-                    }
-                }
-                
-                // Format year/date display for DIME
-                let dateDisplay = '';
-                if (project.year) {
-                    dateDisplay = `
-                        <div style="font-size: 0.9em; margin-bottom: 10px; color: #666;">
-                            <strong>Year:</strong> ${project.year}
-                        </div>
-                    `;
-                } else if (project.contract_completion_date) {
-                    const compDate = new Date(project.contract_completion_date);
-                    dateDisplay = `
-                        <div style="font-size: 0.9em; margin-bottom: 10px; color: #666;">
-                            <strong>Target Completion:</strong> ${compDate.toLocaleDateString('en-PH', {year: 'numeric', month: 'short'})}
-                        </div>
-                    `;
-                }
-                
-                const dimeProjectId = `dime-${project.id}`;
-                
-                const popupContent = `
-                            <div style="width: 900px; font-family: Arial, sans-serif; overflow-wrap: break-word; word-wrap: break-word;">
-                                <h4 style="margin: 0 0 10px 0; color: ${color}; font-size: 1.1em; overflow-wrap: break-word; word-wrap: break-word;">
-                                    🔲 ${project.project_name || 'Unnamed Project'}
-                                </h4>
-                                <div style="font-size: 0.95em; margin-bottom: 10px; overflow-wrap: break-word;">
-                                    <strong>Location:</strong> ${project.city || 'Unknown'}, ${project.province || 'Unknown'}
-                                </div>
-                                <div style="font-size: 0.95em; margin-bottom: 10px;">
-                                    <strong>Status:</strong> <span style="display: inline-block; padding: 2px 6px; border-radius: 3px; font-size: 0.8em; font-weight: 600; background: ${color}20; color: ${color}; border: 1px solid ${color}40;">${project.status || 'Unknown'}</span>
-                                </div>
-                                ${dateDisplay}
-                                <div style="font-size: 0.95em; margin-bottom: 10px;">
-                                    <strong>Cost:</strong> ${costDisplay}
-                                </div>
-                                <div style="font-size: 0.9em; margin-bottom: 10px; color: #666; overflow-wrap: break-word; word-wrap: break-word;">
-                                    <strong>Contractor(s):</strong> ${contractorsList}
-                                </div>
-                                <div style="font-size: 0.85em; padding: 8px; background: #e3f2fd; border-left: 3px solid #2196f3; margin-top: 10px; overflow-wrap: break-word;">
-                                    <strong style="color: #1976d2;">🔲 DIME-only Project</strong><br>
-                                    <span style="color: #666;">This project appears in DIME database but not in Flood Control data</span>
-                                </div>
-                                <div id="philgeps-contracts-${dimeProjectId}" style="margin-top: 12px; padding-top: 12px; border-top: 1px solid #e0e0e0; overflow-wrap: break-word; word-wrap: break-word;">
-                                    <div style="font-size: 0.85em; color: #666; font-style: italic;">
-                                        Loading PhilGEPS contracts...
-                                    </div>
-                                </div>
-                                <div id="sec-info-${dimeProjectId}" style="margin-top: 12px; padding-top: 12px; border-top: 1px solid #e0e0e0; overflow-wrap: break-word; word-wrap: break-word;">
-                                    <div style="font-size: 0.85em; color: #666; font-style: italic;">
-                                        Loading SEC info...
-                                    </div>
-                                </div>
-                            </div>
-                        `;
-                        
-                        square.bindPopup(popupContent, {
-                            maxWidth: 950,
-                            className: 'custom-popup'
-                        });
-                        
-                        // Load PhilGEPS and SEC data when popup opens
-                        square.on('popupopen', async () => {
-                            // Try to find matching PhilGEPS contracts by contractor name
-                            const philgepsContainer = document.getElementById(`philgeps-contracts-${dimeProjectId}`);
-                            if (philgepsContainer) {
-                                philgepsContainer.innerHTML = `
-                                    <div style="font-size: 0.8em; color: #999; font-style: italic;">
-                                        PhilGEPS matching by contractor name (DIME project)
-                                    </div>
-                                `;
-                            }
-                            
-                            // Load SEC info for contractors
-                            const secContainer = document.getElementById(`sec-info-${dimeProjectId}`);
-                            if (secContainer && contractorsList !== 'Unknown') {
-                                try {
-                                    const secResponse = await fetch('/static/data/sec_contractors_database.json');
-                                    if (!secResponse.ok) throw new Error('Failed to load SEC database');
-                                    
-                                    const secData = await secResponse.json();
-                                    const contractors = secData.contractors || [];
-                                    
-                                    const normalizeContractorName = (name) => {
-                                        if (!name) return '';
-                                        return name.toUpperCase()
-                                            .replace(/[^A-Z0-9]/g, '')
-                                            .replace(/CORP(ORATION)?/g, '')
-                                            .replace(/INC(ORPORATED)?/g, '')
-                                            .replace(/LTD(LIMITED)?/g, '')
-                                            .replace(/CO(MPANY)?/g, '');
-                                    };
-                                    
-                                    const normalizedContractorName = normalizeContractorName(contractorsList.split(',')[0].trim());
-                                    
-                                    let matchingContractor = contractors.find(c => 
-                                        normalizeContractorName(c.original_contractor_name || c.company_name) === normalizedContractorName
-                                    );
-                                    
-                                    if (matchingContractor && matchingContractor.sec_number) {
-                                        secContainer.innerHTML = `
-                                            <div style="font-size: 0.9em; color: #0038A8; font-weight: 600; margin-bottom: 8px;">
-                                                🏛️ SEC Registration
-                                            </div>
-                                            <div style="font-size: 0.85em; padding: 8px; background: transparent; border-left: 3px solid #28a745; overflow-wrap: break-word; word-wrap: break-word; max-width: 100%;">
-                                                <div style="font-weight: 600; margin-bottom: 6px; overflow-wrap: break-word; word-wrap: break-word;">
-                                                    ${matchingContractor.company_name || matchingContractor.original_contractor_name}
-                                                </div>
-                                                <div style="color: #666; font-size: 0.9em; line-height: 1.4; overflow-wrap: break-word; word-wrap: break-word;">
-                                                    <strong>SEC Number:</strong> ${matchingContractor.sec_number}<br>
-                                                    <strong>Status:</strong> ${matchingContractor.status || 'N/A'}<br>
-                                                    ${matchingContractor.date_registered ? '<strong>Registered:</strong> ' + matchingContractor.date_registered + '<br>' : ''}
-                                                    ${matchingContractor.registered_address ? '<strong>Address:</strong> ' + matchingContractor.registered_address : ''}
-                                                </div>
-                                            </div>
-                                        `;
-                                    } else if (matchingContractor && matchingContractor.status === 'NO_SEC_RESULTS') {
-                                        secContainer.innerHTML = `
-                                            <div style="font-size: 0.9em; color: #856404; font-weight: 600; margin-bottom: 8px;">
-                                                🏛️ SEC Registration
-                                            </div>
-                                            <div style="font-size: 0.85em; padding: 8px; background: transparent; border-left: 3px solid #ffc107; overflow-wrap: break-word; word-wrap: break-word; max-width: 100%;">
-                                                <div style="font-weight: 600; color: #856404; margin-bottom: 6px;">
-                                                    ⚠️ NO SEC RESULTS - SUSPICIOUS
-                                                </div>
-                                                <div style="color: #856404; font-size: 0.9em; line-height: 1.4; overflow-wrap: break-word; word-wrap: break-word;">
-                                                    This contractor was searched in the SEC database but yielded <strong>zero results</strong>. 
-                                                    Government contractors should be SEC-registered.
-                                                </div>
-                                            </div>
-                                        `;
-                                    } else {
-                                        secContainer.innerHTML = `
-                                            <div style="font-size: 0.8em; color: #999; font-style: italic;">
-                                                SEC info not yet processed for this contractor
-                                            </div>
-                                        `;
-                                    }
-                                } catch (error) {
-                                    console.error('Error fetching SEC info:', error);
-                                    secContainer.innerHTML = `
-                                        <div style="font-size: 0.75em; color: #999; font-style: italic;">
-                                            SEC data unavailable
-                                        </div>
-                                    `;
-                                }
-                            }
-                        });
-                        
-                        square.addTo(mapInstance);
-                        mapMarkers.push(square);
-                    }
-                }
-            }
-}
+    const centerEntry = provinceCenters.get(key);
+    if (!centerEntry) {
+        console.warn('No center data for province', provinceName);
+        return;
+    }
 
-// Initial DIME load (load first 10 squares)
-async function loadDimeOnlyProjects() {
-    try {
-        // Fetch and cache all DIME projects
-        if (!allDimeProjectsCache) {
-            const response = await fetch(`/api/dime/projects/dime-only`);
-            const data = await response.json();
-            
-            if (!data.success || !data.projects) {
-                console.error('Failed to load DIME projects');
-                return;
-            }
-            
-            allDimeProjectsCache = data.projects;
-            console.log(`📊 Cached ${allDimeProjectsCache.length} DIME-only projects (squares)`);
-        }
-        
-        // Load first 10 squares
-        const initialBatch = allDimeProjectsCache.slice(0, 10);
-        console.log(`🔲 Loading initial 10 DIME squares: ${initialBatch.length} loaded`);
-        
-        await processDimeBatch(initialBatch);
-        dimeProjectsLoaded = [...dimeProjectsLoaded, ...initialBatch];
-        dimeGlobalOffset = 10; // Next batch starts at 10
-        
-        updateMapStatus(`Loaded ${mapMarkers.length} total markers (${loadedProjects.length} circles + ${dimeProjectsLoaded.length} squares)`);
-        
-        // Continue loading progressively (10 per batch)
-        startDimeProgressiveLoading();
-        
+    let summary = provinceSummaryLookup.get(key);
+    let marker = provinceMarkers.get(key);
+
+    if (!summary) {
+        marker = createProvinceMarker(key, centerEntry.center, provinceName, null);
+        marker.openPopup();
+        try {
+            prioritizeProvinceSummary(key, provinceName);
+            summary = await ensureProvinceSummary(key, provinceName);
     } catch (error) {
-        console.error('Error loading DIME projects:', error);
-    }
-}
-
-// Progressive DIME loading (load 10 per batch)
-async function loadMoreDimeProjects() {
-    if (isDimeLoading || !allDimeProjectsCache || dimeGlobalOffset >= allDimeProjectsCache.length) return;
-    
-    isDimeLoading = true;
-    
-    try {
-        // Load next 10 squares
-        const batch = allDimeProjectsCache.slice(dimeGlobalOffset, dimeGlobalOffset + 10);
-        
-        if (batch.length === 0) {
-            console.log(`✅ All ${allDimeProjectsCache.length} DIME squares loaded`);
+            console.error('Failed to load province summary:', error);
+            updateMapStatus(`Unable to load data for ${provinceName}.`);
             return;
         }
-        
-        console.log(`🔲 Loading more DIME: offset ${dimeGlobalOffset}, ${batch.length} squares (total loaded: ${dimeProjectsLoaded.length + batch.length}/${allDimeProjectsCache.length})`);
-        
-        await processDimeBatch(batch);
-        dimeProjectsLoaded = [...dimeProjectsLoaded, ...batch];
-        dimeGlobalOffset += 10; // Move to next batch of 10
-        
-        updateMapStatus(`Loaded ${mapMarkers.length} total markers (${loadedProjects.length} circles + ${dimeProjectsLoaded.length} squares)`);
-        
-    } catch (error) {
-        console.error('Error loading more DIME projects:', error);
-    } finally {
-        isDimeLoading = false;
     }
-}
 
-// Start DIME progressive loading (every 2 seconds like circles)
-function startDimeProgressiveLoading() {
-    setInterval(() => {
-        if (!showAllMode && !progressiveLoadingCancelled) {
-            loadMoreDimeProjects();
-        }
-    }, 2000);
-}
-
-// Load ALL DIME projects (for "Load All" button)
-async function loadAllDimeProjects() {
-    try {
-        if (!allDimeProjectsCache) {
-            const response = await fetch(`/api/dime/projects/dime-only`);
-            const data = await response.json();
-            
-            if (!data.success || !data.projects) {
-                console.error('Failed to load DIME projects');
-                return;
-            }
-            
-            allDimeProjectsCache = data.projects;
-        }
-        
-        console.log(`🔲 Loading ALL ${allDimeProjectsCache.length} DIME squares...`);
-        
-        // Load in batches of 200 for smooth rendering
-        for (let offset = 0; offset < allDimeProjectsCache.length; offset += 200) {
-            const batch = allDimeProjectsCache.slice(offset, offset + 200);
-            await processDimeBatch(batch);
-            dimeProjectsLoaded = [...dimeProjectsLoaded, ...batch];
-            
-            if (offset % 400 === 0) {
-                console.log(`   Progress: ${offset}/${allDimeProjectsCache.length}`);
-                await new Promise(resolve => setTimeout(resolve, 10));
-            }
-        }
-        
-        console.log(`✅ Loaded all ${dimeProjectsLoaded.length} DIME squares`);
-        
-    } catch (error) {
-        console.error('Error loading all DIME projects:', error);
+    if (!summary) {
+        return;
     }
-}
 
-// Load DIME squares for a specific region
-async function loadDimeSquaresForRegion(regionName) {
-    try {
-        console.log(`🔲 Loading DIME squares for ${regionName}...`);
-        
-        // Fetch all DIME-only projects
-        const response = await fetch('/api/dime/projects/dime-only');
-        const data = await response.json();
-        
-        if (!data.success || !data.projects) {
-            console.error('Failed to load DIME-only projects');
-            return;
-        }
-        
-        // Normalize region names for matching
-        // Flood: "REGION I - ILOCOS REGION" -> "region i" and "ilocos"
-        // DIME: "(Region I) Ilocos Region" -> "region i" and "ilocos"
-        const normalizedRegionName = regionName.toLowerCase();
-        const regionParts = normalizedRegionName.split(/[\s\-]+/); // Split by space or dash
-        
-        // Filter by region (match region field or province)
-        const regionProjects = data.projects.filter(p => {
-            if (!p.region) return false;
-            
-            const normalizedDimeRegion = p.region.toLowerCase();
-            
-            // Check if any significant part of the region name matches
-            // This handles "REGION I - ILOCOS REGION" matching "(Region I) Ilocos Region"
-            const hasMatch = regionParts.some(part => {
-                // Skip short words like "region", "-"
-                if (part.length <= 2 || part === 'region') return false;
-                return normalizedDimeRegion.includes(part);
-            });
-            
-            // Also check for roman numeral matches (I, II, III, etc.)
-            const floodRomanMatch = normalizedRegionName.match(/region\s+(i{1,3}|iv|v|vi{0,3}|ix|x{1,3})/);
-            const dimeRomanMatch = normalizedDimeRegion.match(/region\s+(i{1,3}|iv|v|vi{0,3}|ix|x{1,3})/);
-            
-            if (floodRomanMatch && dimeRomanMatch) {
-                return floodRomanMatch[1] === dimeRomanMatch[1];
-            }
-            
-            return hasMatch;
+    if (!marker) {
+        marker = createProvinceMarker(key, centerEntry.center, provinceName, summary);
+    }
+
+    showProvinceStatus(provinceName, summary);
+
+    marker = provinceMarkers.get(key);
+    if (marker) {
+        marker.setPopupContent(createProvincePopup(provinceName, summary));
+        marker.openPopup();
+        mapInstance.flyTo(marker.getLatLng(), Math.max(mapInstance.getZoom(), 7), {
+            duration: 0.5
         });
-        
-        console.log(`✅ Found ${regionProjects.length} DIME projects in ${regionName}`);
-        
-        // Process each project as triangle
-        for (const project of regionProjects) {
-            if (project.latitude && project.longitude) {
-                const lat = parseFloat(project.latitude);
-                const lng = parseFloat(project.longitude);
-                
-                if (!isNaN(lat) && !isNaN(lng)) {
-                    const color = getStatusColor(project.status);
-                    const cost = project.cost || 0;
-                    const radius = calculateCircleRadius(cost, currentZoomLevel);
-                    
-                    // Create square marker
-                    // Use slightly larger fraction of radius for square size (in degrees)
-                    const halfSize = (radius / 2.2) / 111000; // Convert meters to degrees
-                    const square = L.rectangle([
-                        [lat - halfSize, lng - halfSize],  // Southwest corner
-                        [lat + halfSize, lng + halfSize]   // Northeast corner
-                    ], {
-                        color: color,
-                        fillColor: color,
-                        fillOpacity: 0.6,
-                        weight: 2
-                    });
-                    
-                    // Parse contractors
-                    let contractorsList = 'Unknown';
-                    if (project.contractors && project.contractors.length > 0) {
-                        try {
-                            const contractorNames = project.contractors.map(c => {
-                                if (typeof c === 'string') {
-                                    const parsed = JSON.parse(c);
-                                    return parsed.name || 'Unknown';
-                                }
-                                return c.name || 'Unknown';
-                            });
-                            contractorsList = contractorNames.join(', ');
-                        } catch (e) {
-                            contractorsList = project.contractors.join(', ');
-                        }
-                    }
-                    
-                    const costDisplay = cost ? `₱${parseFloat(cost).toLocaleString('en-PH', {minimumFractionDigits: 2, maximumFractionDigits: 2})}` : 'N/A';
-                    
-                    // Format year/date display for DIME (region view)
-                    let dateDisplayRegion = '';
-                    if (project.year) {
-                        dateDisplayRegion = `
-                            <div style="font-size: 0.9em; margin-bottom: 10px; color: #666;">
-                                <strong>Year:</strong> ${project.year}
-                            </div>
-                        `;
-                    } else if (project.contract_completion_date) {
-                        const compDate = new Date(project.contract_completion_date);
-                        dateDisplayRegion = `
-                            <div style="font-size: 0.9em; margin-bottom: 10px; color: #666;">
-                                <strong>Target Completion:</strong> ${compDate.toLocaleDateString('en-PH', {year: 'numeric', month: 'short'})}
-                            </div>
-                        `;
-                    }
-                    
-                    const dimeProjectId = `dime-${project.id}`;
-                    
-                    const popupContent = `
-                        <div style="width: 900px; font-family: Arial, sans-serif; overflow-wrap: break-word; word-wrap: break-word;">
-                            <h4 style="margin: 0 0 10px 0; color: ${color}; font-size: 1.1em; overflow-wrap: break-word; word-wrap: break-word;">
-                                🔺 ${project.project_name || 'Unnamed Project'}
-                            </h4>
-                            <div style="font-size: 0.95em; margin-bottom: 10px; overflow-wrap: break-word;">
-                                <strong>Location:</strong> ${project.city || 'Unknown'}, ${project.province || 'Unknown'}
-                            </div>
-                            <div style="font-size: 0.95em; margin-bottom: 10px;">
-                                <strong>Status:</strong> <span style="display: inline-block; padding: 2px 6px; border-radius: 3px; font-size: 0.8em; font-weight: 600; background: ${color}20; color: ${color}; border: 1px solid ${color}40;">${project.status || 'Unknown'}</span>
-                            </div>
-                            ${dateDisplayRegion}
-                            <div style="font-size: 0.95em; margin-bottom: 10px;">
-                                <strong>Cost:</strong> ${costDisplay}
-                            </div>
-                            <div style="font-size: 0.9em; margin-bottom: 10px; color: #666; overflow-wrap: break-word; word-wrap: break-word;">
-                                <strong>Contractor(s):</strong> ${contractorsList}
-                            </div>
-                            <div style="font-size: 0.85em; padding: 8px; background: #e3f2fd; border-left: 3px solid #2196f3; margin-top: 10px; overflow-wrap: break-word;">
-                                <strong style="color: #1976d2;">🔲 DIME-only Project</strong><br>
-                                <span style="color: #666;">This project appears in DIME database but not in Flood Control data</span>
-                            </div>
-                            <div id="philgeps-contracts-${dimeProjectId}" style="margin-top: 12px; padding-top: 12px; border-top: 1px solid #e0e0e0; overflow-wrap: break-word; word-wrap: break-word;">
-                                <div style="font-size: 0.85em; color: #666; font-style: italic;">
-                                    PhilGEPS data not available for DIME-only projects
-                                </div>
-                            </div>
-                            <div id="sec-info-${dimeProjectId}" style="margin-top: 12px; padding-top: 12px; border-top: 1px solid #e0e0e0; overflow-wrap: break-word; word-wrap: break-word;">
-                                <div style="font-size: 0.85em; color: #666; font-style: italic;">
-                                    Loading SEC info...
-                                </div>
-                            </div>
-                        </div>
-                    `;
-                    
-                    square.bindPopup(popupContent, {
-                        maxWidth: 950,
-                        className: 'custom-popup'
-                    });
-                    
-                    // Load SEC info on popup open (same as global DIME squares)
-                    square.on('popupopen', async () => {
-                        const secContainer = document.getElementById(`sec-info-${dimeProjectId}`);
-                        if (secContainer && contractorsList !== 'Unknown') {
-                            try {
-                                const secResponse = await fetch('/static/data/sec_contractors_database.json');
-                                if (!secResponse.ok) throw new Error('Failed to load SEC database');
-                                
-                                const secData = await secResponse.json();
-                                const contractors = secData.contractors || [];
-                                
-                                const normalizeContractorName = (name) => {
-                                    if (!name) return '';
-                                    return name.toUpperCase()
-                                        .replace(/[^A-Z0-9]/g, '')
-                                        .replace(/CORP(ORATION)?/g, '')
-                                        .replace(/INC(ORPORATED)?/g, '')
-                                        .replace(/LTD(LIMITED)?/g, '')
-                                        .replace(/CO(MPANY)?/g, '');
-                                };
-                                
-                                const normalizedContractorName = normalizeContractorName(contractorsList.split(',')[0].trim());
-                                
-                                let matchingContractor = contractors.find(c => 
-                                    normalizeContractorName(c.original_contractor_name || c.company_name) === normalizedContractorName
-                                );
-                                
-                                if (matchingContractor && matchingContractor.sec_number) {
-                                    secContainer.innerHTML = `
-                                        <div style="font-size: 0.9em; color: #0038A8; font-weight: 600; margin-bottom: 8px;">
-                                            🏛️ SEC Registration
-                                        </div>
-                                        <div style="font-size: 0.85em; padding: 8px; background: transparent; border-left: 3px solid #28a745; overflow-wrap: break-word; word-wrap: break-word; max-width: 100%;">
-                                            <div style="font-weight: 600; margin-bottom: 6px; overflow-wrap: break-word; word-wrap: break-word;">
-                                                ${matchingContractor.company_name || matchingContractor.original_contractor_name}
-                                            </div>
-                                            <div style="color: #666; font-size: 0.9em; line-height: 1.4; overflow-wrap: break-word; word-wrap: break-word;">
-                                                <strong>SEC Number:</strong> ${matchingContractor.sec_number}<br>
-                                                <strong>Status:</strong> ${matchingContractor.status || 'N/A'}<br>
-                                                ${matchingContractor.date_registered ? '<strong>Registered:</strong> ' + matchingContractor.date_registered + '<br>' : ''}
-                                                ${matchingContractor.registered_address ? '<strong>Address:</strong> ' + matchingContractor.registered_address : ''}
-                                            </div>
-                                        </div>
-                                    `;
-                                } else if (matchingContractor && matchingContractor.status === 'NO_SEC_RESULTS') {
-                                    secContainer.innerHTML = `
-                                        <div style="font-size: 0.9em; color: #856404; font-weight: 600; margin-bottom: 8px;">
-                                            🏛️ SEC Registration
-                                        </div>
-                                        <div style="font-size: 0.85em; padding: 8px; background: transparent; border-left: 3px solid #ffc107; overflow-wrap: break-word; word-wrap: break-word; max-width: 100%;">
-                                            <div style="font-weight: 600; color: #856404; margin-bottom: 6px;">
-                                                ⚠️ NO SEC RESULTS - SUSPICIOUS
-                                            </div>
-                                            <div style="color: #856404; font-size: 0.9em; line-height: 1.4; overflow-wrap: break-word; word-wrap: break-word;">
-                                                This contractor was searched in the SEC database but yielded <strong>zero results</strong>. 
-                                                Government contractors should be SEC-registered.
-                                            </div>
-                                        </div>
-                                    `;
-                                } else {
-                                    secContainer.innerHTML = `
-                                        <div style="font-size: 0.8em; color: #999; font-style: italic;">
-                                            SEC info not yet processed for this contractor
-                                        </div>
-                                    `;
-                                }
-                            } catch (error) {
-                                console.error('Error fetching SEC info:', error);
-                                secContainer.innerHTML = `
-                                    <div style="font-size: 0.75em; color: #999; font-style: italic;">
-                                        SEC data unavailable
-                                    </div>
-                                `;
-                            }
-                        }
-                    });
-                    
-                    square.addTo(mapInstance);
-                    mapMarkers.push(square);
-                }
-            }
+        if ((summary.counts?.ssp || 0) > 0) {
+            loadSspProjectsIntoPopup(provinceName, summary);
         }
-        
-        console.log(`✅ Added ${regionProjects.length} DIME squares for ${regionName}`);
-        
-    } catch (error) {
-        console.error(`Error loading DIME triangles for ${regionName}:`, error);
+        bindProvincePopupButton(key, provinceName, summary);
     }
 }
 
-// Progressive loading function - loads in chunks, skipping 1000 at a time
-async function loadMoreProjects() {
-    if (isLoadingMore || progressiveLoadingCancelled) return;
+function showProvinceStatus(provinceName, summary) {
+    const fragments = SOURCE_ORDER.map(sourceKey => {
+        const meta = SOURCE_META[sourceKey];
+        const count = summary.counts[sourceKey] || 0;
+        return `${meta.shortLabel}: ${count.toLocaleString('en-PH')}`;
+    });
 
-    isLoadingMore = true;
+    updateMapStatus(`${provinceName} — ${fragments.join(' • ')}`);
+}
+
+function createProvincePopup(provinceName, summary) {
+    const rows = SOURCE_ORDER.map(sourceKey => {
+        const meta = SOURCE_META[sourceKey];
+        const count = summary.counts[sourceKey] || 0;
+        const share = summary.total ? ((count / summary.total) * 100).toFixed(1) : '0.0';
+
+        return `
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+                <span style="display:flex; align-items:center; gap:8px;">
+                    <span class="integrated-shape ${meta.className}" style="--scale:0.55; width:14px; height:14px; border:none;"></span>
+                    ${meta.label}
+                </span>
+                <span><strong>${count.toLocaleString('en-PH')}</strong> <span style="color:#64748b;">(${share}%)</span></span>
+                                </div>
+                            `;
+    }).join('');
+
+    const totalCost = summary.total_cost
+        ? `₱${Math.round(summary.total_cost).toLocaleString('en-PH')}`
+        : '₱0';
+
+    return `
+        <div style="min-width:240px; font-family:'Inter', sans-serif;">
+            <h3 style="margin:0 0 8px; font-size:16px; color:#0f172a;">${provinceName}</h3>
+            <div style="font-size:13px; color:#475569; margin-bottom:12px; line-height:1.5;">
+                <div>Total recorded projects: <strong>${summary.total.toLocaleString('en-PH')}</strong></div>
+                <div>Total reported value: <strong>${totalCost}</strong></div>
+                    </div>
+            <div style="font-size:13px; color:#1e293b;">
+                ${rows}
+                        </div>
+            <div id="ssp-projects-${normalizeProvinceKey(provinceName)}" style="margin-top:12px; font-size:12px; color:#475569; line-height:1.5;"></div>
+            <button id="province-projects-btn-${normalizeProvinceKey(provinceName)}" style="margin-top:10px; width:100%; padding:8px 12px; border:1px solid #2563eb; background:#2563eb; color:#fff; border-radius:8px; font-size:12px; font-weight:600; cursor:pointer;">View detailed project list</button>
+            <div id="province-project-list-${normalizeProvinceKey(provinceName)}" style="margin-top:12px; display:none; max-height:260px; overflow-y:auto; padding-right:6px;"></div>
+                    </div>
+                `;
+                            }
+                            
+async function loadSspProjectsIntoPopup(provinceName, summary) {
+    const containerId = `ssp-projects-${normalizeProvinceKey(provinceName)}`;
+    const container = document.getElementById(containerId);
+    if (!container) return;
+
+    container.innerHTML = 'Loading SSP project snapshots...';
+
     try {
-        // Skip 1000 at a time for efficient loading
-        const response = await fetch(`/api/flood/projects?limit=100&offset=${globalOffset}`);
-        if (!response.ok) {
-            throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+        const response = await fetch(`/api/flood/projects?province=${encodeURIComponent(provinceName)}&limit=20&offset=0`);
+                        if (!response.ok) {
+            throw new Error(`HTTP ${response.status}`);
         }
 
-        const data = await response.json();
-        const projects = data.projects || [];
+        const payload = await response.json();
+        const projects = (payload.projects || []).filter(project =>
+            project.Latitude && project.Longitude && !isNaN(parseFloat(project.Latitude)) && !isNaN(parseFloat(project.Longitude))
+        ).slice(0, 5);
 
-        if (projects.length === 0) {
-            updateMapStatus('All projects loaded');
-            clearInterval(progressiveInterval);
-            progressiveInterval = null;
+        if (!projects.length) {
+            container.innerHTML = '<em>No flood-control projects with coordinates yet in this province.</em>';
+                return;
+            }
+            
+        const listItems = projects.map(project => {
+            const lat = parseFloat(project.Latitude).toFixed(6);
+            const lng = parseFloat(project.Longitude).toFixed(6);
+            const streetViewUrl = `https://www.google.com/maps/@?api=1&map_action=pano&viewpoint=${lat},${lng}`;
+            const mapsUrl = `https://www.google.com/maps/search/?api=1&query=${lat},${lng}`;
+            const title = project.ProjectTitle || project.ProjectName || 'Flood control project';
+            const cost = project.ContractCost ? `₱${Number(project.ContractCost).toLocaleString('en-PH')}` : 'N/A';
+
+            return `
+                <li style="margin-bottom:10px;">
+                    <div style="font-weight:600; color:#0f172a;">${title}</div>
+                    <div style="color:#64748b; font-size:11px;">
+                        Contractor: ${project.Contractor || 'N/A'} • Cost: ${cost}
+                                        </div>
+                    <div style="margin-top:4px; display:flex; gap:8px;">
+                        <a href="${streetViewUrl}" target="_blank" rel="noopener" style="color:#2563eb; font-weight:600;">Street View</a>
+                        <a href="${mapsUrl}" target="_blank" rel="noopener" style="color:#2563eb;">Map</a>
+                                        </div>
+                </li>
+            `;
+        }).join('');
+
+        container.innerHTML = `
+            <div style="font-weight:600; color:#0f172a; margin-bottom:6px;">Flood Control (SSP) projects with Street View</div>
+            <ul style="list-style:none; padding:0; margin:0;">
+                ${listItems}
+            </ul>
+            <div style="margin-top:8px;">
+                <a href="/api/flood/projects?province=${encodeURIComponent(provinceName)}&limit=100&offset=0" target="_blank" style="font-size:11px; color:#2563eb;">Open full SSP list</a>
+                                    </div>
+                                `;
+                    } catch (error) {
+        console.error('Failed to load SSP projects:', error);
+        container.innerHTML = '<em>Street View lookup failed. Please try again.</em>';
+    }
+}
+
+
+function createPlaceholderIcon() {
+    return L.divIcon({
+        className: 'integrated-marker-wrapper',
+        html: `<div class="integrated-marker" style="opacity:0.7; filter: grayscale(0.35);">${SOURCE_ORDER.map(() => '<div class="integrated-shape empty"></div>').join('')}</div>`,
+        iconSize: [28, 28],
+        iconAnchor: [14, 14]
+    });
+}
+
+function createProjectMarkerIcon(sourceKey, options = {}) {
+    const meta = SOURCE_META[sourceKey] || { className: 'circle' };
+    const classes = ['project-marker', meta.className];
+    if (options.unknown) {
+        classes.push('unknown');
+    }
+    if (options.flagStatus === 'red') {
+        classes.push('flag-red');
+    } else if (options.flagStatus === 'green') {
+        classes.push('flag-green');
+    }
+    const scaleValue = Number.isFinite(options.scale) ? options.scale : 1;
+    const scaleAttr = ` style="--scale:${scaleValue.toFixed(3)};"`;
+    return L.divIcon({
+        className: 'project-marker-wrapper',
+        html: `<div class="${classes.join(' ')}"${scaleAttr}></div>`,
+        iconSize: [18, 18],
+        iconAnchor: [9, 9]
+    });
+}
+
+async function fetchProvinceSummary(provinceName) {
+    const slug = getProvinceSlug(provinceName);
+    const staticUrl = `/static/data/province-projects-${slug}/summary.json`;
+
+    try {
+        const staticResponse = await fetch(staticUrl, { cache: 'no-store' });
+        if (staticResponse.ok) {
+            const summaryData = await staticResponse.json();
+            if (summaryData && summaryData.summary) {
+                return {
+                    name: summaryData.province || provinceName,
+                    total: summaryData.summary.total || 0,
+                    total_cost: summaryData.total_cost || 0,
+                    counts: {
+                        ssp: summaryData.summary.ssp || 0,
+                        dime: summaryData.summary.dime || 0,
+                        philgeps: summaryData.summary.philgeps || 0,
+                        microsite: summaryData.summary.microsite || 0
+                    }
+                };
+            }
+                        }
+                    } catch (error) {
+        console.warn('Static summary fetch failed, falling back to API:', error);
+    }
+
+    const canonicalName = provinceName.toLowerCase() === 'compostela valley' ? 'Davao de Oro' : provinceName;
+    const response = await fetch(`/api/province-projects/all?province=${encodeURIComponent(canonicalName)}&limit=1&offset=0`);
+    if (!response.ok) {
+        throw new Error(`HTTP ${response.status}`);
+    }
+    const payload = await response.json();
+    if (!payload.success || !payload.summary) {
+        throw new Error('Summary missing in response');
+    }
+    return {
+        name: payload.province || provinceName,
+        total: payload.summary.total || 0,
+        total_cost: payload.total_cost || 0,
+        counts: {
+            ssp: payload.summary.ssp || 0,
+            dime: payload.summary.dime || 0,
+            philgeps: payload.summary.philgeps || 0,
+            microsite: payload.summary.microsite || 0
+        }
+    };
+}
+
+function createProvinceMarker(key, center, displayName, summary = null) {
+    if (!mapInstance) return;
+
+    if (provinceMarkers.has(key)) {
+        try {
+            mapInstance.removeLayer(provinceMarkers.get(key));
+    } catch (error) {
+            console.warn('Failed to remove previous province marker:', error);
+        }
+    }
+
+    const icon = summary ? createIntegratedIcon(summary) : createPlaceholderIcon();
+    const marker = L.marker(center, { icon });
+
+    const popupContent = summary
+        ? createProvincePopup(displayName, summary)
+        : `<div style="font-family:'Inter', sans-serif; font-size:12px; color:#475569; min-width:220px;">Loading integrated data for <strong>${displayName}</strong>...</div>`;
+
+    marker.bindPopup(popupContent, {
+        maxWidth: 320,
+        className: 'bettergov-popup'
+    });
+
+    marker.on('click', () => {
+        if (!provinceSummaryLookup.has(key)) {
+            prioritizeProvinceSummary(key, displayName);
+        }
+        handleProvinceClick(displayName, key);
+    });
+
+    marker.addTo(mapInstance);
+    provinceMarkers.set(key, marker);
+    if (hiddenProvinceMarkers.has(key)) {
+        hideProvinceMarker(key);
+    }
+    return marker;
+}
+
+async function ensureProvinceSummary(key, displayName) {
+    if (provinceSummaryLookup.has(key)) {
+        return provinceSummaryLookup.get(key);
+    }
+
+    updateMapStatus(`Fetching integrated data for ${displayName}...`);
+    const summary = await fetchProvinceSummary(displayName);
+    provinceSummaryLookup.set(key, summary);
+
+    const centerEntry = provinceCenters.get(key);
+    if (centerEntry) {
+        createProvinceMarker(key, centerEntry.center, displayName, summary);
+    }
+
+    return summary;
+}
+
+function bindProvincePopupButton(key, provinceName, summary) {
+    const button = document.getElementById(`province-projects-btn-${key}`);
+    if (!button || button.dataset.bound === 'true') {
+                return;
+            }
+    button.addEventListener('click', () => {
+        button.remove();
+        renderProvinceProjectsOnMap(provinceName, summary);
+    });
+    button.dataset.bound = 'true';
+}
+
+function hideProvinceMarker(key) {
+    const marker = provinceMarkers.get(key);
+    if (!marker) {
+        hiddenProvinceMarkers.add(key);
+                return;
+            }
+    const applyHide = () => {
+        const el = marker.getElement();
+        if (el) {
+            el.style.opacity = '0';
+            el.style.pointerEvents = 'none';
+            hiddenProvinceMarkers.add(key);
+        }
+    };
+    if (marker._map) {
+        applyHide();
+                                    } else {
+        marker.once('add', applyHide);
+    }
+}
+
+function showProvinceMarker(key) {
+    const marker = provinceMarkers.get(key);
+    if (!marker) return;
+    const applyShow = () => {
+        const el = marker.getElement();
+        if (el) {
+            el.style.opacity = '';
+            el.style.pointerEvents = '';
+        }
+    };
+    if (marker._map) {
+        applyShow();
+    } else {
+        marker.once('add', applyShow);
+    }
+    hiddenProvinceMarkers.delete(key);
+}
+
+function restoreHiddenProvinceMarkers() {
+    hiddenProvinceMarkers.forEach(key => {
+        showProvinceMarker(key);
+    });
+    hiddenProvinceMarkers.clear();
+}
+
+function enqueueProvinceSummaryLoad(key, displayName) {
+    if (provinceSummaryLookup.has(key)) {
+                return;
+            }
+    pendingSummaryQueue.push({ key, displayName, priority: false });
+    if (!summaryQueueBusy) {
+        summaryQueueBusy = true;
+        processProvinceSummaryQueue();
+    }
+}
+
+async function processProvinceSummaryQueue() {
+    if (!pendingSummaryQueue.length) {
+        summaryQueueBusy = false;
+        updateMapStatus('Integrated data ready for loaded provinces.');
+            return;
+        }
+        
+    const { key, displayName } = pendingSummaryQueue.shift();
+    try {
+        await ensureProvinceSummary(key, displayName);
+        updateMapStatus(`Loaded integrated summary for ${displayName}`);
+    } catch (error) {
+        console.warn(`Failed to load integrated summary for ${displayName}:`, error);
+    }
+
+    setTimeout(processProvinceSummaryQueue, 120);
+}
+
+function prioritizeProvinceSummary(key, displayName) {
+    if (provinceSummaryLookup.has(key)) {
+                return;
+            }
+    const existingIndex = pendingSummaryQueue.findIndex(item => item.key === key);
+    if (existingIndex !== -1) {
+        pendingSummaryQueue.splice(existingIndex, 1);
+    }
+    pendingSummaryQueue.unshift({ key, displayName, priority: true });
+    if (!summaryQueueBusy) {
+        summaryQueueBusy = true;
+        processProvinceSummaryQueue();
+    }
+}
+
+async function renderProvinceProjectsOnMap(provinceName, summary) {
+    const key = normalizeProvinceKey(provinceName);
+    const container = document.getElementById(`province-project-list-${key}`);
+    if (!container) return;
+
+    let summaryData = summary;
+    if (!summaryData) {
+        try {
+            summaryData = await ensureProvinceSummary(key, provinceName);
+    } catch (error) {
+            console.error('Failed to ensure province summary before rendering projects:', error);
+            return;
+        }
+    }
+
+    container.style.display = 'block';
+    container.innerHTML = `
+        <div id="province-project-status-${key}" style="font-size:12px; color:#64748b; margin-bottom:8px;">Loading province projects…</div>
+        <div id="province-project-items-${key}" style="font-size:12px; color:#0f172a; line-height:1.5;"></div>
+    `;
+
+    const statusEl = document.getElementById(`province-project-status-${key}`);
+    const listEl = document.getElementById(`province-project-items-${key}`);
+
+    clearActiveProjectMarkers(false);
+    hideProvinceMarker(key);
+
+    const provinceCenter = provinceCenters.get(key)?.center;
+    const seenKeys = new Set();
+    const fragments = [];
+    const bounds = new L.LatLngBounds();
+    let processedPages = 0;
+    let totalPages = 1;
+    let totalMapped = 0;
+    let totalFallback = 0;
+    let totalMarkers = 0;
+    let totalProjectsExpected = null;
+
+    const formatCount = (value) => value.toLocaleString('en-PH');
+
+    const updateStatus = () => {
+        if (!statusEl) {
+            return;
+        }
+        const mappedText = `${formatCount(totalMapped)} exact`;
+        const fallbackText = `${formatCount(totalFallback)} approximate`;
+        statusEl.innerHTML = `Processed ${processedPages}/${totalPages} page(s) — ${mappedText}, ${fallbackText}.`;
+    };
+
+    const buildCoordinateMap = (entries) => {
+        const map = new Map();
+        (entries || []).forEach(entry => {
+            const baseName = (entry.project_name || '').toLowerCase();
+            if (!baseName) {
+                return;
+            }
+            const keys = new Set();
+            if (entry.source) keys.add(entry.source.toLowerCase());
+            if (entry.original_source) keys.add(entry.original_source.toLowerCase());
+            if (entry.matched_source) keys.add(entry.matched_source.toLowerCase());
+            if (Array.isArray(entry.sources)) {
+                entry.sources.forEach(src => {
+                    if (src) keys.add(src.toLowerCase());
+                });
+            }
+            keys.forEach(src => {
+                if (!src) return;
+                map.set(`${src}::${baseName}`, {
+                    ...entry,
+                    latitude: entry.latitude,
+                    longitude: entry.longitude
+                });
+            });
+        });
+        return map;
+    };
+
+    const resolveCoordinateEntry = (project, coordinateMap, provinceKey) => {
+        const candidateSources = new Set([project.__sourceKey]);
+        project.__sourcesList.forEach(src => candidateSources.add(src));
+ 
+        for (const candidate of candidateSources) {
+            const entry = coordinateMap.get(`${candidate}::${project.__nameKey}`);
+            if (!entry) continue;
+            const latVal = Number(entry.latitude);
+            const lngVal = Number(entry.longitude);
+            if (!isFinite(latVal) || !isFinite(lngVal)) continue;
+            return {
+                ...entry,
+                latitude: latVal,
+                longitude: lngVal,
+                matched_source: (entry.matched_source || candidate).toString().toLowerCase(),
+                original_source: (entry.original_source || project.__sourceKey).toString().toLowerCase(),
+                isFallback: Boolean(entry.isFallback)
+            };
+        }
+
+        if (provinceCenter) {
+            const fallbackPoint = generateFallbackCoordinate(provinceKey, project.__sourceKey, provinceCenter, project.__nameKey);
+            if (fallbackPoint) {
+                return {
+                    latitude: fallbackPoint.latitude,
+                    longitude: fallbackPoint.longitude,
+                    matched_source: project.__sourceKey,
+                    original_source: project.__sourceKey,
+                    isFallback: true
+                };
+            }
+        }
+
+        return null;
+    };
+
+    const processBatch = async (projectsBatch, pageNumber) => {
+        if (!Array.isArray(projectsBatch) || !projectsBatch.length) {
+            processedPages += 1;
+            updateStatus();
             return;
         }
 
-        await processProjects(projects);
-        globalOffset += 1000; // Skip 1000 at a time instead of loading sequentially
+        const normalizedBatch = [];
+        projectsBatch.forEach(project => {
+            const primarySource = (project.source || 'unknown').toLowerCase();
+            const title = project.project_name || project.ProjectName || project.ProjectTitle || project.ProjectDescription || '';
+            const nameKey = title.toLowerCase();
+            const dedupeKey = `${primarySource}::${nameKey}`;
+            if (seenKeys.has(dedupeKey)) {
+                return;
+            }
+            seenKeys.add(dedupeKey);
+            normalizedBatch.push({
+                ...project,
+                __sourceKey: primarySource,
+                __nameKey: nameKey,
+                __sourcesList: Array.isArray(project.sources_list) ? project.sources_list.map(src => (src || '').toLowerCase()) : []
+            });
+        });
 
-    } catch (error) {
-        console.error('❌ Error loading more projects:', error);
-        clearInterval(progressiveInterval);
-        progressiveInterval = null;
-    } finally {
-        isLoadingMore = false;
-    }
-}
-
-// Load all projects (advanced feature)
-// Must be defined BEFORE initializeMap() so it exists when event listener is attached
-window.loadAllProjects = async function loadAllProjects() {
-    console.log(`🗺️ Loading all projects (Show All)`);
-
-    // Show warning confirmation
-    const confirmed = confirm(
-        '⚠️ WARNING: Loading all 9,855 projects may:\n' +
-        '• Overwhelm your browser and cause it to freeze\n' +
-        '• Consume significant memory and CPU resources\n' +
-        '• Take several minutes to complete\n' +
-        '• Make your device unresponsive\n\n' +
-        'Continue anyway?'
-    );
-
-    if (!confirmed) return;
-
-    // Cancel any existing progressive loading (both initial page load and region loading)
-    progressiveLoadingCancelled = true;
-    regionProgressiveLoadingCancelled = true;
-    showAllMode = true; // Activate "Show All" mode to prevent initial page load from interfering
-
-    // Wait a moment to ensure any in-flight requests complete
-    await new Promise(resolve => setTimeout(resolve, 100));
-
-    // Update status
-    updateMapStatus(`Loading all projects...`);
-
-    // Clear existing markers
-    mapMarkers.forEach(marker => mapInstance.removeLayer(marker));
-    mapMarkers = [];
-
-    // Stop any existing progressive loading
-    if (progressiveInterval) {
-        clearInterval(progressiveInterval);
-        progressiveInterval = null;
-    }
-
-    // Reset progressive loading state for "Show All" loading
-    progressiveLoadingStarted = false;
-    globalOffset = 0;
-    isLoadingMore = false;
-    loadedProjects = [];
-    
-    // Reset DIME loading state
-    dimeProjectsLoaded = [];
-    isDimeLoading = false;
-    allDimeProjectsCache = null; // Clear cache to force reload from 0
-
-    // Reset cancellation flag now that we've successfully cancelled initial page load
-    // This allows "Show All" progressive loading to proceed
-    progressiveLoadingCancelled = false;
-    // Keep region cancellation flag true since we're loading all projects (not region-specific)
-
-    try {
-        // Load initial batch of 100 projects (all projects, no region filter)
-        const response = await fetch('/api/flood/projects?limit=100&offset=0');
-        if (!response.ok) {
-            throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+        if (!normalizedBatch.length) {
+            processedPages += 1;
+            updateStatus();
+            return;
         }
 
-        const data = await response.json();
-        const projects = data.projects || [];
-        await processProjects(projects);
+        const coordRequestBody = normalizedBatch.map(project => ({
+            source: project.source,
+            project_name: project.project_name || project.ProjectName || project.ProjectTitle || project.ProjectDescription || '',
+            municipality: project.municipality || project.Municipality,
+            province: project.province || project.Province,
+            location: project.location,
+            amount: project.amount ?? project.contract_amount ?? project.ContractCost ?? project.cost,
+            contractor: project.contractor || project.Contractor,
+            sources: Array.isArray(project.sources_list) ? project.sources_list : []
+        }));
 
-        // Continue loading all projects progressively
-        let offset = projects.length;
-        while (true) {
-            const response = await fetch(`/api/flood/projects?limit=500&offset=${offset}`);
-            if (!response.ok) break;
-
-            const batchData = await response.json();
-            const batch = batchData.projects || [];
-
-            if (batch.length === 0) break;
-
-            await processProjects(batch);
-            offset += batch.length;
-
-            // Allow UI to update every 500 projects
-            if (offset % 500 === 0) {
-                await new Promise(resolve => setTimeout(resolve, 10));
+        let coordinateEntries = [];
+        if (coordRequestBody.length) {
+            try {
+                const coordResponse = await fetch('/api/province-projects/coordinates', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ province: provinceName, projects: coordRequestBody })
+                });
+                if (coordResponse.ok) {
+                    const coordPayload = await coordResponse.json();
+                    coordinateEntries = Array.isArray(coordPayload.coordinates) ? coordPayload.coordinates : [];
+                } else {
+                    console.warn(`Coordinate lookup failed with status ${coordResponse.status}`);
+                }
+    } catch (error) {
+                console.warn('Coordinate lookup error:', error);
             }
         }
 
-        updateMapStatus(`Loaded ${mapMarkers.length} flood circles. Loading DIME squares...`);
-        
-        // Also load ALL DIME squares (from 0)
-        await loadAllDimeProjects();
-        
-        updateMapStatus(`All projects loaded: ${mapMarkers.length} markers (circles + squares)`);
+        const coordinateMap = buildCoordinateMap(coordinateEntries);
+ 
+         const batchBounds = new L.LatLngBounds();
+ 
+         normalizedBatch.forEach(project => {
+             const coordinateEntry = resolveCoordinateEntry(project, coordinateMap, key);
+             let markerSourceKey = project.__sourceKey;
+             const amountRaw = project.amount ?? project.contract_amount ?? project.ContractCost ?? project.cost;
+             let flagStatus = null;
 
-    } catch (error) {
-        console.error('❌ Error loading all projects:', error);
-        updateMapStatus('Error loading all projects: ' + error.message);
-    }
-}
+             if (coordinateEntry) {
+                 if (!coordinateEntry.isFallback && coordinateEntry.matched_source) {
+                     markerSourceKey = coordinateEntry.matched_source;
+                 }
 
-// Start progressive loading
-function startProgressiveLoading() {
-    if (progressiveLoadingStarted) return;
+                 const flags = coordinateEntry.flags;
+                 if (flags && (markerSourceKey === 'ssp' || coordinateEntry.original_source === 'ssp')) {
+                     if (flags.hasRedFlags) {
+                         flagStatus = 'red';
+                     } else if (flags.isGreenFlag) {
+                         flagStatus = 'green';
+                     }
+                 }
 
-    progressiveLoadingStarted = true;
-    progressiveLoadingCancelled = false;
+                 const markerOptions = {
+                     unknown: Boolean(coordinateEntry.isFallback),
+                     scale: computeMarkerScale(amountRaw)
+                 };
+                 if (flagStatus) {
+                     markerOptions.flagStatus = flagStatus;
+                 }
 
-    // Load more projects every 2 seconds
-    progressiveInterval = setInterval(() => {
-        if (!showAllMode && !progressiveLoadingCancelled) {
-            loadMoreProjects();
+                 const marker = L.marker([coordinateEntry.latitude, coordinateEntry.longitude], {
+                     icon: createProjectMarkerIcon(markerSourceKey, markerOptions)
+                 });
+
+                 marker.bindPopup(
+                     buildIntegratedProjectPopup(project, coordinateEntry.latitude, coordinateEntry.longitude, markerSourceKey, coordinateEntry, flagStatus),
+                     { maxWidth: 420, className: 'bettergov-popup' }
+                 );
+
+                 marker.addTo(mapInstance);
+                 activeProjectMarkers.push(marker);
+                 bounds.extend([coordinateEntry.latitude, coordinateEntry.longitude]);
+                 batchBounds.extend([coordinateEntry.latitude, coordinateEntry.longitude]);
+                 totalMarkers += 1;
+
+                 if (coordinateEntry.isFallback) {
+                     totalFallback += 1;
+                                } else {
+                     totalMapped += 1;
+                 }
+             }
+
+             fragments.push(renderProjectListRow(project, markerSourceKey, coordinateEntry, flagStatus));
+         });
+ 
+         if (listEl) {
+             listEl.innerHTML = fragments.join('');
+         }
+
+        processedPages += 1;
+        updateStatus();
+
+        if (processedPages === 1) {
+            if (batchBounds.isValid()) {
+                mapInstance.flyToBounds(batchBounds, {
+                    maxZoom: 11,
+                    padding: [60, 60]
+                });
+            } else if (provinceCenter) {
+                mapInstance.flyTo(provinceCenter, Math.min(Math.max(mapInstance.getZoom(), 8.5), 10));
+            }
         }
-    }, 2000);
+    };
+
+    try {
+        const response = await fetch(`/api/province-projects/all?province=${encodeURIComponent(provinceName)}&page=1&limit=${PROVINCE_PAGE_SIZE}`);
+        if (!response.ok) {
+            throw new Error(`HTTP ${response.status}`);
+        }
+
+        const payload = await response.json();
+        const projects = Array.isArray(payload.projects) ? payload.projects : [];
+        totalPages = payload.total_pages || 1;
+        totalProjectsExpected = typeof payload.total === 'number' ? payload.total : null;
+
+        if (!projects.length) {
+            showProvinceMarker(key);
+            container.innerHTML = '<div style="font-size:12px; color:#64748b;">No cached projects available yet for this province.</div>';
+            return;
+        }
+
+        await processBatch(projects, 1);
+
+        if (totalPages > 1) {
+            (async () => {
+                for (let page = 2; page <= totalPages; page += 1) {
+                    if (statusEl) {
+                        statusEl.innerHTML = `Fetching page ${page}/${totalPages}…`;
+                    }
+                    try {
+                        const nextResponse = await fetch(`/api/province-projects/all?province=${encodeURIComponent(provinceName)}&page=${page}&limit=${PROVINCE_PAGE_SIZE}`);
+                        if (!nextResponse.ok) {
+                            console.warn(`Province page ${page} failed with status ${nextResponse.status}`);
+                            break;
+                        }
+                        const nextPayload = await nextResponse.json();
+                        await processBatch(Array.isArray(nextPayload.projects) ? nextPayload.projects : [], page);
+    } catch (error) {
+                        console.warn(`Failed to fetch province page ${page}:`, error);
+                        break;
+                    }
+                    await new Promise(resolve => setTimeout(resolve, 60));
+                }
+
+                if (statusEl) {
+                    const totalPlanned = totalProjectsExpected || fragments.length;
+                    statusEl.innerHTML = `Finished ${processedPages}/${totalPages} page(s) — ${formatCount(totalMapped)} mapped, ${formatCount(totalFallback)} approximate. Showing ${formatCount(fragments.length)} of ${formatCount(totalPlanned)} cached projects.`;
+                }
+
+                updateMapStatus(`${provinceName}: mapped ${formatCount(totalMapped)} project(s) with precise coordinates; ${formatCount(totalFallback)} approximate.`);
+            })();
+        } else {
+            if (statusEl) {
+                statusEl.innerHTML = `Processed 1/${totalPages} page — ${formatCount(totalMapped)} mapped, ${formatCount(totalFallback)} approximate.`;
+            }
+            updateMapStatus(`${provinceName}: mapped ${formatCount(totalMapped)} project(s) with precise coordinates; ${formatCount(totalFallback)} approximate.`);
+        }
+    } catch (error) {
+        console.error('Failed to render province project map:', error);
+        showProvinceMarker(key);
+        container.innerHTML = '<div style="font-size:12px; color:#dc2626;">Unable to render province projects right now.</div>';
+    }
 }
 
-// Refresh map data
-function refreshMapData() {
-    console.log('🔄 Refreshing map data...');
+function renderProjectListRow(project, sourceKey, coordinateEntry, flagStatus = null) {
+    const sourceList = Array.isArray(project.sources_list) && project.sources_list.length
+        ? project.sources_list
+        : [project.source || 'Unknown'];
+    const badges = sourceList.map(src => {
+        const meta = SOURCE_META[src.toLowerCase()] || { label: src, className: '' };
+        return `<span style="padding: 3px 7px; border-radius: 4px; font-size: 11px; font-weight: 600;
+            background: rgba(148, 163, 184, 0.15);
+            color: #0f172a;
+            border: 1px solid rgba(148, 163, 184, 0.35);
+            margin-right: 4px;
+            display: inline-block;">${meta.label}</span>`;
+    }).join('');
 
-    // Clear existing markers
-    mapMarkers.forEach(marker => mapInstance.removeLayer(marker));
-    mapMarkers = [];
+    const amountValue = project.amount ?? project.contract_amount ?? project.ContractCost ?? project.cost;
+    const contractor = project.contractor || project.Contractor || 'N/A';
+    const locationParts = [];
+    if (project.location) locationParts.push(project.location);
+    if (project.municipality || project.Municipality) locationParts.push(project.municipality || project.Municipality);
+    if (project.province || project.Province) locationParts.push(project.province || project.Province);
+    const locationText = locationParts.filter(Boolean).join(', ') || 'N/A';
+    const year = project.year || project.InfraYear || 'N/A';
+    const statusText = project.status || project.Status || 'N/A';
 
-    // Reset loading state
-    globalOffset = 0;
-    loadedProjects = [];
-    progressiveLoadingStarted = false;
-    progressiveLoadingCancelled = false;
-    showAllMode = false;
+    const hasCoordinates = coordinateEntry && isFinite(coordinateEntry.latitude) && isFinite(coordinateEntry.longitude);
+    const isFallback = Boolean(coordinateEntry && coordinateEntry.isFallback);
+    const mappingBadge = isFallback
+        ? '<span style="color:#dc2626; font-weight:600;">Unknown location</span>'
+        : hasCoordinates
+            ? '<span style="color:#16a34a; font-weight:600;">Mapped</span>'
+            : '<span style="color:#f97316; font-weight:600;">Not mapped</span>';
 
-    // Stop any existing progressive loading
-    if (progressiveInterval) {
-        clearInterval(progressiveInterval);
-        progressiveInterval = null;
+    const coordinateLabel = hasCoordinates && !isFallback
+        ? `<span style="font-size:11px; color:#94a3b8;">${Number(coordinateEntry.latitude).toFixed(4)}, ${Number(coordinateEntry.longitude).toFixed(4)}</span>`
+        : '';
+
+    let note = '';
+    if (isFallback) {
+        note = '<div style="font-size:11px; color:#dc2626; font-weight:600;">Exact location unavailable — marker placed at province center.</div>';
+    } else if (coordinateEntry?.matched_source && coordinateEntry.matched_source !== sourceKey) {
+        note = `<div style="font-size:11px; color:#64748b;">Coordinates sourced from ${coordinateEntry.matched_source.toUpperCase()} data.</div>`;
     }
 
-    // Reload initial projects
-    loadInitialProjects();
+    const flags = coordinateEntry?.flags;
+    let effectiveFlag = flagStatus;
+    if (!effectiveFlag && flags && (sourceKey === 'ssp' || coordinateEntry?.original_source === 'ssp')) {
+        if (flags.hasRedFlags) {
+            effectiveFlag = 'red';
+        } else if (flags.isGreenFlag) {
+            effectiveFlag = 'green';
+        }
+    }
+
+    if (effectiveFlag === 'red') {
+        const detail = Array.isArray(flags?.redFlags) && flags.redFlags.length
+            ? (flags.redFlags[0].reason || flags.redFlags[0].description || '').trim()
+            : '';
+        note += `<div style="font-size:11px; color:#b91c1c; font-weight:600;">🔴 NCPAGkilatis Red Flag${detail ? ` — ${detail}` : ''}</div>`;
+    } else if (effectiveFlag === 'green') {
+        const detail = Array.isArray(flags?.greenFlags) && flags.greenFlags.length
+            ? (flags.greenFlags[0].reason || flags.greenFlags[0].description || '').trim()
+            : '';
+        note += `<div style="font-size:11px; color:#15803d; font-weight:600;">🟢 NCPAGkilatis Green Flag${detail ? ` — ${detail}` : ''}</div>`;
+    }
+
+    const title = project.project_name || project.ProjectName || project.ProjectTitle || project.ProjectDescription || 'Project';
+    const amountDisplay = isFinite(Number(amountValue)) ? formatCurrency(amountValue) : 'N/A';
+
+    return `
+        <div style="padding:10px 0; border-bottom:1px solid #e2e8f0;">
+            <div style="display:flex; justify-content:space-between; gap:12px; align-items:flex-start;">
+                <div style="flex:1 1 auto;">
+                    <div style="font-weight:600; color:#0f172a; margin-bottom:4px;">${title}</div>
+                    <div style="font-size:11px; color:#334155; margin-bottom:6px;">${badges}</div>
+                    <div style="font-size:11px; color:#475569;">Cost: <strong>${amountDisplay}</strong></div>
+                    <div style="font-size:11px; color:#475569;">Contractor: <strong>${contractor}</strong></div>
+                    <div style="font-size:11px; color:#475569;">Location: <strong>${locationText}</strong></div>
+                    <div style="font-size:11px; color:#475569;">Status: <strong>${statusText}</strong></div>
+                    <div style="font-size:11px; color:#475569;">Year: <strong>${year}</strong></div>
+                    ${note}
+                </div>
+                <div style="flex:0 0 auto; text-align:right;">
+                    <div>${mappingBadge}</div>
+                    ${coordinateLabel}
+                </div>
+            </div>
+        </div>
+    `;
 }
 
-// Initialize everything when DOM is ready
-document.addEventListener('DOMContentLoaded', function() {
-    console.log('🔍 DOM loaded, initializing map page...');
-    initializeMap();
+function buildIntegratedProjectPopup(project, lat, lng, sourceKey, coordinateEntry, flagStatus = null) {
+    const meta = SOURCE_META[sourceKey] || { label: project.source || 'Project' };
+    const amountValue = project.amount ?? project.contract_amount ?? project.ContractCost ?? project.cost;
+    const contractor = project.contractor || project.Contractor || 'N/A';
+    const locationParts = [];
+    if (project.location) locationParts.push(project.location);
+    if (project.municipality || project.Municipality) locationParts.push(project.municipality || project.Municipality);
+    if (project.province || project.Province) locationParts.push(project.province || project.Province);
+    const locationText = locationParts.filter(Boolean).join(', ') || 'N/A';
+    const year = project.year || project.InfraYear || 'N/A';
+    const statusText = project.status || project.Status || 'N/A';
+    const title = project.project_name || project.ProjectName || project.ProjectTitle || project.ProjectDescription || 'Project';
+    const streetViewUrl = `https://www.google.com/maps/@?api=1&map_action=pano&viewpoint=${lat},${lng}`;
+    const mapsUrl = `https://www.google.com/maps/search/?api=1&query=${lat},${lng}`;
 
-    // Setup event listeners
+    const isFallback = Boolean(coordinateEntry && coordinateEntry.isFallback);
+    const hasCoordinates = !isFallback && isFinite(lat) && isFinite(lng);
+    const coordinateLabel = hasCoordinates
+        ? `<div><strong>Coordinates:</strong> ${Number(lat).toFixed(5)}, ${Number(lng).toFixed(5)}</div>`
+        : '';
+
+    const locationHint = isFallback
+        ? '<div style="color:#dc2626; font-weight:600; margin-top:6px;">Exact location unavailable — marker placed near province center.</div>'
+        : (coordinateEntry?.matched_source && coordinateEntry.matched_source !== sourceKey)
+            ? `<div style="font-size:11px; color:#64748b; margin-top:6px;">Coordinates sourced from ${coordinateEntry.matched_source.toUpperCase()} data.</div>`
+            : '';
+
+    const flags = coordinateEntry?.flags;
+    let effectiveFlag = flagStatus;
+    if (!effectiveFlag && flags && (sourceKey === 'ssp' || coordinateEntry?.original_source === 'ssp')) {
+        if (flags.hasRedFlags) {
+            effectiveFlag = 'red';
+        } else if (flags.isGreenFlag) {
+            effectiveFlag = 'green';
+        }
+    }
+
+    let flagNote = '';
+    if (effectiveFlag === 'red') {
+        const detail = Array.isArray(flags?.redFlags) && flags.redFlags.length
+            ? (flags.redFlags[0].reason || flags.redFlags[0].description || '').trim()
+            : '';
+        flagNote = `<div style="margin-top:6px; font-size:11px; color:#b91c1c; font-weight:600;">🔴 NCPAGkilatis Red Flag${detail ? ` — ${detail}` : ''}</div>`;
+    } else if (effectiveFlag === 'green') {
+        const detail = Array.isArray(flags?.greenFlags) && flags.greenFlags.length
+            ? (flags.greenFlags[0].reason || flags.greenFlags[0].description || '').trim()
+            : '';
+        flagNote = `<div style="margin-top:6px; font-size:11px; color:#15803d; font-weight:600;">🟢 NCPAGkilatis Green Flag${detail ? ` — ${detail}` : ''}</div>`;
+    }
+
+    return `
+        <div style="font-family:'Inter', sans-serif; font-size:12px; color:#0f172a;">
+            <div style="margin-bottom:6px; font-size:11px; font-weight:600; color:#64748b;">${meta.label}</div>
+            <h3 style="margin:0 0 8px; font-size:14px;">${title}</h3>
+            <div style="margin-bottom:8px; color:#475569;">
+                <div><strong>Contractor:</strong> ${contractor}</div>
+                <div><strong>Location:</strong> ${locationText}</div>
+                <div><strong>Year:</strong> ${year}</div>
+                <div><strong>Status:</strong> ${statusText}</div>
+                <div><strong>Amount:</strong> ${formatCurrency(amountValue)}</div>
+                ${coordinateLabel}
+            </div>
+            ${flagNote}
+            ${locationHint}
+            <div style="display:flex; gap:10px; margin-top:8px;">
+                <a href="${streetViewUrl}" target="_blank" style="padding:6px 10px; background:#2563eb; color:#fff; border-radius:6px; text-decoration:none; font-weight:600;">Street View</a>
+                <a href="${mapsUrl}" target="_blank" style="padding:6px 10px; border:1px solid #2563eb; color:#2563eb; border-radius:6px; text-decoration:none; font-weight:600;">Open in Maps</a>
+            </div>
+        </div>
+    `;
+}
+
+function normalizeSourceForDisplay(source) {
+    const lower = source.toLowerCase();
+    if (lower.includes('ssp')) return 'ssp';
+    if (lower.includes('flood')) return 'ssp';
+    if (lower.includes('dime')) return 'dime';
+    if (lower.includes('philgeps')) return 'philgeps';
+    if (lower.includes('microsite') || lower.includes('dpwh')) return 'microsite';
+    return source;
+}
+
+window.addEventListener('DOMContentLoaded', async () => {
+    await initializeMap();
+
     const refreshBtn = document.getElementById('refresh-map-data');
     if (refreshBtn) {
-        refreshBtn.addEventListener('click', refreshMapData);
+        refreshBtn.addEventListener('click', async () => {
+            updateMapStatus('Refreshing integrated data...');
+            provinceSummaryLookup.clear();
+            provinceMarkers.forEach(marker => {
+                try {
+                    mapInstance?.removeLayer(marker);
+                } catch (error) {
+                    console.warn('Failed to remove marker during refresh:', error);
+                }
+            });
+            provinceMarkers.clear();
+            clearActiveProjectMarkers();
+            updateMapStatus('Cleared cached summaries. Click a province to load fresh data.');
+        });
     }
 
-    const showAllBtn = document.getElementById('show-all-map');
-    if (showAllBtn) {
-        showAllBtn.addEventListener('click', window.loadAllProjects);
-    }
-});
-</script>
+    mapInstance?.on('popupopen', async (event) => {
+        const popup = event.popup;
+        if (!popup) return;
+        const provinceNameMatch = popup.getContent().match(/<h3[^>]*>([^<]+)<\/h3>/);
+        if (!provinceNameMatch) return;
+        const provinceName = provinceNameMatch[1];
+        const key = normalizeProvinceKey(provinceName);
 
-<script>
-// Load flood summary stats for map
-fetch('/static/data/flood_summary.json')
-    .then(response => response.json())
-    .then(data => {
-        const totalEl = document.getElementById('map-total');
-        const rangeEl = document.getElementById('map-range');
-        if (totalEl) totalEl.textContent = data.total_projects.toLocaleString('en-PH');
-        if (rangeEl) rangeEl.textContent = data.data_range;
-    })
-    .catch(error => {
-        console.error('Error loading flood summary:', error);
-        const totalEl = document.getElementById('map-total');
-        const rangeEl = document.getElementById('map-range');
-        if (totalEl) totalEl.textContent = '9,855';
-        if (rangeEl) rangeEl.textContent = '2016-2024';
+        const summary = provinceSummaryLookup.get(key);
+        if (!summary) {
+            return;
+        }
+
+        bindProvincePopupButton(key, provinceName, summary);
+    });
+
+    mapInstance?.on('popupclose', (event) => {
+        const popupSource = event?.popup?._source;
+        if (!popupSource) {
+            return;
+        }
+
+        let belongsToProvince = false;
+        provinceMarkers.forEach(marker => {
+            if (!belongsToProvince && marker === popupSource) {
+                belongsToProvince = true;
+            }
+        });
+
+        if (belongsToProvince) {
+            clearActiveProjectMarkers();
+        }
+    });
     });
 </script>
+
 
 {% include "footer.html" %}
 
