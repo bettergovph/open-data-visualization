@@ -5,7 +5,7 @@ Handles all DIME queries using PostgreSQL
 
 import os
 import asyncpg
-from typing import List, Dict, Any, Optional
+from typing import List, Dict, Any, Optional, Tuple
 import json
 from dotenv import load_dotenv
 
@@ -457,6 +457,71 @@ async def get_dime_projects(
         return {"success": False, "error": str(e)}
     finally:
         await conn.close()
+
+
+async def find_dime_project_coordinates(
+    project_name: str,
+    province: Optional[str] = None,
+    city: Optional[str] = None
+) -> Optional[Dict[str, Any]]:
+    """Find a DIME project by name and return its coordinates when available."""
+    conn = await get_db_connection()
+    if not conn:
+        return None
+
+    try:
+        clauses = ["project_name ILIKE $1"]
+        params: List[Any] = [f"%{project_name}%"]
+        param_idx = 2
+
+        if province:
+            clauses.append(f"province ILIKE ${param_idx}")
+            params.append(f"%{province}%")
+            param_idx += 1
+
+        if city:
+            clauses.append(f"city ILIKE ${param_idx}")
+            params.append(f"%{city}%")
+            param_idx += 1
+
+        where_clause = " AND ".join(clauses)
+        query = f"""
+            SELECT
+                id,
+                project_name,
+                province,
+                city,
+                barangay,
+                latitude,
+                longitude,
+                cost,
+                status
+            FROM projects
+            WHERE {where_clause}
+            ORDER BY cost DESC NULLS LAST
+            LIMIT 1
+        """
+
+        row = await conn.fetchrow(query, *params)
+        if row and row.get("latitude") is not None and row.get("longitude") is not None:
+            return {
+                "id": row["id"],
+                "project_name": row["project_name"],
+                "province": row["province"],
+                "city": row["city"],
+                "barangay": row["barangay"],
+                "latitude": float(row["latitude"]),
+                "longitude": float(row["longitude"]),
+                "cost": float(row["cost"]) if row["cost"] else None,
+                "status": row["status"]
+            }
+
+    except Exception as e:
+        print(f"❌ Error finding DIME coordinates: {e}")
+    finally:
+        await conn.close()
+
+    return None
 
 
 async def get_dime_suggestions(field: str, query: str, limit: int = 10):
