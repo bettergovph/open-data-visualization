@@ -227,7 +227,7 @@ function toggleMobileMenu() {
                 </li>
                 <li>
                     <strong>Flood Control Projects (DPWH):</strong><br>
-                    <a href="https://extra.bayanwat.ch/" target="_blank" rel="noopener noreferrer" class="source-link">Sleeper Agent</a> from <a href="https://extra.bayanwat.ch/" target="_blank" rel="noopener noreferrer" class="source-link">extra.bayanwat.ch</a><br>
+                    <a href="https://extra.bayanwat.ch/" target="_blank" rel="noopener noreferrer" class="source-link source-link-with-popup" data-source="Sleeper Agent">Sleeper Agent</a> from <a href="https://extra.bayanwat.ch/" target="_blank" rel="noopener noreferrer" class="source-link">extra.bayanwat.ch</a><br>
                     <a href="https://sumbongsapangulo.ph/flood-control-map/" target="_blank" rel="noopener noreferrer" class="source-link">Sumbong sa Pangulo - Flood Control Map</a><br>
                     <a href="https://bettergov.ph/flood-control-projects/map" target="_blank" rel="noopener noreferrer" class="source-link">BetterGov.ph - Flood Control Projects Map</a><br>
                     <span class="text-gray-600">Used in: Flood Control Analysis, Interactive Map, Budget-Flood Correlation, Flood-DIME Correlation</span>
@@ -311,6 +311,11 @@ function toggleMobileMenu() {
                     <strong>InfraWatch Augmented Projects (2016-2025):</strong><br>
                     <span class="text-gray-700">Supplemental infrastructure records used to highlight projects without matching PhilGEPS contracts and to enrich `/philgeps` search results.</span><br>
                     <span class="text-gray-600">Credit: <a href="https://infrastructure.dpwh.gov.ph/" target="_blank" rel="noopener noreferrer" class="source-link">DPWH Infrastructure Status Microsite</a></span>
+                </li>
+                <li>
+                    <strong>DPWH Infrastructure Projects Data Pipeline:</strong><br>
+                    <span class="text-gray-700">Automated scraping and parsing pipeline that converts DPWH infrastructure project tables into structured CSV datasets, providing contract coverage from 2016-2025 for validation of InfraWatch red-flag indicators.</span><br>
+                    <span class="text-gray-600">Credit: <a href="https://github.com/csiiiv/dpwh-infra-data-scraper" target="_blank" rel="noopener noreferrer" class="source-link">dpwh-infra-data-scraper</a> by csiiiv</span>
                 </li>
                 <li>
                     <strong>Flood Project Red Flag Classification:</strong><br>
@@ -519,6 +524,76 @@ function hideSourcePopup() {
 document.addEventListener('DOMContentLoaded', async function() {
     // Load sources data first
     await loadSourcesData();
+
+    // Ensure Sleeper Agent popup lists Internet Archive mirror files
+    if (!SOURCES_DATA['Sleeper Agent']) {
+        SOURCES_DATA['Sleeper Agent'] = [];
+    }
+    const sleeperSources = SOURCES_DATA['Sleeper Agent'];
+    const archiveFiles = [
+        { base: 'https://archive.org/download/20251016.govph.dpwh.adscurrentarchive.raw/', name: '20251016.govph.dpwh.adscurrentarchive.raw.001.zip' },
+        { base: 'https://archive.org/download/20251016.govph.dpwh.adscurrentarchive.raw/', name: '20251016.govph.dpwh.adscurrentarchive.raw.002.zip' },
+        { base: 'https://archive.org/download/20251016.govph.dpwh.adscurrentarchive.raw/', name: '20251016.govph.dpwh.adscurrentarchive.raw.003.zip' },
+        { base: 'https://archive.org/download/20251016.govph.dpwh.adscurrentarchive.raw/', name: '20251016.govph.dpwh.adscurrentarchive.raw.004.zip' },
+        { base: 'https://archive.org/download/20251016.govph.dpwh.adscurrentarchive.raw/', name: '20251016.govph.dpwh.adscurrentarchive.raw.005.zip' },
+        { base: 'https://archive.org/download/20251016.govph.dpwh.adscurrentarchive.raw/', name: '20251016.govph.dpwh.adscurrentarchive.raw.006.zip' },
+        { base: 'https://archive.org/download/20251016.govph.dpwh.adscurrentarchive.raw/', name: '20251016.govph.dpwh.adscurrentarchive.raw.007.zip' },
+        { base: 'https://archive.org/download/20251016.govph.dpwh.adscurrentarchive.raw/', name: '20251016.govph.dpwh.adscurrentarchive.raw.008.zip' },
+        { base: 'https://archive.org/download/20251016.govph.dpwh.adscurrentarchive.raw/', name: '20251016.govph.dpwh.adscurrentarchive.raw.009.zip' },
+        { base: 'https://archive.org/download/20251016.govph.dpwh.adscurrentarchive.raw/', name: '20251016.govph.dpwh.adscurrentarchive.raw.010.zip' },
+        { base: 'https://archive.org/download/20251016.govph.dpwh.adscurrentarchive.raw/', name: '20251016.govph.dpwh.adscurrentarchive.raw.011.zip' },
+        { base: 'https://archive.org/download/20251016.govph.dpwh.adscurrentarchive.raw/', name: '20251016.govph.dpwh.adscurrentarchive.raw.012.zip' },
+        { base: 'https://archive.org/download/20251016.govph.dpwh.adscurrentarchive.raw/', name: '20251016.govph.dpwh.adscurrentarchive.raw.013.zip' },
+        { base: 'https://archive.org/download/20251016.govph.dpwh.adscurrentarchive.raw/', name: '20251016.govph.dpwh.adscurrentarchive.raw.014.zip' },
+        { base: 'https://archive.org/download/20251016.govph.dpwh.adscurrentarchive.raw/', name: '20251016.govph.dpwh.adscurrentarchive.raw.015.zip' },
+        { base: 'https://archive.org/download/20251016.govph.dpwh.adscurrentarchive.raw/', name: '20251016.govph.dpwh.adscurrentarchive.raw.016.zip' },
+        { base: 'https://archive.org/download/20251016.govph.dpwh.adscurrentarchive.raw/', name: '20251016.govph.dpwh.adscurrentarchive.raw.017.zip' },
+        { base: 'https://archive.org/download/20251016.govph.dpwh.adscurrentarchive.raw/', name: '20251016.govph.dpwh.adscurrentarchive.raw.018.zip' },
+        { base: 'https://archive.org/download/20251016.govph.dpwh.adscurrentarchive.raw/', name: '20251016.govph.dpwh.adscurrentarchive.raw.019.zip' },
+        { base: 'https://archive.org/download/20251016.govph.dpwh.adscurrentarchive.raw/', name: '20251016.govph.dpwh.adscurrentarchive.raw.020.zip' },
+        { base: 'https://archive.org/download/20251016.govph.dpwh.adscurrentarchive.raw/', name: '20251016.govph.dpwh.adscurrentarchive.raw.021.zip' },
+        { base: 'https://archive.org/download/20251016.govph.dpwh.adscurrentarchive.raw/', name: '20251016.govph.dpwh.adscurrentarchive.raw.022.zip' },
+        { base: 'https://archive.org/download/20251016.govph.dpwh.adscurrentarchive.raw/', name: '20251016.govph.dpwh.adscurrentarchive.raw.023.zip' },
+        { base: 'https://archive.org/download/20251016.govph.dpwh.adscurrentarchive.raw/', name: '20251016.govph.dpwh.adscurrentarchive.raw.024.zip' },
+        { base: 'https://archive.org/download/20251016.govph.dpwh.adscurrentarchive.raw/', name: '20251016.govph.dpwh.adscurrentarchive.raw.025.zip' },
+        { base: 'https://archive.org/download/20251016.govph.dpwh.adscurrentarchive.raw/', name: '20251016.govph.dpwh.adscurrentarchive.raw.026.zip' },
+        { base: 'https://archive.org/download/20251016.govph.dpwh.adscurrentarchive.raw/', name: '20251016.govph.dpwh.adscurrentarchive.raw.027.zip' },
+        { base: 'https://archive.org/download/20251016.govph.dpwh.adscurrentarchive.raw/', name: '20251016.govph.dpwh.adscurrentarchive.raw.028.zip' },
+        { base: 'https://archive.org/download/20251016.govph.dpwh.adscurrentarchive.raw/', name: '20251016.govph.dpwh.adscurrentarchive.raw.029.zip' },
+        { base: 'https://archive.org/download/20251016.govph.dpwh.adscurrentarchive.raw/', name: '20251016.govph.dpwh.adscurrentarchive.raw.030.zip' },
+        { base: 'https://archive.org/download/20251016.govph.dpwh.adscurrentarchive.raw/', name: '20251016.govph.dpwh.adscurrentarchive.raw.031.zip' },
+        { base: 'https://archive.org/download/20251016.govph.dpwh.adscurrentarchive.raw/', name: '20251016.govph.dpwh.adscurrentarchive.raw_archive.torrent' },
+        { base: 'https://archive.org/download/20251016.govph.dpwh.adscurrentarchive.raw/', name: '20251016.govph.dpwh.adscurrentarchive.raw_files.xml' },
+        { base: 'https://archive.org/download/20251016.govph.dpwh.adscurrentarchive.raw/', name: '20251016.govph.dpwh.adscurrentarchive.raw_meta.sqlite' },
+        { base: 'https://archive.org/download/20251016.govph.dpwh.adscurrentarchive.raw/', name: '20251016.govph.dpwh.adscurrentarchive.raw_meta.xml' },
+        { base: 'https://archive.org/download/20251016.govph.dpwh.adscurrentarchive.raw.02/', name: '20251016.govph.dpwh.adscurrentarchive.raw.032.zip' },
+        { base: 'https://archive.org/download/20251016.govph.dpwh.adscurrentarchive.raw.02/', name: '20251016.govph.dpwh.adscurrentarchive.raw.033.zip' },
+        { base: 'https://archive.org/download/20251016.govph.dpwh.adscurrentarchive.raw.02/', name: '20251016.govph.dpwh.adscurrentarchive.raw.034.zip' },
+        { base: 'https://archive.org/download/20251016.govph.dpwh.adscurrentarchive.raw.02/', name: '20251016.govph.dpwh.adscurrentarchive.raw.035.zip' },
+        { base: 'https://archive.org/download/20251016.govph.dpwh.adscurrentarchive.raw.02/', name: '20251016.govph.dpwh.adscurrentarchive.raw.036.zip' },
+        { base: 'https://archive.org/download/20251016.govph.dpwh.adscurrentarchive.raw.02/', name: '20251016.govph.dpwh.adscurrentarchive.raw.037.zip' },
+        { base: 'https://archive.org/download/20251016.govph.dpwh.adscurrentarchive.raw.02/', name: '20251016.govph.dpwh.adscurrentarchive.raw.038.zip' },
+        { base: 'https://archive.org/download/20251016.govph.dpwh.adscurrentarchive.raw.02/', name: '20251016.govph.dpwh.adscurrentarchive.raw.039.zip' },
+        { base: 'https://archive.org/download/20251016.govph.dpwh.adscurrentarchive.raw.02/', name: '20251016.govph.dpwh.adscurrentarchive.raw.040.zip' },
+        { base: 'https://archive.org/download/20251016.govph.dpwh.adscurrentarchive.raw.02/', name: '20251016.govph.dpwh.adscurrentarchive.raw.041.zip' },
+        { base: 'https://archive.org/download/20251016.govph.dpwh.adscurrentarchive.raw.02/', name: '20251016.govph.dpwh.adscurrentarchive.raw.042.zip' },
+        { base: 'https://archive.org/download/20251016.govph.dpwh.adscurrentarchive.raw.02/', name: '20251016.govph.dpwh.adscurrentarchive.raw.02_archive.torrent' },
+        { base: 'https://archive.org/download/20251016.govph.dpwh.adscurrentarchive.raw.02/', name: '20251016.govph.dpwh.adscurrentarchive.raw.02_files.xml' },
+        { base: 'https://archive.org/download/20251016.govph.dpwh.adscurrentarchive.raw.02/', name: '20251016.govph.dpwh.adscurrentarchive.raw.02_meta.sqlite' },
+        { base: 'https://archive.org/download/20251016.govph.dpwh.adscurrentarchive.raw.02/', name: '20251016.govph.dpwh.adscurrentarchive.raw.02_meta.xml' },
+        { base: 'https://archive.org/download/20251016.govph.dpwh.adscurrentarchive.raw.02/', name: '20251016.govph.dpwh.adscurrentarchive.raw.meta.map.zip' }
+    ];
+    archiveFiles.forEach(file => {
+        const fileUrl = `${file.base}${file.name}`;
+        const alreadyAdded = sleeperSources.some(source => source.url === fileUrl);
+        if (!alreadyAdded) {
+            sleeperSources.push({
+                title: file.name,
+                url: fileUrl,
+                date: 'Internet Archive mirror (Oct 16, 2025)'
+            });
+        }
+    });
     
     const sourceLinks = document.querySelectorAll('.source-link-with-popup');
     
