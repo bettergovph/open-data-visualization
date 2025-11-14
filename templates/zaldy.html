@@ -83,12 +83,12 @@
         /* Set column widths to fit viewport */
         th:nth-child(1), td:nth-child(1) { width: 8%; } /* GAA Page */
         th:nth-child(2), td:nth-child(2) { width: 25%; } /* Project Title */
-        th:nth-child(3), td:nth-child(3) { width: 10%; } /* Amount (CSV) */
-        th:nth-child(4), td:nth-child(4) { width: 20%; } /* DB Project Title */
-        th:nth-child(5), td:nth-child(5) { width: 10%; } /* Amount (DB) */
-        th:nth-child(6), td:nth-child(6) { width: 10%; } /* Contract ID */
+        th:nth-child(3), td:nth-child(3) { width: 20%; } /* DB Project Title */
+        th:nth-child(4), td:nth-child(4) { width: 12%; } /* Amount */
+        th:nth-child(5), td:nth-child(5) { width: 10%; } /* Contract ID */
+        th:nth-child(6), td:nth-child(6) { width: 10%; } /* PhilGEPS ID */
         th:nth-child(7), td:nth-child(7) { width: 12%; } /* Contractor */
-        th:nth-child(8), td:nth-child(8) { width: 15%; } /* Available In */
+        th:nth-child(8), td:nth-child(8) { width: 13%; } /* Available In */
 
         tr:hover {
             background-color: #f9fafb;
@@ -210,10 +210,10 @@
                 <tr>
                     <th>GAA Page</th>
                     <th>Project Title (CSV)</th>
-                    <th>Amount (CSV)</th>
                     <th>DB Project Title</th>
-                    <th>Amount (DB)</th>
+                    <th>Amount</th>
                     <th>Contract ID/Number</th>
+                    <th>PhilGEPS ID</th>
                     <th>Contractor</th>
                     <th>Available In</th>
                 </tr>
@@ -275,13 +275,20 @@ async function loadProjects() {
             const dbAmount = project.db_amount ? `₱${parseFloat(project.db_amount).toLocaleString('en-US', {maximumFractionDigits: 0})}` : '-';
             const availableIn = getAvailableDatabases(project);
             const row = document.createElement('tr');
+            // Combine amounts - stack CSV and DB amounts vertically
+            let amountDisplay = escapeHtml(project.amount || '-');
+            if (project.db_amount) {
+                const csvAmount = project.amount || '-';
+                amountDisplay = `${escapeHtml(csvAmount)}<br><small style="color: #6b7280; display: block; margin-top: 4px;">DB: ${dbAmount}</small>`;
+            }
+            
             row.innerHTML = `
                 <td>${escapeHtml(project.gaa_page || '-')}</td>
                 <td>${escapeHtml(project.project_title)}</td>
-                <td>${escapeHtml(project.amount || '-')}</td>
                 <td>${escapeHtml(project.db_project_title || '-')}</td>
-                <td>${dbAmount}</td>
+                <td>${amountDisplay}</td>
                 <td>${escapeHtml(project.contract_id || '-')}</td>
+                <td>${escapeHtml(project.philgeps_id || '-')}</td>
                 <td>${escapeHtml(project.contractor || '-')}</td>
                 <td>${availableIn}</td>
             `;

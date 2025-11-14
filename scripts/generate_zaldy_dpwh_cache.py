@@ -734,9 +734,10 @@ async def generate_cache() -> Dict[str, Any]:
         if philgeps_match:
             all_matches.append(("philgeps", philgeps_match))
         if infrawatch_match:
-            all_matches.append(("infrawatch", infrawatch_match))
+            all_matches.append(("infrawatch", infrawatch_match))        # Filter matches based on GAA page rules
+        # Normalize GAA page (remove "vetoed/" prefix)
+        gaa_page_normalized = gaa_page.replace("vetoed/", "").strip() if gaa_page else ""
         
-        # Filter matches based on GAA page rules
         filtered_matches = []
         for source, match in all_matches:
             match_contract_id = match.get("contract_id", "")
@@ -796,7 +797,26 @@ async def generate_cache() -> Dict[str, Any]:
             if contractor:
                 print(f"  👤 Contractor: {contractor[:50]}")
         else:
-            print(f"  ❌ Not found in any database")
+            print(f"  ❌ Not found in any database")                # Extract PhilGEPS ID if PhilGEPS match exists
+        philgeps_id = ""
+        if philgeps_match:
+            philgeps_id = philgeps_match.get("contract_id", "")
+        
+        # Final check: Clear wrong contract IDs completely
+        gaa_page_normalized_final = gaa_page.replace("vetoed/", "").strip() if gaa_page else ""
+        if gaa_page_normalized_final in WRONG_CONTRACT_IDS:
+            wrong_ids = WRONG_CONTRACT_IDS[gaa_page_normalized_final]
+            if contract_id in wrong_ids:
+                # Clear all match data for wrong contract IDs
+                contract_id = ""
+                contractor = ""
+                db_project_title = ""
+                db_amount = None
+                found_flood = False
+                found_dime = False
+                found_philgeps = False
+                found_infrawatch = False
+                philgeps_id = ""
         
         results.append({
             "project_title": project_title,
@@ -807,6 +827,7 @@ async def generate_cache() -> Dict[str, Any]:
             "found_philgeps": found_philgeps,
             "found_infrawatch": found_infrawatch,
             "contract_id": contract_id,
+            "philgeps_id": philgeps_id,
             "contractor": contractor,
             "db_project_title": db_project_title,
             "db_amount": db_amount
