@@ -55,8 +55,10 @@ def normalize_title(title: str) -> str:
 # All matches with these contract IDs will be dropped
 WRONG_CONTRACT_IDS = {
     "60": ["22GL0059"],  # GAA 60: wrong contract ID
+    "88": ["22DQ0079"],  # GAA 88: wrong match (road vs flood control)
     "394": ["22D00057"],  # GAA 394: wrong contract ID
     "632": ["24CJ0230"],  # GAA 632: wrong segment
+    "634": ["24A00008"],  # GAA 634: wrong match (road vs flood control)
     "635": ["24CJ0230"],  # GAA 635: wrong segment
     "659": ["23BE0018"],  # GAA 659: wrong contract ID
     "664": ["22JD0059"],  # GAA 664: wrong contract ID
