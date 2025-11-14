@@ -1,0 +1,136 @@
+{
+  "person": {
+    "normalized_name": "GWEN GARCIA",
+    "display_name": "GWEN GARCIA",
+    "chain_count": 3
+  },
+  "chains": [
+    {
+      "length": 5,
+      "start_surname": "FRASCO",
+      "end_surname": "GARCIA",
+      "path": [
+        86371,
+        4160578,
+        37915,
+        37916,
+        4145014
+      ],
+      "relationships": [
+        "Starting person",
+        "Cousin-in-law: Duke Frasco",
+        "Mother-in-law: Gwendolyn Garcia (Governor of Cebu)",
+        "Gwendolyn Garcia is the daughter of Pablo Garcia",
+        " both part of the Garcia political dynasty in Cebu"
+      ],
+      "source_urls": [
+        "https://www.rappler.com/nation/elections/garcia-dynasty-cebu",
+        "https://en.wikipedia.org/wiki/Gwendolyn_Garcia"
+      ]
+    },
+    {
+      "length": 2,
+      "start_surname": "GARCIA",
+      "end_surname": "GARCIA",
+      "path": [
+        37916,
+        4145014
+      ],
+      "relationships": [
+        "Starting person",
+        "Pablo Garcia is the father of Gwen Garcia"
+      ],
+      "source_urls": [
+        "https://en.wikipedia.org/wiki/Gwendolyn_Garcia"
+      ]
+    },
+    {
+      "length": 2,
+      "start_surname": "GARCIA",
+      "end_surname": "GARCIA",
+      "path": [
+        4145014,
+        37916
+      ],
+      "relationships": [
+        "Starting person",
+        "PABLO GARCIA IS THE FATHER OF GWEN GARCIA"
+      ],
+      "source_urls": [
+        "https://en.wikipedia.org/wiki/Gwendolyn_Garcia"
+      ]
+    }
+  ],
+  "people": {
+    "86371": {
+      "id": 86371,
+      "first_name": "ALJEW",
+      "middle_name": null,
+      "last_name": "FRASCO",
+      "suffix": null,
+      "full_name": "ALJEW FRASCO",
+      "canonical_name": "ALJEW FRASCO",
+      "position": "MAYOR",
+      "region": "REGION VII - CENTRAL VISAYAS",
+      "province": "CEBU",
+      "municipality_city": "Liloan",
+      "location": "Liloan, CEBU, REGION VII - CENTRAL VISAYAS"
+    },
+    "4160578": {
+      "id": 4160578,
+      "first_name": "Vincent Franco",
+      "middle_name": "",
+      "last_name": "Frasco",
+      "suffix": "",
+      "full_name": "Vincent Franco Frasco",
+      "canonical_name": "VINCENT FRANCO FRASCO",
+      "position": "VICE MAYOR",
+      "region": "REGION VII",
+      "province": "CEBU",
+      "municipality_city": "",
+      "location": "CEBU, REGION VII"
+    },
+    "37915": {
+      "id": 37915,
+      "first_name": "Gwendolyn",
+      "middle_name": null,
+      "last_name": "Garcia",
+      "suffix": null,
+      "full_name": "Gwendolyn Garcia",
+      "canonical_name": "GWENDOLYN GARCIA",
+      "position": "GOVERNOR",
+      "region": "REGION VII",
+      "province": "CEBU",
+      "municipality_city": "",
+      "location": "CEBU, REGION VII"
+    },
+    "37916": {
+      "id": 37916,
+      "first_name": "PABLO",
+      "middle_name": null,
+      "last_name": "GARCIA",
+      "suffix": null,
+      "full_name": "PABLO GARCIA",
+      "canonical_name": "PABLO GARCIA",
+      "position": "MEMBER, HOUSE OF REPRESENTATIVES",
+      "region": "REGION VII",
+      "province": "CEBU",
+      "municipality_city": "",
+      "location": "CEBU, REGION VII"
+    },
+    "4145014": {
+      "id": 4145014,
+      "first_name": "GWEN",
+      "middle_name": null,
+      "last_name": "GARCIA",
+      "suffix": null,
+      "full_name": "GWEN GARCIA",
+      "canonical_name": "GWEN GARCIA",
+      "position": null,
+      "region": null,
+      "province": null,
+      "municipality_city": null,
+      "location": "Location unknown"
+    }
+  }
+}

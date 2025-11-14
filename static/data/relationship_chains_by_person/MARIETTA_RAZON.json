@@ -1,0 +1,87 @@
+{
+  "person": {
+    "normalized_name": "MARIETTA RAZON",
+    "display_name": "MARIETTA RAZON",
+    "chain_count": 2
+  },
+  "chains": [
+    {
+      "length": 3,
+      "start_surname": "De Lara",
+      "end_surname": "RAZON",
+      "path": [
+        27824,
+        3745735,
+        4162413
+      ],
+      "relationships": [
+        "Starting person",
+        "JOSEPH DE LARA is uncle of BONG GO",
+        "BONG GO is aunt of MARIETTA RAZON (REVENUE COLLECTION CLERK I"
+      ],
+      "source_urls": [
+        "OCR:pd12.jpg"
+      ]
+    },
+    {
+      "length": 2,
+      "start_surname": "GO",
+      "end_surname": "RAZON",
+      "path": [
+        3745735,
+        4162413
+      ],
+      "relationships": [
+        "Starting person",
+        "BONG GO is aunt of MARIETTA RAZON (REVENUE COLLECTION CLERK I"
+      ],
+      "source_urls": [
+        "OCR:pd12.jpg"
+      ]
+    }
+  ],
+  "people": {
+    "3745735": {
+      "id": 3745735,
+      "first_name": "BONG",
+      "middle_name": null,
+      "last_name": "GO",
+      "suffix": null,
+      "full_name": "BONG GO",
+      "canonical_name": "BONG GO",
+      "position": "SENATOR",
+      "region": "REGION XII",
+      "province": "COTABATO",
+      "municipality_city": "M'LANG",
+      "location": "M'LANG, COTABATO, REGION XII"
+    },
+    "27824": {
+      "id": 27824,
+      "first_name": "JOSEPH",
+      "middle_name": null,
+      "last_name": "De Lara",
+      "suffix": null,
+      "full_name": "JOSEPH De Lara",
+      "canonical_name": "JOSEPH DE LARA",
+      "position": "MAYOR",
+      "region": "REGION I",
+      "province": "ILOCOS NORTE",
+      "municipality_city": "SOLSONA",
+      "location": "SOLSONA, ILOCOS NORTE, REGION I"
+    },
+    "4162413": {
+      "id": 4162413,
+      "first_name": "MARIETTA",
+      "middle_name": null,
+      "last_name": "RAZON",
+      "suffix": null,
+      "full_name": "MARIETTA RAZON",
+      "canonical_name": null,
+      "position": "REVENUE COLLECTION CLERK I,",
+      "region": null,
+      "province": null,
+      "municipality_city": null,
+      "location": "Location unknown"
+    }
+  }
+}

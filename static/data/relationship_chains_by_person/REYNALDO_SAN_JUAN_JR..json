@@ -1,0 +1,87 @@
+{
+  "person": {
+    "normalized_name": "REYNALDO SAN JUAN JR.",
+    "display_name": "REYNALDO SAN JUAN JR.",
+    "chain_count": 2
+  },
+  "chains": [
+    {
+      "length": 3,
+      "start_surname": "Ynares",
+      "end_surname": "SAN JUAN JR.",
+      "path": [
+        85541,
+        85534,
+        72633
+      ],
+      "relationships": [
+        "Starting person",
+        "Cesar Ynares and Rebecca Ynares are spouses",
+        " both serving as governors of Rizal province"
+      ],
+      "source_urls": [
+        "https://en.wikipedia.org/wiki/Political_families_of_the_Philippines"
+      ]
+    },
+    {
+      "length": 2,
+      "start_surname": "SAN JUAN JR.",
+      "end_surname": "Ynares",
+      "path": [
+        72633,
+        85534
+      ],
+      "relationships": [
+        "Starting person",
+        "CESAR YNARES IS THE FATHER-IN-LAW OF REYNALDO SAN JUAN JR."
+      ],
+      "source_urls": [
+        "https://en.wikipedia.org/wiki/Political_families_of_the_Philippines"
+      ]
+    }
+  ],
+  "people": {
+    "85534": {
+      "id": 85534,
+      "first_name": "CESAR",
+      "middle_name": null,
+      "last_name": "Ynares",
+      "suffix": null,
+      "full_name": "CESAR Ynares",
+      "canonical_name": "CESAR YNARES",
+      "position": "MAYOR",
+      "region": "REGION IV-A",
+      "province": "RIZAL",
+      "municipality_city": "BINANGONAN",
+      "location": "BINANGONAN, RIZAL, REGION IV-A"
+    },
+    "85541": {
+      "id": 85541,
+      "first_name": "Rebecca",
+      "middle_name": null,
+      "last_name": "Ynares",
+      "suffix": null,
+      "full_name": "Rebecca Ynares",
+      "canonical_name": "REBECCA YNARES",
+      "position": "GOVERNOR",
+      "region": "REGION IV-A",
+      "province": "RIZAL",
+      "municipality_city": "",
+      "location": "RIZAL, REGION IV-A"
+    },
+    "72633": {
+      "id": 72633,
+      "first_name": "REYNALDO",
+      "middle_name": null,
+      "last_name": "SAN JUAN JR.",
+      "suffix": null,
+      "full_name": "REYNALDO SAN JUAN JR.",
+      "canonical_name": "REYNALDO SAN JUAN JR.",
+      "position": "GOVERNOR",
+      "region": "REGION IV-A",
+      "province": "RIZAL",
+      "municipality_city": "",
+      "location": "RIZAL, REGION IV-A"
+    }
+  }
+}

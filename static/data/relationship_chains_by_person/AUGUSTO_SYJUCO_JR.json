@@ -1,0 +1,141 @@
+{
+  "person": {
+    "normalized_name": "AUGUSTO SYJUCO JR",
+    "display_name": "AUGUSTO SYJUCO JR",
+    "chain_count": 4
+  },
+  "chains": [
+    {
+      "length": 3,
+      "start_surname": "GARDIOLA",
+      "end_surname": "SYJUCO",
+      "path": [
+        4162452,
+        4145243
+      ],
+      "relationships": [
+        "Starting person",
+        "Connected via CWS"
+      ],
+      "source_urls": [],
+      "is_standalone_party_list": true,
+      "party_list_connection": {
+        "party_code": "135",
+        "party_list_number": 135,
+        "party_name": "CWS",
+        "party_full_name": "135, CWS",
+        "relationship_type": "Party-List Membership"
+      }
+    },
+    {
+      "length": 3,
+      "start_surname": "SYJUCO",
+      "end_surname": "GARDIOLA",
+      "path": [
+        4145243,
+        4162452
+      ],
+      "relationships": [
+        "Starting person",
+        "Connected via CWS"
+      ],
+      "source_urls": [],
+      "is_standalone_party_list": true,
+      "party_list_connection": {
+        "party_code": "135",
+        "party_list_number": 135,
+        "party_name": "CWS",
+        "party_full_name": "135, CWS",
+        "relationship_type": "Party-List Membership"
+      }
+    },
+    {
+      "length": 3,
+      "start_surname": "SYJUCO",
+      "end_surname": "YAP",
+      "path": [
+        4145243,
+        4145242
+      ],
+      "relationships": [
+        "Starting person",
+        "Connected via CWS"
+      ],
+      "source_urls": [],
+      "is_standalone_party_list": true,
+      "party_list_connection": {
+        "party_code": "135",
+        "party_list_number": 135,
+        "party_name": "CWS",
+        "party_full_name": "135, CWS",
+        "relationship_type": "Party-List Membership"
+      }
+    },
+    {
+      "length": 3,
+      "start_surname": "YAP",
+      "end_surname": "SYJUCO",
+      "path": [
+        4145242,
+        4145243
+      ],
+      "relationships": [
+        "Starting person",
+        "Connected via CWS"
+      ],
+      "source_urls": [],
+      "is_standalone_party_list": true,
+      "party_list_connection": {
+        "party_code": "135",
+        "party_list_number": 135,
+        "party_name": "CWS",
+        "party_full_name": "135, CWS",
+        "relationship_type": "Party-List Membership"
+      }
+    }
+  ],
+  "people": {
+    "4162452": {
+      "id": 4162452,
+      "first_name": "EDWIN",
+      "middle_name": null,
+      "last_name": "GARDIOLA",
+      "suffix": null,
+      "full_name": "EDWIN GARDIOLA",
+      "canonical_name": "EDWIN GARDIOLA",
+      "position": "Representative, CWS Party-list",
+      "region": null,
+      "province": null,
+      "municipality_city": null,
+      "location": "Location unknown"
+    },
+    "4145243": {
+      "id": 4145243,
+      "first_name": "AUGUSTO",
+      "middle_name": "M",
+      "last_name": "SYJUCO",
+      "suffix": "JR",
+      "full_name": "AUGUSTO M SYJUCO JR",
+      "canonical_name": null,
+      "position": "PARTY-LIST REPRESENTATIVE",
+      "region": null,
+      "province": null,
+      "municipality_city": null,
+      "location": "Location unknown"
+    },
+    "4145242": {
+      "id": 4145242,
+      "first_name": "EDVIC G",
+      "middle_name": null,
+      "last_name": "YAP",
+      "suffix": null,
+      "full_name": "EDVIC G YAP",
+      "canonical_name": null,
+      "position": "PARTY-LIST REPRESENTATIVE",
+      "region": null,
+      "province": null,
+      "municipality_city": null,
+      "location": "Location unknown"
+    }
+  }
+}

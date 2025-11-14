@@ -1,0 +1,104 @@
+{
+  "person": {
+    "normalized_name": "JANELLA EJERCITO ESTRADA",
+    "display_name": "JANELLA EJERCITO ESTRADA",
+    "chain_count": 3
+  },
+  "chains": [
+    {
+      "length": 3,
+      "start_surname": "EJERCITO",
+      "end_surname": "EJERCITO ESTRADA",
+      "path": [
+        4041410,
+        4041412,
+        4162405
+      ],
+      "relationships": [
+        "Starting person",
+        "JV EJERCITO AND JINGGOY ESTRADA ARE HALF-BROTHERS",
+        "JINGGOY EJERCITO ESTRADA IS DAUGHTER OF JANELLA EJERCITO ESTRADA (UNDERSECRETARY"
+      ],
+      "source_urls": [
+        "https://en.wikipedia.org/wiki/JV_Ejercito",
+        "OCR:pd10.jpg"
+      ]
+    },
+    {
+      "length": 2,
+      "start_surname": "EJERCITO ESTRADA",
+      "end_surname": "EJERCITO ESTRADA",
+      "path": [
+        4162405,
+        4041412
+      ],
+      "relationships": [
+        "Starting person",
+        "JANELLA EJERCITO ESTRADA IS DAUGHTER OF JINGGOY EJERCITO ESTRADA"
+      ],
+      "source_urls": [
+        "OCR:pd10.jpg"
+      ]
+    },
+    {
+      "length": 2,
+      "start_surname": "EJERCITO ESTRADA",
+      "end_surname": "EJERCITO ESTRADA",
+      "path": [
+        4041412,
+        4162405
+      ],
+      "relationships": [
+        "Starting person",
+        "JINGGOY EJERCITO ESTRADA IS DAUGHTER OF JANELLA EJERCITO ESTRADA (UNDERSECRETARY"
+      ],
+      "source_urls": [
+        "OCR:pd10.jpg"
+      ]
+    }
+  ],
+  "people": {
+    "4041412": {
+      "id": 4041412,
+      "first_name": "JINGGOY",
+      "middle_name": null,
+      "last_name": "EJERCITO ESTRADA",
+      "suffix": null,
+      "full_name": "JINGGOY EJERCITO ESTRADA",
+      "canonical_name": "JINGGOY EJERCITO ESTRADA",
+      "position": "SENATOR",
+      "region": "NCR",
+      "province": "Metro Manila",
+      "municipality_city": "Manila",
+      "location": "Manila, Metro Manila, NCR"
+    },
+    "4041410": {
+      "id": 4041410,
+      "first_name": "VICTOR",
+      "middle_name": null,
+      "last_name": "EJERCITO",
+      "suffix": null,
+      "full_name": "VICTOR EJERCITO",
+      "canonical_name": "VICTOR EJERCITO",
+      "position": "SENATOR",
+      "region": "NCR",
+      "province": "Metro Manila",
+      "municipality_city": "Manila",
+      "location": "Manila, Metro Manila, NCR"
+    },
+    "4162405": {
+      "id": 4162405,
+      "first_name": "JANELLA",
+      "middle_name": null,
+      "last_name": "EJERCITO ESTRADA",
+      "suffix": null,
+      "full_name": "JANELLA EJERCITO ESTRADA",
+      "canonical_name": null,
+      "position": "UNDERSECRETARY, DSWD",
+      "region": null,
+      "province": null,
+      "municipality_city": null,
+      "location": "Location unknown"
+    }
+  }
+}

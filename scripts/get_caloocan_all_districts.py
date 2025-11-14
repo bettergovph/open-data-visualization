@@ -52,3 +52,12 @@ print("📡 Querying Perplexity for ALL Caloocan districts...")
 response = call_perplexity(prompt)
 print(response)
 
+
+
+
+
+
+
+
+
+

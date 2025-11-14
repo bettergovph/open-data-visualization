@@ -1,0 +1,103 @@
+{
+  "person": {
+    "normalized_name": "AUDREY ZUBIRI",
+    "display_name": "AUDREY ZUBIRI",
+    "chain_count": 3
+  },
+  "chains": [
+    {
+      "length": 2,
+      "start_surname": "ZUBIRI",
+      "end_surname": "ZUBIRI",
+      "path": [
+        4162440,
+        4162441
+      ],
+      "relationships": [
+        "Starting person",
+        "MIGZ ZUBIRI IS WIFE OF AUDREY ZUBIRI (REPRESENTATIVE"
+      ],
+      "source_urls": [
+        "OCR:pd3.jpg"
+      ]
+    },
+    {
+      "length": 2,
+      "start_surname": "ZUBIRI",
+      "end_surname": "ZUBIRI",
+      "path": [
+        4162441,
+        4162440
+      ],
+      "relationships": [
+        "Starting person",
+        "AUDREY ZUBIRI IS WIFE OF MIGZ ZUBIRI"
+      ],
+      "source_urls": [
+        "OCR:pd3.jpg"
+      ]
+    },
+    {
+      "length": 3,
+      "start_surname": "ZUBIRI",
+      "end_surname": "Cuna",
+      "path": [
+        4162441,
+        4162440,
+        4152469
+      ],
+      "relationships": [
+        "Starting person",
+        "AUDREY ZUBIRI IS WIFE OF MIGZ ZUBIRI",
+        "MIGZ ZUBIRI IS COUSIN OF JUAN MIGUEL CUNA (UNDERSECRETARY"
+      ],
+      "source_urls": [
+        "OCR:pd3.jpg"
+      ]
+    }
+  ],
+  "people": {
+    "4162440": {
+      "id": 4162440,
+      "first_name": "MIGZ",
+      "middle_name": null,
+      "last_name": "ZUBIRI",
+      "suffix": null,
+      "full_name": "MIGZ ZUBIRI",
+      "canonical_name": null,
+      "position": "SENATOR OF THE PHILIPPINES",
+      "region": null,
+      "province": null,
+      "municipality_city": null,
+      "location": "Location unknown"
+    },
+    "4162441": {
+      "id": 4162441,
+      "first_name": "AUDREY",
+      "middle_name": null,
+      "last_name": "ZUBIRI",
+      "suffix": null,
+      "full_name": "AUDREY ZUBIRI",
+      "canonical_name": null,
+      "position": "REPRESENTATIVE, BUKIDNON SRD DISTRICT",
+      "region": null,
+      "province": null,
+      "municipality_city": null,
+      "location": "Location unknown"
+    },
+    "4152469": {
+      "id": 4152469,
+      "first_name": "Juan Miguel",
+      "middle_name": "",
+      "last_name": "Cuna",
+      "suffix": "",
+      "full_name": "Juan Miguel Cuna",
+      "canonical_name": "JUAN MIGUEL CUNA",
+      "position": "COUNCILOR",
+      "region": "NATIONAL CAPITAL REGION",
+      "province": "NCR, CITY OF MANILA, FIRST DISTRICT",
+      "municipality_city": "MANILA",
+      "location": "MANILA, NCR, CITY OF MANILA, FIRST DISTRICT, NATIONAL CAPITAL REGION"
+    }
+  }
+}

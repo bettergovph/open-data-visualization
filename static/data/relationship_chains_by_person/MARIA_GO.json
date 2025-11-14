@@ -1,0 +1,103 @@
+{
+  "person": {
+    "normalized_name": "MARIA GO",
+    "display_name": "MARIA GO",
+    "chain_count": 3
+  },
+  "chains": [
+    {
+      "length": 2,
+      "start_surname": "GO",
+      "end_surname": "GO",
+      "path": [
+        3745735,
+        86907
+      ],
+      "relationships": [
+        "Starting person",
+        "BONG GO is sister of MARIA ANGELICA GO (MAYOR OF SANISIDRO"
+      ],
+      "source_urls": [
+        "OCR:pd12.jpg"
+      ]
+    },
+    {
+      "length": 3,
+      "start_surname": "De Lara",
+      "end_surname": "GO",
+      "path": [
+        27824,
+        3745735,
+        86907
+      ],
+      "relationships": [
+        "Starting person",
+        "JOSEPH DE LARA is uncle of BONG GO",
+        "BONG GO is sister of MARIA ANGELICA GO (MAYOR OF SANISIDRO"
+      ],
+      "source_urls": [
+        "OCR:pd12.jpg"
+      ]
+    },
+    {
+      "length": 2,
+      "start_surname": "GO",
+      "end_surname": "GO",
+      "path": [
+        86907,
+        3745735
+      ],
+      "relationships": [
+        "Starting person",
+        "MARIA ANGELICA GO is sister of BONG GO"
+      ],
+      "source_urls": [
+        "OCR:pd12.jpg"
+      ]
+    }
+  ],
+  "people": {
+    "3745735": {
+      "id": 3745735,
+      "first_name": "BONG",
+      "middle_name": null,
+      "last_name": "GO",
+      "suffix": null,
+      "full_name": "BONG GO",
+      "canonical_name": "BONG GO",
+      "position": "SENATOR",
+      "region": "REGION XII",
+      "province": "COTABATO",
+      "municipality_city": "M'LANG",
+      "location": "M'LANG, COTABATO, REGION XII"
+    },
+    "86907": {
+      "id": 86907,
+      "first_name": "MARIA",
+      "middle_name": null,
+      "last_name": "GO",
+      "suffix": null,
+      "full_name": "MARIA GO",
+      "canonical_name": "MARIA GO",
+      "position": "MAYOR",
+      "region": "REGION XI - DAVAO REGION",
+      "province": "DAVAO ORIENTAL",
+      "municipality_city": "San Isidro",
+      "location": "San Isidro, DAVAO ORIENTAL, REGION XI - DAVAO REGION"
+    },
+    "27824": {
+      "id": 27824,
+      "first_name": "JOSEPH",
+      "middle_name": null,
+      "last_name": "De Lara",
+      "suffix": null,
+      "full_name": "JOSEPH De Lara",
+      "canonical_name": "JOSEPH DE LARA",
+      "position": "MAYOR",
+      "region": "REGION I",
+      "province": "ILOCOS NORTE",
+      "municipality_city": "SOLSONA",
+      "location": "SOLSONA, ILOCOS NORTE, REGION I"
+    }
+  }
+}

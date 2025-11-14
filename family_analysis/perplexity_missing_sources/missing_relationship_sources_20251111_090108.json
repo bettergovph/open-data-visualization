@@ -1,0 +1,175 @@
+{
+  "generated_at": "2025-11-11T09:01:08.642116+00:00",
+  "model": "sonar-pro",
+  "records_pending": 5,
+  "results": [
+    {
+      "record": {
+        "id": 604,
+        "company_name": "SUNWEST",
+        "person_name": "INC",
+        "role": "No public data found"
+      },
+      "prompt": "# Contractor Relationship Proof Needed\n\nWe maintain a database that tracks how construction companies relate to public officials.\nOne entry is missing credible sources.\n\n## Database Entry (needs verification)\n- Company: SUNWEST\n- Placeholder person/recorded name: INC\n- Recorded role: No public data found\n\n## Task for you\n1. Identify the ACTUAL individual(s) tied to SUNWEST in capacities such as owner, incorporator,\n   director, officer, chairperson, or other executive roles. Focus on people connected to\n   Philippine politics or politically exposed persons where possible.\n2. Cite up to three credible articles, government documents, or filings that explicitly mention\n   the relationship between the individual and SUNWEST.\n3. Return **only** a JSON array in a ```json fenced code block. Each object must contain:\n   - \"subject_name\": full name of the individual\n   - \"role\": role/title they hold in the company (owner, incorporator, etc.)\n   - \"relationship_description\": concise explanation of the link\n   - \"source_title\": article or document title\n   - \"source_url\": direct URL to the source\n   - \"source_date\": ISO date string (YYYY-MM-DD) if available, else empty string\n   - \"confidence\": integer 1-10 reflecting reliability\n4. Skip speculative content. If no credible sources exist, return an empty JSON array: ```json [] ```\n\nAnswer in English and ensure URLs are accessible.\n",
+      "perplexity_reply": "```json\n[\n  {\n    \"subject_name\": \"Elizaldy \\\"Zaldy\\\" Salcedo Co\",\n    \"role\": \"Founder, CEO, Beneficial Owner (Sunwest Construction and Development Corporation, Sunwest Inc.)\",\n    \"relationship_description\": \"Zaldy Co founded Sunwest Construction and Development Corporation (SCDC) in 1997, later renamed Sunwest Inc. He served as CEO and remains a beneficial owner. He is a former Ako Bicol Partylist representative, making him a politically exposed person.\",\n    \"source_title\": \"Zaldy Co - Wikipedia\",\n    \"source_url\": \"https://en.wikipedia.org/wiki/Zaldy_Co\",\n    \"source_date\": \"\",\n    \"confidence\": 9\n  },\n  {\n    \"subject_name\": \"Christopher \\\"Kito\\\" Co\",\n    \"role\": \"Co-founder (Sunwest Construction and Development Corporation)\",\n    \"relationship_description\": \"Christopher Co co-founded Sunwest Construction and Development Corporation with his brother Zaldy Co, directly linking him to the company and its public contracts.\",\n    \"source_title\": \"Zaldy Co - Wikipedia\",\n    \"source_url\": \"https://en.wikipedia.org/wiki/Zaldy_Co\",\n    \"source_date\": \"\",\n    \"confidence\": 8\n  }\n]\n```",
+      "suggestions": [
+        {
+          "subject_name": "Elizaldy \"Zaldy\" Salcedo Co",
+          "role": "Founder, CEO, Beneficial Owner (Sunwest Construction and Development Corporation, Sunwest Inc.)",
+          "relationship_description": "Zaldy Co founded Sunwest Construction and Development Corporation (SCDC) in 1997, later renamed Sunwest Inc. He served as CEO and remains a beneficial owner. He is a former Ako Bicol Partylist representative, making him a politically exposed person.",
+          "source_title": "Zaldy Co - Wikipedia",
+          "source_url": "https://en.wikipedia.org/wiki/Zaldy_Co",
+          "source_date": "",
+          "confidence": 9
+        },
+        {
+          "subject_name": "Christopher \"Kito\" Co",
+          "role": "Co-founder (Sunwest Construction and Development Corporation)",
+          "relationship_description": "Christopher Co co-founded Sunwest Construction and Development Corporation with his brother Zaldy Co, directly linking him to the company and its public contracts.",
+          "source_title": "Zaldy Co - Wikipedia",
+          "source_url": "https://en.wikipedia.org/wiki/Zaldy_Co",
+          "source_date": "",
+          "confidence": 8
+        }
+      ]
+    },
+    {
+      "record": {
+        "id": 605,
+        "company_name": "L.R. TIQUI BUILDERS",
+        "person_name": "INC",
+        "role": "No public data found"
+      },
+      "prompt": "# Contractor Relationship Proof Needed\n\nWe maintain a database that tracks how construction companies relate to public officials.\nOne entry is missing credible sources.\n\n## Database Entry (needs verification)\n- Company: L.R. TIQUI BUILDERS\n- Placeholder person/recorded name: INC\n- Recorded role: No public data found\n\n## Task for you\n1. Identify the ACTUAL individual(s) tied to L.R. TIQUI BUILDERS in capacities such as owner, incorporator,\n   director, officer, chairperson, or other executive roles. Focus on people connected to\n   Philippine politics or politically exposed persons where possible.\n2. Cite up to three credible articles, government documents, or filings that explicitly mention\n   the relationship between the individual and L.R. TIQUI BUILDERS.\n3. Return **only** a JSON array in a ```json fenced code block. Each object must contain:\n   - \"subject_name\": full name of the individual\n   - \"role\": role/title they hold in the company (owner, incorporator, etc.)\n   - \"relationship_description\": concise explanation of the link\n   - \"source_title\": article or document title\n   - \"source_url\": direct URL to the source\n   - \"source_date\": ISO date string (YYYY-MM-DD) if available, else empty string\n   - \"confidence\": integer 1-10 reflecting reliability\n4. Skip speculative content. If no credible sources exist, return an empty JSON array: ```json [] ```\n\nAnswer in English and ensure URLs are accessible.\n",
+      "perplexity_reply": "```json\n[\n  {\n    \"subject_name\": \"Luisito Tiqui\",\n    \"role\": \"President\",\n    \"relationship_description\": \"Luisito Tiqui is explicitly identified as the president of L.R. Tiqui Builders, Inc., directly linking him to the company's executive leadership.\",\n    \"source_title\": \"43 individuals linked to flood control mess on lookout bulletin\",\n    \"source_url\": \"https://www.pna.gov.ph/articles/1258033\",\n    \"source_date\": \"2025-09-05\",\n    \"confidence\": 10\n  },\n  {\n    \"subject_name\": \"Luisito Tiqui\",\n    \"role\": \"President\",\n    \"relationship_description\": \"Official government notice of award addressed to Luisito Tiqui as the authorized signatory for L.R. Tiqui Builders, Inc., confirming his executive role.\",\n    \"source_title\": \"NOTICE OF AWARD - Provincial Government of Rizal\",\n    \"source_url\": \"https://www.rizalprovince.ph/old%20database/engineering/NOTICE%20OF%20AWARD-PDF/2022/25TH%20PUB-DEC272022/noadec272022.pdf\",\n    \"source_date\": \"2023-01-19\",\n    \"confidence\": 9\n  },\n  {\n    \"subject_name\": \"Luisito Tiqui\",\n    \"role\": \"President\",\n    \"relationship_description\": \"Media investigation identifies Luisito Tiqui as president of L.R. Tiqui Builders, Inc., and notes the company is owned by the Tiqui family of Bulacan.\",\n    \"source_title\": \"6 flood contractors in Marcos list had prior spotty records\",\n    \"source_url\": \"https://picc.com.ph/6-flood-contractors-in-marcos-list-had-prior-spotty-records/\",\n    \"source_date\": \"\",\n    \"confidence\": 8\n  }\n]\n```",
+      "suggestions": [
+        {
+          "subject_name": "Luisito Tiqui",
+          "role": "President",
+          "relationship_description": "Luisito Tiqui is explicitly identified as the president of L.R. Tiqui Builders, Inc., directly linking him to the company's executive leadership.",
+          "source_title": "43 individuals linked to flood control mess on lookout bulletin",
+          "source_url": "https://www.pna.gov.ph/articles/1258033",
+          "source_date": "2025-09-05",
+          "confidence": 10
+        },
+        {
+          "subject_name": "Luisito Tiqui",
+          "role": "President",
+          "relationship_description": "Official government notice of award addressed to Luisito Tiqui as the authorized signatory for L.R. Tiqui Builders, Inc., confirming his executive role.",
+          "source_title": "NOTICE OF AWARD - Provincial Government of Rizal",
+          "source_url": "https://www.rizalprovince.ph/old%20database/engineering/NOTICE%20OF%20AWARD-PDF/2022/25TH%20PUB-DEC272022/noadec272022.pdf",
+          "source_date": "2023-01-19",
+          "confidence": 9
+        },
+        {
+          "subject_name": "Luisito Tiqui",
+          "role": "President",
+          "relationship_description": "Media investigation identifies Luisito Tiqui as president of L.R. Tiqui Builders, Inc., and notes the company is owned by the Tiqui family of Bulacan.",
+          "source_title": "6 flood contractors in Marcos list had prior spotty records",
+          "source_url": "https://picc.com.ph/6-flood-contractors-in-marcos-list-had-prior-spotty-records/",
+          "source_date": "",
+          "confidence": 8
+        }
+      ]
+    },
+    {
+      "record": {
+        "id": 606,
+        "company_name": "J.A. OLIVAR ENG'G DESIGN",
+        "person_name": "CONSTRUCTION AND SUPPLIES",
+        "role": "No public data found"
+      },
+      "prompt": "# Contractor Relationship Proof Needed\n\nWe maintain a database that tracks how construction companies relate to public officials.\nOne entry is missing credible sources.\n\n## Database Entry (needs verification)\n- Company: J.A. OLIVAR ENG'G DESIGN\n- Placeholder person/recorded name: CONSTRUCTION AND SUPPLIES\n- Recorded role: No public data found\n\n## Task for you\n1. Identify the ACTUAL individual(s) tied to J.A. OLIVAR ENG'G DESIGN in capacities such as owner, incorporator,\n   director, officer, chairperson, or other executive roles. Focus on people connected to\n   Philippine politics or politically exposed persons where possible.\n2. Cite up to three credible articles, government documents, or filings that explicitly mention\n   the relationship between the individual and J.A. OLIVAR ENG'G DESIGN.\n3. Return **only** a JSON array in a ```json fenced code block. Each object must contain:\n   - \"subject_name\": full name of the individual\n   - \"role\": role/title they hold in the company (owner, incorporator, etc.)\n   - \"relationship_description\": concise explanation of the link\n   - \"source_title\": article or document title\n   - \"source_url\": direct URL to the source\n   - \"source_date\": ISO date string (YYYY-MM-DD) if available, else empty string\n   - \"confidence\": integer 1-10 reflecting reliability\n4. Skip speculative content. If no credible sources exist, return an empty JSON array: ```json [] ```\n\nAnswer in English and ensure URLs are accessible.\n",
+      "perplexity_reply": "```json\n[\n  {\n    \"subject_name\": \"Olivar\",\n    \"role\": \"Manager/Owner\",\n    \"relationship_description\": \"Olivar is explicitly identified as the Manager/Owner of J.A. Olivar Eng'g Design, Construction and Supplies in official government procurement documents.\",\n    \"source_title\": \"notice of award - Philippine Ports Authority\",\n    \"source_url\": \"https://www.ppa.com.ph/sites/default/files/proc_proj_docs_noa/M103_11192019_000017_NOA.pdf\",\n    \"source_date\": \"2019-11-19\",\n    \"confidence\": 9\n  },\n  {\n    \"subject_name\": \"Olivar\",\n    \"role\": \"Manager/Owner\",\n    \"relationship_description\": \"Olivar is addressed as Manager/Owner of J.A. Olivar Eng'g Design, Construction and Supplies in a contract notice from the Provincial Government of La Union.\",\n    \"source_title\": \"Untitled - Provincial Government of La Union\",\n    \"source_url\": \"https://launion.gov.ph/wp-content/uploads/2024/04/NTP-LUFA-construction-materials-2043946.pdf\",\n    \"source_date\": \"2024-04-01\",\n    \"confidence\": 9\n  }\n]\n```",
+      "suggestions": [
+        {
+          "subject_name": "Olivar",
+          "role": "Manager/Owner",
+          "relationship_description": "Olivar is explicitly identified as the Manager/Owner of J.A. Olivar Eng'g Design, Construction and Supplies in official government procurement documents.",
+          "source_title": "notice of award - Philippine Ports Authority",
+          "source_url": "https://www.ppa.com.ph/sites/default/files/proc_proj_docs_noa/M103_11192019_000017_NOA.pdf",
+          "source_date": "2019-11-19",
+          "confidence": 9
+        },
+        {
+          "subject_name": "Olivar",
+          "role": "Manager/Owner",
+          "relationship_description": "Olivar is addressed as Manager/Owner of J.A. Olivar Eng'g Design, Construction and Supplies in a contract notice from the Provincial Government of La Union.",
+          "source_title": "Untitled - Provincial Government of La Union",
+          "source_url": "https://launion.gov.ph/wp-content/uploads/2024/04/NTP-LUFA-construction-materials-2043946.pdf",
+          "source_date": "2024-04-01",
+          "confidence": 9
+        }
+      ]
+    },
+    {
+      "record": {
+        "id": 1516,
+        "company_name": "ST. RAYMUND CONSTRUCTION",
+        "person_name": "INC",
+        "role": "No data found"
+      },
+      "prompt": "# Contractor Relationship Proof Needed\n\nWe maintain a database that tracks how construction companies relate to public officials.\nOne entry is missing credible sources.\n\n## Database Entry (needs verification)\n- Company: ST. RAYMUND CONSTRUCTION\n- Placeholder person/recorded name: INC\n- Recorded role: No data found\n\n## Task for you\n1. Identify the ACTUAL individual(s) tied to ST. RAYMUND CONSTRUCTION in capacities such as owner, incorporator,\n   director, officer, chairperson, or other executive roles. Focus on people connected to\n   Philippine politics or politically exposed persons where possible.\n2. Cite up to three credible articles, government documents, or filings that explicitly mention\n   the relationship between the individual and ST. RAYMUND CONSTRUCTION.\n3. Return **only** a JSON array in a ```json fenced code block. Each object must contain:\n   - \"subject_name\": full name of the individual\n   - \"role\": role/title they hold in the company (owner, incorporator, etc.)\n   - \"relationship_description\": concise explanation of the link\n   - \"source_title\": article or document title\n   - \"source_url\": direct URL to the source\n   - \"source_date\": ISO date string (YYYY-MM-DD) if available, else empty string\n   - \"confidence\": integer 1-10 reflecting reliability\n4. Skip speculative content. If no credible sources exist, return an empty JSON array: ```json [] ```\n\nAnswer in English and ensure URLs are accessible.\n",
+      "perplexity_reply": "```json\n[\n  {\n    \"subject_name\": \"Imelda T. Batara\",\n    \"role\": \"President\",\n    \"relationship_description\": \"Imelda T. Batara is explicitly identified as the President representing ST. RAYMUND CONSTRUCTION INC. in official government contract documents.\",\n    \"source_title\": \"NEGROS OCCIDENTAL 2ND - DPWH\",\n    \"source_url\": \"https://www.dpwh.gov.ph/dpwh/sites/default/files/webform/civil_works/contract_of_agreement/23gl0089_-_contract.pdf\",\n    \"source_date\": \"\",\n    \"confidence\": 9\n  },\n  {\n    \"subject_name\": \"Raymund I. Tongson\",\n    \"role\": \"Authorized Managing Officer\",\n    \"relationship_description\": \"Raymund I. Tongson is named as the Authorized Managing Officer of ST. RAYMUND CONSTRUCTION INC. in a Department of Public Works and Highways contract.\",\n    \"source_title\": \"Republic of the Philippines - DPWH\",\n    \"source_url\": \"https://dpwh.gov.ph/DPWH/sites/default/files/webform/civil_works/contract_of_agreement/19GM0051%20CONTRACT.pdf\",\n    \"source_date\": \"\",\n    \"confidence\": 9\n  }\n]\n```",
+      "suggestions": [
+        {
+          "subject_name": "Imelda T. Batara",
+          "role": "President",
+          "relationship_description": "Imelda T. Batara is explicitly identified as the President representing ST. RAYMUND CONSTRUCTION INC. in official government contract documents.",
+          "source_title": "NEGROS OCCIDENTAL 2ND - DPWH",
+          "source_url": "https://www.dpwh.gov.ph/dpwh/sites/default/files/webform/civil_works/contract_of_agreement/23gl0089_-_contract.pdf",
+          "source_date": "",
+          "confidence": 9
+        },
+        {
+          "subject_name": "Raymund I. Tongson",
+          "role": "Authorized Managing Officer",
+          "relationship_description": "Raymund I. Tongson is named as the Authorized Managing Officer of ST. RAYMUND CONSTRUCTION INC. in a Department of Public Works and Highways contract.",
+          "source_title": "Republic of the Philippines - DPWH",
+          "source_url": "https://dpwh.gov.ph/DPWH/sites/default/files/webform/civil_works/contract_of_agreement/19GM0051%20CONTRACT.pdf",
+          "source_date": "",
+          "confidence": 9
+        }
+      ]
+    },
+    {
+      "record": {
+        "id": 1517,
+        "company_name": "TOKWING CONSTRUCTION",
+        "person_name": "CORP.",
+        "role": "No data found"
+      },
+      "prompt": "# Contractor Relationship Proof Needed\n\nWe maintain a database that tracks how construction companies relate to public officials.\nOne entry is missing credible sources.\n\n## Database Entry (needs verification)\n- Company: TOKWING CONSTRUCTION\n- Placeholder person/recorded name: CORP.\n- Recorded role: No data found\n\n## Task for you\n1. Identify the ACTUAL individual(s) tied to TOKWING CONSTRUCTION in capacities such as owner, incorporator,\n   director, officer, chairperson, or other executive roles. Focus on people connected to\n   Philippine politics or politically exposed persons where possible.\n2. Cite up to three credible articles, government documents, or filings that explicitly mention\n   the relationship between the individual and TOKWING CONSTRUCTION.\n3. Return **only** a JSON array in a ```json fenced code block. Each object must contain:\n   - \"subject_name\": full name of the individual\n   - \"role\": role/title they hold in the company (owner, incorporator, etc.)\n   - \"relationship_description\": concise explanation of the link\n   - \"source_title\": article or document title\n   - \"source_url\": direct URL to the source\n   - \"source_date\": ISO date string (YYYY-MM-DD) if available, else empty string\n   - \"confidence\": integer 1-10 reflecting reliability\n4. Skip speculative content. If no credible sources exist, return an empty JSON array: ```json [] ```\n\nAnswer in English and ensure URLs are accessible.\n",
+      "perplexity_reply": "```json\n[\n  {\n    \"subject_name\": \"Reynaldo N. Manalansan\",\n    \"role\": \"Owner, President, Chairman, Chief Executive Officer\",\n    \"relationship_description\": \"Reynaldo N. Manalansan is identified as the owner, president, and chairman of Tokwing Construction Corp., and has been publicly linked to political campaign donations.\",\n    \"source_title\": \"Poll laws in limbo: Firms can'tdonate but owners bankroll bets\",\n    \"source_url\": \"https://pcij.org/2013/10/01/poll-laws-in-limbo-firms-cantbrdonate-but-owners-bankroll-bets/\",\n    \"source_date\": \"2013-10-01\",\n    \"confidence\": 10\n  },\n  {\n    \"subject_name\": \"Reynaldo N. Manalansan\",\n    \"role\": \"Chairperson and Chief Executive Officer\",\n    \"relationship_description\": \"Listed as Chairperson and Chief Executive Officer of Tokwing Construction Corp. in a business directory profile.\",\n    \"source_title\": \"TOKWING CONSTRUCTION CORP. Company Profile\",\n    \"source_url\": \"https://www.dnb.com/business-directory/company-profiles.tokwing_construction_corp.96fc97f865566a98c73a8437586cbd2c.html\",\n    \"source_date\": \"\",\n    \"confidence\": 9\n  },\n  {\n    \"subject_name\": \"Reynaldo N. Manalansan\",\n    \"role\": \"Primary Manager\",\n    \"relationship_description\": \"Reynaldo N. Manalansan is described as primarily managing Tokwing Construction Corp. and being known in the general construction business.\",\n    \"source_title\": \"Tokwing Construction - DevelopmentAid\",\n    \"source_url\": \"https://www.developmentaid.org/organizations/view/5131/tokwing-construction\",\n    \"source_date\": \"\",\n    \"confidence\": 8\n  }\n]\n```",
+      "suggestions": [
+        {
+          "subject_name": "Reynaldo N. Manalansan",
+          "role": "Owner, President, Chairman, Chief Executive Officer",
+          "relationship_description": "Reynaldo N. Manalansan is identified as the owner, president, and chairman of Tokwing Construction Corp., and has been publicly linked to political campaign donations.",
+          "source_title": "Poll laws in limbo: Firms can'tdonate but owners bankroll bets",
+          "source_url": "https://pcij.org/2013/10/01/poll-laws-in-limbo-firms-cantbrdonate-but-owners-bankroll-bets/",
+          "source_date": "2013-10-01",
+          "confidence": 10
+        },
+        {
+          "subject_name": "Reynaldo N. Manalansan",
+          "role": "Chairperson and Chief Executive Officer",
+          "relationship_description": "Listed as Chairperson and Chief Executive Officer of Tokwing Construction Corp. in a business directory profile.",
+          "source_title": "TOKWING CONSTRUCTION CORP. Company Profile",
+          "source_url": "https://www.dnb.com/business-directory/company-profiles.tokwing_construction_corp.96fc97f865566a98c73a8437586cbd2c.html",
+          "source_date": "",
+          "confidence": 9
+        },
+        {
+          "subject_name": "Reynaldo N. Manalansan",
+          "role": "Primary Manager",
+          "relationship_description": "Reynaldo N. Manalansan is described as primarily managing Tokwing Construction Corp. and being known in the general construction business.",
+          "source_title": "Tokwing Construction - DevelopmentAid",
+          "source_url": "https://www.developmentaid.org/organizations/view/5131/tokwing-construction",
+          "source_date": "",
+          "confidence": 8
+        }
+      ]
+    }
+  ]
+}

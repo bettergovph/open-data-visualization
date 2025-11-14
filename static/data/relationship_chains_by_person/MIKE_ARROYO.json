@@ -1,0 +1,104 @@
+{
+  "person": {
+    "normalized_name": "MIKE ARROYO",
+    "display_name": "MIKE ARROYO",
+    "chain_count": 3
+  },
+  "chains": [
+    {
+      "length": 2,
+      "start_surname": "ARROYO",
+      "end_surname": "Arroyo",
+      "path": [
+        4145012,
+        8299
+      ],
+      "relationships": [
+        "Starting person",
+        "IGNACIO ARROYO IS THE BROTHER OF MIKE ARROYO"
+      ],
+      "source_urls": [
+        "https://en.wikipedia.org/wiki/Ignacio_Arroyo"
+      ]
+    },
+    {
+      "length": 3,
+      "start_surname": "ARROYO",
+      "end_surname": "Ferrer",
+      "path": [
+        4145012,
+        8299,
+        35244
+      ],
+      "relationships": [
+        "Starting person",
+        "IGNACIO ARROYO IS THE BROTHER OF MIKE ARROYO",
+        " HUSBAND OF FORMER PRESIDENT GLORIA MACAPAGAL ARROYO"
+      ],
+      "source_urls": [
+        "https://en.wikipedia.org/wiki/Ignacio_Arroyo",
+        "https://www.rappler.com/nation/elections/ferrer-arroyo-dynasty-negros-occidental"
+      ]
+    },
+    {
+      "length": 2,
+      "start_surname": "Arroyo",
+      "end_surname": "ARROYO",
+      "path": [
+        8299,
+        4145012
+      ],
+      "relationships": [
+        "Starting person",
+        "Ignacio Arroyo is the brother of Mike Arroyo"
+      ],
+      "source_urls": [
+        "https://en.wikipedia.org/wiki/Ignacio_Arroyo"
+      ]
+    }
+  ],
+  "people": {
+    "8299": {
+      "id": 8299,
+      "first_name": "Ignacio",
+      "middle_name": null,
+      "last_name": "Arroyo",
+      "suffix": null,
+      "full_name": "Ignacio Arroyo",
+      "canonical_name": "IGNACIO ARROYO",
+      "position": "MEMBER, HOUSE OF REPRESENTATIVES",
+      "region": "REGION VI",
+      "province": "NEGROS OCCIDENTAL",
+      "municipality_city": "",
+      "location": "NEGROS OCCIDENTAL, REGION VI"
+    },
+    "35244": {
+      "id": 35244,
+      "first_name": "JULIET",
+      "middle_name": null,
+      "last_name": "Ferrer",
+      "suffix": null,
+      "full_name": "JULIET Ferrer",
+      "canonical_name": "JULIET FERRER",
+      "position": "MAYOR",
+      "region": "REGION VI",
+      "province": "NEGROS OCCIDENTAL",
+      "municipality_city": "",
+      "location": "NEGROS OCCIDENTAL, REGION VI"
+    },
+    "4145012": {
+      "id": 4145012,
+      "first_name": "MIKE",
+      "middle_name": null,
+      "last_name": "ARROYO",
+      "suffix": null,
+      "full_name": "MIKE ARROYO",
+      "canonical_name": "MIKE ARROYO",
+      "position": null,
+      "region": null,
+      "province": null,
+      "municipality_city": null,
+      "location": "Location unknown"
+    }
+  }
+}

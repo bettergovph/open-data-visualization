@@ -1,0 +1,120 @@
+{
+  "person": {
+    "normalized_name": "JEROY AGUSTIN PADILLA",
+    "display_name": "JEROY AGUSTIN PADILLA",
+    "chain_count": 3
+  },
+  "chains": [
+    {
+      "length": 2,
+      "start_surname": "PADILLA",
+      "end_surname": "PADILLA",
+      "path": [
+        4041737,
+        4041420
+      ],
+      "relationships": [
+        "Starting person",
+        "JEROY AGUSTIN PADILLA IS NEPHEW OF ROBINHOOD C. PADILLA"
+      ],
+      "source_urls": [
+        "OCR:pd19.jpg"
+      ]
+    },
+    {
+      "length": 3,
+      "start_surname": "PADILLA",
+      "end_surname": "RODRIGUEZ",
+      "path": [
+        4041737,
+        4041420,
+        4144963
+      ],
+      "relationships": [
+        "Starting person",
+        "JEROY AGUSTIN PADILLA IS NEPHEW OF ROBINHOOD C. PADILLA",
+        "ROBIN PADILLA IS MARRIED TO TELEVISION HOST MARIEL RODRIGUEZ"
+      ],
+      "source_urls": [
+        "OCR:pd19.jpg",
+        "https://en.wikipedia.org/wiki/Robin_Padilla"
+      ]
+    },
+    {
+      "length": 3,
+      "start_surname": "PADILLA",
+      "end_surname": "ADMINISTRATOR",
+      "path": [
+        4041737,
+        4041420,
+        4162429
+      ],
+      "relationships": [
+        "Starting person",
+        "JEROY AGUSTIN PADILLA IS NEPHEW OF ROBINHOOD C. PADILLA",
+        "ROBINHOOD C. PADILLA IS NEPHEW OF PROVINCIAL ADMINISTRATOR (VICE MAYOR OF JOSE PANGANIBAN"
+      ],
+      "source_urls": [
+        "OCR:pd19.jpg"
+      ]
+    }
+  ],
+  "people": {
+    "4041420": {
+      "id": 4041420,
+      "first_name": "ROBINHOOD C.",
+      "middle_name": "C.",
+      "last_name": "PADILLA",
+      "suffix": null,
+      "full_name": "ROBINHOOD C. C. PADILLA",
+      "canonical_name": "ROBINHOOD PADILLA",
+      "position": "SENATOR",
+      "region": "NCR",
+      "province": "Metro Manila",
+      "municipality_city": "Manila",
+      "location": "Manila, Metro Manila, NCR"
+    },
+    "4144963": {
+      "id": 4144963,
+      "first_name": "MARIEL",
+      "middle_name": null,
+      "last_name": "RODRIGUEZ",
+      "suffix": null,
+      "full_name": "MARIEL RODRIGUEZ",
+      "canonical_name": "MARIEL RODRIGUEZ",
+      "position": null,
+      "region": null,
+      "province": null,
+      "municipality_city": null,
+      "location": "Location unknown"
+    },
+    "4041737": {
+      "id": 4041737,
+      "first_name": "JEROY AGUSTIN",
+      "middle_name": null,
+      "last_name": "PADILLA",
+      "suffix": null,
+      "full_name": "JEROY AGUSTIN PADILLA",
+      "canonical_name": "CAMARINES NORTE",
+      "position": "COUNCILOR OF JOSE PANGANIBAN, CAMARINES NORTE",
+      "region": null,
+      "province": null,
+      "municipality_city": null,
+      "location": "Location unknown"
+    },
+    "4162429": {
+      "id": 4162429,
+      "first_name": "PROVINCIAL",
+      "middle_name": null,
+      "last_name": "ADMINISTRATOR",
+      "suffix": null,
+      "full_name": "PROVINCIAL ADMINISTRATOR",
+      "canonical_name": null,
+      "position": "VICE MAYOR OF JOSE PANGANIBAN,",
+      "region": null,
+      "province": null,
+      "municipality_city": null,
+      "location": "Location unknown"
+    }
+  }
+}

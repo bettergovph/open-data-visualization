@@ -1,0 +1,71 @@
+{
+  "person": {
+    "normalized_name": "SANDRO MARCOS",
+    "display_name": "SANDRO MARCOS",
+    "chain_count": 2
+  },
+  "chains": [
+    {
+      "length": 2,
+      "start_surname": "MARCOS",
+      "end_surname": "MARCOS",
+      "path": [
+        4162424,
+        53232
+      ],
+      "relationships": [
+        "Starting person",
+        "SANDRO MARCOS IS NEPHEW OF IMEE MARCOS"
+      ],
+      "source_urls": [
+        "OCR:pd18.jpg"
+      ]
+    },
+    {
+      "length": 2,
+      "start_surname": "MARCOS",
+      "end_surname": "MARCOS",
+      "path": [
+        53232,
+        4162424
+      ],
+      "relationships": [
+        "Starting person",
+        "IMEE MARCOS is nephew of SANDRO MARCOS (REPRESENTATIVE"
+      ],
+      "source_urls": [
+        "OCR:pd18.jpg"
+      ]
+    }
+  ],
+  "people": {
+    "53232": {
+      "id": 53232,
+      "first_name": "IMEE",
+      "middle_name": "REMEDIOS",
+      "last_name": "MARCOS",
+      "suffix": null,
+      "full_name": "IMEE REMEDIOS MARCOS",
+      "canonical_name": "IMEE MARCOS",
+      "position": "MEMBER, HOUSE OF REPRESENTATIVES",
+      "region": "REGION I",
+      "province": "ILOCOS NORTE",
+      "municipality_city": "",
+      "location": "ILOCOS NORTE, REGION I"
+    },
+    "4162424": {
+      "id": 4162424,
+      "first_name": "SANDRO",
+      "middle_name": null,
+      "last_name": "MARCOS",
+      "suffix": null,
+      "full_name": "SANDRO MARCOS",
+      "canonical_name": null,
+      "position": "REPRESENTATIVE, ILOCOS NORTE",
+      "region": null,
+      "province": null,
+      "municipality_city": null,
+      "location": "Location unknown"
+    }
+  }
+}

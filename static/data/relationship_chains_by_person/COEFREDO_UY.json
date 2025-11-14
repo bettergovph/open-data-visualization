@@ -1,0 +1,113 @@
+{
+  "person": {
+    "normalized_name": "COEFREDO UY",
+    "display_name": "Coefredo Uy",
+    "chain_count": 4
+  },
+  "chains": [
+    {
+      "length": 2,
+      "start_surname": "Tan",
+      "end_surname": "Uy",
+      "path": [
+        78160,
+        82012
+      ],
+      "relationships": [
+        "Starting person",
+        "DAUGHTER OF COEFREDO UY"
+      ],
+      "source_urls": []
+    },
+    {
+      "length": 3,
+      "start_surname": "Tan",
+      "end_surname": "TAN",
+      "path": [
+        78160,
+        82012,
+        78075
+      ],
+      "relationships": [
+        "Starting person",
+        "DAUGHTER OF COEFREDO UY",
+        "Father-in-law of Stephen James Tan"
+      ],
+      "source_urls": []
+    },
+    {
+      "length": 2,
+      "start_surname": "TAN",
+      "end_surname": "Uy",
+      "path": [
+        78075,
+        82012
+      ],
+      "relationships": [
+        "Starting person",
+        "SON-IN-LAW OF COEFREDO UY"
+      ],
+      "source_urls": []
+    },
+    {
+      "length": 3,
+      "start_surname": "TAN",
+      "end_surname": "Uy",
+      "path": [
+        78075,
+        78160,
+        82012
+      ],
+      "relationships": [
+        "Starting person",
+        "HUSBAND OF STEPHANY TAN",
+        "Son/Daughter of COEFREDO UY"
+      ],
+      "source_urls": []
+    }
+  ],
+  "people": {
+    "78160": {
+      "id": 78160,
+      "first_name": "Stephany",
+      "middle_name": null,
+      "last_name": "Tan",
+      "suffix": null,
+      "full_name": "Stephany Tan",
+      "canonical_name": "STEPHANY TAN",
+      "position": "MAYOR",
+      "region": "REGION VIII",
+      "province": "SAMAR",
+      "municipality_city": "",
+      "location": "SAMAR, REGION VIII"
+    },
+    "82012": {
+      "id": 82012,
+      "first_name": "Coefredo",
+      "middle_name": null,
+      "last_name": "Uy",
+      "suffix": null,
+      "full_name": "Coefredo Uy",
+      "canonical_name": "COEFREDO UY",
+      "position": "MAYOR",
+      "region": "REGION VIII",
+      "province": "SAMAR",
+      "municipality_city": "CATBALOGAN CITY",
+      "location": "CATBALOGAN CITY, SAMAR, REGION VIII"
+    },
+    "78075": {
+      "id": 78075,
+      "first_name": "STEPHEN",
+      "middle_name": null,
+      "last_name": "TAN",
+      "suffix": null,
+      "full_name": "STEPHEN TAN",
+      "canonical_name": "STEPHEN TAN",
+      "position": "GOVERNOR",
+      "region": "REGION VIII",
+      "province": "SAMAR",
+      "municipality_city": "",
+      "location": "SAMAR, REGION VIII"
+    }
+  }
+}

@@ -1,0 +1,104 @@
+{
+  "person": {
+    "normalized_name": "RUDY FARIÑAS JR.",
+    "display_name": "RUDY FARIÑAS JR.",
+    "chain_count": 2
+  },
+  "chains": [
+    {
+      "length": 2,
+      "start_surname": "FARIÃ‘AS",
+      "end_surname": "FARIÑAS JR.",
+      "path": [
+        34700,
+        4058159
+      ],
+      "relationships": [
+        "Starting person",
+        "Chevylle Fariñas is the mother of Rudy Fariñas Jr."
+      ],
+      "source_urls": [
+        "https://en.wikipedia.org/wiki/Rodolfo_Fariñas"
+      ]
+    },
+    {
+      "length": 4,
+      "start_surname": "Fariñas",
+      "end_surname": "FARIÑAS JR.",
+      "path": [
+        4160446,
+        4058145,
+        34700,
+        4058159
+      ],
+      "relationships": [
+        "Starting person",
+        "Rodolfo Fariñas is the father of Rudy Fariñas",
+        " both part of the Fariñas political dynasty in Ilocos Norte",
+        "CHEVYLLE FARIÑAS IS THE WIFE OF RUDY FARIÑAS"
+      ],
+      "source_urls": [
+        "https://www.rappler.com/nation/elections/farinas-dynasty-ilocos-norte",
+        "https://en.wikipedia.org/wiki/Rodolfo_Fariñas"
+      ]
+    }
+  ],
+  "people": {
+    "34700": {
+      "id": 34700,
+      "first_name": "CHEVYLLE",
+      "middle_name": null,
+      "last_name": "FARIÃ‘AS",
+      "suffix": null,
+      "full_name": "CHEVYLLE FARIÃ‘AS",
+      "canonical_name": "CHEVYLLE FARIÃ‘AS",
+      "position": "MAYOR",
+      "region": "REGION I",
+      "province": "ILOCOS NORTE",
+      "municipality_city": "",
+      "location": "ILOCOS NORTE, REGION I"
+    },
+    "4058159": {
+      "id": 4058159,
+      "first_name": "RUDY",
+      "middle_name": null,
+      "last_name": "FARIÑAS JR.",
+      "suffix": null,
+      "full_name": "RUDY FARIÑAS JR.",
+      "canonical_name": "RUDY FARIÑAS JR.",
+      "position": null,
+      "region": null,
+      "province": null,
+      "municipality_city": null,
+      "location": "Location unknown"
+    },
+    "4160446": {
+      "id": 4160446,
+      "first_name": "RODOLFO",
+      "middle_name": "",
+      "last_name": "Fariñas",
+      "suffix": "",
+      "full_name": "RODOLFO Fariñas",
+      "canonical_name": "RODOLFO FARIÑAS",
+      "position": "MEMBER, HOUSE OF REPRESENTATIVES",
+      "region": "REGION I",
+      "province": "ILOCOS NORTE",
+      "municipality_city": "",
+      "location": "ILOCOS NORTE, REGION I"
+    },
+    "4058145": {
+      "id": 4058145,
+      "first_name": "RUDY",
+      "middle_name": null,
+      "last_name": "FARIÑAS",
+      "suffix": null,
+      "full_name": "RUDY FARIÑAS",
+      "canonical_name": "RUDY FARIÑAS",
+      "position": null,
+      "region": null,
+      "province": null,
+      "municipality_city": null,
+      "location": "Location unknown"
+    }
+  }
+}

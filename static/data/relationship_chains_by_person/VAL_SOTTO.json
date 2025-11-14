@@ -1,0 +1,104 @@
+{
+  "person": {
+    "normalized_name": "VAL SOTTO",
+    "display_name": "VAL SOTTO",
+    "chain_count": 3
+  },
+  "chains": [
+    {
+      "length": 2,
+      "start_surname": "SOTTO",
+      "end_surname": "SOTTO",
+      "path": [
+        3745828,
+        4144962
+      ],
+      "relationships": [
+        "Starting person",
+        "Siblings in the SOTTO family"
+      ],
+      "source_urls": [
+        "https://en.wikipedia.org/wiki/Tito_Sotto"
+      ]
+    },
+    {
+      "length": 3,
+      "start_surname": "PANGILINAN",
+      "end_surname": "SOTTO",
+      "path": [
+        3745804,
+        3745828,
+        4144962
+      ],
+      "relationships": [
+        "Starting person",
+        "KIKO PANGILINAN is uncle of TITO SOTTO (SENATE PRESIDENT)",
+        "Siblings in the SOTTO family"
+      ],
+      "source_urls": [
+        "OCR:pd20.jpg",
+        "https://en.wikipedia.org/wiki/Tito_Sotto"
+      ]
+    },
+    {
+      "length": 2,
+      "start_surname": "SOTTO",
+      "end_surname": "SOTTO",
+      "path": [
+        4144962,
+        3745828
+      ],
+      "relationships": [
+        "Starting person",
+        "SIBLINGS IN THE SOTTO FAMILY"
+      ],
+      "source_urls": [
+        "https://en.wikipedia.org/wiki/Tito_Sotto"
+      ]
+    }
+  ],
+  "people": {
+    "3745828": {
+      "id": 3745828,
+      "first_name": "TITO",
+      "middle_name": null,
+      "last_name": "SOTTO",
+      "suffix": null,
+      "full_name": "TITO SOTTO",
+      "canonical_name": "TITO SOTTO",
+      "position": "SENATOR",
+      "region": "REGION XII",
+      "province": "COTABATO",
+      "municipality_city": "M'LANG",
+      "location": "M'LANG, COTABATO, REGION XII"
+    },
+    "4144962": {
+      "id": 4144962,
+      "first_name": "VAL",
+      "middle_name": null,
+      "last_name": "SOTTO",
+      "suffix": null,
+      "full_name": "VAL SOTTO",
+      "canonical_name": "VAL SOTTO",
+      "position": null,
+      "region": null,
+      "province": null,
+      "municipality_city": null,
+      "location": "Location unknown"
+    },
+    "3745804": {
+      "id": 3745804,
+      "first_name": "KIKO",
+      "middle_name": null,
+      "last_name": "PANGILINAN",
+      "suffix": null,
+      "full_name": "KIKO PANGILINAN",
+      "canonical_name": "KIKO PANGILINAN",
+      "position": "SENATOR",
+      "region": "REGION XII",
+      "province": "COTABATO",
+      "municipality_city": "M'LANG",
+      "location": "M'LANG, COTABATO, REGION XII"
+    }
+  }
+}

@@ -452,7 +452,7 @@ async function loadSourcesData() {
 function isValidNewsSource(url, sourceName) {
     if (url.includes('facebook.com') || url.includes('youtube.com')) {
         // Only allow Facebook/YouTube from these legitimate sources
-        const legitSources = ['VOV Philippines', 'Philippine STAR', 'Aviso Zamboanga'];
+        const legitSources = ['VOV Philippines', 'Philippine STAR', 'Aviso Zamboanga', 'Philippine Daily Inquirer'];
         return legitSources.some(legit => sourceName.includes(legit));
     }
     return true;
@@ -619,6 +619,23 @@ document.addEventListener('DOMContentLoaded', async function() {
     pcijArticles.forEach(article => {
         if (!pcijSources.some(source => source.url === article.url)) {
             pcijSources.push(article);
+        }
+    });
+
+    if (!SOURCES_DATA['Philippine Daily Inquirer']) {
+        SOURCES_DATA['Philippine Daily Inquirer'] = [];
+    }
+    const inquirerSources = SOURCES_DATA['Philippine Daily Inquirer'];
+    const inquirerArticles = [
+        {
+            title: 'Facebook Post',
+            url: 'https://www.facebook.com/share/17TLrbbxGC/?mibextid=wwXIfr',
+            date: '2025'
+        }
+    ];
+    inquirerArticles.forEach(article => {
+        if (!inquirerSources.some(source => source.url === article.url)) {
+            inquirerSources.push(article);
         }
     });
 
