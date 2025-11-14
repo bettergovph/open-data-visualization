@@ -361,6 +361,25 @@ async fn zaldy(_req: HttpRequest) -> Result<HttpResponse, ActixError> {
     Ok(HttpResponse::Ok().content_type("text/html").body(rendered))
 }
 
+// Zarah Companies Investigation Page
+async fn zarah(_req: HttpRequest) -> Result<HttpResponse, ActixError> {
+    let tera = Tera::new("templates/**/*").map_err(|e| actix_web::error::ErrorInternalServerError(e))?;
+    let mut context = Context::new();
+
+    add_frontend_env_to_context(&mut context);
+
+    context.insert("title", "Zarah Companies Investigation - BetterGovPH");
+    context.insert("company_name", "BetterGovPH");
+    context.insert("platform", "BetterGovPH");
+    context.insert("SITE_NAME", "BetterGovPH Data Visualizations");
+    context.insert("SITE_URL", "https://visualizations.bettergov.ph");
+
+    let template_name = "zarah.html";
+
+    let rendered = tera.render(template_name, &context).map_err(|e| actix_web::error::ErrorInternalServerError(e))?;
+    Ok(HttpResponse::Ok().content_type("text/html").body(rendered))
+}
+
 // Integrated Projects Page
 async fn integrated(_req: HttpRequest) -> Result<HttpResponse, ActixError> {
     let tera = Tera::new("templates/**/*").map_err(|e| actix_web::error::ErrorInternalServerError(e))?;
@@ -449,6 +468,7 @@ async fn main() -> std::io::Result<()> {
         .service(web::resource("/integrated").to(integrated))
         .service(web::resource("/family").to(family))
         .service(web::resource("/zaldy").to(zaldy))
+        .service(web::resource("/zarah").to(zarah))
             .service(web::resource("/budget-nep-correlation").to(budget_nep_correlation))
             .service(web::resource("/budget-flood-correlation").to(budget_flood_correlation))
             .service(web::resource("/flood-dime-correlation").to(flood_dime_correlation))
