@@ -4574,6 +4574,7 @@ async def dynasty_relationship_chains_api(
         return JSONResponse({
             "success": True,
             "data": filtered_chains,
+            "people": cache_data.get('people', {}),  # Include people dictionary for reconstruction
             "total_constellations": len(result_constellations),
             "total_chains": len(filtered_chains),
             "min_constellation_stars": chain_length_min,
@@ -4585,6 +4586,43 @@ async def dynasty_relationship_chains_api(
                 "total_cached_constellations": cache_data.get('summary', {}).get('total_constellations', 0),
                 "constellation_mapping": cache_data.get('summary', {}).get('constellation_mapping', {})
             }
+        })
+        
+    except Exception as e:
+        return JSONResponse({"success": False, "error": str(e)})
+
+@app.get("/api/dynasty/relationship-chains/person")
+async def dynasty_relationship_chains_person_api(
+    normalized_name: str = Query(..., description="Normalized person name (e.g., 'FRANCIS ESCUDERO')")
+):
+    """Get relationship chains for a specific person from their JSON file"""
+    try:
+        import json
+        from pathlib import Path
+        
+        # Create safe filename from normalized name
+        safe_filename = normalized_name.replace(' ', '_').replace('/', '_').replace('\\', '_')
+        safe_filename = ''.join(c for c in safe_filename if c.isalnum() or c in ('_', '-', '.'))
+        
+        # Load person-specific JSON file
+        person_file = Path("static/data/relationship_chains_by_person") / f"{safe_filename}.json"
+        
+        if not person_file.exists():
+            return JSONResponse({
+                "success": False, 
+                "error": f"Person file not found for: {normalized_name}",
+                "suggestions": "Make sure the normalized name matches exactly (e.g., 'FRANCIS ESCUDERO')"
+            }, status_code=404)
+        
+        with open(person_file, 'r', encoding='utf-8') as f:
+            person_data = json.load(f)
+        
+        return JSONResponse({
+            "success": True,
+            "person": person_data.get("person", {}),
+            "chains": person_data.get("chains", []),
+            "people": person_data.get("people", {}),
+            "chain_count": len(person_data.get("chains", []))
         })
         
     except Exception as e:
@@ -6434,6 +6472,44 @@ async def _get_infrawatch_table_meta(conn: asyncpg.Connection) -> Dict[str, Any]
 
     _INFRAWATCH_TABLE_META = {"mode": "none", "table": None}
     return _INFRAWATCH_TABLE_META
+
+@app.get("/api/zaldy/dpwh-projects")
+async def zaldy_dpwh_projects_api():
+    """Get DPWH projects with database tags (flood, DIME, PhilGEPS, Infrawatch) - no authentication required"""
+    try:
+        from pathlib import Path
+        import json
+        
+        # Try to load from cache first
+        script_dir = Path(__file__).resolve().parent
+        cache_path = script_dir / "static" / "data" / "zaldy_dpwh_projects_cache.json"
+        
+        if cache_path.exists():
+            try:
+                with open(cache_path, 'r', encoding='utf-8') as f:
+                    cached_data = json.load(f)
+                
+                # Return cached data if it's valid
+                if cached_data.get("success") and "projects" in cached_data:
+                    return JSONResponse(cached_data)
+            except Exception as e:
+                print(f"⚠️  Error reading cache file: {e}")
+                # Fall through to generate fresh data
+        
+        # If cache doesn't exist or is invalid, return error suggesting to run the cache script
+        return JSONResponse({
+            "success": False,
+            "error": "Cache file not found. Please run: python scripts/generate_zaldy_dpwh_cache.py",
+            "cache_path": str(cache_path)
+        })
+        
+    except Exception as e:
+        import traceback
+        traceback.print_exc()
+        return JSONResponse({
+            "success": False,
+            "error": str(e)
+        })
 
 if __name__ == "__main__":
     uvicorn.run(app, host="127.0.0.1", port=8000)
