@@ -11,6 +11,7 @@ import csv
 import json
 import os
 import re
+from difflib import SequenceMatcher
 import sys
 from pathlib import Path
 from datetime import datetime
@@ -89,6 +90,15 @@ CORRECT_GAA_PAGES = {"209", "259", "75", "70", "253", "394", "390", "247", "60",
 MAYBE_GAA_PAGES = {"75", "389", "664"}
 
 
+
+def fuzzy_title_match(title1: str, title2: str) -> float:
+    """Calculate fuzzy match score between two titles using SequenceMatcher."""
+    if not title1 or not title2:
+        return 0.0
+    norm1 = normalize_title(title1).lower()
+    norm2 = normalize_title(title2).lower()
+    return SequenceMatcher(None, norm1, norm2).ratio()
+
 def extract_chainage_markers(title: str) -> set:
     """Extract chainage markers (K followed by digits, like K0015+400) from title."""
     if not title:
@@ -145,13 +155,13 @@ async def find_flood_match(flood_client: FloodControlClient, project_title: str,
             title_score = len(matching_words) / max(len(title_words), 1) if title_words else 0
             
             # Adjust threshold based on GAA page
-            min_title_score = 0.6  # Default
+            min_title_score = 0.5  # Default (lowered with fuzzy matching)
             if gaa_page in STRICT_GAA_PAGES:
-                min_title_score = 0.75  # Stricter for wrong GAA pages
+                min_title_score = 0.7  # Stricter for wrong GAA pages (lowered with fuzzy matching)
             elif gaa_page in MAYBE_GAA_PAGES:
                 min_title_score = 0.5  # Slightly looser for maybe pages
             elif gaa_page not in CORRECT_GAA_PAGES and gaa_page:
-                min_title_score = 0.5  # Looser for not mentioned GAA pages
+                min_title_score = 0.4  # Looser for not mentioned GAA pages (with fuzzy matching)
             
             # Require either chainage match OR strong title match
             if not chainage_match and title_score < min_title_score:
@@ -174,13 +184,13 @@ async def find_flood_match(flood_client: FloodControlClient, project_title: str,
                 amount_match = amount_matches(amount, db_amount, max_diff=1000000.0)
             elif amount is not None and db_amount is None:
                 # If CSV has amount but DB doesn't, require strong match
-                min_score_no_amount = 0.7
+                min_score_no_amount = 0.6
                 if gaa_page in STRICT_GAA_PAGES:
-                    min_score_no_amount = 0.8  # Stricter
+                    min_score_no_amount = 0.6  # Stricter (with fuzzy matching)
                 elif gaa_page in MAYBE_GAA_PAGES:
                     min_score_no_amount = 0.6  # Slightly looser for maybe pages
                 elif gaa_page not in CORRECT_GAA_PAGES and gaa_page:
-                    min_score_no_amount = 0.6  # Looser
+                    min_score_no_amount = 0.5  # Looser (with fuzzy matching)
                 if not chainage_match and title_score < min_score_no_amount:
                     continue
             
@@ -251,7 +261,7 @@ async def find_flood_match(flood_client: FloodControlClient, project_title: str,
                 if amount is not None and db_amount is not None:
                     amount_match = amount_matches(amount, db_amount, max_diff=1000000.0)
                 elif amount is not None and db_amount is None:
-                    min_score_no_amount = 0.7
+                    min_score_no_amount = 0.6
                     if gaa_page in STRICT_GAA_PAGES:
                         min_score_no_amount = 0.8
                     elif gaa_page in MAYBE_GAA_PAGES:
@@ -318,6 +328,10 @@ async def find_dime_match(dime_conn: asyncpg.Connection, project_title: str, amo
             proj_words = set(re.findall(r'\b\w{3,}\b', combined_lower))
             matching_words = title_words.intersection(proj_words)
             title_score = len(matching_words) / max(len(title_words), 1) if title_words else 0
+            # Calculate fuzzy string similarity score
+            fuzzy_score = fuzzy_title_match(project_title, combined_text)
+            # Combine scores (weighted average: 60% word overlap, 40% fuzzy)
+            title_score = (title_score * 0.6) + (fuzzy_score * 0.4)
             
             min_title_score = 0.6
             if gaa_page in STRICT_GAA_PAGES:
@@ -337,7 +351,7 @@ async def find_dime_match(dime_conn: asyncpg.Connection, project_title: str, amo
             if amount is not None and db_amount is not None:
                 amount_match = amount_matches(amount, db_amount, max_diff=1000000.0)
             elif amount is not None and db_amount is None:
-                min_score_no_amount = 0.7
+                min_score_no_amount = 0.6
                 if gaa_page in STRICT_GAA_PAGES:
                     min_score_no_amount = 0.8
                 elif gaa_page in MAYBE_GAA_PAGES:
@@ -407,6 +421,10 @@ async def find_philgeps_match(philgeps_conn: asyncpg.Connection, project_title: 
             proj_words = set(re.findall(r'\b\w{3,}\b', combined_lower))
             matching_words = title_words.intersection(proj_words)
             title_score = len(matching_words) / max(len(title_words), 1) if title_words else 0
+            # Calculate fuzzy string similarity score
+            fuzzy_score = fuzzy_title_match(project_title, combined_text)
+            # Combine scores (weighted average: 60% word overlap, 40% fuzzy)
+            title_score = (title_score * 0.6) + (fuzzy_score * 0.4)
             
             min_title_score = 0.6
             if gaa_page in STRICT_GAA_PAGES:
@@ -426,7 +444,7 @@ async def find_philgeps_match(philgeps_conn: asyncpg.Connection, project_title: 
             if amount is not None and db_amount is not None:
                 amount_match = amount_matches(amount, db_amount, max_diff=1000000.0)
             elif amount is not None and db_amount is None:
-                min_score_no_amount = 0.7
+                min_score_no_amount = 0.6
                 if gaa_page in STRICT_GAA_PAGES:
                     min_score_no_amount = 0.8
                 elif gaa_page in MAYBE_GAA_PAGES:
@@ -453,13 +471,13 @@ async def find_philgeps_match(philgeps_conn: asyncpg.Connection, project_title: 
                     "db_amount": db_amount
                 }
         
-        min_final_score = 0.3
+        min_final_score = 0.2
         if gaa_page in STRICT_GAA_PAGES:
-            min_final_score = 0.5
+            min_final_score = 0.4
         elif gaa_page in MAYBE_GAA_PAGES:
-            min_final_score = 0.25
+            min_final_score = 0.2
         elif gaa_page not in CORRECT_GAA_PAGES and gaa_page:
-            min_final_score = 0.25
+            min_final_score = 0.2
         return best_match if best_score >= min_final_score else None
     except Exception as e:
         print(f"  ⚠️  Error checking PhilGEPS DB: {e}")
@@ -554,7 +572,7 @@ async def find_infrawatch_match(infrawatch_conn: asyncpg.Connection, project_tit
             if amount is not None and db_amount is not None:
                 amount_match = amount_matches(amount, db_amount, max_diff=1000000.0)
             elif amount is not None and db_amount is None:
-                min_score_no_amount = 0.7
+                min_score_no_amount = 0.6
                 if gaa_page in STRICT_GAA_PAGES:
                     min_score_no_amount = 0.8
                 elif gaa_page in MAYBE_GAA_PAGES:
@@ -589,13 +607,13 @@ async def find_infrawatch_match(infrawatch_conn: asyncpg.Connection, project_tit
                     "db_amount": db_amount
                 }
         
-        min_final_score = 0.3
+        min_final_score = 0.2
         if gaa_page in STRICT_GAA_PAGES:
-            min_final_score = 0.5
+            min_final_score = 0.4
         elif gaa_page in MAYBE_GAA_PAGES:
-            min_final_score = 0.25
+            min_final_score = 0.2
         elif gaa_page not in CORRECT_GAA_PAGES and gaa_page:
-            min_final_score = 0.25
+            min_final_score = 0.2
         return best_match if best_score >= min_final_score else None
     except Exception as e:
         print(f"  ⚠️  Error checking Infrawatch DB: {e}")
