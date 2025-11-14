@@ -297,9 +297,14 @@ function toggleMobileMenu() {
                     <span class="text-gray-600">Credit: inyongmaasahan (<a href="mailto:inyongmaaasahan@gmail.com" class="source-link">inyongmaaasahan@gmail.com</a>)</span>
                 </li>
                 <li>
+                    <strong>Records of flood-control contractors (PCIJ, 2025):</strong><br>
+                    <span class="text-gray-700">Primary investigative basis for contractor ownership, valuations, and joint ventures powering dynasty contractor profiles and `/integrated` tabs.</span><br>
+                    <span class="text-gray-600">Credit: <a href="https://pcij.org/2025/08/31/5-reveals-from-the-flood-control-data/" target="_blank" rel="noopener noreferrer" class="source-link source-link-with-popup" data-source="PCIJ Flood Control">Philippine Center for Investigative Journalism</a></span>
+                </li>
+                <li>
                     <strong>Rappler Politicontractors Tracker (2025):</strong><br>
                     <a href="https://www.rappler.com/newsbreak/investigative/politicians-government-contractors-connections-map/" target="_blank" rel="noopener noreferrer" class="source-link">TRACKER: Public officials with links to government contractors</a><br>
-                    <span class="text-gray-600">Used in: Contractor verification for congressmen with zero-cache entries, cross-referencing beneficial ownership of firms such as A.D. Gonzales Jr. Construction, Sunwest Construction, and Quezon-based Suarez companies.</span><br>
+                    <span class="text-gray-600">Used in: Contractor verification for congressmen with zero-cache entries, cross-referencing beneficial ownership of firms such as A.D. Gonzales Jr. Construction, Sunwest Construction, and Quezon-based Suarez companies. “Politicontractors” terminology originates from this Rappler series.</span><br>
                     <span class="text-gray-600 text-sm">Investigative map maintained by Rappler that documents public officials and the construction firms owned by their families. Provides vetted leads for integrating contractor patterns into autocomplete filters and cache generation.</span>
                 </li>
                 <li>
@@ -595,6 +600,28 @@ document.addEventListener('DOMContentLoaded', async function() {
         }
     });
     
+    if (!SOURCES_DATA['PCIJ Flood Control']) {
+        SOURCES_DATA['PCIJ Flood Control'] = [];
+    }
+    const pcijSources = SOURCES_DATA['PCIJ Flood Control'];
+    const pcijArticles = [
+        {
+            title: 'Five Reveals from the Flood-Control Data',
+            url: 'https://pcij.org/2025/08/31/5-reveals-from-the-flood-control-data/',
+            date: 'August 31, 2025'
+        },
+        {
+            title: 'Records of flood-control contractors',
+            url: 'https://pcij.org/2025/08/30/flood-control-records/',
+            date: 'August 30, 2025'
+        }
+    ];
+    pcijArticles.forEach(article => {
+        if (!pcijSources.some(source => source.url === article.url)) {
+            pcijSources.push(article);
+        }
+    });
+
     const sourceLinks = document.querySelectorAll('.source-link-with-popup');
     
     sourceLinks.forEach(link => {
