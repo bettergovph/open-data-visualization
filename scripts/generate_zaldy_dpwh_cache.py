@@ -155,6 +155,10 @@ async def find_flood_match(flood_client: FloodControlClient, project_title: str,
             proj_words = set(re.findall(r'\b\w{3,}\b', proj_desc_lower))
             matching_words = title_words.intersection(proj_words)
             title_score = len(matching_words) / max(len(title_words), 1) if title_words else 0
+            # Calculate fuzzy string similarity score
+            fuzzy_score = fuzzy_title_match(project_title, proj_desc)
+            # Combine scores (weighted average: 60% word overlap, 40% fuzzy)
+            title_score = (title_score * 0.6) + (fuzzy_score * 0.4)
             
             # Adjust threshold based on GAA page
             min_title_score = 0.5  # Default (lowered with fuzzy matching)
@@ -240,6 +244,10 @@ async def find_flood_match(flood_client: FloodControlClient, project_title: str,
                 proj_words = set(re.findall(r'\b\w{3,}\b', proj_desc_lower))
                 matching_words = title_words.intersection(proj_words)
                 title_score = len(matching_words) / max(len(title_words), 1) if title_words else 0
+                # Calculate fuzzy string similarity score
+                fuzzy_score = fuzzy_title_match(project_title, proj_desc)
+                # Combine scores (weighted average: 60% word overlap, 40% fuzzy)
+                title_score = (title_score * 0.6) + (fuzzy_score * 0.4)
                 
                 min_title_score = 0.6
                 if gaa_page in STRICT_GAA_PAGES:
@@ -547,6 +555,10 @@ async def find_infrawatch_match(infrawatch_conn: asyncpg.Connection, project_tit
             # Calculate title match score
             matching_words = title_words.intersection(proj_words)
             title_score = len(matching_words) / max(len(title_words), 1) if title_words else 0
+            # Calculate fuzzy string similarity score
+            fuzzy_score = fuzzy_title_match(project_title, db_title)
+            # Combine scores (weighted average: 60% word overlap, 40% fuzzy)
+            title_score = (title_score * 0.6) + (fuzzy_score * 0.4)
             
             # Adjust threshold based on GAA page
             min_title_score = 0.6
