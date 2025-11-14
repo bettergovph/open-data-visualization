@@ -725,6 +725,14 @@ class DynastyProjectsCacheGenerator:
                     contractor_names.append(company_name)
                 contractor_patterns.extend(_expand_patterns(company_name))
 
+            # Load contractors from family_connections in config (e.g., Zaldy Co's SUNWEST connections)
+            family_contractors = congressman_config.get('family_connections', {}).get('contractors', [])
+            for company_name in family_contractors:
+                if not company_name or _should_exclude(company_name):
+                    continue
+                contractor_names.append(company_name)
+                contractor_patterns.extend(_expand_patterns(company_name))
+
             party_numbers: List[Any] = []
             if political_dynasties_available:
                 if person.get('id') is not None:
@@ -798,6 +806,41 @@ class DynastyProjectsCacheGenerator:
                 return False
             pattern = rf'(?<!\w){re.escape(word)}(?!\w)'
             return re.search(pattern, text) is not None
+        
+        def has_different_district_mentioned(text: str, congressman_district: str) -> bool:
+            """Check if text mentions a different district number than the congressman's district.
+            Returns True if a different district is mentioned, False otherwise."""
+            if not congressman_district:
+                return False
+            
+            district_upper = congressman_district.upper()
+            other_district_patterns = []
+            
+            if '1ST' in district_upper or 'FIRST' in district_upper:
+                other_district_patterns = ['2ND DISTRICT', 'SECOND DISTRICT', '3RD DISTRICT', 'THIRD DISTRICT', '4TH DISTRICT', 'FOURTH DISTRICT']
+            elif '2ND' in district_upper or 'SECOND' in district_upper:
+                other_district_patterns = ['1ST DISTRICT', 'FIRST DISTRICT', '3RD DISTRICT', 'THIRD DISTRICT', '4TH DISTRICT', 'FOURTH DISTRICT']
+            elif '3RD' in district_upper or 'THIRD' in district_upper:
+                other_district_patterns = ['1ST DISTRICT', 'FIRST DISTRICT', '2ND DISTRICT', 'SECOND DISTRICT', '4TH DISTRICT', 'FOURTH DISTRICT']
+            else:
+                # For other districts, check for common ones
+                for i in range(1, 10):
+                    if str(i) not in district_upper:
+                        if i == 1:
+                            other_district_patterns.extend(['1ST DISTRICT', 'FIRST DISTRICT'])
+                        elif i == 2:
+                            other_district_patterns.extend(['2ND DISTRICT', 'SECOND DISTRICT'])
+                        elif i == 3:
+                            other_district_patterns.extend(['3RD DISTRICT', 'THIRD DISTRICT'])
+                        else:
+                            other_district_patterns.append(f'{i}TH DISTRICT')
+            
+            # Check if any other district is mentioned
+            for other_district in other_district_patterns:
+                if contains_word(text, other_district):
+                    return True
+            
+            return False
         
         # 1. Check barangay match (highest priority)
         # For city districts, if a barangay is mentioned, it MUST be in the 2nd District list
@@ -998,6 +1041,10 @@ class DynastyProjectsCacheGenerator:
                 if has_barangay_match:
                     return (congressman_name, "district", match_score)
 
+            # Check if a different district number is mentioned (universal for all city districts)
+            if has_different_district_mentioned(combined_text, district_number):
+                return (None, None, 0)  # Different district mentioned - exclude
+
             if allow_city_wide:
                 return (congressman_name, "district", match_score)
 
@@ -1156,6 +1203,10 @@ class DynastyProjectsCacheGenerator:
                 return (congressman_name, "district", 100)
 
             # Otherwise, allow city-wide match with lower score
+            # Check if a different district number is mentioned (universal for all city districts)
+            if has_different_district_mentioned(combined_text, district_number_raw):
+                return (None, None, 0)  # Different district mentioned - exclude
+            
             if district_identifier in combined_text:
                 return (congressman_name, "district", 1)
         

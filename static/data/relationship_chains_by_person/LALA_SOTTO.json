@@ -1,0 +1,87 @@
+{
+  "person": {
+    "normalized_name": "LALA SOTTO",
+    "display_name": "LALA SOTTO",
+    "chain_count": 2
+  },
+  "chains": [
+    {
+      "length": 3,
+      "start_surname": "SOTTO",
+      "end_surname": "SOTTO",
+      "path": [
+        75988,
+        3745804,
+        4162432
+      ],
+      "relationships": [
+        "Starting person",
+        "GIAN SOTTO is cousin of KIKO PANGILINAN",
+        "KIKO PANGILINAN is cousin of LALA SOTTO"
+      ],
+      "source_urls": [
+        "OCR:pd20.jpg"
+      ]
+    },
+    {
+      "length": 2,
+      "start_surname": "PANGILINAN",
+      "end_surname": "SOTTO",
+      "path": [
+        3745804,
+        4162432
+      ],
+      "relationships": [
+        "Starting person",
+        "KIKO PANGILINAN is cousin of LALA SOTTO"
+      ],
+      "source_urls": [
+        "OCR:pd20.jpg"
+      ]
+    }
+  ],
+  "people": {
+    "3745804": {
+      "id": 3745804,
+      "first_name": "KIKO",
+      "middle_name": null,
+      "last_name": "PANGILINAN",
+      "suffix": null,
+      "full_name": "KIKO PANGILINAN",
+      "canonical_name": "KIKO PANGILINAN",
+      "position": "SENATOR",
+      "region": "REGION XII",
+      "province": "COTABATO",
+      "municipality_city": "M'LANG",
+      "location": "M'LANG, COTABATO, REGION XII"
+    },
+    "75988": {
+      "id": 75988,
+      "first_name": "GIAN",
+      "middle_name": null,
+      "last_name": "SOTTO",
+      "suffix": null,
+      "full_name": "GIAN SOTTO",
+      "canonical_name": "GIAN SOTTO",
+      "position": "COUNCILOR",
+      "region": "NATIONAL CAPITAL REGION",
+      "province": "NCR, SECOND DISTRICT",
+      "municipality_city": "",
+      "location": "NCR, SECOND DISTRICT, NATIONAL CAPITAL REGION"
+    },
+    "4162432": {
+      "id": 4162432,
+      "first_name": "LALA",
+      "middle_name": null,
+      "last_name": "SOTTO",
+      "suffix": null,
+      "full_name": "LALA SOTTO",
+      "canonical_name": null,
+      "position": null,
+      "region": null,
+      "province": null,
+      "municipality_city": null,
+      "location": "Location unknown"
+    }
+  }
+}

@@ -1,0 +1,87 @@
+{
+  "person": {
+    "normalized_name": "- ANGELO MARCOS BARBA",
+    "display_name": "- ANGELO MARCOS BARBA",
+    "chain_count": 2
+  },
+  "chains": [
+    {
+      "length": 3,
+      "start_surname": "MARCOS",
+      "end_surname": "ANGELO MARCOS BARBA",
+      "path": [
+        4162423,
+        53232,
+        4162425
+      ],
+      "relationships": [
+        "Starting person",
+        "BONGBONG MARCOS IS BROTHER OF IMEE MARCOS",
+        "IMEE MARCOS is cousin of - ANGELO MARCOS BARBA (REPRESENTATIVE"
+      ],
+      "source_urls": [
+        "OCR:pd18.jpg"
+      ]
+    },
+    {
+      "length": 2,
+      "start_surname": "MARCOS",
+      "end_surname": "ANGELO MARCOS BARBA",
+      "path": [
+        53232,
+        4162425
+      ],
+      "relationships": [
+        "Starting person",
+        "IMEE MARCOS is cousin of - ANGELO MARCOS BARBA (REPRESENTATIVE"
+      ],
+      "source_urls": [
+        "OCR:pd18.jpg"
+      ]
+    }
+  ],
+  "people": {
+    "53232": {
+      "id": 53232,
+      "first_name": "IMEE",
+      "middle_name": "REMEDIOS",
+      "last_name": "MARCOS",
+      "suffix": null,
+      "full_name": "IMEE REMEDIOS MARCOS",
+      "canonical_name": "IMEE MARCOS",
+      "position": "MEMBER, HOUSE OF REPRESENTATIVES",
+      "region": "REGION I",
+      "province": "ILOCOS NORTE",
+      "municipality_city": "",
+      "location": "ILOCOS NORTE, REGION I"
+    },
+    "4162423": {
+      "id": 4162423,
+      "first_name": "BONGBONG",
+      "middle_name": null,
+      "last_name": "MARCOS",
+      "suffix": null,
+      "full_name": "BONGBONG MARCOS",
+      "canonical_name": null,
+      "position": null,
+      "region": null,
+      "province": null,
+      "municipality_city": null,
+      "location": "Location unknown"
+    },
+    "4162425": {
+      "id": 4162425,
+      "first_name": "-",
+      "middle_name": null,
+      "last_name": "ANGELO MARCOS BARBA",
+      "suffix": null,
+      "full_name": "- ANGELO MARCOS BARBA",
+      "canonical_name": null,
+      "position": "REPRESENTATIVE, ILOCOS NORTE",
+      "region": null,
+      "province": null,
+      "municipality_city": null,
+      "location": "Location unknown"
+    }
+  }
+}

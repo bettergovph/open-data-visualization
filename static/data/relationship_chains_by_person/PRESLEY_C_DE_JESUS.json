@@ -1,0 +1,83 @@
+{
+  "person": {
+    "normalized_name": "PRESLEY C DE JESUS",
+    "display_name": "PRESLEY C DE JESUS",
+    "chain_count": 2
+  },
+  "chains": [
+    {
+      "length": 3,
+      "start_surname": "DAGOOC",
+      "end_surname": "JESUS",
+      "path": [
+        4145264,
+        4145265
+      ],
+      "relationships": [
+        "Starting person",
+        "Connected via APEC"
+      ],
+      "source_urls": [],
+      "is_standalone_party_list": true,
+      "party_list_connection": {
+        "party_code": "43",
+        "party_list_number": 43,
+        "party_name": "APEC",
+        "party_full_name": "43, APEC",
+        "relationship_type": "Party-List Membership"
+      }
+    },
+    {
+      "length": 3,
+      "start_surname": "JESUS",
+      "end_surname": "DAGOOC",
+      "path": [
+        4145265,
+        4145264
+      ],
+      "relationships": [
+        "Starting person",
+        "Connected via APEC"
+      ],
+      "source_urls": [],
+      "is_standalone_party_list": true,
+      "party_list_connection": {
+        "party_code": "43",
+        "party_list_number": 43,
+        "party_name": "APEC",
+        "party_full_name": "43, APEC",
+        "relationship_type": "Party-List Membership"
+      }
+    }
+  ],
+  "people": {
+    "4145264": {
+      "id": 4145264,
+      "first_name": "SERGIO C",
+      "middle_name": null,
+      "last_name": "DAGOOC",
+      "suffix": null,
+      "full_name": "SERGIO C DAGOOC",
+      "canonical_name": null,
+      "position": "PARTY-LIST REPRESENTATIVE",
+      "region": null,
+      "province": null,
+      "municipality_city": null,
+      "location": "Location unknown"
+    },
+    "4145265": {
+      "id": 4145265,
+      "first_name": "PRESLEY C DE",
+      "middle_name": null,
+      "last_name": "JESUS",
+      "suffix": null,
+      "full_name": "PRESLEY C DE JESUS",
+      "canonical_name": null,
+      "position": "PARTY-LIST REPRESENTATIVE",
+      "region": null,
+      "province": null,
+      "municipality_city": null,
+      "location": "Location unknown"
+    }
+  }
+}

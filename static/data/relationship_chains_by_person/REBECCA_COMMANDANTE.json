@@ -1,0 +1,87 @@
+{
+  "person": {
+    "normalized_name": "REBECCA COMMANDANTE",
+    "display_name": "REBECCA COMMANDANTE",
+    "chain_count": 2
+  },
+  "chains": [
+    {
+      "length": 3,
+      "start_surname": "Del Rosario",
+      "end_surname": "COMMANDANTE",
+      "path": [
+        28590,
+        3745717,
+        4162447
+      ],
+      "relationships": [
+        "Starting person",
+        "SEN DELA ROSA is sister of BATO DELA ROSA",
+        "BATO DELA ROSA is sister of REBECCA COMMANDANTE (POLITICAL AFFAIRS OFFICER II"
+      ],
+      "source_urls": [
+        "OCR:pd7.jpg"
+      ]
+    },
+    {
+      "length": 2,
+      "start_surname": "DELA ROSA",
+      "end_surname": "COMMANDANTE",
+      "path": [
+        3745717,
+        4162447
+      ],
+      "relationships": [
+        "Starting person",
+        "BATO DELA ROSA is sister of REBECCA COMMANDANTE (POLITICAL AFFAIRS OFFICER II"
+      ],
+      "source_urls": [
+        "OCR:pd7.jpg"
+      ]
+    }
+  ],
+  "people": {
+    "3745717": {
+      "id": 3745717,
+      "first_name": "BATO",
+      "middle_name": null,
+      "last_name": "DELA ROSA",
+      "suffix": null,
+      "full_name": "BATO DELA ROSA",
+      "canonical_name": "BATO DELA ROSA",
+      "position": "SENATOR",
+      "region": "REGION XII",
+      "province": "COTABATO",
+      "municipality_city": "M'LANG",
+      "location": "M'LANG, COTABATO, REGION XII"
+    },
+    "28590": {
+      "id": 28590,
+      "first_name": "Arsenia",
+      "middle_name": null,
+      "last_name": "Del Rosario",
+      "suffix": null,
+      "full_name": "Arsenia Del Rosario",
+      "canonical_name": "ARSENIA DEL ROSARIO",
+      "position": "COUNCILOR",
+      "region": "REGION IX",
+      "province": "ZAMBOANGA DEL NORTE",
+      "municipality_city": "SIOCON",
+      "location": "SIOCON, ZAMBOANGA DEL NORTE, REGION IX"
+    },
+    "4162447": {
+      "id": 4162447,
+      "first_name": "REBECCA",
+      "middle_name": null,
+      "last_name": "COMMANDANTE",
+      "suffix": null,
+      "full_name": "REBECCA COMMANDANTE",
+      "canonical_name": null,
+      "position": "POLITICAL AFFAIRS OFFICER II,",
+      "region": null,
+      "province": null,
+      "municipality_city": null,
+      "location": "Location unknown"
+    }
+  }
+}

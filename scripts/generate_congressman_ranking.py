@@ -74,6 +74,12 @@ def aggregate_congressman_stats(cache_path: str) -> Dict[str, Dict[str, float]]:
     contractor_count = dashboard.get("contractor_count")
     district_cost = dashboard.get("district_cost")
     contractor_cost = dashboard.get("contractor_cost")
+    flood_count = dashboard.get("flood_control_count")
+    flood_cost = dashboard.get("flood_control_cost")
+    flood_district_count = dashboard.get("flood_control_district_count")
+    flood_district_cost = dashboard.get("flood_control_district_cost")
+    flood_contractor_count = dashboard.get("flood_control_contractor_count")
+    flood_contractor_cost = dashboard.get("flood_control_contractor_cost")
 
     if district_count is None:
         district_count = len([p for p in projects if p.get("match_type") == "district"])
@@ -88,6 +94,43 @@ def aggregate_congressman_stats(cache_path: str) -> Dict[str, Dict[str, float]]:
             parse_amount(p.get("amount", 0)) for p in projects if p.get("match_type") == "contractor"
         )
 
+    flood_projects = [p for p in projects if p.get("flood_control")]
+    if flood_count is None:
+        flood_count = summary.get("flood_control")
+    if flood_count is None:
+        flood_count = len(flood_projects)
+
+    if flood_cost is None:
+        flood_cost = dashboard.get("flood_control_total_cost")  # backwards compatibility
+    if flood_cost is None:
+        flood_cost = summary.get("flood_control_cost")
+    if flood_cost is None:
+        flood_cost = sum(parse_amount(p.get("amount", 0)) for p in flood_projects)
+
+    if flood_district_count is None:
+        flood_district_count = summary.get("flood_control_district_projects")
+    if flood_district_count is None:
+        flood_district_count = len([p for p in flood_projects if p.get("match_type") == "district"])
+
+    if flood_district_cost is None:
+        flood_district_cost = summary.get("flood_control_district_cost")
+    if flood_district_cost is None:
+        flood_district_cost = sum(
+            parse_amount(p.get("amount", 0)) for p in flood_projects if p.get("match_type") == "district"
+        )
+
+    if flood_contractor_count is None:
+        flood_contractor_count = summary.get("flood_control_contractor_projects")
+    if flood_contractor_count is None:
+        flood_contractor_count = len([p for p in flood_projects if p.get("match_type") == "contractor"])
+
+    if flood_contractor_cost is None:
+        flood_contractor_cost = summary.get("flood_control_contractor_cost")
+    if flood_contractor_cost is None:
+        flood_contractor_cost = sum(
+            parse_amount(p.get("amount", 0)) for p in flood_projects if p.get("match_type") == "contractor"
+        )
+
     return {
         name: {
             "name": name,
@@ -98,6 +141,12 @@ def aggregate_congressman_stats(cache_path: str) -> Dict[str, Dict[str, float]]:
             "district_cost": float(district_cost or 0.0),
             "contractor_count": int(contractor_count or 0),
             "contractor_cost": float(contractor_cost or 0.0),
+            "flood_control_count": int(flood_count or 0),
+            "flood_control_cost": float(flood_cost or 0.0),
+            "flood_control_district_count": int(flood_district_count or 0),
+            "flood_control_district_cost": float(flood_district_cost or 0.0),
+            "flood_control_contractor_count": int(flood_contractor_count or 0),
+            "flood_control_contractor_cost": float(flood_contractor_cost or 0.0),
             "sources_breakdown": {
                 "total": int(summary.get("total", count or 0)),
                 "ssp": int(summary.get("ssp", 0)),
@@ -123,11 +172,17 @@ def main():
         "microsite": 0,
         "district_projects": 0,
         "contractor_projects": 0,
+        "flood_control_projects": 0,
+        "flood_control_district_projects": 0,
+        "flood_control_contractor_projects": 0,
     }
     totals_cost = {
         "total_cost_all": 0.0,
         "district_cost": 0.0,
         "contractor_cost": 0.0,
+        "flood_control_cost": 0.0,
+        "flood_control_district_cost": 0.0,
+        "flood_control_contractor_cost": 0.0,
     }
 
     for cache_path in cache_files:
@@ -153,10 +208,16 @@ def main():
             summary_totals["microsite"] += summary.get("microsite", 0)
             summary_totals["district_projects"] += stats.get("district_count", 0)
             summary_totals["contractor_projects"] += stats.get("contractor_count", 0)
+            summary_totals["flood_control_projects"] += stats.get("flood_control_count", 0)
+            summary_totals["flood_control_district_projects"] += stats.get("flood_control_district_count", 0)
+            summary_totals["flood_control_contractor_projects"] += stats.get("flood_control_contractor_count", 0)
 
             totals_cost["total_cost_all"] += stats.get("total_cost", 0.0)
             totals_cost["district_cost"] += stats.get("district_cost", 0.0)
             totals_cost["contractor_cost"] += stats.get("contractor_cost", 0.0)
+            totals_cost["flood_control_cost"] += stats.get("flood_control_cost", 0.0)
+            totals_cost["flood_control_district_cost"] += stats.get("flood_control_district_cost", 0.0)
+            totals_cost["flood_control_contractor_cost"] += stats.get("flood_control_contractor_cost", 0.0)
 
     ranking_list = list(ranking.values())
     ranking_by_count = sorted(ranking_list, key=lambda item: item["count"], reverse=True)
@@ -179,6 +240,12 @@ def main():
         "district_cost": totals_cost["district_cost"],
         "contractor_count": summary_totals["contractor_projects"],
         "contractor_cost": totals_cost["contractor_cost"],
+        "flood_control_count": summary_totals["flood_control_projects"],
+        "flood_control_cost": totals_cost["flood_control_cost"],
+        "flood_control_district_count": summary_totals["flood_control_district_projects"],
+        "flood_control_district_cost": totals_cost["flood_control_district_cost"],
+        "flood_control_contractor_count": summary_totals["flood_control_contractor_projects"],
+        "flood_control_contractor_cost": totals_cost["flood_control_contractor_cost"],
     }
 
     output = {
@@ -207,4 +274,5 @@ def main():
 
 if __name__ == "__main__":
     main()
+
 

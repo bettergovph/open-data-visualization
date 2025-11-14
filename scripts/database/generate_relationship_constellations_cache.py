@@ -8,6 +8,7 @@ import asyncio
 import asyncpg
 import json
 import os
+import sys
 from datetime import datetime
 from pathlib import Path
 from dotenv import load_dotenv
@@ -33,7 +34,12 @@ def load_env_from_dotenv():
 async def fetch_people(conn):
     rows = await conn.fetch(
         """
-        SELECT id, first_name, middle_name, last_name, suffix, canonical_name, position, region, province, municipality_city
+        SELECT id, first_name, middle_name, last_name, suffix, canonical_name, 
+               COALESCE(normalized_name, 
+                   UPPER(TRIM(COALESCE(first_name, '')) || ' ' || TRIM(COALESCE(last_name, '')) || 
+                   CASE WHEN suffix IS NOT NULL AND suffix != '' THEN ' ' || UPPER(TRIM(suffix)) ELSE '' END)
+               ) as normalized_name,
+               position, region, province, municipality_city
         FROM political_dynasties
         """
     )
@@ -46,6 +52,7 @@ async def fetch_people(conn):
             "last_name": row["last_name"],
             "suffix": row["suffix"],
             "canonical_name": row["canonical_name"],
+            "normalized_name": row["normalized_name"],  # Use DB column if available
             "position": row["position"],
             "region": row["region"],
             "province": row["province"],
@@ -54,11 +61,18 @@ async def fetch_people(conn):
     return people
 
 
-async def generate_relationship_constellations_cache():
-    """Generate JSON cache of relationship constellations between different political families"""
-    MAX_CHAIN_DEPTH = 1
+async def generate_relationship_constellations_cache(test_person=None):
+    """Generate JSON cache of relationship constellations between different political families
+    
+    Args:
+        test_person: If provided, only generate cache for this person (normalized name, e.g., 'FRANCIS ESCUDERO')
+    """
+    MAX_CHAIN_DEPTH = 11
     load_env_from_dotenv()
     load_dotenv()
+    
+    if test_person:
+        print(f"🧪 TEST MODE: Generating cache only for: {test_person}", flush=True)
     
     # Database connection
     conn = await asyncpg.connect(
@@ -158,7 +172,8 @@ async def generate_relationship_constellations_cache():
             r.person_id as start_person,
             r.related_person_id as end_person,
             r.person_id::text || ',' || r.related_person_id::text as path_string,
-            r.relationship_description as relationship_string,
+            COALESCE(r.normalized_description, r.relationship_description) as relationship_string,
+            r.source_url,
             1 as chain_length,
             p1.last_name as start_surname,
             p2.last_name as end_surname,
@@ -171,7 +186,8 @@ async def generate_relationship_constellations_cache():
         FROM relationships r
         JOIN political_dynasties p1 ON r.person_id = p1.id
         JOIN political_dynasties p2 ON r.related_person_id = p2.id
-        WHERE (
+        WHERE r.person_id != r.related_person_id
+          AND (
             -- Different families (original logic) - only one direction to avoid duplicates
             -- Use UPPER() for case-insensitive comparison
             (UPPER(p1.last_name) != UPPER(p2.last_name) AND r.person_id < r.related_person_id)
@@ -222,10 +238,12 @@ async def generate_relationship_constellations_cache():
             visited_in_chain = set(path)
             
             # Add this chain to results (if not already seen)
-            # This ensures ALL chains (including all 2-node chains) are captured
+            # Filter out self-connections (same person at start and end)
             if chain['path_string'] not in seen_paths:
-                all_chains.append(chain)
-                seen_paths.add(chain['path_string'])
+                # Skip if start_person == end_person (self-connection)
+                if chain['start_person'] != chain['end_person']:
+                    all_chains.append(chain)
+                    seen_paths.add(chain['path_string'])
 
             # Enforce maximum chain depth
             if len(path) >= MAX_CHAIN_DEPTH:
@@ -247,7 +265,8 @@ async def generate_relationship_constellations_cache():
             ext1_query = """
                     SELECT 
                         r.related_person_id as next_person_id,
-                        r.relationship_description,
+                        COALESCE(r.normalized_description, r.relationship_description) as relationship_description,
+                        r.source_url,
                         p2.last_name,
                         p2.first_name,
                         p2.position
@@ -271,7 +290,8 @@ async def generate_relationship_constellations_cache():
                     
                     SELECT 
                         r.person_id as next_person_id,
-                        r.relationship_description,
+                        COALESCE(r.normalized_description, r.relationship_description) as relationship_description,
+                        r.source_url,
                         p1.last_name,
                         p1.first_name,
                         p1.position
@@ -312,11 +332,18 @@ async def generate_relationship_constellations_cache():
                     else:
                         relationship_string = extension_relationship
                     
+                    # Collect source URLs
+                    existing_sources = chain.get('source_urls', [])
+                    new_sources = existing_sources.copy()
+                    if ext.get('source_url') and ext['source_url'] not in new_sources:
+                        new_sources.append(ext['source_url'])
+                    
                     new_chain = {
                         'start_person': chain['start_person'],
                         'end_person': next_person_id,
                         'path_string': new_path_string,
                         'relationship_string': relationship_string,
+                        'source_urls': new_sources,
                         'chain_length': len(new_path),
                         'start_surname': chain['start_surname'],
                         'end_surname': ext['last_name'],
@@ -361,11 +388,15 @@ async def generate_relationship_constellations_cache():
                         new_path_string = ','.join(str(p) for p in new_path)
                         
                         if new_path_string not in seen_paths:
+                            # Preserve source_urls from parent chain
+                            existing_sources = chain.get('source_urls', [])
+                            
                             new_chain = {
                                 'start_person': chain['start_person'],
                                 'end_person': other_member_id,
                                 'path_string': new_path_string,
                                 'relationship_string': chain['relationship_string'] + ',Connected via ' + party_name,
+                                'source_urls': existing_sources.copy(),  # Preserve source URLs
                                 'chain_length': len(new_path),
                                 'start_surname': chain['start_surname'],
                                 'end_surname': other_person['last_name'],
@@ -426,11 +457,18 @@ async def generate_relationship_constellations_cache():
                         new_path_string = ','.join(str(p) for p in new_path)
                         
                         if new_path_string not in seen_paths:
+                            # Preserve source_urls from parent chain
+                            # Note: politician_contractors table doesn't have source_url column,
+                            # so we only preserve URLs from the relationships that led to this contractor connection
+                            existing_sources = chain.get('source_urls', [])
+                            new_sources = existing_sources.copy()
+                            
                             new_chain = {
                                 'start_person': chain['start_person'],
                                 'end_person': other_member_id,
                                 'path_string': new_path_string,
                                 'relationship_string': chain['relationship_string'] + ',Connected via ' + contractor_name,
+                                'source_urls': new_sources,  # Preserve source URLs from parent chain
                                 'chain_length': len(new_path),
                                 'start_surname': chain['start_surname'],
                                 'end_surname': other_person['last_name'],
@@ -449,9 +487,16 @@ async def generate_relationship_constellations_cache():
                             await recursive_extend(new_chain, depth + 1)
         
         # Start recursive traversal from each initial chain
-        for i, initial_chain in enumerate(initial_chains):
+        for i, initial_chain_record in enumerate(initial_chains):
             if (i + 1) % 50 == 0:
                 print(f"  Processing chain {i+1}/{len(initial_chains)} (found {len(all_chains)} chains so far, {len(global_rendered_nodes)} nodes rendered)...", flush=True)
+            # Convert asyncpg.Record to dict for modification
+            initial_chain = dict(initial_chain_record)
+            # Initialize source_urls for level 0 chains
+            if 'source_urls' not in initial_chain:
+                initial_chain['source_urls'] = []
+            if initial_chain.get('source_url') and initial_chain['source_url'] not in initial_chain['source_urls']:
+                initial_chain['source_urls'].append(initial_chain['source_url'])
             await recursive_extend(initial_chain)
         
         chains = all_chains
@@ -736,7 +781,8 @@ async def generate_relationship_constellations_cache():
                 'party_list_number': plc['party_list_number'],
                 'party_name': plc['party_name'],
                 'party_full_name': plc['party_full_name'],
-                'relationship_type': plc['relationship_type']
+                'relationship_type': plc['relationship_type'],
+                'is_standalone_party_list': True
             })
         
         # Add single-person party-list chains
@@ -760,7 +806,8 @@ async def generate_relationship_constellations_cache():
                 'party_list_number': sp['party_list_number'],
                 'party_name': sp['party_name'],
                 'party_full_name': sp['party_full_name'],
-                'relationship_type': sp['relationship_type']
+                'relationship_type': sp['relationship_type'],
+                'is_standalone_party_list': True
             })
         
         # Contractors are nodes themselves, so Person → Contractor is a 2-node chain
@@ -793,6 +840,8 @@ async def generate_relationship_constellations_cache():
 
         # Format the data
         formatted_chains = []
+        people_dict = {}  # Dictionary to store person metadata once
+        
         for chain in all_chains:
             # Parse the path string to get all person IDs
             person_ids = [int(id_str) for id_str in chain['path_string'].split(',')]
@@ -803,80 +852,91 @@ async def generate_relationship_constellations_cache():
                 relationships = []
             
             # Get person details for each person in the chain
-            path_details = []
+            path_person_ids = []  # Store only person IDs and relationship descriptions
+            path_relationships = []  # Store relationship descriptions for each hop
+            
             for i, person_id in enumerate(person_ids):
                 person = people_cache.get(person_id)
                 
                 if person:
-                    # Person found - add to path
+                    # Person found - add to people_dict if not already present
+                    if person_id not in people_dict:
+                        # Build full name with middle name and suffix
+                        full_name_parts = [person['first_name']]
+                        if person.get('middle_name'):
+                            full_name_parts.append(person['middle_name'])
+                        full_name_parts.append(person['last_name'])
+                        if person.get('suffix'):
+                            full_name_parts.append(person['suffix'])
+                        full_name = ' '.join(full_name_parts)
+                        
+                        # Build location string
+                        location_parts = []
+                        if person['municipality_city']:
+                            location_parts.append(person['municipality_city'])
+                        if person['province']:
+                            location_parts.append(person['province'])
+                        if person['region']:
+                            location_parts.append(person['region'])
+                        location = ', '.join(location_parts) if location_parts else 'Location unknown'
+                        
+                        # Store person metadata once
+                        people_dict[person_id] = {
+                            "id": person_id,
+                            "first_name": person['first_name'],
+                            "middle_name": person.get('middle_name'),
+                            "last_name": person['last_name'],
+                            "suffix": person.get('suffix'),
+                            "full_name": full_name,
+                            "canonical_name": person.get('canonical_name'),
+                            "position": person['position'],
+                            "region": person['region'],
+                            "province": person['province'],
+                            "municipality_city": person['municipality_city'],
+                            "location": location
+                        }
+                    
+                    # Add person ID to path
+                    path_person_ids.append(person_id)
+                    
+                    # Store relationship description for this hop
                     relationship_desc = "Starting person" if i == 0 else relationships[i-1] if i-1 < len(relationships) else "Unknown"
-                    
-                    # Build full name with middle name and suffix
-                    full_name_parts = [person['first_name']]
-                    if person.get('middle_name'):
-                        full_name_parts.append(person['middle_name'])
-                    full_name_parts.append(person['last_name'])
-                    if person.get('suffix'):
-                        full_name_parts.append(person['suffix'])
-                    full_name = ' '.join(full_name_parts)
-                    
-                    # Build location string
-                    location_parts = []
-                    if person['municipality_city']:
-                        location_parts.append(person['municipality_city'])
-                    if person['province']:
-                        location_parts.append(person['province'])
-                    if person['region']:
-                        location_parts.append(person['region'])
-                    location = ', '.join(location_parts) if location_parts else 'Location unknown'
-                    
-                    path_details.append({
-                        "id": person_id,
-                        "first_name": person['first_name'],
-                        "middle_name": person.get('middle_name'),
-                        "last_name": person['last_name'],
-                        "suffix": person.get('suffix'),
-                        "full_name": full_name,
-                        "canonical_name": person.get('canonical_name'),
-                        "position": person['position'],
-                        "region": person['region'],
-                        "province": person['province'],
-                        "municipality_city": person['municipality_city'],
-                        "location": location,
-                        "relationship_description": relationship_desc
-                    })
+                    path_relationships.append(relationship_desc)
                 else:
                     # Person not found - skip this person but continue with the chain
                     # This can happen if records were deleted after chain generation
                     print(f"⚠️ Warning: Person ID {person_id} not found in database (skipping from chain)", flush=True)
             
             # Skip chains where we couldn't load all person details
-            if len(path_details) < len(person_ids):
+            if len(path_person_ids) < len(person_ids):
                 # Some people were missing - skip this chain or log it
                 # For now, we'll continue but log a warning
                 pass
             
             # Add contractor information if this is a contractor-mediated connection
             # For contractors, length includes the contractor node (Person → Contractor = 2 nodes)
-            # For single-person contractors, path_details has 1 person but length should be 2 (Person + Contractor node)
-            chain_length = len(path_details)
+            # For single-person contractors, path_person_ids has 1 person but length should be 2 (Person + Contractor node)
+            chain_length = len(path_person_ids)
             if 'contractor_name' in chain and chain.get('contractor_name'):
                 # Contractor is a node itself, so length is person count + 1 contractor node
-                # But if it's a single-person contractor (path_details = 1), length should be 2
-                if len(path_details) == 1 and chain.get('chain_length') == 2:
+                # But if it's a single-person contractor (path_person_ids = 1), length should be 2
+                if len(path_person_ids) == 1 and chain.get('chain_length') == 2:
                     chain_length = 2  # Person → Contractor node
-                elif len(path_details) > 1:
-                    chain_length = len(path_details) + 1  # People + Contractor node
+                elif len(path_person_ids) > 1:
+                    chain_length = len(path_person_ids) + 1  # People + Contractor node
                 else:
-                    chain_length = len(path_details) + 1  # Default: add contractor node
+                    chain_length = len(path_person_ids) + 1  # Default: add contractor node
             
             chain_data = {
                 "length": chain_length,
                 "start_surname": chain['start_surname'],
                 "end_surname": chain['end_surname'],
-                "path": path_details,
-                "relationships": relationships
+                "path": path_person_ids,  # Store only person IDs
+                "relationships": path_relationships,  # Store relationship descriptions for each hop
+                "source_urls": chain.get('source_urls', [])  # Store source URLs for the chain
             }
+            if chain.get('is_standalone_party_list'):
+                chain_data["is_standalone_party_list"] = True
             
             # Add contractor info for contractor-mediated connections
             if 'contractor_name' in chain and chain['contractor_name']:
@@ -886,8 +946,8 @@ async def generate_relationship_constellations_cache():
                 end_role = None
                 
                 # Check if start_person is in contractor_dynasty_matches for this contractor
-                if path_details and len(path_details) > 0:
-                    start_person_id = path_details[0].get('id')
+                if path_person_ids and len(path_person_ids) > 0:
+                    start_person_id = path_person_ids[0]
                     if start_person_id:
                         start_role_db = await conn.fetchval("""
                             SELECT role FROM contractor_dynasty_matches
@@ -899,8 +959,8 @@ async def generate_relationship_constellations_cache():
                         start_role = start_role_db
                 
                 # Check if end_person is in contractor_dynasty_matches for this contractor
-                if path_details and len(path_details) > 0:
-                    end_person_id = path_details[-1].get('id')
+                if path_person_ids and len(path_person_ids) > 0:
+                    end_person_id = path_person_ids[-1]
                     if end_person_id:
                         end_role_db = await conn.fetchval("""
                             SELECT role FROM contractor_dynasty_matches
@@ -932,12 +992,12 @@ async def generate_relationship_constellations_cache():
                         party_full_name = party_name
                 
                 # Party-list is a node itself, so adjust length if needed
-                if len(path_details) == 1 and chain.get('chain_length') == 2:
+                if len(path_person_ids) == 1 and chain.get('chain_length') == 2:
                     chain_length = 2  # Person → Party-list node
-                elif len(path_details) > 1:
-                    chain_length = len(path_details) + 1  # People + Party-list node
+                elif len(path_person_ids) > 1:
+                    chain_length = len(path_person_ids) + 1  # People + Party-list node
                 else:
-                    chain_length = len(path_details) + 1  # Default: add party-list node
+                    chain_length = len(path_person_ids) + 1  # Default: add party-list node
                 
                 chain_data["length"] = chain_length
                 chain_data["party_list_connection"] = {
@@ -951,14 +1011,38 @@ async def generate_relationship_constellations_cache():
             formatted_chains.append(chain_data)
         
         # Create cache data structure
-        direct_count = len(chains)
-        contractor_count = len(contractor_relationships)
-        standalone_party_list_count = len(party_list_standalone)
-        # Count party-list-mediated chains from formatted_chains (after formatting, party-list info is in party_list_connection field)
-        # This includes both party-list extensions during tree traversal AND standalone party-list connections
-        party_list_count = sum(1 for chain in formatted_chains if chain.get('party_list_connection') is not None)
+        filtered_direct_count = sum(
+            1 for chain in formatted_chains
+            if not chain.get('contractor_connection') and not chain.get('party_list_connection')
+        )
+        filtered_contractor_count = sum(
+            1 for chain in formatted_chains
+            if chain.get('contractor_connection')
+        )
+        filtered_party_list_count = sum(
+            1 for chain in formatted_chains
+            if chain.get('party_list_connection')
+        )
+        filtered_standalone_party_list_count = sum(
+            1 for chain in formatted_chains
+            if chain.get('is_standalone_party_list')
+        )
         
-        print(f"📊 Total constellations: {len(formatted_chains)} ({direct_count} direct + {contractor_count} contractor-mediated + {standalone_party_list_count} standalone party-list + {party_list_count - standalone_party_list_count} party-list extensions)", flush=True)
+        party_list_extensions_count = max(filtered_party_list_count - filtered_standalone_party_list_count, 0)
+        
+        print(f"📊 Total constellations: {len(formatted_chains)} ({filtered_direct_count} direct + {filtered_contractor_count} contractor-mediated + {filtered_standalone_party_list_count} standalone party-list + {party_list_extensions_count} party-list extensions)", flush=True)
+        
+        length_index = {}
+        for idx, chain in enumerate(formatted_chains):
+            length_value = chain.get("length")
+            if isinstance(length_value, int) and length_value > 0:
+                key = str(length_value)
+                length_index.setdefault(key, []).append(idx)
+        
+        if length_index:
+            max_chain_length = max(int(key) for key in length_index.keys())
+        else:
+            max_chain_length = None
         
         # Calculate unique constellations (family pairs) and create mapping
         # A constellation is a unique connection between two families (regardless of path)
@@ -992,30 +1076,196 @@ async def generate_relationship_constellations_cache():
         # Add "ALL" mapping (all constellations = all chains)
         constellation_mapping["ALL"] = len(formatted_chains)
         
+        # Organize chains by person (normalized name) for per-person loading
+        # This allows autocomplete filtering and loading only relevant chains
+        chains_by_person = {}  # Key: normalized person name, Value: list of chain indices
+        person_autocomplete = []  # List of person names for autocomplete
+        
+        def normalize_person_name(first_name, last_name, suffix=None):
+            """Normalize person name for consistent indexing"""
+            name_parts = []
+            if first_name:
+                name_parts.append(first_name.strip().upper())
+            if last_name:
+                name_parts.append(last_name.strip().upper())
+            if suffix:
+                name_parts.append(suffix.strip().upper())
+            return ' '.join(name_parts)
+        
+        # Build person index from people_dict (use normalized_name from DB)
+        person_name_to_id = {}  # normalized_name -> person_id
+        for person_id, person_data in people_dict.items():
+            # Use normalized_name from DB if available, otherwise compute it
+            normalized_name = person_data.get('normalized_name')
+            if not normalized_name:
+                normalized_name = normalize_person_name(
+                    person_data.get('first_name', ''),
+                    person_data.get('last_name', ''),
+                    person_data.get('suffix')
+                )
+            if normalized_name:
+                person_name_to_id[normalized_name] = person_id
+        
+        # Organize chains by person
+        for chain_idx, chain in enumerate(formatted_chains):
+            # Get all person IDs in this chain
+            person_ids = chain.get('path', [])
+            
+            # For each person in the chain, add this chain to their index
+            for person_id in person_ids:
+                person_data = people_dict.get(person_id)
+                if person_data:
+                    # Use normalized_name from DB if available, otherwise compute it
+                    normalized_name = person_data.get('normalized_name')
+                    if not normalized_name:
+                        normalized_name = normalize_person_name(
+                            person_data.get('first_name', ''),
+                            person_data.get('last_name', ''),
+                            person_data.get('suffix')
+                        )
+                    if normalized_name:
+                        if normalized_name not in chains_by_person:
+                            chains_by_person[normalized_name] = []
+                        chains_by_person[normalized_name].append(chain_idx)
+        
+        # Build autocomplete list with display names
+        for normalized_name in sorted(chains_by_person.keys()):
+            person_id = person_name_to_id.get(normalized_name)
+            if person_id:
+                person_data = people_dict.get(person_id)
+                if person_data:
+                    # Create display name
+                    display_parts = []
+                    if person_data.get('first_name'):
+                        display_parts.append(person_data['first_name'])
+                    if person_data.get('last_name'):
+                        display_parts.append(person_data['last_name'])
+                    if person_data.get('suffix'):
+                        display_parts.append(person_data['suffix'])
+                    display_name = ' '.join(display_parts)
+                    
+                    person_autocomplete.append({
+                        "id": person_id,
+                        "normalized_name": normalized_name,
+                        "display_name": display_name,
+                        "position": person_data.get('position'),
+                        "chain_count": len(chains_by_person[normalized_name])
+                    })
+        
         cache_data = {
             "summary": {
                 "total_chains": len(formatted_chains),
                 "total_constellations": total_constellations,
-                "direct_relationships": direct_count,
-                "contractor_mediated": contractor_count,
-                "party_list_mediated": party_list_count,
+                "direct_relationships": filtered_direct_count,
+                "contractor_mediated": filtered_contractor_count,
+                "party_list_mediated": filtered_party_list_count,
+                "standalone_party_list": filtered_standalone_party_list_count,
+                "max_chain_length": max_chain_length,
                 "constellation_mapping": constellation_mapping,  # Maps number of constellations -> chains needed
                 "last_updated": datetime.datetime.now().isoformat(),
                 "description": "Relationship constellations between different political families (includes contractor-mediated and party-list-mediated connections)"
             },
-            "chains": formatted_chains
+            "people": people_dict,  # Centralized person metadata dictionary
+            "chains": formatted_chains,
+            "length_index": length_index,
+            "chains_by_person": chains_by_person,  # Index: normalized_name -> list of chain indices
+            "person_autocomplete": person_autocomplete  # List of person names for autocomplete
         }
         
         # Ensure cache directory exists
         cache_dir = "static/data"
         os.makedirs(cache_dir, exist_ok=True)
         
-        # Write cache file
-        cache_file = os.path.join(cache_dir, "relationship_chains_cache.json")
-        with open(cache_file, 'w', encoding='utf-8') as f:
-            json.dump(cache_data, f, indent=2, ensure_ascii=False)
+        # Create directory for person-specific JSON files
+        person_cache_dir = os.path.join(cache_dir, "relationship_chains_by_person")
+        os.makedirs(person_cache_dir, exist_ok=True)
         
-        print(f"✅ Constellations cache generated: {cache_file}", flush=True)
+        # Write main cache file
+        # Include chains for "all" view (when no person is selected)
+        # In test mode, we can skip chains to save space
+        if test_person:
+            # Test mode: only metadata
+            main_cache_data = {
+                "summary": cache_data["summary"],
+                "people": cache_data["people"],
+                "person_autocomplete": cache_data["person_autocomplete"]
+            }
+        else:
+            # Full mode: include chains for "all" view
+            main_cache_data = {
+                "summary": cache_data["summary"],
+                "people": cache_data["people"],
+                "chains": cache_data["chains"],
+                "length_index": cache_data["length_index"],
+                "chains_by_person": cache_data["chains_by_person"],
+                "person_autocomplete": cache_data["person_autocomplete"]
+            }
+        
+        main_cache_file = os.path.join(cache_dir, "relationship_chains_cache.json")
+        with open(main_cache_file, 'w', encoding='utf-8') as f:
+            json.dump(main_cache_data, f, indent=2, ensure_ascii=False)
+        
+        print(f"✅ Main cache file generated: {main_cache_file}", flush=True)
+        
+        # Create lightweight autocomplete-only file for fast initial loading
+        autocomplete_file = os.path.join(cache_dir, "relationship_chains_autocomplete.json")
+        autocomplete_data = {
+            "person_autocomplete": cache_data["person_autocomplete"],
+            "chains_by_person": cache_data["chains_by_person"]
+        }
+        with open(autocomplete_file, 'w', encoding='utf-8') as f:
+            json.dump(autocomplete_data, f, indent=2, ensure_ascii=False)
+        
+        print(f"✅ Autocomplete file generated: {autocomplete_file}", flush=True)
+        
+        # Create separate JSON files for each person
+        print(f"📁 Creating person-specific JSON files...", flush=True)
+        person_files_created = 0
+        
+        # Filter to test person if specified
+        persons_to_process = chains_by_person.items()
+        if test_person:
+            test_person_upper = test_person.upper().strip()
+            persons_to_process = [(name, indices) for name, indices in chains_by_person.items() 
+                                 if name.upper() == test_person_upper or test_person_upper in name.upper()]
+            if not persons_to_process:
+                print(f"⚠️  No chains found for test person: {test_person}", flush=True)
+                print(f"   Available persons with 'ESCUDERO': {[name for name in chains_by_person.keys() if 'ESCUDERO' in name.upper()][:10]}", flush=True)
+        
+        for normalized_name, chain_indices in persons_to_process:
+            # Get chains for this person
+            person_chains = [formatted_chains[idx] for idx in chain_indices if idx < len(formatted_chains)]
+            
+            if not person_chains:
+                continue
+            
+            # Create safe filename from normalized name
+            safe_filename = normalized_name.replace(' ', '_').replace('/', '_').replace('\\', '_')
+            safe_filename = ''.join(c for c in safe_filename if c.isalnum() or c in ('_', '-', '.'))
+            person_file = os.path.join(person_cache_dir, f"{safe_filename}.json")
+            
+            # Create person-specific cache data
+            person_cache_data = {
+                "person": {
+                    "normalized_name": normalized_name,
+                    "display_name": next((p["display_name"] for p in person_autocomplete if p["normalized_name"] == normalized_name), normalized_name),
+                    "chain_count": len(person_chains)
+                },
+                "chains": person_chains,
+                "people": {pid: people_dict[pid] for pid in people_dict.keys() 
+                           if any(pid in chain.get('path', []) for chain in person_chains)}
+            }
+            
+            # Write person-specific file
+            with open(person_file, 'w', encoding='utf-8') as f:
+                json.dump(person_cache_data, f, indent=2, ensure_ascii=False)
+            
+            person_files_created += 1
+            
+            if person_files_created % 100 == 0:
+                print(f"  Created {person_files_created} person files...", flush=True)
+        
+        print(f"✅ Created {person_files_created} person-specific JSON files in {person_cache_dir}", flush=True)
         print(f"📊 Total constellations: {len(formatted_chains)}")
         
         return cache_data
@@ -1024,6 +1274,12 @@ async def generate_relationship_constellations_cache():
         await conn.close()
 
 if __name__ == "__main__":
-    asyncio.run(generate_relationship_constellations_cache())
+    # Check for test person argument
+    test_person = None
+    if len(sys.argv) > 1:
+        test_person = sys.argv[1]
+        print(f"🧪 Running in test mode for: {test_person}", flush=True)
+    
+    asyncio.run(generate_relationship_constellations_cache(test_person=test_person))
 
 

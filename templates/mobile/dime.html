@@ -32,7 +32,7 @@
     
     /* Mobile-optimized styles */
     .budget-section {
-        padding: 0.5rem;
+        padding: 0.5rem 0;
     }
 
     .budget-header {
@@ -60,7 +60,7 @@
     }
 
     .budget-tab-btn {
-        padding: 0.5rem 1rem;
+        padding: 0.5rem 0;
         background: white;
         border: 1px solid #dee2e6;
         border-radius: 4px;
@@ -85,7 +85,7 @@
 
     .stat-card {
         background: white;
-        padding: 15px;
+        padding: 15px 0;
         border-radius: 8px;
         box-shadow: 0 2px 10px rgba(0,0,0,0.1);
         text-align: center;
@@ -105,7 +105,7 @@
 
     .chart-container {
         background: white;
-        padding: 15px;
+        padding: 15px 0;
         border-radius: 8px;
         box-shadow: 0 2px 10px rgba(0,0,0,0.1);
         margin-bottom: 15px;
@@ -119,7 +119,7 @@
 
     .data-browser-controls {
         background: white;
-        padding: 1rem;
+        padding: 1rem 0;
         border-radius: 8px;
         box-shadow: 0 2px 8px rgba(0,0,0,0.1);
         margin-bottom: 1rem;
@@ -139,7 +139,7 @@
 
     .filter-input {
         width: 100%;
-        padding: 0.5rem;
+        padding: 0.5rem 0;
         border: 1px solid #ced4da;
         border-radius: 4px;
         font-size: 0.9rem;
@@ -148,7 +148,7 @@
 
     .budget-button {
         width: 100%;
-        padding: 0.75rem;
+        padding: 0.75rem 0;
         background: #0038A8;
         color: white;
         border: none;
@@ -166,7 +166,7 @@
     .dime-mobile-card {
         background: white;
         border-radius: 8px;
-        padding: 1rem;
+        padding: 1rem 0;
         margin-bottom: 1rem;
         box-shadow: 0 2px 8px rgba(0,0,0,0.1);
     }
@@ -197,7 +197,7 @@
 
     .status-badge {
         display: inline-block;
-        padding: 0.25rem 0.5rem;
+        padding: 0.25rem 0;
         border-radius: 12px;
         font-size: 0.75rem;
         font-weight: 600;
@@ -209,13 +209,13 @@
         justify-content: space-between;
         align-items: center;
         margin-top: 1rem;
-        padding: 1rem;
+        padding: 1rem 0;
         background: white;
         border-radius: 8px;
     }
 
     .pagination-btn {
-        padding: 0.5rem 1rem;
+        padding: 0.5rem 0;
         background: #0038A8;
         color: white;
         border: none;
@@ -258,7 +258,7 @@
     }
 
     .autocomplete-item {
-        padding: 6px 10px;
+        padding: 6px 0;
         cursor: pointer;
         border-bottom: 1px solid #eee;
         font-size: 0.8rem;
@@ -441,7 +441,7 @@
 
             <!-- Projects Container (Mobile Cards) -->
             <div id="projects-table-container">
-                <div style="text-align: center; padding: 2rem;">
+                <div style="text-align: center; padding: 2rem 0;">
                     <div style="border: 4px solid #f3f3f3; border-top: 4px solid #0038A8; border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; margin: 0 auto 1rem;"></div>
                     Loading projects...
                 </div>
@@ -458,24 +458,24 @@
         <!-- Analysis Tab -->
         <div id="tab-analysis" class="budget-tab-panel">
             <!-- Sub-tab Navigation -->
-            <div style="background: white; padding: 15px 20px 5px; border-radius: 8px 8px 0 0; box-shadow: 0 2px 10px rgba(0,0,0,0.1); margin-bottom: 0;">
+            <div style="background: white; padding: 15px 0 5px; border-radius: 8px 8px 0 0; box-shadow: 0 2px 10px rgba(0,0,0,0.1); margin-bottom: 0;">
                 <div style="display: flex; gap: 5px; border-bottom: 2px solid #e0e0e0;">
-                    <button class="speed-subtab-btn active" data-subtab="fastest" style="padding: 8px 16px; background: none; border: none; border-bottom: 3px solid #0038A8; color: #0038A8; font-weight: 600; cursor: pointer; font-size: 0.9em; transition: all 0.3s;">
+                    <button class="speed-subtab-btn active" data-subtab="fastest" style="padding: 8px 0; background: none; border: none; border-bottom: 3px solid #0038A8; color: #0038A8; font-weight: 600; cursor: pointer; font-size: 0.9em; transition: all 0.3s;">
                         ⚡ Fastest
                     </button>
-                    <button class="speed-subtab-btn" data-subtab="slowest" style="padding: 8px 16px; background: none; border: none; border-bottom: 3px solid transparent; color: #666; font-weight: 500; cursor: pointer; font-size: 0.9em; transition: all 0.3s;">
+                    <button class="speed-subtab-btn" data-subtab="slowest" style="padding: 8px 0; background: none; border: none; border-bottom: 3px solid transparent; color: #666; font-weight: 500; cursor: pointer; font-size: 0.9em; transition: all 0.3s;">
                         🐌 Slowest
                     </button>
                 </div>
             </div>
 
             <!-- Fastest Projects Sub-tab -->
-            <div id="subtab-fastest" class="speed-subtab-panel" style="background: white; padding: 20px; border-radius: 0 0 8px 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); margin-bottom: 20px;">
+            <div id="subtab-fastest" class="speed-subtab-panel" style="background: white; padding: 20px 0; border-radius: 0 0 8px 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); margin-bottom: 20px;">
                 <h2 class="text-blue-900 m-0 mb-2 text-lg text-center font-bold">⚡ Top 100 Fastest Projects</h2>
                 <p class="text-center text-gray-600 mb-4 text-sm">Shortest time from start to completion</p>
 
                 <!-- Loading Spinner -->
-                <div id="fastest-projects-loading" style="display: flex; justify-content: center; align-items: center; padding: 30px;">
+                <div id="fastest-projects-loading" style="display: flex; justify-content: center; align-items: center; padding: 30px 0;">
                     <div style="display: flex; flex-direction: column; align-items: center; gap: 15px;">
                         <div style="width: 40px; height: 40px; border: 4px solid #f3f3f3; border-top: 4px solid #0038A8; border-radius: 50%; animation: spin 1s linear infinite;"></div>
                         <p style="color: #666; font-size: 14px; margin: 0;">Analyzing completion times...</p>
@@ -489,12 +489,12 @@
             </div>
 
             <!-- Slowest Projects Sub-tab -->
-            <div id="subtab-slowest" class="speed-subtab-panel" style="background: white; padding: 20px; border-radius: 0 0 8px 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); margin-bottom: 20px; display: none;">
+            <div id="subtab-slowest" class="speed-subtab-panel" style="background: white; padding: 20px 0; border-radius: 0 0 8px 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); margin-bottom: 20px; display: none;">
                 <h2 class="text-blue-900 m-0 mb-2 text-lg text-center font-bold">🐌 Top 100 Slowest Projects</h2>
                 <p class="text-center text-gray-600 mb-4 text-sm">Longest time from start to completion</p>
 
                 <!-- Loading Spinner -->
-                <div id="slowest-projects-loading" style="display: flex; justify-content: center; align-items: center; padding: 30px;">
+                <div id="slowest-projects-loading" style="display: flex; justify-content: center; align-items: center; padding: 30px 0;">
                     <div style="display: flex; flex-direction: column; align-items: center; gap: 15px;">
                         <div style="width: 40px; height: 40px; border: 4px solid #f3f3f3; border-top: 4px solid #0038A8; border-radius: 50%; animation: spin 1s linear infinite;"></div>
                         <p style="color: #666; font-size: 14px; margin: 0;">Analyzing completion times...</p>
@@ -511,7 +511,7 @@
 </section>
 
 <!-- Data Source Footer -->
-<div style="text-align: center; padding: 1.5rem; color: #6c757d; font-size: 0.75rem; border-top: 1px solid #dee2e6; margin-top: 1rem; background: white;">
+<div style="text-align: center; padding: 1.5rem 0; color: #6c757d; font-size: 0.75rem; border-top: 1px solid #dee2e6; margin-top: 1rem; background: white;">
     <p><strong>Data Source:</strong> DBM DIME</p>
     <p style="font-size: 0.7rem;">Last Updated: <span id="last-updated">-</span></p>
 </div>
@@ -604,7 +604,7 @@
             
             const container = document.getElementById('projects-table-container');
             container.innerHTML = `
-                <div style="text-align: center; padding: 2rem;">
+                <div style="text-align: center; padding: 2rem 0;">
                     <div style="border: 4px solid #f3f3f3; border-top: 4px solid #0038A8; border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; margin: 0 auto 1rem;"></div>
                     Loading projects...
                 </div>
@@ -642,7 +642,7 @@
         } catch (error) {
             console.error('❌ Error loading projects:', error);
             document.getElementById('projects-table-container').innerHTML = `
-                <div style="text-align: center; padding: 2rem; color: #dc3545;">
+                <div style="text-align: center; padding: 2rem 0; color: #dc3545;">
                     <p>Error loading DIME projects: ${error.message}</p>
                 </div>
             `;
@@ -655,7 +655,7 @@
 
         if (projects.length === 0) {
             container.innerHTML = `
-                <div style="text-align: center; padding: 2rem; background: white; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+                <div style="text-align: center; padding: 2rem 0; background: white; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
                     <h3 style="color: #0038A8; margin-bottom: 1rem;">No projects found</h3>
                     <p style="color: #6c757d;">Try adjusting your filters</p>
                 </div>
@@ -1023,7 +1023,7 @@
             // If no data, show a note
             if (fastestProjects.length === 0) {
                 mobileCards.innerHTML = `
-                    <div style="background: #f8f9fa; padding: 1.5rem; border-radius: 8px; text-align: center;">
+                    <div style="background: #f8f9fa; padding: 1.5rem 0; border-radius: 8px; text-align: center;">
                         <h4 style="color: #0038A8; margin-bottom: 0.5rem; font-size: 1rem;">📊 Database Connection Required</h4>
                         <p style="font-size: 0.875rem; color: #666;">To display the fastest completed DIME projects, database credentials are needed.</p>
                     </div>
@@ -1096,7 +1096,7 @@
             const spinner = document.getElementById('fastest-projects-loading');
             if (spinner) {
                 spinner.innerHTML = `
-                    <div style="text-align: center; padding: 1.5rem; color: #dc3545;">
+                    <div style="text-align: center; padding: 1.5rem 0; color: #dc3545;">
                         <p>❌ Error loading fastest projects</p>
                         <p style="font-size: 0.8em;">${error.message}</p>
                     </div>
@@ -1166,7 +1166,7 @@
             // If no data, show a note
             if (slowestProjects.length === 0) {
                 mobileCards.innerHTML = `
-                    <div style="background: #f8f9fa; padding: 1.5rem; border-radius: 8px; text-align: center;">
+                    <div style="background: #f8f9fa; padding: 1.5rem 0; border-radius: 8px; text-align: center;">
                         <h4 style="color: #0038A8; margin-bottom: 0.5rem; font-size: 1rem;">📊 Database Connection Required</h4>
                         <p style="font-size: 0.875rem; color: #666;">To display the slowest completed DIME projects, database credentials are needed.</p>
                     </div>

@@ -1,0 +1,71 @@
+{
+  "person": {
+    "normalized_name": "JONJON VILLANUEVA",
+    "display_name": "JONJON VILLANUEVA",
+    "chain_count": 2
+  },
+  "chains": [
+    {
+      "length": 2,
+      "start_surname": "Villanueva",
+      "end_surname": "VILLANUEVA",
+      "path": [
+        83949,
+        4162438
+      ],
+      "relationships": [
+        "Starting person",
+        "JOEL VILLANUEVA is brother of JONJON VILLANUEVA (MAYOR OF BOCAUE"
+      ],
+      "source_urls": [
+        "OCR:pd24.jpg"
+      ]
+    },
+    {
+      "length": 2,
+      "start_surname": "VILLANUEVA",
+      "end_surname": "Villanueva",
+      "path": [
+        4162438,
+        83949
+      ],
+      "relationships": [
+        "Starting person",
+        "JONJON VILLANUEVA IS BROTHER OF JOEL VILLANUEVA"
+      ],
+      "source_urls": [
+        "OCR:pd24.jpg"
+      ]
+    }
+  ],
+  "people": {
+    "83949": {
+      "id": 83949,
+      "first_name": "JOEL",
+      "middle_name": null,
+      "last_name": "Villanueva",
+      "suffix": null,
+      "full_name": "JOEL Villanueva",
+      "canonical_name": "JOEL VILLANUEVA",
+      "position": "COUNCILOR",
+      "region": "NATIONAL CAPITAL REGION",
+      "province": "NCR, CITY OF MANILA, FIRST DISTRICT",
+      "municipality_city": "",
+      "location": "NCR, CITY OF MANILA, FIRST DISTRICT, NATIONAL CAPITAL REGION"
+    },
+    "4162438": {
+      "id": 4162438,
+      "first_name": "JONJON",
+      "middle_name": null,
+      "last_name": "VILLANUEVA",
+      "suffix": null,
+      "full_name": "JONJON VILLANUEVA",
+      "canonical_name": null,
+      "position": "MAYOR OF BOCAUE, BULACAN",
+      "region": null,
+      "province": null,
+      "municipality_city": null,
+      "location": "Location unknown"
+    }
+  }
+}

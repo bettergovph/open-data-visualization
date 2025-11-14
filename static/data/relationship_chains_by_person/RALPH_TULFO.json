@@ -1,0 +1,71 @@
+{
+  "person": {
+    "normalized_name": "RALPH TULFO",
+    "display_name": "RALPH TULFO",
+    "chain_count": 2
+  },
+  "chains": [
+    {
+      "length": 2,
+      "start_surname": "TULFO",
+      "end_surname": "TULFO",
+      "path": [
+        4162434,
+        3745642
+      ],
+      "relationships": [
+        "Starting person",
+        "RALPH TULFO IS NEPHEW OF ERWIN TULFO"
+      ],
+      "source_urls": [
+        "OCR:pd22.jpg"
+      ]
+    },
+    {
+      "length": 2,
+      "start_surname": "TULFO",
+      "end_surname": "TULFO",
+      "path": [
+        3745642,
+        4162434
+      ],
+      "relationships": [
+        "Starting person",
+        "ERWIN TULFO is nephew of RALPH TULFO (REPRESENTATIVE"
+      ],
+      "source_urls": [
+        "OCR:pd22.jpg"
+      ]
+    }
+  ],
+  "people": {
+    "3745642": {
+      "id": 3745642,
+      "first_name": "ERWIN",
+      "middle_name": null,
+      "last_name": "TULFO",
+      "suffix": null,
+      "full_name": "ERWIN TULFO",
+      "canonical_name": "ERWIN TULFO",
+      "position": "SENATOR",
+      "region": "REGION XII",
+      "province": "COTABATO",
+      "municipality_city": "M'LANG",
+      "location": "M'LANG, COTABATO, REGION XII"
+    },
+    "4162434": {
+      "id": 4162434,
+      "first_name": "RALPH",
+      "middle_name": null,
+      "last_name": "TULFO",
+      "suffix": null,
+      "full_name": "RALPH TULFO",
+      "canonical_name": null,
+      "position": "REPRESENTATIVE, QUEZON CITY",
+      "region": null,
+      "province": null,
+      "municipality_city": null,
+      "location": "Location unknown"
+    }
+  }
+}

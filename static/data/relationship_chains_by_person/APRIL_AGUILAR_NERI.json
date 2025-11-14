@@ -1,0 +1,105 @@
+{
+  "person": {
+    "normalized_name": "APRIL AGUILAR NERI",
+    "display_name": "APRIL AGUILAR NERI",
+    "chain_count": 2
+  },
+  "chains": [
+    {
+      "length": 4,
+      "start_surname": "Villar",
+      "end_surname": "AGUILAR NERI",
+      "path": [
+        84197,
+        4052650,
+        3745651,
+        4162403
+      ],
+      "relationships": [
+        "Starting person",
+        "Mark Villar is the son of Senator Cynthia Villar",
+        "CAMILLE VILLAR IS THE DAUGHTER OF SENATOR CYNTHIA VILLAR",
+        "CAMILLE VILLAR is cousin of APRIL AGUILAR NERI (MAYOR OF LAS PINAS CITY)"
+      ],
+      "source_urls": [
+        "https://en.wikipedia.org/wiki/Mark_Villar",
+        "https://www.camillevillar.com/about/",
+        "OCR:pd1.jpg"
+      ]
+    },
+    {
+      "length": 2,
+      "start_surname": "VILLAR",
+      "end_surname": "AGUILAR NERI",
+      "path": [
+        3745651,
+        4162403
+      ],
+      "relationships": [
+        "Starting person",
+        "CAMILLE VILLAR is cousin of APRIL AGUILAR NERI (MAYOR OF LAS PINAS CITY)"
+      ],
+      "source_urls": [
+        "OCR:pd1.jpg"
+      ]
+    }
+  ],
+  "people": {
+    "84197": {
+      "id": 84197,
+      "first_name": "Mark",
+      "middle_name": null,
+      "last_name": "Villar",
+      "suffix": null,
+      "full_name": "Mark Villar",
+      "canonical_name": "MARK VILLAR",
+      "position": "MEMBER, HOUSE OF REPRESENTATIVES",
+      "region": "NATIONAL CAPITAL REGION",
+      "province": "NCR, FOURTH DISTRICT",
+      "municipality_city": "",
+      "location": "NCR, FOURTH DISTRICT, NATIONAL CAPITAL REGION"
+    },
+    "4052650": {
+      "id": 4052650,
+      "first_name": "Cynthia",
+      "middle_name": null,
+      "last_name": "Villar",
+      "suffix": null,
+      "full_name": "Cynthia Villar",
+      "canonical_name": "CYNTHIA VILLAR",
+      "position": null,
+      "region": null,
+      "province": null,
+      "municipality_city": null,
+      "location": "Location unknown"
+    },
+    "3745651": {
+      "id": 3745651,
+      "first_name": "CAMILLE",
+      "middle_name": null,
+      "last_name": "VILLAR",
+      "suffix": null,
+      "full_name": "CAMILLE VILLAR",
+      "canonical_name": "CAMILLE VILLAR",
+      "position": "SENATOR",
+      "region": "REGION XII",
+      "province": "COTABATO",
+      "municipality_city": "M'LANG",
+      "location": "M'LANG, COTABATO, REGION XII"
+    },
+    "4162403": {
+      "id": 4162403,
+      "first_name": "APRIL",
+      "middle_name": null,
+      "last_name": "AGUILAR NERI",
+      "suffix": null,
+      "full_name": "APRIL AGUILAR NERI",
+      "canonical_name": null,
+      "position": "MAYOR OF LAS PINAS CITY",
+      "region": null,
+      "province": null,
+      "municipality_city": null,
+      "location": "Location unknown"
+    }
+  }
+}

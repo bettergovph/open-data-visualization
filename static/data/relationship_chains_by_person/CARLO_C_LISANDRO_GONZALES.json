@@ -1,0 +1,83 @@
+{
+  "person": {
+    "normalized_name": "CARLO C LISANDRO GONZALES",
+    "display_name": "CARLO C LISANDRO GONZALES",
+    "chain_count": 2
+  },
+  "chains": [
+    {
+      "length": 3,
+      "start_surname": "GONZALES",
+      "end_surname": "GUINTU",
+      "path": [
+        4145246,
+        4145245
+      ],
+      "relationships": [
+        "Starting person",
+        "Connected via PINUNO"
+      ],
+      "source_urls": [],
+      "is_standalone_party_list": true,
+      "party_list_connection": {
+        "party_code": "144",
+        "party_list_number": 144,
+        "party_name": "PINUNO",
+        "party_full_name": "144, PINUNO",
+        "relationship_type": "Party-List Membership"
+      }
+    },
+    {
+      "length": 3,
+      "start_surname": "GUINTU",
+      "end_surname": "GONZALES",
+      "path": [
+        4145245,
+        4145246
+      ],
+      "relationships": [
+        "Starting person",
+        "Connected via PINUNO"
+      ],
+      "source_urls": [],
+      "is_standalone_party_list": true,
+      "party_list_connection": {
+        "party_code": "144",
+        "party_list_number": 144,
+        "party_name": "PINUNO",
+        "party_full_name": "144, PINUNO",
+        "relationship_type": "Party-List Membership"
+      }
+    }
+  ],
+  "people": {
+    "4145246": {
+      "id": 4145246,
+      "first_name": "CARLO C LISANDRO",
+      "middle_name": null,
+      "last_name": "GONZALES",
+      "suffix": null,
+      "full_name": "CARLO C LISANDRO GONZALES",
+      "canonical_name": null,
+      "position": "PARTY-LIST REPRESENTATIVE",
+      "region": null,
+      "province": null,
+      "municipality_city": null,
+      "location": "Location unknown"
+    },
+    "4145245": {
+      "id": 4145245,
+      "first_name": "HOWARD P",
+      "middle_name": null,
+      "last_name": "GUINTU",
+      "suffix": null,
+      "full_name": "HOWARD P GUINTU",
+      "canonical_name": null,
+      "position": "PARTY-LIST REPRESENTATIVE",
+      "region": null,
+      "province": null,
+      "municipality_city": null,
+      "location": "Location unknown"
+    }
+  }
+}

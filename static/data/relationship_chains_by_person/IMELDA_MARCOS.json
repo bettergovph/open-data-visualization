@@ -1,0 +1,71 @@
+{
+  "person": {
+    "normalized_name": "IMELDA MARCOS",
+    "display_name": "IMELDA MARCOS",
+    "chain_count": 2
+  },
+  "chains": [
+    {
+      "length": 2,
+      "start_surname": "MARCOS",
+      "end_surname": "MARCOS",
+      "path": [
+        4145019,
+        53227
+      ],
+      "relationships": [
+        "Starting person",
+        "FERDINAND MARCOS IS THE FATHER OF IMEE MARCOS"
+      ],
+      "source_urls": [
+        "https://www.britannica.com/biography/Ferdinand-Marcos"
+      ]
+    },
+    {
+      "length": 2,
+      "start_surname": "MARCOS",
+      "end_surname": "MARCOS",
+      "path": [
+        53227,
+        4145019
+      ],
+      "relationships": [
+        "Starting person",
+        "Ferdinand Marcos is the father of Imee Marcos"
+      ],
+      "source_urls": [
+        "https://www.britannica.com/biography/Ferdinand-Marcos"
+      ]
+    }
+  ],
+  "people": {
+    "53227": {
+      "id": 53227,
+      "first_name": "FERDINAND",
+      "middle_name": "ROMUALDEZ",
+      "last_name": "MARCOS",
+      "suffix": "JR.",
+      "full_name": "FERDINAND ROMUALDEZ MARCOS JR.",
+      "canonical_name": "FERDINAND MARCOS JR.",
+      "position": "GOVERNOR",
+      "region": "REGION I",
+      "province": "ILOCOS NORTE",
+      "municipality_city": "",
+      "location": "ILOCOS NORTE, REGION I"
+    },
+    "4145019": {
+      "id": 4145019,
+      "first_name": "IMELDA",
+      "middle_name": "REMEDIOS",
+      "last_name": "MARCOS",
+      "suffix": null,
+      "full_name": "IMELDA REMEDIOS MARCOS",
+      "canonical_name": "IMELDA MARCOS",
+      "position": null,
+      "region": null,
+      "province": null,
+      "municipality_city": null,
+      "location": "Location unknown"
+    }
+  }
+}

@@ -33,3 +33,12 @@ async def check_db_manila():
     await conn.close()
 
 asyncio.run(check_db_manila())
+
+
+
+
+
+
+
+
+

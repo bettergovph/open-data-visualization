@@ -862,42 +862,17 @@ function toggleMobileMenu() {
                         <!-- Conflicts Controls -->
                         <div class="conflicts-controls" style="background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); margin-bottom: 20px;">
                             <div style="display: flex; gap: 20px; margin-bottom: 15px; flex-wrap: wrap; align-items: center;">
-                                <div>
-                                    <label style="display: block; margin-bottom: 5px; font-weight: 600; color: #333;">Number of Stars:</label>
-                                    <div style="display: flex; gap: 8px; align-items: center;">
-                                        <select id="chainLengthMinFilter" style="padding: 8px 12px; border: 1px solid #ddd; border-radius: 4px; width: 70px;">
-                                            <option value="2" selected>2</option>
-                                            <option value="3">3</option>
-                                            <option value="4">4</option>
-                                            <option value="5">5</option>
-                                            <option value="6">6</option>
-                                            <option value="7">7</option>
-                                            <option value="8">8</option>
-                                            <option value="9">9</option>
-                                            <option value="10">10</option>
-                                        </select>
-                                        <span style="font-weight: 600; color: #666;">to</span>
-                                        <select id="chainLengthMaxFilter" style="padding: 8px 12px; border: 1px solid #ddd; border-radius: 4px; width: 70px;">
-                                            <option value="2">2</option>
-                                            <option value="3">3</option>
-                                            <option value="4">4</option>
-                                            <option value="5">5</option>
-                                            <option value="6">6</option>
-                                            <option value="7">7</option>
-                                            <option value="8">8</option>
-                                            <option value="9">9</option>
-                                            <option value="10" selected>10+</option>
-                                        </select>
-                                    </div>
-                                </div>
-                                <div>
-                                    <label style="display: block; margin-bottom: 5px; font-weight: 600; color: #333;">Search Name / Family:</label>
+                                <div style="position: relative;">
+                                    <label style="display: block; margin-bottom: 5px; font-weight: 600; color: #333;">Search Person:</label>
                                     <input
                                         id="conflictsNameFilter"
                                         type="text"
-                                        placeholder="e.g., Gardiola or Co"
-                                        style="padding: 8px 12px; border: 1px solid #ddd; border-radius: 4px; width: 220px;"
+                                        placeholder="Loading person list..."
+                                        autocomplete="off"
+                                        disabled
+                                        style="padding: 8px 12px; border: 1px solid #ddd; border-radius: 4px; width: 300px; background-color: #f5f5f5; cursor: not-allowed;"
                                     />
+                                    <div id="conflictsAutocompleteDropdown" style="display: none; position: absolute; top: 100%; left: 0; right: 0; background: white; border: 1px solid #ddd; border-radius: 4px; max-height: 300px; overflow-y: auto; z-index: 1000; box-shadow: 0 4px 6px rgba(0,0,0,0.1); margin-top: 2px;"></div>
                                 </div>
                                 <div style="padding-top: 22px;">
                                     <div style="font-weight: 600; color: #333; margin-bottom: 8px;">Connection Type:</div>
@@ -921,7 +896,7 @@ function toggleMobileMenu() {
 
                         <!-- Relationship Constellations -->
                         <div class="conflicts-visualization" style="background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); margin-bottom: 20px;">
-                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; gap: 15px;">
                                 <h4 style="color: #0038A8; margin: 0;">🕸️ Relationship Constellations</h4>
                                 <div style="display: flex; gap: 15px; align-items: center; font-size: 12px; color: #666;">
                                     <div style="display: flex; align-items: center; gap: 5px;">
@@ -985,12 +960,12 @@ function toggleMobileMenu() {
                                 <table style="width: 100%; border-collapse: collapse; font-size: 14px;">
                                     <thead>
                                         <tr style="background: #f8f9fa; border-bottom: 2px solid #dee2e6;">
-                                            <th style="padding: 12px; text-align: left; font-weight: 600; color: #333;">Constellation Stars</th>
                                             <th style="padding: 12px; text-align: left; font-weight: 600; color: #333;">Family A</th>
                                             <th style="padding: 12px; text-align: left; font-weight: 600; color: #333;">Family B</th>
                                             <th style="padding: 12px; text-align: left; font-weight: 600; color: #333;">Connecting Path</th>
                                             <th style="padding: 12px; text-align: left; font-weight: 600; color: #333;">Relationships</th>
                                             <th style="padding: 12px; text-align: left; font-weight: 600; color: #333;">Type</th>
+                                            <th style="padding: 12px; text-align: left; font-weight: 600; color: #333;">Source</th>
                                         </tr>
                                     </thead>
                                     <tbody id="conflictsTableBody">
@@ -1195,16 +1170,18 @@ function initializeDynastyPage() {
                 showTabLoadingSpinner('poverty-visual');
                 loadPovertyVisualCharts();
             } else if (tabName === 'conflicts') {
-                showTabLoadingSpinner('conflicts');
                 // Initialize conflicts tab
                 console.log('🔍 Conflicts tab activated');
                 // Test if D3 is available
                 if (typeof d3 !== 'undefined') {
                     console.log('✅ D3.js is available in conflicts tab');
-                    // Automatically load conflicts data
-                    loadConflictsData();
-                    // Set up filter change listeners
-                    setupConflictsFilters();
+                    // Load autocomplete data only - wait for user to select a person
+                    loadPersonAutocomplete().then(() => {
+                        // Load conflicts data from main cache (will show all chains if cache is loaded)
+                        loadConflictsData();
+                        // Set up filter change listeners
+                        setupConflictsFilters();
+                    });
                 } else {
                     console.error('❌ D3.js is not available in conflicts tab');
                 }
@@ -3551,32 +3528,244 @@ let fullConflictsData = [];
 let conflictsNetwork = null;
 let conflictsRowsPerPage = 25;
 let conflictsCurrentPage = 1;
+let personAutocompleteData = [];  // Autocomplete person list
+let chainsByPersonIndex = {};  // Index: normalized_name -> chain indices
+let selectedPersonName = null;  // Currently selected person (normalized name)
+let mainCacheData = null;  // Main cache file data (chains + people dictionary)
+let allChainsCache = [];  // Cache of all chains for filtering
+
+// Function to normalize person name (matching backend)
+function normalizePersonName(firstName, lastName, suffix) {
+    const nameParts = [];
+    if (firstName) nameParts.push(firstName.trim().toUpperCase());
+    if (lastName) nameParts.push(lastName.trim().toUpperCase());
+    if (suffix) nameParts.push(suffix.trim().toUpperCase());
+    return nameParts.join(' ');
+}
+
+// Load autocomplete data from cache
+async function loadPersonAutocomplete() {
+    try {
+        // Load lightweight autocomplete file instead of full cache
+        const response = await fetch('/static/data/relationship_chains_autocomplete.json?v=' + Date.now());
+        const cache = await response.json();
+        
+        personAutocompleteData = cache.person_autocomplete || [];
+        // Build index from chains_by_person for quick lookup
+        chainsByPersonIndex = cache.chains_by_person || {};
+        // Also build from autocomplete data as fallback
+        if (Object.keys(chainsByPersonIndex).length === 0) {
+            personAutocompleteData.forEach(person => {
+                chainsByPersonIndex[person.normalized_name] = person.chain_count || 0;
+            });
+        }
+        
+
+        // Also load main cache file for initial display
+        try {
+            const mainCacheResponse = await fetch('/static/data/relationship_chains_cache.json?v=' + Date.now());
+            const mainCache = await mainCacheResponse.json();
+            mainCacheData = {
+                chains: mainCache.chains || [],
+                people: mainCache.people || {}
+            };
+            console.log('✅ Loaded main cache data:', mainCacheData.chains.length, 'chains');
+        } catch (mainCacheError) {
+            console.warn('⚠️ Failed to load main cache (will use API fallback):', mainCacheError);
+            mainCacheData = null;
+        }
+        
+                console.log('✅ Loaded autocomplete data:', personAutocompleteData.length, 'persons');
+        
+        // Enable input now that data is loaded
+        const input = document.getElementById('conflictsNameFilter');
+        if (input) {
+            input.disabled = false;
+            input.placeholder = 'Type to search (e.g., Escudero, Co, Tan, Uy)';
+            input.style.backgroundColor = 'white';
+            input.style.cursor = 'text';
+        }
+        
+        return true;
+    } catch (error) {
+        console.error('❌ Failed to load autocomplete data:', error);
+        return false;
+    }
+}
+
+// Show autocomplete dropdown
+function showAutocompleteDropdown(query) {
+    const dropdown = document.getElementById('conflictsAutocompleteDropdown');
+    if (!dropdown || !personAutocompleteData.length) {
+        dropdown.style.display = 'none';
+        return;
+    }
+    
+    if (!query || query.trim().length === 0) {
+        dropdown.style.display = 'none';
+        return;
+    }
+    
+    const queryLower = query.toLowerCase().trim();
+    const matches = personAutocompleteData.filter(person => {
+        const displayName = person.display_name.toLowerCase();
+        const normalizedName = person.normalized_name.toLowerCase();
+        return displayName.includes(queryLower) || normalizedName.includes(queryLower);
+    }).slice(0, 20); // Limit to 20 results
+    
+    if (matches.length === 0) {
+        dropdown.style.display = 'none';
+        return;
+    }
+    
+    dropdown.innerHTML = matches.map(person => {
+        const position = person.position ? ` (${person.position})` : '';
+        const chainCount = person.chain_count ? ` - ${person.chain_count} chains` : '';
+        return `
+            <div class="autocomplete-item" 
+                 data-normalized="${person.normalized_name}"
+                 data-display="${person.display_name}"
+                 style="padding: 10px 12px; cursor: pointer; border-bottom: 1px solid #eee; transition: background 0.2s;"
+                 onmouseover="this.style.background='#f0f0f0'"
+                 onmouseout="this.style.background='white'"
+                 onclick="selectPerson('${person.normalized_name}', '${person.display_name.replace(/'/g, "\\'")}')">
+                <div style="font-weight: 600; color: #0038A8;">${person.display_name}</div>
+                <div style="font-size: 12px; color: #666;">${person.normalized_name}${position}${chainCount}</div>
+            </div>
+        `;
+    }).join('');
+    
+    dropdown.style.display = 'block';
+}
+
+// Select a person from autocomplete
+function selectPerson(normalizedName, displayName) {
+    selectedPersonName = normalizedName;
+    const input = document.getElementById('conflictsNameFilter');
+    if (input) {
+        input.value = displayName;
+    }
+    const dropdown = document.getElementById('conflictsAutocompleteDropdown');
+    if (dropdown) {
+        dropdown.style.display = 'none';
+    }
+    
+    // Reload conflicts data with person filter
+    loadConflictsData();
+}
+
+// Function to reconstruct person objects from people dictionary
+function reconstructChainPath(chain, peopleDict) {
+    if (!chain.path || !Array.isArray(chain.path)) {
+        return chain; // Already reconstructed or invalid
+    }
+    
+    // Check if path is already reconstructed (has objects with first_name)
+    if (chain.path.length > 0 && typeof chain.path[0] === 'object' && chain.path[0].first_name) {
+        return chain; // Already reconstructed
+    }
+    
+    // Reconstruct path from person IDs
+    const reconstructedPath = chain.path.map((personId, index) => {
+        const person = peopleDict[personId];
+        if (!person) {
+            console.warn(`Person ID ${personId} not found in people dictionary`);
+            return null;
+        }
+        
+        // Add relationship_description from relationships array
+        const relationshipDesc = chain.relationships && chain.relationships[index] 
+            ? chain.relationships[index] 
+            : (index === 0 ? "Starting person" : "Unknown");
+        
+        return {
+            ...person,
+            relationship_description: relationshipDesc
+        };
+    }).filter(p => p !== null); // Remove any null entries
+    
+    // Return reconstructed chain
+    return {
+        ...chain,
+        path: reconstructedPath
+    };
+}
+
+// Clear conflicts visualization and table (show nothing)
+function clearConflictsDisplay() {
+    const networkDiv = document.getElementById('conflictsNetwork');
+    const tableBody = document.getElementById('conflictsTableBody');
+    
+    if (networkDiv) {
+        networkDiv.innerHTML = '';  // Clear network - show nothing
+    }
+    
+    if (tableBody) {
+        tableBody.innerHTML = '';  // Clear table - show nothing
+    }
+    
+    // Clear data
+    fullConflictsData = [];
+    conflictsData = [];
+    conflictsCurrentPage = 1;
+    updateConflictsPaginationControls();
+}
 
 function loadConflictsData() {
     console.log('🚀 loadConflictsData function called!');
     
-    const chainLengthMin = parseInt(document.getElementById('chainLengthMinFilter').value);
-    let chainLengthMax = parseInt(document.getElementById('chainLengthMaxFilter').value);
+    const chainLengthMin = 3;
+    const chainLengthMax = 10;
     const connectionTypeFilter = document.querySelector('input[name="connectionTypeFilter"]:checked')?.value || 'all';
+    const maxConstellations = 'ALL';
     
-    // Handle "10+" as no upper limit (use 10 which backend treats as unlimited)
-    if (chainLengthMax === 10 || document.getElementById('chainLengthMaxFilter').value === '10+') {
-        chainLengthMax = 10; // Use max allowed value to represent "no limit" (backend treats >= 10 as unlimited)
-    }
+    // Check if a person is selected (check if they exist in autocomplete data)
+    const hasPersonFilter = selectedPersonName && (
+        chainsByPersonIndex[selectedPersonName] > 0 || 
+        personAutocompleteData.some(p => p.normalized_name === selectedPersonName)
+    );
     
-    // Validate min <= max
-    if (chainLengthMin > chainLengthMax) {
-        alert('Minimum constellation stars must be less than or equal to maximum. Please adjust your selection.');
-        // Auto-correct: set max to min
-        document.getElementById('chainLengthMaxFilter').value = chainLengthMin;
+    // If no person is selected, use main cache if available
+    if (!hasPersonFilter) {
+        if (mainCacheData && mainCacheData.chains && mainCacheData.chains.length > 0) {
+            console.log('📦 Loading all chains from main cache:', mainCacheData.chains.length);
+            
+            // Reconstruct chains from person IDs
+            const reconstructedChains = mainCacheData.chains.map(chain => reconstructChainPath(chain, mainCacheData.people));
+            console.log('   Reconstructed chains:', reconstructedChains.length);
+            
+            // Apply connection type filter
+            let filtered = reconstructedChains;
+            if (connectionTypeFilter === 'contractor') {
+                filtered = filtered.filter(c => c.contractor_connection && c.contractor_connection.contractor_name);
+            } else if (connectionTypeFilter === 'party-list') {
+                filtered = filtered.filter(c => c.party_list_connection && c.party_list_connection.party_name);
+            }
+            
+            fullConflictsData = filtered;
+            conflictsData = filterConflictsByName(filtered);
+            conflictsCurrentPage = 1;
+            
+            // Display table and network
+            displayConflictsTable();
+            updateConflictsPaginationControls();
+            displayConflictsNetwork();
+            // hideTabLoadingSpinner will be called by loadConflictsData
+        } else {
+            // No cache available, clear display
+            // clearConflictsDisplay will be called by loadConflictsData if needed
+            // hideTabLoadingSpinner will be called by loadConflictsData
+        }
         return;
     }
     
-    const maxConstellations = 'ALL';
+    console.log('🔍 Loading conflicts data:', {
+        person: selectedPersonName || 'none',
+        connectionType: connectionTypeFilter,
+        hasPersonFilter: !!hasPersonFilter
+    });
     
-    console.log('🔍 Loading conflicts data with constellation stars range:', chainLengthMin, 'to', chainLengthMax, 'max constellations:', maxConstellations, 'connection type:', connectionTypeFilter);
-    
-    // Show loading state
+    // Show loading state only if person is selected
     document.getElementById('conflictsNetwork').innerHTML = `
         <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); text-align: center; color: #6c757d;">
             <div style="font-size: 2em; margin-bottom: 10px;">⏳</div>
@@ -3598,6 +3787,79 @@ function loadConflictsData() {
     
     console.log('✅ D3.js is available:', d3.version);
     
+    // If person is selected, use API endpoint to load person-specific JSON
+    if (hasPersonFilter) {
+        console.log('👤 Loading chains for person via API:', selectedPersonName);
+        const encodedName = encodeURIComponent(selectedPersonName);
+        fetch(`/api/dynasty/relationship-chains/person?normalized_name=${encodedName}`)
+            .then(response => {
+                console.log('📡 API response status:', response.status);
+                if (!response.ok) {
+                    return response.json().then(errData => {
+                        throw new Error(errData.error || `API returned ${response.status}: ${response.statusText}`);
+                    });
+                }
+                return response.json();
+            })
+            .then(data => {
+                console.log('📦 API response data:', data);
+                if (data.success) {
+                    console.log(`✅ API returned ${data.chain_count} chains for ${selectedPersonName}`);
+                    
+                    const peopleDict = data.people || {};
+                    const personChains = data.chains || [];
+                    
+                    console.log(`   People dict size: ${Object.keys(peopleDict).length}`);
+                    console.log(`   Raw chains count: ${personChains.length}`);
+                    
+                    if (personChains.length === 0) {
+                        console.warn('⚠️ No chains returned for person');
+                        fullConflictsData = [];
+                        conflictsData = [];
+                    } else {
+                        // Reconstruct chains from person IDs
+                        const reconstructedChains = personChains.map(chain => reconstructChainPath(chain, peopleDict));
+                        console.log(`   Reconstructed chains: ${reconstructedChains.length}`);
+                        
+                        // Apply connection type filter
+                        let filtered = reconstructedChains;
+                        if (connectionTypeFilter === 'contractor') {
+                            filtered = filtered.filter(c => c.contractor_connection && c.contractor_connection.contractor_name);
+                            console.log(`   After contractor filter: ${filtered.length}`);
+                        } else if (connectionTypeFilter === 'party-list') {
+                            filtered = filtered.filter(c => c.party_list_connection && c.party_list_connection.party_name);
+                            console.log(`   After party-list filter: ${filtered.length}`);
+                        }
+                        
+                        fullConflictsData = filtered;
+                        conflictsData = filtered; // No name filter needed when person is selected
+                    }
+                    
+                    conflictsCurrentPage = 1;
+                    
+                    // Display table and network
+                    displayConflictsTable();
+                    updateConflictsPaginationControls();
+                    displayConflictsNetwork();
+                    // hideTabLoadingSpinner will be called by loadConflictsData
+                } else {
+                    console.error('❌ API returned error:', data.error);
+                    fullConflictsData = [];
+                    conflictsData = [];
+                    displayConflictsTable();
+                    // hideTabLoadingSpinner will be called by loadConflictsData
+                }
+            })
+            .catch(err => {
+                console.error('❌ Failed to load from API:', err);
+                fullConflictsData = [];
+                conflictsData = [];
+                displayConflictsTable();
+                // hideTabLoadingSpinner will be called by loadConflictsData
+            });
+        return;
+    }
+    
     // Use API first to get diversified results (API handles diversification logic)
     // This ensures filtered views show multiple sources, not just one
     let connectionParam = '';
@@ -3616,8 +3878,12 @@ function loadConflictsData() {
                 console.log('✅ API returned', data.total_constellations, 'constellations');
                 console.log('📊 Cache info:', data.cache_info);
                 
-                // Use API data for both table and visual
-                fullConflictsData = data.data || [];
+                const apiChains = Array.isArray(data.data) ? data.data : [];
+                const peopleDict = data.people || {}; // Get people dictionary from API response
+                
+                // Reconstruct chains if needed
+                const reconstructedChains = apiChains.map(chain => reconstructChainPath(chain, peopleDict));
+                fullConflictsData = reconstructedChains;
                 conflictsData = filterConflictsByName(fullConflictsData);
                 conflictsCurrentPage = 1;
                 
@@ -3631,176 +3897,44 @@ function loadConflictsData() {
                 displayConflictsNetwork();
                 
                 // Hide conflicts tab loading spinner after both are done
-                hideTabLoadingSpinner('conflicts');
+                // hideTabLoadingSpinner will be called by loadConflictsData
             } else {
                 console.error('❌ API returned error:', data.error);
                 
-                // Fallback to cache if API fails
-                console.log('🔄 Falling back to cached JSON...');
-                fetch('/static/data/relationship_chains_cache.json?v=' + Date.now())
-                    .then(res => res.json())
-                    .then(cache => {
-                        const allChains = cache && cache.chains ? cache.chains : [];
-                        // Filter by constellation stars range and connection type
-                        // Note: chainLengthMax >= 10 means no upper limit
-                        let filtered = allChains.filter(c => {
-                            const chainLength = c.length || 0;
-                            if (chainLengthMax >= 10) {
-                                return chainLength >= chainLengthMin; // 10+ means no upper limit
-                            }
-                            return chainLength >= chainLengthMin && chainLength <= chainLengthMax;
-                        });
-                        
-                        if (connectionTypeFilter === 'contractor') {
-                            filtered = filtered.filter(c => c.contractor_connection && c.contractor_connection.contractor_name);
-                            
-                            // Apply diversification manually for fallback
-                            if (filtered.length > 0) {
-                                const chainsByContractor = {};
-                                filtered.forEach(c => {
-                                    const contractorName = c.contractor_connection?.contractor_name || 'Unknown';
-                                    if (!chainsByContractor[contractorName]) {
-                                        chainsByContractor[contractorName] = [];
-                                    }
-                                    chainsByContractor[contractorName].push(c);
-                                });
-                                
-                                const sortedContractors = Object.entries(chainsByContractor)
-                                    .sort((a, b) => b[1].length - a[1].length);
-                                
-                                const diversified = [];
-                                // Group by constellation (family pairs) for fallback
-                                // Include single-person contractor chains (same surname = Person → Contractor node)
-                                const chainsByConstellation = {};
-                                const singlePersonChains = []; // Store single-person contractor chains separately
-                                filtered.forEach(c => {
-                                    const startFamily = (c.start_surname || '').toUpperCase().trim();
-                                    const endFamily = (c.end_surname || '').toUpperCase().trim();
-                                    // Single-person contractor chain: same surname = Person → Contractor node
-                                    if (startFamily && endFamily && startFamily === endFamily && c.length === 2) {
-                                        singlePersonChains.push(c);
-                                    } else if (startFamily && endFamily && startFamily !== endFamily) {
-                                        const constellationKey = [startFamily, endFamily].sort().join('|');
-                                        if (!chainsByConstellation[constellationKey]) {
-                                            chainsByConstellation[constellationKey] = [];
-                                        }
-                                        chainsByConstellation[constellationKey].push(c);
-                                    } else {
-                                        // Other chains (e.g., same surname but length > 2)
-                                        singlePersonChains.push(c);
-                                    }
-                                });
-                                
-                                const sortedConstellations = Object.entries(chainsByConstellation)
-                                    .sort((a, b) => b[1].length - a[1].length);
-                                
-                                const maxConstNum = maxConstellations === 'ALL' ? Infinity : parseInt(maxConstellations);
-                                for (let i = 0; i < Math.min(sortedConstellations.length, maxConstNum); i++) {
-                                    diversified.push(...sortedConstellations[i][1]);
-                                }
-                                
-                                // Add single-person contractor chains
-                                diversified.push(...singlePersonChains);
-                                
-                                filtered = diversified;
-                            }
-                        } else if (connectionTypeFilter === 'party-list') {
-                            filtered = filtered.filter(c => c.party_list_connection && c.party_list_connection.party_name);
-                            
-                            // Apply diversification for party-list
-                            if (filtered.length > 0) {
-                                const chainsByPartyList = {};
-                                filtered.forEach(c => {
-                                    const partyName = c.party_list_connection?.party_name || 'Unknown';
-                                    if (!chainsByPartyList[partyName]) {
-                                        chainsByPartyList[partyName] = [];
-                                    }
-                                    chainsByPartyList[partyName].push(c);
-                                });
-                                
-                                const sortedPartyLists = Object.entries(chainsByPartyList)
-                                    .sort((a, b) => b[1].length - a[1].length);
-                                
-                                const diversified = [];
-                                // Group by constellation (family pairs) for fallback
-                                // Include single-person party-list chains (same surname = Person → Party-list node)
-                                const chainsByConstellation = {};
-                                const singlePersonChains = []; // Store single-person party-list chains separately
-                                filtered.forEach(c => {
-                                    const startFamily = (c.start_surname || '').toUpperCase().trim();
-                                    const endFamily = (c.end_surname || '').toUpperCase().trim();
-                                    // Single-person party-list chain: same surname = Person → Party-list node
-                                    if (startFamily && endFamily && startFamily === endFamily && c.length === 2) {
-                                        singlePersonChains.push(c);
-                                    } else if (startFamily && endFamily && startFamily !== endFamily) {
-                                        const constellationKey = [startFamily, endFamily].sort().join('|');
-                                        if (!chainsByConstellation[constellationKey]) {
-                                            chainsByConstellation[constellationKey] = [];
-                                        }
-                                        chainsByConstellation[constellationKey].push(c);
-                                    } else {
-                                        // Other chains (e.g., same surname but length > 2)
-                                        singlePersonChains.push(c);
-                                    }
-                                });
-                                
-                                const sortedConstellations = Object.entries(chainsByConstellation)
-                                    .sort((a, b) => b[1].length - a[1].length);
-                                
-                                const maxConstNum = maxConstellations === 'ALL' ? Infinity : parseInt(maxConstellations);
-                                for (let i = 0; i < Math.min(sortedConstellations.length, maxConstNum); i++) {
-                                    diversified.push(...sortedConstellations[i][1]);
-                                }
-                                
-                                // Add single-person party-list chains
-                                diversified.push(...singlePersonChains);
-                                
-                                filtered = diversified;
-                            }
-                        } else {
-                            // Group by constellation (family pairs) and limit
-                            const chainsByConstellation = {};
-                            filtered.forEach(c => {
-                                const startFamily = (c.start_surname || '').toUpperCase().trim();
-                                const endFamily = (c.end_surname || '').toUpperCase().trim();
-                                if (startFamily && endFamily && startFamily !== endFamily) {
-                                    const constellationKey = [startFamily, endFamily].sort().join('|');
-                                    if (!chainsByConstellation[constellationKey]) {
-                                        chainsByConstellation[constellationKey] = [];
-                                    }
-                                    chainsByConstellation[constellationKey].push(c);
-                                }
-                            });
-                            
-                            const sortedConstellations = Object.entries(chainsByConstellation)
-                                .sort((a, b) => b[1].length - a[1].length);
-                            
-                            const diversified = [];
-                            const maxConstNum = maxConstellations === 'ALL' ? Infinity : parseInt(maxConstellations);
-                            for (let i = 0; i < Math.min(sortedConstellations.length, maxConstNum); i++) {
-                                diversified.push(...sortedConstellations[i][1]);
-                            }
-                            
-                            filtered = diversified;
-                        }
-                        
-                        fullConflictsData = filtered || [];
-                        conflictsData = filterConflictsByName(fullConflictsData);
-                        conflictsCurrentPage = 1;
-                        displayConflictsTable();
-                        updateConflictsPaginationControls();
-                        displayConflictsNetwork();
-                        hideTabLoadingSpinner('conflicts');
-                    })
-                    .catch(cacheErr => {
-                        console.error('❌ Cache fallback also failed:', cacheErr);
-                        hideTabLoadingSpinner('conflicts');
-                    });
+                // Show error - do not use full cache
+                fullConflictsData = [];
+                conflictsData = [];
+                // clearConflictsDisplay will be called by loadConflictsData if needed
+                const networkDiv = document.getElementById('conflictsNetwork');
+                if (networkDiv) {
+                    networkDiv.innerHTML = `
+                        <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); text-align: center; color: #dc3545;">
+                            <div style="font-size: 2em; margin-bottom: 10px;">❌</div>
+                            <div style="font-weight: 500; margin-bottom: 5px;">Failed to load data</div>
+                            <div style="font-size: 14px;">${data.error || 'Unknown error'}</div>
+                        </div>
+                    `;
+                }
+                // hideTabLoadingSpinner will be called by loadConflictsData
+                return;
             }
         })
         .catch(apiErr => {
             console.error('❌ API request failed:', apiErr);
-            hideTabLoadingSpinner('conflicts');
+            fullConflictsData = [];
+            conflictsData = [];
+            // clearConflictsDisplay will be called by loadConflictsData if needed
+            const networkDiv = document.getElementById('conflictsNetwork');
+            if (networkDiv) {
+                networkDiv.innerHTML = `
+                    <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); text-align: center; color: #dc3545;">
+                        <div style="font-size: 2em; margin-bottom: 10px;">❌</div>
+                        <div style="font-weight: 500; margin-bottom: 5px;">Failed to load data</div>
+                        <div style="font-size: 14px;">Network error</div>
+                    </div>
+                `;
+            }
+            // hideTabLoadingSpinner will be called by loadConflictsData
         });
 }
 
@@ -5012,14 +5146,27 @@ function displayConflictsTable() {
             `<span style="color: #dc3545; font-weight: 600;">Contractor</span>` : 
             '<span style="color: #6c757d;">Direct</span>';
         
+        // Get source URLs from chain
+        const sourceUrls = chain.source_urls || [];
+        let sourceHtml = 'N/A';
+        if (sourceUrls && sourceUrls.length > 0) {
+            const uniqueUrls = [...new Set(sourceUrls.filter(url => url && url.trim()))];
+            if (uniqueUrls.length > 0) {
+                sourceHtml = uniqueUrls.map(url => {
+                    const displayUrl = url.length > 50 ? url.substring(0, 47) + '...' : url;
+                    return `<a href="${url}" target="_blank" rel="noopener noreferrer" style="color: #0038A8; text-decoration: underline; display: block; margin-bottom: 4px;" title="${url}">${displayUrl}</a>`;
+                }).join('');
+            }
+        }
+        
         html += `
             <tr style="border-bottom: 1px solid #dee2e6;">
-                <td style="padding: 12px; font-weight: 600; color: #0038A8;">${chain.length}</td>
                 <td style="padding: 12px;">${familyA.first_name} ${familyA.last_name}</td>
                 <td style="padding: 12px;">${familyB.first_name} ${familyB.last_name}</td>
                 <td style="padding: 12px; font-size: 12px; color: #6c757d;">${connectingPath || 'Direct connection'}</td>
                 <td style="padding: 12px; font-size: 12px; color: #6c757d;">${relationships}</td>
                 <td style="padding: 12px; font-size: 11px;">${connectionType}</td>
+                <td style="padding: 12px; font-size: 11px; max-width: 200px;">${sourceHtml}</td>
             </tr>
         `;
     });
@@ -5030,60 +5177,10 @@ function displayConflictsTable() {
 
 function setupConflictsFilters() {
     // Set up filter change listeners for automatic updates
-    const chainLengthMinFilter = document.getElementById('chainLengthMinFilter');
-    const chainLengthMaxFilter = document.getElementById('chainLengthMaxFilter');
     const rowsPerPage = document.getElementById('conflictsRowsPerPage');
     const prevBtn = document.getElementById('conflictsPrevPage');
     const nextBtn = document.getElementById('conflictsNextPage');
     const nameFilterInput = document.getElementById('conflictsNameFilter');
-    
-    // Function to validate and update max filter options
-    function updateMaxFilterOptions() {
-        if (!chainLengthMinFilter || !chainLengthMaxFilter) return;
-        
-        const minValue = parseInt(chainLengthMinFilter.value);
-        const maxOptions = [2, 3, 4, 5, 6, 7, 8, 9, 10];
-        const currentMaxValue = parseInt(chainLengthMaxFilter.value);
-        
-        // Update max filter to only show values >= min
-        chainLengthMaxFilter.innerHTML = '';
-        maxOptions.forEach(val => {
-            if (val >= minValue) {
-                const option = document.createElement('option');
-                option.value = val;
-                option.textContent = val === 10 ? '10+' : val;
-                if ((val === currentMaxValue && val >= minValue) || (val === 10 && currentMaxValue > 10 && minValue <= 10)) {
-                    option.selected = true;
-                } else if (val === Math.max(...maxOptions.filter(v => v >= minValue)) && !chainLengthMaxFilter.querySelector('option[selected]')) {
-                    option.selected = true;
-                }
-                chainLengthMaxFilter.appendChild(option);
-            }
-        });
-        
-        // If current max < min, set max to min or the smallest available option >= min
-        const newMaxValue = parseInt(chainLengthMaxFilter.value);
-        if (newMaxValue < minValue) {
-            const smallestValid = Math.min(...maxOptions.filter(v => v >= minValue));
-            chainLengthMaxFilter.value = smallestValid;
-        }
-    }
-    
-    // Initialize max filter options on page load
-    if (chainLengthMinFilter && chainLengthMaxFilter) {
-        updateMaxFilterOptions();
-        
-        chainLengthMinFilter.addEventListener('change', function() {
-            console.log('🔧 Constellation stars min filter changed to:', this.value);
-            updateMaxFilterOptions();
-            loadConflictsData();
-        });
-        
-        chainLengthMaxFilter.addEventListener('change', function() {
-            console.log('🔧 Constellation stars max filter changed to:', this.value);
-            loadConflictsData();
-        });
-    }
     
     // Listen for changes to connection type radio buttons
     const connectionTypeFilters = document.querySelectorAll('input[name="connectionTypeFilter"]');
@@ -5095,19 +5192,44 @@ function setupConflictsFilters() {
     });
 
     if (nameFilterInput) {
-        let nameFilterTimeout;
+        // Load autocomplete data on first input focus
+        let autocompleteLoaded = false;
+        nameFilterInput.addEventListener('focus', async function() {
+            if (!autocompleteLoaded && personAutocompleteData.length === 0) {
+                await loadPersonAutocomplete();
+                autocompleteLoaded = true;
+            }
+        });
+        
+        // Autocomplete input handler
+        let autocompleteTimeout;
         nameFilterInput.addEventListener('input', function() {
-            clearTimeout(nameFilterTimeout);
-            nameFilterTimeout = setTimeout(() => {
-                if (!fullConflictsData) {
-                    return;
-                }
-                conflictsCurrentPage = 1;
-                conflictsData = filterConflictsByName(fullConflictsData);
-                displayConflictsTable();
-                updateConflictsPaginationControls();
-                displayConflictsNetwork();
-            }, 250);
+            const query = this.value;
+            
+            // If input is cleared, reset person selection
+            if (!query || query.trim().length === 0) {
+                selectedPersonName = null;
+                const dropdown = document.getElementById('conflictsAutocompleteDropdown');
+                if (dropdown) dropdown.style.display = 'none';
+                // Reload all data
+                loadConflictsData();
+                return;
+            }
+            
+            // Show autocomplete dropdown
+            clearTimeout(autocompleteTimeout);
+            autocompleteTimeout = setTimeout(() => {
+                showAutocompleteDropdown(query);
+            }, 150);
+        });
+        
+        // Hide dropdown when clicking outside
+        document.addEventListener('click', function(e) {
+            const dropdown = document.getElementById('conflictsAutocompleteDropdown');
+            const input = document.getElementById('conflictsNameFilter');
+            if (dropdown && input && !dropdown.contains(e.target) && !input.contains(e.target)) {
+                dropdown.style.display = 'none';
+            }
         });
     }
 
@@ -5142,33 +5264,18 @@ function setupConflictsFilters() {
 }
 
 function clearConflictsFilters() {
-    document.getElementById('chainLengthMinFilter').value = '2';
-    document.getElementById('chainLengthMaxFilter').value = '10';
     const nameFilterInput = document.getElementById('conflictsNameFilter');
     if (nameFilterInput) {
         nameFilterInput.value = '';
     }
+    selectedPersonName = null;
+    const dropdown = document.getElementById('conflictsAutocompleteDropdown');
+    if (dropdown) dropdown.style.display = 'none';
     // Reset connection type to "all"
     const allRadio = document.querySelector('input[name="connectionTypeFilter"][value="all"]');
     if (allRadio) allRadio.checked = true;
-    conflictsData = [];
-    fullConflictsData = [];
-    document.getElementById('conflictsNetwork').innerHTML = `
-        <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); text-align: center; color: #6c757d;">
-            <div style="font-size: 2em; margin-bottom: 10px;">🕸️</div>
-            <div>Loading relationship networks...</div>
-        </div>
-    `;
-    document.getElementById('conflictsTableBody').innerHTML = `
-        <tr>
-            <td colspan="5" style="padding: 20px; text-align: center; color: #6c757d;">
-                <div style="display: flex; flex-direction: column; align-items: center; gap: 10px;">
-                    <div style="font-size: 2em;">⚔️</div>
-                    <div>Loading relationship chains...</div>
-                </div>
-            </td>
-        </tr>
-    `;
+    // Clear display - show nothing when filters are cleared
+    // clearConflictsDisplay will be called by loadConflictsData if needed
     const pageInfo = document.getElementById('conflictsPageInfo');
     if (pageInfo) pageInfo.textContent = '';
 }

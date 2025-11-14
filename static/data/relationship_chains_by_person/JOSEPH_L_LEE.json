@@ -1,0 +1,152 @@
+{
+  "person": {
+    "normalized_name": "JOSEPH L LEE",
+    "display_name": "JOSEPH L LEE",
+    "chain_count": 3
+  },
+  "chains": [
+    {
+      "length": 6,
+      "start_surname": "LUBIANO",
+      "end_surname": "LEE",
+      "path": [
+        4162605,
+        4162617,
+        4162616,
+        4145240,
+        4145241
+      ],
+      "relationships": [
+        "Starting person",
+        "Father",
+        "Dating/Boyfriend-Girlfriend",
+        "Uncle",
+        "Connected via AKO BICOL"
+      ],
+      "source_urls": [],
+      "party_list_connection": {
+        "party_code": "131",
+        "party_list_number": 131,
+        "party_name": "AKO BICOL",
+        "party_full_name": "131, AKO BICOL",
+        "relationship_type": "Party-List Membership"
+      }
+    },
+    {
+      "length": 3,
+      "start_surname": "CO",
+      "end_surname": "LEE",
+      "path": [
+        4145240,
+        4145241
+      ],
+      "relationships": [
+        "Starting person",
+        "Connected via AKO BICOL"
+      ],
+      "source_urls": [],
+      "is_standalone_party_list": true,
+      "party_list_connection": {
+        "party_code": "131",
+        "party_list_number": 131,
+        "party_name": "AKO BICOL",
+        "party_full_name": "131, AKO BICOL",
+        "relationship_type": "Party-List Membership"
+      }
+    },
+    {
+      "length": 3,
+      "start_surname": "LEE",
+      "end_surname": "CO",
+      "path": [
+        4145241,
+        4145240
+      ],
+      "relationships": [
+        "Starting person",
+        "Connected via AKO BICOL"
+      ],
+      "source_urls": [],
+      "is_standalone_party_list": true,
+      "party_list_connection": {
+        "party_code": "131",
+        "party_list_number": 131,
+        "party_name": "AKO BICOL",
+        "party_full_name": "131, AKO BICOL",
+        "relationship_type": "Party-List Membership"
+      }
+    }
+  ],
+  "people": {
+    "4162605": {
+      "id": 4162605,
+      "first_name": "LAWRENCE",
+      "middle_name": "R.",
+      "last_name": "LUBIANO",
+      "suffix": null,
+      "full_name": "LAWRENCE R. LUBIANO",
+      "canonical_name": "LAWRENCE LUBIANO",
+      "position": null,
+      "region": null,
+      "province": null,
+      "municipality_city": null,
+      "location": "Location unknown"
+    },
+    "4162617": {
+      "id": 4162617,
+      "first_name": "Lemuel",
+      "middle_name": null,
+      "last_name": "Lubiano",
+      "suffix": null,
+      "full_name": "Lemuel Lubiano",
+      "canonical_name": "LEMUEL LUBIANO",
+      "position": null,
+      "region": null,
+      "province": null,
+      "municipality_city": null,
+      "location": "Location unknown"
+    },
+    "4162616": {
+      "id": 4162616,
+      "first_name": "Claudine",
+      "middle_name": null,
+      "last_name": "Co",
+      "suffix": null,
+      "full_name": "Claudine Co",
+      "canonical_name": "CLAUDINE CO",
+      "position": null,
+      "region": null,
+      "province": null,
+      "municipality_city": null,
+      "location": "Location unknown"
+    },
+    "4145240": {
+      "id": 4145240,
+      "first_name": "ELIZALDY",
+      "middle_name": null,
+      "last_name": "CO",
+      "suffix": null,
+      "full_name": "ELIZALDY CO",
+      "canonical_name": "ELIZALDY CO",
+      "position": "Representative, Ako Bicol Party-list",
+      "region": null,
+      "province": null,
+      "municipality_city": null,
+      "location": "Location unknown"
+    },
+    "4145241": {
+      "id": 4145241,
+      "first_name": "JOSEPH L",
+      "middle_name": null,
+      "last_name": "LEE",
+      "suffix": null,
+      "full_name": "JOSEPH L LEE",
+      "canonical_name": null,
+      "position": "PARTY-LIST REPRESENTATIVE",
+      "region": null,
+      "province": null,
+      "municipality_city": null,
+      "location": "Location unknown"
+    }
+  }
+}
