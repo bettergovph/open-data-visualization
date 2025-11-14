@@ -102,9 +102,21 @@
 
         .stats {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            grid-template-columns: repeat(6, 1fr);
             gap: 20px;
             margin-bottom: 30px;
+        }
+        
+        @media (max-width: 1200px) {
+            .stats {
+                grid-template-columns: repeat(3, 1fr);
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .stats {
+                grid-template-columns: repeat(2, 1fr);
+            }
         }
 
         .stat-card {
@@ -163,6 +175,10 @@
         <div class="stat-card">
             <div class="stat-label">Total Projects</div>
             <div class="stat-value" id="total-projects">-</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-label">Total Found</div>
+            <div class="stat-value" id="total-found">-</div>
         </div>
         <div class="stat-card">
             <div class="stat-label">Found in Flood DB</div>
@@ -234,9 +250,11 @@ async function loadProjects() {
         const foundDime = projects.filter(p => p.found_dime).length;
         const foundPhilgeps = projects.filter(p => p.found_philgeps).length;
         const foundInfrawatch = projects.filter(p => p.found_infrawatch).length;
+        const totalFound = projects.filter(p => p.found_flood || p.found_dime || p.found_philgeps || p.found_infrawatch).length;
 
         // Update statistics
         document.getElementById('total-projects').textContent = total;
+        document.getElementById('total-found').textContent = totalFound;
         document.getElementById('found-flood').textContent = foundFlood;
         document.getElementById('found-dime').textContent = foundDime;
         document.getElementById('found-philgeps').textContent = foundPhilgeps;
