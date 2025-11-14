@@ -2,9 +2,29 @@
   "person": {
     "normalized_name": "MICA GONZALES",
     "display_name": "MICA GONZALES",
-    "chain_count": 1
+    "chain_count": 4
   },
   "chains": [
+    {
+      "length": 3,
+      "start_surname": "GONZALES",
+      "end_surname": "GONZALES",
+      "path": [
+        86400,
+        4162483
+      ],
+      "relationships": [
+        "Starting person",
+        "Connected via A.D. GONZALES JR. CONSTRUCTION & TRADING CO. INC."
+      ],
+      "source_urls": [],
+      "contractor_connection": {
+        "contractor_name": "A.D. GONZALES JR. CONSTRUCTION & TRADING CO. INC.",
+        "relationship_type": "Business/Contractor Connection",
+        "start_company_role": null,
+        "end_company_role": null
+      }
+    },
     {
       "length": 3,
       "start_surname": "GONZALES",
@@ -15,11 +35,51 @@
       ],
       "relationships": [
         "Starting person",
-        "Connected via A.D. GONZALES JR. CONSTRUCTION & TRADING CO. INC"
+        "Connected via A.D. GONZALES JR. CONSTRUCTION & TRADING CO. INC."
       ],
       "source_urls": [],
       "contractor_connection": {
-        "contractor_name": "A.D. GONZALES JR. CONSTRUCTION & TRADING CO. INC",
+        "contractor_name": "A.D. GONZALES JR. CONSTRUCTION & TRADING CO. INC.",
+        "relationship_type": "Business/Contractor Connection",
+        "start_company_role": "President (60% owner)",
+        "end_company_role": null
+      }
+    },
+    {
+      "length": 3,
+      "start_surname": "GONZALES",
+      "end_surname": "GONZALES",
+      "path": [
+        4162466,
+        4162483
+      ],
+      "relationships": [
+        "Starting person",
+        "Connected via A.D. GONZALES JR. CONSTRUCTION & TRADING CO. INC."
+      ],
+      "source_urls": [],
+      "contractor_connection": {
+        "contractor_name": "A.D. GONZALES JR. CONSTRUCTION & TRADING CO. INC.",
+        "relationship_type": "Business/Contractor Connection",
+        "start_company_role": "Secretary-Treasurer (19% owner)",
+        "end_company_role": null
+      }
+    },
+    {
+      "length": 3,
+      "start_surname": "GONZALES",
+      "end_surname": "QUIAMBAO",
+      "path": [
+        4162483,
+        4162571
+      ],
+      "relationships": [
+        "Starting person",
+        "Connected via A.D. GONZALES JR. CONSTRUCTION & TRADING CO. INC."
+      ],
+      "source_urls": [],
+      "contractor_connection": {
+        "contractor_name": "A.D. GONZALES JR. CONSTRUCTION & TRADING CO. INC.",
         "relationship_type": "Business/Contractor Connection",
         "start_company_role": null,
         "end_company_role": null
@@ -27,6 +87,34 @@
     }
   ],
   "people": {
+    "86400": {
+      "id": 86400,
+      "first_name": "AURELIO M.",
+      "middle_name": "III",
+      "last_name": "GONZALES",
+      "suffix": null,
+      "full_name": "AURELIO M. III GONZALES",
+      "canonical_name": "AURELIO M. GONZALES",
+      "position": "MAYOR",
+      "region": "REGION VII - CENTRAL VISAYAS",
+      "province": "CEBU",
+      "municipality_city": "San Remigio",
+      "location": "San Remigio, CEBU, REGION VII - CENTRAL VISAYAS"
+    },
+    "4162483": {
+      "id": 4162483,
+      "first_name": "MICA",
+      "middle_name": null,
+      "last_name": "GONZALES",
+      "suffix": null,
+      "full_name": "MICA GONZALES",
+      "canonical_name": "MICA GONZALES",
+      "position": "UNKNOWN",
+      "region": null,
+      "province": null,
+      "municipality_city": null,
+      "location": "Location unknown"
+    },
     "4162464": {
       "id": 4162464,
       "first_name": "AURELIO BRENZ",
@@ -41,15 +129,29 @@
       "municipality_city": "San Fernando City",
       "location": "San Fernando City, Pampanga"
     },
-    "4162483": {
-      "id": 4162483,
-      "first_name": "MICA",
-      "middle_name": null,
+    "4162466": {
+      "id": 4162466,
+      "first_name": "AURELIO MICHAELINE",
+      "middle_name": "M.",
       "last_name": "GONZALES",
       "suffix": null,
-      "full_name": "MICA GONZALES",
-      "canonical_name": "MICA GONZALES",
-      "position": "UNKNOWN",
+      "full_name": "AURELIO MICHAELINE M. GONZALES",
+      "canonical_name": "AURELIO MICHAELINE GONZALES",
+      "position": "Deputy Majority Leader, Congress",
+      "region": null,
+      "province": "Pampanga",
+      "municipality_city": "San Fernando City",
+      "location": "San Fernando City, Pampanga"
+    },
+    "4162571": {
+      "id": 4162571,
+      "first_name": "ZENAIDA",
+      "middle_name": "G.",
+      "last_name": "QUIAMBAO",
+      "suffix": null,
+      "full_name": "ZENAIDA G. QUIAMBAO",
+      "canonical_name": "ZENAIDA QUIAMBAO",
+      "position": null,
       "region": null,
       "province": null,
       "municipality_city": null,
