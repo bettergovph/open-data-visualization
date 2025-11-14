@@ -250,7 +250,8 @@ async function loadProjects() {
         const foundDime = projects.filter(p => p.found_dime).length;
         const foundPhilgeps = projects.filter(p => p.found_philgeps).length;
         const foundInfrawatch = projects.filter(p => p.found_infrawatch).length;
-        const totalFound = projects.filter(p => p.found_flood || p.found_dime || p.found_philgeps || p.found_infrawatch).length;
+        const foundBudgetGaa = projects.filter(p => p.found_budget_gaa).length;
+        const totalFound = projects.filter(p => p.found_flood || p.found_dime || p.found_philgeps || p.found_infrawatch || p.found_budget_gaa).length;
 
         // Update statistics
         document.getElementById('total-projects').textContent = total;
@@ -319,6 +320,9 @@ function getAvailableDatabases(project) {
     }
     if (project.found_infrawatch) {
         databases.push('DPWH Microsite');
+    }
+    if (project.found_budget_gaa) {
+        databases.push('Budget/GAA 2025');
     }
     
     if (databases.length === 0) {

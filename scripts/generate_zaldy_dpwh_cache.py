@@ -634,6 +634,139 @@ async def find_infrawatch_match(infrawatch_conn: asyncpg.Connection, project_tit
         return None
 
 
+
+async def find_budget_gaa_match(budget_conn: asyncpg.Connection, project_title: str, amount: Optional[float], gaa_page: str = "") -> Optional[Dict[str, Any]]:
+    """Find matching project in Budget/GAA 2025 DB by GAA page number and return project info."""
+    if not budget_conn or not gaa_page:
+        return None
+    
+    try:
+        # Normalize GAA page (remove "vetoed/" prefix if present)
+        gaa_page_clean = gaa_page.replace("vetoed/", "").strip()
+        if not gaa_page_clean:
+            return None
+        
+        # Try to convert to integer for exact matching
+        try:
+            gaa_page_int = int(gaa_page_clean)
+        except ValueError:
+            return None
+        
+        normalized_title = normalize_title(project_title)
+        title_words = set(re.findall(r'\w{3,}', normalized_title.lower()))
+        title_chainages = extract_chainage_markers(project_title)
+        
+        # Query budget_2025 table - try different possible column names for GAA page
+        # Common column names: page, gaa_page, page_number, page_no, uacs_page
+        budget_query = """
+            SELECT 
+                uacs_proj_dsc as project_description,
+                uacs_act_dsc as activity_description,
+                uacs_prog_dsc as program_description,
+                amount,
+                page,
+                page_number,
+                gaa_page
+            FROM budget_2025
+            WHERE (page = $1 OR page_number = $1 OR gaa_page = $1)
+               OR (uacs_proj_dsc ILIKE $2 OR uacs_act_dsc ILIKE $2)
+            LIMIT 20
+        """
+        
+        rows = await budget_conn.fetch(budget_query, gaa_page_int, f"%{normalized_title}%")
+        
+        if not rows:
+            return None
+        
+        best_match = None
+        best_score = 0
+        
+        for row in rows:
+            # Get project description from various possible columns
+            proj_desc = (row.get('project_description') or 
+                         row.get('activity_description') or 
+                         row.get('program_description') or "")
+            
+            if not proj_desc:
+                continue
+            
+            # Check if GAA page matches (exact match is strong indicator)
+            page_match = False
+            row_page = row.get('page') or row.get('page_number') or row.get('gaa_page')
+            if row_page:
+                try:
+                    if int(str(row_page)) == gaa_page_int:
+                        page_match = True
+                except (ValueError, TypeError):
+                    pass
+            
+            # Extract chainage markers and words
+            proj_desc_normalized = normalize_title(proj_desc)
+            proj_chainages = extract_chainage_markers(proj_desc)
+            proj_words = set(re.findall(r'\w{3,}', proj_desc_normalized.lower()))
+            
+            # Check chainage match
+            chainage_match = False
+            if title_chainages and proj_chainages:
+                chainage_match = len(title_chainages.intersection(proj_chainages)) > 0
+            
+            # Calculate title match score
+            matching_words = title_words.intersection(proj_words)
+            title_score = len(matching_words) / max(len(title_words), 1) if title_words else 0
+            
+            # Calculate fuzzy string similarity score
+            fuzzy_score = fuzzy_title_match(project_title, proj_desc)
+            # Combine scores (weighted average: 60% word overlap, 40% fuzzy)
+            title_score = (title_score * 0.6) + (fuzzy_score * 0.4)
+            
+            # GAA page match is very strong indicator - lower threshold if page matches
+            min_title_score = 0.4 if page_match else 0.6
+            if gaa_page in STRICT_GAA_PAGES:
+                min_title_score = 0.7 if page_match else 0.75
+            elif gaa_page in MAYBE_GAA_PAGES:
+                min_title_score = 0.3 if page_match else 0.5
+            elif gaa_page not in CORRECT_GAA_PAGES and gaa_page:
+                min_title_score = 0.3 if page_match else 0.5
+            
+            if not chainage_match and not page_match and title_score < min_title_score:
+                continue
+            
+            # Get amount from DB
+            db_amount = None
+            amount_val = row.get('amount')
+            if amount_val:
+                db_amount = parse_amount(str(amount_val))
+            
+            # Check amount match
+            amount_match = True
+            if amount is not None and db_amount is not None:
+                amount_match = amount_matches(amount, db_amount, max_diff=1000000.0)
+            
+            # Calculate overall score
+            score = title_score
+            if page_match:
+                score += 0.8  # Very strong bonus for GAA page match
+            if chainage_match:
+                score += 0.5
+            if amount_match and amount is not None:
+                score += 0.2
+            
+            if score > best_score:
+                best_score = score
+                best_match = {
+                    "contract_id": f"GAA-2025-{gaa_page_clean}",
+                    "contractor": "",
+                    "db_project_title": proj_desc,
+                    "db_amount": db_amount
+                }
+        
+        min_final_score = 0.3 if best_match and best_match.get("contract_id", "").startswith("GAA-2025") else 0.5
+        return best_match if best_score >= min_final_score else None
+    except Exception as e:
+        print(f"  ⚠️  Error checking Budget/GAA 2025 DB: {e}")
+        return None
+
+
 async def generate_cache() -> Dict[str, Any]:
     """Generate cache for DPWH projects with database tags."""
     print("🚀 Generating Zaldy DPWH Projects Cache")
@@ -694,6 +827,20 @@ async def generate_cache() -> Dict[str, Any]:
     else:
         print("  ⚠️  Could not connect to Infrawatch DB (continuing without it)")
     
+    # Connect to Budget/GAA 2025 DB
+    budget_conn = None
+    try:
+        budget_conn = await asyncpg.connect(
+            host=os.getenv('POSTGRES_HOST', 'localhost'),
+            port=int(os.getenv('POSTGRES_PORT', 5432)),
+            user=os.getenv('POSTGRES_USER', 'budget_admin'),
+            password=os.getenv('POSTGRES_PASSWORD', ''),
+            database=os.getenv('POSTGRES_DB_NEP', 'nep')
+        )
+        print("  ✅ Connected to Budget/GAA 2025 DB")
+    except Exception as e:
+        print(f"  ⚠️  Could not connect to Budget/GAA 2025 DB: {e} (continuing without it)")
+    
     # Initialize Flood client
     try:
         flood_client = FloodControlClient()
@@ -737,6 +884,10 @@ async def generate_cache() -> Dict[str, Any]:
         if infrawatch_conn:
             infrawatch_match = await find_infrawatch_match(infrawatch_conn, project_title, amount, gaa_page)
         
+        budget_gaa_match = None
+        if budget_conn:
+            budget_gaa_match = await find_budget_gaa_match(budget_conn, project_title, amount, gaa_page)
+        
         # For wrong GAA pages (133, 641, 642, 643, 658, 632, 635, 659, 849), reject all matches
         if gaa_page in STRICT_GAA_PAGES:
             flood_match = None
@@ -749,6 +900,7 @@ async def generate_cache() -> Dict[str, Any]:
         found_dime = dime_match is not None
         found_philgeps = philgeps_match is not None
         found_infrawatch = infrawatch_match is not None
+        found_budget_gaa = budget_gaa_match is not None
         
         # Get contract ID, contractor, DB title, and DB amount from first match found (priority: Flood > DIME > PhilGEPS > Infrawatch)
         # But filter out wrong contract IDs for specific GAA pages
@@ -858,6 +1010,7 @@ async def generate_cache() -> Dict[str, Any]:
             "found_dime": found_dime,
             "found_philgeps": found_philgeps,
             "found_infrawatch": found_infrawatch,
+            "found_budget_gaa": found_budget_gaa,
             "contract_id": contract_id,
             "philgeps_id": philgeps_id,
             "contractor": contractor,
@@ -905,7 +1058,8 @@ async def generate_cache() -> Dict[str, Any]:
             "found_flood": found_flood_count,
             "found_dime": found_dime_count,
             "found_philgeps": found_philgeps_count,
-            "found_infrawatch": found_infrawatch_count
+            "found_infrawatch": found_infrawatch_count,
+            "found_budget_gaa": found_budget_gaa_count
         },
         "generated_at": datetime.now().isoformat(),
         "cache_version": "2.0"
