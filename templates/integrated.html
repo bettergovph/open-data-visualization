@@ -133,6 +133,23 @@
                 opacity: 1;
             }
         }
+        
+        /* Projects table - prevent horizontal scrolling */
+        #projects-results {
+            width: 100%;
+            max-width: 100%;
+            overflow-x: hidden;
+        }
+        
+        #projects-table {
+            word-wrap: break-word;
+            min-width: 100%;
+        }
+        
+        #projects-table td {
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
     </style>
 </head>
 <body>
@@ -223,6 +240,7 @@ function toggleMobileMenu() {
                     <a href="#province" class="budget-tab-btn" data-tab="province">🗺️ Province</a>
                     <a href="#province-visual" class="budget-tab-btn" data-tab="province-visual">📈 Province Visual</a>
                     <a href="#integration" class="budget-tab-btn" data-tab="integration">🔗 Integration</a>
+                    <a href="#projects" class="budget-tab-btn" data-tab="projects">📋 Projects</a>
                 </div>
                 
                 <div class="budget-tab-content">
@@ -937,6 +955,64 @@ function toggleMobileMenu() {
                             <div id="integration-stats"></div>
                         </div>
                     </div>
+                    
+                    <!-- Projects Tab -->
+                    <div id="tab-projects" class="budget-tab-panel">
+                        <h3 class="budget-section-title">📋 Projects Search</h3>
+                        <p class="budget-section-desc">Search and filter integrated projects by name/title and contractor</p>
+                        
+                        <!-- Filters -->
+                        <div style="margin-bottom: 20px; padding: 20px; background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%); border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); border: 2px solid #333;">
+                            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; align-items: end;">
+                                <div style="display: flex; flex-direction: column; gap: 8px;">
+                                    <label style="font-weight: 700; color: #333; font-size: 14px; text-transform: uppercase; letter-spacing: 0.5px;">Project Name/Title</label>
+                                    <input type="text" id="projects-filter-name" placeholder="Filter by project name or title..." style="padding: 12px 16px; border: 2px solid #333; border-radius: 6px; font-size: 15px; font-weight: 500; background: white; color: #333; box-shadow: 0 2px 8px rgba(0,0,0,0.1);" onkeyup="handleProjectsFilterChange()">
+                                </div>
+                                <div style="display: flex; flex-direction: column; gap: 8px;">
+                                    <label style="font-weight: 700; color: #333; font-size: 14px; text-transform: uppercase; letter-spacing: 0.5px;">Contractor</label>
+                                    <input type="text" id="projects-filter-contractor" placeholder="Filter by contractor name..." style="padding: 12px 16px; border: 2px solid #333; border-radius: 6px; font-size: 15px; font-weight: 500; background: white; color: #333; box-shadow: 0 2px 8px rgba(0,0,0,0.1);" onkeyup="handleProjectsFilterChange()">
+                                </div>
+                                <div style="display: flex; align-items: end; gap: 10px;">
+                                    <button onclick="loadProjectsData()" style="padding: 12px 24px; background: #667eea; color: white; border: 2px solid #667eea; border-radius: 6px; font-size: 14px; font-weight: 600; cursor: pointer; transition: all 0.3s ease; box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);" onmouseover="this.style.background='#5a67d8'; this.style.transform='translateY(-2px)';" onmouseout="this.style.background='#667eea'; this.style.transform='translateY(0)';">🔍 Search</button>
+                                    <button onclick="clearProjectsFilters()" style="padding: 12px 24px; background: #e9ecef; color: #333; border: 2px solid #dee2e6; border-radius: 6px; font-size: 14px; font-weight: 600; cursor: pointer; transition: all 0.3s ease;" onmouseover="this.style.background='#dee2e6';" onmouseout="this.style.background='#e9ecef';">🔄 Clear</button>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Loading Indicator -->
+                        <div id="projects-loading" style="text-align: center; padding: 40px; display: none;">
+                            <div style="display: inline-block; width: 40px; height: 40px; border: 4px solid #f3f3f3; border-top: 4px solid #333; border-radius: 50%; animation: spin 1s linear infinite;"></div>
+                            <p style="color: #666; margin-top: 15px;">Loading projects...</p>
+                        </div>
+                        
+                        <!-- Results Table -->
+                        <div id="projects-results" style="display: none;">
+                            <div style="margin-bottom: 15px; padding: 12px; background: #f8f9fa; border-radius: 6px; border: 1px solid #dee2e6; display: flex; justify-content: space-between; align-items: center;">
+                                <span id="projects-count" style="font-weight: 600; color: #333;">0 projects found</span>
+                                <button id="export-csv-btn" onclick="exportProjectsToCSV()" style="padding: 8px 16px; background: #28a745; color: white; border: none; border-radius: 6px; font-size: 14px; font-weight: 600; cursor: pointer; transition: all 0.3s ease; display: flex; align-items: center; gap: 6px;" onmouseover="this.style.background='#218838'; this.style.transform='translateY(-1px)';" onmouseout="this.style.background='#28a745'; this.style.transform='translateY(0)';">
+                                    📥 Export CSV
+                                </button>
+                            </div>
+                            <div style="border: 1px solid #dee2e6; border-radius: 8px; background: white; overflow: hidden;">
+                                <table id="projects-table" style="width: 100%; border-collapse: collapse; font-size: 14px; table-layout: fixed;">
+                                    <thead>
+                                        <tr style="background: #f8f9fa; border-bottom: 2px solid #dee2e6;">
+                                            <th style="padding: 12px; text-align: left; font-weight: 700; color: #333; border-right: 1px solid #dee2e6; width: 35%;">Project Name</th>
+                                            <th style="padding: 12px; text-align: left; font-weight: 700; color: #333; border-right: 1px solid #dee2e6; width: 30%;">Contractor</th>
+                                            <th style="padding: 12px; text-align: right; font-weight: 700; color: #333; border-right: 1px solid #dee2e6; width: 20%;">Amount</th>
+                                            <th style="padding: 12px; text-align: center; font-weight: 700; color: #333; width: 15%;">Source</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="projects-table-body">
+                                        <!-- Results will be inserted here -->
+                                    </tbody>
+                                </table>
+                            </div>
+                            <div id="projects-pagination" style="margin-top: 20px; display: flex; justify-content: center; align-items: center; gap: 10px;">
+                                <!-- Pagination will be inserted here -->
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -967,6 +1043,10 @@ function switchTab(tabName) {
         loadProvinceProjects();
     } else if (tabName === 'province-visual') {
         loadProvinceVisualData();
+    } else if (tabName === 'integration') {
+        loadIntegrationData();
+    } else if (tabName === 'projects') {
+        loadProjectsData();
     }
 }
 
@@ -2303,6 +2383,11 @@ document.addEventListener('DOMContentLoaded', async () => {
     });
     synchronizeFloodControlCheckboxes();
 
+    // Add click handler for copy integration chart button
+    const copyBtn = document.getElementById('copy-integration-btn');
+    if (copyBtn) {
+        copyBtn.addEventListener('click', copyIntegrationChart);
+    }
 });
 
 function displayProjects(projects) {
@@ -5660,7 +5745,10 @@ async function loadIntegrationData() {
         renderIntegrationVenn();
     } catch (error) {
         console.error('Failed to load integration data:', error);
-        document.getElementById('integration-error').style.display = 'block';
+        const errorDiv = document.getElementById('integration-error');
+        if (errorDiv) {
+            errorDiv.style.display = 'block';
+        }
     }
 }
 
@@ -5724,8 +5812,6 @@ function renderIntegrationVenn() {
         text.setAttribute('fill', ell.stroke);
         text.textContent = ell.label;
         svg.appendChild(text);
-        
-        // Center is now empty (unique moved to corners)
     });
     
     // Add unique counts at corners of ellipses
@@ -5735,22 +5821,18 @@ function renderIntegrationVenn() {
             // Position at corners inside the ellipse
             let x, y;
             if (ell.id === 'SSP') { 
-                // Northwest (top-left) - inside ellipse, moved down
                 x = ell.cx - ell.rx * 0.6; 
                 y = ell.cy - ell.ry * 0.6 + 30; 
             }
             else if (ell.id === 'DIME') { 
-                // Northeast (top-right) - inside ellipse, moved down
                 x = ell.cx + ell.rx * 0.6 - 40; 
                 y = ell.cy - ell.ry * 0.6 + 30; 
             }
             else if (ell.id === 'PhilGEPS') { 
-                // Southwest (bottom-left) - inside ellipse, moved up
                 x = ell.cx - ell.rx * 0.6; 
                 y = ell.cy + ell.ry * 0.6 - 45; 
             }
             else { 
-                // Southeast (bottom-right) - inside ellipse, moved up
                 x = ell.cx + ell.rx * 0.6 - 40; 
                 y = ell.cy + ell.ry * 0.6 - 45; 
             }
@@ -5791,18 +5873,12 @@ function renderIntegrationVenn() {
     // Helper function to get ellipse by ID
     const getEllipse = (id) => ellipsesOriginal.find(e => e.id === id);
     
-    // Calculate intersection positions based on ellipse geometry
-    // Center (all 4) - at the center of the 2x2 grid
-    const centerX = 350; // (250 + 450) / 2
-    const centerY = 350; // (250 + 450) / 2
-    
     // Add intersection labels with backgrounds for readability
     // Center (all 4) - moved to right side for visibility
     const centerCount = data['DIME,Microsite,PhilGEPS,SSP'] || 0;
     if (centerCount > 0) {
-        // Position on the right side of the diagram
         const all4X = 700;
-        const all4Y = centerY;
+        const all4Y = 350;
         
         const centerBg = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
         centerBg.setAttribute('x', (all4X - 70).toString());
@@ -5837,41 +5913,17 @@ function renderIntegrationVenn() {
         svg.appendChild(centerText);
     }
     
-    // 3-way intersections (at centers of 3 overlapping ellipses)
+    // 3-way intersections
     const ssp = getEllipse('SSP');
     const dime = getEllipse('DIME');
     const philgeps = getEllipse('PhilGEPS');
     const microsite = getEllipse('Microsite');
     
     const threeWay = [
-        { 
-            combo: 'DIME,PhilGEPS,SSP', 
-            x: (ssp.cx + dime.cx + philgeps.cx) / 3, 
-            y: (ssp.cy + dime.cy + philgeps.cy) / 3, 
-            label: 'D+P+S', 
-            count: data['DIME,PhilGEPS,SSP'] || 0 
-        },
-        { 
-            combo: 'DIME,Microsite,PhilGEPS', 
-            x: (dime.cx + microsite.cx + philgeps.cx) / 3 + 60, 
-            y: (dime.cy + microsite.cy + philgeps.cy) / 3, 
-            label: 'D+M+P', 
-            count: data['DIME,Microsite,PhilGEPS'] || 0 
-        },
-        { 
-            combo: 'Microsite,PhilGEPS,SSP', 
-            x: (microsite.cx + philgeps.cx + ssp.cx) / 3 - 60, 
-            y: (microsite.cy + philgeps.cy + ssp.cy) / 3, 
-            label: 'M+P+S', 
-            count: data['Microsite,PhilGEPS,SSP'] || 0 
-        },
-        { 
-            combo: 'DIME,Microsite,SSP', 
-            x: (dime.cx + microsite.cx + ssp.cx) / 3, 
-            y: (dime.cy + microsite.cy + ssp.cy) / 3, 
-            label: 'D+M+S', 
-            count: data['DIME,Microsite,SSP'] || 0 
-        }
+        { combo: 'DIME,PhilGEPS,SSP', x: (ssp.cx + dime.cx + philgeps.cx) / 3, y: (ssp.cy + dime.cy + philgeps.cy) / 3, label: 'D+P+S', count: data['DIME,PhilGEPS,SSP'] || 0 },
+        { combo: 'DIME,Microsite,PhilGEPS', x: (dime.cx + microsite.cx + philgeps.cx) / 3 + 60, y: (dime.cy + microsite.cy + philgeps.cy) / 3, label: 'D+M+P', count: data['DIME,Microsite,PhilGEPS'] || 0 },
+        { combo: 'Microsite,PhilGEPS,SSP', x: (microsite.cx + philgeps.cx + ssp.cx) / 3 - 60, y: (microsite.cy + philgeps.cy + ssp.cy) / 3, label: 'M+P+S', count: data['Microsite,PhilGEPS,SSP'] || 0 },
+        { combo: 'DIME,Microsite,SSP', x: (dime.cx + microsite.cx + ssp.cx) / 3, y: (dime.cy + microsite.cy + ssp.cy) / 3, label: 'D+M+S', count: data['DIME,Microsite,SSP'] || 0 }
     ];
     
     threeWay.forEach(item => {
@@ -5910,54 +5962,17 @@ function renderIntegrationVenn() {
         }
     });
     
-    // 2-way intersections (at midpoints between ellipse centers)
+    // 2-way intersections
     const twoWay = [
-        { 
-            combo: 'PhilGEPS,SSP', 
-            x: (philgeps.cx + ssp.cx) / 2 - 80, 
-            y: (philgeps.cy + ssp.cy) / 2, 
-            label: 'P+S', 
-            count: data['PhilGEPS,SSP'] || 0 
-        },
-        { 
-            combo: 'DIME,PhilGEPS', 
-            x: (dime.cx + philgeps.cx) / 2 + 60, 
-            y: (dime.cy + philgeps.cy) / 2 - 40, 
-            label: 'D+P', 
-            count: data['DIME,PhilGEPS'] || 0 
-        },
-        { 
-            combo: 'DIME,Microsite', 
-            x: (dime.cx + microsite.cx) / 2 + 80, 
-            y: (dime.cy + microsite.cy) / 2, 
-            label: 'D+M', 
-            count: data['DIME,Microsite'] || 0 
-        },
-        { 
-            combo: 'Microsite,PhilGEPS', 
-            x: (microsite.cx + philgeps.cx) / 2, 
-            y: (microsite.cy + philgeps.cy) / 2, 
-            label: 'M+P', 
-            count: data['Microsite,PhilGEPS'] || 0 
-        },
-        { 
-            combo: 'SSP,DIME', 
-            x: (ssp.cx + dime.cx) / 2, 
-            y: (ssp.cy + dime.cy) / 2 + 20, 
-            label: 'S+D', 
-            count: data['DIME,SSP'] || data['SSP,DIME'] || 0 
-        },
-        { 
-            combo: 'SSP,Microsite', 
-            x: (ssp.cx + microsite.cx) / 2, 
-            y: (ssp.cy + microsite.cy) / 2 + 30, 
-            label: 'S+M', 
-            count: data['Microsite,SSP'] || 0 
-        }
+        { combo: 'PhilGEPS,SSP', x: (philgeps.cx + ssp.cx) / 2 - 80, y: (philgeps.cy + ssp.cy) / 2, label: 'P+S', count: data['PhilGEPS,SSP'] || 0 },
+        { combo: 'DIME,PhilGEPS', x: (dime.cx + philgeps.cx) / 2 + 60, y: (dime.cy + philgeps.cy) / 2 - 40, label: 'D+P', count: data['DIME,PhilGEPS'] || 0 },
+        { combo: 'DIME,Microsite', x: (dime.cx + microsite.cx) / 2 + 80, y: (dime.cy + microsite.cy) / 2, label: 'D+M', count: data['DIME,Microsite'] || 0 },
+        { combo: 'Microsite,PhilGEPS', x: (microsite.cx + philgeps.cx) / 2, y: (microsite.cy + philgeps.cy) / 2, label: 'M+P', count: data['Microsite,PhilGEPS'] || 0 },
+        { combo: 'SSP,DIME', x: (ssp.cx + dime.cx) / 2, y: (ssp.cy + dime.cy) / 2 + 20, label: 'S+D', count: data['DIME,SSP'] || data['SSP,DIME'] || 0 },
+        { combo: 'SSP,Microsite', x: (ssp.cx + microsite.cx) / 2, y: (ssp.cy + microsite.cy) / 2 + 30, label: 'S+M', count: data['Microsite,SSP'] || 0 }
     ];
     
     twoWay.forEach(item => {
-        // Always show all 2-way combinations even if count is 0
         if (item.count > 0 || item.label === 'S+D' || item.label === 'S+M') {
             const bg = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
             bg.setAttribute('x', (item.x - 35).toString());
@@ -5993,29 +6008,24 @@ function renderIntegrationVenn() {
         }
     });
     
-    // Add total counts - positioned at outer edges of ellipses
+    // Add total counts
     ellipsesOriginal.forEach(ell => {
         const totalCount = totals[ell.id] || 0;
         if (totalCount > 0) {
-            // Position at outer edge of ellipse (furthest from center)
             let x, y;
             if (ell.id === 'SSP') { 
-                // Top-left: position at top-left corner
                 x = ell.cx - ell.rx - 20; 
                 y = ell.cy - ell.ry - 20; 
             }
             else if (ell.id === 'DIME') { 
-                // Top-right: position at top-right corner
                 x = ell.cx + ell.rx - 60; 
                 y = ell.cy - ell.ry - 20; 
             }
             else if (ell.id === 'PhilGEPS') { 
-                // Bottom-left: position at bottom-left corner
                 x = ell.cx - ell.rx - 20; 
                 y = ell.cy + ell.ry - 15; 
             }
             else { 
-                // Bottom-right: position at bottom-right corner
                 x = ell.cx + ell.rx - 60; 
                 y = ell.cy + ell.ry - 15; 
             }
@@ -6151,68 +6161,272 @@ function copyIntegrationChart() {
                 URL.revokeObjectURL(url);
             }).catch(function(err) {
                 console.error('Failed to copy image:', err);
-                // Fallback: try copying as data URL
-                canvas.toBlob(function(blob) {
-                    const reader = new FileReader();
-                    reader.onload = function() {
-                        const dataUrl = reader.result;
-                        // Try to copy as text (data URL) as fallback
-                        navigator.clipboard.writeText(dataUrl).then(function() {
-                            alert('Chart copied as image data. You can paste it into an image editor.');
-                        }).catch(function(err2) {
-                            console.error('Failed to copy:', err2);
-                            alert('Failed to copy chart. Please try right-clicking and saving the image instead.');
-                        });
-                    };
-                    reader.readAsDataURL(blob);
-                });
+                alert('Failed to copy chart. Please try right-clicking and saving the image instead.');
             });
         }, 'image/png');
     };
-    
     img.onerror = function() {
         URL.revokeObjectURL(url);
-        alert('Failed to convert chart to image. Please try again.');
+        alert('Failed to convert chart to image.');
     };
-    
     img.src = url;
 }
 
-// Load integration data when Integration tab is clicked
-document.addEventListener('DOMContentLoaded', function() {
-    // Modify switchTab to load integration data
-    const originalSwitchTab = window.switchTab;
-    window.switchTab = function(tabName) {
-        originalSwitchTab(tabName);
-        if (tabName === 'integration' && !integrationData) {
-            loadIntegrationData();
-        }
-    };
+// Projects tab functions
+let projectsCurrentPage = 1;
+const projectsPageSize = 50;
+let projectsDebounceTimer = null;
+
+function handleProjectsFilterChange() {
+    // Debounce the search
+    if (projectsDebounceTimer) {
+        clearTimeout(projectsDebounceTimer);
+    }
+    projectsDebounceTimer = setTimeout(() => {
+        projectsCurrentPage = 1;
+        loadProjectsData();
+    }, 500);
+}
+
+function clearProjectsFilters() {
+    document.getElementById('projects-filter-name').value = '';
+    document.getElementById('projects-filter-contractor').value = '';
+    projectsCurrentPage = 1;
+    loadProjectsData();
+}
+
+async function loadProjectsData() {
+    const projectNameFilter = document.getElementById('projects-filter-name').value.trim();
+    const contractorFilter = document.getElementById('projects-filter-contractor').value.trim();
     
-    // Check for hash on page load and switch to that tab
-    const hash = window.location.hash.replace('#', '');
-    if (hash) {
-        const validTabs = ['table', 'visual', 'province', 'province-visual', 'integration'];
-        if (validTabs.includes(hash)) {
-            switchTab(hash);
+    const loadingDiv = document.getElementById('projects-loading');
+    const resultsDiv = document.getElementById('projects-results');
+    const tableBody = document.getElementById('projects-table-body');
+    
+    // Show loading
+    loadingDiv.style.display = 'block';
+    resultsDiv.style.display = 'none';
+    tableBody.innerHTML = '';
+    
+    try {
+        const params = new URLSearchParams({
+            page: projectsCurrentPage,
+            limit: projectsPageSize
+        });
+        
+        if (projectNameFilter) {
+            params.append('project_name', projectNameFilter);
         }
+        
+        if (contractorFilter) {
+            params.append('contractor', contractorFilter);
+        }
+        
+        const response = await fetch(`/api/integrated/projects?${params.toString()}`);
+        if (!response.ok) {
+            throw new Error(`Failed to load projects: ${response.status}`);
+        }
+        
+        const data = await response.json();
+        
+        if (!data.success) {
+            throw new Error(data.error || 'Failed to load projects');
+        }
+        
+        // Hide loading
+        loadingDiv.style.display = 'none';
+        
+        // Update count
+        document.getElementById('projects-count').textContent = 
+            `${data.total || 0} project${data.total !== 1 ? 's' : ''} found`;
+        
+        // Populate table
+        if (data.projects && data.projects.length > 0) {
+            tableBody.innerHTML = data.projects.map(project => {
+                // Project name - just the name
+                const projectName = project.project_name || project.philgeps_award_title || project.project_description || 'N/A';
+                
+                const contractor = project.contractor_name || project.philgeps_awardee_name || project.organization_name || 'N/A';
+                const amount = project.amount || project.contract_amount || project.dime_cost || project.infrawatch_contract_price || 0;
+                const amountFormatted = amount ? `₱${parseFloat(amount).toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}` : 'N/A';
+                const source = project.source || 'N/A';
+                const sourceBadge = getSourceBadge(source);
+                
+                return `
+                    <tr style="border-bottom: 1px solid #dee2e6;">
+                        <td style="padding: 12px; border-right: 1px solid #dee2e6; word-wrap: break-word; white-space: normal;">${escapeHtml(projectName)}</td>
+                        <td style="padding: 12px; border-right: 1px solid #dee2e6; word-wrap: break-word; white-space: normal;">${escapeHtml(contractor)}</td>
+                        <td style="padding: 12px; border-right: 1px solid #dee2e6; text-align: right; white-space: nowrap;">${amountFormatted}</td>
+                        <td style="padding: 12px; text-align: center;">${sourceBadge}</td>
+                    </tr>
+                `;
+            }).join('');
+            
+            // Add pagination
+            updateProjectsPagination(data.total, data.total_pages);
+        } else {
+            tableBody.innerHTML = `
+                <tr>
+                    <td colspan="4" style="padding: 40px; text-align: center; color: #666;">
+                        No projects found matching your filters.
+                    </td>
+                </tr>
+            `;
+        }
+        
+        // Show results
+        resultsDiv.style.display = 'block';
+        
+    } catch (error) {
+        console.error('Error loading projects:', error);
+        loadingDiv.style.display = 'none';
+        tableBody.innerHTML = `
+            <tr>
+                <td colspan="4" style="padding: 40px; text-align: center; color: #dc3545;">
+                    Error loading projects: ${escapeHtml(error.message)}
+                </td>
+            </tr>
+        `;
+        resultsDiv.style.display = 'block';
+    }
+}
+
+function updateProjectsPagination(total, totalPages) {
+    const paginationDiv = document.getElementById('projects-pagination');
+    
+    if (totalPages <= 1) {
+        paginationDiv.innerHTML = '';
+        return;
     }
     
-    // Listen for hash changes
-    window.addEventListener('hashchange', function() {
-        const hash = window.location.hash.replace('#', '');
-        const validTabs = ['table', 'visual', 'province', 'province-visual', 'integration'];
-        if (hash && validTabs.includes(hash)) {
-            switchTab(hash);
-        }
-    });
+    let html = '';
     
-    // Add click handler for copy button
-    const copyBtn = document.getElementById('copy-integration-btn');
-    if (copyBtn) {
-        copyBtn.addEventListener('click', copyIntegrationChart);
+    // Previous button
+    if (projectsCurrentPage > 1) {
+        html += `<button onclick="projectsCurrentPage = ${projectsCurrentPage - 1}; loadProjectsData();" style="padding: 8px 16px; background: #667eea; color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: 600;">← Previous</button>`;
+    } else {
+        html += `<button disabled style="padding: 8px 16px; background: #e9ecef; color: #999; border: none; border-radius: 4px; cursor: not-allowed;">← Previous</button>`;
     }
-});
+    
+    // Page numbers
+    html += `<span style="padding: 0 16px; font-weight: 600; color: #333;">Page ${projectsCurrentPage} of ${totalPages}</span>`;
+    
+    // Next button
+    if (projectsCurrentPage < totalPages) {
+        html += `<button onclick="projectsCurrentPage = ${projectsCurrentPage + 1}; loadProjectsData();" style="padding: 8px 16px; background: #667eea; color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: 600;">Next →</button>`;
+    } else {
+        html += `<button disabled style="padding: 8px 16px; background: #e9ecef; color: #999; border: none; border-radius: 4px; cursor: not-allowed;">Next →</button>`;
+    }
+    
+    paginationDiv.innerHTML = html;
+}
+
+function escapeHtml(text) {
+    if (text === null || text === undefined) return 'N/A';
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+}
+
+async function exportProjectsToCSV() {
+    const projectNameFilter = document.getElementById('projects-filter-name').value.trim();
+    const contractorFilter = document.getElementById('projects-filter-contractor').value.trim();
+    const exportBtn = document.getElementById('export-csv-btn');
+    
+    // Disable button and show loading state
+    const originalText = exportBtn.innerHTML;
+    exportBtn.disabled = true;
+    exportBtn.innerHTML = '⏳ Exporting...';
+    exportBtn.style.opacity = '0.6';
+    exportBtn.style.cursor = 'not-allowed';
+    
+    try {
+        const params = new URLSearchParams();
+        if (projectNameFilter) {
+            params.append('project_name', projectNameFilter);
+        }
+        if (contractorFilter) {
+            params.append('contractor', contractorFilter);
+        }
+        
+        const response = await fetch(`/api/integrated/projects/csv?${params.toString()}`);
+        
+        if (!response.ok) {
+            throw new Error(`Failed to export CSV: ${response.status}`);
+        }
+        
+        // Get the CSV content
+        const blob = await response.blob();
+        
+        // Get filename from Content-Disposition header or use default
+        const contentDisposition = response.headers.get('Content-Disposition');
+        let filename = 'integrated_projects.csv';
+        if (contentDisposition) {
+            const filenameMatch = contentDisposition.match(/filename="?([^"]+)"?/);
+            if (filenameMatch) {
+                filename = filenameMatch[1];
+            }
+        }
+        
+        // Create download link
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = filename;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        window.URL.revokeObjectURL(url);
+        
+        // Show success message
+        exportBtn.innerHTML = '✅ Exported!';
+        exportBtn.style.background = '#28a745';
+        setTimeout(() => {
+            exportBtn.innerHTML = originalText;
+            exportBtn.style.background = '#28a745';
+        }, 2000);
+        
+    } catch (error) {
+        console.error('Error exporting CSV:', error);
+        alert(`Failed to export CSV: ${error.message}`);
+        exportBtn.innerHTML = originalText;
+    } finally {
+        exportBtn.disabled = false;
+        exportBtn.style.opacity = '1';
+        exportBtn.style.cursor = 'pointer';
+    }
+}
+
+function getSourceBadge(source) {
+    if (!source || source === 'N/A') {
+        return '<span style="display: inline-block; padding: 4px 8px; background: #e9ecef; color: #495057; border-radius: 4px; font-size: 11px; font-weight: 600;">N/A</span>';
+    }
+    
+    const sourceUpper = String(source).toUpperCase();
+    let badgeColor = '#6c757d';
+    let badgeBg = '#e9ecef';
+    let badgeText = source;
+    
+    if (sourceUpper.includes('SSP') || sourceUpper.includes('FLOOD')) {
+        badgeColor = '#0d6efd';
+        badgeBg = '#cfe2ff';
+        badgeText = 'SSP';
+    } else if (sourceUpper.includes('DIME')) {
+        badgeColor = '#198754';
+        badgeBg = '#d1e7dd';
+        badgeText = 'DIME';
+    } else if (sourceUpper.includes('PHILGEPS')) {
+        badgeColor = '#ffc107';
+        badgeBg = '#fff3cd';
+        badgeText = 'PhilGEPS';
+    } else if (sourceUpper.includes('MICROSITE') || sourceUpper.includes('INFRAWATCH') || sourceUpper.includes('DPWH')) {
+        badgeColor = '#dc3545';
+        badgeBg = '#f8d7da';
+        badgeText = 'Microsite';
+    }
+    
+    return `<span style="display: inline-block; padding: 4px 8px; background: ${badgeBg}; color: ${badgeColor}; border-radius: 4px; font-size: 11px; font-weight: 600; white-space: nowrap;">${escapeHtml(badgeText)}</span>`;
+}
 
 </script>
 </body>

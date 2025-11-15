@@ -16,6 +16,7 @@ from typing import Any, Dict, Optional, Set, List, Tuple
 from dotenv import load_dotenv
 from collections import defaultdict
 from urllib.parse import urlparse
+import duckdb
 
 load_dotenv()
 from budget_client import (
@@ -494,6 +495,291 @@ async def get_integrated_coverage(refresh: bool = Query(False)) -> JSONResponse:
         _cached_integrated_coverage_snapshot.cache_clear()
     snapshot = _cached_integrated_coverage_snapshot()
     return JSONResponse(content=snapshot)
+
+@app.get("/api/integrated/projects")
+async def get_integrated_projects(
+    page: int = Query(default=1, ge=1, description="Page number (1-based)"),
+    limit: int = Query(default=50, ge=1, le=1000, description="Number of projects per page"),
+    project_name: Optional[str] = Query(default=None, description="Filter by project name/title"),
+    contractor: Optional[str] = Query(default=None, description="Filter by contractor name")
+) -> JSONResponse:
+    """Get integrated projects from parquet file using DuckDB with filtering and pagination"""
+    try:
+        # Get the parquet file path (use absolute path)
+        base_dir = Path(__file__).parent.absolute()
+        parquet_file = base_dir / "data" / "parquet" / "integrated_projects.parquet"
+        
+        if not parquet_file.exists():
+            return JSONResponse(
+                content={
+                    "success": False,
+                    "error": f"Parquet file not found: {parquet_file}",
+                    "projects": [],
+                    "total": 0,
+                    "total_pages": 0
+                },
+                status_code=404
+            )
+        
+        # Connect to DuckDB
+        conn = duckdb.connect()
+        
+        try:
+            # Build WHERE clause with proper SQL escaping
+            where_conditions = []
+            
+            def escape_sql_string(s: str) -> str:
+                """Escape single quotes for SQL"""
+                return s.replace("'", "''")
+            
+            if project_name:
+                escaped_name = escape_sql_string(project_name)
+                where_conditions.append(
+                    f"(project_name ILIKE '%{escaped_name}%' OR "
+                    f"philgeps_award_title ILIKE '%{escaped_name}%' OR "
+                    f"project_description ILIKE '%{escaped_name}%')"
+                )
+            
+            if contractor:
+                escaped_contractor = escape_sql_string(contractor)
+                where_conditions.append(
+                    f"(contractor_name ILIKE '%{escaped_contractor}%' OR "
+                    f"philgeps_awardee_name ILIKE '%{escaped_contractor}%' OR "
+                    f"organization_name ILIKE '%{escaped_contractor}%')"
+                )
+            
+            where_clause = " AND ".join(where_conditions) if where_conditions else "1=1"
+            
+            # Calculate offset
+            offset = (page - 1) * limit
+            
+            # Convert path to string and escape single quotes
+            parquet_path_str = str(parquet_file).replace("'", "''")
+            
+            # Get total count
+            count_query = f"""
+                SELECT COUNT(*) as total
+                FROM read_parquet('{parquet_path_str}')
+                WHERE {where_clause}
+            """
+            
+            count_result = conn.execute(count_query).fetchone()
+            total = count_result[0] if count_result else 0
+            total_pages = max(1, (total + limit - 1) // limit)
+            
+            # Get projects with pagination
+            select_query = f"""
+                SELECT 
+                    project_name,
+                    project_description,
+                    philgeps_award_title,
+                    contractor_name,
+                    philgeps_awardee_name,
+                    organization_name,
+                    amount,
+                    contract_amount,
+                    dime_cost,
+                    infrawatch_contract_price,
+                    source
+                FROM read_parquet('{parquet_path_str}')
+                WHERE {where_clause}
+                ORDER BY 
+                    COALESCE(amount, contract_amount, CAST(dime_cost AS DOUBLE), infrawatch_contract_price) DESC NULLS LAST,
+                    project_name
+                LIMIT {limit} OFFSET {offset}
+            """
+            
+            # Execute query
+            results = conn.execute(select_query).fetchall()
+            columns = [desc[0] for desc in conn.description]
+            
+            # Convert to list of dictionaries
+            projects = []
+            for row in results:
+                project_dict = {}
+                for i, col in enumerate(columns):
+                    value = row[i]
+                    # Convert timestamp and other types to string if needed
+                    if value is not None:
+                        if isinstance(value, datetime):
+                            project_dict[col] = value.isoformat()
+                        elif hasattr(value, 'isoformat'):  # Handle other datetime-like objects
+                            project_dict[col] = value.isoformat()
+                        else:
+                            project_dict[col] = value
+                    else:
+                        project_dict[col] = None
+                projects.append(project_dict)
+            
+            return JSONResponse(content={
+                "success": True,
+                "projects": projects,
+                "total": total,
+                "page": page,
+                "limit": limit,
+                "total_pages": total_pages
+            })
+            
+        finally:
+            conn.close()
+            
+    except Exception as e:
+        import traceback
+        error_msg = str(e)
+        traceback.print_exc()
+        return JSONResponse(
+            content={
+                "success": False,
+                "error": error_msg,
+                "projects": [],
+                "total": 0,
+                "total_pages": 0
+            },
+            status_code=500
+        )
+
+@app.get("/api/integrated/projects/csv")
+async def export_integrated_projects_csv(
+    project_name: Optional[str] = Query(default=None, description="Filter by project name/title"),
+    contractor: Optional[str] = Query(default=None, description="Filter by contractor name")
+):
+    """Export integrated projects to CSV with filtering (all pages)"""
+    try:
+        from fastapi.responses import Response
+        import csv
+        import io
+        
+        # Get the parquet file path (use absolute path)
+        base_dir = Path(__file__).parent.absolute()
+        parquet_file = base_dir / "data" / "parquet" / "integrated_projects.parquet"
+        
+        if not parquet_file.exists():
+            return JSONResponse(
+                content={
+                    "success": False,
+                    "error": f"Parquet file not found: {parquet_file}"
+                },
+                status_code=404
+            )
+        
+        # Connect to DuckDB
+        conn = duckdb.connect()
+        
+        try:
+            # Build WHERE clause with proper SQL escaping
+            where_conditions = []
+            
+            def escape_sql_string(s: str) -> str:
+                """Escape single quotes for SQL"""
+                return s.replace("'", "''")
+            
+            if project_name:
+                escaped_name = escape_sql_string(project_name)
+                where_conditions.append(
+                    f"(project_name ILIKE '%{escaped_name}%' OR "
+                    f"philgeps_award_title ILIKE '%{escaped_name}%' OR "
+                    f"project_description ILIKE '%{escaped_name}%')"
+                )
+            
+            if contractor:
+                escaped_contractor = escape_sql_string(contractor)
+                where_conditions.append(
+                    f"(contractor_name ILIKE '%{escaped_contractor}%' OR "
+                    f"philgeps_awardee_name ILIKE '%{escaped_contractor}%' OR "
+                    f"organization_name ILIKE '%{escaped_contractor}%')"
+                )
+            
+            where_clause = " AND ".join(where_conditions) if where_conditions else "1=1"
+            
+            # Convert path to string and escape single quotes
+            parquet_path_str = str(parquet_file).replace("'", "''")
+            
+            # Get all projects (no pagination)
+            select_query = f"""
+                SELECT 
+                    project_name,
+                    project_description,
+                    philgeps_award_title,
+                    contractor_name,
+                    philgeps_awardee_name,
+                    organization_name,
+                    amount,
+                    contract_amount,
+                    dime_cost,
+                    infrawatch_contract_price,
+                    source
+                FROM read_parquet('{parquet_path_str}')
+                WHERE {where_clause}
+                ORDER BY 
+                    COALESCE(amount, contract_amount, CAST(dime_cost AS DOUBLE), infrawatch_contract_price) DESC NULLS LAST,
+                    project_name
+            """
+            
+            # Execute query
+            results = conn.execute(select_query).fetchall()
+            columns = [desc[0] for desc in conn.description]
+            
+            # Create CSV in memory
+            output = io.StringIO()
+            writer = csv.writer(output)
+            
+            # Write header
+            writer.writerow(['Project Name', 'Contractor', 'Amount', 'Source'])
+            
+            # Write data rows
+            for row in results:
+                project_name_val = row[columns.index('project_name')] or row[columns.index('philgeps_award_title')] or row[columns.index('project_description')] or ''
+                contractor_val = row[columns.index('contractor_name')] or row[columns.index('philgeps_awardee_name')] or row[columns.index('organization_name')] or ''
+                amount_val = row[columns.index('amount')] or row[columns.index('contract_amount')] or row[columns.index('dime_cost')] or row[columns.index('infrawatch_contract_price')] or 0
+                source_val = row[columns.index('source')] or ''
+                
+                # Format amount
+                if amount_val:
+                    try:
+                        amount_formatted = f"{float(amount_val):,.2f}"
+                    except (ValueError, TypeError):
+                        amount_formatted = str(amount_val)
+                else:
+                    amount_formatted = ''
+                
+                writer.writerow([
+                    str(project_name_val) if project_name_val else '',
+                    str(contractor_val) if contractor_val else '',
+                    amount_formatted,
+                    str(source_val) if source_val else ''
+                ])
+            
+            # Get CSV content
+            csv_content = output.getvalue()
+            output.close()
+            
+            # Generate filename with timestamp
+            from datetime import datetime
+            timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+            filename = f"integrated_projects_{timestamp}.csv"
+            
+            return Response(
+                content=csv_content,
+                media_type="text/csv",
+                headers={
+                    "Content-Disposition": f"attachment; filename={filename}"
+                }
+            )
+            
+        finally:
+            conn.close()
+            
+    except Exception as e:
+        import traceback
+        error_msg = str(e)
+        traceback.print_exc()
+        return JSONResponse(
+            content={
+                "success": False,
+                "error": error_msg
+            },
+            status_code=500
+        )
 
 @app.get("/api/budget/files")
 async def budget_list_files_api():
