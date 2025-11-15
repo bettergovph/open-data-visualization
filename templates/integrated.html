@@ -222,6 +222,7 @@ function toggleMobileMenu() {
                     <a href="#visual" class="budget-tab-btn" data-tab="visual">📊 Congressman Visual</a>
                     <a href="#province" class="budget-tab-btn" data-tab="province">🗺️ Province</a>
                     <a href="#province-visual" class="budget-tab-btn" data-tab="province-visual">📈 Province Visual</a>
+                    <a href="#integration" class="budget-tab-btn" data-tab="integration">🔗 Integration</a>
                 </div>
                 
                 <div class="budget-tab-content">
@@ -907,6 +908,33 @@ function toggleMobileMenu() {
                         <div id="province-visual-loading" style="text-align: center; padding: 40px; display: none;">
                             <div style="display: inline-block; width: 40px; height: 40px; border: 4px solid #f3f3f3; border-top: 4px solid #333; border-radius: 50%; animation: spin 1s linear infinite;"></div>
                             <p style="color: #666; margin-top: 15px;">Loading visualization data...</p>
+                        </div>
+                    </div>
+                    
+                    <!-- Integration Tab -->
+                    <div id="tab-integration" class="budget-tab-panel">
+                        <h3 class="budget-section-title">🔗 Database Integration Analysis</h3>
+                        <p class="budget-section-desc">Venn diagram showing overlap between SSP, DIME, PhilGEPS, and Microsite databases</p>
+                        
+                        <div style="margin: 20px 0; text-align: right;">
+                            <button id="copy-integration-btn" style="padding: 10px 20px; background: #007bff; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 14px; font-weight: 600; transition: background 0.3s;">
+                                📋 Copy Chart to Clipboard
+                            </button>
+                        </div>
+                        
+                        <div style="margin: 30px 0; padding: 20px; background: #f8f9fa; border-radius: 8px;">
+                            <div id="integration-error" style="display: none; padding: 15px; background: #fee; border-left: 4px solid #f00; border-radius: 4px; color: #c00;">
+                                ❌ Failed to load integration data. Please refresh the page.
+                            </div>
+                            
+                            <div id="venn-diagram-container" style="display: flex; justify-content: center; align-items: center; min-height: 400px; margin: 20px 0;">
+                                <div style="text-align: center; color: #666;">
+                                    <div style="display: inline-block; width: 40px; height: 40px; border: 4px solid #f3f3f3; border-top: 4px solid #333; border-radius: 50%; animation: spin 1s linear infinite; margin-bottom: 15px;"></div>
+                                    <p>Loading integration data...</p>
+                                </div>
+                            </div>
+                            
+                            <div id="integration-stats"></div>
                         </div>
                     </div>
                 </div>
@@ -5621,6 +5649,552 @@ function updateProvinceVisualDashboardProjects(projects, scopeLabel = 'All Munic
 
     dashboard.style.display = 'block';
 }
+
+// Integration Tab - 4-Square Venn Diagram
+let integrationData = null;
+
+async function loadIntegrationData() {
+    try {
+        const response = await fetch('/static/data/integration_venn_data.json?v=' + Date.now());
+        integrationData = await response.json();
+        renderIntegrationVenn();
+    } catch (error) {
+        console.error('Failed to load integration data:', error);
+        document.getElementById('integration-error').style.display = 'block';
+    }
+}
+
+function renderIntegrationVenn() {
+    if (!integrationData) return;
+    
+    const container = document.getElementById('venn-diagram-container');
+    if (!container) return;
+    
+    container.innerHTML = '';
+    
+    const data = integrationData.venn_counts;
+    const totals = integrationData.source_totals;
+    
+    // Create SVG for 4 overlapping ellipses
+    const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+    svg.setAttribute('width', '900');
+    svg.setAttribute('height', '900');
+    svg.setAttribute('viewBox', '0 0 900 900');
+    svg.style.background = '#ffffff';
+    svg.style.borderRadius = '8px';
+    svg.style.border = '2px solid #e9ecef';
+    
+    // Define positions for 4 ellipses in a 2x2 grid with overlaps
+    // Top-left: SSP, Top-right: DIME, Bottom-left: PhilGEPS, Bottom-right: Microsite
+    const ellipses = [
+        { id: 'SSP', cx: 250, cy: 250, rx: 180, ry: 140, color: '#e3f2fd', stroke: '#1565c0', label: 'SSP' },
+        { id: 'DIME', cx: 450, cy: 250, rx: 180, ry: 140, color: '#f3e5f5', stroke: '#7b1fa2', label: 'DIME' },
+        { id: 'PhilGEPS', cx: 250, cy: 450, rx: 180, ry: 140, color: '#fff3e0', stroke: '#e65100', label: 'PhilGEPS' },
+        { id: 'Microsite', cx: 450, cy: 450, rx: 180, ry: 140, color: '#fff4e6', stroke: '#d97706', label: 'Microsite' }
+    ];
+    
+    // Store original order for later use
+    const ellipsesOriginal = [...ellipses];
+    
+    // Draw ellipses with opacity for overlaps (draw in reverse order so overlaps show correctly)
+    ellipses.reverse().forEach(ell => {
+        const ellipse = document.createElementNS('http://www.w3.org/2000/svg', 'ellipse');
+        ellipse.setAttribute('cx', ell.cx);
+        ellipse.setAttribute('cy', ell.cy);
+        ellipse.setAttribute('rx', ell.rx);
+        ellipse.setAttribute('ry', ell.ry);
+        ellipse.setAttribute('fill', ell.color);
+        ellipse.setAttribute('stroke', ell.stroke);
+        ellipse.setAttribute('stroke-width', '4');
+        ellipse.setAttribute('opacity', '0.6');
+        ellipse.style.cursor = 'pointer';
+        svg.appendChild(ellipse);
+        
+        // Label at top of ellipse (or bottom for PhilGEPS and Microsite)
+        const text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+        text.setAttribute('x', ell.cx);
+        // PhilGEPS and Microsite labels at bottom, others at top
+        const labelY = (ell.id === 'PhilGEPS' || ell.id === 'Microsite') 
+            ? ell.cy + ell.ry - 30 
+            : ell.cy - ell.ry + 30;
+        text.setAttribute('y', labelY.toString());
+        text.setAttribute('text-anchor', 'middle');
+        text.setAttribute('font-size', '20');
+        text.setAttribute('font-weight', 'bold');
+        text.setAttribute('fill', ell.stroke);
+        text.textContent = ell.label;
+        svg.appendChild(text);
+        
+        // Center is now empty (unique moved to corners)
+    });
+    
+    // Add unique counts at corners of ellipses
+    ellipsesOriginal.forEach(ell => {
+        const uniqueCount = data[ell.id] || 0;
+        if (uniqueCount > 0) {
+            // Position at corners inside the ellipse
+            let x, y;
+            if (ell.id === 'SSP') { 
+                // Northwest (top-left) - inside ellipse, moved down
+                x = ell.cx - ell.rx * 0.6; 
+                y = ell.cy - ell.ry * 0.6 + 30; 
+            }
+            else if (ell.id === 'DIME') { 
+                // Northeast (top-right) - inside ellipse, moved down
+                x = ell.cx + ell.rx * 0.6 - 40; 
+                y = ell.cy - ell.ry * 0.6 + 30; 
+            }
+            else if (ell.id === 'PhilGEPS') { 
+                // Southwest (bottom-left) - inside ellipse, moved up
+                x = ell.cx - ell.rx * 0.6; 
+                y = ell.cy + ell.ry * 0.6 - 45; 
+            }
+            else { 
+                // Southeast (bottom-right) - inside ellipse, moved up
+                x = ell.cx + ell.rx * 0.6 - 40; 
+                y = ell.cy + ell.ry * 0.6 - 45; 
+            }
+            
+            const uniqueBg = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+            uniqueBg.setAttribute('x', x.toString());
+            uniqueBg.setAttribute('y', y.toString());
+            uniqueBg.setAttribute('width', '80');
+            uniqueBg.setAttribute('height', '35');
+            uniqueBg.setAttribute('fill', '#fff');
+            uniqueBg.setAttribute('stroke', ell.stroke);
+            uniqueBg.setAttribute('stroke-width', '2');
+            uniqueBg.setAttribute('rx', '4');
+            uniqueBg.setAttribute('opacity', '0.9');
+            svg.appendChild(uniqueBg);
+            
+            const uniqueLabel = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+            uniqueLabel.setAttribute('x', (x + 40).toString());
+            uniqueLabel.setAttribute('y', (y + 18).toString());
+            uniqueLabel.setAttribute('text-anchor', 'middle');
+            uniqueLabel.setAttribute('font-size', '10');
+            uniqueLabel.setAttribute('fill', '#666');
+            uniqueLabel.textContent = 'Unique';
+            svg.appendChild(uniqueLabel);
+            
+            const uniqueText = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+            uniqueText.setAttribute('x', (x + 40).toString());
+            uniqueText.setAttribute('y', (y + 32).toString());
+            uniqueText.setAttribute('text-anchor', 'middle');
+            uniqueText.setAttribute('font-size', '14');
+            uniqueText.setAttribute('font-weight', 'bold');
+            uniqueText.setAttribute('fill', ell.stroke);
+            uniqueText.textContent = uniqueCount.toLocaleString();
+            svg.appendChild(uniqueText);
+        }
+    });
+    
+    // Helper function to get ellipse by ID
+    const getEllipse = (id) => ellipsesOriginal.find(e => e.id === id);
+    
+    // Calculate intersection positions based on ellipse geometry
+    // Center (all 4) - at the center of the 2x2 grid
+    const centerX = 350; // (250 + 450) / 2
+    const centerY = 350; // (250 + 450) / 2
+    
+    // Add intersection labels with backgrounds for readability
+    // Center (all 4) - moved to right side for visibility
+    const centerCount = data['DIME,Microsite,PhilGEPS,SSP'] || 0;
+    if (centerCount > 0) {
+        // Position on the right side of the diagram
+        const all4X = 700;
+        const all4Y = centerY;
+        
+        const centerBg = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+        centerBg.setAttribute('x', (all4X - 70).toString());
+        centerBg.setAttribute('y', (all4Y - 25).toString());
+        centerBg.setAttribute('width', '140');
+        centerBg.setAttribute('height', '50');
+        centerBg.setAttribute('fill', '#fff');
+        centerBg.setAttribute('stroke', '#000');
+        centerBg.setAttribute('stroke-width', '2');
+        centerBg.setAttribute('rx', '4');
+        centerBg.setAttribute('opacity', '0.95');
+        svg.appendChild(centerBg);
+        
+        const centerLabel = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+        centerLabel.setAttribute('x', all4X.toString());
+        centerLabel.setAttribute('y', (all4Y - 5).toString());
+        centerLabel.setAttribute('text-anchor', 'middle');
+        centerLabel.setAttribute('font-size', '14');
+        centerLabel.setAttribute('font-weight', 'bold');
+        centerLabel.setAttribute('fill', '#000');
+        centerLabel.textContent = 'All 4 Sources';
+        svg.appendChild(centerLabel);
+        
+        const centerText = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+        centerText.setAttribute('x', all4X.toString());
+        centerText.setAttribute('y', (all4Y + 15).toString());
+        centerText.setAttribute('text-anchor', 'middle');
+        centerText.setAttribute('font-size', '18');
+        centerText.setAttribute('font-weight', 'bold');
+        centerText.setAttribute('fill', '#d97706');
+        centerText.textContent = centerCount.toLocaleString();
+        svg.appendChild(centerText);
+    }
+    
+    // 3-way intersections (at centers of 3 overlapping ellipses)
+    const ssp = getEllipse('SSP');
+    const dime = getEllipse('DIME');
+    const philgeps = getEllipse('PhilGEPS');
+    const microsite = getEllipse('Microsite');
+    
+    const threeWay = [
+        { 
+            combo: 'DIME,PhilGEPS,SSP', 
+            x: (ssp.cx + dime.cx + philgeps.cx) / 3, 
+            y: (ssp.cy + dime.cy + philgeps.cy) / 3, 
+            label: 'D+P+S', 
+            count: data['DIME,PhilGEPS,SSP'] || 0 
+        },
+        { 
+            combo: 'DIME,Microsite,PhilGEPS', 
+            x: (dime.cx + microsite.cx + philgeps.cx) / 3 + 60, 
+            y: (dime.cy + microsite.cy + philgeps.cy) / 3, 
+            label: 'D+M+P', 
+            count: data['DIME,Microsite,PhilGEPS'] || 0 
+        },
+        { 
+            combo: 'Microsite,PhilGEPS,SSP', 
+            x: (microsite.cx + philgeps.cx + ssp.cx) / 3 - 60, 
+            y: (microsite.cy + philgeps.cy + ssp.cy) / 3, 
+            label: 'M+P+S', 
+            count: data['Microsite,PhilGEPS,SSP'] || 0 
+        },
+        { 
+            combo: 'DIME,Microsite,SSP', 
+            x: (dime.cx + microsite.cx + ssp.cx) / 3, 
+            y: (dime.cy + microsite.cy + ssp.cy) / 3, 
+            label: 'D+M+S', 
+            count: data['DIME,Microsite,SSP'] || 0 
+        }
+    ];
+    
+    threeWay.forEach(item => {
+        if (item.count > 0) {
+            const bg = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+            bg.setAttribute('x', (item.x - 50).toString());
+            bg.setAttribute('y', (item.y - 25).toString());
+            bg.setAttribute('width', '100');
+            bg.setAttribute('height', '40');
+            bg.setAttribute('fill', '#fff');
+            bg.setAttribute('stroke', '#666');
+            bg.setAttribute('stroke-width', '1');
+            bg.setAttribute('rx', '4');
+            bg.setAttribute('opacity', '0.9');
+            svg.appendChild(bg);
+            
+            const label = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+            label.setAttribute('x', item.x.toString());
+            label.setAttribute('y', (item.y - 5).toString());
+            label.setAttribute('text-anchor', 'middle');
+            label.setAttribute('font-size', '11');
+            label.setAttribute('font-weight', 'bold');
+            label.setAttribute('fill', '#666');
+            label.textContent = item.label;
+            svg.appendChild(label);
+            
+            const countText = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+            countText.setAttribute('x', item.x.toString());
+            countText.setAttribute('y', (item.y + 12).toString());
+            countText.setAttribute('text-anchor', 'middle');
+            countText.setAttribute('font-size', '14');
+            countText.setAttribute('font-weight', 'bold');
+            countText.setAttribute('fill', '#000');
+            countText.textContent = item.count.toLocaleString();
+            svg.appendChild(countText);
+        }
+    });
+    
+    // 2-way intersections (at midpoints between ellipse centers)
+    const twoWay = [
+        { 
+            combo: 'PhilGEPS,SSP', 
+            x: (philgeps.cx + ssp.cx) / 2 - 80, 
+            y: (philgeps.cy + ssp.cy) / 2, 
+            label: 'P+S', 
+            count: data['PhilGEPS,SSP'] || 0 
+        },
+        { 
+            combo: 'DIME,PhilGEPS', 
+            x: (dime.cx + philgeps.cx) / 2 + 60, 
+            y: (dime.cy + philgeps.cy) / 2 - 40, 
+            label: 'D+P', 
+            count: data['DIME,PhilGEPS'] || 0 
+        },
+        { 
+            combo: 'DIME,Microsite', 
+            x: (dime.cx + microsite.cx) / 2 + 80, 
+            y: (dime.cy + microsite.cy) / 2, 
+            label: 'D+M', 
+            count: data['DIME,Microsite'] || 0 
+        },
+        { 
+            combo: 'Microsite,PhilGEPS', 
+            x: (microsite.cx + philgeps.cx) / 2, 
+            y: (microsite.cy + philgeps.cy) / 2, 
+            label: 'M+P', 
+            count: data['Microsite,PhilGEPS'] || 0 
+        },
+        { 
+            combo: 'SSP,DIME', 
+            x: (ssp.cx + dime.cx) / 2, 
+            y: (ssp.cy + dime.cy) / 2 + 20, 
+            label: 'S+D', 
+            count: data['DIME,SSP'] || data['SSP,DIME'] || 0 
+        },
+        { 
+            combo: 'SSP,Microsite', 
+            x: (ssp.cx + microsite.cx) / 2, 
+            y: (ssp.cy + microsite.cy) / 2 + 30, 
+            label: 'S+M', 
+            count: data['Microsite,SSP'] || 0 
+        }
+    ];
+    
+    twoWay.forEach(item => {
+        // Always show all 2-way combinations even if count is 0
+        if (item.count > 0 || item.label === 'S+D' || item.label === 'S+M') {
+            const bg = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+            bg.setAttribute('x', (item.x - 35).toString());
+            bg.setAttribute('y', (item.y - 20).toString());
+            bg.setAttribute('width', '70');
+            bg.setAttribute('height', '30');
+            bg.setAttribute('fill', '#fff');
+            bg.setAttribute('stroke', '#999');
+            bg.setAttribute('stroke-width', '1');
+            bg.setAttribute('rx', '3');
+            bg.setAttribute('opacity', '0.85');
+            svg.appendChild(bg);
+            
+            const label = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+            label.setAttribute('x', item.x.toString());
+            label.setAttribute('y', (item.y - 3).toString());
+            label.setAttribute('text-anchor', 'middle');
+            label.setAttribute('font-size', '10');
+            label.setAttribute('font-weight', 'bold');
+            label.setAttribute('fill', '#888');
+            label.textContent = item.label;
+            svg.appendChild(label);
+            
+            const countText = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+            countText.setAttribute('x', item.x.toString());
+            countText.setAttribute('y', (item.y + 10).toString());
+            countText.setAttribute('text-anchor', 'middle');
+            countText.setAttribute('font-size', '12');
+            countText.setAttribute('font-weight', 'bold');
+            countText.setAttribute('fill', '#000');
+            countText.textContent = item.count.toLocaleString();
+            svg.appendChild(countText);
+        }
+    });
+    
+    // Add total counts - positioned at outer edges of ellipses
+    ellipsesOriginal.forEach(ell => {
+        const totalCount = totals[ell.id] || 0;
+        if (totalCount > 0) {
+            // Position at outer edge of ellipse (furthest from center)
+            let x, y;
+            if (ell.id === 'SSP') { 
+                // Top-left: position at top-left corner
+                x = ell.cx - ell.rx - 20; 
+                y = ell.cy - ell.ry - 20; 
+            }
+            else if (ell.id === 'DIME') { 
+                // Top-right: position at top-right corner
+                x = ell.cx + ell.rx - 60; 
+                y = ell.cy - ell.ry - 20; 
+            }
+            else if (ell.id === 'PhilGEPS') { 
+                // Bottom-left: position at bottom-left corner
+                x = ell.cx - ell.rx - 20; 
+                y = ell.cy + ell.ry - 15; 
+            }
+            else { 
+                // Bottom-right: position at bottom-right corner
+                x = ell.cx + ell.rx - 60; 
+                y = ell.cy + ell.ry - 15; 
+            }
+            
+            const totalBg = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+            totalBg.setAttribute('x', x.toString());
+            totalBg.setAttribute('y', y.toString());
+            totalBg.setAttribute('width', '80');
+            totalBg.setAttribute('height', '35');
+            totalBg.setAttribute('fill', '#fff');
+            totalBg.setAttribute('stroke', ell.stroke);
+            totalBg.setAttribute('stroke-width', '2');
+            totalBg.setAttribute('rx', '4');
+            totalBg.setAttribute('opacity', '0.9');
+            svg.appendChild(totalBg);
+            
+            const totalLabel = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+            totalLabel.setAttribute('x', (x + 40).toString());
+            totalLabel.setAttribute('y', (y + 18).toString());
+            totalLabel.setAttribute('text-anchor', 'middle');
+            totalLabel.setAttribute('font-size', '10');
+            totalLabel.setAttribute('fill', '#666');
+            totalLabel.textContent = 'Total';
+            svg.appendChild(totalLabel);
+            
+            const totalText = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+            totalText.setAttribute('x', (x + 40).toString());
+            totalText.setAttribute('y', (y + 32).toString());
+            totalText.setAttribute('text-anchor', 'middle');
+            totalText.setAttribute('font-size', '14');
+            totalText.setAttribute('font-weight', 'bold');
+            totalText.setAttribute('fill', ell.stroke);
+            totalText.textContent = totalCount.toLocaleString();
+            svg.appendChild(totalText);
+        }
+    });
+    
+    container.appendChild(svg);
+    
+    // Create detailed statistics table
+    const statsDiv = document.getElementById('integration-stats');
+    if (statsDiv) {
+        statsDiv.innerHTML = `
+            <h4 style="margin-top: 30px; margin-bottom: 15px; font-size: 18px; font-weight: bold;">📊 Detailed Statistics</h4>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 15px; margin-bottom: 20px;">
+                <div style="background: #e3f2fd; padding: 15px; border-radius: 8px; border-left: 4px solid #1565c0;">
+                    <div style="font-weight: bold; color: #1565c0; margin-bottom: 5px;">SSP</div>
+                    <div style="font-size: 24px; font-weight: bold;">${(totals.SSP || 0).toLocaleString()}</div>
+                    <div style="font-size: 12px; color: #666;">Unique: ${(data.SSP || 0).toLocaleString()}</div>
+                </div>
+                <div style="background: #f3e5f5; padding: 15px; border-radius: 8px; border-left: 4px solid #7b1fa2;">
+                    <div style="font-weight: bold; color: #7b1fa2; margin-bottom: 5px;">DIME</div>
+                    <div style="font-size: 24px; font-weight: bold;">${(totals.DIME || 0).toLocaleString()}</div>
+                    <div style="font-size: 12px; color: #666;">Unique: ${(data.DIME || 0).toLocaleString()}</div>
+                </div>
+                <div style="background: #fff3e0; padding: 15px; border-radius: 8px; border-left: 4px solid #e65100;">
+                    <div style="font-weight: bold; color: #e65100; margin-bottom: 5px;">PhilGEPS</div>
+                    <div style="font-size: 24px; font-weight: bold;">${(totals.PhilGEPS || 0).toLocaleString()}</div>
+                    <div style="font-size: 12px; color: #666;">Unique: ${(data.PhilGEPS || 0).toLocaleString()}</div>
+                </div>
+                <div style="background: #fff4e6; padding: 15px; border-radius: 8px; border-left: 4px solid #d97706;">
+                    <div style="font-weight: bold; color: #d97706; margin-bottom: 5px;">Microsite</div>
+                    <div style="font-size: 24px; font-weight: bold;">${(totals.Microsite || 0).toLocaleString()}</div>
+                    <div style="font-size: 12px; color: #666;">Unique: ${(data.Microsite || 0).toLocaleString()}</div>
+                </div>
+            </div>
+            <div style="background: #f8f9fa; padding: 20px; border-radius: 8px; margin-top: 20px;">
+                <h5 style="margin-bottom: 15px; font-weight: bold;">Intersection Counts</h5>
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 10px; font-size: 14px;">
+                    <div><strong>All 4 Sources:</strong> ${(data['DIME,Microsite,PhilGEPS,SSP'] || 0).toLocaleString()}</div>
+                    <div><strong>DIME + PhilGEPS + SSP:</strong> ${(data['DIME,PhilGEPS,SSP'] || 0).toLocaleString()}</div>
+                    <div><strong>DIME + Microsite + PhilGEPS:</strong> ${(data['DIME,Microsite,PhilGEPS'] || 0).toLocaleString()}</div>
+                    <div><strong>Microsite + PhilGEPS + SSP:</strong> ${(data['Microsite,PhilGEPS,SSP'] || 0).toLocaleString()}</div>
+                    <div><strong>PhilGEPS + SSP:</strong> ${(data['PhilGEPS,SSP'] || 0).toLocaleString()}</div>
+                    <div><strong>DIME + PhilGEPS:</strong> ${(data['DIME,PhilGEPS'] || 0).toLocaleString()}</div>
+                    <div><strong>DIME + Microsite:</strong> ${(data['DIME,Microsite'] || 0).toLocaleString()}</div>
+                    <div><strong>Microsite + PhilGEPS:</strong> ${(data['Microsite,PhilGEPS'] || 0).toLocaleString()}</div>
+                </div>
+            </div>
+            <div style="margin-top: 20px; padding: 15px; background: #e8f5e9; border-radius: 8px; border-left: 4px solid #4caf50;">
+                <strong>Total Unique Projects:</strong> ${integrationData.total_unique.toLocaleString()}
+            </div>
+        `;
+    }
+}
+
+// Copy integration chart (SVG) to clipboard as image
+function copyIntegrationChart() {
+    const container = document.getElementById('venn-diagram-container');
+    if (!container) {
+        alert('Chart not loaded yet. Please wait...');
+        return;
+    }
+    
+    const svg = container.querySelector('svg');
+    if (!svg) {
+        alert('Chart not available. Please wait for it to load.');
+        return;
+    }
+    
+    // Convert SVG to image
+    const svgData = new XMLSerializer().serializeToString(svg);
+    const svgBlob = new Blob([svgData], { type: 'image/svg+xml;charset=utf-8' });
+    const url = URL.createObjectURL(svgBlob);
+    
+    const img = new Image();
+    img.onload = function() {
+        // Create canvas to convert SVG to PNG
+        const canvas = document.createElement('canvas');
+        canvas.width = svg.width.baseVal.value;
+        canvas.height = svg.height.baseVal.value;
+        const ctx = canvas.getContext('2d');
+        
+        // Fill white background
+        ctx.fillStyle = '#ffffff';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        
+        // Draw the image
+        ctx.drawImage(img, 0, 0);
+        
+        // Convert to blob and copy
+        canvas.toBlob(function(blob) {
+            const item = new ClipboardItem({ 'image/png': blob });
+            navigator.clipboard.write([item]).then(function() {
+                const btn = document.getElementById('copy-integration-btn');
+                const originalText = btn.textContent;
+                btn.textContent = '✅ Copied!';
+                btn.style.background = '#28a745';
+                setTimeout(function() {
+                    btn.textContent = originalText;
+                    btn.style.background = '#007bff';
+                }, 2000);
+                URL.revokeObjectURL(url);
+            }).catch(function(err) {
+                console.error('Failed to copy image:', err);
+                // Fallback: try copying as data URL
+                canvas.toBlob(function(blob) {
+                    const reader = new FileReader();
+                    reader.onload = function() {
+                        const dataUrl = reader.result;
+                        // Try to copy as text (data URL) as fallback
+                        navigator.clipboard.writeText(dataUrl).then(function() {
+                            alert('Chart copied as image data. You can paste it into an image editor.');
+                        }).catch(function(err2) {
+                            console.error('Failed to copy:', err2);
+                            alert('Failed to copy chart. Please try right-clicking and saving the image instead.');
+                        });
+                    };
+                    reader.readAsDataURL(blob);
+                });
+            });
+        }, 'image/png');
+    };
+    
+    img.onerror = function() {
+        URL.revokeObjectURL(url);
+        alert('Failed to convert chart to image. Please try again.');
+    };
+    
+    img.src = url;
+}
+
+// Load integration data when Integration tab is clicked
+document.addEventListener('DOMContentLoaded', function() {
+    // Modify switchTab to load integration data
+    const originalSwitchTab = window.switchTab;
+    window.switchTab = function(tabName) {
+        originalSwitchTab(tabName);
+        if (tabName === 'integration' && !integrationData) {
+            loadIntegrationData();
+        }
+    };
+    
+    // Add click handler for copy button
+    const copyBtn = document.getElementById('copy-integration-btn');
+    if (copyBtn) {
+        copyBtn.addEventListener('click', copyIntegrationChart);
+    }
+});
 
 </script>
 </body>
