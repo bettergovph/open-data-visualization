@@ -274,19 +274,44 @@ async function loadProjects() {
 
         projects.forEach(project => {
             const dbAmount = project.db_amount ? `₱${parseFloat(project.db_amount).toLocaleString('en-US', {maximumFractionDigits: 0})}` : '-';
+            const csvAmount = project.amount ? `₱${parseFloat(project.amount.replace(/,/g, '')).toLocaleString('en-US', {maximumFractionDigits: 0})}` : '-';
             const availableIn = getAvailableDatabases(project);
             const row = document.createElement('tr');
-            // Combine amounts - stack CSV and DB amounts vertically
-            let amountDisplay = escapeHtml(project.amount || '-');
-            if (project.db_amount) {
-                const csvAmount = project.amount || '-';
-                amountDisplay = `${escapeHtml(csvAmount)}<br><small style="color: #6b7280; display: block; margin-top: 4px;">DB: ${dbAmount}</small>`;
+            // Amount column: Show DB amount as main, CSV amount as italic below
+            let amountDisplay = dbAmount;
+            if (project.amount && project.db_amount) {
+                // Show DB amount on top, CSV amount below in italics
+                amountDisplay = `${dbAmount}<br><small style="color: #6b7280; font-style: italic; display: block; margin-top: 4px;">CSV: ${csvAmount}</small>`;
+            } else if (project.db_amount) {
+                amountDisplay = dbAmount;
+            } else if (project.amount) {
+                amountDisplay = csvAmount;
+            } else {
+                amountDisplay = '-';
+            }
+            
+            // Style DB Project Title - show DB name normally, SQL pattern in italics
+            let dbProjectTitleDisplay = '-';
+            if (project.db_project_title) {
+                const parts = project.db_project_title.split(' | ');
+                if (parts.length > 1 && parts[1].includes('SQL Pattern:')) {
+                    // Has both DB title and SQL pattern - show DB title normally, pattern in italics
+                    const dbTitle = escapeHtml(parts[0]);
+                    const sqlPattern = escapeHtml(parts.slice(1).join(' | '));
+                    dbProjectTitleDisplay = `${dbTitle}<br><small style="color: #6b7280; font-style: italic;">${sqlPattern}</small>`;
+                } else if (project.db_project_title.includes('SQL Pattern:')) {
+                    // Only SQL pattern (no match found)
+                    dbProjectTitleDisplay = `<small style="color: #6b7280; font-style: italic;">${escapeHtml(project.db_project_title)}</small>`;
+                } else {
+                    // Only DB title (no search pattern)
+                    dbProjectTitleDisplay = escapeHtml(project.db_project_title);
+                }
             }
             
             row.innerHTML = `
                 <td>${escapeHtml(project.gaa_page || '-')}</td>
                 <td>${escapeHtml(project.project_title)}</td>
-                <td>${escapeHtml(project.db_project_title || '-')}</td>
+                <td>${dbProjectTitleDisplay}</td>
                 <td>${amountDisplay}</td>
                 <td>${escapeHtml(project.contract_id || '-')}</td>
                 <td>${escapeHtml(project.philgeps_id || '-')}</td>
