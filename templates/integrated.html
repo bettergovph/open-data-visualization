@@ -6189,6 +6189,24 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     };
     
+    // Check for hash on page load and switch to that tab
+    const hash = window.location.hash.replace('#', '');
+    if (hash) {
+        const validTabs = ['table', 'visual', 'province', 'province-visual', 'integration'];
+        if (validTabs.includes(hash)) {
+            switchTab(hash);
+        }
+    }
+    
+    // Listen for hash changes
+    window.addEventListener('hashchange', function() {
+        const hash = window.location.hash.replace('#', '');
+        const validTabs = ['table', 'visual', 'province', 'province-visual', 'integration'];
+        if (hash && validTabs.includes(hash)) {
+            switchTab(hash);
+        }
+    });
+    
     // Add click handler for copy button
     const copyBtn = document.getElementById('copy-integration-btn');
     if (copyBtn) {
