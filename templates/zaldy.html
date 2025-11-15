@@ -10,8 +10,8 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
     <!-- BetterGovPH Metadata -->
-    <meta name="description" content="DPWH Projects Database Tags - Check which projects are found in Flood, DIME, PhilGEPS, and DPWH Microsite databases">
-    <meta name="keywords" content="DPWH, projects, database, flood, DIME, PhilGEPS, DPWH Microsite, BetterGovPH">
+    <meta name="description" content="DPWH Projects Database Tags - Check which projects are found in Flood, DIME, PhilGEPS, and Microsite databases">
+    <meta name="keywords" content="DPWH, projects, database, flood, DIME, PhilGEPS, Microsite, BetterGovPH">
     <meta name="author" content="BetterGovPH">
 
     <style>
@@ -168,7 +168,7 @@
 <!-- Main Content -->
 <div style="padding: 2rem; max-width: 1400px; margin: 0 auto;">
     <h1 style="color: #0038A8; margin-bottom: 10px; font-size: 2rem;">DPWH Projects Database Tags</h1>
-    <p style="color: #6b7280; margin-bottom: 30px;">Check which DPWH projects are found in Flood, DIME, PhilGEPS, and DPWH Microsite databases</p>
+    <p style="color: #6b7280; margin-bottom: 30px;">Check which DPWH projects are found in Flood, DIME, PhilGEPS, and Microsite databases</p>
 
     <!-- Statistics -->
     <div class="stats" id="stats-container">
@@ -193,7 +193,7 @@
             <div class="stat-value" id="found-philgeps">-</div>
         </div>
         <div class="stat-card">
-            <div class="stat-label">Found in DPWH Microsite</div>
+            <div class="stat-label">Found in Microsite</div>
             <div class="stat-value" id="found-infrawatch">-</div>
         </div>
     </div>
@@ -344,7 +344,7 @@ function getAvailableDatabases(project) {
         databases.push('PhilGEPS');
     }
     if (project.found_infrawatch) {
-        databases.push('DPWH Microsite');
+        databases.push('Microsite');
     }
     if (project.found_budget_gaa) {
         databases.push('Budget/GAA 2025');

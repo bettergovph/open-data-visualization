@@ -319,6 +319,17 @@ def extract_codes(text: str) -> set:
     return codes
 
 
+def extract_bridge_identifiers(text: str) -> set:
+    """Extract bridge identifiers like B03318LZ, S03978LZ from project titles."""
+    if not text:
+        return set()
+    
+    # Pattern: Letter(s) followed by digits followed by letters (e.g., B03318LZ, S03978LZ)
+    # Also matches patterns in parentheses: (B03318LZ)
+    bridge_patterns = re.findall(r'\(?([A-Z]\d+[A-Z]+)\)?', text.upper())
+    return set(bridge_patterns)
+
+
 def extract_gaa644_components(text: str) -> Dict[str, Optional[str]]:
     """Extract components for GAA page 644 matching: Ilaya, Abutment (A/B), stream (down/up), package (1/2/3)."""
     if not text:
@@ -539,38 +550,45 @@ async def find_dime_match(dime_conn: asyncpg.Connection, project_title: str, amo
         filtered_locations = None
         search_pattern_for_display = None  # Store pattern for display
         
+        # Check for bridge identifiers first - they're unique and should be prioritized
+        title_bridge_ids = extract_bridge_identifiers(project_title)
+        
         # Build SQL search pattern
-        if title_chainage_bases:
+        if title_bridge_ids:
+            # Bridge identifiers are unique - use them as primary search pattern
+            bridge_id = sorted(title_bridge_ids)[0]  # Use first bridge ID
+            search_pattern = f"%{bridge_id}%"
+            search_patterns = [search_pattern]
+            search_pattern_for_display = search_pattern
+        elif title_chainage_bases:
             # For chainages with offsets, extract all base-offset pairs
             # Format: %Kxxxx%yyy%Kxxxx%zzz% (same base chainage with 2 offsets = high confidence)
             chainage_offset_map = {}  # {base_chainage: [offsets]}
             
             if title_chainage_with_offsets:
-                for chainage_base in sorted(title_chainage_bases):
-                    matching_offsets = [co for co in title_chainage_with_offsets if chainage_base in co]
-                    if matching_offsets:
-                        offsets = []
-                        for offset_str in sorted(matching_offsets):
-                            # Extract offset number (e.g., "057" from "K0032 + 057" or "K0032+057")
-                            offset_match = re.search(rf'{re.escape(chainage_base)}\s*\+\s*(\d+)', offset_str, re.IGNORECASE)
-                            if offset_match:
-                                offset_num = offset_match.group(1)
-                                offsets.append(offset_num)
-                        if offsets:
-                            chainage_offset_map[chainage_base] = offsets
+                # Extract all chainage+offset pairs in order from the title (preserve order, don't sort)
+                # Pattern: pair consecutive chainages (e.g., K0062+000 with K0063+250)
+                # Extract directly from title to preserve order
+                chainage_pairs = []  # List of (base, offset) tuples in order
+                # Find all chainage+offset patterns in order from title
+                chainage_matches = re.finditer(r'(K\d+)\s*\+\s*(\d+)', project_title.upper())
+                for match in chainage_matches:
+                    base, offset = match.groups()
+                    chainage_pairs.append((base, offset))
                 
-                # Build patterns: ALWAYS use %Kxxxx%yyy%Kxxxx%zzz% format when we have offsets
-                # Format: %Kxxxx%yyy%Kxxxx%zzz% (same base chainage with 2 offsets)
-                # Try all chainage patterns - at least 1 match, more = higher confidence
+                # Build patterns by pairing consecutive chainages
+                # Format: %Kxxxx%yyy%Kzzzz%www% (consecutive chainages with their offsets)
                 search_patterns_list = []
-                for base, offsets in sorted(chainage_offset_map.items()):
-                    if len(offsets) >= 2:
-                        # Use first 2 offsets: %Kxxxx%yyy%Kxxxx%zzz%
-                        pattern = f"%{base}%{offsets[0]}%{base}%{offsets[1]}%"
+                for i in range(0, len(chainage_pairs) - 1, 2):
+                    if i + 1 < len(chainage_pairs):
+                        base1, offset1 = chainage_pairs[i]
+                        base2, offset2 = chainage_pairs[i + 1]
+                        pattern = f"%{base1}%{offset1}%{base2}%{offset2}%"
                         search_patterns_list.append(pattern)
-                    elif len(offsets) == 1:
-                        # If only 1 offset, duplicate it: %Kxxxx%yyy%Kxxxx%yyy%
-                        pattern = f"%{base}%{offsets[0]}%{base}%{offsets[0]}%"
+                    elif i < len(chainage_pairs):
+                        # If odd number, use the last one with its offset (duplicate for pattern)
+                        base, offset = chainage_pairs[i]
+                        pattern = f"%{base}%{offset}%{base}%{offset}%"
                         search_patterns_list.append(pattern)
                 
                 if search_patterns_list:
@@ -657,19 +675,40 @@ async def find_dime_match(dime_conn: asyncpg.Connection, project_title: str, amo
                     filtered_locations = filtered_locations[:3]
                 
                 if filtered_locations:
-                    # Generate all permutations of the 3 keywords (max 6 combinations)
+                    # Generate all permutations: 2 keywords = 2 permutations, 3 keywords = 6 permutations
+                    # Split multi-word locations into individual words for pattern matching
                     import itertools
-                    if len(filtered_locations) == 3:
-                        # Generate all 6 permutations (3! = 6)
-                        permutations = list(itertools.permutations(filtered_locations))
+                    # Flatten multi-word locations: "talahib pandayan" -> ["talahib", "pandayan"], "zone iii" -> ["zone", "iii"]
+                    flattened_locations = []
+                    for loc in filtered_locations:
+                        if ' ' in loc:
+                            # Split multi-word location into individual words
+                            flattened_locations.extend(loc.split())
+                        else:
+                            flattened_locations.append(loc)
+                    
+                    # Filter out common non-location words (case insensitive)
+                    excluded_words = {'shore', 'protection', 'coastal', 'road', 'rd', 'construction', 'improvement', 
+                                    'rehabilitation', 'maintenance', 'along', 'barangay', 'brgy', 'section', 'segment',
+                                    'phase', 'package', 'structure', 'facilities', 'building', 'bridge', 'flyover'}
+                    flattened_locations = [loc.lower() for loc in flattened_locations 
+                                          if loc.lower() not in excluded_words and len(loc) > 2]
+                    
+                    # Limit to max 3 keywords after flattening (to avoid too many permutations)
+                    if len(flattened_locations) > 3:
+                        flattened_locations = flattened_locations[:3]
+                    
+                    if len(flattened_locations) >= 2:
+                        # Generate all permutations (2! = 2, 3! = 6, etc.)
+                        permutations = list(itertools.permutations(flattened_locations))
                         # Use first permutation as primary pattern, but store all for query building
                         search_pattern = f"%{'%'.join(permutations[0])}%"
                         search_patterns = [f"%{'%'.join(p)}%" for p in permutations]
-                        # Store pattern for display (show all 6 permutations)
+                        # Store pattern for display (show all permutations)
                         search_pattern_for_display = ", ".join([f"%{'%'.join(p)}%" for p in permutations])
                     else:
-                        # Less than 3 keywords, just use one pattern
-                        search_pattern = f"%{'%'.join(filtered_locations)}%"
+                        # Only 1 keyword, just use one pattern
+                        search_pattern = f"%{'%'.join(flattened_locations)}%"
                         search_patterns = [search_pattern]
                         search_pattern_for_display = search_pattern
                 else:
@@ -681,15 +720,13 @@ async def find_dime_match(dime_conn: asyncpg.Connection, project_title: str, amo
                 search_patterns = [search_pattern]
         
         # Build query: try all chainage patterns (at least 1 match, more = higher confidence)
-        # OR try all 6 keyword permutations if we have 3 keywords
-        if search_patterns and (len(search_patterns) > 1 or (filtered_locations and len(filtered_locations) == 3)):
+        # OR try all keyword permutations if we have 2+ keywords
+        if search_patterns and (len(search_patterns) > 1 or (filtered_locations and len(filtered_locations) >= 2)):
             # Multiple patterns: chainage patterns OR keyword permutations
-            if filtered_locations and len(filtered_locations) == 3:
-                # Generate all 6 keyword permutations
-                import itertools
-                keyword_permutations = list(itertools.permutations(filtered_locations))
-                keyword_patterns = [f"%{'%'.join(p)}%" for p in keyword_permutations]
-                all_patterns = search_patterns + keyword_patterns
+            if filtered_locations and len(filtered_locations) >= 2:
+                # Generate all keyword permutations (already done above, but ensure we use them)
+                # search_patterns already contains all permutations, so just use it
+                all_patterns = search_patterns
             else:
                 all_patterns = search_patterns
             
@@ -714,7 +751,11 @@ async def find_dime_match(dime_conn: asyncpg.Connection, project_title: str, amo
         
         # Simple matching: SQL pattern + amount threshold
         # BUT: For chainage patterns, verify that the exact chainage ranges match
+        # AND: For bridge identifiers, verify they match exactly
         best_match = None
+        
+        # Extract bridge identifiers from CSV title
+        csv_bridge_ids = extract_bridge_identifiers(project_title)
         
         for row in rows:
             # Get amount from DB
@@ -727,6 +768,13 @@ async def find_dime_match(dime_conn: asyncpg.Connection, project_title: str, amo
             proj_desc = row.get('description') or ""
             db_title = proj_name or proj_desc
             db_text = f"{proj_name} {proj_desc}".upper()
+            
+            # If CSV has bridge identifiers, verify they match in DB
+            if csv_bridge_ids:
+                db_bridge_ids = extract_bridge_identifiers(db_text)
+                # Require at least one exact bridge ID match
+                if not csv_bridge_ids.intersection(db_bridge_ids):
+                    continue  # Bridge IDs don't match, skip this row
             
             # If we used chainage patterns with offsets, verify exact matches
             if title_chainage_with_offsets:
@@ -776,24 +824,42 @@ async def find_philgeps_match(philgeps_conn: asyncpg.Connection, project_title: 
         title_chainage_bases = extract_chainage_base_markers(project_title)
         title_chainage_with_offsets = extract_chainage_with_offsets(project_title)
         
+        # Check for bridge identifiers first - they're unique and should be prioritized
+        title_bridge_ids = extract_bridge_identifiers(project_title)
+        
         # Build SQL search pattern (same logic as DIME)
-        if title_chainage_bases:
+        if title_bridge_ids:
+            # Bridge identifiers are unique - use them as primary search pattern
+            bridge_id = sorted(title_bridge_ids)[0]  # Use first bridge ID
+            search_pattern = f"%{bridge_id}%"
+        elif title_chainage_bases:
             # If we have multiple chainage bases (e.g., K000, K491), use them all
             if len(title_chainage_bases) >= 2:
                 chainage_list = sorted(title_chainage_bases)
                 search_pattern = f"%{'%'.join(chainage_list)}%"
             elif title_chainage_with_offsets:
-                chainage_offset_pairs = []
-                for chainage_base in sorted(title_chainage_bases):
-                    matching_offsets = [co for co in title_chainage_with_offsets if chainage_base in co]
-                    if matching_offsets:
-                        for offset_str in sorted(matching_offsets)[:2]:
-                            offset_match = re.search(rf'{re.escape(chainage_base)}\s*\+\s*(\d+)', offset_str, re.IGNORECASE)
-                            if offset_match:
-                                offset_num = offset_match.group(1)
-                                chainage_offset_pairs.append(f"{chainage_base}%{offset_num}")
-                if chainage_offset_pairs:
-                    search_pattern = f"%{'%'.join(chainage_offset_pairs[:2])}%"
+                # Extract chainage+offset pairs in order and pair consecutive ones
+                chainage_pairs = []
+                chainage_matches = re.finditer(r'(K\d+)\s*\+\s*(\d+)', project_title.upper())
+                for match in chainage_matches:
+                    base, offset = match.groups()
+                    chainage_pairs.append((base, offset))
+                
+                # Build patterns by pairing consecutive chainages
+                search_patterns_list = []
+                for i in range(0, len(chainage_pairs) - 1, 2):
+                    if i + 1 < len(chainage_pairs):
+                        base1, offset1 = chainage_pairs[i]
+                        base2, offset2 = chainage_pairs[i + 1]
+                        pattern = f"%{base1}%{offset1}%{base2}%{offset2}%"
+                        search_patterns_list.append(pattern)
+                    elif i < len(chainage_pairs):
+                        base, offset = chainage_pairs[i]
+                        pattern = f"%{base}%{offset}%{base}%{offset}%"
+                        search_patterns_list.append(pattern)
+                
+                if search_patterns_list:
+                    search_pattern = search_patterns_list[0]
                 else:
                     primary_chainage = sorted(title_chainage_bases)[0]
                     search_pattern = f"%{primary_chainage}%"
@@ -865,7 +931,7 @@ async def find_philgeps_match(philgeps_conn: asyncpg.Connection, project_title: 
                 "contractor": row.get('awardee_name') or "",
                 "db_project_title": db_title,
                 "db_amount": db_amount,
-                "philgeps_id": str(row.get('id', '')) if row.get('id') else ""
+                "philgeps_id": row.get('contract_no') or ""  # Use contract_no as philgeps_id (e.g., "24FC0027")
             }
             break  # Take first match
         
@@ -887,24 +953,42 @@ async def find_infrawatch_match(infrawatch_conn: asyncpg.Connection, project_tit
         title_chainage_with_offsets = extract_chainage_with_offsets(project_title)
         title_words = set(re.findall(r'\b\w{3,}\b', normalized_title.lower()))
         
+        # Check for bridge identifiers first - they're unique and should be prioritized
+        title_bridge_ids = extract_bridge_identifiers(project_title)
+        
         # Build SQL search pattern (same logic as DIME and PhilGEPS)
-        if title_chainage_bases:
+        if title_bridge_ids:
+            # Bridge identifiers are unique - use them as primary search pattern
+            bridge_id = sorted(title_bridge_ids)[0]  # Use first bridge ID
+            search_term = f"%{bridge_id}%"
+        elif title_chainage_bases:
             # If we have multiple chainage bases (e.g., K000, K491), use them all
             if len(title_chainage_bases) >= 2:
                 chainage_list = sorted(title_chainage_bases)
                 search_term = f"%{'%'.join(chainage_list)}%"
             elif title_chainage_with_offsets:
-                chainage_offset_pairs = []
-                for chainage_base in sorted(title_chainage_bases):
-                    matching_offsets = [co for co in title_chainage_with_offsets if chainage_base in co]
-                    if matching_offsets:
-                        for offset_str in sorted(matching_offsets)[:2]:
-                            offset_match = re.search(rf'{re.escape(chainage_base)}\s*\+\s*(\d+)', offset_str, re.IGNORECASE)
-                            if offset_match:
-                                offset_num = offset_match.group(1)
-                                chainage_offset_pairs.append(f"{chainage_base}%{offset_num}")
-                if chainage_offset_pairs:
-                    search_term = f"%{'%'.join(chainage_offset_pairs[:2])}%"
+                # Extract chainage+offset pairs in order and pair consecutive ones
+                chainage_pairs = []
+                chainage_matches = re.finditer(r'(K\d+)\s*\+\s*(\d+)', project_title.upper())
+                for match in chainage_matches:
+                    base, offset = match.groups()
+                    chainage_pairs.append((base, offset))
+                
+                # Build patterns by pairing consecutive chainages
+                search_patterns_list = []
+                for i in range(0, len(chainage_pairs) - 1, 2):
+                    if i + 1 < len(chainage_pairs):
+                        base1, offset1 = chainage_pairs[i]
+                        base2, offset2 = chainage_pairs[i + 1]
+                        pattern = f"%{base1}%{offset1}%{base2}%{offset2}%"
+                        search_patterns_list.append(pattern)
+                    elif i < len(chainage_pairs):
+                        base, offset = chainage_pairs[i]
+                        pattern = f"%{base}%{offset}%{base}%{offset}%"
+                        search_patterns_list.append(pattern)
+                
+                if search_patterns_list:
+                    search_term = search_patterns_list[0]
                 else:
                     primary_chainage = sorted(title_chainage_bases)[0]
                     search_term = f"%{primary_chainage}%"
@@ -941,7 +1025,11 @@ async def find_infrawatch_match(infrawatch_conn: asyncpg.Connection, project_tit
         
         # Simple matching: SQL pattern + amount threshold
         # BUT: For chainage patterns, verify that the exact chainage ranges match
+        # AND: For bridge identifiers, verify they match exactly
         best_match = None
+        
+        # Extract bridge identifiers from CSV title
+        csv_bridge_ids = extract_bridge_identifiers(project_title)
         
         for row in rows:
             # Handle both dict and string data
@@ -967,6 +1055,13 @@ async def find_infrawatch_match(infrawatch_conn: asyncpg.Connection, project_tit
                 continue
             
             db_text = db_title.upper()
+            
+            # If CSV has bridge identifiers, verify they match in DB
+            if csv_bridge_ids:
+                db_bridge_ids = extract_bridge_identifiers(db_text)
+                # Require at least one exact bridge ID match
+                if not csv_bridge_ids.intersection(db_bridge_ids):
+                    continue  # Bridge IDs don't match, skip this row
             
             # If we used chainage patterns with offsets, verify exact matches
             if title_chainage_with_offsets:
@@ -1119,26 +1214,27 @@ async def generate_cache() -> Dict[str, Any]:
         search_pattern_for_display = None
         
         if title_chainage_bases and title_chainage_with_offsets:
-            # Build chainage patterns: %Kxxxx%yyy%Kxxxx%zzz%
-            chainage_offset_map = {}
-            for chainage_base in sorted(title_chainage_bases):
-                matching_offsets = [co for co in title_chainage_with_offsets if chainage_base in co]
-                if matching_offsets:
-                    offsets = []
-                    for offset_str in sorted(matching_offsets):
-                        offset_match = re.search(rf'{re.escape(chainage_base)}\s*\+\s*(\d+)', offset_str, re.IGNORECASE)
-                        if offset_match:
-                            offsets.append(offset_match.group(1))
-                    if offsets:
-                        chainage_offset_map[chainage_base] = offsets
+            # Extract chainage+offset pairs in order and pair consecutive ones
+            # Pattern: pair consecutive chainages (e.g., K0062+000 with K0063+250)
+            chainage_pairs = []
+            chainage_matches = re.finditer(r'(K\d+)\s*\+\s*(\d+)', project_title.upper())
+            for match in chainage_matches:
+                base, offset = match.groups()
+                chainage_pairs.append((base, offset))
             
+            # Build patterns by pairing consecutive chainages
+            # Format: %Kxxxx%yyy%Kzzzz%www% (consecutive chainages with their offsets)
             search_patterns_list = []
-            for base, offsets in sorted(chainage_offset_map.items()):
-                if len(offsets) >= 2:
-                    pattern = f"%{base}%{offsets[0]}%{base}%{offsets[1]}%"
+            for i in range(0, len(chainage_pairs) - 1, 2):
+                if i + 1 < len(chainage_pairs):
+                    base1, offset1 = chainage_pairs[i]
+                    base2, offset2 = chainage_pairs[i + 1]
+                    pattern = f"%{base1}%{offset1}%{base2}%{offset2}%"
                     search_patterns_list.append(pattern)
-                elif len(offsets) == 1:
-                    pattern = f"%{base}%{offsets[0]}%{base}%{offsets[0]}%"
+                elif i < len(chainage_pairs):
+                    # If odd number, use the last one with its offset (duplicate for pattern)
+                    base, offset = chainage_pairs[i]
+                    pattern = f"%{base}%{offset}%{base}%{offset}%"
                     search_patterns_list.append(pattern)
             
             if search_patterns_list:
@@ -1189,11 +1285,33 @@ async def generate_cache() -> Dict[str, Any]:
                 
                 if filtered_locations:
                     import itertools
-                    if len(filtered_locations) == 3:
-                        permutations = list(itertools.permutations(filtered_locations))
+                    # Flatten multi-word locations: "talahib pandayan" -> ["talahib", "pandayan"], "zone iii" -> ["zone", "iii"]
+                    flattened_locations = []
+                    for loc in filtered_locations:
+                        if ' ' in loc:
+                            # Split multi-word location into individual words
+                            flattened_locations.extend(loc.split())
+                        else:
+                            flattened_locations.append(loc)
+                    
+                    # Filter out common non-location words (case insensitive)
+                    excluded_words = {'shore', 'protection', 'coastal', 'road', 'rd', 'construction', 'improvement', 
+                                    'rehabilitation', 'maintenance', 'along', 'barangay', 'brgy', 'section', 'segment',
+                                    'phase', 'package', 'structure', 'facilities', 'building', 'bridge', 'flyover'}
+                    flattened_locations = [loc.lower() for loc in flattened_locations 
+                                          if loc.lower() not in excluded_words and len(loc) > 2]
+                    
+                    # Limit to max 3 keywords after flattening (to avoid too many permutations)
+                    if len(flattened_locations) > 3:
+                        flattened_locations = flattened_locations[:3]
+                    
+                    if len(flattened_locations) >= 2:
+                        # Generate all permutations: 2 keywords = 2 permutations, 3 keywords = 6 permutations
+                        permutations = list(itertools.permutations(flattened_locations))
                         search_pattern_for_display = ", ".join([f"%{'%'.join(p)}%" for p in permutations])
                     else:
-                        search_pattern_for_display = f"%{'%'.join(filtered_locations)}%"
+                        # Only 1 keyword
+                        search_pattern_for_display = f"%{'%'.join(flattened_locations)}%"
                 else:
                     search_pattern_for_display = f"%{normalized_title}%"
             else:
