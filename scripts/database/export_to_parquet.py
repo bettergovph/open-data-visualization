@@ -595,122 +595,127 @@ async def export_infrawatch_projects() -> pd.DataFrame:
     conn = await get_pg_connection('infrawatch')
     
     try:
-        columns = await get_table_columns(conn, 'infrawatch_projects')
-        if not columns:
-            print("⚠️  Could not find infrawatch_projects table")
+        # Check if infrawatch_projects_rows table exists
+        table_exists = await conn.fetchval("""
+            SELECT EXISTS (
+                SELECT FROM information_schema.tables 
+                WHERE table_schema = 'public' 
+                AND table_name = 'infrawatch_projects_rows'
+            )
+        """)
+        
+        if not table_exists:
+            print("⚠️  Could not find infrawatch_projects_rows table")
             return pd.DataFrame()
         
-        print(f"   Found table: infrawatch_projects with {len(columns)} columns")
+        print("   Found table: infrawatch_projects_rows (JSONB format)")
         
-        select_parts = []
-        added_columns = set()
-        
-        # Map columns from infrawatch_projects
-        if 'contract_id' in columns:
-            select_parts.append("contract_id::text as contract_id")
-            select_parts.append("contract_id::text as project_id")
-            added_columns.add('contract_id')
-            added_columns.add('project_id')
-        
-        if 'contract_details' in columns:
-            select_parts.append("contract_details as project_name")
-            select_parts.append("contract_details as project_description")
-            added_columns.add('project_name')
-            added_columns.add('project_description')
-        
-        if 'contractor' in columns:
-            select_parts.append("contractor as contractor_name")
-            added_columns.add('contractor_name')
-        
-        if 'contract_price' in columns:
-            if 'amount' not in added_columns:
-                select_parts.append("contract_price as amount")
-                added_columns.add('amount')
-            if 'contract_amount' not in added_columns:
-                select_parts.append("contract_price as contract_amount")
-                added_columns.add('contract_amount')
-            select_parts.append("contract_price as infrawatch_contract_price")  # Keep original
-        
-        if 'implementing_agency' in columns:
-            select_parts.append("implementing_agency as organization_name")
-            added_columns.add('organization_name')
-            select_parts.append("implementing_agency as infrawatch_implementing_agency")  # Keep original
-        
-        if 'fund_source' in columns:
-            select_parts.append("fund_source as source_of_funds")
-            select_parts.append("fund_source as infrawatch_fund_source")  # Keep original
-        
-        if 'effectivity_date' in columns:
-            select_parts.append("effectivity_date as start_date")
-            select_parts.append("EXTRACT(YEAR FROM effectivity_date)::integer as project_year")
-            select_parts.append("EXTRACT(YEAR FROM effectivity_date)::integer as contract_year")
-            added_columns.add('start_date')
-            added_columns.add('project_year')
-            added_columns.add('contract_year')
-        
-        if 'expiry_date' in columns:
-            select_parts.append("expiry_date as end_date")
-            added_columns.add('end_date')
-        
-        if 'contract_status' in columns:
-            select_parts.append("contract_status as contractor_status")
-            select_parts.append("contract_status as infrawatch_contract_status")  # Keep original
-            added_columns.add('contractor_status')
-        
-        if 'accomplishment_pct' in columns:
-            select_parts.append("accomplishment_pct as accomplishment_pct")
-        
-        select_parts.append("'Microsite' as source")  # Renamed from Infrawatch
-        
-        # NULLs for missing columns
-        if 'global_id' not in added_columns:
-            select_parts.append("NULL::text as global_id")
-        if 'project_type' not in added_columns:
-            select_parts.append("NULL::text as project_type")
-        if 'work_type' not in added_columns:
-            select_parts.append("NULL::text as work_type")
-        if 'budget_amount' not in added_columns:
-            select_parts.append("NULL::numeric as budget_amount")
-        if 'region' not in added_columns:
-            select_parts.append("NULL::text as region")
-        if 'province' not in added_columns:
-            select_parts.append("NULL::text as province")
-        if 'municipality' not in added_columns:
-            select_parts.append("NULL::text as municipality")
-        if 'city' not in added_columns:
-            select_parts.append("NULL::text as city")
-        if 'barangay' not in added_columns:
-            select_parts.append("NULL::text as barangay")
-        if 'latitude' not in added_columns:
-            select_parts.append("NULL::double precision as latitude")
-        if 'longitude' not in added_columns:
-            select_parts.append("NULL::double precision as longitude")
-        if 'legislative_district' not in added_columns:
-            select_parts.append("NULL::text as legislative_district")
-        if 'award_date' not in added_columns:
-            select_parts.append("NULL::date as award_date")
-        if 'contractor_sec_number' not in added_columns:
-            select_parts.append("NULL::text as contractor_sec_number")
-        select_parts.append("'main' as contractor_role")
-        select_parts.append("false as is_joint_venture")
-        if 'department' not in added_columns:
-            select_parts.append("NULL::text as department")
-        if 'district_engineering_office' not in added_columns:
-            select_parts.append("NULL::text as district_engineering_office")
-        if 'congressman_name' not in added_columns:
-            select_parts.append("NULL::text as congressman_name")
-        if 'dynasty_member_id' not in added_columns:
-            select_parts.append("0::integer as dynasty_member_id")
-        if 'dynasty_relationship' not in added_columns:
-            select_parts.append("NULL::text as dynasty_relationship")
-        select_parts.append("now() as created_at")
-        select_parts.append("now() as updated_at")
-        if 'created_at' in columns:
-            select_parts.append("created_at as source_created_at")
-        else:
-            select_parts.append("NULL::timestamp as source_created_at")
-        
-        query = f"SELECT {', '.join(select_parts)} FROM infrawatch_projects WHERE contract_price > 0"
+        # Extract fields from JSONB data column
+        # Try multiple possible field names for each attribute
+        query = """
+            SELECT 
+                COALESCE(data->>'Contract ID', data->>'ContractID', data->>'contract_id', id::text) as contract_id,
+                COALESCE(data->>'Contract ID', data->>'ContractID', data->>'contract_id', id::text) as project_id,
+                COALESCE(data->>'Contract Details', data->>'ContractDetails', data->>'contract_details', 
+                         data->>'Project Name', data->>'ProjectName', data->>'project_name', 
+                         data->>'Title', data->>'title') as project_name,
+                COALESCE(data->>'Contract Details', data->>'ContractDetails', data->>'contract_details', 
+                         data->>'Project Description', data->>'ProjectDescription', data->>'project_description',
+                         data->>'Title', data->>'title') as project_description,
+                COALESCE(data->>'Contractor', data->>'Contractor Name', data->>'ContractorName', 
+                         data->>'contractor', data->>'contractor_name') as contractor_name,
+                COALESCE(
+                    NULLIF((data->>'Contract Price')::numeric, 0),
+                    NULLIF((data->>'ContractPrice')::numeric, 0),
+                    NULLIF((data->>'contract_price')::numeric, 0),
+                    NULLIF((data->>'Amount')::numeric, 0),
+                    NULLIF((data->>'amount')::numeric, 0),
+                    NULLIF((data->>'Cost')::numeric, 0),
+                    NULLIF((data->>'cost')::numeric, 0)
+                ) as amount,
+                COALESCE(
+                    NULLIF((data->>'Contract Price')::numeric, 0),
+                    NULLIF((data->>'ContractPrice')::numeric, 0),
+                    NULLIF((data->>'contract_price')::numeric, 0),
+                    NULLIF((data->>'Amount')::numeric, 0),
+                    NULLIF((data->>'amount')::numeric, 0),
+                    NULLIF((data->>'Cost')::numeric, 0),
+                    NULLIF((data->>'cost')::numeric, 0)
+                ) as contract_amount,
+                COALESCE(
+                    NULLIF((data->>'Contract Price')::numeric, 0),
+                    NULLIF((data->>'ContractPrice')::numeric, 0),
+                    NULLIF((data->>'contract_price')::numeric, 0)
+                ) as infrawatch_contract_price,
+                COALESCE(data->>'Implementing Agency', data->>'ImplementingAgency', 
+                         data->>'implementing_agency', data->>'Organization', data->>'organization') as organization_name,
+                COALESCE(data->>'Implementing Agency', data->>'ImplementingAgency', 
+                         data->>'implementing_agency') as infrawatch_implementing_agency,
+                COALESCE(data->>'Fund Source', data->>'FundSource', data->>'fund_source') as infrawatch_fund_source,
+                COALESCE(data->>'Effectivity Date', data->>'EffectivityDate', 
+                         data->>'effectivity_date', data->>'Start Date', data->>'StartDate', 
+                         data->>'start_date')::date as start_date,
+                EXTRACT(YEAR FROM COALESCE(
+                    (data->>'Effectivity Date')::date,
+                    (data->>'EffectivityDate')::date,
+                    (data->>'effectivity_date')::date,
+                    (data->>'Start Date')::date,
+                    (data->>'StartDate')::date,
+                    (data->>'start_date')::date
+                ))::integer as project_year,
+                EXTRACT(YEAR FROM COALESCE(
+                    (data->>'Effectivity Date')::date,
+                    (data->>'EffectivityDate')::date,
+                    (data->>'effectivity_date')::date,
+                    (data->>'Start Date')::date,
+                    (data->>'StartDate')::date,
+                    (data->>'start_date')::date
+                ))::integer as contract_year,
+                COALESCE(data->>'Expiry Date', data->>'ExpiryDate', 
+                         data->>'expiry_date', data->>'End Date', data->>'EndDate', 
+                         data->>'end_date')::date as end_date,
+                COALESCE(data->>'Contract Status', data->>'ContractStatus', 
+                         data->>'contract_status', data->>'Status', data->>'status') as contractor_status,
+                COALESCE(data->>'Contract Status', data->>'ContractStatus', 
+                         data->>'contract_status') as infrawatch_contract_status,
+                NULL::text as global_id,
+                NULL::text as project_type,
+                NULL::text as work_type,
+                NULL::numeric as budget_amount,
+                COALESCE(data->>'Region', data->>'region') as region,
+                COALESCE(data->>'Province', data->>'province') as province,
+                COALESCE(data->>'Municipality', data->>'municipality') as municipality,
+                COALESCE(data->>'City', data->>'city') as city,
+                COALESCE(data->>'Barangay', data->>'barangay') as barangay,
+                NULLIF((data->>'Latitude')::double precision, 0) as latitude,
+                NULLIF((data->>'Longitude')::double precision, 0) as longitude,
+                COALESCE(data->>'Legislative District', data->>'LegislativeDistrict', 
+                         data->>'legislative_district', data->>'District', data->>'district') as legislative_district,
+                NULL::date as award_date,
+                NULL::text as contractor_sec_number,
+                'main' as contractor_role,
+                false as is_joint_venture,
+                NULL::text as department,
+                COALESCE(data->>'District Engineering Office', data->>'DistrictEngineeringOffice', 
+                         data->>'district_engineering_office', data->>'DEO', data->>'deo') as district_engineering_office,
+                NULL::text as congressman_name,
+                0::integer as dynasty_member_id,
+                NULL::text as dynasty_relationship,
+                now() as created_at,
+                now() as updated_at,
+                created_at as source_created_at,
+                'Microsite' as source
+            FROM infrawatch_projects_rows
+            WHERE (
+                NULLIF((data->>'Contract Price')::numeric, 0) IS NOT NULL OR
+                NULLIF((data->>'ContractPrice')::numeric, 0) IS NOT NULL OR
+                NULLIF((data->>'contract_price')::numeric, 0) IS NOT NULL OR
+                NULLIF((data->>'Amount')::numeric, 0) IS NOT NULL OR
+                NULLIF((data->>'amount')::numeric, 0) IS NOT NULL OR
+                NULLIF((data->>'Cost')::numeric, 0) IS NOT NULL OR
+                NULLIF((data->>'cost')::numeric, 0) IS NOT NULL
+            )
+        """
         
         rows = await conn.fetch(query)
         
