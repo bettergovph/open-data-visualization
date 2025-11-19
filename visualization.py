@@ -2642,7 +2642,8 @@ async def get_philgeps_merchants(
         import pandas as pd
         from pathlib import Path
         
-        parquet_file = Path('database/philgeps_merchant_info.parquet')
+        # Resolve path relative to script location (more reliable in production)
+        parquet_file = Path(__file__).parent / 'database' / 'philgeps_merchant_info.parquet'
         
         if not parquet_file.exists():
             return JSONResponse({
