@@ -2631,6 +2631,111 @@ async def flood_dime_correlation_all_api():
     except Exception as e:
         return JSONResponse({"success": False, "error": str(e), "contractors": []})
 
+@app.get("/api/philgeps/merchants")
+async def get_philgeps_merchants(
+    page: int = Query(1, ge=1, description="Page number"),
+    page_size: int = Query(20, ge=1, le=100, description="Items per page"),
+    search: str = Query(None, description="Search merchant name")
+):
+    """Get paginated PhilGEPS merchant data from parquet file"""
+    try:
+        import pandas as pd
+        from pathlib import Path
+        
+        parquet_file = Path('database/philgeps_merchant_info.parquet')
+        
+        if not parquet_file.exists():
+            return JSONResponse({
+                "success": False,
+                "error": "Merchant parquet file not found",
+                "data": [],
+                "total": 0,
+                "page": page,
+                "page_size": page_size,
+                "total_pages": 0
+            })
+        
+        # Read parquet (explicitly use pyarrow engine)
+        try:
+            df = pd.read_parquet(parquet_file, engine='pyarrow')
+        except ImportError as e:
+            # Fallback to fastparquet if pyarrow is not available
+            try:
+                df = pd.read_parquet(parquet_file, engine='fastparquet')
+            except ImportError:
+                return JSONResponse({
+                    "success": False,
+                    "error": "Parquet support requires pyarrow or fastparquet. Please install: pip install pyarrow",
+                    "data": [],
+                    "total": 0,
+                    "page": page,
+                    "page_size": page_size,
+                    "total_pages": 0
+                })
+        
+        # Apply search filter if provided
+        if search and search.strip():
+            search_term = search.strip().upper()
+            mask = (
+                df['name'].str.upper().str.contains(search_term, na=False) |
+                df['contractor_name'].str.upper().str.contains(search_term, na=False) |
+                df['normalized_name'].str.upper().str.contains(search_term, na=False)
+            )
+            df = df[mask]
+        
+        total = len(df)
+        total_pages = (total + page_size - 1) // page_size
+        
+        # Paginate
+        start_idx = (page - 1) * page_size
+        end_idx = start_idx + page_size
+        df_page = df.iloc[start_idx:end_idx]
+        
+        # Select 6 columns for display
+        display_columns = [
+            'name',
+            'company_type',
+            'reg_status',
+            'reg_sec',
+            'reg_philgeps_number',
+            'project_count'
+        ]
+        
+        # Convert to dict
+        merchants = []
+        for _, row in df_page.iterrows():
+            merchant = {}
+            for col in display_columns:
+                value = row.get(col)
+                if pd.isna(value):
+                    merchant[col] = None
+                else:
+                    merchant[col] = str(value) if isinstance(value, (int, float)) else value
+            merchants.append(merchant)
+        
+        return JSONResponse({
+            "success": True,
+            "data": merchants,
+            "total": total,
+            "page": page,
+            "page_size": page_size,
+            "total_pages": total_pages
+        })
+        
+    except Exception as e:
+        print(f"❌ Error loading merchant data: {e}")
+        import traceback
+        traceback.print_exc()
+        return JSONResponse({
+            "success": False,
+            "error": str(e),
+            "data": [],
+            "total": 0,
+            "page": page,
+            "page_size": page_size,
+            "total_pages": 0
+        })
+
 @app.get("/api/philgeps/projects/{contractor_name}")
 async def search_contractor_projects(contractor_name: str):
     """Search for contractor projects across Flood, DIME, and PhilGEPS databases"""
