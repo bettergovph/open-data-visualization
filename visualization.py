@@ -2674,6 +2674,56 @@ async def get_philgeps_merchants(
                     "total_pages": 0
                 })
         
+        # Join with contracts parquet to get PCAB license data
+        contracts_parquet = Path(__file__).parent / 'data' / 'parquet' / 'philgeps_contracts.parquet'
+        if contracts_parquet.exists():
+            try:
+                contracts_df = pd.read_parquet(contracts_parquet, engine='pyarrow', columns=['contractor_name', 'pcab_license_number', 'pcab_category'])
+                # Filter out rows where PCAB data is null
+                contracts_df = contracts_df[contracts_df['pcab_license_number'].notna() | contracts_df['pcab_category'].notna()]
+                
+                if len(contracts_df) > 0:
+                    # Get unique PCAB data per contractor (take first non-null value)
+                    pcab_data = contracts_df.groupby('contractor_name').agg({
+                        'pcab_license_number': 'first',
+                        'pcab_category': 'first'
+                    }).reset_index()
+                    
+                    # Normalize contractor names for better matching
+                    def normalize_name(name):
+                        if pd.isna(name):
+                            return None
+                        name_str = str(name).upper().strip()
+                        # Remove common suffixes
+                        import re
+                        name_str = re.sub(r'\s+(INC\.?|INCORPORATED|CORP\.?|CORPORATION|CO\.?|COMPANY|OPC|OPC\.?)$', '', name_str)
+                        name_str = re.sub(r'[^\w\s]', '', name_str)  # Remove special chars
+                        name_str = re.sub(r'\s+', ' ', name_str).strip()  # Normalize whitespace
+                        return name_str
+                    
+                    # Create normalized name columns for matching
+                    df['_normalized_contractor'] = df['contractor_name'].apply(normalize_name)
+                    pcab_data['_normalized_contractor'] = pcab_data['contractor_name'].apply(normalize_name)
+                    
+                    # Merge on normalized names
+                    df = df.merge(
+                        pcab_data[['_normalized_contractor', 'pcab_license_number', 'pcab_category']],
+                        left_on='_normalized_contractor',
+                        right_on='_normalized_contractor',
+                        how='left'
+                    )
+                    
+                    # Drop temporary column
+                    df = df.drop(columns=['_normalized_contractor'], errors='ignore')
+                    
+                    # Debug: Check how many matches we got
+                    matched = df['pcab_license_number'].notna().sum()
+                    print(f"📊 PCAB data: Matched {matched} out of {len(df)} merchants")
+            except Exception as e:
+                print(f"⚠️  Warning: Could not join PCAB data: {e}")
+                import traceback
+                traceback.print_exc()
+        
         # Apply search filter if provided
         if search and search.strip():
             search_term = search.strip().upper()
@@ -2692,13 +2742,16 @@ async def get_philgeps_merchants(
         end_idx = start_idx + page_size
         df_page = df.iloc[start_idx:end_idx]
         
-        # Select 6 columns for display
+        # Select columns for display (now includes PCAB and PhilGEPS expiry)
         display_columns = [
             'name',
             'company_type',
             'reg_status',
             'reg_sec',
             'reg_philgeps_number',
+            'reg_philgeps_expiry',  # Already split in parquet
+            'pcab_license_number',
+            'pcab_category',
             'project_count'
         ]
         
@@ -2710,8 +2763,14 @@ async def get_philgeps_merchants(
                 value = row.get(col)
                 if pd.isna(value):
                     merchant[col] = None
+                elif col == 'pcab_license_number' and isinstance(value, (int, float)):
+                    # Convert float to int then string to remove .0
+                    merchant[col] = str(int(value)) if not pd.isna(value) else None
+                elif isinstance(value, (int, float)):
+                    merchant[col] = str(value)
                 else:
-                    merchant[col] = str(value) if isinstance(value, (int, float)) else value
+                    merchant[col] = value
+            
             merchants.append(merchant)
         
         return JSONResponse({
@@ -2735,6 +2794,32 @@ async def get_philgeps_merchants(
             "page": page,
             "page_size": page_size,
             "total_pages": 0
+        })
+
+@app.get("/api/philgeps/amo")
+async def get_amo_analysis():
+    """Get PCAB AMO (Authorized Managing Officer) analysis - elected politicians serving as AMOs"""
+    try:
+        cache_path = DATA_ROOT / "philgeps_amo_cache.json"
+        
+        if not cache_path.exists():
+            return JSONResponse({
+                "success": False,
+                "error": "AMO cache file not found. Please run scripts/generate_philgeps_amo_cache.py"
+            })
+        
+        with open(cache_path, 'r', encoding='utf-8') as f:
+            cache_data = json.load(f)
+        
+        return JSONResponse(cache_data)
+        
+    except Exception as e:
+        print(f"Error loading AMO cache: {e}")
+        import traceback
+        traceback.print_exc()
+        return JSONResponse({
+            "success": False,
+            "error": str(e)
         })
 
 @app.get("/api/philgeps/projects/{contractor_name}")

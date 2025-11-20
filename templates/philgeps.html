@@ -157,6 +157,7 @@ function toggleMobileMenu() {
                 <a href="#table-tab" class="budget-tab-btn bg-gray-100 text-gray-600 border-gray-300 border px-6 py-3 rounded-t-lg cursor-pointer font-semibold transition-all duration-300 hover:bg-gray-200" data-tab="table">🏪 Merchant</a>
                 <a href="#projects-search-tab" class="budget-tab-btn bg-gray-100 text-gray-600 border-gray-300 border px-6 py-3 rounded-t-lg cursor-pointer font-semibold transition-all duration-300 hover:bg-gray-200" data-tab="projects-search">🔍 Projects Search</a>
                 <a href="#hidden-flood-tab" class="budget-tab-btn bg-gray-100 text-gray-600 border-gray-300 border px-6 py-3 rounded-t-lg cursor-pointer font-semibold transition-all duration-300 hover:bg-gray-200" data-tab="hidden-flood">🔍 Excluded Flood Control</a>
+                <a href="#amo-tab" class="budget-tab-btn bg-gray-100 text-gray-600 border-gray-300 border px-6 py-3 rounded-t-lg cursor-pointer font-semibold transition-all duration-300 hover:bg-gray-200" data-tab="amo">🏛️ AMO</a>
             </div>
             <div class="budget-tab-content">
 
@@ -338,21 +339,58 @@ function toggleMobileMenu() {
                             </div>
                         </div>
 
-                        <div style="overflow-x: hidden;">
-                            <table style="width: 100%; border-collapse: collapse;">
+                        <!-- Legend -->
+                        <div style="display: flex; gap: 24px; margin-bottom: 16px; padding: 12px; background: #f9fafb; border-radius: 6px; flex-wrap: wrap;">
+                            <div>
+                                <div style="font-size: 0.75rem; font-weight: 600; color: #374151; margin-bottom: 6px;">Status:</div>
+                                <div style="display: flex; gap: 12px; flex-wrap: wrap;">
+                                    <div style="display: flex; align-items: center; gap: 6px;">
+                                        <span style="display: inline-block; width: 16px; height: 16px; background: #fef3c7; border: 1px solid #92400e; border-radius: 3px;"></span>
+                                        <span style="font-size: 0.7rem; color: #6b7280;">Platinum</span>
+                                    </div>
+                                    <div style="display: flex; align-items: center; gap: 6px;">
+                                        <span style="display: inline-block; width: 16px; height: 16px; background: #fef3c7; border: 1px solid #92400e; border-radius: 3px;"></span>
+                                        <span style="font-size: 0.7rem; color: #6b7280;">Gold</span>
+                                    </div>
+                                    <div style="display: flex; align-items: center; gap: 6px;">
+                                        <span style="display: inline-block; width: 16px; height: 16px; background: #e5e7eb; border: 1px solid #374151; border-radius: 3px;"></span>
+                                        <span style="font-size: 0.7rem; color: #6b7280;">Silver</span>
+                                    </div>
+                                    <div style="display: flex; align-items: center; gap: 6px;">
+                                        <span style="display: inline-block; width: 16px; height: 16px; background: #fee2e2; border: 1px solid #991b1b; border-radius: 3px;"></span>
+                                        <span style="font-size: 0.7rem; color: #6b7280;">Red</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div>
+                                <div style="font-size: 0.75rem; font-weight: 600; color: #374151; margin-bottom: 6px;">Company Type:</div>
+                                <div style="display: flex; gap: 12px; flex-wrap: wrap; font-size: 0.7rem; color: #6b7280;">
+                                    <span><strong>Corp</strong> = Corporation/Incorporated</span>
+                                    <span><strong>OPC</strong> = One Person Corporation</span>
+                                    <span><strong>Part</strong> = Partnership</span>
+                                    <span><strong>Sole</strong> = Sole Proprietorship</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div style="overflow-x: auto;">
+                            <table style="width: 100%; border-collapse: collapse; table-layout: fixed;">
                                 <thead style="background: #f9fafb;">
                                     <tr>
-                                        <th style="padding: 12px 16px; text-align: left; font-size: 0.75rem; font-weight: 500; color: #6b7280; text-transform: uppercase; letter-spacing: 0.05em; border-bottom: 1px solid #e5e7eb; width: 30%;">Merchant Name</th>
-                                        <th style="padding: 12px 16px; text-align: left; font-size: 0.75rem; font-weight: 500; color: #6b7280; text-transform: uppercase; letter-spacing: 0.05em; border-bottom: 1px solid #e5e7eb; width: 15%;">Company Type</th>
-                                        <th style="padding: 12px 16px; text-align: left; font-size: 0.75rem; font-weight: 500; color: #6b7280; text-transform: uppercase; letter-spacing: 0.05em; border-bottom: 1px solid #e5e7eb; width: 12%;">Status</th>
-                                        <th style="padding: 12px 16px; text-align: left; font-size: 0.75rem; font-weight: 500; color: #6b7280; text-transform: uppercase; letter-spacing: 0.05em; border-bottom: 1px solid #e5e7eb; width: 15%;">SEC Number</th>
-                                        <th style="padding: 12px 16px; text-align: left; font-size: 0.75rem; font-weight: 500; color: #6b7280; text-transform: uppercase; letter-spacing: 0.05em; border-bottom: 1px solid #e5e7eb; width: 18%;">PhilGEPS Number</th>
-                                        <th style="padding: 12px 16px; text-align: right; font-size: 0.75rem; font-weight: 500; color: #6b7280; text-transform: uppercase; letter-spacing: 0.05em; border-bottom: 1px solid #e5e7eb; width: 10%;">Projects</th>
+                                        <th style="padding: 12px 8px; text-align: left; font-size: 0.7rem; font-weight: 500; color: #6b7280; text-transform: uppercase; letter-spacing: 0.05em; border-bottom: 1px solid #e5e7eb; width: 22%;">Merchant Name</th>
+                                        <th style="padding: 12px 8px; text-align: left; font-size: 0.7rem; font-weight: 500; color: #6b7280; text-transform: uppercase; letter-spacing: 0.05em; border-bottom: 1px solid #e5e7eb; width: 6%;">Company Type</th>
+                                        <th style="padding: 12px 8px; text-align: left; font-size: 0.7rem; font-weight: 500; color: #6b7280; text-transform: uppercase; letter-spacing: 0.05em; border-bottom: 1px solid #e5e7eb; width: 24%;">PhilGEPS Number</th>
+                                        <th style="padding: 12px 8px; text-align: left; font-size: 0.7rem; font-weight: 500; color: #6b7280; text-transform: uppercase; letter-spacing: 0.05em; border-bottom: 1px solid #e5e7eb; width: 10%;">PhilGEPS Expiry</th>
+                                        <th style="padding: 12px 8px; text-align: center; font-size: 0.7rem; font-weight: 500; color: #6b7280; text-transform: uppercase; letter-spacing: 0.05em; border-bottom: 1px solid #e5e7eb; width: 5%;">Status</th>
+                                        <th style="padding: 12px 8px; text-align: left; font-size: 0.7rem; font-weight: 500; color: #6b7280; text-transform: uppercase; letter-spacing: 0.05em; border-bottom: 1px solid #e5e7eb; width: 12%;">SEC Number</th>
+                                        <th style="padding: 12px 8px; text-align: left; font-size: 0.7rem; font-weight: 500; color: #6b7280; text-transform: uppercase; letter-spacing: 0.05em; border-bottom: 1px solid #e5e7eb; width: 10%;">PCAB License</th>
+                                        <th style="padding: 12px 8px; text-align: left; font-size: 0.7rem; font-weight: 500; color: #6b7280; text-transform: uppercase; letter-spacing: 0.05em; border-bottom: 1px solid #e5e7eb; width: 50px;">PCAB Category</th>
+                                        <th style="padding: 12px 8px; text-align: right; font-size: 0.7rem; font-weight: 500; color: #6b7280; text-transform: uppercase; letter-spacing: 0.05em; border-bottom: 1px solid #e5e7eb; width: 50px;">Projects</th>
                                     </tr>
                                 </thead>
                                 <tbody id="merchants-table" style="background: white;">
                                     <tr>
-                                        <td colspan="6" style="padding: 24px; text-align: center; color: #6b7280;">Loading merchants...</td>
+                                        <td colspan="10" style="padding: 24px; text-align: center; color: #6b7280;">Loading merchants...</td>
                                     </tr>
                                 </tbody>
                             </table>
@@ -540,6 +578,113 @@ function toggleMobileMenu() {
                     </div>
                 </div>
 
+                <!-- AMO TAB -->
+                <div id="amo-tab" class="budget-tab-panel">
+                    <div style="background: white; padding: 30px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
+                        <h2 style="color: #0038A8; margin: 0 0 20px 0;">🏛️ PCAB AMO Analysis</h2>
+                        <p style="color: #666; margin: 0 0 30px 0;">
+                            Analysis of PCAB Authorized Managing Officers (AMOs) who are elected politicians, revealing potential conflicts of interest.
+                        </p>
+
+                        <!-- Dashboard Statistics -->
+                        <div id="amo-dashboard" style="display: none;">
+                            <div class="statistics-grid grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 mb-8">
+                                <div class="stat-card bg-white p-5 rounded-lg shadow-lg text-center border-2 border-blue-200">
+                                    <h3 class="text-gray-600 m-0 mb-2 text-sm font-medium">Total Unique AMOs</h3>
+                                    <p id="amo-total-unique" class="text-4xl font-bold text-blue-600 m-0">-</p>
+                                    <p class="text-xs text-gray-500 mt-1">In PhilGEPS</p>
+                                </div>
+                                <div class="stat-card bg-white p-5 rounded-lg shadow-lg text-center border-2 border-purple-200">
+                                    <h3 class="text-gray-600 m-0 mb-2 text-sm font-medium">AMOs Matching Politicians</h3>
+                                    <p id="amo-matching" class="text-4xl font-bold text-purple-600 m-0">-</p>
+                                    <p class="text-xs text-gray-500 mt-1">Found in database</p>
+                                </div>
+                                <div class="stat-card bg-red-50 p-5 rounded-lg shadow-lg text-center border-2 border-red-300">
+                                    <h3 class="text-red-700 m-0 mb-2 text-sm font-medium">⚠️ Elected Officials as AMOs</h3>
+                                    <p id="amo-elected" class="text-4xl font-bold text-red-600 m-0">-</p>
+                                    <p class="text-xs text-red-700 mt-1"><span id="amo-match-percentage">-</span>% of matches</p>
+                                </div>
+                                <div class="stat-card bg-white p-5 rounded-lg shadow-lg text-center border-2 border-orange-200">
+                                    <h3 class="text-gray-600 m-0 mb-2 text-sm font-medium">Total Contracts</h3>
+                                    <p id="amo-contracts" class="text-4xl font-bold text-orange-600 m-0">-</p>
+                                    <p class="text-xs text-gray-500 mt-1">With elected AMOs</p>
+                                </div>
+                                <div class="stat-card bg-yellow-50 p-5 rounded-lg shadow-lg text-center border-2 border-yellow-300">
+                                    <h3 class="text-yellow-700 m-0 mb-2 text-sm font-medium">💰 Total Contract Value</h3>
+                                    <p id="amo-total-value" class="text-4xl font-bold text-yellow-700 m-0">-</p>
+                                    <p class="text-xs text-yellow-700 mt-1">Involved with elected AMOs</p>
+                                </div>
+                            </div>
+
+                            <!-- Breakdown by Position -->
+                            <div style="background: #f9fafb; padding: 20px; border-radius: 8px; margin-bottom: 30px;">
+                                <h3 style="color: #0038A8; margin: 0 0 15px 0;">Breakdown by Position Type</h3>
+                                <div id="amo-breakdown" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+                                    <!-- Will be populated by JavaScript -->
+                                </div>
+                            </div>
+
+                            <!-- Direct Elected AMOs - Horizontal Bar Chart -->
+                            <div id="amoDirectChartContainer" class="chart-container relative" style="background: #f9fafb; padding: 20px; border-radius: 8px; margin-bottom: 20px;">
+                                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; position: relative;">
+                                    <h3 style="color: #0038A8; margin: 0;">Direct: AMOs Who Are Elected Officials</h3>
+                                    <div style="display: flex; gap: 10px; align-items: center;">
+                                        <button 
+                                            id="copyAmoDirectBtn" 
+                                            style="background: #3b82f6; color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-size: 0.8em; transition-colors duration-200 hover:bg-blue-600"
+                                            onclick="copyChartToClipboard('amoDirectChartContainer', 'copyAmoDirectBtn')"
+                                            title="Copy chart image to clipboard"
+                                        >
+                                            📋 Copy
+                                        </button>
+                                        <span id="amo-direct-page-info" style="color: #666; font-size: 0.9em;">Page 1 of 1</span>
+                                        <button id="amo-direct-prev-btn" onclick="changeAmoPage('direct', -1)" 
+                                                style="background: #6c757d; color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-size: 0.8em;"
+                                                disabled>← Previous</button>
+                                        <button id="amo-direct-next-btn" onclick="changeAmoPage('direct', 1)" 
+                                                style="background: #6c757d; color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-size: 0.8em;"
+                                                disabled>Next →</button>
+                                    </div>
+                                </div>
+                                <canvas id="amo-direct-chart" width="800" height="600"></canvas>
+                            </div>
+
+                            <!-- Indirect (Related) AMOs - Horizontal Bar Chart -->
+                            <div id="amoIndirectChartContainer" class="chart-container relative" style="background: #f9fafb; padding: 20px; border-radius: 8px; margin-bottom: 20px;">
+                                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; position: relative;">
+                                    <h3 style="color: #0038A8; margin: 0;">Indirect: AMOs Related to Elected Officials</h3>
+                                    <div style="display: flex; gap: 10px; align-items: center;">
+                                        <button 
+                                            id="copyAmoIndirectBtn" 
+                                            style="background: #3b82f6; color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-size: 0.8em; transition-colors duration-200 hover:bg-blue-600"
+                                            onclick="copyChartToClipboard('amoIndirectChartContainer', 'copyAmoIndirectBtn')"
+                                            title="Copy chart image to clipboard"
+                                        >
+                                            📋 Copy
+                                        </button>
+                                        <span id="amo-indirect-page-info" style="color: #666; font-size: 0.9em;">Page 1 of 1</span>
+                                        <button id="amo-indirect-prev-btn" onclick="changeAmoPage('indirect', -1)" 
+                                                style="background: #6c757d; color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-size: 0.8em;"
+                                                disabled>← Previous</button>
+                                        <button id="amo-indirect-next-btn" onclick="changeAmoPage('indirect', 1)" 
+                                                style="background: #6c757d; color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-size: 0.8em;"
+                                                disabled>Next →</button>
+                                    </div>
+                                </div>
+                                <canvas id="amo-indirect-chart" width="800" height="600"></canvas>
+                            </div>
+                        </div>
+
+                        <div id="amo-loading" style="text-align: center; padding: 40px;">
+                            <p style="color: #666;">Loading AMO analysis data...</p>
+                        </div>
+
+                        <div id="amo-error" style="display: none; background: #fee; border: 2px solid #fcc; padding: 20px; border-radius: 8px; color: #c33;">
+                            <strong>Error:</strong> <span id="amo-error-message"></span>
+                        </div>
+                    </div>
+                </div>
+
             </div>
         </div>
 
@@ -589,6 +734,8 @@ function switchTab(tabName) {
         loadHiddenFloodData();
     } else if (tabName === 'table') {
         loadMerchants();
+    } else if (tabName === 'amo') {
+        loadAmoData();
     }
 }
 
@@ -614,7 +761,8 @@ document.addEventListener('DOMContentLoaded', function() {
                 'table': 'table',
                 'visual': 'visual',
                 'projects-search': 'projects-search',
-                'hidden-flood': 'hidden-flood'
+                'hidden-flood': 'hidden-flood',
+                'amo': 'amo'
             };
             const tabName = hashToTab[hash];
             if (tabName) {
@@ -2411,7 +2559,7 @@ async function copyChartToClipboard(containerId, buttonId) {
 // Merchant data functions
 async function loadMerchants() {
     const tbody = document.getElementById('merchants-table');
-    tbody.innerHTML = '<tr><td colspan="6" style="padding: 24px; text-align: center; color: #6b7280;">Loading merchants...</td></tr>';
+    tbody.innerHTML = '<tr><td colspan="10" style="padding: 24px; text-align: center; color: #6b7280;">Loading merchants...</td></tr>';
     
     try {
         const searchParam = merchantSearchTerm ? `&search=${encodeURIComponent(merchantSearchTerm)}` : '';
@@ -2419,7 +2567,7 @@ async function loadMerchants() {
         const data = await response.json();
         
         if (!data.success) {
-            tbody.innerHTML = `<tr><td colspan="6" style="padding: 24px; text-align: center; color: #dc2626;">Error: ${data.error || 'Failed to load merchants'}</td></tr>`;
+            tbody.innerHTML = `<tr><td colspan="10" style="padding: 24px; text-align: center; color: #dc2626;">Error: ${data.error || 'Failed to load merchants'}</td></tr>`;
             return;
         }
         
@@ -2436,7 +2584,7 @@ async function loadMerchants() {
         // Render table
         tbody.innerHTML = '';
         if (merchants.length === 0) {
-            tbody.innerHTML = '<tr><td colspan="6" style="padding: 24px; text-align: center; color: #6b7280;">No merchants found</td></tr>';
+            tbody.innerHTML = '<tr><td colspan="10" style="padding: 24px; text-align: center; color: #6b7280;">No merchants found</td></tr>';
             return;
         }
         
@@ -2449,34 +2597,70 @@ async function loadMerchants() {
             const status = merchant.reg_status || '-';
             const sec = merchant.reg_sec || '-';
             const philgeps = merchant.reg_philgeps_number || '-';
+            const philgepsExpiry = merchant.reg_philgeps_expiry || '-';
+            const pcabLicense = merchant.pcab_license_number || '-';
+            const pcabCategory = merchant.pcab_category || '-';
             const projects = merchant.project_count || 0;
             
-            // Status badge
-            let statusBadge = status;
-            if (status === 'Platinum') {
-                statusBadge = `<span style="padding: 4px 8px; background: #fef3c7; color: #92400e; font-size: 0.75rem; border-radius: 4px; font-weight: 600;">Platinum</span>`;
+            // Company Type abbreviation
+            let companyTypeAbbr = companyType;
+            if (companyType && companyType !== '-') {
+                const typeMap = {
+                    'Corporation': 'Corp',
+                    'Incorporated': 'Corp',  // Same as Corporation
+                    'One Person Corporation': 'OPC',
+                    'Partnership': 'Part',
+                    'Sole Proprietorship': 'Sole'
+                };
+                companyTypeAbbr = typeMap[companyType] || companyType.substring(0, 4);
+            }
+            
+            // Status box (just colored box, no text)
+            let statusBox = '';
+            if (status === 'Platinum' || status === 'Gold') {
+                statusBox = `<span style="display: inline-block; width: 16px; height: 16px; background: #fef3c7; border: 1px solid #92400e; border-radius: 3px;" title="${status}"></span>`;
             } else if (status === 'Red') {
-                statusBadge = `<span style="padding: 4px 8px; background: #fee2e2; color: #991b1b; font-size: 0.75rem; border-radius: 4px; font-weight: 600;">Red</span>`;
-            } else if (status === 'Gold') {
-                statusBadge = `<span style="padding: 4px 8px; background: #fef3c7; color: #92400e; font-size: 0.75rem; border-radius: 4px; font-weight: 600;">Gold</span>`;
+                statusBox = `<span style="display: inline-block; width: 16px; height: 16px; background: #fee2e2; border: 1px solid #991b1b; border-radius: 3px;" title="${status}"></span>`;
             } else if (status === 'Silver') {
-                statusBadge = `<span style="padding: 4px 8px; background: #e5e7eb; color: #374151; font-size: 0.75rem; border-radius: 4px; font-weight: 600;">Silver</span>`;
+                statusBox = `<span style="display: inline-block; width: 16px; height: 16px; background: #e5e7eb; border: 1px solid #374151; border-radius: 3px;" title="${status}"></span>`;
+            } else {
+                statusBox = `<span style="display: inline-block; width: 16px; height: 16px; background: #f3f4f6; border: 1px solid #9ca3af; border-radius: 3px;" title="${status || '-'}"></span>`;
+            }
+            
+            // PCAB Category badge
+            let pcabCategoryBadge = pcabCategory;
+            if (pcabCategory && pcabCategory !== '-') {
+                const categoryColors = {
+                    'AAAA': '#dc2626',
+                    'AAA': '#ea580c',
+                    'AA': '#f59e0b',
+                    'A': '#10b981',
+                    'B': '#3b82f6',
+                    'C': '#6366f1',
+                    'D': '#8b5cf6',
+                    'E': '#a855f7'
+                };
+                const color = categoryColors[pcabCategory] || '#6b7280';
+                pcabCategoryBadge = `<span style="padding: 4px 8px; background: ${color}20; color: ${color}; font-size: 0.75rem; border-radius: 4px; font-weight: 600; font-family: monospace;">${escapeHtml(pcabCategory)}</span>`;
             }
             
             row.innerHTML = `
-                <td style="padding: 12px 16px; font-size: 0.875rem; color: #111827;">${escapeHtml(name)}</td>
-                <td style="padding: 12px 16px; font-size: 0.875rem; color: #6b7280;">${escapeHtml(companyType)}</td>
-                <td style="padding: 12px 16px; font-size: 0.875rem;">${statusBadge}</td>
-                <td style="padding: 12px 16px; font-size: 0.875rem; color: #6b7280; font-family: monospace;">${escapeHtml(sec)}</td>
-                <td style="padding: 12px 16px; font-size: 0.875rem; color: #6b7280; font-family: monospace;">${escapeHtml(philgeps)}</td>
-                <td style="padding: 12px 16px; font-size: 0.875rem; color: #111827; text-align: right; font-weight: 600;">${projects.toLocaleString()}</td>
+                <td style="padding: 12px 8px; font-size: 0.8rem; color: #111827; word-wrap: break-word; white-space: normal;">${escapeHtml(name)}</td>
+                <td style="padding: 12px 8px; font-size: 0.8rem; color: #6b7280; text-align: center; font-weight: 500;" title="${escapeHtml(companyType)}">${escapeHtml(companyTypeAbbr)}</td>
+                <td style="padding: 12px 8px; font-size: 0.8rem; color: #6b7280; font-family: monospace; word-wrap: break-word; white-space: normal;">${escapeHtml(philgeps)}</td>
+                <td style="padding: 12px 8px; font-size: 0.8rem; color: #6b7280; font-family: monospace; word-wrap: break-word; white-space: normal;">${escapeHtml(philgepsExpiry)}</td>
+                <td style="padding: 12px 8px; font-size: 0.8rem; text-align: center;">${statusBox}</td>
+                <td style="padding: 12px 8px; font-size: 0.8rem; color: #6b7280; font-family: monospace; word-wrap: break-word; white-space: normal;">${escapeHtml(sec)}</td>
+                <td style="padding: 12px 8px; font-size: 0.8rem; color: #6b7280; font-family: monospace; word-wrap: break-word; white-space: normal; overflow: visible;">${escapeHtml(pcabLicense)}</td>
+                <td style="padding: 12px 8px; font-size: 0.8rem;">${pcabCategoryBadge}</td>
+                <td style="padding: 12px 8px; font-size: 0.8rem; color: #111827; text-align: right; font-weight: 600; width: 50px; overflow: hidden; text-overflow: ellipsis;">${projects.toLocaleString()}</td>
             `;
             tbody.appendChild(row);
         });
         
     } catch (error) {
         console.error('Error loading merchants:', error);
-        tbody.innerHTML = `<tr><td colspan="6" style="padding: 24px; text-align: center; color: #dc2626;">Error loading merchants: ${error.message}</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="10" style="padding: 24px; text-align: center; color: #dc2626;">Error loading merchants: ${error.message}</td></tr>`;
     }
 }
 
@@ -2500,6 +2684,311 @@ function escapeHtml(text) {
     const div = document.createElement('div');
     div.textContent = text;
     return div.innerHTML;
+}
+
+// AMO Analysis
+let amoData = null;
+let currentAmoDirectPage = 0;
+let currentAmoIndirectPage = 0;
+const amoPageSize = 10;
+let amoDirectChart = null;
+let amoIndirectChart = null;
+
+async function loadAmoData() {
+    const loadingEl = document.getElementById('amo-loading');
+    const errorEl = document.getElementById('amo-error');
+    const dashboardEl = document.getElementById('amo-dashboard');
+    
+    loadingEl.style.display = 'block';
+    errorEl.style.display = 'none';
+    dashboardEl.style.display = 'none';
+    
+    try {
+        const response = await fetch('/api/philgeps/amo');
+        const data = await response.json();
+        
+        if (!data.success) {
+            throw new Error(data.error || 'Failed to load AMO data');
+        }
+        
+        amoData = data;
+        renderAmoDashboard(data);
+        
+        loadingEl.style.display = 'none';
+        dashboardEl.style.display = 'block';
+    } catch (error) {
+        console.error('Error loading AMO data:', error);
+        loadingEl.style.display = 'none';
+        errorEl.style.display = 'block';
+        document.getElementById('amo-error-message').textContent = error.message;
+    }
+}
+
+function renderAmoDashboard(data) {
+    const summary = data.summary || {};
+    const breakdown = data.breakdown || {};
+    
+    // Update summary statistics
+    document.getElementById('amo-total-unique').textContent = formatNumber(summary.total_unique_amos || 0);
+    document.getElementById('amo-matching').textContent = formatNumber(summary.amos_matching_politicians || 0);
+    document.getElementById('amo-elected').textContent = formatNumber(summary.amos_with_elected_positions || 0);
+    document.getElementById('amo-match-percentage').textContent = (summary.match_percentage || 0).toFixed(1);
+    document.getElementById('amo-contracts').textContent = formatNumber(summary.total_contracts_with_elected || 0);
+    document.getElementById('amo-total-value').textContent = formatCurrency(summary.total_contract_value || 0);
+    
+    // Render breakdown
+    const breakdownEl = document.getElementById('amo-breakdown');
+    breakdownEl.innerHTML = '';
+    
+    const positionOrder = ['Mayor', 'Councilor', 'Provincial Board Member', 'Congressman/Representative', 'Governor', 'Senator', 'Other'];
+    for (const pos of positionOrder) {
+        if (breakdown[pos]) {
+            const div = document.createElement('div');
+            div.style.cssText = 'background: white; padding: 15px; border-radius: 8px; text-align: center; border: 2px solid #e5e7eb;';
+            div.innerHTML = `
+                <div style="font-size: 0.875rem; color: #6b7280; margin-bottom: 8px;">${escapeHtml(pos)}</div>
+                <div style="font-size: 2rem; font-weight: bold; color: #0038A8;">${breakdown[pos]}</div>
+            `;
+            breakdownEl.appendChild(div);
+        }
+    }
+    
+        // Render bar charts
+        currentAmoDirectPage = 0;
+        currentAmoIndirectPage = 0;
+        renderAmoDirectChart();
+        renderAmoIndirectChart();
+}
+
+function renderAmoDirectChart() {
+    if (!amoData || !amoData.top_direct) return;
+    
+    const topDirect = amoData.top_direct;
+    const totalPages = Math.ceil(topDirect.length / amoPageSize);
+    const startIdx = currentAmoDirectPage * amoPageSize;
+    const endIdx = Math.min(startIdx + amoPageSize, topDirect.length);
+    const pageData = topDirect.slice(startIdx, endIdx);
+    
+    const ctx = document.getElementById('amo-direct-chart');
+    if (!ctx) return;
+    
+    // Destroy existing chart
+    if (amoDirectChart && typeof amoDirectChart.destroy === 'function') {
+        amoDirectChart.destroy();
+    }
+    
+    // Create labels with just AMO name (tooltip shows all data)
+    const labels = pageData.map(item => {
+        return item.pcab_amo.length > 50 ? item.pcab_amo.substring(0, 50) + '...' : item.pcab_amo;
+    });
+    
+    amoDirectChart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: labels,
+            datasets: [{
+                label: 'Contract Value (₱)',
+                data: pageData.map(item => item.total_amount),
+                backgroundColor: '#0038A8',
+                borderColor: '#CE1126',
+                borderWidth: 1
+            }]
+        },
+        options: {
+            indexAxis: 'y',
+            responsive: true,
+            maintainAspectRatio: true,
+            aspectRatio: 1.5,
+            plugins: {
+                legend: {
+                    display: false
+                },
+                tooltip: {
+                    callbacks: {
+                        title: function(context) {
+                            const item = pageData[context[0].dataIndex];
+                            return item.pcab_amo;
+                        },
+                        label: function(context) {
+                            const item = pageData[context.dataIndex];
+                            return [
+                                `Name: ${item.full_name}`,
+                                `Position: ${item.position || 'N/A'}`,
+                                `Location: ${[item.province, item.municipality_city].filter(Boolean).join(', ') || 'N/A'}`,
+                                `Year: ${item.year || 'N/A'}`,
+                                `Contracts: ${item.contract_count}`,
+                                `Contractors: ${(item.contractors || []).join(', ') || 'N/A'}`,
+                                `Total: ${formatCurrency(item.total_amount)}`
+                            ];
+                        }
+                    }
+                }
+            },
+            scales: {
+                x: {
+                    beginAtZero: true,
+                    ticks: {
+                        callback: function(value) {
+                            return formatCurrency(value);
+                        }
+                    }
+                },
+                y: {
+                    display: true,
+                    ticks: {
+                        maxTicksLimit: 50,
+                        font: {
+                            size: 9
+                        }
+                    }
+                }
+            },
+            animation: {
+                duration: 0
+            }
+        }
+    });
+    
+    // Update pagination
+    document.getElementById('amo-direct-page-info').textContent = `Page ${currentAmoDirectPage + 1} of ${totalPages}`;
+    document.getElementById('amo-direct-prev-btn').disabled = currentAmoDirectPage <= 0;
+    document.getElementById('amo-direct-next-btn').disabled = currentAmoDirectPage >= totalPages - 1;
+}
+
+function renderAmoIndirectChart() {
+    if (!amoData || !amoData.top_indirect) return;
+    
+    const topIndirect = amoData.top_indirect;
+    const totalPages = Math.ceil(topIndirect.length / amoPageSize);
+    const startIdx = currentAmoIndirectPage * amoPageSize;
+    const endIdx = Math.min(startIdx + amoPageSize, topIndirect.length);
+    const pageData = topIndirect.slice(startIdx, endIdx);
+    
+    const ctx = document.getElementById('amo-indirect-chart');
+    if (!ctx) return;
+    
+    // Destroy existing chart
+    if (amoIndirectChart && typeof amoIndirectChart.destroy === 'function') {
+        amoIndirectChart.destroy();
+    }
+    
+    // Create labels with just AMO name (tooltip shows all data)
+    const labels = pageData.map(item => {
+        return item.pcab_amo.length > 50 ? item.pcab_amo.substring(0, 50) + '...' : item.pcab_amo;
+    });
+    
+    amoIndirectChart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: labels,
+            datasets: [{
+                label: 'Contract Value (₱)',
+                data: pageData.map(item => item.total_amount),
+                backgroundColor: '#7b1fa2',
+                borderColor: '#512da8',
+                borderWidth: 1
+            }]
+        },
+        options: {
+            indexAxis: 'y',
+            responsive: true,
+            maintainAspectRatio: true,
+            aspectRatio: 1.5,
+            plugins: {
+                legend: {
+                    display: false
+                },
+                tooltip: {
+                    callbacks: {
+                        title: function(context) {
+                            const item = pageData[context[0].dataIndex];
+                            return item.pcab_amo;
+                        },
+                        label: function(context) {
+                            const item = pageData[context.dataIndex];
+                            return [
+                                `Name: ${item.full_name}`,
+                                `Relationship: ${item.relationship_type} of ${item.related_person_name}`,
+                                `Related Person Position: ${item.related_person_position || 'N/A'}`,
+                                `Related Person Location: ${[item.related_person_province, item.related_person_municipality_city].filter(Boolean).join(', ') || 'N/A'}`,
+                                `Contracts: ${item.contract_count}`,
+                                `Contractors: ${(item.contractors || []).join(', ') || 'N/A'}`,
+                                `Total: ${formatCurrency(item.total_amount)}`
+                            ];
+                        }
+                    }
+                }
+            },
+            scales: {
+                x: {
+                    beginAtZero: true,
+                    ticks: {
+                        callback: function(value) {
+                            return formatCurrency(value);
+                        }
+                    }
+                },
+                y: {
+                    display: true,
+                    ticks: {
+                        maxTicksLimit: 50,
+                        font: {
+                            size: 9
+                        }
+                    }
+                }
+            },
+            animation: {
+                duration: 0
+            }
+        }
+    });
+    
+    // Update pagination
+    document.getElementById('amo-indirect-page-info').textContent = `Page ${currentAmoIndirectPage + 1} of ${totalPages}`;
+    document.getElementById('amo-indirect-prev-btn').disabled = currentAmoIndirectPage <= 0;
+    document.getElementById('amo-indirect-next-btn').disabled = currentAmoIndirectPage >= totalPages - 1;
+}
+
+function changeAmoPage(type, delta) {
+    if (!amoData) return;
+    
+    let currentPage, data, totalPages, newPage;
+    
+    if (type === 'direct') {
+        if (!amoData.top_direct) return;
+        data = amoData.top_direct;
+        currentPage = currentAmoDirectPage;
+        totalPages = Math.ceil(data.length / amoPageSize);
+        newPage = currentPage + delta;
+        
+        if (newPage >= 0 && newPage < totalPages) {
+            currentAmoDirectPage = newPage;
+            renderAmoDirectChart();
+        }
+    } else if (type === 'indirect') {
+        if (!amoData.top_indirect) return;
+        data = amoData.top_indirect;
+        currentPage = currentAmoIndirectPage;
+        totalPages = Math.ceil(data.length / amoPageSize);
+        newPage = currentPage + delta;
+        
+        if (newPage >= 0 && newPage < totalPages) {
+            currentAmoIndirectPage = newPage;
+            renderAmoIndirectChart();
+        }
+    }
+}
+
+function formatNumber(num) {
+    return new Intl.NumberFormat('en-US').format(num);
+}
+
+function formatCurrency(amount) {
+    return '₱' + new Intl.NumberFormat('en-US', {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2
+    }).format(amount);
 }
 </script>
 
