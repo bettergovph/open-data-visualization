@@ -168,6 +168,9 @@
         <div class="hidden md:flex space-x-6">
             <a href="/nep" class="text-black hover:text-gray-600 font-medium transition">NEP</a>
             <a href="/budget" class="text-black hover:text-gray-600 font-medium transition">Budget</a>
+            <a href="/flood" class="text-black hover:text-gray-600 font-medium transition">Flood</a>
+            <a href="/philgeps" class="text-black hover:text-gray-600 font-medium transition">PhilGEPS</a>
+            <a href="/dime" class="text-black hover:text-gray-600 font-medium transition">DIME</a>
             <a href="/map" class="text-black hover:text-gray-600 font-medium transition">Map</a>
             <a href="/dynasty" class="text-black hover:text-gray-600 font-medium transition">Dynasties</a>
             <a href="/integrated" class="text-black hover:text-gray-600 font-medium transition border-b-2 border-black">Integrated</a>
@@ -185,6 +188,9 @@
     <div id="mobileMenu" class="hidden mt-4 px-4 space-y-2">
         <a href="/nep" class="block text-black hover:text-gray-600 font-medium py-2">NEP</a>
         <a href="/budget" class="block text-black hover:text-gray-600 font-medium py-2">Budget</a>
+        <a href="/flood" class="block text-black hover:text-gray-600 font-medium py-2">Flood</a>
+        <a href="/philgeps" class="block text-black hover:text-gray-600 font-medium py-2">PhilGEPS</a>
+        <a href="/dime" class="block text-black hover:text-gray-600 font-medium py-2">DIME</a>
         <a href="/map" class="block text-black hover:text-gray-600 font-medium py-2">Map</a>
         <a href="/dynasty" class="block text-black hover:text-gray-600 font-medium py-2">Dynasties</a>
         <a href="/integrated" class="block text-black hover:text-gray-600 font-medium py-2 border-b-2 border-black">Integrated</a>
@@ -275,7 +281,7 @@ function toggleMobileMenu() {
                                     <div style="display: flex; flex-direction: column; gap: 12px;">
                                         <label style="font-weight: 700; color: #333; font-size: 16px; text-transform: uppercase; letter-spacing: 0.5px; text-align: left;">Type to Search Congressman</label>
                                         <div style="display: flex; gap: 12px; align-items: center;">
-                                            <input type="text" id="congressman-filter" list="congressman-list" placeholder="Start typing a congressman..." value="" style="padding: 12px 16px; border: 2px solid #333; border-radius: 6px; font-size: 16px; font-weight: 600; min-width: 320px; background: white; color: #333; box-shadow: 0 2px 8px rgba(0,0,0,0.1); transition: all 0.3s ease;" onmouseover="this.style.borderColor='#667eea'; this.style.boxShadow='0 4px 12px rgba(102, 126, 234, 0.3)';" onmouseout="this.style.borderColor='#333'; this.style.boxShadow='0 2px 8px rgba(0,0,0,0.1)';" onchange="handleCongressmanFilterChange()" oninput="handleCongressmanFilterChange()" onblur="handleCongressmanFilterBlur()">
+                                        <input type="text" id="congressman-filter" list="congressman-list" placeholder="Start typing a congressman..." value="" style="padding: 12px 16px; border: 2px solid #333; border-radius: 6px; font-size: 16px; font-weight: 600; min-width: 320px; background: white; color: #333; box-shadow: 0 2px 8px rgba(0,0,0,0.1); transition: all 0.3s ease;" onmouseover="this.style.borderColor='#667eea'; this.style.boxShadow='0 4px 12px rgba(102, 126, 234, 0.3)';" onmouseout="this.style.borderColor='#333'; this.style.boxShadow='0 2px 8px rgba(0,0,0,0.1)';" onchange="handleCongressmanFilterChange()" oninput="handleCongressmanFilterChange()" onblur="handleCongressmanFilterBlur()">
                                             <button id="view-congressman-btn" style="display: none; padding: 12px 20px; background: #667eea; color: white; border: 2px solid #667eea; border-radius: 6px; font-size: 14px; font-weight: 600; cursor: pointer; transition: all 0.3s ease; box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);" onmouseover="this.style.background='#5a67d8'; this.style.transform='translateY(-2px)';" onmouseout="this.style.background='#667eea'; this.style.transform='translateY(0)';">👁️ View Visual</button>
                                         </div>
                                     </div>
@@ -938,7 +944,7 @@ function toggleMobileMenu() {
                             <button id="copy-integration-btn" style="padding: 10px 20px; background: #007bff; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 14px; font-weight: 600; transition: background 0.3s;">
                                 📋 Copy Chart to Clipboard
                             </button>
-                        </div>
+                </div>
                         
                         <div style="margin: 30px 0; padding: 20px; background: #f8f9fa; border-radius: 8px;">
                             <div id="integration-error" style="display: none; padding: 15px; background: #fee; border-left: 4px solid #f00; border-radius: 4px; color: #c00;">
@@ -1023,26 +1029,26 @@ function toggleMobileMenu() {
 <script>
 // Tab switching function
 function switchTab(tabName) {
-    // Update active tab button
-    document.querySelectorAll('.budget-tab-btn').forEach(b => b.classList.remove('active'));
+        // Update active tab button
+        document.querySelectorAll('.budget-tab-btn').forEach(b => b.classList.remove('active'));
     const targetBtn = document.querySelector(`.budget-tab-btn[data-tab="${tabName}"]`);
     if (targetBtn) {
         targetBtn.classList.add('active');
     }
-
-    // Update active tab panel
-    document.querySelectorAll('.budget-tab-panel').forEach(p => p.classList.remove('active'));
-    document.getElementById(`tab-${tabName}`).classList.add('active');
-
-    // Load data for specific tabs
-    if (tabName === 'table') {
-        loadAllProjects();
-    } else if (tabName === 'visual') {
-        loadVisualData();
-    } else if (tabName === 'province') {
-        loadProvinceProjects();
-    } else if (tabName === 'province-visual') {
-        loadProvinceVisualData();
+        
+        // Update active tab panel
+        document.querySelectorAll('.budget-tab-panel').forEach(p => p.classList.remove('active'));
+        document.getElementById(`tab-${tabName}`).classList.add('active');
+        
+        // Load data for specific tabs
+        if (tabName === 'table') {
+            loadAllProjects();
+        } else if (tabName === 'visual') {
+            loadVisualData();
+        } else if (tabName === 'province') {
+            loadProvinceProjects();
+        } else if (tabName === 'province-visual') {
+            loadProvinceVisualData();
     } else if (tabName === 'integration') {
         loadIntegrationData();
     } else if (tabName === 'projects') {
@@ -1180,7 +1186,7 @@ function projectIsFloodControl(project) {
     if (!project || project.placeholder) {
         return false;
     }
-    if (project.flood_control === true) {
+    if (project.is_flood_related === true || project.flood_control === true) {
         return true;
     }
     const sources = Array.isArray(project.sources_list)
@@ -1592,7 +1598,7 @@ async function loadConfigCongressmen() {
             slug = slug.replace(/-{2,}/g, "-");
             return slug.replace(/^-+|-+$/g, "");
         };
-
+        
         const mergeEntries = (entries) => {
             if (!Array.isArray(entries)) return;
             entries.forEach(item => {
@@ -1859,13 +1865,13 @@ function updateCongressmanDatalist() {
         const mergedNames = new Set(initialCongressmanNames.filter(name => name && name !== 'All Congressmen'));
         filteredEntries.forEach(item => {
             if (item && item.display_name) {
-                    mergedNames.add(item.display_name);
-                }
-            });
+                mergedNames.add(item.display_name);
+            }
+        });
         names = Array.from(mergedNames);
-        } else {
+    } else {
         names = filteredEntries.map(item => item.display_name).filter(Boolean);
-        }
+    }
     
     names = dedupeCongressmanNames(names).sort((a, b) => a.localeCompare(b));
     
@@ -1892,10 +1898,37 @@ async function fetchCongressmanProjects(congressmanName) {
     try {
         const response = await fetch(`/api/dynasty-projects/congressman?name=${encodeURIComponent(congressmanName)}&limit=25000`);
         if (!response.ok) {
+            // Handle 404 gracefully - congressman cache doesn't exist yet
+            if (response.status === 404) {
+                console.warn(`Congressman cache not found for: ${congressmanName}`);
+                return {
+                    success: true,
+                    congressman: { name: congressmanName },
+                    projects: [],
+                    total: 0,
+                    total_pages: 0,
+                    page: 1,
+                    limit: 25000
+                };
+            }
             throw new Error(`Failed to fetch congressman projects: ${response.status}`);
         }
         return await response.json();
     } catch (error) {
+        // If it's a network error or other issue, still return empty result instead of throwing
+        if (error.message && error.message.includes('Failed to fetch')) {
+            console.error('Network error fetching congressman projects:', error);
+            return {
+                success: false,
+                error: error.message,
+                congressman: { name: congressmanName },
+                projects: [],
+                total: 0,
+                total_pages: 0,
+                page: 1,
+                limit: 25000
+            };
+        }
         console.error('Error fetching congressman projects:', error);
         throw error;
     }
@@ -2087,7 +2120,7 @@ async function applyFilter() {
             allProjectsData = projects;
             if (projects.length === 0) {
                 filteredData = createPlaceholderProjects(targetNames, 'Project records are still being ingested for this congressman.');
-            } else {
+        } else {
                 filteredData = applyFloodControlFilter(projects);
                 if (floodControlOnly && filteredData.length === 0) {
                     currentProjectsMessage = 'No flood control projects found for this selection.';
@@ -2254,9 +2287,35 @@ function updateDisplay() {
     displayProjects(paginatedData);
     
     // Update summary based on ALL filtered data (not just current page)
-    const summary = floodControlOnly
-        ? calculateSummary(filteredData)
-        : (currentSummaryOverride || calculateSummary(filteredData));
+    let summary;
+    if (floodControlOnly) {
+        // When filtering by flood control, calculate from filtered data
+        // but preserve flood_control value from cache if available (even if 0)
+        const calculated = calculateSummary(filteredData);
+        if (currentSummaryOverride && currentSummaryOverride.flood_control !== undefined) {
+            // Always use the cached flood_control value to ensure accuracy
+            calculated.flood_control = currentSummaryOverride.flood_control;
+            calculated.flood_control_cost = currentSummaryOverride.flood_control_cost || calculated.flood_control_cost;
+        }
+        summary = calculated;
+    } else {
+        // Use cached summary if available, otherwise calculate from data
+        summary = currentSummaryOverride || calculateSummary(filteredData);
+        // If we have a cached summary, ensure all fields are preserved (including flood_control: 0)
+        if (currentSummaryOverride) {
+            // Merge cached summary with calculated values to ensure completeness
+            const calculated = calculateSummary(filteredData);
+            // Preserve cached flood_control value (even if 0) if it exists in cache
+            if (currentSummaryOverride.flood_control !== undefined) {
+                summary.flood_control = currentSummaryOverride.flood_control;
+                summary.flood_control_cost = currentSummaryOverride.flood_control_cost || calculated.flood_control_cost;
+            } else {
+                // If not in cache, use calculated value
+                summary.flood_control = calculated.flood_control;
+                summary.flood_control_cost = calculated.flood_control_cost;
+            }
+        }
+    }
     updateSummary(summary);
     
     // Update pagination
@@ -2436,7 +2495,7 @@ function displayProjects(projects) {
                 <td style="padding: 12px; white-space: nowrap;">
                     ${(project.sources_list || [source]).map(src => {
                         const meta = getSourceDisplayMeta(src);
-                        return `<span style="padding: 4px 8px; border-radius: 4px; font-size: 12px; font-weight: 600;
+                        return `<span style="padding: 4px 8px; border-radius: 4px; font-size: 12px; font-weight: 600; 
                             background: ${meta.background};
                             color: ${meta.color};
                             border: 1px solid ${meta.border};
@@ -2486,6 +2545,8 @@ function updateSummary(summary) {
     }
     const formatCount = (value) => formatProjects(value ?? 0);
     const micrositeCount = summary.microsite ?? summary.infrawatch ?? 0;
+    // Ensure flood_control is explicitly set (even if 0) to display cached values correctly
+    const floodControlCount = summary.flood_control !== undefined ? summary.flood_control : 0;
 
     document.getElementById('total-projects').textContent = formatCount(summary.total);
     document.getElementById('district-count').textContent = formatCount(summary.district_projects);
@@ -2496,7 +2557,7 @@ function updateSummary(summary) {
     document.getElementById('microsite-count').textContent = formatCount(micrositeCount);
     const floodControlCountEl = document.getElementById('flood-control-count');
     if (floodControlCountEl) {
-        floodControlCountEl.textContent = formatCount(summary.flood_control);
+        floodControlCountEl.textContent = formatCount(floodControlCount);
     }
     summaryPanel.style.display = 'block';
 }
@@ -2712,7 +2773,7 @@ async function loadVisualData(prefetchedData = null) {
         }
     } finally {
         if (visualLoading) {
-            visualLoading.style.display = 'none';
+        visualLoading.style.display = 'none';
         }
     }
 }
@@ -3642,7 +3703,7 @@ function provinceDisplayProjects(projects) {
                 <td style="padding: 12px; white-space: nowrap;">
                     ${(project.sources_list || [source]).map(src => {
                         const meta = getSourceDisplayMeta(src);
-                        return `<span style="padding: 4px 8px; border-radius: 4px; font-size: 12px; font-weight: 600;
+                        return `<span style="padding: 4px 8px; border-radius: 4px; font-size: 12px; font-weight: 600; 
                             background: ${meta.background};
                             color: ${meta.color};
                             border: 1px solid ${meta.border};
@@ -4034,7 +4095,7 @@ async function loadProvinceVisualData() {
                 if (municipalityFilterSelect) {
                     municipalityFilterSelect.value = 'all';
                 }
-
+                
                 // Show charts first
                 if (municipalityChartContainer) municipalityChartContainer.style.display = 'block';
                 if (contractorChartContainer) contractorChartContainer.style.display = 'block';
