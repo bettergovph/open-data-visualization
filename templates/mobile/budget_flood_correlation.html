@@ -1,0 +1,247 @@
+{% extends "mobile/base_visualizations.html" %}
+
+{% block head %}
+<!-- BetterGovPH Mobile Theme CSS -->
+<link rel="stylesheet" href="/static/css/visualizations-mobile.css">
+<!-- Tailwind CSS -->
+<link rel="stylesheet" href="/static/css/tailwind.css">
+<script src="/static/js/chart.js"></script>
+<!-- Custom styling - Override ALL base styles -->
+<style>
+    /* Reset and override base.html styles */
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+    }
+
+    body {
+        font-family: 'Inter', sans-serif !important;
+        background-color: white !important;
+        color: black !important;
+        margin: 0 !important;
+        padding: 0 !important;
+    }
+
+    /* Hide main navbar from base.html */
+    nav.navbar,
+    nav.mobile-navbar,
+    header.navbar,
+    header {
+        display: none !important;
+    }
+
+    /* Ensure our BetterGov nav is visible */
+    nav:not(.navbar):not(.mobile-navbar) {
+        display: block !important;
+    }
+
+    /* Hide footer from base.html - we'll add our own */
+    footer.footer,
+    footer.mobile-footer {
+        display: none !important;
+    }
+
+    /* Override any gradients or backgrounds */
+    section,
+    main,
+    div {
+        background: transparent !important;
+    }
+
+    .chart-wrapper {
+        position: relative;
+        height: 300px;
+        margin: 10px 0;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Mobile Budget-Flood Correlation Section -->
+<section class="w-full bg-white shadow-md my-1 overflow-hidden" style="width: 100% !important; margin: 0 !important;">
+    <div class="w-full p-3" style="width: 100% !important;">
+
+        <!-- Header -->
+        <div class="text-center mb-4">
+            <h1 class="text-2xl font-bold text-gray-800 mb-2">Budget-Flood Correlation</h1>
+            <p class="text-sm text-gray-600">Connections between Budget allocations and Flood Control projects</p>
+        </div>
+
+        <div class="mobile-budget-header" style="margin-bottom: 0.5rem; padding-bottom: 0.5rem;">
+            <div class="mobile-desktop-notice bg-blue-50 text-blue-700 rounded-md mb-2 text-center border-l-4 border-blue-500"
+                style="padding: 0.5rem 0; font-size: 0.75rem;">
+                <i class="fas fa-desktop mr-1"></i>
+                <strong>Best experienced on desktop</strong>
+            </div>
+        </div>
+
+        <!-- Year Filter -->
+        <div class="text-center mb-4">
+            <div class="inline-flex items-center gap-2">
+                <label for="correlation-year-filter" class="font-semibold text-gray-700 text-sm">Select Year:</label>
+                <select id="correlation-year-filter"
+                    class="px-2 py-1 border border-blue-600 rounded-md text-sm bg-white text-gray-800">
+                    <option value="2020">2020</option>
+                    <option value="2021">2021</option>
+                    <option value="2022">2022</option>
+                    <option value="2023">2023</option>
+                    <option value="2024">2024</option>
+                    <option value="2025" selected>2025</option>
+                    <option value="all">All Years</option>
+                </select>
+            </div>
+        </div>
+
+        <!-- Key Statistics Grid -->
+        <div class="grid grid-cols-2 gap-3 mb-4">
+            <div class="bg-white p-3 rounded-lg shadow-sm text-center border-l-4 border-blue-500">
+                <h3 class="text-xs font-semibold text-gray-800 mb-1">📊 Projects</h3>
+                <div class="text-lg font-bold text-blue-600 my-1" id="correlation-total-projects">Loading...</div>
+            </div>
+            <div class="bg-white p-3 rounded-lg shadow-sm text-center border-l-4 border-blue-500">
+                <h3 class="text-xs font-semibold text-gray-800 mb-1">💰 Value</h3>
+                <div class="text-lg font-bold text-blue-600 my-1" id="correlation-total-value">Loading...</div>
+            </div>
+            <div class="bg-white p-3 rounded-lg shadow-sm text-center border-l-4 border-blue-500">
+                <h3 class="text-xs font-semibold text-gray-800 mb-1">🏙️ Top Region</h3>
+                <div class="text-lg font-bold text-blue-600 my-1" id="correlation-top-region">Loading...</div>
+            </div>
+            <div class="bg-white p-3 rounded-lg shadow-sm text-center border-l-4 border-blue-500">
+                <h3 class="text-xs font-semibold text-gray-800 mb-1">🏗️ Main Type</h3>
+                <div class="text-lg font-bold text-blue-600 my-1" id="correlation-main-type">Loading...</div>
+            </div>
+        </div>
+
+        <!-- Charts -->
+        <div class="space-y-4">
+            <!-- Top Region Year on Year Chart -->
+            <div class="bg-white p-3 rounded-lg shadow-sm border border-gray-100">
+                <h3 class="text-sm font-semibold text-gray-800 text-center mb-2">📈 Top Region Year on Year</h3>
+                <div class="chart-wrapper">
+                    <canvas id="regionYearChart"></canvas>
+                </div>
+            </div>
+
+            <!-- Geographic Distribution Chart -->
+            <div class="bg-white p-3 rounded-lg shadow-sm border border-gray-100">
+                <h3 class="text-sm font-semibold text-gray-800 text-center mb-2">🗺️ Project Distribution</h3>
+                <div class="chart-wrapper">
+                    <canvas id="provinceChart"></canvas>
+                </div>
+            </div>
+
+            <!-- Project Type Distribution -->
+            <div class="bg-white p-3 rounded-lg shadow-sm border border-gray-100">
+                <h3 class="text-sm font-semibold text-gray-800 text-center mb-2">🏗️ Project Types</h3>
+                <div class="chart-wrapper">
+                    <canvas id="typeChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- Insights Section -->
+        <div class="mt-6 bg-gray-50 p-3 rounded-lg">
+            <h3 class="text-lg font-semibold text-gray-800 mb-3">🔍 Key Insights</h3>
+
+            <div class="space-y-3">
+                <div class="bg-white p-3 rounded-lg border-l-4 border-green-500 shadow-sm">
+                    <h4 class="text-sm font-semibold text-gray-800 mb-1">📊 Geographic Clustering</h4>
+                    <p class="text-xs text-gray-600">60% of projects are clustered in just 3 provinces (Manila, Nueva
+                        Ecija, Tarlac).</p>
+                </div>
+
+                <div class="bg-white p-3 rounded-lg border-l-4 border-green-500 shadow-sm">
+                    <h4 class="text-sm font-semibold text-gray-800 mb-1">💰 Cost Distribution</h4>
+                    <p class="text-xs text-gray-600">Manila projects average ₱54M while others average ₱20M.</p>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</section>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    // Initialize Charts
+    document.addEventListener('DOMContentLoaded', function () {
+        // Region Year on Year Chart
+        const regionYearCtx = document.getElementById('regionYearChart').getContext('2d');
+        new Chart(regionYearCtx, {
+            type: 'bar',
+            data: {
+                labels: ['2020', '2021', '2022', '2023', '2024', '2025'],
+                datasets: [
+                    {
+                        label: 'Projects',
+                        data: [], // Will be populated dynamically
+                        backgroundColor: 'rgba(102, 126, 234, 0.8)',
+                        yAxisID: 'y'
+                    },
+                    {
+                        label: 'Amount (₱M)',
+                        data: [], // Will be populated dynamically
+                        backgroundColor: 'rgba(118, 75, 162, 0.8)',
+                        yAxisID: 'y1'
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { position: 'bottom', labels: { boxWidth: 10, font: { size: 10 } } }
+                },
+                scales: {
+                    y: { type: 'linear', display: true, position: 'left', title: { display: true, text: 'Count' } },
+                    y1: { type: 'linear', display: true, position: 'right', grid: { drawOnChartArea: false }, title: { display: true, text: 'Amount' } }
+                }
+            }
+        });
+
+        // Province Distribution Chart
+        const provinceCtx = document.getElementById('provinceChart').getContext('2d');
+        new Chart(provinceCtx, {
+            type: 'doughnut',
+            data: {
+                labels: ['Manila', 'Nueva Ecija', 'Tarlac', 'Others'],
+                datasets: [{
+                    data: [9, 6, 6, 14],
+                    backgroundColor: ['#667eea', '#764ba2', '#f093fb', '#fa709a']
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { legend: { position: 'bottom', labels: { boxWidth: 10, font: { size: 10 } } } }
+            }
+        });
+
+        // Project Type Chart
+        const typeCtx = document.getElementById('typeChart').getContext('2d');
+        new Chart(typeCtx, {
+            type: 'bar',
+            data: {
+                labels: ['Flood Structure', 'Pumping Stn', 'Drainage', 'Rehab'],
+                datasets: [{
+                    label: 'Projects',
+                    data: [18, 7, 4, 5],
+                    backgroundColor: '#667eea'
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { legend: { display: false } }
+            }
+        });
+
+        // Mock Data Loading (Replace with actual API calls if needed)
+        document.getElementById('correlation-total-projects').textContent = '35';
+        document.getElementById('correlation-total-value').textContent = '₱1.08B';
+        document.getElementById('correlation-top-region').textContent = 'NCR';
+        document.getElementById('correlation-main-type').textContent = 'Structure';
+    });
+</script>
+{% endblock %}

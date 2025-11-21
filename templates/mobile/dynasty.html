@@ -1,0 +1,719 @@
+{% extends "mobile/base_visualizations.html" %}
+
+{% block title %}Political Dynasties - BetterGovPH{% endblock %}
+
+{% block head %}
+<link rel="stylesheet" href="/static/css/tailwind.css">
+<script src="https://d3js.org/d3.v7.min.js"></script>
+
+<style>
+    .mobile-dynasty-section {
+        padding: 1rem;
+        background: #f9fafb;
+    }
+
+    .mobile-filter-card {
+        background: white;
+        border-radius: 8px;
+        padding: 1rem;
+        margin-bottom: 1rem;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    }
+
+    .mobile-network-container {
+        background: white;
+        border-radius: 8px;
+        padding: 1rem;
+        margin-bottom: 1rem;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    }
+
+    #officialsNetwork {
+        width: 100%;
+        height: 500px;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        position: relative;
+        background: #fafafa;
+    }
+
+    .legend-item {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        font-size: 0.75rem;
+        color: #666;
+        margin-bottom: 0.25rem;
+    }
+
+    .legend-dot {
+        width: 12px;
+        height: 12px;
+        border-radius: 50%;
+    }
+
+    .legend-line {
+        width: 20px;
+        height: 2px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<section class="p-4 bg-gray-50">
+    <div class="mb-4">
+        <h1 class="text-2xl font-bold text-blue-900 mb-2">👑 Political Dynasties</h1>
+        <p class="text-xs text-gray-600">Relationship Constellations - Political family connections</p>
+    </div>
+
+    <!-- Filter Card -->
+    <div class="mobile-filter-card">
+        <div style="position: relative;">
+            <label class="text-xs font-bold text-gray-700 block mb-2">Search Person</label>
+            <div style="display: flex; gap: 0.5rem;">
+                <input type="text" id="officialsNameFilter" placeholder="Loading person list..." disabled
+                    class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm bg-gray-100" autocomplete="off" style="flex: 1;">
+                <button id="clear-person-btn" onclick="clearPersonSelection()" style="display: none; padding: 0.5rem 1rem; background: #dc3545; color: white; border: none; border-radius: 0.375rem; font-size: 0.875rem; cursor: pointer;">Clear</button>
+            </div>
+            <div id="officialsAutocompleteDropdown" style="display: none; position: absolute; background: white; border: 1px solid #ddd; border-radius: 4px; max-height: 200px; overflow-y: auto; z-index: 1000; box-shadow: 0 4px 6px rgba(0,0,0,0.1); margin-top: 2px; width: calc(100% - 0.5rem);"></div>
+        </div>
+        
+        <div class="mt-3">
+            <label class="text-xs font-bold text-gray-700 block mb-2">Connection Type</label>
+            <div class="space-y-2">
+                <label class="flex items-center text-sm">
+                    <input type="radio" name="connectionTypeFilter" value="all" checked class="mr-2">
+                    <span>Show all</span>
+                </label>
+                <label class="flex items-center text-sm">
+                    <input type="radio" name="connectionTypeFilter" value="contractor" class="mr-2">
+                    <span>Contractor-mediated only</span>
+                </label>
+                <label class="flex items-center text-sm">
+                    <input type="radio" name="connectionTypeFilter" value="party-list" class="mr-2">
+                    <span>Party-list only</span>
+                </label>
+            </div>
+        </div>
+    </div>
+
+    <!-- Network Visualization -->
+    <div class="mobile-network-container">
+        <div class="mb-3">
+            <h3 class="text-sm font-bold text-gray-900 mb-2">🕸️ Relationship Constellations</h3>
+            <div class="text-xs text-gray-600 space-y-1">
+                <div class="legend-item">
+                    <div class="legend-dot" style="background: #FCD34D; border: 3px solid #F59E0B;"></div>
+                    <span>⭐ Contractor</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-dot" style="background: #DC2626; border: 2px dashed #FEE2E2;"></div>
+                    <span>Contractor-connected</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-dot" style="background: #059669; border: 2px solid #fff;"></div>
+                    <span>Direct relationship</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-line" style="background: #F59E0B;"></div>
+                    <span>Contractor link</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-dot" style="background: #9333EA; border: 3px solid #7C3AED;"></div>
+                    <span>🔮 Party-List</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-dot" style="background: #9333EA; border: 2px dashed #E9D5FF;"></div>
+                    <span>Party-list-connected</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-line" style="background: #9333EA;"></div>
+                    <span>Party-list link</span>
+                </div>
+            </div>
+        </div>
+        <div id="officialsNetwork">
+            <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); text-align: center; color: #6c757d;">
+                <div style="font-size: 2em; margin-bottom: 10px;">🕸️</div>
+                <div>Loading relationship networks...</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Loading -->
+    <div id="officials-loading" class="text-center py-8" style="display: none;">
+        <div class="inline-block w-8 h-8 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin"></div>
+        <p class="text-sm text-gray-500 mt-2">Loading relationship data...</p>
+    </div>
+</section>
+
+<script>
+    let officialsNetwork = null;
+    let personAutocompleteData = [];
+    let chainsByPersonIndex = {};
+    let selectedPersonName = null;
+    let mainCacheData = null;
+    let allChainsCache = [];
+
+    // Load autocomplete data
+    async function loadPersonAutocomplete() {
+        try {
+            const response = await fetch('/static/data/relationship_chains_autocomplete.json?v=' + Date.now());
+            const cache = await response.json();
+            
+            personAutocompleteData = cache.person_autocomplete || [];
+            chainsByPersonIndex = cache.chains_by_person || {};
+            
+            if (Object.keys(chainsByPersonIndex).length === 0) {
+                personAutocompleteData.forEach(person => {
+                    chainsByPersonIndex[person.normalized_name] = person.chain_count || 0;
+                });
+            }
+
+            try {
+                const mainCacheResponse = await fetch('/static/data/relationship_chains_cache.json?v=' + Date.now());
+                const mainCache = await mainCacheResponse.json();
+                mainCacheData = {
+                    chains: mainCache.chains || [],
+                    people: mainCache.people || {}
+                };
+            } catch (mainCacheError) {
+                console.warn('⚠️ Failed to load main cache (will use API fallback):', mainCacheError);
+                mainCacheData = null;
+            }
+            
+            const input = document.getElementById('officialsNameFilter');
+            if (input) {
+                // Don't enable yet - wait for network to load first
+                input.placeholder = 'Loading person list...';
+            }
+            
+            return true;
+        } catch (error) {
+            console.error('❌ Failed to load autocomplete data:', error);
+            return false;
+        }
+    }
+
+    // Show autocomplete dropdown
+    function showAutocompleteDropdown(query) {
+        const dropdown = document.getElementById('officialsAutocompleteDropdown');
+        if (!dropdown || !personAutocompleteData.length) {
+            dropdown.style.display = 'none';
+            return;
+        }
+        
+        if (!query || query.trim().length === 0) {
+            dropdown.style.display = 'none';
+            return;
+        }
+        
+        const queryLower = query.toLowerCase().trim();
+        const matches = personAutocompleteData.filter(person => {
+            const displayName = person.display_name.toLowerCase();
+            const normalizedName = person.normalized_name.toLowerCase();
+            return displayName.includes(queryLower) || normalizedName.includes(queryLower);
+        }).slice(0, 20);
+        
+        if (matches.length === 0) {
+            dropdown.style.display = 'none';
+            return;
+        }
+        
+        dropdown.innerHTML = matches.map(person => {
+            const position = person.position ? ` (${person.position})` : '';
+            const chainCount = person.chain_count ? ` - ${person.chain_count} chains` : '';
+            return `
+                <div class="autocomplete-item" 
+                     data-normalized="${person.normalized_name}"
+                     data-display="${person.display_name}"
+                     style="padding: 10px 12px; cursor: pointer; border-bottom: 1px solid #eee; transition: background 0.2s;"
+                     onmouseover="this.style.background='#f0f0f0'"
+                     onmouseout="this.style.background='white'"
+                     onclick="selectPerson('${person.normalized_name}', '${person.display_name.replace(/'/g, "\\'")}')">
+                    <div style="font-weight: 600; color: #0038A8; font-size: 0.875rem;">${person.display_name}</div>
+                    <div style="font-size: 0.75rem; color: #666;">${person.normalized_name}${position}${chainCount}</div>
+                </div>
+            `;
+        }).join('');
+        
+        dropdown.style.display = 'block';
+    }
+
+    // Select a person from autocomplete
+    function selectPerson(normalizedName, displayName) {
+        selectedPersonName = normalizedName;
+        const input = document.getElementById('officialsNameFilter');
+        if (input) {
+            input.value = displayName;
+        }
+        const dropdown = document.getElementById('officialsAutocompleteDropdown');
+        if (dropdown) {
+            dropdown.style.display = 'none';
+        }
+        
+        // Show clear button
+        const clearBtn = document.getElementById('clear-person-btn');
+        if (clearBtn) {
+            clearBtn.style.display = 'block';
+        }
+        
+        // Reload data with the selected person
+        loadOfficialsData();
+    }
+    
+    // Clear person selection
+    function clearPersonSelection() {
+        selectedPersonName = null;
+        const input = document.getElementById('officialsNameFilter');
+        if (input) {
+            input.value = '';
+        }
+        const clearBtn = document.getElementById('clear-person-btn');
+        if (clearBtn) {
+            clearBtn.style.display = 'none';
+        }
+        loadOfficialsData();
+    }
+
+    // Load officials network data
+    async function loadOfficialsData() {
+        const networkDiv = document.getElementById('officialsNetwork');
+        const loadingEl = document.getElementById('officials-loading');
+        
+        if (!networkDiv) {
+            console.error('Missing element: officialsNetwork');
+            return;
+        }
+        
+        if (loadingEl) {
+            loadingEl.style.display = 'block';
+        }
+        
+        // Show loading in network div
+        networkDiv.innerHTML = `
+            <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); text-align: center; color: #6c757d;">
+                <div style="font-size: 2em; margin-bottom: 10px;">⏳</div>
+                <div>Loading relationship networks...</div>
+            </div>
+        `;
+
+        const chainLengthMin = 3;
+        const chainLengthMax = 10;
+        const connectionTypeFilter = document.querySelector('input[name="connectionTypeFilter"]:checked')?.value || 'all';
+        const maxConstellations = 'ALL';
+        
+        let connectionParam = '';
+        if (connectionTypeFilter === 'contractor') {
+            connectionParam = '&contractor_only=true';
+        } else if (connectionTypeFilter === 'party-list') {
+            connectionParam = '&party_list_only=true';
+        }
+
+        try {
+            let url;
+            if (selectedPersonName) {
+                // Use person-specific endpoint when a person is selected
+                url = `/api/dynasty/relationship-chains/person?normalized_name=${encodeURIComponent(selectedPersonName)}`;
+            } else {
+                // Use general endpoint with connection type filter
+                url = `/api/dynasty/relationship-chains?chain_length_min=${chainLengthMin}&chain_length_max=${chainLengthMax}&max_constellations=${maxConstellations}${connectionParam}`;
+            }
+
+            const response = await fetch(url);
+            
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            
+            const data = await response.json();
+
+            if (loadingEl) {
+                loadingEl.style.display = 'none';
+            }
+
+            // Handle different response structures
+            let chains = [];
+            let peopleDict = {};
+            
+            if (data && data.success) {
+                // Person-specific endpoint returns 'chains', general endpoint returns 'data'
+                if (data.chains && Array.isArray(data.chains)) {
+                    chains = data.chains;
+                    peopleDict = data.people || {};
+                } else if (data.data && Array.isArray(data.data)) {
+                    chains = data.data;
+                    peopleDict = data.people || {};
+                }
+                
+                console.log('Loaded chains:', chains.length, 'for person:', selectedPersonName || 'all');
+            } else if (data && !data.success) {
+                // API returned an error response
+                const errorMsg = data.error || 'Unknown error';
+                console.error('API error:', errorMsg);
+                networkDiv.innerHTML = `
+                    <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); text-align: center; color: #dc3545;">
+                        <div style="font-size: 2em; margin-bottom: 10px;">❌</div>
+                        <div style="font-weight: 600; margin-bottom: 0.5rem;">Error loading data</div>
+                        <div style="font-size: 0.875rem; color: #999;">${errorMsg}</div>
+                        ${data.suggestions ? `<div style="font-size: 0.75rem; color: #666; margin-top: 0.5rem;">${data.suggestions}</div>` : ''}
+                    </div>
+                `;
+                // Still enable search input
+                const input = document.getElementById('officialsNameFilter');
+                if (input) {
+                    input.disabled = false;
+                    input.classList.remove('bg-gray-100');
+                    input.placeholder = 'Type to search (e.g., Escudero, Co, Tan)';
+                }
+                return;
+            }
+
+            if (chains && chains.length > 0) {
+                displayOfficialsNetwork(chains, peopleDict);
+                // Enable search input after network is loaded
+                const input = document.getElementById('officialsNameFilter');
+                if (input) {
+                    input.disabled = false;
+                    input.classList.remove('bg-gray-100');
+                    input.placeholder = 'Type to search (e.g., Escudero, Co, Tan)';
+                }
+            } else {
+                networkDiv.innerHTML = `
+                    <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); text-align: center; color: #6c757d;">
+                        <div style="font-size: 2em; margin-bottom: 10px;">🔍</div>
+                        <div>No relationship chains found</div>
+                        ${selectedPersonName ? `<div style="font-size: 0.875rem; margin-top: 0.5rem; color: #999;">for ${selectedPersonName}</div>` : ''}
+                    </div>
+                `;
+                // Still enable search input even if no data found
+                const input = document.getElementById('officialsNameFilter');
+                if (input) {
+                    input.disabled = false;
+                    input.classList.remove('bg-gray-100');
+                    input.placeholder = 'Type to search (e.g., Escudero, Co, Tan)';
+                }
+            }
+        } catch (error) {
+            console.error('Error loading officials data:', error);
+            if (loadingEl) {
+                loadingEl.style.display = 'none';
+            }
+            networkDiv.innerHTML = `
+                <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); text-align: center; color: #dc3545;">
+                    <div style="font-size: 2em; margin-bottom: 10px;">❌</div>
+                    <div style="font-weight: 600; margin-bottom: 0.5rem;">Failed to load data</div>
+                    <div style="font-size: 0.875rem; color: #999;">${error.message || 'Network error or server unavailable'}</div>
+                </div>
+            `;
+            // Still enable search input
+            const input = document.getElementById('officialsNameFilter');
+            if (input) {
+                input.disabled = false;
+                input.classList.remove('bg-gray-100');
+                input.placeholder = 'Type to search (e.g., Escudero, Co, Tan)';
+            }
+        }
+    }
+
+    // Display network visualization
+    function displayOfficialsNetwork(chains, peopleDict) {
+        const networkDiv = document.getElementById('officialsNetwork');
+        networkDiv.innerHTML = '';
+
+        if (!chains || chains.length === 0) {
+            networkDiv.innerHTML = `
+                <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); text-align: center; color: #6c757d;">
+                    <div style="font-size: 2em; margin-bottom: 10px;">🔍</div>
+                    <div>No data to display</div>
+                </div>
+            `;
+            return;
+        }
+
+        // Reconstruct chains
+        const reconstructedChains = chains.map(chain => {
+            if (!chain.path || !Array.isArray(chain.path)) {
+                return chain;
+            }
+            
+            if (chain.path.length > 0 && typeof chain.path[0] === 'object' && chain.path[0].first_name) {
+                return chain;
+            }
+            
+            const reconstructedPath = chain.path.map((personId, index) => {
+                const person = peopleDict[personId];
+                if (!person) return null;
+                
+                const relationshipDesc = chain.relationships && chain.relationships[index] 
+                    ? chain.relationships[index] 
+                    : (index === 0 ? "Starting person" : "Unknown");
+                
+                return {
+                    ...person,
+                    relationship_description: relationshipDesc
+                };
+            }).filter(p => p !== null);
+            
+            return {
+                ...chain,
+                path: reconstructedPath
+            };
+        });
+
+        // Build network data
+        const nodes = new Map();
+        const links = [];
+
+        reconstructedChains.forEach(chain => {
+            const path = chain.path || [];
+            path.forEach((person, index) => {
+                const nodeId = String(person.normalized_name || person.id || '');
+                if (!nodeId) return; // Skip if no valid ID
+                
+                if (!nodes.has(nodeId)) {
+                    const personName = `${person.first_name || ''} ${person.last_name || ''}`.trim() || String(person.normalized_name || '');
+                    nodes.set(nodeId, {
+                        id: nodeId,
+                        name: personName,
+                        type: person.is_contractor ? 'contractor' : (person.is_party_list ? 'party-list' : 'person'),
+                        is_contractor: person.is_contractor || false,
+                        is_party_list: person.is_party_list || false
+                    });
+                }
+                
+                if (index < path.length - 1) {
+                    const nextPerson = path[index + 1];
+                    const nextNodeId = String(nextPerson.normalized_name || nextPerson.id || '');
+                    if (!nextNodeId) return; // Skip if no valid ID
+                    const linkType = person.is_contractor || nextPerson.is_contractor ? 'contractor' : 
+                                   (person.is_party_list || nextPerson.is_party_list ? 'party-list' : 'direct');
+                    
+                    links.push({
+                        source: nodeId,
+                        target: nextNodeId,
+                        type: linkType
+                    });
+                }
+            });
+        });
+
+        const networkData = {
+            nodes: Array.from(nodes.values()),
+            links: links
+        };
+
+        // Render with D3.js
+        renderNetwork(networkData, selectedPersonName);
+    }
+
+    // Render D3.js network
+    function renderNetwork(data, selectedPersonName = null) {
+        const container = document.getElementById('officialsNetwork');
+        if (!container || !data || !data.nodes || data.nodes.length === 0) {
+            return;
+        }
+
+        container.innerHTML = '';
+
+        const width = container.clientWidth;
+        const height = 500;
+
+        const svg = d3.select('#officialsNetwork')
+            .append('svg')
+            .attr('width', width)
+            .attr('height', height)
+            .style('background', '#fafafa');
+
+        const g = svg.append('g');
+
+        // Add zoom
+        const zoom = d3.zoom()
+            .scaleExtent([0.1, 3])
+            .on('zoom', (event) => {
+                g.attr('transform', event.transform);
+            });
+        svg.call(zoom);
+
+        // Create force simulation
+        const simulation = d3.forceSimulation(data.nodes)
+            .force('link', d3.forceLink(data.links).id(d => d.id).distance(80))
+            .force('charge', d3.forceManyBody().strength(-200))
+            .force('center', d3.forceCenter(width / 2, height / 2))
+            .force('collision', d3.forceCollide().radius(15));
+
+        // Create links
+        const link = g.append('g')
+            .selectAll('line')
+            .data(data.links)
+            .enter()
+            .append('line')
+            .attr('stroke', d => {
+                if (d.type === 'contractor') return '#F59E0B';
+                if (d.type === 'party-list') return '#9333EA';
+                return '#059669';
+            })
+            .attr('stroke-opacity', 0.6)
+            .attr('stroke-width', 2)
+            .attr('stroke-dasharray', d => d.type === 'contractor' || d.type === 'party-list' ? '5,5' : '0');
+
+        // Normalize function for name comparison
+        const normalizeName = (name) => {
+            if (!name) return '';
+            // Ensure name is a string
+            const nameStr = String(name);
+            return nameStr.toUpperCase().trim().replace(/\s+/g, ' ');
+        };
+        
+        // Check if a node matches the selected person
+        const isSelectedNode = (node) => {
+            if (!selectedPersonName) return false;
+            const normalizedSelected = normalizeName(selectedPersonName);
+            const normalizedNodeId = normalizeName(node.id);
+            return normalizedNodeId === normalizedSelected;
+        };
+
+        // Create nodes
+        const node = g.append('g')
+            .selectAll('circle')
+            .data(data.nodes)
+            .enter()
+            .append('circle')
+            .attr('r', d => {
+                if (isSelectedNode(d)) return 10; // Larger for selected
+                if (d.is_contractor) return 8;
+                if (d.is_party_list) return 8;
+                return 6;
+            })
+            .attr('fill', d => {
+                if (isSelectedNode(d)) return '#facc15'; // Yellow highlight for selected
+                if (d.is_contractor) return '#FCD34D';
+                if (d.is_party_list) return '#9333EA';
+                return '#059669';
+            })
+            .attr('stroke', d => {
+                if (isSelectedNode(d)) return '#f59e0b'; // Orange border for selected
+                if (d.is_contractor) return '#F59E0B';
+                if (d.is_party_list) return '#7C3AED';
+                return '#fff';
+            })
+            .attr('stroke-width', d => {
+                if (isSelectedNode(d)) return 4; // Thicker border for selected
+                if (d.is_contractor || d.is_party_list) return 3;
+                return 2;
+            })
+            .call(d3.drag()
+                .on('start', dragstarted)
+                .on('drag', dragged)
+                .on('end', dragended));
+
+        // Add labels
+        const label = g.append('g')
+            .selectAll('text')
+            .data(data.nodes)
+            .enter()
+            .append('text')
+            .text(d => d.name.length > 15 ? d.name.substring(0, 15) + '...' : d.name)
+            .attr('font-size', d => isSelectedNode(d) ? '12px' : '10px')
+            .attr('font-weight', d => isSelectedNode(d) ? 'bold' : 'normal')
+            .attr('dx', 12)
+            .attr('dy', 4)
+            .attr('fill', d => isSelectedNode(d) ? '#f59e0b' : '#333');
+
+        // Update positions on tick
+        simulation.on('tick', () => {
+            link
+                .attr('x1', d => d.source.x)
+                .attr('y1', d => d.source.y)
+                .attr('x2', d => d.target.x)
+                .attr('y2', d => d.target.y);
+
+            node
+                .attr('cx', d => d.x)
+                .attr('cy', d => d.y);
+
+            label
+                .attr('x', d => d.x)
+                .attr('y', d => d.y);
+        });
+
+        function dragstarted(event, d) {
+            if (!event.active) simulation.alphaTarget(0.3).restart();
+            d.fx = d.x;
+            d.fy = d.y;
+        }
+
+        function dragged(event, d) {
+            d.fx = event.x;
+            d.fy = event.y;
+        }
+
+        function dragended(event, d) {
+            if (!event.active) simulation.alphaTarget(0);
+            d.fx = null;
+            d.fy = null;
+        }
+    }
+
+    // Event listeners
+    document.addEventListener('DOMContentLoaded', async () => {
+        // Load autocomplete data first
+        await loadPersonAutocomplete();
+        
+        // Load initial network data
+        loadOfficialsData().then(() => {
+            // Enable search input after network is loaded
+            const nameFilter = document.getElementById('officialsNameFilter');
+            if (nameFilter) {
+                nameFilter.disabled = false;
+                nameFilter.classList.remove('bg-gray-100');
+                nameFilter.placeholder = 'Type to search (e.g., Escudero, Co, Tan)';
+            }
+        });
+
+        const nameFilter = document.getElementById('officialsNameFilter');
+        if (nameFilter) {
+            nameFilter.addEventListener('input', (e) => {
+                if (!nameFilter.disabled) {
+                    showAutocompleteDropdown(e.target.value);
+                }
+            });
+
+            nameFilter.addEventListener('blur', () => {
+                setTimeout(() => {
+                    const dropdown = document.getElementById('officialsAutocompleteDropdown');
+                    if (dropdown) {
+                        dropdown.style.display = 'none';
+                    }
+                }, 200);
+            });
+            
+            // Handle Enter key to search
+            nameFilter.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter' && !nameFilter.disabled) {
+                    e.preventDefault();
+                    const value = nameFilter.value.trim();
+                    if (value) {
+                        // Try to find matching person
+                        const matches = personAutocompleteData.filter(person => {
+                            const displayName = person.display_name.toLowerCase();
+                            const normalizedName = person.normalized_name.toLowerCase();
+                            const query = value.toLowerCase();
+                            return displayName.includes(query) || normalizedName.includes(query);
+                        });
+                        if (matches.length > 0) {
+                            selectPerson(matches[0].normalized_name, matches[0].display_name);
+                        }
+                    }
+                }
+            });
+        }
+
+        document.querySelectorAll('input[name="connectionTypeFilter"]').forEach(radio => {
+            radio.addEventListener('change', () => {
+                loadOfficialsData();
+            });
+        });
+    });
+</script>
+{% endblock %}

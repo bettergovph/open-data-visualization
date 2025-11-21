@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
@@ -7,7 +8,7 @@
     <meta name="description" content="Government Data Analysis Platform for Budget and Flood Control Projects">
     <meta name="keywords" content="government data, budget analysis, flood control, public data, transparency">
     <meta name="author" content="BetterGovPH">
-    
+
     <!-- Mobile-specific meta tags -->
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
@@ -15,41 +16,78 @@
     <meta name="apple-mobile-web-app-title" content="BetterGovPH">
     <meta name="theme-color" content="#0038A8">
     <meta name="msapplication-TileColor" content="#0038A8">
-    
+
     <!-- Open Graph / Facebook -->
     <meta property="og:type" content="website">
     <meta property="og:url" content="{{ og_url | default(value='https://visualizations.bettergov.ph/') }}">
     <meta property="og:title" content="{{ title | default(value='BetterGovPH - Government Data Platform') }}">
     <meta property="og:description" content="Government Data Analysis Platform for Budget and Flood Control Projects">
     <meta property="og:image" content="/static/images/gov_logo.png">
-    
+
     <!-- Twitter -->
     <meta property="twitter:card" content="summary_large_image">
     <meta property="twitter:url" content="https://www.visualizations.bettergov.ph/">
     <meta property="twitter:title" content="{{ title | default(value='BetterGovPH - Government Data Platform') }}">
-    <meta property="twitter:description" content="Government Data Analysis Platform for Budget and Flood Control Projects">
+    <meta property="twitter:description"
+        content="Government Data Analysis Platform for Budget and Flood Control Projects">
     <meta property="twitter:image" content="/static/images/gov_logo.png">
-    
+
     <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    
+
     <!-- Font Awesome -->
     <link rel="stylesheet" href="/static/css/fontawesome/all.min.css">
-    
+
     <!-- BetterGovPH Mobile CSS -->
-    <link rel="stylesheet" href="/static/css/visualizations-mobile.css?v=5">
-    
+    <link rel="stylesheet" href="/static/css/visualizations-mobile.css?v=7">
+    <style>
+        html,
+        body {
+            width: 100%;
+            max-width: 100%;
+            overflow-x: hidden;
+            margin: 0;
+            padding: 0;
+        }
+
+        .visualizations-mobile-container {
+            width: 100% !important;
+            max-width: 100% !important;
+            padding: 0 !important;
+        }
+
+        /* Force full width on everything */
+        * {
+            max-width: 100% !important;
+        }
+
+        .visualizations-mobile-container {
+            padding: 0 !important;
+            margin: 0 !important;
+        }
+
+        .budget-section {
+            width: 100% !important;
+            margin: 0 !important;
+            padding: 0 !important;
+        }
+    </style>
+
     {% block head %}{% endblock %}
 </head>
+
 <body>
     {% include "mobile/navbar.html" %}
-    
-    <main class="visualizations-mobile-main" style="padding: 0; margin: 0;">
+
+    <main
+        style="width: 100% !important; max-width: 100% !important; padding: 0 !important; margin: 0 !important; overflow-x: hidden !important;">
         {% block content %}{% endblock %}
     </main>
-    
+
     {% include "mobile/footer.html" %}
-    
+
+    <script src="/static/js/visualizations-mobile.js"></script>
     {% block scripts %}{% endblock %}
 </body>
+
 </html>

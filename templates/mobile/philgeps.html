@@ -1,0 +1,222 @@
+{% extends "mobile/base_visualizations.html" %}
+
+{% block title %}PhilGEPS - BetterGovPH{% endblock %}
+
+{% block head %}
+<link rel="stylesheet" href="/static/css/tailwind.css">
+<script src="/static/js/chart.js"></script>
+
+<style>
+    .mobile-philgeps-tabs {
+        display: flex;
+        gap: 0.5rem;
+        border-bottom: 2px solid #e5e7eb;
+        margin-bottom: 1rem;
+        overflow-x: auto;
+    }
+
+    .mobile-tab-btn {
+        padding: 0.75rem 1rem;
+        background: #f3f4f6;
+        border-radius: 8px 8px 0 0;
+        font-weight: 600;
+        font-size: 0.875rem;
+        color: #6b7280;
+        cursor: pointer;
+        border: none;
+        white-space: nowrap;
+    }
+
+    .mobile-tab-btn.active {
+        background: white;
+        color: #2563eb;
+        border-bottom: 3px solid #2563eb;
+    }
+
+    .mobile-tab-panel {
+        display: none;
+    }
+
+    .mobile-tab-panel.active {
+        display: block;
+    }
+
+    .mobile-stats-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 0.5rem;
+        margin-bottom: 1rem;
+    }
+
+    .mobile-stat-card {
+        background: white;
+        padding: 1rem;
+        border-radius: 8px;
+        text-align: center;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    }
+
+    .mobile-project-card {
+        background: white;
+        border-radius: 8px;
+        padding: 1rem;
+        margin-bottom: 0.75rem;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    }
+
+    .mobile-chart-container {
+        background: white;
+        border-radius: 8px;
+        padding: 1rem;
+        margin-bottom: 1rem;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<section class="p-4 bg-gray-50">
+    <div class="mb-4">
+        <h1 class="text-2xl font-bold text-blue-900 mb-2">📋 PhilGEPS</h1>
+        <p class="text-xs text-gray-600">Philippine Government Electronic Procurement System</p>
+    </div>
+
+    <!-- Tabs -->
+    <div class="mobile-philgeps-tabs">
+        <button class="mobile-tab-btn active" data-tab="amo">🏛️ AMO Analysis</button>
+    </div>
+
+    <!-- AMO Tab -->
+    <div id="amo-tab" class="mobile-tab-panel active">
+        <p class="text-xs text-gray-600 mb-3">
+            PCAB Authorized Managing Officers (AMOs) who are elected politicians - revealing potential conflicts of
+            interest.
+        </p>
+
+        <!-- Stats -->
+        <div class="mobile-stats-grid">
+            <div class="mobile-stat-card">
+                <div class="text-2xl font-bold text-purple-600" id="amo-matching">-</div>
+                <div class="text-xs text-gray-600 mt-1">AMOs Matching</div>
+            </div>
+            <div class="mobile-stat-card">
+                <div class="text-2xl font-bold text-red-600" id="amo-elected">-</div>
+                <div class="text-xs text-gray-600 mt-1">Elected Officials</div>
+            </div>
+        </div>
+
+        <!-- AMO Cards -->
+        <div id="amo-container"></div>
+
+        <!-- Loading -->
+        <div id="amo-loading" class="text-center py-8">
+            <div class="inline-block w-8 h-8 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin">
+            </div>
+            <p class="text-sm text-gray-500 mt-2">Loading AMO data...</p>
+        </div>
+    </div>
+</section>
+
+<script>
+    function switchTab(tabName) {
+        document.querySelectorAll('.mobile-tab-btn').forEach(btn => {
+            btn.classList.remove('active');
+        });
+        document.querySelectorAll('.mobile-tab-panel').forEach(panel => {
+            panel.classList.remove('active');
+        });
+
+        document.querySelector(`[data-tab="${tabName}"]`).classList.add('active');
+        document.getElementById(`${tabName}-tab`).classList.add('active');
+
+        if (tabName === 'amo' && !amoLoaded) {
+            loadAmoData();
+        }
+    }
+
+    document.querySelectorAll('.mobile-tab-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            switchTab(btn.getAttribute('data-tab'));
+        });
+    });
+
+    let amoLoaded = false;
+
+    function showEmptyState(containerId, message) {
+        document.getElementById(containerId).innerHTML = `
+        <div class="text-center py-12">
+            <div class="text-6xl mb-4">📊</div>
+            <h3 class="text-lg font-bold text-gray-700 mb-2">${message}</h3>
+        </div>
+    `;
+    }
+
+    function showErrorState(containerId, message) {
+        document.getElementById(containerId).innerHTML = `
+        <div class="text-center py-12">
+            <div class="text-6xl mb-4">❌</div>
+            <h3 class="text-lg font-bold text-red-700 mb-2">${message}</h3>
+        </div>
+    `;
+    }
+
+    async function loadAmoData() {
+        try {
+            document.getElementById('amo-loading').style.display = 'block';
+
+            const response = await fetch('/api/philgeps/amo');
+            const data = await response.json();
+
+            document.getElementById('amo-loading').style.display = 'none';
+
+            if (!data.success) {
+                throw new Error(data.error || 'Failed to load AMO data');
+            }
+
+            const summary = data.summary || {};
+
+            // Update stats
+            document.getElementById('amo-matching').textContent = (summary.amos_matching_politicians || 0).toLocaleString();
+            document.getElementById('amo-elected').textContent = (summary.amos_with_elected_positions || 0).toLocaleString();
+
+            // Display AMO cards
+            const topDirect = data.top_direct || [];
+            const topIndirect = data.top_indirect || [];
+            const allMatches = [...topDirect, ...topIndirect].slice(0, 20);
+
+            const container = document.getElementById('amo-container');
+            if (allMatches.length > 0) {
+                container.innerHTML = allMatches.map((amo, index) => {
+                    const location = [amo.province, amo.municipality_city].filter(Boolean).join(', ') || 'N/A';
+                    const contractors = (amo.contractors || []).join(', ') || 'N/A';
+                    
+                    return `
+                    <div class="mobile-project-card">
+                        <div class="text-sm font-bold text-gray-900 mb-2">${index + 1}. ${amo.pcab_amo || 'N/A'}</div>
+                        <div class="text-xs text-gray-600">👤 Name: ${amo.full_name || 'N/A'}</div>
+                        ${amo.position ? `<div class="text-xs text-blue-600">📋 Position: ${amo.position}</div>` : ''}
+                        <div class="text-xs text-gray-600">📍 Location: ${location}</div>
+                        <div class="text-xs text-gray-600">📅 Year: ${amo.year || 'N/A'}</div>
+                        <div class="text-xs text-gray-600 mt-2">📋 Contracts: ${amo.contract_count || 0}</div>
+                        <div class="text-xs text-gray-600">💰 Total: ₱${((amo.total_amount || 0) / 1000000).toFixed(1)}M</div>
+                        ${contractors !== 'N/A' ? `<div class="text-xs text-purple-600 mt-1">🏢 Contractors: ${contractors.length > 50 ? contractors.substring(0, 50) + '...' : contractors}</div>` : ''}
+                    </div>
+                `;
+                }).join('');
+            } else {
+                showEmptyState('amo-container', 'No AMO matches found');
+            }
+
+            amoLoaded = true;
+        } catch (error) {
+            console.error('Error loading AMO data:', error);
+            document.getElementById('amo-loading').style.display = 'none';
+            showErrorState('amo-container', 'Failed to load AMO data');
+        }
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+        loadAmoData();
+    });
+</script>
+{% endblock %}

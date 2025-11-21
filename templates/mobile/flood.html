@@ -1,204 +1,489 @@
 {% extends "mobile/base_visualizations.html" %}
 
 {% block head %}
-<!-- BetterGovPH Theme CSS -->
-<link rel="stylesheet" href="/static/css/visualizations-theme.css">
+<link rel="stylesheet" href="/static/css/tailwind.css">
+<script src="/static/js/chart.js"></script>
+<script src="https://d3js.org/d3.v7.min.js"></script>
 
-<!-- BetterGovPH Metadata Overrides -->
-<meta name="description" content="Government Data Analysis Platform for Flood Control Infrastructure Projects">
-<meta name="keywords" content="flood control, infrastructure, DPWH, government projects, Philippines, public works">
-<meta name="author" content="BetterGovPH">
-
-<!-- BetterGovPH Theme Overrides -->
 <style>
-
-    /* Apply government theme to body */
-    body {
-        background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%) !important; /* Dark blue gradient */
-        color: #333 !important;
-        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif !important;
+    .mobile-flood-tabs {
+        display: flex;
+        gap: 0.5rem;
+        border-bottom: 2px solid #e5e7eb;
+        margin-bottom: 1rem;
+        overflow-x: auto;
     }
 
-    /* Ensure main content area is visible and styled */
-    .main-content {
-        padding-top: 20px !important; /* Adjust if there's a fixed header */
-        min-height: calc(100vh - 40px); /* Ensure content fills screen */
-        background: rgba(255, 255, 255, 0.95);
-        border-radius: 10px;
-        margin: 20px auto;
-        max-width: 1200px;
-        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+    .mobile-tab-btn {
+        padding: 0.75rem 1rem;
+        background: #f3f4f6;
+        border-radius: 8px 8px 0 0;
+        font-weight: 600;
+        font-size: 0.875rem;
+        color: #6b7280;
+        cursor: pointer;
+        border: none;
+        white-space: nowrap;
     }
 
-    /* BetterGovPH Header */
-    .visualizations-header {
+    .mobile-tab-btn.active {
+        background: white;
+        color: #2563eb;
+        border-bottom: 3px solid #2563eb;
+    }
+
+    .mobile-tab-panel {
+        display: none;
+    }
+
+    .mobile-tab-panel.active {
+        display: block;
+    }
+
+    .mobile-project-card {
+        background: white;
+        border-radius: 8px;
+        padding: 1rem;
+        margin-bottom: 0.75rem;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    }
+
+    .mobile-stats-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 0.5rem;
+        margin-bottom: 1rem;
+    }
+
+    .mobile-stat-card {
+        background: white;
+        padding: 1rem;
+        border-radius: 8px;
         text-align: center;
-        padding: 40px 0;
-        background: linear-gradient(135deg, #0038A8 0%, #CE1126 100%); /* Philippine flag colors */
-        color: white;
-        margin: -20px -20px 30px -20px; /* Adjust to fit container */
-        border-radius: 10px 10px 0 0;
-    }
-
-    .visualizations-header h1 {
-        margin: 0;
-        font-size: 2.5em;
-        font-weight: 700;
-        text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
-    }
-
-    .visualizations-header p {
-        margin: 10px 0 0 0;
-        font-size: 1.2em;
-        opacity: 0.9;
-    }
-
-    .bettergov-logo {
-        font-size: 1.5em;
-        font-weight: 700;
-        color: white; /* Changed to white for contrast on gradient */
-        margin-bottom: 10px;
-    }
-
-    /* Style for buttons and links to match theme */
-    .button, .btn, a.cta-button {
-        background: linear-gradient(135deg, #0038A8 0%, #CE1126 100%) !important;
-        color: white !important;
-        border: none !important;
-        padding: 10px 0 !important;
-        border-radius: 5px !important;
-        text-decoration: none !important;
-        transition: transform 0.3s ease;
-    }
-
-    .button:hover, .btn:hover, a.cta-button:hover {
-        transform: scale(1.05);
-        opacity: 0.9;
-    }
-
-    /* Ensure text within the flood content is readable */
-    .flood-content p, .flood-content li {
-        color: #444;
-    }
-
-    /* Specific overrides for existing elements to ensure BetterGovPH look */
-    .flood-title {
-        color: #0038A8 !important; /* Blue from Philippine flag */
-    }
-
-    .flood-subtitle {
-        color: #CE1126 !important; /* Red from Philippine flag */
-    }
-
-    .flood-card {
-        border-left: 4px solid #0038A8 !important;
-    }
-
-    /* BetterGovPH specific mobile overrides */
-    .altgovph-logo, .altgovph-brand, .visualizations-nav-item {
-        display: none !important;
-    }
-
-    /* Mobile-specific adjustments */
-    @media (max-width: 768px) {
-        .main-content {
-            margin: 10px;
-            padding: 15px 0;
-        }
-        
-        .visualizations-header h1 {
-            font-size: 2em;
-        }
-        
-        .feature-grid {
-            grid-template-columns: 1fr;
-        }
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
     }
 </style>
 {% endblock %}
 
 {% block content %}
-<div class="main-content">
-    <div class="visualizations-header">
-        <div class="altgovph-logo">🏛️ BetterGovPH</div>
-        <h1>Flood Control Projects</h1>
-        <p>Government Infrastructure Analysis & Monitoring</p>
+<section class="p-4 bg-gray-50">
+    <div class="mb-4">
+        <h1 class="text-2xl font-bold text-blue-900 mb-2">🌊 Flood Control</h1>
+        <p class="text-xs text-gray-600">DPWH Flood Control Infrastructure Projects</p>
     </div>
 
-    <div class="flood-content">
-        <p class="flood-subtitle">Intelligent flood control infrastructure analysis with AI-powered insights</p>
-        
-        <p class="flood-disclaimer bg-yellow-50 text-yellow-800 py-3 rounded-md my-4 text-base font-medium max-w-2xl mx-auto text-center" style="padding-left: 0; padding-right: 0;">
-            <strong>Infrastructure Analysis:</strong> Track DPWH flood control projects across the Philippines with comprehensive data visualization and monitoring.
+    <!-- Tabs -->
+    <div class="mobile-flood-tabs">
+        <button class="mobile-tab-btn active" data-tab="proximity">📍 Proximity</button>
+        <button class="mobile-tab-btn" data-tab="contractors-web">🕸️ Contractors Web</button>
+    </div>
+
+    <!-- Proximity Tab -->
+    <div id="proximity-tab" class="mobile-tab-panel active">
+        <p class="text-xs text-gray-600 mb-3">
+            Projects with same amounts at close locations (proximity analysis)
         </p>
 
-        <div class="feature-grid grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 my-8">
-            <div class="feature-card flood-card bg-white rounded-lg shadow-lg hover:shadow-xl transition-all" style="padding: 1.5rem 0;">
-                <h3 class="text-blue-900 mt-0 text-xl font-semibold mb-3">🌊 Project Tracking</h3>
-                <p class="text-gray-600 leading-relaxed">Monitor 9,855+ flood control projects across all regions with real-time status updates and completion tracking.</p>
+        <!-- Loading -->
+        <div id="proximity-loading" class="text-center py-8">
+            <div class="inline-block w-8 h-8 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin">
             </div>
-            
-            <div class="feature-card flood-card bg-white rounded-lg shadow-lg hover:shadow-xl transition-all" style="padding: 1.5rem 0;">
-                <h3 class="text-blue-900 mt-0 text-xl font-semibold mb-3">📊 Data Visualization</h3>
-                <p class="text-gray-600 leading-relaxed">Interactive charts and maps showing project distribution, costs, and progress across provinces and regions.</p>
+            <p class="text-sm text-gray-500 mt-2">Loading proximity data...</p>
+        </div>
+
+        <!-- Results -->
+        <div id="proximity-container"></div>
+    </div>
+
+    <!-- Contractors Web Tab -->
+    <div id="contractors-web-tab" class="mobile-tab-panel">
+        <p class="text-xs text-gray-600 mb-3">
+            Joint Venture Network - Relationships between companies through shared projects
+        </p>
+
+        <!-- Loading -->
+        <div id="contractors-web-loading" class="text-center py-8">
+            <div class="inline-block w-8 h-8 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin">
             </div>
-            
-            <div class="feature-card flood-card bg-white rounded-lg shadow-lg hover:shadow-xl transition-all" style="padding: 1.5rem 0;">
-                <h3 class="text-blue-900 mt-0 text-xl font-semibold mb-3">🔍 Advanced Search</h3>
-                <p class="text-gray-600 leading-relaxed">Powerful search and filtering capabilities to find specific projects by location, contractor, or project type.</p>
+            <p class="text-sm text-gray-500 mt-2">Loading joint venture data...</p>
+        </div>
+
+        <!-- Stats -->
+        <div class="mobile-stats-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem; margin-bottom: 1rem;">
+            <div class="mobile-stat-card">
+                <div class="text-lg font-bold text-blue-600" id="jv-total-count">-</div>
+                <div class="text-xs text-gray-600 mt-1">Total JVs</div>
             </div>
-            
-            <div class="feature-card flood-card bg-white rounded-lg shadow-lg hover:shadow-xl transition-all" style="padding: 1.5rem 0;">
-                <h3 class="text-blue-900 mt-0 text-xl font-semibold mb-3">📈 Analytics</h3>
-                <p class="text-gray-600 leading-relaxed">Comprehensive analytics on project costs, timelines, and performance metrics for informed decision-making.</p>
-            </div>
-            
-            <div class="feature-card flood-card bg-white rounded-lg shadow-lg hover:shadow-xl transition-all" style="padding: 1.5rem 0;">
-                <h3 class="text-blue-900 mt-0 text-xl font-semibold mb-3">🗺️ Geographic Analysis</h3>
-                <p class="text-gray-600 leading-relaxed">Interactive maps showing project locations with detailed information and regional analysis capabilities.</p>
-            </div>
-            
-            <div class="feature-card flood-card bg-white rounded-lg shadow-lg hover:shadow-xl transition-all" style="padding: 1.5rem 0;">
-                <h3 class="text-blue-900 mt-0 text-xl font-semibold mb-3">📋 Export Tools</h3>
-                <p class="text-gray-600 leading-relaxed">Export project data in multiple formats for further analysis, reporting, and research purposes.</p>
+            <div class="mobile-stat-card">
+                <div class="text-lg font-bold text-green-600" id="jv-companies-count">-</div>
+                <div class="text-xs text-gray-600 mt-1">Companies</div>
             </div>
         </div>
 
-        <div class="cta-section text-center bg-gray-50 rounded-lg my-8" style="padding: 2.5rem 0;">
-            <h2 class="text-blue-900 mb-4 text-2xl font-bold">Access Flood Control Analysis</h2>
-            <p class="text-gray-600 mb-6">Explore government infrastructure projects with transparency and accountability</p>
-            <a href="/api/flood/projects" class="cta-button inline-block bg-gradient-to-r from-blue-900 to-red-700 text-white py-4 no-underline rounded-md font-semibold text-lg hover:shadow-lg transition-all" style="display: block; text-align: center;">🚀 Start Analysis</a>
+        <!-- Network Graph Container -->
+        <div id="contractors-web-container" style="background: #fafafa; border: 2px solid #ddd; border-radius: 8px; overflow: hidden; position: relative; height: 500px;">
+            <div id="network-graph" style="width: 100%; height: 100%;"></div>
         </div>
     </div>
-
-    <div class="footer text-center py-8 text-gray-600 border-t border-gray-200 mt-10" style="padding-left: 0; padding-right: 0;">
-        <div class="logo text-2xl font-bold text-blue-900 mb-2">BetterGovPH</div>
-        <p>Alternative Government Philippines - Promoting Infrastructure Transparency</p>
-        <p>© 2025 BetterGovPH. Committed to Open Government Data.</p>
-    </div>
-</div>
+</section>
 
 <script>
-    // Add some interactivity
-    document.addEventListener('DOMContentLoaded', function() {
-        console.log('🏛️ BetterGovPH Flood Control Platform Loaded (Mobile)');
-        
-        // Add click tracking for analytics
-        document.querySelectorAll('.cta-button').forEach(button => {
-            button.addEventListener('click', function(e) {
-                console.log('🌊 Flood control analysis access initiated (Mobile)');
-            });
+    function switchTab(tabName) {
+        document.querySelectorAll('.mobile-tab-btn').forEach(btn => {
+            btn.classList.remove('active');
         });
-        
-        // Add hover effects to feature cards
-        document.querySelectorAll('.feature-card').forEach(card => {
-            card.addEventListener('mouseenter', function() {
-                this.style.transform = 'translateY(-5px)';
-            });
-            card.addEventListener('mouseleave', function() {
-                this.style.transform = 'translateY(0)';
-            });
+        document.querySelectorAll('.mobile-tab-panel').forEach(panel => {
+            panel.classList.remove('active');
         });
+
+        document.querySelector(`[data-tab="${tabName}"]`).classList.add('active');
+        document.getElementById(`${tabName}-tab`).classList.add('active');
+
+        if (tabName === 'proximity' && !proximityLoaded) {
+            loadProximityData();
+        } else if (tabName === 'contractors-web' && !contractorsWebLoaded) {
+            loadContractorsWebData();
+        }
+    }
+
+    document.querySelectorAll('.mobile-tab-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            switchTab(btn.getAttribute('data-tab'));
+        });
+    });
+
+    let proximityLoaded = false;
+    let contractorsWebLoaded = false;
+
+    async function loadProximityData() {
+        const loadingEl = document.getElementById('proximity-loading');
+        const container = document.getElementById('proximity-container');
+        
+        if (!loadingEl) {
+            console.error('Missing element: proximity-loading');
+            return;
+        }
+        if (!container) {
+            console.error('Missing element: proximity-container');
+            return;
+        }
+        
+        try {
+            loadingEl.style.display = 'block';
+            container.innerHTML = '';
+            
+            const response = await fetch('/static/data/flood_same_amount_proximity_results.json');
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            const data = await response.json();
+
+            loadingEl.style.display = 'none';
+
+            // Filter to 0-1km matches like desktop does
+            const filteredMatches = (data.matches || [])
+                .filter(m => m.distance_km <= 1.0)
+                .sort((a, b) => {
+                    // Sort by distance first, then by cost
+                    if (a.distance_km !== b.distance_km) {
+                        return a.distance_km - b.distance_km;
+                    }
+                    return b.cost - a.cost;
+                });
+
+            if (filteredMatches.length > 0) {
+                container.innerHTML = filteredMatches.slice(0, 20).map(match => {
+                    const p1 = match.project1 || {};
+                    const p2 = match.project2 || {};
+                    const location1 = p1.Municipality || p1.Province || 'N/A';
+                    const location2 = p2.Municipality || p2.Province || 'N/A';
+                    
+                    return `
+                <div class="mobile-project-card">
+                    <div class="text-xs font-bold text-blue-900 mb-2">₱${match.cost.toLocaleString()}</div>
+                    <div class="text-xs text-gray-700 mb-1"><strong>Project 1:</strong> ${(p1.ProjectDescription || 'N/A').substring(0, 60)}${(p1.ProjectDescription || '').length > 60 ? '...' : ''}</div>
+                    <div class="text-xs text-gray-600">📍 ${location1} • ${p1.Contractor || 'N/A'}</div>
+                    <div class="text-xs text-gray-700 mb-1 mt-2"><strong>Project 2:</strong> ${(p2.ProjectDescription || 'N/A').substring(0, 60)}${(p2.ProjectDescription || '').length > 60 ? '...' : ''}</div>
+                    <div class="text-xs text-gray-600">📍 ${location2} • ${p2.Contractor || 'N/A'}</div>
+                    <div class="text-xs text-orange-600 mt-2">🗺️ Distance: ${match.distance_km ? match.distance_km.toFixed(2) + 'km' : 'N/A'}</div>
+                </div>
+            `;
+                }).join('');
+            } else {
+                showEmptyState('proximity-container', 'No proximity matches found');
+            }
+
+            proximityLoaded = true;
+        } catch (error) {
+            console.error('Error loading proximity data:', error);
+            if (loadingEl) {
+                loadingEl.style.display = 'none';
+            }
+            if (container) {
+                showErrorState('proximity-container', 'Failed to load proximity data');
+            }
+        }
+    }
+
+    let networkData = { nodes: [], links: [] };
+
+    async function loadContractorsWebData() {
+        const loadingEl = document.getElementById('contractors-web-loading');
+        try {
+            if (loadingEl) {
+                loadingEl.style.display = 'block';
+            }
+            // Load joint venture data from the dedicated JV file (same as desktop)
+            const response = await fetch('/static/data/flood_control_data_with_jv.json');
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            const data = await response.json();
+
+            const projects = data.projects || [];
+            const jointVentures = projects.filter(p => p.is_joint_venture === true);
+
+            // Hide loading indicator
+            if (loadingEl) {
+                loadingEl.style.display = 'none';
+            }
+
+            if (jointVentures.length === 0) {
+                showEmptyState('contractors-web-container', 'No joint ventures found');
+                contractorsWebLoaded = true;
+                return;
+            }
+
+            // Build network data
+            networkData = buildNetworkData(jointVentures);
+
+            // Update stats
+            const companies = new Set();
+            networkData.nodes.forEach(node => {
+                if (node.type === 'company') {
+                    companies.add(node.id);
+                }
+            });
+
+            document.getElementById('jv-total-count').textContent = jointVentures.length.toLocaleString();
+            document.getElementById('jv-companies-count').textContent = companies.size.toLocaleString();
+
+            // Render network graph
+            try {
+                renderNetworkGraph(networkData);
+            } catch (renderError) {
+                console.error('Error rendering network graph:', renderError);
+                showErrorState('contractors-web-container', 'Failed to render network graph');
+            }
+
+            contractorsWebLoaded = true;
+        } catch (error) {
+            console.error('Error loading contractors web data:', error);
+            const loadingEl = document.getElementById('contractors-web-loading');
+            if (loadingEl) {
+                loadingEl.style.display = 'none';
+            }
+            showErrorState('contractors-web-container', 'Failed to load joint venture data');
+            contractorsWebLoaded = true; // Mark as loaded to prevent retry loops
+        }
+    }
+
+    function buildNetworkData(jointVentures) {
+        const nodes = new Map();
+        const links = [];
+        const companyProjects = new Map();
+
+        jointVentures.forEach((project, index) => {
+            const contractor = project.Contractor || '';
+            const cost = parseFloat(project.ContractCost) || 0;
+
+            // Extract company names from JV
+            const companies = contractor.split(/[&/]| AND | and /).map(c => c.trim()).filter(c => c.length > 0);
+
+            if (companies.length >= 2) {
+                // Add companies as nodes
+                companies.forEach(company => {
+                    if (!nodes.has(company)) {
+                        nodes.set(company, {
+                            id: company,
+                            type: 'company',
+                            value: 0,
+                            jvCount: 0
+                        });
+                        companyProjects.set(company, []);
+                    }
+                    const node = nodes.get(company);
+                    node.value += cost;
+                    node.jvCount += 1;
+                    companyProjects.get(company).push(project);
+                });
+
+                // Create JV node
+                const jvId = `JV-${index}`;
+                nodes.set(jvId, {
+                    id: jvId,
+                    type: 'jv',
+                    value: cost,
+                    project: project
+                });
+
+                // Create links from companies to JV
+                companies.forEach(company => {
+                    links.push({
+                        source: company,
+                        target: jvId,
+                        value: cost
+                    });
+                });
+            }
+        });
+
+        return {
+            nodes: Array.from(nodes.values()),
+            links: links
+        };
+    }
+
+    function renderNetworkGraph(data) {
+        const container = document.getElementById('network-graph');
+        if (!container || !data || !data.nodes || data.nodes.length === 0) {
+            showEmptyState('contractors-web-container', 'No network data available');
+            return;
+        }
+
+        container.innerHTML = '';
+
+        const width = container.clientWidth;
+        const height = 500;
+
+        const svg = d3.select('#network-graph')
+            .append('svg')
+            .attr('width', width)
+            .attr('height', height)
+            .style('background', '#fafafa');
+
+        const g = svg.append('g');
+
+        // Add zoom
+        const zoom = d3.zoom()
+            .scaleExtent([0.1, 3])
+            .on('zoom', (event) => {
+                g.attr('transform', event.transform);
+            });
+        svg.call(zoom);
+
+        // Create force simulation
+        const simulation = d3.forceSimulation(data.nodes)
+            .force('link', d3.forceLink(data.links).id(d => d.id).distance(80))
+            .force('charge', d3.forceManyBody().strength(-200))
+            .force('center', d3.forceCenter(width / 2, height / 2))
+            .force('collision', d3.forceCollide().radius(15));
+
+        // Create links
+        const link = g.append('g')
+            .selectAll('line')
+            .data(data.links)
+            .enter()
+            .append('line')
+            .attr('stroke', '#2196F3')
+            .attr('stroke-opacity', 0.6)
+            .attr('stroke-width', 2);
+
+        // Create nodes
+        const node = g.append('g')
+            .selectAll('circle')
+            .data(data.nodes)
+            .enter()
+            .append('circle')
+            .attr('r', d => {
+                if (d.type === 'jv') return 8;
+                return Math.min(Math.sqrt(d.value) / 50000 + 8, 20);
+            })
+            .attr('fill', d => {
+                if (d.type === 'jv') return '#FF9800';
+                const jvCount = d.jvCount || 0;
+                if (jvCount >= 10) return '#E91E63';
+                if (jvCount >= 5) return '#FF5722';
+                if (jvCount >= 3) return '#FFC107';
+                return '#4CAF50';
+            })
+            .attr('stroke', '#fff')
+            .attr('stroke-width', 2)
+            .style('cursor', 'pointer')
+            .call(d3.drag()
+                .on('start', dragstarted)
+                .on('drag', dragged)
+                .on('end', dragended));
+
+        // Add labels for companies only (to avoid clutter)
+        const label = g.append('g')
+            .selectAll('text')
+            .data(data.nodes.filter(d => d.type === 'company'))
+            .enter()
+            .append('text')
+            .text(d => d.id.length > 15 ? d.id.substring(0, 15) + '...' : d.id)
+            .attr('font-size', '10px')
+            .attr('dx', 12)
+            .attr('dy', 4)
+            .style('pointer-events', 'none');
+
+        // Update positions on simulation tick
+        simulation.on('tick', () => {
+            link
+                .attr('x1', d => d.source.x)
+                .attr('y1', d => d.source.y)
+                .attr('x2', d => d.target.x)
+                .attr('y2', d => d.target.y);
+
+            node
+                .attr('cx', d => d.x)
+                .attr('cy', d => d.y);
+
+            label
+                .attr('x', d => d.x)
+                .attr('y', d => d.y);
+        });
+
+        function dragstarted(event, d) {
+            if (!event.active) simulation.alphaTarget(0.3).restart();
+            d.fx = d.x;
+            d.fy = d.y;
+        }
+
+        function dragged(event, d) {
+            d.fx = event.x;
+            d.fy = event.y;
+        }
+
+        function dragended(event, d) {
+            if (!event.active) simulation.alphaTarget(0);
+            d.fx = null;
+            d.fy = null;
+        }
+    }
+
+    function showEmptyState(containerId, message) {
+        document.getElementById(containerId).innerHTML = `
+        <div class="text-center py-12">
+            <div class="text-6xl mb-4">🌊</div>
+            <h3 class="text-lg font-bold text-gray-700 mb-2">${message}</h3>
+        </div>
+    `;
+    }
+
+    function showErrorState(containerId, message) {
+        document.getElementById(containerId).innerHTML = `
+        <div class="text-center py-12">
+            <div class="text-6xl mb-4">❌</div>
+            <h3 class="text-lg font-bold text-red-700 mb-2">${message}</h3>
+        </div>
+    `;
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+        console.log('Flood page loaded, initializing...');
+        // Load proximity data on page load since it's the default active tab
+        loadProximityData();
     });
 </script>
 {% endblock %}

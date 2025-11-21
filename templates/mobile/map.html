@@ -1,453 +1,720 @@
 {% extends "mobile/base_visualizations.html" %}
 
+{% block title %}Interactive Map - BetterGovPH{% endblock %}
+
 {% block head %}
-<!-- Google Fonts - Inter -->
-    <!-- Tailwind CSS -->
-    <link rel="stylesheet" href="/static/css/tailwind.css">
-    <!-- Tailwind CSS (Production) -->
-    <link rel="stylesheet" href="/static/css/tailwind.css">
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-
-
-<!-- Chart.js -->
-<script src="/static/js/chart.js"></script>
-
-<!-- D3.js for network visualizations -->
-<script src="https://d3js.org/d3.v7.min.js"></script>
-
+<link rel="stylesheet" href="/static/css/tailwind.css">
 <!-- Leaflet for maps -->
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
-<!-- BetterGovPH Metadata Overrides -->
-<meta name="description" content="Interactive Map - Government Data Analysis Platform">
-<meta name="keywords" content="flood control, infrastructure, DPWH, government projects, Philippines, interactive map">
-<meta name="author" content="BetterGovPH">
+<style>
+    .mobile-map-section {
+        padding: 1rem;
+        background: #f9fafb;
+    }
 
-<!-- Open Graph / Facebook -->
-<meta property="og:type" content="website">
-    <meta property="og:url" content="{{ og_url | default(value='https://visualizations.bettergov.ph/map') }}">
-<meta property="og:title" content="Interactive Map - BetterGovPH">
-<meta property="og:description" content="Interactive map of flood control projects and infrastructure across the Philippines">
-<meta property="og:image" content="/static/images/gov_logo.png">
+    .mobile-map-card {
+        background: white;
+        border-radius: 8px;
+        padding: 1rem;
+        margin-bottom: 1rem;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    }
 
-<!-- Twitter -->
-<meta property="twitter:card" content="summary_large_image">
-<meta property="twitter:url" content="https://visualizations.bettergov.ph/map">
-<meta property="twitter:title" content="Interactive Map - BetterGovPH">
-<meta property="twitter:description" content="Interactive map of flood control projects and infrastructure across the Philippines">
-<meta property="twitter:image" content="/static/images/gov_logo.png">
+    #map {
+        width: 100%;
+        height: 500px;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        position: relative;
+        background: #fafafa;
+    }
 
+    .legend-item {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        font-size: 0.75rem;
+        color: #666;
+        margin-bottom: 0.5rem;
+    }
+
+    .legend-shape {
+        width: 16px;
+        height: 16px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .legend-circle {
+        border-radius: 50%;
+        background: #6b7280;
+        border: 2px solid #374151;
+    }
+
+    .legend-square {
+        border-radius: 4px;
+        background: #6366f1;
+        border: 2px solid #4338ca;
+    }
+
+    .legend-hex {
+        background: #f59e0b;
+        border: 2px solid #b45309;
+        clip-path: polygon(25% 0%, 75% 0%, 100% 50%, 75% 100%, 25% 100%, 0% 50%);
+    }
+
+    .legend-star {
+        background: #f43f5e;
+        border: 2px solid #be123c;
+        clip-path: polygon(50% 0%, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%);
+    }
+
+    .integrated-marker {
+        width: 24px;
+        height: 24px;
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        grid-template-rows: repeat(2, 1fr);
+        gap: 2px;
+        padding: 2px;
+        border-radius: 8px;
+        background: rgba(255, 255, 255, 0.95);
+        border: 1px solid rgba(15, 23, 42, 0.2);
+        box-shadow: 0 4px 12px rgba(15, 23, 42, 0.15);
+    }
+
+    .integrated-shape {
+        width: 10px;
+        height: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.5rem;
+        font-weight: 700;
+        color: #fff;
+        border-radius: 2px;
+    }
+
+    .integrated-shape.empty {
+        opacity: 0.3;
+    }
+
+    .integrated-shape.circle {
+        border-radius: 50%;
+        background: #6b7280;
+        border: 1px solid #374151;
+    }
+
+    .integrated-shape.square {
+        border-radius: 3px;
+        background: #6366f1;
+        border: 1px solid #4338ca;
+    }
+
+    .integrated-shape.hex {
+        background: #f59e0b;
+        border: 1px solid #b45309;
+        clip-path: polygon(25% 0%, 75% 0%, 100% 50%, 75% 100%, 25% 100%, 0% 50%);
+    }
+
+    .integrated-shape.star {
+        background: #f43f5e;
+        border: 1px solid #be123c;
+        clip-path: polygon(50% 0%, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%);
+    }
+
+    .mobile-loading {
+        text-align: center;
+        padding: 2rem;
+        color: #666;
+        font-size: 0.875rem;
+    }
+</style>
 {% endblock %}
 
 {% block content %}
-<!-- Mobile Navigation - Blends with hero, no borders or background -->
-<nav class="py-3 bg-white">
-    <div class="flex items-center justify-between">
-        <div class="flex items-center">
-            <a href="https://bettergov.ph" class="flex items-center">
-                <img src="https://raw.githubusercontent.com/bettergovph/logo/main/png/BetterGov_Horizontal-Black.png"
-                     alt="BetterGov"
-                     class="h-8">
-            </a>
-        </div>
-        <div class="md:hidden">
-            <button class="text-black focus:outline-none" onclick="toggleMobileMenu()">
-                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
-                </svg>
-            </button>
-        </div>
+<section class="mobile-map-section">
+    <div class="mb-4">
+        <h1 class="text-2xl font-bold text-blue-900 mb-2">🗺️ Interactive Map</h1>
+        <p class="text-xs text-gray-600">Explore projects by province across the Philippines</p>
     </div>
-    <!-- Mobile menu (hidden by default) -->
-    <div id="mobileMenu" class="hidden mt-4 space-y-2">
-        <a href="/budget" class="block text-black hover:text-gray-600 font-medium py-2 w-full text-left">Budget</a>
-        <a href="/map" class="block text-black hover:text-gray-600 font-medium py-2 w-full text-left">Map</a>
-        <a href="/budget-flood-correlation" class="block text-black hover:text-gray-600 font-medium py-2 w-full text-left">Budget-Flood</a>
-        <a href="/flood-dime-correlation" class="block text-black hover:text-gray-600 font-medium py-2 w-full text-left">Flood-DIME</a>
+
+    <!-- Map Card -->
+    <div class="mobile-map-card">
+        <div id="map"></div>
     </div>
-</nav>
 
-<script>
-function toggleMobileMenu() {
-    const menu = document.getElementById('mobileMenu');
-    menu.classList.toggle('hidden');
-}
-</script>
-
-<!-- Map Section -->
-<section class="bg-gray-50 py-4">
-    <div class="bg-white rounded-lg shadow-md py-4">
-        <div class="flex flex-col gap-2 mb-3">
-            <h2 class="text-xl font-semibold text-black">🗺️ Interactive Map</h2>
-            <button id="refresh-map-data" class="bg-blue-600 text-white py-2 rounded-lg text-sm hover:bg-blue-700 transition w-full">
-                🔄 Refresh
-            </button>
-        </div>
-
-        <!-- Map Instructions -->
-        <div class="bg-blue-50 rounded-lg mb-3 border-l-4 border-blue-500" style="padding: 1rem 0;">
-            <div class="text-xs text-blue-800 font-medium">
-                💡 <strong>Tip:</strong> Click on a region directly on the map to explore projects in that specific areas.
+    <!-- Legend Card -->
+    <div class="mobile-map-card">
+        <h3 class="text-sm font-bold text-gray-700 mb-3">📊 Map Legend</h3>
+        <div class="space-y-2">
+            <div class="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">Project Source</div>
+            <div class="legend-item">
+                <div class="legend-shape legend-circle"></div>
+                <span>Circles · SSP Flood Control</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-shape legend-square"></div>
+                <span>Squares · DIME Infrastructure</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-shape legend-hex"></div>
+                <span>Hexagons · PhilGEPS Procurement</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-shape legend-star"></div>
+                <span>Stars · DPWH Microsite</span>
+            </div>
+            <div class="text-xs text-gray-500 mt-3">
+                💡 Click a province to see project details. Marker size represents project count.
             </div>
         </div>
+    </div>
 
-        <div id="map" class="w-full rounded-lg border border-gray-300 mb-4" style="height: 400px;"></div>
-
-        <!-- Show All Button (Advanced Feature) -->
-        <details class="border border-gray-200 rounded-lg py-3 bg-gray-50">
-            <summary class="cursor-pointer text-xs text-gray-600 font-medium">Advanced: Load all projects</summary>
-            <div class="mt-2 pt-2 border-t border-gray-200">
-                <p class="text-xs text-red-600 mb-2">
-                    ⚠️ Warning: Loading all 9,855 projects may overwhelm your browser and cause it to freeze. Only use this on powerful devices.
-                </p>
-                <button id="show-all-map" class="bg-gray-600 text-white py-1 rounded-lg text-xs hover:bg-gray-700 transition w-full">
-                    Load All Projects
-                </button>
-            </div>
-        </details>
+    <!-- Loading Indicator -->
+    <div id="map-loading" class="mobile-loading" style="display: none;">
+        <div>Loading map data...</div>
     </div>
 </section>
 
 <script>
-// Copy of flood page map implementation - simplified for mobile standalone map page
+const SOURCE_ORDER = ['ssp', 'dime', 'philgeps', 'microsite'];
+const SOURCE_META = {
+    ssp: { label: 'Flood Control (SSP)', shortLabel: 'SSP', className: 'circle' },
+    dime: { label: 'DIME Infrastructure', shortLabel: 'DIME', className: 'square' },
+    philgeps: { label: 'PhilGEPS Procurement', shortLabel: 'PhilGEPS', className: 'hex' },
+    microsite: { label: 'DPWH Microsite', shortLabel: 'Microsite', className: 'star' }
+};
 
-// Global map variables
+const PROVINCE_GEOJSON_FILES = [
+    'ph.cagayan-valley-region-ii.cagayan.any.any.geo.json',
+    'ph.cagayan-valley-region-ii.isabela.any.any.geo.json',
+    'ph.cagayan-valley-region-ii.nueva-vizcaya.any.any.geo.json',
+    'ph.cagayan-valley-region-ii.quirino.any.any.geo.json',
+    'ph.cagayan-valley-region-ii.batanes.any.any.geo.json',
+    'ph.central-luzon-region-iii.bulacan.any.any.geo.json',
+    'ph.central-luzon-region-iii.nueva-ecija.any.any.geo.json',
+    'ph.central-luzon-region-iii.pampanga.any.any.geo.json',
+    'ph.central-luzon-region-iii.tarlac.any.any.geo.json',
+    'ph.central-luzon-region-iii.zambales.any.any.geo.json',
+    'ph.central-luzon-region-iii.aurora.any.any.geo.json',
+    'ph.central-luzon-region-iii.bataan.any.any.geo.json',
+    'ph.calabarzon-region-iv-a.laguna.any.any.geo.json',
+    'ph.calabarzon-region-iv-a.cavite.any.any.geo.json',
+    'ph.calabarzon-region-iv-a.batangas.any.any.geo.json',
+    'ph.calabarzon-region-iv-a.quezon.any.any.geo.json',
+    'ph.calabarzon-region-iv-a.rizal.any.any.geo.json',
+    'ph.national-capital-region.metropolitan-manila.any.any.geo.json',
+    'ph.central-visayas-region-vii.cebu.any.any.geo.json',
+    'ph.central-visayas-region-vii.bohol.any.any.geo.json',
+    'ph.central-visayas-region-vii.negros-oriental.any.any.geo.json',
+    'ph.central-visayas-region-vii.siquijor.any.any.geo.json',
+    'ph.western-visayas-region-vi.iloilo.any.any.geo.json',
+    'ph.western-visayas-region-vi.negros-occidental.any.any.geo.json',
+    'ph.western-visayas-region-vi.capiz.any.any.geo.json',
+    'ph.western-visayas-region-vi.aklan.any.any.geo.json',
+    'ph.western-visayas-region-vi.antique.any.any.geo.json',
+    'ph.western-visayas-region-vi.guimaras.any.any.geo.json',
+    'ph.eastern-visayas-region-viii.leyte.any.any.geo.json',
+    'ph.eastern-visayas-region-viii.samar.any.any.geo.json',
+    'ph.eastern-visayas-region-viii.northern-samar.any.any.geo.json',
+    'ph.eastern-visayas-region-viii.eastern-samar.any.any.geo.json',
+    'ph.eastern-visayas-region-viii.southern-leyte.any.any.geo.json',
+    'ph.eastern-visayas-region-viii.biliran.any.any.geo.json',
+    'ph.bicol-region-region-v.camarines-sur.any.any.geo.json',
+    'ph.bicol-region-region-v.camarines-norte.any.any.geo.json',
+    'ph.bicol-region-region-v.albay.any.any.geo.json',
+    'ph.bicol-region-region-v.sorsogon.any.any.geo.json',
+    'ph.bicol-region-region-v.catanduanes.any.any.geo.json',
+    'ph.bicol-region-region-v.masbate.any.any.geo.json',
+    'ph.mimaropa-region-iv-b.oriental-mindoro.any.any.geo.json',
+    'ph.mimaropa-region-iv-b.occidental-mindoro.any.any.geo.json',
+    'ph.mimaropa-region-iv-b.marinduque.any.any.geo.json',
+    'ph.mimaropa-region-iv-b.romblon.any.any.geo.json',
+    'ph.mimaropa-region-iv-b.palawan.any.any.geo.json',
+    'ph.cordillera-administrative-region-car.abra.any.any.geo.json',
+    'ph.cordillera-administrative-region-car.benguet.any.any.geo.json',
+    'ph.cordillera-administrative-region-car.ifugao.any.any.geo.json',
+    'ph.cordillera-administrative-region-car.kalinga.any.any.geo.json',
+    'ph.cordillera-administrative-region-car.mountain-province.any.any.geo.json',
+    'ph.cordillera-administrative-region-car.apayao.any.any.geo.json',
+    'ph.ilocos-region-region-i.ilocos-norte.any.any.geo.json',
+    'ph.ilocos-region-region-i.ilocos-sur.any.any.geo.json',
+    'ph.ilocos-region-region-i.la-union.any.any.geo.json',
+    'ph.ilocos-region-region-i.pangasinan.any.any.geo.json',
+    'ph.northern-mindanao-region-x.bukidnon.any.any.geo.json',
+    'ph.northern-mindanao-region-x.camiguin.any.any.geo.json',
+    'ph.northern-mindanao-region-x.lanao-del-norte.any.any.geo.json',
+    'ph.northern-mindanao-region-x.misamis-occidental.any.any.geo.json',
+    'ph.northern-mindanao-region-x.misamis-oriental.any.any.geo.json',
+    'ph.davao-region-region-xi.davao-del-norte.any.any.geo.json',
+    'ph.davao-region-region-xi.davao-del-sur.any.any.geo.json',
+    'ph.davao-region-region-xi.davao-oriental.any.any.geo.json',
+    'ph.davao-region-region-xi.compostela-valley.any.any.geo.json',
+    'ph.soccsksargen-region-xii.north-cotabato.any.any.geo.json',
+    'ph.soccsksargen-region-xii.south-cotabato.any.any.geo.json',
+    'ph.soccsksargen-region-xii.sultan-kudarat.any.any.geo.json',
+    'ph.soccsksargen-region-xii.sarangani.any.any.geo.json',
+    'ph.caraga-region-xiii.agusan-del-norte.any.any.geo.json',
+    'ph.caraga-region-xiii.agusan-del-sur.any.any.geo.json',
+    'ph.caraga-region-xiii.surigao-del-norte.any.any.geo.json',
+    'ph.caraga-region-xiii.surigao-del-sur.any.any.geo.json',
+    'ph.caraga-region-xiii.dinagat-islands.any.any.geo.json',
+    'ph.zamboanga-peninsula-region-ix.zamboanga-del-norte.any.any.geo.json',
+    'ph.zamboanga-peninsula-region-ix.zamboanga-del-sur.any.any.geo.json',
+    'ph.zamboanga-peninsula-region-ix.zamboanga-sibugay.any.any.geo.json',
+    'ph.autonomous-region-of-muslim-mindanao-armm.basilan.any.any.geo.json',
+    'ph.autonomous-region-of-muslim-mindanao-armm.lanao-del-sur.any.any.geo.json',
+    'ph.autonomous-region-of-muslim-mindanao-armm.maguindanao.any.any.geo.json',
+    'ph.autonomous-region-of-muslim-mindanao-armm.sulu.any.any.geo.json',
+    'ph.autonomous-region-of-muslim-mindanao-armm.tawi-tawi.any.any.geo.json'
+];
+
+const PROVINCE_KEY_OVERRIDES = {
+    'davaodeoro': 'compostelavalley',
+    'metropolitanmanila': 'metromanila',
+    'nationalcapitalregion': 'metromanila'
+};
+
+const PROVINCE_SLUG_OVERRIDES = {
+    'compostelavalley': 'davao-de-oro',
+    'metromanila': 'metropolitan-manila'
+};
+
 let mapInstance = null;
-let mapMarkers = [];
-let loadedProjects = [];
-let globalOffset = 0;
-let isLoadingMore = false;
-let progressiveInterval = null;
-let progressiveLoadingStarted = false;
-let progressiveLoadingCancelled = false;
-let regionProgressiveLoadingCancelled = false;
-let showAllMode = false;
-let initialLoadDone = false;
-let isLoading = false;
+let provinceGeoJSONLayer = null;
+const provinceCenters = new Map();
+const provinceSummaryLookup = new Map();
+const provinceMarkers = new Map();
+const provinceLayers = new Map();
+let activeProvinceKey = null;
 
-// Map status display
-function updateMapStatus(message) {
-    console.log(`🗺️ ${message}`);
+function normalizeProvinceKey(name) {
+    if (!name) return '';
+    const cleaned = String(name)
+        .toLowerCase()
+        .replace(/province of\s+/g, '')
+        .replace(/city of\s+/g, '')
+        .replace(/\band\b/g, '&')
+        .replace(/[^a-z0-9]/g, '');
+    return PROVINCE_KEY_OVERRIDES[cleaned] || cleaned;
 }
 
-// Initialize the map
-function initializeMap() {
-    const mapContainer = document.getElementById('map');
-    if (mapContainer) {
-        // Ensure container is visible and has dimensions
-        if (mapContainer.offsetWidth === 0 || mapContainer.offsetHeight === 0) {
-            console.warn('Map container has no dimensions, retrying in 100ms...');
-            setTimeout(initializeMap, 100);
-            return;
-        }
+function toSlug(name) {
+    if (!name) return '';
+    const cleaned = String(name)
+        .toLowerCase()
+        .replace(/province of\s+/g, '')
+        .replace(/city of\s+/g, '')
+        .replace(/&/g, 'and')
+        .replace(/[^a-z0-9\s-]/g, '')
+        .trim()
+        .replace(/\s+/g, '-');
+    return cleaned;
+}
 
-        // Initialize Leaflet map centered on Philippines with optimal view for mobile
-        mapInstance = L.map('map', {
-            preferCanvas: false,
-            renderer: L.canvas()
-        }).setView([12.2, 121.8], 5.5);
+function getProvinceSlug(provinceName) {
+    const key = normalizeProvinceKey(provinceName);
+    if (PROVINCE_SLUG_OVERRIDES[key]) {
+        return PROVINCE_SLUG_OVERRIDES[key];
+    }
+    return toSlug(provinceName);
+}
 
-        // Add OpenStreetMap tiles with proper configuration for better loading
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-            attribution: '© OpenStreetMap contributors',
-            maxZoom: 19,
-            minZoom: 3,
-            subdomains: ['a', 'b', 'c'],
-            tileSize: 256,
-            zoomOffset: 0,
-            crossOrigin: true,
-            bounds: [[4.5, 116], [21, 127]], // Philippines bounds
-            maxBounds: [[4.5, 116], [21, 127]] // Restrict panning to Philippines area
-        }).addTo(mapInstance);
+const defaultProvinceStyle = {
+    color: '#0F172A',
+    weight: 1.5,
+    opacity: 0.8,
+    fillColor: '#0F172A',
+    fillOpacity: 0.05
+};
 
-        // Set map bounds to fit Philippines properly in mobile container
-        mapInstance.fitBounds([[4.5, 116], [21, 127]], {
-            padding: [10, 10],
-            maxZoom: 6
-        });
+function extractProvinceDisplayName(geoData, filename) {
+    if (!geoData) return filename;
+    if (geoData.properties) {
+        if (geoData.properties.province_name) return geoData.properties.province_name;
+        if (geoData.properties.name) return geoData.properties.name;
+        if (geoData.properties.PROVINCE) return geoData.properties.PROVINCE;
+    }
+    if (geoData.features && geoData.features.length > 0) {
+        const feature = geoData.features[0];
+        if (feature.properties?.province_name) return feature.properties.province_name;
+        if (feature.properties?.name) return feature.properties.name;
+        if (feature.properties?.PROVINCE) return feature.properties.PROVINCE;
+    }
+    const parts = filename.split('.');
+    if (parts.length >= 3) {
+        const raw = parts[2].replace(/-/g, ' ');
+        return raw.replace(/\b\w/g, char => char.toUpperCase());
+    }
+    return filename;
+}
 
-        // Add error handling for tile loading
-        mapInstance.on('tileerror', function(e) {
-            console.warn('Tile loading error:', e);
-        });
+function createShapeHTML(sourceKey, count) {
+    const meta = SOURCE_META[sourceKey];
+    const isEmpty = !count || count === 0;
+    const countLabel = isEmpty ? '' : String(count);
+    return `<div class="integrated-shape ${meta.className} ${isEmpty ? 'empty' : ''}" title="${meta.label}: ${count}">${countLabel}</div>`;
+}
 
-        // Show initial state
-        updateMapStatus('Map initialized. Loading initial data...');
+function createIntegratedIcon(summary) {
+    const html = `
+        <div class="integrated-marker" title="${summary.name}">
+            ${SOURCE_ORDER.map(sourceKey => createShapeHTML(sourceKey, summary.counts[sourceKey] || 0)).join('')}
+        </div>
+    `;
+    return L.divIcon({
+        className: 'integrated-marker-wrapper',
+        html,
+        iconSize: [24, 24],
+        iconAnchor: [12, 12]
+    });
+}
 
-        // Force map to resize and invalidate size
-        setTimeout(() => {
-            if (mapInstance) {
-                mapInstance.invalidateSize();
-                console.log('✅ Map invalidated and resized');
+function createPlaceholderIcon() {
+    return L.divIcon({
+        className: 'integrated-marker-wrapper',
+        html: `<div class="integrated-marker" style="opacity:0.7; filter: grayscale(0.35);">${SOURCE_ORDER.map(() => '<div class="integrated-shape empty"></div>').join('')}</div>`,
+        iconSize: [24, 24],
+        iconAnchor: [12, 12]
+    });
+}
+
+function formatCurrency(value) {
+    const numericValue = Number(value);
+    if (!isFinite(numericValue)) return 'N/A';
+    return `₱${numericValue.toLocaleString('en-PH', { maximumFractionDigits: 0 })}`;
+}
+
+function createProvincePopup(provinceName, summary) {
+    const rows = SOURCE_ORDER.map(sourceKey => {
+        const meta = SOURCE_META[sourceKey];
+        const count = summary.counts[sourceKey] || 0;
+        const share = summary.total ? ((count / summary.total) * 100).toFixed(1) : '0.0';
+        return `
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px; font-size:0.875rem;">
+                <span style="display:flex; align-items:center; gap:6px;">
+                    <span class="integrated-shape ${meta.className}" style="width:12px; height:12px;"></span>
+                    <span>${meta.label}</span>
+                </span>
+                <span><strong>${count.toLocaleString('en-PH')}</strong> <span style="color:#64748b; font-size:0.75rem;">(${share}%)</span></span>
+            </div>
+        `;
+    }).join('');
+
+    const totalCost = summary.total_cost ? formatCurrency(summary.total_cost) : '₱0';
+
+    return `
+        <div style="min-width:240px; max-width:300px; font-family:'Inter', sans-serif;">
+            <h3 style="margin:0 0 8px; font-size:1rem; color:#0f172a; font-weight:700;">${provinceName}</h3>
+            <div style="font-size:0.75rem; color:#475569; margin-bottom:12px; line-height:1.5;">
+                <div>Total projects: <strong>${summary.total.toLocaleString('en-PH')}</strong></div>
+                <div>Total value: <strong>${totalCost}</strong></div>
+            </div>
+            <div style="font-size:0.8125rem; color:#1e293b; border-top:1px solid #e5e7eb; padding-top:8px;">
+                ${rows}
+            </div>
+        </div>
+    `;
+}
+
+async function fetchProvinceSummary(provinceName) {
+    const slug = getProvinceSlug(provinceName);
+    const staticUrl = `/static/data/province-projects-${slug}/summary.json`;
+
+    try {
+        const staticResponse = await fetch(staticUrl, { cache: 'no-store' });
+        if (staticResponse.ok) {
+            const summaryData = await staticResponse.json();
+            if (summaryData && summaryData.summary) {
+                return {
+                    name: summaryData.province || provinceName,
+                    total: summaryData.summary.total || 0,
+                    total_cost: summaryData.total_cost || 0,
+                    counts: {
+                        ssp: summaryData.summary.ssp || 0,
+                        dime: summaryData.summary.dime || 0,
+                        philgeps: summaryData.summary.philgeps || 0,
+                        microsite: summaryData.summary.microsite || 0
+                    }
+                };
             }
-        }, 100);
+        }
+    } catch (error) {
+        console.warn('Static summary fetch failed, falling back to API:', error);
+    }
 
-        // Load initial map data (10 projects with progressive loading)
-        loadInitialMapData();
+    const canonicalName = provinceName.toLowerCase() === 'compostela valley' ? 'Davao de Oro' : provinceName;
+    const response = await fetch(`/api/province-projects/all?province=${encodeURIComponent(canonicalName)}&limit=1&offset=0`);
+    if (!response.ok) {
+        throw new Error(`HTTP ${response.status}`);
+    }
+    const payload = await response.json();
+    if (!payload.success || !payload.summary) {
+        throw new Error('Summary missing in response');
+    }
+    return {
+        name: payload.province || provinceName,
+        total: payload.summary.total || 0,
+        total_cost: payload.total_cost || 0,
+        counts: {
+            ssp: payload.summary.ssp || 0,
+            dime: payload.summary.dime || 0,
+            philgeps: payload.summary.philgeps || 0,
+            microsite: payload.summary.microsite || 0
+        }
+    };
+}
+
+function highlightProvinceLayer(key) {
+    if (!provinceGeoJSONLayer) return;
+    if (activeProvinceKey && provinceLayers.has(activeProvinceKey)) {
+        provinceLayers.get(activeProvinceKey).setStyle({ ...defaultProvinceStyle });
+    }
+    activeProvinceKey = key;
+    const layer = provinceLayers.get(key);
+    if (layer) {
+        layer.setStyle({
+            ...defaultProvinceStyle,
+            fillOpacity: 0.35,
+            weight: 3
+        });
     }
 }
 
-// Load initial map data (copied exactly from working flood.html)
-async function loadInitialMapData() {
-    if (initialLoadDone || isLoading) return;
+async function handleProvinceClick(provinceName, key) {
+    highlightProvinceLayer(key);
+    const centerEntry = provinceCenters.get(key);
+    if (!centerEntry) {
+        console.warn('No center data for province', provinceName);
+        return;
+    }
 
-    isLoading = true;
-    initialLoadDone = true;
+    let summary = provinceSummaryLookup.get(key);
+    let marker = provinceMarkers.get(key);
 
-    try {
-        console.log('🔍 Loading initial map data...');
-        const response = await fetch('/api/flood/projects?limit=10&offset=0');
-        if (response.ok) {
-            const data = await response.json();
-            const projects = data.projects || [];
+    if (!summary) {
+        marker = createProvinceMarker(key, centerEntry.center, provinceName, null);
+        marker.openPopup();
+        try {
+            summary = await fetchProvinceSummary(provinceName);
+            provinceSummaryLookup.set(key, summary);
+        } catch (error) {
+            console.error('Failed to load province summary:', error);
+            return;
+        }
+    }
 
-            console.log(`✅ Loaded initial ${projects.length} projects`);
-            loadedProjects = projects;
+    if (!summary) return;
 
-            // Add markers for initial projects
-            await processProjects(projects);
+    if (!marker) {
+        marker = createProvinceMarker(key, centerEntry.center, provinceName, summary);
+    }
 
-            // Set offset to 1000 to start skipping
-            globalOffset = 1000;
+    marker = provinceMarkers.get(key);
+    if (marker) {
+        marker.setPopupContent(createProvincePopup(provinceName, summary));
+        marker.openPopup();
+        mapInstance.flyTo(marker.getLatLng(), Math.max(mapInstance.getZoom(), 7), {
+            duration: 0.5
+        });
+    }
+}
 
-            updateMapStatus(`Map initialized with ${projects.length} projects. Loading more with 1000-skip...`);
+function createProvinceMarker(key, center, displayName, summary = null) {
+    if (!mapInstance) return;
 
-            // Auto-start progressive loading with 1000-skip
-            startProgressiveLoading();
+    if (provinceMarkers.has(key)) {
+        try {
+            mapInstance.removeLayer(provinceMarkers.get(key));
+        } catch (error) {
+            console.warn('Failed to remove previous province marker:', error);
+        }
+    }
 
+    const icon = summary ? createIntegratedIcon(summary) : createPlaceholderIcon();
+    const marker = L.marker(center, { icon });
+
+    const popupContent = summary
+        ? createProvincePopup(displayName, summary)
+        : `<div style="font-family:'Inter', sans-serif; font-size:0.75rem; color:#475569; min-width:200px;">Loading data for <strong>${displayName}</strong>...</div>`;
+
+    marker.bindPopup(popupContent, {
+        maxWidth: 320,
+        className: 'bettergov-popup'
+    });
+
+    marker.on('click', () => {
+        if (!provinceSummaryLookup.has(key)) {
+            handleProvinceClick(displayName, key);
         } else {
-            throw new Error(`API returned ${response.status}`);
+            handleProvinceClick(displayName, key);
         }
-    } catch (error) {
-        console.error('❌ Failed to load initial map data:', error);
-        updateMapStatus('Loading initial map data...');
-    } finally {
-        isLoading = false;
-    }
+    });
+
+    marker.addTo(mapInstance);
+    provinceMarkers.set(key, marker);
+    return marker;
 }
 
-// Process projects and add to map
-async function processProjects(projects) {
-    for (let i = 0; i < projects.length; i++) {
-        const project = projects[i];
-        if (project.Latitude && project.Longitude) {
-            const lat = parseFloat(project.Latitude);
-            const lng = parseFloat(project.Longitude);
-
-            if (!isNaN(lat) && !isNaN(lng)) {
-                // Add small delay every 10 projects to prevent overwhelming backend
-                if (i > 0 && i % 10 === 0) {
-                    await new Promise(resolve => setTimeout(resolve, 100));
-                }
-                
-                // Create marker
-                const marker = L.marker([lat, lng]);
-
-                // Create popup content (smaller for mobile)
-                const popupContent = `
-                    <div style="max-width: 250px; font-family: Arial, sans-serif; font-size: 12px;">
-                        <h4 style="margin: 0 0 6px 0; color: #0038A8; font-size: 14px;">${project.project_title || 'Unnamed Project'}</h4>
-                        <div style="font-size: 11px; margin-bottom: 4px;">
-                            <strong>Location:</strong> ${project.municipality || 'Unknown'}, ${project.province || 'Unknown'}
-                        </div>
-                        <div style="font-size: 11px; margin-bottom: 4px;">
-                            <strong>Cost:</strong> ₱${project.contract_cost ? parseFloat(project.contract_cost).toLocaleString() : 'N/A'}
-                        </div>
-                        <div style="font-size: 11px; margin-bottom: 4px;">
-                            <strong>Status:</strong> ${project.status || 'Unknown'}
-                        </div>
-                        <div style="font-size: 10px; color: #666;">
-                            <strong>Contractor:</strong> ${project.contractor || 'Unknown'}
-                        </div>
-                    </div>
-                `;
-
-                marker.bindPopup(popupContent);
-                marker.addTo(mapInstance);
-                mapMarkers.push(marker);
-            }
-        }
-    }
-
-    updateMapStatus(`Loaded ${mapMarkers.length} projects`);
-}
-
-// Progressive loading function - loads in chunks, skipping 1000 at a time
-async function loadMoreProjects() {
-    if (isLoadingMore || progressiveLoadingCancelled) return;
-
-    isLoadingMore = true;
+async function loadProvinceGeometry(filename) {
     try {
-        // Skip 1000 at a time for efficient loading
-        const response = await fetch(`/api/flood/projects?limit=100&offset=${globalOffset}`);
+        const response = await fetch(`/static/data/${filename}`);
         if (!response.ok) {
-            throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+            throw new Error(`Failed to load ${filename}`);
+        }
+        const geoData = await response.json();
+        const displayName = extractProvinceDisplayName(geoData, filename);
+        const key = normalizeProvinceKey(displayName);
+
+        const geoLayer = L.geoJSON(geoData, {
+            style: () => ({ ...defaultProvinceStyle }),
+            onEachFeature: (_, featureLayer) => {
+                featureLayer.bindTooltip(`Click ${displayName}`, {
+                    permanent: false,
+                    direction: 'center',
+                    className: 'province-tooltip'
+                });
+
+                featureLayer.on('click', () => {
+                    const center = provinceCenters.get(key)?.center;
+                    if (center && !provinceMarkers.has(key)) {
+                        createProvinceMarker(key, center, displayName, null);
+                    }
+                    handleProvinceClick(displayName, key);
+                });
+
+                featureLayer.on('mouseover', () => {
+                    if (activeProvinceKey !== key) {
+                        featureLayer.setStyle({
+                            ...defaultProvinceStyle,
+                            fillOpacity: 0.2,
+                            weight: 2.5
+                        });
+                    }
+                });
+
+                featureLayer.on('mouseout', () => {
+                    if (activeProvinceKey !== key) {
+                        featureLayer.setStyle({ ...defaultProvinceStyle });
+                    }
+                });
+            }
+        });
+
+        geoLayer.addTo(provinceGeoJSONLayer);
+        const bounds = geoLayer.getBounds();
+        if (bounds.isValid()) {
+            provinceCenters.set(key, {
+                center: bounds.getCenter(),
+                displayName
+            });
         }
 
-        const data = await response.json();
-        const projects = data.projects || [];
-
-        if (projects.length === 0) {
-            updateMapStatus('All projects loaded');
-            clearInterval(progressiveInterval);
-            progressiveInterval = null;
-            return;
+        provinceLayers.set(key, geoLayer);
+        const centerEntry = provinceCenters.get(key);
+        if (centerEntry?.center) {
+            createProvinceMarker(key, centerEntry.center, displayName, null);
         }
 
-        await processProjects(projects);
-        globalOffset += 1000; // Skip 1000 at a time instead of loading sequentially
+        // Pre-fetch summary in background
+        fetchProvinceSummary(displayName).then(summary => {
+            provinceSummaryLookup.set(key, summary);
+            const center = provinceCenters.get(key);
+            if (center) {
+                createProvinceMarker(key, center.center, displayName, summary);
+            }
+        }).catch(err => {
+            console.warn(`Failed to pre-fetch summary for ${displayName}:`, err);
+        });
 
+        return { key, displayName };
     } catch (error) {
-        console.error('❌ Error loading more projects:', error);
-        clearInterval(progressiveInterval);
-        progressiveInterval = null;
-    } finally {
-        isLoadingMore = false;
+        console.error(`Error loading province ${filename}:`, error);
+        throw error;
     }
 }
 
-// Start progressive loading
-function startProgressiveLoading() {
-    if (progressiveLoadingStarted) return;
+async function addProvinceBoundaries() {
+    if (!mapInstance) return;
 
-    progressiveLoadingStarted = true;
-    progressiveLoadingCancelled = false;
+    if (provinceGeoJSONLayer) {
+        provinceGeoJSONLayer.remove();
+    }
 
-    // Load more projects every 3 seconds (slower for mobile)
-    progressiveInterval = setInterval(() => {
-        if (!showAllMode && !progressiveLoadingCancelled) {
-            loadMoreProjects();
+    provinceGeoJSONLayer = L.layerGroup().addTo(mapInstance);
+    provinceCenters.clear();
+    provinceLayers.clear();
+    provinceMarkers.forEach(marker => {
+        try {
+            mapInstance?.removeLayer(marker);
+        } catch (error) {
+            console.warn('Failed to remove province marker:', error);
         }
-    }, 3000);
-}
+    });
+    provinceMarkers.clear();
 
-// Load all projects (advanced feature)
-async function loadAllProjects() {
-    console.log(`🗺️ Loading all projects (Show All)`);
+    const loadingEl = document.getElementById('map-loading');
+    if (loadingEl) loadingEl.style.display = 'block';
 
-    // Show warning confirmation
-    const confirmed = confirm(
-        '⚠️ WARNING: Loading all 9,855 projects may:\n' +
-        '• Overwhelm your browser and cause it to freeze\n' +
-        '• Consume significant memory and CPU resources\n' +
-        '• Take several minutes to complete\n' +
-        '• Make your device unresponsive\n\n' +
-        'Continue anyway?'
-    );
+    const batchSize = 8;
+    let loaded = 0;
 
-    if (!confirmed) return;
-
-    // Cancel any existing progressive loading
-    progressiveLoadingCancelled = true;
-    regionProgressiveLoadingCancelled = true;
-    showAllMode = true;
-
-    // Wait a moment to ensure any in-flight requests complete
-    await new Promise(resolve => setTimeout(resolve, 100));
-
-    // Update status
-    updateMapStatus(`Loading all projects...`);
-
-    // Clear existing markers
-    mapMarkers.forEach(marker => mapInstance.removeLayer(marker));
-    mapMarkers = [];
-
-    // Stop any existing progressive loading
-    if (progressiveInterval) {
-        clearInterval(progressiveInterval);
-        progressiveInterval = null;
+    for (let i = 0; i < PROVINCE_GEOJSON_FILES.length; i += batchSize) {
+        const batch = PROVINCE_GEOJSON_FILES.slice(i, i + batchSize);
+        const results = await Promise.allSettled(batch.map(file => loadProvinceGeometry(file)));
+        results.forEach((result, index) => {
+            if (result.status !== 'fulfilled') {
+                console.warn(`Failed to load province ${batch[index]}:`, result.reason);
+            }
+        });
+        loaded += batch.length;
     }
 
-    // Reset progressive loading state for "Show All" loading
-    progressiveLoadingStarted = false;
-    globalOffset = 0;
-    isLoadingMore = false;
-    loadedProjects = [];
+    if (loadingEl) loadingEl.style.display = 'none';
+}
 
-    // Reset cancellation flag
-    progressiveLoadingCancelled = false;
+async function initializeMap() {
+    const mapContainer = document.getElementById('map');
+    if (!mapContainer) return;
+
+    mapInstance = L.map('map', {
+        preferCanvas: false,
+        renderer: L.canvas()
+    });
+
+    mapInstance.setView([12.2, 121.8], 6.2);
+
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '© OpenStreetMap contributors',
+        maxZoom: 19,
+        minZoom: 3,
+        subdomains: ['a', 'b', 'c'],
+        tileSize: 256,
+        zoomOffset: 0,
+        crossOrigin: true,
+        bounds: [[4.5, 116], [21, 127]],
+        maxBounds: [[4.5, 116], [21, 127]]
+    }).addTo(mapInstance);
+
+    mapInstance.fitBounds([[4.5, 116], [21, 127]], {
+        padding: [30, 30],
+        maxZoom: 7
+    });
 
     try {
-        // Load initial batch of 100 projects
-        const response = await fetch('/api/flood/projects?limit=100&offset=0');
-        if (!response.ok) {
-            throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-        }
-
-        const data = await response.json();
-        const projects = data.projects || [];
-        processProjects(projects);
-
-        // Continue loading all projects progressively
-        let offset = projects.length;
-        while (true) {
-            const response = await fetch(`/api/flood/projects?limit=200&offset=${offset}`);
-            if (!response.ok) break;
-
-            const batchData = await response.json();
-            const batch = batchData.projects || [];
-
-            if (batch.length === 0) break;
-
-            processProjects(batch);
-            offset += batch.length;
-
-            // Allow UI to update every 200 projects
-            if (offset % 200 === 0) {
-                await new Promise(resolve => setTimeout(resolve, 10));
-            }
-        }
-
-        updateMapStatus(`All ${mapMarkers.length} projects loaded successfully!`);
-
+        await addProvinceBoundaries();
+        setTimeout(() => mapInstance.invalidateSize(), 150);
     } catch (error) {
-        console.error('❌ Error loading all projects:', error);
-        updateMapStatus('Error loading all projects: ' + error.message);
+        console.error('Failed to initialize map:', error);
     }
 }
 
-// Refresh map data
-function refreshMapData() {
-    console.log('🔄 Refreshing map data...');
-
-    // Clear existing markers
-    mapMarkers.forEach(marker => mapInstance.removeLayer(marker));
-    mapMarkers = [];
-
-    // Reset loading state
-    globalOffset = 0;
-    loadedProjects = [];
-    progressiveLoadingStarted = false;
-    progressiveLoadingCancelled = false;
-    showAllMode = false;
-
-    // Stop any existing progressive loading
-    if (progressiveInterval) {
-        clearInterval(progressiveInterval);
-        progressiveInterval = null;
-    }
-
-    // Reload initial projects
-    loadInitialProjects();
-}
-
-// Initialize everything when DOM is ready
-document.addEventListener('DOMContentLoaded', function() {
-    console.log('🔍 DOM loaded, initializing mobile map page...');
-    initializeMap();
-
-    // Setup event listeners
-    const refreshBtn = document.getElementById('refresh-map-data');
-    if (refreshBtn) {
-        refreshBtn.addEventListener('click', refreshMapData);
-    }
-
-    const showAllBtn = document.getElementById('show-all-map');
-    if (showAllBtn) {
-        showAllBtn.addEventListener('click', loadAllProjects);
-    }
+document.addEventListener('DOMContentLoaded', async () => {
+    await initializeMap();
 });
 </script>
-
 {% endblock %}
