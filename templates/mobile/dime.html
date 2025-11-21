@@ -3,15 +3,34 @@
 {% block title %}DIME - Infrastructure Projects | BetterGovPH{% endblock %}
 
 {% block head %}
+<!-- Tailwind CSS -->
+<link rel="stylesheet" href="/static/css/tailwind.css">
 <!-- Chart.js for visualizations -->
 <script src="/static/js/chart.js"></script>
 
+<!-- Custom styling - Override ALL base styles -->
 <style>
+    /* Reset and override base.html styles */
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+    }
+
+    body {
+        font-family: 'Inter', sans-serif !important;
+        background-color: white !important;
+        color: black !important;
+        margin: 0 !important;
+        padding: 0 !important;
+    }
+
+    /* DIME-specific styles */
     /* Ensure tab panels work correctly */
     .budget-tab-panel {
         display: none !important;
     }
-    
+
     .budget-tab-panel.active {
         display: block !important;
     }
@@ -20,23 +39,26 @@
     .speed-subtab-panel {
         display: none;
     }
-    
+
     .speed-subtab-panel.active {
         display: block;
     }
-    
+
     .speed-subtab-btn:hover {
         color: #0038A8 !important;
         border-bottom-color: #0038A8 !important;
     }
-    
+
     /* Mobile-optimized styles */
     .budget-section {
-        padding: 0.5rem 0;
+        padding: 0;
+        background: #f9fafb;
+        width: 100%;
+        margin: 0;
     }
 
     .budget-header {
-        padding: 1rem 0;
+        padding: 0.5rem;
     }
 
     .budget-section-title {
@@ -54,13 +76,15 @@
     .budget-tab-nav {
         display: flex;
         gap: 0.5rem;
-        margin-bottom: 1rem;
+        margin-bottom: 0.5rem;
         overflow-x: auto;
         -webkit-overflow-scrolling: touch;
+        width: 100%;
+        padding: 0;
     }
 
     .budget-tab-btn {
-        padding: 0.5rem 0;
+        padding: 0.5rem 1rem;
         background: white;
         border: 1px solid #dee2e6;
         border-radius: 4px;
@@ -68,6 +92,7 @@
         font-weight: 500;
         white-space: nowrap;
         flex-shrink: 0;
+        font-size: 0.85rem;
     }
 
     .budget-tab-btn.active {
@@ -85,9 +110,9 @@
 
     .stat-card {
         background: white;
-        padding: 15px 0;
+        padding: 0.5rem;
         border-radius: 8px;
-        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
         text-align: center;
     }
 
@@ -105,10 +130,10 @@
 
     .chart-container {
         background: white;
-        padding: 15px 0;
+        padding: 0.5rem;
         border-radius: 8px;
-        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-        margin-bottom: 15px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        margin-bottom: 0.5rem;
     }
 
     .chart-container h3 {
@@ -119,10 +144,11 @@
 
     .data-browser-controls {
         background: white;
-        padding: 1rem 0;
+        padding: 0.5rem;
         border-radius: 8px;
-        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-        margin-bottom: 1rem;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        margin-bottom: 0.5rem;
+        width: 100%;
     }
 
     .filter-group {
@@ -166,9 +192,10 @@
     .dime-mobile-card {
         background: white;
         border-radius: 8px;
-        padding: 1rem 0;
-        margin-bottom: 1rem;
-        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        padding: 0.5rem;
+        margin-bottom: 0.5rem;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        width: 100%;
     }
 
     .dime-mobile-card-title {
@@ -208,10 +235,11 @@
         display: flex;
         justify-content: space-between;
         align-items: center;
-        margin-top: 1rem;
-        padding: 1rem 0;
+        margin-top: 0.5rem;
+        padding: 0.5rem;
         background: white;
         border-radius: 8px;
+        width: 100%;
     }
 
     .pagination-btn {
@@ -254,7 +282,7 @@
         max-height: 150px;
         overflow-y: auto;
         z-index: 1000;
-        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
     }
 
     .autocomplete-item {
@@ -279,8 +307,44 @@
     }
 
     @keyframes spin {
-        0% { transform: rotate(0deg); }
-        100% { transform: rotate(360deg); }
+        0% {
+            transform: rotate(0deg);
+        }
+
+        100% {
+            transform: rotate(360deg);
+        }
+    }
+
+    .budget-section,
+    .budget-tab-nav,
+    .budget-tab-content,
+    .budget-tab-panel {
+        width: 100% !important;
+        max-width: 100% !important;
+        margin-left: 0 !important;
+        margin-right: 0 !important;
+        padding-left: 0 !important;
+        padding-right: 0 !important;
+        box-sizing: border-box !important;
+    }
+
+    .budget-tab-btn {
+        margin: 0 !important;
+    }
+
+    .budget-tab-nav {
+        gap: 0.25rem !important;
+        margin-bottom: 0.25rem !important;
+    }
+
+    .budget-tab-btn {
+        font-size: 0.85rem !important;
+        padding: 0.5rem 0.75rem !important;
+    }
+
+    .budget-tab-nav {
+        padding: 0 !important;
     }
 </style>
 {% endblock %}
@@ -293,191 +357,82 @@
 
     <!-- Tabs Navigation -->
     <div class="budget-tab-nav">
-        <button class="budget-tab-btn active" data-tab="visual">📊 Visual</button>
-        <button class="budget-tab-btn" data-tab="table">📋 Table</button>
+        <button class="budget-tab-btn active" data-tab="barangays">🏘️ Barangays</button>
         <button class="budget-tab-btn" data-tab="analysis">🚀 Speed</button>
     </div>
 
     <!-- Tab Content -->
     <div class="budget-tab-content">
-        <!-- Visual Tab -->
-        <div id="tab-visual" class="budget-tab-panel active">
-            <!-- Loading Spinner -->
-            <div id="visual-loading-spinner" class="flex justify-center items-center py-10">
-                <div class="flex flex-col items-center gap-4">
-                    <div class="w-10 h-10 border-4 border-gray-200 border-t-blue-900 rounded-full animate-spin"></div>
-                    <p class="text-gray-600 text-sm m-0">Loading DIME project data...</p>
-                </div>
+        <!-- Barangays Tab -->
+        <div id="tab-barangays" class="budget-tab-panel active">
+            <p class="text-xs text-gray-600 mb-3">Top barangays by project investment and activity</p>
+
+            <!-- Sub-tab Navigation -->
+            <div style="display: flex; gap: 0.5rem; margin-bottom: 1rem; border-bottom: 2px solid #e5e7eb;">
+                <button class="barangay-subtab-btn active" data-subtab="investment" style="padding: 0.75rem 1rem; background: none; border: none; border-bottom: 3px solid #2563eb; color: #2563eb; font-weight: 600; cursor: pointer; font-size: 0.875rem;">
+                    💰 Top Investment
+                </button>
+                <button class="barangay-subtab-btn" data-subtab="active" style="padding: 0.75rem 1rem; background: none; border: none; border-bottom: 3px solid transparent; color: #6b7280; font-weight: 500; cursor: pointer; font-size: 0.875rem;">
+                    🎯 Most Active
+                </button>
             </div>
 
-            <!-- Visual Statistics Cards -->
-            <div class="visual-stats-grid hidden">
-                <div class="stat-card">
-                    <h3>Total Projects</h3>
-                    <p id="visual-total-projects" class="text-green-600">-</p>
+            <!-- Top Investment Barangays Sub-tab -->
+            <div id="subtab-investment" class="barangay-subtab-panel">
+                <!-- Loading -->
+                <div id="barangays-loading" class="text-center py-8">
+                    <div class="inline-block w-8 h-8 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin"></div>
+                    <p class="text-sm text-gray-500 mt-2">Loading barangay data...</p>
                 </div>
-                <div class="stat-card">
-                    <h3>Total Budget</h3>
-                    <p id="visual-total-budget" class="text-red-600">-</p>
-                </div>
-                <div class="stat-card">
-                    <h3>Avg Cost</h3>
-                    <p id="visual-avg-cost" class="text-purple-600">-</p>
-                </div>
-                <div class="stat-card">
-                    <h3>Active</h3>
-                    <p id="visual-active-projects" class="text-orange-500">-</p>
-                </div>
+
+                <!-- Barangays List -->
+                <div id="barangays-container" style="display: none;"></div>
             </div>
 
-            <!-- Charts Section - Mobile optimized -->
-            <div class="charts-grid hidden">
-                <!-- Project Status Distribution -->
-                <div class="chart-container">
-                    <h3>📊 Project Status</h3>
-                    <div style="height: 250px; position: relative;">
-                        <canvas id="statusChart"></canvas>
-                    </div>
+            <!-- Most Active Barangays Sub-tab -->
+            <div id="subtab-active" class="barangay-subtab-panel" style="display: none;">
+                <!-- Loading -->
+                <div id="barangays-active-loading" class="text-center py-8">
+                    <div class="inline-block w-8 h-8 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin"></div>
+                    <p class="text-sm text-gray-500 mt-2">Loading active barangays...</p>
                 </div>
 
-                <!-- Budget by Region -->
-                <div class="chart-container">
-                    <h3>🗺️ Budget by Region</h3>
-                    <div style="height: 300px; position: relative;">
-                        <canvas id="regionBudgetChart"></canvas>
-                    </div>
-                </div>
-
-                <!-- Top Implementing Offices -->
-                <div class="chart-container">
-                    <h3>🏛️ Top Offices</h3>
-                    <div style="height: 300px; position: relative;">
-                        <canvas id="implementingOfficesChart"></canvas>
-                    </div>
-                </div>
-
-                <!-- Project Types -->
-                <div class="chart-container">
-                    <h3>🏗️ Project Types</h3>
-                    <div style="height: 250px; position: relative;">
-                        <canvas id="projectTypesChart"></canvas>
-                    </div>
-                </div>
-
-                <!-- Most Expensive Projects -->
-                <div class="chart-container">
-                    <h3>💰 Most Expensive</h3>
-                    <div style="height: 250px; position: relative;">
-                        <canvas id="expensiveProjectsChart"></canvas>
-                    </div>
-                </div>
-
-                <!-- Projects by Year -->
-                <div class="chart-container">
-                    <h3>📅 By Start Year</h3>
-                    <div style="height: 250px; position: relative;">
-                        <canvas id="yearlyChart"></canvas>
-                    </div>
-                </div>
-
-                <!-- Source of Funds -->
-                <div class="chart-container">
-                    <h3>💵 Source of Funds</h3>
-                    <div style="height: 250px; position: relative;">
-                        <canvas id="fundsChart"></canvas>
-                    </div>
-                </div>
-
-                <!-- Progress Distribution -->
-                <div class="chart-container">
-                    <h3>📈 Project Progress</h3>
-                    <div style="height: 250px; position: relative;">
-                        <canvas id="progressChart"></canvas>
-                    </div>
-                    <div class="mt-2 text-xs text-gray-600">
-                        <p class="my-1"><strong>Avg Progress:</strong> <span id="avg-progress">-</span>%</p>
-                        <p class="my-1"><strong>Near Completion:</strong> <span id="near-completion">-</span></p>
-                        <p class="my-1"><strong>Early Stage:</strong> <span id="early-stage">-</span></p>
-                    </div>
-                </div>
+                <!-- Barangays List -->
+                <div id="barangays-active-container" style="display: none;"></div>
             </div>
         </div>
 
-        <!-- Table Tab -->
-        <div id="tab-table" class="budget-tab-panel">
-            <!-- Filters -->
-            <div class="data-browser-controls">
-                <div class="filter-group">
-                    <label for="filter-search">🔍 Search Project Name</label>
-                    <input type="text" id="filter-search" class="filter-input" placeholder="Type to search...">
-                </div>
-                <div class="filter-group">
-                    <label for="filter-status">Status</label>
-                    <select id="filter-status" class="filter-input">
-                        <option value="">All Status</option>
-                    </select>
-                </div>
-                <div class="filter-group">
-                    <label for="filter-region">Region</label>
-                    <select id="filter-region" class="filter-input">
-                        <option value="">All Regions</option>
-                    </select>
-                </div>
-                <div class="filter-group">
-                    <label for="filter-province">Province</label>
-                    <input type="text" id="filter-province" class="filter-input" placeholder="Search province...">
-                </div>
-                <div class="filter-group">
-                    <label for="filter-city">City</label>
-                    <input type="text" id="filter-city" class="filter-input" placeholder="Search city...">
-                </div>
-                <div class="filter-group">
-                    <label for="filter-barangay">Barangay</label>
-                    <input type="text" id="filter-barangay" class="filter-input" placeholder="Search barangay...">
-                </div>
-                <button id="apply-filters-btn" class="budget-button">Apply Filters</button>
-                <button id="clear-filters-btn" class="budget-button bg-gray-600 hover:bg-gray-700">Clear Filters</button>
-            </div>
-
-            <!-- Projects Container (Mobile Cards) -->
-            <div id="projects-table-container">
-                <div style="text-align: center; padding: 2rem 0;">
-                    <div style="border: 4px solid #f3f3f3; border-top: 4px solid #0038A8; border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; margin: 0 auto 1rem;"></div>
-                    Loading projects...
-                </div>
-            </div>
-
-            <!-- Pagination -->
-            <div id="table-pagination" class="pagination-container hidden">
-                <button id="prev-page-btn" class="pagination-btn">← Prev</button>
-                <span id="page-info" class="page-info">Page 1 of 1</span>
-                <button id="next-page-btn" class="pagination-btn">Next →</button>
-            </div>
-        </div>
 
         <!-- Analysis Tab -->
         <div id="tab-analysis" class="budget-tab-panel">
             <!-- Sub-tab Navigation -->
-            <div style="background: white; padding: 15px 0 5px; border-radius: 8px 8px 0 0; box-shadow: 0 2px 10px rgba(0,0,0,0.1); margin-bottom: 0;">
+            <div
+                style="background: white; padding: 15px 0 5px; border-radius: 8px 8px 0 0; box-shadow: 0 2px 10px rgba(0,0,0,0.1); margin-bottom: 0;">
                 <div style="display: flex; gap: 5px; border-bottom: 2px solid #e0e0e0;">
-                    <button class="speed-subtab-btn active" data-subtab="fastest" style="padding: 8px 0; background: none; border: none; border-bottom: 3px solid #0038A8; color: #0038A8; font-weight: 600; cursor: pointer; font-size: 0.9em; transition: all 0.3s;">
+                    <button class="speed-subtab-btn active" data-subtab="fastest"
+                        style="padding: 8px 0; background: none; border: none; border-bottom: 3px solid #0038A8; color: #0038A8; font-weight: 600; cursor: pointer; font-size: 0.9em; transition: all 0.3s;">
                         ⚡ Fastest
                     </button>
-                    <button class="speed-subtab-btn" data-subtab="slowest" style="padding: 8px 0; background: none; border: none; border-bottom: 3px solid transparent; color: #666; font-weight: 500; cursor: pointer; font-size: 0.9em; transition: all 0.3s;">
+                    <button class="speed-subtab-btn" data-subtab="slowest"
+                        style="padding: 8px 0; background: none; border: none; border-bottom: 3px solid transparent; color: #666; font-weight: 500; cursor: pointer; font-size: 0.9em; transition: all 0.3s;">
                         🐌 Slowest
                     </button>
                 </div>
             </div>
 
             <!-- Fastest Projects Sub-tab -->
-            <div id="subtab-fastest" class="speed-subtab-panel" style="background: white; padding: 20px 0; border-radius: 0 0 8px 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); margin-bottom: 20px;">
+            <div id="subtab-fastest" class="speed-subtab-panel"
+                style="background: white; padding: 20px 0; border-radius: 0 0 8px 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); margin-bottom: 20px;">
                 <h2 class="text-blue-900 m-0 mb-2 text-lg text-center font-bold">⚡ Top 100 Fastest Projects</h2>
                 <p class="text-center text-gray-600 mb-4 text-sm">Shortest time from start to completion</p>
 
                 <!-- Loading Spinner -->
-                <div id="fastest-projects-loading" style="display: flex; justify-content: center; align-items: center; padding: 30px 0;">
+                <div id="fastest-projects-loading"
+                    style="display: flex; justify-content: center; align-items: center; padding: 30px 0;">
                     <div style="display: flex; flex-direction: column; align-items: center; gap: 15px;">
-                        <div style="width: 40px; height: 40px; border: 4px solid #f3f3f3; border-top: 4px solid #0038A8; border-radius: 50%; animation: spin 1s linear infinite;"></div>
+                        <div
+                            style="width: 40px; height: 40px; border: 4px solid #f3f3f3; border-top: 4px solid #0038A8; border-radius: 50%; animation: spin 1s linear infinite;">
+                        </div>
                         <p style="color: #666; font-size: 14px; margin: 0;">Analyzing completion times...</p>
                     </div>
                 </div>
@@ -489,14 +444,18 @@
             </div>
 
             <!-- Slowest Projects Sub-tab -->
-            <div id="subtab-slowest" class="speed-subtab-panel" style="background: white; padding: 20px 0; border-radius: 0 0 8px 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); margin-bottom: 20px; display: none;">
+            <div id="subtab-slowest" class="speed-subtab-panel"
+                style="background: white; padding: 20px 0; border-radius: 0 0 8px 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); margin-bottom: 20px; display: none;">
                 <h2 class="text-blue-900 m-0 mb-2 text-lg text-center font-bold">🐌 Top 100 Slowest Projects</h2>
                 <p class="text-center text-gray-600 mb-4 text-sm">Longest time from start to completion</p>
 
                 <!-- Loading Spinner -->
-                <div id="slowest-projects-loading" style="display: flex; justify-content: center; align-items: center; padding: 30px 0;">
+                <div id="slowest-projects-loading"
+                    style="display: flex; justify-content: center; align-items: center; padding: 30px 0;">
                     <div style="display: flex; flex-direction: column; align-items: center; gap: 15px;">
-                        <div style="width: 40px; height: 40px; border: 4px solid #f3f3f3; border-top: 4px solid #0038A8; border-radius: 50%; animation: spin 1s linear infinite;"></div>
+                        <div
+                            style="width: 40px; height: 40px; border: 4px solid #f3f3f3; border-top: 4px solid #0038A8; border-radius: 50%; animation: spin 1s linear infinite;">
+                        </div>
                         <p style="color: #666; font-size: 14px; margin: 0;">Analyzing completion times...</p>
                     </div>
                 </div>
@@ -511,7 +470,8 @@
 </section>
 
 <!-- Data Source Footer -->
-<div style="text-align: center; padding: 1.5rem 0; color: #6c757d; font-size: 0.75rem; border-top: 1px solid #dee2e6; margin-top: 1rem; background: white;">
+<div
+    style="text-align: center; padding: 1.5rem 0; color: #6c757d; font-size: 0.75rem; border-top: 1px solid #dee2e6; margin-top: 1rem; background: white;">
     <p><strong>Data Source:</strong> DBM DIME</p>
     <p style="font-size: 0.7rem;">Last Updated: <span id="last-updated">-</span></p>
 </div>
@@ -542,66 +502,87 @@
                 document.getElementById(`tab-${targetTab}`).classList.add('active');
 
                 // Load data for specific tabs
-                if (targetTab === 'table') {
-                    loadProjects(1);
+                if (targetTab === 'barangays') {
+                    // Load barangays data when tab is opened
+                    if (!barangaysLoaded) {
+                        loadBarangaysData();
+                    }
                 } else if (targetTab === 'analysis') {
+                    // Show fastest subtab and load data
+                    document.querySelectorAll('.speed-subtab-panel').forEach(panel => {
+                        panel.style.display = 'none';
+                    });
+                    document.getElementById('subtab-fastest').style.display = 'block';
+                    document.querySelectorAll('.speed-subtab-btn').forEach(btn => {
+                        btn.classList.remove('active');
+                        btn.style.borderBottomColor = 'transparent';
+                        btn.style.color = '#666';
+                        btn.style.fontWeight = '500';
+                    });
+                    const fastestBtn = document.querySelector('[data-subtab="fastest"]');
+                    if (fastestBtn) {
+                        fastestBtn.classList.add('active');
+                        fastestBtn.style.borderBottomColor = '#0038A8';
+                        fastestBtn.style.color = '#0038A8';
+                        fastestBtn.style.fontWeight = '600';
+                    }
                     // Automatically load fastest projects when Speed tab is opened
-                    loadFastestProjectsMobile();
+                    loadFastestProjects();
                 }
             });
         });
     }
 
-        // Load filter options
-        async function loadFilterOptions() {
-            try {
-                console.log('🏗️ Loading filter options...');
-                
-                const statusSelect = document.getElementById('filter-status');
-                const regionSelect = document.getElementById('filter-region');
+    // Load filter options
+    async function loadFilterOptions() {
+        try {
+            console.log('🏗️ Loading filter options...');
 
-                const response = await fetch('/api/dime/filter-options');
-                const data = await response.json();
+            const statusSelect = document.getElementById('filter-status');
+            const regionSelect = document.getElementById('filter-region');
 
-                if (data.success) {
-                    // Populate statuses
-                    if (data.statuses && Array.isArray(data.statuses)) {
-                        data.statuses.forEach(status => {
-                            const option = document.createElement('option');
-                            option.value = status;
-                            option.textContent = status;
-                            statusSelect.appendChild(option);
-                        });
-                    }
+            const response = await fetch('/api/dime/filter-options');
+            const data = await response.json();
 
-                    // Populate regions
-                    if (data.regions && Array.isArray(data.regions)) {
-                        data.regions.forEach(region => {
-                            const option = document.createElement('option');
-                            option.value = region;
-                            option.textContent = region;
-                            regionSelect.appendChild(option);
-                        });
-                    }
-
-                    console.log('✅ Filter options loaded');
-
-                    // Setup autocomplete for appropriate filters
-                    setupDimeAutocomplete(data);
-                } else {
-                    console.error('❌ Failed to load filter options:', data.error);
+            if (data.success) {
+                // Populate statuses
+                if (data.statuses && Array.isArray(data.statuses)) {
+                    data.statuses.forEach(status => {
+                        const option = document.createElement('option');
+                        option.value = status;
+                        option.textContent = status;
+                        statusSelect.appendChild(option);
+                    });
                 }
 
-            } catch (error) {
-                console.error('❌ Error loading filter options:', error);
+                // Populate regions
+                if (data.regions && Array.isArray(data.regions)) {
+                    data.regions.forEach(region => {
+                        const option = document.createElement('option');
+                        option.value = region;
+                        option.textContent = region;
+                        regionSelect.appendChild(option);
+                    });
+                }
+
+                console.log('✅ Filter options loaded');
+
+                // Setup autocomplete for appropriate filters
+                setupDimeAutocomplete(data);
+            } else {
+                console.error('❌ Failed to load filter options:', data.error);
             }
+
+        } catch (error) {
+            console.error('❌ Error loading filter options:', error);
         }
+    }
 
     // Load projects with pagination
     async function loadProjects(page = 1) {
         try {
             console.log(`🏗️ Loading DIME projects - Page ${page}...`);
-            
+
             const container = document.getElementById('projects-table-container');
             container.innerHTML = `
                 <div style="text-align: center; padding: 2rem 0;">
@@ -674,7 +655,7 @@
                 'Proposed': '#17a2b8'
             };
             const statusColor = statusColors[project.status] || '#6c757d';
-            
+
             cardsHTML += `
                 <div class="dime-mobile-card">
                     <div class="dime-mobile-card-title">${project.project_name || 'N/A'}</div>
@@ -708,8 +689,8 @@
                     </div>
                     <div class="dime-mobile-card-row">
                         <span class="dime-mobile-card-label">Days:</span>
-                        <span class="dime-mobile-card-value" style="font-weight: 600; color: ${project.days >= 0 ? (project.days > 365 ? '#dc3545' : '#28a745') : '#6c757d'};">
-                            ${project.days_formatted || 'N/A'}
+                        <span class="dime-mobile-card-value" style="font-weight: 600; color: ${(project.completion_days || project.days || 0) >= 0 ? ((project.completion_days || project.days || 0) > 365 ? '#dc3545' : '#28a745') : '#6c757d'};">
+                            ${(project.completion_days !== undefined && project.completion_days !== null) ? project.completion_days.toLocaleString() : (project.days !== undefined && project.days !== null) ? project.days.toLocaleString() : 'N/A'}
                         </span>
                     </div>
                 </div>
@@ -761,26 +742,171 @@
         loadProjects(1);
     }
 
-    // Load visual data and charts
-    async function loadVisualData() {
+    // Load barangays data
+    let barangaysLoaded = false;
+    let barangaysActiveLoaded = false;
+
+    async function loadBarangaysData() {
+        if (barangaysLoaded) return;
+        
+        try {
+            const loadingEl = document.getElementById('barangays-loading');
+            const container = document.getElementById('barangays-container');
+            
+            if (loadingEl) loadingEl.style.display = 'block';
+            
+            const response = await fetch('/api/dime/barangay-aggregates');
+            const data = await response.json();
+            
+            if (loadingEl) loadingEl.style.display = 'none';
+            
+            if (data && data.success && data.barangays && data.barangays.length > 0) {
+                container.style.display = 'block';
+                displayBarangays(data.barangays.slice(0, 50), container);
+                barangaysLoaded = true;
+            } else {
+                container.innerHTML = '<div class="text-center py-8 text-gray-500">No barangay data available</div>';
+                container.style.display = 'block';
+            }
+        } catch (error) {
+            console.error('Error loading barangays:', error);
+            const loadingEl = document.getElementById('barangays-loading');
+            const container = document.getElementById('barangays-container');
+            if (loadingEl) loadingEl.style.display = 'none';
+            if (container) {
+                container.innerHTML = '<div class="text-center py-8 text-red-500">Failed to load barangay data</div>';
+                container.style.display = 'block';
+            }
+        }
+    }
+
+    async function loadBarangaysActiveData() {
+        if (barangaysActiveLoaded) return;
+        
+        try {
+            const loadingEl = document.getElementById('barangays-active-loading');
+            const container = document.getElementById('barangays-active-container');
+            
+            if (loadingEl) loadingEl.style.display = 'block';
+            
+            const response = await fetch('/api/dime/barangay-aggregates-by-count');
+            const data = await response.json();
+            
+            if (loadingEl) loadingEl.style.display = 'none';
+            
+            if (data && data.success && data.barangays && data.barangays.length > 0) {
+                container.style.display = 'block';
+                displayBarangays(data.barangays.slice(0, 50), container, true);
+                barangaysActiveLoaded = true;
+            } else {
+                container.innerHTML = '<div class="text-center py-8 text-gray-500">No active barangay data available</div>';
+                container.style.display = 'block';
+            }
+        } catch (error) {
+            console.error('Error loading active barangays:', error);
+            const loadingEl = document.getElementById('barangays-active-loading');
+            const container = document.getElementById('barangays-active-container');
+            if (loadingEl) loadingEl.style.display = 'none';
+            if (container) {
+                container.innerHTML = '<div class="text-center py-8 text-red-500">Failed to load active barangay data</div>';
+                container.style.display = 'block';
+            }
+        }
+    }
+
+    function displayBarangays(barangays, container, isActive = false) {
+        container.innerHTML = barangays.map((bg, index) => {
+            const rank = index + 1;
+            const rankBadge = rank === 1 ? '🥇' : rank === 2 ? '🥈' : rank === 3 ? '🥉' : `#${rank}`;
+            
+            return `
+                <div class="dime-mobile-card" style="${rank <= 3 ? 'background: #fff3cd;' : ''}">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+                        <span style="font-size: 1.5rem;">${rankBadge}</span>
+                        ${isActive ? 
+                            `<span style="font-weight: 600; color: #2563eb; font-size: 1.1rem;">${bg.project_count || 0} projects</span>` :
+                            `<span style="font-weight: 600; color: #2563eb; font-size: 1.1rem;">₱${bg.total_amount ? (parseFloat(bg.total_amount) / 1000000).toFixed(1) + 'M' : '0'}</span>`
+                        }
+                    </div>
+                    <div class="dime-mobile-card-title">${bg.barangay || 'N/A'}</div>
+                    <div class="dime-mobile-card-row">
+                        <span class="dime-mobile-card-label">City/Municipality:</span>
+                        <span class="dime-mobile-card-value">${bg.city || bg.municipality || 'N/A'}</span>
+                    </div>
+                    <div class="dime-mobile-card-row">
+                        <span class="dime-mobile-card-label">Province:</span>
+                        <span class="dime-mobile-card-value">${bg.province || 'N/A'}</span>
+                    </div>
+                    ${!isActive ? `
+                    <div class="dime-mobile-card-row">
+                        <span class="dime-mobile-card-label">Projects:</span>
+                        <span class="dime-mobile-card-value">${bg.project_count || 0}</span>
+                    </div>
+                    <div class="dime-mobile-card-row">
+                        <span class="dime-mobile-card-label">Avg Amount:</span>
+                        <span class="dime-mobile-card-value">₱${bg.avg_amount ? (parseFloat(bg.avg_amount) / 1000000).toFixed(1) + 'M' : '0'}</span>
+                    </div>
+                    ` : ''}
+                </div>
+            `;
+        }).join('');
+    }
+
+    // Barangay subtab switching
+    document.querySelectorAll('.barangay-subtab-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const subtab = this.getAttribute('data-subtab');
+            
+            document.querySelectorAll('.barangay-subtab-btn').forEach(b => {
+                b.classList.remove('active');
+                b.style.borderBottomColor = 'transparent';
+                b.style.color = '#6b7280';
+                b.style.fontWeight = '500';
+            });
+            
+            this.classList.add('active');
+            this.style.borderBottomColor = '#2563eb';
+            this.style.color = '#2563eb';
+            this.style.fontWeight = '600';
+            
+            document.querySelectorAll('.barangay-subtab-panel').forEach(panel => {
+                panel.style.display = 'none';
+            });
+            
+            if (subtab === 'investment') {
+                document.getElementById('subtab-investment').style.display = 'block';
+                if (!barangaysLoaded) {
+                    loadBarangaysData();
+                }
+            } else if (subtab === 'active') {
+                document.getElementById('subtab-active').style.display = 'block';
+                if (!barangaysActiveLoaded) {
+                    loadBarangaysActiveData();
+                }
+            }
+        });
+    });
+
+    // Old loadVisualData function (removed)
+    async function loadVisualData_OLD() {
         try {
             console.log('🏗️ Loading visual data from API...');
-            
+
             const spinner = document.getElementById('visual-loading-spinner');
             if (spinner) spinner.style.display = 'flex';
 
             // Fetch real-time statistics from API
             const response = await fetch('/api/dime/statistics');
             const data = await response.json();
-            
+
             if (!data.success) {
                 throw new Error(data.error || 'Failed to load statistics');
             }
-            
+
             // Hide spinner, show content
             if (spinner) spinner.style.display = 'none';
-            document.querySelector('.visual-stats-grid').style.display = 'grid';
-            document.querySelector('.charts-grid').style.display = 'block';
+            const statsGrid = document.querySelector('.visual-stats-grid');
+            if (statsGrid) statsGrid.classList.remove('hidden');
 
             // Update statistics cards
             const stats = data.statistics;
@@ -789,16 +915,6 @@
             document.getElementById('visual-avg-cost').textContent = '₱' + (stats.avg_cost / 1e6).toFixed(1) + 'M';
             document.getElementById('visual-active-projects').textContent = stats.active_projects.toLocaleString('en-PH');
 
-            // Render charts with real data
-            renderStatusChart(data.status_distribution);
-            renderRegionBudgetChart(data.budget_by_region);
-            renderImplementingOfficesChart(data.top_offices);
-            renderProjectTypesChart(data.project_types);
-            renderExpensiveProjectsChart(data.expensive_projects);
-            renderYearlyChart(data.projects_by_year);
-            renderFundsChart(data.source_of_funds);
-            renderProgressChart(data.progress_distribution);
-            
             console.log('✅ Visual data loaded successfully');
 
         } catch (error) {
@@ -810,205 +926,19 @@
         }
     }
 
-    // Chart rendering functions (mobile-optimized)
-    function renderStatusChart(data) {
-        const ctx = document.getElementById('statusChart');
-        if (!ctx || !data) return;
-        
-        new Chart(ctx, {
-            type: 'bar',
-            data: {
-                labels: data.map(d => d.status),
-                datasets: [{
-                    label: 'Projects',
-                    data: data.map(d => d.count),
-                    backgroundColor: ['#28a745', '#007bff', '#ffc107', '#dc3545']
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: { legend: { display: false } }
-            }
-        });
-    }
-
-    function renderRegionBudgetChart(data) {
-        const ctx = document.getElementById('regionBudgetChart');
-        if (!ctx || !data) return;
-        
-        new Chart(ctx, {
-            type: 'bar',
-            data: {
-                labels: data.map(d => d.region),
-                datasets: [{
-                    label: 'Budget (B)',
-                    data: data.map(d => d.total_budget / 1e9),
-                    backgroundColor: '#0038A8'
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                indexAxis: 'y',
-                plugins: { legend: { display: false } }
-            }
-        });
-    }
-
-    function renderImplementingOfficesChart(data) {
-        const ctx = document.getElementById('implementingOfficesChart');
-        if (!ctx || !data) return;
-        
-        new Chart(ctx, {
-            type: 'bar',
-            data: {
-                labels: data.map(d => d.office),
-                datasets: [{
-                    label: 'Budget (B)',
-                    data: data.map(d => d.total_budget / 1e9),
-                    backgroundColor: '#6f42c1'
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                indexAxis: 'y',
-                plugins: { legend: { display: false } }
-            }
-        });
-    }
-
-    function renderProjectTypesChart(data) {
-        const ctx = document.getElementById('projectTypesChart');
-        if (!ctx || !data) return;
-        
-        new Chart(ctx, {
-            type: 'doughnut',
-            data: {
-                labels: data.map(d => d.type),
-                datasets: [{
-                    data: data.map(d => d.count),
-                    backgroundColor: ['#0038A8', '#28a745', '#dc3545', '#ffc107', '#6f42c1', '#fd7e14']
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false
-            }
-        });
-    }
-
-    function renderExpensiveProjectsChart(data) {
-        const ctx = document.getElementById('expensiveProjectsChart');
-        if (!ctx || !data) return;
-        
-        new Chart(ctx, {
-            type: 'bar',
-            data: {
-                labels: data.map(d => d.name.substring(0, 20) + '...'),
-                datasets: [{
-                    label: 'Cost (B)',
-                    data: data.map(d => d.cost / 1e9),
-                    backgroundColor: '#dc3545'
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                indexAxis: 'y',
-                plugins: { legend: { display: false } }
-            }
-        });
-    }
-
-    function renderYearlyChart(data) {
-        const ctx = document.getElementById('yearlyChart');
-        if (!ctx || !data) return;
-        
-        new Chart(ctx, {
-            type: 'line',
-            data: {
-                labels: data.map(d => d.year),
-                datasets: [{
-                    label: 'Projects',
-                    data: data.map(d => d.count),
-                    borderColor: '#0038A8',
-                    backgroundColor: 'rgba(0, 56, 168, 0.1)',
-                    fill: true
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: { legend: { display: false } }
-            }
-        });
-    }
-
-    function renderFundsChart(data) {
-        const ctx = document.getElementById('fundsChart');
-        if (!ctx || !data) return;
-        
-        new Chart(ctx, {
-            type: 'pie',
-            data: {
-                labels: data.map(d => d.source),
-                datasets: [{
-                    data: data.map(d => d.total_budget),
-                    backgroundColor: ['#0038A8', '#28a745', '#ffc107', '#6f42c1', '#fd7e14']
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false
-            }
-        });
-    }
-
-    function renderProgressChart(data) {
-        const ctx = document.getElementById('progressChart');
-        if (!ctx || !data) return;
-        
-        new Chart(ctx, {
-            type: 'bar',
-            data: {
-                labels: data.map(d => d.range),
-                datasets: [{
-                    label: 'Projects',
-                    data: data.map(d => d.count),
-                    backgroundColor: ['#dc3545', '#fd7e14', '#ffc107', '#28a745']
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: { legend: { display: false } }
-            }
-        });
-
-        // Calculate and update progress stats
-        const totalProjects = data.reduce((sum, d) => sum + d.count, 0);
-        const nearCompletion = data.find(d => d.range === '75-100%')?.count || 0;
-        const earlyStage = data.find(d => d.range === '0-25%')?.count || 0;
-        
-        document.getElementById('avg-progress').textContent = '52.3';
-        document.getElementById('near-completion').textContent = nearCompletion.toLocaleString('en-PH');
-        document.getElementById('early-stage').textContent = earlyStage.toLocaleString('en-PH');
-    }
 
     // Load fastest completed projects
     async function loadFastestProjects() {
         try {
             console.log('⚡ Loading fastest completed projects...');
-            
+
             const spinner = document.getElementById('fastest-projects-loading');
             const container = document.getElementById('fastest-projects-container');
             const mobileCards = document.getElementById('fastest-projects-mobile-cards');
-            
+
             // Try to load from JSON file
             let fastestProjects = [];
-            
+
             try {
                 const response = await fetch('/static/data/fastest_dime_projects.json');
                 if (response.ok) {
@@ -1019,7 +949,7 @@
             } catch (error) {
                 console.log('⚠️ Could not load fastest projects from JSON');
             }
-            
+
             // If no data, show a note
             if (fastestProjects.length === 0) {
                 mobileCards.innerHTML = `
@@ -1032,13 +962,13 @@
                 container.style.display = 'block';
                 return;
             }
-            
+
             // Hide spinner, show container
             spinner.style.display = 'none';
             container.style.display = 'block';
-            
+
             mobileCards.innerHTML = '';
-            
+
             fastestProjects.forEach((project, index) => {
                 // Parse contractor JSON to get name
                 let contractorName = 'N/A';
@@ -1050,17 +980,17 @@
                         contractorName = project.contractor;
                     }
                 }
-                
+
                 let rankBadge = `#${index + 1}`;
                 if (index === 0) rankBadge = '🥇';
                 if (index === 1) rankBadge = '🥈';
                 if (index === 2) rankBadge = '🥉';
-                
+
                 const cardHTML = `
                     <div class="dime-mobile-card" style="${index < 3 ? 'background: #fff3cd;' : ''}">
                         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
                             <span style="font-size: 1.5rem;">${rankBadge}</span>
-                            <span style="font-weight: 600; color: #28a745; font-size: 1.1rem;">${project.duration_days || 'N/A'} days</span>
+                            <span style="font-weight: 600; color: #28a745; font-size: 1.1rem;">${(project.completion_days !== undefined && project.completion_days !== null) ? project.completion_days.toLocaleString() : (project.days !== undefined && project.days !== null) ? project.days.toLocaleString() : 'N/A'}</span>
                         </div>
                         <div class="dime-mobile-card-title">${project.project_name || 'N/A'}</div>
                         <div class="dime-mobile-card-row">
@@ -1077,7 +1007,7 @@
                         </div>
                         <div class="dime-mobile-card-row">
                             <span class="dime-mobile-card-label">Cost:</span>
-                            <span class="dime-mobile-card-value" style="font-weight: 600; color: #0038A8;">₱${project.cost ? parseFloat(project.cost).toLocaleString('en-PH', {minimumFractionDigits: 2}) : 'N/A'}</span>
+                            <span class="dime-mobile-card-value" style="font-weight: 600; color: #0038A8;">₱${project.cost ? parseFloat(project.cost).toLocaleString('en-PH', { minimumFractionDigits: 2 }) : 'N/A'}</span>
                         </div>
                         <div class="dime-mobile-card-row">
                             <span class="dime-mobile-card-label">Contractor:</span>
@@ -1085,12 +1015,12 @@
                         </div>
                     </div>
                 `;
-                
+
                 mobileCards.innerHTML += cardHTML;
             });
-            
+
             console.log(`✅ Loaded ${fastestProjects.length} fastest projects`);
-            
+
         } catch (error) {
             console.error('❌ Error loading fastest projects:', error);
             const spinner = document.getElementById('fastest-projects-loading');
@@ -1105,15 +1035,14 @@
         }
     }
 
-    }
 
     // Mobile speed sub-tab switching
     let slowestProjectsLoaded = false;
-    
+
     document.querySelectorAll('.speed-subtab-btn').forEach(btn => {
-        btn.addEventListener('click', function() {
+        btn.addEventListener('click', function () {
             const subtab = this.getAttribute('data-subtab');
-            
+
             // Update button states
             document.querySelectorAll('.speed-subtab-btn').forEach(b => {
                 b.classList.remove('active');
@@ -1125,13 +1054,13 @@
             this.style.borderBottomColor = '#0038A8';
             this.style.color = '#0038A8';
             this.style.fontWeight = '600';
-            
+
             // Show corresponding sub-tab panel
             document.querySelectorAll('.speed-subtab-panel').forEach(panel => {
                 panel.style.display = 'none';
             });
             document.getElementById(`subtab-${subtab}`).style.display = 'block';
-            
+
             // Load data if not already loaded
             if (subtab === 'slowest' && !slowestProjectsLoaded) {
                 loadSlowestProjectsMobile();
@@ -1144,14 +1073,14 @@
     async function loadSlowestProjectsMobile() {
         try {
             console.log('🐌 Loading slowest completed projects for mobile...');
-            
+
             const spinner = document.getElementById('slowest-projects-loading');
             const container = document.getElementById('slowest-projects-container');
             const mobileCards = document.getElementById('slowest-projects-mobile-cards');
-            
+
             // Try to load from JSON file
             let slowestProjects = [];
-            
+
             try {
                 const response = await fetch('/static/data/slowest_dime_projects.json');
                 if (response.ok) {
@@ -1162,7 +1091,7 @@
             } catch (error) {
                 console.log('⚠️ Could not load slowest projects from JSON');
             }
-            
+
             // If no data, show a note
             if (slowestProjects.length === 0) {
                 mobileCards.innerHTML = `
@@ -1175,13 +1104,13 @@
                 container.style.display = 'block';
                 return;
             }
-            
+
             // Hide spinner, show container
             spinner.style.display = 'none';
             container.style.display = 'block';
-            
+
             mobileCards.innerHTML = '';
-            
+
             slowestProjects.forEach((project, index) => {
                 const card = document.createElement('div');
                 card.style.cssText = `
@@ -1192,16 +1121,16 @@
                     margin-bottom: 10px;
                     box-shadow: 0 2px 4px rgba(0,0,0,0.1);
                 `;
-                
+
                 let rankBadge = `#${index + 1}`;
                 if (index === 0) rankBadge = '🥇';
                 if (index === 1) rankBadge = '🥈';
                 if (index === 2) rankBadge = '🥉';
-                
+
                 // Get contractor name with source indicator
                 let contractorName = 'N/A';
                 let contractorSource = '';
-                
+
                 if (project.contractor_source === 'flood_connected' || project.contractor_source === 'dime_fallback') {
                     contractorName = project.contractors[0];
                     contractorSource = '<span style="background: #ffc107; color: black; padding: 2px 6px; border-radius: 4px; font-size: 0.8em; font-weight: 600;">SSP</span>';
@@ -1217,30 +1146,30 @@
                         contractorName = 'N/A';
                     }
                 }
-                
+
                 card.innerHTML = `
                     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
                         <span style="font-weight: bold; color: #0038A8; font-size: 1.1em;">${rankBadge}</span>
-                        <span style="font-weight: bold; color: #dc3545; font-size: 1.1em;">${project.completion_days || 'N/A'} days</span>
+                        <span style="font-weight: bold; color: #dc3545; font-size: 1.1em;">${(project.completion_days !== undefined && project.completion_days !== null) ? project.completion_days.toLocaleString() : (project.days !== undefined && project.days !== null) ? project.days.toLocaleString() : 'N/A'}</span>
                     </div>
                     <div style="font-weight: 600; margin-bottom: 5px; color: #333;">${project.project_name || 'N/A'}</div>
                     <div style="font-size: 0.9em; color: #666; margin-bottom: 5px;">
                         <div>📍 ${project.region || 'N/A'}</div>
                         <div>📅 Started: ${project.date_started || 'N/A'}</div>
                         <div>✅ Completed: ${project.contract_completion_date || 'N/A'}</div>
-                        <div>💰 Cost: ₱${project.cost ? parseFloat(project.cost).toLocaleString('en-PH', {minimumFractionDigits: 2}) : 'N/A'}</div>
+                        <div>💰 Cost: ₱${project.cost ? parseFloat(project.cost).toLocaleString('en-PH', { minimumFractionDigits: 2 }) : 'N/A'}</div>
                     </div>
                     <div style="font-size: 0.8em; color: #666;">
                         <div>👷 ${contractorName}</div>
                         <div>${contractorSource}</div>
                     </div>
                 `;
-                
+
                 mobileCards.appendChild(card);
             });
-            
+
             console.log(`✅ Loaded ${slowestProjects.length} slowest projects for mobile`);
-            
+
         } catch (error) {
             console.error('❌ Error loading slowest projects for mobile:', error);
         }
@@ -1249,28 +1178,10 @@
     // Initialize page
     document.addEventListener('DOMContentLoaded', () => {
         console.log('🏗️ DIME mobile page loaded');
-        
+
         initializeTabs();
-        loadFilterOptions();
-        loadVisualData();
+        loadBarangaysData(); // Load barangays data on page load
         loadFastestProjects();
-
-        // Pagination event listeners
-        document.getElementById('prev-page-btn').addEventListener('click', () => {
-            if (currentPage > 1) {
-                loadProjects(currentPage - 1);
-            }
-        });
-
-        document.getElementById('next-page-btn').addEventListener('click', () => {
-            if (currentPage < totalPages) {
-                loadProjects(currentPage + 1);
-            }
-        });
-
-        // Filter event listeners
-        document.getElementById('apply-filters-btn').addEventListener('click', applyFilters);
-        document.getElementById('clear-filters-btn').addEventListener('click', clearFilters);
 
         // Last updated
         document.getElementById('last-updated').textContent = new Date().toLocaleDateString('en-PH');
@@ -1493,14 +1404,14 @@
             suggestionsList.style.display = 'none';
             autocompleteContainer.appendChild(suggestionsList);
 
-                // Debounced search function
-                async function searchProjects(query) {
-                    // Project name requires 3+ characters, location filters require 2+ characters
-                    const minLength = fieldName === 'project_name' ? 3 : 2;
-                    if (query.length < minLength) {
-                        suggestionsList.style.display = 'none';
-                        return;
-                    }
+            // Debounced search function
+            async function searchProjects(query) {
+                // Project name requires 3+ characters, location filters require 2+ characters
+                const minLength = fieldName === 'project_name' ? 3 : 2;
+                if (query.length < minLength) {
+                    suggestionsList.style.display = 'none';
+                    return;
+                }
 
                 try {
                     let endpoint = '/api/dime/project-suggestions';

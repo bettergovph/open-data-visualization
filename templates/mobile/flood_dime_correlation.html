@@ -1,0 +1,269 @@
+{% extends "mobile/base_visualizations.html" %}
+
+{% block head %}
+<!-- BetterGovPH Mobile Theme CSS -->
+<link rel="stylesheet" href="/static/css/visualizations-mobile.css">
+<!-- Tailwind CSS -->
+<link rel="stylesheet" href="/static/css/tailwind.css">
+<script src="/static/js/chart.js"></script>
+<!-- Custom styling - Override ALL base styles -->
+<style>
+    /* Reset and override base.html styles */
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+    }
+
+    body {
+        font-family: 'Inter', sans-serif !important;
+        background-color: white !important;
+        color: black !important;
+        margin: 0 !important;
+        padding: 0 !important;
+    }
+
+    /* Hide main navbar from base.html */
+    nav.navbar,
+    nav.mobile-navbar,
+    header.navbar,
+    header {
+        display: none !important;
+    }
+
+    /* Ensure our BetterGov nav is visible */
+    nav:not(.navbar):not(.mobile-navbar) {
+        display: block !important;
+    }
+
+    /* Hide footer from base.html - we'll add our own */
+    footer.footer,
+    footer.mobile-footer {
+        display: none !important;
+    }
+
+    /* Override any gradients or backgrounds */
+    section,
+    main,
+    div {
+        background: transparent !important;
+    }
+
+    .rank-badge {
+        display: inline-block;
+        background: #667eea;
+        color: white;
+        padding: 2px 8px;
+        border-radius: 12px;
+        font-size: 0.75em;
+        font-weight: 600;
+        margin-right: 8px;
+    }
+
+    .gold-badge {
+        background: linear-gradient(135deg, #FFD700 0%, #FFA500 100%);
+    }
+
+    .silver-badge {
+        background: linear-gradient(135deg, #C0C0C0 0%, #808080 100%);
+    }
+
+    .bronze-badge {
+        background: linear-gradient(135deg, #CD7F32 0%, #8B4513 100%);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Mobile Flood-DIME Correlation Section -->
+<section class="w-full bg-white shadow-md my-1 overflow-hidden" style="width: 100% !important; margin: 0 !important;">
+    <div class="w-full p-3" style="width: 100% !important;">
+
+        <!-- Header -->
+        <div class="text-center mb-4">
+            <h1 class="text-2xl font-bold text-gray-800 mb-2">Flood-DIME Correlation</h1>
+            <p class="text-sm text-gray-600">Connections between Flood Control contractors and DIME infrastructure
+                projects</p>
+        </div>
+
+        <div class="mobile-budget-header" style="margin-bottom: 0.5rem; padding-bottom: 0.5rem;">
+            <div class="mobile-desktop-notice bg-blue-50 text-blue-700 rounded-md mb-2 text-center border-l-4 border-blue-500"
+                style="padding: 0.5rem 0; font-size: 0.75rem;">
+                <i class="fas fa-desktop mr-1"></i>
+                <strong>Best experienced on desktop</strong>
+            </div>
+        </div>
+
+        <!-- Year Filter -->
+        <div class="text-center mb-4">
+            <div class="inline-flex items-center gap-2">
+                <label for="correlation-year-filter" class="font-semibold text-gray-700 text-sm">Select Year:</label>
+                <select id="correlation-year-filter"
+                    class="px-2 py-1 border border-blue-600 rounded-md text-sm bg-white text-gray-800">
+                    <option value="2020">2020</option>
+                    <option value="2021">2021</option>
+                    <option value="2022">2022</option>
+                    <option value="2023">2023</option>
+                    <option value="2024">2024</option>
+                    <option value="2025" selected>2025</option>
+                    <option value="all_years">All Years</option>
+                </select>
+            </div>
+        </div>
+
+        <!-- Loading Spinner -->
+        <div id="contractor-loading-spinner" class="flex flex-col items-center justify-center py-8">
+            <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mb-2"></div>
+            <p class="text-gray-600 text-xs">Loading data...</p>
+        </div>
+
+        <!-- Error Message -->
+        <div id="contractor-error" class="bg-red-50 border border-red-200 rounded-lg p-4 text-center hidden">
+            <div class="text-red-600">
+                <h3 class="text-sm font-semibold mb-1">Error Loading Data</h3>
+                <p class="text-xs">Unable to load data. Please try again.</p>
+            </div>
+        </div>
+
+        <!-- Key Statistics Grid -->
+        <div id="stats-section" class="grid grid-cols-2 gap-3 mb-4 hidden">
+            <div class="bg-white p-3 rounded-lg shadow-sm text-center border-l-4 border-blue-500">
+                <h3 class="text-xs font-semibold text-gray-800 mb-1">Top Contractors</h3>
+                <p class="text-lg font-bold text-blue-600 my-1" id="stat-flood-contractors">-</p>
+            </div>
+            <div class="bg-white p-3 rounded-lg shadow-sm text-center border-l-4 border-blue-500">
+                <h3 class="text-xs font-semibold text-gray-800 mb-1">Flood Projects</h3>
+                <p class="text-lg font-bold text-blue-600 my-1" id="stat-flood-projects">-</p>
+            </div>
+            <div class="bg-white p-3 rounded-lg shadow-sm text-center border-l-4 border-blue-500">
+                <h3 class="text-xs font-semibold text-gray-800 mb-1">In DIME</h3>
+                <p class="text-lg font-bold text-blue-600 my-1" id="stat-contractors-in-dime">-</p>
+            </div>
+            <div class="bg-white p-3 rounded-lg shadow-sm text-center border-l-4 border-blue-500">
+                <h3 class="text-xs font-semibold text-gray-800 mb-1">DIME Value</h3>
+                <p class="text-lg font-bold text-blue-600 my-1" id="stat-dime-value">-</p>
+            </div>
+        </div>
+
+        <!-- Contractor List (Cards) -->
+        <div id="contractor-section" class="space-y-3 hidden">
+            <h3 class="text-lg font-semibold text-gray-800 text-center mb-3">🏆 Top Contractors</h3>
+            <div id="contractor-list-container" class="space-y-3">
+                <!-- Cards will be injected here -->
+            </div>
+        </div>
+
+    </div>
+</section>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    // Utility function to format currency to PHP
+    function formatCurrency(amount) {
+        if (amount === null || amount === undefined) return 'N/A';
+        // Shorten for mobile (e.g. 1.5B, 500M)
+        const val = parseFloat(amount);
+        if (val >= 1e9) return `₱${(val / 1e9).toFixed(1)}B`;
+        if (val >= 1e6) return `₱${(val / 1e6).toFixed(1)}M`;
+        return `₱${val.toLocaleString('en-PH')}`;
+    }
+
+    function formatNumber(num) {
+        if (num === null || num === undefined) return 'N/A';
+        return parseFloat(num).toLocaleString('en-PH');
+    }
+
+    async function loadContractorCorrelation() {
+        try {
+            const selectedYear = document.getElementById('correlation-year-filter').value;
+
+            const response = await fetch(`/static/data/flood_dime_contractor_correlation_${selectedYear}.json`);
+
+            if (!response.ok) throw new Error(`HTTP error: ${response.status}`);
+
+            const data = await response.json();
+
+            if (!data || data.status === 'error' || !data.data || !data.data.contractors) {
+                throw new Error('Invalid data structure');
+            }
+
+            // Hide spinner, show content
+            document.getElementById('contractor-loading-spinner').style.display = 'none';
+            document.getElementById('stats-section').classList.remove('hidden');
+            document.getElementById('contractor-section').classList.remove('hidden');
+
+            // Update statistics
+            const contractorsList = Object.values(data.data.contractors);
+            const totalFloodProjects = contractorsList.reduce((sum, c) => sum + c.flood_projects, 0);
+            const totalDimeProjects = contractorsList.reduce((sum, c) => sum + c.dime_non_flood_projects, 0);
+            const totalDimeValue = contractorsList.reduce((sum, c) => sum + c.dime_non_flood_cost, 0);
+            const contractorsInDime = contractorsList.filter(c => c.dime_non_flood_projects > 0).length;
+
+            document.getElementById('stat-flood-contractors').textContent = formatNumber(contractorsList.length);
+            document.getElementById('stat-flood-projects').textContent = formatNumber(totalFloodProjects);
+            document.getElementById('stat-contractors-in-dime').textContent = formatNumber(contractorsInDime);
+            document.getElementById('stat-dime-value').textContent = formatCurrency(totalDimeValue);
+
+            // Populate List
+            const container = document.getElementById('contractor-list-container');
+            container.innerHTML = '';
+
+            // Sort
+            contractorsList.sort((a, b) => {
+                if (b.flood_projects !== a.flood_projects) return b.flood_projects - a.flood_projects;
+                return b.dime_non_flood_projects - a.dime_non_flood_projects;
+            });
+
+            contractorsList.slice(0, 20).forEach((contractor, index) => { // Limit to top 20 for mobile
+                const rank = index + 1;
+                let rankBadgeClass = 'bg-gray-600';
+                if (rank === 1) rankBadgeClass = 'bg-yellow-500';
+                else if (rank === 2) rankBadgeClass = 'bg-gray-400';
+                else if (rank === 3) rankBadgeClass = 'bg-yellow-700';
+
+                const card = document.createElement('div');
+                card.className = 'bg-white p-3 rounded-lg border border-gray-200 shadow-sm';
+                card.innerHTML = `
+                    <div class="flex justify-between items-start mb-2">
+                        <div class="flex items-center gap-2">
+                            <span class="text-xs font-bold text-white px-2 py-0.5 rounded-full ${rankBadgeClass}">#${rank}</span>
+                            <span class="text-sm font-bold text-gray-800 line-clamp-1">${contractor.contractor}</span>
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-2 gap-2 text-xs">
+                        <div class="bg-blue-50 p-2 rounded">
+                            <div class="text-blue-800 font-semibold">Flood Control</div>
+                            <div>${contractor.flood_projects} projects</div>
+                            <div class="font-bold">${formatCurrency(contractor.flood_total_cost)}</div>
+                        </div>
+                        <div class="bg-purple-50 p-2 rounded">
+                            <div class="text-purple-800 font-semibold">DIME (Other)</div>
+                            <div>${contractor.dime_non_flood_projects} projects</div>
+                            <div class="font-bold">${formatCurrency(contractor.dime_non_flood_cost)}</div>
+                        </div>
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+
+        } catch (error) {
+            console.error('Error:', error);
+            document.getElementById('contractor-loading-spinner').style.display = 'none';
+            document.getElementById('contractor-error').classList.remove('hidden');
+        }
+    }
+
+    document.addEventListener('DOMContentLoaded', function () {
+        loadContractorCorrelation();
+
+        document.getElementById('correlation-year-filter').addEventListener('change', function () {
+            document.getElementById('contractor-loading-spinner').style.display = 'flex';
+            document.getElementById('stats-section').classList.add('hidden');
+            document.getElementById('contractor-section').classList.add('hidden');
+            document.getElementById('contractor-error').classList.add('hidden');
+            loadContractorCorrelation();
+        });
+    });
+</script>
+{% endblock %}

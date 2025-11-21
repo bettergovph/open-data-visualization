@@ -2,10 +2,10 @@
 
 {% block head %}
 <!-- Google Fonts - Inter -->
-    <!-- Tailwind CSS -->
-    <link rel="stylesheet" href="/static/css/tailwind.css">
-    <!-- Tailwind CSS (Production) -->
-    <link rel="stylesheet" href="/static/css/tailwind.css">
+<!-- Tailwind CSS -->
+<link rel="stylesheet" href="/static/css/tailwind.css">
+<!-- Tailwind CSS (Production) -->
+<link rel="stylesheet" href="/static/css/tailwind.css">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
 
@@ -17,6 +17,7 @@
         padding: 0;
         box-sizing: border-box;
     }
+
     body {
         font-family: 'Inter', sans-serif !important;
         background-color: white !important;
@@ -24,31 +25,12 @@
         margin: 0 !important;
         padding: 0 !important;
     }
-    /* Hide main navbar from base.html */
-    nav.navbar,
-    nav.mobile-navbar,
-    header.navbar,
-    header { 
-        display: none !important; 
-    }
-    /* Ensure our BetterGov nav is visible */
-    nav:not(.navbar):not(.mobile-navbar) {
-        display: block !important;
-    }
-    /* Hide footer from base.html - we'll add our own */
-    footer.footer,
-    footer.mobile-footer {
-        display: none !important;
-    }
-    /* Override any gradients or backgrounds */
-    section, main, div {
-        background: transparent !important;
-    }
 </style>
 
 <!-- BetterGovPH Metadata Overrides -->
 <meta name="description" content="BetterGovPH - Promoting Data Transparency and Open Government">
-<meta name="keywords" content="government data, transparency, Philippines, budget analysis, flood control, public data, open government">
+<meta name="keywords"
+    content="government data, transparency, Philippines, budget analysis, flood control, public data, open government">
 <meta name="author" content="BetterGovPH">
 
 <!-- Open Graph / Facebook -->
@@ -67,109 +49,85 @@
 {% endblock %}
 
 {% block content %}
-<!-- Mobile Navigation - Blends with hero, no borders or background -->
-<nav class="py-3 bg-white">
-    <div class="flex items-center justify-between">
-        <div class="flex items-center">
-            <a href="https://bettergov.ph" class="flex items-center">
-                <img src="https://raw.githubusercontent.com/bettergovph/logo/main/png/BetterGov_Horizontal-Black.png" 
-                     alt="BetterGov" 
-                     class="h-8">
-            </a>
-        </div>
-        <div class="md:hidden">
-            <button class="text-black focus:outline-none" onclick="toggleMobileMenu()">
-                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
-                </svg>
-            </button>
-        </div>
-    </div>
-    <!-- Mobile menu (hidden by default) -->
-    <div id="mobileMenu" class="hidden mt-4 space-y-2">
-        <a href="/nep" class="block text-black hover:text-gray-600 font-medium py-2">NEP</a>
-        <a href="/budget" class="block text-black hover:text-gray-600 font-medium py-2">Budget</a>
-        <a href="/map" class="block text-black hover:text-gray-600 font-medium py-2">Map</a>
-        <a href="/budget-nep-correlation" class="block text-black hover:text-gray-600 font-medium py-2">NEP-Budget</a>
-        <a href="/budget-flood-correlation" class="block text-black hover:text-gray-600 font-medium py-2">Budget-Flood</a>
-        <a href="/flood-dime-correlation" class="block text-black hover:text-gray-600 font-medium py-2">Flood-DIME</a>
-    </div>
-</nav>
+<!-- Logo Header -->
+<div class="text-center py-4 mb-4">
+    <img src="https://raw.githubusercontent.com/bettergovph/logo/main/png/BetterGov_Horizontal-Black.png" 
+         alt="BetterGovPH" 
+         class="mx-auto"
+         style="max-width: 200px; height: auto;">
+</div>
 
-<script>
-function toggleMobileMenu() {
-    const menu = document.getElementById('mobileMenu');
-    menu.classList.toggle('hidden');
-}
-</script>
 
 
 <!-- Feature Cards -->
-<section class="bg-gray-50 py-8">
-    <div class="space-y-4">
-        <!-- NEP Card -->
-        <div class="bg-white rounded-lg shadow-md py-4">
-            <h3 class="text-xl font-semibold text-black mb-2">🏛️ NEP</h3>
-            <p class="text-gray-600 text-sm mb-3">National Expenditure Program analysis for government spending priorities.</p>
-            <a href="/nep" class="block bg-black text-white py-2 rounded-lg text-sm text-center w-full">Explore NEP Data</a>
-        </div>
-
-        <!-- Budget Card -->
-        <div class="bg-white rounded-lg shadow-md py-4">
-            <h3 class="text-xl font-semibold text-black mb-2">💰 Budget</h3>
-            <p class="text-gray-600 text-sm mb-3">AI-powered analysis of Government Appropriations Act (GAA) data.</p>
-            <a href="/budget" class="block bg-black text-white py-2 rounded-lg text-sm text-center w-full">Explore Budget Data</a>
-        </div>
-
-        <!-- Flood Control Card -->
-        <div class="bg-white rounded-lg shadow-md py-4">
-            <h3 class="text-xl font-semibold text-black mb-2">🌊 Flood Control</h3>
-            <p class="text-gray-600 text-sm mb-3">Track DPWH flood control infrastructure projects across the Philippines.</p>
-            <a href="/flood" class="block bg-black text-white py-2 rounded-lg text-sm text-center w-full">View Projects</a>
-        </div>
-
-        <!-- DIME Card -->
-        <div class="bg-white rounded-lg shadow-md py-4">
-            <h3 class="text-xl font-semibold text-black mb-2">🏗️ DIME</h3>
-            <p class="text-gray-600 text-sm mb-3">Infrastructure Master Plan tracking for government development initiatives.</p>
-            <a href="/dime" class="block bg-black text-white py-2 rounded-lg text-sm text-center w-full">Explore DIME</a>
-        </div>
-
-        <!-- Map Card -->
-        <div class="bg-white rounded-lg shadow-md py-4">
-            <h3 class="text-xl font-semibold text-black mb-2">🗺️ Map</h3>
-            <p class="text-gray-600 text-sm mb-3">Explore flood control projects geographically across the Philippines.</p>
-            <a href="/map" class="block bg-black text-white py-2 rounded-lg text-sm text-center w-full">View Map</a>
-        </div>
-
-        <!-- NEP-Budget Correlation Card -->
-        <div class="bg-white rounded-lg shadow-md py-4">
-            <h3 class="text-xl font-semibold text-black mb-2">📊 NEP-Budget</h3>
-            <p class="text-gray-600 text-sm mb-3">Correlation analysis connecting NEP priorities with budget allocations.</p>
-            <a href="/budget-nep-correlation" class="block bg-black text-white py-2 rounded-lg text-sm text-center w-full">View Analysis</a>
-        </div>
-
-        <!-- Budget-Flood Correlation Card -->
-        <div class="bg-white rounded-lg shadow-md py-4">
-            <h3 class="text-xl font-semibold text-black mb-2">📈 Budget-Flood</h3>
-            <p class="text-gray-600 text-sm mb-3">Data analysis connecting budget items with flood control projects.</p>
-            <a href="/budget-flood-correlation" class="block bg-black text-white py-2 rounded-lg text-sm text-center w-full">View Analysis</a>
-        </div>
-
-        <!-- Flood-DIME Correlation Card -->
-        <div class="bg-white rounded-lg shadow-md py-4">
-            <h3 class="text-xl font-semibold text-black mb-2">🌉 Flood-DIME</h3>
-            <p class="text-gray-600 text-sm mb-3">Analyze overlap between flood control and infrastructure projects.</p>
-            <a href="/flood-dime-correlation" class="block bg-black text-white py-2 rounded-lg text-sm text-center w-full">View Analysis</a>
-        </div>
-
-        <!-- Dynasty Card -->
-        <div class="bg-white rounded-lg shadow-md py-4">
-            <h3 class="text-xl font-semibold text-black mb-2">👑 Political Dynasties</h3>
-            <p class="text-gray-600 text-sm mb-3">Interactive analysis of political dynasty patterns across 82 provinces.</p>
-            <a href="/dynasty" class="block bg-black text-white py-2 rounded-lg text-sm text-center w-full">Explore Dynasties</a>
-        </div>
+<div class="grid grid-cols-2 gap-2 px-2">
+    <!-- NEP Card -->
+    <div class="bg-white rounded-lg shadow-sm p-2 border border-gray-100 flex flex-col h-full">
+        <h3 class="text-sm font-semibold text-black mb-1">🏛️ NEP</h3>
+        <p class="text-gray-600 text-xs mb-2 flex-grow">National Expenditure Program analysis.</p>
+        <a href="/nep" class="block bg-black text-white py-1.5 rounded text-xs text-center w-full mt-auto">Explore</a>
     </div>
+
+    <!-- Budget Card -->
+    <div class="bg-white rounded-lg shadow-sm p-2 border border-gray-100 flex flex-col h-full">
+        <h3 class="text-sm font-semibold text-black mb-1">💰 Budget</h3>
+        <p class="text-gray-600 text-xs mb-2 flex-grow">AI-powered GAA data analysis.</p>
+        <a href="/budget"
+            class="block bg-black text-white py-1.5 rounded text-xs text-center w-full mt-auto">Explore</a>
+    </div>
+
+    <!-- Flood Control Card -->
+    <div class="bg-white rounded-lg shadow-sm p-2 border border-gray-100 flex flex-col h-full">
+        <h3 class="text-sm font-semibold text-black mb-1">🌊 Flood</h3>
+        <p class="text-gray-600 text-xs mb-2 flex-grow">Track DPWH flood control projects.</p>
+        <a href="/flood" class="block bg-black text-white py-1.5 rounded text-xs text-center w-full mt-auto">View</a>
+    </div>
+
+    <!-- DIME Card -->
+    <div class="bg-white rounded-lg shadow-sm p-2 border border-gray-100 flex flex-col h-full">
+        <h3 class="text-sm font-semibold text-black mb-1">🏗️ DIME</h3>
+        <p class="text-gray-600 text-xs mb-2 flex-grow">Infrastructure Master Plan tracking.</p>
+        <a href="/dime" class="block bg-black text-white py-1.5 rounded text-xs text-center w-full mt-auto">Explore</a>
+    </div>
+
+    <!-- Map Card -->
+    <div class="bg-white rounded-lg shadow-sm p-2 border border-gray-100 flex flex-col h-full">
+        <h3 class="text-sm font-semibold text-black mb-1">🗺️ Map</h3>
+        <p class="text-gray-600 text-xs mb-2 flex-grow">Geographic project exploration.</p>
+        <a href="/map" class="block bg-black text-white py-1.5 rounded text-xs text-center w-full mt-auto">View Map</a>
+    </div>
+
+    <!-- PhilGEPS Card -->
+    <div class="bg-white rounded-lg shadow-sm p-2 border border-gray-100 flex flex-col h-full">
+        <h3 class="text-sm font-semibold text-black mb-1">📋 PhilGEPS</h3>
+        <p class="text-gray-600 text-xs mb-2 flex-grow">Government procurement data 2013-2025.</p>
+        <a href="/philgeps" class="block bg-black text-white py-1.5 rounded text-xs text-center w-full mt-auto">View</a>
+    </div>
+
+    <!-- Dynasty Card (spans 2 columns) -->
+    <div class="bg-white rounded-lg shadow-sm p-2 border border-gray-100 flex flex-col h-full col-span-2">
+        <h3 class="text-sm font-semibold text-black mb-1">👑 Political Dynasties</h3>
+        <p class="text-gray-600 text-xs mb-2">Interactive analysis of political dynasty patterns across 82 provinces.
+        </p>
+        <a href="/dynasty" class="block bg-black text-white py-1.5 rounded text-xs text-center w-full">Explore
+            Dynasties</a>
+    </div>
+
+    <!-- Integrated Card -->
+    <div class="bg-white rounded-lg shadow-sm p-2 border border-gray-100 flex flex-col h-full">
+        <h3 class="text-sm font-semibold text-black mb-1">🎯 Integrated</h3>
+        <p class="text-gray-600 text-xs mb-2 flex-grow">Combined multi-source analysis.</p>
+        <a href="/integrated"
+            class="block bg-black text-white py-1.5 rounded text-xs text-center w-full mt-auto">Explore</a>
+    </div>
+
+    <!-- Sources Card -->
+    <div class="bg-white rounded-lg shadow-sm p-2 border border-gray-100 flex flex-col h-full">
+        <h3 class="text-sm font-semibold text-black mb-1">📚 Sources</h3>
+        <p class="text-gray-600 text-xs mb-2 flex-grow">Data sources and methodology.</p>
+        <a href="/sources" class="block bg-black text-white py-1.5 rounded text-xs text-center w-full mt-auto">View</a>
+    </div>
+</div>
 </section>
 
 {% endblock %}

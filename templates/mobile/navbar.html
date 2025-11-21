@@ -1,24 +1,98 @@
-<header class="visualizations-mobile-header">
-    <div class="visualizations-mobile-container">
-        <div class="visualizations-mobile-logo-section">
-            <a href="https://bettergov.ph" class="visualizations-mobile-logo-link">
-                <img src="/static/images/gov_logo.png" alt="BetterGov.ph" class="visualizations-mobile-logo-img">
-            </a>
-            <a href="/" class="visualizations-mobile-site-name-link">
-                <span class="visualizations-mobile-site-name">Data Visualizations</span>
-            </a>
+<header class="visualizations-mobile-header"
+    style="position: sticky; top: 0; z-index: 1000; background: white; border-bottom: 1px solid #eee;">
+    <div class="visualizations-mobile-container" style="display: flex; flex-direction: column; padding: 0;">
+        <div class="visualizations-mobile-logo-section"
+            style="padding: 0.5rem 1rem; border-bottom: 1px solid #f5f5f5; width: 100%; display: flex; align-items: center; justify-content: space-between;">
+            <div style="display: flex; align-items: center; gap: 0.5rem;">
+                <a href="https://bettergov.ph" class="visualizations-mobile-logo-link"
+                    style="display: flex; align-items: center;">
+                    <img src="https://raw.githubusercontent.com/bettergovph/logo/main/png/BetterGov_Horizontal-Black.png" alt="BetterGov.ph" class="visualizations-mobile-logo-img"
+                        style="height: 24px; width: auto;">
+                </a>
+                <a href="/" class="visualizations-mobile-site-name-link"
+                    style="text-decoration: none; color: #0038A8; font-weight: 600; font-size: 0.9rem;">
+                    <span class="visualizations-mobile-site-name">Data Visualizations</span>
+                </a>
+            </div>
+            <button id="mobile-menu-toggle" 
+                style="background: none; border: none; padding: 0.5rem; cursor: pointer; display: flex; flex-direction: column; gap: 4px; align-items: center; justify-content: center; width: 32px; height: 32px;"
+                onclick="toggleMobileMenu()">
+                <span class="hamburger-line" style="width: 24px; height: 2px; background: #333; transition: all 0.3s;"></span>
+                <span class="hamburger-line" style="width: 24px; height: 2px; background: #333; transition: all 0.3s;"></span>
+                <span class="hamburger-line" style="width: 24px; height: 2px; background: #333; transition: all 0.3s;"></span>
+            </button>
         </div>
-        <nav class="visualizations-mobile-nav-menu">
-            <a href="/nep">NEP</a>
-            <a href="/budget">Budget</a>
-            <a href="/flood">Flood</a>
-            <a href="/philgeps">PhilGEPS</a>
-            <a href="/dime">DIME</a>
-            <a href="/map">Map</a>
-            <a href="/budget-nep-correlation">NEP-Budget</a>
-            <a href="/budget-flood-correlation">Budget-Flood</a>
-            <a href="/flood-dime-correlation">Flood-DIME</a>
+        <nav id="mobile-nav-menu" class="visualizations-mobile-nav-menu"
+            style="display: none; flex-direction: column; padding: 0.5rem; gap: 0.5rem; width: 100%; max-height: 0; overflow: hidden; transition: max-height 0.3s ease-out;">
+            <a href="/nep"
+                style="padding: 0.75rem; background: #f5f5f5; border-radius: 0.5rem; color: #333; text-decoration: none; font-size: 0.9rem; display: block;">NEP</a>
+            <a href="/budget"
+                style="padding: 0.75rem; background: #f5f5f5; border-radius: 0.5rem; color: #333; text-decoration: none; font-size: 0.9rem; display: block;">Budget</a>
+            <a href="/flood"
+                style="padding: 0.75rem; background: #f5f5f5; border-radius: 0.5rem; color: #333; text-decoration: none; font-size: 0.9rem; display: block;">Flood</a>
+            <a href="/philgeps"
+                style="padding: 0.75rem; background: #f5f5f5; border-radius: 0.5rem; color: #333; text-decoration: none; font-size: 0.9rem; display: block;">PhilGEPS</a>
+            <a href="/dime"
+                style="padding: 0.75rem; background: #f5f5f5; border-radius: 0.5rem; color: #333; text-decoration: none; font-size: 0.9rem; display: block;">DIME</a>
+            <a href="/map"
+                style="padding: 0.75rem; background: #f5f5f5; border-radius: 0.5rem; color: #333; text-decoration: none; font-size: 0.9rem; display: block;">Map</a>
+            <a href="/dynasty"
+                style="padding: 0.75rem; background: #f5f5f5; border-radius: 0.5rem; color: #333; text-decoration: none; font-size: 0.9rem; display: block;">Dynasties</a>
+            <a href="/integrated"
+                style="padding: 0.75rem; background: #f5f5f5; border-radius: 0.5rem; color: #333; text-decoration: none; font-size: 0.9rem; display: block;">Integrated</a>
+            <a href="/sources"
+                style="padding: 0.75rem; background: #f5f5f5; border-radius: 0.5rem; color: #333; text-decoration: none; font-size: 0.9rem; display: block;">Sources</a>
         </nav>
     </div>
 </header>
 
+<script>
+    function toggleMobileMenu() {
+        const menu = document.getElementById('mobile-nav-menu');
+        const toggle = document.getElementById('mobile-menu-toggle');
+        const lines = toggle.querySelectorAll('.hamburger-line');
+        
+        if (menu.style.display === 'none' || !menu.style.display) {
+            menu.style.display = 'flex';
+            menu.style.maxHeight = '500px';
+            toggle.setAttribute('aria-expanded', 'true');
+            
+            // Animate hamburger to X
+            lines[0].style.transform = 'rotate(45deg) translate(6px, 6px)';
+            lines[1].style.opacity = '0';
+            lines[2].style.transform = 'rotate(-45deg) translate(6px, -6px)';
+        } else {
+            menu.style.maxHeight = '0';
+            setTimeout(() => {
+                menu.style.display = 'none';
+            }, 300);
+            toggle.setAttribute('aria-expanded', 'false');
+            
+            // Reset hamburger
+            lines[0].style.transform = 'none';
+            lines[1].style.opacity = '1';
+            lines[2].style.transform = 'none';
+        }
+    }
+    
+    // Close menu when clicking outside
+    document.addEventListener('click', (e) => {
+        const menu = document.getElementById('mobile-nav-menu');
+        const toggle = document.getElementById('mobile-menu-toggle');
+        if (menu && toggle && !menu.contains(e.target) && !toggle.contains(e.target)) {
+            if (menu.style.display === 'flex') {
+                toggleMobileMenu();
+            }
+        }
+    });
+    
+    // Close menu when clicking a link
+    document.querySelectorAll('#mobile-nav-menu a').forEach(link => {
+        link.addEventListener('click', () => {
+            const menu = document.getElementById('mobile-nav-menu');
+            if (menu.style.display === 'flex') {
+                toggleMobileMenu();
+            }
+        });
+    });
+</script>
