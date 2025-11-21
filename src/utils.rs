@@ -17,11 +17,31 @@ pub fn load_frontend_env() -> HashMap<String, String> {
     env_vars
 }
 
+
+
 // Function: add_frontend_env_to_context
 pub fn add_frontend_env_to_context(context: &mut tera::Context) {
     let env_vars = load_frontend_env();
     for (key, value) in env_vars {
         context.insert(key, &value);
     }
+}
+
+// Function: is_mobile
+// Detects if the request is from a mobile device based on User-Agent
+pub fn is_mobile(req: &actix_web::HttpRequest) -> bool {
+    if let Some(user_agent) = req.headers().get(actix_web::http::header::USER_AGENT) {
+        if let Ok(ua_str) = user_agent.to_str() {
+            let ua = ua_str.to_lowercase();
+            // Check for common mobile user agents
+            return ua.contains("mobile") || 
+                   ua.contains("android") || 
+                   ua.contains("iphone") || 
+                   ua.contains("ipod") ||
+                   ua.contains("blackberry") ||
+                   ua.contains("windows phone");
+        }
+    }
+    false
 }
 
