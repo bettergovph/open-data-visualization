@@ -6057,7 +6057,9 @@ async def get_sources_api():
             'pdplaban.org.ph': 'PDP Laban',
             'reddit.com': 'Reddit',
             'philatlas.com': 'PhilAtlas',
-            'bilyonaryo.com': 'Bilyonaryo'
+            'bilyonaryo.com': 'Bilyonaryo',
+            'abs-cbn.com': 'ABS-CBN',
+            'pcij.org': 'PCIJ Flood Control'
         }
         
         name_normalization = {

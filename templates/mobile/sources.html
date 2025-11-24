@@ -224,7 +224,7 @@
             <li>
                 <strong>Contractor-Dynasty Relationship Data:</strong><br>
                 <span class="text-gray-700 text-xs">Investigative data on construction companies and contractors linked to political dynasties. Used in: Dynasty Analysis, Relationship Constellations, Contractor Connections.</span><br>
-                <span class="text-gray-600 text-xs">Credit: <a href="https://www.rappler.com/newsbreak/investigative/politicians-government-contractors-connections-map/" target="_blank" rel="noopener noreferrer" class="source-link source-link-with-popup" data-source="Rappler">Rappler</a>, <a href="https://www.inquirer.net/" target="_blank" rel="noopener noreferrer" class="source-link source-link-with-popup" data-source="Philippine Daily Inquirer">Philippine Daily Inquirer</a>, <a href="https://manilastandard.net/" target="_blank" rel="noopener noreferrer" class="source-link source-link-with-popup" data-source="Manila Standard">Manila Standard</a>, <a href="https://www.manilatimes.net/" target="_blank" rel="noopener noreferrer" class="source-link source-link-with-popup" data-source="Manila Times">Manila Times</a>, <a href="https://www.wikipedia.org/" target="_blank" rel="noopener noreferrer" class="source-link source-link-with-popup" data-source="Wikipedia">Wikipedia</a>, <a href="https://bilyonaryo.com/" target="_blank" rel="noopener noreferrer" class="source-link source-link-with-popup" data-source="Bilyonaryo">Bilyonaryo</a>, <a href="https://www.philstar.com/" target="_blank" rel="noopener noreferrer" class="source-link source-link-with-popup" data-source="Philippine STAR">Philippine Star</a> - Investigative reporting and reference materials used to validate contractor-family linkages.</span>
+                <span class="text-gray-600 text-xs">Credit: <a href="https://www.rappler.com/newsbreak/investigative/politicians-government-contractors-connections-map/" target="_blank" rel="noopener noreferrer" class="source-link source-link-with-popup" data-source="Rappler">Rappler</a>, <a href="https://www.inquirer.net/" target="_blank" rel="noopener noreferrer" class="source-link source-link-with-popup" data-source="Philippine Daily Inquirer">Philippine Daily Inquirer</a>, <a href="https://manilastandard.net/" target="_blank" rel="noopener noreferrer" class="source-link source-link-with-popup" data-source="Manila Standard">Manila Standard</a>, <a href="https://www.manilatimes.net/" target="_blank" rel="noopener noreferrer" class="source-link source-link-with-popup" data-source="Manila Times">Manila Times</a>, <a href="https://www.wikipedia.org/" target="_blank" rel="noopener noreferrer" class="source-link source-link-with-popup" data-source="Wikipedia">Wikipedia</a>, <a href="https://bilyonaryo.com/" target="_blank" rel="noopener noreferrer" class="source-link source-link-with-popup" data-source="Bilyonaryo">Bilyonaryo</a>, <a href="https://www.philstar.com/" target="_blank" rel="noopener noreferrer" class="source-link source-link-with-popup" data-source="Philippine STAR">Philippine Star</a>, <a href="https://www.abs-cbn.com/" target="_blank" rel="noopener noreferrer" class="source-link source-link-with-popup" data-source="ABS-CBN">ABS-CBN</a>, <a href="https://pcij.org/" target="_blank" rel="noopener noreferrer" class="source-link source-link-with-popup" data-source="PCIJ Flood Control">PCIJ</a> - Investigative reporting and reference materials used to validate contractor-family linkages.</span>
             </li>
             <li>
                 <strong>InfraWatch Augmented Projects (2016-2025):</strong><br>
@@ -370,7 +370,9 @@ function isValidNewsSource(url, sourceName) {
         /^https?:\/\/(www\.)?philstar\.com\/?$/i,
         /^https?:\/\/(www\.)?rappler\.com\/?$/i,
         /^https?:\/\/(www\.)?bilyonaryo\.com\/?$/i,
-        /^https?:\/\/(www\.)?wikipedia\.org\/?$/i
+        /^https?:\/\/(www\.)?wikipedia\.org\/?$/i,
+        /^https?:\/\/(www\.)?abs-cbn\.com\/?$/i,
+        /^https?:\/\/(www\.)?pcij\.org\/?$/i
     ];
     for (const pattern of genericHomepagePatterns) {
         if (pattern.test(url)) {
@@ -527,6 +529,11 @@ document.addEventListener('DOMContentLoaded', async function() {
             title: 'Records of flood-control contractors',
             url: 'https://pcij.org/2025/08/30/flood-control-records/',
             date: 'August 30, 2025'
+        },
+        {
+            title: 'Marcos and Duterte received millions in contributions from contractors',
+            url: 'https://pcij.org/2025/09/18/marcos-and-duterte-contractors/',
+            date: 'September 18, 2025'
         }
     ];
     pcijArticles.forEach(article => {
@@ -566,6 +573,23 @@ document.addEventListener('DOMContentLoaded', async function() {
     bilyonaryoArticles.forEach(article => {
         if (!bilyonaryoSources.some(source => source.url === article.url)) {
             bilyonaryoSources.push(article);
+        }
+    });
+
+    if (!SOURCES_DATA['ABS-CBN']) {
+        SOURCES_DATA['ABS-CBN'] = [];
+    }
+    const abscbnSources = SOURCES_DATA['ABS-CBN'];
+    const abscbnArticles = [
+        {
+            title: "Gardiola-linked companies 'bought' some P22B in DPWH projects — Leviste",
+            url: 'https://www.abs-cbn.com/news/regions/2025/11/19/gardiola-linked-companies-bought-some-p22b-in-dpwh-projects-leviste-1924',
+            date: 'November 19, 2025'
+        }
+    ];
+    abscbnArticles.forEach(article => {
+        if (!abscbnSources.some(source => source.url === article.url)) {
+            abscbnSources.push(article);
         }
     });
 
