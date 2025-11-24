@@ -1,0 +1,78 @@
+{
+  "person": {
+    "normalized_name": "JUDE ACIDRE",
+    "display_name": "JUDE ACIDRE",
+    "chain_count": 3
+  },
+  "chains": [
+    {
+      "length": 4,
+      "path": [
+        70158,
+        70156,
+        4145268
+      ],
+      "relationships": [
+        "Starting person",
+        "Alfred Romualdez is married to Yedda Marie Romualdez",
+        " who is also a politician"
+      ],
+      "party_list_connection": {
+        "party_name": "TINGOG",
+        "party_full_name": "47, TINGOG"
+      }
+    },
+    {
+      "length": 3,
+      "path": [
+        4145268,
+        70156
+      ],
+      "relationships": [
+        "Starting person",
+        "Connected via TINGOG"
+      ],
+      "is_standalone_party_list": true,
+      "party_list_connection": {
+        "party_name": "TINGOG",
+        "party_full_name": "TINGOG"
+      }
+    },
+    {
+      "length": 3,
+      "path": [
+        70156,
+        4145268
+      ],
+      "relationships": [
+        "Starting person",
+        "Connected via TINGOG"
+      ],
+      "is_standalone_party_list": true,
+      "party_list_connection": {
+        "party_name": "TINGOG",
+        "party_full_name": "TINGOG"
+      }
+    }
+  ],
+  "people": {
+    "70156": {
+      "id": 70156,
+      "full_name": "YEDDA MARIE K ROMUALDEZ",
+      "position": "PARTY-LIST REPRESENTATIVE",
+      "location": "LEYTE, REGION VIII"
+    },
+    "70158": {
+      "id": 70158,
+      "full_name": "Alfred Romualdez",
+      "position": "MAYOR",
+      "location": "TACLOBAN CITY, LEYTE, REGION VIII"
+    },
+    "4145268": {
+      "id": 4145268,
+      "full_name": "JUDE A ACIDRE",
+      "position": "PARTY-LIST REPRESENTATIVE",
+      "location": "Location unknown"
+    }
+  }
+}

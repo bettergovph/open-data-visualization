@@ -1,0 +1,71 @@
+{
+  "person": {
+    "normalized_name": "RODULFO D HILOT JR",
+    "display_name": "RODULFO D HILOT JR",
+    "chain_count": 3
+  },
+  "chains": [
+    {
+      "length": 3,
+      "path": [
+        70156,
+        4162401,
+        4162642
+      ],
+      "relationships": [
+        "Starting person",
+        "Political connection - TINGOG party-list representative",
+        "Campaign donor who gave ₱20 million to elect Marcos Jr. in 2022. One of the president's largest contributors"
+      ]
+    },
+    {
+      "length": 2,
+      "path": [
+        4162401,
+        4162642
+      ],
+      "relationships": [
+        "Starting person",
+        "Campaign donor who gave ₱20 million to elect Marcos Jr. in 2022. One of the president's largest contributors"
+      ]
+    },
+    {
+      "length": 3,
+      "path": [
+        4162401,
+        4162642
+      ],
+      "relationships": [
+        "Starting person",
+        "Connected via RUDHIL CONSTRUCTION & ENTERPRISES INC"
+      ],
+      "contractor_connection": {
+        "contractor_name": "RUDHIL CONSTRUCTION & ENTERPRISES INC",
+        "start_company_role": null,
+        "end_company_role": null,
+        "start_position": "PRESIDENT",
+        "end_position": "CEO, RUDHIL GROUP OF COMPANIES"
+      }
+    }
+  ],
+  "people": {
+    "70156": {
+      "id": 70156,
+      "full_name": "YEDDA MARIE K ROMUALDEZ",
+      "position": "PARTY-LIST REPRESENTATIVE",
+      "location": "LEYTE, REGION VIII"
+    },
+    "4162401": {
+      "id": 4162401,
+      "full_name": "FERDINAND ROMUALDEZ MARCOS",
+      "position": "PRESIDENT",
+      "location": "NATIONAL, NATIONAL"
+    },
+    "4162642": {
+      "id": 4162642,
+      "full_name": "RODULFO D HILOT JR",
+      "position": "CEO, RUDHIL GROUP OF COMPANIES",
+      "location": "ZAMBOANGA DEL SUR"
+    }
+  }
+}

@@ -2,9 +2,139 @@
   "person": {
     "normalized_name": "RENE MAGLANQUE",
     "display_name": "RENE Maglanque",
-    "chain_count": 1
+    "chain_count": 8
   },
   "chains": [
+    {
+      "length": 11,
+      "path": [
+        2799,
+        3745651,
+        4052633,
+        4041425,
+        4052650,
+        84197,
+        4041079,
+        4162626,
+        4162455,
+        4162454,
+        50874
+      ],
+      "relationships": [
+        "Starting person",
+        "IMELDA AGUILAR is nephew of CAMILLE VILLAR",
+        "Camille Villar is the daughter of former Senate President Manny Villar",
+        "MARK VILLAR IS THE SON OF FORMER SENATE PRESIDENT MANNY VILLAR",
+        "MARK VILLAR IS THE SON OF SENATOR CYNTHIA VILLAR",
+        "MARK VILLAR IS THE SON OF SENATOR CYNTHIA VILLAR",
+        "Worked closely with Catalina Cabral for DPWH project allocations",
+        "Worked with Roberto Bernardo on DPWH project approvals",
+        "Sunshine M. Bernardo is daughter of Roberto Bernardo",
+        "Co-owners and officers of MBB Global Properties Corp",
+        "Macy Monique Maglanque is daughter of Rene Maglanque"
+      ]
+    },
+    {
+      "length": 2,
+      "path": [
+        4162454,
+        50874
+      ],
+      "relationships": [
+        "Starting person",
+        "Macy Monique Maglanque is daughter of Rene Maglanque"
+      ]
+    },
+    {
+      "length": 3,
+      "path": [
+        50874,
+        4162626
+      ],
+      "relationships": [
+        "Starting person",
+        "Connected via MBB GLOBAL PROPERTIES"
+      ],
+      "contractor_connection": {
+        "contractor_name": "MBB GLOBAL PROPERTIES",
+        "start_company_role": null,
+        "end_company_role": null,
+        "start_position": "MAYOR",
+        "end_position": "FORMER DPWH UNDERSECRETARY"
+      }
+    },
+    {
+      "length": 3,
+      "path": [
+        50874,
+        4162455
+      ],
+      "relationships": [
+        "Starting person",
+        "Connected via MBB GLOBAL PROPERTIES"
+      ],
+      "contractor_connection": {
+        "contractor_name": "MBB GLOBAL PROPERTIES",
+        "start_company_role": null,
+        "end_company_role": null,
+        "start_position": "MAYOR",
+        "end_position": "Business Owner/Officer - MBB Global Properties"
+      }
+    },
+    {
+      "length": 3,
+      "path": [
+        50874,
+        4162630
+      ],
+      "relationships": [
+        "Starting person",
+        "Connected via MBB GLOBAL PROPERTIES"
+      ],
+      "contractor_connection": {
+        "contractor_name": "MBB GLOBAL PROPERTIES",
+        "start_company_role": null,
+        "end_company_role": null,
+        "start_position": "MAYOR",
+        "end_position": "FORMER DPWH SECRETARY"
+      }
+    },
+    {
+      "length": 3,
+      "path": [
+        50874,
+        4162456
+      ],
+      "relationships": [
+        "Starting person",
+        "Connected via MBB GLOBAL PROPERTIES"
+      ],
+      "contractor_connection": {
+        "contractor_name": "MBB GLOBAL PROPERTIES",
+        "start_company_role": null,
+        "end_company_role": null,
+        "start_position": "MAYOR",
+        "end_position": "Business Owner/Officer - MBB Global Properties"
+      }
+    },
+    {
+      "length": 3,
+      "path": [
+        50874,
+        4162454
+      ],
+      "relationships": [
+        "Starting person",
+        "Connected via MBB GLOBAL PROPERTIES"
+      ],
+      "contractor_connection": {
+        "contractor_name": "MBB GLOBAL PROPERTIES",
+        "start_company_role": null,
+        "end_company_role": null,
+        "start_position": "MAYOR",
+        "end_position": "Business Owner/Officer - MBB Global Properties"
+      }
+    },
     {
       "length": 2,
       "path": [
@@ -23,6 +153,78 @@
     }
   ],
   "people": {
+    "2799": {
+      "id": 2799,
+      "full_name": "IMELDA Aguilar",
+      "position": "MAYOR",
+      "location": "CITY OF LAS PINAS, NCR, FOURTH DISTRICT, NATIONAL CAPITAL REGION"
+    },
+    "3745651": {
+      "id": 3745651,
+      "full_name": "CAMILLE VILLAR",
+      "position": "SENATOR",
+      "location": "M'LANG, COTABATO, REGION XII"
+    },
+    "4052633": {
+      "id": 4052633,
+      "full_name": "Manny Villar",
+      "position": null,
+      "location": "Location unknown"
+    },
+    "4041425": {
+      "id": 4041425,
+      "full_name": "MARK VILLAR",
+      "position": "SENATOR",
+      "location": "Manila, Metro Manila, NCR"
+    },
+    "4052650": {
+      "id": 4052650,
+      "full_name": "Cynthia Villar",
+      "position": null,
+      "location": "Location unknown"
+    },
+    "84197": {
+      "id": 84197,
+      "full_name": "MARK VILLAR",
+      "position": "MEMBER, HOUSE OF REPRESENTATIVES",
+      "location": "NCR, FOURTH DISTRICT, NATIONAL CAPITAL REGION"
+    },
+    "4041079": {
+      "id": 4041079,
+      "full_name": "CATALINA CABRAL",
+      "position": "SECRETARY OF PUBLIC WORKS AND HIGHWAYS",
+      "location": "Manila, Metro Manila, NCR"
+    },
+    "4162626": {
+      "id": 4162626,
+      "full_name": "ROBERTO BERNARDO",
+      "position": "FORMER DPWH UNDERSECRETARY",
+      "location": "Location unknown"
+    },
+    "4162456": {
+      "id": 4162456,
+      "full_name": "FATIMA GAY (BONOAN) DELA CRUZ",
+      "position": "Business Owner/Officer - MBB Global Properties",
+      "location": "Location unknown"
+    },
+    "4162454": {
+      "id": 4162454,
+      "full_name": "MACY MONIQUE MAGLANQUE",
+      "position": "Business Owner/Officer - MBB Global Properties",
+      "location": "Location unknown"
+    },
+    "4162455": {
+      "id": 4162455,
+      "full_name": "SUNSHINE BERNARDO",
+      "position": "Business Owner/Officer - MBB Global Properties",
+      "location": "Location unknown"
+    },
+    "4162630": {
+      "id": 4162630,
+      "full_name": "MANUEL BONOAN",
+      "position": "FORMER DPWH SECRETARY",
+      "location": "Location unknown"
+    },
     "50874": {
       "id": 50874,
       "full_name": "RENE Maglanque",

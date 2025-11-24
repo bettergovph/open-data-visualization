@@ -1,0 +1,55 @@
+{
+  "person": {
+    "normalized_name": "RAUL CABALLERO",
+    "display_name": "RAUL CABALLERO",
+    "chain_count": 2
+  },
+  "chains": [
+    {
+      "length": 3,
+      "path": [
+        4145235,
+        4145234
+      ],
+      "relationships": [
+        "Starting person",
+        "Connected via AGAP"
+      ],
+      "is_standalone_party_list": true,
+      "party_list_connection": {
+        "party_name": "AGAP",
+        "party_full_name": "AGAP"
+      }
+    },
+    {
+      "length": 3,
+      "path": [
+        4145234,
+        4145235
+      ],
+      "relationships": [
+        "Starting person",
+        "Connected via AGAP"
+      ],
+      "is_standalone_party_list": true,
+      "party_list_connection": {
+        "party_name": "AGAP",
+        "party_full_name": "AGAP"
+      }
+    }
+  ],
+  "people": {
+    "4145235": {
+      "id": 4145235,
+      "full_name": "RAUL A CABALLERO",
+      "position": "PARTY-LIST REPRESENTATIVE",
+      "location": "Location unknown"
+    },
+    "4145234": {
+      "id": 4145234,
+      "full_name": "SOLON M CUA",
+      "position": "PARTY-LIST REPRESENTATIVE",
+      "location": "Location unknown"
+    }
+  }
+}

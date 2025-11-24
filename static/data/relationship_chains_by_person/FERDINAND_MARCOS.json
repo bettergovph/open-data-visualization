@@ -2,7 +2,7 @@
   "person": {
     "normalized_name": "FERDINAND MARCOS",
     "display_name": "FERDINAND MARCOS",
-    "chain_count": 48
+    "chain_count": 55
   },
   "chains": [
     {
@@ -586,6 +586,47 @@
       "path": [
         70156,
         4162401,
+        4162642
+      ],
+      "relationships": [
+        "Starting person",
+        "Political connection - TINGOG party-list representative",
+        "Campaign donor who gave ₱20 million to elect Marcos Jr. in 2022. One of the president's largest contributors"
+      ]
+    },
+    {
+      "length": 3,
+      "path": [
+        70156,
+        4162401,
+        4162643
+      ],
+      "relationships": [
+        "Starting person",
+        "Political connection - TINGOG party-list representative",
+        "Campaign donor who gave ₱1 million to elect Marcos Jr. in 2022"
+      ]
+    },
+    {
+      "length": 4,
+      "path": [
+        70156,
+        4162401,
+        4162643,
+        4162644
+      ],
+      "relationships": [
+        "Starting person",
+        "Political connection - TINGOG party-list representative",
+        "Campaign donor who gave ₱1 million to elect Marcos Jr. in 2022",
+        "Allan Quirante is uncle of Jonathan M. Quirante. Both own construction companies (QM Builders and Quirante Construction)"
+      ]
+    },
+    {
+      "length": 3,
+      "path": [
+        70156,
+        4162401,
         4162402
       ],
       "relationships": [
@@ -597,6 +638,17 @@
     {
       "length": 2,
       "path": [
+        4162401,
+        4162642
+      ],
+      "relationships": [
+        "Starting person",
+        "Campaign donor who gave ₱20 million to elect Marcos Jr. in 2022. One of the president's largest contributors"
+      ]
+    },
+    {
+      "length": 2,
+      "path": [
         53227,
         4162401
       ],
@@ -614,6 +666,17 @@
       "relationships": [
         "Starting person",
         "Ferdinand Marcos Jr. is the son of Ferdinand Marcos Sr."
+      ]
+    },
+    {
+      "length": 2,
+      "path": [
+        4162401,
+        4162643
+      ],
+      "relationships": [
+        "Starting person",
+        "Campaign donor who gave ₱1 million to elect Marcos Jr. in 2022"
       ]
     },
     {
@@ -716,6 +779,42 @@
         "Starting person",
         "Alfred Romualdez is a cousin of Ferdinand Marcos Jr."
       ]
+    },
+    {
+      "length": 3,
+      "path": [
+        4162401,
+        4162643
+      ],
+      "relationships": [
+        "Starting person",
+        "Connected via QUIRANTE CONSTRUCTION CORPORATION"
+      ],
+      "contractor_connection": {
+        "contractor_name": "QUIRANTE CONSTRUCTION CORPORATION",
+        "start_company_role": null,
+        "end_company_role": null,
+        "start_position": "PRESIDENT",
+        "end_position": "OWNER, QUIRANTE CONSTRUCTION CORPORATION"
+      }
+    },
+    {
+      "length": 3,
+      "path": [
+        4162401,
+        4162642
+      ],
+      "relationships": [
+        "Starting person",
+        "Connected via RUDHIL CONSTRUCTION & ENTERPRISES INC"
+      ],
+      "contractor_connection": {
+        "contractor_name": "RUDHIL CONSTRUCTION & ENTERPRISES INC",
+        "start_company_role": null,
+        "end_company_role": null,
+        "start_position": "PRESIDENT",
+        "end_position": "CEO, RUDHIL GROUP OF COMPANIES"
+      }
     }
   ],
   "people": {
@@ -751,7 +850,7 @@
     },
     "4162401": {
       "id": 4162401,
-      "full_name": "FERDINAND EDRALIN MARCOS",
+      "full_name": "FERDINAND ROMUALDEZ MARCOS",
       "position": "PRESIDENT",
       "location": "NATIONAL, NATIONAL"
     },
@@ -826,6 +925,24 @@
       "full_name": "MARIA MARCOS",
       "position": "MEMBER, HOUSE OF REPRESENTATIVES",
       "location": "ILOCOS NORTE, REGION I"
+    },
+    "4162642": {
+      "id": 4162642,
+      "full_name": "RODULFO D HILOT JR",
+      "position": "CEO, RUDHIL GROUP OF COMPANIES",
+      "location": "ZAMBOANGA DEL SUR"
+    },
+    "4162643": {
+      "id": 4162643,
+      "full_name": "JONATHAN M QUIRANTE",
+      "position": "OWNER, QUIRANTE CONSTRUCTION CORPORATION",
+      "location": "CEBU"
+    },
+    "4162644": {
+      "id": 4162644,
+      "full_name": "ALLAN QUIRANTE",
+      "position": "OWNER, QM BUILDERS",
+      "location": "CEBU"
     }
   }
 }

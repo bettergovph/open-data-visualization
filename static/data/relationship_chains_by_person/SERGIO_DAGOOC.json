@@ -1,0 +1,55 @@
+{
+  "person": {
+    "normalized_name": "SERGIO DAGOOC",
+    "display_name": "SERGIO DAGOOC",
+    "chain_count": 2
+  },
+  "chains": [
+    {
+      "length": 3,
+      "path": [
+        4145264,
+        4145265
+      ],
+      "relationships": [
+        "Starting person",
+        "Connected via APEC"
+      ],
+      "is_standalone_party_list": true,
+      "party_list_connection": {
+        "party_name": "APEC",
+        "party_full_name": "APEC"
+      }
+    },
+    {
+      "length": 3,
+      "path": [
+        4145265,
+        4145264
+      ],
+      "relationships": [
+        "Starting person",
+        "Connected via APEC"
+      ],
+      "is_standalone_party_list": true,
+      "party_list_connection": {
+        "party_name": "APEC",
+        "party_full_name": "APEC"
+      }
+    }
+  ],
+  "people": {
+    "4145264": {
+      "id": 4145264,
+      "full_name": "SERGIO C DAGOOC",
+      "position": "PARTY-LIST REPRESENTATIVE",
+      "location": "Location unknown"
+    },
+    "4145265": {
+      "id": 4145265,
+      "full_name": "PRESLEY C DE JESUS",
+      "position": "PARTY-LIST REPRESENTATIVE",
+      "location": "Location unknown"
+    }
+  }
+}
