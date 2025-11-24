@@ -1,0 +1,96 @@
+{
+  "person": {
+    "normalized_name": "EMMELINE VILLAR",
+    "display_name": "EMMELINE VILLAR",
+    "chain_count": 5
+  },
+  "chains": [
+    {
+      "length": 4,
+      "path": [
+        2799,
+        3745651,
+        3862767,
+        4041098
+      ],
+      "relationships": [
+        "Starting person",
+        "IMELDA AGUILAR is nephew of CAMILLE VILLAR",
+        "CAMILLE VILLAR is cousin of MARK VILLAR (SENATOR OF THE PHILIPPINES)",
+        "MARK VILLARICO is cousin of EMMELINE VILLAR (UNDERSECRETARY"
+      ]
+    },
+    {
+      "length": 3,
+      "path": [
+        2799,
+        3745651,
+        4041098
+      ],
+      "relationships": [
+        "Starting person",
+        "IMELDA AGUILAR is nephew of CAMILLE VILLAR",
+        "CAMILLE VILLAR is cousin of EMMELINE VILLAR (UNDERSECRETARY"
+      ]
+    },
+    {
+      "length": 2,
+      "path": [
+        4041098,
+        3745651
+      ],
+      "relationships": [
+        "Starting person",
+        "EMMELINE VILLAR IS COUSIN OF CAMILLE VILLAR"
+      ]
+    },
+    {
+      "length": 2,
+      "path": [
+        3862767,
+        4041098
+      ],
+      "relationships": [
+        "Starting person",
+        "MARK VILLARICO is cousin of EMMELINE VILLAR (UNDERSECRETARY"
+      ]
+    },
+    {
+      "length": 2,
+      "path": [
+        3745651,
+        4041098
+      ],
+      "relationships": [
+        "Starting person",
+        "CAMILLE VILLAR is cousin of EMMELINE VILLAR (UNDERSECRETARY"
+      ]
+    }
+  ],
+  "people": {
+    "2799": {
+      "id": 2799,
+      "full_name": "IMELDA Aguilar",
+      "position": "MAYOR",
+      "location": "CITY OF LAS PINAS, NCR, FOURTH DISTRICT, NATIONAL CAPITAL REGION"
+    },
+    "3745651": {
+      "id": 3745651,
+      "full_name": "CAMILLE VILLAR",
+      "position": "SENATOR",
+      "location": "M'LANG, COTABATO, REGION XII"
+    },
+    "3862767": {
+      "id": 3862767,
+      "full_name": "MARK VILLARICO",
+      "position": "COUNCILOR",
+      "location": "CITY OF KIDAPAWAN, COTABATO, REGION XII"
+    },
+    "4041098": {
+      "id": 4041098,
+      "full_name": "EMMELINE A VILLAR",
+      "position": "SECRETARY OF SOCIAL WELFARE AND DEVELOPMENT",
+      "location": "Manila, Metro Manila, NCR"
+    }
+  }
+}

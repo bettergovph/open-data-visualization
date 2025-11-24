@@ -1,0 +1,45 @@
+{
+  "person": {
+    "normalized_name": "SEBASTIAN DUTERTE",
+    "display_name": "SEBASTIAN DUTERTE",
+    "chain_count": 2
+  },
+  "chains": [
+    {
+      "length": 2,
+      "path": [
+        31580,
+        4162645
+      ],
+      "relationships": [
+        "Starting person",
+        "Son: Politician"
+      ]
+    },
+    {
+      "length": 2,
+      "path": [
+        4162645,
+        31580
+      ],
+      "relationships": [
+        "Starting person",
+        "Father"
+      ]
+    }
+  ],
+  "people": {
+    "31580": {
+      "id": 31580,
+      "full_name": "RODRIGO Duterte",
+      "position": "MAYOR",
+      "location": "DAVAO DEL SUR, REGION XI"
+    },
+    "4162645": {
+      "id": 4162645,
+      "full_name": "SEBASTIAN DUTERTE",
+      "position": "POLITICIAN",
+      "location": "DAVAO DEL SUR"
+    }
+  }
+}

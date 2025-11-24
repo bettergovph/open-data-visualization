@@ -2,9 +2,36 @@
   "person": {
     "normalized_name": "JINGGOY ESTRADA",
     "display_name": "JINGGOY ESTRADA",
-    "chain_count": 3
+    "chain_count": 2
   },
   "chains": [
+    {
+      "length": 10,
+      "path": [
+        2799,
+        3745651,
+        4052633,
+        4041425,
+        4052650,
+        84197,
+        4041079,
+        4162626,
+        4041073,
+        4162629
+      ],
+      "relationships": [
+        "Starting person",
+        "IMELDA AGUILAR is nephew of CAMILLE VILLAR",
+        "Camille Villar is the daughter of former Senate President Manny Villar",
+        "MARK VILLAR IS THE SON OF FORMER SENATE PRESIDENT MANNY VILLAR",
+        "MARK VILLAR IS THE SON OF SENATOR CYNTHIA VILLAR",
+        "MARK VILLAR IS THE SON OF SENATOR CYNTHIA VILLAR",
+        "Worked closely with Catalina Cabral for DPWH project allocations",
+        "Worked with Roberto Bernardo on DPWH project approvals",
+        "Worked with Roberto Bernardo on project allocations",
+        "Requested projects through Manuel Bonoan"
+      ]
+    },
     {
       "length": 9,
       "path": [
@@ -29,44 +56,6 @@
         "Worked with Roberto Bernardo on DPWH project approvals",
         "Received kickbacks from DPWH projects through Roberto Bernardo"
       ]
-    },
-    {
-      "length": 10,
-      "path": [
-        2799,
-        3745651,
-        4052633,
-        4041425,
-        4052650,
-        84197,
-        4041079,
-        4162626,
-        4162629,
-        4162630
-      ],
-      "relationships": [
-        "Starting person",
-        "IMELDA AGUILAR is nephew of CAMILLE VILLAR",
-        "Camille Villar is the daughter of former Senate President Manny Villar",
-        "MARK VILLAR IS THE SON OF FORMER SENATE PRESIDENT MANNY VILLAR",
-        "MARK VILLAR IS THE SON OF SENATOR CYNTHIA VILLAR",
-        "MARK VILLAR IS THE SON OF SENATOR CYNTHIA VILLAR",
-        "Worked closely with Catalina Cabral for DPWH project allocations",
-        "Worked with Roberto Bernardo on DPWH project approvals",
-        "Received kickbacks from DPWH projects through Roberto Bernardo",
-        "Requested projects through Manuel Bonoan"
-      ]
-    },
-    {
-      "length": 2,
-      "path": [
-        4162629,
-        4162630
-      ],
-      "relationships": [
-        "Starting person",
-        "Requested projects through Manuel Bonoan"
-      ]
     }
   ],
   "people": {
@@ -90,7 +79,7 @@
     },
     "4041425": {
       "id": 4041425,
-      "full_name": "MARK A. A. VILLAR",
+      "full_name": "MARK VILLAR",
       "position": "SENATOR",
       "location": "Manila, Metro Manila, NCR"
     },
@@ -102,7 +91,7 @@
     },
     "84197": {
       "id": 84197,
-      "full_name": "Mark Villar",
+      "full_name": "MARK VILLAR",
       "position": "MEMBER, HOUSE OF REPRESENTATIVES",
       "location": "NCR, FOURTH DISTRICT, NATIONAL CAPITAL REGION"
     },
@@ -118,16 +107,16 @@
       "position": "FORMER DPWH UNDERSECRETARY",
       "location": "Location unknown"
     },
+    "4041073": {
+      "id": 4041073,
+      "full_name": "MANUEL M BONOAN",
+      "position": "SECRETARY OF PUBLIC WORKS AND HIGHWAYS, Secretary, Department of Public Works and Highways (DPWH), Acting Chief, Department of Public Works and Highways (DPWH), Undersecretary, Department of Public Works and Highways (DPWH)",
+      "location": "Manila, Metro Manila, NCR"
+    },
     "4162629": {
       "id": 4162629,
       "full_name": "JINGGOY ESTRADA",
       "position": "SENATOR",
-      "location": "Location unknown"
-    },
-    "4162630": {
-      "id": 4162630,
-      "full_name": "MANUEL BONOAN",
-      "position": "FORMER DPWH SECRETARY",
       "location": "Location unknown"
     }
   }

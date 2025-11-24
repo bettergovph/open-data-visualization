@@ -887,6 +887,7 @@ async def generate_relationship_constellations_cache(test_person=None):
             
             # Get person details for each person in the chain
             path_person_ids = []  # Store only person IDs and relationship descriptions
+            path_person_objects = []  # Store full person objects for display
             path_relationships = []  # Store relationship descriptions for each hop
             
             for i, person_id in enumerate(person_ids):
@@ -936,6 +937,17 @@ async def generate_relationship_constellations_cache(test_person=None):
                     # Add person ID to path
                     path_person_ids.append(person_id)
                     
+                    # Store full person object for path (for table display)
+                    path_person_objects.append({
+                        "id": person_id,
+                        "first_name": person.get('first_name', ''),
+                        "last_name": person.get('last_name', ''),
+                        "middle_name": person.get('middle_name'),
+                        "suffix": person.get('suffix'),
+                        "position": person.get('position'),
+                        "relationship_description": "Starting person" if i == 0 else relationships[i-1] if i-1 < len(relationships) else "Unknown"
+                    })
+                    
                     # Store relationship description for this hop
                     relationship_desc = "Starting person" if i == 0 else relationships[i-1] if i-1 < len(relationships) else "Unknown"
                     path_relationships.append(relationship_desc)
@@ -966,7 +978,7 @@ async def generate_relationship_constellations_cache(test_person=None):
             
             chain_data = {
                 "length": chain_length,
-                "path": path_person_ids,  # Store only person IDs
+                "path": path_person_objects,  # Store full person objects with first_name, last_name, etc.
                 "relationships": path_relationships,  # Store relationship descriptions for each hop
             }
             if chain.get('is_standalone_party_list'):
@@ -980,8 +992,8 @@ async def generate_relationship_constellations_cache(test_person=None):
                 end_role = None
                 
                 # Check if start_person is in contractor_dynasty_matches for this contractor
-                if path_person_ids and len(path_person_ids) > 0:
-                    start_person_id = path_person_ids[0]
+                if path_person_objects and len(path_person_objects) > 0:
+                    start_person_id = path_person_objects[0]['id']
                     if start_person_id:
                         # Escape apostrophes in contractor name for SQL
                         contractor_name_escaped = chain['contractor_name'].replace("'", "''")
@@ -994,8 +1006,8 @@ async def generate_relationship_constellations_cache(test_person=None):
                         """.format(contractor_name_escaped, str(POLITICAL_DYNASTIES_PARQUET), start_person_id, str(POLITICAL_DYNASTIES_PARQUET), start_person_id))
                 
                 # Check if end_person is in contractor_dynasty_matches for this contractor
-                if path_person_ids and len(path_person_ids) > 0:
-                    end_person_id = path_person_ids[-1]
+                if path_person_objects and len(path_person_objects) > 0:
+                    end_person_id = path_person_objects[-1]['id']
                     if end_person_id:
                         # Escape apostrophes in contractor name for SQL
                         contractor_name_escaped = chain['contractor_name'].replace("'", "''")
@@ -1085,8 +1097,11 @@ async def generate_relationship_constellations_cache(test_person=None):
         
         for chain in formatted_chains:
             # Extract surnames from people_dict using the start/end IDs from the path
-            start_person_id = chain['path'][0] if chain['path'] else None
-            end_person_id = chain['path'][-1] if chain['path'] else None
+            # Extract person IDs from path (path now contains objects with 'id' field)
+            start_person_obj = chain['path'][0] if chain['path'] else None
+            end_person_obj = chain['path'][-1] if chain['path'] else None
+            start_person_id = start_person_obj['id'] if isinstance(start_person_obj, dict) else start_person_obj
+            end_person_id = end_person_obj['id'] if isinstance(end_person_obj, dict) else end_person_obj
             
             start_family = ""
             end_family = ""
@@ -1155,11 +1170,13 @@ async def generate_relationship_constellations_cache(test_person=None):
         
         # Organize chains by person
         for chain_idx, chain in enumerate(formatted_chains):
-            # Get all person IDs in this chain
-            person_ids = chain.get('path', [])
+            # Get all person objects in this chain (path now contains objects with 'id' field)
+            path_items = chain.get('path', [])
             
             # For each person in the chain, add this chain to their index
-            for person_id in person_ids:
+            for path_item in path_items:
+                # Extract person_id from object or use directly if it's still an ID
+                person_id = path_item['id'] if isinstance(path_item, dict) else path_item
                 person_data = people_cache.get(person_id)
                 if person_data:
                     # Use normalized_name from DB if available, otherwise compute it

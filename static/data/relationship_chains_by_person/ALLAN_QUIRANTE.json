@@ -1,0 +1,88 @@
+{
+  "person": {
+    "normalized_name": "ALLAN QUIRANTE",
+    "display_name": "ALLAN QUIRANTE",
+    "chain_count": 4
+  },
+  "chains": [
+    {
+      "length": 4,
+      "path": [
+        70156,
+        4162401,
+        4162643,
+        4162644
+      ],
+      "relationships": [
+        "Starting person",
+        "Political connection - TINGOG party-list representative",
+        "Campaign donor who gave ₱1 million to elect Marcos Jr. in 2022",
+        "Allan Quirante is uncle of Jonathan M. Quirante. Both own construction companies (QM Builders and Quirante Construction)"
+      ]
+    },
+    {
+      "length": 2,
+      "path": [
+        4162644,
+        4162643
+      ],
+      "relationships": [
+        "Starting person",
+        "Jonathan M. Quirante is nephew of Allan Quirante. Both own construction companies (Quirante Construction and QM Builders)"
+      ]
+    },
+    {
+      "length": 2,
+      "path": [
+        4162643,
+        4162644
+      ],
+      "relationships": [
+        "Starting person",
+        "Allan Quirante is uncle of Jonathan M. Quirante. Both own construction companies (QM Builders and Quirante Construction)"
+      ]
+    },
+    {
+      "length": 2,
+      "path": [
+        4162644
+      ],
+      "relationships": [
+        "Starting person"
+      ],
+      "contractor_connection": {
+        "contractor_name": "QM BUILDERS",
+        "start_company_role": null,
+        "end_company_role": null,
+        "start_position": "OWNER, QM BUILDERS",
+        "end_position": "OWNER, QM BUILDERS"
+      }
+    }
+  ],
+  "people": {
+    "70156": {
+      "id": 70156,
+      "full_name": "YEDDA MARIE K ROMUALDEZ",
+      "position": "PARTY-LIST REPRESENTATIVE",
+      "location": "LEYTE, REGION VIII"
+    },
+    "4162401": {
+      "id": 4162401,
+      "full_name": "FERDINAND ROMUALDEZ MARCOS",
+      "position": "PRESIDENT",
+      "location": "NATIONAL, NATIONAL"
+    },
+    "4162643": {
+      "id": 4162643,
+      "full_name": "JONATHAN M QUIRANTE",
+      "position": "OWNER, QUIRANTE CONSTRUCTION CORPORATION",
+      "location": "CEBU"
+    },
+    "4162644": {
+      "id": 4162644,
+      "full_name": "ALLAN QUIRANTE",
+      "position": "OWNER, QM BUILDERS",
+      "location": "CEBU"
+    }
+  }
+}
