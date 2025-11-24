@@ -2,13 +2,40 @@
   "person": {
     "normalized_name": "MARLEN BINAY",
     "display_name": "MARLEN BINAY",
-    "chain_count": 2
+    "chain_count": 3
   },
   "chains": [
     {
+      "length": 11,
+      "path": [
+        2799,
+        3745651,
+        4052633,
+        4041425,
+        4052650,
+        84197,
+        4041079,
+        4162626,
+        4041629,
+        4144982,
+        15185
+      ],
+      "relationships": [
+        "Starting person",
+        "IMELDA AGUILAR is nephew of CAMILLE VILLAR",
+        "Camille Villar is the daughter of former Senate President Manny Villar",
+        "MARK VILLAR IS THE SON OF FORMER SENATE PRESIDENT MANNY VILLAR",
+        "MARK VILLAR IS THE SON OF SENATOR CYNTHIA VILLAR",
+        "MARK VILLAR IS THE SON OF SENATOR CYNTHIA VILLAR",
+        "Worked closely with Catalina Cabral for DPWH project allocations",
+        "Worked with Roberto Bernardo on DPWH project approvals",
+        "Personally delivered P37 million (15% of P250M projects) to Nancy Binay at house in Quezon City",
+        "ABIGAIL BINAY AND NANCY BINAY ARE SISTERS",
+        " BOTH PART OF THE BINAY POLITICAL DYNASTY"
+      ]
+    },
+    {
       "length": 2,
-      "start_surname": "BINAY",
-      "end_surname": "BINAY",
       "path": [
         15185,
         4144982
@@ -16,15 +43,10 @@
       "relationships": [
         "Starting person",
         "MARLEN BINAY IS THE SISTER OF ABIGAIL BINAY"
-      ],
-      "source_urls": [
-        "https://en.wikipedia.org/wiki/Abigail_Binay"
       ]
     },
     {
       "length": 2,
-      "start_surname": "BINAY",
-      "end_surname": "BINAY",
       "path": [
         4144982,
         15185
@@ -32,39 +54,74 @@
       "relationships": [
         "Starting person",
         "MARLEN BINAY IS THE SISTER OF ABIGAIL BINAY"
-      ],
-      "source_urls": [
-        "https://en.wikipedia.org/wiki/Abigail_Binay"
       ]
     }
   ],
   "people": {
+    "2799": {
+      "id": 2799,
+      "full_name": "IMELDA Aguilar",
+      "position": "MAYOR",
+      "location": "CITY OF LAS PINAS, NCR, FOURTH DISTRICT, NATIONAL CAPITAL REGION"
+    },
+    "3745651": {
+      "id": 3745651,
+      "full_name": "CAMILLE VILLAR",
+      "position": "SENATOR",
+      "location": "M'LANG, COTABATO, REGION XII"
+    },
+    "4052633": {
+      "id": 4052633,
+      "full_name": "Manny Villar",
+      "position": null,
+      "location": "Location unknown"
+    },
+    "4041425": {
+      "id": 4041425,
+      "full_name": "MARK A. A. VILLAR",
+      "position": "SENATOR",
+      "location": "Manila, Metro Manila, NCR"
+    },
+    "4052650": {
+      "id": 4052650,
+      "full_name": "Cynthia Villar",
+      "position": null,
+      "location": "Location unknown"
+    },
+    "84197": {
+      "id": 84197,
+      "full_name": "Mark Villar",
+      "position": "MEMBER, HOUSE OF REPRESENTATIVES",
+      "location": "NCR, FOURTH DISTRICT, NATIONAL CAPITAL REGION"
+    },
+    "4041079": {
+      "id": 4041079,
+      "full_name": "CATALINA CABRAL",
+      "position": "SECRETARY OF PUBLIC WORKS AND HIGHWAYS",
+      "location": "Manila, Metro Manila, NCR"
+    },
+    "4162626": {
+      "id": 4162626,
+      "full_name": "ROBERTO BERNARDO",
+      "position": "FORMER DPWH UNDERSECRETARY",
+      "location": "Location unknown"
+    },
+    "4041629": {
+      "id": 4041629,
+      "full_name": "NANCY BINAY",
+      "position": null,
+      "location": "Location unknown"
+    },
     "4144982": {
       "id": 4144982,
-      "first_name": "ABIGAIL",
-      "middle_name": null,
-      "last_name": "BINAY",
-      "suffix": null,
       "full_name": "ABIGAIL BINAY",
-      "canonical_name": "ABIGAIL BINAY",
       "position": null,
-      "region": null,
-      "province": null,
-      "municipality_city": null,
       "location": "Location unknown"
     },
     "15185": {
       "id": 15185,
-      "first_name": "MARLEN",
-      "middle_name": null,
-      "last_name": "BINAY",
-      "suffix": null,
       "full_name": "MARLEN BINAY",
-      "canonical_name": "MARLEN BINAY",
       "position": "MEMBER, HOUSE OF REPRESENTATIVES",
-      "region": "NATIONAL CAPITAL REGION",
-      "province": "NCR, FOURTH DISTRICT",
-      "municipality_city": "",
       "location": "NCR, FOURTH DISTRICT, NATIONAL CAPITAL REGION"
     }
   }

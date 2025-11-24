@@ -2,47 +2,11 @@
   "person": {
     "normalized_name": "ROGER DELOSO",
     "display_name": "ROGER DELOSO",
-    "chain_count": 3
+    "chain_count": 5
   },
   "chains": [
     {
       "length": 2,
-      "start_surname": "Deloso-Montalla",
-      "end_surname": "DELOSO",
-      "path": [
-        29107,
-        4058171
-      ],
-      "relationships": [
-        "Starting person",
-        "CHERYL DELOSO-MONTALLA IS THE DAUGHTER OF FORMER ZAMBALES GOVERNOR ROGER DELOSO"
-      ],
-      "source_urls": [
-        "https://en.wikipedia.org/wiki/Cheryl_Deloso-Montalla"
-      ]
-    },
-    {
-      "length": 3,
-      "start_surname": "Deloso-Montalla",
-      "end_surname": "Deloso-Montalla",
-      "path": [
-        29107,
-        4058171,
-        29108
-      ],
-      "relationships": [
-        "Starting person",
-        "CHERYL DELOSO-MONTALLA IS THE DAUGHTER OF FORMER ZAMBALES GOVERNOR ROGER DELOSO",
-        "CHERY DELOSO-MONTALLA IS THE DAUGHTER OF ROGER DELOSO"
-      ],
-      "source_urls": [
-        "https://en.wikipedia.org/wiki/Cheryl_Deloso-Montalla"
-      ]
-    },
-    {
-      "length": 2,
-      "start_surname": "Deloso-Montalla",
-      "end_surname": "DELOSO",
       "path": [
         29108,
         4058171
@@ -50,53 +14,92 @@
       "relationships": [
         "Starting person",
         "CHERY DELOSO-MONTALLA IS THE DAUGHTER OF ROGER DELOSO"
+      ]
+    },
+    {
+      "length": 3,
+      "path": [
+        29108,
+        4058171,
+        29107
       ],
-      "source_urls": [
-        "https://en.wikipedia.org/wiki/Cheryl_Deloso-Montalla"
+      "relationships": [
+        "Starting person",
+        "CHERY DELOSO-MONTALLA IS THE DAUGHTER OF ROGER DELOSO",
+        " BOTH IN ZAMBALES POLITICS"
+      ]
+    },
+    {
+      "length": 4,
+      "path": [
+        29108,
+        4058171,
+        29107,
+        51035
+      ],
+      "relationships": [
+        "Starting person",
+        "CHERY DELOSO-MONTALLA IS THE DAUGHTER OF ROGER DELOSO",
+        " BOTH IN ZAMBALES POLITICS",
+        "CHERYL DELOSO-MONTALLA IS THE DAUGHTER OF FORMER ZAMBALES GOVERNOR ROGER DELOSO"
+      ]
+    },
+    {
+      "length": 4,
+      "path": [
+        29108,
+        4058171,
+        29107,
+        4058139
+      ],
+      "relationships": [
+        "Starting person",
+        "CHERY DELOSO-MONTALLA IS THE DAUGHTER OF ROGER DELOSO",
+        " BOTH IN ZAMBALES POLITICS",
+        "CHERYL DELOSO-MONTALLA IS THE DAUGHTER OF FORMER ZAMBALES GOVERNOR ROGER DELOSO"
+      ]
+    },
+    {
+      "length": 2,
+      "path": [
+        29107,
+        4058171
+      ],
+      "relationships": [
+        "Starting person",
+        "CHERYL DELOSO-MONTALLA IS THE DAUGHTER OF FORMER ZAMBALES GOVERNOR ROGER DELOSO"
       ]
     }
   ],
   "people": {
     "29107": {
       "id": 29107,
-      "first_name": "Cheryl",
-      "middle_name": null,
-      "last_name": "Deloso-Montalla",
-      "suffix": null,
       "full_name": "Cheryl Deloso-Montalla",
-      "canonical_name": "CHERYL DELOSO-MONTALLA",
       "position": "MEMBER, HOUSE OF REPRESENTATIVES",
-      "region": "REGION III",
-      "province": "ZAMBALES",
-      "municipality_city": "",
       "location": "ZAMBALES, REGION III"
     },
-    "4058171": {
-      "id": 4058171,
-      "first_name": "ROGER",
-      "middle_name": null,
-      "last_name": "DELOSO",
-      "suffix": null,
-      "full_name": "ROGER DELOSO",
-      "canonical_name": "ROGER DELOSO",
+    "4058139": {
+      "id": 4058139,
+      "full_name": "ROSEMARIE DELOSO",
       "position": null,
-      "region": null,
-      "province": null,
-      "municipality_city": null,
       "location": "Location unknown"
     },
     "29108": {
       "id": 29108,
-      "first_name": "Chery",
-      "middle_name": null,
-      "last_name": "Deloso-Montalla",
-      "suffix": null,
       "full_name": "Chery Deloso-Montalla",
-      "canonical_name": "CHERY DELOSO-MONTALLA",
       "position": "MEMBER, HOUSE OF REPRESENTATIVES",
-      "region": "REGION III",
-      "province": "ZAMBALES",
-      "municipality_city": "",
+      "location": "ZAMBALES, REGION III"
+    },
+    "4058171": {
+      "id": 4058171,
+      "full_name": "ROGER DELOSO",
+      "position": null,
+      "location": "Location unknown"
+    },
+    "51035": {
+      "id": 51035,
+      "full_name": "Vicente Magsaysay",
+      "position": "GOVERNOR",
       "location": "ZAMBALES, REGION III"
     }
   }

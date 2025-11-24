@@ -7,72 +7,6 @@
   "chains": [
     {
       "length": 2,
-      "start_surname": "Ferrer",
-      "end_surname": "Rivera",
-      "path": [
-        35253,
-        69413
-      ],
-      "relationships": [
-        "Starting person",
-        "Wikipedia: sibling of Former Representative And Incumbent City Mayor Luis Ferrer Iv"
-      ],
-      "source_urls": []
-    },
-    {
-      "length": 2,
-      "start_surname": "FERRER",
-      "end_surname": "Ferrer",
-      "path": [
-        4041660,
-        35253
-      ],
-      "relationships": [
-        "Starting person",
-        "ANTONIO FERRER IS MARRIED TO MELENI FERRER"
-      ],
-      "source_urls": [
-        "https://en.wikipedia.org/wiki/Political_families_of_the_Philippines"
-      ]
-    },
-    {
-      "length": 3,
-      "start_surname": "FERRER",
-      "end_surname": "Rivera",
-      "path": [
-        4041660,
-        35253,
-        69413
-      ],
-      "relationships": [
-        "Starting person",
-        "ANTONIO FERRER IS MARRIED TO MELENI FERRER",
-        " BOTH INVOLVED IN CAVITE POLITICS"
-      ],
-      "source_urls": [
-        "https://en.wikipedia.org/wiki/Political_families_of_the_Philippines"
-      ]
-    },
-    {
-      "length": 2,
-      "start_surname": "FERRER",
-      "end_surname": "Ferrer",
-      "path": [
-        4041661,
-        35253
-      ],
-      "relationships": [
-        "Starting person",
-        "ANTONIO FERRER IS THE BROTHER OF FREDERICK FERRER"
-      ],
-      "source_urls": [
-        "https://en.wikipedia.org/wiki/Political_families_of_the_Philippines"
-      ]
-    },
-    {
-      "length": 2,
-      "start_surname": "Ferrer",
-      "end_surname": "FERRER",
       "path": [
         35253,
         4041660
@@ -80,15 +14,10 @@
       "relationships": [
         "Starting person",
         "Antonio Ferrer is married to Meleni Ferrer"
-      ],
-      "source_urls": [
-        "https://en.wikipedia.org/wiki/Political_families_of_the_Philippines"
       ]
     },
     {
       "length": 2,
-      "start_surname": "Ferrer",
-      "end_surname": "FERRER",
       "path": [
         35253,
         4041661
@@ -96,68 +25,79 @@
       "relationships": [
         "Starting person",
         "Antonio Ferrer is the brother of Frederick Ferrer"
+      ]
+    },
+    {
+      "length": 2,
+      "path": [
+        4041661,
+        35253
       ],
-      "source_urls": [
-        "https://en.wikipedia.org/wiki/Political_families_of_the_Philippines"
+      "relationships": [
+        "Starting person",
+        "ANTONIO FERRER IS THE BROTHER OF FREDERICK FERRER"
+      ]
+    },
+    {
+      "length": 3,
+      "path": [
+        4041661,
+        35253,
+        69413
+      ],
+      "relationships": [
+        "Starting person",
+        "ANTONIO FERRER IS THE BROTHER OF FREDERICK FERRER",
+        " BOTH SERVING AS MAYORS IN CAVITE"
+      ]
+    },
+    {
+      "length": 2,
+      "path": [
+        4041660,
+        35253
+      ],
+      "relationships": [
+        "Starting person",
+        "ANTONIO FERRER IS MARRIED TO MELENI FERRER"
+      ]
+    },
+    {
+      "length": 2,
+      "path": [
+        35253,
+        69413
+      ],
+      "relationships": [
+        "Starting person",
+        "Wikipedia: sibling of Former Representative And Incumbent City Mayor Luis Ferrer Iv"
       ]
     }
   ],
   "people": {
     "35253": {
       "id": 35253,
-      "first_name": "Antonio",
-      "middle_name": null,
-      "last_name": "Ferrer",
-      "suffix": null,
       "full_name": "Antonio Ferrer",
-      "canonical_name": "ANTONIO FERRER",
       "position": "MEMBER, HOUSE OF REPRESENTATIVES",
-      "region": "REGION IV-A",
-      "province": "CAVITE",
-      "municipality_city": "",
-      "location": "CAVITE, REGION IV-A"
-    },
-    "69413": {
-      "id": 69413,
-      "first_name": "Carolina",
-      "middle_name": null,
-      "last_name": "Rivera",
-      "suffix": null,
-      "full_name": "Carolina Rivera",
-      "canonical_name": "CAROLINA RIVERA",
-      "position": "COUNCILOR",
-      "region": "REGION IV-A",
-      "province": "CAVITE",
-      "municipality_city": "",
       "location": "CAVITE, REGION IV-A"
     },
     "4041660": {
       "id": 4041660,
-      "first_name": "MELENI",
-      "middle_name": null,
-      "last_name": "FERRER",
-      "suffix": null,
       "full_name": "MELENI FERRER",
-      "canonical_name": "MELENI FERRER",
       "position": null,
-      "region": null,
-      "province": null,
-      "municipality_city": null,
       "location": "Location unknown"
     },
     "4041661": {
       "id": 4041661,
-      "first_name": "FREDERICK",
-      "middle_name": null,
-      "last_name": "FERRER",
-      "suffix": null,
       "full_name": "FREDERICK FERRER",
-      "canonical_name": "FREDERICK FERRER",
       "position": null,
-      "region": null,
-      "province": null,
-      "municipality_city": null,
       "location": "Location unknown"
+    },
+    "69413": {
+      "id": 69413,
+      "full_name": "Carolina Rivera",
+      "position": "COUNCILOR",
+      "location": "CAVITE, REGION IV-A"
     }
   }
 }

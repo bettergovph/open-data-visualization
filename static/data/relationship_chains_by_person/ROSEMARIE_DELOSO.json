@@ -2,13 +2,11 @@
   "person": {
     "normalized_name": "ROSEMARIE DELOSO",
     "display_name": "ROSEMARIE DELOSO",
-    "chain_count": 1
+    "chain_count": 2
   },
   "chains": [
     {
       "length": 2,
-      "start_surname": "Deloso-Montalla",
-      "end_surname": "DELOSO",
       "path": [
         29107,
         4058139
@@ -16,39 +14,47 @@
       "relationships": [
         "Starting person",
         "CHERYL DELOSO-MONTALLA IS THE SISTER OF ROSEMARIE DELOSO"
+      ]
+    },
+    {
+      "length": 4,
+      "path": [
+        29108,
+        4058171,
+        29107,
+        4058139
       ],
-      "source_urls": [
-        "https://en.wikipedia.org/wiki/Political_families_of_the_Philippines"
+      "relationships": [
+        "Starting person",
+        "CHERY DELOSO-MONTALLA IS THE DAUGHTER OF ROGER DELOSO",
+        " BOTH IN ZAMBALES POLITICS",
+        "CHERYL DELOSO-MONTALLA IS THE DAUGHTER OF FORMER ZAMBALES GOVERNOR ROGER DELOSO"
       ]
     }
   ],
   "people": {
     "29107": {
       "id": 29107,
-      "first_name": "Cheryl",
-      "middle_name": null,
-      "last_name": "Deloso-Montalla",
-      "suffix": null,
       "full_name": "Cheryl Deloso-Montalla",
-      "canonical_name": "CHERYL DELOSO-MONTALLA",
       "position": "MEMBER, HOUSE OF REPRESENTATIVES",
-      "region": "REGION III",
-      "province": "ZAMBALES",
-      "municipality_city": "",
       "location": "ZAMBALES, REGION III"
     },
     "4058139": {
       "id": 4058139,
-      "first_name": "ROSEMARIE",
-      "middle_name": null,
-      "last_name": "DELOSO",
-      "suffix": null,
       "full_name": "ROSEMARIE DELOSO",
-      "canonical_name": "ROSEMARIE DELOSO",
       "position": null,
-      "region": null,
-      "province": null,
-      "municipality_city": null,
+      "location": "Location unknown"
+    },
+    "29108": {
+      "id": 29108,
+      "full_name": "Chery Deloso-Montalla",
+      "position": "MEMBER, HOUSE OF REPRESENTATIVES",
+      "location": "ZAMBALES, REGION III"
+    },
+    "4058171": {
+      "id": 4058171,
+      "full_name": "ROGER DELOSO",
+      "position": null,
       "location": "Location unknown"
     }
   }

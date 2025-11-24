@@ -2,13 +2,11 @@
   "person": {
     "normalized_name": "CORAZON ANAS",
     "display_name": "Corazon Anas",
-    "chain_count": 4
+    "chain_count": 3
   },
   "chains": [
     {
       "length": 3,
-      "start_surname": "Anas",
-      "end_surname": "Canicula",
       "path": [
         4162508,
         4162509
@@ -17,18 +15,34 @@
         "Starting person",
         "Connected via Alpha Omega Gen Contractor Development Corp"
       ],
-      "source_urls": [],
       "contractor_connection": {
         "contractor_name": "Alpha Omega Gen Contractor Development Corp",
-        "relationship_type": "Business/Contractor Connection",
         "start_company_role": null,
-        "end_company_role": null
+        "end_company_role": null,
+        "start_position": null,
+        "end_position": null
       }
     },
     {
       "length": 3,
-      "start_surname": "Anas",
-      "end_surname": "Discaya",
+      "path": [
+        4162508,
+        4162572
+      ],
+      "relationships": [
+        "Starting person",
+        "Connected via Alpha Omega Gen Contractor Development Corp"
+      ],
+      "contractor_connection": {
+        "contractor_name": "Alpha Omega Gen Contractor Development Corp",
+        "start_company_role": null,
+        "end_company_role": null,
+        "start_position": null,
+        "end_position": null
+      }
+    },
+    {
+      "length": 3,
       "path": [
         4162508,
         4162510
@@ -37,124 +51,38 @@
         "Starting person",
         "Connected via Alpha Omega Gen Contractor Development Corp"
       ],
-      "source_urls": [],
       "contractor_connection": {
         "contractor_name": "Alpha Omega Gen Contractor Development Corp",
-        "relationship_type": "Business/Contractor Connection",
         "start_company_role": null,
-        "end_company_role": null
-      }
-    },
-    {
-      "length": 3,
-      "start_surname": "Anas",
-      "end_surname": "I",
-      "path": [
-        4162508,
-        4162511
-      ],
-      "relationships": [
-        "Starting person",
-        "Connected via Alpha Omega Gen Contractor Development Corp"
-      ],
-      "source_urls": [],
-      "contractor_connection": {
-        "contractor_name": "Alpha Omega Gen Contractor Development Corp",
-        "relationship_type": "Business/Contractor Connection",
-        "start_company_role": null,
-        "end_company_role": null
-      }
-    },
-    {
-      "length": 3,
-      "start_surname": "C",
-      "end_surname": "Anas",
-      "path": [
-        4162507,
-        4162508
-      ],
-      "relationships": [
-        "Starting person",
-        "Connected via Alpha Omega Gen Contractor Development Corp"
-      ],
-      "source_urls": [],
-      "contractor_connection": {
-        "contractor_name": "Alpha Omega Gen Contractor Development Corp",
-        "relationship_type": "Business/Contractor Connection",
-        "start_company_role": null,
-        "end_company_role": null
+        "end_company_role": null,
+        "start_position": null,
+        "end_position": null
       }
     }
   ],
   "people": {
+    "4162572": {
+      "id": 4162572,
+      "full_name": "CEZARAH ROWENA C. DISCAYA",
+      "position": null,
+      "location": "Location unknown"
+    },
     "4162508": {
       "id": 4162508,
-      "first_name": "Corazon",
-      "middle_name": null,
-      "last_name": "Anas",
-      "suffix": null,
       "full_name": "Corazon Anas",
-      "canonical_name": "CORAZON ANAS",
       "position": null,
-      "region": null,
-      "province": null,
-      "municipality_city": null,
       "location": "Location unknown"
     },
     "4162509": {
       "id": 4162509,
-      "first_name": "G",
-      "middle_name": null,
-      "last_name": "Canicula",
-      "suffix": null,
       "full_name": "G Canicula",
-      "canonical_name": "G CANICULA",
       "position": null,
-      "region": null,
-      "province": null,
-      "municipality_city": null,
       "location": "Location unknown"
     },
     "4162510": {
       "id": 4162510,
-      "first_name": "Pacifico",
-      "middle_name": null,
-      "last_name": "Discaya",
-      "suffix": null,
       "full_name": "Pacifico Discaya",
-      "canonical_name": "PACIFICO DISCAYA",
       "position": null,
-      "region": null,
-      "province": null,
-      "municipality_city": null,
-      "location": "Location unknown"
-    },
-    "4162511": {
-      "id": 4162511,
-      "first_name": "Pacifico F. Discaya",
-      "middle_name": null,
-      "last_name": "I",
-      "suffix": null,
-      "full_name": "Pacifico F. Discaya I",
-      "canonical_name": "PACIFICO F. DISCAYA I",
-      "position": null,
-      "region": null,
-      "province": null,
-      "municipality_city": null,
-      "location": "Location unknown"
-    },
-    "4162507": {
-      "id": 4162507,
-      "first_name": "Cezarah Rowena",
-      "middle_name": null,
-      "last_name": "C",
-      "suffix": null,
-      "full_name": "Cezarah Rowena C",
-      "canonical_name": "CEZARAH ROWENA C",
-      "position": null,
-      "region": null,
-      "province": null,
-      "municipality_city": null,
       "location": "Location unknown"
     }
   }

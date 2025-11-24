@@ -2,34 +2,11 @@
   "person": {
     "normalized_name": "JERVIN O. CORONEL",
     "display_name": "JERVIN O. CORONEL",
-    "chain_count": 2
+    "chain_count": 4
   },
   "chains": [
     {
-      "length": 4,
-      "start_surname": "CAYETANO",
-      "end_surname": "CORONEL",
-      "path": [
-        3745704,
-        4041648,
-        4152812,
-        4142821
-      ],
-      "relationships": [
-        "Starting person",
-        "PIA CAYETANO is sister of LANI CAYETANO (MAYOR OF TAGUIG CITY)",
-        "LANI CAYETANO IS WIFE OF ALAN PETER CAYETANO",
-        "ALAN PETER CAYETANO is cousin of CORONEL (DIRECTOR I"
-      ],
-      "source_urls": [
-        "OCR:pd6.jpg",
-        "OCR:pd5.jpg"
-      ]
-    },
-    {
       "length": 2,
-      "start_surname": "CORONEL",
-      "end_surname": "Cayetano",
       "path": [
         4142821,
         4152812
@@ -37,67 +14,77 @@
       "relationships": [
         "Starting person",
         "CORONEL IS COUSIN OF ALAN PETER CAYETANO"
+      ]
+    },
+    {
+      "length": 3,
+      "path": [
+        4142821,
+        4152812,
+        3745704
       ],
-      "source_urls": [
-        "OCR:pd5.jpg"
+      "relationships": [
+        "Starting person",
+        "CORONEL IS COUSIN OF ALAN PETER CAYETANO",
+        "Siblings in the CAYETANO political dynasty"
+      ]
+    },
+    {
+      "length": 3,
+      "path": [
+        4142821,
+        4152812,
+        4041648
+      ],
+      "relationships": [
+        "Starting person",
+        "CORONEL IS COUSIN OF ALAN PETER CAYETANO",
+        "ALAN PETER CAYETANO is wife of LANI CAYETANO (MAYOR OF TAGUIG CITY)"
+      ]
+    },
+    {
+      "length": 3,
+      "path": [
+        4142821,
+        4152812,
+        4162444
+      ],
+      "relationships": [
+        "Starting person",
+        "CORONEL IS COUSIN OF ALAN PETER CAYETANO",
+        "ALAN PETER CAYETANO is cousin of JESSA CORONEL (DIRECTOR I"
       ]
     }
   ],
   "people": {
+    "4152812": {
+      "id": 4152812,
+      "full_name": "ALAN PETER Cayetano",
+      "position": "MEMBER, HOUSE OF REPRESENTATIVES",
+      "location": "PATEROS-TAGUIG, NCR, FOURTH DISTRICT, NATIONAL CAPITAL REGION"
+    },
     "3745704": {
       "id": 3745704,
-      "first_name": "PIA",
-      "middle_name": null,
-      "last_name": "CAYETANO",
-      "suffix": null,
       "full_name": "PIA CAYETANO",
-      "canonical_name": "PIA CAYETANO",
       "position": "SENATOR",
-      "region": "REGION XII",
-      "province": "COTABATO",
-      "municipality_city": "M'LANG",
       "location": "M'LANG, COTABATO, REGION XII"
+    },
+    "4162444": {
+      "id": 4162444,
+      "full_name": "JESSA CORONEL",
+      "position": "DIRECTOR I, OFFICE OF SEN. PIA CAYETANO",
+      "location": "Location unknown"
     },
     "4041648": {
       "id": 4041648,
-      "first_name": "LANI",
-      "middle_name": null,
-      "last_name": "CAYETANO",
-      "suffix": null,
       "full_name": "LANI CAYETANO",
-      "canonical_name": "LANI CAYETANO",
       "position": null,
-      "region": null,
-      "province": null,
-      "municipality_city": null,
       "location": "Location unknown"
-    },
-    "4152812": {
-      "id": 4152812,
-      "first_name": "ALAN PETER",
-      "middle_name": "",
-      "last_name": "Cayetano",
-      "suffix": "",
-      "full_name": "ALAN PETER Cayetano",
-      "canonical_name": "ALAN PETER CAYETANO",
-      "position": "MEMBER, HOUSE OF REPRESENTATIVES",
-      "region": "NATIONAL CAPITAL REGION",
-      "province": "NCR, FOURTH DISTRICT",
-      "municipality_city": "PATEROS-TAGUIG",
-      "location": "PATEROS-TAGUIG, NCR, FOURTH DISTRICT, NATIONAL CAPITAL REGION"
     },
     "4142821": {
       "id": 4142821,
-      "first_name": "JERVIN O.",
-      "middle_name": "O.",
-      "last_name": "CORONEL",
-      "suffix": null,
       "full_name": "JERVIN O. O. CORONEL",
-      "canonical_name": "JERVIN CORONEL",
       "position": "Engineer II Engineer",
-      "region": null,
-      "province": null,
-      "municipality_city": null,
       "location": "Location unknown"
     }
   }

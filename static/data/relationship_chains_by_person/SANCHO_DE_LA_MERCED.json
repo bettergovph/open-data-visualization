@@ -2,31 +2,11 @@
   "person": {
     "normalized_name": "SANCHO DE LA MERCED",
     "display_name": "Sancho De La Merced",
-    "chain_count": 2
+    "chain_count": 5
   },
   "chains": [
     {
-      "length": 3,
-      "start_surname": "Dacup",
-      "end_surname": "De La Merced",
-      "path": [
-        25857,
-        27713,
-        27712
-      ],
-      "relationships": [
-        "Starting person",
-        "Unknown relationship",
-        "Unknown"
-      ],
-      "source_urls": [
-        "https://www.gmanetwork.com/news/topstories/nation/958214/chiz-escudero-joel-villanueva-bong-go-congressmen-contractors/story/"
-      ]
-    },
-    {
       "length": 2,
-      "start_surname": "De La Merced",
-      "end_surname": "MERCED",
       "path": [
         27712,
         27713
@@ -34,54 +14,97 @@
       "relationships": [
         "Starting person",
         "Unknown"
+      ]
+    },
+    {
+      "length": 3,
+      "path": [
+        27712,
+        27713,
+        15110
       ],
-      "source_urls": [
-        "https://www.gmanetwork.com/news/topstories/nation/958214/chiz-escudero-joel-villanueva-bong-go-congressmen-contractors/story/"
+      "relationships": [
+        "Starting person",
+        "Unknown relationship",
+        "Unknown"
+      ]
+    },
+    {
+      "length": 3,
+      "path": [
+        27712,
+        27713,
+        25857
+      ],
+      "relationships": [
+        "Starting person",
+        "Unknown relationship",
+        "Unknown"
+      ]
+    },
+    {
+      "length": 3,
+      "path": [
+        27712,
+        27713,
+        27710
+      ],
+      "relationships": [
+        "Starting person",
+        "Unknown relationship",
+        "Unknown"
+      ]
+    },
+    {
+      "length": 3,
+      "path": [
+        27712,
+        27713,
+        27711
+      ],
+      "relationships": [
+        "Starting person",
+        "Unknown relationship",
+        "Unknown"
       ]
     }
   ],
   "people": {
-    "25857": {
-      "id": 25857,
-      "first_name": "Harieto",
-      "middle_name": null,
-      "last_name": "Dacup",
-      "suffix": null,
-      "full_name": "Harieto Dacup",
-      "canonical_name": "HARIETO DACUP",
+    "27712": {
+      "id": 27712,
+      "full_name": "Sancho De La Merced",
       "position": "COUNCILOR",
-      "region": "REGION IX",
-      "province": "ZAMBOANGA DEL NORTE",
-      "municipality_city": "BALIGUIAN",
-      "location": "BALIGUIAN, ZAMBOANGA DEL NORTE, REGION IX"
+      "location": "BOMBON, CAMARINES SUR, REGION V"
     },
     "27713": {
       "id": 27713,
-      "first_name": "ELVIS",
-      "middle_name": null,
-      "last_name": "MERCED",
-      "suffix": null,
       "full_name": "ELVIS MERCED",
-      "canonical_name": "ELVIS MERCED",
       "position": "GOVERNOR",
-      "region": "REGION XIII",
-      "province": "DINAGAT ISLANDS",
-      "municipality_city": "",
       "location": "DINAGAT ISLANDS, REGION XIII"
     },
-    "27712": {
-      "id": 27712,
-      "first_name": "Sancho",
-      "middle_name": null,
-      "last_name": "De La Merced",
-      "suffix": null,
-      "full_name": "Sancho De La Merced",
-      "canonical_name": "SANCHO DE LA MERCED",
+    "15110": {
+      "id": 15110,
+      "full_name": "MA. BILBAO",
+      "position": "MAYOR",
+      "location": "HINOBA-AN (ASIA), NEGROS OCCIDENTAL, REGION VI"
+    },
+    "25857": {
+      "id": 25857,
+      "full_name": "Harieto Dacup",
       "position": "COUNCILOR",
-      "region": "REGION V",
-      "province": "CAMARINES SUR",
-      "municipality_city": "BOMBON",
-      "location": "BOMBON, CAMARINES SUR, REGION V"
+      "location": "BALIGUIAN, ZAMBOANGA DEL NORTE, REGION IX"
+    },
+    "27710": {
+      "id": 27710,
+      "full_name": "GUILLERMO DE LA LLANA",
+      "position": "MAYOR",
+      "location": "ILOILO CITY, ILOILO, REGION VI"
+    },
+    "27711": {
+      "id": 27711,
+      "full_name": "Loretta De La Llana",
+      "position": "PROVINCIAL BOARD MEMBER",
+      "location": "ZAMBALES, REGION III"
     }
   }
 }

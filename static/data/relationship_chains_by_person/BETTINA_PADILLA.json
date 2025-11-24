@@ -2,13 +2,11 @@
   "person": {
     "normalized_name": "BETTINA PADILLA",
     "display_name": "BETTINA PADILLA",
-    "chain_count": 2
+    "chain_count": 4
   },
   "chains": [
     {
       "length": 2,
-      "start_surname": "PADILLA",
-      "end_surname": "PADILLA",
       "path": [
         4162431,
         4041420
@@ -16,15 +14,36 @@
       "relationships": [
         "Starting person",
         "BETTINA PADILLA IS NIECE OF ROBINHOOD C. PADILLA"
+      ]
+    },
+    {
+      "length": 3,
+      "path": [
+        4162431,
+        4041420,
+        4144963
       ],
-      "source_urls": [
-        "OCR:pd19.jpg"
+      "relationships": [
+        "Starting person",
+        "BETTINA PADILLA IS NIECE OF ROBINHOOD C. PADILLA",
+        "ROBIN PADILLA IS MARRIED TO TELEVISION HOST MARIEL RODRIGUEZ"
+      ]
+    },
+    {
+      "length": 3,
+      "path": [
+        4162431,
+        4041420,
+        4162429
+      ],
+      "relationships": [
+        "Starting person",
+        "BETTINA PADILLA IS NIECE OF ROBINHOOD C. PADILLA",
+        "ROBINHOOD C. PADILLA IS NEPHEW OF PROVINCIAL ADMINISTRATOR (VICE MAYOR OF JOSE PANGANIBAN"
       ]
     },
     {
       "length": 2,
-      "start_surname": "PADILLA",
-      "end_surname": "PADILLA",
       "path": [
         4041420,
         4162431
@@ -32,39 +51,32 @@
       "relationships": [
         "Starting person",
         "ROBINHOOD C. PADILLA IS NIECE OF BETTINA PADILLA (LEGISLATIVE STAFF OFFICER"
-      ],
-      "source_urls": [
-        "OCR:pd19.jpg"
       ]
     }
   ],
   "people": {
-    "4041420": {
-      "id": 4041420,
-      "first_name": "ROBINHOOD C.",
-      "middle_name": "C.",
-      "last_name": "PADILLA",
-      "suffix": null,
-      "full_name": "ROBINHOOD C. C. PADILLA",
-      "canonical_name": "ROBINHOOD PADILLA",
-      "position": "SENATOR",
-      "region": "NCR",
-      "province": "Metro Manila",
-      "municipality_city": "Manila",
-      "location": "Manila, Metro Manila, NCR"
-    },
     "4162431": {
       "id": 4162431,
-      "first_name": "BETTINA",
-      "middle_name": null,
-      "last_name": "PADILLA",
-      "suffix": null,
       "full_name": "BETTINA PADILLA",
-      "canonical_name": null,
       "position": "LEGISLATIVE STAFF OFFICER, OFFICE OF SEN. PADILLA",
-      "region": null,
-      "province": null,
-      "municipality_city": null,
+      "location": "Location unknown"
+    },
+    "4041420": {
+      "id": 4041420,
+      "full_name": "ROBINHOOD C. C. PADILLA",
+      "position": "SENATOR",
+      "location": "Manila, Metro Manila, NCR"
+    },
+    "4144963": {
+      "id": 4144963,
+      "full_name": "MARIEL RODRIGUEZ",
+      "position": null,
+      "location": "Location unknown"
+    },
+    "4162429": {
+      "id": 4162429,
+      "full_name": "PROVINCIAL ADMINISTRATOR",
+      "position": "VICE MAYOR OF JOSE PANGANIBAN,",
       "location": "Location unknown"
     }
   }

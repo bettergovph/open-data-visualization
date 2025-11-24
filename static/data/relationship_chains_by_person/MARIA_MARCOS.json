@@ -2,13 +2,26 @@
   "person": {
     "normalized_name": "MARIA MARCOS",
     "display_name": "MARIA MARCOS",
-    "chain_count": 1
+    "chain_count": 2
   },
   "chains": [
     {
+      "length": 4,
+      "path": [
+        70156,
+        4162401,
+        53227,
+        53228
+      ],
+      "relationships": [
+        "Starting person",
+        "Political connection - TINGOG party-list representative",
+        "FERDINAND MARCOS SR. IS THE FATHER OF FERDINAND MARCOS JR.",
+        "Wikipedia: child of Ferdinand Marcos"
+      ]
+    },
+    {
       "length": 2,
-      "start_surname": "MARCOS",
-      "end_surname": "MARCOS",
       "path": [
         53228,
         53227
@@ -16,37 +29,32 @@
       "relationships": [
         "Starting person",
         "Wikipedia: child of Ferdinand Marcos"
-      ],
-      "source_urls": []
+      ]
     }
   ],
   "people": {
     "53227": {
       "id": 53227,
-      "first_name": "FERDINAND",
-      "middle_name": "ROMUALDEZ",
-      "last_name": "MARCOS",
-      "suffix": "JR.",
-      "full_name": "FERDINAND ROMUALDEZ MARCOS JR.",
-      "canonical_name": "FERDINAND MARCOS JR.",
+      "full_name": "FERDINAND ROMUALDEZ MARCOS",
       "position": "GOVERNOR",
-      "region": "REGION I",
-      "province": "ILOCOS NORTE",
-      "municipality_city": "",
       "location": "ILOCOS NORTE, REGION I"
+    },
+    "70156": {
+      "id": 70156,
+      "full_name": "YEDDA MARIE K ROMUALDEZ",
+      "position": "PARTY-LIST REPRESENTATIVE",
+      "location": "LEYTE, REGION VIII"
+    },
+    "4162401": {
+      "id": 4162401,
+      "full_name": "FERDINAND EDRALIN MARCOS",
+      "position": "PRESIDENT",
+      "location": "NATIONAL, NATIONAL"
     },
     "53228": {
       "id": 53228,
-      "first_name": "MARIA",
-      "middle_name": null,
-      "last_name": "MARCOS",
-      "suffix": null,
       "full_name": "MARIA MARCOS",
-      "canonical_name": "MARIA MARCOS",
       "position": "MEMBER, HOUSE OF REPRESENTATIVES",
-      "region": "REGION I",
-      "province": "ILOCOS NORTE",
-      "municipality_city": "",
       "location": "ILOCOS NORTE, REGION I"
     }
   }

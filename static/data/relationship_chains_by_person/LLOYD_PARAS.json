@@ -6,25 +6,7 @@
   },
   "chains": [
     {
-      "length": 2,
-      "start_surname": "GO",
-      "end_surname": "PARAS",
-      "path": [
-        3745735,
-        4162414
-      ],
-      "relationships": [
-        "Starting person",
-        "BONG GO is cousin of LLOYD PARAS (DRIVER I"
-      ],
-      "source_urls": [
-        "OCR:pd12.jpg"
-      ]
-    },
-    {
       "length": 3,
-      "start_surname": "De Lara",
-      "end_surname": "PARAS",
       "path": [
         27824,
         3745735,
@@ -34,54 +16,38 @@
         "Starting person",
         "JOSEPH DE LARA is uncle of BONG GO",
         "BONG GO is cousin of LLOYD PARAS (DRIVER I"
+      ]
+    },
+    {
+      "length": 2,
+      "path": [
+        3745735,
+        4162414
       ],
-      "source_urls": [
-        "OCR:pd12.jpg"
+      "relationships": [
+        "Starting person",
+        "BONG GO is cousin of LLOYD PARAS (DRIVER I"
       ]
     }
   ],
   "people": {
     "3745735": {
       "id": 3745735,
-      "first_name": "BONG",
-      "middle_name": null,
-      "last_name": "GO",
-      "suffix": null,
       "full_name": "BONG GO",
-      "canonical_name": "BONG GO",
       "position": "SENATOR",
-      "region": "REGION XII",
-      "province": "COTABATO",
-      "municipality_city": "M'LANG",
       "location": "M'LANG, COTABATO, REGION XII"
-    },
-    "4162414": {
-      "id": 4162414,
-      "first_name": "LLOYD",
-      "middle_name": null,
-      "last_name": "PARAS",
-      "suffix": null,
-      "full_name": "LLOYD PARAS",
-      "canonical_name": null,
-      "position": "DRIVER I,",
-      "region": null,
-      "province": null,
-      "municipality_city": null,
-      "location": "Location unknown"
     },
     "27824": {
       "id": 27824,
-      "first_name": "JOSEPH",
-      "middle_name": null,
-      "last_name": "De Lara",
-      "suffix": null,
       "full_name": "JOSEPH De Lara",
-      "canonical_name": "JOSEPH DE LARA",
       "position": "MAYOR",
-      "region": "REGION I",
-      "province": "ILOCOS NORTE",
-      "municipality_city": "SOLSONA",
       "location": "SOLSONA, ILOCOS NORTE, REGION I"
+    },
+    "4162414": {
+      "id": 4162414,
+      "full_name": "LLOYD PARAS",
+      "position": "DRIVER I,",
+      "location": "Location unknown"
     }
   }
 }

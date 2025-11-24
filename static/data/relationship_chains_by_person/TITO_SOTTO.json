@@ -2,83 +2,11 @@
   "person": {
     "normalized_name": "TITO SOTTO",
     "display_name": "TITO SOTTO",
-    "chain_count": 8
+    "chain_count": 6
   },
   "chains": [
     {
-      "length": 2,
-      "start_surname": "SOTTO",
-      "end_surname": "SOTTO",
-      "path": [
-        3745828,
-        4144962
-      ],
-      "relationships": [
-        "Starting person",
-        "Siblings in the SOTTO family"
-      ],
-      "source_urls": [
-        "https://en.wikipedia.org/wiki/Tito_Sotto"
-      ]
-    },
-    {
-      "length": 2,
-      "start_surname": "PANGILINAN",
-      "end_surname": "SOTTO",
-      "path": [
-        3745804,
-        3745828
-      ],
-      "relationships": [
-        "Starting person",
-        "KIKO PANGILINAN is uncle of TITO SOTTO (SENATE PRESIDENT)"
-      ],
-      "source_urls": [
-        "OCR:pd20.jpg"
-      ]
-    },
-    {
       "length": 3,
-      "start_surname": "PANGILINAN",
-      "end_surname": "SOTTO",
-      "path": [
-        3745804,
-        3745828,
-        4144961
-      ],
-      "relationships": [
-        "Starting person",
-        "KIKO PANGILINAN is uncle of TITO SOTTO (SENATE PRESIDENT)",
-        "Siblings in the SOTTO family"
-      ],
-      "source_urls": [
-        "OCR:pd20.jpg",
-        "https://en.wikipedia.org/wiki/Tito_Sotto"
-      ]
-    },
-    {
-      "length": 3,
-      "start_surname": "PANGILINAN",
-      "end_surname": "SOTTO",
-      "path": [
-        3745804,
-        3745828,
-        4144962
-      ],
-      "relationships": [
-        "Starting person",
-        "KIKO PANGILINAN is uncle of TITO SOTTO (SENATE PRESIDENT)",
-        "Siblings in the SOTTO family"
-      ],
-      "source_urls": [
-        "OCR:pd20.jpg",
-        "https://en.wikipedia.org/wiki/Tito_Sotto"
-      ]
-    },
-    {
-      "length": 3,
-      "start_surname": "SOTTO",
-      "end_surname": "SOTTO",
       "path": [
         75988,
         3745804,
@@ -87,32 +15,11 @@
       "relationships": [
         "Starting person",
         "GIAN SOTTO is cousin of KIKO PANGILINAN",
-        "KIKO PANGILINAN is uncle of TITO SOTTO (SENATE PRESIDENT)"
-      ],
-      "source_urls": [
-        "OCR:pd20.jpg"
+        "KIKO PANGILINAN is cousin of TITO SOTTO (VICE MAYOR OF QUEZON CITY)"
       ]
     },
     {
       "length": 2,
-      "start_surname": "SOTTO",
-      "end_surname": "SOTTO",
-      "path": [
-        4144961,
-        3745828
-      ],
-      "relationships": [
-        "Starting person",
-        "SIBLINGS IN THE SOTTO FAMILY"
-      ],
-      "source_urls": [
-        "https://en.wikipedia.org/wiki/Tito_Sotto"
-      ]
-    },
-    {
-      "length": 2,
-      "start_surname": "SOTTO",
-      "end_surname": "SOTTO",
       "path": [
         4144962,
         3745828
@@ -120,15 +27,32 @@
       "relationships": [
         "Starting person",
         "SIBLINGS IN THE SOTTO FAMILY"
-      ],
-      "source_urls": [
-        "https://en.wikipedia.org/wiki/Tito_Sotto"
       ]
     },
     {
       "length": 2,
-      "start_surname": "SOTTO",
-      "end_surname": "SOTTO",
+      "path": [
+        4144961,
+        3745828
+      ],
+      "relationships": [
+        "Starting person",
+        "SIBLINGS IN THE SOTTO FAMILY"
+      ]
+    },
+    {
+      "length": 2,
+      "path": [
+        3745804,
+        3745828
+      ],
+      "relationships": [
+        "Starting person",
+        "KIKO PANGILINAN is uncle of TITO SOTTO (SENATE PRESIDENT)"
+      ]
+    },
+    {
+      "length": 2,
       "path": [
         3745828,
         4144961
@@ -136,82 +60,50 @@
       "relationships": [
         "Starting person",
         "Siblings in the SOTTO family"
+      ]
+    },
+    {
+      "length": 2,
+      "path": [
+        3745828,
+        4144962
       ],
-      "source_urls": [
-        "https://en.wikipedia.org/wiki/Tito_Sotto"
+      "relationships": [
+        "Starting person",
+        "Siblings in the SOTTO family"
       ]
     }
   ],
   "people": {
+    "75988": {
+      "id": 75988,
+      "full_name": "GIAN SOTTO",
+      "position": "COUNCILOR",
+      "location": "NCR, SECOND DISTRICT, NATIONAL CAPITAL REGION"
+    },
+    "3745804": {
+      "id": 3745804,
+      "full_name": "KIKO PANGILINAN",
+      "position": "SENATOR",
+      "location": "M'LANG, COTABATO, REGION XII"
+    },
     "3745828": {
       "id": 3745828,
-      "first_name": "TITO",
-      "middle_name": null,
-      "last_name": "SOTTO",
-      "suffix": null,
       "full_name": "TITO SOTTO",
-      "canonical_name": "TITO SOTTO",
       "position": "SENATOR",
-      "region": "REGION XII",
-      "province": "COTABATO",
-      "municipality_city": "M'LANG",
       "location": "M'LANG, COTABATO, REGION XII"
     },
     "4144962": {
       "id": 4144962,
-      "first_name": "VAL",
-      "middle_name": null,
-      "last_name": "SOTTO",
-      "suffix": null,
       "full_name": "VAL SOTTO",
-      "canonical_name": "VAL SOTTO",
       "position": null,
-      "region": null,
-      "province": null,
-      "municipality_city": null,
       "location": "Location unknown"
-    },
-    "3745804": {
-      "id": 3745804,
-      "first_name": "KIKO",
-      "middle_name": null,
-      "last_name": "PANGILINAN",
-      "suffix": null,
-      "full_name": "KIKO PANGILINAN",
-      "canonical_name": "KIKO PANGILINAN",
-      "position": "SENATOR",
-      "region": "REGION XII",
-      "province": "COTABATO",
-      "municipality_city": "M'LANG",
-      "location": "M'LANG, COTABATO, REGION XII"
     },
     "4144961": {
       "id": 4144961,
-      "first_name": "VIC",
-      "middle_name": null,
-      "last_name": "SOTTO",
-      "suffix": null,
       "full_name": "VIC SOTTO",
-      "canonical_name": "VIC SOTTO",
       "position": null,
-      "region": null,
-      "province": null,
-      "municipality_city": null,
       "location": "Location unknown"
-    },
-    "75988": {
-      "id": 75988,
-      "first_name": "GIAN",
-      "middle_name": null,
-      "last_name": "SOTTO",
-      "suffix": null,
-      "full_name": "GIAN SOTTO",
-      "canonical_name": "GIAN SOTTO",
-      "position": "COUNCILOR",
-      "region": "NATIONAL CAPITAL REGION",
-      "province": "NCR, SECOND DISTRICT",
-      "municipality_city": "",
-      "location": "NCR, SECOND DISTRICT, NATIONAL CAPITAL REGION"
     }
   }
 }

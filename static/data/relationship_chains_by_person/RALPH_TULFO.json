@@ -2,13 +2,11 @@
   "person": {
     "normalized_name": "RALPH TULFO",
     "display_name": "RALPH TULFO",
-    "chain_count": 2
+    "chain_count": 6
   },
   "chains": [
     {
       "length": 2,
-      "start_surname": "TULFO",
-      "end_surname": "TULFO",
       "path": [
         4162434,
         3745642
@@ -16,15 +14,68 @@
       "relationships": [
         "Starting person",
         "RALPH TULFO IS NEPHEW OF ERWIN TULFO"
+      ]
+    },
+    {
+      "length": 3,
+      "path": [
+        4162434,
+        3745642,
+        4162433
       ],
-      "source_urls": [
-        "OCR:pd22.jpg"
+      "relationships": [
+        "Starting person",
+        "RALPH TULFO IS NEPHEW OF ERWIN TULFO",
+        "ERWIN TULFO is daughter of RAFFY TULFO MARICEL TULFO-TUNGOL (SENATOR OF THE PHILIPPINES -)"
+      ]
+    },
+    {
+      "length": 4,
+      "path": [
+        4162434,
+        3745642,
+        4162433,
+        4162435
+      ],
+      "relationships": [
+        "Starting person",
+        "RALPH TULFO IS NEPHEW OF ERWIN TULFO",
+        "ERWIN TULFO is daughter of RAFFY TULFO MARICEL TULFO-TUNGOL (SENATOR OF THE PHILIPPINES -)",
+        "RAFFY TULFO MARICEL TULFO-TUNGOL IS SON-IN-LAW OF JOCELYN TULFO GARETH TUNGOL (REPRESENTATIVE"
+      ]
+    },
+    {
+      "length": 4,
+      "path": [
+        4162434,
+        3745642,
+        4162433,
+        4162436
+      ],
+      "relationships": [
+        "Starting person",
+        "RALPH TULFO IS NEPHEW OF ERWIN TULFO",
+        "ERWIN TULFO is daughter of RAFFY TULFO MARICEL TULFO-TUNGOL (SENATOR OF THE PHILIPPINES -)",
+        "RAFFY TULFO MARICEL TULFO-TUNGOL IS BROTHER OF SON NEPHEW (OFFICE OF SEN. RAFFY TULFO SENATOR OF THE PHILIPPINES)"
+      ]
+    },
+    {
+      "length": 4,
+      "path": [
+        4162434,
+        3745642,
+        4162433,
+        4162437
+      ],
+      "relationships": [
+        "Starting person",
+        "RALPH TULFO IS NEPHEW OF ERWIN TULFO",
+        "ERWIN TULFO is daughter of RAFFY TULFO MARICEL TULFO-TUNGOL (SENATOR OF THE PHILIPPINES -)",
+        "RAFFY TULFO MARICEL TULFO-TUNGOL IS NIECE OF NEPHEW NIECE (POLITICAL AFFAIRS OFFICER II"
       ]
     },
     {
       "length": 2,
-      "start_surname": "TULFO",
-      "end_surname": "TULFO",
       "path": [
         3745642,
         4162434
@@ -32,39 +83,44 @@
       "relationships": [
         "Starting person",
         "ERWIN TULFO is nephew of RALPH TULFO (REPRESENTATIVE"
-      ],
-      "source_urls": [
-        "OCR:pd22.jpg"
       ]
     }
   ],
   "people": {
     "3745642": {
       "id": 3745642,
-      "first_name": "ERWIN",
-      "middle_name": null,
-      "last_name": "TULFO",
-      "suffix": null,
       "full_name": "ERWIN TULFO",
-      "canonical_name": "ERWIN TULFO",
       "position": "SENATOR",
-      "region": "REGION XII",
-      "province": "COTABATO",
-      "municipality_city": "M'LANG",
       "location": "M'LANG, COTABATO, REGION XII"
     },
     "4162434": {
       "id": 4162434,
-      "first_name": "RALPH",
-      "middle_name": null,
-      "last_name": "TULFO",
-      "suffix": null,
       "full_name": "RALPH TULFO",
-      "canonical_name": null,
       "position": "REPRESENTATIVE, QUEZON CITY",
-      "region": null,
-      "province": null,
-      "municipality_city": null,
+      "location": "Location unknown"
+    },
+    "4162433": {
+      "id": 4162433,
+      "full_name": "RAFFY TULFO MARICEL TULFO-TUNGOL",
+      "position": "SENATOR OF THE PHILIPPINES -",
+      "location": "Location unknown"
+    },
+    "4162435": {
+      "id": 4162435,
+      "full_name": "JOCELYN TULFO GARETH TUNGOL",
+      "position": "REPRESENTATIVE, ACT-CIS CHIEF OF STAFF,",
+      "location": "Location unknown"
+    },
+    "4162436": {
+      "id": 4162436,
+      "full_name": "SON NEPHEW",
+      "position": "OFFICE OF SEN. RAFFY TULFO SENATOR OF THE PHILIPPINES",
+      "location": "Location unknown"
+    },
+    "4162437": {
+      "id": 4162437,
+      "full_name": "NEPHEW NIECE",
+      "position": "POLITICAL AFFAIRS OFFICER II, OFFICE OF SEN. ERWIN TULFO",
       "location": "Location unknown"
     }
   }

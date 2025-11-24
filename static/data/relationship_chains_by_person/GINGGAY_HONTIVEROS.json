@@ -2,13 +2,11 @@
   "person": {
     "normalized_name": "GINGGAY HONTIVEROS",
     "display_name": "GINGGAY HONTIVEROS",
-    "chain_count": 2
+    "chain_count": 3
   },
   "chains": [
     {
       "length": 2,
-      "start_surname": "HONTIVEROS",
-      "end_surname": "HONTIVEROS",
       "path": [
         4162415,
         4041415
@@ -16,15 +14,23 @@
       "relationships": [
         "Starting person",
         "GINGGAY HONTIVEROS IS SISTER OF RISA HONTIVEROS"
+      ]
+    },
+    {
+      "length": 3,
+      "path": [
+        4162415,
+        4041415,
+        4162416
       ],
-      "source_urls": [
-        "OCR:pd13.jpg"
+      "relationships": [
+        "Starting person",
+        "GINGGAY HONTIVEROS IS SISTER OF RISA HONTIVEROS",
+        "RISA HONTIVEROS IS BROTHER OF PABLO GABRIEL MALVAR (PRIVATE SECTOR REPRESENTATIVE FOR)"
       ]
     },
     {
       "length": 2,
-      "start_surname": "HONTIVEROS",
-      "end_surname": "HONTIVEROS",
       "path": [
         4041415,
         4162415
@@ -32,39 +38,26 @@
       "relationships": [
         "Starting person",
         "RISA HONTIVEROS IS SISTER OF GINGGAY HONTIVEROS (MEMBER"
-      ],
-      "source_urls": [
-        "OCR:pd13.jpg"
       ]
     }
   ],
   "people": {
-    "4041415": {
-      "id": 4041415,
-      "first_name": "RISA",
-      "middle_name": null,
-      "last_name": "HONTIVEROS",
-      "suffix": null,
-      "full_name": "RISA HONTIVEROS",
-      "canonical_name": "RISA HONTIVEROS",
-      "position": "SENATOR",
-      "region": "NCR",
-      "province": "Metro Manila",
-      "municipality_city": "Manila",
-      "location": "Manila, Metro Manila, NCR"
-    },
     "4162415": {
       "id": 4162415,
-      "first_name": "GINGGAY",
-      "middle_name": null,
-      "last_name": "HONTIVEROS",
-      "suffix": null,
       "full_name": "GINGGAY HONTIVEROS",
-      "canonical_name": null,
       "position": "MEMBER, PRIVATE SECTOR",
-      "region": null,
-      "province": null,
-      "municipality_city": null,
+      "location": "Location unknown"
+    },
+    "4041415": {
+      "id": 4041415,
+      "full_name": "RISA HONTIVEROS",
+      "position": "SENATOR",
+      "location": "Manila, Metro Manila, NCR"
+    },
+    "4162416": {
+      "id": 4162416,
+      "full_name": "PABLO GABRIEL MALVAR",
+      "position": "PRIVATE SECTOR REPRESENTATIVE FOR",
       "location": "Location unknown"
     }
   }

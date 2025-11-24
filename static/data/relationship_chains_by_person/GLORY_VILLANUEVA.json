@@ -2,13 +2,40 @@
   "person": {
     "normalized_name": "GLORY VILLANUEVA",
     "display_name": "GLORY VILLANUEVA",
-    "chain_count": 2
+    "chain_count": 3
   },
   "chains": [
     {
+      "length": 11,
+      "path": [
+        2799,
+        3745651,
+        4052633,
+        4041425,
+        4052650,
+        84197,
+        4041079,
+        4162626,
+        3794,
+        83949,
+        4162439
+      ],
+      "relationships": [
+        "Starting person",
+        "IMELDA AGUILAR is nephew of CAMILLE VILLAR",
+        "Camille Villar is the daughter of former Senate President Manny Villar",
+        "MARK VILLAR IS THE SON OF FORMER SENATE PRESIDENT MANNY VILLAR",
+        "MARK VILLAR IS THE SON OF SENATOR CYNTHIA VILLAR",
+        "MARK VILLAR IS THE SON OF SENATOR CYNTHIA VILLAR",
+        "Worked closely with Catalina Cabral for DPWH project allocations",
+        "Worked with Roberto Bernardo on DPWH project approvals",
+        "Engineer collected commitments for projects",
+        "Delivered P1B in cash to Joel Villanueva's staff at rest house in Bocaue",
+        " Bulacan"
+      ]
+    },
+    {
       "length": 2,
-      "start_surname": "Villanueva",
-      "end_surname": "VILLANUEVA",
       "path": [
         83949,
         4162439
@@ -16,15 +43,10 @@
       "relationships": [
         "Starting person",
         "JOEL VILLANUEVA is cousin of GLORY VILLANUEVA"
-      ],
-      "source_urls": [
-        "OCR:pd24.jpg"
       ]
     },
     {
       "length": 2,
-      "start_surname": "VILLANUEVA",
-      "end_surname": "Villanueva",
       "path": [
         4162439,
         83949
@@ -32,39 +54,74 @@
       "relationships": [
         "Starting person",
         "GLORY VILLANUEVA IS COUSIN OF JOEL VILLANUEVA"
-      ],
-      "source_urls": [
-        "OCR:pd24.jpg"
       ]
     }
   ],
   "people": {
     "83949": {
       "id": 83949,
-      "first_name": "JOEL",
-      "middle_name": null,
-      "last_name": "Villanueva",
-      "suffix": null,
       "full_name": "JOEL Villanueva",
-      "canonical_name": "JOEL VILLANUEVA",
       "position": "COUNCILOR",
-      "region": "NATIONAL CAPITAL REGION",
-      "province": "NCR, CITY OF MANILA, FIRST DISTRICT",
-      "municipality_city": "",
       "location": "NCR, CITY OF MANILA, FIRST DISTRICT, NATIONAL CAPITAL REGION"
+    },
+    "2799": {
+      "id": 2799,
+      "full_name": "IMELDA Aguilar",
+      "position": "MAYOR",
+      "location": "CITY OF LAS PINAS, NCR, FOURTH DISTRICT, NATIONAL CAPITAL REGION"
+    },
+    "3745651": {
+      "id": 3745651,
+      "full_name": "CAMILLE VILLAR",
+      "position": "SENATOR",
+      "location": "M'LANG, COTABATO, REGION XII"
+    },
+    "4052633": {
+      "id": 4052633,
+      "full_name": "Manny Villar",
+      "position": null,
+      "location": "Location unknown"
+    },
+    "4041425": {
+      "id": 4041425,
+      "full_name": "MARK A. A. VILLAR",
+      "position": "SENATOR",
+      "location": "Manila, Metro Manila, NCR"
+    },
+    "4052650": {
+      "id": 4052650,
+      "full_name": "Cynthia Villar",
+      "position": null,
+      "location": "Location unknown"
+    },
+    "84197": {
+      "id": 84197,
+      "full_name": "Mark Villar",
+      "position": "MEMBER, HOUSE OF REPRESENTATIVES",
+      "location": "NCR, FOURTH DISTRICT, NATIONAL CAPITAL REGION"
+    },
+    "4041079": {
+      "id": 4041079,
+      "full_name": "CATALINA CABRAL",
+      "position": "SECRETARY OF PUBLIC WORKS AND HIGHWAYS",
+      "location": "Manila, Metro Manila, NCR"
+    },
+    "4162626": {
+      "id": 4162626,
+      "full_name": "ROBERTO BERNARDO",
+      "position": "FORMER DPWH UNDERSECRETARY",
+      "location": "Location unknown"
+    },
+    "3794": {
+      "id": 3794,
+      "full_name": "Henry Alcantara",
+      "position": "COUNCILOR",
+      "location": "PANGANIBAN (PAYO), CATANDUANES, REGION V"
     },
     "4162439": {
       "id": 4162439,
-      "first_name": "GLORY",
-      "middle_name": null,
-      "last_name": "VILLANUEVA",
-      "suffix": null,
       "full_name": "GLORY VILLANUEVA",
-      "canonical_name": null,
       "position": null,
-      "region": null,
-      "province": null,
-      "municipality_city": null,
       "location": "Location unknown"
     }
   }

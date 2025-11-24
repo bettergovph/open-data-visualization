@@ -6,98 +6,52 @@
   },
   "chains": [
     {
-      "length": 2,
-      "start_surname": "EJERCITO ESTRADA",
-      "end_surname": "ESTRADA",
+      "length": 4,
       "path": [
+        4162405,
         4041412,
+        4041410,
         4144956
       ],
       "relationships": [
         "Starting person",
-        "JINGGOY ESTRADA IS THE SON OF FORMER PRESIDENT JOSEPH ESTRADA"
-      ],
-      "source_urls": [
-        "https://en.wikipedia.org/wiki/Jinggoy_Estrada"
+        "JANELLA EJERCITO ESTRADA IS DAUGHTER OF JINGGOY EJERCITO ESTRADA",
+        "JV EJERCITO AND JINGGOY ESTRADA ARE HALF-BROTHERS",
+        "JV EJERCITO IS THE SON OF FORMER PRESIDENT JOSEPH ESTRADA"
       ]
     },
     {
-      "length": 3,
-      "start_surname": "EJERCITO ESTRADA",
-      "end_surname": "Ejercito",
+      "length": 5,
       "path": [
+        4162405,
         4041412,
+        4041410,
         4144956,
         32135
       ],
       "relationships": [
         "Starting person",
-        "JINGGOY ESTRADA IS THE SON OF FORMER PRESIDENT JOSEPH ESTRADA",
-        "JOSEPH EJERCITO IS THE SON OF FORMER PRESIDENT JOSEPH ESTRADA"
-      ],
-      "source_urls": [
-        "https://en.wikipedia.org/wiki/Jinggoy_Estrada",
-        "https://en.wikipedia.org/wiki/Joseph_Ejercito_Estrada"
-      ]
-    },
-    {
-      "length": 3,
-      "start_surname": "EJERCITO ESTRADA",
-      "end_surname": "EJERCITO",
-      "path": [
-        4041412,
-        4144956,
-        4041410
-      ],
-      "relationships": [
-        "Starting person",
-        "JINGGOY ESTRADA IS THE SON OF FORMER PRESIDENT JOSEPH ESTRADA",
-        "JV EJERCITO IS THE SON OF FORMER PRESIDENT JOSEPH ESTRADA"
-      ],
-      "source_urls": [
-        "https://en.wikipedia.org/wiki/Jinggoy_Estrada",
-        "https://en.wikipedia.org/wiki/JV_Ejercito"
-      ]
-    },
-    {
-      "length": 2,
-      "start_surname": "EJERCITO",
-      "end_surname": "ESTRADA",
-      "path": [
-        4041410,
-        4144956
-      ],
-      "relationships": [
-        "Starting person",
-        "JV EJERCITO IS THE SON OF FORMER PRESIDENT JOSEPH ESTRADA"
-      ],
-      "source_urls": [
-        "https://en.wikipedia.org/wiki/JV_Ejercito"
-      ]
-    },
-    {
-      "length": 3,
-      "start_surname": "EJERCITO",
-      "end_surname": "ESTRADA",
-      "path": [
-        4041410,
-        4041412,
-        4144956
-      ],
-      "relationships": [
-        "Starting person",
+        "JANELLA EJERCITO ESTRADA IS DAUGHTER OF JINGGOY EJERCITO ESTRADA",
         "JV EJERCITO AND JINGGOY ESTRADA ARE HALF-BROTHERS",
-        "JINGGOY ESTRADA IS THE SON OF FORMER PRESIDENT JOSEPH ESTRADA"
+        "JV EJERCITO IS THE SON OF FORMER PRESIDENT JOSEPH ESTRADA",
+        "JOSEPH EJERCITO IS THE SON OF FORMER PRESIDENT JOSEPH ESTRADA"
+      ]
+    },
+    {
+      "length": 3,
+      "path": [
+        4162405,
+        4041412,
+        4144956
       ],
-      "source_urls": [
-        "https://en.wikipedia.org/wiki/JV_Ejercito",
-        "https://en.wikipedia.org/wiki/Jinggoy_Estrada"
+      "relationships": [
+        "Starting person",
+        "JANELLA EJERCITO ESTRADA IS DAUGHTER OF JINGGOY EJERCITO ESTRADA",
+        "JINGGOY ESTRADA IS THE SON OF FORMER PRESIDENT JOSEPH ESTRADA"
       ]
     },
     {
       "length": 2,
-      "start_surname": "Ejercito",
-      "end_surname": "ESTRADA",
       "path": [
         32135,
         4144956
@@ -105,68 +59,61 @@
       "relationships": [
         "Starting person",
         "JOSEPH EJERCITO IS THE SON OF FORMER PRESIDENT JOSEPH ESTRADA"
+      ]
+    },
+    {
+      "length": 2,
+      "path": [
+        4041412,
+        4144956
       ],
-      "source_urls": [
-        "https://en.wikipedia.org/wiki/Joseph_Ejercito_Estrada"
+      "relationships": [
+        "Starting person",
+        "JINGGOY ESTRADA IS THE SON OF FORMER PRESIDENT JOSEPH ESTRADA"
+      ]
+    },
+    {
+      "length": 2,
+      "path": [
+        4041410,
+        4144956
+      ],
+      "relationships": [
+        "Starting person",
+        "JV EJERCITO IS THE SON OF FORMER PRESIDENT JOSEPH ESTRADA"
       ]
     }
   ],
   "people": {
+    "4162405": {
+      "id": 4162405,
+      "full_name": "JANELLA EJERCITO ESTRADA",
+      "position": "UNDERSECRETARY, DSWD",
+      "location": "Location unknown"
+    },
     "4041412": {
       "id": 4041412,
-      "first_name": "JINGGOY",
-      "middle_name": null,
-      "last_name": "EJERCITO ESTRADA",
-      "suffix": null,
       "full_name": "JINGGOY EJERCITO ESTRADA",
-      "canonical_name": "JINGGOY EJERCITO ESTRADA",
       "position": "SENATOR",
-      "region": "NCR",
-      "province": "Metro Manila",
-      "municipality_city": "Manila",
+      "location": "Manila, Metro Manila, NCR"
+    },
+    "4041410": {
+      "id": 4041410,
+      "full_name": "VICTOR EJERCITO",
+      "position": "SENATOR",
       "location": "Manila, Metro Manila, NCR"
     },
     "4144956": {
       "id": 4144956,
-      "first_name": "JOSEPH",
-      "middle_name": null,
-      "last_name": "ESTRADA",
-      "suffix": null,
       "full_name": "JOSEPH ESTRADA",
-      "canonical_name": "JOSEPH ESTRADA",
       "position": null,
-      "region": null,
-      "province": null,
-      "municipality_city": null,
       "location": "Location unknown"
     },
     "32135": {
       "id": 32135,
-      "first_name": "JOSEPH",
-      "middle_name": null,
-      "last_name": "Ejercito",
-      "suffix": null,
       "full_name": "JOSEPH Ejercito",
-      "canonical_name": "JOSEPH EJERCITO",
       "position": "MAYOR",
-      "region": "NATIONAL CAPITAL REGION",
-      "province": "NCR, CITY OF MANILA, FIRST DISTRICT",
-      "municipality_city": "",
       "location": "NCR, CITY OF MANILA, FIRST DISTRICT, NATIONAL CAPITAL REGION"
-    },
-    "4041410": {
-      "id": 4041410,
-      "first_name": "VICTOR",
-      "middle_name": null,
-      "last_name": "EJERCITO",
-      "suffix": null,
-      "full_name": "VICTOR EJERCITO",
-      "canonical_name": "VICTOR EJERCITO",
-      "position": "SENATOR",
-      "region": "NCR",
-      "province": "Metro Manila",
-      "municipality_city": "Manila",
-      "location": "Manila, Metro Manila, NCR"
     }
   }
 }

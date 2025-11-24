@@ -2,49 +2,11 @@
   "person": {
     "normalized_name": "GLORIA MACAPAGAL",
     "display_name": "Gloria Macapagal",
-    "chain_count": 3
+    "chain_count": 5
   },
   "chains": [
     {
-      "length": 4,
-      "start_surname": "ARROYO",
-      "end_surname": "Macapagal",
-      "path": [
-        8298,
-        8302,
-        4145000,
-        50154
-      ],
-      "relationships": [
-        "Starting person",
-        "Gloria Arroyo is the mother of Diosdado Arroyo",
-        "GLORIA ARROYO IS THE DAUGHTER OF FORMER PRESIDENT DIOSDADO MACAPAGAL",
-        "GLORIA MACAPAGAL IS THE DAUGHTER OF DIOSDADO MACAPAGAL"
-      ],
-      "source_urls": [
-        "https://en.wikipedia.org/wiki/Gloria_Macapagal_Arroyo"
-      ]
-    },
-    {
       "length": 2,
-      "start_surname": "MACAPAGAL",
-      "end_surname": "Macapagal",
-      "path": [
-        4145000,
-        50154
-      ],
-      "relationships": [
-        "Starting person",
-        "GLORIA MACAPAGAL IS THE DAUGHTER OF DIOSDADO MACAPAGAL"
-      ],
-      "source_urls": [
-        "https://en.wikipedia.org/wiki/Gloria_Macapagal_Arroyo"
-      ]
-    },
-    {
-      "length": 2,
-      "start_surname": "Macapagal",
-      "end_surname": "MACAPAGAL",
       "path": [
         50154,
         4145000
@@ -52,68 +14,93 @@
       "relationships": [
         "Starting person",
         "GLORIA MACAPAGAL IS THE DAUGHTER OF DIOSDADO MACAPAGAL"
+      ]
+    },
+    {
+      "length": 3,
+      "path": [
+        50154,
+        4145000,
+        8302
       ],
-      "source_urls": [
-        "https://en.wikipedia.org/wiki/Gloria_Macapagal_Arroyo"
+      "relationships": [
+        "Starting person",
+        "GLORIA MACAPAGAL IS THE DAUGHTER OF DIOSDADO MACAPAGAL",
+        " BOTH PART OF THE MACAPAGAL POLITICAL DYNASTY"
+      ]
+    },
+    {
+      "length": 4,
+      "path": [
+        50154,
+        4145000,
+        8302,
+        8298
+      ],
+      "relationships": [
+        "Starting person",
+        "GLORIA MACAPAGAL IS THE DAUGHTER OF DIOSDADO MACAPAGAL",
+        " BOTH PART OF THE MACAPAGAL POLITICAL DYNASTY",
+        "GLORIA ARROYO IS THE DAUGHTER OF FORMER PRESIDENT DIOSDADO MACAPAGAL"
+      ]
+    },
+    {
+      "length": 4,
+      "path": [
+        50154,
+        4145000,
+        8302,
+        4144999
+      ],
+      "relationships": [
+        "Starting person",
+        "GLORIA MACAPAGAL IS THE DAUGHTER OF DIOSDADO MACAPAGAL",
+        " BOTH PART OF THE MACAPAGAL POLITICAL DYNASTY",
+        "GLORIA ARROYO IS THE DAUGHTER OF FORMER PRESIDENT DIOSDADO MACAPAGAL"
+      ]
+    },
+    {
+      "length": 2,
+      "path": [
+        4145000,
+        50154
+      ],
+      "relationships": [
+        "Starting person",
+        "GLORIA MACAPAGAL IS THE DAUGHTER OF DIOSDADO MACAPAGAL"
       ]
     }
   ],
   "people": {
-    "8298": {
-      "id": 8298,
-      "first_name": "DIOSDADO",
-      "middle_name": null,
-      "last_name": "ARROYO",
-      "suffix": null,
-      "full_name": "DIOSDADO ARROYO",
-      "canonical_name": "DIOSDADO ARROYO",
-      "position": "MEMBER, HOUSE OF REPRESENTATIVES",
-      "region": "REGION V",
-      "province": "CAMARINES SUR",
-      "municipality_city": "",
-      "location": "CAMARINES SUR, REGION V"
-    },
     "8302": {
       "id": 8302,
-      "first_name": "Gloria",
-      "middle_name": null,
-      "last_name": "Arroyo",
-      "suffix": null,
       "full_name": "Gloria Arroyo",
-      "canonical_name": "GLORIA ARROYO",
       "position": "MEMBER, HOUSE OF REPRESENTATIVES",
-      "region": "REGION III",
-      "province": "PAMPANGA",
-      "municipality_city": "",
       "location": "PAMPANGA, REGION III"
     },
-    "4145000": {
-      "id": 4145000,
-      "first_name": "DIOSDADO",
-      "middle_name": null,
-      "last_name": "MACAPAGAL",
-      "suffix": null,
-      "full_name": "DIOSDADO MACAPAGAL",
-      "canonical_name": "DIOSDADO MACAPAGAL",
+    "4144999": {
+      "id": 4144999,
+      "full_name": "JOSE MIGUEL MIGUEL ARROYO",
       "position": null,
-      "region": null,
-      "province": null,
-      "municipality_city": null,
       "location": "Location unknown"
     },
     "50154": {
       "id": 50154,
-      "first_name": "Gloria",
-      "middle_name": null,
-      "last_name": "Macapagal",
-      "suffix": null,
       "full_name": "Gloria Macapagal",
-      "canonical_name": "GLORIA MACAPAGAL",
       "position": "MEMBER, HOUSE OF REPRESENTATIVES",
-      "region": "REGION III",
-      "province": "PAMPANGA",
-      "municipality_city": "",
       "location": "PAMPANGA, REGION III"
+    },
+    "4145000": {
+      "id": 4145000,
+      "full_name": "DIOSDADO MACAPAGAL",
+      "position": null,
+      "location": "Location unknown"
+    },
+    "8298": {
+      "id": 8298,
+      "full_name": "DIOSDADO ARROYO",
+      "position": "MEMBER, HOUSE OF REPRESENTATIVES",
+      "location": "CAMARINES SUR, REGION V"
     }
   }
 }

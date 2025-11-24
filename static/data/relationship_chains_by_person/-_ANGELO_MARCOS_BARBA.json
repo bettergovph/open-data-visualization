@@ -6,27 +6,24 @@
   },
   "chains": [
     {
-      "length": 3,
-      "start_surname": "MARCOS",
-      "end_surname": "ANGELO MARCOS BARBA",
+      "length": 5,
       "path": [
-        4162423,
+        70156,
+        4162401,
+        53227,
         53232,
         4162425
       ],
       "relationships": [
         "Starting person",
-        "BONGBONG MARCOS IS BROTHER OF IMEE MARCOS",
+        "Political connection - TINGOG party-list representative",
+        "FERDINAND MARCOS SR. IS THE FATHER OF FERDINAND MARCOS JR.",
+        "Mother-son relationship in the MARCOS political dynasty",
         "IMEE MARCOS is cousin of - ANGELO MARCOS BARBA (REPRESENTATIVE"
-      ],
-      "source_urls": [
-        "OCR:pd18.jpg"
       ]
     },
     {
       "length": 2,
-      "start_surname": "MARCOS",
-      "end_surname": "ANGELO MARCOS BARBA",
       "path": [
         53232,
         4162425
@@ -34,53 +31,38 @@
       "relationships": [
         "Starting person",
         "IMEE MARCOS is cousin of - ANGELO MARCOS BARBA (REPRESENTATIVE"
-      ],
-      "source_urls": [
-        "OCR:pd18.jpg"
       ]
     }
   ],
   "people": {
     "53232": {
       "id": 53232,
-      "first_name": "IMEE",
-      "middle_name": "REMEDIOS",
-      "last_name": "MARCOS",
-      "suffix": null,
       "full_name": "IMEE REMEDIOS MARCOS",
-      "canonical_name": "IMEE MARCOS",
       "position": "MEMBER, HOUSE OF REPRESENTATIVES",
-      "region": "REGION I",
-      "province": "ILOCOS NORTE",
-      "municipality_city": "",
       "location": "ILOCOS NORTE, REGION I"
     },
-    "4162423": {
-      "id": 4162423,
-      "first_name": "BONGBONG",
-      "middle_name": null,
-      "last_name": "MARCOS",
-      "suffix": null,
-      "full_name": "BONGBONG MARCOS",
-      "canonical_name": null,
-      "position": null,
-      "region": null,
-      "province": null,
-      "municipality_city": null,
-      "location": "Location unknown"
+    "53227": {
+      "id": 53227,
+      "full_name": "FERDINAND ROMUALDEZ MARCOS",
+      "position": "GOVERNOR",
+      "location": "ILOCOS NORTE, REGION I"
+    },
+    "70156": {
+      "id": 70156,
+      "full_name": "YEDDA MARIE K ROMUALDEZ",
+      "position": "PARTY-LIST REPRESENTATIVE",
+      "location": "LEYTE, REGION VIII"
+    },
+    "4162401": {
+      "id": 4162401,
+      "full_name": "FERDINAND EDRALIN MARCOS",
+      "position": "PRESIDENT",
+      "location": "NATIONAL, NATIONAL"
     },
     "4162425": {
       "id": 4162425,
-      "first_name": "-",
-      "middle_name": null,
-      "last_name": "ANGELO MARCOS BARBA",
-      "suffix": null,
       "full_name": "- ANGELO MARCOS BARBA",
-      "canonical_name": null,
       "position": "REPRESENTATIVE, ILOCOS NORTE",
-      "region": null,
-      "province": null,
-      "municipality_city": null,
       "location": "Location unknown"
     }
   }

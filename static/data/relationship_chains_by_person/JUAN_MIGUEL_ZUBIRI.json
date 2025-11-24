@@ -7,8 +7,6 @@
   "chains": [
     {
       "length": 2,
-      "start_surname": "Zubiri",
-      "end_surname": "ZUBIRI",
       "path": [
         4149676,
         86177
@@ -16,49 +14,10 @@
       "relationships": [
         "Starting person",
         "Jose Zubiri is the father of Juan Miguel Zubiri"
-      ],
-      "source_urls": [
-        "https://en.wikipedia.org/wiki/Juan_Miguel_Zubiri"
       ]
     },
     {
       "length": 2,
-      "start_surname": "ZUBIRI",
-      "end_surname": "Zubiri",
-      "path": [
-        86177,
-        4149676
-      ],
-      "relationships": [
-        "Starting person",
-        "Jose Zubiri is the father of Juan Miguel Zubiri"
-      ],
-      "source_urls": [
-        "https://en.wikipedia.org/wiki/Juan_Miguel_Zubiri"
-      ]
-    },
-    {
-      "length": 3,
-      "start_surname": "ZUBIRI",
-      "end_surname": "ACOSTA",
-      "path": [
-        86177,
-        4149676,
-        1798
-      ],
-      "relationships": [
-        "Starting person",
-        "Jose Zubiri is the father of Juan Miguel Zubiri",
-        " a senator"
-      ],
-      "source_urls": [
-        "https://en.wikipedia.org/wiki/Juan_Miguel_Zubiri"
-      ]
-    },
-    {
-      "length": 2,
-      "start_surname": "ACOSTA",
-      "end_surname": "Zubiri",
       "path": [
         1798,
         4149676
@@ -66,53 +25,50 @@
       "relationships": [
         "Starting person",
         "COUSINS IN ZUBIRI POLITICAL DYNASTY"
+      ]
+    },
+    {
+      "length": 3,
+      "path": [
+        1798,
+        4149676,
+        86177
       ],
-      "source_urls": [
-        "https://en.wikipedia.org/wiki/Juan_Miguel_Zubiri"
+      "relationships": [
+        "Starting person",
+        "COUSINS IN ZUBIRI POLITICAL DYNASTY",
+        "Jose Zubiri is the father of Juan Miguel Zubiri"
+      ]
+    },
+    {
+      "length": 2,
+      "path": [
+        86177,
+        4149676
+      ],
+      "relationships": [
+        "Starting person",
+        "Jose Zubiri is the father of Juan Miguel Zubiri"
       ]
     }
   ],
   "people": {
     "4149676": {
       "id": 4149676,
-      "first_name": "JUAN MIGUEL",
-      "middle_name": "",
-      "last_name": "Zubiri",
-      "suffix": "",
       "full_name": "JUAN MIGUEL Zubiri",
-      "canonical_name": "JUAN MIGUEL ZUBIRI",
       "position": "MEMBER, HOUSE OF REPRESENTATIVES",
-      "region": "REGION X",
-      "province": "BUKIDNON",
-      "municipality_city": "",
       "location": "BUKIDNON, REGION X"
     },
     "86177": {
       "id": 86177,
-      "first_name": "JOSE",
-      "middle_name": null,
-      "last_name": "ZUBIRI",
-      "suffix": null,
       "full_name": "JOSE ZUBIRI",
-      "canonical_name": "JOSE ZUBIRI",
       "position": "MEMBER, HOUSE OF REPRESENTATIVES",
-      "region": "REGION X",
-      "province": "BUKIDNON",
-      "municipality_city": "",
       "location": "BUKIDNON, REGION X"
     },
     "1798": {
       "id": 1798,
-      "first_name": "MARIA",
-      "middle_name": null,
-      "last_name": "ACOSTA",
-      "suffix": null,
       "full_name": "MARIA ACOSTA",
-      "canonical_name": "MARIA ACOSTA",
       "position": "COUNCILOR",
-      "region": "REGION XI",
-      "province": "DAVAO DEL SUR",
-      "municipality_city": "",
       "location": "DAVAO DEL SUR, REGION XI"
     }
   }

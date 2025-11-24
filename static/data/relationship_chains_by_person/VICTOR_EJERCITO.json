@@ -2,48 +2,56 @@
   "person": {
     "normalized_name": "VICTOR EJERCITO",
     "display_name": "VICTOR EJERCITO",
-    "chain_count": 8
+    "chain_count": 5
   },
   "chains": [
     {
       "length": 3,
-      "start_surname": "EJERCITO ESTRADA",
-      "end_surname": "EJERCITO",
       "path": [
+        4162405,
         4041412,
-        4144956,
         4041410
       ],
       "relationships": [
         "Starting person",
-        "JINGGOY ESTRADA IS THE SON OF FORMER PRESIDENT JOSEPH ESTRADA",
-        "JV EJERCITO IS THE SON OF FORMER PRESIDENT JOSEPH ESTRADA"
-      ],
-      "source_urls": [
-        "https://en.wikipedia.org/wiki/Jinggoy_Estrada",
-        "https://en.wikipedia.org/wiki/JV_Ejercito"
+        "JANELLA EJERCITO ESTRADA IS DAUGHTER OF JINGGOY EJERCITO ESTRADA",
+        "JV EJERCITO AND JINGGOY ESTRADA ARE HALF-BROTHERS"
       ]
     },
     {
-      "length": 2,
-      "start_surname": "EJERCITO",
-      "end_surname": "ESTRADA",
+      "length": 4,
       "path": [
+        4162405,
+        4041412,
         4041410,
         4144956
       ],
       "relationships": [
         "Starting person",
+        "JANELLA EJERCITO ESTRADA IS DAUGHTER OF JINGGOY EJERCITO ESTRADA",
+        "JV EJERCITO AND JINGGOY ESTRADA ARE HALF-BROTHERS",
         "JV EJERCITO IS THE SON OF FORMER PRESIDENT JOSEPH ESTRADA"
+      ]
+    },
+    {
+      "length": 5,
+      "path": [
+        4162405,
+        4041412,
+        4041410,
+        4144956,
+        32135
       ],
-      "source_urls": [
-        "https://en.wikipedia.org/wiki/JV_Ejercito"
+      "relationships": [
+        "Starting person",
+        "JANELLA EJERCITO ESTRADA IS DAUGHTER OF JINGGOY EJERCITO ESTRADA",
+        "JV EJERCITO AND JINGGOY ESTRADA ARE HALF-BROTHERS",
+        "JV EJERCITO IS THE SON OF FORMER PRESIDENT JOSEPH ESTRADA",
+        "JOSEPH EJERCITO IS THE SON OF FORMER PRESIDENT JOSEPH ESTRADA"
       ]
     },
     {
       "length": 2,
-      "start_surname": "EJERCITO",
-      "end_surname": "EJERCITO ESTRADA",
       "path": [
         4041410,
         4041412
@@ -51,194 +59,50 @@
       "relationships": [
         "Starting person",
         "JV EJERCITO AND JINGGOY ESTRADA ARE HALF-BROTHERS"
-      ],
-      "source_urls": [
-        "https://en.wikipedia.org/wiki/JV_Ejercito"
       ]
     },
     {
-      "length": 3,
-      "start_surname": "EJERCITO",
-      "end_surname": "ESTRADA",
+      "length": 2,
       "path": [
         4041410,
-        4041412,
         4144956
       ],
       "relationships": [
         "Starting person",
-        "JV EJERCITO AND JINGGOY ESTRADA ARE HALF-BROTHERS",
-        "JINGGOY ESTRADA IS THE SON OF FORMER PRESIDENT JOSEPH ESTRADA"
-      ],
-      "source_urls": [
-        "https://en.wikipedia.org/wiki/JV_Ejercito",
-        "https://en.wikipedia.org/wiki/Jinggoy_Estrada"
-      ]
-    },
-    {
-      "length": 3,
-      "start_surname": "EJERCITO",
-      "end_surname": "EJERCITO ESTRADA",
-      "path": [
-        4041410,
-        4041412,
-        4162405
-      ],
-      "relationships": [
-        "Starting person",
-        "JV EJERCITO AND JINGGOY ESTRADA ARE HALF-BROTHERS",
-        "JINGGOY EJERCITO ESTRADA IS DAUGHTER OF JANELLA EJERCITO ESTRADA (UNDERSECRETARY"
-      ],
-      "source_urls": [
-        "https://en.wikipedia.org/wiki/JV_Ejercito",
-        "OCR:pd10.jpg"
-      ]
-    },
-    {
-      "length": 3,
-      "start_surname": "EJERCITO",
-      "end_surname": "EJERCITO",
-      "path": [
-        4041410,
-        4041412,
-        4162406
-      ],
-      "relationships": [
-        "Starting person",
-        "JV EJERCITO AND JINGGOY ESTRADA ARE HALF-BROTHERS",
-        "JINGGOY EJERCITO ESTRADA IS BROTHER OF JV EJERCITO (SENATOR OF THE PHILIPPINES)"
-      ],
-      "source_urls": [
-        "https://en.wikipedia.org/wiki/JV_Ejercito",
-        "OCR:pd10.jpg"
-      ]
-    },
-    {
-      "length": 4,
-      "start_surname": "EJERCITO",
-      "end_surname": "EJERCITO",
-      "path": [
-        4041410,
-        4041412,
-        4162406,
-        4162407
-      ],
-      "relationships": [
-        "Starting person",
-        "JV EJERCITO AND JINGGOY ESTRADA ARE HALF-BROTHERS",
-        "JINGGOY EJERCITO ESTRADA IS BROTHER OF JV EJERCITO (SENATOR OF THE PHILIPPINES)",
-        "JV EJERCITO IS COUSIN OF ER EJERCITO (MAYOR OF PAGSANJAN"
-      ],
-      "source_urls": [
-        "https://en.wikipedia.org/wiki/JV_Ejercito",
-        "OCR:pd10.jpg",
-        "OCR:pd8.jpg"
-      ]
-    },
-    {
-      "length": 3,
-      "start_surname": "EJERCITO",
-      "end_surname": "EJERCITO",
-      "path": [
-        4041410,
-        4041412,
-        4162407
-      ],
-      "relationships": [
-        "Starting person",
-        "JV EJERCITO AND JINGGOY ESTRADA ARE HALF-BROTHERS",
-        "JINGGOY EJERCITO ESTRADA IS COUSIN OF ER EJERCITO (MAYOR OF PAGSANJAN"
-      ],
-      "source_urls": [
-        "https://en.wikipedia.org/wiki/JV_Ejercito",
-        "OCR:pd10.jpg"
+        "JV EJERCITO IS THE SON OF FORMER PRESIDENT JOSEPH ESTRADA"
       ]
     }
   ],
   "people": {
+    "4162405": {
+      "id": 4162405,
+      "full_name": "JANELLA EJERCITO ESTRADA",
+      "position": "UNDERSECRETARY, DSWD",
+      "location": "Location unknown"
+    },
     "4041412": {
       "id": 4041412,
-      "first_name": "JINGGOY",
-      "middle_name": null,
-      "last_name": "EJERCITO ESTRADA",
-      "suffix": null,
       "full_name": "JINGGOY EJERCITO ESTRADA",
-      "canonical_name": "JINGGOY EJERCITO ESTRADA",
       "position": "SENATOR",
-      "region": "NCR",
-      "province": "Metro Manila",
-      "municipality_city": "Manila",
+      "location": "Manila, Metro Manila, NCR"
+    },
+    "4041410": {
+      "id": 4041410,
+      "full_name": "VICTOR EJERCITO",
+      "position": "SENATOR",
       "location": "Manila, Metro Manila, NCR"
     },
     "4144956": {
       "id": 4144956,
-      "first_name": "JOSEPH",
-      "middle_name": null,
-      "last_name": "ESTRADA",
-      "suffix": null,
       "full_name": "JOSEPH ESTRADA",
-      "canonical_name": "JOSEPH ESTRADA",
       "position": null,
-      "region": null,
-      "province": null,
-      "municipality_city": null,
       "location": "Location unknown"
     },
-    "4041410": {
-      "id": 4041410,
-      "first_name": "VICTOR",
-      "middle_name": null,
-      "last_name": "EJERCITO",
-      "suffix": null,
-      "full_name": "VICTOR EJERCITO",
-      "canonical_name": "VICTOR EJERCITO",
-      "position": "SENATOR",
-      "region": "NCR",
-      "province": "Metro Manila",
-      "municipality_city": "Manila",
-      "location": "Manila, Metro Manila, NCR"
-    },
-    "4162405": {
-      "id": 4162405,
-      "first_name": "JANELLA",
-      "middle_name": null,
-      "last_name": "EJERCITO ESTRADA",
-      "suffix": null,
-      "full_name": "JANELLA EJERCITO ESTRADA",
-      "canonical_name": null,
-      "position": "UNDERSECRETARY, DSWD",
-      "region": null,
-      "province": null,
-      "municipality_city": null,
-      "location": "Location unknown"
-    },
-    "4162406": {
-      "id": 4162406,
-      "first_name": "JV",
-      "middle_name": null,
-      "last_name": "EJERCITO",
-      "suffix": null,
-      "full_name": "JV EJERCITO",
-      "canonical_name": null,
-      "position": "SENATOR OF THE PHILIPPINES",
-      "region": null,
-      "province": null,
-      "municipality_city": null,
-      "location": "Location unknown"
-    },
-    "4162407": {
-      "id": 4162407,
-      "first_name": "ER",
-      "middle_name": null,
-      "last_name": "EJERCITO",
-      "suffix": null,
-      "full_name": "ER EJERCITO",
-      "canonical_name": null,
-      "position": "MAYOR OF PAGSANJAN, LAGUNA",
-      "region": null,
-      "province": null,
-      "municipality_city": null,
-      "location": "Location unknown"
+    "32135": {
+      "id": 32135,
+      "full_name": "JOSEPH Ejercito",
+      "position": "MAYOR",
+      "location": "NCR, CITY OF MANILA, FIRST DISTRICT, NATIONAL CAPITAL REGION"
     }
   }
 }

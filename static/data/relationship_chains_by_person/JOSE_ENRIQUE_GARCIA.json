@@ -1,0 +1,53 @@
+{
+  "person": {
+    "normalized_name": "JOSE ENRIQUE GARCIA",
+    "display_name": "Jose Enrique Garcia",
+    "chain_count": 2
+  },
+  "chains": [
+    {
+      "length": 3,
+      "path": [
+        78671,
+        3745717,
+        4148631
+      ],
+      "relationships": [
+        "Starting person",
+        "JOHN CARLO DELA ROSA is nephew of BATO DELA ROSA",
+        "BATO DELA ROSA is brother of JOSE ERWIN GARCIA (SUPERVISING LEGISLATIVE STAFF OFFICER"
+      ]
+    },
+    {
+      "length": 2,
+      "path": [
+        3745717,
+        4148631
+      ],
+      "relationships": [
+        "Starting person",
+        "BATO DELA ROSA is brother of JOSE ERWIN GARCIA (SUPERVISING LEGISLATIVE STAFF OFFICER"
+      ]
+    }
+  ],
+  "people": {
+    "78671": {
+      "id": 78671,
+      "full_name": "JOHN TARROSA",
+      "position": "MAYOR",
+      "location": "ZARRAGA, ILOILO, REGION VI"
+    },
+    "3745717": {
+      "id": 3745717,
+      "full_name": "BATO DELA ROSA",
+      "position": "SENATOR",
+      "location": "M'LANG, COTABATO, REGION XII"
+    },
+    "4148631": {
+      "id": 4148631,
+      "full_name": "Jose Enrique Garcia",
+      "position": "MEMBER, HOUSE OF REPRESENTATIVES",
+      "location": "BATAAN, REGION III"
+    }
+  }
+}
