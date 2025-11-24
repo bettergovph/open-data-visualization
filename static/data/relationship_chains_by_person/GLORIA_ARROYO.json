@@ -2,67 +2,11 @@
   "person": {
     "normalized_name": "GLORIA ARROYO",
     "display_name": "Gloria Arroyo",
-    "chain_count": 7
+    "chain_count": 8
   },
   "chains": [
     {
       "length": 2,
-      "start_surname": "ARROYO",
-      "end_surname": "Arroyo",
-      "path": [
-        8298,
-        8302
-      ],
-      "relationships": [
-        "Starting person",
-        "Gloria Arroyo is the mother of Diosdado Arroyo"
-      ],
-      "source_urls": [
-        "https://en.wikipedia.org/wiki/Gloria_Macapagal_Arroyo"
-      ]
-    },
-    {
-      "length": 3,
-      "start_surname": "ARROYO",
-      "end_surname": "MACAPAGAL",
-      "path": [
-        8298,
-        8302,
-        4145000
-      ],
-      "relationships": [
-        "Starting person",
-        "Gloria Arroyo is the mother of Diosdado Arroyo",
-        "GLORIA ARROYO IS THE DAUGHTER OF FORMER PRESIDENT DIOSDADO MACAPAGAL"
-      ],
-      "source_urls": [
-        "https://en.wikipedia.org/wiki/Gloria_Macapagal_Arroyo"
-      ]
-    },
-    {
-      "length": 4,
-      "start_surname": "ARROYO",
-      "end_surname": "Macapagal",
-      "path": [
-        8298,
-        8302,
-        4145000,
-        50154
-      ],
-      "relationships": [
-        "Starting person",
-        "Gloria Arroyo is the mother of Diosdado Arroyo",
-        "GLORIA ARROYO IS THE DAUGHTER OF FORMER PRESIDENT DIOSDADO MACAPAGAL",
-        "GLORIA MACAPAGAL IS THE DAUGHTER OF DIOSDADO MACAPAGAL"
-      ],
-      "source_urls": [
-        "https://en.wikipedia.org/wiki/Gloria_Macapagal_Arroyo"
-      ]
-    },
-    {
-      "length": 2,
-      "start_surname": "Arroyo",
-      "end_surname": "ARROYO",
       "path": [
         8302,
         4144999
@@ -70,47 +14,53 @@
       "relationships": [
         "Starting person",
         "GLORIA ARROYO IS MARRIED TO JOSE MIGUEL ARROYO"
-      ],
-      "source_urls": [
-        "https://en.wikipedia.org/wiki/Gloria_Macapagal_Arroyo"
       ]
     },
     {
-      "length": 2,
-      "start_surname": "ARROYO",
-      "end_surname": "Arroyo",
+      "length": 3,
       "path": [
-        4144999,
+        50154,
+        4145000,
         8302
       ],
       "relationships": [
         "Starting person",
-        "GLORIA ARROYO IS MARRIED TO JOSE MIGUEL ARROYO"
-      ],
-      "source_urls": [
-        "https://en.wikipedia.org/wiki/Gloria_Macapagal_Arroyo"
+        "GLORIA MACAPAGAL IS THE DAUGHTER OF DIOSDADO MACAPAGAL",
+        " BOTH PART OF THE MACAPAGAL POLITICAL DYNASTY"
       ]
     },
     {
-      "length": 2,
-      "start_surname": "Arroyo",
-      "end_surname": "ARROYO",
+      "length": 4,
       "path": [
+        50154,
+        4145000,
         8302,
         8298
       ],
       "relationships": [
         "Starting person",
-        "GLORIA ARROYO IS THE MOTHER OF DIOSDADO ARROYO"
+        "GLORIA MACAPAGAL IS THE DAUGHTER OF DIOSDADO MACAPAGAL",
+        " BOTH PART OF THE MACAPAGAL POLITICAL DYNASTY",
+        "GLORIA ARROYO IS THE DAUGHTER OF FORMER PRESIDENT DIOSDADO MACAPAGAL"
+      ]
+    },
+    {
+      "length": 4,
+      "path": [
+        50154,
+        4145000,
+        8302,
+        4144999
       ],
-      "source_urls": [
-        "https://en.wikipedia.org/wiki/Gloria_Macapagal_Arroyo"
+      "relationships": [
+        "Starting person",
+        "GLORIA MACAPAGAL IS THE DAUGHTER OF DIOSDADO MACAPAGAL",
+        " BOTH PART OF THE MACAPAGAL POLITICAL DYNASTY",
+        "GLORIA ARROYO IS THE DAUGHTER OF FORMER PRESIDENT DIOSDADO MACAPAGAL"
       ]
     },
     {
       "length": 2,
-      "start_surname": "Arroyo",
-      "end_surname": "MACAPAGAL",
       "path": [
         8302,
         4145000
@@ -118,82 +68,72 @@
       "relationships": [
         "Starting person",
         "GLORIA ARROYO IS THE DAUGHTER OF FORMER PRESIDENT DIOSDADO MACAPAGAL"
+      ]
+    },
+    {
+      "length": 2,
+      "path": [
+        8302,
+        8298
       ],
-      "source_urls": [
-        "https://en.wikipedia.org/wiki/Gloria_Macapagal_Arroyo"
+      "relationships": [
+        "Starting person",
+        "GLORIA ARROYO IS THE MOTHER OF DIOSDADO ARROYO"
+      ]
+    },
+    {
+      "length": 2,
+      "path": [
+        8298,
+        8302
+      ],
+      "relationships": [
+        "Starting person",
+        "Gloria Arroyo is the mother of Diosdado Arroyo"
+      ]
+    },
+    {
+      "length": 2,
+      "path": [
+        4144999,
+        8302
+      ],
+      "relationships": [
+        "Starting person",
+        "GLORIA ARROYO IS MARRIED TO JOSE MIGUEL ARROYO"
       ]
     }
   ],
   "people": {
-    "8298": {
-      "id": 8298,
-      "first_name": "DIOSDADO",
-      "middle_name": null,
-      "last_name": "ARROYO",
-      "suffix": null,
-      "full_name": "DIOSDADO ARROYO",
-      "canonical_name": "DIOSDADO ARROYO",
-      "position": "MEMBER, HOUSE OF REPRESENTATIVES",
-      "region": "REGION V",
-      "province": "CAMARINES SUR",
-      "municipality_city": "",
-      "location": "CAMARINES SUR, REGION V"
-    },
     "8302": {
       "id": 8302,
-      "first_name": "Gloria",
-      "middle_name": null,
-      "last_name": "Arroyo",
-      "suffix": null,
       "full_name": "Gloria Arroyo",
-      "canonical_name": "GLORIA ARROYO",
       "position": "MEMBER, HOUSE OF REPRESENTATIVES",
-      "region": "REGION III",
-      "province": "PAMPANGA",
-      "municipality_city": "",
-      "location": "PAMPANGA, REGION III"
-    },
-    "4145000": {
-      "id": 4145000,
-      "first_name": "DIOSDADO",
-      "middle_name": null,
-      "last_name": "MACAPAGAL",
-      "suffix": null,
-      "full_name": "DIOSDADO MACAPAGAL",
-      "canonical_name": "DIOSDADO MACAPAGAL",
-      "position": null,
-      "region": null,
-      "province": null,
-      "municipality_city": null,
-      "location": "Location unknown"
-    },
-    "50154": {
-      "id": 50154,
-      "first_name": "Gloria",
-      "middle_name": null,
-      "last_name": "Macapagal",
-      "suffix": null,
-      "full_name": "Gloria Macapagal",
-      "canonical_name": "GLORIA MACAPAGAL",
-      "position": "MEMBER, HOUSE OF REPRESENTATIVES",
-      "region": "REGION III",
-      "province": "PAMPANGA",
-      "municipality_city": "",
       "location": "PAMPANGA, REGION III"
     },
     "4144999": {
       "id": 4144999,
-      "first_name": "JOSE MIGUEL",
-      "middle_name": "MIGUEL",
-      "last_name": "ARROYO",
-      "suffix": null,
       "full_name": "JOSE MIGUEL MIGUEL ARROYO",
-      "canonical_name": "JOSE ARROYO",
       "position": null,
-      "region": null,
-      "province": null,
-      "municipality_city": null,
       "location": "Location unknown"
+    },
+    "50154": {
+      "id": 50154,
+      "full_name": "Gloria Macapagal",
+      "position": "MEMBER, HOUSE OF REPRESENTATIVES",
+      "location": "PAMPANGA, REGION III"
+    },
+    "4145000": {
+      "id": 4145000,
+      "full_name": "DIOSDADO MACAPAGAL",
+      "position": null,
+      "location": "Location unknown"
+    },
+    "8298": {
+      "id": 8298,
+      "full_name": "DIOSDADO ARROYO",
+      "position": "MEMBER, HOUSE OF REPRESENTATIVES",
+      "location": "CAMARINES SUR, REGION V"
     }
   }
 }

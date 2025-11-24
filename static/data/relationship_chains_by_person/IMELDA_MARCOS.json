@@ -2,29 +2,11 @@
   "person": {
     "normalized_name": "IMELDA MARCOS",
     "display_name": "IMELDA MARCOS",
-    "chain_count": 2
+    "chain_count": 3
   },
   "chains": [
     {
       "length": 2,
-      "start_surname": "MARCOS",
-      "end_surname": "MARCOS",
-      "path": [
-        4145019,
-        53227
-      ],
-      "relationships": [
-        "Starting person",
-        "FERDINAND MARCOS IS THE FATHER OF IMEE MARCOS"
-      ],
-      "source_urls": [
-        "https://www.britannica.com/biography/Ferdinand-Marcos"
-      ]
-    },
-    {
-      "length": 2,
-      "start_surname": "MARCOS",
-      "end_surname": "MARCOS",
       "path": [
         53227,
         4145019
@@ -32,40 +14,59 @@
       "relationships": [
         "Starting person",
         "Ferdinand Marcos is the father of Imee Marcos"
+      ]
+    },
+    {
+      "length": 4,
+      "path": [
+        70156,
+        4162401,
+        53227,
+        4145019
       ],
-      "source_urls": [
-        "https://www.britannica.com/biography/Ferdinand-Marcos"
+      "relationships": [
+        "Starting person",
+        "Political connection - TINGOG party-list representative",
+        "FERDINAND MARCOS SR. IS THE FATHER OF FERDINAND MARCOS JR.",
+        "Ferdinand Marcos Jr. and Imee Marcos are siblings"
+      ]
+    },
+    {
+      "length": 2,
+      "path": [
+        4145019,
+        53227
+      ],
+      "relationships": [
+        "Starting person",
+        "FERDINAND MARCOS IS THE FATHER OF IMEE MARCOS"
       ]
     }
   ],
   "people": {
     "53227": {
       "id": 53227,
-      "first_name": "FERDINAND",
-      "middle_name": "ROMUALDEZ",
-      "last_name": "MARCOS",
-      "suffix": "JR.",
-      "full_name": "FERDINAND ROMUALDEZ MARCOS JR.",
-      "canonical_name": "FERDINAND MARCOS JR.",
+      "full_name": "FERDINAND ROMUALDEZ MARCOS",
       "position": "GOVERNOR",
-      "region": "REGION I",
-      "province": "ILOCOS NORTE",
-      "municipality_city": "",
       "location": "ILOCOS NORTE, REGION I"
     },
     "4145019": {
       "id": 4145019,
-      "first_name": "IMELDA",
-      "middle_name": "REMEDIOS",
-      "last_name": "MARCOS",
-      "suffix": null,
       "full_name": "IMELDA REMEDIOS MARCOS",
-      "canonical_name": "IMELDA MARCOS",
       "position": null,
-      "region": null,
-      "province": null,
-      "municipality_city": null,
       "location": "Location unknown"
+    },
+    "70156": {
+      "id": 70156,
+      "full_name": "YEDDA MARIE K ROMUALDEZ",
+      "position": "PARTY-LIST REPRESENTATIVE",
+      "location": "LEYTE, REGION VIII"
+    },
+    "4162401": {
+      "id": 4162401,
+      "full_name": "FERDINAND EDRALIN MARCOS",
+      "position": "PRESIDENT",
+      "location": "NATIONAL, NATIONAL"
     }
   }
 }

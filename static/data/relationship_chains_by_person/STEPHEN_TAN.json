@@ -2,87 +2,11 @@
   "person": {
     "normalized_name": "STEPHEN TAN",
     "display_name": "STEPHEN TAN",
-    "chain_count": 8
+    "chain_count": 9
   },
   "chains": [
     {
-      "length": 3,
-      "start_surname": "Tan",
-      "end_surname": "TAN",
-      "path": [
-        78160,
-        82012,
-        78075
-      ],
-      "relationships": [
-        "Starting person",
-        "DAUGHTER OF COEFREDO UY",
-        "Father-in-law of Stephen James Tan"
-      ],
-      "source_urls": []
-    },
-    {
       "length": 2,
-      "start_surname": "TAN",
-      "end_surname": "Uy",
-      "path": [
-        78075,
-        82012
-      ],
-      "relationships": [
-        "Starting person",
-        "SON-IN-LAW OF COEFREDO UY"
-      ],
-      "source_urls": []
-    },
-    {
-      "length": 2,
-      "start_surname": "TAN",
-      "end_surname": "Tan",
-      "path": [
-        78075,
-        78160
-      ],
-      "relationships": [
-        "Starting person",
-        "HUSBAND OF STEPHANY TAN"
-      ],
-      "source_urls": []
-    },
-    {
-      "length": 3,
-      "start_surname": "TAN",
-      "end_surname": "Uy",
-      "path": [
-        78075,
-        78160,
-        82012
-      ],
-      "relationships": [
-        "Starting person",
-        "HUSBAND OF STEPHANY TAN",
-        "Son/Daughter of COEFREDO UY"
-      ],
-      "source_urls": []
-    },
-    {
-      "length": 2,
-      "start_surname": "Tan",
-      "end_surname": "TAN",
-      "path": [
-        78160,
-        78075
-      ],
-      "relationships": [
-        "Starting person",
-        "WIFE OF STEPHEN JAMES TAN"
-      ],
-      "source_urls": []
-    },
-    {
-      "length": 2,
-      "start_surname": "TAN",
-      "end_surname": "TAN",
       "path": [
         78075,
         77980
@@ -90,31 +14,10 @@
       "relationships": [
         "Starting person",
         "Siblings"
-      ],
-      "source_urls": [
-        "https://newsinfo.inquirer.net/1595755/tan-family-dominates-2022-polls-in-samar"
       ]
     },
     {
       "length": 2,
-      "start_surname": "TAN",
-      "end_surname": "TAN",
-      "path": [
-        77980,
-        78075
-      ],
-      "relationships": [
-        "Starting person",
-        "SHAREE ANN TAN is brother of STEPHEN JAMES TAN"
-      ],
-      "source_urls": [
-        "https://newsinfo.inquirer.net/1595755/tan-family-dominates-2022-polls-in-samar"
-      ]
-    },
-    {
-      "length": 2,
-      "start_surname": "TAN",
-      "end_surname": "TAN",
       "path": [
         78220,
         78075
@@ -122,82 +25,124 @@
       "relationships": [
         "Starting person",
         "FATHER-SON RELATIONSHIP"
+      ]
+    },
+    {
+      "length": 3,
+      "path": [
+        78220,
+        78075,
+        78160
       ],
-      "source_urls": [
-        "https://newsinfo.inquirer.net/1595755/tan-family-dominates-2022-polls-in-samar"
+      "relationships": [
+        "Starting person",
+        "FATHER-SON RELATIONSHIP",
+        " REYNALDO IS FORMER GOVERNOR OF SAMAR"
+      ]
+    },
+    {
+      "length": 4,
+      "path": [
+        78220,
+        78075,
+        78160,
+        82012
+      ],
+      "relationships": [
+        "Starting person",
+        "FATHER-SON RELATIONSHIP",
+        " REYNALDO IS FORMER GOVERNOR OF SAMAR",
+        " STEPHEN IS 1ST DISTRICT REP"
+      ]
+    },
+    {
+      "length": 3,
+      "path": [
+        78220,
+        78075,
+        82012
+      ],
+      "relationships": [
+        "Starting person",
+        "FATHER-SON RELATIONSHIP",
+        " REYNALDO IS FORMER GOVERNOR OF SAMAR"
+      ]
+    },
+    {
+      "length": 2,
+      "path": [
+        78075,
+        78160
+      ],
+      "relationships": [
+        "Starting person",
+        "HUSBAND OF STEPHANY TAN"
+      ]
+    },
+    {
+      "length": 2,
+      "path": [
+        78160,
+        78075
+      ],
+      "relationships": [
+        "Starting person",
+        "WIFE OF STEPHEN JAMES TAN"
+      ]
+    },
+    {
+      "length": 2,
+      "path": [
+        77980,
+        78075
+      ],
+      "relationships": [
+        "Starting person",
+        "SHAREE ANN TAN is brother of STEPHEN JAMES TAN"
+      ]
+    },
+    {
+      "length": 2,
+      "path": [
+        78075,
+        82012
+      ],
+      "relationships": [
+        "Starting person",
+        "SON-IN-LAW OF COEFREDO UY"
       ]
     }
   ],
   "people": {
-    "78160": {
-      "id": 78160,
-      "first_name": "Stephany",
-      "middle_name": null,
-      "last_name": "Tan",
-      "suffix": null,
-      "full_name": "Stephany Tan",
-      "canonical_name": "STEPHANY TAN",
-      "position": "MAYOR",
-      "region": "REGION VIII",
-      "province": "SAMAR",
-      "municipality_city": "",
-      "location": "SAMAR, REGION VIII"
-    },
-    "82012": {
-      "id": 82012,
-      "first_name": "Coefredo",
-      "middle_name": null,
-      "last_name": "Uy",
-      "suffix": null,
-      "full_name": "Coefredo Uy",
-      "canonical_name": "COEFREDO UY",
-      "position": "MAYOR",
-      "region": "REGION VIII",
-      "province": "SAMAR",
-      "municipality_city": "CATBALOGAN CITY",
-      "location": "CATBALOGAN CITY, SAMAR, REGION VIII"
-    },
     "78075": {
       "id": 78075,
-      "first_name": "STEPHEN",
-      "middle_name": null,
-      "last_name": "TAN",
-      "suffix": null,
       "full_name": "STEPHEN TAN",
-      "canonical_name": "STEPHEN TAN",
-      "position": "GOVERNOR",
-      "region": "REGION VIII",
-      "province": "SAMAR",
-      "municipality_city": "",
+      "position": "Member, House of Representatives (Samar–1st District)",
       "location": "SAMAR, REGION VIII"
     },
     "77980": {
       "id": 77980,
-      "first_name": "SHAREE",
-      "middle_name": null,
-      "last_name": "TAN",
-      "suffix": null,
       "full_name": "SHAREE TAN",
-      "canonical_name": "SHAREE TAN",
       "position": "MEMBER, HOUSE OF REPRESENTATIVES",
-      "region": "REGION VIII",
-      "province": "SAMAR",
-      "municipality_city": "",
       "location": "SAMAR, REGION VIII"
     },
     "78220": {
       "id": 78220,
-      "first_name": "MARTIN",
-      "middle_name": null,
-      "last_name": "TAN",
-      "suffix": null,
       "full_name": "MARTIN TAN",
-      "canonical_name": "MARTIN TAN",
-      "position": "COUNCILOR",
-      "region": "REGION VI",
-      "province": "NEGROS OCCIDENTAL",
-      "municipality_city": "ISABELA",
+      "position": null,
       "location": "ISABELA, NEGROS OCCIDENTAL, REGION VI"
+    },
+    "78160": {
+      "id": 78160,
+      "full_name": "Stephany Tan",
+      "position": "MAYOR",
+      "location": "SAMAR, REGION VIII"
+    },
+    "82012": {
+      "id": 82012,
+      "full_name": "Coefredo Uy",
+      "position": "MAYOR",
+      "location": "CATBALOGAN CITY, SAMAR, REGION VIII"
     }
   }
 }

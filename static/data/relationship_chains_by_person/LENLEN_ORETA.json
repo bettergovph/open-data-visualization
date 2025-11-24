@@ -7,8 +7,6 @@
   "chains": [
     {
       "length": 3,
-      "start_surname": "AQUINO",
-      "end_surname": "ORETA",
       "path": [
         4041683,
         3745665,
@@ -18,16 +16,10 @@
         "Starting person",
         "BAM AQUINO IS THE GRANDSON OF CORAZON AQUINO",
         " FORMER PRESIDENT OF THE PHILIPPINES"
-      ],
-      "source_urls": [
-        "https://en.wikipedia.org/wiki/Paolo_Benigno_Aquino_IV",
-        "OCR:pd4.jpg"
       ]
     },
     {
       "length": 2,
-      "start_surname": "AQUINO",
-      "end_surname": "ORETA",
       "path": [
         3745665,
         4162443
@@ -35,53 +27,26 @@
       "relationships": [
         "Starting person",
         "BAM AQUINO is cousin of LENLEN ORETA (REPRESENTATIVE"
-      ],
-      "source_urls": [
-        "OCR:pd4.jpg"
       ]
     }
   ],
   "people": {
-    "3745665": {
-      "id": 3745665,
-      "first_name": "BAM",
-      "middle_name": null,
-      "last_name": "AQUINO",
-      "suffix": null,
-      "full_name": "BAM AQUINO",
-      "canonical_name": "BAM AQUINO",
-      "position": "SENATOR",
-      "region": "REGION XII",
-      "province": "COTABATO",
-      "municipality_city": "M'LANG",
-      "location": "M'LANG, COTABATO, REGION XII"
-    },
     "4041683": {
       "id": 4041683,
-      "first_name": "CORAZON",
-      "middle_name": null,
-      "last_name": "AQUINO",
-      "suffix": null,
       "full_name": "CORAZON AQUINO",
-      "canonical_name": "CORAZON AQUINO",
       "position": null,
-      "region": null,
-      "province": null,
-      "municipality_city": null,
       "location": "Location unknown"
+    },
+    "3745665": {
+      "id": 3745665,
+      "full_name": "BAM AQUINO",
+      "position": "SENATOR",
+      "location": "M'LANG, COTABATO, REGION XII"
     },
     "4162443": {
       "id": 4162443,
-      "first_name": "LENLEN",
-      "middle_name": null,
-      "last_name": "ORETA",
-      "suffix": null,
       "full_name": "LENLEN ORETA",
-      "canonical_name": null,
       "position": "REPRESENTATIVE, MALABON CITY",
-      "region": null,
-      "province": null,
-      "municipality_city": null,
       "location": "Location unknown"
     }
   }

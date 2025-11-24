@@ -2,13 +2,11 @@
   "person": {
     "normalized_name": "JOSE MIGUEL ARROYO",
     "display_name": "JOSE MIGUEL ARROYO",
-    "chain_count": 2
+    "chain_count": 3
   },
   "chains": [
     {
       "length": 2,
-      "start_surname": "Arroyo",
-      "end_surname": "ARROYO",
       "path": [
         8302,
         4144999
@@ -16,15 +14,25 @@
       "relationships": [
         "Starting person",
         "GLORIA ARROYO IS MARRIED TO JOSE MIGUEL ARROYO"
+      ]
+    },
+    {
+      "length": 4,
+      "path": [
+        50154,
+        4145000,
+        8302,
+        4144999
       ],
-      "source_urls": [
-        "https://en.wikipedia.org/wiki/Gloria_Macapagal_Arroyo"
+      "relationships": [
+        "Starting person",
+        "GLORIA MACAPAGAL IS THE DAUGHTER OF DIOSDADO MACAPAGAL",
+        " BOTH PART OF THE MACAPAGAL POLITICAL DYNASTY",
+        "GLORIA ARROYO IS THE DAUGHTER OF FORMER PRESIDENT DIOSDADO MACAPAGAL"
       ]
     },
     {
       "length": 2,
-      "start_surname": "ARROYO",
-      "end_surname": "Arroyo",
       "path": [
         4144999,
         8302
@@ -32,39 +40,32 @@
       "relationships": [
         "Starting person",
         "GLORIA ARROYO IS MARRIED TO JOSE MIGUEL ARROYO"
-      ],
-      "source_urls": [
-        "https://en.wikipedia.org/wiki/Gloria_Macapagal_Arroyo"
       ]
     }
   ],
   "people": {
     "8302": {
       "id": 8302,
-      "first_name": "Gloria",
-      "middle_name": null,
-      "last_name": "Arroyo",
-      "suffix": null,
       "full_name": "Gloria Arroyo",
-      "canonical_name": "GLORIA ARROYO",
       "position": "MEMBER, HOUSE OF REPRESENTATIVES",
-      "region": "REGION III",
-      "province": "PAMPANGA",
-      "municipality_city": "",
       "location": "PAMPANGA, REGION III"
     },
     "4144999": {
       "id": 4144999,
-      "first_name": "JOSE MIGUEL",
-      "middle_name": "MIGUEL",
-      "last_name": "ARROYO",
-      "suffix": null,
       "full_name": "JOSE MIGUEL MIGUEL ARROYO",
-      "canonical_name": "JOSE ARROYO",
       "position": null,
-      "region": null,
-      "province": null,
-      "municipality_city": null,
+      "location": "Location unknown"
+    },
+    "50154": {
+      "id": 50154,
+      "full_name": "Gloria Macapagal",
+      "position": "MEMBER, HOUSE OF REPRESENTATIVES",
+      "location": "PAMPANGA, REGION III"
+    },
+    "4145000": {
+      "id": 4145000,
+      "full_name": "DIOSDADO MACAPAGAL",
+      "position": null,
       "location": "Location unknown"
     }
   }

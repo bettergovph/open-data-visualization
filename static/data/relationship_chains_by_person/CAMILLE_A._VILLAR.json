@@ -6,170 +6,120 @@
   },
   "chains": [
     {
-      "length": 5,
-      "start_surname": "Villar",
-      "end_surname": "VILLAR",
+      "length": 8,
       "path": [
-        84197,
-        4052650,
+        2799,
         3745651,
+        4052633,
+        4041425,
+        4052650,
+        84197,
         4041424
       ],
       "relationships": [
         "Starting person",
-        "Mark Villar is the son of Senator Cynthia Villar",
-        "CAMILLE VILLAR IS THE DAUGHTER OF SENATOR CYNTHIA VILLAR",
-        "Connected via I&E CONSTRUCTION CORPORATION"
-      ],
-      "source_urls": [
-        "https://en.wikipedia.org/wiki/Mark_Villar",
-        "https://www.camillevillar.com/about/"
+        "IMELDA AGUILAR is nephew of CAMILLE VILLAR",
+        "Camille Villar is the daughter of former Senate President Manny Villar",
+        "MARK VILLAR IS THE SON OF FORMER SENATE PRESIDENT MANNY VILLAR",
+        "MARK VILLAR IS THE SON OF SENATOR CYNTHIA VILLAR",
+        "MARK VILLAR IS THE SON OF SENATOR CYNTHIA VILLAR",
+        "Connected via OMNICON BUILDERS"
       ],
       "contractor_connection": {
-        "contractor_name": "I&E CONSTRUCTION CORPORATION",
-        "relationship_type": "Business/Contractor Connection",
-        "start_company_role": "Positions: Senators Mark and Camille Villar | Connections: The owner, Christian Aguilar, is the uncle of Senators Mark and Camille Villar, or Cynthia Villar's brother. Christian's son Carlo, who is a part owner, lost as Las Pinas mayor in 2026; The owner, Christian Aguilar, is the uncle of Senators Mark and Camille Villar, or Cynthia Villar's brother. Christian's son Carlo, who is a part owner, lost as Las Pinas mayor in 2028",
-        "end_company_role": null
+        "contractor_name": "OMNICON BUILDERS",
+        "start_company_role": null,
+        "end_company_role": null,
+        "start_position": "MAYOR",
+        "end_position": "SENATOR"
       }
     },
     {
       "length": 6,
-      "start_surname": "Villar",
-      "end_surname": "VILLAR",
       "path": [
-        84197,
-        4052650,
+        2799,
         3745651,
-        4041424,
-        4041425
-      ],
-      "relationships": [
-        "Starting person",
-        "Mark Villar is the son of Senator Cynthia Villar",
-        "CAMILLE VILLAR IS THE DAUGHTER OF SENATOR CYNTHIA VILLAR",
-        "Connected via I&E CONSTRUCTION CORPORATION",
-        "Connected via I&E CONSTRUCTION CORPORATION"
-      ],
-      "source_urls": [
-        "https://en.wikipedia.org/wiki/Mark_Villar",
-        "https://www.camillevillar.com/about/"
-      ],
-      "contractor_connection": {
-        "contractor_name": "I&E CONSTRUCTION CORPORATION",
-        "relationship_type": "Business/Contractor Connection",
-        "start_company_role": "Positions: Senators Mark and Camille Villar | Connections: The owner, Christian Aguilar, is the uncle of Senators Mark and Camille Villar, or Cynthia Villar's brother. Christian's son Carlo, who is a part owner, lost as Las Pinas mayor in 2026; The owner, Christian Aguilar, is the uncle of Senators Mark and Camille Villar, or Cynthia Villar's brother. Christian's son Carlo, who is a part owner, lost as Las Pinas mayor in 2028",
-        "end_company_role": null
-      }
-    },
-    {
-      "length": 4,
-      "start_surname": "VILLAR",
-      "end_surname": "VILLAR",
-      "path": [
-        4145002,
-        84197,
+        4052633,
+        4041425,
         4041424
       ],
       "relationships": [
         "Starting person",
-        "MARK VILLAR IS THE SON OF FORMER SENATOR MANUEL VILLAR",
-        "Connected via I&E CONSTRUCTION CORPORATION"
-      ],
-      "source_urls": [
-        "https://en.wikipedia.org/wiki/Mark_Villar"
+        "IMELDA AGUILAR is nephew of CAMILLE VILLAR",
+        "Camille Villar is the daughter of former Senate President Manny Villar",
+        "MARK VILLAR IS THE SON OF FORMER SENATE PRESIDENT MANNY VILLAR",
+        "Connected via OMNICON BUILDERS"
       ],
       "contractor_connection": {
-        "contractor_name": "I&E CONSTRUCTION CORPORATION",
-        "relationship_type": "Business/Contractor Connection",
+        "contractor_name": "OMNICON BUILDERS",
         "start_company_role": null,
-        "end_company_role": null
+        "end_company_role": null,
+        "start_position": "MAYOR",
+        "end_position": "SENATOR"
+      }
+    },
+    {
+      "length": 4,
+      "path": [
+        2799,
+        3745651,
+        4041424
+      ],
+      "relationships": [
+        "Starting person",
+        "IMELDA AGUILAR is nephew of CAMILLE VILLAR",
+        "Connected via MOTIONTRADE DEVELOPMENT CORPORATION"
+      ],
+      "contractor_connection": {
+        "contractor_name": "MOTIONTRADE DEVELOPMENT CORPORATION",
+        "start_company_role": null,
+        "end_company_role": null,
+        "start_position": "MAYOR",
+        "end_position": "SENATOR"
       }
     }
   ],
   "people": {
-    "84197": {
-      "id": 84197,
-      "first_name": "Mark",
-      "middle_name": null,
-      "last_name": "Villar",
-      "suffix": null,
-      "full_name": "Mark Villar",
-      "canonical_name": "MARK VILLAR",
-      "position": "MEMBER, HOUSE OF REPRESENTATIVES",
-      "region": "NATIONAL CAPITAL REGION",
-      "province": "NCR, FOURTH DISTRICT",
-      "municipality_city": "",
-      "location": "NCR, FOURTH DISTRICT, NATIONAL CAPITAL REGION"
-    },
-    "4052650": {
-      "id": 4052650,
-      "first_name": "Cynthia",
-      "middle_name": null,
-      "last_name": "Villar",
-      "suffix": null,
-      "full_name": "Cynthia Villar",
-      "canonical_name": "CYNTHIA VILLAR",
-      "position": null,
-      "region": null,
-      "province": null,
-      "municipality_city": null,
-      "location": "Location unknown"
+    "2799": {
+      "id": 2799,
+      "full_name": "IMELDA Aguilar",
+      "position": "MAYOR",
+      "location": "CITY OF LAS PINAS, NCR, FOURTH DISTRICT, NATIONAL CAPITAL REGION"
     },
     "3745651": {
       "id": 3745651,
-      "first_name": "CAMILLE",
-      "middle_name": null,
-      "last_name": "VILLAR",
-      "suffix": null,
       "full_name": "CAMILLE VILLAR",
-      "canonical_name": "CAMILLE VILLAR",
       "position": "SENATOR",
-      "region": "REGION XII",
-      "province": "COTABATO",
-      "municipality_city": "M'LANG",
       "location": "M'LANG, COTABATO, REGION XII"
     },
-    "4041424": {
-      "id": 4041424,
-      "first_name": "CAMILLE A.",
-      "middle_name": "A.",
-      "last_name": "VILLAR",
-      "suffix": null,
-      "full_name": "CAMILLE A. A. VILLAR",
-      "canonical_name": "CAMILLE VILLAR",
-      "position": "SENATOR",
-      "region": "NCR",
-      "province": "Metro Manila",
-      "municipality_city": "Manila",
-      "location": "Manila, Metro Manila, NCR"
+    "4052633": {
+      "id": 4052633,
+      "full_name": "Manny Villar",
+      "position": null,
+      "location": "Location unknown"
     },
     "4041425": {
       "id": 4041425,
-      "first_name": "MARK A.",
-      "middle_name": "A.",
-      "last_name": "VILLAR",
-      "suffix": null,
       "full_name": "MARK A. A. VILLAR",
-      "canonical_name": "MARK VILLAR",
       "position": "SENATOR",
-      "region": "NCR",
-      "province": "Metro Manila",
-      "municipality_city": "Manila",
       "location": "Manila, Metro Manila, NCR"
     },
-    "4145002": {
-      "id": 4145002,
-      "first_name": "MANUEL",
-      "middle_name": null,
-      "last_name": "VILLAR",
-      "suffix": null,
-      "full_name": "MANUEL VILLAR",
-      "canonical_name": "MANUEL VILLAR",
+    "4052650": {
+      "id": 4052650,
+      "full_name": "Cynthia Villar",
       "position": null,
-      "region": null,
-      "province": null,
-      "municipality_city": null,
       "location": "Location unknown"
+    },
+    "84197": {
+      "id": 84197,
+      "full_name": "Mark Villar",
+      "position": "MEMBER, HOUSE OF REPRESENTATIVES",
+      "location": "NCR, FOURTH DISTRICT, NATIONAL CAPITAL REGION"
+    },
+    "4041424": {
+      "id": 4041424,
+      "full_name": "CAMILLE A. A. VILLAR",
+      "position": "SENATOR",
+      "location": "Manila, Metro Manila, NCR"
     }
   }
 }

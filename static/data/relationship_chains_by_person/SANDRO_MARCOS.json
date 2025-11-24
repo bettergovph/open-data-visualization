@@ -2,29 +2,28 @@
   "person": {
     "normalized_name": "SANDRO MARCOS",
     "display_name": "SANDRO MARCOS",
-    "chain_count": 2
+    "chain_count": 3
   },
   "chains": [
     {
-      "length": 2,
-      "start_surname": "MARCOS",
-      "end_surname": "MARCOS",
+      "length": 5,
       "path": [
-        4162424,
-        53232
+        70156,
+        4162401,
+        53227,
+        53232,
+        4162424
       ],
       "relationships": [
         "Starting person",
-        "SANDRO MARCOS IS NEPHEW OF IMEE MARCOS"
-      ],
-      "source_urls": [
-        "OCR:pd18.jpg"
+        "Political connection - TINGOG party-list representative",
+        "FERDINAND MARCOS SR. IS THE FATHER OF FERDINAND MARCOS JR.",
+        "Mother-son relationship in the MARCOS political dynasty",
+        "IMEE MARCOS is nephew of SANDRO MARCOS (REPRESENTATIVE"
       ]
     },
     {
       "length": 2,
-      "start_surname": "MARCOS",
-      "end_surname": "MARCOS",
       "path": [
         53232,
         4162424
@@ -32,39 +31,49 @@
       "relationships": [
         "Starting person",
         "IMEE MARCOS is nephew of SANDRO MARCOS (REPRESENTATIVE"
+      ]
+    },
+    {
+      "length": 2,
+      "path": [
+        4162424,
+        53232
       ],
-      "source_urls": [
-        "OCR:pd18.jpg"
+      "relationships": [
+        "Starting person",
+        "SANDRO MARCOS IS NEPHEW OF IMEE MARCOS"
       ]
     }
   ],
   "people": {
     "53232": {
       "id": 53232,
-      "first_name": "IMEE",
-      "middle_name": "REMEDIOS",
-      "last_name": "MARCOS",
-      "suffix": null,
       "full_name": "IMEE REMEDIOS MARCOS",
-      "canonical_name": "IMEE MARCOS",
       "position": "MEMBER, HOUSE OF REPRESENTATIVES",
-      "region": "REGION I",
-      "province": "ILOCOS NORTE",
-      "municipality_city": "",
       "location": "ILOCOS NORTE, REGION I"
+    },
+    "53227": {
+      "id": 53227,
+      "full_name": "FERDINAND ROMUALDEZ MARCOS",
+      "position": "GOVERNOR",
+      "location": "ILOCOS NORTE, REGION I"
+    },
+    "70156": {
+      "id": 70156,
+      "full_name": "YEDDA MARIE K ROMUALDEZ",
+      "position": "PARTY-LIST REPRESENTATIVE",
+      "location": "LEYTE, REGION VIII"
+    },
+    "4162401": {
+      "id": 4162401,
+      "full_name": "FERDINAND EDRALIN MARCOS",
+      "position": "PRESIDENT",
+      "location": "NATIONAL, NATIONAL"
     },
     "4162424": {
       "id": 4162424,
-      "first_name": "SANDRO",
-      "middle_name": null,
-      "last_name": "MARCOS",
-      "suffix": null,
       "full_name": "SANDRO MARCOS",
-      "canonical_name": null,
       "position": "REPRESENTATIVE, ILOCOS NORTE",
-      "region": null,
-      "province": null,
-      "municipality_city": null,
       "location": "Location unknown"
     }
   }

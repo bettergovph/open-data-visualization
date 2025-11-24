@@ -6,25 +6,7 @@
   },
   "chains": [
     {
-      "length": 2,
-      "start_surname": "AQUINO",
-      "end_surname": "Oreta",
-      "path": [
-        3745665,
-        4149034
-      ],
-      "relationships": [
-        "Starting person",
-        "BAM AQUINO is cousin of LORENZO ORETA (COUNCILOR"
-      ],
-      "source_urls": [
-        "OCR:pd4.jpg"
-      ]
-    },
-    {
       "length": 3,
-      "start_surname": "AQUINO",
-      "end_surname": "Oreta",
       "path": [
         4041683,
         3745665,
@@ -34,55 +16,38 @@
         "Starting person",
         "BAM AQUINO IS THE GRANDSON OF CORAZON AQUINO",
         " FORMER PRESIDENT OF THE PHILIPPINES"
+      ]
+    },
+    {
+      "length": 2,
+      "path": [
+        3745665,
+        4149034
       ],
-      "source_urls": [
-        "https://en.wikipedia.org/wiki/Paolo_Benigno_Aquino_IV",
-        "OCR:pd4.jpg"
+      "relationships": [
+        "Starting person",
+        "BAM AQUINO is cousin of LORENZO ORETA (COUNCILOR"
       ]
     }
   ],
   "people": {
+    "4041683": {
+      "id": 4041683,
+      "full_name": "CORAZON AQUINO",
+      "position": null,
+      "location": "Location unknown"
+    },
     "3745665": {
       "id": 3745665,
-      "first_name": "BAM",
-      "middle_name": null,
-      "last_name": "AQUINO",
-      "suffix": null,
       "full_name": "BAM AQUINO",
-      "canonical_name": "BAM AQUINO",
       "position": "SENATOR",
-      "region": "REGION XII",
-      "province": "COTABATO",
-      "municipality_city": "M'LANG",
       "location": "M'LANG, COTABATO, REGION XII"
     },
     "4149034": {
       "id": 4149034,
-      "first_name": "Jose Lorenzo",
-      "middle_name": "",
-      "last_name": "Oreta",
-      "suffix": "",
       "full_name": "Jose Lorenzo Oreta",
-      "canonical_name": "JOSE LORENZO ORETA",
       "position": "COUNCILOR",
-      "region": "NATIONAL CAPITAL REGION",
-      "province": "NCR, THIRD DISTRICT",
-      "municipality_city": "MALABON",
       "location": "MALABON, NCR, THIRD DISTRICT, NATIONAL CAPITAL REGION"
-    },
-    "4041683": {
-      "id": 4041683,
-      "first_name": "CORAZON",
-      "middle_name": null,
-      "last_name": "AQUINO",
-      "suffix": null,
-      "full_name": "CORAZON AQUINO",
-      "canonical_name": "CORAZON AQUINO",
-      "position": null,
-      "region": null,
-      "province": null,
-      "municipality_city": null,
-      "location": "Location unknown"
     }
   }
 }

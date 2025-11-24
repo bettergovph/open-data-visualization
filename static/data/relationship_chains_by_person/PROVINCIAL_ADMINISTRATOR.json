@@ -7,26 +7,19 @@
   "chains": [
     {
       "length": 3,
-      "start_surname": "PADILLA",
-      "end_surname": "ADMINISTRATOR",
       "path": [
-        4041737,
+        4162431,
         4041420,
         4162429
       ],
       "relationships": [
         "Starting person",
-        "JEROY AGUSTIN PADILLA IS NEPHEW OF ROBINHOOD C. PADILLA",
+        "BETTINA PADILLA IS NIECE OF ROBINHOOD C. PADILLA",
         "ROBINHOOD C. PADILLA IS NEPHEW OF PROVINCIAL ADMINISTRATOR (VICE MAYOR OF JOSE PANGANIBAN"
-      ],
-      "source_urls": [
-        "OCR:pd19.jpg"
       ]
     },
     {
       "length": 2,
-      "start_surname": "PADILLA",
-      "end_surname": "ADMINISTRATOR",
       "path": [
         4041420,
         4162429
@@ -34,53 +27,26 @@
       "relationships": [
         "Starting person",
         "ROBINHOOD C. PADILLA IS NEPHEW OF PROVINCIAL ADMINISTRATOR (VICE MAYOR OF JOSE PANGANIBAN"
-      ],
-      "source_urls": [
-        "OCR:pd19.jpg"
       ]
     }
   ],
   "people": {
+    "4162431": {
+      "id": 4162431,
+      "full_name": "BETTINA PADILLA",
+      "position": "LEGISLATIVE STAFF OFFICER, OFFICE OF SEN. PADILLA",
+      "location": "Location unknown"
+    },
     "4041420": {
       "id": 4041420,
-      "first_name": "ROBINHOOD C.",
-      "middle_name": "C.",
-      "last_name": "PADILLA",
-      "suffix": null,
       "full_name": "ROBINHOOD C. C. PADILLA",
-      "canonical_name": "ROBINHOOD PADILLA",
       "position": "SENATOR",
-      "region": "NCR",
-      "province": "Metro Manila",
-      "municipality_city": "Manila",
       "location": "Manila, Metro Manila, NCR"
-    },
-    "4041737": {
-      "id": 4041737,
-      "first_name": "JEROY AGUSTIN",
-      "middle_name": null,
-      "last_name": "PADILLA",
-      "suffix": null,
-      "full_name": "JEROY AGUSTIN PADILLA",
-      "canonical_name": "CAMARINES NORTE",
-      "position": "COUNCILOR OF JOSE PANGANIBAN, CAMARINES NORTE",
-      "region": null,
-      "province": null,
-      "municipality_city": null,
-      "location": "Location unknown"
     },
     "4162429": {
       "id": 4162429,
-      "first_name": "PROVINCIAL",
-      "middle_name": null,
-      "last_name": "ADMINISTRATOR",
-      "suffix": null,
       "full_name": "PROVINCIAL ADMINISTRATOR",
-      "canonical_name": null,
       "position": "VICE MAYOR OF JOSE PANGANIBAN,",
-      "region": null,
-      "province": null,
-      "municipality_city": null,
       "location": "Location unknown"
     }
   }

@@ -2,13 +2,11 @@
   "person": {
     "normalized_name": "MARTIN TAN",
     "display_name": "MARTIN TAN",
-    "chain_count": 1
+    "chain_count": 4
   },
   "chains": [
     {
       "length": 2,
-      "start_surname": "TAN",
-      "end_surname": "TAN",
       "path": [
         78220,
         78075
@@ -16,40 +14,74 @@
       "relationships": [
         "Starting person",
         "FATHER-SON RELATIONSHIP"
+      ]
+    },
+    {
+      "length": 3,
+      "path": [
+        78220,
+        78075,
+        78160
       ],
-      "source_urls": [
-        "https://newsinfo.inquirer.net/1595755/tan-family-dominates-2022-polls-in-samar"
+      "relationships": [
+        "Starting person",
+        "FATHER-SON RELATIONSHIP",
+        " REYNALDO IS FORMER GOVERNOR OF SAMAR"
+      ]
+    },
+    {
+      "length": 4,
+      "path": [
+        78220,
+        78075,
+        78160,
+        82012
+      ],
+      "relationships": [
+        "Starting person",
+        "FATHER-SON RELATIONSHIP",
+        " REYNALDO IS FORMER GOVERNOR OF SAMAR",
+        " STEPHEN IS 1ST DISTRICT REP"
+      ]
+    },
+    {
+      "length": 3,
+      "path": [
+        78220,
+        78075,
+        82012
+      ],
+      "relationships": [
+        "Starting person",
+        "FATHER-SON RELATIONSHIP",
+        " REYNALDO IS FORMER GOVERNOR OF SAMAR"
       ]
     }
   ],
   "people": {
     "78075": {
       "id": 78075,
-      "first_name": "STEPHEN",
-      "middle_name": null,
-      "last_name": "TAN",
-      "suffix": null,
       "full_name": "STEPHEN TAN",
-      "canonical_name": "STEPHEN TAN",
-      "position": "GOVERNOR",
-      "region": "REGION VIII",
-      "province": "SAMAR",
-      "municipality_city": "",
+      "position": "Member, House of Representatives (Samar–1st District)",
       "location": "SAMAR, REGION VIII"
     },
     "78220": {
       "id": 78220,
-      "first_name": "MARTIN",
-      "middle_name": null,
-      "last_name": "TAN",
-      "suffix": null,
       "full_name": "MARTIN TAN",
-      "canonical_name": "MARTIN TAN",
-      "position": "COUNCILOR",
-      "region": "REGION VI",
-      "province": "NEGROS OCCIDENTAL",
-      "municipality_city": "ISABELA",
+      "position": null,
       "location": "ISABELA, NEGROS OCCIDENTAL, REGION VI"
+    },
+    "78160": {
+      "id": 78160,
+      "full_name": "Stephany Tan",
+      "position": "MAYOR",
+      "location": "SAMAR, REGION VIII"
+    },
+    "82012": {
+      "id": 82012,
+      "full_name": "Coefredo Uy",
+      "position": "MAYOR",
+      "location": "CATBALOGAN CITY, SAMAR, REGION VIII"
     }
   }
 }

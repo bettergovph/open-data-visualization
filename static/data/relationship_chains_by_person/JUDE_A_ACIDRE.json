@@ -7,33 +7,23 @@
   "chains": [
     {
       "length": 4,
-      "start_surname": "MARCOS",
-      "end_surname": "ACIDRE",
       "path": [
-        53232,
+        70158,
         70156,
         4145268
       ],
       "relationships": [
         "Starting person",
-        "IMEE MARCOS is cousin of YEDDA ROMUALDEZ (REPRESENTATIVE",
-        " TINGOG PARTYLIST)"
-      ],
-      "source_urls": [
-        "OCR:pd18.jpg"
+        "Alfred Romualdez is married to Yedda Marie Romualdez",
+        " who is also a politician"
       ],
       "party_list_connection": {
-        "party_code": "47",
-        "party_list_number": 47,
         "party_name": "TINGOG",
-        "party_full_name": "47, TINGOG",
-        "relationship_type": "Party-List Membership"
+        "party_full_name": "47, TINGOG"
       }
     },
     {
       "length": 3,
-      "start_surname": "ACIDRE",
-      "end_surname": "ROMUALDEZ",
       "path": [
         4145268,
         70156
@@ -42,20 +32,14 @@
         "Starting person",
         "Connected via TINGOG"
       ],
-      "source_urls": [],
       "is_standalone_party_list": true,
       "party_list_connection": {
-        "party_code": "47",
-        "party_list_number": 47,
         "party_name": "TINGOG",
-        "party_full_name": "47, TINGOG",
-        "relationship_type": "Party-List Membership"
+        "party_full_name": "TINGOG"
       }
     },
     {
       "length": 3,
-      "start_surname": "ROMUALDEZ",
-      "end_surname": "ACIDRE",
       "path": [
         70156,
         4145268
@@ -64,58 +48,30 @@
         "Starting person",
         "Connected via TINGOG"
       ],
-      "source_urls": [],
       "is_standalone_party_list": true,
       "party_list_connection": {
-        "party_code": "47",
-        "party_list_number": 47,
         "party_name": "TINGOG",
-        "party_full_name": "47, TINGOG",
-        "relationship_type": "Party-List Membership"
+        "party_full_name": "TINGOG"
       }
     }
   ],
   "people": {
-    "53232": {
-      "id": 53232,
-      "first_name": "IMEE",
-      "middle_name": "REMEDIOS",
-      "last_name": "MARCOS",
-      "suffix": null,
-      "full_name": "IMEE REMEDIOS MARCOS",
-      "canonical_name": "IMEE MARCOS",
-      "position": "MEMBER, HOUSE OF REPRESENTATIVES",
-      "region": "REGION I",
-      "province": "ILOCOS NORTE",
-      "municipality_city": "",
-      "location": "ILOCOS NORTE, REGION I"
-    },
     "70156": {
       "id": 70156,
-      "first_name": "YEDDA MARIE K",
-      "middle_name": null,
-      "last_name": "ROMUALDEZ",
-      "suffix": null,
       "full_name": "YEDDA MARIE K ROMUALDEZ",
-      "canonical_name": "YEDDA ROMUALDEZ",
       "position": "PARTY-LIST REPRESENTATIVE",
-      "region": "REGION VIII",
-      "province": "LEYTE",
-      "municipality_city": "",
       "location": "LEYTE, REGION VIII"
+    },
+    "70158": {
+      "id": 70158,
+      "full_name": "Alfred Romualdez",
+      "position": "MAYOR",
+      "location": "TACLOBAN CITY, LEYTE, REGION VIII"
     },
     "4145268": {
       "id": 4145268,
-      "first_name": "JUDE A",
-      "middle_name": null,
-      "last_name": "ACIDRE",
-      "suffix": null,
       "full_name": "JUDE A ACIDRE",
-      "canonical_name": null,
       "position": "PARTY-LIST REPRESENTATIVE",
-      "region": null,
-      "province": null,
-      "municipality_city": null,
       "location": "Location unknown"
     }
   }

@@ -6,25 +6,7 @@
   },
   "chains": [
     {
-      "length": 2,
-      "start_surname": "GO",
-      "end_surname": "GO",
-      "path": [
-        3745735,
-        4162409
-      ],
-      "relationships": [
-        "Starting person",
-        "BONG GO is son of CHRENCE GO (VICE MAYOR OF LUPON"
-      ],
-      "source_urls": [
-        "OCR:pd12.jpg"
-      ]
-    },
-    {
       "length": 3,
-      "start_surname": "De Lara",
-      "end_surname": "GO",
       "path": [
         27824,
         3745735,
@@ -34,15 +16,10 @@
         "Starting person",
         "JOSEPH DE LARA is uncle of BONG GO",
         "BONG GO is son of CHRENCE GO (VICE MAYOR OF LUPON"
-      ],
-      "source_urls": [
-        "OCR:pd12.jpg"
       ]
     },
     {
       "length": 2,
-      "start_surname": "GO",
-      "end_surname": "GO",
       "path": [
         4162409,
         3745735
@@ -50,54 +27,38 @@
       "relationships": [
         "Starting person",
         "CHRENCE GO IS SON OF BONG GO"
+      ]
+    },
+    {
+      "length": 2,
+      "path": [
+        3745735,
+        4162409
       ],
-      "source_urls": [
-        "OCR:pd12.jpg"
+      "relationships": [
+        "Starting person",
+        "BONG GO is son of CHRENCE GO (VICE MAYOR OF LUPON"
       ]
     }
   ],
   "people": {
     "3745735": {
       "id": 3745735,
-      "first_name": "BONG",
-      "middle_name": null,
-      "last_name": "GO",
-      "suffix": null,
       "full_name": "BONG GO",
-      "canonical_name": "BONG GO",
       "position": "SENATOR",
-      "region": "REGION XII",
-      "province": "COTABATO",
-      "municipality_city": "M'LANG",
       "location": "M'LANG, COTABATO, REGION XII"
-    },
-    "4162409": {
-      "id": 4162409,
-      "first_name": "CHRENCE",
-      "middle_name": null,
-      "last_name": "GO",
-      "suffix": null,
-      "full_name": "CHRENCE GO",
-      "canonical_name": null,
-      "position": "VICE MAYOR OF LUPON,",
-      "region": null,
-      "province": null,
-      "municipality_city": null,
-      "location": "Location unknown"
     },
     "27824": {
       "id": 27824,
-      "first_name": "JOSEPH",
-      "middle_name": null,
-      "last_name": "De Lara",
-      "suffix": null,
       "full_name": "JOSEPH De Lara",
-      "canonical_name": "JOSEPH DE LARA",
       "position": "MAYOR",
-      "region": "REGION I",
-      "province": "ILOCOS NORTE",
-      "municipality_city": "SOLSONA",
       "location": "SOLSONA, ILOCOS NORTE, REGION I"
+    },
+    "4162409": {
+      "id": 4162409,
+      "full_name": "CHRENCE GO",
+      "position": "VICE MAYOR OF LUPON,",
+      "location": "Location unknown"
     }
   }
 }

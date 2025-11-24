@@ -2,13 +2,11 @@
   "person": {
     "normalized_name": "ANTONIO FLOIRENDO",
     "display_name": "Antonio Floirendo",
-    "chain_count": 1
+    "chain_count": 3
   },
   "chains": [
     {
       "length": 2,
-      "start_surname": "Floirendo",
-      "end_surname": "ANTONIO",
       "path": [
         35482,
         86777
@@ -16,40 +14,61 @@
       "relationships": [
         "Starting person",
         "ANTONIO FLOIRENDO IS THE FATHER OF ANTONIO FLOIRENDO JR."
+      ]
+    },
+    {
+      "length": 2,
+      "path": [
+        35481,
+        4041676
       ],
-      "source_urls": [
-        "https://en.wikipedia.org/wiki/Political_families_of_the_Philippines"
+      "relationships": [
+        "Starting person",
+        "ANTONIO FLOIRENDO JR. IS THE SON OF ANTONIO FLOIRENDO SR."
+      ]
+    },
+    {
+      "length": 2,
+      "path": [
+        35481,
+        4041677
+      ],
+      "relationships": [
+        "Starting person",
+        "ANTONIO FLOIRENDO JR. IS THE UNCLE OF ANTONIO LAGDAMEO JR."
       ]
     }
   ],
   "people": {
     "35482": {
       "id": 35482,
-      "first_name": "Antonio",
-      "middle_name": null,
-      "last_name": "Floirendo",
-      "suffix": null,
       "full_name": "Antonio Floirendo",
-      "canonical_name": "ANTONIO FLOIRENDO",
       "position": "MEMBER, HOUSE OF REPRESENTATIVES",
-      "region": "REGION XI",
-      "province": "DAVAO DEL NORTE",
-      "municipality_city": "",
       "location": "DAVAO DEL NORTE, REGION XI"
     },
     "86777": {
       "id": 86777,
-      "first_name": "ANTONIO JR",
-      "middle_name": null,
-      "last_name": "ANTONIO",
-      "suffix": "JR",
-      "full_name": "ANTONIO JR ANTONIO JR",
-      "canonical_name": "ANTONIO ANTONIO JR",
+      "full_name": "ANTONIO JR ANTONIO",
       "position": "MAYOR",
-      "region": "REGION II CAGAYAN VALLEY",
-      "province": "ISABELA PROVINCE",
-      "municipality_city": "San Pablo",
       "location": "San Pablo, ISABELA PROVINCE, REGION II CAGAYAN VALLEY"
+    },
+    "35481": {
+      "id": 35481,
+      "full_name": "Antonio Floirendo",
+      "position": "MEMBER, HOUSE OF REPRESENTATIVES",
+      "location": "DAVAO DEL NORTE, REGION XI"
+    },
+    "4041676": {
+      "id": 4041676,
+      "full_name": "ANTONIO FLOIRENDO SR.",
+      "position": null,
+      "location": "Location unknown"
+    },
+    "4041677": {
+      "id": 4041677,
+      "full_name": "ANTONIO LAGDAMEO JR.",
+      "position": null,
+      "location": "Location unknown"
     }
   }
 }

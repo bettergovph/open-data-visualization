@@ -6,28 +6,22 @@
   },
   "chains": [
     {
-      "length": 3,
-      "start_surname": "TULFO",
-      "end_surname": "NIECE",
+      "length": 4,
       "path": [
+        4162434,
         3745642,
         4162433,
         4162437
       ],
       "relationships": [
         "Starting person",
+        "RALPH TULFO IS NEPHEW OF ERWIN TULFO",
         "ERWIN TULFO is daughter of RAFFY TULFO MARICEL TULFO-TUNGOL (SENATOR OF THE PHILIPPINES -)",
         "RAFFY TULFO MARICEL TULFO-TUNGOL IS NIECE OF NEPHEW NIECE (POLITICAL AFFAIRS OFFICER II"
-      ],
-      "source_urls": [
-        "OCR:pd22.jpg",
-        "OCR:pd23.jpg"
       ]
     },
     {
       "length": 2,
-      "start_surname": "TULFO MARICEL TULFO-TUNGOL",
-      "end_surname": "NIECE",
       "path": [
         4162433,
         4162437
@@ -35,53 +29,32 @@
       "relationships": [
         "Starting person",
         "RAFFY TULFO MARICEL TULFO-TUNGOL IS NIECE OF NEPHEW NIECE (POLITICAL AFFAIRS OFFICER II"
-      ],
-      "source_urls": [
-        "OCR:pd23.jpg"
       ]
     }
   ],
   "people": {
     "3745642": {
       "id": 3745642,
-      "first_name": "ERWIN",
-      "middle_name": null,
-      "last_name": "TULFO",
-      "suffix": null,
       "full_name": "ERWIN TULFO",
-      "canonical_name": "ERWIN TULFO",
       "position": "SENATOR",
-      "region": "REGION XII",
-      "province": "COTABATO",
-      "municipality_city": "M'LANG",
       "location": "M'LANG, COTABATO, REGION XII"
+    },
+    "4162434": {
+      "id": 4162434,
+      "full_name": "RALPH TULFO",
+      "position": "REPRESENTATIVE, QUEZON CITY",
+      "location": "Location unknown"
     },
     "4162433": {
       "id": 4162433,
-      "first_name": "RAFFY",
-      "middle_name": null,
-      "last_name": "TULFO MARICEL TULFO-TUNGOL",
-      "suffix": null,
       "full_name": "RAFFY TULFO MARICEL TULFO-TUNGOL",
-      "canonical_name": null,
       "position": "SENATOR OF THE PHILIPPINES -",
-      "region": null,
-      "province": null,
-      "municipality_city": null,
       "location": "Location unknown"
     },
     "4162437": {
       "id": 4162437,
-      "first_name": "NEPHEW",
-      "middle_name": null,
-      "last_name": "NIECE",
-      "suffix": null,
       "full_name": "NEPHEW NIECE",
-      "canonical_name": null,
       "position": "POLITICAL AFFAIRS OFFICER II, OFFICE OF SEN. ERWIN TULFO",
-      "region": null,
-      "province": null,
-      "municipality_city": null,
       "location": "Location unknown"
     }
   }

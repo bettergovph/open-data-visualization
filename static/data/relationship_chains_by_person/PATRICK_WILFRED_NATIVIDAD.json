@@ -7,8 +7,6 @@
   "chains": [
     {
       "length": 3,
-      "start_surname": "NATIVIDAD",
-      "end_surname": "NATIVIDAD",
       "path": [
         4162601,
         4162615
@@ -17,18 +15,16 @@
         "Starting person",
         "Connected via TRIPLE 8 CONSTRUCTION & SUPPLY"
       ],
-      "source_urls": [],
       "contractor_connection": {
         "contractor_name": "TRIPLE 8 CONSTRUCTION & SUPPLY, INC.",
-        "relationship_type": "Business/Contractor Connection",
         "start_company_role": null,
-        "end_company_role": null
+        "end_company_role": null,
+        "start_position": null,
+        "end_position": null
       }
     },
     {
       "length": 3,
-      "start_surname": "NATIVIDAD",
-      "end_surname": "NATIVIDAD",
       "path": [
         4162569,
         4162601
@@ -37,38 +33,16 @@
         "Starting person",
         "Connected via TRIPLE 8 CONSTRUCTION & SUPPLY"
       ],
-      "source_urls": [],
       "contractor_connection": {
         "contractor_name": "TRIPLE 8 CONSTRUCTION & SUPPLY, INC.",
-        "relationship_type": "Business/Contractor Connection",
         "start_company_role": null,
-        "end_company_role": null
+        "end_company_role": null,
+        "start_position": null,
+        "end_position": null
       }
     },
     {
       "length": 3,
-      "start_surname": "NATIVIDAD",
-      "end_surname": "NATIVIDAD",
-      "path": [
-        4162562,
-        4162601
-      ],
-      "relationships": [
-        "Starting person",
-        "Connected via TRIPLE 8 CONSTRUCTION & SUPPLY"
-      ],
-      "source_urls": [],
-      "contractor_connection": {
-        "contractor_name": "TRIPLE 8 CONSTRUCTION & SUPPLY, INC.",
-        "relationship_type": "Business/Contractor Connection",
-        "start_company_role": null,
-        "end_company_role": null
-      }
-    },
-    {
-      "length": 3,
-      "start_surname": "NATIVIDAD",
-      "end_surname": "NATIVIDAD",
       "path": [
         3756301,
         4162601
@@ -77,85 +51,63 @@
         "Starting person",
         "Connected via TRIPLE 8 CONSTRUCTION & SUPPLY"
       ],
-      "source_urls": [],
       "contractor_connection": {
         "contractor_name": "TRIPLE 8 CONSTRUCTION & SUPPLY, INC.",
-        "relationship_type": "Business/Contractor Connection",
         "start_company_role": null,
-        "end_company_role": null
+        "end_company_role": null,
+        "start_position": "COUNCILOR",
+        "end_position": null
+      }
+    },
+    {
+      "length": 3,
+      "path": [
+        4162562,
+        4162601
+      ],
+      "relationships": [
+        "Starting person",
+        "Connected via TRIPLE 8 CONSTRUCTION & SUPPLY"
+      ],
+      "contractor_connection": {
+        "contractor_name": "TRIPLE 8 CONSTRUCTION & SUPPLY, INC.",
+        "start_company_role": null,
+        "end_company_role": null,
+        "start_position": null,
+        "end_position": null
       }
     }
   ],
   "people": {
-    "3756301": {
-      "id": 3756301,
-      "first_name": "ESTEVEN JAIME",
-      "middle_name": "R.",
-      "last_name": "NATIVIDAD",
-      "suffix": null,
-      "full_name": "ESTEVEN JAIME R. NATIVIDAD",
-      "canonical_name": "ESTEVEN JAIME NATIVIDAD",
-      "position": "COUNCILOR",
-      "region": "REGION IV-A",
-      "province": "LAGUNA",
-      "municipality_city": "CITY OF CALAMBA",
-      "location": "CITY OF CALAMBA, LAGUNA, REGION IV-A"
-    },
-    "4162569": {
-      "id": 4162569,
-      "first_name": "WILFREDO",
-      "middle_name": "M.",
-      "last_name": "NATIVIDAD",
-      "suffix": null,
-      "full_name": "WILFREDO M. NATIVIDAD",
-      "canonical_name": "WILFREDO NATIVIDAD",
-      "position": null,
-      "region": null,
-      "province": null,
-      "municipality_city": null,
-      "location": "Location unknown"
-    },
     "4162601": {
       "id": 4162601,
-      "first_name": "PATRICK WILFRED",
-      "middle_name": "R.",
-      "last_name": "NATIVIDAD",
-      "suffix": null,
       "full_name": "PATRICK WILFRED R. NATIVIDAD",
-      "canonical_name": "PATRICK WILFRED NATIVIDAD",
       "position": null,
-      "region": null,
-      "province": null,
-      "municipality_city": null,
       "location": "Location unknown"
     },
     "4162615": {
       "id": 4162615,
-      "first_name": "JOCELYN",
-      "middle_name": "R.",
-      "last_name": "NATIVIDAD",
-      "suffix": null,
       "full_name": "JOCELYN R. NATIVIDAD",
-      "canonical_name": "JOCELYN NATIVIDAD",
       "position": null,
-      "region": null,
-      "province": null,
-      "municipality_city": null,
+      "location": "Location unknown"
+    },
+    "4162569": {
+      "id": 4162569,
+      "full_name": "WILFREDO M. NATIVIDAD",
+      "position": null,
       "location": "Location unknown"
     },
     "4162562": {
       "id": 4162562,
-      "first_name": "JUSTIN WILBERT",
-      "middle_name": "R.",
-      "last_name": "NATIVIDAD",
-      "suffix": null,
       "full_name": "JUSTIN WILBERT R. NATIVIDAD",
-      "canonical_name": "JUSTIN WILBERT NATIVIDAD",
       "position": null,
-      "region": null,
-      "province": null,
-      "municipality_city": null,
       "location": "Location unknown"
+    },
+    "3756301": {
+      "id": 3756301,
+      "full_name": "ESTEVEN JAIME R. NATIVIDAD",
+      "position": "COUNCILOR",
+      "location": "CITY OF CALAMBA, LAGUNA, REGION IV-A"
     }
   }
 }

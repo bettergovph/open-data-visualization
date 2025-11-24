@@ -7,24 +7,6 @@
   "chains": [
     {
       "length": 2,
-      "start_surname": "ROMUALDO",
-      "end_surname": "ROMUALDO",
-      "path": [
-        3871685,
-        3871755
-      ],
-      "relationships": [
-        "Starting person",
-        "SIBLINGS IN THE ROMUALDO POLITICAL DYNASTY"
-      ],
-      "source_urls": [
-        "https://example.org/source2"
-      ]
-    },
-    {
-      "length": 2,
-      "start_surname": "ROMUALDO",
-      "end_surname": "ROMUALDO",
       "path": [
         3871755,
         3871685
@@ -32,15 +14,10 @@
       "relationships": [
         "Starting person",
         "SIBLINGS IN THE ROMUALDO POLITICAL DYNASTY"
-      ],
-      "source_urls": [
-        "https://example.org/source2"
       ]
     },
     {
       "length": 3,
-      "start_surname": "ROMUALDO",
-      "end_surname": "MABALE",
       "path": [
         3871755,
         3871685,
@@ -50,16 +27,10 @@
         "Starting person",
         "SIBLINGS IN THE ROMUALDO POLITICAL DYNASTY",
         "HOMER MABALE IS THE FATHER-IN-LAW OF XJ ROMUALDO"
-      ],
-      "source_urls": [
-        "https://example.org/source2",
-        "https://example.org/source3"
       ]
     },
     {
       "length": 4,
-      "start_surname": "ROMUALDO",
-      "end_surname": "POPERA-JOSE",
       "path": [
         3871755,
         3871685,
@@ -71,69 +42,43 @@
         "SIBLINGS IN THE ROMUALDO POLITICAL DYNASTY",
         "HOMER MABALE IS THE FATHER-IN-LAW OF XJ ROMUALDO",
         "MARRIED COUPLE WITHIN THE MABALE-JOSE POLITICAL FAMILIES"
+      ]
+    },
+    {
+      "length": 2,
+      "path": [
+        3871685,
+        3871755
       ],
-      "source_urls": [
-        "https://example.org/source2",
-        "https://example.org/source3",
-        "https://example.org/source1"
+      "relationships": [
+        "Starting person",
+        "SIBLINGS IN THE ROMUALDO POLITICAL DYNASTY"
       ]
     }
   ],
   "people": {
-    "3871685": {
-      "id": 3871685,
-      "first_name": "XJ",
-      "middle_name": null,
-      "last_name": "ROMUALDO",
-      "suffix": null,
-      "full_name": "XJ ROMUALDO",
-      "canonical_name": "XJ ROMUALDO",
-      "position": "GOVERNOR",
-      "region": "REGION X",
-      "province": "CAMIGUIN",
-      "municipality_city": "CATARMAN",
-      "location": "CATARMAN, CAMIGUIN, REGION X"
-    },
     "3871755": {
       "id": 3871755,
-      "first_name": "DAN-DAN",
-      "middle_name": null,
-      "last_name": "ROMUALDO",
-      "suffix": null,
       "full_name": "DAN-DAN ROMUALDO",
-      "canonical_name": "DAN-DAN ROMUALDO",
       "position": "GOVERNOR",
-      "region": "REGION X",
-      "province": "CAMIGUIN",
-      "municipality_city": "CATARMAN",
+      "location": "CATARMAN, CAMIGUIN, REGION X"
+    },
+    "3871685": {
+      "id": 3871685,
+      "full_name": "XJ ROMUALDO",
+      "position": "GOVERNOR",
       "location": "CATARMAN, CAMIGUIN, REGION X"
     },
     "3871683": {
       "id": 3871683,
-      "first_name": "HOMER",
-      "middle_name": null,
-      "last_name": "MABALE",
-      "suffix": null,
       "full_name": "HOMER MABALE",
-      "canonical_name": "HOMER MABALE",
       "position": "GOVERNOR",
-      "region": "REGION X",
-      "province": "CAMIGUIN",
-      "municipality_city": "CATARMAN",
       "location": "CATARMAN, CAMIGUIN, REGION X"
     },
     "3871753": {
       "id": 3871753,
-      "first_name": "ELEANOR",
-      "middle_name": null,
-      "last_name": "POPERA-JOSE",
-      "suffix": null,
       "full_name": "ELEANOR POPERA-JOSE",
-      "canonical_name": "ELEANOR POPERA-JOSE",
       "position": "GOVERNOR",
-      "region": "REGION X",
-      "province": "CAMIGUIN",
-      "municipality_city": "CATARMAN",
       "location": "CATARMAN, CAMIGUIN, REGION X"
     }
   }

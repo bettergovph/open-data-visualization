@@ -2,63 +2,11 @@
   "person": {
     "normalized_name": "CESAR YNARES",
     "display_name": "CESAR Ynares",
-    "chain_count": 6
+    "chain_count": 7
   },
   "chains": [
     {
       "length": 2,
-      "start_surname": "Ynares",
-      "end_surname": "YNARES",
-      "path": [
-        85534,
-        4057683
-      ],
-      "relationships": [
-        "Starting person",
-        "Cesar Ynares is the father of Nina Ricci Ynares"
-      ],
-      "source_urls": [
-        "https://en.wikipedia.org/wiki/Political_families_of_the_Philippines"
-      ]
-    },
-    {
-      "length": 2,
-      "start_surname": "Ynares",
-      "end_surname": "Ynares",
-      "path": [
-        85541,
-        85534
-      ],
-      "relationships": [
-        "Starting person",
-        "Cesar Ynares and Rebecca Ynares are spouses"
-      ],
-      "source_urls": [
-        "https://en.wikipedia.org/wiki/Political_families_of_the_Philippines"
-      ]
-    },
-    {
-      "length": 3,
-      "start_surname": "Ynares",
-      "end_surname": "SAN JUAN JR.",
-      "path": [
-        85541,
-        85534,
-        72633
-      ],
-      "relationships": [
-        "Starting person",
-        "Cesar Ynares and Rebecca Ynares are spouses",
-        " both serving as governors of Rizal province"
-      ],
-      "source_urls": [
-        "https://en.wikipedia.org/wiki/Political_families_of_the_Philippines"
-      ]
-    },
-    {
-      "length": 2,
-      "start_surname": "SAN JUAN JR.",
-      "end_surname": "Ynares",
       "path": [
         72633,
         85534
@@ -66,31 +14,36 @@
       "relationships": [
         "Starting person",
         "CESAR YNARES IS THE FATHER-IN-LAW OF REYNALDO SAN JUAN JR."
-      ],
-      "source_urls": [
-        "https://en.wikipedia.org/wiki/Political_families_of_the_Philippines"
       ]
     },
     {
-      "length": 2,
-      "start_surname": "YNARES",
-      "end_surname": "Ynares",
+      "length": 3,
       "path": [
-        4057683,
-        85534
+        72633,
+        85534,
+        85541
       ],
       "relationships": [
         "Starting person",
-        "CESAR YNARES IS THE FATHER OF NINA RICCI YNARES"
+        "CESAR YNARES IS THE FATHER-IN-LAW OF REYNALDO SAN JUAN JR.",
+        " WHO MARRIED HIS DAUGHTER REBECCA YNARES"
+      ]
+    },
+    {
+      "length": 3,
+      "path": [
+        72633,
+        85534,
+        4057683
       ],
-      "source_urls": [
-        "https://en.wikipedia.org/wiki/Political_families_of_the_Philippines"
+      "relationships": [
+        "Starting person",
+        "CESAR YNARES IS THE FATHER-IN-LAW OF REYNALDO SAN JUAN JR.",
+        " WHO MARRIED HIS DAUGHTER REBECCA YNARES"
       ]
     },
     {
       "length": 2,
-      "start_surname": "Ynares",
-      "end_surname": "Ynares",
       "path": [
         85534,
         85541
@@ -98,68 +51,66 @@
       "relationships": [
         "Starting person",
         "Cesar Ynares and Rebecca Ynares are spouses"
+      ]
+    },
+    {
+      "length": 2,
+      "path": [
+        4057683,
+        85534
       ],
-      "source_urls": [
-        "https://en.wikipedia.org/wiki/Political_families_of_the_Philippines"
+      "relationships": [
+        "Starting person",
+        "CESAR YNARES IS THE FATHER OF NINA RICCI YNARES"
+      ]
+    },
+    {
+      "length": 2,
+      "path": [
+        85541,
+        85534
+      ],
+      "relationships": [
+        "Starting person",
+        "Cesar Ynares and Rebecca Ynares are spouses"
+      ]
+    },
+    {
+      "length": 2,
+      "path": [
+        85534,
+        4057683
+      ],
+      "relationships": [
+        "Starting person",
+        "Cesar Ynares is the father of Nina Ricci Ynares"
       ]
     }
   ],
   "people": {
+    "72633": {
+      "id": 72633,
+      "full_name": "REYNALDO SAN JUAN JR.",
+      "position": "GOVERNOR",
+      "location": "RIZAL, REGION IV-A"
+    },
     "85534": {
       "id": 85534,
-      "first_name": "CESAR",
-      "middle_name": null,
-      "last_name": "Ynares",
-      "suffix": null,
       "full_name": "CESAR Ynares",
-      "canonical_name": "CESAR YNARES",
       "position": "MAYOR",
-      "region": "REGION IV-A",
-      "province": "RIZAL",
-      "municipality_city": "BINANGONAN",
       "location": "BINANGONAN, RIZAL, REGION IV-A"
-    },
-    "4057683": {
-      "id": 4057683,
-      "first_name": "NINA RICCI",
-      "middle_name": "RICCI",
-      "last_name": "YNARES",
-      "suffix": null,
-      "full_name": "NINA RICCI RICCI YNARES",
-      "canonical_name": "NINA YNARES",
-      "position": null,
-      "region": null,
-      "province": null,
-      "municipality_city": null,
-      "location": "Location unknown"
     },
     "85541": {
       "id": 85541,
-      "first_name": "Rebecca",
-      "middle_name": null,
-      "last_name": "Ynares",
-      "suffix": null,
       "full_name": "Rebecca Ynares",
-      "canonical_name": "REBECCA YNARES",
       "position": "GOVERNOR",
-      "region": "REGION IV-A",
-      "province": "RIZAL",
-      "municipality_city": "",
       "location": "RIZAL, REGION IV-A"
     },
-    "72633": {
-      "id": 72633,
-      "first_name": "REYNALDO",
-      "middle_name": null,
-      "last_name": "SAN JUAN JR.",
-      "suffix": null,
-      "full_name": "REYNALDO SAN JUAN JR.",
-      "canonical_name": "REYNALDO SAN JUAN JR.",
-      "position": "GOVERNOR",
-      "region": "REGION IV-A",
-      "province": "RIZAL",
-      "municipality_city": "",
-      "location": "RIZAL, REGION IV-A"
+    "4057683": {
+      "id": 4057683,
+      "full_name": "NINA RICCI RICCI YNARES",
+      "position": null,
+      "location": "Location unknown"
     }
   }
 }

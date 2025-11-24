@@ -2,13 +2,24 @@
   "person": {
     "normalized_name": "CRISTIAN ZUBIRI",
     "display_name": "CRISTIAN ZUBIRI",
-    "chain_count": 2
+    "chain_count": 3
   },
   "chains": [
     {
+      "length": 3,
+      "path": [
+        4152469,
+        4162440,
+        4162442
+      ],
+      "relationships": [
+        "Starting person",
+        "JUAN MIGUEL CUNA IS COUSIN OF MIGZ ZUBIRI",
+        "MIGZ ZUBIRI IS NEPHEW OF CRISTIAN ZUBIRI (PAON"
+      ]
+    },
+    {
       "length": 2,
-      "start_surname": "ZUBIRI",
-      "end_surname": "ZUBIRI",
       "path": [
         4162440,
         4162442
@@ -16,15 +27,10 @@
       "relationships": [
         "Starting person",
         "MIGZ ZUBIRI IS NEPHEW OF CRISTIAN ZUBIRI (PAON"
-      ],
-      "source_urls": [
-        "OCR:pd3.jpg"
       ]
     },
     {
       "length": 2,
-      "start_surname": "ZUBIRI",
-      "end_surname": "ZUBIRI",
       "path": [
         4162442,
         4162440
@@ -32,39 +38,26 @@
       "relationships": [
         "Starting person",
         "CRISTIAN ZUBIRI IS NEPHEW OF MIGZ ZUBIRI"
-      ],
-      "source_urls": [
-        "OCR:pd3.jpg"
       ]
     }
   ],
   "people": {
+    "4152469": {
+      "id": 4152469,
+      "full_name": "Juan Miguel Cuna",
+      "position": "COUNCILOR",
+      "location": "MANILA, NCR, CITY OF MANILA, FIRST DISTRICT, NATIONAL CAPITAL REGION"
+    },
     "4162440": {
       "id": 4162440,
-      "first_name": "MIGZ",
-      "middle_name": null,
-      "last_name": "ZUBIRI",
-      "suffix": null,
       "full_name": "MIGZ ZUBIRI",
-      "canonical_name": null,
       "position": "SENATOR OF THE PHILIPPINES",
-      "region": null,
-      "province": null,
-      "municipality_city": null,
       "location": "Location unknown"
     },
     "4162442": {
       "id": 4162442,
-      "first_name": "CRISTIAN",
-      "middle_name": null,
-      "last_name": "ZUBIRI",
-      "suffix": null,
       "full_name": "CRISTIAN ZUBIRI",
-      "canonical_name": null,
       "position": "PAON, OFFICE OF SEN. ZUBIRI",
-      "region": null,
-      "province": null,
-      "municipality_city": null,
       "location": "Location unknown"
     }
   }

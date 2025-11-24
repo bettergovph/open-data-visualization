@@ -2,31 +2,11 @@
   "person": {
     "normalized_name": "JUAN MIGUEL CUNA",
     "display_name": "Juan Miguel Cuna",
-    "chain_count": 2
+    "chain_count": 3
   },
   "chains": [
     {
-      "length": 3,
-      "start_surname": "ZUBIRI",
-      "end_surname": "Cuna",
-      "path": [
-        4162441,
-        4162440,
-        4152469
-      ],
-      "relationships": [
-        "Starting person",
-        "AUDREY ZUBIRI IS WIFE OF MIGZ ZUBIRI",
-        "MIGZ ZUBIRI IS COUSIN OF JUAN MIGUEL CUNA (UNDERSECRETARY"
-      ],
-      "source_urls": [
-        "OCR:pd3.jpg"
-      ]
-    },
-    {
       "length": 2,
-      "start_surname": "Cuna",
-      "end_surname": "ZUBIRI",
       "path": [
         4152469,
         4162440
@@ -34,54 +14,59 @@
       "relationships": [
         "Starting person",
         "JUAN MIGUEL CUNA IS COUSIN OF MIGZ ZUBIRI"
+      ]
+    },
+    {
+      "length": 3,
+      "path": [
+        4152469,
+        4162440,
+        4162441
       ],
-      "source_urls": [
-        "OCR:pd3.jpg"
+      "relationships": [
+        "Starting person",
+        "JUAN MIGUEL CUNA IS COUSIN OF MIGZ ZUBIRI",
+        "MIGZ ZUBIRI IS WIFE OF AUDREY ZUBIRI (REPRESENTATIVE"
+      ]
+    },
+    {
+      "length": 3,
+      "path": [
+        4152469,
+        4162440,
+        4162442
+      ],
+      "relationships": [
+        "Starting person",
+        "JUAN MIGUEL CUNA IS COUSIN OF MIGZ ZUBIRI",
+        "MIGZ ZUBIRI IS NEPHEW OF CRISTIAN ZUBIRI (PAON"
       ]
     }
   ],
   "people": {
+    "4152469": {
+      "id": 4152469,
+      "full_name": "Juan Miguel Cuna",
+      "position": "COUNCILOR",
+      "location": "MANILA, NCR, CITY OF MANILA, FIRST DISTRICT, NATIONAL CAPITAL REGION"
+    },
     "4162440": {
       "id": 4162440,
-      "first_name": "MIGZ",
-      "middle_name": null,
-      "last_name": "ZUBIRI",
-      "suffix": null,
       "full_name": "MIGZ ZUBIRI",
-      "canonical_name": null,
       "position": "SENATOR OF THE PHILIPPINES",
-      "region": null,
-      "province": null,
-      "municipality_city": null,
       "location": "Location unknown"
     },
     "4162441": {
       "id": 4162441,
-      "first_name": "AUDREY",
-      "middle_name": null,
-      "last_name": "ZUBIRI",
-      "suffix": null,
       "full_name": "AUDREY ZUBIRI",
-      "canonical_name": null,
       "position": "REPRESENTATIVE, BUKIDNON SRD DISTRICT",
-      "region": null,
-      "province": null,
-      "municipality_city": null,
       "location": "Location unknown"
     },
-    "4152469": {
-      "id": 4152469,
-      "first_name": "Juan Miguel",
-      "middle_name": "",
-      "last_name": "Cuna",
-      "suffix": "",
-      "full_name": "Juan Miguel Cuna",
-      "canonical_name": "JUAN MIGUEL CUNA",
-      "position": "COUNCILOR",
-      "region": "NATIONAL CAPITAL REGION",
-      "province": "NCR, CITY OF MANILA, FIRST DISTRICT",
-      "municipality_city": "MANILA",
-      "location": "MANILA, NCR, CITY OF MANILA, FIRST DISTRICT, NATIONAL CAPITAL REGION"
+    "4162442": {
+      "id": 4162442,
+      "full_name": "CRISTIAN ZUBIRI",
+      "position": "PAON, OFFICE OF SEN. ZUBIRI",
+      "location": "Location unknown"
     }
   }
 }
