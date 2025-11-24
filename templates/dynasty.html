@@ -4900,14 +4900,13 @@ function displayConflictsNetwork() {
                 .style('box-shadow', '0 4px 12px rgba(0,0,0,0.3)')
                 .style('border', '1px solid rgba(255,255,255,0.2)');
             
-            let contractorHtml = '';
             if (d.isContractor) {
-                // Contractor node tooltip - show connected people with their positions and company roles
+                // Contractor node tooltip - show ALL connected people (officers, incorporators, staff)
                 const connectedPeople = [];
                 links.forEach(l => {
                     if (l.source.id === d.id) {
                         const targetNode = nodes.find(n => n.id === l.target.id);
-                        if (targetNode && !targetNode.isContractor) {
+                        if (targetNode && !targetNode.isContractor && !targetNode.isPartyList) {
                             connectedPeople.push({
                                 name: targetNode.name,
                                 position: targetNode.position || 'Unknown Position',
@@ -4916,7 +4915,7 @@ function displayConflictsNetwork() {
                         }
                     } else if (l.target.id === d.id) {
                         const sourceNode = nodes.find(n => n.id === l.source.id);
-                        if (sourceNode && !sourceNode.isContractor) {
+                        if (sourceNode && !sourceNode.isContractor && !sourceNode.isPartyList) {
                             connectedPeople.push({
                                 name: sourceNode.name,
                                 position: sourceNode.position || 'Unknown Position',
@@ -4934,17 +4933,14 @@ function displayConflictsNetwork() {
                     }
                 });
                 
-                // Filter to only show people who have a companyRole (owners/officers)
-                // People without companyRole are connected via family relationships, not as company officers
-                const uniquePeople = Array.from(uniquePeopleMap.values())
-                    .filter(p => p.companyRole !== null && p.companyRole !== undefined);
+                // Show ALL connected people (not just those with companyRole)
+                const uniquePeople = Array.from(uniquePeopleMap.values());
                 
                 let peopleList = '';
                 if (uniquePeople.length > 0) {
                     peopleList = '<div style="margin-top: 8px; padding-top: 8px; border-top: 1px solid rgba(255,255,255,0.2);">';
-                    peopleList += '<div style="font-weight: 600; margin-bottom: 4px; color: #FCD34D;">Connected People (Owners/Officers):</div>';
-                    uniquePeople.slice(0, 10).forEach(person => {
-                        // Top: Political Position (e.g., "Mayor"), Bottom: Company Role (e.g., "President")
+                    peopleList += '<div style="font-weight: 600; margin-bottom: 4px; color: #FCD34D;">Connected People (Officers/Incorporators/Staff):</div>';
+                    uniquePeople.slice(0, 15).forEach(person => {
                         peopleList += `<div style="font-size: 11px; margin-bottom: 4px; padding-bottom: 3px; border-bottom: 1px solid rgba(255,255,255,0.1);">`;
                         peopleList += `<div style="color: #fff; font-weight: 500;">${person.name}</div>`;
                         if (person.position) {
@@ -4955,8 +4951,8 @@ function displayConflictsNetwork() {
                         }
                         peopleList += `</div>`;
                     });
-                    if (uniquePeople.length > 10) {
-                        peopleList += `<div style="font-size: 10px; color: #9ca3af; margin-top: 4px;">... and ${uniquePeople.length - 10} more</div>`;
+                    if (uniquePeople.length > 15) {
+                        peopleList += `<div style="font-size: 10px; color: #9ca3af; margin-top: 4px;">... and ${uniquePeople.length - 15} more</div>`;
                     }
                     peopleList += '</div>';
                 }
@@ -4967,28 +4963,129 @@ function displayConflictsNetwork() {
                     <div style="color: #a78bfa; margin-bottom: 4px;">${d.relationship_type || 'Business/Contractor Connection'}</div>
                     ${peopleList}
                 `);
-            } else {
-                // Regular person node tooltip
-                if (d.contractorInfo && d.contractorInfo.contractor_name) {
-                    contractorHtml = `<div style="color: #f87171; margin-top: 6px; padding-top: 6px; border-top: 1px solid rgba(255,255,255,0.2);">
-                        <div style="font-weight: 600; margin-bottom: 3px;">⭐ Connected via Contractor:</div>
-                        <div style="font-weight: 500; margin-bottom: 3px;">${d.contractorInfo.contractor_name}</div>`;
-                    if (d.companyRole) {
-                        contractorHtml += `<div style="font-size: 10px; color: #d1d5db; font-style: italic; margin-bottom: 2px;">Company Role: ${d.companyRole}</div>`;
-                    } else {
-                        contractorHtml += `<div style="font-size: 10px; color: #9ca3af; font-style: italic; margin-bottom: 2px;">Company Role: Not available</div>`;
+            } else if (d.isPartyList) {
+                // Party-list node tooltip - show party-list member names
+                const connectedPeople = [];
+                links.forEach(l => {
+                    if (l.source.id === d.id) {
+                        const targetNode = nodes.find(n => n.id === l.target.id);
+                        if (targetNode && !targetNode.isContractor && !targetNode.isPartyList) {
+                            connectedPeople.push({
+                                name: targetNode.name,
+                                position: targetNode.position || 'Unknown Position'
+                            });
+                        }
+                    } else if (l.target.id === d.id) {
+                        const sourceNode = nodes.find(n => n.id === l.source.id);
+                        if (sourceNode && !sourceNode.isContractor && !sourceNode.isPartyList) {
+                            connectedPeople.push({
+                                name: sourceNode.name,
+                                position: sourceNode.position || 'Unknown Position'
+                            });
+                        }
                     }
-                    contractorHtml += `<div style="font-size: 10px; color: #9ca3af; margin-top: 2px;">${d.contractorInfo.relationship_type || 'Business/Contractor Connection'}</div>
-                    </div>`;
+                });
+                
+                // Remove duplicates (by name)
+                const uniquePeopleMap = new Map();
+                connectedPeople.forEach(p => {
+                    if (!uniquePeopleMap.has(p.name)) {
+                        uniquePeopleMap.set(p.name, p);
+                    }
+                });
+                
+                const uniquePeople = Array.from(uniquePeopleMap.values());
+                
+                let peopleList = '';
+                if (uniquePeople.length > 0) {
+                    peopleList = '<div style="margin-top: 8px; padding-top: 8px; border-top: 1px solid rgba(255,255,255,0.2);">';
+                    peopleList += '<div style="font-weight: 600; margin-bottom: 4px; color: #A855F7;">Party-List Members:</div>';
+                    uniquePeople.slice(0, 15).forEach(person => {
+                        peopleList += `<div style="font-size: 11px; margin-bottom: 4px; padding-bottom: 3px; border-bottom: 1px solid rgba(255,255,255,0.1);">`;
+                        peopleList += `<div style="color: #fff; font-weight: 500;">${person.name}</div>`;
+                        if (person.position) {
+                            peopleList += `<div style="color: #d8b4fe; font-size: 10px; margin-top: 1px;">${person.position}</div>`;
+                        }
+                        peopleList += `</div>`;
+                    });
+                    if (uniquePeople.length > 15) {
+                        peopleList += `<div style="font-size: 10px; color: #9ca3af; margin-top: 4px;">... and ${uniquePeople.length - 15} more</div>`;
+                    }
+                    peopleList += '</div>';
+                }
+                
+                tooltip.html(`
+                    <div style="font-weight: bold; margin-bottom: 4px; color: #A855F7;">🏛️ ${d.name}</div>
+                    <div style="color: #d1d5db; margin-bottom: 4px;">📋 Party-List</div>
+                    <div style="color: #c084fc; margin-bottom: 4px;">${d.relationship_type || 'Party-List Membership'}</div>
+                    ${peopleList}
+                `);
+            } else {
+                // Regular person node tooltip - show ONLY direct name connections (no contractor info)
+                // Get direct relationships (not via contractors or party-lists)
+                const directConnections = [];
+                links.forEach(l => {
+                    if (l.isContractorLink || l.isPartyListLink || l.isImplicit) {
+                        return; // Skip contractor, party-list, and implicit links
+                    }
+                    if (l.source.id === d.id) {
+                        const targetNode = nodes.find(n => n.id === l.target.id);
+                        if (targetNode && !targetNode.isContractor && !targetNode.isPartyList) {
+                            directConnections.push({
+                                name: targetNode.name,
+                                position: targetNode.position || 'Unknown Position',
+                                relationship: l.relationship || 'Direct connection'
+                            });
+                        }
+                    } else if (l.target.id === d.id) {
+                        const sourceNode = nodes.find(n => n.id === l.source.id);
+                        if (sourceNode && !sourceNode.isContractor && !sourceNode.isPartyList) {
+                            directConnections.push({
+                                name: sourceNode.name,
+                                position: sourceNode.position || 'Unknown Position',
+                                relationship: l.relationship || 'Direct connection'
+                            });
+                        }
+                    }
+                });
+                
+                // Remove duplicates
+                const uniqueConnectionsMap = new Map();
+                directConnections.forEach(c => {
+                    if (!uniqueConnectionsMap.has(c.name)) {
+                        uniqueConnectionsMap.set(c.name, c);
+                    }
+                });
+                const uniqueConnections = Array.from(uniqueConnectionsMap.values());
+                
+                let connectionsList = '';
+                if (uniqueConnections.length > 0) {
+                    connectionsList = '<div style="margin-top: 8px; padding-top: 8px; border-top: 1px solid rgba(255,255,255,0.2);">';
+                    connectionsList += '<div style="font-weight: 600; margin-bottom: 4px; color: #60a5fa;">Direct Connections:</div>';
+                    uniqueConnections.slice(0, 10).forEach(conn => {
+                        connectionsList += `<div style="font-size: 11px; margin-bottom: 4px; padding-bottom: 3px; border-bottom: 1px solid rgba(255,255,255,0.1);">`;
+                        connectionsList += `<div style="color: #fff; font-weight: 500;">${conn.name}</div>`;
+                        if (conn.position) {
+                            connectionsList += `<div style="color: #60a5fa; font-size: 10px; margin-top: 1px;">${conn.position}</div>`;
+                        }
+                        if (conn.relationship) {
+                            connectionsList += `<div style="color: #9ca3af; font-size: 9px; margin-top: 1px; font-style: italic;">${conn.relationship}</div>`;
+                        }
+                        connectionsList += `</div>`;
+                    });
+                    if (uniqueConnections.length > 10) {
+                        connectionsList += `<div style="font-size: 10px; color: #9ca3af; margin-top: 4px;">... and ${uniqueConnections.length - 10} more</div>`;
+                    }
+                    connectionsList += '</div>';
                 }
                 
                 tooltip.html(`
                     <div style="font-weight: bold; margin-bottom: 4px;">${d.name}</div>
                     <div style="color: #ccc; margin-bottom: 4px; font-weight: 500;">${d.position || 'Unknown Position'}</div>
                     <div style="color: #a78bfa; margin-bottom: 4px;">📍 ${d.location || 'Location unknown'}</div>
-                    <div style="color: #4ade80;">${d.relationship_description || 'Relationship unknown'}</div>
+                    ${d.relationship_description ? `<div style="color: #4ade80; margin-bottom: 4px;">${d.relationship_description}</div>` : ''}
                     ${d.isConnector ? '<div style="color: #fbbf24;">🔗 Connecting Node</div>' : '<div style="color: #60a5fa;">🏛️ Family Member</div>'}
-                    ${contractorHtml}
+                    ${connectionsList}
                 `);
             }
             
@@ -5008,21 +5105,30 @@ function displayConflictsNetwork() {
             d3.select('.conflicts-tooltip').remove();
         });
     
-    // Add labels for family nodes and contractors
+    // Add labels for all nodes (person nodes show full name, contractors/party-lists show their name)
     const labels = svg.append('g')
         .selectAll('text')
-        .data(nodes.filter(d => !d.isConnector || d.isContractor))
+        .data(nodes)
         .enter().append('text')
         .text(d => {
             // Contractors get star symbol + name
             if (d.isContractor) {
                 return `⭐ ${d.surname}`;
             }
-            return d.surname;
+            // Party-lists get their name
+            if (d.isPartyList) {
+                return `🏛️ ${d.surname}`;
+            }
+            // Person nodes get full name
+            return d.name || d.surname;
         })
         .attr('font-size', d => {
             // Contractors get largest labels
             if (d.isContractor) {
+                return '14px';
+            }
+            // Party-lists get large labels
+            if (d.isPartyList) {
                 return '14px';
             }
             // Make contractor-connected labels larger and bolder
@@ -5034,6 +5140,9 @@ function displayConflictsNetwork() {
         .attr('font-weight', d => {
             if (d.isContractor) {
                 return '900'; // Extra bold for contractors
+            }
+            if (d.isPartyList) {
+                return '900'; // Extra bold for party-lists
             }
             if (d.contractorInfo && d.contractorInfo.contractor_name) {
                 return '900'; // Extra bold for contractor-connected nodes
@@ -5047,6 +5156,10 @@ function displayConflictsNetwork() {
             if (d.isContractor) {
                 return '#F59E0B'; // Amber/gold for contractor labels
             }
+            // Purple text for party-lists
+            if (d.isPartyList) {
+                return '#9333EA'; // Purple for party-list labels
+            }
             // White text for contractor-connected nodes for better contrast
             if (d.contractorInfo && d.contractorInfo.contractor_name) {
                 return '#FFFFFF';
@@ -5057,6 +5170,9 @@ function displayConflictsNetwork() {
         .style('text-shadow', d => {
             if (d.isContractor) {
                 return '2px 2px 6px rgba(0,0,0,0.9)'; // Strong shadow for contractor labels
+            }
+            if (d.isPartyList) {
+                return '2px 2px 6px rgba(0,0,0,0.9)'; // Strong shadow for party-list labels
             }
             if (d.contractorInfo && d.contractorInfo.contractor_name) {
                 return '2px 2px 4px rgba(0,0,0,0.8)'; // Stronger shadow for contractor-connected labels

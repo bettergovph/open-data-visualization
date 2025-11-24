@@ -2,16 +2,18 @@
 """
 Generate relationship constellations cache for relationship visualization
 Includes both direct relationships and contractor-mediated connections
+Uses DuckDB and Parquet files instead of PostgreSQL
 """
 
 import asyncio
-import asyncpg
 import json
 import os
 import sys
 from datetime import datetime
 from pathlib import Path
 from dotenv import load_dotenv
+import duckdb
+from generate_relationship_constellations_cache_parquet_helper import DuckDBQueryHelper
 
 
 def load_env_from_dotenv():
@@ -31,35 +33,42 @@ def load_env_from_dotenv():
             os.environ[k] = v
 
 
-async def fetch_people(conn):
-    rows = await conn.fetch(
-        """
-        SELECT id, first_name, middle_name, last_name, suffix, canonical_name, 
-               COALESCE(normalized_name, 
-                   UPPER(TRIM(COALESCE(first_name, '')) || ' ' || TRIM(COALESCE(last_name, '')) || 
-                   CASE WHEN suffix IS NOT NULL AND suffix != '' THEN ' ' || UPPER(TRIM(suffix)) ELSE '' END)
-               ) as normalized_name,
+def fetch_people(parquet_path):
+    """Fetch people from parquet file using DuckDB"""
+    conn = duckdb.connect()
+    try:
+        query = f"""
+        SELECT id, first_name, middle_name, last_name,
+               UPPER(TRIM(COALESCE(first_name, '')) || ' ' || TRIM(COALESCE(last_name, ''))) as normalized_name,
                position, region, province, municipality_city
-        FROM political_dynasties
+        FROM read_parquet('{parquet_path}')
         """
-    )
-    people = {}
-    for row in rows:
-        people[row["id"]] = {
-            "id": row["id"],
-            "first_name": row["first_name"],
-            "middle_name": row["middle_name"],
-            "last_name": row["last_name"],
-            "suffix": row["suffix"],
-            "canonical_name": row["canonical_name"],
-            "normalized_name": row["normalized_name"],  # Use DB column if available
-            "position": row["position"],
-            "region": row["region"],
-            "province": row["province"],
-            "municipality_city": row["municipality_city"],
-        }
-    return people
+        rows = conn.execute(query).fetchall()
+        columns = [desc[0] for desc in conn.description]
+        people = {}
+        for row in rows:
+            row_dict = dict(zip(columns, row))
+            people[row_dict["id"]] = {
+                "id": row_dict["id"],
+                "first_name": row_dict["first_name"],
+                "middle_name": row_dict.get("middle_name"),
+                "last_name": row_dict["last_name"],
+                "normalized_name": row_dict["normalized_name"],
+                "position": row_dict["position"],
+                "region": row_dict["region"],
+                "province": row_dict["province"],
+                "municipality_city": row_dict["municipality_city"],
+            }
+        return people
+    finally:
+        conn.close()
 
+
+# Parquet file paths (module level)
+PARQUET_DIR = Path(__file__).parent.parent.parent / 'data' / 'parquet'
+POLITICAL_DYNASTIES_PARQUET = PARQUET_DIR / 'political_dynasties.parquet'
+RELATIONSHIPS_PARQUET = PARQUET_DIR / 'relationships.parquet'
+POLITICIAN_CONTRACTORS_PARQUET = PARQUET_DIR / 'politician_contractors.parquet'
 
 async def generate_relationship_constellations_cache(test_person=None):
     """Generate JSON cache of relationship constellations between different political families
@@ -74,35 +83,55 @@ async def generate_relationship_constellations_cache(test_person=None):
     if test_person:
         print(f"🧪 TEST MODE: Generating cache only for: {test_person}", flush=True)
     
-    # Database connection
-    conn = await asyncpg.connect(
-        host=os.getenv('POSTGRES_HOST', 'localhost'),
-        port=int(os.getenv('POSTGRES_PORT', 5432)),
-        user=os.getenv('POSTGRES_USER', 'budget_admin'),
-        password=os.getenv('POSTGRES_PASSWORD', ''),
-        database=os.getenv('POSTGRES_DB_DYNASTY', 'dynasty')
-    )
+    if not POLITICAL_DYNASTIES_PARQUET.exists():
+        print(f"❌ Error: {POLITICAL_DYNASTIES_PARQUET} not found!")
+        return None
+    if not RELATIONSHIPS_PARQUET.exists():
+        print(f"❌ Error: {RELATIONSHIPS_PARQUET} not found!")
+        return None
+    
+    # DuckDB query helper (wraps DuckDB for async-like usage)
+    db = DuckDBQueryHelper()
     
     try:
-        print("🔍 Generating relationship constellations cache...")
+        print("🔍 Generating relationship constellations cache (using Parquet files)...")
         import datetime
         start_time = datetime.datetime.now()
         print(f"[{start_time.strftime('%Y-%m-%d %H:%M:%S')}] Starting tree-based BFS chain generation...", flush=True)
         
         # Get party-list memberships for party-list extensions
-        # Use party_list_members table directly (database-level connections)
-        party_list_members_query = """
-        SELECT DISTINCT
-            plm.person_id,
-            plm.party_code,
-            plm.party_list_number,
-            plm.party_name,
-            COALESCE(plm.party_list_number::text || ', ', '') || plm.party_name as party_full_name
-        FROM party_list_members plm
-        JOIN political_dynasties p ON plm.person_id = p.id
-        WHERE plm.party_list_number IS NOT NULL
-        """
-        party_list_members_data = await conn.fetch(party_list_members_query)
+        # Use party_list_members table from parquet or DuckDB database
+        # Use actual party_name if available, otherwise generate from party_list_number
+        PARQUET_DIR = Path(__file__).parent.parent.parent / 'data' / 'parquet'
+        PARTY_LIST_MEMBERS_PARQUET = PARQUET_DIR / 'party_list_members.parquet'
+        
+        if PARTY_LIST_MEMBERS_PARQUET.exists():
+            # Use parquet file
+            party_list_members_query = f"""
+            SELECT DISTINCT
+                plm.person_id,
+                COALESCE(CAST(plm.party_code AS VARCHAR), CAST(plm.party_list_number AS VARCHAR)) as party_code,
+                plm.party_list_number,
+                COALESCE(plm.party_name, 'Party-List ' || CAST(plm.party_list_number AS VARCHAR)) as party_name,
+                COALESCE(plm.party_name, 'Party-List ' || CAST(plm.party_list_number AS VARCHAR)) as party_full_name
+            FROM read_parquet('{PARTY_LIST_MEMBERS_PARQUET}') plm
+            JOIN read_parquet('{POLITICAL_DYNASTIES_PARQUET}') p ON plm.person_id = p.id
+            WHERE plm.party_list_number IS NOT NULL
+            """
+        else:
+            # Fallback to DuckDB database (if attached)
+            party_list_members_query = """
+            SELECT DISTINCT
+                plm.person_id,
+                COALESCE(CAST(plm.party_code AS VARCHAR), CAST(plm.party_list_number AS VARCHAR)) as party_code,
+                plm.party_list_number,
+                COALESCE(plm.party_name, 'Party-List ' || CAST(plm.party_list_number AS VARCHAR)) as party_name,
+                COALESCE(plm.party_name, 'Party-List ' || CAST(plm.party_list_number AS VARCHAR)) as party_full_name
+            FROM party_list_members plm
+            JOIN read_parquet('{}') p ON plm.person_id = p.id
+            WHERE plm.party_list_number IS NOT NULL
+            """.format(str(POLITICAL_DYNASTIES_PARQUET))
+        party_list_members_data = db.execute(party_list_members_query)
         print(f"📊 Found {len(party_list_members_data)} party-list memberships", flush=True)
         
         # Build party-list lookup maps
@@ -130,7 +159,7 @@ async def generate_relationship_constellations_cache(test_person=None):
             cdm.company_name as contractor_name,
             cdm.role as contractor_role
         FROM contractor_dynasty_matches cdm
-        JOIN political_dynasties p ON (
+        JOIN read_parquet('{}') p ON (
             (UPPER(TRIM(p.first_name)) = UPPER(TRIM(cdm.dynasty_first_name))
              AND UPPER(TRIM(p.last_name)) = UPPER(TRIM(cdm.dynasty_last_name)))
             OR
@@ -143,8 +172,8 @@ async def generate_relationship_constellations_cache(test_person=None):
                 FROM politician_contractors pc
                 WHERE UPPER(TRIM(pc.contractor_name)) = UPPER(TRIM(cdm.company_name))
           )
-        """
-        contractor_members_data = await conn.fetch(contractor_members_query)
+        """.format(str(POLITICAL_DYNASTIES_PARQUET))
+        contractor_members_data = db.execute(contractor_members_query)
         print(f"📊 Found {len(contractor_members_data)} contractor connections", flush=True)
         
         # Build contractor lookup maps
@@ -171,7 +200,7 @@ async def generate_relationship_constellations_cache(test_person=None):
         SELECT 
             r.person_id as start_person,
             r.related_person_id as end_person,
-            r.person_id::text || ',' || r.related_person_id::text as path_string,
+            CAST(r.person_id AS VARCHAR) || ',' || CAST(r.related_person_id AS VARCHAR) as path_string,
             COALESCE(r.normalized_description, r.relationship_description) as relationship_string,
             r.source_url,
             1 as chain_length,
@@ -183,9 +212,9 @@ async def generate_relationship_constellations_cache(test_person=None):
             p2.first_name as end_first_name,
             p2.last_name as end_last_name,
             p2.position as end_position
-        FROM relationships r
-        JOIN political_dynasties p1 ON r.person_id = p1.id
-        JOIN political_dynasties p2 ON r.related_person_id = p2.id
+        FROM read_parquet('{}') r
+        JOIN read_parquet('{}') p1 ON r.person_id = p1.id
+        JOIN read_parquet('{}') p2 ON r.related_person_id = p2.id
         WHERE r.person_id != r.related_person_id
           AND (
             -- Different families (original logic) - only one direction to avoid duplicates
@@ -195,8 +224,8 @@ async def generate_relationship_constellations_cache(test_person=None):
             -- Same family BUT at least one connects to different families - allow both directions
             (UPPER(p1.last_name) = UPPER(p2.last_name) AND (
                 EXISTS (
-                    SELECT 1 FROM relationships r2
-                    JOIN political_dynasties p3 ON (
+                    SELECT 1 FROM read_parquet('{}') r2
+                    JOIN read_parquet('{}') p3 ON (
                         (r2.person_id = p3.id AND r2.related_person_id = r.person_id)
                         OR (r2.related_person_id = p3.id AND r2.person_id = r.person_id)
                     )
@@ -205,8 +234,8 @@ async def generate_relationship_constellations_cache(test_person=None):
                     LIMIT 1
                 )
                 OR EXISTS (
-                    SELECT 1 FROM relationships r2
-                    JOIN political_dynasties p3 ON (
+                    SELECT 1 FROM read_parquet('{}') r2
+                    JOIN read_parquet('{}') p3 ON (
                         (r2.person_id = p3.id AND r2.related_person_id = r.related_person_id)
                         OR (r2.related_person_id = p3.id AND r2.person_id = r.related_person_id)
                     )
@@ -216,9 +245,17 @@ async def generate_relationship_constellations_cache(test_person=None):
                 )
             ))
         )
-        """
+        """.format(
+            str(RELATIONSHIPS_PARQUET),
+            str(POLITICAL_DYNASTIES_PARQUET),
+            str(POLITICAL_DYNASTIES_PARQUET),
+            str(RELATIONSHIPS_PARQUET),
+            str(POLITICAL_DYNASTIES_PARQUET),
+            str(RELATIONSHIPS_PARQUET),
+            str(POLITICAL_DYNASTIES_PARQUET)
+        )
         
-        initial_chains = await conn.fetch(level0_query)
+        initial_chains = db.execute(level0_query)
         all_chains = []
         seen_paths = set()
         
@@ -262,6 +299,8 @@ async def generate_relationship_constellations_cache(test_person=None):
             global_rendered_nodes.add(last_person)
             
             # Extension type 1: Direct relationships
+            # Convert path list to SQL array format for DuckDB
+            path_array = ','.join(str(p) for p in path)
             ext1_query = """
                     SELECT 
                         r.related_person_id as next_person_id,
@@ -270,19 +309,19 @@ async def generate_relationship_constellations_cache(test_person=None):
                         p2.last_name,
                         p2.first_name,
                         p2.position
-                    FROM relationships r
-                    JOIN political_dynasties p2 ON r.related_person_id = p2.id
-                    WHERE r.person_id = $1
-              AND r.related_person_id != ALL($2::int[])
+                    FROM read_parquet('{}') r
+                    JOIN read_parquet('{}') p2 ON r.related_person_id = p2.id
+                    WHERE r.person_id = {}
+              AND r.related_person_id NOT IN ({})
                       AND (
-                  UPPER(p2.last_name) != UPPER($3)
+                  UPPER(p2.last_name) != UPPER('{}')
                           OR
-                  (UPPER(p2.last_name) = UPPER($3) AND EXISTS (
-                              SELECT 1 FROM relationships r2
-                              JOIN political_dynasties p3 ON (r2.person_id = p3.id AND r2.related_person_id = r.related_person_id)
+                  (UPPER(p2.last_name) = UPPER('{}') AND EXISTS (
+                              SELECT 1 FROM read_parquet('{}') r2
+                              JOIN read_parquet('{}') p3 ON (r2.person_id = p3.id AND r2.related_person_id = r.related_person_id)
                                        OR (r2.related_person_id = p3.id AND r2.person_id = r.related_person_id)
                               WHERE (r2.person_id = r.related_person_id OR r2.related_person_id = r.related_person_id)
-                        AND UPPER(p3.last_name) != UPPER($3)
+                        AND UPPER(p3.last_name) != UPPER('{}')
                           ))
                       )
                     
@@ -295,24 +334,31 @@ async def generate_relationship_constellations_cache(test_person=None):
                         p1.last_name,
                         p1.first_name,
                         p1.position
-                    FROM relationships r
-                    JOIN political_dynasties p1 ON r.person_id = p1.id
-                    WHERE r.related_person_id = $1
-              AND r.person_id != ALL($2::int[])
+                    FROM read_parquet('{}') r
+                    JOIN read_parquet('{}') p1 ON r.person_id = p1.id
+                    WHERE r.related_person_id = {}
+              AND r.person_id NOT IN ({})
                       AND (
-                  UPPER(p1.last_name) != UPPER($3)
+                  UPPER(p1.last_name) != UPPER('{}')
                           OR
-                  (UPPER(p1.last_name) = UPPER($3) AND EXISTS (
-                              SELECT 1 FROM relationships r2
-                              JOIN political_dynasties p3 ON (r2.person_id = p3.id AND r2.related_person_id = r.person_id)
+                  (UPPER(p1.last_name) = UPPER('{}') AND EXISTS (
+                              SELECT 1 FROM read_parquet('{}') r2
+                              JOIN read_parquet('{}') p3 ON (r2.person_id = p3.id AND r2.related_person_id = r.person_id)
                                        OR (r2.related_person_id = p3.id AND r2.person_id = r.person_id)
                               WHERE (r2.person_id = r.person_id OR r2.related_person_id = r.person_id)
-                        AND UPPER(p3.last_name) != UPPER($3)
+                        AND UPPER(p3.last_name) != UPPER('{}')
                           ))
                       )
-                    """
+                    """.format(
+                str(RELATIONSHIPS_PARQUET), str(POLITICAL_DYNASTIES_PARQUET), last_person, path_array,
+                chain['start_surname'], chain['start_surname'],
+                str(RELATIONSHIPS_PARQUET), str(POLITICAL_DYNASTIES_PARQUET), chain['start_surname'],
+                str(RELATIONSHIPS_PARQUET), str(POLITICAL_DYNASTIES_PARQUET), last_person, path_array,
+                chain['start_surname'], chain['start_surname'],
+                str(RELATIONSHIPS_PARQUET), str(POLITICAL_DYNASTIES_PARQUET), chain['start_surname']
+            )
                     
-            extensions = await conn.fetch(ext1_query, last_person, path, chain['start_surname'])
+            extensions = db.execute(ext1_query)
             
             for ext in extensions:
                 next_person_id = ext['next_person_id']
@@ -375,11 +421,11 @@ async def generate_relationship_constellations_cache(test_person=None):
                         if other_member_id in visited_in_chain:
                             continue
                         
-                        other_person = await conn.fetchrow("""
+                        other_person = db.fetchrow("""
                             SELECT last_name, first_name, position 
-                            FROM political_dynasties 
-                            WHERE id = $1
-                        """, other_member_id)
+                            FROM read_parquet('{}') 
+                            WHERE id = {}
+                        """.format(str(POLITICAL_DYNASTIES_PARQUET), other_member_id))
                         
                         if not other_person:
                             continue
@@ -423,35 +469,35 @@ async def generate_relationship_constellations_cache(test_person=None):
                     # (similar to how we handle direct relationships)
                     
                     # Get contractor role for the current person
-                    current_person_role = await conn.fetchval("""
+                    current_person_role = db.fetchval("""
                         SELECT role FROM contractor_dynasty_matches
-                        WHERE company_name = $1
-                          AND dynasty_first_name = (SELECT first_name FROM political_dynasties WHERE id = $2)
-                          AND dynasty_last_name = (SELECT last_name FROM political_dynasties WHERE id = $2)
+                        WHERE company_name = '{}'
+                          AND dynasty_first_name = (SELECT first_name FROM read_parquet('{}') WHERE id = {})
+                          AND dynasty_last_name = (SELECT last_name FROM read_parquet('{}') WHERE id = {})
                         LIMIT 1
-                    """, contractor_name, last_person)
+                    """.format(contractor_name, str(POLITICAL_DYNASTIES_PARQUET), last_person, str(POLITICAL_DYNASTIES_PARQUET), last_person))
                     
                     for other_member_id in contractor_to_members[contractor_name]:
                         if other_member_id in visited_in_chain:
                             continue
                         
-                        other_person = await conn.fetchrow("""
+                        other_person = db.fetchrow("""
                             SELECT last_name, first_name, position 
-                            FROM political_dynasties 
-                            WHERE id = $1
-                        """, other_member_id)
+                            FROM read_parquet('{}') 
+                            WHERE id = {}
+                        """.format(str(POLITICAL_DYNASTIES_PARQUET), other_member_id))
                         
                         if not other_person:
                             continue
                         
                         # Get contractor role for the other person
-                        other_person_role = await conn.fetchval("""
+                        other_person_role = db.fetchval("""
                             SELECT role FROM contractor_dynasty_matches
-                            WHERE company_name = $1
-                              AND dynasty_first_name = (SELECT first_name FROM political_dynasties WHERE id = $2)
-                              AND dynasty_last_name = (SELECT last_name FROM political_dynasties WHERE id = $2)
+                            WHERE company_name = '{}'
+                              AND dynasty_first_name = (SELECT first_name FROM read_parquet('{}') WHERE id = {})
+                              AND dynasty_last_name = (SELECT last_name FROM read_parquet('{}') WHERE id = {})
                             LIMIT 1
-                        """, contractor_name, other_member_id)
+                        """.format(contractor_name, str(POLITICAL_DYNASTIES_PARQUET), other_member_id, str(POLITICAL_DYNASTIES_PARQUET), other_member_id))
                         
                         new_path = path + [other_member_id]
                         new_path_string = ','.join(str(p) for p in new_path)
@@ -490,8 +536,8 @@ async def generate_relationship_constellations_cache(test_person=None):
         for i, initial_chain_record in enumerate(initial_chains):
             if (i + 1) % 50 == 0:
                 print(f"  Processing chain {i+1}/{len(initial_chains)} (found {len(all_chains)} chains so far, {len(global_rendered_nodes)} nodes rendered)...", flush=True)
-            # Convert asyncpg.Record to dict for modification
-            initial_chain = dict(initial_chain_record)
+            # Convert dict (already from DuckDB) to dict for modification
+            initial_chain = dict(initial_chain_record) if isinstance(initial_chain_record, dict) else initial_chain_record
             # Initialize source_urls for level 0 chains
             if 'source_urls' not in initial_chain:
                 initial_chain['source_urls'] = []
@@ -514,7 +560,7 @@ async def generate_relationship_constellations_cache(test_person=None):
                 pc.contractor_name AS company_name,
                 pc.politician_id AS person_id,
                 COALESCE(pc.notes, 'Listed in Rappler Politicontractors tracker') AS role
-            FROM politician_contractors pc
+            FROM read_parquet('{}') pc
         ),
         contractor_connections AS (
             SELECT
@@ -545,13 +591,16 @@ async def generate_relationship_constellations_cache(test_person=None):
             p1.last_name as start_surname,
             p2.last_name as end_surname
         FROM contractor_connections cc
-        JOIN political_dynasties p1 ON p1.id = cc.person1_id
-        JOIN political_dynasties p2 ON p2.id = cc.person2_id
+        JOIN read_parquet('{}') p1 ON p1.id = cc.person1_id
+        JOIN read_parquet('{}') p2 ON p2.id = cc.person2_id
         WHERE p1.id != p2.id
         ORDER BY cc.contractor_name, p1.last_name, p2.last_name
-        """
+        """.format(
+            str(POLITICIAN_CONTRACTORS_PARQUET),
+            str(POLITICAL_DYNASTIES_PARQUET), str(POLITICAL_DYNASTIES_PARQUET)
+        )
         
-        contractor_chains = await conn.fetch(contractor_relationships_query)
+        contractor_chains = db.execute(contractor_relationships_query)
         print(f"📊 Found {len(contractor_chains)} contractor-mediated connections", flush=True)
         
         # Also add single-person contractors (contractors with only 1 person connected)
@@ -563,7 +612,7 @@ async def generate_relationship_constellations_cache(test_person=None):
             SELECT
                 contractor_name,
                 COUNT(DISTINCT politician_id) AS person_count
-            FROM politician_contractors
+            FROM read_parquet('{}')
             GROUP BY contractor_name
         ),
         single_contractor_people AS (
@@ -571,7 +620,7 @@ async def generate_relationship_constellations_cache(test_person=None):
                 pc.contractor_name,
                 pc.politician_id,
                 COALESCE(pc.notes, 'Listed in Rappler Politicontractors tracker') AS role
-            FROM politician_contractors pc
+            FROM read_parquet('{}') pc
             JOIN company_person_counts cpc
               ON pc.contractor_name = cpc.contractor_name
             WHERE cpc.person_count = 1
@@ -592,10 +641,10 @@ async def generate_relationship_constellations_cache(test_person=None):
             p.last_name as start_surname,
             p.last_name as end_surname
         FROM single_contractor_people scp
-        JOIN political_dynasties p ON p.id = scp.politician_id
-        """
+        JOIN read_parquet('{}') p ON p.id = scp.politician_id
+        """.format(str(POLITICIAN_CONTRACTORS_PARQUET), str(POLITICIAN_CONTRACTORS_PARQUET), str(POLITICAL_DYNASTIES_PARQUET))
         
-        single_person_chains = await conn.fetch(single_person_contractors_query)
+        single_person_chains = db.execute(single_person_contractors_query)
         print(f"📊 Found {len(single_person_chains)} single-person contractor connections", flush=True)
         
         # Convert contractor connections to same format as relationship chains
@@ -627,42 +676,27 @@ async def generate_relationship_constellations_cache(test_person=None):
         
         # Use party_list_members table directly (database-level connections)
         party_list_standalone_query = """
-        WITH party_list_members AS (
-            SELECT DISTINCT
-                plm.person_id,
-                p.first_name,
-                p.last_name,
-                p.position,
-                plm.party_code,
-                plm.party_list_number,
-                plm.party_name,
-                COALESCE(plm.party_list_number::text || ', ', '') || plm.party_name as party_full_name
-            FROM party_list_members plm
-            JOIN political_dynasties p ON plm.person_id = p.id
-            WHERE plm.party_list_number IS NOT NULL
-        ),
-        party_list_connections AS (
+        WITH party_list_connections AS (
             SELECT DISTINCT
                 plm1.person_id as person1_id,
                 plm2.person_id as person2_id,
-                plm1.party_code,
+                COALESCE(CAST(plm1.party_code AS VARCHAR), CAST(plm1.party_list_number AS VARCHAR)) as party_code,
                 plm1.party_list_number,
-                plm1.party_name,
-                plm1.party_full_name,
+                COALESCE(plm1.party_name, 'Party-List ' || CAST(plm1.party_list_number AS VARCHAR)) as party_name,
+                COALESCE(plm1.party_name, 'Party-List ' || CAST(plm1.party_list_number AS VARCHAR)) as party_full_name,
                 'Party-List Membership' as relationship_type,
                 p1.last_name as person1_last_name,
                 p2.last_name as person2_last_name
             FROM party_list_members plm1
             JOIN party_list_members plm2
                 ON plm1.party_list_number = plm2.party_list_number
-                AND plm1.party_name = plm2.party_name
                 AND plm1.person_id != plm2.person_id
-            JOIN political_dynasties p1 ON plm1.person_id = p1.id
-            JOIN political_dynasties p2 ON plm2.person_id = p2.id
+            JOIN read_parquet('{}') p1 ON plm1.person_id = p1.id
+            JOIN read_parquet('{}') p2 ON plm2.person_id = p2.id
             WHERE UPPER(p1.last_name) != UPPER(p2.last_name)  -- Different families (case-insensitive)
               -- Only include if these two people are NOT already connected via direct relationship
               AND NOT EXISTS (
-                  SELECT 1 FROM relationships r
+                  SELECT 1 FROM read_parquet('{}') r
                   WHERE (r.person_id = plm1.person_id AND r.related_person_id = plm2.person_id)
                      OR (r.person_id = plm2.person_id AND r.related_person_id = plm1.person_id)
               )
@@ -684,13 +718,17 @@ async def generate_relationship_constellations_cache(test_person=None):
             p1.last_name as start_surname,
             p2.last_name as end_surname
         FROM party_list_connections plc
-        JOIN political_dynasties p1 ON plc.person1_id = p1.id
-        JOIN political_dynasties p2 ON plc.person2_id = p2.id
+        JOIN read_parquet('{}') p1 ON plc.person1_id = p1.id
+        JOIN read_parquet('{}') p2 ON plc.person2_id = p2.id
         WHERE p1.id != p2.id
         ORDER BY plc.party_name, p1.last_name, p2.last_name
-        """
+        """.format(
+            str(POLITICAL_DYNASTIES_PARQUET), str(POLITICAL_DYNASTIES_PARQUET),
+            str(RELATIONSHIPS_PARQUET),
+            str(POLITICAL_DYNASTIES_PARQUET), str(POLITICAL_DYNASTIES_PARQUET)
+        )
         
-        party_list_standalone_chains = await conn.fetch(party_list_standalone_query)
+        party_list_standalone_chains = db.execute(party_list_standalone_query)
         print(f"📊 Found {len(party_list_standalone_chains)} standalone party-list connections (families only connected via party-list)", flush=True)
         
         # Also add single-person party-list connections (party-lists with only 1 person)
@@ -699,13 +737,13 @@ async def generate_relationship_constellations_cache(test_person=None):
         single_person_party_list_query = """
         WITH party_list_person_counts AS (
             SELECT 
-                plm.party_code,
+                COALESCE(CAST(plm.party_code AS VARCHAR), CAST(plm.party_list_number AS VARCHAR)) as party_code,
                 plm.party_list_number,
-                plm.party_name,
+                COALESCE(plm.party_name, 'Party-List ' || CAST(plm.party_list_number AS VARCHAR)) as party_name,
                 COUNT(DISTINCT plm.person_id) as person_count
             FROM party_list_members plm
             WHERE plm.party_list_number IS NOT NULL
-            GROUP BY plm.party_code, plm.party_list_number, plm.party_name
+            GROUP BY plm.party_list_number, plm.party_code, plm.party_name
         ),
         single_person_party_lists AS (
             SELECT plpc.party_code, plpc.party_list_number, plpc.party_name
@@ -717,24 +755,20 @@ async def generate_relationship_constellations_cache(test_person=None):
                 sppl.party_code,
                 sppl.party_list_number,
                 sppl.party_name,
-                COALESCE(sppl.party_list_number::text || ', ', '') || sppl.party_name as party_full_name,
+                sppl.party_name as party_full_name,
                 p.id as person_id,
                 p.first_name,
                 p.last_name,
                 p.position
             FROM single_person_party_lists sppl
             JOIN party_list_members plm ON (
-                plm.party_code = sppl.party_code
-                AND plm.party_list_number = sppl.party_list_number
-                AND plm.party_name = sppl.party_name
+                plm.party_list_number = sppl.party_list_number
             )
-            JOIN political_dynasties p ON plm.person_id = p.id
+            JOIN read_parquet('{}') p ON plm.person_id = p.id
             WHERE NOT EXISTS (
                   -- Don't include if already in party_list_standalone_chains (has multiple people)
                   SELECT 1 FROM party_list_person_counts plpc2
-                  WHERE plpc2.party_code = sppl.party_code
-                    AND plpc2.party_list_number = sppl.party_list_number
-                    AND plpc2.party_name = sppl.party_name
+                  WHERE plpc2.party_list_number = sppl.party_list_number
                     AND plpc2.person_count > 1
               )
         )
@@ -755,9 +789,9 @@ async def generate_relationship_constellations_cache(test_person=None):
             spp.last_name as start_surname,
             spp.last_name as end_surname
         FROM single_party_list_people spp
-        """
+        """.format(str(POLITICAL_DYNASTIES_PARQUET))
         
-        single_person_party_list_chains = await conn.fetch(single_person_party_list_query)
+        single_person_party_list_chains = db.execute(single_person_party_list_query)
         print(f"📊 Found {len(single_person_party_list_chains)} single-person party-list connections", flush=True)
         
         # Convert standalone party-list connections to same format
@@ -836,7 +870,7 @@ async def generate_relationship_constellations_cache(test_person=None):
         # (Party-list extensions during tree traversal are already included in chains)
         all_chains = list(chains) + contractor_relationships + party_list_standalone
         
-        people_cache = await fetch_people(conn)
+        people_cache = fetch_people(POLITICAL_DYNASTIES_PARQUET)
 
         # Format the data
         formatted_chains = []
@@ -880,19 +914,22 @@ async def generate_relationship_constellations_cache(test_person=None):
                             location_parts.append(person['region'])
                         location = ', '.join(location_parts) if location_parts else 'Location unknown'
                         
-                        # Store person metadata once
+                        # Build location string
+                        location_parts = []
+                        if person['municipality_city']:
+                            location_parts.append(person['municipality_city'])
+                        if person['province']:
+                            location_parts.append(person['province'])
+                        if person['region']:
+                            location_parts.append(person['region'])
+                        location = ', '.join(location_parts) if location_parts else 'Location unknown'
+                        
+                        # Store person metadata once - SIMPLIFIED for popups
+                        # Only keep what's needed: id, full name, position, and location context
                         people_dict[person_id] = {
                             "id": person_id,
-                            "first_name": person['first_name'],
-                            "middle_name": person.get('middle_name'),
-                            "last_name": person['last_name'],
-                            "suffix": person.get('suffix'),
                             "full_name": full_name,
-                            "canonical_name": person.get('canonical_name'),
                             "position": person['position'],
-                            "region": person['region'],
-                            "province": person['province'],
-                            "municipality_city": person['municipality_city'],
                             "location": location
                         }
                     
@@ -929,11 +966,8 @@ async def generate_relationship_constellations_cache(test_person=None):
             
             chain_data = {
                 "length": chain_length,
-                "start_surname": chain['start_surname'],
-                "end_surname": chain['end_surname'],
                 "path": path_person_ids,  # Store only person IDs
                 "relationships": path_relationships,  # Store relationship descriptions for each hop
-                "source_urls": chain.get('source_urls', [])  # Store source URLs for the chain
             }
             if chain.get('is_standalone_party_list'):
                 chain_data["is_standalone_party_list"] = True
@@ -949,33 +983,36 @@ async def generate_relationship_constellations_cache(test_person=None):
                 if path_person_ids and len(path_person_ids) > 0:
                     start_person_id = path_person_ids[0]
                     if start_person_id:
-                        start_role_db = await conn.fetchval("""
+                        # Escape apostrophes in contractor name for SQL
+                        contractor_name_escaped = chain['contractor_name'].replace("'", "''")
+                        start_role = db.fetchval("""
                             SELECT role FROM contractor_dynasty_matches
-                            WHERE company_name = $1
-                              AND dynasty_first_name = (SELECT first_name FROM political_dynasties WHERE id = $2)
-                              AND dynasty_last_name = (SELECT last_name FROM political_dynasties WHERE id = $2)
+                            WHERE company_name = '{}'
+                              AND dynasty_first_name = (SELECT first_name FROM read_parquet('{}') WHERE id = {})
+                              AND dynasty_last_name = (SELECT last_name FROM read_parquet('{}') WHERE id = {})
                             LIMIT 1
-                        """, chain['contractor_name'], start_person_id)
-                        start_role = start_role_db
+                        """.format(contractor_name_escaped, str(POLITICAL_DYNASTIES_PARQUET), start_person_id, str(POLITICAL_DYNASTIES_PARQUET), start_person_id))
                 
                 # Check if end_person is in contractor_dynasty_matches for this contractor
                 if path_person_ids and len(path_person_ids) > 0:
                     end_person_id = path_person_ids[-1]
                     if end_person_id:
-                        end_role_db = await conn.fetchval("""
+                        # Escape apostrophes in contractor name for SQL
+                        contractor_name_escaped = chain['contractor_name'].replace("'", "''")
+                        end_role = db.fetchval("""
                             SELECT role FROM contractor_dynasty_matches
-                            WHERE company_name = $1
-                              AND dynasty_first_name = (SELECT first_name FROM political_dynasties WHERE id = $2)
-                              AND dynasty_last_name = (SELECT last_name FROM political_dynasties WHERE id = $2)
+                            WHERE company_name = '{}'
+                              AND dynasty_first_name = (SELECT first_name FROM read_parquet('{}') WHERE id = {})
+                              AND dynasty_last_name = (SELECT last_name FROM read_parquet('{}') WHERE id = {})
                             LIMIT 1
-                        """, chain['contractor_name'], end_person_id)
-                        end_role = end_role_db
+                        """.format(contractor_name_escaped, str(POLITICAL_DYNASTIES_PARQUET), end_person_id, str(POLITICAL_DYNASTIES_PARQUET), end_person_id))
                 
                 chain_data["contractor_connection"] = {
                     "contractor_name": chain['contractor_name'],
-                    "relationship_type": chain.get('relationship_type', 'Business/Contractor Connection'),
                     "start_company_role": start_role,
-                    "end_company_role": end_role
+                    "end_company_role": end_role,
+                    "start_position": chain.get('start_position'),
+                    "end_position": chain.get('end_position')
                 }
             
             # Add party-list info for party-list-mediated connections
@@ -1001,11 +1038,8 @@ async def generate_relationship_constellations_cache(test_person=None):
                 
                 chain_data["length"] = chain_length
                 chain_data["party_list_connection"] = {
-                    "party_code": chain.get('party_code'),
-                    "party_list_number": party_list_number,
                     "party_name": party_name,
-                    "party_full_name": party_full_name,
-                    "relationship_type": chain.get('relationship_type', 'Party-List Membership')
+                    "party_full_name": party_full_name
                 }
             
             formatted_chains.append(chain_data)
@@ -1050,8 +1084,20 @@ async def generate_relationship_constellations_cache(test_person=None):
         chains_by_constellation = defaultdict(list)
         
         for chain in formatted_chains:
-            start_family = chain.get('start_surname', '').upper().strip()
-            end_family = chain.get('end_surname', '').upper().strip()
+            # Extract surnames from people_dict using the start/end IDs from the path
+            start_person_id = chain['path'][0] if chain['path'] else None
+            end_person_id = chain['path'][-1] if chain['path'] else None
+            
+            start_family = ""
+            end_family = ""
+            
+            # We need to look up the surnames from the original people_cache since we stripped them from people_dict
+            if start_person_id and start_person_id in people_cache:
+                start_family = people_cache[start_person_id]['last_name'].upper().strip()
+            
+            if end_person_id and end_person_id in people_cache:
+                end_family = people_cache[end_person_id]['last_name'].upper().strip()
+                
             if start_family and end_family and start_family != end_family:
                 # Normalize: use sorted tuple so A->B and B->A are the same constellation
                 constellation_key = tuple(sorted([start_family, end_family]))
@@ -1092,9 +1138,10 @@ async def generate_relationship_constellations_cache(test_person=None):
                 name_parts.append(suffix.strip().upper())
             return ' '.join(name_parts)
         
-        # Build person index from people_dict (use normalized_name from DB)
+        # Build person index from people_cache (use normalized_name from DB)
+        # We use people_cache here because people_dict is now simplified and lacks metadata
         person_name_to_id = {}  # normalized_name -> person_id
-        for person_id, person_data in people_dict.items():
+        for person_id, person_data in people_cache.items():
             # Use normalized_name from DB if available, otherwise compute it
             normalized_name = person_data.get('normalized_name')
             if not normalized_name:
@@ -1113,7 +1160,7 @@ async def generate_relationship_constellations_cache(test_person=None):
             
             # For each person in the chain, add this chain to their index
             for person_id in person_ids:
-                person_data = people_dict.get(person_id)
+                person_data = people_cache.get(person_id)
                 if person_data:
                     # Use normalized_name from DB if available, otherwise compute it
                     normalized_name = person_data.get('normalized_name')
@@ -1132,7 +1179,7 @@ async def generate_relationship_constellations_cache(test_person=None):
         for normalized_name in sorted(chains_by_person.keys()):
             person_id = person_name_to_id.get(normalized_name)
             if person_id:
-                person_data = people_dict.get(person_id)
+                person_data = people_cache.get(person_id)
                 if person_data:
                     # Create display name
                     display_parts = []
@@ -1271,7 +1318,7 @@ async def generate_relationship_constellations_cache(test_person=None):
         return cache_data
         
     finally:
-        await conn.close()
+        db.close()
 
 if __name__ == "__main__":
     # Check for test person argument
