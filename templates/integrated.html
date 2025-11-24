@@ -979,7 +979,6 @@ function toggleMobileMenu() {
                                     <input type="text" id="projects-filter-contractor" placeholder="Filter by contractor name..." style="padding: 12px 16px; border: 2px solid #333; border-radius: 6px; font-size: 15px; font-weight: 500; background: white; color: #333; box-shadow: 0 2px 8px rgba(0,0,0,0.1);" onkeyup="handleProjectsFilterChange()">
                                 </div>
                                 <div style="display: flex; align-items: end; gap: 10px;">
-                                    <button onclick="loadProjectsData()" style="padding: 12px 24px; background: #667eea; color: white; border: 2px solid #667eea; border-radius: 6px; font-size: 14px; font-weight: 600; cursor: pointer; transition: all 0.3s ease; box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);" onmouseover="this.style.background='#5a67d8'; this.style.transform='translateY(-2px)';" onmouseout="this.style.background='#667eea'; this.style.transform='translateY(0)';">🔍 Search</button>
                                     <button onclick="clearProjectsFilters()" style="padding: 12px 24px; background: #e9ecef; color: #333; border: 2px solid #dee2e6; border-radius: 6px; font-size: 14px; font-weight: 600; cursor: pointer; transition: all 0.3s ease;" onmouseover="this.style.background='#dee2e6';" onmouseout="this.style.background='#e9ecef';">🔄 Clear</button>
                                 </div>
                             </div>
@@ -1039,6 +1038,11 @@ function switchTab(tabName) {
         // Update active tab panel
         document.querySelectorAll('.budget-tab-panel').forEach(p => p.classList.remove('active'));
         document.getElementById(`tab-${tabName}`).classList.add('active');
+        
+        // Update URL hash
+        if (window.location.hash !== `#${tabName}`) {
+            window.location.hash = `#${tabName}`;
+        }
         
         // Load data for specific tabs
         if (tabName === 'table') {
@@ -2357,7 +2361,7 @@ function calculateSummary(projects) {
     
     return summary;
 }
-// Load on page load
+    // Load on page load
 document.addEventListener('DOMContentLoaded', async () => {
     const congressmanList = document.getElementById('congressman-list');
     if (congressmanList && initialCongressmanNames.length === 0) {
@@ -2367,8 +2371,59 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
     await loadIntegratedCoverageSummary();
     sortCongressmanOptions();
-    // Load Table tab data on page load (it's the active tab)
-    loadAllProjects();
+    
+    // Check URL hash and switch to appropriate tab
+    const hash = window.location.hash;
+    if (hash) {
+        const tabName = hash.substring(1); // Remove the #
+        if (tabName && document.getElementById(`tab-${tabName}`)) {
+            switchTab(tabName);
+        } else {
+            // Default to table tab if hash doesn't match a valid tab
+            loadAllProjects();
+        }
+    } else {
+        // Load Table tab data on page load (it's the active tab)
+        loadAllProjects();
+    }
+    
+    // Check for URL parameters to pre-fill contractor filter
+    const urlParams = new URLSearchParams(window.location.search);
+    const contractorParam = urlParams.get('contractor');
+    if (contractorParam) {
+        const contractorFilter = document.getElementById('projects-filter-contractor');
+        if (contractorFilter) {
+            contractorFilter.value = decodeURIComponent(contractorParam);
+            // Switch to projects tab if not already there
+            if (window.location.hash !== '#projects') {
+                switchTab('projects');
+            } else {
+                // Already on projects tab, just trigger the filter
+                setTimeout(() => {
+                    handleProjectsFilterChange();
+                }, 100);
+            }
+        }
+    }
+    
+    // Listen for hash changes (e.g., when clicking contractor node from dynasty page)
+    window.addEventListener('hashchange', function() {
+        const hash = window.location.hash;
+        if (hash) {
+            const tabName = hash.substring(1);
+            if (tabName && document.getElementById(`tab-${tabName}`)) {
+                switchTab(tabName);
+                // If there's a contractor parameter, trigger filter after tab loads
+                const urlParams = new URLSearchParams(window.location.search);
+                const contractorParam = urlParams.get('contractor');
+                if (contractorParam && tabName === 'projects') {
+                    setTimeout(() => {
+                        handleProjectsFilterChange();
+                    }, 100);
+                }
+            }
+        }
+    });
     
     // Add filter change listener for Congressman tab
     const congressmanFilter = document.getElementById('congressman-filter');
