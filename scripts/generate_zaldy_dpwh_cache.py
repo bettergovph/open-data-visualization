@@ -16,6 +16,7 @@ from pathlib import Path
 from datetime import datetime
 from typing import Dict, List, Any, Optional, Tuple
 from dotenv import load_dotenv
+from difflib import SequenceMatcher
 
 # Add parent directory to path for imports
 sys.path.insert(0, str(Path(__file__).parent.parent))
@@ -168,6 +169,96 @@ def amount_matches(amount1: Optional[float], amount2: Optional[float], max_diff:
     max_absolute_diff = max(max_diff, avg_amount * max_percentage_diff)
     
     return absolute_diff <= max_absolute_diff and percentage_diff <= max_percentage_diff
+
+
+def normalize_location(location: str) -> str:
+    """Normalize location string for comparison."""
+    if not location:
+        return ""
+    # Convert to uppercase, remove common words, strip whitespace
+    location = location.upper().strip()
+    # Remove common location prefixes/suffixes
+    location = re.sub(r'\b(PROVINCE|CITY|MUNICIPALITY|MUNICIPAL|BARANGAY|BRGY)\b', '', location)
+    location = re.sub(r'\s+', ' ', location).strip()
+    return location
+
+
+def location_match_score(csv_location: str, db_province: str, db_region: str = "") -> float:
+    """Calculate location match score (0-1) using province/region from database."""
+    if not csv_location:
+        return 0.0
+    
+    csv_normalized = normalize_location(csv_location)
+    province_normalized = normalize_location(db_province or "")
+    region_normalized = normalize_location(db_region or "")
+    
+    # Check if CSV location contains province or vice versa
+    if province_normalized and len(province_normalized) > 3:
+        if csv_normalized in province_normalized or province_normalized in csv_normalized:
+            return 1.0
+        # Check similarity
+        similarity = SequenceMatcher(None, csv_normalized, province_normalized).ratio()
+        if similarity >= 0.7:
+            return similarity
+    
+    # Check region if province didn't match
+    if region_normalized and len(region_normalized) > 3:
+        if csv_normalized in region_normalized or region_normalized in csv_normalized:
+            return 0.8  # Region match is less strong than province
+        similarity = SequenceMatcher(None, csv_normalized, region_normalized).ratio()
+        if similarity >= 0.7:
+            return similarity * 0.8
+    
+    return 0.0
+
+
+def contractor_match_score(csv_contractor: str, db_contractor: str) -> float:
+    """Calculate contractor match score (0-1)."""
+    if not csv_contractor or not db_contractor:
+        return 0.0
+    
+    csv_normalized = csv_contractor.upper().strip()
+    db_normalized = db_contractor.upper().strip()
+    
+    # Exact match
+    if csv_normalized == db_normalized:
+        return 1.0
+    
+    # Check if one contains the other
+    if csv_normalized in db_normalized or db_normalized in csv_normalized:
+        return 0.9
+    
+    # Calculate similarity
+    similarity = SequenceMatcher(None, csv_normalized, db_normalized).ratio()
+    if similarity >= 0.7:
+        return similarity
+    
+    return 0.0
+
+
+def extract_location_from_title(title: str) -> Optional[str]:
+    """Extract location name from project title (province, city, municipality)."""
+    if not title:
+        return None
+    
+    # Common location patterns in titles
+    # Pattern 1: "..., Province" or "..., City"
+    location_patterns = [
+        r',\s*([A-Z][a-z]+(?:\s+[A-Z][a-z]+)*)\s*(?:Province|City|Municipality)',
+        r'in\s+([A-Z][a-z]+(?:\s+[A-Z][a-z]+)*)\s*(?:Province|City|Municipality)',
+        r'at\s+([A-Z][a-z]+(?:\s+[A-Z][a-z]+)*)\s*(?:Province|City|Municipality)',
+        r',\s*([A-Z][a-z]+(?:\s+[A-Z][a-z]+)*)$',  # Location at end of title
+    ]
+    
+    for pattern in location_patterns:
+        match = re.search(pattern, title, re.IGNORECASE)
+        if match:
+            location = match.group(1).strip()
+            # Filter out common non-location words
+            if location.lower() not in ['section', 'road', 'bridge', 'bypass', 'coastal']:
+                return location
+    
+    return None
 
 
 def extract_unique_words(text: str) -> Tuple[set, set]:
@@ -368,7 +459,8 @@ def extract_gaa644_components(text: str) -> Dict[str, Optional[str]]:
 
 
 async def find_flood_match(flood_client: FloodControlClient, project_title: str, amount: Optional[float], gaa_page: str = "") -> Optional[Dict[str, Any]]:
-    """Find matching project in Flood DB and return ContractID, Contractor, DB title, and amount."""
+    """Find matching project in Flood DB and return ContractID, Contractor, DB title, and amount.
+    Uses title, amount, location (province/region), and contractor as matching criteria."""
     try:
         # Normalize title (remove leading numbers)
         normalized_title = normalize_title(project_title)
@@ -376,6 +468,9 @@ async def find_flood_match(flood_client: FloodControlClient, project_title: str,
             query=normalized_title,
             limit=20
         )
+        
+        # Extract location from CSV title for additional matching
+        csv_location = extract_location_from_title(project_title)
         
         # Extract chainage markers and key words from normalized title
         title_chainages = extract_chainage_markers(project_title)
@@ -441,18 +536,34 @@ async def find_flood_match(flood_client: FloodControlClient, project_title: str,
                 if not chainage_match and title_score < min_score_no_amount:
                     continue
             
-            # Calculate overall score
+            # Additional matching: location (province/region) from database
+            location_score = 0.0
+            if csv_location:
+                db_province = getattr(proj, 'Province', None) or ""
+                db_region = getattr(proj, 'Region', None) or ""
+                location_score = location_match_score(csv_location, db_province, db_region)
+            
+            # Additional matching: contractor (if available in both)
+            contractor_score = 0.0
+            db_contractor = getattr(proj, 'Contractor', None) or ""
+            # Note: CSV doesn't have contractor, so this is for validation only
+            
+            # Calculate overall score with location and contractor bonuses
             score = title_score
             if chainage_match:
                 score += 0.5  # Strong bonus for chainage match
             if amount is not None and db_amount is not None and amount_matches(amount, db_amount):
                 score += 0.2  # Bonus for amount match
+            if location_score > 0.7:
+                score += 0.15  # Bonus for location match (province/region)
+            if contractor_score > 0.7:
+                score += 0.1  # Bonus for contractor match
             
             if score > best_score:
                 best_score = score
                 best_match = {
                     "contract_id": proj.ContractID or proj.ProjectID or "",
-                    "contractor": proj.Contractor or "",
+                    "contractor": db_contractor,
                     "db_project_title": proj_desc,
                     "db_amount": db_amount
                 }
@@ -719,6 +830,9 @@ async def find_dime_match(dime_conn: asyncpg.Connection, project_title: str, amo
                 search_pattern = f"%{normalized_title}%"
                 search_patterns = [search_pattern]
         
+        # Extract location from CSV title for additional matching
+        csv_location = extract_location_from_title(project_title)
+        
         # Build query: try all chainage patterns (at least 1 match, more = higher confidence)
         # OR try all keyword permutations if we have 2+ keywords
         if search_patterns and (len(search_patterns) > 1 or (filtered_locations and len(filtered_locations) >= 2)):
@@ -734,7 +848,7 @@ async def find_dime_match(dime_conn: asyncpg.Connection, project_title: str, amo
             pattern_conditions = ' OR '.join([f"(project_name ILIKE ${i+1} OR description ILIKE ${i+1})" 
                                             for i in range(len(all_patterns))])
             dime_query = f"""
-                SELECT project_code, contractors, cost, project_name, description
+                SELECT project_code, contractors, cost, project_name, description, province, city
                 FROM projects
                 WHERE ({pattern_conditions})
                 LIMIT 20
@@ -742,7 +856,7 @@ async def find_dime_match(dime_conn: asyncpg.Connection, project_title: str, amo
             rows = await dime_conn.fetch(dime_query, *all_patterns)
         else:
             dime_query = """
-                SELECT project_code, contractors, cost, project_name, description
+                SELECT project_code, contractors, cost, project_name, description, province, city
                 FROM projects
                 WHERE (project_name ILIKE $1 OR description ILIKE $1)
                 LIMIT 20
@@ -752,7 +866,9 @@ async def find_dime_match(dime_conn: asyncpg.Connection, project_title: str, amo
         # Simple matching: SQL pattern + amount threshold
         # BUT: For chainage patterns, verify that the exact chainage ranges match
         # AND: For bridge identifiers, verify they match exactly
+        # AND: Use location (province/city) and contractor as additional matching criteria
         best_match = None
+        best_score = 0.0
         
         # Extract bridge identifiers from CSV title
         csv_bridge_ids = extract_bridge_identifiers(project_title)
@@ -798,17 +914,30 @@ async def find_dime_match(dime_conn: asyncpg.Connection, project_title: str, amo
                 if not csv_chainage_pairs.intersection(db_chainage_pairs):
                     continue  # No exact chainage+offset match, skip this row
             
+            # Additional matching: location (province/city) from database
+            location_score = 0.0
+            if csv_location:
+                db_province = row.get('province') or ""
+                db_city = row.get('city') or ""
+                location_score = location_match_score(csv_location, db_province, db_city)
+            
+            # Calculate base score (1.0 if we got here, meaning pattern matched)
+            score = 1.0
+            if location_score > 0.7:
+                score += 0.15  # Bonus for location match
+            
             # If we get here, it's a valid match
             contractors = row.get('contractors', [])
             contractor_str = ", ".join(contractors) if isinstance(contractors, list) else (contractors or "")
             
-            best_match = {
-                "contract_id": row.get('project_code') or "",
-                "contractor": contractor_str,
-                "db_project_title": db_title,
-                "db_amount": db_amount
-            }
-            break  # Take first match that passes validation
+            if score > best_score:
+                best_score = score
+                best_match = {
+                    "contract_id": row.get('project_code') or "",
+                    "contractor": contractor_str,
+                    "db_project_title": db_title,
+                    "db_amount": db_amount
+                }
         
         return best_match
     except Exception as e:
@@ -882,8 +1011,11 @@ async def find_philgeps_match(philgeps_conn: asyncpg.Connection, project_title: 
             else:
                 search_pattern = f"%{normalized_title}%"
         
+        # Extract location from CSV title for additional matching
+        csv_location = extract_location_from_title(project_title)
+        
         philgeps_query = """
-            SELECT contract_no, awardee_name, contract_amount, award_title, notice_title, id
+            SELECT contract_no, awardee_name, contract_amount, award_title, notice_title, id, area_of_delivery
             FROM contracts
             WHERE (award_title ILIKE $1 OR notice_title ILIKE $1)
             LIMIT 20
@@ -892,14 +1024,23 @@ async def find_philgeps_match(philgeps_conn: asyncpg.Connection, project_title: 
         
         # Simple matching: SQL pattern + amount threshold
         # BUT: For chainage patterns, verify that the exact chainage ranges match
+        # AND: Use location (area_of_delivery) and contractor as additional matching criteria
         best_match = None
+        best_score = 0.0
         
         for row in rows:
             # Get amount from DB (just show it, don't reject based on amount differences)
             db_amount = float(row['contract_amount']) if row['contract_amount'] else None
             
-            db_title = row.get('award_title') or row.get('notice_title') or ""
+            # Prioritize award_title, but also check notice_title
+            # Ensure we're checking award_title column content for matching
+            db_award_title = row.get('award_title') or ""
+            db_notice_title = row.get('notice_title') or ""
+            db_title = db_award_title or db_notice_title
             db_text = db_title.upper()
+            
+            # Also check award_title specifically - combine both for text matching
+            combined_db_text = f"{db_award_title} {db_notice_title}".upper().strip()
             
             # If we used chainage patterns with offsets, verify exact matches
             if title_chainage_with_offsets:
@@ -913,8 +1054,9 @@ async def find_philgeps_match(philgeps_conn: asyncpg.Connection, project_title: 
                         csv_chainage_pairs.add(f"{base}+{offset}")
                 
                 # Extract all chainage+offset pairs from DB text
+                # Use combined_db_text (award_title + notice_title) for better matching
                 db_chainage_pairs = set()
-                db_matches = re.findall(r'(K\d+)\s*[+\-]\s*(\d+)', db_text, re.IGNORECASE)
+                db_matches = re.findall(r'(K\d+)\s*[+\-]\s*(\d+)', combined_db_text, re.IGNORECASE)
                 for base, offset in db_matches:
                     db_chainage_pairs.add(f"{base.upper()}+{offset}")
                 
@@ -923,17 +1065,30 @@ async def find_philgeps_match(philgeps_conn: asyncpg.Connection, project_title: 
                 if not csv_chainage_pairs.intersection(db_chainage_pairs):
                     continue  # No exact chainage+offset match, skip this row
             
+            # Additional matching: location (area_of_delivery) from database
+            location_score = 0.0
+            if csv_location:
+                db_area = row.get('area_of_delivery') or ""
+                # area_of_delivery in PhilGEPS typically contains province/region info
+                location_score = location_match_score(csv_location, db_area, "")
+            
+            # Calculate base score (1.0 if we got here, meaning pattern matched)
+            score = 1.0
+            if location_score > 0.7:
+                score += 0.15  # Bonus for location match
+            
             # If we get here, it's a valid match
             # Amount differences are OK - projects can be split into multiple components
             
-            best_match = {
-                "contract_id": row.get('contract_no') or "",
-                "contractor": row.get('awardee_name') or "",
-                "db_project_title": db_title,
-                "db_amount": db_amount,
-                "philgeps_id": row.get('contract_no') or ""  # Use contract_no as philgeps_id (e.g., "24FC0027")
-            }
-            break  # Take first match
+            if score > best_score:
+                best_score = score
+                best_match = {
+                    "contract_id": row.get('contract_no') or "",
+                    "contractor": row.get('awardee_name') or "",
+                    "db_project_title": db_title,
+                    "db_amount": db_amount,
+                    "philgeps_id": row.get('contract_no') or ""  # Use contract_no as philgeps_id (e.g., "24FC0027")
+                }
         
         return best_match
     except Exception as e:
@@ -1122,6 +1277,209 @@ async def find_infrawatch_match(infrawatch_conn: asyncpg.Connection, project_tit
         return None
 
 
+async def find_budget_match(budget_conn: asyncpg.Connection, project_title: str, amount: Optional[float], gaa_page: str = "") -> Optional[Dict[str, Any]]:
+    """Find matching project in Budget DB using description columns and return project info."""
+    try:
+        normalized_title = normalize_title(project_title)
+        title_chainages = extract_chainage_markers(project_title)
+        title_chainage_bases = extract_chainage_base_markers(project_title)
+        title_chainage_with_offsets = extract_chainage_with_offsets(project_title)
+        
+        # Check for bridge identifiers first - they're unique and should be prioritized
+        title_bridge_ids = extract_bridge_identifiers(project_title)
+        
+        # Build SQL search pattern (same logic as other DBs)
+        if title_bridge_ids:
+            # Bridge identifiers are unique - use them as primary search pattern
+            bridge_id = sorted(title_bridge_ids)[0]  # Use first bridge ID
+            search_pattern = f"%{bridge_id}%"
+        elif title_chainage_bases:
+            # If we have multiple chainage bases (e.g., K000, K491), use them all
+            if len(title_chainage_bases) >= 2:
+                chainage_list = sorted(title_chainage_bases)
+                search_pattern = f"%{'%'.join(chainage_list)}%"
+            elif title_chainage_with_offsets:
+                # Extract chainage+offset pairs in order and pair consecutive ones
+                chainage_pairs = []
+                chainage_matches = re.finditer(r'(K\d+)\s*\+\s*(\d+)', project_title.upper())
+                for match in chainage_matches:
+                    base, offset = match.groups()
+                    chainage_pairs.append((base, offset))
+                
+                # Build patterns by pairing consecutive chainages
+                search_patterns_list = []
+                for i in range(0, len(chainage_pairs) - 1, 2):
+                    if i + 1 < len(chainage_pairs):
+                        base1, offset1 = chainage_pairs[i]
+                        base2, offset2 = chainage_pairs[i + 1]
+                        pattern = f"%{base1}%{offset1}%{base2}%{offset2}%"
+                        search_patterns_list.append(pattern)
+                    elif i < len(chainage_pairs):
+                        base, offset = chainage_pairs[i]
+                        pattern = f"%{base}%{offset}%{base}%{offset}%"
+                        search_patterns_list.append(pattern)
+                
+                if search_patterns_list:
+                    search_pattern = search_patterns_list[0]
+                else:
+                    primary_chainage = sorted(title_chainage_bases)[0]
+                    search_pattern = f"%{primary_chainage}%"
+            else:
+                primary_chainage = sorted(title_chainage_bases)[0]
+                search_pattern = f"%{primary_chainage}%"
+        else:
+            # No chainages - use unique location names (filter out common words)
+            title_words, title_locations = extract_unique_words(project_title)
+            if title_locations:
+                # Filter out common words and province names, keep only unique location names
+                filtered_locations = [loc for loc in title_locations 
+                                     if loc not in {'barangay', 'brgy', 'section', 'segment', 'phase', 'package'}
+                                     and len(loc) > 3]
+                if filtered_locations:
+                    location_list = sorted(filtered_locations)
+                    search_pattern = f"%{'%'.join(location_list)}%"
+                else:
+                    search_pattern = f"%{normalized_title}%"
+            else:
+                search_pattern = f"%{normalized_title}%"
+        
+        # First, check which columns exist in the budget_2025 table
+        columns_result = await budget_conn.fetch("""
+            SELECT column_name
+            FROM information_schema.columns
+            WHERE table_name = 'budget_2025'
+            AND table_schema = 'public'
+            AND column_name LIKE 'uacs_%'
+            ORDER BY column_name
+        """)
+        
+        available_uacs_columns = [row['column_name'] for row in columns_result]
+        
+        # Also check for common columns
+        all_columns_result = await budget_conn.fetch("""
+            SELECT column_name
+            FROM information_schema.columns
+            WHERE table_name = 'budget_2025'
+            AND table_schema = 'public'
+            AND column_name IN ('amt', 'amount', 'sorder', 'dsc', 'description')
+        """)
+        
+        available_common_columns = [row['column_name'] for row in all_columns_result]
+        
+        # Build list of columns to select and search
+        select_columns = []
+        search_conditions = []
+        
+        # Preferred UACS description columns (in order of preference)
+        preferred_uacs_cols = ['uacs_sobj_dsc', 'uacs_act_dsc', 'uacs_prog_dsc', 
+                               'uacs_func_dsc', 'uacs_obj_dsc', 'uacs_spec_dsc',
+                               'uacs_loc_dsc', 'uacs_oper_dsc', 'uacs_agy_dsc', 'uacs_dpt_dsc']
+        
+        # Add available UACS columns to select and search
+        for col in preferred_uacs_cols:
+            if col in available_uacs_columns:
+                select_columns.append(col)
+                search_conditions.append(f"{col} ILIKE $1")
+        
+        # Add common columns if they exist
+        if 'amt' in available_common_columns:
+            select_columns.append('amt')
+        elif 'amount' in available_common_columns:
+            select_columns.append('amount')
+        
+        if 'sorder' in available_common_columns:
+            select_columns.append('sorder')
+        
+        # Fallback to 'dsc' or 'description' if no UACS columns found
+        if not select_columns:
+            if 'dsc' in available_common_columns:
+                select_columns.append('dsc')
+                search_conditions.append('dsc ILIKE $1')
+            elif 'description' in available_common_columns:
+                select_columns.append('description')
+                search_conditions.append('description ILIKE $1')
+        
+        if not search_conditions:
+            # No searchable columns found, return None
+            return None
+        
+        # Build the query dynamically
+        select_clause = ', '.join(select_columns)
+        where_clause = ' OR '.join(search_conditions)
+        
+        budget_query = f"""
+            SELECT {select_clause}
+            FROM budget_2025
+            WHERE ({where_clause})
+            LIMIT 20
+        """
+        rows = await budget_conn.fetch(budget_query, search_pattern)
+        
+        best_match = None
+        
+        for row in rows:
+            # Combine all description columns for matching (use available columns)
+            db_descriptions = []
+            for col in select_columns:
+                if col.startswith('uacs_') or col in ['dsc', 'description']:
+                    value = row.get(col)
+                    if value and value is not None and str(value).strip():
+                        db_descriptions.append(str(value))
+            
+            combined_db_text = " ".join(db_descriptions).upper()
+            
+            # Get amount from DB
+            db_amount = None
+            amt_value = row.get('amt') or row.get('amount')
+            if amt_value is not None:
+                try:
+                    db_amount = float(amt_value)
+                except (ValueError, TypeError):
+                    pass
+            
+            # If we used chainage patterns with offsets, verify exact matches
+            if title_chainage_with_offsets:
+                # Extract all chainage+offset pairs from CSV
+                csv_chainage_pairs = set()
+                for chainage_offset in title_chainage_with_offsets:
+                    match = re.search(r'(K\d+)\s*\+\s*(\d+)', chainage_offset, re.IGNORECASE)
+                    if match:
+                        base, offset = match.groups()
+                        csv_chainage_pairs.add(f"{base}+{offset}")
+                
+                # Extract all chainage+offset pairs from combined DB text
+                db_chainage_pairs = set()
+                db_matches = re.findall(r'(K\d+)\s*[+\-]\s*(\d+)', combined_db_text, re.IGNORECASE)
+                for base, offset in db_matches:
+                    db_chainage_pairs.add(f"{base.upper()}+{offset}")
+                
+                # Require at least one exact chainage+offset match
+                if not csv_chainage_pairs.intersection(db_chainage_pairs):
+                    continue  # No exact chainage+offset match, skip this row
+            
+            # Use the most descriptive field as the project title (try in order of preference)
+            db_title = ""
+            for col in ['uacs_sobj_dsc', 'uacs_act_dsc', 'uacs_prog_dsc', 'dsc', 'description']:
+                if col in select_columns:
+                    value = row.get(col)
+                    if value and str(value).strip():
+                        db_title = str(value).strip()
+                        break
+            
+            best_match = {
+                "contract_id": str(row.get('sorder') or ""),
+                "contractor": "",  # Budget DB doesn't have contractor info
+                "db_project_title": db_title,
+                "db_amount": db_amount
+            }
+            break  # Take first match
+        
+        return best_match
+    except Exception as e:
+        print(f"  ⚠️  Error checking Budget DB: {e}")
+        return None
+
+
 async def generate_cache() -> Dict[str, Any]:
     """Generate cache for DPWH projects with database tags."""
     print("🚀 Generating Zaldy DPWH Projects Cache")
@@ -1189,6 +1547,21 @@ async def generate_cache() -> Dict[str, Any]:
     except Exception as e:
         print(f"  ⚠️  Could not initialize Flood client: {e}")
         flood_client = None
+    
+    # Connect to Budget DB
+    budget_conn = None
+    try:
+        budget_conn = await asyncpg.connect(
+            host=os.getenv('POSTGRES_HOST', 'localhost'),
+            port=int(os.getenv('POSTGRES_PORT', 5432)),
+            user=os.getenv('POSTGRES_USER', 'budget_admin'),
+            password=os.getenv('POSTGRES_PASSWORD', ''),
+            database=os.getenv('POSTGRES_DB', 'budget_analysis')
+        )
+        print("  ✅ Connected to Budget DB")
+    except Exception as e:
+        print(f"  ⚠️  Could not connect to Budget DB: {e} (continuing without it)")
+        budget_conn = None
     
     print()
     
@@ -1322,6 +1695,7 @@ async def generate_cache() -> Dict[str, Any]:
         dime_match = None
         philgeps_match = None
         infrawatch_match = None
+        budget_match = None
         
         # Get GAA page for matching adjustments
         gaa_page = project.get("gaa_page", "")
@@ -1337,6 +1711,9 @@ async def generate_cache() -> Dict[str, Any]:
         if infrawatch_conn:
             infrawatch_match = await find_infrawatch_match(infrawatch_conn, project_title, amount, gaa_page)
         
+        if budget_conn:
+            budget_match = await find_budget_match(budget_conn, project_title, amount, gaa_page)
+        
         # For wrong GAA pages (133, 641, 642, 658, 664), reject all matches
         # Use normalized GAA page for checking
         if gaa_page_normalized in STRICT_GAA_PAGES:
@@ -1344,12 +1721,14 @@ async def generate_cache() -> Dict[str, Any]:
             dime_match = None
             philgeps_match = None
             infrawatch_match = None
+            budget_match = None
         
         # Determine which databases found matches
         found_flood = flood_match is not None
         found_dime = dime_match is not None
         found_philgeps = philgeps_match is not None
         found_infrawatch = infrawatch_match is not None
+        found_budget = budget_match is not None
         
         # Get contract ID, contractor, DB title, and DB amount from first match found (priority: Flood > DIME > PhilGEPS > Infrawatch)
         # But filter out wrong contract IDs for specific GAA pages
@@ -1370,6 +1749,8 @@ async def generate_cache() -> Dict[str, Any]:
             all_matches.append(("philgeps", philgeps_match))
         if infrawatch_match:
             all_matches.append(("infrawatch", infrawatch_match))
+        if budget_match:
+            all_matches.append(("budget", budget_match))
         
         # Filter matches based on GAA page rules
         filtered_matches = []
@@ -1399,7 +1780,7 @@ async def generate_cache() -> Dict[str, Any]:
             filtered_matches.append((source, match))
         
         # Use first filtered match (or first match if no filtering needed)
-        # Priority: Flood > DIME > PhilGEPS > Infrawatch
+        # Priority: Flood > DIME > PhilGEPS > Infrawatch > Budget
         if filtered_matches:
             source, match = filtered_matches[0]
             contract_id = match.get("contract_id", "")
@@ -1513,6 +1894,8 @@ async def generate_cache() -> Dict[str, Any]:
             tags.append("PhilGEPS")
         if found_infrawatch:
             tags.append("Infrawatch")
+        if found_budget:
+            tags.append("Budget")
         
         # Always show search pattern (even when match found)
         if not db_project_title or (not tags and not db_project_title.startswith("SQL Pattern")):
@@ -1545,6 +1928,7 @@ async def generate_cache() -> Dict[str, Any]:
             "found_dime": found_dime,
             "found_philgeps": found_philgeps,
             "found_infrawatch": found_infrawatch,
+            "found_budget": found_budget,
             "contract_id": contract_id,
             "contractor": contractor,
             "db_project_title": db_project_title,
@@ -1557,6 +1941,8 @@ async def generate_cache() -> Dict[str, Any]:
     await philgeps_conn.close()
     if infrawatch_conn:
         await infrawatch_conn.close()
+    if budget_conn:
+        await budget_conn.close()
     
     # Sort results by GAA page ascending (lower GAA page first)
     def sort_key(project):
@@ -1575,6 +1961,7 @@ async def generate_cache() -> Dict[str, Any]:
     found_dime_count = sum(1 for p in results if p["found_dime"])
     found_philgeps_count = sum(1 for p in results if p["found_philgeps"])
     found_infrawatch_count = sum(1 for p in results if p["found_infrawatch"])
+    found_budget_count = sum(1 for p in results if p["found_budget"])
     
     print()
     print("📊 Statistics:")
@@ -1583,6 +1970,7 @@ async def generate_cache() -> Dict[str, Any]:
     print(f"  Found in DIME: {found_dime_count}")
     print(f"  Found in PhilGEPS: {found_philgeps_count}")
     print(f"  Found in Infrawatch: {found_infrawatch_count}")
+    print(f"  Found in Budget: {found_budget_count}")
     
     return {
         "success": True,
@@ -1592,7 +1980,8 @@ async def generate_cache() -> Dict[str, Any]:
             "found_flood": found_flood_count,
             "found_dime": found_dime_count,
             "found_philgeps": found_philgeps_count,
-            "found_infrawatch": found_infrawatch_count
+            "found_infrawatch": found_infrawatch_count,
+            "found_budget": found_budget_count
         },
         "generated_at": datetime.now().isoformat(),
         "cache_version": "2.0"
