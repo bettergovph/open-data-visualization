@@ -1317,16 +1317,23 @@ _amendments_cache = None
 def load_amendments_data():
     """Load FY 2026 budget amendments data from JSON"""
     global _amendments_cache
-    if _amendments_cache is not None:
-        return _amendments_cache
     json_path = DATA_ROOT / "budget_amendments_2026.json"
     if not json_path.exists():
         print(f"⚠️ [Budget Amendments] JSON file not found at: {json_path}")
         return None
     try:
-        with open(json_path, 'r', encoding='utf-8') as f:
-            _amendments_cache = json.load(f)
-        print(f"✅ [Budget Amendments] Loaded {len(_amendments_cache.get('departments', []))} departments from {json_path}")
+        # Check file modification time to reload if file has changed
+        import os
+        file_mtime = os.path.getmtime(json_path)
+        cache_mtime = getattr(load_amendments_data, '_cache_mtime', None)
+        
+        # Reload if cache is empty or file has been modified
+        if _amendments_cache is None or cache_mtime != file_mtime:
+            with open(json_path, 'r', encoding='utf-8') as f:
+                _amendments_cache = json.load(f)
+            load_amendments_data._cache_mtime = file_mtime
+            print(f"✅ [Budget Amendments] Loaded {len(_amendments_cache.get('departments', []))} departments from {json_path}")
+        
         return _amendments_cache
     except Exception as e:
         print(f"❌ [Budget Amendments] Error loading JSON from {json_path}: {e}")
