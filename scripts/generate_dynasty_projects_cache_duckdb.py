@@ -3989,10 +3989,8 @@ class DynastyProjectsCacheGeneratorDuckDB:
             # Process each source type from the in-memory data
             sources = [
                 ("SSP", self._process_flood_chunk),
-                ("Flood", self._process_flood_chunk),
                 ("DIME", self._process_dime_chunk),
                 ("PhilGEPS", self._process_philgeps_chunk),
-                ("Infrawatch", self._process_infrawatch_chunk),
                 ("Microsite", self._process_infrawatch_chunk),
             ]
             
@@ -4041,10 +4039,8 @@ class DynastyProjectsCacheGeneratorDuckDB:
             # Note: source column values may vary (SSP/Flood, DIME, PhilGEPS, Infrawatch/Microsite)
             sources = [
                 ("SSP", self._process_flood_chunk),
-                ("Flood", self._process_flood_chunk),  # Alternative name
                 ("DIME", self._process_dime_chunk),
                 ("PhilGEPS", self._process_philgeps_chunk),
-                ("Infrawatch", self._process_infrawatch_chunk),
                 ("Microsite", self._process_infrawatch_chunk),  # Alternative name
             ]
             
