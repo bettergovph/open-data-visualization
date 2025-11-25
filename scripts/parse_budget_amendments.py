@@ -33,6 +33,8 @@ class BudgetAmendmentParser:
         self.prog_counter = 0
         self.proj_counter = 0
         self.line_item_counter = 0
+        self.next_item_is_create = False  # Track if next item should be marked as CREATE
+        self.next_item_is_delete = False  # Track if next item should be marked as DELETE
     
     def col_num_to_letter(self, n):
         """Convert column number to Excel letter (1->A, 27->AA)"""
@@ -42,6 +44,25 @@ class BudgetAmendmentParser:
             result = chr(65 + (n % 26)) + result
             n //= 26
         return result
+    
+    def _get_excel_total(self, key: str, departments_list: list) -> float:
+        """Get total from Excel if available, otherwise calculate from departments"""
+        excel_totals = getattr(self, 'excel_totals', {})
+        excel_value = excel_totals.get(key)
+        if excel_value is not None:
+            return float(excel_value)
+        # Fallback: calculate from departments
+        if key == 'original':
+            return sum(d.get('original_amount', 0) for d in departments_list)
+        elif key == 'final':
+            return sum(d.get('final_amount', 0) for d in departments_list)
+        elif key == 'net_change':
+            return sum(d.get('net_change', 0) for d in departments_list)
+        elif key == 'increase':
+            return sum(d.get('increase', 0) for d in departments_list)
+        elif key == 'decrease':
+            return sum(d.get('decrease', 0) for d in departments_list)
+        return 0.0
     
     def _finalize_component_group(self, header, components, dept_id, current_program, 
                                    sheet_name, col_mapping, line_items_data, program_line_items,
@@ -232,25 +253,26 @@ class BudgetAmendmentParser:
             'DA': ['AGRICULTURE'],
             'DEPDEV': ['ECONOMY', 'PLANNING', 'DEVELOPMENT'],
             'DEPED': ['EDUCATION'],
-            'SUCS-UP': ['EDUCATION', 'DEPED'],  # All SUCs-* are under DepEd
-            'SUCS-NCR': ['EDUCATION', 'DEPED'],
-            'SUCS-RI': ['EDUCATION', 'DEPED'],
-            'SUCS-CAR': ['EDUCATION', 'DEPED'],
-            'SUCS-RII': ['EDUCATION', 'DEPED'],
-            'SUCS-RIII': ['EDUCATION', 'DEPED'],
-            'SUCS-RIV-A': ['EDUCATION', 'DEPED'],
-            'SUCS-RIV-B': ['EDUCATION', 'DEPED'],
-            'SUCS-RV': ['EDUCATION', 'DEPED'],
-            'SUCS-RVI': ['EDUCATION', 'DEPED'],
-            'SUCS-NIR': ['EDUCATION', 'DEPED'],
-            'SUCS-RVII': ['EDUCATION', 'DEPED'],
-            'SUCS-RVIII': ['EDUCATION', 'DEPED'],
-            'SUCS-RIX': ['EDUCATION', 'DEPED'],
-            'SUCS-RX': ['EDUCATION', 'DEPED'],
-            'SUCS-RXI': ['EDUCATION', 'DEPED'],
-            'SUCS-RXII': ['EDUCATION', 'DEPED'],
-            'SUCS-RXIII': ['EDUCATION', 'DEPED'],
-            'SUCS-BARMM': ['EDUCATION', 'DEPED'],
+            # SUCs-* worksheets are under SUC department (not DepEd)
+            'SUCS-UP': ['UNIVERSITIES', 'COLLEGES', 'SUC'],
+            'SUCS-NCR': ['UNIVERSITIES', 'COLLEGES', 'SUC'],
+            'SUCS-RI': ['UNIVERSITIES', 'COLLEGES', 'SUC'],
+            'SUCS-CAR': ['UNIVERSITIES', 'COLLEGES', 'SUC'],
+            'SUCS-RII': ['UNIVERSITIES', 'COLLEGES', 'SUC'],
+            'SUCS-RIII': ['UNIVERSITIES', 'COLLEGES', 'SUC'],
+            'SUCS-RIV-A': ['UNIVERSITIES', 'COLLEGES', 'SUC'],
+            'SUCS-RIV-B': ['UNIVERSITIES', 'COLLEGES', 'SUC'],
+            'SUCS-RV': ['UNIVERSITIES', 'COLLEGES', 'SUC'],
+            'SUCS-RVI': ['UNIVERSITIES', 'COLLEGES', 'SUC'],
+            'SUCS-NIR': ['UNIVERSITIES', 'COLLEGES', 'SUC'],
+            'SUCS-RVII': ['UNIVERSITIES', 'COLLEGES', 'SUC'],
+            'SUCS-RVIII': ['UNIVERSITIES', 'COLLEGES', 'SUC'],
+            'SUCS-RIX': ['UNIVERSITIES', 'COLLEGES', 'SUC'],
+            'SUCS-RX': ['UNIVERSITIES', 'COLLEGES', 'SUC'],
+            'SUCS-RXI': ['UNIVERSITIES', 'COLLEGES', 'SUC'],
+            'SUCS-RXII': ['UNIVERSITIES', 'COLLEGES', 'SUC'],
+            'SUCS-RXIII': ['UNIVERSITIES', 'COLLEGES', 'SUC'],
+            'SUCS-BARMM': ['UNIVERSITIES', 'COLLEGES', 'SUC'],
             'DENR': ['ENVIRONMENT', 'NATURAL RESOURCES'],
             'DOF': ['FINANCE'],
             'DFA': ['FOREIGN AFFAIRS'],
@@ -280,13 +302,13 @@ class BudgetAmendmentParser:
             'NIA': ['IRRIGATION'],
         }
         
-        # Check if sheet starts with 'SUCS-' (all are under DepEd - AOO-5)
+        # Check if sheet starts with 'SUCS-' (all are under SUC department, not DepEd)
         if sheet_upper.startswith('SUCS-'):
             for dept in self.departments:
                 dept_id = dept.get('id', '').upper()
                 dept_name = dept.get('name', '').upper()
-                # Look for DepEd Office of the Secretary (AOO-5)
-                if dept_id == 'AOO-5' or ('EDUCATION' in dept_name and 'OFFICE OF THE SECRETARY' in dept_name):
+                # Look for SUC department (ID: "SUC" or name contains "UNIVERSITIES" and "COLLEGES")
+                if dept_id == 'SUC' or ('UNIVERSITIES' in dept_name and 'COLLEGES' in dept_name):
                     return dept['id']
         
         # Try direct mapping first
@@ -382,8 +404,54 @@ class BudgetAmendmentParser:
             wb_formulas = openpyxl.load_workbook(file_path, data_only=False)
             ws_formulas = wb_formulas['By Agency']
             
+            # Read grand totals from Excel
+            # Note: Values in Excel are in "Thousand Pesos" (see row 3), so multiply by 1000
+            excel_total_original = None
+            excel_total_final = None
+            excel_total_increase = None
+            excel_total_decrease = None
+            excel_total_net_change = None
+            
+            # Search for "TOTAL NEW APPROPRIATIONS" row (this is the grand total)
+            # This appears around row 15 and row 532
+            for row_num in range(1, ws_values.max_row + 1):
+                row_val = ws_values[row_num]
+                col_a = str(row_val[0].value or '').strip().upper()
+                col_b = str(row_val[1].value or '').strip().upper() if len(row_val) > 1 else ''
+                col_c = str(row_val[2].value or '').strip().upper() if len(row_val) > 2 else ''
+                
+                # Look for "TOTAL NEW APPROPRIATIONS" (the grand total row)
+                if 'TOTAL' in col_a and 'NEW' in col_a and 'APPROPRIATIONS' in col_a:
+                    col_e = row_val[4].value if len(row_val) > 4 else None  # Original (Column E)
+                    col_f = row_val[5].value if len(row_val) > 5 else None  # Increase (Column F)
+                    col_g = row_val[6].value if len(row_val) > 6 else None  # Decrease (Column G)
+                    col_h = row_val[7].value if len(row_val) > 7 else None  # Net Change (Column H)
+                    col_i = row_val[8].value if len(row_val) > 8 else None  # Final (Column I)
+                    
+                    # Convert from thousand pesos to pesos (multiply by 1000)
+                    if col_e and isinstance(col_e, (int, float)):
+                        excel_total_original = float(col_e) * 1000
+                    if col_i and isinstance(col_i, (int, float)):
+                        excel_total_final = float(col_i) * 1000
+                    if col_f and isinstance(col_f, (int, float)):
+                        excel_total_increase = float(col_f) * 1000
+                    if col_g and isinstance(col_g, (int, float)):
+                        excel_total_decrease = float(col_g) * 1000
+                    if col_h and isinstance(col_h, (int, float)):
+                        excel_total_net_change = float(col_h) * 1000
+                    
+                    # Found the grand total, break
+                    break
+            
             dept_data = []
             current_parent_dept = None
+            self.excel_totals = {
+                'original': excel_total_original,
+                'final': excel_total_final,
+                'increase': excel_total_increase,
+                'decrease': excel_total_decrease,
+                'net_change': excel_total_net_change
+            }
             
             # Iterate through all rows
             for row_num in range(1, ws_values.max_row + 1):
@@ -555,6 +623,9 @@ class BudgetAmendmentParser:
                         is_agency = True
                     elif 'Philippine National Police' in dept_name or 'PNP' in dept_name:
                         is_agency = True
+                    elif 'Philippine National Oil' in dept_name or 'PNOC' in dept_name:
+                        # Philippine National Oil Company is under UNPROGRAMMED APPROPRIATIONS
+                        is_agency = True
                     # If prefix is a letter code, it's likely an agency (unless it's a top-level department)
                     else:
                         is_agency = True
@@ -586,6 +657,9 @@ class BudgetAmendmentParser:
                     elif 'Armed Forces' in dept_name or 'Armed Forces of the Philippines' in dept_name:
                         # Armed Forces is under Department of National Defense
                         parent_dept_name = "DEPARTMENT OF NATIONAL DEFENSE"
+                    elif 'Philippine National Oil' in dept_name or 'PNOC' in dept_name:
+                        # Philippine National Oil Company is under UNPROGRAMMED APPROPRIATIONS
+                        parent_dept_name = "UNPROGRAMMED APPROPRIATIONS"
                 
                 # Clean department/agency name - remove numbering prefixes
                 clean_name = dept_name
@@ -986,6 +1060,14 @@ class BudgetAmendmentParser:
                             ('before line' in line_item_text_lower and 'insert' in line_item_text_lower)
                         ) and not has_gk_values  # Only if it doesn't have amounts (it's just a description)
                         
+                        # Check for deletion description rows (hints, not actual line items)
+                        # Examples: "On line 49, delete the following object of expenditure:"
+                        # These are just descriptions - skip them, but mark following items as DELETE
+                        is_deletion_description = (
+                            ('on line' in line_item_text_lower and 'delete' in line_item_text_lower and 'following' in line_item_text_lower) or
+                            ('from lines' in line_item_text_lower and 'delete' in line_item_text_lower and 'following' in line_item_text_lower)
+                        ) and not has_gk_values  # Only if it doesn't have amounts (it's just a description)
+                        
                         if is_insertion_description:
                             # Check if this row also has pipe-separated entries after the insertion description
                             # Example: "Between lines 7 and 8, insert the following object of expenditures: | FINANCIAL ASSISTANCE/SUBSIDY | Communication Expenses"
@@ -1066,6 +1148,87 @@ class BudgetAmendmentParser:
                             
                             # If no pipe-separated entries, just mark insertion context for next rows
                             in_insertion_context = True
+                            continue  # Skip processing this description row
+                        
+                        if is_deletion_description:
+                            # Check if this row also has pipe-separated entries after the deletion description
+                            # Example: "On line 49, delete the following object of expenditure: | [Buildings and Other Structures] | Machinery and Equipment Outlay"
+                            if '|' in line_item_text:
+                                # Extract the pipe-separated parts (remove the "On line X, delete..." prefix)
+                                pipe_parts = line_item_text.split('|')
+                                if len(pipe_parts) > 1:
+                                    # The first part is the deletion description, skip it
+                                    # Process the remaining parts as separate DELETE entries
+                                    entries = [p.strip() for p in pipe_parts[1:] if p.strip() and len(p.strip()) > 2]
+                                    
+                                    if entries and has_gk_values:
+                                        # Create separate DELETE line items for each entry
+                                        for entry_text in entries:
+                                            self.line_item_counter += 1
+                                            final_dept_id = current_program.get('department_id', dept_id) if current_program else dept_id
+                                            
+                                            # Split amounts equally among entries
+                                            entry_original = original_gab / len(entries) if original_gab > 0 else 0.0
+                                            entry_final = final_amount / len(entries) if final_amount > 0 else 0.0
+                                            entry_increase = increase / len(entries) if increase > 0 else 0.0
+                                            entry_decrease = decrease / len(entries) if decrease < 0 else 0.0
+                                            entry_net = net_change / len(entries) if net_change != 0 else 0.0
+                                            
+                                            assignment_method = "sheet_match"
+                                            assignment_reason = f"Assigned from sheet '{sheet_name}' using department matching logic"
+                                            
+                                            line_item = {
+                                                "id": f"{final_dept_id}-LINE-{self.line_item_counter:04d}",
+                                                "program_id": current_program['id'] if current_program else None,
+                                                "department_id": final_dept_id,
+                                                "page_no": page_no,
+                                                "line_no": line_no,
+                                                "description": entry_text[:500],
+                                                "amendment_type": 'DELETE',
+                                                "original_amount": float(entry_original),
+                                                "final_amount": float(entry_final),
+                                                "increase": float(entry_increase),
+                                                "decrease": float(entry_decrease),
+                                                "net_change": float(entry_net),
+                                                "percent_change": float((entry_net / entry_original * 100) if entry_original > 0 else 0.0),
+                                                "formulas": row_formulas if row_formulas else None,
+                                                "excel_row": row_idx,
+                                                "excel_sheet": sheet_name,
+                                                "source": {
+                                                    "file": "Annex A - Line By Line Amendments.xlsx",
+                                                    "sheet": sheet_name,
+                                                    "row": row_idx,
+                                                    "cell_reference": f"{self.col_num_to_letter(col_mapping.get('line item', 2) + 1)}{row_idx}" if col_mapping.get('line item') is not None else f"A{row_idx}",
+                                                    "columns": {
+                                                        "description": self.col_num_to_letter(col_mapping.get('line item', 2) + 1) if col_mapping.get('line item') is not None else "C",
+                                                        "gab": self.col_num_to_letter(col_mapping.get('gab', 6) + 1) if col_mapping.get('gab') is not None else "G",
+                                                        "committee": self.col_num_to_letter(col_mapping.get('committee report', 7) + 1) if col_mapping.get('committee report') is not None else "H",
+                                                        "sv_committee": self.col_num_to_letter(col_mapping.get('sv committee', 10) + 1) if col_mapping.get('sv committee') is not None else "K"
+                                                    }
+                                                },
+                                                "assignment": {
+                                                    "method": assignment_method,
+                                                    "reason": assignment_reason,
+                                                    "original_sheet_dept": dept_id,
+                                                    "final_dept": final_dept_id
+                                                },
+                                                "is_split_entry": True,
+                                                "split_from": line_item_text[:100]
+                                            }
+                                            
+                                            line_items_data.append(line_item)
+                                            if current_program:
+                                                program_line_items.append(line_item)
+                                                current_program['original_amount'] += entry_original
+                                                current_program['final_amount'] += entry_final
+                                                current_program['increase'] += entry_increase
+                                                current_program['decrease'] += entry_decrease
+                                                current_program['net_change'] += entry_net
+                                        
+                                        continue  # Skip processing the original combined row
+                            
+                            # If no pipe-separated entries, mark deletion context for next rows
+                            self.next_item_is_delete = True
                             continue  # Skip processing this description row
                         
                         # If we're in insertion context and the line item has pipe-separated entries, split them
@@ -1564,12 +1727,19 @@ class BudgetAmendmentParser:
                         # Be conservative: only classify as amendment if there's clear evidence of change
                         amendment_type = 'RETAIN'  # Default: retained (not an amendment)
                         
+                        # Check if this item should be marked as DELETE (from deletion context)
+                        if self.next_item_is_delete:
+                            amendment_type = 'DELETE'
+                            self.next_item_is_delete = False  # Reset flag
                         # Check for actual amendments (items with clear changes)
                         # TOTAL rows with empty GAB are CREATE
-                        if is_total_row and (original_gab == 0 or str(col_g_val).strip() in ['', '-']):
+                        elif is_total_row and (original_gab == 0 or str(col_g_val).strip() in ['', '-']):
                             amendment_type = 'CREATE'
                         # Items that follow "Between lines X and Y, insert..." or "After line X, insert..." are CREATE
                         # (The description row itself is already skipped above)
+                        elif self.next_item_is_create:
+                            amendment_type = 'CREATE'
+                            self.next_item_is_create = False  # Reset flag
                         elif has_gk_values and (original_gab == 0 or str(col_g_val).strip() in ['', '-']) and (final_amount > 0 or increase > 0):
                             # New items (no original amount, but has final/increase) are CREATE
                             amendment_type = 'CREATE'
@@ -1653,11 +1823,14 @@ class BudgetAmendmentParser:
                             program_line_items = []
                         
                         elif is_line_item:
-                            # Clean description: remove "Between lines X and Y, insert..." prefix if present
+                            # Clean description: remove insertion/deletion description prefixes if present
                             cleaned_description = line_item_text
                             # Remove insertion description prefix
                             cleaned_description = re.sub(r'^.*?between\s+lines?\s+\d+\s+and\s+\d+.*?insert\s+(the\s+following\s+)?(objects?\s+of\s+expenditure|items?|activities?|projects?):?\s*', '', cleaned_description, flags=re.IGNORECASE)
                             cleaned_description = re.sub(r'^.*?after\s+line\s+\d+.*?insert\s+(the\s+following\s+)?(objects?\s+of\s+expenditure|items?|activities?|projects?):?\s*', '', cleaned_description, flags=re.IGNORECASE)
+                            # Remove deletion description prefix
+                            cleaned_description = re.sub(r'^.*?on\s+line\s+\d+.*?delete\s+(the\s+following\s+)?(objects?\s+of\s+expenditure|items?|activities?|projects?):?\s*', '', cleaned_description, flags=re.IGNORECASE)
+                            cleaned_description = re.sub(r'^.*?from\s+lines?\s+\d+.*?to\s+\d+.*?delete\s+(the\s+following\s+)?(objects?\s+of\s+expenditure|items?|activities?|projects?):?\s*', '', cleaned_description, flags=re.IGNORECASE)
                             cleaned_description = cleaned_description.strip()
                             
                             # Check if cleaned description has pipe-separated entries (even if not in insertion context)
@@ -2470,11 +2643,13 @@ class BudgetAmendmentParser:
             "total_agencies": len(agencies_list),
             "total_programs": len(self.programs),
             "total_projects": len(self.projects),
-            "total_original_budget": sum(d['original_amount'] for d in departments_list),
-            "total_final_budget": sum(d['final_amount'] for d in self.departments),
-            "total_net_change": sum(d['net_change'] for d in self.departments),
-            "total_increase": sum(d['increase'] for d in self.departments),
-            "total_decrease": sum(d['decrease'] for d in self.departments),
+            # Read totals directly from Excel (from TOTAL row in General Summary)
+            # Use Excel totals if available, otherwise fall back to calculated sum
+            "total_original_budget": self._get_excel_total('original', departments_list),
+            "total_final_budget": self._get_excel_total('final', departments_list),
+            "total_net_change": self._get_excel_total('net_change', departments_list),
+            "total_increase": self._get_excel_total('increase', departments_list),
+            "total_decrease": self._get_excel_total('decrease', departments_list),
             "source_files": [
                 "General Summary of Committee Report No. 18 on House Bill No. 4058 (FY 2026 GAB).xlsx",
                 "Annex A - Line By Line Amendments.xlsx",
@@ -2500,16 +2675,17 @@ class BudgetAmendmentParser:
                     worksheets_by_dept[dept_id] = []
                 worksheets_by_dept[dept_id].append(worksheet)
         
-        # Add SUCs as a grouped component under DepEd
+        # Add SUCs as a grouped component under SUC department (not DepEd)
         if sucs_worksheets:
-            deped_id = next((d['id'] for d in departments_list if 'EDUCATION' in d.get('name', '').upper() and 'OFFICE' not in d.get('name', '').upper()), None)
-            if deped_id:
+            # Find SUC department (ID: "SUC" or name contains "UNIVERSITIES" and "COLLEGES")
+            suc_id = next((d['id'] for d in departments_list if d.get('id', '').upper() == 'SUC' or ('UNIVERSITIES' in d.get('name', '').upper() and 'COLLEGES' in d.get('name', '').upper())), None)
+            if suc_id:
                 # Create a combined SUCs entry
                 sucs_entry = {
                     "id": "SUCS-GROUP",
                     "sheet_name": "SUCs",
                     "description": "State Universities and Colleges",
-                    "department_id": deped_id,
+                    "department_id": suc_id,
                     "is_sucs": True,
                     "is_group": True,
                     "worksheet_count": len(sucs_worksheets),
@@ -2520,9 +2696,9 @@ class BudgetAmendmentParser:
                     "net_change": sum(ws.get('net_change', 0) for ws in sucs_worksheets),
                     "worksheets": sucs_worksheets  # Individual SUC worksheets
                 }
-                if deped_id not in worksheets_by_dept:
-                    worksheets_by_dept[deped_id] = []
-                worksheets_by_dept[deped_id].append(sucs_entry)
+                if suc_id not in worksheets_by_dept:
+                    worksheets_by_dept[suc_id] = []
+                worksheets_by_dept[suc_id].append(sucs_entry)
         
         # Add worksheets to departments
         for dept in departments_list:
