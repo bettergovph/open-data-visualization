@@ -1311,6 +1311,348 @@ async def budget_column_mapping_api():
     except Exception as e:
         return JSONResponse({"success": False, "error": str(e)})
 
+# ===== BUDGET AMENDMENTS (FY 2026) ENDPOINTS =====
+_amendments_cache = None
+
+def load_amendments_data():
+    """Load FY 2026 budget amendments data from JSON"""
+    global _amendments_cache
+    if _amendments_cache is not None:
+        return _amendments_cache
+    json_path = DATA_ROOT / "budget_amendments_2026.json"
+    if not json_path.exists():
+        print(f"⚠️ [Budget Amendments] JSON file not found at: {json_path}")
+        return None
+    try:
+        with open(json_path, 'r', encoding='utf-8') as f:
+            _amendments_cache = json.load(f)
+        print(f"✅ [Budget Amendments] Loaded {len(_amendments_cache.get('departments', []))} departments from {json_path}")
+        return _amendments_cache
+    except Exception as e:
+        print(f"❌ [Budget Amendments] Error loading JSON from {json_path}: {e}")
+        import traceback
+        traceback.print_exc()
+        return None
+
+@app.get("/api/budget/amendments/summary")
+async def budget_amendments_summary():
+    """Get FY 2026 budget amendments summary statistics"""
+    try:
+        data = load_amendments_data()
+        if not data:
+            return JSONResponse({"success": False, "error": "Data not available"}, status_code=404)
+        return JSONResponse({"success": True, **data['metadata']})
+    except Exception as e:
+        return JSONResponse({"success": False, "error": str(e)}, status_code=500)
+
+@app.get("/api/budget/amendments/departments")
+async def budget_amendments_departments():
+    """Get all top-level departments (excluding agencies) with budget amendment summary"""
+    try:
+        data = load_amendments_data()
+        if not data:
+            return JSONResponse({"success": False, "error": "Data not available"}, status_code=404)
+        # Filter out agencies - only return top-level departments
+        departments = [
+            d for d in data['departments'] 
+            if not d.get('is_agency', False)  # Exclude agencies
+        ]
+        departments = sorted(departments, key=lambda d: d.get('original_amount', 0), reverse=True)
+        return JSONResponse({"success": True, "departments": departments, "metadata": data['metadata']})
+    except Exception as e:
+        return JSONResponse({"success": False, "error": str(e)}, status_code=500)
+
+@app.get("/api/budget/amendments/department/{dept_id}")
+async def budget_amendments_department_details(dept_id: str):
+    """Get programs within a department with enriched descriptions from budget database"""
+    try:
+        # URL decode the department ID in case it contains special characters
+        from urllib.parse import unquote
+        dept_id = unquote(dept_id)
+        
+        data = load_amendments_data()
+        if not data:
+            return JSONResponse({"success": False, "error": "Data not available"}, status_code=404)
+        
+        # Try exact match first
+        department = next((d for d in data['departments'] if d['id'] == dept_id), None)
+        
+        # If not found, try matching without any colon suffix (e.g., "DIC:1" -> "DIC")
+        if not department and ':' in dept_id:
+            dept_id_base = dept_id.split(':')[0]
+            department = next((d for d in data['departments'] if d['id'] == dept_id_base), None)
+            if department:
+                dept_id = dept_id_base  # Use the base ID for subsequent lookups
+        
+        if not department:
+            return JSONResponse({"success": False, "error": f"Department not found: {dept_id}"}, status_code=404)
+        
+        # Match programs by department_id - use EXACT match only to avoid false positives
+        # The department_id should already be correctly set during parsing
+        programs = []
+        for p in data.get('programs', []):
+            prog_dept_id = p.get('department_id', '')
+            # Use exact match only - this is the most reliable
+            if prog_dept_id == dept_id:
+                programs.append(p)
+        
+        # Also get line items for this department - use exact match only
+        line_items = [li for li in data.get('line_items', []) 
+                     if li.get('department_id') == dept_id]
+        
+        # Get agencies for this department
+        agencies = []
+        # Check if department has agencies in its structure
+        if department.get('agencies'):
+            agencies = department.get('agencies', [])
+        else:
+            # Find agencies by parent_department_id or parent_department_name
+            # Only if 'agencies' key exists in data (it might not if parser hasn't been run with agency separation)
+            if 'agencies' in data:
+                dept_name = (department.get('name') or '').upper()
+                for agency in data.get('agencies', []):
+                    agency_parent_id = agency.get('parent_department_id')
+                    agency_parent_name = agency.get('parent_department_name')
+                    # Safely handle None values
+                    agency_parent_name_upper = (agency_parent_name or '').upper() if agency_parent_name else ''
+                    if agency_parent_id == dept_id or (agency_parent_name_upper and dept_name and dept_name in agency_parent_name_upper):
+                        agencies.append(agency)
+        
+        # Try to enrich descriptions from budget database
+        try:
+            import asyncpg
+            budget_conn = await asyncpg.connect(
+                host=os.getenv('POSTGRES_HOST', 'localhost'),
+                port=int(os.getenv('POSTGRES_PORT', 5432)),
+                user=os.getenv('POSTGRES_USER', 'budget_admin'),
+                password=os.getenv('POSTGRES_PASSWORD', ''),
+                database='budget_analysis'
+            )
+            
+            # Look up department description - try exact match first, then partial
+            dept_desc = None
+            # Try exact department code match (use uacs_dpt_dsc pattern matching instead)
+            # Note: budget_2025 doesn't have a 'department' column, use uacs_dpt_dsc instead
+            dept_desc_query = """
+                SELECT DISTINCT uacs_dpt_dsc 
+                FROM budget_2025 
+                WHERE uacs_dpt_dsc ILIKE $1 
+                AND uacs_dpt_dsc IS NOT NULL 
+                AND uacs_dpt_dsc != ''
+                LIMIT 1
+            """
+            # Try matching by department name pattern
+            dept_name_for_search = (department.get('name') or '').strip()
+            if dept_name_for_search:
+                # Remove prefixes and search
+                cleaned = dept_name_for_search
+                if '.' in cleaned:
+                    parts = cleaned.split('.', 1)
+                    if len(parts) > 1:
+                        cleaned = parts[1].strip()
+                dept_desc = await budget_conn.fetchval(dept_desc_query, f"%{cleaned}%")
+            
+            # If no exact match, try to find by department name pattern
+            if not dept_desc:
+                dept_name_pattern = (department.get('name') or '').strip()
+                if dept_name_pattern:
+                    # Remove common prefixes like "A.", "B.", "38.", "XLIII."
+                    cleaned_name = dept_name_pattern
+                    if '.' in cleaned_name:
+                        parts = cleaned_name.split('.', 1)
+                        if len(parts) > 1 and len(parts[0].strip()) < 5:
+                            cleaned_name = parts[1].strip()
+                    
+                    if cleaned_name and len(cleaned_name) > 3:
+                        dept_desc_query2 = """
+                            SELECT DISTINCT uacs_dpt_dsc 
+                            FROM budget_2025 
+                            WHERE uacs_dpt_dsc ILIKE $1
+                            AND uacs_dpt_dsc IS NOT NULL 
+                            AND uacs_dpt_dsc != ''
+                            LIMIT 1
+                        """
+                        dept_desc = await budget_conn.fetchval(dept_desc_query2, f"%{cleaned_name}%")
+            
+            if dept_desc and len(dept_desc.strip()) > len(department.get('name', '').strip()):
+                department['full_description'] = dept_desc.strip()
+            
+            # Look up program descriptions
+            for program in programs:
+                program_name = (program.get('name') or '').strip()
+                # Skip if name is too short or looks like just a prefix/number
+                if len(program_name) < 5 or program_name in ['X', '38.', 'XLIII.'] or (program_name.count('.') > 0 and len(program_name.split('.')[0]) < 3):
+                    # Try to find program description by matching partial name
+                    # Use department name pattern instead of department code
+                    dept_name_for_prog_search = (department.get('name') or '').strip()
+                    if dept_name_for_prog_search:
+                        # Clean department name for search
+                        cleaned_dept = dept_name_for_prog_search
+                        if '.' in cleaned_dept:
+                            parts = cleaned_dept.split('.', 1)
+                            if len(parts) > 1:
+                                cleaned_dept = parts[1].strip()
+                        
+                        # Remove parenthetical text for cleaner search
+                        if '(' in cleaned_dept:
+                            cleaned_dept = cleaned_dept.split('(')[0].strip()
+                        
+                        prog_desc_query = """
+                            SELECT DISTINCT uacs_prog_dsc 
+                            FROM budget_2025 
+                            WHERE uacs_dpt_dsc ILIKE $1 
+                            AND uacs_prog_dsc IS NOT NULL 
+                            AND uacs_prog_dsc != ''
+                            AND (
+                                uacs_prog_dsc ILIKE $2 
+                                OR uacs_prog_dsc ILIKE $3
+                            )
+                            LIMIT 1
+                        """
+                        # Try matching with the prefix or look for any program in this department
+                        search_pattern1 = f"%{program_name}%"
+                        search_pattern2 = "%"  # Fallback to any program if prefix doesn't match
+                        prog_desc = await budget_conn.fetchval(prog_desc_query, f"%{cleaned_dept}%", search_pattern1, search_pattern2)
+                        
+                        if not prog_desc and len(programs) == 1:
+                            # If only one program, get the most common program description for this department
+                            prog_desc_query2 = """
+                                SELECT uacs_prog_dsc, COUNT(*) as cnt
+                                FROM budget_2025 
+                                WHERE uacs_dpt_dsc ILIKE $1 
+                                AND uacs_prog_dsc IS NOT NULL 
+                                AND uacs_prog_dsc != ''
+                                GROUP BY uacs_prog_dsc
+                                ORDER BY cnt DESC
+                                LIMIT 1
+                            """
+                            prog_desc = await budget_conn.fetchval(prog_desc_query2, f"%{cleaned_dept}%")
+                    
+                    if prog_desc and len(prog_desc.strip()) > len(program_name):
+                        program['full_description'] = prog_desc.strip()
+                        # Update the name if it's significantly better
+                        if len(prog_desc.strip()) > len(program_name) + 10:
+                            program['name'] = prog_desc.strip()
+            
+            await budget_conn.close()
+        except Exception as db_error:
+            # If database lookup fails, continue with original data
+            print(f"⚠️ Could not enrich descriptions from database: {db_error}")
+        
+        return JSONResponse({"success": True, "department": department, "programs": programs, "agencies": agencies, "line_items": line_items[:100]})  # Limit to 100 for performance
+    except Exception as e:
+        return JSONResponse({"success": False, "error": str(e)}, status_code=500)
+
+@app.get("/api/budget/amendments/search")
+async def budget_amendments_search(q: str = Query("")):
+    """Full-text search across departments, programs, and projects"""
+    try:
+        data = load_amendments_data()
+        if not data:
+            return JSONResponse({"success": False, "error": "Data not available"}, status_code=404)
+        query = q.lower()
+        if not query:
+            return JSONResponse({"success": True, "query": q, "results": []})
+        results = []
+        for dept in data['departments']:
+            if query in dept['name'].lower() or query in dept['code'].lower():
+                results.append({
+                    "type": "department",
+                    "id": dept['id'],
+                    "name": dept['name'],
+                    "code": dept['code'],
+                    "amount": dept['final_amount']
+                })
+        return JSONResponse({"success": True, "query": q, "results": results[:50]})
+    except Exception as e:
+        return JSONResponse({"success": False, "error": str(e)}, status_code=500)
+
+@app.get("/api/budget/amendments/department/{dept_id}/line-items")
+async def budget_amendments_department_line_items(dept_id: str):
+    """Get detailed line items (Annex A) for a department"""
+    try:
+        # URL decode the department ID in case it contains special characters
+        from urllib.parse import unquote
+        dept_id = unquote(dept_id)
+        
+        data = load_amendments_data()
+        if not data:
+            return JSONResponse({"success": False, "error": "Data not available"}, status_code=404)
+        
+        # Try exact match first
+        department = next((d for d in data['departments'] if d['id'] == dept_id), None)
+        
+        # If not found, try matching without any colon suffix (e.g., "OP:1" -> "OP")
+        if not department and ':' in dept_id:
+            dept_id_base = dept_id.split(':')[0]
+            department = next((d for d in data['departments'] if d['id'] == dept_id_base), None)
+            if department:
+                dept_id = dept_id_base  # Use the base ID for subsequent lookups
+        
+        if not department:
+            return JSONResponse({"success": False, "error": f"Department not found: {dept_id}"}, status_code=404)
+        
+        dept_code = department.get('code', '').upper()
+        dept_name = department.get('name', '').upper()
+        
+        # Get line items matching this department - be more flexible
+        line_items = []
+        for li in data.get('line_items', []):
+            li_dept_id = str(li.get('department_id', '')).upper()
+            li_sheet = str(li.get('excel_sheet', '')).upper()
+            
+            # Match by department ID, code, or sheet name
+            if (li_dept_id == dept_id.upper() or 
+                li_dept_id == dept_code or
+                dept_code in li_dept_id or
+                dept_id.upper() in li_dept_id or
+                any(word in li_dept_id for word in dept_name.split() if len(word) > 3) or
+                # Also match by sheet name if it contains department keywords
+                (li_sheet and any(word in li_sheet for word in dept_name.split() if len(word) > 3))):
+                line_items.append(li)
+        
+        return JSONResponse({
+            "success": True, 
+            "department": department,
+            "line_items": line_items,
+            "total": len(line_items)
+        })
+    except Exception as e:
+        return JSONResponse({"success": False, "error": str(e)}, status_code=500)
+
+@app.get("/api/budget/amendments/program/{program_id}/line-items")
+async def budget_amendments_program_line_items(program_id: str):
+    """Get detailed line-by-line amendments for a specific program"""
+    try:
+        data = load_amendments_data()
+        if not data:
+            return JSONResponse({"success": False, "error": "Data not available"}, status_code=404)
+        
+        # Find program
+        program = next((p for p in data.get('programs', []) if p.get('id') == program_id), None)
+        if not program:
+            return JSONResponse({"success": False, "error": "Program not found"}, status_code=404)
+        
+        # Get line items for this program
+        line_items = [
+            item for item in data.get('line_items', [])
+            if item.get('program_id') == program_id
+        ]
+        
+        # If program has line_items embedded, use those
+        if program.get('line_items'):
+            line_items = program['line_items']
+        
+        return JSONResponse({
+            "success": True,
+            "program": program,
+            "line_items": line_items,
+            "total_line_items": len(line_items)
+        })
+    except Exception as e:
+        return JSONResponse({"success": False, "error": str(e)}, status_code=500)
+
+
 @app.get("/api/budget/analysis/comparison-chart")
 async def budget_analysis_comparison_chart_api():
     """Get data for Budget vs NEP comparison chart - no authentication required"""
