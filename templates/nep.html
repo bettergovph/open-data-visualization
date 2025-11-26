@@ -956,7 +956,7 @@
                                                         </div>
                                                     </div>
                                                     <div style="background: #f8f9fa; padding: 1rem; border-radius: 8px; text-align: center; cursor: pointer;"
-                                                         onclick="showDepartmentDetails('${dept.id}')"
+                                                         onclick="event.stopPropagation(); showDepartmentLineItems('${dept.id}', '${deptName.replace(/'/g, "\\'")}')"
                                                          onmouseover="this.style.background='#e9ecef';"
                                                          onmouseout="this.style.background='#f8f9fa';">
                                                         <div style="font-size: 0.85em; color: #666; margin-bottom: 0.5rem;">Amendments</div>
