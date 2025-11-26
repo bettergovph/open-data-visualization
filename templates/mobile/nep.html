@@ -59,30 +59,30 @@
 
     <!-- Insertions Tab -->
     <div id="tab-insertions" class="mobile-tab-panel active">
-        <p class="text-xs text-gray-600 mb-3 bg-blue-50 p-3 rounded">
-            🧩 Showing program insertions by office and district
-        </p>
+    <p class="text-xs text-gray-600 mb-3 bg-blue-50 p-3 rounded">
+        🧩 Showing program insertions by office and district
+    </p>
 
-        <!-- Stats -->
-        <div class="mobile-stats-grid">
-            <div class="mobile-stat-card">
-                <div class="text-2xl font-bold text-blue-600" id="total-offices">-</div>
-                <div class="text-xs text-gray-600 mt-1">Total Offices</div>
-            </div>
-            <div class="mobile-stat-card">
-                <div class="text-2xl font-bold text-green-600" id="total-insertions">-</div>
-                <div class="text-xs text-gray-600 mt-1">Total Insertions</div>
-            </div>
+    <!-- Stats -->
+    <div class="mobile-stats-grid">
+        <div class="mobile-stat-card">
+            <div class="text-2xl font-bold text-blue-600" id="total-offices">-</div>
+            <div class="text-xs text-gray-600 mt-1">Total Offices</div>
         </div>
-
-        <!-- Loading -->
-        <div id="loading" class="text-center py-8">
-            <div class="inline-block w-8 h-8 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin"></div>
-            <p class="text-sm text-gray-500 mt-2">Loading insertions data...</p>
+        <div class="mobile-stat-card">
+            <div class="text-2xl font-bold text-green-600" id="total-insertions">-</div>
+            <div class="text-xs text-gray-600 mt-1">Total Insertions</div>
         </div>
+    </div>
 
-        <!-- Results -->
-        <div id="insertions-container"></div>
+    <!-- Loading -->
+    <div id="loading" class="text-center py-8">
+        <div class="inline-block w-8 h-8 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin"></div>
+        <p class="text-sm text-gray-500 mt-2">Loading insertions data...</p>
+    </div>
+
+    <!-- Results -->
+    <div id="insertions-container"></div>
     </div>
 
     <!-- Duplicate Tab -->
@@ -316,40 +316,78 @@
 
     // Display duplicate groups (mobile version)
     function displayMobileDuplicates(data) {
-        const metadata = data.metadata || {};
-        const groups = data.duplicate_groups || data.groups || [];
-        const container = document.getElementById('mobile-duplicate-groups-container');
-        
-        // Update stats - use metadata if available, otherwise calculate
-        const totalGroups = metadata.total_groups || groups.length;
-        const totalItems = metadata.total_items || groups.reduce((sum, g) => sum + (g.count || (g.items ? g.items.length : 0)), 0);
-        const totalAmount = groups.reduce((sum, g) => sum + (g.total_amount || 0), 0);
-        
-        // Update DOM elements
-        const groupsEl = document.getElementById('mobile-duplicate-total-groups');
-        const itemsEl = document.getElementById('mobile-duplicate-total-items');
-        const amountEl = document.getElementById('mobile-duplicate-total-amount');
-        
-        if (groupsEl) groupsEl.textContent = totalGroups.toLocaleString();
-        if (itemsEl) itemsEl.textContent = totalItems.toLocaleString();
-        if (amountEl) amountEl.textContent = formatAmountFull(totalAmount);
-        
-        console.log('Mobile duplicate stats:', { totalGroups, totalItems, totalAmount });
-        
-        if (!container) {
-            console.error('Mobile: duplicate-groups-container not found');
-            return;
-        }
-        
-        container.style.display = 'block';
-        
-        if (groups.length === 0) {
-            container.innerHTML = '<div class="text-center py-8 text-gray-500">No duplicates found</div>';
-            return;
-        }
-        
-        // Display groups (collapsible, collapsed by default)
-        container.innerHTML = groups.map((group, groupIdx) => {
+        try {
+            console.log('Mobile: displayMobileDuplicates called with data:', {
+                hasMetadata: !!data.metadata,
+                hasGroups: !!(data.duplicate_groups || data.groups),
+                groupsCount: (data.duplicate_groups || data.groups || []).length
+            });
+            
+            const metadata = data.metadata || {};
+            const groups = data.duplicate_groups || data.groups || [];
+            
+            // Update stats - use metadata if available, otherwise calculate
+            const totalGroups = metadata.total_groups || groups.length;
+            const totalItems = metadata.total_items || groups.reduce((sum, g) => sum + (g.count || (g.items ? g.items.length : 0)), 0);
+            const totalAmount = groups.reduce((sum, g) => sum + (g.total_amount || 0), 0);
+            
+            console.log('Mobile: Calculated stats:', { totalGroups, totalItems, totalAmount });
+            
+            // Update DOM elements - try multiple times to ensure elements exist
+            const updateStats = () => {
+                const groupsEl = document.getElementById('mobile-duplicate-total-groups');
+                const itemsEl = document.getElementById('mobile-duplicate-total-items');
+                const amountEl = document.getElementById('mobile-duplicate-total-amount');
+                
+                console.log('Mobile: Elements found:', {
+                    groupsEl: !!groupsEl,
+                    itemsEl: !!itemsEl,
+                    amountEl: !!amountEl
+                });
+                
+                if (groupsEl) {
+                    groupsEl.textContent = totalGroups.toLocaleString();
+                    console.log('Mobile: Set groups to', totalGroups.toLocaleString());
+                } else {
+                    console.error('Mobile: groupsEl not found');
+                }
+                
+                if (itemsEl) {
+                    itemsEl.textContent = totalItems.toLocaleString();
+                    console.log('Mobile: Set items to', totalItems.toLocaleString());
+                } else {
+                    console.error('Mobile: itemsEl not found');
+                }
+                
+                if (amountEl) {
+                    amountEl.textContent = formatAmountFull(totalAmount);
+                    console.log('Mobile: Set amount to', formatAmountFull(totalAmount));
+                } else {
+                    console.error('Mobile: amountEl not found');
+                }
+            };
+            
+            // Try immediately
+            updateStats();
+            
+            // Also try after a short delay in case elements aren't ready
+            setTimeout(updateStats, 100);
+            
+            const container = document.getElementById('mobile-duplicate-groups-container');
+            if (!container) {
+                console.error('Mobile: duplicate-groups-container not found');
+                return;
+            }
+            
+            container.style.display = 'block';
+            
+            if (groups.length === 0) {
+                container.innerHTML = '<div class="text-center py-8 text-gray-500">No duplicates found</div>';
+                return;
+            }
+            
+            // Display groups (collapsible, collapsed by default)
+            container.innerHTML = groups.map((group, groupIdx) => {
             const items = group.items || [];
             const groupId = `mobile-group-${groupIdx}`;
             const itemsId = `mobile-items-${groupIdx}`;
@@ -399,6 +437,24 @@
                 </div>
             `;
         }).join('');
+        } catch (error) {
+            console.error('Mobile: Error in displayMobileDuplicates:', error);
+            // Still try to update stats even if display fails
+            const groupsEl = document.getElementById('mobile-duplicate-total-groups');
+            const itemsEl = document.getElementById('mobile-duplicate-total-items');
+            const amountEl = document.getElementById('mobile-duplicate-total-amount');
+            
+            if (groupsEl && data.duplicate_groups) {
+                groupsEl.textContent = data.duplicate_groups.length.toLocaleString();
+            }
+            if (itemsEl && data.metadata) {
+                itemsEl.textContent = (data.metadata.total_items || 0).toLocaleString();
+            }
+            if (amountEl && data.duplicate_groups) {
+                const totalAmount = data.duplicate_groups.reduce((sum, g) => sum + (g.total_amount || 0), 0);
+                amountEl.textContent = formatAmountFull(totalAmount);
+            }
+        }
     }
 
     // Toggle duplicate group (mobile) - make it globally available
