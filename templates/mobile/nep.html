@@ -283,6 +283,24 @@
                 metadata: duplicatesData.metadata
             });
             
+            // Set stats immediately as backup (before display function)
+            const metadata = duplicatesData.metadata || {};
+            const groups = duplicatesData.duplicate_groups || [];
+            const totalGroups = metadata.total_groups || groups.length;
+            const totalItems = metadata.total_items || groups.reduce((sum, g) => sum + (g.count || (g.items ? g.items.length : 0)), 0);
+            const totalAmount = groups.reduce((sum, g) => sum + (g.total_amount || 0), 0);
+            
+            // Try to set stats immediately
+            setTimeout(() => {
+                const groupsEl = document.getElementById('mobile-duplicate-total-groups');
+                const itemsEl = document.getElementById('mobile-duplicate-total-items');
+                const amountEl = document.getElementById('mobile-duplicate-total-amount');
+                if (groupsEl) groupsEl.textContent = totalGroups.toLocaleString();
+                if (itemsEl) itemsEl.textContent = totalItems.toLocaleString();
+                if (amountEl) amountEl.textContent = formatAmountFull(totalAmount);
+                console.log('Mobile: Stats set directly:', { totalGroups, totalItems, totalAmount });
+            }, 50);
+            
             // Display duplicates
             displayMobileDuplicates(duplicatesData);
             
