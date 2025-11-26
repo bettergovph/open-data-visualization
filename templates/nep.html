@@ -130,7 +130,7 @@
                             <a href="#gab2026" class="budget-tab-btn" data-tab="gab2026">📕 GAB 2026</a>
                             <a href="#insertion" class="budget-tab-btn" data-tab="insertion">🧩 Insertions</a>
                             <a href="#win" class="budget-tab-btn" data-tab="win">📊 Win (Amendments)</a>
-                            <a href="#duplicate" class="budget-tab-btn" data-tab="duplicate">📊 Win (Duplicates)</a>
+                            <a href="#duplicate" class="budget-tab-btn" data-tab="duplicate">🚜 Farm to Market</a>
                             <a href="#dpwh" class="budget-tab-btn" data-tab="dpwh">🛣️ DPWH (Annex A-5)</a>
                         </div>
 
@@ -670,8 +670,8 @@
 
                             <!-- Duplicate Tab -->
                             <div id="tab-duplicate" class="budget-tab-panel">
-                                <h3 class="budget-section-title">📊 Win (Duplicates)</h3>
-                                <p class="budget-section-desc">Track duplicate entries in budget amendments with similar names and amounts</p>
+                                <h3 class="budget-section-title">🚜 Farm to Market (Annex A-1)</h3>
+                                <p class="budget-section-desc">Track duplicate entries in Farm-to-Market Road projects with similar names and amounts</p>
 
                                 <!-- Stats Cards -->
                                 <div class="duplicate-stats-grid"
@@ -2814,8 +2814,7 @@
                                     // Find max count for scaling
                                     const maxCount = Math.max(...sortedBins.map(b => b.count));
 
-                                    // Create chart HTML
-                                    const chartDiv = document.getElementById('dpwh-histogram-chart');
+                                    // Create chart HTML (chartDiv already declared above)
                                     const chartHeight = 500;
                                     const chartWidth = 1000;
                                     const marginLeft = 90;
