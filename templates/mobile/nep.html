@@ -41,23 +41,6 @@
         border-bottom-color: #0038A8 !important;
         font-weight: 600 !important;
     }
-
-    /* Make toggleMobileDuplicateGroup available globally */
-    window.toggleMobileDuplicateGroup = function(groupId) {
-        const itemsId = groupId.replace('mobile-group-', 'mobile-items-');
-        const itemsDiv = document.getElementById(itemsId);
-        if (itemsDiv) {
-            const isVisible = itemsDiv.style.display !== 'none';
-            itemsDiv.style.display = isVisible ? 'none' : 'block';
-            const groupDiv = document.getElementById(groupId);
-            if (groupDiv) {
-                const arrow = groupDiv.querySelector('div:last-child');
-                if (arrow) {
-                    arrow.textContent = isVisible ? '▼' : '▲';
-                }
-            }
-        }
-    };
 </style>
 {% endblock %}
 
@@ -397,8 +380,8 @@
         }).join('');
     }
 
-    // Toggle duplicate group (mobile)
-    function toggleMobileDuplicateGroup(groupId) {
+    // Toggle duplicate group (mobile) - make it globally available
+    window.toggleMobileDuplicateGroup = function(groupId) {
         const itemsId = groupId.replace('mobile-group-', 'mobile-items-');
         const itemsDiv = document.getElementById(itemsId);
         if (itemsDiv) {
@@ -413,7 +396,7 @@
                 }
             }
         }
-    }
+    };
 
     // Display Annex A-1 histogram (mobile version)
     function displayMobileAnnexA1Histogram(amounts) {
