@@ -2773,22 +2773,30 @@
                                     }
 
                                     // Use bins instead of unique amounts (since amounts are varied)
-                                    const minAmount = Math.min(...amounts);
-                                    const maxAmount = Math.max(...amounts);
+                                    const validAmounts = amounts.filter(a => a > 0);
+                                    if (validAmounts.length === 0) {
+                                        console.warn('No valid amounts to bin');
+                                        return;
+                                    }
+                                    
+                                    const minAmount = Math.min(...validAmounts);
+                                    const maxAmount = Math.max(...validAmounts);
                                     
                                     // Create bins - use logarithmic scale for better distribution
                                     const numBins = 30;
-                                    const binSize = (Math.log10(maxAmount) - Math.log10(minAmount)) / numBins;
+                                    const logMin = Math.log10(minAmount);
+                                    const logMax = Math.log10(maxAmount);
+                                    const binSize = (logMax - logMin) / numBins;
                                     
                                     const bins = {};
-                                    amounts.forEach(amount => {
-                                        if (amount <= 0) return;
-                                        const binIndex = Math.floor((Math.log10(amount) - Math.log10(minAmount)) / binSize);
-                                        const binKey = Math.min(binIndex, numBins - 1);
+                                    validAmounts.forEach(amount => {
+                                        const logAmount = Math.log10(amount);
+                                        const binIndex = Math.floor((logAmount - logMin) / binSize);
+                                        const binKey = Math.min(Math.max(0, binIndex), numBins - 1);
                                         
                                         // Calculate bin range
-                                        const binMin = Math.pow(10, Math.log10(minAmount) + binKey * binSize);
-                                        const binMax = Math.pow(10, Math.log10(minAmount) + (binKey + 1) * binSize);
+                                        const binMin = Math.pow(10, logMin + binKey * binSize);
+                                        const binMax = Math.pow(10, logMin + (binKey + 1) * binSize);
                                         
                                         const binLabel = `${formatAmountFull(binMin)} - ${formatAmountFull(binMax)}`;
                                         
