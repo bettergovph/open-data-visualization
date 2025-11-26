@@ -41,6 +41,23 @@
         border-bottom-color: #0038A8 !important;
         font-weight: 600 !important;
     }
+
+    /* Make toggleMobileDuplicateGroup available globally */
+    window.toggleMobileDuplicateGroup = function(groupId) {
+        const itemsId = groupId.replace('mobile-group-', 'mobile-items-');
+        const itemsDiv = document.getElementById(itemsId);
+        if (itemsDiv) {
+            const isVisible = itemsDiv.style.display !== 'none';
+            itemsDiv.style.display = isVisible ? 'none' : 'block';
+            const groupDiv = document.getElementById(groupId);
+            if (groupDiv) {
+                const arrow = groupDiv.querySelector('div:last-child');
+                if (arrow) {
+                    arrow.textContent = isVisible ? '▼' : '▲';
+                }
+            }
+        }
+    };
 </style>
 {% endblock %}
 
@@ -119,6 +136,20 @@
 
         <!-- Error Message -->
         <div id="mobile-duplicate-error" style="display: none; text-align: center; padding: 2rem; color: #dc3545;"></div>
+
+        <!-- Annex A-1 Distribution Chart -->
+        <div id="mobile-annex-a1-histogram" style="display: none; background: white; padding: 1rem; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); margin-bottom: 1rem;">
+            <h4 style="margin: 0 0 1rem 0; color: #333; font-size: 1.1em; text-align: center;">📊 Annex A-1 Project Amount Distribution</h4>
+            <div id="mobile-histogram-chart" style="min-height: 400px; display: flex; justify-content: center; overflow-x: auto;"></div>
+            
+            <!-- Statistical Analysis Results -->
+            <div id="mobile-statistical-analysis" style="display: none; margin-top: 1rem; padding: 1rem; background: #f8f9fa; border-radius: 8px; border-left: 4px solid #dc3545;">
+                <h4 style="margin: 0 0 0.75rem 0; color: #333; font-size: 1em; font-weight: 600;">📊 Results:</h4>
+                <div id="mobile-statistical-analysis-content" style="color: #333; line-height: 1.6; font-size: 0.9em;">
+                    <!-- Content will be populated by JavaScript -->
+                </div>
+            </div>
+        </div>
 
         <!-- Results -->
         <div id="mobile-duplicate-groups-container" style="display: none;"></div>
@@ -235,7 +266,13 @@
         }
     }
 
-    // Load duplicate data function (simplified mobile version)
+    // Format amount as full number with commas (no abbreviations)
+    function formatAmountFull(amount) {
+        if (!amount && amount !== 0) return '₱0';
+        return '₱' + Math.abs(amount).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    }
+
+    // Load duplicate data function (full mobile version with chart and statistics)
     async function loadMobileDuplicateData() {
         const loadingDiv = document.getElementById('mobile-duplicate-loading');
         const errorDiv = document.getElementById('mobile-duplicate-error');
@@ -246,54 +283,37 @@
             errorDiv.style.display = 'none';
             container.style.display = 'none';
             
+            // Load duplicates
             const response = await fetch('/api/budget/amendments/duplicates');
             if (!response.ok) {
                 throw new Error(`HTTP ${response.status}`);
             }
             
-            const data = await response.json();
-            if (!data.success) {
-                throw new Error(data.error || 'Failed to load duplicate data');
+            const duplicatesData = await response.json();
+            if (!duplicatesData.success) {
+                throw new Error(duplicatesData.error || 'Failed to load duplicate data');
             }
             
-            // Update stats
-            const totalGroups = data.groups ? data.groups.length : 0;
-            const totalItems = data.groups ? data.groups.reduce((sum, g) => sum + (g.items ? g.items.length : 0), 0) : 0;
-            const totalAmount = data.groups ? data.groups.reduce((sum, g) => sum + (g.total_amount || 0), 0) : 0;
+            // Display duplicates
+            displayMobileDuplicates(duplicatesData);
             
-            document.getElementById('mobile-duplicate-total-groups').textContent = totalGroups.toLocaleString();
-            document.getElementById('mobile-duplicate-total-items').textContent = totalItems.toLocaleString();
-            document.getElementById('mobile-duplicate-total-amount').textContent = '₱' + (totalAmount / 1000000000).toFixed(2) + 'B';
-            
-            // Load total projects count
+            // Load Annex A-1 amounts for histogram and total project count
             try {
                 const amountsResponse = await fetch('/api/budget/amendments/annex-a1-amounts');
                 if (amountsResponse.ok) {
                     const amountsData = await amountsResponse.json();
                     if (amountsData.success) {
+                        // Update total projects count
                         document.getElementById('mobile-duplicate-total-projects').textContent = amountsData.total_projects.toLocaleString();
+                        
+                        // Display histogram and statistics
+                        if (amountsData.amounts && amountsData.amounts.length > 0) {
+                            displayMobileAnnexA1Histogram(amountsData.amounts);
+                        }
                     }
                 }
-            } catch (e) {
-                console.warn('Could not load total projects:', e);
-            }
-            
-            // Display duplicate groups (simplified for mobile)
-            if (data.groups && data.groups.length > 0) {
-                container.innerHTML = data.groups.slice(0, 20).map((group, idx) => {
-                    const items = group.items || [];
-                    return `
-                        <div class="mobile-nep-card" style="margin-bottom: 1rem;">
-                            <div style="font-weight: 600; color: #0038A8; margin-bottom: 0.5rem;">Group #${idx + 1} (${items.length} items)</div>
-                            <div style="font-size: 0.85rem; color: #666; margin-bottom: 0.5rem;">${group.remarks || 'Similar names and amounts'}</div>
-                            <div style="font-size: 0.85rem; color: #666;">Total: ₱${(group.total_amount || 0).toLocaleString()}</div>
-                        </div>
-                    `;
-                }).join('');
-                container.style.display = 'block';
-            } else {
-                container.innerHTML = '<div class="text-center py-8 text-gray-500">No duplicates found</div>';
-                container.style.display = 'block';
+            } catch (histError) {
+                console.warn('Could not load histogram data:', histError);
             }
             
             loadingDiv.style.display = 'none';
@@ -302,6 +322,254 @@
             loadingDiv.style.display = 'none';
             errorDiv.style.display = 'block';
             errorDiv.innerHTML = `<p>❌ Error: ${error.message}</p>`;
+        }
+    }
+
+    // Display duplicate groups (mobile version)
+    function displayMobileDuplicates(data) {
+        const metadata = data.metadata || {};
+        const groups = data.duplicate_groups || [];
+        const container = document.getElementById('mobile-duplicate-groups-container');
+        
+        // Update stats
+        document.getElementById('mobile-duplicate-total-groups').textContent = (metadata.total_groups || groups.length).toLocaleString();
+        document.getElementById('mobile-duplicate-total-items').textContent = (metadata.total_items || groups.reduce((sum, g) => sum + (g.count || 0), 0)).toLocaleString();
+        const totalAmount = groups.reduce((sum, g) => sum + (g.total_amount || 0), 0);
+        document.getElementById('mobile-duplicate-total-amount').textContent = formatAmountFull(totalAmount);
+        
+        container.style.display = 'block';
+        
+        if (groups.length === 0) {
+            container.innerHTML = '<div class="text-center py-8 text-gray-500">No duplicates found</div>';
+            return;
+        }
+        
+        // Display groups (collapsible, collapsed by default)
+        container.innerHTML = groups.map((group, groupIdx) => {
+            const items = group.items || [];
+            const groupId = `mobile-group-${groupIdx}`;
+            const itemsId = `mobile-items-${groupIdx}`;
+            
+            return `
+                <div class="mobile-nep-card" style="margin-bottom: 1rem;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; cursor: pointer;" onclick="toggleMobileDuplicateGroup('${groupId}')">
+                        <div style="flex: 1;">
+                            <div style="font-weight: 600; color: #0038A8; margin-bottom: 0.25rem;">Group #${groupIdx + 1} (${items.length} items)</div>
+                            ${group.remarks ? `<div style="font-size: 0.85em; color: #666; margin-bottom: 0.25rem;">${group.remarks}</div>` : ''}
+                            <div style="font-size: 0.9em; color: #333; font-weight: 500;">Total: ${formatAmountFull(group.total_amount || 0)}</div>
+                        </div>
+                        <div style="font-size: 1.2em; color: #666; margin-left: 0.5rem;">▼</div>
+                    </div>
+                    <div id="${itemsId}" style="margin-top: 0.75rem; display: none; border-top: 1px solid #eee; padding-top: 0.75rem;">
+                        ${items.map((item, itemIdx) => {
+                            const childProjectName = item.name || item.description || 'Unknown';
+                            const description = item.description || '';
+                            const originalAmount = item.original_amount || 0;
+                            const finalAmount = item.final_amount || item.original_amount || 0;
+                            const netChange = item.net_change || (finalAmount - originalAmount);
+                            const region = item.location?.region || 'N/A';
+                            const sourceSheet = item.source_sheet || 'Unknown';
+                            const sourceRow = item.source_row || '?';
+                            const sourceColB = item.source_col_b || 'B';
+                            const sourceColC = item.source_col_c || 'C';
+                            
+                            return `
+                                <div style="padding: 0.75rem; background: #f8f9fa; border-radius: 6px; margin-bottom: 0.5rem;">
+                                    <div style="font-weight: 600; color: #333; margin-bottom: 0.5rem; font-size: 0.95em;">${childProjectName}</div>
+                                    ${description && description !== childProjectName ? `<div style="font-size: 0.85em; color: #666; margin-bottom: 0.5rem;">${description}</div>` : ''}
+                                    <div style="display: flex; flex-wrap: wrap; gap: 0.5rem; margin-bottom: 0.5rem; font-size: 0.8em;">
+                                        <span style="background: #e3f2fd; color: #1976d2; padding: 0.25rem 0.5rem; border-radius: 4px;">${item.department_id || 'N/A'}</span>
+                                        <span style="background: #f3e5f5; color: #7b1fa2; padding: 0.25rem 0.5rem; border-radius: 4px;">${sourceSheet}</span>
+                                        ${region !== 'N/A' ? `<span style="background: #fff3e0; color: #e65100; padding: 0.25rem 0.5rem; border-radius: 4px;">📍 ${region}</span>` : ''}
+                                        <span style="background: #e8f5e9; color: #2e7d32; padding: 0.25rem 0.5rem; border-radius: 4px;">${sourceColB}${sourceRow}:${sourceColC}${sourceRow}</span>
+                                    </div>
+                                    <div style="font-size: 0.9em;">
+                                        ${originalAmount > 0 ? `<div style="color: #666; margin-bottom: 0.25rem;">Original: ${formatAmountFull(originalAmount)}</div>` : ''}
+                                        <div style="font-weight: 600; color: #28a745; margin-bottom: 0.25rem;">${formatAmountFull(finalAmount)}</div>
+                                        ${netChange !== 0 ? `<div style="color: ${netChange > 0 ? '#28a745' : '#dc3545'}; font-size: 0.85em;">${netChange > 0 ? '+' : ''}${formatAmountFull(netChange)}</div>` : ''}
+                                    </div>
+                                </div>
+                            `;
+                        }).join('')}
+                    </div>
+                </div>
+            `;
+        }).join('');
+    }
+
+    // Toggle duplicate group (mobile)
+    function toggleMobileDuplicateGroup(groupId) {
+        const itemsId = groupId.replace('mobile-group-', 'mobile-items-');
+        const itemsDiv = document.getElementById(itemsId);
+        if (itemsDiv) {
+            const isVisible = itemsDiv.style.display !== 'none';
+            itemsDiv.style.display = isVisible ? 'none' : 'block';
+            // Update arrow
+            const groupDiv = document.getElementById(groupId);
+            if (groupDiv) {
+                const arrow = groupDiv.querySelector('div:last-child');
+                if (arrow) {
+                    arrow.textContent = isVisible ? '▼' : '▲';
+                }
+            }
+        }
+    }
+
+    // Display Annex A-1 histogram (mobile version)
+    function displayMobileAnnexA1Histogram(amounts) {
+        if (!amounts || amounts.length === 0) {
+            return;
+        }
+
+        // Count unique amounts
+        const uniqueAmounts = {};
+        amounts.forEach(amount => {
+            uniqueAmounts[amount] = (uniqueAmounts[amount] || 0) + 1;
+        });
+
+        // Sort by amount
+        const sortedAmounts = Object.entries(uniqueAmounts)
+            .map(([amountStr, count]) => {
+                const amount = parseFloat(amountStr);
+                return { amount, count, label: formatAmountFull(amount) };
+            })
+            .sort((a, b) => a.amount - b.amount);
+
+        const maxCount = Math.max(...sortedAmounts.map(b => b.count));
+        const chartDiv = document.getElementById('mobile-histogram-chart');
+        
+        // Mobile-optimized chart dimensions
+        const chartHeight = 400;
+        const chartWidth = Math.min(800, window.innerWidth - 40);
+        const marginLeft = 50;
+        const marginRight = 20;
+        const marginTop = 20;
+        const marginBottom = 80;
+        const plotWidth = chartWidth - marginLeft - marginRight;
+        const plotHeight = chartHeight - marginTop - marginBottom;
+        const barWidth = Math.max(15, plotWidth / sortedAmounts.length - 2);
+
+        let chartHTML = `
+            <svg width="${chartWidth}" height="${chartHeight + 30}" style="font-family: Arial, sans-serif;">
+                <!-- Y-axis label -->
+                <text x="20" y="${chartHeight / 2}" transform="rotate(-90, 20, ${chartHeight / 2})" 
+                      style="font-size: 12px; fill: #666; text-anchor: middle; font-weight: 600;">
+                    Number of Projects
+                </text>
+                
+                <!-- X-axis label -->
+                <text x="${chartWidth / 2}" y="${chartHeight + 20}" 
+                      style="font-size: 12px; fill: #666; text-anchor: middle; font-weight: 600;">
+                    Price (Amount in ₱)
+                </text>
+                
+                <!-- Y-axis ticks -->
+                ${[0, 0.25, 0.5, 0.75, 1].map((ratio) => {
+                    const y = marginTop + (plotHeight * (1 - ratio));
+                    const value = Math.round(maxCount * ratio);
+                    return `
+                        <line x1="${marginLeft}" y1="${y}" x2="${chartWidth - marginRight}" y2="${y}" 
+                              stroke="#e9ecef" stroke-width="1" stroke-dasharray="2,2"/>
+                        <text x="${marginLeft - 10}" y="${y + 4}" style="font-size: 10px; fill: #666; text-anchor: end;">
+                            ${value}
+                        </text>
+                    `;
+                }).join('')}
+                
+                <!-- Axes -->
+                <line x1="${marginLeft}" y1="${marginTop + plotHeight}" 
+                      x2="${chartWidth - marginRight}" y2="${marginTop + plotHeight}" 
+                      stroke="#333" stroke-width="2"/>
+                <line x1="${marginLeft}" y1="${marginTop}" 
+                      x2="${marginLeft}" y2="${marginTop + plotHeight}" 
+                      stroke="#333" stroke-width="2"/>
+                
+                <!-- Bars -->
+                ${sortedAmounts.map((item, idx) => {
+                    const barHeight = (item.count / maxCount) * plotHeight;
+                    const x = marginLeft + (idx * (plotWidth / sortedAmounts.length)) + 1;
+                    const y = marginTop + plotHeight - barHeight;
+                    const barColor = item.count > 100 ? '#dc3545' : item.count > 50 ? '#fd7e14' : item.count > 20 ? '#ffc107' : '#28a745';
+                    
+                    const amountDisplay = item.amount >= 1000000 ? `${(item.amount / 1000000).toFixed(1)}M` : 
+                                         item.amount >= 1000 ? `${(item.amount / 1000).toFixed(0)}K` : item.amount.toString();
+                    
+                    return `
+                        <g>
+                            <rect x="${x}" y="${y}" width="${barWidth}" height="${barHeight}" 
+                                  fill="${barColor}" opacity="0.8" rx="2">
+                                <title>${item.label}: ${item.count} projects</title>
+                            </rect>
+                            <text x="${x + barWidth / 2}" y="${y - 5}" 
+                                  style="font-size: 10px; fill: #333; text-anchor: middle; font-weight: 600;">
+                                ${item.count}
+                            </text>
+                            <text x="${x + barWidth / 2}" y="${marginTop + plotHeight + 20}" 
+                                  transform="rotate(-45, ${x + barWidth / 2}, ${marginTop + plotHeight + 20})"
+                                  style="font-size: 9px; fill: #666; text-anchor: end;">
+                                ${amountDisplay}
+                            </text>
+                        </g>
+                    `;
+                }).join('')}
+            </svg>
+        `;
+
+        chartDiv.innerHTML = chartHTML;
+        document.getElementById('mobile-annex-a1-histogram').style.display = 'block';
+        
+        // Calculate and display statistics
+        calculateAndDisplayMobileStatistics(amounts, sortedAmounts);
+    }
+
+    // Calculate statistical analysis results (mobile version)
+    function calculateAndDisplayMobileStatistics(amounts, sortedAmounts) {
+        const totalProjects = amounts.length;
+        const uniqueCount = sortedAmounts.length;
+        const probability = 0.000000;
+        
+        // Benford's Law Test
+        const firstDigitCounts = {};
+        amounts.forEach(amount => {
+            const amountStr = Math.abs(amount).toString();
+            const firstDigit = parseInt(amountStr.charAt(0));
+            if (firstDigit >= 1 && firstDigit <= 9) {
+                firstDigitCounts[firstDigit] = (firstDigitCounts[firstDigit] || 0) + 1;
+            }
+        });
+        
+        const benfordExpected = {};
+        for (let d = 1; d <= 9; d++) {
+            benfordExpected[d] = totalProjects * Math.log10(1 + 1/d);
+        }
+        
+        let chiSquare = 0;
+        for (let d = 1; d <= 9; d++) {
+            const observed = firstDigitCounts[d] || 0;
+            const expected = benfordExpected[d];
+            if (expected > 0) {
+                chiSquare += Math.pow(observed - expected, 2) / expected;
+            }
+        }
+        
+        const criticalValue = 15.51;
+        const benfordRejected = chiSquare > criticalValue;
+        
+        const dominantAmount = sortedAmounts.reduce((max, item) => 
+            item.count > max.count ? item : max, sortedAmounts[0]);
+        const dominantPercentage = ((dominantAmount.count / totalProjects) * 100).toFixed(0);
+        
+        const analysisDiv = document.getElementById('mobile-statistical-analysis');
+        const contentDiv = document.getElementById('mobile-statistical-analysis-content');
+        
+        if (analysisDiv && contentDiv) {
+            contentDiv.innerHTML = `
+                <p style="margin: 0.5rem 0;"><strong>Probability of ${uniqueCount} unique amounts in ${totalProjects} projects:</strong> Effectively ${probability.toFixed(6)}.</p>
+                <p style="margin: 0.5rem 0;"><strong>Benford's Law Test:</strong> <span style="color: ${benfordRejected ? '#dc3545' : '#28a745'}; font-weight: 600;">${benfordRejected ? 'REJECTED' : 'PASSED'}</span> (Chi-Square: ${chiSquare.toFixed(2)}, Critical: ${criticalValue.toFixed(2)}).</p>
+                <p style="margin: 0.5rem 0;"><strong>Dominant Amount:</strong> ${formatAmountFull(dominantAmount.amount)} (${dominantPercentage}% of all projects).</p>
+                <p style="margin: 1rem 0 0 0; font-weight: 600; color: #dc3545;">This strongly suggests the data is artificial or copy-pasted.</p>
+            `;
+            analysisDiv.style.display = 'block';
         }
     }
 
