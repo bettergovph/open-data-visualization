@@ -2625,17 +2625,47 @@
 
                                 // Display DPWH duplicate groups
                                 function displayDPWHDuplicates(data) {
+                                    console.log('displayDPWHDuplicates called with data:', {
+                                        hasMetadata: !!data.metadata,
+                                        groupsCount: data.duplicate_groups?.length || 0
+                                    });
+                                    
                                     const metadata = data.metadata || {};
                                     const groups = data.duplicate_groups || [];
                                     
                                     // Update stats
-                                    document.getElementById('dpwh-total-groups').textContent = (metadata.total_groups || groups.length).toLocaleString();
-                                    document.getElementById('dpwh-total-items').textContent = (metadata.total_items || groups.reduce((sum, g) => sum + (g.count || 0), 0)).toLocaleString();
+                                    const groupsEl = document.getElementById('dpwh-total-groups');
+                                    const itemsEl = document.getElementById('dpwh-total-items');
+                                    const amountEl = document.getElementById('dpwh-duplicate-amount');
+                                    
+                                    if (groupsEl) {
+                                        groupsEl.textContent = (metadata.total_groups || groups.length).toLocaleString();
+                                        console.log('Set dpwh-total-groups to', (metadata.total_groups || groups.length));
+                                    } else {
+                                        console.error('dpwh-total-groups element not found');
+                                    }
+                                    
+                                    if (itemsEl) {
+                                        itemsEl.textContent = (metadata.total_items || groups.reduce((sum, g) => sum + (g.count || 0), 0)).toLocaleString();
+                                        console.log('Set dpwh-total-items to', (metadata.total_items || groups.reduce((sum, g) => sum + (g.count || 0), 0)));
+                                    } else {
+                                        console.error('dpwh-total-items element not found');
+                                    }
+                                    
                                     const totalAmount = groups.reduce((sum, g) => sum + (g.total_amount || 0), 0);
-                                    document.getElementById('dpwh-duplicate-amount').textContent = formatAmountFull(totalAmount);
+                                    if (amountEl) {
+                                        amountEl.textContent = formatAmountFull(totalAmount);
+                                        console.log('Set dpwh-duplicate-amount to', formatAmountFull(totalAmount));
+                                    } else {
+                                        console.error('dpwh-duplicate-amount element not found');
+                                    }
                                     
                                     // Display groups
                                     const container = document.getElementById('dpwh-duplicate-groups-container');
+                                    if (!container) {
+                                        console.error('dpwh-duplicate-groups-container not found');
+                                        return;
+                                    }
                                     container.style.display = 'block';
                                     
                                     if (groups.length === 0) {
