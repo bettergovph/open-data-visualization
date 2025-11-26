@@ -2449,79 +2449,248 @@ class BudgetAmendmentParser:
             return {"programs": [], "projects": []}
     
     def parse_dpwh_projects(self) -> List[Dict]:
-        """Parse Annex A-5 DPWH Projects"""
+        """
+        Parse Annex A-5 DPWH Projects
+        
+        Structure:
+        - Row 2-3: Headers
+        - Column A: Page No.
+        - Column B, L: Spacers (ignore)
+        - Column C (BOLD): Department (new department when new bold C appears)
+        - Columns C-I: Nested parent-child hierarchy (program -> sub-program -> region -> office -> category -> sub-category -> sub-sub-category)
+        - Column J: Number prefix (e.g., "2.")
+        - Column K: Letter prefix (e.g., "s.")
+        - Column M: Letter prefix (e.g., "a.")
+        - Column N: Revised Project Name
+        - Columns O-S: Amounts (O=GAB, P=Increase, Q=Decrease, R=Net Change, S=Final)
+        """
         file_path = self.base_dir / "Annex A-5 Details of DPWH's Programs&Projects.xlsx"
         
-        print(f"🛣️  Parsing DPWH Projects...")
+        print(f"🛣️  Parsing DPWH Projects (Annex A-5)...")
         
         try:
+            import openpyxl
+            # Load with formulas to detect bold formatting
+            wb = openpyxl.load_workbook(file_path, data_only=False)
+            
+            # Also load values for reading amounts
+            wb_values = openpyxl.load_workbook(file_path, data_only=True)
+            
             projects_data = []
-            wb = openpyxl.load_workbook(file_path, data_only=True)
             
             # Parse the main sheet "DPWH 1-C ComRep"
             if 'DPWH 1-C ComRep' in wb.sheetnames:
                 ws = wb['DPWH 1-C ComRep']
+                ws_val = wb_values['DPWH 1-C ComRep']
                 
-                # Find header row
-                header_row = None
-                for row_idx in range(1, min(10, ws.max_row + 1)):
-                    row_values = [str(ws.cell(row_idx, col).value or '').strip() for col in range(1, min(21, ws.max_column + 1))]
-                    if any('project' in str(v).lower() for v in row_values) or any('activity' in str(v).lower() for v in row_values):
-                        header_row = row_idx
-                        break
+                # Data starts after row 3 (rows 2-3 are headers)
+                data_start_row = 4
                 
-                if header_row:
-                    # Find column indices
-                    col_project = None
-                    col_amount = None
+                # Track hierarchy
+                current_department = None
+                current_program = None  # Column C
+                current_subprogram = None  # Column D
+                current_region = None  # Column E
+                current_office = None  # Column F
+                current_category = None  # Column G
+                current_subcategory = None  # Column H
+                current_subsubcategory = None  # Column I
+                
+                for row_idx in range(data_start_row, ws.max_row + 1):
+                    # Get cells from both workbooks
+                    cell_c = ws.cell(row_idx, 3)
+                    cell_c_val = ws_val.cell(row_idx, 3)
+                    cell_d = ws_val.cell(row_idx, 4)
+                    cell_e = ws_val.cell(row_idx, 5)
+                    cell_f = ws_val.cell(row_idx, 6)
+                    cell_g = ws_val.cell(row_idx, 7)
+                    cell_h = ws_val.cell(row_idx, 8)
+                    cell_i = ws_val.cell(row_idx, 9)
+                    cell_j = ws_val.cell(row_idx, 10)
+                    cell_k = ws_val.cell(row_idx, 11)
+                    cell_m = ws_val.cell(row_idx, 13)
+                    cell_n = ws_val.cell(row_idx, 14)  # Revised Project Name
+                    cell_o = ws_val.cell(row_idx, 15)  # GAB (original)
+                    cell_p = ws_val.cell(row_idx, 16)  # Increase
+                    cell_q = ws_val.cell(row_idx, 17)  # Decrease
+                    cell_r = ws_val.cell(row_idx, 18)  # Net Change
+                    cell_s = ws_val.cell(row_idx, 19)  # Final (SV Committee)
+                    cell_a = ws_val.cell(row_idx, 1)  # Page No.
                     
-                    for col_idx in range(1, ws.max_column + 1):
-                        cell_val = str(ws.cell(header_row, col_idx).value or '').lower()
-                        if ('project' in cell_val or 'activity' in cell_val) and col_project is None:
-                            col_project = col_idx
-                        if 'amount' in cell_val and col_amount is None:
-                            col_amount = col_idx
+                    # Check if column C is bold (new department)
+                    is_bold_c = cell_c.font.bold if cell_c.font else False
+                    c_value = cell_c_val.value
                     
-                    # Parse data rows (limit for performance)
-                    for row_idx in range(header_row + 1, min(ws.max_row + 1, header_row + 1000)):
-                        project_name = ws.cell(row_idx, col_project).value if col_project else None
-                        if not project_name or not str(project_name).strip() or len(str(project_name).strip()) < 5:
-                            continue
+                    # Update hierarchy based on which columns have values
+                    # Track hierarchy for ALL rows, not just project rows
+                    if is_bold_c and c_value:
+                        # New department (bold C)
+                        current_department = str(c_value).strip()
+                        # Reset all lower levels
+                        current_program = None
+                        current_subprogram = None
+                        current_region = None
+                        current_office = None
+                        current_category = None
+                        current_subcategory = None
+                        current_subsubcategory = None
+                    elif c_value and not is_bold_c:
+                        # Program level (Column C, not bold) - only update if different
+                        new_program = str(c_value).strip()
+                        if new_program != current_program:
+                            current_program = new_program
+                            # Reset lower levels when program changes
+                            current_subprogram = None
+                            current_region = None
+                            current_office = None
+                            current_category = None
+                            current_subcategory = None
+                            current_subsubcategory = None
+                    
+                    # Update subprogram (Column D) - only if it has a value
+                    if cell_d.value:
+                        new_subprogram = str(cell_d.value).strip()
+                        if new_subprogram != current_subprogram:
+                            current_subprogram = new_subprogram
+                            # Reset lower levels
+                            current_region = None
+                            current_office = None
+                            current_category = None
+                            current_subcategory = None
+                            current_subsubcategory = None
+                    
+                    # Update region (Column E)
+                    if cell_e.value:
+                        new_region = str(cell_e.value).strip()
+                        if new_region != current_region:
+                            current_region = new_region
+                            # Reset lower levels
+                            current_office = None
+                            current_category = None
+                            current_subcategory = None
+                            current_subsubcategory = None
+                    
+                    # Update office (Column F)
+                    if cell_f.value:
+                        new_office = str(cell_f.value).strip()
+                        if new_office != current_office:
+                            current_office = new_office
+                            # Reset lower levels
+                            current_category = None
+                            current_subcategory = None
+                            current_subsubcategory = None
+                    
+                    # Update category (Column G)
+                    if cell_g.value:
+                        new_category = str(cell_g.value).strip()
+                        if new_category != current_category:
+                            current_category = new_category
+                            # Reset lower levels
+                            current_subcategory = None
+                            current_subsubcategory = None
+                    
+                    # Update subcategory (Column H)
+                    if cell_h.value:
+                        new_subcategory = str(cell_h.value).strip()
+                        if new_subcategory != current_subcategory:
+                            current_subcategory = new_subcategory
+                            # Reset lower level
+                            current_subsubcategory = None
+                    
+                    # Update subsubcategory (Column I)
+                    if cell_i.value:
+                        current_subsubcategory = str(cell_i.value).strip()
+                    
+                    # Get project name from J, K, or M (whichever has value)
+                    project_name = None
+                    if cell_j.value:
+                        project_name = str(cell_j.value).strip()
+                    elif cell_k.value:
+                        project_name = str(cell_k.value).strip()
+                    elif cell_m.value:
+                        project_name = str(cell_m.value).strip()
+                    
+                    # Get revised name from column N
+                    revised_name = str(cell_n.value).strip() if cell_n.value else None
+                    
+                    # Get amounts
+                    original_amount = self.parse_amount(cell_o.value)  # GAB
+                    increase = self.parse_amount(cell_p.value)
+                    decrease = self.parse_amount(cell_q.value)
+                    net_change = self.parse_amount(cell_r.value)
+                    final_amount = self.parse_amount(cell_s.value)  # Final
+                    
+                    # Get page reference
+                    page_ref = str(cell_a.value).strip() if cell_a.value else None
+                    
+                    # Only create project if we have a name and an amount
+                    if project_name and (original_amount > 0 or final_amount > 0):
+                        self.proj_counter += 1
                         
-                        # Try to find amount in various columns
-                        amount = 0.0
-                        if col_amount:
-                            amount = self.parse_amount(ws.cell(row_idx, col_amount).value)
+                        # Build description from hierarchy
+                        description_parts = []
+                        if current_program:
+                            description_parts.append(current_program)
+                        if current_subprogram:
+                            description_parts.append(current_subprogram)
+                        if current_region:
+                            description_parts.append(current_region)
+                        if current_office:
+                            description_parts.append(current_office)
+                        if current_category:
+                            description_parts.append(current_category)
+                        if current_subcategory:
+                            description_parts.append(current_subcategory)
+                        if current_subsubcategory:
+                            description_parts.append(current_subsubcategory)
                         
-                        # If no amount found, try other columns
-                        if amount == 0:
-                            for col_idx in range(col_project or 1, min(ws.max_column + 1, (col_project or 1) + 10)):
-                                val = ws.cell(row_idx, col_idx).value
-                                if isinstance(val, (int, float)) and val > 1000:  # Likely an amount
-                                    amount = self.parse_amount(val)
-                                    break
+                        description = ' | '.join(description_parts) if description_parts else None
                         
-                        if amount > 0:
-                            self.proj_counter += 1
-                            
-                            projects_data.append({
-                                "id": f"DPWH-Proj-{self.proj_counter:04d}",
-                                "program_id": None,
-                                "department_id": "DPWH",
-                                "name": str(project_name).strip(),
-                                "description": None,
-                                "location": {"region": None, "province": None, "municipality": None, "barangay": None},
-                                "original_amount": amount,
-                                "final_amount": amount,
-                                "net_change": 0.0,
-                                "percent_change": 0.0,
-                                "amendments": [],
-                                "revised_name": None,
-                                "page_reference": None,
-                                "source_sheet": "DPWH 1-C ComRep"
-                            })
+                        projects_data.append({
+                            "id": f"DPWH-Proj-{self.proj_counter:04d}",
+                            "program_id": None,
+                            "department_id": "DPWH",
+                            "name": project_name,
+                            "description": description,
+                            "revised_name": revised_name,
+                            "location": {
+                                "region": current_region,
+                                "province": None,
+                                "municipality": None,
+                                "barangay": None
+                            },
+                            "original_amount": original_amount,
+                            "final_amount": final_amount if final_amount > 0 else original_amount,
+                            "increase": increase,
+                            "decrease": decrease,
+                            "net_change": net_change if net_change != 0 else (final_amount - original_amount),
+                            "percent_change": ((final_amount - original_amount) / original_amount * 100) if original_amount > 0 else 0.0,
+                            "amendments": [],
+                            "page_reference": page_ref,
+                            "source_sheet": "Annex A-5",
+                            "source_row": row_idx,
+                            "source_cols": {
+                                "page": "A",
+                                "description": "C-I",
+                                "project": "J/K/M",
+                                "revised_name": "N",
+                                "amounts": "O-S"
+                            },
+                            "hierarchy": {
+                                "department": current_department,
+                                "program": current_program,
+                                "subprogram": current_subprogram,
+                                "region": current_region,
+                                "office": current_office,
+                                "category": current_category,
+                                "subcategory": current_subcategory,
+                                "subsubcategory": current_subsubcategory
+                            }
+                        })
             
             wb.close()
+            wb_values.close()
+            
             print(f"✅ Parsed {len(projects_data)} DPWH projects")
             return projects_data
             
