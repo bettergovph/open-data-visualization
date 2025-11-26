@@ -2569,6 +2569,10 @@
                                         
                                         document.getElementById('dpwh-total-amount').textContent = formatAmountFull(totalAmount);
                                         
+                                        // Calculate unique amounts
+                                        const uniqueAmounts = new Set(amounts).size;
+                                        document.getElementById('dpwh-unique-amounts').textContent = uniqueAmounts.toLocaleString();
+                                        
                                         // Display histogram (with bins) - do this first
                                         if (amounts && amounts.length > 0) {
                                             console.log('Displaying DPWH histogram with', amounts.length, 'amounts');
