@@ -8,9 +8,33 @@
     {
       "length": 3,
       "path": [
-        75988,
-        3745804,
-        3745828
+        {
+          "id": 75988,
+          "first_name": "GIAN",
+          "last_name": "SOTTO",
+          "middle_name": null,
+          "suffix": null,
+          "position": "COUNCILOR",
+          "relationship_description": "Starting person"
+        },
+        {
+          "id": 3745804,
+          "first_name": "KIKO",
+          "last_name": "PANGILINAN",
+          "middle_name": null,
+          "suffix": null,
+          "position": "SENATOR",
+          "relationship_description": "GIAN SOTTO is cousin of KIKO PANGILINAN"
+        },
+        {
+          "id": 3745828,
+          "first_name": "TITO",
+          "last_name": "SOTTO",
+          "middle_name": null,
+          "suffix": null,
+          "position": "SENATOR",
+          "relationship_description": "KIKO PANGILINAN is cousin of TITO SOTTO (VICE MAYOR OF QUEZON CITY)"
+        }
       ],
       "relationships": [
         "Starting person",
@@ -21,8 +45,24 @@
     {
       "length": 2,
       "path": [
-        4144962,
-        3745828
+        {
+          "id": 4144962,
+          "first_name": "VAL",
+          "last_name": "SOTTO",
+          "middle_name": null,
+          "suffix": null,
+          "position": null,
+          "relationship_description": "Starting person"
+        },
+        {
+          "id": 3745828,
+          "first_name": "TITO",
+          "last_name": "SOTTO",
+          "middle_name": null,
+          "suffix": null,
+          "position": "SENATOR",
+          "relationship_description": "SIBLINGS IN THE SOTTO FAMILY"
+        }
       ],
       "relationships": [
         "Starting person",
@@ -32,8 +72,24 @@
     {
       "length": 2,
       "path": [
-        4144961,
-        3745828
+        {
+          "id": 4144961,
+          "first_name": "VIC",
+          "last_name": "SOTTO",
+          "middle_name": null,
+          "suffix": null,
+          "position": null,
+          "relationship_description": "Starting person"
+        },
+        {
+          "id": 3745828,
+          "first_name": "TITO",
+          "last_name": "SOTTO",
+          "middle_name": null,
+          "suffix": null,
+          "position": "SENATOR",
+          "relationship_description": "SIBLINGS IN THE SOTTO FAMILY"
+        }
       ],
       "relationships": [
         "Starting person",
@@ -43,8 +99,24 @@
     {
       "length": 2,
       "path": [
-        3745804,
-        3745828
+        {
+          "id": 3745804,
+          "first_name": "KIKO",
+          "last_name": "PANGILINAN",
+          "middle_name": null,
+          "suffix": null,
+          "position": "SENATOR",
+          "relationship_description": "Starting person"
+        },
+        {
+          "id": 3745828,
+          "first_name": "TITO",
+          "last_name": "SOTTO",
+          "middle_name": null,
+          "suffix": null,
+          "position": "SENATOR",
+          "relationship_description": "KIKO PANGILINAN is uncle of TITO SOTTO (SENATE PRESIDENT)"
+        }
       ],
       "relationships": [
         "Starting person",
@@ -54,8 +126,24 @@
     {
       "length": 2,
       "path": [
-        3745828,
-        4144961
+        {
+          "id": 3745828,
+          "first_name": "TITO",
+          "last_name": "SOTTO",
+          "middle_name": null,
+          "suffix": null,
+          "position": "SENATOR",
+          "relationship_description": "Starting person"
+        },
+        {
+          "id": 4144961,
+          "first_name": "VIC",
+          "last_name": "SOTTO",
+          "middle_name": null,
+          "suffix": null,
+          "position": null,
+          "relationship_description": "Siblings in the SOTTO family"
+        }
       ],
       "relationships": [
         "Starting person",
@@ -65,8 +153,24 @@
     {
       "length": 2,
       "path": [
-        3745828,
-        4144962
+        {
+          "id": 3745828,
+          "first_name": "TITO",
+          "last_name": "SOTTO",
+          "middle_name": null,
+          "suffix": null,
+          "position": "SENATOR",
+          "relationship_description": "Starting person"
+        },
+        {
+          "id": 4144962,
+          "first_name": "VAL",
+          "last_name": "SOTTO",
+          "middle_name": null,
+          "suffix": null,
+          "position": null,
+          "relationship_description": "Siblings in the SOTTO family"
+        }
       ],
       "relationships": [
         "Starting person",
@@ -74,36 +178,5 @@
       ]
     }
   ],
-  "people": {
-    "75988": {
-      "id": 75988,
-      "full_name": "GIAN SOTTO",
-      "position": "COUNCILOR",
-      "location": "NCR, SECOND DISTRICT, NATIONAL CAPITAL REGION"
-    },
-    "3745804": {
-      "id": 3745804,
-      "full_name": "KIKO PANGILINAN",
-      "position": "SENATOR",
-      "location": "M'LANG, COTABATO, REGION XII"
-    },
-    "3745828": {
-      "id": 3745828,
-      "full_name": "TITO SOTTO",
-      "position": "SENATOR",
-      "location": "M'LANG, COTABATO, REGION XII"
-    },
-    "4144962": {
-      "id": 4144962,
-      "full_name": "VAL SOTTO",
-      "position": null,
-      "location": "Location unknown"
-    },
-    "4144961": {
-      "id": 4144961,
-      "full_name": "VIC SOTTO",
-      "position": null,
-      "location": "Location unknown"
-    }
-  }
+  "people": {}
 }

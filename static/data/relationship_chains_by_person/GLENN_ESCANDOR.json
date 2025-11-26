@@ -2,14 +2,141 @@
   "person": {
     "normalized_name": "GLENN ESCANDOR",
     "display_name": "GLENN ESCANDOR",
-    "chain_count": 2
+    "chain_count": 5
   },
   "chains": [
     {
+      "length": 3,
+      "path": [
+        {
+          "id": 31580,
+          "first_name": "RODRIGO",
+          "last_name": "Duterte",
+          "middle_name": null,
+          "suffix": null,
+          "position": "MAYOR",
+          "relationship_description": "Starting person"
+        },
+        {
+          "id": 4040936,
+          "first_name": "SARA",
+          "last_name": "DUTERTE-CARPIO",
+          "middle_name": "Z",
+          "suffix": null,
+          "position": "VICE PRESIDENT OF THE PHILIPPINES (Former: MAYOR)",
+          "relationship_description": "Daughter: Vice President of the Philippines"
+        },
+        {
+          "id": 4162641,
+          "first_name": "GLENN",
+          "last_name": "ESCANDOR",
+          "middle_name": null,
+          "suffix": null,
+          "position": "CONSTRUCTION MAGNATE, OWNER OF GENESIS88 CONSTRUCTION",
+          "relationship_description": "Longtime friend and campaign donor. Escandor's Esdevco Realty Corporation donated ₱19.9M for Sara Duterte's 2022 vice presidential campaign"
+        }
+      ],
+      "relationships": [
+        "Starting person",
+        "Daughter: Vice President of the Philippines",
+        "Longtime friend and campaign donor. Escandor's Esdevco Realty Corporation donated ₱19.9M for Sara Duterte's 2022 vice presidential campaign"
+      ]
+    },
+    {
+      "length": 4,
+      "path": [
+        {
+          "id": 31580,
+          "first_name": "RODRIGO",
+          "last_name": "Duterte",
+          "middle_name": null,
+          "suffix": null,
+          "position": "MAYOR",
+          "relationship_description": "Starting person"
+        },
+        {
+          "id": 4040936,
+          "first_name": "SARA",
+          "last_name": "DUTERTE-CARPIO",
+          "middle_name": "Z",
+          "suffix": null,
+          "position": "VICE PRESIDENT OF THE PHILIPPINES (Former: MAYOR)",
+          "relationship_description": "Daughter: Vice President of the Philippines"
+        },
+        {
+          "id": 4162641,
+          "first_name": "GLENN",
+          "last_name": "ESCANDOR",
+          "middle_name": null,
+          "suffix": null,
+          "position": "CONSTRUCTION MAGNATE, OWNER OF GENESIS88 CONSTRUCTION",
+          "relationship_description": "Longtime friend and campaign donor. Escandor's Esdevco Realty Corporation donated ₱19.9M for Sara Duterte's 2022 vice presidential campaign"
+        },
+        {
+          "id": 31578,
+          "first_name": "SARA",
+          "last_name": "Duterte",
+          "middle_name": null,
+          "suffix": null,
+          "position": "MAYOR",
+          "relationship_description": "Longtime friend of Duterte family. Donated ₱19.9M through Esdevco Realty Corporation for Sara Duterte's 2022 vice presidential campaign"
+        }
+      ],
+      "relationships": [
+        "Starting person",
+        "Daughter: Vice President of the Philippines",
+        "Longtime friend and campaign donor. Escandor's Esdevco Realty Corporation donated ₱19.9M for Sara Duterte's 2022 vice presidential campaign",
+        "Longtime friend of Duterte family. Donated ₱19.9M through Esdevco Realty Corporation for Sara Duterte's 2022 vice presidential campaign"
+      ]
+    },
+    {
       "length": 2,
       "path": [
-        31578,
-        4162641
+        {
+          "id": 31578,
+          "first_name": "SARA",
+          "last_name": "Duterte",
+          "middle_name": null,
+          "suffix": null,
+          "position": "MAYOR",
+          "relationship_description": "Starting person"
+        },
+        {
+          "id": 4162641,
+          "first_name": "GLENN",
+          "last_name": "ESCANDOR",
+          "middle_name": null,
+          "suffix": null,
+          "position": "CONSTRUCTION MAGNATE, OWNER OF GENESIS88 CONSTRUCTION",
+          "relationship_description": "Longtime friend and campaign donor. Escandor's Esdevco Realty Corporation donated ₱19.9M for Sara Duterte's 2022 vice presidential campaign"
+        }
+      ],
+      "relationships": [
+        "Starting person",
+        "Longtime friend and campaign donor. Escandor's Esdevco Realty Corporation donated ₱19.9M for Sara Duterte's 2022 vice presidential campaign"
+      ]
+    },
+    {
+      "length": 2,
+      "path": [
+        {
+          "id": 4040936,
+          "first_name": "SARA",
+          "last_name": "DUTERTE-CARPIO",
+          "middle_name": "Z",
+          "suffix": null,
+          "position": "VICE PRESIDENT OF THE PHILIPPINES (Former: MAYOR)",
+          "relationship_description": "Starting person"
+        },
+        {
+          "id": 4162641,
+          "first_name": "GLENN",
+          "last_name": "ESCANDOR",
+          "middle_name": null,
+          "suffix": null,
+          "position": "CONSTRUCTION MAGNATE, OWNER OF GENESIS88 CONSTRUCTION",
+          "relationship_description": "Longtime friend and campaign donor. Escandor's Esdevco Realty Corporation donated ₱19.9M for Sara Duterte's 2022 vice presidential campaign"
+        }
       ],
       "relationships": [
         "Starting person",
@@ -19,8 +146,24 @@
     {
       "length": 3,
       "path": [
-        31578,
-        4162641
+        {
+          "id": 31578,
+          "first_name": "SARA",
+          "last_name": "Duterte",
+          "middle_name": null,
+          "suffix": null,
+          "position": "MAYOR",
+          "relationship_description": "Starting person"
+        },
+        {
+          "id": 4162641,
+          "first_name": "GLENN",
+          "last_name": "ESCANDOR",
+          "middle_name": null,
+          "suffix": null,
+          "position": "CONSTRUCTION MAGNATE, OWNER OF GENESIS88 CONSTRUCTION",
+          "relationship_description": "Connected via GENESIS88 CONSTRUCTION INC"
+        }
       ],
       "relationships": [
         "Starting person",
@@ -35,18 +178,5 @@
       }
     }
   ],
-  "people": {
-    "31578": {
-      "id": 31578,
-      "full_name": "SARA Duterte",
-      "position": "MAYOR",
-      "location": "DAVAO DEL SUR, REGION XI"
-    },
-    "4162641": {
-      "id": 4162641,
-      "full_name": "GLENN ESCANDOR",
-      "position": "CONSTRUCTION MAGNATE, OWNER OF GENESIS88 CONSTRUCTION",
-      "location": "DAVAO DEL SUR"
-    }
-  }
+  "people": {}
 }

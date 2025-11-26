@@ -8,9 +8,33 @@
     {
       "length": 3,
       "path": [
-        78671,
-        3745717,
-        28590
+        {
+          "id": 78671,
+          "first_name": "JOHN",
+          "last_name": "TARROSA",
+          "middle_name": null,
+          "suffix": null,
+          "position": "MAYOR",
+          "relationship_description": "Starting person"
+        },
+        {
+          "id": 3745717,
+          "first_name": "BATO",
+          "last_name": "DELA ROSA",
+          "middle_name": null,
+          "suffix": null,
+          "position": "SENATOR",
+          "relationship_description": "JOHN CARLO DELA ROSA is nephew of BATO DELA ROSA"
+        },
+        {
+          "id": 28590,
+          "first_name": "Arsenia",
+          "last_name": "Del Rosario",
+          "middle_name": null,
+          "suffix": null,
+          "position": "COUNCILOR",
+          "relationship_description": "BATO DELA ROSA is sister of SEN DELA ROSA"
+        }
       ],
       "relationships": [
         "Starting person",
@@ -21,8 +45,24 @@
     {
       "length": 2,
       "path": [
-        28590,
-        3745717
+        {
+          "id": 28590,
+          "first_name": "Arsenia",
+          "last_name": "Del Rosario",
+          "middle_name": null,
+          "suffix": null,
+          "position": "COUNCILOR",
+          "relationship_description": "Starting person"
+        },
+        {
+          "id": 3745717,
+          "first_name": "BATO",
+          "last_name": "DELA ROSA",
+          "middle_name": null,
+          "suffix": null,
+          "position": "SENATOR",
+          "relationship_description": "SEN DELA ROSA is sister of BATO DELA ROSA"
+        }
       ],
       "relationships": [
         "Starting person",
@@ -30,24 +70,5 @@
       ]
     }
   ],
-  "people": {
-    "78671": {
-      "id": 78671,
-      "full_name": "JOHN TARROSA",
-      "position": "MAYOR",
-      "location": "ZARRAGA, ILOILO, REGION VI"
-    },
-    "3745717": {
-      "id": 3745717,
-      "full_name": "BATO DELA ROSA",
-      "position": "SENATOR",
-      "location": "M'LANG, COTABATO, REGION XII"
-    },
-    "28590": {
-      "id": 28590,
-      "full_name": "Arsenia Del Rosario",
-      "position": "COUNCILOR",
-      "location": "SIOCON, ZAMBOANGA DEL NORTE, REGION IX"
-    }
-  }
+  "people": {}
 }

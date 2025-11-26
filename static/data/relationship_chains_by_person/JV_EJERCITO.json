@@ -8,9 +8,33 @@
     {
       "length": 3,
       "path": [
-        4162405,
-        4041412,
-        4162406
+        {
+          "id": 4162405,
+          "first_name": "JANELLA",
+          "last_name": "EJERCITO ESTRADA",
+          "middle_name": null,
+          "suffix": null,
+          "position": "UNDERSECRETARY, DSWD",
+          "relationship_description": "Starting person"
+        },
+        {
+          "id": 4041412,
+          "first_name": "JINGGOY",
+          "last_name": "EJERCITO ESTRADA",
+          "middle_name": null,
+          "suffix": null,
+          "position": "SENATOR",
+          "relationship_description": "JANELLA EJERCITO ESTRADA IS DAUGHTER OF JINGGOY EJERCITO ESTRADA"
+        },
+        {
+          "id": 4162406,
+          "first_name": "JV",
+          "last_name": "EJERCITO",
+          "middle_name": null,
+          "suffix": null,
+          "position": "SENATOR OF THE PHILIPPINES",
+          "relationship_description": "JINGGOY EJERCITO ESTRADA IS BROTHER OF JV EJERCITO (SENATOR OF THE PHILIPPINES)"
+        }
       ],
       "relationships": [
         "Starting person",
@@ -21,10 +45,42 @@
     {
       "length": 4,
       "path": [
-        4162405,
-        4041412,
-        4162406,
-        4162407
+        {
+          "id": 4162405,
+          "first_name": "JANELLA",
+          "last_name": "EJERCITO ESTRADA",
+          "middle_name": null,
+          "suffix": null,
+          "position": "UNDERSECRETARY, DSWD",
+          "relationship_description": "Starting person"
+        },
+        {
+          "id": 4041412,
+          "first_name": "JINGGOY",
+          "last_name": "EJERCITO ESTRADA",
+          "middle_name": null,
+          "suffix": null,
+          "position": "SENATOR",
+          "relationship_description": "JANELLA EJERCITO ESTRADA IS DAUGHTER OF JINGGOY EJERCITO ESTRADA"
+        },
+        {
+          "id": 4162406,
+          "first_name": "JV",
+          "last_name": "EJERCITO",
+          "middle_name": null,
+          "suffix": null,
+          "position": "SENATOR OF THE PHILIPPINES",
+          "relationship_description": "JINGGOY EJERCITO ESTRADA IS BROTHER OF JV EJERCITO (SENATOR OF THE PHILIPPINES)"
+        },
+        {
+          "id": 4162407,
+          "first_name": "ER",
+          "last_name": "EJERCITO",
+          "middle_name": null,
+          "suffix": null,
+          "position": "MAYOR OF PAGSANJAN, LAGUNA",
+          "relationship_description": "JV EJERCITO IS COUSIN OF ER EJERCITO (MAYOR OF PAGSANJAN"
+        }
       ],
       "relationships": [
         "Starting person",
@@ -36,8 +92,24 @@
     {
       "length": 2,
       "path": [
-        4162407,
-        4162406
+        {
+          "id": 4162407,
+          "first_name": "ER",
+          "last_name": "EJERCITO",
+          "middle_name": null,
+          "suffix": null,
+          "position": "MAYOR OF PAGSANJAN, LAGUNA",
+          "relationship_description": "Starting person"
+        },
+        {
+          "id": 4162406,
+          "first_name": "JV",
+          "last_name": "EJERCITO",
+          "middle_name": null,
+          "suffix": null,
+          "position": "SENATOR OF THE PHILIPPINES",
+          "relationship_description": "ER EJERCITO IS COUSIN OF JV EJERCITO"
+        }
       ],
       "relationships": [
         "Starting person",
@@ -47,8 +119,24 @@
     {
       "length": 2,
       "path": [
-        4162406,
-        4162407
+        {
+          "id": 4162406,
+          "first_name": "JV",
+          "last_name": "EJERCITO",
+          "middle_name": null,
+          "suffix": null,
+          "position": "SENATOR OF THE PHILIPPINES",
+          "relationship_description": "Starting person"
+        },
+        {
+          "id": 4162407,
+          "first_name": "ER",
+          "last_name": "EJERCITO",
+          "middle_name": null,
+          "suffix": null,
+          "position": "MAYOR OF PAGSANJAN, LAGUNA",
+          "relationship_description": "JV EJERCITO IS COUSIN OF ER EJERCITO (MAYOR OF PAGSANJAN"
+        }
       ],
       "relationships": [
         "Starting person",
@@ -58,8 +146,24 @@
     {
       "length": 2,
       "path": [
-        4041412,
-        4162406
+        {
+          "id": 4041412,
+          "first_name": "JINGGOY",
+          "last_name": "EJERCITO ESTRADA",
+          "middle_name": null,
+          "suffix": null,
+          "position": "SENATOR",
+          "relationship_description": "Starting person"
+        },
+        {
+          "id": 4162406,
+          "first_name": "JV",
+          "last_name": "EJERCITO",
+          "middle_name": null,
+          "suffix": null,
+          "position": "SENATOR OF THE PHILIPPINES",
+          "relationship_description": "JINGGOY EJERCITO ESTRADA IS BROTHER OF JV EJERCITO (SENATOR OF THE PHILIPPINES)"
+        }
       ],
       "relationships": [
         "Starting person",
@@ -67,30 +171,5 @@
       ]
     }
   ],
-  "people": {
-    "4162405": {
-      "id": 4162405,
-      "full_name": "JANELLA EJERCITO ESTRADA",
-      "position": "UNDERSECRETARY, DSWD",
-      "location": "Location unknown"
-    },
-    "4041412": {
-      "id": 4041412,
-      "full_name": "JINGGOY EJERCITO ESTRADA",
-      "position": "SENATOR",
-      "location": "Manila, Metro Manila, NCR"
-    },
-    "4162406": {
-      "id": 4162406,
-      "full_name": "JV EJERCITO",
-      "position": "SENATOR OF THE PHILIPPINES",
-      "location": "Location unknown"
-    },
-    "4162407": {
-      "id": 4162407,
-      "full_name": "ER EJERCITO",
-      "position": "MAYOR OF PAGSANJAN, LAGUNA",
-      "location": "Location unknown"
-    }
-  }
+  "people": {}
 }

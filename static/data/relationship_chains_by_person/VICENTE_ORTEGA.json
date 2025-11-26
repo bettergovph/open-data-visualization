@@ -8,8 +8,24 @@
     {
       "length": 2,
       "path": [
-        60518,
-        4145024
+        {
+          "id": 60518,
+          "first_name": "MANUEL",
+          "last_name": "Ortega",
+          "middle_name": null,
+          "suffix": null,
+          "position": "MEMBER, HOUSE OF REPRESENTATIVES",
+          "relationship_description": "Starting person"
+        },
+        {
+          "id": 4145024,
+          "first_name": "VICENTE",
+          "last_name": "ORTEGA",
+          "middle_name": null,
+          "suffix": null,
+          "position": null,
+          "relationship_description": "Manuel Ortega is the son of Vicente Ortega"
+        }
       ],
       "relationships": [
         "Starting person",
@@ -19,8 +35,24 @@
     {
       "length": 2,
       "path": [
-        4145024,
-        60518
+        {
+          "id": 4145024,
+          "first_name": "VICENTE",
+          "last_name": "ORTEGA",
+          "middle_name": null,
+          "suffix": null,
+          "position": null,
+          "relationship_description": "Starting person"
+        },
+        {
+          "id": 60518,
+          "first_name": "MANUEL",
+          "last_name": "Ortega",
+          "middle_name": null,
+          "suffix": null,
+          "position": "MEMBER, HOUSE OF REPRESENTATIVES",
+          "relationship_description": "MANUEL ORTEGA IS THE SON OF VICENTE ORTEGA"
+        }
       ],
       "relationships": [
         "Starting person",
@@ -28,18 +60,5 @@
       ]
     }
   ],
-  "people": {
-    "60518": {
-      "id": 60518,
-      "full_name": "MANUEL Ortega",
-      "position": "MEMBER, HOUSE OF REPRESENTATIVES",
-      "location": "LA UNION, REGION I"
-    },
-    "4145024": {
-      "id": 4145024,
-      "full_name": "VICENTE ORTEGA",
-      "position": null,
-      "location": "Location unknown"
-    }
-  }
+  "people": {}
 }

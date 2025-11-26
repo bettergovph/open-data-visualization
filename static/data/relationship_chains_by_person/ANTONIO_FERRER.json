@@ -8,8 +8,24 @@
     {
       "length": 2,
       "path": [
-        35253,
-        4041660
+        {
+          "id": 35253,
+          "first_name": "Antonio",
+          "last_name": "Ferrer",
+          "middle_name": null,
+          "suffix": null,
+          "position": "MEMBER, HOUSE OF REPRESENTATIVES",
+          "relationship_description": "Starting person"
+        },
+        {
+          "id": 4041660,
+          "first_name": "MELENI",
+          "last_name": "FERRER",
+          "middle_name": null,
+          "suffix": null,
+          "position": null,
+          "relationship_description": "Antonio Ferrer is married to Meleni Ferrer"
+        }
       ],
       "relationships": [
         "Starting person",
@@ -19,8 +35,24 @@
     {
       "length": 2,
       "path": [
-        35253,
-        4041661
+        {
+          "id": 35253,
+          "first_name": "Antonio",
+          "last_name": "Ferrer",
+          "middle_name": null,
+          "suffix": null,
+          "position": "MEMBER, HOUSE OF REPRESENTATIVES",
+          "relationship_description": "Starting person"
+        },
+        {
+          "id": 4041661,
+          "first_name": "FREDERICK",
+          "last_name": "FERRER",
+          "middle_name": null,
+          "suffix": null,
+          "position": null,
+          "relationship_description": "Antonio Ferrer is the brother of Frederick Ferrer"
+        }
       ],
       "relationships": [
         "Starting person",
@@ -30,8 +62,24 @@
     {
       "length": 2,
       "path": [
-        4041661,
-        35253
+        {
+          "id": 4041661,
+          "first_name": "FREDERICK",
+          "last_name": "FERRER",
+          "middle_name": null,
+          "suffix": null,
+          "position": null,
+          "relationship_description": "Starting person"
+        },
+        {
+          "id": 35253,
+          "first_name": "Antonio",
+          "last_name": "Ferrer",
+          "middle_name": null,
+          "suffix": null,
+          "position": "MEMBER, HOUSE OF REPRESENTATIVES",
+          "relationship_description": "ANTONIO FERRER IS THE BROTHER OF FREDERICK FERRER"
+        }
       ],
       "relationships": [
         "Starting person",
@@ -41,9 +89,33 @@
     {
       "length": 3,
       "path": [
-        4041661,
-        35253,
-        69413
+        {
+          "id": 4041661,
+          "first_name": "FREDERICK",
+          "last_name": "FERRER",
+          "middle_name": null,
+          "suffix": null,
+          "position": null,
+          "relationship_description": "Starting person"
+        },
+        {
+          "id": 35253,
+          "first_name": "Antonio",
+          "last_name": "Ferrer",
+          "middle_name": null,
+          "suffix": null,
+          "position": "MEMBER, HOUSE OF REPRESENTATIVES",
+          "relationship_description": "ANTONIO FERRER IS THE BROTHER OF FREDERICK FERRER"
+        },
+        {
+          "id": 69413,
+          "first_name": "Carolina",
+          "last_name": "Rivera",
+          "middle_name": null,
+          "suffix": null,
+          "position": "COUNCILOR",
+          "relationship_description": " BOTH SERVING AS MAYORS IN CAVITE"
+        }
       ],
       "relationships": [
         "Starting person",
@@ -54,8 +126,24 @@
     {
       "length": 2,
       "path": [
-        4041660,
-        35253
+        {
+          "id": 4041660,
+          "first_name": "MELENI",
+          "last_name": "FERRER",
+          "middle_name": null,
+          "suffix": null,
+          "position": null,
+          "relationship_description": "Starting person"
+        },
+        {
+          "id": 35253,
+          "first_name": "Antonio",
+          "last_name": "Ferrer",
+          "middle_name": null,
+          "suffix": null,
+          "position": "MEMBER, HOUSE OF REPRESENTATIVES",
+          "relationship_description": "ANTONIO FERRER IS MARRIED TO MELENI FERRER"
+        }
       ],
       "relationships": [
         "Starting person",
@@ -65,8 +153,24 @@
     {
       "length": 2,
       "path": [
-        35253,
-        69413
+        {
+          "id": 35253,
+          "first_name": "Antonio",
+          "last_name": "Ferrer",
+          "middle_name": null,
+          "suffix": null,
+          "position": "MEMBER, HOUSE OF REPRESENTATIVES",
+          "relationship_description": "Starting person"
+        },
+        {
+          "id": 69413,
+          "first_name": "Carolina",
+          "last_name": "Rivera",
+          "middle_name": null,
+          "suffix": null,
+          "position": "COUNCILOR",
+          "relationship_description": "Wikipedia: sibling of Former Representative And Incumbent City Mayor Luis Ferrer Iv"
+        }
       ],
       "relationships": [
         "Starting person",
@@ -74,30 +178,5 @@
       ]
     }
   ],
-  "people": {
-    "35253": {
-      "id": 35253,
-      "full_name": "Antonio Ferrer",
-      "position": "MEMBER, HOUSE OF REPRESENTATIVES",
-      "location": "CAVITE, REGION IV-A"
-    },
-    "4041660": {
-      "id": 4041660,
-      "full_name": "MELENI FERRER",
-      "position": null,
-      "location": "Location unknown"
-    },
-    "4041661": {
-      "id": 4041661,
-      "full_name": "FREDERICK FERRER",
-      "position": null,
-      "location": "Location unknown"
-    },
-    "69413": {
-      "id": 69413,
-      "full_name": "Carolina Rivera",
-      "position": "COUNCILOR",
-      "location": "CAVITE, REGION IV-A"
-    }
-  }
+  "people": {}
 }

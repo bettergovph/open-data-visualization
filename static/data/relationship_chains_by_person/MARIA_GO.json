@@ -8,8 +8,24 @@
     {
       "length": 2,
       "path": [
-        3745735,
-        86907
+        {
+          "id": 3745735,
+          "first_name": "BONG",
+          "last_name": "GO",
+          "middle_name": null,
+          "suffix": null,
+          "position": "SENATOR",
+          "relationship_description": "Starting person"
+        },
+        {
+          "id": 86907,
+          "first_name": "MARIA",
+          "last_name": "GO",
+          "middle_name": null,
+          "suffix": null,
+          "position": "MAYOR",
+          "relationship_description": "BONG GO is sister of MARIA ANGELICA GO (MAYOR OF SANISIDRO"
+        }
       ],
       "relationships": [
         "Starting person",
@@ -19,9 +35,33 @@
     {
       "length": 3,
       "path": [
-        27824,
-        3745735,
-        86907
+        {
+          "id": 27824,
+          "first_name": "JOSEPH",
+          "last_name": "De Lara",
+          "middle_name": null,
+          "suffix": null,
+          "position": "MAYOR",
+          "relationship_description": "Starting person"
+        },
+        {
+          "id": 3745735,
+          "first_name": "BONG",
+          "last_name": "GO",
+          "middle_name": null,
+          "suffix": null,
+          "position": "SENATOR",
+          "relationship_description": "JOSEPH DE LARA is uncle of BONG GO"
+        },
+        {
+          "id": 86907,
+          "first_name": "MARIA",
+          "last_name": "GO",
+          "middle_name": null,
+          "suffix": null,
+          "position": "MAYOR",
+          "relationship_description": "BONG GO is sister of MARIA ANGELICA GO (MAYOR OF SANISIDRO"
+        }
       ],
       "relationships": [
         "Starting person",
@@ -32,8 +72,24 @@
     {
       "length": 2,
       "path": [
-        86907,
-        3745735
+        {
+          "id": 86907,
+          "first_name": "MARIA",
+          "last_name": "GO",
+          "middle_name": null,
+          "suffix": null,
+          "position": "MAYOR",
+          "relationship_description": "Starting person"
+        },
+        {
+          "id": 3745735,
+          "first_name": "BONG",
+          "last_name": "GO",
+          "middle_name": null,
+          "suffix": null,
+          "position": "SENATOR",
+          "relationship_description": "MARIA ANGELICA GO is sister of BONG GO"
+        }
       ],
       "relationships": [
         "Starting person",
@@ -41,24 +97,5 @@
       ]
     }
   ],
-  "people": {
-    "3745735": {
-      "id": 3745735,
-      "full_name": "BONG GO",
-      "position": "SENATOR",
-      "location": "M'LANG, COTABATO, REGION XII"
-    },
-    "86907": {
-      "id": 86907,
-      "full_name": "MARIA GO",
-      "position": "MAYOR",
-      "location": "San Isidro, DAVAO ORIENTAL, REGION XI - DAVAO REGION"
-    },
-    "27824": {
-      "id": 27824,
-      "full_name": "JOSEPH De Lara",
-      "position": "MAYOR",
-      "location": "SOLSONA, ILOCOS NORTE, REGION I"
-    }
-  }
+  "people": {}
 }

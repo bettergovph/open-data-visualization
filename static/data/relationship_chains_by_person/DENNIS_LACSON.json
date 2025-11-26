@@ -8,8 +8,24 @@
     {
       "length": 2,
       "path": [
-        45464,
-        3745749
+        {
+          "id": 45464,
+          "first_name": "Dennis",
+          "last_name": "Lacson",
+          "middle_name": null,
+          "suffix": null,
+          "position": "COUNCILOR",
+          "relationship_description": "Starting person"
+        },
+        {
+          "id": 3745749,
+          "first_name": "PING",
+          "last_name": "LACSON",
+          "middle_name": null,
+          "suffix": null,
+          "position": "SENATOR",
+          "relationship_description": "DENNIS LACSON is nephew of PING LACSON"
+        }
       ],
       "relationships": [
         "Starting person",
@@ -19,9 +35,33 @@
     {
       "length": 3,
       "path": [
-        45464,
-        3745749,
-        4162417
+        {
+          "id": 45464,
+          "first_name": "Dennis",
+          "last_name": "Lacson",
+          "middle_name": null,
+          "suffix": null,
+          "position": "COUNCILOR",
+          "relationship_description": "Starting person"
+        },
+        {
+          "id": 3745749,
+          "first_name": "PING",
+          "last_name": "LACSON",
+          "middle_name": null,
+          "suffix": null,
+          "position": "SENATOR",
+          "relationship_description": "DENNIS LACSON is nephew of PING LACSON"
+        },
+        {
+          "id": 4162417,
+          "first_name": "REGINALD",
+          "last_name": "LACSON JOAN KAREN CORONEL",
+          "middle_name": null,
+          "suffix": null,
+          "position": "SENIOR MANAGER, PAGCOR LSO-III RMMS SENATE OF THE PHILIPPINES",
+          "relationship_description": "PING LACSON is niece of REGINALD LACSON JOAN KAREN CORONEL (SENIOR MANAGER"
+        }
       ],
       "relationships": [
         "Starting person",
@@ -32,8 +72,24 @@
     {
       "length": 2,
       "path": [
-        3745749,
-        45464
+        {
+          "id": 3745749,
+          "first_name": "PING",
+          "last_name": "LACSON",
+          "middle_name": null,
+          "suffix": null,
+          "position": "SENATOR",
+          "relationship_description": "Starting person"
+        },
+        {
+          "id": 45464,
+          "first_name": "Dennis",
+          "last_name": "Lacson",
+          "middle_name": null,
+          "suffix": null,
+          "position": "COUNCILOR",
+          "relationship_description": "PING LACSON is nephew of DENNIS LACSON (COUNCILOR"
+        }
       ],
       "relationships": [
         "Starting person",
@@ -41,24 +97,5 @@
       ]
     }
   ],
-  "people": {
-    "45464": {
-      "id": 45464,
-      "full_name": "Dennis Lacson",
-      "position": "COUNCILOR",
-      "location": "IMUS, CAVITE, REGION IV-A"
-    },
-    "3745749": {
-      "id": 3745749,
-      "full_name": "PING LACSON",
-      "position": "SENATOR",
-      "location": "M'LANG, COTABATO, REGION XII"
-    },
-    "4162417": {
-      "id": 4162417,
-      "full_name": "REGINALD LACSON JOAN KAREN CORONEL",
-      "position": "SENIOR MANAGER, PAGCOR LSO-III RMMS SENATE OF THE PHILIPPINES",
-      "location": "Location unknown"
-    }
-  }
+  "people": {}
 }

@@ -8,8 +8,24 @@
     {
       "length": 3,
       "path": [
-        4162453,
-        4162470
+        {
+          "id": 4162453,
+          "first_name": "ELMER",
+          "last_name": "GARDIOLA",
+          "middle_name": null,
+          "suffix": null,
+          "position": "Business Owner",
+          "relationship_description": "Starting person"
+        },
+        {
+          "id": 4162470,
+          "first_name": "ELAINE",
+          "last_name": "GARDIOLA",
+          "middle_name": null,
+          "suffix": null,
+          "position": "President, Newington Builders, Inc.",
+          "relationship_description": "Connected via E. GARDIOLA CONSTRUCTION"
+        }
       ],
       "relationships": [
         "Starting person",
@@ -26,8 +42,24 @@
     {
       "length": 3,
       "path": [
-        4162453,
-        4162639
+        {
+          "id": 4162453,
+          "first_name": "ELMER",
+          "last_name": "GARDIOLA",
+          "middle_name": null,
+          "suffix": null,
+          "position": "Business Owner",
+          "relationship_description": "Starting person"
+        },
+        {
+          "id": 4162640,
+          "first_name": "KATRINA MARA",
+          "last_name": "GARDIOLA",
+          "middle_name": null,
+          "suffix": null,
+          "position": "CORPORATE OFFICER",
+          "relationship_description": "Connected via JSG CONSTRUCTION COMPANY INC."
+        }
       ],
       "relationships": [
         "Starting person",
@@ -44,26 +76,24 @@
     {
       "length": 3,
       "path": [
-        4162452,
-        4162453
-      ],
-      "relationships": [
-        "Starting person",
-        "Connected via JSG CONSTRUCTION COMPANY INC."
-      ],
-      "contractor_connection": {
-        "contractor_name": "JSG CONSTRUCTION COMPANY INC.",
-        "start_company_role": null,
-        "end_company_role": null,
-        "start_position": "Representative, CWS Party-list",
-        "end_position": "Business Owner"
-      }
-    },
-    {
-      "length": 3,
-      "path": [
-        4162453,
-        4162472
+        {
+          "id": 4162453,
+          "first_name": "ELMER",
+          "last_name": "GARDIOLA",
+          "middle_name": null,
+          "suffix": null,
+          "position": "Business Owner",
+          "relationship_description": "Starting person"
+        },
+        {
+          "id": 4162472,
+          "first_name": "JUDY",
+          "last_name": "GARDIOLA",
+          "middle_name": "SILVA",
+          "suffix": null,
+          "position": "President, S-Ang Construction & General Trading, Inc.",
+          "relationship_description": "Connected via JSG CONSTRUCTION COMPANY INC."
+        }
       ],
       "relationships": [
         "Starting person",
@@ -80,8 +110,58 @@
     {
       "length": 3,
       "path": [
-        4162453,
-        4162640
+        {
+          "id": 4162452,
+          "first_name": "EDWIN",
+          "last_name": "GARDIOLA",
+          "middle_name": null,
+          "suffix": null,
+          "position": "Representative, CWS Party-list",
+          "relationship_description": "Starting person"
+        },
+        {
+          "id": 4162453,
+          "first_name": "ELMER",
+          "last_name": "GARDIOLA",
+          "middle_name": null,
+          "suffix": null,
+          "position": "Business Owner",
+          "relationship_description": "Connected via JSG CONSTRUCTION COMPANY INC."
+        }
+      ],
+      "relationships": [
+        "Starting person",
+        "Connected via JSG CONSTRUCTION COMPANY INC."
+      ],
+      "contractor_connection": {
+        "contractor_name": "JSG CONSTRUCTION COMPANY INC.",
+        "start_company_role": null,
+        "end_company_role": null,
+        "start_position": "Representative, CWS Party-list",
+        "end_position": "Business Owner"
+      }
+    },
+    {
+      "length": 3,
+      "path": [
+        {
+          "id": 4162453,
+          "first_name": "ELMER",
+          "last_name": "GARDIOLA",
+          "middle_name": null,
+          "suffix": null,
+          "position": "Business Owner",
+          "relationship_description": "Starting person"
+        },
+        {
+          "id": 4162639,
+          "first_name": "KIM ANN",
+          "last_name": "GARDIOLA",
+          "middle_name": null,
+          "suffix": null,
+          "position": "CORPORATE OFFICER",
+          "relationship_description": "Connected via JSG CONSTRUCTION COMPANY INC."
+        }
       ],
       "relationships": [
         "Starting person",
@@ -96,42 +176,5 @@
       }
     }
   ],
-  "people": {
-    "4162452": {
-      "id": 4162452,
-      "full_name": "EDWIN GARDIOLA",
-      "position": "Representative, CWS Party-list",
-      "location": "Location unknown"
-    },
-    "4162472": {
-      "id": 4162472,
-      "full_name": "JUDY SILVA GARDIOLA",
-      "position": "President, S-Ang Construction & General Trading, Inc.",
-      "location": "Location unknown"
-    },
-    "4162453": {
-      "id": 4162453,
-      "full_name": "ELMER GARDIOLA",
-      "position": "Business Owner",
-      "location": "Location unknown"
-    },
-    "4162470": {
-      "id": 4162470,
-      "full_name": "ELAINE GARDIOLA",
-      "position": "President, Newington Builders, Inc.",
-      "location": "Location unknown"
-    },
-    "4162639": {
-      "id": 4162639,
-      "full_name": "KIM ANN GARDIOLA",
-      "position": "CORPORATE OFFICER",
-      "location": "Location unknown"
-    },
-    "4162640": {
-      "id": 4162640,
-      "full_name": "KATRINA MARA GARDIOLA",
-      "position": "CORPORATE OFFICER",
-      "location": "Location unknown"
-    }
-  }
+  "people": {}
 }

@@ -1,40 +1,27 @@
 {
   "success": true,
-  "generated_at": "2025-11-20T18:10:41.311019",
+  "generated_at": "2025-11-20T19:18:12.559788",
   "summary": {
     "total_unique_amos": 3052,
     "amos_matching_politicians": 163,
-    "amos_with_elected_positions": 157,
-    "amos_related_to_elected": 6,
-    "match_percentage": 96.3,
-    "total_contracts_direct": 1468,
-    "total_contract_value_direct": 14898066667.359999,
-    "total_contracts_indirect": 375,
-    "total_contract_value_indirect": 23255092149.4,
-    "total_contracts_with_elected": 1843,
-    "total_contract_value": 38153158816.76
+    "amos_with_elected_positions": 156,
+    "amos_related_to_elected": 7,
+    "match_percentage": 95.7,
+    "total_contracts_direct": 1483,
+    "total_contract_value_direct": 13994730442.21,
+    "total_contracts_indirect": 394,
+    "total_contract_value_indirect": 24357099624.86,
+    "total_contracts_with_elected": 1877,
+    "total_contract_value": 38351830067.07
   },
   "breakdown": {
-    "Councilor": 101,
-    "Mayor": 43,
+    "Councilor": 102,
+    "Mayor": 41,
     "Provincial Board": 10,
     "Congressman": 1,
     "Governor": 2
   },
   "top_direct": [
-    {
-      "pcab_amo": "JOSEPH JEREMY DE GUZMAN LARA",
-      "full_name": "JOSEPH  LARA",
-      "position": "MAYOR",
-      "year": 2022,
-      "province": "ILOCOS NORTE",
-      "municipality_city": "Solsona",
-      "contract_count": 19,
-      "total_amount": 1102007475.46,
-      "contractors": [
-        "JLL PULSAR CONSTRUCTION CORPORATION"
-      ]
-    },
     {
       "pcab_amo": "Gian Nicolette Guillen Chua",
       "full_name": "GIAN  CHUA",
@@ -99,6 +86,19 @@
       "total_amount": 374639201.17,
       "contractors": [
         "CONTE BUILDERS & CONSTRUCTION SUPPLY"
+      ]
+    },
+    {
+      "pcab_amo": "Esteven Jaime R. Natividad",
+      "full_name": "ESTEVEN JAIME R. NATIVIDAD",
+      "position": "COUNCILOR",
+      "year": 2025,
+      "province": "LAGUNA",
+      "municipality_city": "CITY OF CALAMBA",
+      "contract_count": 37,
+      "total_amount": 356475816.39,
+      "contractors": [
+        "747 BUILDERS & TRADERS, INC."
       ]
     },
     {
@@ -286,7 +286,7 @@
     {
       "pcab_amo": "ARISTOTLE ABARCA ABELLA",
       "full_name": "ARISTOTLE  ABELLA",
-      "position": "MAYOR",
+      "position": "VICE MAYOR",
       "year": 2004,
       "province": "DAVAO ORIENTAL",
       "municipality_city": "CATEEL",
@@ -346,19 +346,6 @@
       "total_amount": 167198446.04000002,
       "contractors": [
         "NORTHERN COTABATO CONSTRUCTION AND SUPPLY"
-      ]
-    },
-    {
-      "pcab_amo": "Rommel T. Concepcion",
-      "full_name": "Rommel  Concepcion",
-      "position": "MAYOR",
-      "year": 2013,
-      "province": "PAMPANGA",
-      "municipality_city": "",
-      "contract_count": 3,
-      "total_amount": 157804566.07999998,
-      "contractors": [
-        "HAIDEE CONSTRUCTION AND DEVELOPMENT CORPORATION"
       ]
     },
     {
@@ -1474,9 +1461,9 @@
       "pcab_amo": "JOSE ANGELO BALDOZ GO",
       "full_name": "Jose  Go",
       "position": "COUNCILOR",
-      "year": 2016,
-      "province": "SOUTHERN LEYTE",
-      "municipality_city": "MALITBOG",
+      "year": 2004,
+      "province": "LEYTE",
+      "municipality_city": "BAYBAY CITY",
       "contract_count": 1,
       "total_amount": 9603000.0,
       "contractors": [
@@ -2090,12 +2077,27 @@
       ]
     },
     {
+      "pcab_amo": "JOSEPH JEREMY DE GUZMAN LARA",
+      "full_name": "JOSEPH JEREMY DE GUZMAN LARA",
+      "relationship_type": "Son",
+      "related_person_name": "JOSEPH JOJO LASAM LARA",
+      "related_person_position": "Member, House of Representatives (Cagayan–3rd District)",
+      "related_person_year": 2022,
+      "related_person_province": "CAGAYAN",
+      "related_person_municipality_city": null,
+      "contract_count": 19,
+      "total_amount": 1102007475.46,
+      "contractors": [
+        "JLL PULSAR CONSTRUCTION CORPORATION"
+      ]
+    },
+    {
       "pcab_amo": "Martin Gerard S. Tan",
       "full_name": "MARTIN  TAN",
       "relationship_type": "Father",
       "related_person_name": "STEPHEN  TAN",
-      "related_person_position": "GOVERNOR",
-      "related_person_year": 2010,
+      "related_person_position": "Member, House of Representatives (Samar–1st District)",
+      "related_person_year": 2022,
       "related_person_province": "SAMAR",
       "related_person_municipality_city": "",
       "contract_count": 20,
@@ -2124,8 +2126,8 @@
       "full_name": "MARTIN  TAN",
       "relationship_type": "Father",
       "related_person_name": "STEPHEN  TAN",
-      "related_person_position": "GOVERNOR",
-      "related_person_year": 2010,
+      "related_person_position": "Member, House of Representatives (Samar–1st District)",
+      "related_person_year": 2022,
       "related_person_province": "SAMAR",
       "related_person_municipality_city": "",
       "contract_count": 16,

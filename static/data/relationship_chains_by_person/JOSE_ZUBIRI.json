@@ -8,8 +8,24 @@
     {
       "length": 2,
       "path": [
-        4149676,
-        86177
+        {
+          "id": 4149676,
+          "first_name": "JUAN MIGUEL",
+          "last_name": "Zubiri",
+          "middle_name": "",
+          "suffix": null,
+          "position": "MEMBER, HOUSE OF REPRESENTATIVES",
+          "relationship_description": "Starting person"
+        },
+        {
+          "id": 86177,
+          "first_name": "JOSE",
+          "last_name": "ZUBIRI",
+          "middle_name": null,
+          "suffix": null,
+          "position": "MEMBER, HOUSE OF REPRESENTATIVES",
+          "relationship_description": "Jose Zubiri is the father of Juan Miguel Zubiri"
+        }
       ],
       "relationships": [
         "Starting person",
@@ -19,9 +35,33 @@
     {
       "length": 3,
       "path": [
-        1798,
-        4149676,
-        86177
+        {
+          "id": 1798,
+          "first_name": "MARIA",
+          "last_name": "ACOSTA",
+          "middle_name": null,
+          "suffix": null,
+          "position": "COUNCILOR",
+          "relationship_description": "Starting person"
+        },
+        {
+          "id": 4149676,
+          "first_name": "JUAN MIGUEL",
+          "last_name": "Zubiri",
+          "middle_name": "",
+          "suffix": null,
+          "position": "MEMBER, HOUSE OF REPRESENTATIVES",
+          "relationship_description": "COUSINS IN ZUBIRI POLITICAL DYNASTY"
+        },
+        {
+          "id": 86177,
+          "first_name": "JOSE",
+          "last_name": "ZUBIRI",
+          "middle_name": null,
+          "suffix": null,
+          "position": "MEMBER, HOUSE OF REPRESENTATIVES",
+          "relationship_description": "Jose Zubiri is the father of Juan Miguel Zubiri"
+        }
       ],
       "relationships": [
         "Starting person",
@@ -32,8 +72,24 @@
     {
       "length": 2,
       "path": [
-        86177,
-        4149676
+        {
+          "id": 86177,
+          "first_name": "JOSE",
+          "last_name": "ZUBIRI",
+          "middle_name": null,
+          "suffix": null,
+          "position": "MEMBER, HOUSE OF REPRESENTATIVES",
+          "relationship_description": "Starting person"
+        },
+        {
+          "id": 4149676,
+          "first_name": "JUAN MIGUEL",
+          "last_name": "Zubiri",
+          "middle_name": "",
+          "suffix": null,
+          "position": "MEMBER, HOUSE OF REPRESENTATIVES",
+          "relationship_description": "Jose Zubiri is the father of Juan Miguel Zubiri"
+        }
       ],
       "relationships": [
         "Starting person",
@@ -41,24 +97,5 @@
       ]
     }
   ],
-  "people": {
-    "4149676": {
-      "id": 4149676,
-      "full_name": "JUAN MIGUEL Zubiri",
-      "position": "MEMBER, HOUSE OF REPRESENTATIVES",
-      "location": "BUKIDNON, REGION X"
-    },
-    "86177": {
-      "id": 86177,
-      "full_name": "JOSE ZUBIRI",
-      "position": "MEMBER, HOUSE OF REPRESENTATIVES",
-      "location": "BUKIDNON, REGION X"
-    },
-    "1798": {
-      "id": 1798,
-      "full_name": "MARIA ACOSTA",
-      "position": "COUNCILOR",
-      "location": "DAVAO DEL SUR, REGION XI"
-    }
-  }
+  "people": {}
 }

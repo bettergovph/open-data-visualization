@@ -8,9 +8,33 @@
     {
       "length": 3,
       "path": [
-        4162431,
-        4041420,
-        4162429
+        {
+          "id": 4162431,
+          "first_name": "BETTINA",
+          "last_name": "PADILLA",
+          "middle_name": null,
+          "suffix": null,
+          "position": "LEGISLATIVE STAFF OFFICER, OFFICE OF SEN. PADILLA",
+          "relationship_description": "Starting person"
+        },
+        {
+          "id": 4041420,
+          "first_name": "ROBINHOOD",
+          "last_name": "PADILLA",
+          "middle_name": "C",
+          "suffix": null,
+          "position": "SENATOR",
+          "relationship_description": "BETTINA PADILLA IS NIECE OF ROBINHOOD C. PADILLA"
+        },
+        {
+          "id": 4162429,
+          "first_name": "PROVINCIAL",
+          "last_name": "ADMINISTRATOR",
+          "middle_name": null,
+          "suffix": null,
+          "position": "VICE MAYOR OF JOSE PANGANIBAN,",
+          "relationship_description": "ROBINHOOD C. PADILLA IS NEPHEW OF PROVINCIAL ADMINISTRATOR (VICE MAYOR OF JOSE PANGANIBAN"
+        }
       ],
       "relationships": [
         "Starting person",
@@ -21,8 +45,24 @@
     {
       "length": 2,
       "path": [
-        4041420,
-        4162429
+        {
+          "id": 4041420,
+          "first_name": "ROBINHOOD",
+          "last_name": "PADILLA",
+          "middle_name": "C",
+          "suffix": null,
+          "position": "SENATOR",
+          "relationship_description": "Starting person"
+        },
+        {
+          "id": 4162429,
+          "first_name": "PROVINCIAL",
+          "last_name": "ADMINISTRATOR",
+          "middle_name": null,
+          "suffix": null,
+          "position": "VICE MAYOR OF JOSE PANGANIBAN,",
+          "relationship_description": "ROBINHOOD C. PADILLA IS NEPHEW OF PROVINCIAL ADMINISTRATOR (VICE MAYOR OF JOSE PANGANIBAN"
+        }
       ],
       "relationships": [
         "Starting person",
@@ -30,24 +70,5 @@
       ]
     }
   ],
-  "people": {
-    "4162431": {
-      "id": 4162431,
-      "full_name": "BETTINA PADILLA",
-      "position": "LEGISLATIVE STAFF OFFICER, OFFICE OF SEN. PADILLA",
-      "location": "Location unknown"
-    },
-    "4041420": {
-      "id": 4041420,
-      "full_name": "ROBINHOOD C PADILLA",
-      "position": "SENATOR",
-      "location": "Manila, Metro Manila, NCR"
-    },
-    "4162429": {
-      "id": 4162429,
-      "full_name": "PROVINCIAL ADMINISTRATOR",
-      "position": "VICE MAYOR OF JOSE PANGANIBAN,",
-      "location": "Location unknown"
-    }
-  }
+  "people": {}
 }

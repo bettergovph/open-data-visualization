@@ -8,9 +8,33 @@
     {
       "length": 3,
       "path": [
-        72633,
-        85534,
-        85541
+        {
+          "id": 72633,
+          "first_name": "REYNALDO",
+          "last_name": "SAN JUAN JR.",
+          "middle_name": null,
+          "suffix": null,
+          "position": "GOVERNOR",
+          "relationship_description": "Starting person"
+        },
+        {
+          "id": 85534,
+          "first_name": "CESAR",
+          "last_name": "Ynares",
+          "middle_name": null,
+          "suffix": null,
+          "position": "MAYOR",
+          "relationship_description": "CESAR YNARES IS THE FATHER-IN-LAW OF REYNALDO SAN JUAN JR."
+        },
+        {
+          "id": 85541,
+          "first_name": "Rebecca",
+          "last_name": "Ynares",
+          "middle_name": null,
+          "suffix": null,
+          "position": "GOVERNOR",
+          "relationship_description": " WHO MARRIED HIS DAUGHTER REBECCA YNARES"
+        }
       ],
       "relationships": [
         "Starting person",
@@ -21,8 +45,24 @@
     {
       "length": 2,
       "path": [
-        85534,
-        85541
+        {
+          "id": 85534,
+          "first_name": "CESAR",
+          "last_name": "Ynares",
+          "middle_name": null,
+          "suffix": null,
+          "position": "MAYOR",
+          "relationship_description": "Starting person"
+        },
+        {
+          "id": 85541,
+          "first_name": "Rebecca",
+          "last_name": "Ynares",
+          "middle_name": null,
+          "suffix": null,
+          "position": "GOVERNOR",
+          "relationship_description": "Cesar Ynares and Rebecca Ynares are spouses"
+        }
       ],
       "relationships": [
         "Starting person",
@@ -32,8 +72,24 @@
     {
       "length": 2,
       "path": [
-        85541,
-        85534
+        {
+          "id": 85541,
+          "first_name": "Rebecca",
+          "last_name": "Ynares",
+          "middle_name": null,
+          "suffix": null,
+          "position": "GOVERNOR",
+          "relationship_description": "Starting person"
+        },
+        {
+          "id": 85534,
+          "first_name": "CESAR",
+          "last_name": "Ynares",
+          "middle_name": null,
+          "suffix": null,
+          "position": "MAYOR",
+          "relationship_description": "Cesar Ynares and Rebecca Ynares are spouses"
+        }
       ],
       "relationships": [
         "Starting person",
@@ -41,24 +97,5 @@
       ]
     }
   ],
-  "people": {
-    "72633": {
-      "id": 72633,
-      "full_name": "REYNALDO SAN JUAN JR.",
-      "position": "GOVERNOR",
-      "location": "RIZAL, REGION IV-A"
-    },
-    "85534": {
-      "id": 85534,
-      "full_name": "CESAR Ynares",
-      "position": "MAYOR",
-      "location": "BINANGONAN, RIZAL, REGION IV-A"
-    },
-    "85541": {
-      "id": 85541,
-      "full_name": "Rebecca Ynares",
-      "position": "GOVERNOR",
-      "location": "RIZAL, REGION IV-A"
-    }
-  }
+  "people": {}
 }

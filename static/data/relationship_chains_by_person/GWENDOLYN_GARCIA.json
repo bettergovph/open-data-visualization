@@ -8,9 +8,33 @@
     {
       "length": 3,
       "path": [
-        37916,
-        4160578,
-        37915
+        {
+          "id": 37916,
+          "first_name": "PABLO",
+          "last_name": "GARCIA",
+          "middle_name": null,
+          "suffix": null,
+          "position": "MEMBER, HOUSE OF REPRESENTATIVES",
+          "relationship_description": "Starting person"
+        },
+        {
+          "id": 4160578,
+          "first_name": "VINCENT FRANCO",
+          "last_name": "FRASCO",
+          "middle_name": null,
+          "suffix": null,
+          "position": "VICE MAYOR",
+          "relationship_description": "Grandson-in-law: Duke Frasco"
+        },
+        {
+          "id": 37915,
+          "first_name": "Gwendolyn",
+          "last_name": "Garcia",
+          "middle_name": null,
+          "suffix": null,
+          "position": "GOVERNOR",
+          "relationship_description": "Mother-in-law: Gwendolyn Garcia (Governor of Cebu)"
+        }
       ],
       "relationships": [
         "Starting person",
@@ -21,8 +45,24 @@
     {
       "length": 2,
       "path": [
-        37915,
-        4160578
+        {
+          "id": 37915,
+          "first_name": "Gwendolyn",
+          "last_name": "Garcia",
+          "middle_name": null,
+          "suffix": null,
+          "position": "GOVERNOR",
+          "relationship_description": "Starting person"
+        },
+        {
+          "id": 4160578,
+          "first_name": "VINCENT FRANCO",
+          "last_name": "FRASCO",
+          "middle_name": null,
+          "suffix": null,
+          "position": "VICE MAYOR",
+          "relationship_description": "Son-in-law: Duke Frasco"
+        }
       ],
       "relationships": [
         "Starting person",
@@ -32,8 +72,24 @@
     {
       "length": 2,
       "path": [
-        37916,
-        37915
+        {
+          "id": 37916,
+          "first_name": "PABLO",
+          "last_name": "GARCIA",
+          "middle_name": null,
+          "suffix": null,
+          "position": "MEMBER, HOUSE OF REPRESENTATIVES",
+          "relationship_description": "Starting person"
+        },
+        {
+          "id": 37915,
+          "first_name": "Gwendolyn",
+          "last_name": "Garcia",
+          "middle_name": null,
+          "suffix": null,
+          "position": "GOVERNOR",
+          "relationship_description": "Gwendolyn Garcia is the daughter of Pablo Garcia"
+        }
       ],
       "relationships": [
         "Starting person",
@@ -43,8 +99,24 @@
     {
       "length": 2,
       "path": [
-        37915,
-        37916
+        {
+          "id": 37915,
+          "first_name": "Gwendolyn",
+          "last_name": "Garcia",
+          "middle_name": null,
+          "suffix": null,
+          "position": "GOVERNOR",
+          "relationship_description": "Starting person"
+        },
+        {
+          "id": 37916,
+          "first_name": "PABLO",
+          "last_name": "GARCIA",
+          "middle_name": null,
+          "suffix": null,
+          "position": "MEMBER, HOUSE OF REPRESENTATIVES",
+          "relationship_description": "SIBLINGS"
+        }
       ],
       "relationships": [
         "Starting person",
@@ -54,9 +126,33 @@
     {
       "length": 3,
       "path": [
-        37915,
-        37916,
-        4160578
+        {
+          "id": 37915,
+          "first_name": "Gwendolyn",
+          "last_name": "Garcia",
+          "middle_name": null,
+          "suffix": null,
+          "position": "GOVERNOR",
+          "relationship_description": "Starting person"
+        },
+        {
+          "id": 37916,
+          "first_name": "PABLO",
+          "last_name": "GARCIA",
+          "middle_name": null,
+          "suffix": null,
+          "position": "MEMBER, HOUSE OF REPRESENTATIVES",
+          "relationship_description": "SIBLINGS"
+        },
+        {
+          "id": 4160578,
+          "first_name": "VINCENT FRANCO",
+          "last_name": "FRASCO",
+          "middle_name": null,
+          "suffix": null,
+          "position": "VICE MAYOR",
+          "relationship_description": " ELDEST DAUGHTER AND YOUNGEST SON OF PABLO GARCIA"
+        }
       ],
       "relationships": [
         "Starting person",
@@ -65,24 +161,5 @@
       ]
     }
   ],
-  "people": {
-    "4160578": {
-      "id": 4160578,
-      "full_name": "VINCENT FRANCO FRASCO",
-      "position": "VICE MAYOR",
-      "location": "CEBU, REGION VII"
-    },
-    "37916": {
-      "id": 37916,
-      "full_name": "PABLO GARCIA",
-      "position": "MEMBER, HOUSE OF REPRESENTATIVES",
-      "location": "CEBU, REGION VII"
-    },
-    "37915": {
-      "id": 37915,
-      "full_name": "Gwendolyn Garcia",
-      "position": "GOVERNOR",
-      "location": "CEBU, REGION VII"
-    }
-  }
+  "people": {}
 }

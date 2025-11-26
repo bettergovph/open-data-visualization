@@ -8,11 +8,51 @@
     {
       "length": 5,
       "path": [
-        4162405,
-        4041412,
-        4041410,
-        4144956,
-        32135
+        {
+          "id": 4162405,
+          "first_name": "JANELLA",
+          "last_name": "EJERCITO ESTRADA",
+          "middle_name": null,
+          "suffix": null,
+          "position": "UNDERSECRETARY, DSWD",
+          "relationship_description": "Starting person"
+        },
+        {
+          "id": 4041412,
+          "first_name": "JINGGOY",
+          "last_name": "EJERCITO ESTRADA",
+          "middle_name": null,
+          "suffix": null,
+          "position": "SENATOR",
+          "relationship_description": "JANELLA EJERCITO ESTRADA IS DAUGHTER OF JINGGOY EJERCITO ESTRADA"
+        },
+        {
+          "id": 4041410,
+          "first_name": "VICTOR",
+          "last_name": "EJERCITO",
+          "middle_name": null,
+          "suffix": null,
+          "position": "SENATOR",
+          "relationship_description": "JV EJERCITO AND JINGGOY ESTRADA ARE HALF-BROTHERS"
+        },
+        {
+          "id": 4144956,
+          "first_name": "JOSEPH",
+          "last_name": "ESTRADA",
+          "middle_name": null,
+          "suffix": null,
+          "position": null,
+          "relationship_description": "JV EJERCITO IS THE SON OF FORMER PRESIDENT JOSEPH ESTRADA"
+        },
+        {
+          "id": 32135,
+          "first_name": "JOSEPH",
+          "last_name": "Ejercito",
+          "middle_name": null,
+          "suffix": null,
+          "position": "MAYOR",
+          "relationship_description": "JOSEPH EJERCITO IS THE SON OF FORMER PRESIDENT JOSEPH ESTRADA"
+        }
       ],
       "relationships": [
         "Starting person",
@@ -25,8 +65,24 @@
     {
       "length": 2,
       "path": [
-        32135,
-        4144956
+        {
+          "id": 32135,
+          "first_name": "JOSEPH",
+          "last_name": "Ejercito",
+          "middle_name": null,
+          "suffix": null,
+          "position": "MAYOR",
+          "relationship_description": "Starting person"
+        },
+        {
+          "id": 4144956,
+          "first_name": "JOSEPH",
+          "last_name": "ESTRADA",
+          "middle_name": null,
+          "suffix": null,
+          "position": null,
+          "relationship_description": "JOSEPH EJERCITO IS THE SON OF FORMER PRESIDENT JOSEPH ESTRADA"
+        }
       ],
       "relationships": [
         "Starting person",
@@ -34,36 +90,5 @@
       ]
     }
   ],
-  "people": {
-    "4162405": {
-      "id": 4162405,
-      "full_name": "JANELLA EJERCITO ESTRADA",
-      "position": "UNDERSECRETARY, DSWD",
-      "location": "Location unknown"
-    },
-    "4041412": {
-      "id": 4041412,
-      "full_name": "JINGGOY EJERCITO ESTRADA",
-      "position": "SENATOR",
-      "location": "Manila, Metro Manila, NCR"
-    },
-    "4041410": {
-      "id": 4041410,
-      "full_name": "VICTOR EJERCITO",
-      "position": "SENATOR",
-      "location": "Manila, Metro Manila, NCR"
-    },
-    "4144956": {
-      "id": 4144956,
-      "full_name": "JOSEPH ESTRADA",
-      "position": null,
-      "location": "Location unknown"
-    },
-    "32135": {
-      "id": 32135,
-      "full_name": "JOSEPH Ejercito",
-      "position": "MAYOR",
-      "location": "NCR, CITY OF MANILA, FIRST DISTRICT, NATIONAL CAPITAL REGION"
-    }
-  }
+  "people": {}
 }

@@ -48,13 +48,21 @@ async def match_amos_to_politicians(pcab_amos: List[str], dynasty_conn) -> Tuple
         first_name = name_parts[0]
         last_name = name_parts[-1]
         middle_initial = None
+        middle_name_full = None
+        
+        # Handle compound names like "JOSEPH JEREMY DE GUZMAN LARA"
+        # First name could be "JOSEPH JEREMY", middle could be "DE GUZMAN"
         if len(name_parts) > 2:
             middle = name_parts[1]
             if len(middle) == 1 or middle in ['JR', 'SR', 'II', 'III', 'IV']:
                 last_name = name_parts[-1]
             else:
                 middle_initial = middle[0] if len(middle) > 0 else None
+                # If we have multiple middle parts, use the full middle name for better matching
+                if len(name_parts) > 3:
+                    middle_name_full = ' '.join(name_parts[1:-1])
         
+        # Try matching with first name only first
         query = """
             SELECT id, first_name, last_name, middle_name, 
                    position, position_category, government_branch,
@@ -65,11 +73,43 @@ async def match_amos_to_politicians(pcab_amos: List[str], dynasty_conn) -> Tuple
         """
         params = [first_name, last_name]
         
-        if middle_initial:
-            query += " AND (UPPER(SUBSTRING(middle_name FROM 1 FOR 1)) = $3 OR middle_name IS NULL)"
+        if middle_name_full:
+            # Use full middle name match for better accuracy
+            query += " AND (UPPER(middle_name) LIKE $3 OR UPPER(middle_name) IS NULL OR UPPER(first_name || ' ' || COALESCE(middle_name, '')) LIKE $4)"
+            params.append(f"%{middle_name_full.upper()}%")
+            params.append(f"%{middle_name_full.upper()}%")
+        elif middle_initial:
+            query += " AND (UPPER(SUBSTRING(middle_name FROM 1 FOR 1)) = $3 OR middle_name IS NULL OR UPPER(SUBSTRING(first_name FROM 1 FOR LENGTH($1) + 1)) LIKE $4)"
             params.append(middle_initial)
+            params.append(f"%{first_name.upper()} {middle_initial.upper()}%")
         
         rows = await dynasty_conn.fetch(query, *params)
+        
+        # If multiple matches, prefer non-elected ones when AMO has detailed name
+        if len(rows) > 1 and len(name_parts) > 3:
+            non_elected = [r for r in rows if not (
+                r['position_category'] in ['Elected Officials', 'Elected Official', 'Representative'] or
+                r['government_branch'] in ('Legislative', 'Executive') or
+                (r['position'] and any(term in r['position'].upper() for term in ['CONGRESS', 'SENATOR', 'MAYOR', 'GOVERNOR', 'VICE', 'REPRESENTATIVE', 'COUNCILOR', 'BOARD MEMBER']))
+            )]
+            if non_elected:
+                rows = non_elected
+        
+        # If still no match and we have a compound first name, try matching first_name that contains the full first part
+        if len(rows) == 0 and len(name_parts) > 3:
+            compound_first = ' '.join(name_parts[:2])  # "JOSEPH JEREMY"
+            query2 = """
+                SELECT id, first_name, last_name, middle_name, 
+                       position, position_category, government_branch,
+                       province, municipality_city, district, year
+                FROM political_dynasties
+                WHERE UPPER(first_name) LIKE $1 
+                  AND UPPER(last_name) = $2
+            """
+            params2 = [f"%{compound_first.upper()}%", last_name]
+            rows2 = await dynasty_conn.fetch(query2, *params2)
+            if rows2:
+                rows = rows2
         
         for row in rows:
             position = row['position'] or ''

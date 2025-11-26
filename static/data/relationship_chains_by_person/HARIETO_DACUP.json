@@ -8,9 +8,33 @@
     {
       "length": 3,
       "path": [
-        27712,
-        27713,
-        25857
+        {
+          "id": 27712,
+          "first_name": "Sancho",
+          "last_name": "De La Merced",
+          "middle_name": null,
+          "suffix": null,
+          "position": "COUNCILOR",
+          "relationship_description": "Starting person"
+        },
+        {
+          "id": 27713,
+          "first_name": "ELVIS",
+          "last_name": "MERCED",
+          "middle_name": null,
+          "suffix": null,
+          "position": "GOVERNOR",
+          "relationship_description": "Unknown relationship"
+        },
+        {
+          "id": 25857,
+          "first_name": "Harieto",
+          "last_name": "Dacup",
+          "middle_name": null,
+          "suffix": null,
+          "position": "COUNCILOR",
+          "relationship_description": "Unknown"
+        }
       ],
       "relationships": [
         "Starting person",
@@ -21,8 +45,24 @@
     {
       "length": 2,
       "path": [
-        25857,
-        27713
+        {
+          "id": 25857,
+          "first_name": "Harieto",
+          "last_name": "Dacup",
+          "middle_name": null,
+          "suffix": null,
+          "position": "COUNCILOR",
+          "relationship_description": "Starting person"
+        },
+        {
+          "id": 27713,
+          "first_name": "ELVIS",
+          "last_name": "MERCED",
+          "middle_name": null,
+          "suffix": null,
+          "position": "GOVERNOR",
+          "relationship_description": "Unknown"
+        }
       ],
       "relationships": [
         "Starting person",
@@ -30,24 +70,5 @@
       ]
     }
   ],
-  "people": {
-    "27712": {
-      "id": 27712,
-      "full_name": "Sancho De La Merced",
-      "position": "COUNCILOR",
-      "location": "BOMBON, CAMARINES SUR, REGION V"
-    },
-    "27713": {
-      "id": 27713,
-      "full_name": "ELVIS MERCED",
-      "position": "GOVERNOR",
-      "location": "DINAGAT ISLANDS, REGION XIII"
-    },
-    "25857": {
-      "id": 25857,
-      "full_name": "Harieto Dacup",
-      "position": "COUNCILOR",
-      "location": "BALIGUIAN, ZAMBOANGA DEL NORTE, REGION IX"
-    }
-  }
+  "people": {}
 }

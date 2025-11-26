@@ -8,8 +8,24 @@
     {
       "length": 2,
       "path": [
-        4041423,
-        3745642
+        {
+          "id": 4041423,
+          "first_name": "RAFFY",
+          "last_name": "TULFO",
+          "middle_name": "T",
+          "suffix": null,
+          "position": "SENATOR",
+          "relationship_description": "Starting person"
+        },
+        {
+          "id": 3745642,
+          "first_name": "ERWIN",
+          "last_name": "TULFO",
+          "middle_name": null,
+          "suffix": null,
+          "position": "SENATOR",
+          "relationship_description": "SIBLINGS IN THE TULFO FAMILY"
+        }
       ],
       "relationships": [
         "Starting person",
@@ -19,8 +35,24 @@
     {
       "length": 2,
       "path": [
-        3745642,
-        4041423
+        {
+          "id": 3745642,
+          "first_name": "ERWIN",
+          "last_name": "TULFO",
+          "middle_name": null,
+          "suffix": null,
+          "position": "SENATOR",
+          "relationship_description": "Starting person"
+        },
+        {
+          "id": 4041423,
+          "first_name": "RAFFY",
+          "last_name": "TULFO",
+          "middle_name": "T",
+          "suffix": null,
+          "position": "SENATOR",
+          "relationship_description": "Siblings"
+        }
       ],
       "relationships": [
         "Starting person",
@@ -28,18 +60,5 @@
       ]
     }
   ],
-  "people": {
-    "3745642": {
-      "id": 3745642,
-      "full_name": "ERWIN TULFO",
-      "position": "SENATOR",
-      "location": "M'LANG, COTABATO, REGION XII"
-    },
-    "4041423": {
-      "id": 4041423,
-      "full_name": "RAFFY T TULFO",
-      "position": "SENATOR",
-      "location": "Manila, Metro Manila, NCR"
-    }
-  }
+  "people": {}
 }

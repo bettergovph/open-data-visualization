@@ -8,9 +8,33 @@
     {
       "length": 3,
       "path": [
-        78671,
-        3745717,
-        4162447
+        {
+          "id": 78671,
+          "first_name": "JOHN",
+          "last_name": "TARROSA",
+          "middle_name": null,
+          "suffix": null,
+          "position": "MAYOR",
+          "relationship_description": "Starting person"
+        },
+        {
+          "id": 3745717,
+          "first_name": "BATO",
+          "last_name": "DELA ROSA",
+          "middle_name": null,
+          "suffix": null,
+          "position": "SENATOR",
+          "relationship_description": "JOHN CARLO DELA ROSA is nephew of BATO DELA ROSA"
+        },
+        {
+          "id": 4162447,
+          "first_name": "REBECCA",
+          "last_name": "COMMANDANTE",
+          "middle_name": null,
+          "suffix": null,
+          "position": "POLITICAL AFFAIRS OFFICER II,",
+          "relationship_description": "BATO DELA ROSA is sister of REBECCA COMMANDANTE (POLITICAL AFFAIRS OFFICER II"
+        }
       ],
       "relationships": [
         "Starting person",
@@ -21,8 +45,24 @@
     {
       "length": 2,
       "path": [
-        3745717,
-        4162447
+        {
+          "id": 3745717,
+          "first_name": "BATO",
+          "last_name": "DELA ROSA",
+          "middle_name": null,
+          "suffix": null,
+          "position": "SENATOR",
+          "relationship_description": "Starting person"
+        },
+        {
+          "id": 4162447,
+          "first_name": "REBECCA",
+          "last_name": "COMMANDANTE",
+          "middle_name": null,
+          "suffix": null,
+          "position": "POLITICAL AFFAIRS OFFICER II,",
+          "relationship_description": "BATO DELA ROSA is sister of REBECCA COMMANDANTE (POLITICAL AFFAIRS OFFICER II"
+        }
       ],
       "relationships": [
         "Starting person",
@@ -30,24 +70,5 @@
       ]
     }
   ],
-  "people": {
-    "78671": {
-      "id": 78671,
-      "full_name": "JOHN TARROSA",
-      "position": "MAYOR",
-      "location": "ZARRAGA, ILOILO, REGION VI"
-    },
-    "3745717": {
-      "id": 3745717,
-      "full_name": "BATO DELA ROSA",
-      "position": "SENATOR",
-      "location": "M'LANG, COTABATO, REGION XII"
-    },
-    "4162447": {
-      "id": 4162447,
-      "full_name": "REBECCA COMMANDANTE",
-      "position": "POLITICAL AFFAIRS OFFICER II,",
-      "location": "Location unknown"
-    }
-  }
+  "people": {}
 }

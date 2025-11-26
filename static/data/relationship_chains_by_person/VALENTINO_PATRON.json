@@ -8,10 +8,42 @@
     {
       "length": 4,
       "path": [
-        78671,
-        3745717,
-        4162445,
-        63568
+        {
+          "id": 78671,
+          "first_name": "JOHN",
+          "last_name": "TARROSA",
+          "middle_name": null,
+          "suffix": null,
+          "position": "MAYOR",
+          "relationship_description": "Starting person"
+        },
+        {
+          "id": 3745717,
+          "first_name": "BATO",
+          "last_name": "DELA ROSA",
+          "middle_name": null,
+          "suffix": null,
+          "position": "SENATOR",
+          "relationship_description": "JOHN CARLO DELA ROSA is nephew of BATO DELA ROSA"
+        },
+        {
+          "id": 4162445,
+          "first_name": "JESSICA",
+          "last_name": "MAY DELA ROSA",
+          "middle_name": null,
+          "suffix": null,
+          "position": "SUPERVISING LEGISLATIVE STAFF OFFICER Ill,",
+          "relationship_description": "BATO DELA ROSA is niece of JESSICA MAY DELA ROSA (SUPERVISING LEGISLATIVE STAFF OFFICER Ill"
+        },
+        {
+          "id": 63568,
+          "first_name": "VALENTINO",
+          "last_name": "Patron",
+          "middle_name": null,
+          "suffix": null,
+          "position": "MAYOR",
+          "relationship_description": ")"
+        }
       ],
       "relationships": [
         "Starting person",
@@ -21,30 +53,5 @@
       ]
     }
   ],
-  "people": {
-    "78671": {
-      "id": 78671,
-      "full_name": "JOHN TARROSA",
-      "position": "MAYOR",
-      "location": "ZARRAGA, ILOILO, REGION VI"
-    },
-    "3745717": {
-      "id": 3745717,
-      "full_name": "BATO DELA ROSA",
-      "position": "SENATOR",
-      "location": "M'LANG, COTABATO, REGION XII"
-    },
-    "4162445": {
-      "id": 4162445,
-      "full_name": "JESSICA MAY DELA ROSA",
-      "position": "SUPERVISING LEGISLATIVE STAFF OFFICER Ill,",
-      "location": "Location unknown"
-    },
-    "63568": {
-      "id": 63568,
-      "full_name": "VALENTINO Patron",
-      "position": "MAYOR",
-      "location": "BATANGAS, REGION IV-A"
-    }
-  }
+  "people": {}
 }

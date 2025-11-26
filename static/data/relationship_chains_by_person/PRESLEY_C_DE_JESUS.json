@@ -8,8 +8,24 @@
     {
       "length": 3,
       "path": [
-        4145264,
-        4145265
+        {
+          "id": 4145264,
+          "first_name": "SERGIO",
+          "last_name": "DAGOOC",
+          "middle_name": "C",
+          "suffix": null,
+          "position": "PARTY-LIST REPRESENTATIVE",
+          "relationship_description": "Starting person"
+        },
+        {
+          "id": 4145265,
+          "first_name": "PRESLEY C DE",
+          "last_name": "JESUS",
+          "middle_name": null,
+          "suffix": null,
+          "position": "PARTY-LIST REPRESENTATIVE",
+          "relationship_description": "Connected via APEC"
+        }
       ],
       "relationships": [
         "Starting person",
@@ -24,8 +40,24 @@
     {
       "length": 3,
       "path": [
-        4145265,
-        4145264
+        {
+          "id": 4145265,
+          "first_name": "PRESLEY C DE",
+          "last_name": "JESUS",
+          "middle_name": null,
+          "suffix": null,
+          "position": "PARTY-LIST REPRESENTATIVE",
+          "relationship_description": "Starting person"
+        },
+        {
+          "id": 4145264,
+          "first_name": "SERGIO",
+          "last_name": "DAGOOC",
+          "middle_name": "C",
+          "suffix": null,
+          "position": "PARTY-LIST REPRESENTATIVE",
+          "relationship_description": "Connected via APEC"
+        }
       ],
       "relationships": [
         "Starting person",
@@ -38,18 +70,5 @@
       }
     }
   ],
-  "people": {
-    "4145264": {
-      "id": 4145264,
-      "full_name": "SERGIO C DAGOOC",
-      "position": "PARTY-LIST REPRESENTATIVE",
-      "location": "Location unknown"
-    },
-    "4145265": {
-      "id": 4145265,
-      "full_name": "PRESLEY C DE JESUS",
-      "position": "PARTY-LIST REPRESENTATIVE",
-      "location": "Location unknown"
-    }
-  }
+  "people": {}
 }

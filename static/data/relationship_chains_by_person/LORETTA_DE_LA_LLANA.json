@@ -8,9 +8,33 @@
     {
       "length": 3,
       "path": [
-        27712,
-        27713,
-        27711
+        {
+          "id": 27712,
+          "first_name": "Sancho",
+          "last_name": "De La Merced",
+          "middle_name": null,
+          "suffix": null,
+          "position": "COUNCILOR",
+          "relationship_description": "Starting person"
+        },
+        {
+          "id": 27713,
+          "first_name": "ELVIS",
+          "last_name": "MERCED",
+          "middle_name": null,
+          "suffix": null,
+          "position": "GOVERNOR",
+          "relationship_description": "Unknown relationship"
+        },
+        {
+          "id": 27711,
+          "first_name": "Loretta",
+          "last_name": "De La Llana",
+          "middle_name": null,
+          "suffix": null,
+          "position": "PROVINCIAL BOARD MEMBER",
+          "relationship_description": "Unknown"
+        }
       ],
       "relationships": [
         "Starting person",
@@ -21,8 +45,24 @@
     {
       "length": 2,
       "path": [
-        27711,
-        27713
+        {
+          "id": 27711,
+          "first_name": "Loretta",
+          "last_name": "De La Llana",
+          "middle_name": null,
+          "suffix": null,
+          "position": "PROVINCIAL BOARD MEMBER",
+          "relationship_description": "Starting person"
+        },
+        {
+          "id": 27713,
+          "first_name": "ELVIS",
+          "last_name": "MERCED",
+          "middle_name": null,
+          "suffix": null,
+          "position": "GOVERNOR",
+          "relationship_description": "Unknown"
+        }
       ],
       "relationships": [
         "Starting person",
@@ -30,24 +70,5 @@
       ]
     }
   ],
-  "people": {
-    "27712": {
-      "id": 27712,
-      "full_name": "Sancho De La Merced",
-      "position": "COUNCILOR",
-      "location": "BOMBON, CAMARINES SUR, REGION V"
-    },
-    "27713": {
-      "id": 27713,
-      "full_name": "ELVIS MERCED",
-      "position": "GOVERNOR",
-      "location": "DINAGAT ISLANDS, REGION XIII"
-    },
-    "27711": {
-      "id": 27711,
-      "full_name": "Loretta De La Llana",
-      "position": "PROVINCIAL BOARD MEMBER",
-      "location": "ZAMBALES, REGION III"
-    }
-  }
+  "people": {}
 }

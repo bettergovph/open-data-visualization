@@ -8,9 +8,33 @@
     {
       "length": 3,
       "path": [
-        78220,
-        78075,
-        78160
+        {
+          "id": 78220,
+          "first_name": "MARTIN",
+          "last_name": "TAN",
+          "middle_name": null,
+          "suffix": null,
+          "position": null,
+          "relationship_description": "Starting person"
+        },
+        {
+          "id": 78075,
+          "first_name": "STEPHEN",
+          "last_name": "TAN",
+          "middle_name": null,
+          "suffix": null,
+          "position": "Member, House of Representatives (Samar–1st District)",
+          "relationship_description": "FATHER-SON RELATIONSHIP"
+        },
+        {
+          "id": 78160,
+          "first_name": "Stephany",
+          "last_name": "Tan",
+          "middle_name": null,
+          "suffix": null,
+          "position": "MAYOR",
+          "relationship_description": " REYNALDO IS FORMER GOVERNOR OF SAMAR"
+        }
       ],
       "relationships": [
         "Starting person",
@@ -21,10 +45,42 @@
     {
       "length": 4,
       "path": [
-        78220,
-        78075,
-        78160,
-        82012
+        {
+          "id": 78220,
+          "first_name": "MARTIN",
+          "last_name": "TAN",
+          "middle_name": null,
+          "suffix": null,
+          "position": null,
+          "relationship_description": "Starting person"
+        },
+        {
+          "id": 78075,
+          "first_name": "STEPHEN",
+          "last_name": "TAN",
+          "middle_name": null,
+          "suffix": null,
+          "position": "Member, House of Representatives (Samar–1st District)",
+          "relationship_description": "FATHER-SON RELATIONSHIP"
+        },
+        {
+          "id": 78160,
+          "first_name": "Stephany",
+          "last_name": "Tan",
+          "middle_name": null,
+          "suffix": null,
+          "position": "MAYOR",
+          "relationship_description": " REYNALDO IS FORMER GOVERNOR OF SAMAR"
+        },
+        {
+          "id": 82012,
+          "first_name": "Coefredo",
+          "last_name": "Uy",
+          "middle_name": null,
+          "suffix": null,
+          "position": "MAYOR",
+          "relationship_description": " STEPHEN IS 1ST DISTRICT REP"
+        }
       ],
       "relationships": [
         "Starting person",
@@ -36,8 +92,24 @@
     {
       "length": 2,
       "path": [
-        78075,
-        78160
+        {
+          "id": 78075,
+          "first_name": "STEPHEN",
+          "last_name": "TAN",
+          "middle_name": null,
+          "suffix": null,
+          "position": "Member, House of Representatives (Samar–1st District)",
+          "relationship_description": "Starting person"
+        },
+        {
+          "id": 78160,
+          "first_name": "Stephany",
+          "last_name": "Tan",
+          "middle_name": null,
+          "suffix": null,
+          "position": "MAYOR",
+          "relationship_description": "HUSBAND OF STEPHANY TAN"
+        }
       ],
       "relationships": [
         "Starting person",
@@ -47,8 +119,24 @@
     {
       "length": 2,
       "path": [
-        78160,
-        78075
+        {
+          "id": 78160,
+          "first_name": "Stephany",
+          "last_name": "Tan",
+          "middle_name": null,
+          "suffix": null,
+          "position": "MAYOR",
+          "relationship_description": "Starting person"
+        },
+        {
+          "id": 78075,
+          "first_name": "STEPHEN",
+          "last_name": "TAN",
+          "middle_name": null,
+          "suffix": null,
+          "position": "Member, House of Representatives (Samar–1st District)",
+          "relationship_description": "WIFE OF STEPHEN JAMES TAN"
+        }
       ],
       "relationships": [
         "Starting person",
@@ -58,8 +146,24 @@
     {
       "length": 2,
       "path": [
-        78160,
-        82012
+        {
+          "id": 78160,
+          "first_name": "Stephany",
+          "last_name": "Tan",
+          "middle_name": null,
+          "suffix": null,
+          "position": "MAYOR",
+          "relationship_description": "Starting person"
+        },
+        {
+          "id": 82012,
+          "first_name": "Coefredo",
+          "last_name": "Uy",
+          "middle_name": null,
+          "suffix": null,
+          "position": "MAYOR",
+          "relationship_description": "DAUGHTER OF COEFREDO UY"
+        }
       ],
       "relationships": [
         "Starting person",
@@ -67,30 +171,5 @@
       ]
     }
   ],
-  "people": {
-    "78075": {
-      "id": 78075,
-      "full_name": "STEPHEN TAN",
-      "position": "Member, House of Representatives (Samar–1st District)",
-      "location": "SAMAR, REGION VIII"
-    },
-    "78220": {
-      "id": 78220,
-      "full_name": "MARTIN TAN",
-      "position": null,
-      "location": "ISABELA, NEGROS OCCIDENTAL, REGION VI"
-    },
-    "78160": {
-      "id": 78160,
-      "full_name": "Stephany Tan",
-      "position": "MAYOR",
-      "location": "SAMAR, REGION VIII"
-    },
-    "82012": {
-      "id": 82012,
-      "full_name": "Coefredo Uy",
-      "position": "MAYOR",
-      "location": "CATBALOGAN CITY, SAMAR, REGION VIII"
-    }
-  }
+  "people": {}
 }

@@ -8,8 +8,24 @@
     {
       "length": 2,
       "path": [
-        8299,
-        4145012
+        {
+          "id": 8299,
+          "first_name": "Ignacio",
+          "last_name": "Arroyo",
+          "middle_name": null,
+          "suffix": null,
+          "position": "MEMBER, HOUSE OF REPRESENTATIVES",
+          "relationship_description": "Starting person"
+        },
+        {
+          "id": 4145012,
+          "first_name": "MIKE",
+          "last_name": "ARROYO",
+          "middle_name": null,
+          "suffix": null,
+          "position": null,
+          "relationship_description": "Ignacio Arroyo is the brother of Mike Arroyo"
+        }
       ],
       "relationships": [
         "Starting person",
@@ -19,8 +35,24 @@
     {
       "length": 2,
       "path": [
-        4145012,
-        8299
+        {
+          "id": 4145012,
+          "first_name": "MIKE",
+          "last_name": "ARROYO",
+          "middle_name": null,
+          "suffix": null,
+          "position": null,
+          "relationship_description": "Starting person"
+        },
+        {
+          "id": 8299,
+          "first_name": "Ignacio",
+          "last_name": "Arroyo",
+          "middle_name": null,
+          "suffix": null,
+          "position": "MEMBER, HOUSE OF REPRESENTATIVES",
+          "relationship_description": "IGNACIO ARROYO IS THE BROTHER OF MIKE ARROYO"
+        }
       ],
       "relationships": [
         "Starting person",
@@ -30,9 +62,33 @@
     {
       "length": 3,
       "path": [
-        4145012,
-        8299,
-        35244
+        {
+          "id": 4145012,
+          "first_name": "MIKE",
+          "last_name": "ARROYO",
+          "middle_name": null,
+          "suffix": null,
+          "position": null,
+          "relationship_description": "Starting person"
+        },
+        {
+          "id": 8299,
+          "first_name": "Ignacio",
+          "last_name": "Arroyo",
+          "middle_name": null,
+          "suffix": null,
+          "position": "MEMBER, HOUSE OF REPRESENTATIVES",
+          "relationship_description": "IGNACIO ARROYO IS THE BROTHER OF MIKE ARROYO"
+        },
+        {
+          "id": 35244,
+          "first_name": "JULIET",
+          "last_name": "FERRER",
+          "middle_name": "M",
+          "suffix": null,
+          "position": "MAYOR",
+          "relationship_description": " HUSBAND OF FORMER PRESIDENT GLORIA MACAPAGAL ARROYO"
+        }
       ],
       "relationships": [
         "Starting person",
@@ -41,24 +97,5 @@
       ]
     }
   ],
-  "people": {
-    "8299": {
-      "id": 8299,
-      "full_name": "Ignacio Arroyo",
-      "position": "MEMBER, HOUSE OF REPRESENTATIVES",
-      "location": "NEGROS OCCIDENTAL, REGION VI"
-    },
-    "4145012": {
-      "id": 4145012,
-      "full_name": "MIKE ARROYO",
-      "position": null,
-      "location": "Location unknown"
-    },
-    "35244": {
-      "id": 35244,
-      "full_name": "JULIET M FERRER",
-      "position": "MAYOR",
-      "location": "NEGROS OCCIDENTAL, REGION VI"
-    }
-  }
+  "people": {}
 }

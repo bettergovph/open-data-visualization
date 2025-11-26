@@ -1155,7 +1155,9 @@ async def generate_relationship_constellations_cache(test_person=None):
         
         # Build person index from people_cache (use normalized_name from DB)
         # We use people_cache here because people_dict is now simplified and lacks metadata
+        # Handle duplicates by keeping the best person_id (most recent position or most relationships)
         person_name_to_id = {}  # normalized_name -> person_id
+        person_name_to_ids = {}  # normalized_name -> list of person_ids (for deduplication)
         for person_id, person_data in people_cache.items():
             # Use normalized_name from DB if available, otherwise compute it
             normalized_name = person_data.get('normalized_name')
@@ -1166,7 +1168,35 @@ async def generate_relationship_constellations_cache(test_person=None):
                     person_data.get('suffix')
                 )
             if normalized_name:
-                person_name_to_id[normalized_name] = person_id
+                if normalized_name not in person_name_to_ids:
+                    person_name_to_ids[normalized_name] = []
+                person_name_to_ids[normalized_name].append(person_id)
+        
+        # For each normalized_name, pick the best person_id
+        for normalized_name, person_ids in person_name_to_ids.items():
+            if len(person_ids) == 1:
+                person_name_to_id[normalized_name] = person_ids[0]
+            else:
+                # Multiple IDs with same normalized_name - pick the best one
+                # Prefer: VICE PRESIDENT > PRESIDENT > other positions, or most recent year
+                best_id = person_ids[0]
+                best_score = 0
+                for pid in person_ids:
+                    pdata = people_cache.get(pid)
+                    if not pdata:
+                        continue
+                    score = 0
+                    position = (pdata.get('position') or '').upper()
+                    if 'VICE PRESIDENT' in position:
+                        score += 1000
+                    elif 'PRESIDENT' in position:
+                        score += 500
+                    year = pdata.get('year') or 0
+                    score += year  # More recent = higher score
+                    if score > best_score:
+                        best_score = score
+                        best_id = pid
+                person_name_to_id[normalized_name] = best_id
         
         # Organize chains by person
         for chain_idx, chain in enumerate(formatted_chains):

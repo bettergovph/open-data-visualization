@@ -8,9 +8,33 @@
     {
       "length": 3,
       "path": [
-        4041683,
-        3745665,
-        4162443
+        {
+          "id": 4041683,
+          "first_name": "CORAZON",
+          "last_name": "AQUINO",
+          "middle_name": null,
+          "suffix": null,
+          "position": null,
+          "relationship_description": "Starting person"
+        },
+        {
+          "id": 3745665,
+          "first_name": "BAM",
+          "last_name": "AQUINO",
+          "middle_name": null,
+          "suffix": null,
+          "position": "SENATOR",
+          "relationship_description": "BAM AQUINO IS THE GRANDSON OF CORAZON AQUINO"
+        },
+        {
+          "id": 4162443,
+          "first_name": "LENLEN",
+          "last_name": "ORETA",
+          "middle_name": null,
+          "suffix": null,
+          "position": "REPRESENTATIVE, MALABON CITY",
+          "relationship_description": " FORMER PRESIDENT OF THE PHILIPPINES"
+        }
       ],
       "relationships": [
         "Starting person",
@@ -21,8 +45,24 @@
     {
       "length": 2,
       "path": [
-        3745665,
-        4162443
+        {
+          "id": 3745665,
+          "first_name": "BAM",
+          "last_name": "AQUINO",
+          "middle_name": null,
+          "suffix": null,
+          "position": "SENATOR",
+          "relationship_description": "Starting person"
+        },
+        {
+          "id": 4162443,
+          "first_name": "LENLEN",
+          "last_name": "ORETA",
+          "middle_name": null,
+          "suffix": null,
+          "position": "REPRESENTATIVE, MALABON CITY",
+          "relationship_description": "BAM AQUINO is cousin of LENLEN ORETA (REPRESENTATIVE"
+        }
       ],
       "relationships": [
         "Starting person",
@@ -30,24 +70,5 @@
       ]
     }
   ],
-  "people": {
-    "4041683": {
-      "id": 4041683,
-      "full_name": "CORAZON AQUINO",
-      "position": null,
-      "location": "Location unknown"
-    },
-    "3745665": {
-      "id": 3745665,
-      "full_name": "BAM AQUINO",
-      "position": "SENATOR",
-      "location": "M'LANG, COTABATO, REGION XII"
-    },
-    "4162443": {
-      "id": 4162443,
-      "full_name": "LENLEN ORETA",
-      "position": "REPRESENTATIVE, MALABON CITY",
-      "location": "Location unknown"
-    }
-  }
+  "people": {}
 }

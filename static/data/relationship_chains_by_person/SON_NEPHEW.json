@@ -8,10 +8,42 @@
     {
       "length": 4,
       "path": [
-        4162434,
-        3745642,
-        4162433,
-        4162436
+        {
+          "id": 4162434,
+          "first_name": "RALPH",
+          "last_name": "TULFO",
+          "middle_name": null,
+          "suffix": null,
+          "position": "REPRESENTATIVE, QUEZON CITY",
+          "relationship_description": "Starting person"
+        },
+        {
+          "id": 3745642,
+          "first_name": "ERWIN",
+          "last_name": "TULFO",
+          "middle_name": null,
+          "suffix": null,
+          "position": "SENATOR",
+          "relationship_description": "RALPH TULFO IS NEPHEW OF ERWIN TULFO"
+        },
+        {
+          "id": 4162433,
+          "first_name": "RAFFY",
+          "last_name": "TULFO MARICEL TULFO-TUNGOL",
+          "middle_name": null,
+          "suffix": null,
+          "position": "SENATOR OF THE PHILIPPINES -",
+          "relationship_description": "ERWIN TULFO is daughter of RAFFY TULFO MARICEL TULFO-TUNGOL (SENATOR OF THE PHILIPPINES -)"
+        },
+        {
+          "id": 4162436,
+          "first_name": "SON",
+          "last_name": "NEPHEW",
+          "middle_name": null,
+          "suffix": null,
+          "position": "OFFICE OF SEN. RAFFY TULFO SENATOR OF THE PHILIPPINES",
+          "relationship_description": "RAFFY TULFO MARICEL TULFO-TUNGOL IS BROTHER OF SON NEPHEW (OFFICE OF SEN. RAFFY TULFO SENATOR OF THE PHILIPPINES)"
+        }
       ],
       "relationships": [
         "Starting person",
@@ -23,8 +55,24 @@
     {
       "length": 2,
       "path": [
-        4162433,
-        4162436
+        {
+          "id": 4162433,
+          "first_name": "RAFFY",
+          "last_name": "TULFO MARICEL TULFO-TUNGOL",
+          "middle_name": null,
+          "suffix": null,
+          "position": "SENATOR OF THE PHILIPPINES -",
+          "relationship_description": "Starting person"
+        },
+        {
+          "id": 4162436,
+          "first_name": "SON",
+          "last_name": "NEPHEW",
+          "middle_name": null,
+          "suffix": null,
+          "position": "OFFICE OF SEN. RAFFY TULFO SENATOR OF THE PHILIPPINES",
+          "relationship_description": "RAFFY TULFO MARICEL TULFO-TUNGOL IS BROTHER OF SON NEPHEW (OFFICE OF SEN. RAFFY TULFO SENATOR OF THE PHILIPPINES)"
+        }
       ],
       "relationships": [
         "Starting person",
@@ -32,30 +80,5 @@
       ]
     }
   ],
-  "people": {
-    "3745642": {
-      "id": 3745642,
-      "full_name": "ERWIN TULFO",
-      "position": "SENATOR",
-      "location": "M'LANG, COTABATO, REGION XII"
-    },
-    "4162434": {
-      "id": 4162434,
-      "full_name": "RALPH TULFO",
-      "position": "REPRESENTATIVE, QUEZON CITY",
-      "location": "Location unknown"
-    },
-    "4162433": {
-      "id": 4162433,
-      "full_name": "RAFFY TULFO MARICEL TULFO-TUNGOL",
-      "position": "SENATOR OF THE PHILIPPINES -",
-      "location": "Location unknown"
-    },
-    "4162436": {
-      "id": 4162436,
-      "full_name": "SON NEPHEW",
-      "position": "OFFICE OF SEN. RAFFY TULFO SENATOR OF THE PHILIPPINES",
-      "location": "Location unknown"
-    }
-  }
+  "people": {}
 }

@@ -3688,6 +3688,15 @@ class DynastyProjectsCacheGeneratorDuckDB:
                             province_matches = True
                             break
                 
+                # CRITICAL FIX: Strict location check for Eulogio Rodriguez
+                # He is the congressman for Catanduanes, but "E. Rodriguez" is a common street name in QC/Rizal
+                # Prevent false positives by ensuring the project is actually in Catanduanes
+                if province_matches and 'RODRIGUEZ' in cm_name.upper() and 'EULOGIO' in cm_name.upper():
+                    # Check if project province is strictly Catanduanes
+                    if 'CATANDUANES' not in province_upper:
+                        # Reject match if not in Catanduanes
+                        continue
+
                 if province_matches:
                     validated_candidates.append((cm_name, cm_data))
             
@@ -3814,12 +3823,30 @@ class DynastyProjectsCacheGeneratorDuckDB:
                             continue
                             
                         # At least one proper name must match
-                        proper_name_match = any(
+                        # CRITICAL FIX: Use 'all' instead of 'any' to prevent broad matching
+                        # e.g., "J. RODRIGUEZ" should NOT match "EULOGIO RODRIGUEZ" just because of "RODRIGUEZ"
+                        proper_name_match = all(
                             any(pn == cn for cn in contractor_proper_names)
                             for pn in pattern_proper_names
                         )
                         
                         if proper_name_match:
+                             # Additional check: If the pattern is short (1-2 words), ensure the contractor isn't significantly longer
+                             # This prevents "RODRIGUEZ" from matching "EULOGIO RODRIGUEZ" (1 vs 2 proper names)
+                             if len(pattern_proper_names) <= 2:
+                                 # Allow at most 1 extra proper name in contractor (e.g. middle initial)
+                                 # But for "EULOGIO RODRIGUEZ" vs "RODRIGUEZ", that's 1 extra.
+                                 # Maybe strict equality for single-word patterns?
+                                 if len(pattern_proper_names) == 1 and len(contractor_proper_names) > 1:
+                                     # If pattern is just "RODRIGUEZ", don't match "EULOGIO RODRIGUEZ"
+                                     # But allow "RODRIGUEZ CONSTRUCTION" (where CONSTRUCTION is common)
+                                     # contractor_proper_names only contains non-common words.
+                                     continue
+                                 
+                                 # For 2 words, allow max 1 extra (e.g. "JUAN DELA CRUZ" vs "JUAN A. DELA CRUZ")
+                                 if len(contractor_proper_names) > len(pattern_proper_names) + 1:
+                                     continue
+
                              candidates.extend(cm_list)
         
         if candidates:

@@ -8,9 +8,33 @@
     {
       "length": 3,
       "path": [
-        4152469,
-        4162440,
-        4162442
+        {
+          "id": 4152469,
+          "first_name": "JUAN MIGUEL",
+          "last_name": "CUNA",
+          "middle_name": null,
+          "suffix": null,
+          "position": "COUNCILOR",
+          "relationship_description": "Starting person"
+        },
+        {
+          "id": 4162440,
+          "first_name": "MIGZ",
+          "last_name": "ZUBIRI",
+          "middle_name": null,
+          "suffix": null,
+          "position": "SENATOR OF THE PHILIPPINES",
+          "relationship_description": "JUAN MIGUEL CUNA IS COUSIN OF MIGZ ZUBIRI"
+        },
+        {
+          "id": 4162442,
+          "first_name": "CRISTIAN",
+          "last_name": "ZUBIRI",
+          "middle_name": null,
+          "suffix": null,
+          "position": "PAON, OFFICE OF SEN. ZUBIRI",
+          "relationship_description": "MIGZ ZUBIRI IS NEPHEW OF CRISTIAN ZUBIRI (PAON"
+        }
       ],
       "relationships": [
         "Starting person",
@@ -21,8 +45,24 @@
     {
       "length": 2,
       "path": [
-        4162440,
-        4162442
+        {
+          "id": 4162440,
+          "first_name": "MIGZ",
+          "last_name": "ZUBIRI",
+          "middle_name": null,
+          "suffix": null,
+          "position": "SENATOR OF THE PHILIPPINES",
+          "relationship_description": "Starting person"
+        },
+        {
+          "id": 4162442,
+          "first_name": "CRISTIAN",
+          "last_name": "ZUBIRI",
+          "middle_name": null,
+          "suffix": null,
+          "position": "PAON, OFFICE OF SEN. ZUBIRI",
+          "relationship_description": "MIGZ ZUBIRI IS NEPHEW OF CRISTIAN ZUBIRI (PAON"
+        }
       ],
       "relationships": [
         "Starting person",
@@ -32,8 +72,24 @@
     {
       "length": 2,
       "path": [
-        4162442,
-        4162440
+        {
+          "id": 4162442,
+          "first_name": "CRISTIAN",
+          "last_name": "ZUBIRI",
+          "middle_name": null,
+          "suffix": null,
+          "position": "PAON, OFFICE OF SEN. ZUBIRI",
+          "relationship_description": "Starting person"
+        },
+        {
+          "id": 4162440,
+          "first_name": "MIGZ",
+          "last_name": "ZUBIRI",
+          "middle_name": null,
+          "suffix": null,
+          "position": "SENATOR OF THE PHILIPPINES",
+          "relationship_description": "CRISTIAN ZUBIRI IS NEPHEW OF MIGZ ZUBIRI"
+        }
       ],
       "relationships": [
         "Starting person",
@@ -41,24 +97,5 @@
       ]
     }
   ],
-  "people": {
-    "4152469": {
-      "id": 4152469,
-      "full_name": "JUAN MIGUEL CUNA",
-      "position": "COUNCILOR",
-      "location": "MANILA, NCR, CITY OF MANILA, FIRST DISTRICT, NATIONAL CAPITAL REGION"
-    },
-    "4162440": {
-      "id": 4162440,
-      "full_name": "MIGZ ZUBIRI",
-      "position": "SENATOR OF THE PHILIPPINES",
-      "location": "Location unknown"
-    },
-    "4162442": {
-      "id": 4162442,
-      "full_name": "CRISTIAN ZUBIRI",
-      "position": "PAON, OFFICE OF SEN. ZUBIRI",
-      "location": "Location unknown"
-    }
-  }
+  "people": {}
 }

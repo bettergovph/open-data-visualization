@@ -8,8 +8,24 @@
     {
       "length": 2,
       "path": [
-        31580,
-        4162646
+        {
+          "id": 31580,
+          "first_name": "RODRIGO",
+          "last_name": "Duterte",
+          "middle_name": null,
+          "suffix": null,
+          "position": "MAYOR",
+          "relationship_description": "Starting person"
+        },
+        {
+          "id": 4162646,
+          "first_name": "HONEYLET",
+          "last_name": "AVANCEÑA",
+          "middle_name": null,
+          "suffix": null,
+          "position": "MOTHER OF THEIR CHILD",
+          "relationship_description": "Partner: Mother of their child"
+        }
       ],
       "relationships": [
         "Starting person",
@@ -19,9 +35,33 @@
     {
       "length": 3,
       "path": [
-        31577,
-        31580,
-        4162646
+        {
+          "id": 31577,
+          "first_name": "PAOLO",
+          "last_name": "DUTERTE",
+          "middle_name": null,
+          "suffix": null,
+          "position": "MAYOR",
+          "relationship_description": "Starting person"
+        },
+        {
+          "id": 31580,
+          "first_name": "RODRIGO",
+          "last_name": "Duterte",
+          "middle_name": null,
+          "suffix": null,
+          "position": "MAYOR",
+          "relationship_description": "Father"
+        },
+        {
+          "id": 4162646,
+          "first_name": "HONEYLET",
+          "last_name": "AVANCEÑA",
+          "middle_name": null,
+          "suffix": null,
+          "position": "MOTHER OF THEIR CHILD",
+          "relationship_description": "Partner: Mother of their child"
+        }
       ],
       "relationships": [
         "Starting person",
@@ -30,24 +70,5 @@
       ]
     }
   ],
-  "people": {
-    "31580": {
-      "id": 31580,
-      "full_name": "RODRIGO Duterte",
-      "position": "MAYOR",
-      "location": "DAVAO DEL SUR, REGION XI"
-    },
-    "4162646": {
-      "id": 4162646,
-      "full_name": "HONEYLET AVANCEÑA",
-      "position": "MOTHER OF THEIR CHILD",
-      "location": "DAVAO DEL SUR"
-    },
-    "31577": {
-      "id": 31577,
-      "full_name": "PAOLO DUTERTE",
-      "position": "MAYOR",
-      "location": "DAVAO DEL SUR, REGION XI"
-    }
-  }
+  "people": {}
 }
