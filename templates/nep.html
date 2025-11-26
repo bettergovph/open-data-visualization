@@ -2945,21 +2945,25 @@
                                     const criticalValue = 15.51;
                                     const benfordRejected = chiSquare > criticalValue;
                                     
-                                    const dominantAmount = sortedAmounts.reduce((max, item) => 
-                                        item.count > max.count ? item : max, sortedAmounts[0]);
-                                    const dominantPercentage = ((dominantAmount.count / totalProjects) * 100).toFixed(0);
+                                    // Find dominant bin
+                                    const dominantBin = sortedBins && sortedBins.length > 0 ? sortedBins.reduce((max, bin) => 
+                                        bin.count > max.count ? bin : max, sortedBins[0]) : null;
+                                    const dominantPercentage = dominantBin ? ((dominantBin.count / totalProjects) * 100).toFixed(0) : '0';
                                     
                                     const analysisDiv = document.getElementById('dpwh-statistical-analysis');
                                     const contentDiv = document.getElementById('dpwh-statistical-analysis-content');
                                     
                                     if (analysisDiv && contentDiv) {
                                         contentDiv.innerHTML = `
-                                            <p style="margin: 0.5rem 0;"><strong>Probability of ${uniqueCount} unique amounts in ${totalProjects} projects:</strong> Effectively ${probability.toFixed(6)}.</p>
+                                            <p style="margin: 0.5rem 0;"><strong>Probability of ${uniqueCount} bins in ${totalProjects} projects:</strong> Effectively ${probability.toFixed(6)}.</p>
                                             <p style="margin: 0.5rem 0;"><strong>Benford's Law Test:</strong> <span style="color: ${benfordRejected ? '#dc3545' : '#28a745'}; font-weight: 600;">${benfordRejected ? 'REJECTED' : 'PASSED'}</span> (Chi-Square: ${chiSquare.toFixed(2)}, Critical: ${criticalValue.toFixed(2)}).</p>
-                                            <p style="margin: 0.5rem 0;"><strong>Dominant Range:</strong> ${dominantBin.label} (${dominantPercentage}% of all projects).</p>
+                                            ${dominantBin ? `<p style="margin: 0.5rem 0;"><strong>Dominant Range:</strong> ${dominantBin.label} (${dominantPercentage}% of all projects).</p>` : ''}
                                             <p style="margin: 1rem 0 0 0; font-weight: 600; color: #dc3545;">This strongly suggests the data is artificial or copy-pasted.</p>
                                         `;
                                         analysisDiv.style.display = 'block';
+                                        console.log('DPWH statistical analysis displayed');
+                                    } else {
+                                        console.error('DPWH statistical analysis elements not found');
                                     }
                                 }
 
