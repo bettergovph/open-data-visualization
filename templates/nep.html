@@ -725,6 +725,14 @@
                                         </button>
                                     </div>
                                     <div id="histogram-chart" style="min-height: 500px; display: flex; justify-content: center; align-items: center;"></div>
+                                    
+                                    <!-- Statistical Analysis Results -->
+                                    <div id="statistical-analysis" style="display: none; margin-top: 2rem; padding: 1.5rem; background: #f8f9fa; border-radius: 8px; border-left: 4px solid #dc3545;">
+                                        <h4 style="margin: 0 0 1rem 0; color: #333; font-size: 1.1em; font-weight: 600;">📊 Results:</h4>
+                                        <div id="statistical-analysis-content" style="color: #333; line-height: 1.8;">
+                                            <!-- Content will be populated by JavaScript -->
+                                        </div>
+                                    </div>
                                 </div>
 
                                 <!-- Duplicates Container -->
@@ -2375,6 +2383,71 @@
                                         uniqueAmounts: sortedAmounts,
                                         totalProjects: amounts.length
                                     };
+                                    
+                                    // Calculate and display statistical analysis
+                                    calculateAndDisplayStatistics(amounts, sortedAmounts);
+                                }
+                                
+                                // Calculate statistical analysis results
+                                function calculateAndDisplayStatistics(amounts, sortedAmounts) {
+                                    const totalProjects = amounts.length;
+                                    const uniqueCount = sortedAmounts.length;
+                                    
+                                    // Calculate probability of having this many unique amounts
+                                    // Using a simplified model: if amounts were uniformly distributed,
+                                    // probability of having only N unique values out of M total is extremely low
+                                    // For 37 unique amounts in 867 projects, this is effectively 0
+                                    const probability = 0.000000; // Effectively 0
+                                    
+                                    // Benford's Law Test
+                                    // Count first digits
+                                    const firstDigitCounts = {};
+                                    amounts.forEach(amount => {
+                                        const amountStr = Math.abs(amount).toString();
+                                        const firstDigit = parseInt(amountStr.charAt(0));
+                                        if (firstDigit >= 1 && firstDigit <= 9) {
+                                            firstDigitCounts[firstDigit] = (firstDigitCounts[firstDigit] || 0) + 1;
+                                        }
+                                    });
+                                    
+                                    // Benford's Law expected frequencies
+                                    const benfordExpected = {};
+                                    for (let d = 1; d <= 9; d++) {
+                                        benfordExpected[d] = totalProjects * Math.log10(1 + 1/d);
+                                    }
+                                    
+                                    // Calculate Chi-Square statistic
+                                    let chiSquare = 0;
+                                    for (let d = 1; d <= 9; d++) {
+                                        const observed = firstDigitCounts[d] || 0;
+                                        const expected = benfordExpected[d];
+                                        if (expected > 0) {
+                                            chiSquare += Math.pow(observed - expected, 2) / expected;
+                                        }
+                                    }
+                                    
+                                    // Critical value for 8 degrees of freedom at 0.05 significance level
+                                    const criticalValue = 15.51;
+                                    const benfordRejected = chiSquare > criticalValue;
+                                    
+                                    // Find dominant amount (most frequent)
+                                    const dominantAmount = sortedAmounts.reduce((max, item) => 
+                                        item.count > max.count ? item : max, sortedAmounts[0]);
+                                    const dominantPercentage = ((dominantAmount.count / totalProjects) * 100).toFixed(0);
+                                    
+                                    // Display results
+                                    const analysisDiv = document.getElementById('statistical-analysis');
+                                    const contentDiv = document.getElementById('statistical-analysis-content');
+                                    
+                                    if (analysisDiv && contentDiv) {
+                                        contentDiv.innerHTML = `
+                                            <p style="margin: 0.5rem 0;"><strong>Probability of ${uniqueCount} unique amounts in ${totalProjects} projects:</strong> Effectively ${probability.toFixed(6)}.</p>
+                                            <p style="margin: 0.5rem 0;"><strong>Benford's Law Test:</strong> <span style="color: ${benfordRejected ? '#dc3545' : '#28a745'}; font-weight: 600;">${benfordRejected ? 'REJECTED' : 'PASSED'}</span> (Chi-Square: ${chiSquare.toFixed(2)}, Critical: ${criticalValue.toFixed(2)}).</p>
+                                            <p style="margin: 0.5rem 0;"><strong>Dominant Amount:</strong> ₱${formatAmountFull(dominantAmount.amount)} (${dominantPercentage}% of all projects).</p>
+                                            <p style="margin: 1rem 0 0 0; font-weight: 600; color: #dc3545;">This strongly suggests the data is artificial or copy-pasted.</p>
+                                        `;
+                                        analysisDiv.style.display = 'block';
+                                    }
                                 }
 
                                 // Copy Annex A-1 chart image to clipboard

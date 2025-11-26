@@ -27,6 +27,20 @@
         text-align: center;
         box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
     }
+
+    .mobile-tab-panel {
+        display: none;
+    }
+
+    .mobile-tab-panel.active {
+        display: block;
+    }
+
+    .mobile-tab-link.active {
+        color: #0038A8 !important;
+        border-bottom-color: #0038A8 !important;
+        font-weight: 600 !important;
+    }
 </style>
 {% endblock %}
 
@@ -37,30 +51,78 @@
         <p class="text-xs text-gray-600">National Expenditure Program - Insertions Analysis</p>
     </div>
 
-    <p class="text-xs text-gray-600 mb-3 bg-blue-50 p-3 rounded">
-        🧩 Showing program insertions by office and district
-    </p>
-
-    <!-- Stats -->
-    <div class="mobile-stats-grid">
-        <div class="mobile-stat-card">
-            <div class="text-2xl font-bold text-blue-600" id="total-offices">-</div>
-            <div class="text-xs text-gray-600 mt-1">Total Offices</div>
-        </div>
-        <div class="mobile-stat-card">
-            <div class="text-2xl font-bold text-green-600" id="total-insertions">-</div>
-            <div class="text-xs text-gray-600 mt-1">Total Insertions</div>
-        </div>
+    <!-- Tabs -->
+    <div class="mb-4" style="display: flex; gap: 0.5rem; overflow-x: auto; -webkit-overflow-scrolling: touch; border-bottom: 2px solid #dee2e6;">
+        <a href="#insertions" class="mobile-tab-link active" data-tab="insertions" style="padding: 0.75rem 1rem; white-space: nowrap; border-bottom: 2px solid transparent; color: #666; text-decoration: none; font-weight: 500;">📋 Insertions</a>
+        <a href="#duplicate" class="mobile-tab-link" data-tab="duplicate" style="padding: 0.75rem 1rem; white-space: nowrap; border-bottom: 2px solid transparent; color: #666; text-decoration: none; font-weight: 500;">📊 Win (Duplicates)</a>
     </div>
 
-    <!-- Loading -->
-    <div id="loading" class="text-center py-8">
-        <div class="inline-block w-8 h-8 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin"></div>
-        <p class="text-sm text-gray-500 mt-2">Loading insertions data...</p>
+    <!-- Insertions Tab -->
+    <div id="tab-insertions" class="mobile-tab-panel active">
+        <p class="text-xs text-gray-600 mb-3 bg-blue-50 p-3 rounded">
+            🧩 Showing program insertions by office and district
+        </p>
+
+        <!-- Stats -->
+        <div class="mobile-stats-grid">
+            <div class="mobile-stat-card">
+                <div class="text-2xl font-bold text-blue-600" id="total-offices">-</div>
+                <div class="text-xs text-gray-600 mt-1">Total Offices</div>
+            </div>
+            <div class="mobile-stat-card">
+                <div class="text-2xl font-bold text-green-600" id="total-insertions">-</div>
+                <div class="text-xs text-gray-600 mt-1">Total Insertions</div>
+            </div>
+        </div>
+
+        <!-- Loading -->
+        <div id="loading" class="text-center py-8">
+            <div class="inline-block w-8 h-8 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin"></div>
+            <p class="text-sm text-gray-500 mt-2">Loading insertions data...</p>
+        </div>
+
+        <!-- Results -->
+        <div id="insertions-container"></div>
     </div>
 
-    <!-- Results -->
-    <div id="insertions-container"></div>
+    <!-- Duplicate Tab -->
+    <div id="tab-duplicate" class="mobile-tab-panel" style="display: none;">
+        <p class="text-xs text-gray-600 mb-3 bg-blue-50 p-3 rounded">
+            📊 Track duplicate entries in budget amendments
+        </p>
+
+        <!-- Stats Cards -->
+        <div class="mobile-stats-grid">
+            <div class="mobile-stat-card">
+                <div class="text-xl font-bold text-blue-600" id="mobile-duplicate-total-projects">-</div>
+                <div class="text-xs text-gray-600 mt-1">Total Projects</div>
+            </div>
+            <div class="mobile-stat-card">
+                <div class="text-xl font-bold text-purple-600" id="mobile-duplicate-total-groups">-</div>
+                <div class="text-xs text-gray-600 mt-1">Duplicate Groups</div>
+            </div>
+            <div class="mobile-stat-card">
+                <div class="text-xl font-bold text-orange-600" id="mobile-duplicate-total-items">-</div>
+                <div class="text-xs text-gray-600 mt-1">Items in Groups</div>
+            </div>
+            <div class="mobile-stat-card">
+                <div class="text-xl font-bold text-red-600" id="mobile-duplicate-total-amount">-</div>
+                <div class="text-xs text-gray-600 mt-1">Total Amount</div>
+            </div>
+        </div>
+
+        <!-- Loading -->
+        <div id="mobile-duplicate-loading" class="text-center py-8">
+            <div class="inline-block w-8 h-8 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin"></div>
+            <p class="text-sm text-gray-500 mt-2">Loading duplicate data...</p>
+        </div>
+
+        <!-- Error Message -->
+        <div id="mobile-duplicate-error" style="display: none; text-align: center; padding: 2rem; color: #dc3545;"></div>
+
+        <!-- Results -->
+        <div id="mobile-duplicate-groups-container" style="display: none;"></div>
+    </div>
 </section>
 
 <script>
@@ -129,6 +191,130 @@
     `;
     }
 
-    document.addEventListener('DOMContentLoaded', loadInsertionsData);
+    // Tab switching
+    document.querySelectorAll('.mobile-tab-link').forEach(link => {
+        link.addEventListener('click', function(e) {
+            e.preventDefault();
+            const tabName = this.getAttribute('data-tab');
+            
+            // Update active tab link
+            document.querySelectorAll('.mobile-tab-link').forEach(l => l.classList.remove('active'));
+            this.classList.add('active');
+            
+            // Update active tab panel
+            document.querySelectorAll('.mobile-tab-panel').forEach(p => {
+                p.classList.remove('active');
+                p.style.display = 'none';
+            });
+            
+            const targetPanel = document.getElementById(`tab-${tabName}`);
+            if (targetPanel) {
+                targetPanel.classList.add('active');
+                targetPanel.style.display = 'block';
+            }
+            
+            // Load duplicate data if switching to duplicate tab
+            if (tabName === 'duplicate' && typeof loadMobileDuplicateData === 'function') {
+                loadMobileDuplicateData();
+            }
+            
+            // Update URL hash
+            if (tabName === 'duplicate') {
+                window.location.hash = 'duplicate';
+            } else {
+                window.location.hash = '';
+            }
+        });
+    });
+
+    // Check URL hash on load
+    if (window.location.hash === '#duplicate') {
+        const duplicateLink = document.querySelector('[data-tab="duplicate"]');
+        if (duplicateLink) {
+            duplicateLink.click();
+        }
+    }
+
+    // Load duplicate data function (simplified mobile version)
+    async function loadMobileDuplicateData() {
+        const loadingDiv = document.getElementById('mobile-duplicate-loading');
+        const errorDiv = document.getElementById('mobile-duplicate-error');
+        const container = document.getElementById('mobile-duplicate-groups-container');
+        
+        try {
+            loadingDiv.style.display = 'block';
+            errorDiv.style.display = 'none';
+            container.style.display = 'none';
+            
+            const response = await fetch('/api/budget/amendments/duplicates');
+            if (!response.ok) {
+                throw new Error(`HTTP ${response.status}`);
+            }
+            
+            const data = await response.json();
+            if (!data.success) {
+                throw new Error(data.error || 'Failed to load duplicate data');
+            }
+            
+            // Update stats
+            const totalGroups = data.groups ? data.groups.length : 0;
+            const totalItems = data.groups ? data.groups.reduce((sum, g) => sum + (g.items ? g.items.length : 0), 0) : 0;
+            const totalAmount = data.groups ? data.groups.reduce((sum, g) => sum + (g.total_amount || 0), 0) : 0;
+            
+            document.getElementById('mobile-duplicate-total-groups').textContent = totalGroups.toLocaleString();
+            document.getElementById('mobile-duplicate-total-items').textContent = totalItems.toLocaleString();
+            document.getElementById('mobile-duplicate-total-amount').textContent = '₱' + (totalAmount / 1000000000).toFixed(2) + 'B';
+            
+            // Load total projects count
+            try {
+                const amountsResponse = await fetch('/api/budget/amendments/annex-a1-amounts');
+                if (amountsResponse.ok) {
+                    const amountsData = await amountsResponse.json();
+                    if (amountsData.success) {
+                        document.getElementById('mobile-duplicate-total-projects').textContent = amountsData.total_projects.toLocaleString();
+                    }
+                }
+            } catch (e) {
+                console.warn('Could not load total projects:', e);
+            }
+            
+            // Display duplicate groups (simplified for mobile)
+            if (data.groups && data.groups.length > 0) {
+                container.innerHTML = data.groups.slice(0, 20).map((group, idx) => {
+                    const items = group.items || [];
+                    return `
+                        <div class="mobile-nep-card" style="margin-bottom: 1rem;">
+                            <div style="font-weight: 600; color: #0038A8; margin-bottom: 0.5rem;">Group #${idx + 1} (${items.length} items)</div>
+                            <div style="font-size: 0.85rem; color: #666; margin-bottom: 0.5rem;">${group.remarks || 'Similar names and amounts'}</div>
+                            <div style="font-size: 0.85rem; color: #666;">Total: ₱${(group.total_amount || 0).toLocaleString()}</div>
+                        </div>
+                    `;
+                }).join('');
+                container.style.display = 'block';
+            } else {
+                container.innerHTML = '<div class="text-center py-8 text-gray-500">No duplicates found</div>';
+                container.style.display = 'block';
+            }
+            
+            loadingDiv.style.display = 'none';
+        } catch (error) {
+            console.error('Error loading duplicate data:', error);
+            loadingDiv.style.display = 'none';
+            errorDiv.style.display = 'block';
+            errorDiv.innerHTML = `<p>❌ Error: ${error.message}</p>`;
+        }
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+        loadInsertionsData();
+        
+        // Check if we should load duplicate data on initial load
+        if (window.location.hash === '#duplicate') {
+            const duplicateLink = document.querySelector('[data-tab="duplicate"]');
+            if (duplicateLink) {
+                duplicateLink.click();
+            }
+        }
+    });
 </script>
 {% endblock %}
