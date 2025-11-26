@@ -1666,6 +1666,28 @@ async def budget_amendments_annex_a5_amounts():
     except Exception as e:
         return JSONResponse({"success": False, "error": str(e)}, status_code=500)
 
+@app.get("/api/budget/amendments/annex-a5-duplicates")
+async def budget_amendments_annex_a5_duplicates():
+    """Get duplicate detection results for Annex A-5 (DPWH) projects"""
+    try:
+        json_path = Path('static/data/duplicates_a5_2026.json')
+        
+        if not json_path.exists():
+            return JSONResponse({
+                "success": False,
+                "error": "Annex A-5 duplicate data not available. Please run duplicate detection for Annex A-5 first."
+            }, status_code=404)
+        
+        with open(json_path, 'r', encoding='utf-8') as f:
+            duplicates_data = json.load(f)
+        
+        return JSONResponse({
+            "success": True,
+            **duplicates_data
+        })
+    except Exception as e:
+        return JSONResponse({"success": False, "error": str(e)}, status_code=500)
+
 @app.get("/api/budget/amendments/department/{dept_id}/line-items")
 async def budget_amendments_department_line_items(dept_id: str):
     """Get detailed line items (Annex A) for a department"""
