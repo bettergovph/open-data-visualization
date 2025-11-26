@@ -957,7 +957,7 @@
                                         // Calculate bar chart widths (for horizontal bars)
                                         const maxAmount = Math.max(dept.original_amount || 0, dept.final_amount || 0);
                                         const changeColor = (dept.net_change || 0) >= 0 ? '#28a745' : '#dc3545';
-                                        
+
                                         return `
                                         <div class="win-dept-card" style="background: white; border: 1px solid ${isAggregate ? '#ffc107' : '#dee2e6'}; border-radius: 8px; padding: 1.5rem; margin-bottom: 1rem; cursor: pointer; transition: all 0.2s; box-shadow: 0 2px 4px rgba(0,0,0,0.05); ${isAggregate ? 'border-left: 4px solid #ffc107;' : ''}"
                                              onmouseover="this.style.boxShadow='0 4px 12px rgba(0,0,0,0.1)'; this.style.transform='translateY(-2px)';"
@@ -980,11 +980,11 @@
                                             </div>
                                             <div style="display: grid; grid-template-columns: 1fr 240px; gap: 1.5rem; align-items: center;">
                                                 <div>
-                                                    <div style="display: flex; gap: 2rem; margin-bottom: 0.5rem; font-size: 0.95rem; color: #666;">
+                                            <div style="display: flex; gap: 2rem; margin-bottom: 0.5rem; font-size: 0.95rem; color: #666;">
                                                         <div>Original: ${formatAmount(dept.original_amount)}</div>
                                                         <div>Final: ${formatAmount(dept.final_amount)}</div>
-                                                    </div>
-                                                    <div style="display: flex; gap: 1.5rem; font-size: 0.9rem;">
+                                            </div>
+                                            <div style="display: flex; gap: 1.5rem; font-size: 0.9rem;">
                                                         <span style="color: #28a745;">+${formatAmount(dept.increase)} increases</span>
                                                         <span style="color: #dc3545;">-${formatAmount(Math.abs(dept.decrease))} decreases</span>
                                                         <span style="color: #666; cursor: pointer; text-decoration: underline;" 
@@ -2558,9 +2558,6 @@
                                             throw new Error(amountsData.error || 'Failed to load DPWH data');
                                         }
 
-                                        // Hide loading
-                                        document.getElementById('dpwh-loading').style.display = 'none';
-                                        
                                         // Update stats
                                         if (amountsData.total_projects) {
                                             document.getElementById('dpwh-total-projects').textContent = amountsData.total_projects.toLocaleString();
@@ -2580,7 +2577,7 @@
                                             console.warn('No amounts to display in histogram');
                                         }
                                         
-                                        // Load duplicates
+                                        // Load duplicates - keep spinner visible until this completes
                                         try {
                                             console.log('Loading DPWH duplicates...');
                                             const duplicatesResponse = await fetch('/api/budget/amendments/annex-a5-duplicates');
@@ -2600,6 +2597,9 @@
                                             }
                                         } catch (dupError) {
                                             console.error('Error loading duplicate data:', dupError);
+                                        } finally {
+                                            // Hide loading spinner only after duplicates are loaded
+                                            document.getElementById('dpwh-loading').style.display = 'none';
                                         }
                                         
                                     } catch (error) {
@@ -2664,9 +2664,19 @@
                                     const container = document.getElementById('dpwh-duplicate-groups-container');
                                     if (!container) {
                                         console.error('dpwh-duplicate-groups-container not found');
+                                        // Hide spinner even if container not found
+                                        const loadingDiv = document.getElementById('dpwh-loading');
+                                        if (loadingDiv) loadingDiv.style.display = 'none';
                                         return;
                                     }
                                     container.style.display = 'block';
+                                    
+                                    // Hide spinner after groups are displayed
+                                    const loadingDiv = document.getElementById('dpwh-loading');
+                                    if (loadingDiv) {
+                                        loadingDiv.style.display = 'none';
+                                        console.log('DPWH loading spinner hidden after duplicate groups displayed');
+                                    }
                                     
                                     if (groups.length === 0) {
                                         container.innerHTML = '<div class="text-center py-8 text-gray-500">No duplicates found.</div>';
