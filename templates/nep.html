@@ -769,9 +769,21 @@
                                     </div>
                                     <div class="stat-card"
                                         style="background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); text-align: center;">
-                                        <h3 style="color: #0038A8; margin: 0 0 10px 0; font-size: 1.1em;">Avg Amount</h3>
-                                        <p id="dpwh-avg-amount"
-                                            style="font-size: 1.8em; font-weight: bold; color: #fd7e14; margin: 0;">-</p>
+                                        <h3 style="color: #0038A8; margin: 0 0 10px 0; font-size: 1.1em;">Duplicate Groups</h3>
+                                        <p id="dpwh-total-groups"
+                                            style="font-size: 2em; font-weight: bold; color: #667eea; margin: 0;">-</p>
+                                    </div>
+                                    <div class="stat-card"
+                                        style="background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); text-align: center;">
+                                        <h3 style="color: #0038A8; margin: 0 0 10px 0; font-size: 1.1em;">Items in Groups</h3>
+                                        <p id="dpwh-total-items"
+                                            style="font-size: 2em; font-weight: bold; color: #fd7e14; margin: 0;">-</p>
+                                    </div>
+                                    <div class="stat-card"
+                                        style="background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); text-align: center;">
+                                        <h3 style="color: #0038A8; margin: 0 0 10px 0; font-size: 1.1em;">Total Amount</h3>
+                                        <p id="dpwh-duplicate-amount"
+                                            style="font-size: 1.8em; font-weight: bold; color: #dc3545; margin: 0;">-</p>
                                     </div>
                                 </div>
 
@@ -807,6 +819,9 @@
                                         </div>
                                     </div>
                                 </div>
+
+                                <!-- Duplicates Container -->
+                                <div id="dpwh-duplicate-groups-container" style="display: none;"></div>
                             </div>
 
                             <script>
@@ -2554,16 +2569,23 @@
                                         // Calculate stats
                                         const amounts = amountsData.amounts || [];
                                         const totalAmount = amounts.reduce((sum, amt) => sum + amt, 0);
-                                        const avgAmount = amounts.length > 0 ? totalAmount / amounts.length : 0;
-                                        
-                                        // Count unique amounts
-                                        const uniqueAmounts = new Set(amounts);
                                         
                                         document.getElementById('dpwh-total-amount').textContent = formatAmountFull(totalAmount);
-                                        document.getElementById('dpwh-unique-amounts').textContent = uniqueAmounts.size.toLocaleString();
-                                        document.getElementById('dpwh-avg-amount').textContent = formatAmountFull(avgAmount);
                                         
-                                        // Display histogram
+                                        // Load duplicates
+                                        try {
+                                            const duplicatesResponse = await fetch('/api/budget/amendments/annex-a5-duplicates');
+                                            if (duplicatesResponse.ok) {
+                                                const duplicatesData = await duplicatesResponse.json();
+                                                if (duplicatesData.success) {
+                                                    displayDPWHDuplicates(duplicatesData);
+                                                }
+                                            }
+                                        } catch (dupError) {
+                                            console.warn('Could not load duplicate data:', dupError);
+                                        }
+                                        
+                                        // Display histogram (with bins)
                                         if (amounts && amounts.length > 0) {
                                             displayAnnexA5Histogram(amounts);
                                         }
@@ -2589,29 +2611,149 @@
                                     `;
                                 }
 
-                                // Display Annex A-5 histogram (similar to A-1)
+                                // Display DPWH duplicate groups
+                                function displayDPWHDuplicates(data) {
+                                    const metadata = data.metadata || {};
+                                    const groups = data.duplicate_groups || [];
+                                    
+                                    // Update stats
+                                    document.getElementById('dpwh-total-groups').textContent = (metadata.total_groups || groups.length).toLocaleString();
+                                    document.getElementById('dpwh-total-items').textContent = (metadata.total_items || groups.reduce((sum, g) => sum + (g.count || 0), 0)).toLocaleString();
+                                    const totalAmount = groups.reduce((sum, g) => sum + (g.total_amount || 0), 0);
+                                    document.getElementById('dpwh-duplicate-amount').textContent = formatAmountFull(totalAmount);
+                                    
+                                    // Display groups
+                                    const container = document.getElementById('dpwh-duplicate-groups-container');
+                                    container.style.display = 'block';
+                                    
+                                    if (groups.length === 0) {
+                                        container.innerHTML = '<div class="text-center py-8 text-gray-500">No duplicates found.</div>';
+                                        return;
+                                    }
+                                    
+                                    // Sort by total amount descending
+                                    const sortedGroups = [...groups].sort((a, b) => (b.total_amount || 0) - (a.total_amount || 0));
+                                    
+                                    container.innerHTML = sortedGroups.map((group, idx) => {
+                                        const items = group.items || [];
+                                        const groupId = `dpwh-group-${group.group_id}`;
+                                        const itemsId = `dpwh-items-${group.group_id}`;
+                                        
+                                        return `
+                                            <div class="duplicate-group-card" style="background: white; padding: 1.5rem; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); margin-bottom: 1.5rem;">
+                                                <div id="${groupId}" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; padding-bottom: 0.75rem; border-bottom: 2px solid #e9ecef; cursor: pointer;" onclick="toggleDPWHGroup('${group.group_id}')">
+                                                    <div style="flex: 1;">
+                                                        <div style="display: flex; align-items: center; gap: 0.5rem;">
+                                                            <span id="dpwh-toggle-icon-${group.group_id}" style="font-size: 1.2em; transition: transform 0.3s;">▶</span>
+                                                            <h4 style="margin: 0 0 0.5rem 0; color: #333; font-size: 1.1em;">
+                                                                Group #${group.group_id} (${group.count || items.length} items)
+                                                            </h4>
+                                                        </div>
+                                                        ${group.remarks ? `
+                                                            <div style="font-size: 0.85em; color: #666; background: #f8f9fa; padding: 0.5rem; border-radius: 4px; margin-top: 0.5rem; margin-left: 1.5rem;">
+                                                                <strong>Why duplicates:</strong> ${group.remarks}
+                                                            </div>
+                                                        ` : ''}
+                                                    </div>
+                                                    <div style="text-align: right; margin-left: 1rem;">
+                                                        <div style="font-size: 0.9em; color: #666;">Total Amount</div>
+                                                        <div style="font-size: 1.2em; font-weight: bold; color: #dc3545;">
+                                                            ${formatAmountFull(group.total_amount || 0)}
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div id="${itemsId}" style="margin-top: 1rem; display: none;">
+                                                    ${items.map((item, itemIdx) => {
+                                                        const projectName = item.name || item.description || 'Unknown';
+                                                        const amount = item.final_amount || item.original_amount || 0;
+                                                        const dept = item.department_id || 'DPWH';
+                                                        const source = item.source_sheet || 'Annex A-5';
+                                                        const region = item.location && item.location.region ? item.location.region : null;
+                                                        const sourceRow = item.source_row || null;
+                                                        
+                                                        return `
+                                                            <div style="padding: 0.75rem; background: ${itemIdx % 2 === 0 ? '#f8f9fa' : 'white'}; border-left: 3px solid #667eea; margin-bottom: 0.5rem; border-radius: 4px;">
+                                                                <div style="display: flex; justify-content: space-between; align-items: start;">
+                                                                    <div style="flex: 1;">
+                                                                        <div style="font-weight: 600; color: #333; margin-bottom: 0.25rem; line-height: 1.4;">
+                                                                            ${projectName.replace(/\n/g, ' ').trim()}
+                                                                        </div>
+                                                                        <div style="font-size: 0.85em; color: #666; margin-bottom: 0.25rem;">
+                                                                            <span style="background: #e9ecef; padding: 2px 6px; border-radius: 3px; margin-right: 0.5rem;">${dept}</span>
+                                                                            <span style="background: #e9ecef; padding: 2px 6px; border-radius: 3px; margin-right: 0.5rem;">${source}</span>
+                                                                            ${region ? `<span style="background: #d4edda; padding: 2px 6px; border-radius: 3px; margin-right: 0.5rem; color: #155724;">📍 ${region}</span>` : ''}
+                                                                            ${sourceRow ? `<span style="background: #fff3cd; padding: 2px 6px; border-radius: 3px; color: #856404; font-family: monospace;">Row ${sourceRow}</span>` : ''}
+                                                                        </div>
+                                                                    </div>
+                                                                    <div style="text-align: right; margin-left: 1rem; min-width: 200px;">
+                                                                        <div style="font-size: 1.1em; font-weight: bold; color: #28a745;">
+                                                                            ${formatAmountFull(amount)}
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        `;
+                                                    }).join('')}
+                                                </div>
+                                            </div>
+                                        `;
+                                    }).join('');
+                                }
+
+                                // Toggle DPWH duplicate group
+                                function toggleDPWHGroup(groupId) {
+                                    const itemsId = `dpwh-items-${groupId}`;
+                                    const itemsDiv = document.getElementById(itemsId);
+                                    const iconSpan = document.getElementById(`dpwh-toggle-icon-${groupId}`);
+                                    
+                                    if (itemsDiv) {
+                                        const isVisible = itemsDiv.style.display !== 'none';
+                                        itemsDiv.style.display = isVisible ? 'none' : 'block';
+                                        if (iconSpan) {
+                                            iconSpan.textContent = isVisible ? '▶' : '▼';
+                                        }
+                                    }
+                                }
+
+                                // Display Annex A-5 histogram with bins (for varied amounts)
                                 function displayAnnexA5Histogram(amounts) {
                                     if (!amounts || amounts.length === 0) {
                                         return;
                                     }
 
-                                    // Count unique amounts (exact values, not binned)
-                                    const uniqueAmounts = {};
+                                    // Use bins instead of unique amounts (since amounts are varied)
+                                    const minAmount = Math.min(...amounts);
+                                    const maxAmount = Math.max(...amounts);
                                     
+                                    // Create bins - use logarithmic scale for better distribution
+                                    const numBins = 30;
+                                    const binSize = (Math.log10(maxAmount) - Math.log10(minAmount)) / numBins;
+                                    
+                                    const bins = {};
                                     amounts.forEach(amount => {
-                                        uniqueAmounts[amount] = (uniqueAmounts[amount] || 0) + 1;
+                                        if (amount <= 0) return;
+                                        const binIndex = Math.floor((Math.log10(amount) - Math.log10(minAmount)) / binSize);
+                                        const binKey = Math.min(binIndex, numBins - 1);
+                                        
+                                        // Calculate bin range
+                                        const binMin = Math.pow(10, Math.log10(minAmount) + binKey * binSize);
+                                        const binMax = Math.pow(10, Math.log10(minAmount) + (binKey + 1) * binSize);
+                                        
+                                        const binLabel = `${formatAmountFull(binMin)} - ${formatAmountFull(binMax)}`;
+                                        
+                                        if (!bins[binKey]) {
+                                            bins[binKey] = { count: 0, label: binLabel, min: binMin, max: binMax };
+                                        }
+                                        bins[binKey].count++;
                                     });
 
-                                    // Sort by amount (ascending)
-                                    const sortedAmounts = Object.entries(uniqueAmounts)
-                                        .map(([amountStr, count]) => {
-                                            const amount = parseFloat(amountStr);
-                                            return { amount, count, label: formatAmountFull(amount) };
-                                        })
-                                        .sort((a, b) => a.amount - b.amount);
+                                    // Sort by bin index
+                                    const sortedBins = Object.entries(bins)
+                                        .map(([key, data]) => ({ binIndex: parseInt(key), ...data }))
+                                        .sort((a, b) => a.binIndex - b.binIndex);
 
                                     // Find max count for scaling
-                                    const maxCount = Math.max(...sortedAmounts.map(b => b.count));
+                                    const maxCount = Math.max(...sortedBins.map(b => b.count));
 
                                     // Create chart HTML
                                     const chartDiv = document.getElementById('dpwh-histogram-chart');
@@ -2623,7 +2765,7 @@
                                     const marginBottom = 100;
                                     const plotWidth = chartWidth - marginLeft - marginRight;
                                     const plotHeight = chartHeight - marginTop - marginBottom;
-                                    const barWidth = Math.max(20, plotWidth / sortedAmounts.length - 1);
+                                    const barWidth = Math.max(20, plotWidth / sortedBins.length - 1);
 
                                     let chartHTML = `
                                         <div style="overflow-x: auto; width: 100%; display: flex; justify-content: center;">
@@ -2637,7 +2779,7 @@
                                                 <!-- X-axis label -->
                                                 <text x="${chartWidth / 2}" y="${chartHeight + 40}" 
                                                       style="font-size: 14px; fill: #666; text-anchor: middle; font-weight: 600;">
-                                                    Price (Amount in ₱)
+                                                    Price (Amount in ₱) - Binned
                                                 </text>
                                                 
                                                 <!-- Y-axis ticks and grid lines -->
@@ -2664,29 +2806,32 @@
                                                       stroke="#333" stroke-width="2"/>
                                                 
                                                 <!-- Bars -->
-                                                ${sortedAmounts.map((item, idx) => {
-                                                    const barHeight = (item.count / maxCount) * plotHeight;
-                                                    const x = marginLeft + (idx * (plotWidth / sortedAmounts.length)) + 1;
+                                                ${sortedBins.map((bin, idx) => {
+                                                    const barHeight = (bin.count / maxCount) * plotHeight;
+                                                    const x = marginLeft + (idx * (plotWidth / sortedBins.length)) + 1;
                                                     const y = marginTop + plotHeight - barHeight;
-                                                    const barColor = item.count > 100 ? '#dc3545' : item.count > 50 ? '#fd7e14' : item.count > 20 ? '#ffc107' : '#28a745';
+                                                    const barColor = bin.count > 100 ? '#dc3545' : bin.count > 50 ? '#fd7e14' : bin.count > 20 ? '#ffc107' : '#28a745';
                                                     
-                                                    const amountDisplay = item.amount >= 1000000 ? `${(item.amount / 1000000).toFixed(1)}M` : 
-                                                                         item.amount >= 1000 ? `${(item.amount / 1000).toFixed(0)}K` : item.amount.toString();
+                                                    // Format bin label for display
+                                                    const binMinDisplay = bin.min >= 1000000 ? `${(bin.min / 1000000).toFixed(1)}M` : 
+                                                                         bin.min >= 1000 ? `${(bin.min / 1000).toFixed(0)}K` : bin.min.toString();
+                                                    const binMaxDisplay = bin.max >= 1000000 ? `${(bin.max / 1000000).toFixed(1)}M` : 
+                                                                         bin.max >= 1000 ? `${(bin.max / 1000).toFixed(0)}K` : bin.max.toString();
                                                     
                                                     return `
                                                         <g>
                                                             <rect x="${x}" y="${y}" width="${barWidth}" height="${barHeight}" 
                                                                   fill="${barColor}" opacity="0.8" rx="2">
-                                                                <title>${item.label}: ${item.count} projects</title>
+                                                                <title>${bin.label}: ${bin.count} projects</title>
                                                             </rect>
                                                             <text x="${x + barWidth / 2}" y="${y - 8}" 
-                                                                  style="font-size: 12px; fill: #333; text-anchor: middle; font-weight: 600;">
-                                                                ${item.count}
+                                                                  style="font-size: 11px; fill: #333; text-anchor: middle; font-weight: 600;">
+                                                                ${bin.count}
                                                             </text>
                                                             <text x="${x + barWidth / 2}" y="${marginTop + plotHeight + 25}" 
                                                                   transform="rotate(-45, ${x + barWidth / 2}, ${marginTop + plotHeight + 25})"
-                                                                  style="font-size: 10px; fill: #666; text-anchor: end;">
-                                                                ${amountDisplay}
+                                                                  style="font-size: 9px; fill: #666; text-anchor: end;">
+                                                                ${binMinDisplay}
                                                             </text>
                                                         </g>
                                                     `;
@@ -2701,12 +2846,12 @@
                                     // Store chart data for copying
                                     window.dpwhChartData = {
                                         amounts: amounts,
-                                        uniqueAmounts: sortedAmounts,
+                                        bins: sortedBins,
                                         totalProjects: amounts.length
                                     };
                                     
                                     // Calculate and display statistical analysis
-                                    calculateAndDisplayDPWHStatistics(amounts, sortedAmounts);
+                                    calculateAndDisplayDPWHStatistics(amounts, sortedBins);
                                 }
 
                                 // Calculate statistical analysis results for DPWH
@@ -2753,7 +2898,7 @@
                                         contentDiv.innerHTML = `
                                             <p style="margin: 0.5rem 0;"><strong>Probability of ${uniqueCount} unique amounts in ${totalProjects} projects:</strong> Effectively ${probability.toFixed(6)}.</p>
                                             <p style="margin: 0.5rem 0;"><strong>Benford's Law Test:</strong> <span style="color: ${benfordRejected ? '#dc3545' : '#28a745'}; font-weight: 600;">${benfordRejected ? 'REJECTED' : 'PASSED'}</span> (Chi-Square: ${chiSquare.toFixed(2)}, Critical: ${criticalValue.toFixed(2)}).</p>
-                                            <p style="margin: 0.5rem 0;"><strong>Dominant Amount:</strong> ${formatAmountFull(dominantAmount.amount)} (${dominantPercentage}% of all projects).</p>
+                                            <p style="margin: 0.5rem 0;"><strong>Dominant Range:</strong> ${dominantBin.label} (${dominantPercentage}% of all projects).</p>
                                             <p style="margin: 1rem 0 0 0; font-weight: 600; color: #dc3545;">This strongly suggests the data is artificial or copy-pasted.</p>
                                         `;
                                         analysisDiv.style.display = 'block';
