@@ -311,7 +311,7 @@
     // Display duplicate groups (mobile version)
     function displayMobileDuplicates(data) {
         const metadata = data.metadata || {};
-        const groups = data.duplicate_groups || [];
+        const groups = data.duplicate_groups || data.groups || [];
         const container = document.getElementById('mobile-duplicate-groups-container');
         
         // Update stats
