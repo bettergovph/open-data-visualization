@@ -2572,22 +2572,34 @@
                                         
                                         document.getElementById('dpwh-total-amount').textContent = formatAmountFull(totalAmount);
                                         
-                                        // Load duplicates
-                                        try {
-                                            const duplicatesResponse = await fetch('/api/budget/amendments/annex-a5-duplicates');
-                                            if (duplicatesResponse.ok) {
-                                                const duplicatesData = await duplicatesResponse.json();
-                                                if (duplicatesData.success) {
-                                                    displayDPWHDuplicates(duplicatesData);
-                                                }
-                                            }
-                                        } catch (dupError) {
-                                            console.warn('Could not load duplicate data:', dupError);
+                                        // Display histogram (with bins) - do this first
+                                        if (amounts && amounts.length > 0) {
+                                            console.log('Displaying DPWH histogram with', amounts.length, 'amounts');
+                                            displayAnnexA5Histogram(amounts);
+                                        } else {
+                                            console.warn('No amounts to display in histogram');
                                         }
                                         
-                                        // Display histogram (with bins)
-                                        if (amounts && amounts.length > 0) {
-                                            displayAnnexA5Histogram(amounts);
+                                        // Load duplicates
+                                        try {
+                                            console.log('Loading DPWH duplicates...');
+                                            const duplicatesResponse = await fetch('/api/budget/amendments/annex-a5-duplicates');
+                                            console.log('Duplicates response status:', duplicatesResponse.status);
+                                            
+                                            if (duplicatesResponse.ok) {
+                                                const duplicatesData = await duplicatesResponse.json();
+                                                console.log('Duplicates data loaded:', duplicatesData.success);
+                                                
+                                                if (duplicatesData.success) {
+                                                    displayDPWHDuplicates(duplicatesData);
+                                                } else {
+                                                    console.error('Duplicates data not successful:', duplicatesData.error);
+                                                }
+                                            } else {
+                                                console.error('Duplicates response not OK:', duplicatesResponse.status, duplicatesResponse.statusText);
+                                            }
+                                        } catch (dupError) {
+                                            console.error('Error loading duplicate data:', dupError);
                                         }
                                         
                                     } catch (error) {
@@ -2717,7 +2729,16 @@
 
                                 // Display Annex A-5 histogram with bins (for varied amounts)
                                 function displayAnnexA5Histogram(amounts) {
+                                    console.log('displayAnnexA5Histogram called with', amounts?.length, 'amounts');
+                                    
                                     if (!amounts || amounts.length === 0) {
+                                        console.warn('No amounts provided to displayAnnexA5Histogram');
+                                        return;
+                                    }
+                                    
+                                    const chartDiv = document.getElementById('dpwh-histogram-chart');
+                                    if (!chartDiv) {
+                                        console.error('dpwh-histogram-chart element not found');
                                         return;
                                     }
 
