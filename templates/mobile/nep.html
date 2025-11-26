@@ -314,11 +314,21 @@
         const groups = data.duplicate_groups || data.groups || [];
         const container = document.getElementById('mobile-duplicate-groups-container');
         
-        // Update stats
-        document.getElementById('mobile-duplicate-total-groups').textContent = (metadata.total_groups || groups.length).toLocaleString();
-        document.getElementById('mobile-duplicate-total-items').textContent = (metadata.total_items || groups.reduce((sum, g) => sum + (g.count || 0), 0)).toLocaleString();
+        // Update stats - use metadata if available, otherwise calculate
+        const totalGroups = metadata.total_groups || groups.length;
+        const totalItems = metadata.total_items || groups.reduce((sum, g) => sum + (g.count || (g.items ? g.items.length : 0)), 0);
         const totalAmount = groups.reduce((sum, g) => sum + (g.total_amount || 0), 0);
-        document.getElementById('mobile-duplicate-total-amount').textContent = formatAmountFull(totalAmount);
+        
+        // Update DOM elements
+        const groupsEl = document.getElementById('mobile-duplicate-total-groups');
+        const itemsEl = document.getElementById('mobile-duplicate-total-items');
+        const amountEl = document.getElementById('mobile-duplicate-total-amount');
+        
+        if (groupsEl) groupsEl.textContent = totalGroups.toLocaleString();
+        if (itemsEl) itemsEl.textContent = totalItems.toLocaleString();
+        if (amountEl) amountEl.textContent = formatAmountFull(totalAmount);
+        
+        console.log('Mobile duplicate stats:', { totalGroups, totalItems, totalAmount });
         
         container.style.display = 'block';
         
