@@ -164,3 +164,22 @@ def search_amendments():
         "query": query,
         "results": results[:50]  # Limit to 50 results
     })
+
+@bp.route('/duplicates')
+def get_duplicates():
+    """Get duplicate detection results"""
+    json_path = Path('static/data/duplicates_2026.json')
+    
+    if not json_path.exists():
+        return jsonify({
+            "success": False,
+            "error": "Duplicate data not available. Please run scripts/detect_duplicates.py first."
+        }), 404
+    
+    with open(json_path, 'r', encoding='utf-8') as f:
+        duplicates_data = json.load(f)
+    
+    return jsonify({
+        "success": True,
+        **duplicates_data
+    })
