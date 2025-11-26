@@ -131,6 +131,7 @@
                             <a href="#insertion" class="budget-tab-btn" data-tab="insertion">🧩 Insertions</a>
                             <a href="#win" class="budget-tab-btn" data-tab="win">📊 Win (Amendments)</a>
                             <a href="#duplicate" class="budget-tab-btn" data-tab="duplicate">📊 Win (Duplicates)</a>
+                            <a href="#dpwh" class="budget-tab-btn" data-tab="dpwh">🛣️ DPWH (Annex A-5)</a>
                         </div>
 
                         <div class="budget-tab-content">
@@ -737,6 +738,75 @@
 
                                 <!-- Duplicates Container -->
                                 <div id="duplicate-groups-container" style="display: none;"></div>
+                            </div>
+
+                            <!-- DPWH Tab -->
+                            <div id="tab-dpwh" class="budget-tab-panel">
+                                <h3 class="budget-section-title">🛣️ DPWH Projects (Annex A-5)</h3>
+                                <p class="budget-section-desc">Track DPWH projects from Annex A-5 with statistical analysis</p>
+
+                                <!-- Stats Cards -->
+                                <div class="duplicate-stats-grid"
+                                    style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-bottom: 2rem;">
+                                    <div class="stat-card"
+                                        style="background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); text-align: center;">
+                                        <h3 style="color: #0038A8; margin: 0 0 10px 0; font-size: 1.1em;">Total Projects</h3>
+                                        <p id="dpwh-total-projects"
+                                            style="font-size: 2em; font-weight: bold; color: #0038A8; margin: 0;">-</p>
+                                        <p style="font-size: 0.85em; color: #666; margin-top: 0.5rem;">Annex A-5 (all)</p>
+                                    </div>
+                                    <div class="stat-card"
+                                        style="background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); text-align: center;">
+                                        <h3 style="color: #0038A8; margin: 0 0 10px 0; font-size: 1.1em;">Total Amount</h3>
+                                        <p id="dpwh-total-amount"
+                                            style="font-size: 1.8em; font-weight: bold; color: #28a745; margin: 0;">-</p>
+                                    </div>
+                                    <div class="stat-card"
+                                        style="background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); text-align: center;">
+                                        <h3 style="color: #0038A8; margin: 0 0 10px 0; font-size: 1.1em;">Unique Amounts</h3>
+                                        <p id="dpwh-unique-amounts"
+                                            style="font-size: 2em; font-weight: bold; color: #667eea; margin: 0;">-</p>
+                                    </div>
+                                    <div class="stat-card"
+                                        style="background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); text-align: center;">
+                                        <h3 style="color: #0038A8; margin: 0 0 10px 0; font-size: 1.1em;">Avg Amount</h3>
+                                        <p id="dpwh-avg-amount"
+                                            style="font-size: 1.8em; font-weight: bold; color: #fd7e14; margin: 0;">-</p>
+                                    </div>
+                                </div>
+
+                                <!-- Loading -->
+                                <div id="dpwh-loading" style="text-align: center; padding: 2rem;">
+                                    <div
+                                        style="display: inline-block; width: 40px; height: 40px; border: 4px solid #f3f3f3; border-top: 4px solid #0038A8; border-radius: 50%; animation: spin 1s linear infinite;">
+                                    </div>
+                                    <p style="color: #666; margin-top: 10px;">Loading DPWH data...</p>
+                                </div>
+
+                                <!-- Error Message -->
+                                <div id="dpwh-error" style="display: none; text-align: center; padding: 2rem; color: #dc3545;"></div>
+
+                                <!-- Annex A-5 Distribution Chart -->
+                                <div id="annex-a5-histogram" style="display: none; background: white; padding: 2rem; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); margin-bottom: 2rem;">
+                                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+                                        <h4 style="margin: 0; color: #333; font-size: 1.3em;">📊 Annex A-5 Project Amount Distribution</h4>
+                                        <button id="copy-dpwh-chart-btn" onclick="copyAnnexA5ChartToClipboard()" 
+                                                style="padding: 0.5rem 1rem; background: #0038A8; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 0.9em; display: flex; align-items: center; gap: 0.5rem;"
+                                                onmouseover="this.style.background='#002d7a'" 
+                                                onmouseout="this.style.background='#0038A8'">
+                                            📋 Copy Chart
+                                        </button>
+                                    </div>
+                                    <div id="dpwh-histogram-chart" style="min-height: 500px; display: flex; justify-content: center; align-items: center;"></div>
+                                    
+                                    <!-- Statistical Analysis Results -->
+                                    <div id="dpwh-statistical-analysis" style="display: none; margin-top: 2rem; padding: 1.5rem; background: #f8f9fa; border-radius: 8px; border-left: 4px solid #dc3545;">
+                                        <h4 style="margin: 0 0 1rem 0; color: #333; font-size: 1.1em; font-weight: 600;">📊 Results:</h4>
+                                        <div id="dpwh-statistical-analysis-content" style="color: #333; line-height: 1.8;">
+                                            <!-- Content will be populated by JavaScript -->
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
 
                             <script>
@@ -6010,6 +6080,13 @@
                             loadDuplicateData();
                         } else {
                             console.warn('⚠️ loadDuplicateData function not available yet');
+                        }
+                    } else if (tabName === 'dpwh') {
+                        // Load DPWH (Annex A-5) data
+                        if (typeof loadDPWHData === 'function') {
+                            loadDPWHData();
+                        } else {
+                            console.warn('⚠️ loadDPWHData function not available yet');
                         }
                     } else if (tabName === 'trends') {
                         // Load trends data when tab is activated (v2.0 - 2025-01-05)
