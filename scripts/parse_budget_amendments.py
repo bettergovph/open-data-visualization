@@ -2348,99 +2348,172 @@ class BudgetAmendmentParser:
             return []
     
     def parse_nia_operations(self) -> Dict:
-        """Parse Annex A-4 NIA Operations"""
+        """
+        Parse Annex A-4 NIA Operations
+        
+        Structure:
+        - Columns B-G: Description (parent-child, nested context)
+        - Column H: Amount
+        - Column G: Specific project (but need B-F for context)
+        - Bold indicates totals (same as before)
+        
+        Hierarchy:
+        - B (bold): Program
+        - C (bold): Sub-program
+        - D (bold): Activity
+        - E (not bold): Region
+        - F (not bold): Province
+        - G (not bold): Specific project
+        - H: Amount
+        """
         file_path = self.base_dir / "Annex A-4 BSGC-OEOs-NIA Details of NIA's Operations Budget.xlsx"
         
-        print(f"💧 Parsing NIA Operations...")
+        print(f"💧 Parsing NIA Operations (Annex A-4)...")
         
         try:
-            programs_data = []
+            import openpyxl
+            # Load with formulas to detect bold formatting
+            wb = openpyxl.load_workbook(file_path, data_only=False)
+            
+            # Also load values for reading amounts
+            wb_values = openpyxl.load_workbook(file_path, data_only=True)
+            
             projects_data = []
-            wb = openpyxl.load_workbook(file_path, data_only=True)
             
             if 'Adjusted per ComRep ' in wb.sheetnames:
                 ws = wb['Adjusted per ComRep ']
+                ws_val = wb_values['Adjusted per ComRep ']
                 
-                # Find header row
-                header_row = None
-                for row_idx in range(1, min(10, ws.max_row + 1)):
-                    row_values = [str(ws.cell(row_idx, col).value or '').strip() for col in range(1, min(10, ws.max_column + 1))]
-                    if any('program' in str(v).lower() for v in row_values) or any('amount' in str(v).lower() for v in row_values):
-                        header_row = row_idx
-                        break
+                # Data starts after row 4 (row 4 is header: "PROGRAMS / ACTIVITIES / PROJECTS" and "AMOUNT")
+                data_start_row = 5
                 
-                if header_row:
-                    # Parse data rows
-                    current_program = None
-                    for row_idx in range(header_row + 1, min(ws.max_row + 1, header_row + 500)):  # Limit for performance
-                        col_b = ws.cell(row_idx, 2).value
-                        col_c = ws.cell(row_idx, 3).value
+                # Track hierarchy
+                current_program = None  # Column B (bold)
+                current_subprogram = None  # Column C (bold)
+                current_activity = None  # Column D (bold)
+                current_region = None  # Column E (not bold)
+                current_province = None  # Column F (not bold)
+                
+                for row_idx in range(data_start_row, ws.max_row + 1):
+                    # Get cells from both workbooks
+                    cell_b = ws.cell(row_idx, 2)
+                    cell_b_val = ws_val.cell(row_idx, 2)
+                    cell_c = ws.cell(row_idx, 3)
+                    cell_c_val = ws_val.cell(row_idx, 3)
+                    cell_d = ws.cell(row_idx, 4)
+                    cell_d_val = ws_val.cell(row_idx, 4)
+                    cell_e_val = ws_val.cell(row_idx, 5)
+                    cell_f_val = ws_val.cell(row_idx, 6)
+                    cell_g_val = ws_val.cell(row_idx, 7)
+                    cell_h_val = ws_val.cell(row_idx, 8)  # Amount
+                    
+                    # Check bold formatting
+                    is_bold_b = cell_b.font.bold if cell_b.font else False
+                    is_bold_c = cell_c.font.bold if cell_c.font else False
+                    is_bold_d = cell_d.font.bold if cell_d.font else False
+                    
+                    b_value = cell_b_val.value
+                    c_value = cell_c_val.value
+                    d_value = cell_d_val.value
+                    e_value = cell_e_val.value
+                    f_value = cell_f_val.value
+                    g_value = cell_g_val.value
+                    h_value = cell_h_val.value
+                    
+                    # Update hierarchy based on bold and values
+                    if is_bold_b and b_value:
+                        # New program (Column B, bold)
+                        current_program = str(b_value).strip()
+                        current_subprogram = None
+                        current_activity = None
+                        current_region = None
+                        current_province = None
+                        continue  # Skip totals
+                    elif is_bold_c and c_value:
+                        # Sub-program (Column C, bold)
+                        current_subprogram = str(c_value).strip()
+                        current_activity = None
+                        current_region = None
+                        current_province = None
+                        continue  # Skip totals
+                    elif is_bold_d and d_value:
+                        # Activity (Column D, bold)
+                        current_activity = str(d_value).strip()
+                        current_region = None
+                        current_province = None
+                        continue  # Skip totals
+                    elif e_value and not is_bold_d:
+                        # Region (Column E, not bold)
+                        current_region = str(e_value).strip()
+                        current_province = None
+                    elif f_value and not is_bold_d:
+                        # Province (Column F, not bold)
+                        current_province = str(f_value).strip()
+                    
+                    # Get project name from column G and amount from column H
+                    if g_value and h_value:
+                        project_name = str(g_value).strip()
+                        amount = self.parse_amount(h_value)
                         
-                        # Check if this is a program header
-                        if col_b and isinstance(col_b, str) and ('program' in str(col_b).lower() or 'irrigation' in str(col_b).lower()):
-                            if current_program:
-                                programs_data.append(current_program)
+                        # Only create project if we have a name, amount, and context
+                        if project_name and amount > 0 and current_program:
+                            self.proj_counter += 1
                             
-                            self.prog_counter += 1
-                            current_program = {
-                                "id": f"NIA-Prog-{self.prog_counter:04d}",
+                            # Build description from hierarchy (B-F for context)
+                            description_parts = []
+                            if current_program:
+                                description_parts.append(current_program)
+                            if current_subprogram:
+                                description_parts.append(current_subprogram)
+                            if current_activity:
+                                description_parts.append(current_activity)
+                            if current_region:
+                                description_parts.append(current_region)
+                            if current_province:
+                                description_parts.append(current_province)
+                            
+                            description = ' | '.join(description_parts) if description_parts else None
+                            
+                            projects_data.append({
+                                "id": f"NIA-Proj-{self.proj_counter:04d}",
+                                "program_id": None,
                                 "department_id": "NIA",
-                                "name": str(col_b).strip(),
-                                "description": None,
-                                "original_amount": 0.0,
-                                "final_amount": 0.0,
-                                "increase": 0.0,
-                                "decrease": 0.0,
+                                "name": project_name,
+                                "description": description,
+                                "location": {
+                                    "region": current_region,
+                                    "province": current_province,
+                                    "municipality": None,
+                                    "barangay": None
+                                },
+                                "original_amount": amount,
+                                "final_amount": amount,
                                 "net_change": 0.0,
                                 "percent_change": 0.0,
-                                "line_items": []
-                            }
-                        elif current_program and col_c:
-                            # This is a project/activity under the program
-                            project_name = str(col_c).strip()
-                            if len(project_name) > 5:
-                                # Try to extract amounts from columns
-                                amounts = []
-                                for col_idx in range(5, min(10, ws.max_column + 1)):
-                                    val = ws.cell(row_idx, col_idx).value
-                                    if isinstance(val, (int, float)) and val > 0:
-                                        amounts.append(float(val) * 1000)  # Convert from thousands
-                                
-                                if amounts:
-                                    original = amounts[0] if len(amounts) > 0 else 0.0
-                                    final = amounts[-1] if len(amounts) > 1 else original
-                                    
-                                    self.proj_counter += 1
-                                    net_change = final - original
-                                    
-                                    project = {
-                                        "id": f"NIA-Proj-{self.proj_counter:04d}",
-                                        "program_id": current_program['id'],
-                                        "department_id": "NIA",
-                                        "name": project_name,
-                                        "description": None,
-                                        "location": {"region": None, "province": None, "municipality": None, "barangay": None},
-                                        "original_amount": original,
-                                        "final_amount": final,
-                                        "net_change": net_change,
-                                        "percent_change": (net_change / original * 100) if original > 0 else 0.0,
-                                        "amendments": [],
-                                        "revised_name": None,
-                                        "page_reference": None,
-                                        "source_sheet": "Adjusted per ComRep "
-                                    }
-                                    
-                                    projects_data.append(project)
-                                    current_program['original_amount'] += original
-                                    current_program['final_amount'] += final
-                                    current_program['net_change'] += net_change
-                    
-                    if current_program:
-                        programs_data.append(current_program)
+                                "amendments": [],
+                                "revised_name": None,
+                                "page_reference": None,
+                                "source_sheet": "Annex A-4",
+                                "source_row": row_idx,
+                                "source_cols": {
+                                    "description": "B-G",
+                                    "project": "G",
+                                    "amount": "H"
+                                },
+                                "hierarchy": {
+                                    "program": current_program,
+                                    "subprogram": current_subprogram,
+                                    "activity": current_activity,
+                                    "region": current_region,
+                                    "province": current_province
+                                }
+                            })
             
             wb.close()
-            print(f"✅ Parsed {len(programs_data)} NIA programs and {len(projects_data)} projects")
-            return {"programs": programs_data, "projects": projects_data}
+            wb_values.close()
+            
+            print(f"✅ Parsed {len(projects_data)} NIA projects")
+            return {"programs": [], "projects": projects_data}
             
         except Exception as e:
             print(f"❌ Error parsing NIA Operations: {e}")
