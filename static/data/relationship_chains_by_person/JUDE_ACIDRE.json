@@ -8,9 +8,33 @@
     {
       "length": 4,
       "path": [
-        70158,
-        70156,
-        4145268
+        {
+          "id": 70158,
+          "first_name": "Alfred",
+          "last_name": "Romualdez",
+          "middle_name": null,
+          "suffix": null,
+          "position": "MAYOR",
+          "relationship_description": "Starting person"
+        },
+        {
+          "id": 70156,
+          "first_name": "YEDDA MARIE",
+          "last_name": "ROMUALDEZ",
+          "middle_name": "K",
+          "suffix": null,
+          "position": "PARTY-LIST REPRESENTATIVE",
+          "relationship_description": "Alfred Romualdez is married to Yedda Marie Romualdez"
+        },
+        {
+          "id": 4145268,
+          "first_name": "JUDE",
+          "last_name": "ACIDRE",
+          "middle_name": "A",
+          "suffix": null,
+          "position": "PARTY-LIST REPRESENTATIVE",
+          "relationship_description": " who is also a politician"
+        }
       ],
       "relationships": [
         "Starting person",
@@ -25,8 +49,24 @@
     {
       "length": 3,
       "path": [
-        4145268,
-        70156
+        {
+          "id": 4145268,
+          "first_name": "JUDE",
+          "last_name": "ACIDRE",
+          "middle_name": "A",
+          "suffix": null,
+          "position": "PARTY-LIST REPRESENTATIVE",
+          "relationship_description": "Starting person"
+        },
+        {
+          "id": 70156,
+          "first_name": "YEDDA MARIE",
+          "last_name": "ROMUALDEZ",
+          "middle_name": "K",
+          "suffix": null,
+          "position": "PARTY-LIST REPRESENTATIVE",
+          "relationship_description": "Connected via TINGOG"
+        }
       ],
       "relationships": [
         "Starting person",
@@ -41,8 +81,24 @@
     {
       "length": 3,
       "path": [
-        70156,
-        4145268
+        {
+          "id": 70156,
+          "first_name": "YEDDA MARIE",
+          "last_name": "ROMUALDEZ",
+          "middle_name": "K",
+          "suffix": null,
+          "position": "PARTY-LIST REPRESENTATIVE",
+          "relationship_description": "Starting person"
+        },
+        {
+          "id": 4145268,
+          "first_name": "JUDE",
+          "last_name": "ACIDRE",
+          "middle_name": "A",
+          "suffix": null,
+          "position": "PARTY-LIST REPRESENTATIVE",
+          "relationship_description": "Connected via TINGOG"
+        }
       ],
       "relationships": [
         "Starting person",
@@ -55,24 +111,5 @@
       }
     }
   ],
-  "people": {
-    "70156": {
-      "id": 70156,
-      "full_name": "YEDDA MARIE K ROMUALDEZ",
-      "position": "PARTY-LIST REPRESENTATIVE",
-      "location": "LEYTE, REGION VIII"
-    },
-    "70158": {
-      "id": 70158,
-      "full_name": "Alfred Romualdez",
-      "position": "MAYOR",
-      "location": "TACLOBAN CITY, LEYTE, REGION VIII"
-    },
-    "4145268": {
-      "id": 4145268,
-      "full_name": "JUDE A ACIDRE",
-      "position": "PARTY-LIST REPRESENTATIVE",
-      "location": "Location unknown"
-    }
-  }
+  "people": {}
 }

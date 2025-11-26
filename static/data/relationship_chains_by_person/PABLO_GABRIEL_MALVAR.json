@@ -8,9 +8,33 @@
     {
       "length": 3,
       "path": [
-        4162415,
-        4041415,
-        4162416
+        {
+          "id": 4162415,
+          "first_name": "GINGGAY",
+          "last_name": "HONTIVEROS",
+          "middle_name": null,
+          "suffix": null,
+          "position": "MEMBER, PRIVATE SECTOR",
+          "relationship_description": "Starting person"
+        },
+        {
+          "id": 4041415,
+          "first_name": "RISA",
+          "last_name": "HONTIVEROS",
+          "middle_name": null,
+          "suffix": null,
+          "position": "SENATOR",
+          "relationship_description": "GINGGAY HONTIVEROS IS SISTER OF RISA HONTIVEROS"
+        },
+        {
+          "id": 4162416,
+          "first_name": "PABLO",
+          "last_name": "GABRIEL MALVAR",
+          "middle_name": null,
+          "suffix": null,
+          "position": "PRIVATE SECTOR REPRESENTATIVE FOR",
+          "relationship_description": "RISA HONTIVEROS IS BROTHER OF PABLO GABRIEL MALVAR (PRIVATE SECTOR REPRESENTATIVE FOR)"
+        }
       ],
       "relationships": [
         "Starting person",
@@ -21,8 +45,24 @@
     {
       "length": 2,
       "path": [
-        4041415,
-        4162416
+        {
+          "id": 4041415,
+          "first_name": "RISA",
+          "last_name": "HONTIVEROS",
+          "middle_name": null,
+          "suffix": null,
+          "position": "SENATOR",
+          "relationship_description": "Starting person"
+        },
+        {
+          "id": 4162416,
+          "first_name": "PABLO",
+          "last_name": "GABRIEL MALVAR",
+          "middle_name": null,
+          "suffix": null,
+          "position": "PRIVATE SECTOR REPRESENTATIVE FOR",
+          "relationship_description": "RISA HONTIVEROS IS BROTHER OF PABLO GABRIEL MALVAR (PRIVATE SECTOR REPRESENTATIVE FOR)"
+        }
       ],
       "relationships": [
         "Starting person",
@@ -30,24 +70,5 @@
       ]
     }
   ],
-  "people": {
-    "4162415": {
-      "id": 4162415,
-      "full_name": "GINGGAY HONTIVEROS",
-      "position": "MEMBER, PRIVATE SECTOR",
-      "location": "Location unknown"
-    },
-    "4041415": {
-      "id": 4041415,
-      "full_name": "RISA HONTIVEROS",
-      "position": "SENATOR",
-      "location": "Manila, Metro Manila, NCR"
-    },
-    "4162416": {
-      "id": 4162416,
-      "full_name": "PABLO GABRIEL MALVAR",
-      "position": "PRIVATE SECTOR REPRESENTATIVE FOR",
-      "location": "Location unknown"
-    }
-  }
+  "people": {}
 }

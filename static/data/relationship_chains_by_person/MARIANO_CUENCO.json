@@ -8,8 +8,24 @@
     {
       "length": 2,
       "path": [
-        25388,
-        4041655
+        {
+          "id": 25388,
+          "first_name": "Antonio",
+          "last_name": "Cuenco",
+          "middle_name": null,
+          "suffix": null,
+          "position": "MEMBER, HOUSE OF REPRESENTATIVES",
+          "relationship_description": "Starting person"
+        },
+        {
+          "id": 4041655,
+          "first_name": "MARIANO",
+          "last_name": "CUENCO",
+          "middle_name": null,
+          "suffix": null,
+          "position": null,
+          "relationship_description": "Antonio Cuenco is the son of Mariano Jesus Cuenco"
+        }
       ],
       "relationships": [
         "Starting person",
@@ -19,8 +35,24 @@
     {
       "length": 2,
       "path": [
-        4041655,
-        25388
+        {
+          "id": 4041655,
+          "first_name": "MARIANO",
+          "last_name": "CUENCO",
+          "middle_name": null,
+          "suffix": null,
+          "position": null,
+          "relationship_description": "Starting person"
+        },
+        {
+          "id": 25388,
+          "first_name": "Antonio",
+          "last_name": "Cuenco",
+          "middle_name": null,
+          "suffix": null,
+          "position": "MEMBER, HOUSE OF REPRESENTATIVES",
+          "relationship_description": "ANTONIO CUENCO IS THE SON OF MARIANO JESUS CUENCO"
+        }
       ],
       "relationships": [
         "Starting person",
@@ -28,18 +60,5 @@
       ]
     }
   ],
-  "people": {
-    "25388": {
-      "id": 25388,
-      "full_name": "Antonio Cuenco",
-      "position": "MEMBER, HOUSE OF REPRESENTATIVES",
-      "location": "CEBU, REGION VII"
-    },
-    "4041655": {
-      "id": 4041655,
-      "full_name": "MARIANO CUENCO",
-      "position": null,
-      "location": "Location unknown"
-    }
-  }
+  "people": {}
 }

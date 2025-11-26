@@ -8,8 +8,24 @@
     {
       "length": 2,
       "path": [
-        31580,
-        4162645
+        {
+          "id": 31580,
+          "first_name": "RODRIGO",
+          "last_name": "Duterte",
+          "middle_name": null,
+          "suffix": null,
+          "position": "MAYOR",
+          "relationship_description": "Starting person"
+        },
+        {
+          "id": 4162645,
+          "first_name": "SEBASTIAN",
+          "last_name": "DUTERTE",
+          "middle_name": null,
+          "suffix": null,
+          "position": "POLITICIAN",
+          "relationship_description": "Son: Politician"
+        }
       ],
       "relationships": [
         "Starting person",
@@ -19,8 +35,24 @@
     {
       "length": 2,
       "path": [
-        4162645,
-        31580
+        {
+          "id": 4162645,
+          "first_name": "SEBASTIAN",
+          "last_name": "DUTERTE",
+          "middle_name": null,
+          "suffix": null,
+          "position": "POLITICIAN",
+          "relationship_description": "Starting person"
+        },
+        {
+          "id": 31580,
+          "first_name": "RODRIGO",
+          "last_name": "Duterte",
+          "middle_name": null,
+          "suffix": null,
+          "position": "MAYOR",
+          "relationship_description": "Father"
+        }
       ],
       "relationships": [
         "Starting person",
@@ -28,18 +60,5 @@
       ]
     }
   ],
-  "people": {
-    "31580": {
-      "id": 31580,
-      "full_name": "RODRIGO Duterte",
-      "position": "MAYOR",
-      "location": "DAVAO DEL SUR, REGION XI"
-    },
-    "4162645": {
-      "id": 4162645,
-      "full_name": "SEBASTIAN DUTERTE",
-      "position": "POLITICIAN",
-      "location": "DAVAO DEL SUR"
-    }
-  }
+  "people": {}
 }

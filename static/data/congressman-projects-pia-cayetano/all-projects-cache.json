@@ -1,25 +1,61 @@
 {
   "success": true,
   "congressman": "Pia Cayetano",
-  "projects": [],
+  "projects": [
+    {
+      "source": "PhilGEPS",
+      "meilisearch_id": null,
+      "project_name": "San Pedro, Municipality of Hagon",
+      "contractor": "ESN CONSTRUCTION & TRADING",
+      "amount": 1408404.53,
+      "location": "Bulacan",
+      "year": 2016,
+      "status": "active",
+      "district_congressman": "Pia Cayetano",
+      "district_match_type": "district",
+      "district_match_score": 100,
+      "district_is_city_wide": false,
+      "congressman_district": "2nd District District Taguig–Pateros",
+      "contractor_congressman": null,
+      "contractor_match_type": null,
+      "contractor_match_score": 0,
+      "contractor_congressman_district": null,
+      "project_district_type": "province",
+      "project_district": "Taguig–Pateros 2nd District District",
+      "project_barangay_municipality": "San Pedro",
+      "project_province_city_district": "Province",
+      "project_municipality_barangay": "San Pedro",
+      "is_flood_related": false,
+      "match_type": "district",
+      "match_score": 10,
+      "congressman": "Pia Cayetano",
+      "sources_count": 1,
+      "sources_list": [
+        "PhilGEPS"
+      ]
+    }
+  ],
   "summary": {
-    "total": 0,
+    "total": 1,
     "dime": 0,
-    "philgeps": 0,
+    "philgeps": 1,
     "ssp": 0,
     "infrawatch": 0,
     "microsite": 0,
-    "district_projects": 0,
-    "contractor_projects": 0
+    "district_projects": 1,
+    "contractor_projects": 0,
+    "flood_projects": 0
   },
   "dashboard_stats": {
-    "total_cost_all": 0,
-    "total_projects": 0,
-    "district_count": 0,
-    "district_cost": 0,
+    "total_cost_all": 1408404.53,
+    "total_projects": 1,
+    "district_count": 1,
+    "district_cost": 1408404.53,
     "contractor_count": 0,
-    "contractor_cost": 0
+    "contractor_cost": 0,
+    "flood_count": 0,
+    "flood_cost": 0
   },
-  "generated_at": "2025-11-08T22:12:45.314927",
+  "generated_at": "2025-11-25T22:31:31.389688",
   "cache_version": "1.0"
 }

@@ -94,7 +94,7 @@ def aggregate_congressman_stats(cache_path: str) -> Dict[str, Dict[str, float]]:
             parse_amount(p.get("amount", 0)) for p in projects if p.get("match_type") == "contractor"
         )
 
-    flood_projects = [p for p in projects if p.get("flood_control")]
+    flood_projects = [p for p in projects if p.get("is_flood_related") or p.get("flood_control")]
     if flood_count is None:
         flood_count = summary.get("flood_control")
     if flood_count is None:
@@ -227,11 +227,13 @@ def main():
 
     print("\n📈 Top 10 Congressmen by Project Count (preview):")
     for idx, entry in enumerate(top_10_by_count, 1):
-        print(f"   {idx}. {entry['name']}: {entry['count']} projects, ₱{entry['total_cost']:,.2f}")
+        flood_info = f" (🌊 {entry.get('flood_control_count', 0)} flood projects)" if entry.get('flood_control_count', 0) > 0 else ""
+        print(f"   {idx}. {entry['name']}: {entry['count']} projects, ₱{entry['total_cost']:,.2f}{flood_info}")
 
     print("\n💰 Top 10 Congressmen by Total Cost (preview):")
     for idx, entry in enumerate(top_10_by_cost, 1):
-        print(f"   {idx}. {entry['name']}: ₱{entry['total_cost']:,.2f} ({entry['count']} projects)")
+        flood_info = f" 🌊 ₱{entry.get('flood_control_cost', 0):,.2f}" if entry.get('flood_control_cost', 0) > 0 else ""
+        print(f"   {idx}. {entry['name']}: ₱{entry['total_cost']:,.2f} ({entry['count']} projects){flood_info}")
 
     dashboard_stats = {
         "total_cost_all": totals_cost["total_cost_all"],
@@ -269,6 +271,7 @@ def main():
     print(f"   Total projects (summary): {summary_totals['total']}")
     print(f"   District matches: {summary_totals['district_projects']} (₱{totals_cost['district_cost']:,.2f})")
     print(f"   Contractor matches: {summary_totals['contractor_projects']} (₱{totals_cost['contractor_cost']:,.2f})")
+    print(f"   🌊 Flood-related projects: {summary_totals['flood_control_projects']} (₱{totals_cost['flood_control_cost']:,.2f})")
     print(f"   Total congressmen covered: {len(ranking_by_count)}")
 
 

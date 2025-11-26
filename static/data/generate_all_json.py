@@ -573,7 +573,7 @@ class JSONGenerator:
             'cache_dynasty_animation.py',
             'Dynasty Animation Cache (All Years + Master Index)'
         )
-
+        
         # Generate relationship constellations cache
         success3, output3 = await self.run_script(
             'scripts/database/generate_relationship_constellations_cache.py',

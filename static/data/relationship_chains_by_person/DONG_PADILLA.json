@@ -8,8 +8,24 @@
     {
       "length": 2,
       "path": [
-        4162428,
-        4041420
+        {
+          "id": 4162428,
+          "first_name": "DONG",
+          "last_name": "PADILLA",
+          "middle_name": null,
+          "suffix": null,
+          "position": "GOVERNOR OF CAMARINES NORTE",
+          "relationship_description": "Starting person"
+        },
+        {
+          "id": 4041420,
+          "first_name": "ROBINHOOD",
+          "last_name": "PADILLA",
+          "middle_name": "C",
+          "suffix": null,
+          "position": "SENATOR",
+          "relationship_description": "DONG PADILLA IS BROTHER OF ROBINHOOD C. PADILLA"
+        }
       ],
       "relationships": [
         "Starting person",
@@ -19,8 +35,24 @@
     {
       "length": 2,
       "path": [
-        4041420,
-        4162428
+        {
+          "id": 4041420,
+          "first_name": "ROBINHOOD",
+          "last_name": "PADILLA",
+          "middle_name": "C",
+          "suffix": null,
+          "position": "SENATOR",
+          "relationship_description": "Starting person"
+        },
+        {
+          "id": 4162428,
+          "first_name": "DONG",
+          "last_name": "PADILLA",
+          "middle_name": null,
+          "suffix": null,
+          "position": "GOVERNOR OF CAMARINES NORTE",
+          "relationship_description": "ROBINHOOD C. PADILLA IS BROTHER OF DONG PADILLA (GOVERNOR OF CAMARINES NORTE)"
+        }
       ],
       "relationships": [
         "Starting person",
@@ -28,18 +60,5 @@
       ]
     }
   ],
-  "people": {
-    "4041420": {
-      "id": 4041420,
-      "full_name": "ROBINHOOD C PADILLA",
-      "position": "SENATOR",
-      "location": "Manila, Metro Manila, NCR"
-    },
-    "4162428": {
-      "id": 4162428,
-      "full_name": "DONG PADILLA",
-      "position": "GOVERNOR OF CAMARINES NORTE",
-      "location": "Location unknown"
-    }
-  }
+  "people": {}
 }

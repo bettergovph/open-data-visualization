@@ -8,9 +8,33 @@
     {
       "length": 3,
       "path": [
-        28274,
-        28269,
-        2462
+        {
+          "id": 28274,
+          "first_name": "Maria",
+          "last_name": "De Venecia",
+          "middle_name": null,
+          "suffix": null,
+          "position": "MEMBER, HOUSE OF REPRESENTATIVES",
+          "relationship_description": "Starting person"
+        },
+        {
+          "id": 28269,
+          "first_name": "Jose",
+          "last_name": "De Venecia",
+          "middle_name": null,
+          "suffix": null,
+          "position": "MEMBER, HOUSE OF REPRESENTATIVES",
+          "relationship_description": "MARRIED COUPLE WITHIN THE DE VENECIA DYNASTY"
+        },
+        {
+          "id": 2462,
+          "first_name": "VICTOR",
+          "last_name": "AGBAYANI",
+          "middle_name": null,
+          "suffix": null,
+          "position": "GOVERNOR",
+          "relationship_description": "Victor Agbayani is married to Jose de Venecia's daughter"
+        }
       ],
       "relationships": [
         "Starting person",
@@ -21,8 +45,24 @@
     {
       "length": 2,
       "path": [
-        2462,
-        28269
+        {
+          "id": 2462,
+          "first_name": "VICTOR",
+          "last_name": "AGBAYANI",
+          "middle_name": null,
+          "suffix": null,
+          "position": "GOVERNOR",
+          "relationship_description": "Starting person"
+        },
+        {
+          "id": 28269,
+          "first_name": "Jose",
+          "last_name": "De Venecia",
+          "middle_name": null,
+          "suffix": null,
+          "position": "MEMBER, HOUSE OF REPRESENTATIVES",
+          "relationship_description": "Victor Agbayani is married to Jose de Venecia's daughter"
+        }
       ],
       "relationships": [
         "Starting person",
@@ -30,24 +70,5 @@
       ]
     }
   ],
-  "people": {
-    "28274": {
-      "id": 28274,
-      "full_name": "Maria De Venecia",
-      "position": "MEMBER, HOUSE OF REPRESENTATIVES",
-      "location": "PANGASINAN, REGION I"
-    },
-    "28269": {
-      "id": 28269,
-      "full_name": "Jose De Venecia",
-      "position": "MEMBER, HOUSE OF REPRESENTATIVES",
-      "location": "PANGASINAN, REGION I"
-    },
-    "2462": {
-      "id": 2462,
-      "full_name": "VICTOR AGBAYANI",
-      "position": "GOVERNOR",
-      "location": "PANGASINAN, REGION I"
-    }
-  }
+  "people": {}
 }

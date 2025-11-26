@@ -8,11 +8,51 @@
     {
       "length": 5,
       "path": [
-        70156,
-        4162401,
-        53227,
-        53232,
-        4162425
+        {
+          "id": 70156,
+          "first_name": "YEDDA MARIE",
+          "last_name": "ROMUALDEZ",
+          "middle_name": "K",
+          "suffix": null,
+          "position": "PARTY-LIST REPRESENTATIVE",
+          "relationship_description": "Starting person"
+        },
+        {
+          "id": 4162401,
+          "first_name": "FERDINAND",
+          "last_name": "MARCOS",
+          "middle_name": "ROMUALDEZ",
+          "suffix": null,
+          "position": "PRESIDENT",
+          "relationship_description": "Political connection - TINGOG party-list representative"
+        },
+        {
+          "id": 53227,
+          "first_name": "FERDINAND",
+          "last_name": "MARCOS",
+          "middle_name": "ROMUALDEZ",
+          "suffix": null,
+          "position": "GOVERNOR",
+          "relationship_description": "FERDINAND MARCOS SR. IS THE FATHER OF FERDINAND MARCOS JR."
+        },
+        {
+          "id": 53232,
+          "first_name": "IMEE",
+          "last_name": "MARCOS",
+          "middle_name": "REMEDIOS",
+          "suffix": null,
+          "position": "MEMBER, HOUSE OF REPRESENTATIVES",
+          "relationship_description": "Mother-son relationship in the MARCOS political dynasty"
+        },
+        {
+          "id": 4162425,
+          "first_name": "-",
+          "last_name": "ANGELO MARCOS BARBA",
+          "middle_name": null,
+          "suffix": null,
+          "position": "REPRESENTATIVE, ILOCOS NORTE",
+          "relationship_description": "IMEE MARCOS is cousin of - ANGELO MARCOS BARBA (REPRESENTATIVE"
+        }
       ],
       "relationships": [
         "Starting person",
@@ -25,8 +65,24 @@
     {
       "length": 2,
       "path": [
-        53232,
-        4162425
+        {
+          "id": 53232,
+          "first_name": "IMEE",
+          "last_name": "MARCOS",
+          "middle_name": "REMEDIOS",
+          "suffix": null,
+          "position": "MEMBER, HOUSE OF REPRESENTATIVES",
+          "relationship_description": "Starting person"
+        },
+        {
+          "id": 4162425,
+          "first_name": "-",
+          "last_name": "ANGELO MARCOS BARBA",
+          "middle_name": null,
+          "suffix": null,
+          "position": "REPRESENTATIVE, ILOCOS NORTE",
+          "relationship_description": "IMEE MARCOS is cousin of - ANGELO MARCOS BARBA (REPRESENTATIVE"
+        }
       ],
       "relationships": [
         "Starting person",
@@ -34,36 +90,5 @@
       ]
     }
   ],
-  "people": {
-    "53232": {
-      "id": 53232,
-      "full_name": "IMEE REMEDIOS MARCOS",
-      "position": "MEMBER, HOUSE OF REPRESENTATIVES",
-      "location": "ILOCOS NORTE, REGION I"
-    },
-    "53227": {
-      "id": 53227,
-      "full_name": "FERDINAND ROMUALDEZ MARCOS",
-      "position": "GOVERNOR",
-      "location": "ILOCOS NORTE, REGION I"
-    },
-    "70156": {
-      "id": 70156,
-      "full_name": "YEDDA MARIE K ROMUALDEZ",
-      "position": "PARTY-LIST REPRESENTATIVE",
-      "location": "LEYTE, REGION VIII"
-    },
-    "4162401": {
-      "id": 4162401,
-      "full_name": "FERDINAND ROMUALDEZ MARCOS",
-      "position": "PRESIDENT",
-      "location": "NATIONAL, NATIONAL"
-    },
-    "4162425": {
-      "id": 4162425,
-      "full_name": "- ANGELO MARCOS BARBA",
-      "position": "REPRESENTATIVE, ILOCOS NORTE",
-      "location": "Location unknown"
-    }
-  }
+  "people": {}
 }

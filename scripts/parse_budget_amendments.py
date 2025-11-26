@@ -235,6 +235,9 @@ class BudgetAmendmentParser:
     def _match_sheet_to_department(self, sheet_name: str) -> str:
         """Match sheet name to department ID from parsed departments"""
         if not self.departments:
+            # For D* codes, the worksheet name IS the code - use it directly
+            if sheet_name.upper().startswith('D') and len(sheet_name.upper()) >= 2:
+                return sheet_name.upper()
             return self._generate_dept_code(sheet_name)
         
         sheet_upper = sheet_name.upper().strip()
@@ -294,9 +297,9 @@ class BudgetAmendmentParser:
             'COA': ['COMMISSION ON AUDIT'],
             'BSGC': ['BUDGETARY SUPPORT', 'GOVERNMENT CORPORATIONS', 'GOCC'],
             'ALGU': ['ALLOCATION', 'LGU', 'LOCAL GOVERNMENT UNIT'],
-            'MPBF': [],  # As-is for now
+            'MPBF': None,  # Do not match - MPBF is a separate entity, not under Congress
             'NDRRMF': ['DISASTER', 'RISK', 'REDUCTION', 'MANAGEMENT', 'FUND'],
-            'RAFPMP': [],  # As-is for now
+            'RAFPMP': None,  # Do not match - RAFPMP is a separate entity, not under Congress
             'UA': ['UNPROGRAMMED', 'APPROPRIATIONS'],
             'DOE-ATTACHED CORP': ['ENERGY', 'GOCC'],  # GOCCs under Department of Energy
             'NIA': ['IRRIGATION'],
@@ -311,10 +314,52 @@ class BudgetAmendmentParser:
                 if dept_id == 'SUC' or ('UNIVERSITIES' in dept_name and 'COLLEGES' in dept_name):
                     return dept['id']
         
-        # Try direct mapping first
+        # FIRST: Try exact match of sheet name to department ID/code
+        # The worksheet name IS the code - match it directly to department code/ID from parsed data
+        # Do NOT invent codes - only use what was actually parsed from the Excel files
+        for dept in self.departments:
+            dept_id = dept.get('id', '').upper()
+            dept_code = dept.get('code', '').upper()
+            # Exact match on ID or code - worksheet name should match exactly
+            if sheet_upper == dept_id or sheet_upper == dept_code:
+                return dept['id']
+        
+        # For sheets starting with D (departments), handle known worksheet code to department code mappings
+        # These are established codes from the worksheets that map to parsed department codes
+        if sheet_upper.startswith('D') and len(sheet_upper) >= 2:
+            # Known mappings: worksheet code -> department code
+            # "DOF" worksheet -> "DF" department (Department of Finance)
+            if sheet_upper == 'DOF':
+                # Find Department of Finance by name and return its ID
+                for dept in self.departments:
+                    dept_name = dept.get('name', '').upper()
+                    if 'FINANCE' in dept_name and 'FOREIGN' not in dept_name:
+                        return dept['id']  # Return "DF" (the department ID)
+            # "DENR" worksheet -> "DEN" department (Department of Environment and Natural Resources)
+            elif sheet_upper == 'DENR':
+                # Find DENR department by name
+                for dept in self.departments:
+                    dept_name = dept.get('name', '').upper()
+                    dept_id = dept.get('id', '').upper()
+                    if ('ENVIRONMENT' in dept_name and 'NATURAL' in dept_name) or dept_id == 'DEN':
+                        return dept['id']  # Return "DEN" (the department ID)
+            # All other D* codes should have matched exactly above
+            # If no match, return the worksheet code as-is (will create new department)
+            return sheet_upper
+        
+        # For non-D sheets, use keyword matching only when explicitly mapped
+        # SECOND: Try direct mapping with exact sheet name match (only for non-D sheets or special cases)
         for sheet_key, dept_keywords in sheet_to_dept_mapping.items():
-            if sheet_key in sheet_upper or sheet_upper in sheet_key:
-                # Find department matching keywords
+            # Skip D* sheets - they should have matched exactly above
+            if sheet_key.startswith('D') and len(sheet_key) >= 2:
+                continue
+            
+            # Skip sheets with None keywords (explicitly do not match)
+            if dept_keywords is None:
+                continue
+                
+            # Check for exact match first
+            if sheet_upper == sheet_key:
                 # For DOTR, prioritize AOS-17 (Office of the Secretary - Transportation)
                 if sheet_key == 'DOTR':
                     for dept in self.departments:
@@ -329,7 +374,14 @@ class BudgetAmendmentParser:
                         if 'OFFICE OF THE SECRETARY' in dept_name and 'TRANSPORTATION' in dept_name:
                             return dept['id']
                 
-                # For other sheets, use keyword matching
+                # For other sheets, try keyword matching on department name
+                # Check if all keywords are present in department name (more specific match)
+                for dept in self.departments:
+                    dept_name = dept.get('name', '').upper()
+                    if all(keyword in dept_name for keyword in dept_keywords):
+                        return dept['id']
+                
+                # Fallback: check if any keyword matches
                 for dept in self.departments:
                     dept_name = dept.get('name', '').upper()
                     dept_id = dept.get('id', '').upper()
@@ -340,51 +392,13 @@ class BudgetAmendmentParser:
                        any(keyword in dept_code for keyword in dept_keywords):
                         return dept['id']
         
-        # Try to find matching department - multiple strategies
-        best_match = None
-        best_score = 0
+        # For D* sheets, if no exact match, use the worksheet name as the code
+        # D* codes are exact - the worksheet name IS the code
+        if sheet_upper.startswith('D') and len(sheet_upper) >= 2:
+            # Return the worksheet name as the code (it's the exact code)
+            return sheet_upper
         
-        for dept in self.departments:
-            dept_name = dept.get('name', '').upper()
-            dept_code = dept.get('code', '').upper()
-            dept_id = dept.get('id', '').upper()
-            
-            score = 0
-            
-            # Exact matches get highest score
-            if sheet_upper == dept_code or sheet_upper == dept_id:
-                return dept['id']  # Perfect match, return immediately
-            
-            # Check if sheet name contains department code/ID or vice versa
-            if dept_code and dept_code in sheet_upper:
-                score += 10
-            if dept_id and dept_id in sheet_upper:
-                score += 10
-            if sheet_upper in dept_code or sheet_upper in dept_id:
-                score += 10
-            
-            # Check for word matches in department name
-            dept_words = set(word for word in dept_name.split() if len(word) > 2)
-            sheet_words = set(word for word in sheet_clean.split() if len(word) > 2)
-            common_words = dept_words.intersection(sheet_words)
-            if common_words:
-                score += len(common_words) * 3
-            
-            # Check if department name contains sheet name or vice versa
-            if sheet_upper in dept_name:
-                score += 5
-            if any(word in dept_name for word in sheet_words if len(word) > 3):
-                score += 3
-            
-            if score > best_score:
-                best_score = score
-                best_match = dept['id']
-        
-        # Return best match if score is good enough, otherwise generate code
-        if best_score >= 5:
-            return best_match
-        
-        # Fallback to generating code
+        # Fallback to generating code for non-D sheets
         return self._generate_dept_code(sheet_name)
     
     def parse_general_summary(self) -> Dict:
@@ -799,7 +813,17 @@ class BudgetAmendmentParser:
                     ws_val = wb_values[sheet_name]
                     ws_form = wb_formulas[sheet_name]
                     
-                    dept_id = self._match_sheet_to_department(sheet_name) if self.departments else self._generate_dept_code(sheet_name)
+                    # For D* worksheets, the worksheet name IS the department code
+                    # Match it to existing departments or use it as the code
+                    if sheet_name.upper().startswith('D') and len(sheet_name.upper()) >= 2:
+                        # For D* worksheets, use the worksheet name as the code
+                        # Try to match to existing department, otherwise use worksheet name
+                        matched_dept_id = self._match_sheet_to_department(sheet_name) if self.departments else sheet_name.upper()
+                        # IMPORTANT: For D* worksheets, always use the worksheet name as dept_id for programs/line items
+                        # This ensures "DOF" worksheet creates items with department_id="DOF", not "DF"
+                        dept_id = sheet_name.upper()
+                    else:
+                        dept_id = self._match_sheet_to_department(sheet_name) if self.departments else self._generate_dept_code(sheet_name)
                     
                     # Special handling for DOTR - must match AOS-17
                     if sheet_name.upper() == 'DOTR':
@@ -861,7 +885,12 @@ class BudgetAmendmentParser:
                     # Create department-level entry from this worksheet
                     # Use row 10 department name, or fall back to sheet name
                     annex_dept_name = dept_name_from_row10 if dept_name_from_row10 else worksheet_description
-                    annex_dept_code = self._generate_dept_code(annex_dept_name)
+                    # For D* worksheets, the worksheet name IS the code (e.g., "DOF" worksheet -> code "DOF")
+                    # For other worksheets, generate code from name
+                    if sheet_name.upper().startswith('D') and len(sheet_name.upper()) >= 2:
+                        annex_dept_code = sheet_name.upper()  # Use worksheet name as code
+                    else:
+                        annex_dept_code = self._generate_dept_code(annex_dept_name)
                     
                     # Check if this department already exists (from General Summary or previous worksheet)
                     existing_dept = next((d for d in annex_a_departments if d.get('name', '').upper() == annex_dept_name.upper()), None)
@@ -2077,6 +2106,11 @@ class BudgetAmendmentParser:
                     # Prefer Annex A name (it's cleaner, from row 10)
                     if annex_dept.get('name'):
                         existing['name'] = annex_dept.get('name')
+                    # For D* worksheets, the worksheet name IS the code - use it instead of General Summary code
+                    if annex_dept.get('sheet_name') and annex_dept.get('sheet_name').upper().startswith('D') and len(annex_dept.get('sheet_name').upper()) >= 2:
+                        # Use the Annex A code (worksheet name) for D* departments
+                        existing['id'] = annex_dept.get('id')
+                        existing['code'] = annex_dept.get('code')
                     # IMPORTANT: Keep General Summary amounts if they exist (they represent full budget)
                     # Only calculate from line items if existing department has 0 amounts
                     existing_original = existing.get('original_amount', 0)

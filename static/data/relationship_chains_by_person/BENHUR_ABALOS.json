@@ -8,8 +8,24 @@
     {
       "length": 2,
       "path": [
-        207,
-        3745664
+        {
+          "id": 207,
+          "first_name": "CARMELITA",
+          "last_name": "Abalos",
+          "middle_name": null,
+          "suffix": null,
+          "position": "MAYOR",
+          "relationship_description": "Starting person"
+        },
+        {
+          "id": 3745664,
+          "first_name": "BENHUR",
+          "last_name": "ABALOS",
+          "middle_name": null,
+          "suffix": null,
+          "position": "OTHER",
+          "relationship_description": "Benhur Abalos is married to Carmelita Abalos"
+        }
       ],
       "relationships": [
         "Starting person",
@@ -19,8 +35,24 @@
     {
       "length": 2,
       "path": [
-        3745664,
-        207
+        {
+          "id": 3745664,
+          "first_name": "BENHUR",
+          "last_name": "ABALOS",
+          "middle_name": null,
+          "suffix": null,
+          "position": "OTHER",
+          "relationship_description": "Starting person"
+        },
+        {
+          "id": 207,
+          "first_name": "CARMELITA",
+          "last_name": "Abalos",
+          "middle_name": null,
+          "suffix": null,
+          "position": "MAYOR",
+          "relationship_description": "Benhur Abalos is married to Carmelita Abalos"
+        }
       ],
       "relationships": [
         "Starting person",
@@ -28,18 +60,5 @@
       ]
     }
   ],
-  "people": {
-    "207": {
-      "id": 207,
-      "full_name": "CARMELITA Abalos",
-      "position": "MAYOR",
-      "location": "NCR, SECOND DISTRICT, NATIONAL CAPITAL REGION"
-    },
-    "3745664": {
-      "id": 3745664,
-      "full_name": "BENHUR ABALOS",
-      "position": "OTHER",
-      "location": "CITY OF CAGAYAN DE ORO, MISAMIS ORIENTAL, REGION X"
-    }
-  }
+  "people": {}
 }

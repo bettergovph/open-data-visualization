@@ -8,8 +8,24 @@
     {
       "length": 2,
       "path": [
-        59600,
-        59598
+        {
+          "id": 59600,
+          "first_name": "ERIC",
+          "last_name": "Olivarez",
+          "middle_name": null,
+          "suffix": null,
+          "position": "COUNCILOR",
+          "relationship_description": "Starting person"
+        },
+        {
+          "id": 59598,
+          "first_name": "EDWIN",
+          "last_name": "OLIVAREZ",
+          "middle_name": null,
+          "suffix": null,
+          "position": "GOVERNOR",
+          "relationship_description": "Wikipedia: sibling of Edwin Olivarez"
+        }
       ],
       "relationships": [
         "Starting person",
@@ -19,9 +35,33 @@
     {
       "length": 3,
       "path": [
-        59600,
-        59598,
-        19352
+        {
+          "id": 59600,
+          "first_name": "ERIC",
+          "last_name": "Olivarez",
+          "middle_name": null,
+          "suffix": null,
+          "position": "COUNCILOR",
+          "relationship_description": "Starting person"
+        },
+        {
+          "id": 59598,
+          "first_name": "EDWIN",
+          "last_name": "OLIVAREZ",
+          "middle_name": null,
+          "suffix": null,
+          "position": "GOVERNOR",
+          "relationship_description": "Wikipedia: sibling of Edwin Olivarez"
+        },
+        {
+          "id": 19352,
+          "first_name": "Imelda",
+          "last_name": "Calixto-Rubiano",
+          "middle_name": null,
+          "suffix": null,
+          "position": "MEMBER, HOUSE OF REPRESENTATIVES",
+          "relationship_description": "Imelda Calixto-Rubiano is the sister-in-law of Edwin Olivarez"
+        }
       ],
       "relationships": [
         "Starting person",
@@ -30,24 +70,5 @@
       ]
     }
   ],
-  "people": {
-    "59600": {
-      "id": 59600,
-      "full_name": "ERIC Olivarez",
-      "position": "COUNCILOR",
-      "location": "CITY OF PARANAQUE, NCR, FOURTH DISTRICT, NATIONAL CAPITAL REGION"
-    },
-    "59598": {
-      "id": 59598,
-      "full_name": "EDWIN OLIVAREZ",
-      "position": "GOVERNOR",
-      "location": "LAGUNA, REGION IV-A"
-    },
-    "19352": {
-      "id": 19352,
-      "full_name": "Imelda Calixto-Rubiano",
-      "position": "MEMBER, HOUSE OF REPRESENTATIVES",
-      "location": "PASAY, NCR, FOURTH DISTRICT, NATIONAL CAPITAL REGION"
-    }
-  }
+  "people": {}
 }

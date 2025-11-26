@@ -8,8 +8,24 @@
     {
       "length": 2,
       "path": [
-        22207,
-        3745704
+        {
+          "id": 22207,
+          "first_name": "ALAN",
+          "last_name": "CAYETANO",
+          "middle_name": null,
+          "suffix": null,
+          "position": "MEMBER, HOUSE OF REPRESENTATIVES",
+          "relationship_description": "Starting person"
+        },
+        {
+          "id": 3745704,
+          "first_name": "PIA",
+          "last_name": "CAYETANO",
+          "middle_name": null,
+          "suffix": null,
+          "position": "SENATOR",
+          "relationship_description": "ALAN PETER CAYETANO IS THE BROTHER OF SENATOR PIA CAYETANO"
+        }
       ],
       "relationships": [
         "Starting person",
@@ -19,8 +35,24 @@
     {
       "length": 2,
       "path": [
-        3745704,
-        22207
+        {
+          "id": 3745704,
+          "first_name": "PIA",
+          "last_name": "CAYETANO",
+          "middle_name": null,
+          "suffix": null,
+          "position": "SENATOR",
+          "relationship_description": "Starting person"
+        },
+        {
+          "id": 22207,
+          "first_name": "ALAN",
+          "last_name": "CAYETANO",
+          "middle_name": null,
+          "suffix": null,
+          "position": "MEMBER, HOUSE OF REPRESENTATIVES",
+          "relationship_description": "Siblings"
+        }
       ],
       "relationships": [
         "Starting person",
@@ -28,18 +60,5 @@
       ]
     }
   ],
-  "people": {
-    "3745704": {
-      "id": 3745704,
-      "full_name": "PIA CAYETANO",
-      "position": "SENATOR",
-      "location": "M'LANG, COTABATO, REGION XII"
-    },
-    "22207": {
-      "id": 22207,
-      "full_name": "ALAN CAYETANO",
-      "position": "MEMBER, HOUSE OF REPRESENTATIVES",
-      "location": "PATEROS-TAGUIG, NCR, FOURTH DISTRICT, NATIONAL CAPITAL REGION"
-    }
-  }
+  "people": {}
 }

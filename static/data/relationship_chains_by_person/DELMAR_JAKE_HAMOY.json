@@ -8,9 +8,33 @@
     {
       "length": 3,
       "path": [
-        27824,
-        3745735,
-        4162412
+        {
+          "id": 27824,
+          "first_name": "JOSEPH",
+          "last_name": "De Lara",
+          "middle_name": null,
+          "suffix": null,
+          "position": "MAYOR",
+          "relationship_description": "Starting person"
+        },
+        {
+          "id": 3745735,
+          "first_name": "BONG",
+          "last_name": "GO",
+          "middle_name": null,
+          "suffix": null,
+          "position": "SENATOR",
+          "relationship_description": "JOSEPH DE LARA is uncle of BONG GO"
+        },
+        {
+          "id": 4162412,
+          "first_name": "DELMAR",
+          "last_name": "JAKE HAMOY",
+          "middle_name": null,
+          "suffix": null,
+          "position": "LICENSING OFFICER I,",
+          "relationship_description": "BONG GO is cousin of DELMAR JAKE HAMOY (LICENSING OFFICER I"
+        }
       ],
       "relationships": [
         "Starting person",
@@ -21,8 +45,24 @@
     {
       "length": 2,
       "path": [
-        3745735,
-        4162412
+        {
+          "id": 3745735,
+          "first_name": "BONG",
+          "last_name": "GO",
+          "middle_name": null,
+          "suffix": null,
+          "position": "SENATOR",
+          "relationship_description": "Starting person"
+        },
+        {
+          "id": 4162412,
+          "first_name": "DELMAR",
+          "last_name": "JAKE HAMOY",
+          "middle_name": null,
+          "suffix": null,
+          "position": "LICENSING OFFICER I,",
+          "relationship_description": "BONG GO is cousin of DELMAR JAKE HAMOY (LICENSING OFFICER I"
+        }
       ],
       "relationships": [
         "Starting person",
@@ -30,24 +70,5 @@
       ]
     }
   ],
-  "people": {
-    "3745735": {
-      "id": 3745735,
-      "full_name": "BONG GO",
-      "position": "SENATOR",
-      "location": "M'LANG, COTABATO, REGION XII"
-    },
-    "27824": {
-      "id": 27824,
-      "full_name": "JOSEPH De Lara",
-      "position": "MAYOR",
-      "location": "SOLSONA, ILOCOS NORTE, REGION I"
-    },
-    "4162412": {
-      "id": 4162412,
-      "full_name": "DELMAR JAKE HAMOY",
-      "position": "LICENSING OFFICER I,",
-      "location": "Location unknown"
-    }
-  }
+  "people": {}
 }

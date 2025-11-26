@@ -82,9 +82,10 @@ body {
 }
 
 .visualizations-mobile-container {
-    max-width: 100%;
-    margin: 0 auto;
-    padding: 0; /* Maximize space */
+    width: 100% !important;
+    max-width: 100% !important;
+    margin: 0;
+    padding: 0;
 }
 
 .visualizations-mobile-header .visualizations-mobile-container {
@@ -205,10 +206,12 @@ body {
     box-shadow: var(--shadow-md);
     margin: var(--spacing-xs) 0; /* Vertical margin only to maximize horizontal space */
     overflow: hidden;
+    width: 100% !important;
 }
 
 .mobile-budget-container {
     padding: 0; /* Maximize space */
+    width: 100% !important;
 }
 
 .mobile-budget-header {
@@ -242,6 +245,51 @@ body {
 }
 
 .mobile-budget-section-desc {
+    color: var(--gray-600);
+    margin-bottom: var(--spacing-lg);
+    font-size: var(--font-size-sm);
+}
+
+/* Mobile NEP Section Styles (Mirrors Budget) */
+.mobile-nep-section {
+    background: var(--white);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-md);
+    margin: var(--spacing-xs) 0;
+    overflow: hidden;
+    width: 100% !important;
+}
+
+.mobile-nep-container {
+    padding: 0;
+    width: 100% !important;
+}
+
+.mobile-nep-header {
+    text-align: center;
+    margin-bottom: var(--spacing-lg);
+    padding-bottom: var(--spacing-lg);
+    border-bottom: 1px solid var(--gray-200);
+}
+
+.mobile-nep-title {
+    font-size: var(--font-size-2xl);
+    font-weight: 700;
+    color: var(--primary);
+    margin-bottom: var(--spacing-sm);
+}
+
+.mobile-nep-section-title {
+    font-size: var(--font-size-lg);
+    font-weight: 600;
+    color: var(--primary);
+    margin-bottom: var(--spacing-md);
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-xs);
+}
+
+.mobile-nep-section-desc {
     color: var(--gray-600);
     margin-bottom: var(--spacing-lg);
     font-size: var(--font-size-sm);

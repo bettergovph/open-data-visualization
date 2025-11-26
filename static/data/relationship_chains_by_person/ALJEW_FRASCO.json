@@ -8,8 +8,24 @@
     {
       "length": 2,
       "path": [
-        4160578,
-        86371
+        {
+          "id": 4160578,
+          "first_name": "VINCENT FRANCO",
+          "last_name": "FRASCO",
+          "middle_name": null,
+          "suffix": null,
+          "position": "VICE MAYOR",
+          "relationship_description": "Starting person"
+        },
+        {
+          "id": 86371,
+          "first_name": "ALJEW",
+          "last_name": "FRASCO",
+          "middle_name": null,
+          "suffix": null,
+          "position": "MAYOR",
+          "relationship_description": "Cousin-in-law: Aljew Frasco (Current Mayor of Liloan)"
+        }
       ],
       "relationships": [
         "Starting person",
@@ -19,9 +35,33 @@
     {
       "length": 3,
       "path": [
-        37916,
-        4160578,
-        86371
+        {
+          "id": 37916,
+          "first_name": "PABLO",
+          "last_name": "GARCIA",
+          "middle_name": null,
+          "suffix": null,
+          "position": "MEMBER, HOUSE OF REPRESENTATIVES",
+          "relationship_description": "Starting person"
+        },
+        {
+          "id": 4160578,
+          "first_name": "VINCENT FRANCO",
+          "last_name": "FRASCO",
+          "middle_name": null,
+          "suffix": null,
+          "position": "VICE MAYOR",
+          "relationship_description": "Grandson-in-law: Duke Frasco"
+        },
+        {
+          "id": 86371,
+          "first_name": "ALJEW",
+          "last_name": "FRASCO",
+          "middle_name": null,
+          "suffix": null,
+          "position": "MAYOR",
+          "relationship_description": "Cousin-in-law: Aljew Frasco (Current Mayor of Liloan)"
+        }
       ],
       "relationships": [
         "Starting person",
@@ -32,8 +72,24 @@
     {
       "length": 2,
       "path": [
-        86371,
-        4160578
+        {
+          "id": 86371,
+          "first_name": "ALJEW",
+          "last_name": "FRASCO",
+          "middle_name": null,
+          "suffix": null,
+          "position": "MAYOR",
+          "relationship_description": "Starting person"
+        },
+        {
+          "id": 4160578,
+          "first_name": "VINCENT FRANCO",
+          "last_name": "FRASCO",
+          "middle_name": null,
+          "suffix": null,
+          "position": "VICE MAYOR",
+          "relationship_description": "Cousin-in-law: Duke Frasco"
+        }
       ],
       "relationships": [
         "Starting person",
@@ -41,24 +97,5 @@
       ]
     }
   ],
-  "people": {
-    "4160578": {
-      "id": 4160578,
-      "full_name": "VINCENT FRANCO FRASCO",
-      "position": "VICE MAYOR",
-      "location": "CEBU, REGION VII"
-    },
-    "86371": {
-      "id": 86371,
-      "full_name": "ALJEW FRASCO",
-      "position": "MAYOR",
-      "location": "Liloan, CEBU, REGION VII - CENTRAL VISAYAS"
-    },
-    "37916": {
-      "id": 37916,
-      "full_name": "PABLO GARCIA",
-      "position": "MEMBER, HOUSE OF REPRESENTATIVES",
-      "location": "CEBU, REGION VII"
-    }
-  }
+  "people": {}
 }

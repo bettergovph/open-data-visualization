@@ -8,44 +8,24 @@
     {
       "length": 3,
       "path": [
-        4162562,
-        4162615
-      ],
-      "relationships": [
-        "Starting person",
-        "Connected via TRIPLE 8 CONSTRUCTION & SUPPLY"
-      ],
-      "contractor_connection": {
-        "contractor_name": "TRIPLE 8 CONSTRUCTION & SUPPLY, INC.",
-        "start_company_role": null,
-        "end_company_role": null,
-        "start_position": null,
-        "end_position": null
-      }
-    },
-    {
-      "length": 3,
-      "path": [
-        4162569,
-        4162615
-      ],
-      "relationships": [
-        "Starting person",
-        "Connected via TRIPLE 8 CONSTRUCTION & SUPPLY"
-      ],
-      "contractor_connection": {
-        "contractor_name": "TRIPLE 8 CONSTRUCTION & SUPPLY, INC.",
-        "start_company_role": null,
-        "end_company_role": null,
-        "start_position": null,
-        "end_position": null
-      }
-    },
-    {
-      "length": 3,
-      "path": [
-        3756301,
-        4162615
+        {
+          "id": 3756301,
+          "first_name": "ESTEVEN JAIME",
+          "last_name": "NATIVIDAD",
+          "middle_name": null,
+          "suffix": null,
+          "position": "COUNCILOR",
+          "relationship_description": "Starting person"
+        },
+        {
+          "id": 4162615,
+          "first_name": "JOCELYN",
+          "last_name": "NATIVIDAD",
+          "middle_name": null,
+          "suffix": null,
+          "position": null,
+          "relationship_description": "Connected via TRIPLE 8 CONSTRUCTION & SUPPLY"
+        }
       ],
       "relationships": [
         "Starting person",
@@ -62,8 +42,92 @@
     {
       "length": 3,
       "path": [
-        4162601,
-        4162615
+        {
+          "id": 4162562,
+          "first_name": "JUSTIN WILBERT",
+          "last_name": "NATIVIDAD",
+          "middle_name": null,
+          "suffix": null,
+          "position": null,
+          "relationship_description": "Starting person"
+        },
+        {
+          "id": 4162615,
+          "first_name": "JOCELYN",
+          "last_name": "NATIVIDAD",
+          "middle_name": null,
+          "suffix": null,
+          "position": null,
+          "relationship_description": "Connected via TRIPLE 8 CONSTRUCTION & SUPPLY"
+        }
+      ],
+      "relationships": [
+        "Starting person",
+        "Connected via TRIPLE 8 CONSTRUCTION & SUPPLY"
+      ],
+      "contractor_connection": {
+        "contractor_name": "TRIPLE 8 CONSTRUCTION & SUPPLY, INC.",
+        "start_company_role": null,
+        "end_company_role": null,
+        "start_position": null,
+        "end_position": null
+      }
+    },
+    {
+      "length": 3,
+      "path": [
+        {
+          "id": 4162569,
+          "first_name": "WILFREDO",
+          "last_name": "NATIVIDAD",
+          "middle_name": null,
+          "suffix": null,
+          "position": null,
+          "relationship_description": "Starting person"
+        },
+        {
+          "id": 4162615,
+          "first_name": "JOCELYN",
+          "last_name": "NATIVIDAD",
+          "middle_name": null,
+          "suffix": null,
+          "position": null,
+          "relationship_description": "Connected via TRIPLE 8 CONSTRUCTION & SUPPLY"
+        }
+      ],
+      "relationships": [
+        "Starting person",
+        "Connected via TRIPLE 8 CONSTRUCTION & SUPPLY"
+      ],
+      "contractor_connection": {
+        "contractor_name": "TRIPLE 8 CONSTRUCTION & SUPPLY, INC.",
+        "start_company_role": null,
+        "end_company_role": null,
+        "start_position": null,
+        "end_position": null
+      }
+    },
+    {
+      "length": 3,
+      "path": [
+        {
+          "id": 4162601,
+          "first_name": "PATRICK WILFRED",
+          "last_name": "NATIVIDAD",
+          "middle_name": null,
+          "suffix": null,
+          "position": null,
+          "relationship_description": "Starting person"
+        },
+        {
+          "id": 4162615,
+          "first_name": "JOCELYN",
+          "last_name": "NATIVIDAD",
+          "middle_name": null,
+          "suffix": null,
+          "position": null,
+          "relationship_description": "Connected via TRIPLE 8 CONSTRUCTION & SUPPLY"
+        }
       ],
       "relationships": [
         "Starting person",
@@ -78,36 +142,5 @@
       }
     }
   ],
-  "people": {
-    "3756301": {
-      "id": 3756301,
-      "full_name": "ESTEVEN JAIME NATIVIDAD",
-      "position": "COUNCILOR",
-      "location": "CITY OF CALAMBA, LAGUNA, REGION IV-A"
-    },
-    "4162562": {
-      "id": 4162562,
-      "full_name": "JUSTIN WILBERT NATIVIDAD",
-      "position": null,
-      "location": "Location unknown"
-    },
-    "4162615": {
-      "id": 4162615,
-      "full_name": "JOCELYN NATIVIDAD",
-      "position": null,
-      "location": "Location unknown"
-    },
-    "4162601": {
-      "id": 4162601,
-      "full_name": "PATRICK WILFRED NATIVIDAD",
-      "position": null,
-      "location": "Location unknown"
-    },
-    "4162569": {
-      "id": 4162569,
-      "full_name": "WILFREDO NATIVIDAD",
-      "position": null,
-      "location": "Location unknown"
-    }
-  }
+  "people": {}
 }

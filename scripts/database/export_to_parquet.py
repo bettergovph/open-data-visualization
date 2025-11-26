@@ -531,6 +531,26 @@ async def export_philgeps_contracts() -> pd.DataFrame:
         if 'meilisearch_id' in columns:
             select_parts.append("meilisearch_id as global_id")
         
+        # Include contractor normalization and PCAB columns
+        if 'contractor_name_canonical' in columns:
+            select_parts.append("contractor_name_canonical")
+        if 'contractor_name_normalized' in columns:
+            select_parts.append("contractor_name_normalized")
+        if 'contractor_normalization_confidence' in columns:
+            select_parts.append("contractor_normalization_confidence")
+        if 'contractor_pcab_license' in columns:
+            select_parts.append("contractor_pcab_license")
+        if 'pcab_amo' in columns:
+            select_parts.append("pcab_amo")
+        if 'pcab_category' in columns:
+            select_parts.append("pcab_category")
+        if 'pcab_license_number' in columns:
+            select_parts.append("pcab_license_number")
+        if 'pcab_reg_for_gov_infra' in columns:
+            select_parts.append("pcab_reg_for_gov_infra")
+        if 'pcab_valid_to_date' in columns:
+            select_parts.append("pcab_valid_to_date")
+        
         select_parts.append("'PhilGEPS' as source")
         
         # NULLs for missing columns
@@ -559,7 +579,7 @@ async def export_philgeps_contracts() -> pd.DataFrame:
         else:
             select_parts.append("NULL::timestamp as source_created_at")
         
-        query = f"SELECT {', '.join(select_parts)} FROM contracts WHERE contract_amount > 0 LIMIT 100000"
+        query = f"SELECT {', '.join(select_parts)} FROM contracts WHERE contract_amount > 0"
         
         rows = await conn.fetch(query)
         
@@ -875,3 +895,4 @@ async def main():
 
 if __name__ == "__main__":
     asyncio.run(main())
+

@@ -8,8 +8,24 @@
     {
       "length": 3,
       "path": [
-        4145235,
-        4145234
+        {
+          "id": 4145235,
+          "first_name": "RAUL",
+          "last_name": "CABALLERO",
+          "middle_name": "A",
+          "suffix": null,
+          "position": "PARTY-LIST REPRESENTATIVE",
+          "relationship_description": "Starting person"
+        },
+        {
+          "id": 4145234,
+          "first_name": "SOLON",
+          "last_name": "CUA",
+          "middle_name": "M",
+          "suffix": null,
+          "position": "PARTY-LIST REPRESENTATIVE",
+          "relationship_description": "Connected via AGAP"
+        }
       ],
       "relationships": [
         "Starting person",
@@ -24,8 +40,24 @@
     {
       "length": 3,
       "path": [
-        4145234,
-        4145235
+        {
+          "id": 4145234,
+          "first_name": "SOLON",
+          "last_name": "CUA",
+          "middle_name": "M",
+          "suffix": null,
+          "position": "PARTY-LIST REPRESENTATIVE",
+          "relationship_description": "Starting person"
+        },
+        {
+          "id": 4145235,
+          "first_name": "RAUL",
+          "last_name": "CABALLERO",
+          "middle_name": "A",
+          "suffix": null,
+          "position": "PARTY-LIST REPRESENTATIVE",
+          "relationship_description": "Connected via AGAP"
+        }
       ],
       "relationships": [
         "Starting person",
@@ -38,18 +70,5 @@
       }
     }
   ],
-  "people": {
-    "4145235": {
-      "id": 4145235,
-      "full_name": "RAUL A CABALLERO",
-      "position": "PARTY-LIST REPRESENTATIVE",
-      "location": "Location unknown"
-    },
-    "4145234": {
-      "id": 4145234,
-      "full_name": "SOLON M CUA",
-      "position": "PARTY-LIST REPRESENTATIVE",
-      "location": "Location unknown"
-    }
-  }
+  "people": {}
 }

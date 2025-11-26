@@ -1,0 +1,79 @@
+# Budget Amendments API Endpoints
+# Add this code to visualization.py after line 1312 (after budget_column_mapping_api)
+
+# ===== BUDGET AMENDMENTS (FY 2026) ENDPOINTS =====
+_amendments_cache = None
+
+def load_amendments_data():
+    """Load FY 2026 budget amendments data from JSON"""
+    global _amendments_cache
+    if _amendments_cache is not None:
+        return _amendments_cache
+    json_path = DATA_ROOT / "budget_amendments_2026.json"
+    if not json_path.exists():
+        return None
+    with open(json_path, 'r', encoding='utf-8') as f:
+        _amendments_cache = json.load(f)
+    return _amendments_cache
+
+@app.get("/api/budget/amendments/summary")
+async def budget_amendments_summary():
+    """Get FY 2026 budget amendments summary statistics"""
+    try:
+        data = load_amendments_data()
+        if not data:
+            return JSONResponse({"success": False, "error": "Data not available"}, status_code=404)
+        return JSONResponse({"success": True, **data['metadata']})
+    except Exception as e:
+        return JSONResponse({"success": False, "error": str(e)}, status_code=500)
+
+@app.get("/api/budget/amendments/departments")
+async def budget_amendments_departments():
+    """Get all departments with budget amendment summary"""
+    try:
+        data = load_amendments_data()
+        if not data:
+            return JSONResponse({"success": False, "error": "Data not available"}, status_code=404)
+        departments = sorted(data['departments'], key=lambda d: d.get('original_amount', 0), reverse=True)
+        return JSONResponse({"success": True, "departments": departments, "metadata": data['metadata']})
+    except Exception as e:
+        return JSONResponse({"success": False, "error": str(e)}, status_code=500)
+
+@app.get("/api/budget/amendments/department/{dept_id}")
+async def budget_amendments_department_details(dept_id: str):
+    """Get programs within a department"""
+    try:
+        data = load_amendments_data()
+        if not data:
+            return JSONResponse({"success": False, "error": "Data not available"}, status_code=404)
+        department = next((d for d in data['departments'] if d['id'] == dept_id), None)
+        if not department:
+            return JSONResponse({"success": False, "error": "Department not found"}, status_code=404)
+        programs = [p for p in data.get('programs', []) if p.get('department_id') == dept_id]
+        return JSONResponse({"success": True, "department": department, "programs": programs})
+    except Exception as e:
+        return JSONResponse({"success": False, "error": str(e)}, status_code=500)
+
+@app.get("/api/budget/amendments/search")
+async def budget_amendments_search(q: str = Query("")):
+    """Full-text search across departments, programs, and projects"""
+    try:
+        data = load_amendments_data()
+        if not data:
+            return JSONResponse({"success": False, "error": "Data not available"}, status_code=404)
+        query = q.lower()
+        if not query:
+            return JSONResponse({"success": True, "query": q, "results": []})
+        results = []
+        for dept in data['departments']:
+            if query in dept['name'].lower() or query in dept['code'].lower():
+                results.append({
+                    "type": "department",
+                    "id": dept['id'],
+                    "name": dept['name'],
+                    "code": dept['code'],
+                    "amount": dept['final_amount']
+                })
+        return JSONResponse({"success": True, "query": q, "results": results[:50]})
+    except Exception as e:
+        return JSONResponse({"success": False, "error": str(e)}, status_code=500)

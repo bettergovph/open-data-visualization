@@ -8,9 +8,33 @@
     {
       "length": 3,
       "path": [
-        27824,
-        3745735,
-        4162410
+        {
+          "id": 27824,
+          "first_name": "JOSEPH",
+          "last_name": "De Lara",
+          "middle_name": null,
+          "suffix": null,
+          "position": "MAYOR",
+          "relationship_description": "Starting person"
+        },
+        {
+          "id": 3745735,
+          "first_name": "BONG",
+          "last_name": "GO",
+          "middle_name": null,
+          "suffix": null,
+          "position": "SENATOR",
+          "relationship_description": "JOSEPH DE LARA is uncle of BONG GO"
+        },
+        {
+          "id": 4162410,
+          "first_name": "JOHN",
+          "last_name": "ERWIN MONTOJO",
+          "middle_name": null,
+          "suffix": null,
+          "position": "BOARD MEMBER, DAVAO ORIENTAL",
+          "relationship_description": "BONG GO is cousin of JOHN ERWIN MONTOJO (BOARD MEMBER"
+        }
       ],
       "relationships": [
         "Starting person",
@@ -21,8 +45,24 @@
     {
       "length": 2,
       "path": [
-        3745735,
-        4162410
+        {
+          "id": 3745735,
+          "first_name": "BONG",
+          "last_name": "GO",
+          "middle_name": null,
+          "suffix": null,
+          "position": "SENATOR",
+          "relationship_description": "Starting person"
+        },
+        {
+          "id": 4162410,
+          "first_name": "JOHN",
+          "last_name": "ERWIN MONTOJO",
+          "middle_name": null,
+          "suffix": null,
+          "position": "BOARD MEMBER, DAVAO ORIENTAL",
+          "relationship_description": "BONG GO is cousin of JOHN ERWIN MONTOJO (BOARD MEMBER"
+        }
       ],
       "relationships": [
         "Starting person",
@@ -30,24 +70,5 @@
       ]
     }
   ],
-  "people": {
-    "3745735": {
-      "id": 3745735,
-      "full_name": "BONG GO",
-      "position": "SENATOR",
-      "location": "M'LANG, COTABATO, REGION XII"
-    },
-    "27824": {
-      "id": 27824,
-      "full_name": "JOSEPH De Lara",
-      "position": "MAYOR",
-      "location": "SOLSONA, ILOCOS NORTE, REGION I"
-    },
-    "4162410": {
-      "id": 4162410,
-      "full_name": "JOHN ERWIN MONTOJO",
-      "position": "BOARD MEMBER, DAVAO ORIENTAL",
-      "location": "Location unknown"
-    }
-  }
+  "people": {}
 }
