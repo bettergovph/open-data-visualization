@@ -717,7 +717,7 @@
                                 <div id="annex-a1-histogram" style="display: none; background: white; padding: 2rem; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); margin-bottom: 2rem;">
                                     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
                                         <h4 style="margin: 0; color: #333; font-size: 1.3em;">📊 Annex A-1 Project Amount Distribution</h4>
-                                        <button id="copy-chart-btn" onclick="copyChartToClipboard()" 
+                                        <button id="copy-chart-btn" onclick="copyAnnexA1ChartToClipboard()" 
                                                 style="padding: 0.5rem 1rem; background: #0038A8; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 0.9em; display: flex; align-items: center; gap: 0.5rem;"
                                                 onmouseover="this.style.background='#002d7a'" 
                                                 onmouseout="this.style.background='#0038A8'">
@@ -2260,26 +2260,24 @@
                                         return;
                                     }
 
-                                    // Create bins for histogram (group amounts into ranges)
-                                    const bins = {};
-                                    const binSize = 5000000; // 5M bins
+                                    // Count unique amounts (exact values, not binned)
+                                    const uniqueAmounts = {};
                                     
                                     amounts.forEach(amount => {
-                                        const bin = Math.floor(amount / binSize) * binSize;
-                                        const binLabel = `${formatAmountFull(bin)} - ${formatAmountFull(bin + binSize)}`;
-                                        bins[binLabel] = (bins[binLabel] || 0) + 1;
+                                        // Use exact amount as key
+                                        uniqueAmounts[amount] = (uniqueAmounts[amount] || 0) + 1;
                                     });
 
-                                    // Sort bins by amount
-                                    const sortedBins = Object.entries(bins)
-                                        .map(([label, count]) => {
-                                            const minAmount = parseFloat(label.split(' - ')[0].replace(/[₱,]/g, ''));
-                                            return { label, count, minAmount };
+                                    // Sort by amount (ascending)
+                                    const sortedAmounts = Object.entries(uniqueAmounts)
+                                        .map(([amountStr, count]) => {
+                                            const amount = parseFloat(amountStr);
+                                            return { amount, count, label: formatAmountFull(amount) };
                                         })
-                                        .sort((a, b) => a.minAmount - b.minAmount);
+                                        .sort((a, b) => a.amount - b.amount);
 
                                     // Find max count for scaling (Y-axis = number of projects)
-                                    const maxCount = Math.max(...sortedBins.map(b => b.count));
+                                    const maxCount = Math.max(...sortedAmounts.map(b => b.count));
 
                                     // Create chart HTML
                                     const chartDiv = document.getElementById('histogram-chart');
@@ -2291,7 +2289,7 @@
                                     const marginBottom = 100;
                                     const plotWidth = chartWidth - marginLeft - marginRight;
                                     const plotHeight = chartHeight - marginTop - marginBottom;
-                                    const barWidth = Math.max(25, plotWidth / sortedBins.length - 2);
+                                    const barWidth = Math.max(20, plotWidth / sortedAmounts.length - 1);
 
                                     let chartHTML = `
                                         <div style="overflow-x: auto; width: 100%; display: flex; justify-content: center;">
@@ -2331,32 +2329,30 @@
                                                       x2="${marginLeft}" y2="${marginTop + plotHeight}" 
                                                       stroke="#333" stroke-width="2"/>
                                                 
-                                                <!-- Bars (X-axis = amount ranges, Y-axis = count) -->
-                                                ${sortedBins.map((bin, idx) => {
-                                                    const barHeight = (bin.count / maxCount) * plotHeight;
-                                                    const x = marginLeft + (idx * (plotWidth / sortedBins.length)) + 2;
+                                                <!-- Bars (X-axis = unique amounts, Y-axis = count) -->
+                                                ${sortedAmounts.map((item, idx) => {
+                                                    const barHeight = (item.count / maxCount) * plotHeight;
+                                                    const x = marginLeft + (idx * (plotWidth / sortedAmounts.length)) + 1;
                                                     const y = marginTop + plotHeight - barHeight;
-                                                    const barColor = bin.count > 100 ? '#dc3545' : bin.count > 50 ? '#fd7e14' : bin.count > 20 ? '#ffc107' : '#28a745';
+                                                    const barColor = item.count > 100 ? '#dc3545' : item.count > 50 ? '#fd7e14' : item.count > 20 ? '#ffc107' : '#28a745';
                                                     
-                                                    // Format amount label for X-axis
-                                                    const amountLabel = bin.label.split(' - ')[0].replace('₱', '').replace(/,/g, '');
-                                                    const amountNum = parseFloat(amountLabel);
-                                                    const amountDisplay = amountNum >= 1000000 ? `${(amountNum / 1000000).toFixed(0)}M` : 
-                                                                         amountNum >= 1000 ? `${(amountNum / 1000).toFixed(0)}K` : amountNum.toString();
+                                                    // Format amount for X-axis (use exact value, abbreviated)
+                                                    const amountDisplay = item.amount >= 1000000 ? `${(item.amount / 1000000).toFixed(1)}M` : 
+                                                                         item.amount >= 1000 ? `${(item.amount / 1000).toFixed(0)}K` : item.amount.toString();
                                                     
                                                     return `
                                                         <g>
                                                             <rect x="${x}" y="${y}" width="${barWidth}" height="${barHeight}" 
                                                                   fill="${barColor}" opacity="0.8" rx="2">
-                                                                <title>${bin.label}: ${bin.count} projects</title>
+                                                                <title>${item.label}: ${item.count} projects</title>
                                                             </rect>
                                                             <text x="${x + barWidth / 2}" y="${y - 8}" 
                                                                   style="font-size: 12px; fill: #333; text-anchor: middle; font-weight: 600;">
-                                                                ${bin.count}
+                                                                ${item.count}
                                                             </text>
                                                             <text x="${x + barWidth / 2}" y="${marginTop + plotHeight + 25}" 
                                                                   transform="rotate(-45, ${x + barWidth / 2}, ${marginTop + plotHeight + 25})"
-                                                                  style="font-size: 11px; fill: #666; text-anchor: end;">
+                                                                  style="font-size: 10px; fill: #666; text-anchor: end;">
                                                                 ${amountDisplay}
                                                             </text>
                                                         </g>
@@ -2376,13 +2372,13 @@
                                     // Store chart data for copying
                                     window.chartData = {
                                         amounts: amounts,
-                                        bins: sortedBins,
+                                        uniqueAmounts: sortedAmounts,
                                         totalProjects: amounts.length
                                     };
                                 }
 
-                                // Copy chart data to clipboard
-                                async function copyChartToClipboard() {
+                                // Copy Annex A-1 chart data to clipboard
+                                async function copyAnnexA1ChartToClipboard() {
                                     if (!window.chartData) {
                                         alert('Chart data not available');
                                         return;
@@ -2392,11 +2388,11 @@
                                     let text = 'Annex A-1 Project Amount Distribution\n';
                                     text += '='.repeat(50) + '\n';
                                     text += `Total Projects: ${data.totalProjects}\n\n`;
-                                    text += 'Amount Range | Count\n';
+                                    text += 'Amount | Count\n';
                                     text += '-'.repeat(30) + '\n';
                                     
-                                    data.bins.forEach(bin => {
-                                        text += `${bin.label} | ${bin.count}\n`;
+                                    data.uniqueAmounts.forEach(item => {
+                                        text += `${item.label} | ${item.count}\n`;
                                     });
                                     
                                     try {
