@@ -1574,6 +1574,63 @@ async def budget_amendments_search(q: str = Query("")):
     except Exception as e:
         return JSONResponse({"success": False, "error": str(e)}, status_code=500)
 
+@app.get("/api/budget/amendments/duplicates")
+async def budget_amendments_duplicates():
+    """Get duplicate detection results for budget amendments"""
+    try:
+        json_path = Path('static/data/duplicates_2026.json')
+        
+        if not json_path.exists():
+            return JSONResponse({
+                "success": False,
+                "error": "Duplicate data not available. Please run scripts/detect_duplicates.py first."
+            }, status_code=404)
+        
+        with open(json_path, 'r', encoding='utf-8') as f:
+            duplicates_data = json.load(f)
+        
+        return JSONResponse({
+            "success": True,
+            **duplicates_data
+        })
+    except Exception as e:
+        return JSONResponse({"success": False, "error": str(e)}, status_code=500)
+
+@app.get("/api/budget/amendments/annex-a1-amounts")
+async def budget_amendments_annex_a1_amounts():
+    """Get just the amounts from Annex A-1 projects for histogram (lightweight)"""
+    try:
+        json_path = Path('static/data/budget_amendments_2026.json')
+        
+        if not json_path.exists():
+            return JSONResponse({
+                "success": False,
+                "error": "Budget amendments data not available"
+            }, status_code=404)
+        
+        with open(json_path, 'r', encoding='utf-8') as f:
+            data = json.load(f)
+        
+        # Extract only Annex A-1 project amounts (much smaller payload)
+        annex_a1_projects = [
+            p for p in data.get('projects', [])
+            if p.get('source_sheet') == 'Annex A-1'
+        ]
+        
+        amounts = [
+            p.get('final_amount') or p.get('original_amount') or 0
+            for p in annex_a1_projects
+            if (p.get('final_amount') or p.get('original_amount') or 0) > 0
+        ]
+        
+        return JSONResponse({
+            "success": True,
+            "amounts": amounts,
+            "total_projects": len(amounts)
+        })
+    except Exception as e:
+        return JSONResponse({"success": False, "error": str(e)}, status_code=500)
+
 @app.get("/api/budget/amendments/department/{dept_id}/line-items")
 async def budget_amendments_department_line_items(dept_id: str):
     """Get detailed line items (Annex A) for a department"""

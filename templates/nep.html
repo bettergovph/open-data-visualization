@@ -130,6 +130,7 @@
                             <a href="#gab2026" class="budget-tab-btn" data-tab="gab2026">📕 GAB 2026</a>
                             <a href="#insertion" class="budget-tab-btn" data-tab="insertion">🧩 Insertions</a>
                             <a href="#win" class="budget-tab-btn" data-tab="win">📊 Win (Amendments)</a>
+                            <a href="#duplicate" class="budget-tab-btn" data-tab="duplicate">📊 Win (Duplicates)</a>
                         </div>
 
                         <div class="budget-tab-content">
@@ -664,6 +665,70 @@
                                 <!-- Departments Container -->
                                 <div id="win-departments-container"></div>
 
+                            </div>
+
+                            <!-- Duplicate Tab -->
+                            <div id="tab-duplicate" class="budget-tab-panel">
+                                <h3 class="budget-section-title">📊 Win (Duplicates)</h3>
+                                <p class="budget-section-desc">Track duplicate entries in budget amendments with similar names and amounts</p>
+
+                                <!-- Stats Cards -->
+                                <div class="duplicate-stats-grid"
+                                    style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-bottom: 2rem;">
+                                    <div class="stat-card"
+                                        style="background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); text-align: center;">
+                                        <h3 style="color: #0038A8; margin: 0 0 10px 0; font-size: 1.1em;">Total Projects</h3>
+                                        <p id="duplicate-total-projects"
+                                            style="font-size: 2em; font-weight: bold; color: #0038A8; margin: 0;">-</p>
+                                        <p style="font-size: 0.85em; color: #666; margin-top: 0.5rem;">Annex A-1 (all)</p>
+                                    </div>
+                                    <div class="stat-card"
+                                        style="background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); text-align: center;">
+                                        <h3 style="color: #0038A8; margin: 0 0 10px 0; font-size: 1.1em;">Duplicate Groups</h3>
+                                        <p id="duplicate-total-groups"
+                                            style="font-size: 2em; font-weight: bold; color: #667eea; margin: 0;">-</p>
+                                    </div>
+                                    <div class="stat-card"
+                                        style="background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); text-align: center;">
+                                        <h3 style="color: #0038A8; margin: 0 0 10px 0; font-size: 1.1em;">Items in Groups</h3>
+                                        <p id="duplicate-total-items"
+                                            style="font-size: 2em; font-weight: bold; color: #fd7e14; margin: 0;">-</p>
+                                    </div>
+                                    <div class="stat-card"
+                                        style="background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); text-align: center;">
+                                        <h3 style="color: #0038A8; margin: 0 0 10px 0; font-size: 1.1em;">Total Amount</h3>
+                                        <p id="duplicate-total-amount"
+                                            style="font-size: 1.8em; font-weight: bold; color: #dc3545; margin: 0;">-</p>
+                                    </div>
+                                </div>
+
+                                <!-- Loading -->
+                                <div id="duplicate-loading" style="text-align: center; padding: 2rem;">
+                                    <div
+                                        style="display: inline-block; width: 40px; height: 40px; border: 4px solid #f3f3f3; border-top: 4px solid #0038A8; border-radius: 50%; animation: spin 1s linear infinite;">
+                                    </div>
+                                    <p style="color: #666; margin-top: 10px;">Loading duplicate data...</p>
+                                </div>
+
+                                <!-- Error Message -->
+                                <div id="duplicate-error" style="display: none; text-align: center; padding: 2rem; color: #dc3545;"></div>
+
+                                <!-- Annex A-1 Distribution Chart -->
+                                <div id="annex-a1-histogram" style="display: none; background: white; padding: 2rem; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); margin-bottom: 2rem;">
+                                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+                                        <h4 style="margin: 0; color: #333; font-size: 1.3em;">📊 Annex A-1 Project Amount Distribution</h4>
+                                        <button id="copy-chart-btn" onclick="copyChartToClipboard()" 
+                                                style="padding: 0.5rem 1rem; background: #0038A8; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 0.9em; display: flex; align-items: center; gap: 0.5rem;"
+                                                onmouseover="this.style.background='#002d7a'" 
+                                                onmouseout="this.style.background='#0038A8'">
+                                            📋 Copy Chart
+                                        </button>
+                                    </div>
+                                    <div id="histogram-chart" style="min-height: 500px; display: flex; justify-content: center; align-items: center;"></div>
+                                </div>
+
+                                <!-- Duplicates Container -->
+                                <div id="duplicate-groups-container" style="display: none;"></div>
                             </div>
 
                             <script>
@@ -1940,11 +2005,429 @@
                                         });
                                     }
 
+                                    const duplicateTab = document.querySelector('[data-tab="duplicate"]');
+                                    if (duplicateTab) {
+                                        duplicateTab.addEventListener('click', () => {
+                                            if (!duplicateData) {
+                                                loadDuplicateData();
+                                            }
+                                        });
+                                    }
+
                                     // Load immediately if URL has #win
                                     if (window.location.hash === '#win') {
                                         loadWinData();
                                     }
+
+                                    // Load immediately if URL has #duplicate
+                                    if (window.location.hash === '#duplicate') {
+                                        loadDuplicateData();
+                                    }
                                 });
+
+                                // Load duplicate data
+                                let duplicateData = null;
+                                async function loadDuplicateData() {
+                                    try {
+                                        document.getElementById('duplicate-loading').style.display = 'block';
+                                        document.getElementById('duplicate-error').style.display = 'none';
+                                        document.getElementById('duplicate-groups-container').style.display = 'none';
+                                        document.getElementById('annex-a1-histogram').style.display = 'none';
+
+                                        console.log('Loading duplicate data...');
+                                        
+                                        // Load duplicates
+                                        const duplicatesResponse = await fetch('/api/budget/amendments/duplicates');
+                                        console.log('Duplicates response status:', duplicatesResponse.status);
+                                        
+                                        if (!duplicatesResponse.ok) {
+                                            throw new Error(`HTTP ${duplicatesResponse.status}: ${duplicatesResponse.statusText}`);
+                                        }
+
+                                        const duplicatesData = await duplicatesResponse.json();
+                                        console.log('Duplicates data loaded:', duplicatesData.success);
+                                        
+                                        if (!duplicatesData.success) {
+                                            throw new Error(duplicatesData.error || 'Failed to load duplicate data');
+                                        }
+
+                                        duplicateData = duplicatesData;
+                                        
+                                        // Hide loading and display duplicates first
+                                        document.getElementById('duplicate-loading').style.display = 'none';
+                                        displayDuplicates(duplicatesData);
+                                        
+                                        // Load Annex A-1 amounts for histogram and total project count (lightweight endpoint) - non-blocking
+                                        try {
+                                            const amountsResponse = await fetch('/api/budget/amendments/annex-a1-amounts');
+                                            if (amountsResponse.ok) {
+                                                const amountsData = await amountsResponse.json();
+                                                if (amountsData.success) {
+                                                    // Update total projects count
+                                                    if (amountsData.total_projects) {
+                                                        document.getElementById('duplicate-total-projects').textContent = amountsData.total_projects.toLocaleString();
+                                                    }
+                                                    
+                                                    // Display histogram
+                                                    if (amountsData.amounts && amountsData.amounts.length > 0) {
+                                                        displayAnnexA1Histogram(amountsData.amounts);
+                                                    }
+                                                }
+                                            }
+                                        } catch (histError) {
+                                            console.warn('Could not load histogram data:', histError);
+                                            // Don't fail the whole page if histogram fails
+                                        }
+                                        
+                                    } catch (error) {
+                                        console.error('Error loading duplicate data:', error);
+                                        document.getElementById('duplicate-loading').style.display = 'none';
+                                        showDuplicateError(error.message || 'Failed to load duplicate data');
+                                    }
+                                }
+
+                                function showDuplicateError(message) {
+                                    const errorDiv = document.getElementById('duplicate-error');
+                                    errorDiv.style.display = 'block';
+                                    errorDiv.innerHTML = `
+                                        <div style="background: #fee; border: 1px solid #fcc; padding: 1rem; border-radius: 8px;">
+                                            <p style="margin: 0 0 0.5rem 0; font-weight: bold;">❌ Error loading duplicates</p>
+                                            <p style="margin: 0; color: #666;">${message}</p>
+                                            <button onclick="loadDuplicateData()" style="margin-top: 10px; padding: 8px 16px; background: #0038A8; color: white; border: none; border-radius: 4px; cursor: pointer;">
+                                                Retry
+                                            </button>
+                                        </div>
+                                    `;
+                                }
+
+                                // Format amount as full number with commas (no abbreviations)
+                                function formatAmountFull(amount) {
+                                    if (!amount && amount !== 0) return '₱0';
+                                    return '₱' + Math.abs(amount).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+                                }
+
+                                function displayDuplicates(data) {
+                                    document.getElementById('duplicate-loading').style.display = 'none';
+                                    
+                                    const metadata = data.metadata || {};
+                                    const groups = data.duplicate_groups || [];
+                                    
+                                    // Update stats
+                                    document.getElementById('duplicate-total-groups').textContent = metadata.total_groups || groups.length;
+                                    document.getElementById('duplicate-total-items').textContent = metadata.total_items || groups.reduce((sum, g) => sum + (g.count || 0), 0);
+                                    const totalAmount = groups.reduce((sum, g) => sum + (g.total_amount || 0), 0);
+                                    document.getElementById('duplicate-total-amount').textContent = formatAmountFull(totalAmount);
+                                    
+                                    // Display groups
+                                    const container = document.getElementById('duplicate-groups-container');
+                                    container.style.display = 'block';
+                                    
+                                    if (groups.length === 0) {
+                                        container.innerHTML = `
+                                            <div class="tab-placeholder">
+                                                <p>No duplicates found.</p>
+                                            </div>
+                                        `;
+                                        return;
+                                    }
+                                    
+                                    // Sort by total amount descending
+                                    const sortedGroups = [...groups].sort((a, b) => (b.total_amount || 0) - (a.total_amount || 0));
+                                    
+                                    container.innerHTML = sortedGroups.map((group, idx) => {
+                                        const items = group.items || [];
+                                        const groupId = `duplicate-group-${group.group_id}`;
+                                        const itemsId = `duplicate-items-${group.group_id}`;
+                                        
+                                        return `
+                                            <div class="duplicate-group-card" style="background: white; padding: 1.5rem; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); margin-bottom: 1.5rem;">
+                                                <div id="${groupId}" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; padding-bottom: 0.75rem; border-bottom: 2px solid #e9ecef; cursor: pointer;" onclick="toggleDuplicateGroup('${group.group_id}')">
+                                                    <div style="flex: 1;">
+                                                        <div style="display: flex; align-items: center; gap: 0.5rem;">
+                                                            <span id="toggle-icon-${group.group_id}" style="font-size: 1.2em; transition: transform 0.3s;">▶</span>
+                                                            <h4 style="margin: 0 0 0.5rem 0; color: #333; font-size: 1.1em;">
+                                                                Group #${group.group_id} (${group.count || items.length} items)
+                                                            </h4>
+                                                        </div>
+                                                        ${group.source_excel ? `
+                                                            <div style="font-size: 0.8em; color: #0038A8; background: #e7f1ff; padding: 0.25rem 0.5rem; border-radius: 3px; margin-bottom: 0.5rem; display: inline-block; margin-left: 1.5rem;">
+                                                                📄 ${group.source_excel}
+                                                            </div>
+                                                        ` : ''}
+                                                        ${group.remarks ? `
+                                                            <div style="font-size: 0.85em; color: #666; background: #f8f9fa; padding: 0.5rem; border-radius: 4px; margin-top: 0.5rem; margin-left: 1.5rem;">
+                                                                <strong>Why duplicates:</strong> ${group.remarks}
+                                                            </div>
+                                                        ` : ''}
+                                                    </div>
+                                                    <div style="text-align: right; margin-left: 1rem;">
+                                                        <div style="font-size: 0.9em; color: #666;">Total Amount</div>
+                                                        <div style="font-size: 1.2em; font-weight: bold; color: #dc3545;">
+                                                            ${formatAmountFull(group.total_amount || 0)}
+                                                        </div>
+                                                        ${group.amount_range ? `
+                                                            <div style="font-size: 0.8em; color: #fd7e14; margin-top: 0.25rem;">
+                                                                Range: ${formatAmountFull(group.amount_range.min)} - ${formatAmountFull(group.amount_range.max)}
+                                                            </div>
+                                                            ${group.amount_range.difference > 0 ? `
+                                                                <div style="font-size: 0.75em; color: #999; margin-top: 0.25rem;">
+                                                                    Diff: ${formatAmountFull(group.amount_range.difference)} (${group.amount_range.difference_pct.toFixed(2)}%)
+                                                                </div>
+                                                            ` : ''}
+                                                        ` : ''}
+                                                    </div>
+                                                </div>
+                                                <div id="${itemsId}" style="margin-top: 1rem; display: none;">
+                                                    ${items.map((item, itemIdx) => {
+                                                        // Use the actual project name (child project), not the description
+                                                        const childProjectName = item.name || item.description || 'Unknown';
+                                                        const description = item.description || '';
+                                                        const amount = item.final_amount || item.original_amount || 0;
+                                                        const dept = item.department_id || 'UNKNOWN';
+                                                        const source = item.source_sheet || 'Unknown';
+                                                        const originalAmount = item.original_amount || 0;
+                                                        const finalAmount = item.final_amount || 0;
+                                                        const netChange = finalAmount - originalAmount;
+                                                        const region = item.location && item.location.region ? item.location.region : null;
+                                                        const sourceRow = item.source_row || null;
+                                                        const sourceColB = item.source_col_b || 'B';
+                                                        const sourceColC = item.source_col_c || 'C';
+                                                        const cellRef = sourceRow ? `${sourceColB}${sourceRow}:${sourceColC}${sourceRow}` : null;
+                                                        
+                                                        return `
+                                                            <div style="padding: 0.75rem; background: ${itemIdx % 2 === 0 ? '#f8f9fa' : 'white'}; border-left: 3px solid #667eea; margin-bottom: 0.5rem; border-radius: 4px;">
+                                                                <div style="display: flex; justify-content: space-between; align-items: start;">
+                                                                    <div style="flex: 1;">
+                                                                        <div style="font-weight: 600; color: #333; margin-bottom: 0.25rem; line-height: 1.4;">
+                                                                            ${childProjectName.replace(/\n/g, ' ').trim()}
+                                                                        </div>
+                                                                        ${description && description !== childProjectName ? `
+                                                                            <div style="font-size: 0.85em; color: #999; font-style: italic; margin-bottom: 0.25rem;">
+                                                                                ${description.replace(/\n/g, ' ').trim()}
+                                                                            </div>
+                                                                        ` : ''}
+                                                                        <div style="font-size: 0.85em; color: #666; margin-bottom: 0.25rem;">
+                                                                            <span style="background: #e9ecef; padding: 2px 6px; border-radius: 3px; margin-right: 0.5rem;">${dept}</span>
+                                                                            <span style="background: #e9ecef; padding: 2px 6px; border-radius: 3px; margin-right: 0.5rem;">${source}</span>
+                                                                            ${region ? `<span style="background: #d4edda; padding: 2px 6px; border-radius: 3px; margin-right: 0.5rem; color: #155724;">📍 ${region}</span>` : ''}
+                                                                            ${cellRef ? `<span style="background: #fff3cd; padding: 2px 6px; border-radius: 3px; color: #856404; font-family: monospace;">${cellRef}</span>` : ''}
+                                                                        </div>
+                                                                    </div>
+                                                                    <div style="text-align: right; margin-left: 1rem; min-width: 200px;">
+                                                                        ${originalAmount > 0 ? `
+                                                                            <div style="font-size: 0.85em; color: #666; margin-bottom: 0.25rem;">
+                                                                                Original: ${formatAmountFull(originalAmount)}
+                                                                            </div>
+                                                                        ` : ''}
+                                                                        <div style="font-size: 1.1em; font-weight: bold; color: #28a745; margin-bottom: 0.25rem;">
+                                                                            ${formatAmountFull(finalAmount || amount)}
+                                                                        </div>
+                                                                        ${netChange !== 0 ? `
+                                                                            <div style="font-size: 0.85em; color: ${netChange > 0 ? '#28a745' : '#dc3545'};">
+                                                                                ${netChange > 0 ? '+' : ''}${formatAmountFull(netChange)}
+                                                                            </div>
+                                                                        ` : ''}
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        `;
+                                                    }).join('')}
+                                                </div>
+                                            </div>
+                                        `;
+                                    }).join('');
+                                }
+
+                                // Toggle duplicate group expand/collapse
+                                function toggleDuplicateGroup(groupId) {
+                                    const itemsDiv = document.getElementById(`duplicate-items-${groupId}`);
+                                    const iconSpan = document.getElementById(`toggle-icon-${groupId}`);
+                                    
+                                    if (itemsDiv.style.display === 'none') {
+                                        itemsDiv.style.display = 'block';
+                                        iconSpan.textContent = '▼';
+                                        iconSpan.style.transform = 'rotate(0deg)';
+                                    } else {
+                                        itemsDiv.style.display = 'none';
+                                        iconSpan.textContent = '▶';
+                                        iconSpan.style.transform = 'rotate(0deg)';
+                                    }
+                                }
+
+                                // Display histogram of Annex A-1 project amounts
+                                function displayAnnexA1Histogram(amounts) {
+                                    if (!amounts || amounts.length === 0) {
+                                        return;
+                                    }
+
+                                    // Create bins for histogram (group amounts into ranges)
+                                    const bins = {};
+                                    const binSize = 5000000; // 5M bins
+                                    
+                                    amounts.forEach(amount => {
+                                        const bin = Math.floor(amount / binSize) * binSize;
+                                        const binLabel = `${formatAmountFull(bin)} - ${formatAmountFull(bin + binSize)}`;
+                                        bins[binLabel] = (bins[binLabel] || 0) + 1;
+                                    });
+
+                                    // Sort bins by amount
+                                    const sortedBins = Object.entries(bins)
+                                        .map(([label, count]) => {
+                                            const minAmount = parseFloat(label.split(' - ')[0].replace(/[₱,]/g, ''));
+                                            return { label, count, minAmount };
+                                        })
+                                        .sort((a, b) => a.minAmount - b.minAmount);
+
+                                    // Find max count for scaling (Y-axis = number of projects)
+                                    const maxCount = Math.max(...sortedBins.map(b => b.count));
+
+                                    // Create chart HTML
+                                    const chartDiv = document.getElementById('histogram-chart');
+                                    const chartHeight = 500;
+                                    const chartWidth = 1000;
+                                    const marginLeft = 90;
+                                    const marginRight = 30;
+                                    const marginTop = 30;
+                                    const marginBottom = 100;
+                                    const plotWidth = chartWidth - marginLeft - marginRight;
+                                    const plotHeight = chartHeight - marginTop - marginBottom;
+                                    const barWidth = Math.max(25, plotWidth / sortedBins.length - 2);
+
+                                    let chartHTML = `
+                                        <div style="overflow-x: auto; width: 100%; display: flex; justify-content: center;">
+                                            <svg width="${chartWidth}" height="${chartHeight + 50}" style="font-family: Arial, sans-serif;">
+                                                <!-- Y-axis label (Number of Projects) -->
+                                                <text x="30" y="${chartHeight / 2}" transform="rotate(-90, 30, ${chartHeight / 2})" 
+                                                      style="font-size: 14px; fill: #666; text-anchor: middle; font-weight: 600;">
+                                                    Number of Projects
+                                                </text>
+                                                
+                                                <!-- X-axis label (Price/Amount) -->
+                                                <text x="${chartWidth / 2}" y="${chartHeight + 40}" 
+                                                      style="font-size: 14px; fill: #666; text-anchor: middle; font-weight: 600;">
+                                                    Price (Amount in ₱)
+                                                </text>
+                                                
+                                                <!-- Y-axis ticks and grid lines (Number of Projects) -->
+                                                ${[0, 0.25, 0.5, 0.75, 1].map((ratio) => {
+                                                    const y = marginTop + (plotHeight * (1 - ratio));
+                                                    const value = Math.round(maxCount * ratio);
+                                                    return `
+                                                        <line x1="${marginLeft}" y1="${y}" x2="${chartWidth - marginRight}" y2="${y}" 
+                                                              stroke="#e9ecef" stroke-width="1" stroke-dasharray="2,2"/>
+                                                        <text x="${marginLeft - 15}" y="${y + 5}" style="font-size: 12px; fill: #666; text-anchor: end; font-weight: 500;">
+                                                            ${value}
+                                                        </text>
+                                                    `;
+                                                }).join('')}
+                                                
+                                                <!-- X-axis baseline -->
+                                                <line x1="${marginLeft}" y1="${marginTop + plotHeight}" 
+                                                      x2="${chartWidth - marginRight}" y2="${marginTop + plotHeight}" 
+                                                      stroke="#333" stroke-width="2"/>
+                                                
+                                                <!-- Y-axis baseline -->
+                                                <line x1="${marginLeft}" y1="${marginTop}" 
+                                                      x2="${marginLeft}" y2="${marginTop + plotHeight}" 
+                                                      stroke="#333" stroke-width="2"/>
+                                                
+                                                <!-- Bars (X-axis = amount ranges, Y-axis = count) -->
+                                                ${sortedBins.map((bin, idx) => {
+                                                    const barHeight = (bin.count / maxCount) * plotHeight;
+                                                    const x = marginLeft + (idx * (plotWidth / sortedBins.length)) + 2;
+                                                    const y = marginTop + plotHeight - barHeight;
+                                                    const barColor = bin.count > 100 ? '#dc3545' : bin.count > 50 ? '#fd7e14' : bin.count > 20 ? '#ffc107' : '#28a745';
+                                                    
+                                                    // Format amount label for X-axis
+                                                    const amountLabel = bin.label.split(' - ')[0].replace('₱', '').replace(/,/g, '');
+                                                    const amountNum = parseFloat(amountLabel);
+                                                    const amountDisplay = amountNum >= 1000000 ? `${(amountNum / 1000000).toFixed(0)}M` : 
+                                                                         amountNum >= 1000 ? `${(amountNum / 1000).toFixed(0)}K` : amountNum.toString();
+                                                    
+                                                    return `
+                                                        <g>
+                                                            <rect x="${x}" y="${y}" width="${barWidth}" height="${barHeight}" 
+                                                                  fill="${barColor}" opacity="0.8" rx="2">
+                                                                <title>${bin.label}: ${bin.count} projects</title>
+                                                            </rect>
+                                                            <text x="${x + barWidth / 2}" y="${y - 8}" 
+                                                                  style="font-size: 12px; fill: #333; text-anchor: middle; font-weight: 600;">
+                                                                ${bin.count}
+                                                            </text>
+                                                            <text x="${x + barWidth / 2}" y="${marginTop + plotHeight + 25}" 
+                                                                  transform="rotate(-45, ${x + barWidth / 2}, ${marginTop + plotHeight + 25})"
+                                                                  style="font-size: 11px; fill: #666; text-anchor: end;">
+                                                                ${amountDisplay}
+                                                            </text>
+                                                        </g>
+                                                    `;
+                                                }).join('')}
+                                            </svg>
+                                        </div>
+                                    `;
+
+                                    chartDiv.innerHTML = chartHTML;
+                                    document.getElementById('annex-a1-histogram').style.display = 'block';
+                                    
+                                    // Ensure chart container is properly sized
+                                    const chartContainer = document.getElementById('annex-a1-histogram');
+                                    chartContainer.style.display = 'block';
+                                    
+                                    // Store chart data for copying
+                                    window.chartData = {
+                                        amounts: amounts,
+                                        bins: sortedBins,
+                                        totalProjects: amounts.length
+                                    };
+                                }
+
+                                // Copy chart data to clipboard
+                                async function copyChartToClipboard() {
+                                    if (!window.chartData) {
+                                        alert('Chart data not available');
+                                        return;
+                                    }
+                                    
+                                    const data = window.chartData;
+                                    let text = 'Annex A-1 Project Amount Distribution\n';
+                                    text += '='.repeat(50) + '\n';
+                                    text += `Total Projects: ${data.totalProjects}\n\n`;
+                                    text += 'Amount Range | Count\n';
+                                    text += '-'.repeat(30) + '\n';
+                                    
+                                    data.bins.forEach(bin => {
+                                        text += `${bin.label} | ${bin.count}\n`;
+                                    });
+                                    
+                                    try {
+                                        await navigator.clipboard.writeText(text);
+                                        const btn = document.getElementById('copy-chart-btn');
+                                        const originalText = btn.innerHTML;
+                                        btn.innerHTML = '✅ Copied!';
+                                        btn.style.background = '#28a745';
+                                        setTimeout(() => {
+                                            btn.innerHTML = originalText;
+                                            btn.style.background = '#0038A8';
+                                        }, 2000);
+                                    } catch (err) {
+                                        // Fallback for older browsers
+                                        const textarea = document.createElement('textarea');
+                                        textarea.value = text;
+                                        document.body.appendChild(textarea);
+                                        textarea.select();
+                                        document.execCommand('copy');
+                                        document.body.removeChild(textarea);
+                                        
+                                        const btn = document.getElementById('copy-chart-btn');
+                                        const originalText = btn.innerHTML;
+                                        btn.innerHTML = '✅ Copied!';
+                                        btn.style.background = '#28a745';
+                                        setTimeout(() => {
+                                            btn.innerHTML = originalText;
+                                            btn.style.background = '#0038A8';
+                                        }, 2000);
+                                    }
+                                }
                             </script>
 
                         </div>
@@ -5424,6 +5907,18 @@
                         setTimeout(() => {
                             loadInsertionPivot();
                         }, 150);
+                    } else if (tabName === 'win') {
+                        // Load Win (Amendments) data
+                        if (!winAmendmentsData) {
+                            loadWinData();
+                        }
+                    } else if (tabName === 'duplicate') {
+                        // Load Win (Duplicates) data
+                        if (typeof loadDuplicateData === 'function') {
+                            loadDuplicateData();
+                        } else {
+                            console.warn('⚠️ loadDuplicateData function not available yet');
+                        }
                     } else if (tabName === 'trends') {
                         // Load trends data when tab is activated (v2.0 - 2025-01-05)
                         loadDepartmentTrends();
@@ -7425,14 +7920,14 @@
 
                 // Check for hash in URL and switch to that tab
                 const hash = window.location.hash.substring(1); // Remove the # character
-                if (hash && ['visual', 'browser', 'analysis', 'gab2026', 'insertion'].includes(hash)) {
+                if (hash && ['visual', 'browser', 'analysis', 'gab2026', 'insertion', 'win', 'duplicate'].includes(hash)) {
                     switchToTab(hash, false); // Don't update hash since we're reading from it
                 }
 
                 // Listen for hash changes
                 window.addEventListener('hashchange', function () {
                     const newHash = window.location.hash.substring(1);
-                    if (newHash && ['visual', 'browser', 'analysis', 'gab2026', 'insertion'].includes(newHash)) {
+                    if (newHash && ['visual', 'browser', 'analysis', 'gab2026', 'insertion', 'win', 'duplicate'].includes(newHash)) {
                         switchToTab(newHash, false);
                     }
                 });

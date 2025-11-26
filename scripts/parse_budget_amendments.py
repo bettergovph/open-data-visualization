@@ -2145,120 +2145,123 @@ class BudgetAmendmentParser:
             return []
     
     def parse_da_farm_roads(self) -> List[Dict]:
-        """Parse Annex A-1 DA Farm-to-Market Roads"""
+        """
+        Parse Annex A-1 DA Farm-to-Market Roads
+        
+        Structure:
+        - B2: GAB Volume FY 2026
+        - B3: Department-Parent Project
+        - B6: Type (DELETE+CREATE = REPLACE)
+        - B9: Same as B3
+        - B10-11: Column title (multi-purpose description)
+        - C10-11: Column title (amount)
+        
+        Parsing Pattern:
+        - B column in bold = parent project (first bold) or region (subsequent bold)
+        - Normal text in B = child projects for that project-region
+        - Column C = amount
+        - Amount on parent project and region = totals
+        """
         file_path = self.base_dir / "Annex A-1 DA-Farm-to-Market Roads.xlsx"
         
-        print(f"🚜 Parsing DA Farm-to-Market Roads...")
+        print(f"🚜 Parsing DA Farm-to-Market Roads (Annex A-1)...")
         
         try:
             import openpyxl
-            wb = openpyxl.load_workbook(file_path, data_only=True)
+            # Load with formulas to detect bold formatting
+            wb = openpyxl.load_workbook(file_path, data_only=False)
             ws = wb[wb.sheetnames[0]]
+            
+            # Also load values for reading amounts
+            wb_values = openpyxl.load_workbook(file_path, data_only=True)
+            ws_val = wb_values[wb_values.sheetnames[0]]
             
             projects_data = []
             
-            # Find header row (look for "NAME OF PROJECTS" or "AMOUNT")
-            header_row = None
-            for row_idx in range(1, min(20, ws.max_row + 1)):
-                row_values = [str(ws.cell(row_idx, col).value or '').strip() for col in range(1, min(15, ws.max_column + 1))]
-                row_str = ' '.join(row_values).lower()
-                if ('project' in row_str and 'amount' in row_str) or ('name' in row_str and 'project' in row_str):
-                    header_row = row_idx
-                    break
-                
-            if header_row is None:
-                print(f"      ⚠️  Could not find header row")
-                wb.close()
-                return []
+            # Data starts after row 11 (rows 10-11 are column headers)
+            data_start_row = 12
+            current_parent_project = None
+            current_region = None
             
-            # Find column indices
-            col_project = None
-            col_amount = None
-            col_region = None
-            
-            for col_idx in range(1, ws.max_column + 1):
-                cell_val = str(ws.cell(header_row, col_idx).value or '').lower()
-                if 'project' in cell_val or 'name' in cell_val:
-                    col_project = col_idx
-                if 'amount' in cell_val or 'pesos' in cell_val:
-                    col_amount = col_idx
-                if 'region' in cell_val:
-                    col_region = col_idx
-            
-            # Parse data rows
-            current_category = None
-            for row_idx in range(header_row + 1, ws.max_row + 1):
-                project_name = None
-                region = None
-                amount = 0.0
+            for row_idx in range(data_start_row, ws.max_row + 1):
+                # Get cell from formula workbook (for bold detection) and values workbook (for data)
+                cell_b = ws.cell(row_idx, 2)  # Column B
+                cell_c = ws.cell(row_idx, 3)  # Column C
+                cell_b_val = ws_val.cell(row_idx, 2)
+                cell_c_val = ws_val.cell(row_idx, 3)
                 
-                # Get project name
-                if col_project:
-                    project_val = ws.cell(row_idx, col_project).value
-                    if project_val:
-                        project_name = str(project_val).strip()
+                # Get values
+                b_value = cell_b_val.value
+                c_value = cell_c_val.value
                 
-                # Get amount
-                if col_amount:
-                    amount_val = ws.cell(row_idx, col_amount).value
-                    amount = self.parse_amount(amount_val)
-                
-                # Get region (might be in project name or separate column)
-                if col_region:
-                    region_val = ws.cell(row_idx, col_region).value
-                    if region_val:
-                        region = str(region_val).strip()
-                
-                # Check if this is a category header (like "REPAIR/ REHABILITATION")
-                if project_name and len(project_name) > 10 and amount > 1000000000:  # Large amounts might be category totals
-                    if any(keyword in project_name.upper() for keyword in ['REPAIR', 'REHABILITATION', 'CONSTRUCTION', 'REGION']):
-                        current_category = project_name
-                        continue
-                
-                # Check if this is a region header
-                if project_name and 'Region' in project_name and amount > 100000000:
-                    region = project_name
+                # Skip empty rows
+                if not b_value and not c_value:
                     continue
                 
-                # Only create project if we have name and amount
-                if project_name and len(project_name) > 3 and amount > 0:
-                    # Skip if it looks like a header or total
-                    if any(keyword in project_name.upper() for keyword in ['TOTAL', 'SUBTOTAL', 'GRAND', 'STATUS', 'VALIDATION']):
+                # Check if cell B is bold
+                is_bold = False
+                if cell_b.font and hasattr(cell_b.font, 'bold'):
+                    is_bold = cell_b.font.bold
+                
+                # Convert values to strings/numbers
+                b_text = str(b_value).strip() if b_value else ""
+                c_amount = self.parse_amount(c_value)
+                
+                # If bold, it's either a parent project or a region
+                if is_bold and b_text:
+                    # Check if it's a region (starts with "Region" or contains region pattern)
+                    if b_text.upper().startswith('REGION') or 'REGION' in b_text.upper():
+                        # This is a region header
+                        current_region = b_text.strip()
+                        # Region amount is the total for that region
+                        print(f"      📍 Region: {current_region} (Total: {c_amount:,.0f})")
+                    else:
+                        # This is a parent project
+                        current_parent_project = b_text.strip()
+                        current_region = None  # Reset region when new parent project starts
+                        # Parent project amount is the total for that project
+                        print(f"      🏗️  Parent Project: {current_parent_project[:60]}... (Total: {c_amount:,.0f})")
+                elif not is_bold and b_text and c_amount > 0:
+                    # This is a child project (normal text with amount)
+                    if not current_parent_project:
+                        # Skip if we haven't found a parent project yet
                         continue
                     
                     self.proj_counter += 1
                     
-                    # Extract region from name if not in separate column
-                    if not region and 'Region' in project_name:
-                        parts = project_name.split('-', 1)
-                        if len(parts) > 1:
-                            region = parts[0].strip()
-                            project_name = parts[1].strip()
-                    
+                    # Create child project entry
                     projects_data.append({
                         "id": f"DA-FMR-{self.proj_counter:04d}",
                         "program_id": None,
                         "department_id": "DA",
-                        "name": project_name,
-                        "description": f"Farm-to-Market Road{(' - ' + current_category) if current_category else ''}",
+                        "name": b_text.strip(),
+                        "description": f"Farm-to-Market Road - {current_parent_project[:50]}",
+                        "parent_project": current_parent_project,
                         "location": {
-                            "region": region,
+                            "region": current_region,
                             "province": None,
                             "municipality": None,
                             "barangay": None
                         },
-                        "original_amount": amount,
-                        "final_amount": amount,
+                        "original_amount": c_amount,
+                        "final_amount": c_amount,
                         "net_change": 0.0,
                         "percent_change": 0.0,
                         "amendments": [],
                         "revised_name": None,
                         "page_reference": None,
-                        "source_sheet": "Annex A-1"
+                        "source_sheet": "Annex A-1",
+                        "source_row": row_idx,
+                        "source_col_b": "B",
+                        "source_col_c": "C",
+                        "is_total": False  # Child projects are not totals
                     })
             
             wb.close()
-            print(f"✅ Parsed {len(projects_data)} farm road projects")
+            wb_values.close()
+            
+            print(f"✅ Parsed {len(projects_data)} farm road child projects")
+            print(f"   📊 Parent projects and regions tracked (totals stored in parent/region rows)")
             return projects_data
             
         except Exception as e:
