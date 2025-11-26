@@ -277,6 +277,12 @@
                 throw new Error(duplicatesData.error || 'Failed to load duplicate data');
             }
             
+            console.log('Mobile: Duplicate data loaded:', {
+                success: duplicatesData.success,
+                groupsCount: duplicatesData.duplicate_groups?.length || 0,
+                metadata: duplicatesData.metadata
+            });
+            
             // Display duplicates
             displayMobileDuplicates(duplicatesData);
             
@@ -329,6 +335,11 @@
         if (amountEl) amountEl.textContent = formatAmountFull(totalAmount);
         
         console.log('Mobile duplicate stats:', { totalGroups, totalItems, totalAmount });
+        
+        if (!container) {
+            console.error('Mobile: duplicate-groups-container not found');
+            return;
+        }
         
         container.style.display = 'block';
         
