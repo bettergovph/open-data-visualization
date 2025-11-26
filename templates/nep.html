@@ -2892,7 +2892,14 @@
                                     `;
 
                                     chartDiv.innerHTML = chartHTML;
-                                    document.getElementById('annex-a5-histogram').style.display = 'block';
+                                    
+                                    const histogramContainer = document.getElementById('annex-a5-histogram');
+                                    if (histogramContainer) {
+                                        histogramContainer.style.display = 'block';
+                                        console.log('DPWH histogram displayed');
+                                    } else {
+                                        console.error('annex-a5-histogram container not found');
+                                    }
                                     
                                     // Store chart data for copying
                                     window.dpwhChartData = {
