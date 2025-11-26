@@ -38,6 +38,14 @@ class DuplicateDetector:
         # Convert to uppercase
         name = name.upper()
         
+        # Remove funding source indicators (GOP, Loan proceeds, etc.) - these are not part of project identity
+        # Projects can be: GOP only, Loan proceeds only, or both - but funding source doesn't make them different projects
+        name = re.sub(r'\bGOP\b', '', name, flags=re.IGNORECASE)  # Remove standalone GOP
+        name = re.sub(r'\bLOAN\s+PROCEEDS\b', '', name, flags=re.IGNORECASE)  # Remove "LOAN PROCEEDS"
+        name = re.sub(r'\bLOAN\s+PROCEED\b', '', name, flags=re.IGNORECASE)  # Remove "LOAN PROCEED" (singular)
+        name = re.sub(r'\bPROCEEDS\b', '', name, flags=re.IGNORECASE)  # Remove standalone PROCEEDS
+        name = re.sub(r'\bLOAN\b', '', name, flags=re.IGNORECASE)  # Remove standalone LOAN
+        
         # Remove common prefixes/suffixes
         name = re.sub(r'^(CONSTRUCTION OF|CONCRETING OF|REPAIR/|REHABILITATION AND|REHABILITATION OF)\s+', '', name)
         name = re.sub(r'\s+(FMR|PHASE\s+[IVXLCDM]+|PHASE\s+\d+)$', '', name)
@@ -115,67 +123,128 @@ class DuplicateDetector:
         print(f"   Amount similarity threshold: {amount_similarity_threshold:.0%}")
         print(f"   Minimum amount: ₱{min_amount:,.0f}")
         
-        # Group by department first to reduce comparisons
-        dept_groups = defaultdict(list)
-        for idx, item in enumerate(line_items):
-            dept_id = item.get('department_id', 'UNKNOWN')
-            dept_groups[dept_id].append((idx, item))
+        # For Annex A-5 with exact amount matching, use optimized grouping by amount first
+        use_exact_amount = (source_filter == "Annex A-5")
         
-        duplicate_groups = []
+        all_groups = []  # Collect all groups from both paths
         total_comparisons = 0
         
-        for dept_id, items in dept_groups.items():
-            # Compare all pairs within the same department
-            for i, (idx1, item1) in enumerate(items):
-                if idx1 in processed:
-                    continue
+        if use_exact_amount:
+            # Fast path: Group by exact amount first, then compare names within each amount group
+            amount_groups = defaultdict(list)
+            for idx, item in enumerate(line_items):
+                amount = abs(item.get('final_amount', 0) or item.get('original_amount', 0))
+                if amount >= min_amount:
+                    amount_groups[amount].append((idx, item))
+            
+            for exact_amount, items in amount_groups.items():
+                if len(items) < 2:
+                    continue  # Need at least 2 items with same amount
                 
-                name1 = item1.get('description', '') or item1.get('name', '')
-                amount1 = abs(item1.get('final_amount', 0) or item1.get('original_amount', 0))
-                region1 = None
-                if item1.get('location') and isinstance(item1.get('location'), dict):
-                    region1 = item1.get('location', {}).get('region')
+                # Group by region within this amount group
+                region_groups = defaultdict(list)
+                for idx, item in items:
+                    region = None
+                    if item.get('location') and isinstance(item.get('location'), dict):
+                        region = item.get('location', {}).get('region')
+                    region_groups[region].append((idx, item))
                 
-                if amount1 < min_amount:
-                    continue
-                
-                group = [item1]
-                group_indices = [idx1]
-                
-                for j, (idx2, item2) in enumerate(items[i+1:], start=i+1):
-                    if idx2 in processed:
+                # Compare names within each region group
+                for region, region_items in region_groups.items():
+                    if len(region_items) < 2:
                         continue
                     
-                    name2 = item2.get('description', '') or item2.get('name', '')
-                    amount2 = abs(item2.get('final_amount', 0) or item2.get('original_amount', 0))
-                    region2 = None
-                    if item2.get('location') and isinstance(item2.get('location'), dict):
-                        region2 = item2.get('location', {}).get('region')
-                    
-                    if amount2 < min_amount:
+                    # Compare all pairs within this region/amount group
+                    for i, (idx1, item1) in enumerate(region_items):
+                        if idx1 in processed:
+                            continue
+                        
+                        name1 = item1.get('description', '') or item1.get('name', '')
+                        group = [item1]
+                        group_indices = [idx1]
+                        
+                        for j, (idx2, item2) in enumerate(region_items[i+1:], start=i+1):
+                            if idx2 in processed:
+                                continue
+                            
+                            name2 = item2.get('description', '') or item2.get('name', '')
+                            total_comparisons += 1
+                            
+                            # Only check name similarity (amount is already exact match)
+                            name_sim = self.similarity(name1, name2)
+                            
+                            if name_sim >= name_similarity_threshold:
+                                group.append(item2)
+                                group_indices.append(idx2)
+                                processed.add(idx2)
+                        
+                        if len(group) > 1:
+                            processed.add(idx1)
+                            all_groups.append(group)
+        else:
+            # Original algorithm for approximate amount matching
+            dept_groups = defaultdict(list)
+            for idx, item in enumerate(line_items):
+                dept_id = item.get('department_id', 'UNKNOWN')
+                dept_groups[dept_id].append((idx, item))
+            
+            for dept_id, items in dept_groups.items():
+                # Compare all pairs within the same department
+                for i, (idx1, item1) in enumerate(items):
+                    if idx1 in processed:
                         continue
                     
-                    # IMPORTANT: Only consider duplicates if they're from the same region
-                    # This prevents grouping items from different regions as duplicates
-                    if region1 and region2 and region1 != region2:
-                        continue  # Different regions, not duplicates
-                    if (region1 and not region2) or (not region1 and region2):
-                        continue  # One has region, one doesn't - not duplicates
+                    name1 = item1.get('description', '') or item1.get('name', '')
+                    amount1 = abs(item1.get('final_amount', 0) or item1.get('original_amount', 0))
+                    region1 = None
+                    if item1.get('location') and isinstance(item1.get('location'), dict):
+                        region1 = item1.get('location', {}).get('region')
                     
-                    total_comparisons += 1
+                    if amount1 < min_amount:
+                        continue
                     
-                    # Calculate similarities
-                    name_sim = self.similarity(name1, name2)
-                    amount_sim = self.amount_similarity(amount1, amount2)
+                    group = [item1]
+                    group_indices = [idx1]
                     
-                    # Check if both thresholds are met
-                    if name_sim >= name_similarity_threshold and amount_sim >= amount_similarity_threshold:
-                        group.append(item2)
-                        group_indices.append(idx2)
-                        processed.add(idx2)
-                
-                if len(group) > 1:
-                    processed.add(idx1)
+                    for j, (idx2, item2) in enumerate(items[i+1:], start=i+1):
+                        if idx2 in processed:
+                            continue
+                        
+                        name2 = item2.get('description', '') or item2.get('name', '')
+                        amount2 = abs(item2.get('final_amount', 0) or item2.get('original_amount', 0))
+                        region2 = None
+                        if item2.get('location') and isinstance(item2.get('location'), dict):
+                            region2 = item2.get('location', {}).get('region')
+                        
+                        if amount2 < min_amount:
+                            continue
+                        
+                        # IMPORTANT: Only consider duplicates if they're from the same region
+                        if region1 and region2 and region1 != region2:
+                            continue
+                        if (region1 and not region2) or (not region1 and region2):
+                            continue
+                        
+                        total_comparisons += 1
+                        
+                        # Calculate similarities
+                        name_sim = self.similarity(name1, name2)
+                        amount_sim = self.amount_similarity(amount1, amount2)
+                        amount_match = amount_sim >= amount_similarity_threshold
+                        
+                        # Check if both thresholds are met
+                        if name_sim >= name_similarity_threshold and amount_match:
+                            group.append(item2)
+                            group_indices.append(idx2)
+                            processed.add(idx2)
+                    
+                    if len(group) > 1:
+                        processed.add(idx1)
+                        all_groups.append(group)
+        
+        # Process all groups into duplicate_groups format
+        duplicate_groups = []
+        for group in all_groups:
                     
                     # Calculate average similarities for the group
                     group_name_sims = []
@@ -201,9 +270,12 @@ class DuplicateDetector:
                     
                     remarks = []
                     remarks.append(f"Name similarity: {avg_name_sim:.1%} (threshold: {name_similarity_threshold:.0%})")
-                    remarks.append(f"Amount similarity: {avg_amount_sim:.1%} (threshold: {amount_similarity_threshold:.0%})")
-                    if amount_diff_pct > 0:
-                        remarks.append(f"Amount difference: {amount_diff_pct:.2f}% between items")
+                    if use_exact_amount:
+                        remarks.append("Exact amount match (all items have identical amounts)")
+                    else:
+                        remarks.append(f"Amount similarity: {avg_amount_sim:.1%} (threshold: {amount_similarity_threshold:.0%})")
+                        if amount_diff_pct > 0:
+                            remarks.append(f"Amount difference: {amount_diff_pct:.2f}% between items")
                     
                     # Check if names are very similar
                     normalized_names = [self.normalize_name(item.get('description', '') or item.get('name', '')) for item in group]
