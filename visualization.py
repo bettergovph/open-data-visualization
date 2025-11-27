@@ -1194,6 +1194,121 @@ async def budget_roads_cost_analysis_api():
     except Exception as e:
         return JSONResponse({"success": False, "error": str(e)}, status_code=500)
 
+@app.get("/api/budget/anti-zero-analysis")
+async def budget_anti_zero_analysis_api():
+    """Get analysis of uniform decrease patterns in Annex A-5 projects (Column O to Column S)"""
+    try:
+        from collections import defaultdict
+        
+        # Load uniform decreases data (all patterns)
+        uniform_path = Path('static/data/annex_a5_uniform_decreases.json')
+        if uniform_path.exists():
+            with open(uniform_path, 'r', encoding='utf-8') as f:
+                uniform_data = json.load(f)
+            
+            patterns = uniform_data.get('patterns', [])
+            metadata = uniform_data.get('metadata', {})
+            
+            # Group by decrease percentage for chart
+            by_percentage = []
+            for pattern in patterns:
+                by_percentage.append({
+                    'decrease_percentage': pattern['decrease_percentage'],
+                    'match_count': pattern['match_count'],
+                    'total_column_o_amount': pattern['total_column_o_amount'],
+                    'total_column_s_amount': pattern['total_column_s_amount'],
+                    'total_decrease': pattern['total_decrease']
+                })
+            
+            # Sort by percentage for chart
+            by_percentage.sort(key=lambda x: x['decrease_percentage'])
+            
+            total_projects = metadata.get('total_projects', 0)
+            total_matches = sum(p['match_count'] for p in patterns)
+            percentage = (total_matches / total_projects * 100) if total_projects > 0 else 0.0
+            
+            summary = {
+                "total_matches": total_matches,
+                "total_projects": total_projects,
+                "percentage": percentage,
+                "unique_patterns": len(patterns),
+                "total_column_o_amount": sum(p['total_column_o_amount'] for p in patterns),
+                "total_column_s_amount": sum(p['total_column_s_amount'] for p in patterns),
+                "total_decrease": sum(p['total_decrease'] for p in patterns)
+            }
+            
+            return JSONResponse({
+                "success": True,
+                "summary": summary,
+                "by_percentage": by_percentage,
+                "top_patterns": sorted(patterns, key=lambda x: x['match_count'], reverse=True)[:20]
+            })
+        
+        # Fallback to old 3.1906% data if uniform decreases not available
+        json_path = Path('static/data/annex_a5_decreased_31pct.json')
+        if not json_path.exists():
+            return JSONResponse({"success": False, "error": "Anti-zero analysis data not available. Please run scripts/find_uniform_decreases.py first."}, status_code=404)
+        
+        with open(json_path, 'r', encoding='utf-8') as f:
+            data = json.load(f)
+        
+        matches = data.get('matches', [])
+        metadata = data.get('metadata', {})
+        
+        if not matches:
+            return JSONResponse({
+                "success": True,
+                "summary": {
+                    "total_matches": 0,
+                    "total_projects": metadata.get('total_items', 0),
+                    "percentage": 0.0,
+                    "unique_patterns": 0,
+                    "total_column_o_amount": 0,
+                    "total_column_s_amount": 0,
+                    "total_decrease": 0
+                },
+                "by_percentage": [],
+                "top_patterns": []
+            })
+        
+        # For single pattern, create by_percentage array
+        total_projects = metadata.get('total_items', 0)
+        percentage = (len(matches) / total_projects * 100) if total_projects > 0 else 0.0
+        
+        total_o = sum(m['project']['column_o_amount'] for m in matches)
+        total_s = sum(m['project']['column_s_amount'] for m in matches)
+        
+        summary = {
+            "total_matches": len(matches),
+            "total_projects": total_projects,
+            "percentage": percentage,
+            "unique_patterns": 1,
+            "total_column_o_amount": total_o,
+            "total_column_s_amount": total_s,
+            "total_decrease": total_o - total_s
+        }
+        
+        # Get the decrease percentage from first match
+        first_decrease = matches[0]['decrease']['percentage'] if matches else 0
+        
+        return JSONResponse({
+            "success": True,
+            "summary": summary,
+            "by_percentage": [{
+                'decrease_percentage': first_decrease,
+                'match_count': len(matches),
+                'total_column_o_amount': total_o,
+                'total_column_s_amount': total_s,
+                'total_decrease': total_o - total_s
+            }],
+            "top_patterns": []
+        })
+        
+    except Exception as e:
+        import traceback
+        traceback.print_exc()
+        return JSONResponse({"success": False, "error": str(e)}, status_code=500)
+
 @app.get("/api/budget/anomalies/count")
 async def budget_anomalies_count_api(year: str = "2025"):
     """Get count of budget anomalies for a specific year - no authentication required"""
