@@ -122,6 +122,7 @@ function toggleMobileMenu() {
                     <a href="#trends" class="budget-tab-btn" data-tab="trends">📈 Trends</a>
                     <a href="#resu" class="budget-tab-btn" data-tab="resu">🔄 Resurrection</a>
                     <a href="#roads" class="budget-tab-btn" data-tab="roads">🛣️ Roads</a>
+                    <a href="#zero" class="budget-tab-btn" data-tab="zero">🚫 Anti-zero</a>
                 </div>
                 
                 <div class="budget-tab-content">
@@ -7971,6 +7972,77 @@ async function copyChartToClipboard(containerId, buttonId) {
                         </div>
                     </div>
                 </div>
+                
+                <!-- Anti-zero Tab -->
+                <div id="tab-zero" class="budget-tab-panel">
+                    <h3 class="budget-section-title">🚫 Anti-zero: Uniform Percentage Decrease Analysis</h3>
+                    <p class="budget-section-desc">Analysis of Annex A-5 projects revealing 105 different uniform decrease patterns affecting 9,183 projects (53.5%). Each pattern represents a fixed percentage decrease from Column O (GAB/original) to Column S (Final) applied systematically across multiple projects, suggesting uniform budget adjustments that may obscure original rounded allocations.</p>
+                    
+                    <!-- Loading Spinner -->
+                    <div id="zero-loading" style="text-align: center; padding: 2rem;">
+                        <div class="spinner" style="width: 40px; height: 40px; border: 4px solid #f3f3f3; border-top: 4px solid #0038A8; border-radius: 50%; animation: spin 1s linear infinite; margin: 0 auto;"></div>
+                        <p style="color: #666; margin-top: 1rem;">Loading analysis data...</p>
+                    </div>
+                    
+                    <!-- Error Message -->
+                    <div id="zero-error" style="display: none; text-align: center; padding: 2rem; color: #dc3545; background: #f8d7da; border-radius: 8px; margin: 2rem 0;"></div>
+                    
+                    <!-- Info Note -->
+                    <div style="background: #fff3cd; border-left: 4px solid #ffc107; padding: 1rem; margin: 1.5rem 0; border-radius: 4px; display: none;" id="zero-info">
+                        <p style="margin: 0; color: #856404; font-size: 0.95em;">
+                            <strong>Finding:</strong> Analysis of 17,179 Annex A-5 projects revealed <strong>105 different uniform decrease patterns</strong>, affecting <strong>9,183 projects (53.5%)</strong>. Each pattern represents a fixed percentage decrease from Column O (GAB/original) to Column S (Final) applied systematically across multiple projects. The top pattern affects 544 projects with a 17.80% decrease. This systematic application of fixed percentage reductions suggests uniform budget adjustments that may obscure original rounded allocations.
+                        </p>
+                    </div>
+                    
+                    <!-- Stats Cards -->
+                    <div id="zero-stats" style="display: none; display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1rem; margin: 2rem 0;">
+                        <div class="stat-card" style="background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); text-align: center;">
+                            <h3 style="color: #0038A8; margin: 0 0 10px 0; font-size: 1.1em;">Total Matches</h3>
+                            <p id="zero-total-matches" style="font-size: 2em; font-weight: bold; color: #dc3545; margin: 0;">-</p>
+                        </div>
+                        <div class="stat-card" style="background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); text-align: center;">
+                            <h3 style="color: #0038A8; margin: 0 0 10px 0; font-size: 1.1em;">Total Projects</h3>
+                            <p id="zero-total-projects" style="font-size: 1.6em; font-weight: bold; color: #667eea; margin: 0;">-</p>
+                        </div>
+                        <div class="stat-card" style="background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); text-align: center;">
+                            <h3 style="color: #0038A8; margin: 0 0 10px 0; font-size: 1.1em;">Percentage</h3>
+                            <p id="zero-percentage" style="font-size: 1.6em; font-weight: bold; color: #667eea; margin: 0;">-</p>
+                        </div>
+                        <div class="stat-card" style="background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); text-align: center;">
+                            <h3 style="color: #0038A8; margin: 0 0 10px 0; font-size: 1.1em;">Unique Patterns</h3>
+                            <p id="zero-unique-patterns" style="font-size: 1.6em; font-weight: bold; color: #28a745; margin: 0;">-</p>
+                        </div>
+                    </div>
+                    
+                    <!-- Chart Container -->
+                    <div id="zero-chart-container" style="display: none; margin: 2rem 0; background: white; padding: 2rem; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
+                        <h4 style="color: #0038A8; margin-bottom: 1rem;">Uniform Decrease Patterns: Percentage Decrease vs Number of Projects</h4>
+                        <p style="color: #666; font-size: 0.9em; margin-bottom: 1rem;">This chart shows the pattern of uniform percentage decreases applied across Annex A-5 projects. Each bar represents a specific decrease percentage and how many projects use that exact percentage.</p>
+                        <canvas id="zero-chart" style="max-height: 500px;"></canvas>
+                    </div>
+                    
+                    <!-- Summary Table -->
+                    <div id="zero-table-container" style="display: none; margin-top: 2rem;">
+                        <h4 style="color: #0038A8; margin-bottom: 1rem;">Uniform Decrease Patterns - Fixed Percentages</h4>
+                        <p style="color: #666; font-size: 0.9em; margin-bottom: 1rem;">Each row shows a fixed percentage decrease and how many projects use that exact percentage, demonstrating systematic uniform reductions.</p>
+                        <div style="margin-bottom: 1rem;">
+                            <input type="text" id="zero-search" placeholder="Search by percentage..." style="width: 100%; padding: 0.75rem; border: 2px solid #ddd; border-radius: 6px; font-size: 14px;">
+                        </div>
+                        <div style="overflow-x: auto;">
+                            <table id="zero-table" style="width: 100%; border-collapse: collapse; background: white; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
+                                <thead>
+                                    <tr style="background: linear-gradient(135deg, #0038A8 0%, #003087 100%); color: white;">
+                                        <th style="padding: 1rem; text-align: right; font-weight: 600;">Rank</th>
+                                        <th style="padding: 1rem; text-align: right; font-weight: 600;">Fixed Decrease %</th>
+                                        <th style="padding: 1rem; text-align: right; font-weight: 600;">Number of Projects</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="zero-table-body">
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
             </div>
     </div>
     
@@ -8207,6 +8279,17 @@ async function copyChartToClipboard(containerId, buttonId) {
                 }
             });
         }
+        
+        const zeroTab = document.querySelector('[data-tab="zero"]');
+        if (zeroTab) {
+            zeroTab.addEventListener('click', () => {
+                const panel = document.getElementById('tab-zero');
+                if (panel && !panel.dataset.loaded) {
+                    loadAntiZeroData();
+                    panel.dataset.loaded = 'true';
+                }
+            });
+        }
     });
     
     // Load budget summary stats
@@ -8222,6 +8305,230 @@ async function copyChartToClipboard(containerId, buttonId) {
             const rangeEl = document.getElementById('budget-range');
             if (rangeEl) rangeEl.textContent = '2017-2025';
         });
+    
+    // Load Anti-zero data
+    async function loadAntiZeroData() {
+        const loadingEl = document.getElementById('zero-loading');
+        const errorEl = document.getElementById('zero-error');
+        const statsEl = document.getElementById('zero-stats');
+        const chartEl = document.getElementById('zero-chart-container');
+        const tableEl = document.getElementById('zero-table-container');
+        const infoEl = document.getElementById('zero-info');
+        
+        try {
+            const response = await fetch('/api/budget/anti-zero-analysis');
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            const data = await response.json();
+            
+            if (!data.success) {
+                throw new Error(data.error || 'Failed to load data');
+            }
+            
+            const summary = data.summary || {};
+            const byPercentage = data.by_percentage || [];
+            const topPatterns = data.top_patterns || [];
+            
+            console.log('✅ Anti-zero data loaded:', {
+                summary,
+                byPercentageCount: byPercentage.length,
+                topPatternsCount: topPatterns.length,
+                dataKeys: Object.keys(data),
+                hasByPercentage: 'by_percentage' in data,
+                hasTopPatterns: 'top_patterns' in data
+            });
+            
+            // Update stats
+            if (document.getElementById('zero-total-matches')) {
+                document.getElementById('zero-total-matches').textContent = (summary.total_matches || 0).toLocaleString();
+            }
+            if (document.getElementById('zero-total-projects')) {
+                document.getElementById('zero-total-projects').textContent = (summary.total_projects || 0).toLocaleString();
+            }
+            if (document.getElementById('zero-percentage')) {
+                document.getElementById('zero-percentage').textContent = (summary.percentage || 0).toFixed(2) + '%';
+            }
+            if (document.getElementById('zero-unique-patterns')) {
+                document.getElementById('zero-unique-patterns').textContent = (summary.unique_patterns || 0).toLocaleString();
+            }
+            
+            // Display chart - X-axis is percentage decrease, Y-axis is number of projects
+            if (byPercentage && byPercentage.length > 0) {
+                console.log('📊 Displaying chart with', byPercentage.length, 'data points');
+                displayAntiZeroChart(byPercentage);
+            } else {
+                console.warn('⚠️ No by_percentage data available for chart');
+                const chartEl = document.getElementById('zero-chart-container');
+                if (chartEl) chartEl.style.display = 'none';
+            }
+            
+            // Display table with top patterns - show all patterns sorted by match count
+            if (topPatterns && topPatterns.length > 0) {
+                console.log('📋 Displaying table with', topPatterns.length, 'patterns');
+                displayAntiZeroTable(topPatterns);
+            } else if (byPercentage && byPercentage.length > 0) {
+                // Fallback: use byPercentage data sorted by match count
+                const sorted = [...byPercentage].sort((a, b) => b.match_count - a.match_count).slice(0, 20);
+                console.log('📋 Using byPercentage data for table:', sorted.length, 'patterns');
+                displayAntiZeroTable(sorted);
+            } else {
+                console.warn('⚠️ No data available for table');
+                const tableEl = document.getElementById('zero-table-container');
+                if (tableEl) {
+                    const tbody = document.getElementById('zero-table-body');
+                    if (tbody) {
+                        tbody.innerHTML = '<tr><td colspan="4" style="padding: 2rem; text-align: center; color: #666;">No data available</td></tr>';
+                    }
+                }
+            }
+            
+            // Hide loading, show content
+            loadingEl.style.display = 'none';
+            statsEl.style.display = 'grid';
+            chartEl.style.display = 'block';
+            tableEl.style.display = 'block';
+            infoEl.style.display = 'block';
+            
+        } catch (error) {
+            console.error('Error loading anti-zero data:', error);
+            loadingEl.style.display = 'none';
+            errorEl.textContent = `Error: ${error.message}`;
+            errorEl.style.display = 'block';
+        }
+    }
+    
+    function displayAntiZeroChart(data) {
+        const ctx = document.getElementById('zero-chart');
+        if (!ctx || typeof Chart === 'undefined') {
+            console.error('Chart.js not available');
+            return;
+        }
+        
+        // Destroy existing chart if any
+        if (window.antiZeroChart) {
+            window.antiZeroChart.destroy();
+        }
+        
+        // X-axis: Percentage decrease, Y-axis: Number of projects
+        const labels = data.map(d => d.decrease_percentage.toFixed(4) + '%');
+        const matchCounts = data.map(d => d.match_count);
+        
+        window.antiZeroChart = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: 'Number of Projects',
+                    data: matchCounts,
+                    backgroundColor: 'rgba(220, 53, 69, 0.7)',
+                    borderColor: 'rgba(220, 53, 69, 1)',
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: true,
+                plugins: {
+                    legend: {
+                        display: true,
+                        position: 'top'
+                    },
+                    title: {
+                        display: false
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                const index = context.dataIndex;
+                                const item = data[index];
+                                return [
+                                    `Fixed Decrease: ${item.decrease_percentage.toFixed(4)}%`,
+                                    `Number of Projects: ${item.match_count.toLocaleString()}`
+                                ];
+                            }
+                        }
+                    }
+                },
+                scales: {
+                    x: {
+                        ticks: {
+                            maxRotation: 90,
+                            minRotation: 90,
+                            font: { size: 9 },
+                            callback: function(value, index) {
+                                // Show every Nth label to avoid crowding
+                                const step = Math.max(1, Math.floor(data.length / 20));
+                                if (index % step === 0 || index === data.length - 1) {
+                                    return data[index].decrease_percentage.toFixed(2) + '%';
+                                }
+                                return '';
+                            }
+                        },
+                        title: {
+                            display: true,
+                            text: 'Percentage Decrease (Column O to Column S)',
+                            font: { size: 13, weight: 'bold' }
+                        }
+                    },
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            callback: function(value) {
+                                return value.toLocaleString();
+                            }
+                        },
+                        title: {
+                            display: true,
+                            text: 'Number of Projects',
+                            font: { size: 13, weight: 'bold' }
+                        }
+                    }
+                }
+            }
+        });
+    }
+    
+    function displayAntiZeroTable(data) {
+        const tbody = document.getElementById('zero-table-body');
+        tbody.innerHTML = '';
+        
+        if (!data || data.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="3" style="padding: 2rem; text-align: center; color: #666;">No data available</td></tr>';
+            return;
+        }
+        
+        const totalProjects = parseInt(document.getElementById('zero-total-projects').textContent.replace(/,/g, '')) || 1;
+        
+        data.forEach((item, index) => {
+            const row = document.createElement('tr');
+            row.style.borderBottom = '1px solid #eee';
+            if (index % 2 === 0) {
+                row.style.backgroundColor = '#f8f9fa';
+            }
+            
+            const pctOfTotal = (item.match_count / totalProjects * 100);
+            
+            row.innerHTML = `
+                <td style="padding: 1rem; text-align: right; font-weight: bold;">${index + 1}</td>
+                <td style="padding: 1rem; text-align: right; font-weight: bold; color: #dc3545; font-size: 1.1em;">${item.decrease_percentage.toFixed(4)}%</td>
+                <td style="padding: 1rem; text-align: right; font-weight: bold; color: #dc3545; font-size: 1.1em;">${item.match_count.toLocaleString()}</td>
+            `;
+            tbody.appendChild(row);
+        });
+        
+        // Add search functionality
+        const searchEl = document.getElementById('zero-search');
+        if (searchEl) {
+            searchEl.addEventListener('input', (e) => {
+                const searchTerm = e.target.value.toLowerCase();
+                Array.from(tbody.children).forEach(row => {
+                    const text = row.textContent.toLowerCase();
+                    row.style.display = text.includes(searchTerm) ? '' : 'none';
+                });
+            });
+        }
+    }
     </script>
     
     {% include "footer.html" %}

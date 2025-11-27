@@ -27,6 +27,7 @@
         <a href="#trends" class="mobile-tab-link active" data-tab="trends" style="padding: 0.75rem 1rem; white-space: nowrap; border-bottom: 2px solid #0038A8; color: #0038A8; text-decoration: none; font-weight: 600;">📈 Trends</a>
         <a href="#resu" class="mobile-tab-link" data-tab="resu" style="padding: 0.75rem 1rem; white-space: nowrap; border-bottom: 2px solid transparent; color: #666; text-decoration: none; font-weight: 500;">🔄 Resurrection</a>
         <a href="#roads" class="mobile-tab-link" data-tab="roads" style="padding: 0.75rem 1rem; white-space: nowrap; border-bottom: 2px solid transparent; color: #666; text-decoration: none; font-weight: 500;">🛣️ Roads</a>
+        <a href="#zero" class="mobile-tab-link" data-tab="zero" style="padding: 0.75rem 1rem; white-space: nowrap; border-bottom: 2px solid transparent; color: #666; text-decoration: none; font-weight: 500;">🚫 Anti-zero</a>
     </div>
 
     <!-- Trends Tab -->
@@ -142,6 +143,62 @@
                 <input type="text" id="mobile-roads-search" placeholder="Search projects..." style="width: 100%; padding: 0.5rem; border: 1px solid #ddd; border-radius: 4px; font-size: 14px;">
             </div>
             <div id="mobile-roads-list"></div>
+        </div>
+    </div>
+
+    <!-- Anti-zero Tab -->
+    <div id="tab-zero" class="mobile-tab-panel" style="display: none;">
+        <p class="text-xs text-gray-600 mb-3 bg-blue-50 p-3 rounded">
+            🚫 Uniform Decrease Patterns - 105 patterns affecting 9,183 projects (53.5%)
+        </p>
+
+        <!-- Info Note -->
+        <div style="background: #fff3cd; border-left: 3px solid #ffc107; padding: 0.75rem; margin-bottom: 1rem; border-radius: 4px;">
+            <p style="margin: 0; color: #856404; font-size: 0.8rem;">
+                <strong>Finding:</strong> Analysis of 17,179 Annex A-5 projects revealed <strong>105 different uniform decrease patterns</strong>, affecting <strong>9,183 projects (53.5%)</strong>. Each pattern represents a fixed percentage decrease from Column O (GAB/original) to Column S (Final) applied systematically across multiple projects. The top pattern affects 544 projects with a 17.80% decrease. This systematic application of fixed percentage reductions suggests uniform budget adjustments that may obscure original rounded allocations.
+            </p>
+        </div>
+
+        <!-- Loading -->
+        <div id="mobile-zero-loading" class="text-center py-8">
+            <div class="inline-block w-8 h-8 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin"></div>
+            <p class="text-sm text-gray-500 mt-2">Loading analysis data...</p>
+        </div>
+
+        <!-- Error -->
+        <div id="mobile-zero-error" style="display: none; text-align: center; padding: 1rem; color: #dc3545; background: #f8d7da; border-radius: 8px; margin: 1rem 0;"></div>
+
+        <!-- Stats -->
+        <div id="mobile-zero-stats" style="display: none; display: grid; grid-template-columns: repeat(2, 1fr); gap: 0.75rem; margin: 1rem 0;">
+            <div class="mobile-stat-card" style="background: white; padding: 1rem; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); text-align: center;">
+                <div class="text-xl font-bold text-red-600" id="mobile-zero-total-matches">-</div>
+                <div class="text-xs text-gray-600 mt-1">Total Matches</div>
+            </div>
+            <div class="mobile-stat-card" style="background: white; padding: 1rem; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); text-align: center;">
+                <div class="text-lg font-bold text-purple-600" id="mobile-zero-total-projects">-</div>
+                <div class="text-xs text-gray-600 mt-1">Total Projects</div>
+            </div>
+            <div class="mobile-stat-card" style="background: white; padding: 1rem; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); text-align: center;">
+                <div class="text-lg font-bold text-green-600" id="mobile-zero-unique-patterns">-</div>
+                <div class="text-xs text-gray-600 mt-1">Unique Patterns</div>
+            </div>
+        </div>
+
+        <!-- Chart -->
+        <div id="mobile-zero-chart-container" style="display: none; margin-top: 1rem; background: white; padding: 1rem; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
+            <h4 class="text-sm font-bold text-gray-900 mb-2">Top 2026 Amounts</h4>
+            <div style="position: relative; height: 300px;">
+                <canvas id="mobile-zero-chart"></canvas>
+            </div>
+        </div>
+
+        <!-- Summary List -->
+        <div id="mobile-zero-list" style="display: none; margin-top: 1rem;">
+            <h4 class="text-sm font-bold text-gray-900 mb-2">Summary by 2026 Amount</h4>
+            <div style="margin-bottom: 0.75rem;">
+                <input type="text" id="mobile-zero-search" placeholder="Search by amount..." style="width: 100%; padding: 0.5rem; border: 1px solid #ddd; border-radius: 4px; font-size: 14px;">
+            </div>
+            <div id="mobile-zero-list-items"></div>
         </div>
     </div>
 </section>
@@ -314,13 +371,155 @@
                 if (targetTab === 'resu' && !targetPanel.dataset.loaded) {
                     loadMobileResurrectedProjects();
                     targetPanel.dataset.loaded = 'true';
-                } else if (targetTab === 'roads' && !targetPanel.dataset.loaded) {
+                } else                 if (targetTab === 'roads' && !targetPanel.dataset.loaded) {
                     loadMobileRoadsData();
+                    targetPanel.dataset.loaded = 'true';
+                }
+                if (targetTab === 'zero' && !targetPanel.dataset.loaded) {
+                    loadMobileAntiZeroData();
                     targetPanel.dataset.loaded = 'true';
                 }
             });
         });
     });
+    
+    // Load mobile Anti-zero data
+    async function loadMobileAntiZeroData() {
+        const loadingEl = document.getElementById('mobile-zero-loading');
+        const errorEl = document.getElementById('mobile-zero-error');
+        const statsEl = document.getElementById('mobile-zero-stats');
+        const chartEl = document.getElementById('mobile-zero-chart-container');
+        const listEl = document.getElementById('mobile-zero-list');
+        
+        try {
+            const response = await fetch('/api/budget/anti-zero-analysis');
+            if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+            const data = await response.json();
+            if (!data.success) throw new Error(data.error || 'Failed to load data');
+            
+            const summary = data.summary || {};
+            const byAmount = data.by_amount_2026 || [];
+            
+            // Update stats
+            document.getElementById('mobile-zero-total-matches').textContent = (summary.total_matches || 0).toLocaleString();
+            document.getElementById('mobile-zero-unique-2026').textContent = (summary.unique_2026_amounts || 0).toLocaleString();
+            
+            // Display chart
+            displayMobileAntiZeroChart(byAmount.slice(0, 15)); // Top 15 for mobile
+            
+            // Display list
+            displayMobileAntiZeroList(byAmount);
+            
+            loadingEl.style.display = 'none';
+            statsEl.style.display = 'grid';
+            chartEl.style.display = 'block';
+            listEl.style.display = 'block';
+        } catch (error) {
+            console.error('Error loading mobile anti-zero data:', error);
+            loadingEl.style.display = 'none';
+            errorEl.textContent = `Error: ${error.message}`;
+            errorEl.style.display = 'block';
+        }
+    }
+    
+    function displayMobileAntiZeroChart(data) {
+        const ctx = document.getElementById('mobile-zero-chart');
+        if (!ctx || typeof Chart === 'undefined') {
+            console.error('Chart.js not available');
+            return;
+        }
+        
+        // Destroy existing chart if any
+        if (window.mobileAntiZeroChart) {
+            window.mobileAntiZeroChart.destroy();
+        }
+        
+        const labels = data.map(d => '₱' + (d.amount_2026 / 1000000).toFixed(1) + 'M');
+        const matchCounts = data.map(d => d.match_count);
+        
+        window.mobileAntiZeroChart = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: 'Matches',
+                    data: matchCounts,
+                    backgroundColor: 'rgba(220, 53, 69, 0.7)',
+                    borderColor: 'rgba(220, 53, 69, 1)',
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        display: false
+                    }
+                },
+                scales: {
+                    x: {
+                        ticks: {
+                            maxRotation: 45,
+                            minRotation: 45,
+                            font: { size: 8 }
+                        }
+                    },
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            callback: function(value) {
+                                return value.toLocaleString();
+                            },
+                            font: { size: 9 }
+                        }
+                    }
+                }
+            }
+        });
+    }
+    
+    function displayMobileAntiZeroList(data) {
+        const container = document.getElementById('mobile-zero-list-items');
+        container.innerHTML = '';
+        
+        data.forEach((item, index) => {
+            const card = document.createElement('div');
+            card.style.cssText = 'background: white; padding: 1rem; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); margin-bottom: 0.75rem;';
+            card.innerHTML = `
+                <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 0.5rem;">
+                    <div>
+                        <div class="text-sm font-bold text-gray-900">₱${(item.amount_2026 / 1000000).toFixed(2)}M</div>
+                        <div class="text-xs text-gray-600 mt-1">Expected 2025: ₱${(item.expected_2025_amount / 1000000).toFixed(2)}M</div>
+                    </div>
+                    <div class="text-lg font-bold text-red-600">${item.match_count.toLocaleString()}</div>
+                </div>
+                <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 0.5rem; margin-top: 0.5rem; padding-top: 0.5rem; border-top: 1px solid #eee;">
+                    <div>
+                        <div class="text-xs text-gray-600">Total 2025</div>
+                        <div class="text-xs font-bold text-green-600">₱${(item.total_2025_amount / 1000000).toFixed(2)}M</div>
+                    </div>
+                    <div>
+                        <div class="text-xs text-gray-600">Total 2026</div>
+                        <div class="text-xs font-bold text-orange-600">₱${(item.total_2026_amount / 1000000).toFixed(2)}M</div>
+                    </div>
+                </div>
+            `;
+            container.appendChild(card);
+        });
+        
+        // Add search functionality
+        const searchEl = document.getElementById('mobile-zero-search');
+        if (searchEl) {
+            searchEl.addEventListener('input', (e) => {
+                const searchTerm = e.target.value.toLowerCase();
+                Array.from(container.children).forEach(card => {
+                    const text = card.textContent.toLowerCase();
+                    card.style.display = text.includes(searchTerm) ? '' : 'none';
+                });
+            });
+        }
+    }
 
     // Load mobile resurrected projects
     async function loadMobileResurrectedProjects() {
