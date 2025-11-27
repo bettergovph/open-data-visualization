@@ -120,6 +120,8 @@ function toggleMobileMenu() {
                     <a href="#browser" class="budget-tab-btn" data-tab="browser">📋 Data Browser</a>
                     <a href="#analysis" class="budget-tab-btn" data-tab="analysis">🔍 Analysis</a>
                     <a href="#trends" class="budget-tab-btn" data-tab="trends">📈 Trends</a>
+                    <a href="#resu" class="budget-tab-btn" data-tab="resu">🔄 Resurrection</a>
+                    <a href="#roads" class="budget-tab-btn" data-tab="roads">🛣️ Roads</a>
                 </div>
                 
                 <div class="budget-tab-content">
@@ -7847,10 +7849,359 @@ async function copyChartToClipboard(containerId, buttonId) {
                         
                     </div>
                 </div>
+                
+                <!-- Resurrection Tab -->
+                <div id="tab-resu" class="budget-tab-panel">
+                    <h3 class="budget-section-title">🔄 Resurrected Projects</h3>
+                    <p class="budget-section-desc">DPWH projects in 2026 that also existed in previous years (2016-2025)</p>
+                    
+                    <!-- Loading Spinner -->
+                    <div id="resu-loading" style="text-align: center; padding: 2rem;">
+                        <div class="spinner" style="width: 40px; height: 40px; border: 4px solid #f3f3f3; border-top: 4px solid #0038A8; border-radius: 50%; animation: spin 1s linear infinite; margin: 0 auto;"></div>
+                        <p style="color: #666; margin-top: 1rem;">Loading resurrected projects...</p>
+                    </div>
+                    
+                    <!-- Error Message -->
+                    <div id="resu-error" style="display: none; text-align: center; padding: 2rem; color: #dc3545; background: #f8d7da; border-radius: 8px; margin: 2rem 0;"></div>
+                    
+                    <!-- Stats Cards -->
+                    <div id="resu-stats" style="display: none; display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1rem; margin: 2rem 0;">
+                        <div class="stat-card" style="background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); text-align: center;">
+                            <h3 style="color: #0038A8; margin: 0 0 10px 0; font-size: 1.1em;">Total Resurrected</h3>
+                            <p id="resu-total" style="font-size: 2em; font-weight: bold; color: #dc3545; margin: 0;">-</p>
+                        </div>
+                        <div class="stat-card" style="background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); text-align: center;">
+                            <h3 style="color: #0038A8; margin: 0 0 10px 0; font-size: 1.1em;">Total Amount (2026)</h3>
+                            <p id="resu-amount-2026" style="font-size: 1.6em; font-weight: bold; color: #dc3545; margin: 0;">-</p>
+                        </div>
+                        <div class="stat-card" style="background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); text-align: center;">
+                            <h3 style="color: #0038A8; margin: 0 0 10px 0; font-size: 1.1em;">Total Amount (Historical)</h3>
+                            <p id="resu-amount-historical" style="font-size: 1.6em; font-weight: bold; color: #667eea; margin: 0;">-</p>
+                        </div>
+                        <div class="stat-card" style="background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); text-align: center;">
+                            <h3 style="color: #0038A8; margin: 0 0 10px 0; font-size: 1.1em;">Years Searched</h3>
+                            <p id="resu-years" style="font-size: 1.5em; font-weight: bold; color: #28a745; margin: 0;">-</p>
+                        </div>
+                    </div>
+                    
+                    <!-- By Year Breakdown -->
+                    <div id="resu-by-year" style="display: none; margin: 2rem 0;">
+                        <h4 style="color: #0038A8; margin-bottom: 1rem;">By Historical Year</h4>
+                        <div id="resu-year-breakdown" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem;"></div>
+                    </div>
+                    
+                    <!-- Projects List -->
+                    <div id="resu-projects" style="display: none; margin-top: 2rem;">
+                        <h4 style="color: #0038A8; margin-bottom: 1rem;">Resurrected Projects</h4>
+                        <div style="margin-bottom: 1rem;">
+                            <input type="text" id="resu-search" placeholder="Search projects..." style="width: 100%; padding: 0.75rem; border: 2px solid #ddd; border-radius: 6px; font-size: 14px;">
+                        </div>
+                        <div id="resu-projects-list" style="display: grid; gap: 1rem;"></div>
+                    </div>
+                </div>
+                
+                <!-- Roads Tab -->
+                <div id="tab-roads" class="budget-tab-panel">
+                    <h3 class="budget-section-title">🛣️ Road Infrastructure Projects Cost Analysis (2026)</h3>
+                    <p class="budget-section-desc">Analyze road infrastructure projects (roads, bridges, traffic signs, etc.) from 2026 budget by calculating distance from chainage and cost per kilometer</p>
+                    
+                    <!-- Loading Spinner -->
+                    <div id="roads-loading" style="text-align: center; padding: 2rem;">
+                        <div class="spinner" style="width: 40px; height: 40px; border: 4px solid #f3f3f3; border-top: 4px solid #0038A8; border-radius: 50%; animation: spin 1s linear infinite; margin: 0 auto;"></div>
+                        <p style="color: #666; margin-top: 1rem;">Loading road projects...</p>
+                    </div>
+                    
+                    <!-- Error Message -->
+                    <div id="roads-error" style="display: none; text-align: center; padding: 2rem; color: #dc3545; background: #f8d7da; border-radius: 8px; margin: 2rem 0;"></div>
+                    
+                    <!-- Info Note -->
+                    <div style="background: #e7f3ff; border-left: 4px solid #0038A8; padding: 1rem; margin: 1.5rem 0; border-radius: 4px;">
+                        <p style="margin: 0; color: #0038A8; font-size: 0.95em;">
+                            <strong>Note:</strong> This analysis includes mixed road infrastructure projects from <strong>2026 budget amendments</strong>, including roads, bridges, traffic signs, and other related infrastructure with chainage notation. Projects are sorted by cost per kilometer (most expensive first).
+                        </p>
+                    </div>
+                    
+                    <!-- Stats Summary -->
+                    <div id="roads-stats" style="display: none; display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin: 2rem 0;">
+                        <div class="stat-card" style="background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); text-align: center;">
+                            <h3 style="color: #0038A8; margin: 0 0 10px 0; font-size: 1.1em;">Total Projects (2026)</h3>
+                            <p id="roads-total-projects" style="font-size: 2em; font-weight: bold; color: #28a745; margin: 0;">-</p>
+                        </div>
+                        <div class="stat-card" style="background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); text-align: center;">
+                            <h3 style="color: #0038A8; margin: 0 0 10px 0; font-size: 1.1em;">Total Distance</h3>
+                            <p id="roads-total-distance" style="font-size: 1.6em; font-weight: bold; color: #667eea; margin: 0;">-</p>
+                        </div>
+                        <div class="stat-card" style="background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); text-align: center;">
+                            <h3 style="color: #0038A8; margin: 0 0 10px 0; font-size: 1.1em;">Total Amount</h3>
+                            <p id="roads-total-amount" style="font-size: 1.6em; font-weight: bold; color: #dc3545; margin: 0;">-</p>
+                        </div>
+                        <div class="stat-card" style="background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); text-align: center;">
+                            <h3 style="color: #0038A8; margin: 0 0 10px 0; font-size: 1.1em;">Avg Cost/km</h3>
+                            <p id="roads-avg-cost" style="font-size: 1.6em; font-weight: bold; color: #fd7e14; margin: 0;">-</p>
+                        </div>
+                    </div>
+                    
+                    <!-- Projects Table -->
+                    <div id="roads-table-container" style="display: none; margin-top: 2rem;">
+                        <div style="margin-bottom: 1rem;">
+                            <input type="text" id="roads-search" placeholder="Search projects..." style="width: 100%; padding: 0.75rem; border: 2px solid #ddd; border-radius: 6px; font-size: 14px;">
+                        </div>
+                        <div style="overflow-x: auto;">
+                            <table id="roads-table" style="width: 100%; border-collapse: collapse; background: white; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
+                                <thead>
+                                    <tr style="background: linear-gradient(135deg, #0038A8 0%, #003087 100%); color: white;">
+                                        <th style="padding: 1rem; text-align: left; font-weight: 600;">Project Name</th>
+                                        <th style="padding: 1rem; text-align: right; font-weight: 600;">Chainage</th>
+                                        <th style="padding: 1rem; text-align: right; font-weight: 600;">Distance Breakdown</th>
+                                        <th style="padding: 1rem; text-align: right; font-weight: 600;">Distance (km)</th>
+                                        <th style="padding: 1rem; text-align: right; font-weight: 600;">Amount</th>
+                                        <th style="padding: 1rem; text-align: right; font-weight: 600;">Cost/km</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="roads-table-body">
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
             </div>
     </div>
     
     <script>
+    // Load road projects data
+    async function loadRoadsData() {
+        const loadingEl = document.getElementById('roads-loading');
+        const errorEl = document.getElementById('roads-error');
+        const statsEl = document.getElementById('roads-stats');
+        const tableEl = document.getElementById('roads-table-container');
+        
+        try {
+            const response = await fetch('/api/budget/roads-cost-analysis');
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            const data = await response.json();
+            
+            if (!data.success) {
+                throw new Error(data.error || 'Failed to load data');
+            }
+            
+            const projects = data.projects || [];
+            
+            // Update stats
+            const totalProjects = projects.length;
+            const totalDistance = projects.reduce((sum, p) => sum + (p.distance_km || 0), 0);
+            const totalAmount = projects.reduce((sum, p) => sum + (p.amount || 0), 0);
+            const avgCost = totalDistance > 0 ? totalAmount / totalDistance : 0;
+            
+            document.getElementById('roads-total-projects').textContent = totalProjects.toLocaleString();
+            document.getElementById('roads-total-distance').textContent = totalDistance.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2}) + ' km';
+            document.getElementById('roads-total-amount').textContent = '₱' + totalAmount.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+            document.getElementById('roads-avg-cost').textContent = '₱' + avgCost.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2}) + '/km';
+            
+            // Display table
+            displayRoadsTable(projects);
+            
+            // Hide loading, show content
+            loadingEl.style.display = 'none';
+            statsEl.style.display = 'grid';
+            tableEl.style.display = 'block';
+            
+        } catch (error) {
+            console.error('Error loading roads data:', error);
+            loadingEl.style.display = 'none';
+            errorEl.textContent = `Error: ${error.message}`;
+            errorEl.style.display = 'block';
+        }
+    }
+    
+    function displayRoadsTable(projects) {
+        const tbody = document.getElementById('roads-table-body');
+        tbody.innerHTML = '';
+        
+        projects.forEach((project, index) => {
+            const row = document.createElement('tr');
+            row.style.borderBottom = '1px solid #eee';
+            if (index % 2 === 0) {
+                row.style.backgroundColor = '#f8f9fa';
+            }
+            row.dataset.index = index;
+            row.innerHTML = `
+                <td style="padding: 1rem;">${escapeHtml(project.name || 'N/A')}</td>
+                <td style="padding: 1rem; text-align: right; font-family: monospace;">${escapeHtml(project.chainage_display || 'N/A')}</td>
+                <td style="padding: 1rem; text-align: right; font-family: monospace; color: ${project.distance_breakdown ? '#667eea' : '#999'};">${project.distance_breakdown || '-'}</td>
+                <td style="padding: 1rem; text-align: right;">${(project.distance_km || 0).toLocaleString('en-US', {minimumFractionDigits: 3, maximumFractionDigits: 3})} km</td>
+                <td style="padding: 1rem; text-align: right;">₱${(project.amount || 0).toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
+                <td style="padding: 1rem; text-align: right; font-weight: bold; color: ${project.cost_per_km > 100000000 ? '#dc3545' : project.cost_per_km > 50000000 ? '#fd7e14' : '#28a745'};">₱${(project.cost_per_km || 0).toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}/km</td>
+            `;
+            tbody.appendChild(row);
+        });
+        
+        // Add search functionality
+        const searchEl = document.getElementById('roads-search');
+        if (searchEl) {
+            searchEl.addEventListener('input', (e) => {
+                const searchTerm = e.target.value.toLowerCase();
+                Array.from(tbody.children).forEach(row => {
+                    const text = row.textContent.toLowerCase();
+                    row.style.display = text.includes(searchTerm) ? '' : 'none';
+                });
+            });
+        }
+    }
+    
+    function escapeHtml(text) {
+        const div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
+    }
+    
+    // Load data when tab is activated
+    document.addEventListener('DOMContentLoaded', () => {
+        const roadsTab = document.querySelector('[data-tab="roads"]');
+        if (roadsTab) {
+            roadsTab.addEventListener('click', () => {
+                const panel = document.getElementById('tab-roads');
+                if (panel && !panel.dataset.loaded) {
+                    loadRoadsData();
+                    panel.dataset.loaded = 'true';
+                }
+            });
+        }
+    });
+    
+    // Load resurrected projects data
+    async function loadResurrectedProjects() {
+        const loadingEl = document.getElementById('resu-loading');
+        const errorEl = document.getElementById('resu-error');
+        const statsEl = document.getElementById('resu-stats');
+        const byYearEl = document.getElementById('resu-by-year');
+        const projectsEl = document.getElementById('resu-projects');
+        
+        try {
+            const response = await fetch('/api/budget/resurrected-projects');
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            const data = await response.json();
+            
+            if (!data.success) {
+                throw new Error(data.error || 'Failed to load data');
+            }
+            
+            const matches = data.matches || [];
+            const metadata = data.metadata || {};
+            
+            // Update stats
+            document.getElementById('resu-total').textContent = matches.length.toLocaleString();
+            const total2026 = matches.reduce((sum, m) => sum + (m.year_2026?.amount || 0), 0);
+            const totalHistorical = matches.reduce((sum, m) => sum + (m.historical?.amount || 0), 0);
+            document.getElementById('resu-amount-2026').textContent = '₱' + total2026.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+            document.getElementById('resu-amount-historical').textContent = '₱' + totalHistorical.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+            document.getElementById('resu-years').textContent = metadata.search_years?.join(', ') || '2016-2025';
+            
+            // Group by year
+            const byYear = {};
+            matches.forEach(match => {
+                const year = match.historical?.year || 'Unknown';
+                if (!byYear[year]) {
+                    byYear[year] = { count: 0, amount2026: 0, amountHistorical: 0 };
+                }
+                byYear[year].count++;
+                byYear[year].amount2026 += match.year_2026?.amount || 0;
+                byYear[year].amountHistorical += match.historical?.amount || 0;
+            });
+            
+            // Display by year
+            const yearBreakdown = document.getElementById('resu-year-breakdown');
+            Object.keys(byYear).sort((a, b) => parseInt(b) - parseInt(a)).forEach(year => {
+                const stats = byYear[year];
+                const card = document.createElement('div');
+                card.className = 'stat-card';
+                card.style.cssText = 'background: white; padding: 15px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);';
+                card.innerHTML = `
+                    <h5 style="color: #0038A8; margin: 0 0 10px 0;">${year}</h5>
+                    <p style="font-size: 1.5em; font-weight: bold; color: #dc3545; margin: 0;">${stats.count}</p>
+                    <p style="font-size: 0.85em; color: #666; margin-top: 5px;">projects</p>
+                `;
+                yearBreakdown.appendChild(card);
+            });
+            
+            // Display projects
+            displayResurrectedProjects(matches);
+            
+            // Hide loading, show content
+            loadingEl.style.display = 'none';
+            statsEl.style.display = 'grid';
+            byYearEl.style.display = 'block';
+            projectsEl.style.display = 'block';
+            
+        } catch (error) {
+            console.error('Error loading resurrected projects:', error);
+            loadingEl.style.display = 'none';
+            errorEl.textContent = `Error: ${error.message}`;
+            errorEl.style.display = 'block';
+        }
+    }
+    
+    function displayResurrectedProjects(matches) {
+        const listEl = document.getElementById('resu-projects-list');
+        listEl.innerHTML = '';
+        
+        matches.forEach((match, index) => {
+            const card = document.createElement('div');
+            card.style.cssText = 'background: white; padding: 1.5rem; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); border-left: 4px solid #dc3545;';
+            card.innerHTML = `
+                <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 1rem;">
+                    <h5 style="color: #0038A8; margin: 0; flex: 1;">${(match.year_2026?.name || match.year_2026?.description || 'Unknown').substring(0, 100)}${(match.year_2026?.name || match.year_2026?.description || '').length > 100 ? '...' : ''}</h5>
+                    <span style="background: #dc3545; color: white; padding: 0.25rem 0.75rem; border-radius: 4px; font-size: 0.85em; font-weight: bold;">${(match.similarity?.name * 100).toFixed(1)}%</span>
+                </div>
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-top: 1rem;">
+                    <div>
+                        <p style="font-size: 0.85em; color: #666; margin: 0;">Found in ${match.historical?.year || 'Unknown'}</p>
+                        <p style="font-size: 1.1em; font-weight: bold; color: #667eea; margin: 0;">${match.years_apart || 0} year(s) ago</p>
+                    </div>
+                    <div>
+                        <p style="font-size: 0.85em; color: #666; margin: 0;">2026 Amount</p>
+                        <p style="font-size: 1.1em; font-weight: bold; color: #dc3545; margin: 0;">₱${(match.year_2026?.amount || 0).toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</p>
+                    </div>
+                    <div>
+                        <p style="font-size: 0.85em; color: #666; margin: 0;">${match.historical?.year || 'Historical'} Amount</p>
+                        <p style="font-size: 1.1em; font-weight: bold; color: #667eea; margin: 0;">₱${(match.historical?.amount || 0).toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</p>
+                    </div>
+                </div>
+                ${match.historical?.description ? `<p style="font-size: 0.9em; color: #666; margin-top: 0.5rem; font-style: italic;">${match.historical.description.substring(0, 150)}${match.historical.description.length > 150 ? '...' : ''}</p>` : ''}
+            `;
+            listEl.appendChild(card);
+        });
+        
+        // Add search functionality
+        const searchEl = document.getElementById('resu-search');
+        if (searchEl) {
+            searchEl.addEventListener('input', (e) => {
+                const searchTerm = e.target.value.toLowerCase();
+                Array.from(listEl.children).forEach(card => {
+                    const text = card.textContent.toLowerCase();
+                    card.style.display = text.includes(searchTerm) ? 'block' : 'none';
+                });
+            });
+        }
+    }
+    
+    // Load data when tab is activated
+    document.addEventListener('DOMContentLoaded', () => {
+        const resuTab = document.querySelector('[data-tab="resu"]');
+        if (resuTab) {
+            resuTab.addEventListener('click', () => {
+                const panel = document.getElementById('tab-resu');
+                if (panel && !panel.dataset.loaded) {
+                    loadResurrectedProjects();
+                    panel.dataset.loaded = 'true';
+                }
+            });
+        }
+    });
+    
     // Load budget summary stats
     fetch('/static/data/budget_summary.json')
         .then(response => response.json())
