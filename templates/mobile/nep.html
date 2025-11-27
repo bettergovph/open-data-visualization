@@ -56,6 +56,7 @@
         <a href="#insertions" class="mobile-tab-link active" data-tab="insertions" style="padding: 0.75rem 1rem; white-space: nowrap; border-bottom: 2px solid transparent; color: #666; text-decoration: none; font-weight: 500;">📋 Insertions</a>
         <a href="#duplicate" class="mobile-tab-link" data-tab="duplicate" style="padding: 0.75rem 1rem; white-space: nowrap; border-bottom: 2px solid transparent; color: #666; text-decoration: none; font-weight: 500;">🚜 Farm to Market</a>
         <a href="#dpwh" class="mobile-tab-link" data-tab="dpwh" style="padding: 0.75rem 1rem; white-space: nowrap; border-bottom: 2px solid transparent; color: #666; text-decoration: none; font-weight: 500;">🛣️ DPWH</a>
+        <a href="#nia" class="mobile-tab-link" data-tab="nia" style="padding: 0.75rem 1rem; white-space: nowrap; border-bottom: 2px solid transparent; color: #666; text-decoration: none; font-weight: 500;">💧 NIA</a>
     </div>
 
     <!-- Insertions Tab -->
@@ -199,6 +200,67 @@
         <!-- Duplicates Container -->
         <div id="mobile-dpwh-groups-container" style="display: none;"></div>
     </div>
+
+    <!-- NIA Tab -->
+    <div id="tab-nia" class="mobile-tab-panel" style="display: none;">
+        <p class="text-xs text-gray-600 mb-3 bg-blue-50 p-3 rounded">
+            💧 Track NIA operations from Annex A-4 with statistical analysis
+        </p>
+
+        <!-- Stats Cards -->
+        <div class="mobile-stats-grid" style="grid-template-columns: repeat(2, 1fr);">
+            <div class="mobile-stat-card">
+                <div class="text-xl font-bold text-blue-600" id="mobile-nia-total-projects">-</div>
+                <div class="text-xs text-gray-600 mt-1">Total Projects</div>
+            </div>
+            <div class="mobile-stat-card">
+                <div class="text-lg font-bold text-green-600" id="mobile-nia-total-amount">-</div>
+                <div class="text-xs text-gray-600 mt-1">Total Amount</div>
+            </div>
+            <div class="mobile-stat-card">
+                <div class="text-xl font-bold text-purple-600" id="mobile-nia-unique-amounts">-</div>
+                <div class="text-xs text-gray-600 mt-1">Unique Amounts</div>
+            </div>
+            <div class="mobile-stat-card">
+                <div class="text-xl font-bold text-purple-600" id="mobile-nia-total-groups">-</div>
+                <div class="text-xs text-gray-600 mt-1">Duplicate Groups</div>
+            </div>
+            <div class="mobile-stat-card">
+                <div class="text-xl font-bold text-orange-600" id="mobile-nia-total-items">-</div>
+                <div class="text-xs text-gray-600 mt-1">Items in Groups</div>
+            </div>
+            <div class="mobile-stat-card">
+                <div class="text-lg font-bold text-red-600" id="mobile-nia-duplicate-amount">-</div>
+                <div class="text-xs text-gray-600 mt-1">Duplicate Amount</div>
+            </div>
+        </div>
+
+        <!-- Loading -->
+        <div id="mobile-nia-loading" class="text-center py-8">
+            <div class="inline-block w-8 h-8 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin"></div>
+            <p class="text-sm text-gray-500 mt-2">Loading NIA data...</p>
+        </div>
+
+        <!-- Error Message -->
+        <div id="mobile-nia-error" style="display: none; text-align: center; padding: 2rem; color: #dc3545;"></div>
+
+        <!-- Annex A-4 Distribution Chart -->
+        <div id="mobile-annex-a4-histogram" style="display: none; background: white; padding: 1rem; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); margin-bottom: 1rem;">
+            <h4 style="margin: 0 0 1rem 0; color: #333; font-size: 1.1em; text-align: center;">📊 Annex A-4 Project Amount Distribution</h4>
+            <div id="mobile-nia-histogram-chart" style="min-height: 400px; display: flex; justify-content: center; overflow-x: auto;"></div>
+            
+            <!-- Statistical Analysis Results -->
+            <div id="mobile-nia-statistical-analysis" style="display: none; margin-top: 1rem; padding: 1rem; background: #f8f9fa; border-radius: 8px; border-left: 4px solid #dc3545;">
+                <h4 style="margin: 0 0 0.75rem 0; color: #333; font-size: 1em; font-weight: 600;">📊 Results:</h4>
+                <div id="mobile-nia-statistical-analysis-content" style="color: #333; line-height: 1.6; font-size: 0.9em;">
+                    <!-- Content will be populated by JavaScript -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Duplicates Container -->
+        <div id="mobile-nia-groups-container" style="display: none;"></div>
+    </div>
 </section>
 
 <script>
@@ -294,6 +356,8 @@
                 loadMobileDuplicateData();
             } else if (tabName === 'dpwh' && typeof loadMobileDPWHData === 'function') {
                 loadMobileDPWHData();
+            } else if (tabName === 'nia' && typeof loadMobileNIAData === 'function') {
+                loadMobileNIAData();
             }
             
             // Update URL hash
@@ -996,10 +1060,13 @@
     // Calculate statistical analysis results for DPWH (mobile version)
     function calculateAndDisplayMobileDPWHStatistics(amounts, sortedBins) {
         const totalProjects = amounts.length;
-        const uniqueCount = sortedBins.length;
+        
+        // Always calculate unique count from actual amounts (not binned)
+        const uniqueAmountSet = new Set(amounts);
+        const uniqueCount = uniqueAmountSet.size;
         const probability = 0.000000;
         
-        // Benford's Law Test
+        // Benford's Law Test - always use actual amounts (not binned)
         const firstDigitCounts = {};
         amounts.forEach(amount => {
             const amountStr = Math.abs(amount).toString();
@@ -1044,6 +1111,422 @@
         }
     }
 
+    // ========== NIA (Annex A-4) Mobile Functions ==========
+    
+    async function loadMobileNIAData() {
+        const loadingDiv = document.getElementById('mobile-nia-loading');
+        const errorDiv = document.getElementById('mobile-nia-error');
+        const container = document.getElementById('mobile-nia-groups-container');
+        
+        try {
+            loadingDiv.style.display = 'block';
+            errorDiv.style.display = 'none';
+            container.style.display = 'none';
+            
+            // Load Annex A-4 amounts for histogram and stats
+            const amountsResponse = await fetch('/api/budget/amendments/annex-a4-amounts');
+            if (!amountsResponse.ok) {
+                throw new Error(`HTTP ${amountsResponse.status}`);
+            }
+            
+            const amountsData = await amountsResponse.json();
+            if (!amountsData.success) {
+                throw new Error(amountsData.error || 'Failed to load NIA data');
+            }
+            
+            // Update stats
+            const amounts = amountsData.amounts || [];
+            const totalAmount = amounts.reduce((sum, amt) => sum + amt, 0);
+            
+            document.getElementById('mobile-nia-total-projects').textContent = (amountsData.total_projects || amounts.length).toLocaleString();
+            document.getElementById('mobile-nia-total-amount').textContent = formatAmountFull(totalAmount);
+            
+            // Calculate unique amounts
+            const uniqueAmounts = new Set(amounts).size;
+            document.getElementById('mobile-nia-unique-amounts').textContent = uniqueAmounts.toLocaleString();
+            
+            // Display histogram
+            if (amounts && amounts.length > 0) {
+                displayMobileAnnexA4Histogram(amounts);
+            }
+            
+            // Load duplicates
+            const duplicatesResponse = await fetch('/api/budget/amendments/annex-a4-duplicates');
+            if (duplicatesResponse.ok) {
+                const duplicatesData = await duplicatesResponse.json();
+                if (duplicatesData.success) {
+                    displayMobileNIADuplicates(duplicatesData);
+                }
+            }
+            
+            loadingDiv.style.display = 'none';
+        } catch (error) {
+            console.error('Error loading NIA data:', error);
+            loadingDiv.style.display = 'none';
+            errorDiv.style.display = 'block';
+            errorDiv.innerHTML = `<p>❌ Error: ${error.message}</p>`;
+        }
+    }
+
+    // Display NIA duplicate groups (mobile version)
+    function displayMobileNIADuplicates(data) {
+        const metadata = data.metadata || {};
+        const groups = data.duplicate_groups || [];
+        
+        // Update stats (always update, even if 0)
+        const groupsEl = document.getElementById('mobile-nia-total-groups');
+        if (groupsEl) {
+            groupsEl.textContent = groups.length > 0 ? groups.length.toLocaleString() : '0';
+        }
+        
+        const itemsEl = document.getElementById('mobile-nia-total-items');
+        if (itemsEl) {
+            const totalItems = metadata.total_items || groups.reduce((sum, g) => sum + (g.count || 0), 0);
+            itemsEl.textContent = totalItems > 0 ? totalItems.toLocaleString() : '0';
+        }
+        
+        const amountEl = document.getElementById('mobile-nia-duplicate-amount');
+        if (amountEl) {
+            const totalAmount = groups.reduce((sum, g) => sum + (g.total_amount || 0), 0);
+            amountEl.textContent = totalAmount > 0 ? formatAmountFull(totalAmount) : '₱0';
+        }
+        
+        const container = document.getElementById('mobile-nia-groups-container');
+        container.style.display = 'block';
+        
+        if (groups.length === 0) {
+            container.innerHTML = '<div class="text-center py-8 text-gray-500">No duplicates found</div>';
+            return;
+        }
+        
+        // Display groups (collapsible, collapsed by default)
+        container.innerHTML = groups.map((group, groupIdx) => {
+            const items = group.items || [];
+            const groupId = `mobile-nia-group-${groupIdx}`;
+            const itemsId = `mobile-nia-items-${groupIdx}`;
+            
+            return `
+                <div class="mobile-nep-card" style="margin-bottom: 1rem;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; cursor: pointer;" onclick="toggleMobileNIAGroup('${groupId}')">
+                        <div style="flex: 1;">
+                            <div style="font-weight: 600; color: #0038A8; margin-bottom: 0.25rem;">Group #${group.group_id || (groupIdx + 1)} (${items.length} items)</div>
+                            ${group.remarks ? `<div style="font-size: 0.85em; color: #666; margin-bottom: 0.25rem;">${group.remarks}</div>` : ''}
+                            <div style="font-size: 0.9em; color: #333; font-weight: 500;">Total: ${formatAmountFull(group.total_amount || 0)}</div>
+                        </div>
+                        <div style="font-size: 1.2em; color: #666; margin-left: 0.5rem;">▼</div>
+                    </div>
+                    <div id="${itemsId}" style="margin-top: 0.75rem; display: none; border-top: 1px solid #eee; padding-top: 0.75rem;">
+                        ${items.map((item, itemIdx) => {
+                            const projectName = item.name || item.description || 'Unknown';
+                            const amount = item.final_amount || item.original_amount || 0;
+                            const region = item.location?.region || 'N/A';
+                            const sourceRow = item.source_row || '?';
+                            
+                            return `
+                                <div style="padding: 0.75rem; background: #f8f9fa; border-radius: 6px; margin-bottom: 0.5rem;">
+                                    <div style="font-weight: 600; color: #333; margin-bottom: 0.5rem; font-size: 0.95em;">${projectName}</div>
+                                    <div style="display: flex; flex-wrap: wrap; gap: 0.5rem; margin-bottom: 0.5rem; font-size: 0.8em;">
+                                        ${region !== 'N/A' ? `<span style="background: #fff3e0; color: #e65100; padding: 0.25rem 0.5rem; border-radius: 4px;">📍 ${region}</span>` : ''}
+                                        <span style="background: #e8f5e9; color: #2e7d32; padding: 0.25rem 0.5rem; border-radius: 4px;">Row ${sourceRow}</span>
+                                    </div>
+                                    <div style="font-size: 0.9em; font-weight: 600; color: #28a745;">${formatAmountFull(amount)}</div>
+                                </div>
+                            `;
+                        }).join('')}
+                    </div>
+                </div>
+            `;
+        }).join('');
+    }
+
+    // Toggle NIA duplicate group (mobile)
+    window.toggleMobileNIAGroup = function(groupId) {
+        const itemsId = groupId.replace('mobile-nia-group-', 'mobile-nia-items-');
+        const itemsDiv = document.getElementById(itemsId);
+        if (itemsDiv) {
+            const isVisible = itemsDiv.style.display !== 'none';
+            itemsDiv.style.display = isVisible ? 'none' : 'block';
+            // Update arrow
+            const groupDiv = document.getElementById(groupId);
+            if (groupDiv) {
+                const arrow = groupDiv.querySelector('div:last-child');
+                if (arrow) {
+                    arrow.textContent = isVisible ? '▼' : '▲';
+                }
+            }
+        }
+    };
+
+    // Display Annex A-4 histogram (mobile version)
+    function displayMobileAnnexA4Histogram(amounts) {
+        if (!amounts || amounts.length === 0) {
+            return;
+        }
+
+        const validAmounts = amounts.filter(a => a > 0);
+        if (validAmounts.length === 0) {
+            return;
+        }
+        
+        // Check if we should use unique amounts or bins
+        const uniqueAmountSet = new Set(validAmounts);
+        const uniqueCount = uniqueAmountSet.size;
+        const useBins = uniqueCount >= 50;
+        
+        let sortedBins, sortedAmounts, maxCount;
+        
+        if (useBins) {
+            // Use bins for large datasets
+            const minAmount = Math.min(...validAmounts);
+            const maxAmount = Math.max(...validAmounts);
+            
+            // Create bins - use logarithmic scale
+            const numBins = 20; // Fewer bins for mobile
+            const logMin = Math.log10(minAmount);
+            const logMax = Math.log10(maxAmount);
+            const binSize = (logMax - logMin) / numBins;
+            
+            const bins = {};
+            validAmounts.forEach(amount => {
+                const logAmount = Math.log10(amount);
+                const binIndex = Math.floor((logAmount - logMin) / binSize);
+                const binKey = Math.min(Math.max(0, binIndex), numBins - 1);
+                
+                const binMin = Math.pow(10, logMin + binKey * binSize);
+                const binMax = Math.pow(10, logMin + (binKey + 1) * binSize);
+                const binLabel = `${formatAmountFull(binMin)} - ${formatAmountFull(binMax)}`;
+                
+                if (!bins[binKey]) {
+                    bins[binKey] = { count: 0, label: binLabel, min: binMin, max: binMax };
+                }
+                bins[binKey].count++;
+            });
+
+            sortedBins = Object.entries(bins)
+                .map(([key, data]) => ({ binIndex: parseInt(key), ...data }))
+                .sort((a, b) => a.binIndex - b.binIndex);
+            
+            maxCount = Math.max(...sortedBins.map(b => b.count));
+        } else {
+            // Use unique amounts (like Annex A-1)
+            const uniqueAmounts = {};
+            
+            validAmounts.forEach(amount => {
+                uniqueAmounts[amount] = (uniqueAmounts[amount] || 0) + 1;
+            });
+
+            // Sort by amount (ascending)
+            sortedAmounts = Object.entries(uniqueAmounts)
+                .map(([amountStr, count]) => {
+                    const amount = parseFloat(amountStr);
+                    return { amount, count, label: formatAmountFull(amount) };
+                })
+                .sort((a, b) => a.amount - b.amount);
+
+            maxCount = Math.max(...sortedAmounts.map(item => item.count));
+        }
+
+        const dataLength = useBins ? sortedBins.length : sortedAmounts.length;
+        const chartDiv = document.getElementById('mobile-nia-histogram-chart');
+        
+        // Mobile-optimized chart dimensions
+        const chartHeight = 400;
+        const chartWidth = Math.min(800, window.innerWidth - 40);
+        const marginLeft = 50;
+        const marginRight = 20;
+        const marginTop = 20;
+        const marginBottom = 80;
+        const plotWidth = chartWidth - marginLeft - marginRight;
+        const plotHeight = chartHeight - marginTop - marginBottom;
+        const barWidth = Math.max(10, plotWidth / dataLength - 1);
+
+        let chartHTML = `
+            <svg width="${chartWidth}" height="${chartHeight + 30}" style="font-family: Arial, sans-serif;">
+                <!-- Y-axis label -->
+                <text x="20" y="${chartHeight / 2}" transform="rotate(-90, 20, ${chartHeight / 2})" 
+                      style="font-size: 12px; fill: #666; text-anchor: middle; font-weight: 600;">
+                    Number of Projects
+                </text>
+                
+                <!-- X-axis label -->
+                <text x="${chartWidth / 2}" y="${chartHeight + 20}" 
+                      style="font-size: 12px; fill: #666; text-anchor: middle; font-weight: 600;">
+                    Price (Amount in ₱)${useBins ? ' - Binned' : ''}
+                </text>
+                
+                <!-- Y-axis ticks and grid lines -->
+                ${[0, 0.25, 0.5, 0.75, 1].map((ratio) => {
+                    const y = marginTop + (plotHeight * (1 - ratio));
+                    const value = Math.round(maxCount * ratio);
+                    return `
+                        <line x1="${marginLeft}" y1="${y}" x2="${chartWidth - marginRight}" y2="${y}" 
+                              stroke="#e9ecef" stroke-width="1" stroke-dasharray="2,2"/>
+                        <text x="${marginLeft - 10}" y="${y + 4}" style="font-size: 10px; fill: #666; text-anchor: end; font-weight: 500;">
+                            ${value}
+                        </text>
+                    `;
+                }).join('')}
+                
+                <!-- X-axis baseline -->
+                <line x1="${marginLeft}" y1="${marginTop + plotHeight}" 
+                      x2="${chartWidth - marginRight}" y2="${marginTop + plotHeight}" 
+                      stroke="#333" stroke-width="2"/>
+                
+                <!-- Y-axis baseline -->
+                <line x1="${marginLeft}" y1="${marginTop}" 
+                      x2="${marginLeft}" y2="${marginTop + plotHeight}" 
+                      stroke="#333" stroke-width="2"/>
+                
+                <!-- Bars -->
+                ${useBins ? sortedBins.map((bin, idx) => {
+                    const barHeight = (bin.count / maxCount) * plotHeight;
+                    const x = marginLeft + (idx * (plotWidth / sortedBins.length)) + 1;
+                    const y = marginTop + plotHeight - barHeight;
+                    const barColor = bin.count > 100 ? '#dc3545' : bin.count > 50 ? '#fd7e14' : bin.count > 20 ? '#ffc107' : '#28a745';
+                    
+                    const binMinDisplay = bin.min >= 1000000 ? `${(bin.min / 1000000).toFixed(1)}M` : 
+                                         bin.min >= 1000 ? `${(bin.min / 1000).toFixed(0)}K` : bin.min.toString();
+                    
+                    return `
+                        <g>
+                            <rect x="${x}" y="${y}" width="${barWidth}" height="${barHeight}" 
+                                  fill="${barColor}" opacity="0.8" rx="2">
+                                <title>${bin.label}: ${bin.count} projects</title>
+                            </rect>
+                            <text x="${x + barWidth / 2}" y="${y - 6}" 
+                                  style="font-size: 9px; fill: #333; text-anchor: middle; font-weight: 600;">
+                                ${bin.count}
+                            </text>
+                            <text x="${x + barWidth / 2}" y="${marginTop + plotHeight + 20}" 
+                                  transform="rotate(-45, ${x + barWidth / 2}, ${marginTop + plotHeight + 20})"
+                                  style="font-size: 8px; fill: #666; text-anchor: end;">
+                                ${binMinDisplay}
+                            </text>
+                        </g>
+                    `;
+                }).join('') : sortedAmounts.map((item, idx) => {
+                    const barHeight = (item.count / maxCount) * plotHeight;
+                    const x = marginLeft + (idx * (plotWidth / sortedAmounts.length)) + 1;
+                    const y = marginTop + plotHeight - barHeight;
+                    const barColor = item.count > 100 ? '#dc3545' : item.count > 50 ? '#fd7e14' : item.count > 20 ? '#ffc107' : '#28a745';
+                    
+                    // Format amount for X-axis (use exact value, abbreviated)
+                    const amountDisplay = item.amount >= 1000000 ? `${(item.amount / 1000000).toFixed(1)}M` : 
+                                         item.amount >= 1000 ? `${(item.amount / 1000).toFixed(0)}K` : item.amount.toString();
+                    
+                    return `
+                        <g>
+                            <rect x="${x}" y="${y}" width="${barWidth}" height="${barHeight}" 
+                                  fill="${barColor}" opacity="0.8" rx="2">
+                                <title>${item.label}: ${item.count} projects</title>
+                            </rect>
+                            <text x="${x + barWidth / 2}" y="${y - 6}" 
+                                  style="font-size: 9px; fill: #333; text-anchor: middle; font-weight: 600;">
+                                ${item.count}
+                            </text>
+                            <text x="${x + barWidth / 2}" y="${marginTop + plotHeight + 20}" 
+                                  transform="rotate(-45, ${x + barWidth / 2}, ${marginTop + plotHeight + 20})"
+                                  style="font-size: 8px; fill: #666; text-anchor: end;">
+                                ${amountDisplay}
+                            </text>
+                        </g>
+                    `;
+                }).join('')}
+            </svg>
+        `;
+
+        chartDiv.innerHTML = chartHTML;
+        
+        const histogramContainer = document.getElementById('mobile-annex-a4-histogram');
+        if (histogramContainer) {
+            histogramContainer.style.display = 'block';
+        }
+        
+        // Store chart data
+        window.niaChartData = {
+            amounts: amounts,
+            bins: useBins ? sortedBins : null,
+            uniqueAmounts: useBins ? null : sortedAmounts,
+            totalProjects: amounts.length,
+            useBins: useBins
+        };
+        
+        // Calculate and display statistics
+        calculateAndDisplayMobileNIAStatistics(amounts, useBins ? sortedBins : sortedAmounts, useBins);
+    }
+
+    // Calculate statistical analysis results for NIA (mobile version)
+    function calculateAndDisplayMobileNIAStatistics(amounts, sortedData, useBins) {
+        const totalProjects = amounts.length;
+        
+        // Always calculate unique count from actual amounts (not binned)
+        const uniqueAmountSet = new Set(amounts);
+        const uniqueCount = uniqueAmountSet.size;
+        const probability = 0.000000;
+        
+        // Benford's Law Test - always use actual amounts (not binned)
+        const firstDigitCounts = {};
+        amounts.forEach(amount => {
+            const amountStr = Math.abs(amount).toString();
+            const firstDigit = parseInt(amountStr.charAt(0));
+            if (firstDigit >= 1 && firstDigit <= 9) {
+                firstDigitCounts[firstDigit] = (firstDigitCounts[firstDigit] || 0) + 1;
+            }
+        });
+        
+        const benfordExpected = {};
+        for (let d = 1; d <= 9; d++) {
+            benfordExpected[d] = totalProjects * Math.log10(1 + 1/d);
+        }
+        
+        let chiSquare = 0;
+        for (let d = 1; d <= 9; d++) {
+            const observed = firstDigitCounts[d] || 0;
+            const expected = benfordExpected[d];
+            if (expected > 0) {
+                chiSquare += Math.pow(observed - expected, 2) / expected;
+            }
+        }
+        
+        const criticalValue = 15.51;
+        const benfordRejected = chiSquare > criticalValue;
+        
+        // Find dominant amount/range
+        let dominantInfo = null;
+        if (useBins) {
+            const dominantBin = sortedData && sortedData.length > 0 ? sortedData.reduce((max, bin) => 
+                bin.count > max.count ? bin : max, sortedData[0]) : null;
+            if (dominantBin) {
+                dominantInfo = {
+                    label: dominantBin.label,
+                    percentage: ((dominantBin.count / totalProjects) * 100).toFixed(0)
+                };
+            }
+        } else {
+            const dominantAmount = sortedData && sortedData.length > 0 ? sortedData.reduce((max, item) => 
+                item.count > max.count ? item : max, sortedData[0]) : null;
+            if (dominantAmount) {
+                dominantInfo = {
+                    label: dominantAmount.label,
+                    percentage: ((dominantAmount.count / totalProjects) * 100).toFixed(0)
+                };
+            }
+        }
+        
+        const analysisDiv = document.getElementById('mobile-nia-statistical-analysis');
+        const contentDiv = document.getElementById('mobile-nia-statistical-analysis-content');
+        
+        if (analysisDiv && contentDiv) {
+            contentDiv.innerHTML = `
+                <p style="margin: 0.5rem 0; font-size: 0.85em;"><strong>Probability</strong> of ${uniqueCount} unique amounts in ${totalProjects} projects: Effectively ${probability.toFixed(6)}.</p>
+                <p style="margin: 0.5rem 0; font-size: 0.85em;"><strong>Benford's Law Test:</strong> <span style="color: ${benfordRejected ? '#dc3545' : '#28a745'}; font-weight: 600;">${benfordRejected ? 'REJECTED' : 'PASSED'}</span> (Chi-Square: ${chiSquare.toFixed(2)}, Critical: ${criticalValue.toFixed(2)}).</p>
+                ${dominantInfo ? `<p style="margin: 0.5rem 0; font-size: 0.85em;"><strong>Dominant ${useBins ? 'Range' : 'Amount'}:</strong> ${dominantInfo.label} (${dominantInfo.percentage}% of all projects).</p>` : ''}
+                ${benfordRejected ? '<p style="margin: 1rem 0 0 0; font-weight: 600; color: #dc3545; font-size: 0.85em;">This strongly suggests the data is artificial or copy-pasted.</p>' : ''}
+            `;
+            analysisDiv.style.display = 'block';
+        }
+    }
+
     document.addEventListener('DOMContentLoaded', function() {
         loadInsertionsData();
         
@@ -1057,6 +1540,11 @@
             const dpwhLink = document.querySelector('[data-tab="dpwh"]');
             if (dpwhLink) {
                 dpwhLink.click();
+            }
+        } else if (window.location.hash === '#nia') {
+            const niaLink = document.querySelector('[data-tab="nia"]');
+            if (niaLink) {
+                niaLink.click();
             }
         }
     });
