@@ -1030,7 +1030,169 @@ async def budget_duplicates_count_api(year: str = "2025"):
         result = await get_budget_duplicates_count(year)
         return JSONResponse(result)
     except Exception as e:
-        return JSONResponse({"success": False, "error": str(e)})
+        return JSONResponse({"success": False, "error": str(e)}, status_code=500)
+
+@app.get("/api/budget/resurrected-projects")
+async def budget_resurrected_projects_api():
+    """Get resurrected projects data (DPWH projects in 2026 that existed in previous years)"""
+    try:
+        json_path = Path('static/data/resurrected_projects_dpwh.json')
+        if not json_path.exists():
+            return JSONResponse({"success": False, "error": "Resurrected projects data not available. Please run the detection script first."}, status_code=404)
+        
+        with open(json_path, 'r', encoding='utf-8') as f:
+            data = json.load(f)
+        
+        return JSONResponse({"success": True, **data})
+    except Exception as e:
+        return JSONResponse({"success": False, "error": str(e)}, status_code=500)
+
+@app.get("/api/budget/roads-cost-analysis")
+async def budget_roads_cost_analysis_api():
+    """Get road infrastructure projects (roads, bridges, traffic signs, etc.) with chainage, calculate distance and cost per km from 2026 budget amendments data"""
+    try:
+        import re
+        from difflib import SequenceMatcher
+        
+        json_path = Path('static/data/budget_amendments_2026.json')
+        if not json_path.exists():
+            return JSONResponse({"success": False, "error": "Budget amendments 2026 data not available"}, status_code=404)
+        
+        with open(json_path, 'r', encoding='utf-8') as f:
+            data = json.load(f)
+        
+        all_items = data.get('line_items', []) + data.get('projects', [])
+        
+        def extract_all_chainage_ranges(name: str):
+            """Extract all chainage ranges from name and return list of (start_km, start_m, end_km, end_m)"""
+            ranges = []
+            
+            # Pattern 1: K format - find all occurrences
+            pattern_k = r'K(\d+)\s*\+\s*\(?(-?\d+)\)?\s*-\s*K(\d+)\s*\+\s*\(?(-?\d+)\)?'
+            for match in re.finditer(pattern_k, name, re.IGNORECASE):
+                ranges.append((int(match.group(1)), int(match.group(2)), int(match.group(3)), int(match.group(4))))
+            
+            # Pattern 2: Chainage format - find all occurrences
+            pattern_chainage = r'Chainage\s+(\d+)\s*-\s*Chainage\s+(\d+)'
+            for match in re.finditer(pattern_chainage, name, re.IGNORECASE):
+                start_total = int(match.group(1))
+                end_total = int(match.group(2))
+                start_km = start_total // 1000
+                start_m = start_total % 1000
+                end_km = end_total // 1000
+                end_m = end_total % 1000
+                ranges.append((start_km, start_m, end_km, end_m))
+            
+            return ranges
+        
+        def calculate_distance(chainage_ranges):
+            """Calculate total distance in kilometers from list of chainage ranges
+            Returns: (total_distance_km, breakdown_string, individual_distances_m)
+            """
+            if not chainage_ranges:
+                return None, None, []
+            
+            total_distance_m = 0
+            individual_distances_m = []
+            
+            # Convert to total meters helper
+            def to_meters(km, m):
+                return km * 1000 + m
+            
+            for chainage_range in chainage_ranges:
+                start_km, start_m, end_km, end_m = chainage_range
+                
+                start_total = to_meters(start_km, start_m)
+                end_total = to_meters(end_km, end_m)
+                
+                # Distance in meters (absolute value) for this range
+                distance_m = abs(end_total - start_total)
+                individual_distances_m.append(distance_m)
+                total_distance_m += distance_m
+            
+            # Convert to kilometers
+            distance_km = total_distance_m / 1000.0
+            
+            # Create breakdown string if multiple ranges
+            if len(individual_distances_m) > 1:
+                breakdown = ' + '.join([f'{int(d)}m' for d in individual_distances_m]) + f' = {int(total_distance_m)}m'
+            else:
+                breakdown = None
+            
+            return distance_km, breakdown, individual_distances_m
+        
+        def format_chainage_display(name: str, ranges):
+            """Format all chainage ranges for display"""
+            if not ranges:
+                return None
+            
+            # Extract all chainage strings from the name
+            chainage_strings = []
+            
+            # K format
+            pattern_k = r'(K\d+\s*\+\s*\(?-?\d+\)?\s*-\s*K\d+\s*\+\s*\(?-?\d+\)?)'
+            for match in re.finditer(pattern_k, name, re.IGNORECASE):
+                chainage_strings.append(match.group(1))
+            
+            # Chainage format
+            pattern_chainage = r'(Chainage\s+\d+\s*-\s*Chainage\s+\d+)'
+            for match in re.finditer(pattern_chainage, name, re.IGNORECASE):
+                chainage_strings.append(match.group(1))
+            
+            if chainage_strings:
+                return ', '.join(chainage_strings)
+            
+            return None
+        
+        road_projects = []
+        
+        for item in all_items:
+            name = item.get('name', '') or item.get('description', '')
+            if not name:
+                continue
+            
+            # Check if it has chainage notation - extract ALL ranges
+            chainage_ranges = extract_all_chainage_ranges(name)
+            if not chainage_ranges:
+                continue
+            
+            amount = abs(item.get('final_amount', 0) or item.get('original_amount', 0))
+            if amount <= 0:
+                continue
+            
+            # Calculate total distance from all ranges
+            distance_km, breakdown, individual_distances = calculate_distance(chainage_ranges)
+            if not distance_km or distance_km <= 0:
+                continue
+            
+            # Calculate cost per km
+            cost_per_km = amount / distance_km
+            
+            chainage_display = format_chainage_display(name, chainage_ranges) or 'N/A'
+            
+            road_projects.append({
+                'name': name,
+                'chainage_display': chainage_display,
+                'chainage_ranges': chainage_ranges,  # Store all ranges
+                'distance_km': distance_km,
+                'distance_breakdown': breakdown,  # e.g., "2 + 2 = 4m"
+                'amount': amount,
+                'cost_per_km': cost_per_km,
+                'source_sheet': item.get('source_sheet'),
+                'region': item.get('location', {}).get('region') if isinstance(item.get('location'), dict) else None
+            })
+        
+        # Sort by cost per km descending
+        road_projects.sort(key=lambda x: x['cost_per_km'], reverse=True)
+        
+        return JSONResponse({
+            "success": True,
+            "projects": road_projects,
+            "total": len(road_projects)
+        })
+        
+    except Exception as e:
+        return JSONResponse({"success": False, "error": str(e)}, status_code=500)
 
 @app.get("/api/budget/anomalies/count")
 async def budget_anomalies_count_api(year: str = "2025"):
