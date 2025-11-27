@@ -344,6 +344,10 @@ class DuplicateDetector:
         output_file = Path(output_path)
         output_file.parent.mkdir(parents=True, exist_ok=True)
         
+        # If no duplicates found, still create file with empty groups
+        if not self.duplicates:
+            self.duplicates = []
+        
         # Get unique source Excel files from all groups
         source_excels = set()
         source_sheets = set()
