@@ -406,6 +406,10 @@ class ResurrectedProjectFinder:
                 # Calculate name similarity
                 name_sim = SequenceMatcher(None, normalized_name_2026, norm_historical['normalized_name']).ratio()
                 
+                # First check: name similarity must meet threshold BEFORE penalties
+                if name_sim < name_similarity_threshold:
+                    continue  # Skip if base similarity is too low
+                
                 # If 2026 item has chainage, check for overlap with historical
                 chainage_penalty = 0.0
                 if chainage_2026:
@@ -432,11 +436,12 @@ class ResurrectedProjectFinder:
                 years_old = 2026 - historical_year
                 time_penalty = min(0.50, years_old * 0.10)  # Max 50% penalty (5+ years)
                 
-                # Apply penalties to similarity score
+                # Apply penalties to similarity score (for ranking/display only)
                 adjusted_sim = name_sim * (1.0 - chainage_penalty) * (1.0 - time_penalty)
                 
-                # Use adjusted similarity for threshold check and comparison
-                if adjusted_sim >= name_similarity_threshold and adjusted_sim > best_adjusted_sim:
+                # Use adjusted similarity for comparison (to find best match)
+                # But we already checked that name_sim >= threshold above
+                if adjusted_sim > best_adjusted_sim:
                     best_match = norm_historical
                     best_name_sim = name_sim  # Store original similarity for display
                     best_adjusted_sim = adjusted_sim  # Store adjusted for comparison
@@ -513,7 +518,7 @@ if __name__ == "__main__":
     print("=" * 100)
     print(" RESURRECTED PROJECTS DETECTION - DPWH ONLY")
     print(" Finding DPWH projects in 2026 that existed in 2025 or earlier years")
-    print(" Using strict name matching (85% similarity threshold)")
+    print(" Using strict name matching (92% similarity threshold)")
     print(" Processing ALL DPWH items")
     print("=" * 100)
     
@@ -525,7 +530,7 @@ if __name__ == "__main__":
     print("="*100)
     all_matches = finder.find_resurrected_projects(
         source_filter="Annex A-5",
-        name_similarity_threshold=0.85,  # 85% for strict name matching
+        name_similarity_threshold=0.92,  # 92% for stricter name matching
         min_amount=100000,
         max_items=None,  # Process ALL items (no limit)
         amounts_in_thousands=True  # Budget amounts are stored in thousands
@@ -537,7 +542,7 @@ if __name__ == "__main__":
         "metadata": {
             "total_matches": len(all_matches),
             "source_filter": "Annex A-5 (DPWH)",
-            "name_similarity_threshold": 0.85,
+            "name_similarity_threshold": 0.92,
             "min_amount": 100000,
             "search_years": list(range(2016, 2026)),
             "generated_at": datetime.now().isoformat(),

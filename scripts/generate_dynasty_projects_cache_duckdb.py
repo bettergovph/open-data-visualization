@@ -45,7 +45,7 @@ CLASSIFIED_PARQUET = PARQUET_DIR / 'integrated_projects_classified.parquet'
 # Fallback to separate files if integrated file doesn't exist
 DIME_PARQUET = PARQUET_DIR / 'dime_projects.parquet'
 PHILGEPS_PARQUET = PARQUET_DIR / 'philgeps_contracts.parquet'
-INFRAWATCH_PARQUET = PARQUET_DIR / 'infrawatch_projects.parquet'
+MICROSITE_PARQUET = PARQUET_DIR / 'infrawatch_projects.parquet'  # File is named infrawatch but we call it microsite
 FLOOD_PARQUET = PARQUET_DIR / 'flood_projects.parquet'
 # Dynasty data parquet files
 POLITICAL_DYNASTIES_PARQUET = PARQUET_DIR / 'political_dynasties.parquet'
@@ -110,6 +110,9 @@ class DynastyProjectsCacheGeneratorDuckDB:
         
         # Load substring provinces config for strict word boundary matching
         self.substring_provinces = self._load_substring_provinces()
+        
+        # Load project code mapping for short-circuit district matching
+        self.project_code_mapping = self._load_project_code_mapping()
 
     def _log(self, message: str, *, verbose_only: bool = False) -> None:
         if verbose_only and not self.verbose:
@@ -178,6 +181,162 @@ class DynastyProjectsCacheGeneratorDuckDB:
                 'lanao', 'leyte', 'mindoro', 'misamis', 'negros', 'quezon',
                 'samar', 'surigao', 'zamboanga'
             }
+    
+    def _load_project_code_mapping(self) -> Dict:
+        """Load the DPWH project code mapping from JSON file"""
+        mapping_path = Path(__file__).parent.parent / 'database' / 'dpwh-project-code-mapping.json'
+        if not mapping_path.exists():
+            self._log("⚠️  Project code mapping file not found; project code parsing will be disabled", verbose_only=True)
+            return {}
+        
+        try:
+            with open(mapping_path, 'r', encoding='utf-8') as f:
+                mapping = json.load(f)
+            self._log(f"✅ Loaded project code mapping from {mapping_path}", verbose_only=True)
+            return mapping
+        except Exception as e:
+            self._log(f"⚠️  Warning: Could not load project code mapping: {e}", verbose_only=True)
+            return {}
+    
+    def _parse_project_code(self, project_code: str) -> Optional[Dict]:
+        """Parse integrated project code into components
+        
+        Format: YYRDSSSS
+        - YY = Year (2 digits)
+        - R = Region (1 letter)
+        - D = District (1 letter)
+        - SSSS = Sequence (4 digits)
+        
+        Returns dict with year, region_letter, district_letter, sequence, or None if invalid
+        """
+        if not project_code:
+            return None
+        
+        project_code = str(project_code).strip().upper()
+        
+        # Remove any dashes or spaces
+        project_code = re.sub(r'[-\s]', '', project_code)
+        
+        # Match pattern: YYRDSSSS (8 characters total)
+        pattern = re.match(r'^(\d{2})([A-Z])([A-Z])(\d{4})$', project_code)
+        if pattern:
+            year, region_letter, district_letter, sequence = pattern.groups()
+            return {
+                'year': year,
+                'region_letter': region_letter,
+                'district_letter': district_letter,
+                'sequence': sequence,
+                'full_code': project_code
+            }
+        
+        return None
+    
+    def _extract_project_code_from_data(self, project: Dict) -> Optional[str]:
+        """Extract integrated project code from project data"""
+        # Common field names for project codes
+        code_fields = [
+            'project_code', 'code', 'ipc', 'integrated_project_code',
+            'project_id', 'contract_id', 'reference_number', 'ref_number',
+            'project_number', 'project_no', 'contract_number', 'contract_no',
+            'philgeps_project_code', 'philgeps_code', 'award_id', 'notice_id'
+        ]
+        
+        for field in code_fields:
+            if field in project and project[field]:
+                code = str(project[field]).strip()
+                if code and len(code) >= 6:  # Minimum length for YYRDSSSS
+                    parsed = self._parse_project_code(code)
+                    if parsed:
+                        return code
+        
+        # Also check if code might be embedded in other fields
+        text_fields = ['project_name', 'project_description', 'award_title', 'notice_title', 
+                      'description', 'title', 'name', 'location']
+        for field in text_fields:
+            if field in project and project[field]:
+                text = str(project[field])
+                # Look for code-like patterns: YYRDSSSS
+                code_match = re.search(r'\b(\d{2}[A-Z]{2}\d{4})\b', text, re.IGNORECASE)
+                if code_match:
+                    code = code_match.group(1)
+                    parsed = self._parse_project_code(code)
+                    if parsed:
+                        return code
+        
+        return None
+    
+    def _classify_by_project_code(self, project_code: str, congressmen_data: Dict, 
+                                  district_lookup: Dict) -> Optional[tuple]:
+        """Classify a project using integrated project code
+        
+        Returns: (congressman_name, match_score) or None
+        """
+        if not self.project_code_mapping:
+            return None
+        
+        # Parse the code
+        parsed = self._parse_project_code(project_code)
+        if not parsed:
+            return None
+        
+        region_letter = parsed['region_letter']
+        district_letter = parsed['district_letter']
+        
+        # Get region and district info from mapping
+        if region_letter not in self.project_code_mapping:
+            return None
+        
+        region_info = self.project_code_mapping[region_letter]
+        districts = region_info.get('districts', {})
+        
+        if district_letter not in districts:
+            return None
+        
+        district_deo = districts[district_letter]
+        
+        # Map DEO name to congressman district
+        # DEO names typically contain province and district info
+        # Examples: "Batangas 1st DEO", "Ilocos Norte 1st DEO", "Quezon 2nd DEO"
+        # We need to extract province and district number from DEO name
+        
+        # Try to match DEO to congressman by province and district
+        # Look for patterns like "Province Xth DEO" or "Province Xst DEO" or "Province Xnd DEO" or "Province Xrd DEO"
+        deo_upper = district_deo.upper()
+        
+        # Extract province name (everything before the district number)
+        # Pattern: "BATANGAS 1ST DEO" -> province="BATANGAS", district="1ST"
+        deo_match = re.match(r'^(.+?)\s+(\d+)(?:ST|ND|RD|TH)?\s+DEO', deo_upper)
+        if not deo_match:
+            # Try alternative patterns
+            deo_match = re.match(r'^(.+?)\s+(\d+)(?:ST|ND|RD|TH)?\s+DISTRICT', deo_upper)
+        
+        if deo_match:
+            province_name = deo_match.group(1).strip()
+            district_num_str = deo_match.group(2).strip()
+            
+            # Try to find matching congressman
+            for cm_name, cm_data in congressmen_data.items():
+                cm_provinces = cm_data.get('provinces', [])
+                cm_district_number = cm_data.get('district_number', '')
+                
+                # Check if province matches
+                for cm_province in cm_provinces:
+                    cm_prov_upper = cm_province.upper().strip()
+                    
+                    # Check if province name matches (with variations)
+                    if (province_name in cm_prov_upper or cm_prov_upper in province_name or
+                        self._normalize_location_name(province_name) == self._normalize_location_name(cm_prov_upper)):
+                        
+                        # Check if district number matches
+                        # Extract district number from cm_district_number (e.g., "1st District" -> "1")
+                        cm_dist_match = re.search(r'(\d+)(?:ST|ND|RD|TH)?', str(cm_district_number).upper())
+                        if cm_dist_match:
+                            cm_dist_num = cm_dist_match.group(1)
+                            if cm_dist_num == district_num_str:
+                                # Found match! Return with high score (200 for code-based match)
+                                return (cm_name, 200)
+        
+        return None
     
     def _is_flood_related(self, project_name: str, description: str = "", location: str = "") -> bool:
         """Detect if a project is flood-related based on keywords"""
@@ -395,24 +554,58 @@ class DynastyProjectsCacheGeneratorDuckDB:
             merged['match_score'] = incoming_score
             merged['is_city_wide'] = incoming.get('is_city_wide', False)
 
-        # Preserve both district and contractor congressmen (each project can have 2 congressmen)
-        # Each project can have: 1 district congressman + 1 contractor congressman
-        # When merging, preserve both from either source (they'll be tracked in the congressmen set during deduplication)
+        # CRITICAL: Always prefer incoming classification fields (they're newly computed)
+        # This ensures force mode works correctly - new classifications overwrite old ones
+        # Classification fields that should always use incoming values when present:
+        classification_fields = [
+            'project_district_type', 'project_district', 'project_barangay_municipality',
+            'project_province_city_district', 'project_municipality_barangay',
+            'is_flood_related', 'district_congressman', 'district_match_type',
+            'district_match_score', 'district_is_city_wide', 'congressman_district',
+            'contractor_congressman', 'contractor_match_type', 'contractor_match_score',
+            'contractor_congressman_district', 'match_type', 'match_score'
+        ]
         
-        # District congressman: prefer primary, but use incoming if primary doesn't have one
-        if not merged.get('district_congressman') and incoming.get('district_congressman'):
-            merged['district_congressman'] = incoming.get('district_congressman')
-            merged['district_match_type'] = incoming.get('district_match_type')
-            merged['district_match_score'] = incoming.get('district_match_score')
-            merged['congressman_district'] = incoming.get('congressman_district')
+        # CRITICAL: Handle district and contractor congressmen separately to preserve both
+        # Don't overwrite with None - preserve existing matches when merging
         
-        # Contractor congressman: prefer primary, but use incoming if primary doesn't have one
+        # District congressman: prefer incoming if it has a higher score or primary doesn't have one
+        if incoming.get('district_congressman'):
+            incoming_score = incoming.get('district_match_score', 0)
+            merged_score = merged.get('district_match_score', 0)
+            if not merged.get('district_congressman') or incoming_score > merged_score:
+                merged['district_congressman'] = incoming.get('district_congressman')
+                merged['district_match_type'] = incoming.get('district_match_type')
+                merged['district_match_score'] = incoming.get('district_match_score')
+                merged['district_is_city_wide'] = incoming.get('district_is_city_wide')
+                merged['congressman_district'] = incoming.get('congressman_district')
+        # Don't overwrite district_congressman with None - preserve existing
+        
+        # Contractor congressman: preserve both if they exist, prefer incoming if it's new
         # Note: Both can exist simultaneously (different congressmen)
-        if not merged.get('contractor_congressman') and incoming.get('contractor_congressman'):
+        if incoming.get('contractor_congressman'):
+            # Incoming has a contractor match - use it (may be same or different from merged)
             merged['contractor_congressman'] = incoming.get('contractor_congressman')
             merged['contractor_match_type'] = incoming.get('contractor_match_type')
             merged['contractor_match_score'] = incoming.get('contractor_match_score')
             merged['contractor_congressman_district'] = incoming.get('contractor_congressman_district')
+        # Don't overwrite contractor_congressman with None - preserve existing
+        
+        # Now handle other classification fields (excluding congressman fields which we handled above)
+        other_classification_fields = [
+            'project_district_type', 'project_district', 'project_barangay_municipality',
+            'project_province_city_district', 'project_municipality_barangay',
+            'is_flood_related', 'district_match_type', 'district_match_score',
+            'district_is_city_wide', 'congressman_district',
+            'contractor_match_type', 'contractor_match_score',
+            'contractor_congressman_district', 'match_type', 'match_score'
+        ]
+        
+        for field in other_classification_fields:
+            # Always use incoming value if it exists (even if None, to clear old values in force mode)
+            # This ensures newly classified values overwrite old ones
+            if field in incoming:
+                merged[field] = incoming[field]
 
         return merged
 
@@ -458,16 +651,45 @@ class DynastyProjectsCacheGeneratorDuckDB:
                              congressmen_data: Dict,
                              district_lookup: Dict,
                              contractor_lookup: Dict,
-                             contractor_inverted_index: Dict) -> tuple[Optional[str], Optional[str], int, Optional[str], Optional[str]]:
+                             contractor_inverted_index: Dict,
+                             project_data: Optional[Dict] = None) -> tuple[Optional[str], Optional[str], int, Optional[str], Optional[str]]:
         """
         Unified matching logic using O(1) lookups.
         Returns: (congressman_name, match_type, match_score, district_congressman, contractor_congressman)
+        
+        Args:
+            project_data: Optional project dict to extract project code for short-circuit matching
         """
         district_congressman = None
         contractor_congressman = None
         match_type = 'unknown'
         match_score = 0
         final_congressman = 'Unknown'
+
+        # 0. SHORT-CIRCUIT: Try Project Code Match (highest priority)
+        # If project has an integrated project code, use it for direct district matching
+        if project_data:
+            project_code = self._extract_project_code_from_data(project_data)
+            if project_code:
+                code_match = self._classify_by_project_code(project_code, congressmen_data, district_lookup)
+                if code_match:
+                    district_congressman, code_score = code_match
+                    # Normalize congressman name to canonical form
+                    if district_congressman and hasattr(self, 'canonical_name_map'):
+                        district_congressman = self.canonical_name_map.get(district_congressman, district_congressman)
+                    match_score = code_score
+                    match_type = 'district'
+                    final_congressman = district_congressman
+                    # Short-circuit: return immediately with code-based match
+                    # Still check contractor match for completeness
+                    contractor_match = self._find_congressman_by_contractor(
+                        contractor, contractor_lookup, contractor_inverted_index, congressmen_data
+                    )
+                    if contractor_match:
+                        contractor_congressman, c_score = contractor_match
+                        if contractor_congressman and hasattr(self, 'canonical_name_map'):
+                            contractor_congressman = self.canonical_name_map.get(contractor_congressman, contractor_congressman)
+                    return final_congressman, match_type, match_score, district_congressman, contractor_congressman
 
         # 1. Try District Match
         district_match = self._find_congressman_by_district(
@@ -496,6 +718,9 @@ class DynastyProjectsCacheGeneratorDuckDB:
             # Normalize congressman name to canonical form
             if contractor_congressman and hasattr(self, 'canonical_name_map'):
                 contractor_congressman = self.canonical_name_map.get(contractor_congressman, contractor_congressman)
+            
+            # Note: Contractor matching is based solely on owner/officer relationship, not location
+            # Location validation is NOT applied to contractor matches
             
         # 3. Determine Primary Match
         # CRITICAL: For party-list congressmen, prioritize contractor matches over district matches
@@ -565,6 +790,7 @@ class DynastyProjectsCacheGeneratorDuckDB:
         
         for proj in projects_chunk:
             # Check if already classified (unless force mode)
+            # CRITICAL: In force mode, ALWAYS reclassify - never skip
             if not self.force_reclassify:
                 project_district_type = proj.get('project_district_type')
                 project_district = proj.get('project_district')
@@ -595,11 +821,37 @@ class DynastyProjectsCacheGeneratorDuckDB:
                     chunk_results.append(result)
                     self.progress_counters['skipped'] += 1
                     continue
+            # Force mode: Explicitly clear any remaining classification fields from project dict
+            # This ensures we don't accidentally use old values during matching
+            elif self.force_reclassify:
+                # Double-check: Clear classification fields if they somehow still exist
+                classification_fields_to_clear = [
+                    'district_congressman', 'contractor_congressman',
+                    'project_district_type', 'project_district', 'project_barangay_municipality',
+                    'project_province_city_district', 'project_municipality_barangay',
+                    'is_flood_related', 'district_match_type', 'district_match_score',
+                    'district_is_city_wide', 'congressman_district',
+                    'contractor_match_type', 'contractor_match_score',
+                    'contractor_congressman_district', 'match_type', 'match_score'
+                ]
+                for field in classification_fields_to_clear:
+                    if field in proj:
+                        del proj[field]
             
-            # Extract basic data
+            # Extract basic data - ALWAYS use raw data fields, never old classification values
+            # CRITICAL: In force mode, ensure we're using raw location data, not old classification
             proj_province = (proj.get('province') or '').strip()
             proj_city = (proj.get('city') or '').strip()
             proj_barangay = (proj.get('barangay') or '').strip()
+            
+            # CRITICAL: Never use old classification fields for matching
+            # These should have been cleared in load_projects_from_parquet, but double-check
+            if self.force_reclassify:
+                # Ensure we're not accidentally using old classification values
+                # project_district should not be used as province
+                if not proj_province and proj.get('project_district'):
+                    # Don't use project_district - it's a classification field, not raw data
+                    pass
             
             # Determine location key
             is_city_district = bool(proj_city and 'CITY' in proj_city.upper())
@@ -655,7 +907,8 @@ class DynastyProjectsCacheGeneratorDuckDB:
                 congressmen_data=congressmen_data,
                 district_lookup=district_lookup_dict,
                 contractor_lookup=contractor_lookup_dict,
-                contractor_inverted_index=contractor_inverted_index
+                contractor_inverted_index=contractor_inverted_index,
+                project_data=proj  # Pass project data for project code extraction
             )
 
             # Update Progress
@@ -759,6 +1012,7 @@ class DynastyProjectsCacheGeneratorDuckDB:
 
         for contract in contracts_chunk:
             # Check if already classified (unless force mode)
+            # CRITICAL: In force mode, ALWAYS reclassify - never skip
             # Check that all fields are not None and not empty strings
             if not self.force_reclassify:
                 project_district_type = contract.get('project_district_type')
@@ -790,6 +1044,22 @@ class DynastyProjectsCacheGeneratorDuckDB:
                     chunk_results.append(result)
                     self.progress_counters['skipped'] += 1
                     continue
+            # Force mode: Explicitly clear any remaining classification fields from contract dict
+            # This ensures we don't accidentally use old values during matching
+            elif self.force_reclassify:
+                # Double-check: Clear classification fields if they somehow still exist
+                classification_fields_to_clear = [
+                    'district_congressman', 'contractor_congressman',
+                    'project_district_type', 'project_district', 'project_barangay_municipality',
+                    'project_province_city_district', 'project_municipality_barangay',
+                    'is_flood_related', 'district_match_type', 'district_match_score',
+                    'district_is_city_wide', 'congressman_district',
+                    'contractor_match_type', 'contractor_match_score',
+                    'contractor_congressman_district', 'match_type', 'match_score'
+                ]
+                for field in classification_fields_to_clear:
+                    if field in contract:
+                        del contract[field]
             
             # Basic Data
             award_title = (contract.get('philgeps_award_title') or contract.get('award_title') or contract.get('project_name') or contract.get('project_description') or '')
@@ -854,7 +1124,8 @@ class DynastyProjectsCacheGeneratorDuckDB:
                 congressmen_data=congressmen_data,
                 district_lookup=district_lookup_dict,
                 contractor_lookup=contractor_lookup_dict,
-                contractor_inverted_index=contractor_inverted_index
+                contractor_inverted_index=contractor_inverted_index,
+                project_data=contract  # Pass contract data for project code extraction
             )
 
             # Update Progress
@@ -944,11 +1215,11 @@ class DynastyProjectsCacheGeneratorDuckDB:
             
         return chunk_results
 
-    def _process_infrawatch_chunk(self, rows_chunk: List[Dict], congressmen_data: Dict, districts_data: Dict,
+    def _process_microsite_chunk(self, rows_chunk: List[Dict], congressmen_data: Dict, districts_data: Dict,
                                  district_lookup_dict: Dict, contractor_lookup_dict: Dict, contractor_inverted_index: Dict,
                                  known_provinces: List[str] = None, known_cities: List[str] = None, 
                                  location_context_map: Dict = None) -> List[Dict]:
-        """Process a chunk of Infrawatch projects from Parquet using O(1) lookups."""
+        """Process a chunk of Microsite projects from Parquet using O(1) lookups."""
         chunk_results: List[Dict] = []
         
         # Use passed location data if available, otherwise extract (fallback)
@@ -966,7 +1237,7 @@ class DynastyProjectsCacheGeneratorDuckDB:
                 continue
             
             # Check if already classified (unless force mode)
-            # Check that all fields are not None and not empty strings
+            # CRITICAL: In force mode, ALWAYS reclassify - never skip
             if not self.force_reclassify:
                 project_district_type = record.get('project_district_type')
                 project_district = record.get('project_district')
@@ -997,18 +1268,45 @@ class DynastyProjectsCacheGeneratorDuckDB:
                     chunk_results.append(result)
                     self.progress_counters['skipped'] += 1
                     continue
-
+            # Force mode: Explicitly clear any remaining classification fields from record dict
+            # This ensures we don't accidentally use old values during matching
+            elif self.force_reclassify:
+                # Double-check: Clear classification fields if they somehow still exist
+                classification_fields_to_clear = [
+                    'district_congressman', 'contractor_congressman',
+                    'project_district_type', 'project_district', 'project_barangay_municipality',
+                    'project_province_city_district', 'project_municipality_barangay',
+                    'is_flood_related', 'district_match_type', 'district_match_score',
+                    'district_is_city_wide', 'congressman_district',
+                    'contractor_match_type', 'contractor_match_score',
+                    'contractor_congressman_district', 'match_type', 'match_score'
+                ]
+                for field in classification_fields_to_clear:
+                    if field in record:
+                        del record[field]
+            
             # Basic Data
-            description = (record.get("Contract Details") or record.get("Project Description") or "").upper()
+            # CRITICAL: Parquet file has standardized columns from export script (not JSONB field names)
+            # Export script creates: project_name, project_description, contractor_name, organization_name, etc.
+            description = (record.get("project_name") or record.get("project_description") or 
+                         record.get("Contract Details") or record.get("Project Description") or "").upper()
             # Get project title/description for classification (similar to notice_title in PhilGEPS)
-            project_title = (record.get("Contract Details") or record.get("Project Description") or record.get("Project Title") or record.get("Title") or "").upper()
-            contractor_raw = (record.get("Contractor") or record.get("Contractor Name") or record.get("Contractor_Name") or "")
+            project_title = (record.get("project_name") or record.get("project_description") or
+                           record.get("Contract Details") or record.get("Project Description") or 
+                           record.get("Project Title") or record.get("Title") or "").upper()
+            contractor_raw = (record.get("contractor_name") or 
+                            record.get("Contractor") or record.get("Contractor Name") or record.get("Contractor_Name") or "")
             contractor = contractor_raw.upper()
-            agency = (record.get("Implementing Agency") or "").upper()
-            fund_source = (record.get("Fund Source") or "").upper()
+            # Export script maps "Implementing Agency" to organization_name and infrawatch_implementing_agency
+            agency = (record.get("organization_name") or record.get("infrawatch_implementing_agency") or
+                     record.get("Implementing Agency") or "").upper()
+            fund_source = (record.get("infrawatch_fund_source") or record.get("Fund Source") or "").upper()
             
             # Location Extraction - include project_title for better classification
-            project_location = record.get("Implementing Agency") or record.get("Project Location") or record.get("location") or ""
+            # Use standardized parquet columns: organization_name contains location info
+            project_location = (record.get("organization_name") or record.get("infrawatch_implementing_agency") or
+                              record.get("Implementing Agency") or 
+                              record.get("Project Location") or record.get("location") or "")
             combined_text = f"{description} {project_title} {agency} {fund_source} {contractor} {project_location}"
             
             location_info = self._extract_location_from_text(combined_text, known_provinces, known_cities, location_context_map)
@@ -1061,7 +1359,8 @@ class DynastyProjectsCacheGeneratorDuckDB:
                 congressmen_data=congressmen_data,
                 district_lookup=district_lookup_dict,
                 contractor_lookup=contractor_lookup_dict,
-                contractor_inverted_index=contractor_inverted_index
+                contractor_inverted_index=contractor_inverted_index,
+                project_data=record  # Pass record data for project code extraction
             )
 
             # Update Progress
@@ -1192,9 +1491,12 @@ class DynastyProjectsCacheGeneratorDuckDB:
             if processed_count % 1000 == 0:
                 print(f"  🔄 Processed {processed_count} SSP/Flood rows in current chunk...")
             # Check if already classified (unless force mode)
-            # Check that all fields are not None and not empty strings
-            already_classified = False
-            if not self.force_reclassify:
+            # CRITICAL: In force mode, always reclassify - ignore old classification values
+            if self.force_reclassify:
+                # Force mode: always reclassify, ignore existing classification fields
+                already_classified = False
+            elif not self.force_reclassify:
+                already_classified = False
                 project_district_type = proj.get('project_district_type')
                 project_district = proj.get('project_district')
                 project_barangay_municipality = proj.get('project_barangay_municipality')
@@ -1302,7 +1604,8 @@ class DynastyProjectsCacheGeneratorDuckDB:
                 congressmen_data=congressmen_data,
                 district_lookup=district_lookup_dict,
                 contractor_lookup=contractor_lookup_dict,
-                contractor_inverted_index=contractor_inverted_index
+                contractor_inverted_index=contractor_inverted_index,
+                project_data=proj  # Pass project data for project code extraction
             )
 
             # Update Progress
@@ -1698,72 +2001,110 @@ class DynastyProjectsCacheGeneratorDuckDB:
         party_memberships_by_party: Dict[Any, set[tuple[str, str]]] = defaultdict(set)
         party_contractors: Dict[Any, set[str]] = defaultdict(set)
 
-        # Try to load contractor matches from DuckDB first (faster)
-        duckdb_path = PARQUET_DIR / 'dynasty_data.duckdb'
+        # Try to load contractor matches from Parquet file first, then DuckDB
         contractor_rows = []
-        if duckdb_path.exists():
+        
+        # Check for parquet file first
+        contractor_parquet = PARQUET_DIR / 'contractor_dynasty_matches.parquet'
+        if contractor_parquet.exists():
             try:
                 import duckdb
-                conn = duckdb.connect(str(duckdb_path))
+                conn = duckdb.connect()
                 try:
-                    contractor_rows = conn.execute("SELECT dynasty_first_name, dynasty_last_name, company_name, role FROM contractor_dynasty_matches").fetchall()
-                    # Convert to asyncpg.Record-like objects
-                    for row in contractor_rows:
-                        # Create a dict-like object
-                        row_dict = {
-                            'dynasty_first_name': row[0],
-                            'dynasty_last_name': row[1],
-                            'company_name': row[2],
-                            'role': row[3]
-                        }
-                        key = _name_key(row_dict['dynasty_first_name'], row_dict['dynasty_last_name'])
-                        contractor_lookup[key].append(row_dict)
-                    print(f"✅ Loaded {len(contractor_rows)} contractor matches from DuckDB")
+                    contractor_rows = conn.execute(f"SELECT dynasty_first_name, dynasty_last_name, company_name, role FROM read_parquet('{contractor_parquet}')").fetchall()
+                    print(f"✅ Loaded {len(contractor_rows)} contractor matches from Parquet")
                 finally:
                     conn.close()
             except Exception as e:
-                print(f"⚠️  Failed to load contractors from DuckDB: {e}")
+                print(f"⚠️  Failed to load contractors from Parquet: {e}")
+        
+        # Fallback to DuckDB if parquet not available
+        if not contractor_rows:
+            duckdb_path = PARQUET_DIR / 'dynasty_data.duckdb'
+            if duckdb_path.exists():
+                try:
+                    import duckdb
+                    conn = duckdb.connect(str(duckdb_path))
+                    try:
+                        contractor_rows = conn.execute("SELECT dynasty_first_name, dynasty_last_name, company_name, role FROM contractor_dynasty_matches").fetchall()
+                        # Convert to asyncpg.Record-like objects
+                        print(f"✅ Loaded {len(contractor_rows)} contractor matches from DuckDB")
+                    finally:
+                        conn.close()
+                except Exception as e:
+                    print(f"⚠️  Failed to load contractors from DuckDB: {e}")
+        
+        # Process contractor rows
+        for row in contractor_rows:
+            # Create a dict-like object
+            row_dict = {
+                'dynasty_first_name': row[0],
+                'dynasty_last_name': row[1],
+                'company_name': row[2],
+                'role': row[3]
+            }
+            key = _name_key(row_dict['dynasty_first_name'], row_dict['dynasty_last_name'])
+            contractor_lookup[key].append(row_dict)
         
         # Note: No PostgreSQL fallback - using DuckDB/Parquet only
 
-            # Try to load party list members from DuckDB first
-            party_rows = []
+        # Try to load party list members from Parquet file first, then DuckDB
+        party_rows = []
+        
+        # Check for parquet file first
+        party_parquet = PARQUET_DIR / 'party_list_members.parquet'
+        if party_parquet.exists():
+            try:
+                import duckdb
+                conn = duckdb.connect()
+                try:
+                    party_rows = conn.execute(f"SELECT person_id, party_list_number, first_name, last_name FROM read_parquet('{party_parquet}')").fetchall()
+                    print(f"✅ Loaded {len(party_rows)} party list members from Parquet")
+                finally:
+                    conn.close()
+            except Exception as e:
+                print(f"⚠️  Failed to load party members from Parquet: {e}")
+        
+        # Fallback to DuckDB if parquet not available
+        if not party_rows:
+            duckdb_path = PARQUET_DIR / 'dynasty_data.duckdb'
             if duckdb_path.exists():
                 try:
                     import duckdb
                     conn = duckdb.connect(str(duckdb_path))
                     try:
                         party_rows = conn.execute("SELECT person_id, party_list_number, first_name, last_name FROM party_list_members").fetchall()
-                        # Convert to dict-like objects
-                        for row in party_rows:
-                            row_dict = {
-                                'person_id': row[0],
-                                'party_list_number': row[1],
-                                'first_name': row[2],
-                                'last_name': row[3]
-                            }
-                            party_number = row_dict['party_list_number']
-                            person_id = row_dict['person_id']
-                            key = _name_key(row_dict['first_name'], row_dict['last_name'])
-                            if person_id is not None:
-                                party_memberships_by_person[person_id].append(party_number)
-                            party_memberships_by_name[key].append(party_number)
-                            party_memberships_by_party[party_number].add(key)
                         print(f"✅ Loaded {len(party_rows)} party list members from DuckDB")
                     finally:
                         conn.close()
                 except Exception as e:
                     print(f"⚠️  Failed to load party members from DuckDB: {e}")
-            
-            # Note: No PostgreSQL fallback - using DuckDB/Parquet only
+        
+        # Process party rows
+        for row in party_rows:
+            row_dict = {
+                'person_id': row[0],
+                'party_list_number': row[1],
+                'first_name': row[2],
+                'last_name': row[3]
+            }
+            party_number = row_dict['party_list_number']
+            person_id = row_dict['person_id']
+            key = _name_key(row_dict['first_name'], row_dict['last_name'])
+            if person_id is not None:
+                party_memberships_by_person[person_id].append(party_number)
+            party_memberships_by_name[key].append(party_number)
+            party_memberships_by_party[party_number].add(key)
+        
+        # Note: No PostgreSQL fallback - using DuckDB/Parquet only
 
-            for party_number, member_keys in party_memberships_by_party.items():
-                party_set = party_contractors[party_number]
-                for member_key in member_keys:
-                    for contractor_row in contractor_lookup.get(member_key, []):
-                        company_name = contractor_row.get('company_name')
-                        if company_name:
-                            party_set.add(company_name)
+        for party_number, member_keys in party_memberships_by_party.items():
+            party_set = party_contractors[party_number]
+            for member_key in member_keys:
+                for contractor_row in contractor_lookup.get(member_key, []):
+                    company_name = contractor_row.get('company_name')
+                    if company_name:
+                        party_set.add(company_name)
 
         for congressman_config in target_congressmen:
             first_name_pattern = congressman_config.get('first_name_pattern', '')
@@ -2811,8 +3152,37 @@ class DynastyProjectsCacheGeneratorDuckDB:
         
         if len(parts) >= 2:
             # Check last 2 parts for "<location>, <province/city>" pattern (strict order)
-            location_part = parts[-2].strip()  # Municipality/barangay (before comma)
+            # CRITICAL: For "SANTA CATALINA (ILOCOS SUR), ILOCOS SUR, Region I"
+            # parts[-1] = "Region I" (not what we want)
+            # parts[-2] = "ILOCOS SUR" (this is the province!)
+            # parts[-3] = "SANTA CATALINA (ILOCOS SUR)" (municipality)
+            # So we need to check if parts[-1] is "Region X" and use parts[-2] instead
+            location_part = parts[-2].strip() if len(parts) >= 2 else ""
             province_city_part = parts[-1].strip().upper()  # Province/city (after comma)
+            
+            # CRITICAL FIX: If last part is "Region X", use the second-to-last part as province
+            # Example: "SANTA CATALINA (ILOCOS SUR), ILOCOS SUR, Region I"
+            # -> parts[-1] = "REGION I", parts[-2] = "ILOCOS SUR" (this is the province!)
+            if province_city_part.startswith('REGION ') and len(parts) >= 3:
+                province_city_part = parts[-2].strip().upper()  # Use second-to-last as province
+                location_part = parts[-3].strip() if len(parts) >= 3 else ""
+            
+            # CRITICAL: Also check if location_part contains province info in parentheses
+            # Example: "SANTA CATALINA (ILOCOS SUR), ILOCOS SUR, Region I"
+            # Extract province from parentheses in location_part if it has directional modifier
+            if '(' in location_part and ')' in location_part:
+                # Extract text in parentheses
+                paren_matches = re.findall(r'\(([^)]+)\)', location_part.upper())
+                for paren_text in paren_matches:
+                    # Check if this looks like a province with directional modifier
+                    if has_directional_modifier(paren_text):
+                        # Use the province from parentheses if it's more specific
+                        if not province_city_part or not has_directional_modifier(province_city_part):
+                            province_city_part = paren_text.strip()
+                        elif has_directional_modifier(province_city_part) and has_directional_modifier(paren_text):
+                            # Both have directional - prefer the one from parentheses (more explicit)
+                            province_city_part = paren_text.strip()
+                        break
             
             if location_part and province_city_part:
                 # Check if location_part contains barangay indicators
@@ -2900,18 +3270,29 @@ class DynastyProjectsCacheGeneratorDuckDB:
                             # Example: "SOUTHERN LEYTE" should NOT match "LEYTE", only "SOUTHERN LEYTE"
                             # Example: "NORTHERN SAMAR" should NOT match "SAMAR", only "NORTHERN SAMAR"
                             # Example: "ILOILO CITY" should NOT match "ILOILO" province, only "ILOILO CITY"
+                            # CRITICAL: "ILOCOS SUR" should NEVER match "ILOCOS NORTE" - require exact directional match
                             if part_has_directional:
-                                # Must be exact match or the known_prov must be more specific
+                                # Must be exact match - no partial matches for directional provinces
                                 if prov_upper == province_city_part:
-                                    # Exact match
+                                    # Exact match - this is the ONLY acceptable match for directional provinces
                                     result['province'] = known_prov
                                     result['municipality_barangay'] = location_clean
                                     break
-                                elif known_prov_has_directional and prov_upper.startswith(province_city_part):
-                                    # Known province is more specific and starts with our part
-                                    result['province'] = known_prov
-                                    result['municipality_barangay'] = location_clean
-                                    break
+                                # CRITICAL: If both have directional modifiers, they must match exactly
+                                elif known_prov_has_directional:
+                                    # Both have directional - check if they match exactly
+                                    # Extract directional from both
+                                    prov_dir_match = re.search(r'\b(DEL\s+)?(SUR|NORTE|OCCIDENTAL|ORIENTAL|EASTERN|WESTERN|NORTHERN|SOUTHERN)\b', prov_upper, re.IGNORECASE)
+                                    part_dir_match = re.search(r'\b(DEL\s+)?(SUR|NORTE|OCCIDENTAL|ORIENTAL|EASTERN|WESTERN|NORTHERN|SOUTHERN)\b', province_city_part, re.IGNORECASE)
+                                    
+                                    if prov_dir_match and part_dir_match:
+                                        prov_dir = prov_dir_match.group(0).upper().strip()
+                                        part_dir = part_dir_match.group(0).upper().strip()
+                                        # Only match if directions are EXACTLY the same
+                                        if prov_dir == part_dir and prov_upper == province_city_part:
+                                            result['province'] = known_prov
+                                            result['municipality_barangay'] = location_clean
+                                            break
                                 # Skip if known_prov doesn't have directional but part_after does
                                 elif not known_prov_has_directional:
                                     continue
@@ -3018,7 +3399,40 @@ class DynastyProjectsCacheGeneratorDuckDB:
                     needs_strict_matching = any(base in variant_base_lower for base in self.substring_provinces)
                     
                     # Check for exact match first (especially important for directional provinces)
-                    if variant in text_upper:
+                    # CRITICAL: For directional provinces, use word boundary to ensure exact match
+                    # "ILOCOS SUR" should match "ILOCOS SUR" but NOT "ILOCOS NORTE"
+                    if variant_has_directional:
+                        # For directional provinces, require exact word boundary match
+                        pattern = r'\b' + re.escape(variant) + r'\b'
+                        if re.search(pattern, text_upper, re.IGNORECASE):
+                            # Verify no conflicting directional variant exists
+                            # Extract base and check for opposite direction
+                            base = normalize_province_base(variant)
+                            variant_dir_match = re.search(r'\b(DEL\s+)?(SUR|NORTE|OCCIDENTAL|ORIENTAL|EASTERN|WESTERN|NORTHERN|SOUTHERN)\b', variant, re.IGNORECASE)
+                            if variant_dir_match:
+                                variant_dir = variant_dir_match.group(0).upper().strip()
+                                # Check for opposite directions
+                                opposite_dirs = {
+                                    'SUR': ['NORTE', 'DEL NORTE'],
+                                    'NORTE': ['SUR', 'DEL SUR'],
+                                    'DEL SUR': ['NORTE', 'DEL NORTE'],
+                                    'DEL NORTE': ['SUR', 'DEL SUR'],
+                                    'OCCIDENTAL': ['ORIENTAL'],
+                                    'ORIENTAL': ['OCCIDENTAL'],
+                                    'EASTERN': ['WESTERN'],
+                                    'WESTERN': ['EASTERN'],
+                                    'NORTHERN': ['SOUTHERN'],
+                                    'SOUTHERN': ['NORTHERN']
+                                }
+                                opposite_list = opposite_dirs.get(variant_dir, [])
+                                has_opposite = any(re.search(rf'\b{re.escape(opp)}\b', text_upper, re.IGNORECASE) and 
+                                                  re.search(rf'\b{re.escape(base)}\b', text_upper, re.IGNORECASE) 
+                                                  for opp in opposite_list)
+                                if not has_opposite:
+                                    result['province'] = known_prov
+                                    matched = True
+                                    break
+                    elif variant in text_upper:
                         # CRITICAL: Check for city vs province conflicts (e.g., "ILOILO CITY" vs "ILOILO")
                         if 'CITY' in known_prov.upper() and 'CITY' not in text_upper:
                             # Known province is a city but text doesn't mention "CITY"
@@ -3037,13 +3451,23 @@ class DynastyProjectsCacheGeneratorDuckDB:
                             if needs_strict_matching:
                                 pattern = r'\b' + re.escape(variant) + r'\b'
                                 if re.search(pattern, text_upper, re.IGNORECASE):
-                                    # Check if a more specific version exists in text
-                                    directional_pattern = rf'\b(SOUTHERN|NORTHERN|EASTERN|WESTERN|OCCIDENTAL|ORIENTAL|DEL\s+SUR|DEL\s+NORTE)\s+{re.escape(variant)}\b'
-                                    if not re.search(directional_pattern, text_upper, re.IGNORECASE):
+                                    # CRITICAL: Check if a more specific version exists in text
+                                    # Check for ALL directional patterns, not just one
+                                    directional_patterns = [
+                                        rf'\b(SOUTHERN|NORTHERN|EASTERN|WESTERN|OCCIDENTAL|ORIENTAL|DEL\s+SUR|DEL\s+NORTE)\s+{re.escape(variant)}\b',
+                                        rf'\b{re.escape(variant)}\s+(SOUTHERN|NORTHERN|EASTERN|WESTERN|OCCIDENTAL|ORIENTAL|DEL\s+SUR|DEL\s+NORTE)\b',
+                                        rf'\b(SOUTHERN|NORTHERN|EASTERN|WESTERN|OCCIDENTAL|ORIENTAL)\s+{re.escape(variant)}\b',
+                                        rf'\b{re.escape(variant)}\s+(DEL\s+SUR|DEL\s+NORTE)\b'
+                                    ]
+                                    has_directional_in_text = any(re.search(dp, text_upper, re.IGNORECASE) for dp in directional_patterns)
+                                    if not has_directional_in_text:
                                         # No more specific version found, safe to use this
                                         result['province'] = known_prov
                                         matched = True
                                         break
+                                    else:
+                                        # More specific version exists - skip base match to avoid cross-variant matches
+                                        continue
                             else:
                                 # Check if a more specific version exists in text
                                 directional_pattern = rf'\b(SOUTHERN|NORTHERN|EASTERN|WESTERN|OCCIDENTAL|ORIENTAL|DEL\s+SUR|DEL\s+NORTE)\s+{re.escape(variant)}\b'
@@ -3056,6 +3480,19 @@ class DynastyProjectsCacheGeneratorDuckDB:
                         # CRITICAL: Check for city vs province conflicts
                         if 'CITY' in known_prov.upper() and 'CITY' not in text_upper:
                             # Known province is a city but text doesn't mention "CITY"
+                            continue
+                        
+                        # CRITICAL: Before matching base name, check if ANY directional variant exists in text
+                        # If "ILOCOS SUR" or "ILOCOS NORTE" exists, don't match base "ILOCOS"
+                        # This prevents cross-variant matches
+                        all_directional_patterns = [
+                            rf'\b{re.escape(variant_base)}\s+(SUR|NORTE|OCCIDENTAL|ORIENTAL|EASTERN|WESTERN|NORTHERN|SOUTHERN|DEL\s+SUR|DEL\s+NORTE)\b',
+                            rf'\b(SUR|NORTE|OCCIDENTAL|ORIENTAL|EASTERN|WESTERN|NORTHERN|SOUTHERN|DEL\s+SUR|DEL\s+NORTE)\s+{re.escape(variant_base)}\b',
+                        ]
+                        has_any_directional = any(re.search(dp, text_upper, re.IGNORECASE) for dp in all_directional_patterns)
+                        
+                        if has_any_directional:
+                            # Text has a directional variant - skip base name match to avoid cross-variant errors
                             continue
                         
                         # For substring provinces, use word boundary matching
@@ -3369,22 +3806,40 @@ class DynastyProjectsCacheGeneratorDuckDB:
         # CRITICAL: For provinces with directional variants (e.g., "Samar" has "Northern Samar", "Eastern Samar")
         # Get all variants and exclude directional ones when matching base name
         # Example: If querying "Samar", exclude "Northern Samar" and "Eastern Samar" from matches
+        # CRITICAL FIX: Prevent "Ilocos Norte" from matching "Ilocos Sur" projects and vice versa
         province_base_name = re.sub(r'\s*(DEL\s+)?(SUR|NORTE|OCCIDENTAL|ORIENTAL|EASTERN|WESTERN|NORTHERN|SOUTHERN)\s*$', '', province_upper).strip()
+        all_variants = []
+        
+        # Check if province has a directional modifier
+        has_directional = bool(re.search(r'\b(DEL\s+)?(SUR|NORTE|OCCIDENTAL|ORIENTAL|EASTERN|WESTERN|NORTHERN|SOUTHERN)\b', province_upper))
+        
         if province_base_name != province_upper:
-            # This is a directional province (e.g., "Northern Samar")
-            # Get all variants and exclude other directional variants
+            # This is a directional province (e.g., "Northern Samar", "Ilocos Norte", "Ilocos Sur")
+            # Get all variants to validate against
             all_variants = self._get_location_variants(province_base_name, 'province', dedup_dict)
-            # Only use the exact variant, not other directional variants
-            province_variants = [province_upper]  # Reset to only use exact match
+            # CRITICAL: Only use the exact variant, never match to other directional variants
+            # "Ilocos Norte" should NEVER match "Ilocos Sur" projects
+            province_variants = [province_upper]  # Reset to only use exact match - NO base name fallback
         elif province_base_name == province_upper:
-            # This is a base province name (e.g., "Samar")
+            # This is a base province name (e.g., "Samar", "Ilocos")
             # Get all variants to know what to exclude
             all_variants = self._get_location_variants(province_upper, 'province', dedup_dict)
-            # If there are multiple variants (e.g., Samar, Northern Samar, Eastern Samar)
-            # We should only match the exact base name, not the directional variants
+            # If there are multiple variants (e.g., Ilocos Norte, Ilocos Sur)
+            # We should NOT match at all - require explicit directional variant
+            # This prevents "Ilocos" from matching both "Ilocos Norte" and "Ilocos Sur"
             if len(all_variants) > 1:
-                # Multiple variants exist - only use base name, exclude directional variants
+                # Multiple variants exist - require explicit directional variant
+                # Don't match base name to avoid cross-variant matches
+                province_variants = []  # Empty - require explicit match
+            else:
+                # Only one variant or no variants - safe to use base name
                 province_variants = [province_upper]
+        
+        # CRITICAL: If we have a directional modifier, NEVER try base name variants
+        # This is a double-check to prevent any fallback to base name matching
+        if has_directional and province_base_name != province_upper:
+            # We have a directional province - ONLY use exact match, no base name
+            province_variants = [province_upper]
         
         # STRICTEST: Try exact match first
         candidates = []
@@ -3417,19 +3872,57 @@ class DynastyProjectsCacheGeneratorDuckDB:
                 # - No specific barangay/municipality was provided (location_upper is empty), OR
                 # - The city name is explicitly mentioned with "CITY" word in the text
                 # This prevents broad matches for city districts like Manila
+                # CRITICAL FIX: Also validate directional variants to prevent "ILOCOS SUR" matching "ILOCOS NORTE"
                 if not variant_candidates:
                     # Check if this is a city district and we need stricter matching
                     province_only_candidates = district_lookup.get((prov_variant, ''), [])
                     if province_only_candidates:
                         # Filter candidates to only city districts if we have location
-                        # For province districts, allow province-only match
+                        # For province districts, allow province-only match BUT validate directional variants
                         # For city districts, be more strict
                         filtered_candidates = []
                         for cm_name, cm_data in province_only_candidates:
                             is_city_district = cm_data.get('is_city_district', False)
+                            
+                            # CRITICAL: Validate directional variants for province districts
                             if not is_city_district:
-                                # Province district - allow province-only match
-                                filtered_candidates.append((cm_name, cm_data))
+                                # Province district - validate directional variants match
+                                cm_provinces = cm_data.get('provinces', [])
+                                directional_match = False
+                                
+                                for cm_province in cm_provinces:
+                                    cm_prov_upper = cm_province.upper().strip()
+                                    
+                                    # Extract base names and directional modifiers
+                                    cm_base = re.sub(r'\s*(DEL\s+)?(SUR|NORTE|OCCIDENTAL|ORIENTAL|EASTERN|WESTERN|NORTHERN|SOUTHERN)\s*$', '', cm_prov_upper).strip()
+                                    req_base = re.sub(r'\s*(DEL\s+)?(SUR|NORTE|OCCIDENTAL|ORIENTAL|EASTERN|WESTERN|NORTHERN|SOUTHERN)\s*$', '', prov_variant).strip()
+                                    
+                                    # If both have the same base name, check directional modifiers
+                                    if cm_base == req_base and cm_base:
+                                        # Extract directional modifiers
+                                        cm_dir_match = re.search(r'\b(DEL\s+)?(SUR|NORTE|OCCIDENTAL|ORIENTAL|EASTERN|WESTERN|NORTHERN|SOUTHERN)\b', cm_prov_upper)
+                                        req_dir_match = re.search(r'\b(DEL\s+)?(SUR|NORTE|OCCIDENTAL|ORIENTAL|EASTERN|WESTERN|NORTHERN|SOUTHERN)\b', prov_variant)
+                                        
+                                        cm_dir = cm_dir_match.group(0) if cm_dir_match else None
+                                        req_dir = req_dir_match.group(0) if req_dir_match else None
+                                        
+                                        # If both have directional modifiers, they must match exactly
+                                        if cm_dir and req_dir:
+                                            if cm_dir == req_dir:
+                                                directional_match = True
+                                                break
+                                        elif not cm_dir and not req_dir:
+                                            # Both are base names (no directional) - allow match
+                                            directional_match = True
+                                            break
+                                    elif cm_prov_upper == prov_variant:
+                                        # Exact match (including directional variants)
+                                        directional_match = True
+                                        break
+                                
+                                # Only add if directional variants match
+                                if directional_match:
+                                    filtered_candidates.append((cm_name, cm_data))
                             elif not location_upper:
                                 # City district but no location specified - allow match
                                 filtered_candidates.append((cm_name, cm_data))
@@ -3459,38 +3952,136 @@ class DynastyProjectsCacheGeneratorDuckDB:
                         candidates = district_lookup.get((correct_prov, correct_loc), [])
                 
                 # If still no match, try province-only
+                # CRITICAL: Validate directional variants even for normalized matches
                 if not candidates:
-                    candidates = district_lookup.get((correct_prov, ''), [])
+                    province_only_candidates = district_lookup.get((correct_prov, ''), [])
+                    if province_only_candidates:
+                        # Filter by directional variant match
+                        filtered_candidates = []
+                        for cm_name, cm_data in province_only_candidates:
+                            cm_provinces = cm_data.get('provinces', [])
+                            is_city_district = cm_data.get('is_city_district', False)
+                            
+                            # For province districts, validate directional variants
+                            if not is_city_district:
+                                directional_match = False
+                                for cm_province in cm_provinces:
+                                    cm_prov_upper = cm_province.upper().strip()
+                                    
+                                    # Extract base names and directional modifiers
+                                    cm_base = re.sub(r'\s*(DEL\s+)?(SUR|NORTE|OCCIDENTAL|ORIENTAL|EASTERN|WESTERN|NORTHERN|SOUTHERN)\s*$', '', cm_prov_upper).strip()
+                                    req_base = re.sub(r'\s*(DEL\s+)?(SUR|NORTE|OCCIDENTAL|ORIENTAL|EASTERN|WESTERN|NORTHERN|SOUTHERN)\s*$', '', correct_prov).strip()
+                                    
+                                    if cm_base == req_base and cm_base:
+                                        cm_dir_match = re.search(r'\b(DEL\s+)?(SUR|NORTE|OCCIDENTAL|ORIENTAL|EASTERN|WESTERN|NORTHERN|SOUTHERN)\b', cm_prov_upper)
+                                        req_dir_match = re.search(r'\b(DEL\s+)?(SUR|NORTE|OCCIDENTAL|ORIENTAL|EASTERN|WESTERN|NORTHERN|SOUTHERN)\b', correct_prov)
+                                        
+                                        cm_dir = cm_dir_match.group(0) if cm_dir_match else None
+                                        req_dir = req_dir_match.group(0) if req_dir_match else None
+                                        
+                                        if cm_dir and req_dir:
+                                            if cm_dir == req_dir:
+                                                directional_match = True
+                                                break
+                                        elif not cm_dir and not req_dir:
+                                            directional_match = True
+                                            break
+                                    elif cm_prov_upper == correct_prov:
+                                        directional_match = True
+                                        break
+                                
+                                if directional_match:
+                                    filtered_candidates.append((cm_name, cm_data))
+                            else:
+                                # City district - allow match
+                                filtered_candidates.append((cm_name, cm_data))
+                        
+                        candidates = filtered_candidates
                 
                 if candidates:
                     match_score = 5
         
         # 4. FUZZY MATCHING (last resort) - score 3
         # Use Levenshtein distance to find closest match
+        # CRITICAL: Do NOT use fuzzy matching for directional provinces - require exact match
+        # This prevents "ILOCOS SUR" from fuzzy-matching to "ILOCOS NORTE"
         if not candidates:
-            # Try fuzzy matching for province
-            closest_prov = self._find_closest_match(province_upper, all_provinces, max_distance=2)
-            if closest_prov:
-                closest_prov_upper = closest_prov.upper().strip()
-                # Try with location if available
-                if location_upper:
-                    # Try fuzzy match for location
-                    closest_loc = None
-                    # Determine if it's a municipality or barangay based on district type
-                    # Try municipalities first
-                    closest_loc = self._find_closest_match(location_upper, all_municipalities, max_distance=2)
-                    if not closest_loc:
-                        closest_loc = self._find_closest_match(location_upper, all_barangays, max_distance=2)
+            # Check if province has directional modifier - if so, skip fuzzy matching
+            province_has_directional = bool(re.search(r'\b(DEL\s+)?(SUR|NORTE|OCCIDENTAL|ORIENTAL|EASTERN|WESTERN|NORTHERN|SOUTHERN)\b', province_upper))
+            
+            if province_has_directional:
+                # Has directional modifier - skip fuzzy matching to prevent cross-variant matches
+                # Only exact matches are allowed for directional provinces
+                pass
+            else:
+                # No directional modifier - safe to try fuzzy matching
+                # Try fuzzy matching for province
+                closest_prov = self._find_closest_match(province_upper, all_provinces, max_distance=2)
+                if closest_prov:
+                    closest_prov_upper = closest_prov.upper().strip()
                     
-                    if closest_loc:
-                        candidates = district_lookup.get((closest_prov_upper, closest_loc.upper().strip()), [])
-                
-                # If still no match, try province-only
-                if not candidates:
-                    candidates = district_lookup.get((closest_prov_upper, ''), [])
-                
-                if candidates:
-                    match_score = 3
+                    # Try with location if available
+                    if location_upper:
+                        # Try fuzzy match for location
+                        closest_loc = None
+                        # Determine if it's a municipality or barangay based on district type
+                        # Try municipalities first
+                        closest_loc = self._find_closest_match(location_upper, all_municipalities, max_distance=2)
+                        if not closest_loc:
+                            closest_loc = self._find_closest_match(location_upper, all_barangays, max_distance=2)
+                        
+                        if closest_loc:
+                            candidates = district_lookup.get((closest_prov_upper, closest_loc.upper().strip()), [])
+                    
+                    # If still no match, try province-only
+                    # CRITICAL: Validate directional variants even for fuzzy matches
+                    if not candidates:
+                        province_only_candidates = district_lookup.get((closest_prov_upper, ''), [])
+                        if province_only_candidates:
+                            # Filter by directional variant match
+                            filtered_candidates = []
+                            for cm_name, cm_data in province_only_candidates:
+                                cm_provinces = cm_data.get('provinces', [])
+                                is_city_district = cm_data.get('is_city_district', False)
+                                
+                                # For province districts, validate directional variants
+                                if not is_city_district:
+                                    directional_match = False
+                                    for cm_province in cm_provinces:
+                                        cm_prov_upper = cm_province.upper().strip()
+                                        
+                                        # Extract base names and directional modifiers
+                                        cm_base = re.sub(r'\s*(DEL\s+)?(SUR|NORTE|OCCIDENTAL|ORIENTAL|EASTERN|WESTERN|NORTHERN|SOUTHERN)\s*$', '', cm_prov_upper).strip()
+                                        req_base = re.sub(r'\s*(DEL\s+)?(SUR|NORTE|OCCIDENTAL|ORIENTAL|EASTERN|WESTERN|NORTHERN|SOUTHERN)\s*$', '', closest_prov_upper).strip()
+                                        
+                                        if cm_base == req_base and cm_base:
+                                            cm_dir_match = re.search(r'\b(DEL\s+)?(SUR|NORTE|OCCIDENTAL|ORIENTAL|EASTERN|WESTERN|NORTHERN|SOUTHERN)\b', cm_prov_upper)
+                                            req_dir_match = re.search(r'\b(DEL\s+)?(SUR|NORTE|OCCIDENTAL|ORIENTAL|EASTERN|WESTERN|NORTHERN|SOUTHERN)\b', closest_prov_upper)
+                                            
+                                            cm_dir = cm_dir_match.group(0) if cm_dir_match else None
+                                            req_dir = req_dir_match.group(0) if req_dir_match else None
+                                            
+                                            if cm_dir and req_dir:
+                                                if cm_dir == req_dir:
+                                                    directional_match = True
+                                                    break
+                                            elif not cm_dir and not req_dir:
+                                                directional_match = True
+                                                break
+                                        elif cm_prov_upper == closest_prov_upper:
+                                            directional_match = True
+                                            break
+                                    
+                                    if directional_match:
+                                        filtered_candidates.append((cm_name, cm_data))
+                                else:
+                                    # City district - allow match
+                                    filtered_candidates.append((cm_name, cm_data))
+                            
+                            candidates = filtered_candidates
+                    
+                    if candidates:
+                        match_score = 3
         
         # CRITICAL: Filter out party-list congressmen from district matches
         # Party-list congressmen don't have districts, so they should never match via district
@@ -3623,6 +4214,60 @@ class DynastyProjectsCacheGeneratorDuckDB:
                         province_matches = True
                         break
                     
+                    # CRITICAL FIX: Prevent directional variant mismatches
+                    # "ILOCOS NORTE" should NEVER match "ILOCOS SUR" and vice versa
+                    # This is the STRICTEST check - must be applied before any other matching logic
+                    
+                    # Extract base names and directional modifiers
+                    cm_base = re.sub(r'\s*(DEL\s+)?(SUR|NORTE|OCCIDENTAL|ORIENTAL|EASTERN|WESTERN|NORTHERN|SOUTHERN)\s*$', '', cm_prov_upper).strip()
+                    req_base = re.sub(r'\s*(DEL\s+)?(SUR|NORTE|OCCIDENTAL|ORIENTAL|EASTERN|WESTERN|NORTHERN|SOUTHERN)\s*$', '', province_upper).strip()
+                    
+                    # Extract directional modifiers (case-insensitive, with word boundaries)
+                    cm_dir_match = re.search(r'\b(DEL\s+)?(SUR|NORTE|OCCIDENTAL|ORIENTAL|EASTERN|WESTERN|NORTHERN|SOUTHERN)\b', cm_prov_upper, re.IGNORECASE)
+                    req_dir_match = re.search(r'\b(DEL\s+)?(SUR|NORTE|OCCIDENTAL|ORIENTAL|EASTERN|WESTERN|NORTHERN|SOUTHERN)\b', province_upper, re.IGNORECASE)
+                    
+                    cm_dir = cm_dir_match.group(0).upper().strip() if cm_dir_match else None
+                    req_dir = req_dir_match.group(0).upper().strip() if req_dir_match else None
+                    
+                    # If both have the same base name (e.g., "ILOCOS"), check directional modifiers
+                    if cm_base == req_base and cm_base:
+                        # CRITICAL: For directional provinces, require EXACT match
+                        # "ILOCOS NORTE" should NEVER match "ILOCOS SUR" and vice versa
+                        if cm_dir and req_dir:
+                            # Both have directional modifiers - they MUST match exactly
+                            # Normalize both directions for comparison (handle "DEL SUR" vs "SUR")
+                            cm_dir_clean = re.sub(r'\s+', ' ', cm_dir.upper().strip())
+                            req_dir_clean = re.sub(r'\s+', ' ', req_dir.upper().strip())
+                            
+                            # Also check if they're equivalent (e.g., "SUR" = "DEL SUR" for Ilocos)
+                            cm_dir_simple = re.sub(r'^DEL\s+', '', cm_dir_clean).strip()
+                            req_dir_simple = re.sub(r'^DEL\s+', '', req_dir_clean).strip()
+                            
+                            if cm_dir_clean != req_dir_clean and cm_dir_simple != req_dir_simple:
+                                # Different directional variants - REJECT match immediately
+                                # e.g., "ILOCOS NORTE" != "ILOCOS SUR"
+                                # This is a hard rejection - do not proceed with any other matching
+                                continue
+                            else:
+                                # Same directional modifiers - allow match
+                                province_matches = True
+                                break
+                        elif cm_dir or req_dir:
+                            # One has directional, one doesn't - REJECT match
+                            # e.g., "ILOCOS NORTE" != "ILOCOS" (base name)
+                            # e.g., "ILOCOS" (base) != "ILOCOS NORTE" (directional)
+                            # This prevents base name from matching directional variants
+                            continue
+                        else:
+                            # Neither has directional - safe to match if base names match
+                            if cm_base == req_base:
+                                province_matches = True
+                                break
+                    elif cm_dir and req_dir and cm_dir != req_dir:
+                        # Different base names but both have directionals - still reject if directionals differ
+                        # This catches edge cases
+                        continue
+                    
                     # CRITICAL: Prevent substring matches that cause false positives
                     # "MANILA" should NOT match "METRO MANILA"
                     # "DAVAO" should NOT match "DAVAO CITY" or "DAVAO DEL SUR" unless explicitly allowed
@@ -3673,7 +4318,18 @@ class DynastyProjectsCacheGeneratorDuckDB:
                         continue
                     
                     # Compound name match with word boundaries (e.g., "Taguig" matches "Taguig–Pateros")
-                    # Use word boundary to prevent partial matches
+                    # CRITICAL: Do NOT allow compound matches for directional provinces
+                    # "ILOCOS SUR" should NEVER match "ILOCOS NORTE" via compound matching
+                    # Check if either has a directional modifier
+                    has_cm_directional = bool(re.search(r'\b(DEL\s+)?(SUR|NORTE|OCCIDENTAL|ORIENTAL|EASTERN|WESTERN|NORTHERN|SOUTHERN)\b', cm_prov_upper))
+                    has_req_directional = bool(re.search(r'\b(DEL\s+)?(SUR|NORTE|OCCIDENTAL|ORIENTAL|EASTERN|WESTERN|NORTHERN|SOUTHERN)\b', province_upper))
+                    
+                    # If either has a directional, require exact match (no compound matching)
+                    if has_cm_directional or has_req_directional:
+                        # Skip compound matching for directional provinces - require exact match
+                        continue
+                    
+                    # Only allow compound matching for non-directional provinces
                     if re.search(r'\b' + re.escape(province_upper) + r'\b', cm_prov_upper) or \
                        re.search(r'\b' + re.escape(cm_prov_upper) + r'\b', province_upper):
                         province_matches = True
@@ -3688,14 +4344,8 @@ class DynastyProjectsCacheGeneratorDuckDB:
                             province_matches = True
                             break
                 
-                # CRITICAL FIX: Strict location check for Eulogio Rodriguez
-                # He is the congressman for Catanduanes, but "E. Rodriguez" is a common street name in QC/Rizal
-                # Prevent false positives by ensuring the project is actually in Catanduanes
-                if province_matches and 'RODRIGUEZ' in cm_name.upper() and 'EULOGIO' in cm_name.upper():
-                    # Check if project province is strictly Catanduanes
-                    if 'CATANDUANES' not in province_upper:
-                        # Reject match if not in Catanduanes
-                        continue
+                # Note: District matches require location validation (already done above)
+                # Contractor matches do NOT require location validation (handled separately)
 
                 if province_matches:
                     validated_candidates.append((cm_name, cm_data))
@@ -3738,8 +4388,14 @@ class DynastyProjectsCacheGeneratorDuckDB:
     def _find_congressman_by_contractor(self, contractor_name: str, contractor_lookup: Dict, 
                                         contractor_inverted_index: Dict, congressmen_data: Dict) -> Optional[tuple]:
         """
-        O(1) lookup for congressman by contractor using inverted index.
+        O(1) lookup for congressman by contractor.
+        CRITICAL: Only matches verified contractor relationships from contractor_dynasty_matches.
         Returns: (congressman_name, match_score) or None
+        
+        Matching strategy:
+        1. Exact match on company name (highest priority)
+        2. Normalized match (removes special chars, normalizes spaces)
+        3. NO partial/token matching - only verified relationships are matched
         """
         if not contractor_name:
             return None
@@ -3747,121 +4403,22 @@ class DynastyProjectsCacheGeneratorDuckDB:
         contractor_upper = contractor_name.upper().strip()
         normalized = re.sub(r'[^A-Z0-9]+', ' ', contractor_upper).strip()
         
-        # Try exact match
+        # Try exact match first (highest priority)
         candidates = contractor_lookup.get(contractor_upper, [])
         
-        # Try normalized match
+        # Try normalized match (removes special chars, normalizes spaces)
         if not candidates:
             candidates = contractor_lookup.get(normalized, [])
         
-        # Try inverted index lookup for partial matches
-        if not candidates:
-            # Tokenize contractor name
-            tokens = re.split(r'[^A-Z0-9]+', contractor_upper)
-            candidate_keys = set()
-            
-            # Common words to exclude from query (must match exclusion list in _build_lookup_dictionaries)
-            COMMON_TOKENS = {'CONSTRUCTION', 'INC', 'CORP', 'INCORPORATED', 'CORPORATION', 'AND', 'THE', 'OF', 'COMPANY', 'CO', 'LTD', 'LIMITED', 'TRADING', 'ENTERPRISES', 'SUPPLY', 'SERVICES', 'BUILDERS', 'DEVELOPMENT', 'ENGINEERING'}
-            
-            # Collect candidate keys from inverted index
-            valid_tokens = [t for t in tokens if len(t) >= 3 and t not in COMMON_TOKENS]
-            
-            if valid_tokens:
-                # Find keys that contain ANY of the valid tokens
-                # We could use intersection (ALL tokens) for stricter matching, but union (ANY) is safer for now
-                # given we will verify with stricter logic below
-                for token in valid_tokens:
-                    if token in contractor_inverted_index:
-                        candidate_keys.update(contractor_inverted_index[token])
-            
-            # If we have candidates from the index, check them
-            if candidate_keys:
-                # Common patterns allowed: CONSTRUCTION, INC, CORP
-                COMMON_PATTERNS = {'CONSTRUCTION', 'INC', 'CORP', 'INCORPORATED', 'CORPORATION'}
-                
-                for key in candidate_keys:
-                    cm_list = contractor_lookup[key]
-                    
-                    # Check if any congressman in the list is party-list (needs strict matching)
-                    has_partylist = any(cm_data.get('is_partylist', False) for _, cm_data in cm_list)
-                    
-                    # Normalize both key (pattern) and contractor for comparison
-                    pattern_normalized = re.sub(r'[^A-Z0-9]+', ' ', key).strip()
-                    contractor_normalized = re.sub(r'[^A-Z0-9]+', ' ', contractor_upper).strip()
-                    
-                    # Split into words
-                    pattern_words = pattern_normalized.split()
-                    contractor_words = contractor_normalized.split()
-                    
-                    # Separate proper names (non-common patterns) from common patterns
-                    pattern_proper_names = [w for w in pattern_words if w not in COMMON_PATTERNS and len(w) >= 3]
-                    pattern_common = [w for w in pattern_words if w in COMMON_PATTERNS]
-                    contractor_proper_names = [w for w in contractor_words if w not in COMMON_PATTERNS and len(w) >= 3]
-                    contractor_common = [w for w in contractor_words if w in COMMON_PATTERNS]
-                    
-                    # CRITICAL: For party-list, require ALL proper names to match exactly
-                    if has_partylist:
-                        if not pattern_proper_names:
-                            continue
-                        
-                        # ALL proper names from pattern must appear as exact words in contractor
-                        all_proper_names_match = all(
-                            any(pn == cn for cn in contractor_proper_names) 
-                            for pn in pattern_proper_names
-                        )
-                        
-                        if all_proper_names_match:
-                            if pattern_common:
-                                common_match = any(pc in contractor_common for pc in pattern_common)
-                                if common_match:
-                                    candidates.extend(cm_list)
-                            else:
-                                candidates.extend(cm_list)
-                    else:
-                        # For district congressmen, slightly looser matching (but still strict on proper names)
-                        if not pattern_proper_names:
-                            continue
-                            
-                        # At least one proper name must match
-                        # CRITICAL FIX: Use 'all' instead of 'any' to prevent broad matching
-                        # e.g., "J. RODRIGUEZ" should NOT match "EULOGIO RODRIGUEZ" just because of "RODRIGUEZ"
-                        proper_name_match = all(
-                            any(pn == cn for cn in contractor_proper_names)
-                            for pn in pattern_proper_names
-                        )
-                        
-                        if proper_name_match:
-                             # Additional check: If the pattern is short (1-2 words), ensure the contractor isn't significantly longer
-                             # This prevents "RODRIGUEZ" from matching "EULOGIO RODRIGUEZ" (1 vs 2 proper names)
-                             if len(pattern_proper_names) <= 2:
-                                 # Allow at most 1 extra proper name in contractor (e.g. middle initial)
-                                 # But for "EULOGIO RODRIGUEZ" vs "RODRIGUEZ", that's 1 extra.
-                                 # Maybe strict equality for single-word patterns?
-                                 if len(pattern_proper_names) == 1 and len(contractor_proper_names) > 1:
-                                     # If pattern is just "RODRIGUEZ", don't match "EULOGIO RODRIGUEZ"
-                                     # But allow "RODRIGUEZ CONSTRUCTION" (where CONSTRUCTION is common)
-                                     # contractor_proper_names only contains non-common words.
-                                     continue
-                                 
-                                 # For 2 words, allow max 1 extra (e.g. "JUAN DELA CRUZ" vs "JUAN A. DELA CRUZ")
-                                 if len(contractor_proper_names) > len(pattern_proper_names) + 1:
-                                     continue
-
-                             candidates.extend(cm_list)
+        # CRITICAL: Do NOT use inverted index for partial matching
+        # Only match if the contractor name is in the actual verified contractor list
+        # This prevents false positives like "RODRIGUEZ" matching "EULOGIO RODRIGUEZ"
+        # when there's no actual relationship in contractor_dynasty_matches
         
+        # Only proceed if we have exact or normalized matches
+        # This ensures we only match verified contractor relationships
         if candidates:
-            # Return the first match (highest priority)
-            # Sort by length of contractor pattern (prefer longer/more specific matches)
-            # But since we don't have the pattern here easily for all candidates, just take the first one
-            # In a real scenario, we might want to score them.
-            return candidates[0][0], 100  # Return name and score
-            
-        # Check exclusions
-        # The original code had a loop here, but the instruction implies a direct return if candidates are found
-        # and then the exclusion logic. Let's re-integrate the exclusion logic for the found candidates.
-        
-        # If candidates were found by any method (exact, normalized, inverted index), apply exclusions
-        if candidates:
+            # Apply exclusions before returning
             for cm_name, cm_data in candidates:
                 contractor_exclusions = cm_data.get('contractor_exclusions', {})
                 excluded = False
@@ -3875,7 +4432,8 @@ class DynastyProjectsCacheGeneratorDuckDB:
                         break
                 
                 if not excluded:
-                    return (cm_name, 50)
+                    # Return first non-excluded match with high score (100 for exact/normalized match)
+                    return (cm_name, 100)
         
         return None
 
@@ -3954,6 +4512,23 @@ class DynastyProjectsCacheGeneratorDuckDB:
                     project_dict['_source'] = project_dict.get('source', source_name)
                 elif source_name and '_source' not in project_dict:
                     project_dict['_source'] = source_name
+                
+                # CRITICAL: In force mode, clear old classification values to ensure fresh reclassification
+                # This prevents old classification values from being used during matching or merging
+                if self.force_reclassify:
+                    classification_fields_to_clear = [
+                        'district_congressman', 'contractor_congressman',
+                        'project_district_type', 'project_district', 'project_barangay_municipality',
+                        'project_province_city_district', 'project_municipality_barangay',
+                        'is_flood_related', 'district_match_type', 'district_match_score',
+                        'district_is_city_wide', 'congressman_district',
+                        'contractor_match_type', 'contractor_match_score',
+                        'contractor_congressman_district', 'match_type', 'match_score'
+                    ]
+                    for field in classification_fields_to_clear:
+                        if field in project_dict:
+                            del project_dict[field]
+                
                 projects.append(project_dict)
             
             return projects
@@ -3972,17 +4547,54 @@ class DynastyProjectsCacheGeneratorDuckDB:
             'Flood': ['SSP', 'FLOOD'],
             'DIME': ['DIME'],
             'PhilGEPS': ['PHILGEPS'],
-            'Infrawatch': ['INFRAWATCH', 'MICROSITE'],
-            'Microsite': ['INFRAWATCH', 'MICROSITE'],
+            'Microsite': ['INFRAWATCH', 'MICROSITE'],  # Both names refer to the same source
         }
         
         valid_sources = source_variations.get(source_name, [source_name.upper()])
+        # Also add the source_name itself (case-insensitive) to valid sources
+        valid_sources = [s.upper() for s in valid_sources] + [source_name.upper()]
+        valid_sources = list(set(valid_sources))  # Remove duplicates
         
         filtered = []
+        # Debug: collect unique source values for Microsite
+        if source_name == 'Microsite':
+            unique_sources = set()
+            all_field_names = set()
+            for project in projects[:1000]:  # Sample first 1000 to get better coverage
+                # Check all possible source field names
+                source = (project.get('_source') or 
+                         project.get('source') or 
+                         project.get('Source') or
+                         project.get('SOURCE') or '').upper()
+                if source:
+                    unique_sources.add(source)
+                # Also collect all field names to see what's available
+                all_field_names.update(project.keys())
+            if unique_sources:
+                print(f"🔍 DEBUG: Found source values in data: {sorted(unique_sources)}")
+            # Show some sample field names that might contain source info
+            source_like_fields = [f for f in all_field_names if 'source' in f.lower() or 'type' in f.lower() or 'origin' in f.lower()]
+            if source_like_fields:
+                print(f"🔍 DEBUG: Source-like field names found: {sorted(source_like_fields)}")
+        
         for project in projects:
-            source = (project.get('_source') or project.get('source') or '').upper()
+            # Check multiple possible source field names
+            source = (project.get('_source') or 
+                     project.get('source') or 
+                     project.get('Source') or
+                     project.get('SOURCE') or '').upper()
+            
+            # Check if source matches any valid source (case-insensitive)
             if source in valid_sources:
                 filtered.append(project)
+            # Also check if source contains any of the valid source keywords (for partial matches)
+            elif any(valid_src in source for valid_src in valid_sources if len(valid_src) > 3):
+                filtered.append(project)
+        
+        if source_name == 'Microsite' and len(filtered) == 0:
+            print(f"⚠️  WARNING: No {source_name} projects found after filtering!")
+            print(f"   Valid sources we're looking for: {valid_sources}")
+            print(f"   Total projects checked: {len(projects)}")
         
         return filtered
 
@@ -4014,17 +4626,45 @@ class DynastyProjectsCacheGeneratorDuckDB:
             print(f"✅ Loaded {len(all_projects_data)} classified projects into memory")
             
             # Process each source type from the in-memory data
+            # Note: Infrawatch and Microsite are the same - use "Microsite" as the canonical name
             sources = [
                 ("SSP", self._process_flood_chunk),
                 ("DIME", self._process_dime_chunk),
                 ("PhilGEPS", self._process_philgeps_chunk),
-                ("Microsite", self._process_infrawatch_chunk),
+                ("Microsite", self._process_microsite_chunk),
             ]
             
             for source_name, process_func in sources:
                 try:
                     # Filter from in-memory data
                     projects = self._filter_projects_by_source(all_projects_data, source_name)
+                    
+                    # CRITICAL: For Microsite, if no projects found, try alternative approaches
+                    if source_name == 'Microsite' and len(projects) == 0:
+                        print(f"⚠️  No {source_name} projects found with standard filtering, trying alternative methods...")
+                        # Try to find projects that might be Microsite but have different source values
+                        # Check if any projects have Microsite-like characteristics
+                        alt_projects = []
+                        for p in all_projects_data[:10000]:  # Sample first 10k to avoid full scan
+                            # Check various fields that might indicate Microsite
+                            has_microsite_indicator = False
+                            for field in ['Contract Details', 'Project Description', 'Contractor', 'Implementing Agency']:
+                                if field in p and p[field]:
+                                    val = str(p[field]).upper()
+                                    if 'MICROSITE' in val or 'INFRAWATCH' in val:
+                                        has_microsite_indicator = True
+                                        break
+                            
+                            # If no source is set but has Microsite indicators, treat as Microsite
+                            source = (p.get('_source') or p.get('source') or '').upper()
+                            if (not source or source == 'NONE' or source == 'NULL') and has_microsite_indicator:
+                                p['_source'] = 'Microsite'
+                                alt_projects.append(p)
+                        
+                        if alt_projects:
+                            print(f"   Found {len(alt_projects)} potential Microsite projects by content analysis")
+                            projects = alt_projects
+                    
                     if projects:
                         print(f"📊 Filtered {len(projects)} {source_name} projects from memory")
                         print(f"🔍 About to create chunks with max_workers={self.max_workers}...")
@@ -4064,17 +4704,45 @@ class DynastyProjectsCacheGeneratorDuckDB:
             # Process each source type from the in-memory data
             # Map source values to processing functions
             # Note: source column values may vary (SSP/Flood, DIME, PhilGEPS, Infrawatch/Microsite)
+            # Infrawatch and Microsite are the same - use "Microsite" as the canonical name
             sources = [
                 ("SSP", self._process_flood_chunk),
                 ("DIME", self._process_dime_chunk),
                 ("PhilGEPS", self._process_philgeps_chunk),
-                ("Microsite", self._process_infrawatch_chunk),  # Alternative name
+                ("Microsite", self._process_microsite_chunk),
             ]
             
             for source_name, process_func in sources:
                 try:
                     # Filter from in-memory data instead of reading from disk
                     projects = self._filter_projects_by_source(all_projects_data, source_name)
+                    
+                    # CRITICAL: For Microsite, if no projects found, try alternative approaches
+                    if source_name == 'Microsite' and len(projects) == 0:
+                        print(f"⚠️  No {source_name} projects found with standard filtering, trying alternative methods...")
+                        # Try to find projects that might be Microsite but have different source values
+                        # Check if any projects have Microsite-like characteristics
+                        alt_projects = []
+                        for p in all_projects_data[:10000]:  # Sample first 10k to avoid full scan
+                            # Check various fields that might indicate Microsite
+                            has_microsite_indicator = False
+                            for field in ['Contract Details', 'Project Description', 'Contractor', 'Implementing Agency']:
+                                if field in p and p[field]:
+                                    val = str(p[field]).upper()
+                                    if 'MICROSITE' in val or 'INFRAWATCH' in val:
+                                        has_microsite_indicator = True
+                                        break
+                            
+                            # If no source is set but has Microsite indicators, treat as Microsite
+                            source = (p.get('_source') or p.get('source') or '').upper()
+                            if (not source or source == 'NONE' or source == 'NULL') and has_microsite_indicator:
+                                p['_source'] = 'Microsite'
+                                alt_projects.append(p)
+                        
+                        if alt_projects:
+                            print(f"   Found {len(alt_projects)} potential Microsite projects by content analysis")
+                            projects = alt_projects
+                    
                     if projects:
                         print(f"📊 Filtered {len(projects)} {source_name} projects from memory")
                         print(f"🔍 About to create chunks with max_workers={self.max_workers}...")
@@ -4120,14 +4788,14 @@ class DynastyProjectsCacheGeneratorDuckDB:
             all_flood_projects = self.load_projects_from_parquet(FLOOD_PARQUET, source_name=None)
             all_dime_projects = self.load_projects_from_parquet(DIME_PARQUET, source_name=None) if DIME_PARQUET.exists() else []
             all_philgeps_projects = self.load_projects_from_parquet(PHILGEPS_PARQUET, source_name=None) if PHILGEPS_PARQUET.exists() else []
-            all_infrawatch_projects = self.load_projects_from_parquet(INFRAWATCH_PARQUET, source_name=None) if INFRAWATCH_PARQUET.exists() else []
+            all_microsite_projects = self.load_projects_from_parquet(MICROSITE_PARQUET, source_name=None) if MICROSITE_PARQUET.exists() else []
             
-            total_loaded = len(all_flood_projects) + len(all_dime_projects) + len(all_philgeps_projects) + len(all_infrawatch_projects)
+            total_loaded = len(all_flood_projects) + len(all_dime_projects) + len(all_philgeps_projects) + len(all_microsite_projects)
             print(f"✅ Loaded {total_loaded} total projects into memory")
             print(f"   - Flood/SSP: {len(all_flood_projects)}")
             print(f"   - DIME: {len(all_dime_projects)}")
             print(f"   - PhilGEPS: {len(all_philgeps_projects)}")
-            print(f"   - Infrawatch: {len(all_infrawatch_projects)}")
+            print(f"   - Microsite: {len(all_microsite_projects)}")
             
             # Process SSP/Flood projects
             try:
@@ -4213,32 +4881,37 @@ class DynastyProjectsCacheGeneratorDuckDB:
                 import traceback
                 traceback.print_exc()
             
-            # Process Infrawatch projects
+            # Process Microsite projects
             try:
-                # Filter from in-memory data
-                infrawatch_projects = [p for p in all_infrawatch_projects if p.get('_source', p.get('source', '')).upper() in ('INFRAWATCH', 'MICROSITE')]
-                if infrawatch_projects:
-                    print(f"📊 Filtered {len(infrawatch_projects)} Infrawatch projects from memory")
-                    infrawatch_chunks = self._chunk_list(infrawatch_projects, self.max_workers)
+                # For separate Microsite file, all projects should be Microsite
+                # Don't filter - just process all of them and set source explicitly
+                microsite_projects = all_microsite_projects
+                # Ensure source is set correctly
+                for p in microsite_projects:
+                    if not p.get('_source') and not p.get('source'):
+                        p['_source'] = 'Microsite'
+                if microsite_projects:
+                    print(f"📊 Processing {len(microsite_projects)} Microsite projects from memory")
+                    microsite_chunks = self._chunk_list(microsite_projects, self.max_workers)
                     # Submit tasks directly to ThreadPoolExecutor for better thread utilization
-                    infrawatch_futures = [
+                    microsite_futures = [
                         self.executor.submit(
-                            self._process_infrawatch_chunk, chunk, congressmen_data, districts_data,
+                            self._process_microsite_chunk, chunk, congressmen_data, districts_data,
                             district_lookup_dict, contractor_lookup_dict, contractor_inverted_index,
                             known_provinces, known_cities, location_context_map
                         )
-                        for chunk in infrawatch_chunks
+                        for chunk in microsite_chunks
                     ]
                     # Convert futures to awaitables using asyncio.wrap_future
                     loop = asyncio.get_running_loop()
-                    infrawatch_tasks = [asyncio.wrap_future(future, loop=loop) for future in infrawatch_futures]
+                    microsite_tasks = [asyncio.wrap_future(future, loop=loop) for future in microsite_futures]
                     prev_count = len(all_projects)
-                    for completed_task in asyncio.as_completed(infrawatch_tasks):
+                    for completed_task in asyncio.as_completed(microsite_tasks):
                         result = await completed_task
                         all_projects.extend(result)
-                    print(f"✅ Processed {len(all_projects) - prev_count} Infrawatch projects (matched)")
+                    print(f"✅ Processed {len(all_projects) - prev_count} Microsite projects (matched)")
             except Exception as e:
-                print(f"Error processing Infrawatch projects: {e}")
+                print(f"Error processing Microsite projects: {e}")
                 import traceback
                 traceback.print_exc()
         
@@ -4696,8 +5369,11 @@ class DynastyProjectsCacheGeneratorDuckDB:
             
             # Calculate summary
             ssp_count = len([p for p in unique_projects if 'SSP' in (p.get('sources_list', []))])
-            # Count both 'Microsite' and 'Infrawatch' as Infrawatch (normalization may vary)
-            microsite_count = len([p for p in unique_projects if 'Microsite' in (p.get('sources_list', [])) or 'Infrawatch' in (p.get('sources_list', []))])
+            # Count Microsite projects (Infrawatch is the same thing, just normalized to Microsite)
+            microsite_count = len([p for p in unique_projects if 
+                                  'Microsite' in (p.get('sources_list', [])) or 
+                                  'MICROSITE' in (p.get('sources_list', [])) or
+                                  'INFRAWATCH' in (p.get('sources_list', []))])  # INFRAWATCH is normalized to Microsite
             flood_count = len([p for p in unique_projects if p.get('is_flood_related') == True])
             # Count projects by match type
             # Note: A project can have both district and contractor matches, but match_type indicates the primary match
@@ -4715,7 +5391,6 @@ class DynastyProjectsCacheGeneratorDuckDB:
                 "dime": len([p for p in unique_projects if 'DIME' in (p.get('sources_list', []))]),
                 "philgeps": len([p for p in unique_projects if 'PhilGEPS' in (p.get('sources_list', []))]),
                 "ssp": ssp_count,
-                "infrawatch": microsite_count,
                 "microsite": microsite_count,
                 "district_projects": district_projects_count,  # Count all projects with district match
                 "contractor_projects": contractor_projects_count,  # Count all projects with contractor match
@@ -4921,17 +5596,69 @@ class DynastyProjectsCacheGeneratorDuckDB:
                         location = p.get('location', '').upper()
                         cm_provinces = cm_data.get('provinces', []) if cm_data else []
                         
-                        # CRITICAL: Check Metro Manila FIRST, before accepting direct matches
+                        # CRITICAL: Validate province matches to prevent incorrect assignments
                         if cm_provinces:
                             cm_province = cm_provinces[0].upper()
+                            
                             # Special check: Prevent METRO MANILA from matching MANILA districts
                             if cm_province == 'MANILA' and 'METRO MANILA' in location:
                                 should_include = False
-                                # Skip this project entirely for this congressman
+                                continue
+                            
+                            # CRITICAL: Prevent directional variant mismatches (e.g., ILOCOS SUR vs ILOCOS NORTE)
+                            # Get project's province from RAW data fields (not classification fields)
+                            # Use the raw province field that was used for matching, not project_district
+                            project_province_raw = p.get('province', '') or ''
+                            if not project_province_raw:
+                                # Fallback: try to extract from location string
+                                location_parts = location.split(',')
+                                if location_parts:
+                                    project_province_raw = location_parts[-1].strip()
+                            
+                            project_province = project_province_raw.upper().strip() if project_province_raw else None
+                            
+                            # If we have project_district, it might have format like "Ilocos Sur 1st District"
+                            # But prefer raw province field for validation
+                            if not project_province and p.get('project_district'):
+                                project_district_str = str(p.get('project_district', '')).upper()
+                                if 'DISTRICT' in project_district_str:
+                                    # Extract province name before "District"
+                                    parts = project_district_str.split('DISTRICT')
+                                    if parts:
+                                        project_province = parts[0].strip()
+                            
+                            # If we have a project province, validate directional variants
+                            if project_province:
+                                cm_prov_upper = cm_province.upper().strip()
+                                
+                                # Extract base names and directional modifiers
+                                cm_base = re.sub(r'\s*(DEL\s+)?(SUR|NORTE|OCCIDENTAL|ORIENTAL|EASTERN|WESTERN|NORTHERN|SOUTHERN)\s*$', '', cm_prov_upper).strip()
+                                proj_base = re.sub(r'\s*(DEL\s+)?(SUR|NORTE|OCCIDENTAL|ORIENTAL|EASTERN|WESTERN|NORTHERN|SOUTHERN)\s*$', '', project_province).strip()
+                                
+                                # Extract directional modifiers
+                                cm_dir_match = re.search(r'\b(DEL\s+)?(SUR|NORTE|OCCIDENTAL|ORIENTAL|EASTERN|WESTERN|NORTHERN|SOUTHERN)\b', cm_prov_upper, re.IGNORECASE)
+                                proj_dir_match = re.search(r'\b(DEL\s+)?(SUR|NORTE|OCCIDENTAL|ORIENTAL|EASTERN|WESTERN|NORTHERN|SOUTHERN)\b', project_province, re.IGNORECASE)
+                                
+                                cm_dir = cm_dir_match.group(0).upper().strip() if cm_dir_match else None
+                                proj_dir = proj_dir_match.group(0).upper().strip() if proj_dir_match else None
+                                
+                                # If both have the same base name, check directional modifiers
+                                if cm_base == proj_base and cm_base:
+                                    if cm_dir and proj_dir:
+                                        if cm_dir != proj_dir:
+                                            # Different directional variants - REJECT
+                                            # e.g., "ILOCOS NORTE" != "ILOCOS SUR"
+                                            should_include = False
+                                            continue
+                                    elif cm_dir or proj_dir:
+                                        # One has directional, one doesn't - REJECT
+                                        should_include = False
+                                        continue
+                            
                             # Check for direct match (any variation)
-                            elif district_match or contractor_match:
+                            if district_match or contractor_match:
                                 should_include = True
-                            # For _all_congressmen matches, allow unless it's Metro Manila
+                            # For _all_congressmen matches, allow unless validation failed above
                             elif all_congressmen_match:
                                 should_include = True
                         else:
@@ -5036,7 +5763,7 @@ class DynastyProjectsCacheGeneratorDuckDB:
             print(f"   DIME: {summary['dime']}")
             print(f"   PhilGEPS: {summary['philgeps']}")
             print(f"   SSP: {summary['ssp']}")
-            print(f"   Infrawatch: {summary['infrawatch']}")
+            print(f"   Microsite: {summary['microsite']}")
             print(f"   District projects: {summary['district_projects']}")
             print(f"   Contractor projects: {summary['contractor_projects']}")
             print(f"   🌊 Flood-related projects: {summary['flood_projects']} (₱{flood_cost:,.2f})")
