@@ -5019,6 +5019,7 @@ class DynastyProjectsCacheGeneratorDuckDB:
                 ("DIME", self._process_dime_chunk),
                 ("PhilGEPS", self._process_philgeps_chunk),
                 ("Microsite", self._process_microsite_chunk),
+                ("Transparency", self._process_transparency_chunk),
             ]
             
             for source_name, process_func in sources:
