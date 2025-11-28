@@ -359,6 +359,27 @@ class DynastyProjectsCacheGeneratorDuckDB:
         return False
 
     @staticmethod
+    def _normalize_source_label(source: Optional[str]) -> str:
+        """Normalize source label to canonical form"""
+        if not source:
+            return 'Unknown'
+        source_upper = str(source).upper().strip()
+        # Map variations to canonical names
+        if source_upper in ('SSP', 'FLOOD', 'FLOOD CONTROL'):
+            return 'SSP'
+        elif source_upper == 'DIME':
+            return 'DIME'
+        elif source_upper in ('PHILGEPS', 'PHILGEPS PROCUREMENT'):
+            return 'PhilGEPS'
+        elif source_upper in ('MICROSITE', 'INFRAWATCH', 'DPWH MICROSITE', 'DPWH INFRAWATCH'):
+            return 'Microsite'
+        elif source_upper in ('TRANSPARENCY', 'DPWH TRANSPARENCY', 'DPWH SCRAPER'):
+            return 'Transparency'
+        else:
+            # Return as-is with proper capitalization
+            return source.strip()
+    
+    @staticmethod
     def _normalize_text_for_key(value: Optional[str]) -> str:
         if not value:
             return ""
@@ -4864,8 +4885,8 @@ class DynastyProjectsCacheGeneratorDuckDB:
         valid_sources = list(set(valid_sources))  # Remove duplicates
         
         filtered = []
-        # Debug: collect unique source values for Microsite
-        if source_name == 'Microsite':
+        # Debug: collect unique source values for all sources, especially Transparency
+        if source_name in ('Microsite', 'Transparency'):
             unique_sources = set()
             all_field_names = set()
             for project in projects[:1000]:  # Sample first 1000 to get better coverage
@@ -4899,10 +4920,12 @@ class DynastyProjectsCacheGeneratorDuckDB:
             elif any(valid_src in source for valid_src in valid_sources if len(valid_src) > 3):
                 filtered.append(project)
         
-        if source_name == 'Microsite' and len(filtered) == 0:
+        if source_name in ('Microsite', 'Transparency') and len(filtered) == 0:
             print(f"⚠️  WARNING: No {source_name} projects found after filtering!")
             print(f"   Valid sources we're looking for: {valid_sources}")
             print(f"   Total projects checked: {len(projects)}")
+            if unique_sources:
+                print(f"   Available source values in data: {sorted(unique_sources)}")
         
         return filtered
 
@@ -5027,34 +5050,74 @@ class DynastyProjectsCacheGeneratorDuckDB:
                     # Filter from in-memory data instead of reading from disk
                     projects = self._filter_projects_by_source(all_projects_data, source_name)
                     
-                    # CRITICAL: For Microsite, if no projects found, try alternative approaches
-                    if source_name == 'Microsite' and len(projects) == 0:
+                    # Log if no projects found for any source
+                    if len(projects) == 0:
+                        print(f"⚠️  No {source_name} projects found in integrated parquet after filtering")
+                    
+                    # CRITICAL: For Transparency, try loading from separate parquet file if it exists
+                    if source_name == 'Transparency' and len(projects) == 0:
+                        transparency_file = PARQUET_DIR / 'transparency_projects.parquet'
+                        print(f"   🔍 Checking for separate Transparency file: {transparency_file}")
+                        print(f"   📂 File exists: {transparency_file.exists()}")
+                        if transparency_file.exists():
+                            print(f"   📂 Loading Transparency from separate file: {transparency_file}")
+                            try:
+                                transparency_data = self.load_projects_from_parquet(transparency_file, source_name=None)
+                                print(f"   📊 Raw loaded: {len(transparency_data)} projects")
+                                # Ensure all projects have Transparency as source
+                                for p in transparency_data:
+                                    p['_source'] = 'Transparency'
+                                    p['source'] = 'Transparency'
+                                projects = transparency_data
+                                print(f"   ✅ Loaded {len(projects)} Transparency projects from separate file")
+                            except Exception as e:
+                                print(f"   ⚠️  Error loading Transparency from separate file: {e}")
+                                import traceback
+                                traceback.print_exc()
+                        else:
+                            print(f"   ❌ Transparency file not found at: {transparency_file}")
+                            print(f"   📁 PARQUET_DIR: {PARQUET_DIR}")
+                            print(f"   📁 PARQUET_DIR exists: {PARQUET_DIR.exists()}")
+                    
+                    # CRITICAL: For Microsite and Transparency, if no projects found, try alternative approaches
+                    if source_name in ('Microsite', 'Transparency') and len(projects) == 0:
                         print(f"⚠️  No {source_name} projects found with standard filtering, trying alternative methods...")
-                        # Try to find projects that might be Microsite but have different source values
-                        # Check if any projects have Microsite-like characteristics
+                        # Try to find projects that might have different source values
+                        # Check if any projects have source-like characteristics
                         alt_projects = []
+                        search_terms = {
+                            'Microsite': ['MICROSITE', 'INFRAWATCH'],
+                            'Transparency': ['TRANSPARENCY', 'DPWH SCRAPER']
+                        }
+                        terms = search_terms.get(source_name, [])
+                        
                         for p in all_projects_data[:10000]:  # Sample first 10k to avoid full scan
-                            # Check various fields that might indicate Microsite
-                            has_microsite_indicator = False
-                            for field in ['Contract Details', 'Project Description', 'Contractor', 'Implementing Agency']:
+                            # Check various fields that might indicate the source
+                            has_indicator = False
+                            for field in ['Contract Details', 'Project Description', 'Contractor', 'Implementing Agency', 'source', '_source']:
                                 if field in p and p[field]:
                                     val = str(p[field]).upper()
-                                    if 'MICROSITE' in val or 'INFRAWATCH' in val:
-                                        has_microsite_indicator = True
+                                    if any(term in val for term in terms):
+                                        has_indicator = True
                                         break
                             
-                            # If no source is set but has Microsite indicators, treat as Microsite
+                            # If no source is set but has indicators, treat as the source
                             source = (p.get('_source') or p.get('source') or '').upper()
-                            if (not source or source == 'NONE' or source == 'NULL') and has_microsite_indicator:
-                                p['_source'] = 'Microsite'
+                            if (not source or source == 'NONE' or source == 'NULL') and has_indicator:
+                                p['_source'] = source_name
+                                p['source'] = source_name
                                 alt_projects.append(p)
                         
                         if alt_projects:
-                            print(f"   Found {len(alt_projects)} potential Microsite projects by content analysis")
+                            print(f"   Found {len(alt_projects)} potential {source_name} projects by content analysis")
                             projects = alt_projects
+                        else:
+                            print(f"   ❌ No {source_name} projects found even after alternative methods")
+                    
+                    # Always log the filtered count (even if 0) for visibility
+                    print(f"📊 Filtered {len(projects)} {source_name} projects from memory")
                     
                     if projects:
-                        print(f"📊 Filtered {len(projects)} {source_name} projects from memory")
                         print(f"🔍 About to create chunks with max_workers={self.max_workers}...")
                         chunks = self._chunk_list(projects, self.max_workers)
                         print(f"🔧 Created {len(chunks)} chunks for {source_name} processing")
@@ -5085,6 +5148,9 @@ class DynastyProjectsCacheGeneratorDuckDB:
                                 print(f"⏳ Progress: {completed}/{len(tasks)} chunks completed for {source_name}")
                             
                         print(f"✅ Processed {len(all_projects) - prev_count} {source_name} projects")
+                    else:
+                        # Even if no projects found, log it for debugging
+                        print(f"⚠️  Skipping {source_name} - no projects to process")
                 except Exception as e:
                     print(f"Error processing {source_name} projects: {e}")
                     import traceback
@@ -5233,8 +5299,14 @@ class DynastyProjectsCacheGeneratorDuckDB:
                 transparency_projects = all_transparency_projects
                 # Ensure source is set correctly
                 for p in transparency_projects:
+                    # Set both _source and source to ensure it's preserved
                     if not p.get('_source') and not p.get('source'):
                         p['_source'] = 'Transparency'
+                        p['source'] = 'Transparency'
+                    elif p.get('_source') and not p.get('source'):
+                        p['source'] = p['_source']
+                    elif p.get('source') and not p.get('_source'):
+                        p['_source'] = p['source']
                 if transparency_projects:
                     print(f"📊 Processing {len(transparency_projects)} Transparency projects from memory")
                     transparency_chunks = self._chunk_list(transparency_projects, self.max_workers)
@@ -5251,10 +5323,22 @@ class DynastyProjectsCacheGeneratorDuckDB:
                     loop = asyncio.get_running_loop()
                     transparency_tasks = [asyncio.wrap_future(future, loop=loop) for future in transparency_futures]
                     prev_count = len(all_projects)
+                    transparency_processed = 0
                     for completed_task in asyncio.as_completed(transparency_tasks):
                         result = await completed_task
+                        # Verify source is set correctly
+                        for r in result:
+                            if r.get('source') != 'Transparency' and r.get('_source') != 'Transparency':
+                                # Fix source if not set correctly
+                                r['source'] = 'Transparency'
+                                r['_source'] = 'Transparency'
                         all_projects.extend(result)
-                    print(f"✅ Processed {len(all_projects) - prev_count} Transparency projects (matched)")
+                        transparency_processed += len(result)
+                    print(f"✅ Processed {transparency_processed} Transparency projects (matched)")
+                    # Debug: Count how many have correct source
+                    transparency_with_source = len([p for p in all_projects[prev_count:] if p.get('source') == 'Transparency' or p.get('_source') == 'Transparency'])
+                    if transparency_processed > 0:
+                        print(f"   🔍 Debug: {transparency_with_source}/{transparency_processed} Transparency projects have source='Transparency'")
             except Exception as e:
                 print(f"Error processing Transparency projects: {e}")
                 import traceback
@@ -5597,21 +5681,6 @@ class DynastyProjectsCacheGeneratorDuckDB:
             )
             print(f"✅ Processed {len(all_projects)} projects")
             
-            # Save classified projects to Parquet for future runs
-            try:
-                print(f"💾 Saving classified projects to {CLASSIFIED_PARQUET}...")
-                # Use pandas to create DataFrame, then DuckDB to write to Parquet
-                # This ensures we persist the classification columns (project_district, etc.)
-                df = pd.DataFrame(all_projects)
-                # Convert any set/list columns to strings if needed, or let DuckDB handle it
-                # DuckDB handles lists fine in Parquet
-                duckdb.sql("SELECT * FROM df").write_parquet(str(CLASSIFIED_PARQUET))
-                print(f"✅ Saved classified projects to {CLASSIFIED_PARQUET}")
-            except Exception as e:
-                print(f"⚠️  Failed to save classified projects to Parquet: {e}")
-                import traceback
-                traceback.print_exc()
-            
             # Update skipped counter from results (since parallel processing doesn't share instance variables)
             # Count skipped projects before deduplication
             total_skipped = len([p for p in all_projects if p.get('_skipped_reclassification')])
@@ -5635,8 +5704,16 @@ class DynastyProjectsCacheGeneratorDuckDB:
             # Original logic: deduplicate by project key, track all sources and all congressmen
             projects_by_key = {}
             for proj in all_projects:
-                source_label = self._normalize_source_label(proj.get('source', 'Unknown'))
+                # CRITICAL: Get source from multiple possible fields and normalize
+                raw_source = (proj.get('source') or 
+                            proj.get('_source') or 
+                            proj.get('Source') or 
+                            'Unknown')
+                source_label = self._normalize_source_label(raw_source)
                 proj['source'] = source_label
+                # Also ensure _source is set for consistency
+                if not proj.get('_source'):
+                    proj['_source'] = source_label
                 
                 # CRITICAL: Prioritize contract_id for better cross-source matching
                 # Check multiple possible contract_id fields
@@ -5678,7 +5755,10 @@ class DynastyProjectsCacheGeneratorDuckDB:
                     merged_project = self._merge_project_records(projects_by_key[key]['project'], proj)
                     projects_by_key[key]['project'] = merged_project
                 
+                # CRITICAL: Always add the normalized source_label to sources set
+                # This ensures all sources are tracked even after merging
                 projects_by_key[key]['sources'].add(source_label)
+                
                 # Track both district and contractor congressmen
                 if proj.get('district_congressman'):
                     projects_by_key[key]['congressmen'].add(proj.get('district_congressman'))
@@ -5720,6 +5800,31 @@ class DynastyProjectsCacheGeneratorDuckDB:
                 proj['sources_count'] = sources_count
                 proj['sources_list'] = sorted(list(data['sources']))
                 
+                # CRITICAL: Fix project_name for PhilGEPS projects BEFORE saving to parquet
+                # For PhilGEPS projects, use award_title instead of contract_id
+                if 'PhilGEPS' in proj.get('sources_list', []):
+                    # Check if project_name looks like a contract ID (e.g., "19Z00043")
+                    project_name = proj.get('project_name', '')
+                    if project_name and re.match(r'^\d{2}[A-Z]\d{5}$', str(project_name)):
+                        # This is a contract ID, replace with award_title
+                        award_title = proj.get('philgeps_award_title') or proj.get('award_title')
+                        if award_title and str(award_title).strip():
+                            proj['project_name'] = award_title
+                        else:
+                            # Try notice_title as fallback
+                            notice_title = proj.get('notice_title')
+                            if notice_title and str(notice_title).strip():
+                                proj['project_name'] = notice_title
+                    # Also ensure project_name is set if empty
+                    elif not project_name or project_name == '':
+                        proj['project_name'] = (
+                            proj.get('philgeps_award_title') or 
+                            proj.get('award_title') or
+                            proj.get('notice_title') or
+                            proj.get('project_description') or
+                            ''
+                        )
+                
                 # Keep the primary congressman from district match (or contractor if no district)
                 if not proj.get('congressman'):
                     proj['congressman'] = proj.get('district_congressman') or proj.get('contractor_congressman') or 'Unknown'
@@ -5748,7 +5853,14 @@ class DynastyProjectsCacheGeneratorDuckDB:
             district_primary_count = len([p for p in unique_projects if p.get('match_type') == 'district'])
             contractor_primary_count = len([p for p in unique_projects if p.get('match_type') == 'contractor'])
             
-            transparency_count = len([p for p in unique_projects if 'Transparency' in (p.get('sources_list', []))])
+            # Count Transparency projects - check both normalized and raw source values
+            # Also check the source field directly in case sources_list wasn't set correctly
+            transparency_count = len([p for p in unique_projects if 
+                                    'Transparency' in (p.get('sources_list', [])) or
+                                    'TRANSPARENCY' in (p.get('sources_list', [])) or
+                                    p.get('source') == 'Transparency' or
+                                    p.get('_source') == 'Transparency'])
+            
             summary = {
                 "total": len(unique_projects),
                 "dime": len([p for p in unique_projects if 'DIME' in (p.get('sources_list', []))]),
@@ -5877,6 +5989,20 @@ class DynastyProjectsCacheGeneratorDuckDB:
                 "flood_count": flood_count,
                 "flood_cost": flood_cost
             }
+            
+            # CRITICAL: Save deduplicated unique_projects to classified parquet (AFTER deduplication)
+            # This ensures the API endpoint gets unique projects with correct project_name for PhilGEPS
+            try:
+                print(f"💾 Saving deduplicated classified projects to {CLASSIFIED_PARQUET}...")
+                # Use pandas to create DataFrame from unique_projects (already deduplicated)
+                df = pd.DataFrame(unique_projects)
+                # DuckDB handles lists fine in Parquet (sources_list will be preserved)
+                duckdb.sql("SELECT * FROM df").write_parquet(str(CLASSIFIED_PARQUET))
+                print(f"✅ Saved {len(unique_projects)} unique projects to {CLASSIFIED_PARQUET}")
+            except Exception as e:
+                print(f"⚠️  Failed to save classified projects to Parquet: {e}")
+                import traceback
+                traceback.print_exc()
             
             print("ℹ️  Combined cache file generation skipped (file too large and unused)")
             
