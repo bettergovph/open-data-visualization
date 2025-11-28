@@ -1039,6 +1039,15 @@ class DynastyProjectsCacheGeneratorDuckDB:
                             result['match_type'] = 'contractor'
                         else:
                             result['match_type'] = 'unknown'
+                    # Add descriptive fields if missing (for frontend display)
+                    if 'project_description' not in result or not result.get('project_description'):
+                        result['project_description'] = contract.get('project_description') or contract.get('award_description') or None
+                    if 'notice_title' not in result or not result.get('notice_title'):
+                        result['notice_title'] = contract.get('notice_title') or None
+                    if 'award_description' not in result or not result.get('award_description'):
+                        result['award_description'] = contract.get('award_description') or None
+                    if 'award_title' not in result or not result.get('award_title'):
+                        result['award_title'] = contract.get('philgeps_award_title') or contract.get('award_title') or contract.get('project_name') or None
                     # Mark as skipped for tracking
                     result['_skipped_reclassification'] = True
                     chunk_results.append(result)
@@ -1062,10 +1071,18 @@ class DynastyProjectsCacheGeneratorDuckDB:
                         del contract[field]
             
             # Basic Data
-            award_title = (contract.get('philgeps_award_title') or contract.get('award_title') or contract.get('project_name') or contract.get('project_description') or '')
+            # For project_name, prefer descriptive fields over contract numbers
+            # Try project_description, notice_title, or award_description first, then fall back to award_title
+            project_description_field = (contract.get('project_description') or contract.get('award_description') or '')
             notice_title = (contract.get('notice_title') or '')  # Add notice_title for classification
+            award_title = (contract.get('philgeps_award_title') or contract.get('award_title') or contract.get('project_name') or '')
+            
             area_of_delivery = (contract.get('philgeps_area_of_delivery') or contract.get('area_of_delivery') or '')
             awardee_name = (contract.get('contractor_name') or contract.get('philgeps_awardee_name') or contract.get('awardee_name') or '')
+            
+            # Use the most descriptive field for project_name
+            # Prefer: project_description > notice_title > award_description > award_title
+            descriptive_project_name = project_description_field or notice_title or contract.get('award_description') or award_title or "N/A"
             
             # Location Extraction - include notice_title for better classification
             location_text = f'{award_title} {notice_title} {area_of_delivery} {contract.get("province") or ""} {contract.get("city") or ""} {contract.get("municipality") or ""}'
@@ -1188,7 +1205,11 @@ class DynastyProjectsCacheGeneratorDuckDB:
             chunk_results.append({
                 "source": self._normalize_source_label("PhilGEPS"),
                 "meilisearch_id": contract.get('meilisearch_id') or contract.get('global_id'),
-                "project_name": award_title or "N/A",
+                "project_name": descriptive_project_name or "N/A",
+                "project_description": project_description_field or None,  # Add for frontend to use
+                "notice_title": notice_title or None,  # Add for frontend to use
+                "award_description": contract.get('award_description') or None,  # Add for frontend to use
+                "award_title": award_title or None,  # Keep original for reference
                 "contractor": awardee_name or "N/A",
                 "amount": amount,
                 "location": location_str or "N/A",
@@ -1253,8 +1274,8 @@ class DynastyProjectsCacheGeneratorDuckDB:
                     # Convert to result format and add to chunk_results
                     result = record.copy()
                     # Ensure required fields are set for deduplication and summary
-                    if not result.get('source'):
-                        result['source'] = 'Microsite'  # Normalize to Microsite (Infrawatch -> Microsite)
+                    # Normalize source to ensure consistency (Infrawatch -> Microsite)
+                    result['source'] = self._normalize_source_label(result.get('source') or 'Microsite')
                     # Ensure match_type is set
                     if not result.get('match_type'):
                         if result.get('district_congressman'):
@@ -5520,17 +5541,20 @@ class DynastyProjectsCacheGeneratorDuckDB:
             print(f"\n📁 Creating individual cache files for each congressman...")
             cache_base_dir = Path(__file__).parent.parent / 'static' / 'data'
             
-            # CRITICAL: Clear all existing congressman cache directories before writing new ones
-            # This ensures we don't accumulate stale data from previous runs and is faster than clearing one by one
-            print("🧹 Clearing existing congressman cache directories...")
-            import shutil
-            cleared_count = 0
-            for item in cache_base_dir.iterdir():
-                if item.is_dir() and item.name.startswith('congressman-projects-'):
-                    shutil.rmtree(item)
-                    cleared_count += 1
-            if cleared_count > 0:
-                print(f"   🗑️  Removed {cleared_count} congressman cache directories")
+            # CRITICAL: Only clear all existing congressman cache directories when --force is used
+            # This ensures we don't accidentally delete cache when running without --force
+            if self.force_reclassify:
+                print("🧹 Clearing existing congressman cache directories (--force mode)...")
+                import shutil
+                cleared_count = 0
+                for item in cache_base_dir.iterdir():
+                    if item.is_dir() and item.name.startswith('congressman-projects-'):
+                        shutil.rmtree(item)
+                        cleared_count += 1
+                if cleared_count > 0:
+                    print(f"   🗑️  Removed {cleared_count} congressman cache directories")
+            else:
+                print("ℹ️  Skipping cache directory clearing (use --force to clear existing caches)")
             
             # Build name normalization map to merge duplicate name variations
             print("🔧 Building name normalization map...")
@@ -5701,8 +5725,8 @@ class DynastyProjectsCacheGeneratorDuckDB:
                     "dime": len([p for p in congressman_projects if 'DIME' in (p.get('sources_list', []))]),
                     "philgeps": len([p for p in congressman_projects if 'PhilGEPS' in (p.get('sources_list', []))]),
                     "ssp": len([p for p in congressman_projects if 'SSP' in (p.get('sources_list', []))]),
-                    "infrawatch": len([p for p in congressman_projects if 'Infrawatch' in (p.get('sources_list', []))]),
-                    "microsite": len([p for p in congressman_projects if 'Infrawatch' in (p.get('sources_list', []))]),
+                    "infrawatch": len([p for p in congressman_projects if 'Microsite' in (p.get('sources_list', [])) or 'MICROSITE' in (p.get('sources_list', [])) or 'Infrawatch' in (p.get('sources_list', [])) or 'INFRAWATCH' in (p.get('sources_list', []))]),
+                    "microsite": len([p for p in congressman_projects if 'Microsite' in (p.get('sources_list', [])) or 'MICROSITE' in (p.get('sources_list', [])) or 'Infrawatch' in (p.get('sources_list', [])) or 'INFRAWATCH' in (p.get('sources_list', []))]),
                     "district_projects": congressman_district_count,
                     "contractor_projects": congressman_contractor_count,
                     "flood_projects": congressman_flood_count
