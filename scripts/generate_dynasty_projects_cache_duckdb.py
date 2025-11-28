@@ -46,6 +46,7 @@ CLASSIFIED_PARQUET = PARQUET_DIR / 'integrated_projects_classified.parquet'
 DIME_PARQUET = PARQUET_DIR / 'dime_projects.parquet'
 PHILGEPS_PARQUET = PARQUET_DIR / 'philgeps_contracts.parquet'
 MICROSITE_PARQUET = PARQUET_DIR / 'infrawatch_projects.parquet'  # File is named infrawatch but we call it microsite
+TRANSPARENCY_PARQUET = PARQUET_DIR / 'transparency_projects.parquet'  # DPWH scraper data
 FLOOD_PARQUET = PARQUET_DIR / 'flood_projects.parquet'
 # Dynasty data parquet files
 POLITICAL_DYNASTIES_PARQUET = PARQUET_DIR / 'political_dynasties.parquet'
@@ -498,7 +499,35 @@ class DynastyProjectsCacheGeneratorDuckDB:
         return 0
 
     def _build_project_key(self, proj: Dict[str, Any]) -> str:
+        # CRITICAL: Try to use stable identifiers first for better deduplication across sources
+        # Check for contract_id, meilisearch_id, or other stable IDs
+        contract_id = proj.get('contract_id') or proj.get('meilisearch_id') or proj.get('global_id')
+        if contract_id:
+            # Use contract ID as primary key (most reliable for cross-source matching)
+            contractor = self._normalize_text_for_key(proj.get('contractor'))
+            amount = self._normalize_amount_for_key(proj.get('amount'))
+            return f"ID:{contract_id}|{contractor}|{amount}"
+        
+        # Fallback: Use project name, contractor, amount, location
+        # Normalize project name to handle contract numbers vs descriptive names
         project_name = self._normalize_text_for_key(proj.get('project_name'))
+        # Also check award_title, contract_id fields for contract numbers
+        award_title = self._normalize_text_for_key(proj.get('award_title'))
+        # If project_name looks like a contract number, prefer award_title if it's more descriptive
+        if project_name and len(project_name) <= 20 and project_name.replace('-', '').replace('/', '').isalnum():
+            # project_name looks like a contract number, try to find a better identifier
+            if award_title and len(award_title) > len(project_name):
+                # Use award_title if it's more descriptive
+                project_name = award_title
+            # Also check for contract_id in other fields
+            for field in ['contract_id', 'award_id', 'notice_id', 'reference_number']:
+                if proj.get(field):
+                    contract_id_val = str(proj.get(field)).strip()
+                    if contract_id_val:
+                        contractor = self._normalize_text_for_key(proj.get('contractor'))
+                        amount = self._normalize_amount_for_key(proj.get('amount'))
+                        return f"ID:{contract_id_val}|{contractor}|{amount}"
+        
         contractor = self._normalize_text_for_key(proj.get('contractor'))
         location = self._normalize_text_for_key(proj.get('location'))
         amount = self._normalize_amount_for_key(proj.get('amount'))
@@ -515,6 +544,17 @@ class DynastyProjectsCacheGeneratorDuckDB:
         # Prefer non-empty meilisearch_id
         if not merged.get('meilisearch_id') and incoming.get('meilisearch_id'):
             merged['meilisearch_id'] = incoming.get('meilisearch_id')
+        
+        # Prefer non-empty contract_id (critical for deduplication)
+        if not merged.get('contract_id') and incoming.get('contract_id'):
+            merged['contract_id'] = incoming.get('contract_id')
+        elif incoming.get('contract_id') and merged.get('contract_id') != incoming.get('contract_id'):
+            # If both have contract_id but they differ, prefer the one that looks more like a standard ID
+            incoming_id = str(incoming.get('contract_id', '')).strip()
+            merged_id = str(merged.get('contract_id', '')).strip()
+            # Prefer longer, more complete IDs
+            if len(incoming_id) > len(merged_id):
+                merged['contract_id'] = incoming.get('contract_id')
 
         # Prefer more specific amount (>0)
         primary_amount = DynastyProjectsCacheGeneratorDuckDB._normalize_amount_for_key(merged.get('amount'))
@@ -525,6 +565,17 @@ class DynastyProjectsCacheGeneratorDuckDB:
         # Prefer more descriptive project name (longer string)
         if len((incoming.get('project_name') or '')) > len((merged.get('project_name') or '')):
             merged['project_name'] = incoming.get('project_name')
+        
+        # CRITICAL: Preserve descriptive fields for PhilGEPS projects (needed for frontend display)
+        # Prefer longer/more descriptive values when merging
+        for field in ['project_description', 'notice_title', 'award_description', 'award_title']:
+            incoming_val = incoming.get(field)
+            merged_val = merged.get(field)
+            if incoming_val and (not merged_val or len(str(incoming_val)) > len(str(merged_val))):
+                merged[field] = incoming_val
+            elif not merged_val and incoming_val:
+                # If merged doesn't have it but incoming does, use incoming
+                merged[field] = incoming_val
 
         # Prefer more detailed contractor string
         if len((incoming.get('contractor') or '')) > len((merged.get('contractor') or '')):
@@ -1080,9 +1131,29 @@ class DynastyProjectsCacheGeneratorDuckDB:
             area_of_delivery = (contract.get('philgeps_area_of_delivery') or contract.get('area_of_delivery') or '')
             awardee_name = (contract.get('contractor_name') or contract.get('philgeps_awardee_name') or contract.get('awardee_name') or '')
             
+            # Helper function to detect if a string looks like a contract number
+            def looks_like_contract_number(text):
+                if not text or not isinstance(text, str):
+                    return False
+                # Contract numbers are typically short (under 20 chars) and mostly alphanumeric
+                # Pattern: alphanumeric with possible dashes/slashes, like "23Z00041" or "19Z00042"
+                cleaned = text.replace('-', '').replace('/', '').strip()
+                return len(cleaned) <= 20 and cleaned.isalnum() and len(cleaned) >= 6
+            
             # Use the most descriptive field for project_name
-            # Prefer: project_description > notice_title > award_description > award_title
-            descriptive_project_name = project_description_field or notice_title or contract.get('award_description') or award_title or "N/A"
+            # Prefer: project_description > notice_title > award_description
+            # Only use award_title if it doesn't look like a contract number
+            descriptive_project_name = project_description_field or notice_title or contract.get('award_description')
+            
+            # If we still don't have a descriptive name, check award_title (but skip if it's a contract number)
+            if not descriptive_project_name or descriptive_project_name.strip() == '':
+                if award_title and not looks_like_contract_number(award_title):
+                    descriptive_project_name = award_title
+                else:
+                    # If award_title looks like a contract number, don't use it for project_name
+                    # Leave it as None/empty so frontend can handle it better
+                    # The contract number will be available in award_title for the frontend to use as last resort
+                    descriptive_project_name = None
             
             # Location Extraction - include notice_title for better classification
             location_text = f'{award_title} {notice_title} {area_of_delivery} {contract.get("province") or ""} {contract.get("city") or ""} {contract.get("municipality") or ""}'
@@ -1202,14 +1273,24 @@ class DynastyProjectsCacheGeneratorDuckDB:
                 if not (project_district_type and project_district and project_barangay_municipality):
                     continue
 
+            # Ensure project_name has a value (use award_title as last resort even if it's a contract number)
+            # Frontend will handle displaying it appropriately
+            final_project_name = descriptive_project_name
+            if not final_project_name or final_project_name.strip() == '':
+                if award_title:
+                    final_project_name = award_title
+                else:
+                    final_project_name = None
+            
             chunk_results.append({
                 "source": self._normalize_source_label("PhilGEPS"),
                 "meilisearch_id": contract.get('meilisearch_id') or contract.get('global_id'),
-                "project_name": descriptive_project_name or "N/A",
-                "project_description": project_description_field or None,  # Add for frontend to use
-                "notice_title": notice_title or None,  # Add for frontend to use
-                "award_description": contract.get('award_description') or None,  # Add for frontend to use
-                "award_title": award_title or None,  # Keep original for reference
+                "contract_id": contract.get('philgeps_award_id') or contract.get('award_id') or contract.get('notice_id') or contract.get('contract_id') or None,  # Add for deduplication
+                "project_name": final_project_name,
+                "project_description": project_description_field if project_description_field else None,  # Add for frontend to use
+                "notice_title": notice_title if notice_title else None,  # Add for frontend to use
+                "award_description": contract.get('award_description') if contract.get('award_description') else None,  # Add for frontend to use
+                "award_title": award_title if award_title else None,  # Keep original for reference
                 "contractor": awardee_name or "N/A",
                 "amount": amount,
                 "location": location_str or "N/A",
@@ -1231,6 +1312,211 @@ class DynastyProjectsCacheGeneratorDuckDB:
                 "project_municipality_barangay": project_barangay_municipality,
                 "is_flood_related": is_flood,
                 "match_type": match_type,  # Add match_type for summary counting
+                "match_score": match_score
+            })
+            
+        return chunk_results
+
+    def _process_transparency_chunk(self, rows_chunk: List[Dict], congressmen_data: Dict, districts_data: Dict,
+                                 district_lookup_dict: Dict, contractor_lookup_dict: Dict, contractor_inverted_index: Dict,
+                                 known_provinces: List[str] = None, known_cities: List[str] = None, 
+                                 location_context_map: Dict = None) -> List[Dict]:
+        """Process a chunk of Transparency (DPWH scraper) projects from Parquet using O(1) lookups."""
+        chunk_results: List[Dict] = []
+        
+        # Use passed location data if available, otherwise extract (fallback)
+        if known_provinces is None or known_cities is None:
+            known_provinces_set, known_cities_set = self._extract_provinces_and_cities_from_data(congressmen_data, district_lookup_dict)
+            known_provinces = sorted(list(known_provinces_set))
+            known_cities = sorted(list(known_cities_set))
+        
+        if location_context_map is None:
+            location_context_map = getattr(self, 'location_dicts', {}).get('location_context_map', None) if hasattr(self, 'location_dicts') else None
+
+        for row in rows_chunk:
+            record = row
+            if not isinstance(record, dict):
+                continue
+            
+            # Check if already classified (unless force mode)
+            if not self.force_reclassify:
+                project_district_type = record.get('project_district_type')
+                project_district = record.get('project_district')
+                project_barangay_municipality = record.get('project_barangay_municipality')
+                is_flood_related = record.get('is_flood_related')
+                
+                if (project_district_type and 
+                    project_district and 
+                    project_barangay_municipality and
+                    is_flood_related is not None):
+                    result = record.copy()
+                    result['source'] = self._normalize_source_label(result.get('source') or 'Transparency')
+                    if not result.get('match_type'):
+                        if result.get('district_congressman'):
+                            result['match_type'] = 'district'
+                        elif result.get('contractor_congressman'):
+                            result['match_type'] = 'contractor'
+                        else:
+                            result['match_type'] = 'unknown'
+                    result['_skipped_reclassification'] = True
+                    chunk_results.append(result)
+                    self.progress_counters['skipped'] += 1
+                    continue
+            
+            # Force mode: Clear classification fields
+            elif self.force_reclassify:
+                classification_fields_to_clear = [
+                    'district_congressman', 'contractor_congressman',
+                    'project_district_type', 'project_district', 'project_barangay_municipality',
+                    'project_province_city_district', 'project_municipality_barangay',
+                    'is_flood_related', 'district_match_type', 'district_match_score',
+                    'district_is_city_wide', 'congressman_district',
+                    'contractor_match_type', 'contractor_match_score',
+                    'contractor_congressman_district', 'match_type', 'match_score'
+                ]
+                for field in classification_fields_to_clear:
+                    if field in record:
+                        del record[field]
+            
+            # Basic Data - Transparency uses similar structure to Microsite
+            description = (record.get("project_name") or record.get("project_description") or 
+                         record.get("description") or "").upper()
+            project_title = (record.get("project_name") or record.get("project_description") or
+                           record.get("description") or "").upper()
+            contractor_raw = (record.get("contractor_name") or "")
+            contractor = contractor_raw.upper()
+            agency = (record.get("organization_name") or record.get("implementing_office") or "").upper()
+            fund_source = (record.get("source_of_funds") or "").upper()
+            
+            # Location Extraction
+            project_location = (record.get("organization_name") or record.get("implementing_office") or
+                              record.get("location") or record.get("region") or "")
+            combined_text = f"{description} {project_title} {agency} {fund_source} {contractor} {project_location}"
+            
+            location_info = self._extract_location_from_text(combined_text, known_provinces, known_cities, location_context_map)
+            
+            proj_province = location_info.get('province') or ""
+            proj_municipality_barangay = location_info.get('municipality_barangay') or ""
+            is_city_district = location_info.get('is_city_district', False)
+            
+            # Extract rich text for matching
+            proj_name = (record.get('project_name') or record.get('description') or '').strip()
+            proj_desc = (record.get('project_description') or '').strip()
+            location = (record.get('location') or record.get('implementing_office') or '').strip()
+            
+            combined_text = f"{proj_name} {proj_desc} {location}".strip()
+
+            # Unified Match
+            final_congressman, match_type, match_score, district_cm, contractor_cm = self._match_project_unified(
+                project_text=combined_text,
+                province=proj_province,
+                municipality_barangay=proj_municipality_barangay,
+                contractor=contractor,
+                year=record.get('year'),
+                congressmen_data=congressmen_data,
+                district_lookup=district_lookup_dict,
+                contractor_lookup=contractor_lookup_dict,
+                contractor_inverted_index=contractor_inverted_index,
+                project_data=record
+            )
+
+            # Update Progress
+            self._update_progress(match_type, final_congressman, is_city_district, bool(proj_municipality_barangay))
+
+            # Construct Result
+            amount = self._parse_amount(record.get("amount") or record.get("cost_php") or record.get("Contract Price") or record.get("Contract Amount"))
+            
+            # Determine district details
+            congressman_district = None
+            if district_cm and district_cm in congressmen_data:
+                cm_data = congressmen_data[district_cm]
+                if cm_data.get('district_number') and cm_data.get('provinces'):
+                    congressman_district = f"{cm_data.get('district_number')} District {cm_data.get('provinces')[0]}"
+
+            contractor_congressman_district = None
+            if contractor_cm and contractor_cm in congressmen_data:
+                cm_data = congressmen_data[contractor_cm]
+                if cm_data.get('district_number') and cm_data.get('provinces'):
+                    contractor_congressman_district = f"{cm_data.get('district_number')} District {cm_data.get('provinces')[0]}"
+
+            # Determine project district type and name
+            project_district_type = "city" if "CITY" in (project_location or "").upper() else ("province" if proj_province else "province")
+            
+            project_district = None
+            if district_cm and district_cm in congressmen_data:
+                cm_data = congressmen_data[district_cm]
+                if cm_data.get('district_number') and cm_data.get('provinces'):
+                    project_district = f"{cm_data.get('provinces')[0]} {cm_data.get('district_number')} District"
+
+            # Determine barangay/municipality
+            project_barangay_municipality = proj_municipality_barangay
+            if not project_barangay_municipality and project_location:
+                 parts = [p.strip() for p in project_location.split(',')]
+                 project_barangay_municipality = parts[-1] if parts else None
+
+            # Include project_title in flood classification
+            is_flood = self._is_flood_related(description, f"{description} {project_title}".strip(), project_location)
+
+            # In force mode, always process and set fields to None if we can't determine them
+            if self.force_reclassify:
+                if not project_district_type:
+                    project_district_type = None
+                if not project_district:
+                    project_district = None
+                if not project_barangay_municipality:
+                    project_barangay_municipality = None
+            else:
+                # In non-force mode, skip reclassification if we can't determine all required fields
+                if not (project_district_type and project_district and project_barangay_municipality):
+                    chunk_results.append({
+                        "source": self._normalize_source_label("Transparency"),
+                        "meilisearch_id": None,
+                        "contract_id": record.get('contract_id') or None,  # Add for deduplication
+                        "project_name": description or "N/A",
+                        "contractor": contractor_raw or "N/A",
+                        "amount": amount,
+                        "location": project_location or "N/A",
+                        "year": record.get('year'),
+                        "status": record.get("status") or record.get("Contract Status") or "N/A",
+                        "district_congressman": None,
+                        "contractor_congressman": None,
+                        "match_type": "unmatched",
+                        "match_score": 0,
+                        "project_district_type": None,
+                        "project_district": None,
+                        "project_barangay_municipality": None,
+                        "is_flood_related": is_flood,
+                        "_skipped_reclassification": False,
+                        "_unmatched": True
+                    })
+                    continue
+
+            chunk_results.append({
+                "source": self._normalize_source_label("Transparency"),
+                "meilisearch_id": None,
+                "contract_id": record.get('contract_id') or None,  # Add for deduplication
+                "project_name": description or "N/A",
+                "contractor": contractor_raw or "N/A",
+                "amount": amount,
+                "location": project_location or "N/A",
+                "year": record.get('year'),
+                "status": record.get("status") or record.get("Contract Status") or "N/A",
+                "district_congressman": district_cm,
+                "district_match_type": "district" if district_cm else None,
+                "district_match_score": match_score if match_type == 'district' else 0,
+                "district_is_city_wide": (match_score == 1 and match_type == "district"),
+                "congressman_district": congressman_district,
+                "contractor_congressman": contractor_cm,
+                "contractor_match_type": "contractor" if contractor_cm else None,
+                "contractor_match_score": 50 if contractor_cm else 0,
+                "contractor_congressman_district": contractor_congressman_district,
+                "project_district_type": project_district_type,
+                "project_district": project_district,
+                "project_barangay_municipality": project_barangay_municipality,
+                "project_province_city_district": project_district_type.capitalize() if project_district_type else None,
+                "project_municipality_barangay": project_barangay_municipality,
+                "is_flood_related": is_flood,
+                "match_type": match_type,
                 "match_score": match_score
             })
             
@@ -4569,6 +4855,7 @@ class DynastyProjectsCacheGeneratorDuckDB:
             'DIME': ['DIME'],
             'PhilGEPS': ['PHILGEPS'],
             'Microsite': ['INFRAWATCH', 'MICROSITE'],  # Both names refer to the same source
+            'Transparency': ['TRANSPARENCY'],
         }
         
         valid_sources = source_variations.get(source_name, [source_name.upper()])
@@ -4653,6 +4940,7 @@ class DynastyProjectsCacheGeneratorDuckDB:
                 ("DIME", self._process_dime_chunk),
                 ("PhilGEPS", self._process_philgeps_chunk),
                 ("Microsite", self._process_microsite_chunk),
+                ("Transparency", self._process_transparency_chunk),
             ]
             
             for source_name, process_func in sources:
@@ -4810,13 +5098,15 @@ class DynastyProjectsCacheGeneratorDuckDB:
             all_dime_projects = self.load_projects_from_parquet(DIME_PARQUET, source_name=None) if DIME_PARQUET.exists() else []
             all_philgeps_projects = self.load_projects_from_parquet(PHILGEPS_PARQUET, source_name=None) if PHILGEPS_PARQUET.exists() else []
             all_microsite_projects = self.load_projects_from_parquet(MICROSITE_PARQUET, source_name=None) if MICROSITE_PARQUET.exists() else []
+            all_transparency_projects = self.load_projects_from_parquet(TRANSPARENCY_PARQUET, source_name=None) if TRANSPARENCY_PARQUET.exists() else []
             
-            total_loaded = len(all_flood_projects) + len(all_dime_projects) + len(all_philgeps_projects) + len(all_microsite_projects)
+            total_loaded = len(all_flood_projects) + len(all_dime_projects) + len(all_philgeps_projects) + len(all_microsite_projects) + len(all_transparency_projects)
             print(f"✅ Loaded {total_loaded} total projects into memory")
             print(f"   - Flood/SSP: {len(all_flood_projects)}")
             print(f"   - DIME: {len(all_dime_projects)}")
             print(f"   - PhilGEPS: {len(all_philgeps_projects)}")
             print(f"   - Microsite: {len(all_microsite_projects)}")
+            print(f"   - Transparency: {len(all_transparency_projects)}")
             
             # Process SSP/Flood projects
             try:
@@ -4933,6 +5223,39 @@ class DynastyProjectsCacheGeneratorDuckDB:
                     print(f"✅ Processed {len(all_projects) - prev_count} Microsite projects (matched)")
             except Exception as e:
                 print(f"Error processing Microsite projects: {e}")
+                import traceback
+                traceback.print_exc()
+            
+            # Process Transparency projects
+            try:
+                # For separate Transparency file, all projects should be Transparency
+                transparency_projects = all_transparency_projects
+                # Ensure source is set correctly
+                for p in transparency_projects:
+                    if not p.get('_source') and not p.get('source'):
+                        p['_source'] = 'Transparency'
+                if transparency_projects:
+                    print(f"📊 Processing {len(transparency_projects)} Transparency projects from memory")
+                    transparency_chunks = self._chunk_list(transparency_projects, self.max_workers)
+                    # Submit tasks directly to ThreadPoolExecutor for better thread utilization
+                    transparency_futures = [
+                        self.executor.submit(
+                            self._process_transparency_chunk, chunk, congressmen_data, districts_data,
+                            district_lookup_dict, contractor_lookup_dict, contractor_inverted_index,
+                            known_provinces, known_cities, location_context_map
+                        )
+                        for chunk in transparency_chunks
+                    ]
+                    # Convert futures to awaitables using asyncio.wrap_future
+                    loop = asyncio.get_running_loop()
+                    transparency_tasks = [asyncio.wrap_future(future, loop=loop) for future in transparency_futures]
+                    prev_count = len(all_projects)
+                    for completed_task in asyncio.as_completed(transparency_tasks):
+                        result = await completed_task
+                        all_projects.extend(result)
+                    print(f"✅ Processed {len(all_projects) - prev_count} Transparency projects (matched)")
+            except Exception as e:
+                print(f"Error processing Transparency projects: {e}")
                 import traceback
                 traceback.print_exc()
         
@@ -5313,7 +5636,24 @@ class DynastyProjectsCacheGeneratorDuckDB:
             for proj in all_projects:
                 source_label = self._normalize_source_label(proj.get('source', 'Unknown'))
                 proj['source'] = source_label
-                key = proj.get('meilisearch_id') or self._build_project_key(proj)
+                
+                # CRITICAL: Prioritize contract_id for better cross-source matching
+                # Check multiple possible contract_id fields
+                contract_id = (proj.get('contract_id') or 
+                             proj.get('meilisearch_id') or 
+                             proj.get('global_id') or
+                             proj.get('philgeps_award_id') or
+                             proj.get('award_id') or
+                             proj.get('notice_id'))
+                
+                if contract_id:
+                    # Use contract_id as primary key (most reliable for cross-source matching)
+                    contractor = self._normalize_text_for_key(proj.get('contractor'))
+                    amount = self._normalize_amount_for_key(proj.get('amount'))
+                    key = f"ID:{contract_id}|{contractor}|{amount}"
+                else:
+                    # Fallback to project key
+                    key = self._build_project_key(proj)
                 
                 # Determine primary congressman (district takes precedence)
                 primary_congressman = proj.get('district_congressman') or proj.get('contractor_congressman') or 'Unknown'
@@ -5407,12 +5747,14 @@ class DynastyProjectsCacheGeneratorDuckDB:
             district_primary_count = len([p for p in unique_projects if p.get('match_type') == 'district'])
             contractor_primary_count = len([p for p in unique_projects if p.get('match_type') == 'contractor'])
             
+            transparency_count = len([p for p in unique_projects if 'Transparency' in (p.get('sources_list', []))])
             summary = {
                 "total": len(unique_projects),
                 "dime": len([p for p in unique_projects if 'DIME' in (p.get('sources_list', []))]),
                 "philgeps": len([p for p in unique_projects if 'PhilGEPS' in (p.get('sources_list', []))]),
                 "ssp": ssp_count,
                 "microsite": microsite_count,
+                "transparency": transparency_count,
                 "district_projects": district_projects_count,  # Count all projects with district match
                 "contractor_projects": contractor_projects_count,  # Count all projects with contractor match
                 "district_primary": district_primary_count,  # Projects where district is primary match
@@ -5727,6 +6069,7 @@ class DynastyProjectsCacheGeneratorDuckDB:
                     "ssp": len([p for p in congressman_projects if 'SSP' in (p.get('sources_list', []))]),
                     "infrawatch": len([p for p in congressman_projects if 'Microsite' in (p.get('sources_list', [])) or 'MICROSITE' in (p.get('sources_list', [])) or 'Infrawatch' in (p.get('sources_list', [])) or 'INFRAWATCH' in (p.get('sources_list', []))]),
                     "microsite": len([p for p in congressman_projects if 'Microsite' in (p.get('sources_list', [])) or 'MICROSITE' in (p.get('sources_list', [])) or 'Infrawatch' in (p.get('sources_list', [])) or 'INFRAWATCH' in (p.get('sources_list', []))]),
+                    "transparency": len([p for p in congressman_projects if 'Transparency' in (p.get('sources_list', []))]),
                     "district_projects": congressman_district_count,
                     "contractor_projects": congressman_contractor_count,
                     "flood_projects": congressman_flood_count
@@ -5788,6 +6131,7 @@ class DynastyProjectsCacheGeneratorDuckDB:
             print(f"   PhilGEPS: {summary['philgeps']}")
             print(f"   SSP: {summary['ssp']}")
             print(f"   Microsite: {summary['microsite']}")
+            print(f"   Transparency: {summary['transparency']}")
             print(f"   District projects: {summary['district_projects']}")
             print(f"   Contractor projects: {summary['contractor_projects']}")
             print(f"   🌊 Flood-related projects: {summary['flood_projects']} (₱{flood_cost:,.2f})")
