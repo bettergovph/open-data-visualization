@@ -83,3 +83,7 @@ huggingface_*.log
 
 *.xls
 *.xlsx
+
+# Congressman project cache files (do not ignore)
+!static/data/congressman-projects-*/
+!static/data/congressman-projects-*/*.json

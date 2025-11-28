@@ -16,10 +16,10 @@
       "district_match_score": 100,
       "district_is_city_wide": false,
       "congressman_district": "6th District District Batangas",
-      "contractor_congressman": "Eulogio Rodriguez",
-      "contractor_match_type": "contractor",
-      "contractor_match_score": 50,
-      "contractor_congressman_district": "Lone District District Catanduanes",
+      "contractor_congressman": null,
+      "contractor_match_type": null,
+      "contractor_match_score": 0,
+      "contractor_congressman_district": null,
       "project_district_type": "province",
       "project_district": "Batangas 6th District District",
       "project_barangay_municipality": "San Juan",
@@ -321,61 +321,29 @@
       "sources_list": [
         "DIME"
       ]
-    },
-    {
-      "source": "PhilGEPS",
-      "meilisearch_id": null,
-      "project_name": "22DD0345 Repair of Slope Protection Structures along Bacao River, Taysan, Batangas",
-      "contractor": "VITALTECH CONSTRUCTION CORPORATION",
-      "amount": 966344.25,
-      "location": "Batangas",
-      "year": 2022,
-      "status": "active",
-      "district_congressman": "Vilma Santos-Recto",
-      "district_match_type": "district",
-      "district_match_score": 100,
-      "district_is_city_wide": false,
-      "congressman_district": "6th District District Batangas",
-      "contractor_congressman": null,
-      "contractor_match_type": null,
-      "contractor_match_score": 0,
-      "contractor_congressman_district": null,
-      "project_district_type": "province",
-      "project_district": "Batangas 6th District District",
-      "project_barangay_municipality": "Taysan",
-      "project_province_city_district": "Province",
-      "project_municipality_barangay": "Taysan",
-      "is_flood_related": true,
-      "match_type": "district",
-      "match_score": 10,
-      "congressman": "Vilma Santos-Recto",
-      "sources_count": 1,
-      "sources_list": [
-        "PhilGEPS"
-      ]
     }
   ],
   "summary": {
-    "total": 11,
+    "total": 10,
     "dime": 10,
-    "philgeps": 1,
+    "philgeps": 0,
     "ssp": 0,
     "infrawatch": 0,
     "microsite": 0,
-    "district_projects": 10,
+    "district_projects": 9,
     "contractor_projects": 0,
-    "flood_projects": 9
+    "flood_projects": 8
   },
   "dashboard_stats": {
-    "total_cost_all": 504216711.90999997,
-    "total_projects": 11,
-    "district_count": 10,
-    "district_cost": 407716711.91,
+    "total_cost_all": 503250367.65999997,
+    "total_projects": 10,
+    "district_count": 9,
+    "district_cost": 406750367.66,
     "contractor_count": 0,
     "contractor_cost": 0,
-    "flood_count": 9,
-    "flood_cost": 495574051.90999997
+    "flood_count": 8,
+    "flood_cost": 494607707.65999997
   },
-  "generated_at": "2025-11-25T22:31:36.503109",
+  "generated_at": "2025-11-28T18:07:21.024715",
   "cache_version": "1.0"
 }

@@ -80,10 +80,10 @@
       "district_match_score": 100,
       "district_is_city_wide": false,
       "congressman_district": "2nd District District Zamboanga Sibugay",
-      "contractor_congressman": "Eulogio Rodriguez",
-      "contractor_match_type": "contractor",
-      "contractor_match_score": 50,
-      "contractor_congressman_district": "Lone District District Catanduanes",
+      "contractor_congressman": null,
+      "contractor_match_type": null,
+      "contractor_match_score": 0,
+      "contractor_congressman_district": null,
       "project_district_type": "province",
       "project_district": "Zamboanga Sibugay 2nd District District",
       "project_barangay_municipality": "Siay",
@@ -163,38 +163,6 @@
       ]
     },
     {
-      "source": "PhilGEPS",
-      "meilisearch_id": null,
-      "project_name": "Construction of Flood Control, Brgy. Sanito, Ipil,",
-      "contractor": "LAKEWOOD CONSTRUCTION COMPANY",
-      "amount": 24479969.44,
-      "location": "Zamboanga Sibugay",
-      "year": 2020,
-      "status": "active",
-      "district_congressman": "Dulce Ann Hofer",
-      "district_match_type": "district",
-      "district_match_score": 100,
-      "district_is_city_wide": false,
-      "congressman_district": "2nd District District Zamboanga Sibugay",
-      "contractor_congressman": null,
-      "contractor_match_type": null,
-      "contractor_match_score": 0,
-      "contractor_congressman_district": null,
-      "project_district_type": "province",
-      "project_district": "Zamboanga Sibugay 2nd District District",
-      "project_barangay_municipality": "Ipil",
-      "project_province_city_district": "Province",
-      "project_municipality_barangay": "Ipil",
-      "is_flood_related": true,
-      "match_type": "district",
-      "match_score": 22,
-      "congressman": "Dulce Ann Hofer",
-      "sources_count": 1,
-      "sources_list": [
-        "PhilGEPS"
-      ]
-    },
-    {
       "source": "DIME",
       "meilisearch_id": null,
       "project_name": "Construction/Improvement of Drainage System, Hashim Street to Funda and Anduhol Street, Ipil, Zamboanga Sibugay",
@@ -228,26 +196,26 @@
     }
   ],
   "summary": {
-    "total": 7,
+    "total": 6,
     "dime": 6,
-    "philgeps": 1,
+    "philgeps": 0,
     "ssp": 0,
     "infrawatch": 0,
     "microsite": 0,
-    "district_projects": 7,
+    "district_projects": 6,
     "contractor_projects": 0,
-    "flood_projects": 7
+    "flood_projects": 6
   },
   "dashboard_stats": {
-    "total_cost_all": 403753917.9,
-    "total_projects": 7,
-    "district_count": 7,
-    "district_cost": 403753917.9,
+    "total_cost_all": 379273948.46,
+    "total_projects": 6,
+    "district_count": 6,
+    "district_cost": 379273948.46,
     "contractor_count": 0,
     "contractor_cost": 0,
-    "flood_count": 7,
-    "flood_cost": 403753917.9
+    "flood_count": 6,
+    "flood_cost": 379273948.46
   },
-  "generated_at": "2025-11-25T22:31:14.468563",
+  "generated_at": "2025-11-28T18:06:41.341816",
   "cache_version": "1.0"
 }

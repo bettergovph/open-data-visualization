@@ -144,10 +144,10 @@
       "district_match_score": 100,
       "district_is_city_wide": false,
       "congressman_district": "2nd District District Camarines Norte",
-      "contractor_congressman": "Marie Bernadette Escudero",
-      "contractor_match_type": "contractor",
-      "contractor_match_score": 50,
-      "contractor_congressman_district": "1st District District Sorsogon",
+      "contractor_congressman": null,
+      "contractor_match_type": null,
+      "contractor_match_score": 0,
+      "contractor_congressman_district": null,
       "project_district_type": "province",
       "project_district": "Camarines Norte 2nd District District",
       "project_barangay_municipality": "Camambugan",
@@ -160,39 +160,6 @@
       "sources_count": 1,
       "sources_list": [
         "DIME"
-      ]
-    },
-    {
-      "source": "SSP",
-      "meilisearch_id": "00d4a036-2340-46bb-a5c7-443d376ecca0",
-      "project_name": "CONSTRUCTION OF RIVER SLOPE PROTECTION ALONG IGAMOT CREEK, SALVACION AND BUSAKAN, BARANGAY SAN VICENTE, BAAO, CAMARINES SUR",
-      "contractor": "RAMARPLUS INCORPORATED (FORMERLY RAMAR ENTERPRISES",
-      "amount": 47282777.73,
-      "location": "BAAO (CAMARINES SUR), CAMARINES SUR, Region V",
-      "year": 2022,
-      "status": "active",
-      "district_congressman": "Salvio Fortuno",
-      "district_match_type": "district",
-      "district_match_score": 100,
-      "district_is_city_wide": false,
-      "congressman_district": "5th District District Camarines Sur",
-      "contractor_congressman": "Eulogio Rodriguez",
-      "contractor_match_type": "contractor",
-      "contractor_match_score": 50,
-      "contractor_congressman_district": "Lone District District Catanduanes",
-      "project_district_type": "province",
-      "project_district": "Camarines Sur 5th District District",
-      "project_barangay_municipality": "BAAO",
-      "project_province_city_district": "Province",
-      "project_municipality_barangay": "BAAO",
-      "is_flood_related": true,
-      "match_type": "district",
-      "match_score": 43,
-      "congressman": "Marisol Panotes",
-      "sources_count": 2,
-      "sources_list": [
-        "PhilGEPS",
-        "SSP"
       ]
     },
     {
@@ -321,39 +288,6 @@
       "sources_count": 1,
       "sources_list": [
         "DIME"
-      ]
-    },
-    {
-      "source": "SSP",
-      "meilisearch_id": "181dbb1d-c1f7-4213-a125-82dc5c868881",
-      "project_name": "CONSTRUCTION OF FLOOD CONTROL STRUCTURE, BRGY. SAN VICENTE, STA. ELENA, CAMARINES NORTE",
-      "contractor": "N.E.B. CONSTRUCTION AND SUPPLY",
-      "amount": 24499261.95,
-      "location": "SANTA ELENA (CAMARINES NORTE), CAMARINES NORTE, Region V",
-      "year": 2022,
-      "status": "active",
-      "district_congressman": "Josefina Tallado",
-      "district_match_type": "district",
-      "district_match_score": 100,
-      "district_is_city_wide": false,
-      "congressman_district": "1st District District Camarines Norte",
-      "contractor_congressman": null,
-      "contractor_match_type": null,
-      "contractor_match_score": 0,
-      "contractor_congressman_district": null,
-      "project_district_type": "province",
-      "project_district": "Camarines Norte 1st District District",
-      "project_barangay_municipality": "SANTA ELENA",
-      "project_province_city_district": "Province",
-      "project_municipality_barangay": "SANTA ELENA",
-      "is_flood_related": true,
-      "match_type": "district",
-      "match_score": 32,
-      "congressman": "Marisol Panotes",
-      "sources_count": 2,
-      "sources_list": [
-        "PhilGEPS",
-        "SSP"
       ]
     },
     {
@@ -1094,26 +1028,26 @@
     }
   ],
   "summary": {
-    "total": 34,
+    "total": 32,
     "dime": 32,
-    "philgeps": 2,
-    "ssp": 2,
+    "philgeps": 0,
+    "ssp": 0,
     "infrawatch": 0,
     "microsite": 0,
     "district_projects": 32,
     "contractor_projects": 0,
-    "flood_projects": 33
+    "flood_projects": 31
   },
   "dashboard_stats": {
-    "total_cost_all": 1420780763.0900004,
-    "total_projects": 34,
+    "total_cost_all": 1348998723.4100003,
+    "total_projects": 32,
     "district_count": 32,
     "district_cost": 1348998723.4100003,
     "contractor_count": 0,
     "contractor_cost": 0,
-    "flood_count": 33,
-    "flood_cost": 1391380817.9400003
+    "flood_count": 31,
+    "flood_cost": 1319598778.2600002
   },
-  "generated_at": "2025-11-25T22:31:28.695481",
+  "generated_at": "2025-11-28T18:07:06.349881",
   "cache_version": "1.0"
 }
