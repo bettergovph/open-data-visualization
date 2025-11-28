@@ -256,6 +256,18 @@ function toggleMobileMenu() {
                     <span class="text-gray-600 text-sm">Comprehensive transparency dashboard providing access to Philippine government procurement data from 2013-2025</span>
                 </li>
                 <li>
+                    <strong>DPWH Integrated Project Code Classification (DO 172 s2016):</strong><br>
+                    <a href="https://www.dpwh.gov.ph/dpwh/sites/default/files/issuances/DO_172_s2016.pdf" target="_blank" rel="noopener noreferrer" class="source-link">DO 172 s2016 - Integrated Project Code Classification Rules</a><br>
+                    <span class="text-gray-600">Used in: Project Code Decoding, District/Region Classification</span><br>
+                    <span class="text-gray-600 text-sm">Official DPWH Department Order defining the integrated project code format (YYRDSSSS) and rules for classifying projects into regions and districts. Format: YY (Year) + R (Region letter) + D (District letter) + SSSS (Sequence).</span>
+                </li>
+                <li>
+                    <strong>DPWH Project Code Mapping:</strong><br>
+                    <span class="text-gray-700">Mapping file (dpwh-project-code-mapping.json) containing region letters to region names and district letters to District Engineering Office (DEO) names for all DPWH regions.</span><br>
+                    <span class="text-gray-600">Used in: Project Code Decoding, District/Region Classification, DEO Name Resolution</span><br>
+                    <span class="text-gray-600">Credit: <a href="https://github.com/csiiiv" target="_blank" rel="noopener noreferrer" class="source-link">@csiiiv</a> - Comprehensive mapping of integrated project codes to regions and DEOs</span>
+                </li>
+                <li>
                     <strong>Raw Philippine Data (Persons, Memberships & Legislative Documents):</strong><br>
                     <a href="https://huggingface.co/datasets/bettergovph/raw-philippine-data" target="_blank" rel="noopener noreferrer" class="source-link">BetterGovPH Raw Philippine Data on HuggingFace</a><br>
                     <span class="text-gray-600">Used in: Semantic Search, Political Analysis, Legislative Document Research</span><br>
@@ -343,7 +355,13 @@ function toggleMobileMenu() {
                 <li>
                     <strong>DPWH Infrastructure Projects Data Pipeline:</strong><br>
                     <span class="text-gray-700">Automated scraping and parsing pipeline that converts DPWH infrastructure project tables into structured CSV datasets, providing contract coverage from 2016-2025 for validation of InfraWatch red-flag indicators.</span><br>
-                    <span class="text-gray-600">Credit: <a href="https://github.com/csiiiv/dpwh-infra-data-scraper" target="_blank" rel="noopener noreferrer" class="source-link">dpwh-infra-data-scraper</a> by csiiiv</span>
+                    <span class="text-gray-600">Credit: <a href="https://github.com/csiiiv/dpwh-infra-data-scraper" target="_blank" rel="noopener noreferrer" class="source-link">dpwh-infra-data-scraper</a> by <a href="https://github.com/csiiiv" target="_blank" rel="noopener noreferrer" class="source-link">@csiiiv</a></span>
+                </li>
+                <li>
+                    <strong>DPWH Project Code Mapping (dpwh-project-code-mapping.json):</strong><br>
+                    <span class="text-gray-700">Comprehensive JSON mapping file containing region letters to region names and district letters to District Engineering Office (DEO) names for all DPWH regions. Enables decoding of integrated project codes (YYRDSSSS format) into human-readable region and DEO classifications.</span><br>
+                    <span class="text-gray-600">Used in: Project Code Decoding, District/Region Classification, DEO Name Resolution</span><br>
+                    <span class="text-gray-600">Credit: <a href="https://github.com/csiiiv" target="_blank" rel="noopener noreferrer" class="source-link">@csiiiv</a> - Comprehensive mapping of integrated project codes to regions and DEOs</span>
                 </li>
                 <li>
                     <strong>Flood Project Red Flag Classification:</strong><br>
