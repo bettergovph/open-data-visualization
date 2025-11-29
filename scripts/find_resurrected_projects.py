@@ -400,6 +400,7 @@ class ResurrectedProjectFinder:
         
         # Compare each 2026 item with historical items
         # Start with existing matches, track new ones separately
+        matches = existing_matches.copy()  # Start with existing matches
         new_matches = []
         total_comparisons = 0
         processed = len(processed_ids)  # Start from where we left off
