@@ -644,7 +644,7 @@
                 <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 0.5rem;">
                     <div style="flex: 1;">
                         <h5 style="color: #0038A8; margin: 0 0 0.25rem 0; font-size: 0.9rem;">${escapeHtml(project?.name || project?.description || 'Unknown')}</h5>
-                        ${contractor ? `<p style="font-size: 0.8em; color: #666; margin: 0; font-style: italic;">Contractor: <strong>${escapeHtml(contractor)}</strong></p>` : ''}
+                        ${contractor ? `<p style="font-size: 0.8em; color: #666; margin: 0; font-style: italic;">Contractor: <strong data-contractor-2026>${escapeHtml(contractor)}</strong></p>` : ''}
                     </div>
                     <span style="background: #dc3545; color: white; padding: 0.2rem 0.5rem; border-radius: 4px; font-size: 0.75rem; font-weight: bold; margin-left: 0.5rem; align-self: flex-start;">Avg ${(avgSimilarity * 100).toFixed(1)}%</span>
                 </div>
@@ -667,13 +667,28 @@
         const contractorSearchEl = document.getElementById('mobile-resu-contractor-search');
         
         const performSearch = () => {
-            const projectTerm = (searchEl?.value || '').toLowerCase();
-            const contractorTerm = (contractorSearchEl?.value || '').toLowerCase();
+            const projectTerm = (searchEl?.value || '').toLowerCase().trim();
+            const contractorTerm = (contractorSearchEl?.value || '').toLowerCase().trim();
             
             Array.from(listEl.children).forEach(card => {
                 const text = card.textContent.toLowerCase();
+                
+                // For project search, check project name/description
                 const projectMatch = !projectTerm || text.includes(projectTerm);
-                const contractorMatch = !contractorTerm || text.includes(contractorTerm);
+                
+                // For contractor search, specifically check contractor fields
+                let contractorMatch = true;
+                if (contractorTerm) {
+                    // Check 2026 contractor
+                    const contractor2026 = card.querySelector('[data-contractor-2026]')?.textContent?.toLowerCase() || '';
+                    // Check historical contractors
+                    const historicalContractors = Array.from(card.querySelectorAll('[data-contractor-historical]'))
+                        .map(el => el.textContent?.toLowerCase() || '').join(' ');
+                    // Combine all contractor text
+                    const allContractorText = (contractor2026 + ' ' + historicalContractors).trim();
+                    contractorMatch = allContractorText.includes(contractorTerm);
+                }
+                
                 card.style.display = (projectMatch && contractorMatch) ? 'block' : 'none';
             });
         };
