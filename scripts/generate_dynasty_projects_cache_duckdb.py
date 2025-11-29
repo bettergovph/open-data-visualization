@@ -6233,13 +6233,42 @@ class DynastyProjectsCacheGeneratorDuckDB:
                             # Check for direct match (any variation)
                             if district_match or contractor_match:
                                 should_include = True
-                            # For _all_congressmen matches, allow unless validation failed above
+                            # For _all_congressmen matches, ONLY allow if province validation passed
+                            # CRITICAL: Don't allow _all_congressmen matches if province validation failed
                             elif all_congressmen_match:
+                                # Only allow if we didn't reject due to province mismatch
+                                # If we got here, province validation passed (or wasn't checked)
                                 should_include = True
                         else:
                             # No province info, use default logic
-                            if district_match or contractor_match or all_congressmen_match:
+                            # CRITICAL: For _all_congressmen matches without province info, be more strict
+                            # Only allow if it's a direct district or contractor match
+                            if district_match or contractor_match:
                                 should_include = True
+                            elif all_congressmen_match:
+                                # For _all_congressmen matches without province validation, be cautious
+                                # Only allow if we can't validate (no province data)
+                                should_include = True
+                        
+                        # CRITICAL: Additional validation - check if project's district_congressman or contractor_congressman
+                        # actually matches this congressman, not just _all_congressmen
+                        # This prevents Isidro Ungab from getting Paolo Duterte's projects
+                        if should_include and all_congressmen_match and not district_match and not contractor_match:
+                            # This project is only in _all_congressmen, not directly assigned
+                            # Double-check: is this congressman actually in the project's direct assignments?
+                            project_district_cm = p.get('district_congressman', '')
+                            project_contractor_cm = p.get('contractor_congressman', '')
+                            
+                            # Check if this congressman (or any variation) is the actual district or contractor match
+                            is_actual_match = (
+                                project_district_cm in name_variations or
+                                project_contractor_cm in name_variations
+                            )
+                            
+                            if not is_actual_match:
+                                # This congressman is only in _all_congressmen due to merging, not a direct match
+                                # REJECT to prevent cross-contamination
+                                should_include = False
                         
                         if not should_include:
                             continue
