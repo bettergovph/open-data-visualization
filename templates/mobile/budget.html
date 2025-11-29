@@ -635,10 +635,16 @@
             // Get 2026 amount (should be same across all matches for same project)
             const amount2026 = historicalMatches[0]?.year_2026?.amount || project?.amount || 0;
             
+            // Get contractor information if available
+            const contractor = project?.contractor || project?.contractors?.[0] || historicalMatches[0]?.year_2026?.contractor || null;
+            
             card.innerHTML = `
                 <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 0.5rem;">
-                    <h5 style="color: #0038A8; margin: 0; font-size: 0.9rem; flex: 1;">${escapeHtml((project?.name || project?.description || 'Unknown').substring(0, 80))}${(project?.name || project?.description || '').length > 80 ? '...' : ''}</h5>
-                    <span style="background: #dc3545; color: white; padding: 0.2rem 0.5rem; border-radius: 4px; font-size: 0.75rem; font-weight: bold; margin-left: 0.5rem;">Avg ${(avgSimilarity * 100).toFixed(1)}%</span>
+                    <div style="flex: 1;">
+                        <h5 style="color: #0038A8; margin: 0 0 0.25rem 0; font-size: 0.9rem;">${escapeHtml(project?.name || project?.description || 'Unknown')}</h5>
+                        ${contractor ? `<p style="font-size: 0.8em; color: #666; margin: 0; font-style: italic;">Contractor: <strong>${escapeHtml(contractor)}</strong></p>` : ''}
+                    </div>
+                    <span style="background: #dc3545; color: white; padding: 0.2rem 0.5rem; border-radius: 4px; font-size: 0.75rem; font-weight: bold; margin-left: 0.5rem; align-self: flex-start;">Avg ${(avgSimilarity * 100).toFixed(1)}%</span>
                 </div>
                 <div style="margin-bottom: 0.5rem; padding: 0.5rem; background: #f8f9fa; border-radius: 4px;">
                     <p style="font-size: 0.75rem; color: #666; margin: 0 0 0.25rem 0;">2026 Amount</p>
