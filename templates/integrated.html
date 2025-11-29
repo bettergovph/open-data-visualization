@@ -2538,7 +2538,59 @@ function displayProjects(projects) {
             matchTypeDisplay = '🗺️ Province';
             matchTypeEmoji = '🗺️';
         }
-        const name = project.project_name || project.award_title || project.title || 'N/A';
+        // For PhilGEPS projects, prefer more descriptive fields over contract numbers
+        let name = 'N/A';
+        if (project.source === 'PhilGEPS' || (project.sources_list && project.sources_list.includes('PhilGEPS'))) {
+            // Helper function to detect if a string looks like a contract number
+            const looksLikeContractNumber = (str) => {
+                if (!str || typeof str !== 'string') return false;
+                // Contract numbers are typically short (under 20 chars) and mostly alphanumeric
+                // Pattern: alphanumeric with possible dashes/slashes, like "23Z00041" or "19Z00042"
+                const cleaned = str.replace(/[-/]/g, '').trim();
+                return cleaned.length <= 20 && cleaned.length >= 6 && /^[A-Z0-9]+$/i.test(cleaned);
+            };
+            
+            // Priority: project_description > notice_title > award_description
+            // Check each field and skip if it looks like a contract number
+            const candidates = [
+                project.project_description,
+                project.notice_title,
+                project.award_description,
+                project.project_name,
+                project.award_title
+            ];
+            
+            // Find first candidate that exists and doesn't look like a contract number
+            for (const candidate of candidates) {
+                // Handle null/undefined/empty strings
+                if (candidate != null && candidate !== 'N/A' && String(candidate).trim() !== '') {
+                    const candidateStr = String(candidate).trim();
+                    if (!looksLikeContractNumber(candidateStr)) {
+                        name = candidateStr;
+                        break;
+                    }
+                }
+            }
+            
+            // If all candidates look like contract numbers or are empty, use the first available one
+            if (name === 'N/A' || !name) {
+                for (const candidate of candidates) {
+                    // Handle null/undefined/empty strings
+                    if (candidate != null && candidate !== 'N/A' && String(candidate).trim() !== '') {
+                        name = String(candidate).trim();
+                        break;
+                    }
+                }
+            }
+            
+            // Final fallback
+            if (!name || name === 'N/A') {
+                name = project.title || 'N/A';
+            }
+        } else {
+            // For other sources, use existing logic
+            name = project.project_name || project.award_title || project.title || 'N/A';
+        }
         const contractor = project.contractor || project.awardee_name || project.contractors || '—';
         const amount = project.placeholder ? '—' : formatCurrency(project.amount || project.contract_cost || project.contract_amount || project.cost);
         const location = project.placeholder ? '—' : (project.location || `${project.province || ''}${project.province && project.municipality ? ', ' : ''}${project.municipality || ''}`.trim() || 'N/A');
@@ -6207,11 +6259,17 @@ function renderIntegrationVenn() {
                     <div style="font-size: 24px; font-weight: bold;">${(totals.Microsite || 0).toLocaleString()}</div>
                     <div style="font-size: 12px; color: #666;">Unique: ${(data.Microsite || 0).toLocaleString()}</div>
                 </div>
+                <div style="background: #f3e5f5; padding: 15px; border-radius: 8px; border-left: 4px solid #6f42c1;">
+                    <div style="font-weight: bold; color: #6f42c1; margin-bottom: 5px;">Transparency</div>
+                    <div style="font-size: 24px; font-weight: bold;">${(totals.Transparency || 0).toLocaleString()}</div>
+                    <div style="font-size: 12px; color: #666;">Unique: ${(data.Transparency || 0).toLocaleString()}</div>
+                </div>
             </div>
             <div style="background: #f8f9fa; padding: 20px; border-radius: 8px; margin-top: 20px;">
                 <h5 style="margin-bottom: 15px; font-weight: bold;">Intersection Counts</h5>
                 <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 10px; font-size: 14px;">
-                    <div><strong>All 4 Sources:</strong> ${(data['DIME,Microsite,PhilGEPS,SSP'] || 0).toLocaleString()}</div>
+                    <div><strong>All 5 Sources:</strong> ${(data['DIME,Microsite,PhilGEPS,SSP,Transparency'] || data['DIME,Microsite,PhilGEPS,SSP'] || 0).toLocaleString()}</div>
+                    <div><strong>All 4 Sources (SSP+DIME+PhilGEPS+Microsite):</strong> ${(data['DIME,Microsite,PhilGEPS,SSP'] || 0).toLocaleString()}</div>
                     <div><strong>DIME + PhilGEPS + SSP:</strong> ${(data['DIME,PhilGEPS,SSP'] || 0).toLocaleString()}</div>
                     <div><strong>DIME + Microsite + PhilGEPS:</strong> ${(data['DIME,Microsite,PhilGEPS'] || 0).toLocaleString()}</div>
                     <div><strong>Microsite + PhilGEPS + SSP:</strong> ${(data['Microsite,PhilGEPS,SSP'] || 0).toLocaleString()}</div>
@@ -6359,21 +6417,58 @@ async function loadProjectsData() {
         // Populate table
         if (data.projects && data.projects.length > 0) {
             tableBody.innerHTML = data.projects.map(project => {
-                // Project name - just the name
-                const projectName = project.project_name || project.philgeps_award_title || project.project_description || 'N/A';
+                // Project name - CONCATENATE multiple fields to show more information
+                // Combine contract_id, award_title, and project_name for maximum context
+                let projectNameParts = [];
+                
+                // Add contract_id if it exists and looks like a contract ID
+                if (project.contract_id && /^\d{2}[A-Z]\d{5}$/.test(project.contract_id)) {
+                    projectNameParts.push(project.contract_id);
+                }
+                
+                // Add award_title (most descriptive)
+                if (project.philgeps_award_title && project.philgeps_award_title !== 'N/A' && project.philgeps_award_title !== 'nan') {
+                    projectNameParts.push(project.philgeps_award_title);
+                } else if (project.award_title && project.award_title !== 'N/A' && project.award_title !== 'nan') {
+                    projectNameParts.push(project.award_title);
+                }
+                
+                // Add notice_title if no award_title
+                if (projectNameParts.length === 0 && project.notice_title && project.notice_title !== 'N/A' && project.notice_title !== 'nan') {
+                    projectNameParts.push(project.notice_title);
+                }
+                
+                // Add project_name if it's not a contract ID and not already included
+                if (project.project_name && project.project_name !== 'N/A' && project.project_name !== 'nan') {
+                    const isContractId = /^\d{2}[A-Z]\d{5}$/.test(project.project_name);
+                    if (!isContractId && !projectNameParts.includes(project.project_name)) {
+                        projectNameParts.push(project.project_name);
+                    }
+                }
+                
+                // Add project_description as last resort
+                if (projectNameParts.length === 0 && project.project_description && project.project_description !== 'N/A' && project.project_description !== 'nan') {
+                    projectNameParts.push(project.project_description);
+                }
+                
+                // Combine parts with separator, or use N/A if nothing found
+                const projectName = projectNameParts.length > 0 
+                    ? projectNameParts.join(' - ') 
+                    : 'N/A';
                 
                 const contractor = project.contractor_name || project.philgeps_awardee_name || project.organization_name || 'N/A';
                 const amount = project.amount || project.contract_amount || project.dime_cost || project.infrawatch_contract_price || 0;
                 const amountFormatted = amount ? `₱${parseFloat(amount).toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}` : 'N/A';
-                const source = project.source || 'N/A';
-                const sourceBadge = getSourceBadge(source);
+                // Use sources_list if available (shows all databases where project was found)
+                const sources = project.sources_list || (project.source ? [project.source] : ['N/A']);
+                const sourceBadges = sources.map(src => getSourceBadge(src)).join(' ');
                 
                 return `
                     <tr style="border-bottom: 1px solid #dee2e6;">
                         <td style="padding: 12px; border-right: 1px solid #dee2e6; word-wrap: break-word; white-space: normal;">${escapeHtml(projectName)}</td>
                         <td style="padding: 12px; border-right: 1px solid #dee2e6; word-wrap: break-word; white-space: normal;">${escapeHtml(contractor)}</td>
                         <td style="padding: 12px; border-right: 1px solid #dee2e6; text-align: right; white-space: nowrap;">${amountFormatted}</td>
-                        <td style="padding: 12px; text-align: center;">${sourceBadge}</td>
+                        <td style="padding: 12px; text-align: center; white-space: normal;">${sourceBadges}</td>
                     </tr>
                 `;
             }).join('');
@@ -6539,9 +6634,36 @@ function getSourceBadge(source) {
         badgeColor = '#dc3545';
         badgeBg = '#f8d7da';
         badgeText = 'Microsite';
+    } else if (sourceUpper.includes('TRANSPARENCY')) {
+        badgeColor = '#6f42c1';
+        badgeBg = '#e2d9f3';
+        badgeText = 'Transparency';
     }
     
-    return `<span style="display: inline-block; padding: 4px 8px; background: ${badgeBg}; color: ${badgeColor}; border-radius: 4px; font-size: 11px; font-weight: 600; white-space: nowrap;">${escapeHtml(badgeText)}</span>`;
+    return `<span style="display: inline-block; padding: 4px 8px; background: ${badgeBg}; color: ${badgeColor}; border-radius: 4px; font-size: 11px; font-weight: 600; white-space: nowrap; margin-right: 4px;">${escapeHtml(badgeText)}</span>`;
+}
+
+// Helper function for getSourceDisplayMeta (used in projects tab)
+function getSourceDisplayMeta(source) {
+    if (!source || source === 'N/A') {
+        return { label: 'N/A', background: '#e9ecef', color: '#495057', border: '#dee2e6' };
+    }
+    
+    const sourceUpper = String(source).toUpperCase();
+    
+    if (sourceUpper.includes('SSP') || sourceUpper.includes('FLOOD')) {
+        return { label: 'SSP', background: '#cfe2ff', color: '#0d6efd', border: '#0d6efd' };
+    } else if (sourceUpper.includes('DIME')) {
+        return { label: 'DIME', background: '#d1e7dd', color: '#198754', border: '#198754' };
+    } else if (sourceUpper.includes('PHILGEPS')) {
+        return { label: 'PhilGEPS', background: '#fff3cd', color: '#ffc107', border: '#ffc107' };
+    } else if (sourceUpper.includes('MICROSITE') || sourceUpper.includes('INFRAWATCH') || sourceUpper.includes('DPWH')) {
+        return { label: 'Microsite', background: '#f8d7da', color: '#dc3545', border: '#dc3545' };
+    } else if (sourceUpper.includes('TRANSPARENCY')) {
+        return { label: 'Transparency', background: '#e2d9f3', color: '#6f42c1', border: '#6f42c1' };
+    }
+    
+    return { label: source, background: '#e9ecef', color: '#6c757d', border: '#dee2e6' };
 }
 
 </script>
