@@ -581,8 +581,23 @@
             group.historicalMatches.sort((a, b) => (b.historical?.year || 0) - (a.historical?.year || 0));
         });
 
+        // Sort projects by: 1) highest 2026 amount, 2) highest number of year matches
+        const sortedProjects = Object.values(groupedByProject).sort((a, b) => {
+            const amountA = a.historicalMatches[0]?.year_2026?.amount || a.project?.amount || 0;
+            const amountB = b.historicalMatches[0]?.year_2026?.amount || b.project?.amount || 0;
+            const yearsA = a.historicalMatches.length;
+            const yearsB = b.historicalMatches.length;
+            
+            // First sort by amount (descending)
+            if (amountB !== amountA) {
+                return amountB - amountA;
+            }
+            // Then by number of year matches (descending)
+            return yearsB - yearsA;
+        });
+
         // Display one card per 2026 project with all historical year matches
-        Object.values(groupedByProject).forEach((group, index) => {
+        sortedProjects.forEach((group, index) => {
             const project = group.project;
             const historicalMatches = group.historicalMatches;
             
