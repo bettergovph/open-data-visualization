@@ -28,11 +28,19 @@ class ResurrectedProjectFinder:
             'user': 'budget_admin',
             'password': 'wuQ5gBYCKkZiOGb61chLcByMu'
         }
+        self.dime_db_config = {
+            'host': 'localhost',
+            'port': 5432,
+            'database': 'dime',
+            'user': 'budget_admin',
+            'password': 'wuQ5gBYCKkZiOGb61chLcByMu'
+        }
         self.year_2026_data = {}
         self.year_2025_data = []
         self.year_2024_data = []
         self.year_2023_data = []
         self.matches = []
+        self.contractor_cache = {}  # Cache contractor lookups by project name/description
         
     def extract_chainage_range(self, name: str) -> tuple:
         """Extract chainage range from project name
@@ -174,6 +182,61 @@ class ResurrectedProjectFinder:
             return 0.0
         
         return SequenceMatcher(None, norm1, norm2).ratio()
+    
+    def get_contractor_for_project(self, project_name: str, project_description: str = None):
+        """Try to get contractor information for a project from DIME database
+        Uses fuzzy matching on project name/description
+        """
+        if not project_name:
+            return None
+        
+        # Check cache first
+        cache_key = project_name.lower().strip()
+        if cache_key in self.contractor_cache:
+            return self.contractor_cache[cache_key]
+        
+        try:
+            import psycopg2
+            from psycopg2.extras import RealDictCursor
+            
+            conn = psycopg2.connect(**self.dime_db_config)
+            cursor = conn.cursor(cursor_factory=RealDictCursor)
+            
+            # Try to match by project name (fuzzy match)
+            # Search for projects with similar names
+            search_term = f"%{project_name[:50]}%"  # Use first 50 chars for matching
+            
+            query = """
+                SELECT DISTINCT contractors
+                FROM projects
+                WHERE (project_name ILIKE %s OR description ILIKE %s)
+                AND contractors IS NOT NULL
+                AND array_length(contractors, 1) > 0
+                LIMIT 1
+            """
+            
+            cursor.execute(query, (search_term, search_term))
+            row = cursor.fetchone()
+            
+            contractor = None
+            if row and row['contractors']:
+                # Get first contractor from array
+                contractors_list = row['contractors']
+                if isinstance(contractors_list, list) and len(contractors_list) > 0:
+                    contractor = contractors_list[0]
+            
+            cursor.close()
+            conn.close()
+            
+            # Cache result (even if None)
+            self.contractor_cache[cache_key] = contractor
+            return contractor
+            
+        except Exception as e:
+            # If DIME database is not available or query fails, return None
+            # Don't print error to avoid cluttering output
+            self.contractor_cache[cache_key] = None
+            return None
     
     def load_2026_data(self, source_filter: str):
         """Load 2026 data from JSON file"""
@@ -501,6 +564,13 @@ class ResurrectedProjectFinder:
                 if year not in matches_by_year or match['adjusted_sim'] > matches_by_year[year]['adjusted_sim']:
                     matches_by_year[year] = match
             
+            # Get contractor information for this 2026 project (once per project, not per match)
+            contractor = (
+                item_2026.get('contractor') or 
+                (item_2026.get('contractors', [None])[0] if isinstance(item_2026.get('contractors'), list) else None) or
+                self.get_contractor_for_project(name_2026, item_2026.get('description', ''))
+            )
+            
             # Save all matches (one per year)
             for match in matches_by_year.values():
                 item_historical = match['historical']['item']
@@ -516,7 +586,7 @@ class ResurrectedProjectFinder:
                         'region': item_2026.get('location', {}).get('region') if isinstance(item_2026.get('location'), dict) else None,
                         'source_row': item_2026.get('source_row'),
                         'source_col': item_2026.get('source_col_b') or item_2026.get('source_col_c'),
-                        'contractor': item_2026.get('contractor') or item_2026.get('contractors', [None])[0] if isinstance(item_2026.get('contractors'), list) else None
+                        'contractor': contractor
                     },
                     'historical': {
                         'id': item_historical['id'],
