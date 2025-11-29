@@ -628,7 +628,7 @@
                                 <span style="color: #666;">${match.historical?.year} Amount: </span>
                                 <span style="font-weight: bold; color: #dc3545;">₱${((match.historical?.amount || 0) / 1000000).toFixed(1)}M</span>
                             </div>
-                            ${match.historical?.contractor ? `<div style="margin-top: 0.25rem;"><span style="color: #666; font-size: 0.75rem;">Contractor: </span><span style="font-weight: bold; color: #667eea; font-size: 0.75rem;">${escapeHtml(match.historical.contractor)}</span></div>` : ''}
+                            ${match.historical?.contractor ? `<div style="margin-top: 0.25rem;"><span style="color: #666; font-size: 0.75rem;">Contractor: </span><span style="font-weight: bold; color: #667eea; font-size: 0.75rem;" data-contractor-historical>${escapeHtml(match.historical.contractor)}</span></div>` : ''}
                         </div>
                     </div>
                 `;
