@@ -56,6 +56,16 @@ CONNECTION_TYPES_PARQUET = PARQUET_DIR / 'connection_types.parquet'
 class DynastyProjectsCacheGeneratorDuckDB:
     """Generate cached JSON for dynasty-projects using DuckDB"""
     
+    # Common words to exclude from contractor matching (too broad, not proper names)
+    COMMON_TOKENS = {
+        'CONSTRUCTION', 'INC', 'CORP', 'INCORPORATED', 'CORPORATION', 'AND', 'THE', 'OF', 'COMPANY', 
+        'CO', 'LTD', 'LIMITED', 'TRADING', 'ENTERPRISES', 'SUPPLY', 'SERVICES', 'BUILDERS', 'DEVELOPMENT', 
+        'ENGINEERING', 'FORMERLY', 'GENERAL', 'FOR', 'GROUP', 'SYSTEMS', 'TECHNOLOGIES', 
+        'INTERNATIONAL', 'GLOBAL', 'WORLDWIDE', 'ASSOCIATES', 'PARTNERS', 'MANAGEMENT', 'HOLDINGS',
+        'INVESTMENTS', 'PROPERTIES', 'REALTY', 'ESTATE', 'PROJECTS', 'SOLUTIONS', 'CONSULTING',
+        'DISTRIBUTORS', 'MANUFACTURING', 'INDUSTRIES', 'PRODUCTS', 'EQUIPMENT', 'MATERIALS'
+    }
+    
     def __init__(self, force_reclassify: bool = False):
         """
         Initialize the cache generator.
@@ -2624,13 +2634,41 @@ class DynastyProjectsCacheGeneratorDuckDB:
                     part = part.strip()
                     if len(part) >= 2:  # Changed from 3 to 2 to include "FS CO"
                         patterns.add(part)
-                # Also extract key words (for "FS CO BUILDERS" -> "FS", "CO", "BUILDERS")
-                # But only if they're meaningful (2+ chars)
-                words = re.split(r'[^A-Z0-9]+', base_upper)
+                
+                # Extract key words, BUT preserve hyphenated names (e.g., "HI-TONE", "S-ANG")
+                # First, find hyphenated words and add them as patterns
+                hyphenated = re.findall(r'[A-Z0-9]+-[A-Z0-9]+(?:-[A-Z0-9]+)*', base_upper)
+                for hw in hyphenated:
+                    if len(hw) >= 2:
+                        patterns.add(hw)
+                        # Also add without hyphen for matching variations
+                        patterns.add(hw.replace('-', ''))
+                
+                # Split by non-alphanumeric (excluding hyphen for hyphenated words)
+                words = re.split(r'[^A-Z0-9-]+', base_upper)
                 for word in words:
                     word = word.strip()
                     if len(word) >= 2:  # Changed from 3 to 2
                         patterns.add(word)
+                        # If it's hyphenated, also add without hyphen
+                        if '-' in word:
+                            patterns.add(word.replace('-', ''))
+                
+                # Also add first 2 words combined for patterns like "FS CO"
+                clean_name = re.sub(r'\([^)]*\)', '', base_upper).strip()
+                words_list = re.split(r'[^A-Z0-9]+', clean_name)
+                words_list = [w for w in words_list if w and len(w) >= 2]
+                if len(words_list) >= 2:
+                    # Add first 2 words combined
+                    first_two = ' '.join(words_list[:2])
+                    if len(first_two) >= 3:
+                        patterns.add(first_two)
+                    # Add first 3 words combined if available
+                    if len(words_list) >= 3:
+                        first_three = ' '.join(words_list[:3])
+                        if len(first_three) >= 4:
+                            patterns.add(first_three)
+                
                 final = set()
                 for pattern in patterns:
                     clean = re.sub(r'\s+', ' ', pattern).strip()
@@ -2733,18 +2771,32 @@ class DynastyProjectsCacheGeneratorDuckDB:
             first_upper = (first_name_pattern or '').upper().strip()
             last_upper = (last_name_pattern or '').upper().strip()
             
+            # Also try to match using display_name if available
+            display_name_upper = (display_name or '').upper().strip()
+            
             for lookup_key, contractor_rows in contractor_lookup.items():
                 lookup_first, lookup_last = lookup_key
                 lookup_first_upper = lookup_first.upper().strip()
                 lookup_last_upper = lookup_last.upper().strip()
+                lookup_full_upper = f"{lookup_first_upper} {lookup_last_upper}".strip()
                 
                 # Check if names match (allowing for middle names/variations)
                 # For Elizaldy Co: first_name_pattern="ELIZALDY", last_name_pattern="CO"
                 # Parquet might have: "ELIZALDY", "SALCEDO" or "ELIZALDY", "CO" or "ELIZALDY SALCEDO", "CO"
                 name_matches = False
                 
+                # CRITICAL: Also check if display_name matches (e.g., "ELIZALDY SALCEDO CO" in display_name)
+                if display_name_upper:
+                    # Check if lookup full name appears in display_name
+                    if lookup_full_upper in display_name_upper or display_name_upper in lookup_full_upper:
+                        name_matches = True
+                    # Check if key parts match
+                    elif first_upper and first_upper in display_name_upper and lookup_first_upper in display_name_upper:
+                        if not last_upper or last_upper in display_name_upper or lookup_last_upper in display_name_upper:
+                            name_matches = True
+                
                 # Exact match on first name
-                if first_upper and first_upper == lookup_first_upper:
+                if not name_matches and first_upper and first_upper == lookup_first_upper:
                     # Check if last name matches or is a variation
                     if last_upper:
                         # Direct match
@@ -2758,23 +2810,38 @@ class DynastyProjectsCacheGeneratorDuckDB:
                             name_matches = True
                         elif 'CO' in lookup_last_upper and 'SALCEDO' in last_upper:
                             name_matches = True
+                        # Handle "TIRSO" matching "TIRSO EDWIN" or "EDWIN" matching "TIRSO EDWIN LOLENG"
+                        elif 'TIRSO' in lookup_first_upper and 'EDWIN' in first_upper:
+                            name_matches = True
+                        elif 'EDWIN' in lookup_first_upper and 'TIRSO' in first_upper:
+                            name_matches = True
+                        elif 'LOLENG' in lookup_last_upper and 'GARDIOLA' in last_upper:
+                            name_matches = True
+                        elif 'GARDIOLA' in lookup_last_upper and 'LOLENG' in last_upper:
+                            name_matches = True
                     else:
                         # If no last name pattern, match on first name only
                         name_matches = True
                 
                 # Also check if first name pattern is contained in lookup first name
                 # (handles "ELIZALDY" matching "ELIZALDY SALCEDO")
-                elif first_upper and first_upper in lookup_first_upper:
+                if not name_matches and first_upper and first_upper in lookup_first_upper:
                     if last_upper:
                         if last_upper == lookup_last_upper or last_upper in lookup_last_upper or lookup_last_upper in last_upper:
+                            name_matches = True
+                        # Special handling for "CO" and "SALCEDO CO"
+                        elif 'CO' in last_upper and ('SALCEDO' in lookup_last_upper or 'CO' in lookup_last_upper):
                             name_matches = True
                     else:
                         name_matches = True
                 
                 # Reverse: check if lookup first name is in our pattern
-                elif first_upper and lookup_first_upper in first_upper:
+                if not name_matches and first_upper and lookup_first_upper in first_upper:
                     if last_upper:
                         if last_upper == lookup_last_upper or last_upper in lookup_last_upper or lookup_last_upper in last_upper:
+                            name_matches = True
+                        # Special handling for "CO" and "SALCEDO CO"
+                        elif 'CO' in last_upper and ('SALCEDO' in lookup_last_upper or 'CO' in lookup_last_upper):
                             name_matches = True
                     else:
                         name_matches = True
@@ -2930,8 +2997,7 @@ class DynastyProjectsCacheGeneratorDuckDB:
         contractor_lookup: Dict[str, List[tuple]] = defaultdict(list)
         contractor_inverted_index: Dict[str, Set[str]] = defaultdict(set)
         
-        # Common words to exclude from inverted index (too broad)
-        COMMON_TOKENS = {'CONSTRUCTION', 'INC', 'CORP', 'INCORPORATED', 'CORPORATION', 'AND', 'THE', 'OF', 'COMPANY', 'CO', 'LTD', 'LIMITED', 'TRADING', 'ENTERPRISES', 'SUPPLY', 'SERVICES', 'BUILDERS', 'DEVELOPMENT', 'ENGINEERING'}
+        # Use class-level COMMON_TOKENS (defined at class level)
         # Special handling for Davao City districts
         # Paolo Duterte is listed under 'Davao del Sur', '1st District' but represents Davao City 1st District
         # We need to ensure that Davao City 1st District is treated as a city district, not a provincial one.
@@ -3114,7 +3180,7 @@ class DynastyProjectsCacheGeneratorDuckDB:
             # Use simple splitting by non-alphanumeric characters
             tokens = re.split(r'[^A-Z0-9]+', key.upper())
             for token in tokens:
-                if len(token) >= 3 and token not in COMMON_TOKENS:
+                if len(token) >= 3 and token not in self.COMMON_TOKENS:
                     contractor_inverted_index[token].add(key)
         
         return dict(district_lookup), dict(contractor_lookup), dict(contractor_inverted_index)
@@ -5250,50 +5316,49 @@ class DynastyProjectsCacheGeneratorDuckDB:
             # Normalize contractor name for better matching
             normalized_contractor = re.sub(r'[^A-Z0-9]+', ' ', contractor_upper).strip()
             
-            # Extract key tokens from contractor name (words of 3+ chars)
+            # Extract key tokens from contractor name (words of 2+ chars for better matching)
+            # CRITICAL: Filter out common words - only match on proper names
             contractor_tokens = set()
             for token in re.split(r'[^A-Z0-9]+', normalized_contractor):
                 token = token.strip()
-                if len(token) >= 3:
+                if len(token) >= 2 and token not in self.COMMON_TOKENS:  # Exclude common words
                     contractor_tokens.add(token)
             
             # Check if any lookup key matches (either direction)
             for lookup_key in contractor_lookup.keys():
                 lookup_key_clean = lookup_key.strip()
-                if len(lookup_key_clean) < 3:
+                if len(lookup_key_clean) < 2:  # Changed from 3 to 2 to allow "FS", "CO", etc.
                     continue
                 
                 # Normalize lookup key
                 normalized_lookup = re.sub(r'[^A-Z0-9]+', ' ', lookup_key_clean).strip()
                 
                 # Extract tokens from lookup key
+                # CRITICAL: Filter out common words - only match on proper names
                 lookup_tokens = set()
                 for token in re.split(r'[^A-Z0-9]+', normalized_lookup):
                     token = token.strip()
-                    if len(token) >= 3:
+                    if len(token) >= 2 and token not in self.COMMON_TOKENS:  # Exclude common words
                         lookup_tokens.add(token)
                 
-                # Check if there's significant token overlap (at least one key token matches)
+                # Check if there's significant token overlap on PROPER NAMES only
                 # This handles cases like:
-                # - "SUNWEST" (lookup) matches "SUNWEST, INC." (project) - both have "SUNWEST"
-                # - "FS CO" (lookup) matches "FS CO BUILDERS" (project) - both have "FS" and "CO"
-                # - "NEWINGTON BUILDERS" (lookup) matches "NEWINGTON BUILDERS, INC." (project)
-                common_tokens = contractor_tokens.intersection(lookup_tokens)
+                # - "SUNWEST" (lookup) matches "SUNWEST, INC." (project) - both have "SUNWEST" (proper name)
+                # - "FS CO" (lookup) matches "FS CO BUILDERS" (project) - both have "FS" and "CO" (proper names)
+                # - "NEWINGTON BUILDERS" (lookup) matches "NEWINGTON BUILDERS, INC." (project) - "NEWINGTON" (proper name)
+                # We ignore common words like "CONSTRUCTION", "INC", "FORMERLY", etc.
+                common_proper_names = contractor_tokens.intersection(lookup_tokens)
                 
-                if common_tokens:
-                    # Check if the overlap is significant
-                    # For short names (like "FS CO"), require at least 2 tokens to match
-                    # For longer names, require at least 1 key token
-                    min_tokens_required = 2 if len(lookup_tokens) <= 3 else 1
-                    
-                    if len(common_tokens) >= min_tokens_required:
-                        # Additional check: ensure the most important token (usually the first significant one) matches
-                        # This prevents false matches like "CO" matching "CONSTRUCTION"
-                        important_tokens = sorted(lookup_tokens, key=len, reverse=True)[:2]  # Top 2 longest tokens
-                        if any(token in contractor_tokens for token in important_tokens):
-                            candidates = contractor_lookup[lookup_key]
-                            match_score = 90
-                            break
+                if common_proper_names:
+                    # CRITICAL: Require at least ONE proper name match (not common words)
+                    # This ensures we're matching on actual company names, not generic terms
+                    if len(common_proper_names) >= 1:
+                        # Additional validation: ensure we have meaningful proper name matches
+                        # For very short names (2 chars like "FS", "CO"), require at least 1 match
+                        # For longer names, require at least 1 proper name match
+                        candidates = contractor_lookup[lookup_key]
+                        match_score = 90
+                        break
                 
                 # Also try substring matching as fallback (for cases where tokenization might miss)
                 # Check if lookup key is contained in contractor name (with word boundaries)
@@ -5302,16 +5367,27 @@ class DynastyProjectsCacheGeneratorDuckDB:
                     match_score = 90
                     break
                 
-                # For short names (2-3 chars), also try without word boundaries
+                # For short names (2-5 chars), also try without word boundaries
                 # This handles "FS CO" matching "FS CO BUILDERS" when "FS" or "CO" alone might not match
+                # Also handles "S-ANG" matching "S-ANG CONSTRUCTION"
                 if len(lookup_key_clean) <= 5 and lookup_key_clean in contractor_upper:
                     # Make sure it's not a false match (e.g., "CO" matching "CONSTRUCTION")
-                    # Check if it's followed by space, comma, or end of string
-                    if re.search(re.escape(lookup_key_clean) + r'[\s,)]', contractor_upper) or \
-                       contractor_upper.endswith(lookup_key_clean):
-                        candidates = contractor_lookup[lookup_key]
-                        match_score = 90
-                        break
+                    # Check if it's followed by space, comma, dash, slash, or end of string
+                    if re.search(re.escape(lookup_key_clean) + r'[\s,)\-/]', contractor_upper) or \
+                       contractor_upper.endswith(lookup_key_clean) or \
+                       contractor_upper.startswith(lookup_key_clean):
+                        # Additional safety: for very short names (2 chars), check it's not part of a longer word
+                        if len(lookup_key_clean) <= 2:
+                            # Only match if it's at word boundaries or standalone
+                            if re.search(r'\b' + re.escape(lookup_key_clean) + r'\b', contractor_upper) or \
+                               contractor_upper == lookup_key_clean:
+                                candidates = contractor_lookup[lookup_key]
+                                match_score = 90
+                                break
+                        else:
+                            candidates = contractor_lookup[lookup_key]
+                            match_score = 90
+                            break
                 
                 # Check reverse: if contractor name (normalized) appears in lookup key
                 if normalized_contractor and len(normalized_contractor) >= 3:
@@ -5331,7 +5407,11 @@ class DynastyProjectsCacheGeneratorDuckDB:
         # Only proceed if we have matches
         # This ensures we only match verified contractor relationships
         if candidates:
-            # Apply exclusions before returning
+            # CRITICAL: Collect ALL non-excluded candidates, then prioritize
+            # Party-list congressmen should be prioritized since contractor matching
+            # is their primary method (they don't have districts)
+            valid_candidates = []
+            
             for cm_name, cm_data in candidates:
                 contractor_exclusions = cm_data.get('contractor_exclusions', {})
                 excluded = False
@@ -5345,8 +5425,30 @@ class DynastyProjectsCacheGeneratorDuckDB:
                         break
                 
                 if not excluded:
-                    # Return first non-excluded match
-                    return (cm_name, match_score)
+                    is_partylist = cm_data.get('is_partylist', False)
+                    # Check if this contractor is in the congressman's family_connections
+                    # (more specific match = higher priority)
+                    family_contractors = cm_data.get('contractors', [])
+                    is_family_contractor = any(
+                        contractor_upper in fc.upper() or fc.upper() in contractor_upper
+                        for fc in family_contractors
+                    )
+                    valid_candidates.append((cm_name, cm_data, is_partylist, is_family_contractor))
+            
+            if valid_candidates:
+                # Sort candidates: prioritize party-list AND family contractor matches
+                # Priority order:
+                # 1. Party-list with family contractor match (highest)
+                # 2. Party-list without family contractor match
+                # 3. Non-party-list with family contractor match
+                # 4. Non-party-list without family contractor match (lowest)
+                valid_candidates.sort(key=lambda x: (
+                    not (x[2] and x[3]),  # Party-list + family match first
+                    not x[2],              # Then party-list
+                    not x[3],              # Then family match
+                ))
+                
+                return (valid_candidates[0][0], match_score)
         
         return None
 
