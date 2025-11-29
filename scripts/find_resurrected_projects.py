@@ -577,6 +577,12 @@ class ResurrectedProjectFinder:
                 item_historical = match['historical']['item']
                 amount_historical = match['historical']['amount']
                 
+                # Get contractor for historical project too
+                historical_contractor = self.get_contractor_for_project(
+                    item_historical['description'], 
+                    item_historical.get('description', '')
+                )
+                
                 new_match = {
                     'source_sheet': source_filter,
                     'year_2026': {
@@ -597,7 +603,8 @@ class ResurrectedProjectFinder:
                         'region_id': item_historical['region_id'],
                         'department_desc': item_historical['department_desc'],
                         'agency_desc': item_historical['agency_desc'],
-                        'source_file': item_historical['source_file']
+                        'source_file': item_historical['source_file'],
+                        'contractor': historical_contractor
                     },
                     'similarity': {
                         'name': match['name_sim'],  # Original similarity

@@ -8293,6 +8293,7 @@ async function copyChartToClipboard(containerId, buttonId) {
                                 <span style="color: #666;">${match.historical?.year} Amount: </span>
                                 <span style="font-weight: bold; color: #dc3545;">₱${(match.historical?.amount || 0).toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</span>
                             </div>
+                            ${match.historical?.contractor ? `<div style="margin-top: 0.5rem;"><span style="color: #666; font-size: 0.85em;">Contractor: </span><span style="font-weight: bold; color: #667eea; font-size: 0.85em;">${match.historical.contractor}</span></div>` : ''}
                         </div>
                         ${match.historical?.description ? `<p style="font-size: 0.85em; color: #666; margin-top: 0.5rem; font-style: italic;">${match.historical.description.substring(0, 200)}${match.historical.description.length > 200 ? '...' : ''}</p>` : ''}
                     </div>
