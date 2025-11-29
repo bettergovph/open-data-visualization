@@ -623,12 +623,8 @@
                             <span style="background: #667eea; color: white; padding: 0.15rem 0.4rem; border-radius: 3px; font-size: 0.7rem;">${((match.similarity?.name || 0) * 100).toFixed(1)}%</span>
                         </div>
                         <div style="font-size: 0.8rem;">
-                            <div style="margin-bottom: 0.25rem;">
-                                <span style="color: #666;">2026: </span>
-                                <span style="font-weight: bold; color: #dc3545;">₱${((match.year_2026?.amount || 0) / 1000000).toFixed(1)}M</span>
-                            </div>
                             <div>
-                                <span style="color: #666;">${match.historical?.year}: </span>
+                                <span style="color: #666;">${match.historical?.year} Amount: </span>
                                 <span style="font-weight: bold; color: #667eea;">₱${((match.historical?.amount || 0) / 1000000).toFixed(1)}M</span>
                             </div>
                         </div>
