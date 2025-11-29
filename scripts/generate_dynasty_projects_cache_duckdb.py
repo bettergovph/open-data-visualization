@@ -764,14 +764,18 @@ class DynastyProjectsCacheGeneratorDuckDB:
                     return final_congressman, match_type, match_score, district_congressman, contractor_congressman
 
         # 1. Try District Match
+        # Pass project_district if available to help with district number matching
+        project_district = None
+        if project_data:
+            project_district = project_data.get('project_district') or project_data.get('district')
         district_match = self._find_congressman_by_district(
-            province, municipality_barangay, year, district_lookup, congressmen_data
+            province, municipality_barangay, year, district_lookup, congressmen_data, project_district
         )
         
         # Fallback: Province-only match if strict match failed and we have a province
         if not district_match and province and municipality_barangay:
              district_match = self._find_congressman_by_district(
-                province, '', year, district_lookup, congressmen_data
+                province, '', year, district_lookup, congressmen_data, project_district
             )
             
         if district_match:
@@ -2659,6 +2663,106 @@ class DynastyProjectsCacheGeneratorDuckDB:
         
         return congressmen_data
 
+    def _apply_district_corrections(self, congressmen_data: Dict) -> None:
+        """
+        Apply manual corrections to congressmen data to fix known issues in districts.json.
+        This ensures fixes persist even if districts.json is overwritten by DB sync.
+        
+        Fixes:
+        1. Davao City: Move misassigned barangays from 3rd District (Ungab) to 1st District (Paolo Duterte).
+        2. Leyte 1st District: Ensure Martin Romualdez gets Tacloban City and correct municipalities.
+        """
+        print("🔧 Applying district corrections...")
+        
+        # 1. Fix Davao City
+        # Barangays incorrectly assigned to 3rd District (should be 1st)
+        davao_1st_barangays = [
+            "Bago Gallera", "Baliok", "Catalunan Grande", "Catalunan Pequeño", 
+            "Bago Aplaya", "Ma-a", "Matina Crossing", "Matina Pangi", "Talomo"
+        ]
+        
+        # Find Paolo Duterte (1st District) and Isidro Ungab (3rd District)
+        paolo_duterte = None
+        isidro_ungab = None
+        
+        for name, data in congressmen_data.items():
+            if 'DUTERTE' in name.upper() and 'PAOLO' in name.upper():
+                paolo_duterte = data
+            elif 'UNGAB' in name.upper() and 'ISIDRO' in name.upper():
+                isidro_ungab = data
+        
+        if paolo_duterte and isidro_ungab:
+            print("  - Fixing Davao City barangays...")
+            # Remove from Ungab (3rd District)
+            ungab_barangays = isidro_ungab.get('barangays', [])
+            original_len = len(ungab_barangays)
+            isidro_ungab['barangays'] = [b for b in ungab_barangays if b not in davao_1st_barangays]
+            print(f"    Removed {original_len - len(isidro_ungab['barangays'])} barangays from Isidro Ungab")
+            
+            # Add to Paolo Duterte (1st District)
+            paolo_barangays = set(paolo_duterte.get('barangays', []))
+            for b in davao_1st_barangays:
+                paolo_barangays.add(b)
+            
+            # Cleanup Paolo Duterte's list (remove 2nd District areas if present)
+            # Agdao, Buhangin, Bunawan, Paquibato are districts in 2nd Legislative District
+            incorrect_1st_entries = ["Agdao", "Buhangin", "Bunawan", "Paquibato"]
+            paolo_barangays = {b for b in paolo_barangays if b not in incorrect_1st_entries}
+            
+            paolo_duterte['barangays'] = sorted(list(paolo_barangays))
+            print(f"    Added {len(davao_1st_barangays)} barangays to Paolo Duterte and cleaned up incorrect entries")
+            
+            # Also ensure Paolo Duterte has "Davao City" as a province alias
+            if "Davao City" not in paolo_duterte['provinces']:
+                paolo_duterte['provinces'].append("Davao City")
+            paolo_duterte['is_city_district'] = True
+            
+        # Fix Davao City 2nd District (Vincent Garcia) - Remove Wangan (belongs to 3rd)
+        vincent_garcia = None
+        for name, data in congressmen_data.items():
+            if 'GARCIA' in name.upper() and 'VINCENT' in name.upper():
+                vincent_garcia = data
+                break
+        
+        if vincent_garcia:
+            garcia_barangays = vincent_garcia.get('barangays', [])
+            if "Wangan" in garcia_barangays:
+                vincent_garcia['barangays'] = [b for b in garcia_barangays if b != "Wangan"]
+                print("    Removed 'Wangan' from Vincent Garcia (belongs to 3rd District)")
+        
+        # 2. Fix Leyte 1st District (Martin Romualdez)
+        # Correct municipalities for Leyte 1st District (all 9):
+        leyte_1st_municipalities = [
+            "Tacloban City", "Tacloban", 
+            "Alangalang", "Babatngon", "Palo", 
+            "San Miguel", "Santa Fe", "Tanauan", "Tolosa"
+        ]
+        
+        martin_romualdez = None
+        for name, data in congressmen_data.items():
+            if 'ROMUALDEZ' in name.upper() and 'MARTIN' in name.upper():
+                martin_romualdez = data
+                break
+        
+        if martin_romualdez:
+            print("  - Fixing Leyte 1st District municipalities...")
+            # Force set the correct municipalities
+            martin_romualdez['district_municipalities'] = leyte_1st_municipalities
+            # Ensure Tacloban City is treated as a city district match too
+            # We add "Tacloban City" to provinces so it matches as a city district
+            if "Tacloban City" not in martin_romualdez['provinces']:
+                martin_romualdez['provinces'].append("Tacloban City")
+            
+            # Also remove these municipalities from other Leyte congressmen to avoid conflicts
+            for name, data in congressmen_data.items():
+                if name != martin_romualdez['name'] and 'LEYTE' in str(data.get('provinces', [])).upper():
+                    # Remove 1st district municipalities from others
+                    other_munis = data.get('district_municipalities', [])
+                    new_munis = [m for m in other_munis if m not in leyte_1st_municipalities]
+                    if len(new_munis) != len(other_munis):
+                        print(f"    Removed {len(other_munis) - len(new_munis)} municipalities from {name}")
+                        data['district_municipalities'] = new_munis
+
     def _build_lookup_dictionaries(self, congressmen_data: Dict, districts_data: Dict) -> tuple[Dict, Dict]:
         """
         Build O(1) lookup dictionaries for O(n) matching.
@@ -2685,22 +2789,12 @@ class DynastyProjectsCacheGeneratorDuckDB:
         
         # Common words to exclude from inverted index (too broad)
         COMMON_TOKENS = {'CONSTRUCTION', 'INC', 'CORP', 'INCORPORATED', 'CORPORATION', 'AND', 'THE', 'OF', 'COMPANY', 'CO', 'LTD', 'LIMITED', 'TRADING', 'ENTERPRISES', 'SUPPLY', 'SERVICES', 'BUILDERS', 'DEVELOPMENT', 'ENGINEERING'}
-        # 3. Special handling for Davao City districts
+        # Special handling for Davao City districts
         # Paolo Duterte is listed under 'Davao del Sur', '1st District' but represents Davao City 1st District
         # We need to ensure that Davao City 1st District is treated as a city district, not a provincial one.
-        # This logic needs to be applied to the specific congressman's data before processing.
         
-        # This part of the snippet seems to be misplaced or incomplete.
-        # The original instruction was to update `_match_project_unified` and `_initialize_manila_tokens`.
-        # The provided snippet for `_build_lookup_dictionaries` seems to be an attempt to add logic
-        # for Davao City districts, but it's syntactically incorrect and refers to `congressman_data`
-        # as a single item, not the dictionary of all congressmen.
-        # Assuming the intent was to modify the `cm_data` within the loop,
-        # but without a clear and syntactically correct instruction,
-        # I will only apply the `_initialize_manila_tokens` change and
-        # leave `_build_lookup_dictionaries` as it was, as the provided
-        # snippet for it is not a valid or complete change.
-        # If the user intended a specific change here, it needs to be re-specified.
+        # Apply corrections to congressmen data (fixes for Davao City, Leyte, etc.)
+        self._apply_district_corrections(congressmen_data)
         
         for congressman_name, cm_data in congressmen_data.items():
             provinces = cm_data.get('provinces', [])
@@ -4001,7 +4095,7 @@ class DynastyProjectsCacheGeneratorDuckDB:
         return []
     
     def _find_congressman_by_district(self, province: str, municipality_barangay: str, project_year: Optional[int], 
-                                     district_lookup: Dict, congressmen_data: Dict) -> Optional[tuple]:
+                                     district_lookup: Dict, congressmen_data: Dict, project_district: Optional[str] = None) -> Optional[tuple]:
         """
         O(1) lookup for congressman by district.
         Returns: (congressman_name, match_score) or None
@@ -4189,17 +4283,22 @@ class DynastyProjectsCacheGeneratorDuckDB:
         if not candidates:
             for prov_variant in province_variants:
                 # 1. Exact match: (province, municipality/barangay) - score 100
+                # CRITICAL: This should give us the specific district if the municipality/barangay is properly mapped
                 variant_candidates = district_lookup.get((prov_variant, location_upper), [])
                 if variant_candidates:
                     candidates.extend(variant_candidates)
                     match_score = 100
+                    # CRITICAL: If we have a location (municipality/barangay) and got an exact match,
+                    # we should NOT fall back to province-only match - the exact match should be definitive
+                    # If we got multiple candidates from exact match, we'll filter by district number later
                     break
                 
                 # 2. Province-only match: (province, '') - score 10
-                # CRITICAL: For city districts, only allow province-only match if:
+                # CRITICAL: Only use province-only match if:
                 # - No specific barangay/municipality was provided (location_upper is empty), OR
-                # - The city name is explicitly mentioned with "CITY" word in the text
-                # This prevents broad matches for city districts like Manila
+                # - Exact match failed (no mapping exists for this municipality/barangay)
+                # CRITICAL: For city districts with a location specified, we should NOT use province-only match
+                # because it will return ALL districts in that city, causing incorrect assignments
                 # CRITICAL FIX: Also validate directional variants to prevent "ILOCOS SUR" matching "ILOCOS NORTE"
                 if not variant_candidates:
                     # Check if this is a city district and we need stricter matching
@@ -4254,8 +4353,10 @@ class DynastyProjectsCacheGeneratorDuckDB:
                             elif not location_upper:
                                 # City district but no location specified - allow match
                                 filtered_candidates.append((cm_name, cm_data))
-                            # If city district AND location specified, skip province-only match
+                            # CRITICAL: If city district AND location specified, skip province-only match
                             # (require specific barangay match instead)
+                            # This prevents Matina, Davao City from matching to all Davao City districts
+                            # We should only use province-only match when location is empty
                         
                         if filtered_candidates:
                             candidates.extend(filtered_candidates)
@@ -4688,6 +4789,113 @@ class DynastyProjectsCacheGeneratorDuckDB:
                     validated_candidates.append((cm_name, cm_data))
             
             if validated_candidates:
+                # CRITICAL: If multiple candidates match (e.g., multiple Davao City districts),
+                # we need to determine which specific district this project belongs to
+                # Strategy:
+                # 1. If we have a location (municipality/barangay), check if it's mapped to a specific district
+                # 2. Extract district number from project_district or location string
+                # 3. Match against congressmen's district numbers
+                # Example: Matina, Davao City 1st District should go to Paolo Duterte, not Isidro Ungab
+                if len(validated_candidates) > 1:
+                    # CRITICAL: If we have a location (municipality/barangay), check district_lookup again
+                    # to see if the exact match should have given us a single district
+                    # This handles cases where the municipality/barangay dictionary exists but wasn't used properly
+                    # The district_lookup should have (province, municipality/barangay) -> [congressman] mappings
+                    # that directly tell us which district a location belongs to
+                    if location_upper:
+                        # Re-check exact match for province and its variants to see if we can narrow it down
+                        # Try the main province first
+                        exact_match_candidates = district_lookup.get((province_upper, location_upper), [])
+                        if exact_match_candidates:
+                            if len(exact_match_candidates) == 1:
+                                # Exact match found a single candidate - use that instead
+                                # This means the municipality/barangay dictionary has the correct mapping
+                                validated_candidates = exact_match_candidates
+                            elif len(exact_match_candidates) < len(validated_candidates):
+                                # Exact match found fewer candidates - prefer those
+                                # This means the exact match is more specific than what we have
+                                validated_candidates = exact_match_candidates
+                        
+                        # If still multiple, try province variants (like Davao City / Davao Del Sur)
+                        if len(validated_candidates) > 1:
+                            # Get province variants that were used earlier in the function
+                            # Check Davao variants specifically
+                            davao_variants = []
+                            if province_upper in ['DAVAO DEL SUR', 'DAVAO CITY', 'DAVAO DEL NORTE', 'DAVAO ORIENTAL', 'DAVAO DE ORO']:
+                                if province_upper == 'DAVAO DEL SUR':
+                                    davao_variants = ['DAVAO CITY']
+                                elif province_upper == 'DAVAO CITY':
+                                    davao_variants = ['DAVAO DEL SUR']
+                            
+                            for prov_variant in davao_variants:
+                                exact_match_candidates = district_lookup.get((prov_variant, location_upper), [])
+                                if exact_match_candidates and len(exact_match_candidates) == 1:
+                                    # Found single match with variant - use it
+                                    validated_candidates = exact_match_candidates
+                                    break
+                                elif exact_match_candidates and len(exact_match_candidates) < len(validated_candidates):
+                                    # Variant match is more specific
+                                    validated_candidates = exact_match_candidates
+                    
+                    # Try to extract district number from location, project_district parameter, or municipality_barangay
+                    district_number = None
+                    
+                    # First, try project_district parameter if provided
+                    if project_district:
+                        project_district_upper = str(project_district).upper()
+                        district_match = re.search(r'\b(\d+)(ST|ND|RD|TH)\s+DISTRICT\b', project_district_upper, re.IGNORECASE)
+                        if district_match:
+                            district_number = int(district_match.group(1))
+                        else:
+                            # Try just number with ordinal suffix
+                            district_match = re.search(r'\b(\d+)(ST|ND|RD|TH)\b', project_district_upper, re.IGNORECASE)
+                            if district_match:
+                                district_number = int(district_match.group(1))
+                    
+                    # If not found in project_district, try location
+                    if district_number is None and location_upper:
+                        # Check for patterns like "1ST DISTRICT", "1ST", "FIRST DISTRICT"
+                        district_match = re.search(r'\b(\d+)(ST|ND|RD|TH)\s+DISTRICT\b', location_upper, re.IGNORECASE)
+                        if district_match:
+                            district_number = int(district_match.group(1))
+                        else:
+                            # Try just number with ordinal suffix
+                            district_match = re.search(r'\b(\d+)(ST|ND|RD|TH)\b', location_upper, re.IGNORECASE)
+                            if district_match:
+                                district_number = int(district_match.group(1))
+                    
+                    # If we found a district number, filter candidates by district
+                    if district_number:
+                        district_matched_candidates = []
+                        for cm_name, cm_data in validated_candidates:
+                            cm_district = cm_data.get('district', None)
+                            if cm_district:
+                                # Extract district number from congressman's district (e.g., "1st District" -> 1)
+                                cm_district_str = str(cm_district).upper()
+                                cm_district_match = re.search(r'\b(\d+)(ST|ND|RD|TH)\s+DISTRICT\b', cm_district_str, re.IGNORECASE)
+                                if cm_district_match:
+                                    cm_district_num = int(cm_district_match.group(1))
+                                    if cm_district_num == district_number:
+                                        district_matched_candidates.append((cm_name, cm_data))
+                                else:
+                                    # Try just number with ordinal
+                                    cm_district_match = re.search(r'\b(\d+)(ST|ND|RD|TH)\b', cm_district_str, re.IGNORECASE)
+                                    if cm_district_match:
+                                        cm_district_num = int(cm_district_match.group(1))
+                                        if cm_district_num == district_number:
+                                            district_matched_candidates.append((cm_name, cm_data))
+                        
+                        # If district matching found candidates, use only those
+                        if district_matched_candidates:
+                            validated_candidates = district_matched_candidates
+                        # CRITICAL: If we still have multiple candidates after district number filtering,
+                        # and we have a location, this indicates the municipality/barangay dictionary
+                        # might be missing or incomplete - log a warning but proceed
+                        elif location_upper and len(validated_candidates) > 1:
+                            # Municipality/barangay exists but district number not found or doesn't match
+                            # This suggests the municipality/barangay-to-district mapping might be missing
+                            pass
+                
                 # If project_year is provided and multiple candidates match, prioritize the one whose term best matches
                 # CRITICAL: Use project_year_int (converted to int) instead of project_year (may be string)
                 if project_year_int is not None and len(validated_candidates) > 1:
@@ -4775,6 +4983,107 @@ class DynastyProjectsCacheGeneratorDuckDB:
                     return (cm_name, 100)
         
         return None
+
+    def _merge_project_records(self, existing: Dict, new: Dict) -> Dict:
+        """
+        Merge two project records when they are duplicates across sources.
+        Resolves conflicts in district_congressman and contractor_congressman by preferring:
+        1. Higher match_score
+        2. District match over contractor match
+        3. Non-None values over None
+        
+        Args:
+            existing: The existing project record in projects_by_key
+            new: The new project record being merged
+            
+        Returns:
+            Merged project record with resolved conflicts
+        """
+        merged = existing.copy()
+        
+        # Merge basic fields (prefer non-None values, or new if both exist)
+        for key in ['project_name', 'project_description', 'contractor', 'amount', 'location', 'year', 'status']:
+            if key in new and (new[key] and (not key in merged or not merged[key] or merged[key] == 'N/A')):
+                merged[key] = new[key]
+        
+        # CRITICAL: Resolve district_congressman conflicts
+        existing_district = existing.get('district_congressman')
+        new_district = new.get('district_congressman')
+        existing_district_score = existing.get('district_match_score', 0)
+        new_district_score = new.get('district_match_score', 0)
+        
+        if existing_district and new_district:
+            if existing_district == new_district:
+                # Same congressman - keep it
+                merged['district_congressman'] = existing_district
+                merged['district_match_score'] = max(existing_district_score, new_district_score)
+            else:
+                # Different congressmen - prefer higher score
+                if new_district_score > existing_district_score:
+                    merged['district_congressman'] = new_district
+                    merged['district_match_score'] = new_district_score
+                    merged['district_match_type'] = new.get('district_match_type')
+                    merged['congressman_district'] = new.get('congressman_district')
+                else:
+                    # Keep existing (higher or equal score)
+                    merged['district_congressman'] = existing_district
+                    merged['district_match_score'] = existing_district_score
+        elif new_district:
+            # Only new has district match - use it
+            merged['district_congressman'] = new_district
+            merged['district_match_score'] = new_district_score
+            merged['district_match_type'] = new.get('district_match_type')
+            merged['congressman_district'] = new.get('congressman_district')
+        # If only existing has district match, it's already in merged
+        
+        # CRITICAL: Resolve contractor_congressman conflicts
+        existing_contractor = existing.get('contractor_congressman')
+        new_contractor = new.get('contractor_congressman')
+        existing_contractor_score = existing.get('contractor_match_score', 0)
+        new_contractor_score = new.get('contractor_match_score', 0)
+        
+        if existing_contractor and new_contractor:
+            if existing_contractor == new_contractor:
+                # Same congressman - keep it
+                merged['contractor_congressman'] = existing_contractor
+                merged['contractor_match_score'] = max(existing_contractor_score, new_contractor_score)
+            else:
+                # Different congressmen - prefer higher score
+                if new_contractor_score > existing_contractor_score:
+                    merged['contractor_congressman'] = new_contractor
+                    merged['contractor_match_score'] = new_contractor_score
+                    merged['contractor_match_type'] = new.get('contractor_match_type')
+                    merged['contractor_congressman_district'] = new.get('contractor_congressman_district')
+                else:
+                    # Keep existing (higher or equal score)
+                    merged['contractor_congressman'] = existing_contractor
+                    merged['contractor_match_score'] = existing_contractor_score
+        elif new_contractor:
+            # Only new has contractor match - use it
+            merged['contractor_congressman'] = new_contractor
+            merged['contractor_match_score'] = new_contractor_score
+            merged['contractor_match_type'] = new.get('contractor_match_type')
+            merged['contractor_congressman_district'] = new.get('contractor_congressman_district')
+        # If only existing has contractor match, it's already in merged
+        
+        # Update match_type (district takes precedence)
+        if merged.get('district_congressman'):
+            merged['match_type'] = 'district'
+            merged['match_score'] = merged.get('district_match_score', 0)
+        elif merged.get('contractor_congressman'):
+            merged['match_type'] = 'contractor'
+            merged['match_score'] = merged.get('contractor_match_score', 0)
+        else:
+            merged['match_type'] = existing.get('match_type', 'unknown')
+            merged['match_score'] = existing.get('match_score', 0)
+        
+        # Merge other classification fields (prefer non-None, non-empty values)
+        for key in ['project_district_type', 'project_district', 'project_barangay_municipality', 
+                    'project_province_city_district', 'project_municipality_barangay', 'is_flood_related']:
+            if key in new and new[key] and (key not in merged or not merged[key] or merged[key] == 'N/A'):
+                merged[key] = new[key]
+        
+        return merged
 
     def _display_progress_summary(self, source_name: str = ""):
         """Display progress summary every 1000 projects"""
@@ -5787,11 +6096,14 @@ class DynastyProjectsCacheGeneratorDuckDB:
                 # This ensures all sources are tracked even after merging
                 projects_by_key[key]['sources'].add(source_label)
                 
-                # Track both district and contractor congressmen
-                if proj.get('district_congressman'):
-                    projects_by_key[key]['congressmen'].add(proj.get('district_congressman'))
-                if proj.get('contractor_congressman'):
-                    projects_by_key[key]['congressmen'].add(proj.get('contractor_congressman'))
+                # CRITICAL: Only add congressmen from the MERGED project, not from individual sources
+                # This prevents cross-contamination when different sources match to different congressmen
+                # After merging, use the resolved district_congressman and contractor_congressman
+                merged_proj = projects_by_key[key]['project']
+                if merged_proj.get('district_congressman'):
+                    projects_by_key[key]['congressmen'].add(merged_proj.get('district_congressman'))
+                if merged_proj.get('contractor_congressman'):
+                    projects_by_key[key]['congressmen'].add(merged_proj.get('contractor_congressman'))
             
             # Build unique projects list
             unique_projects = []
