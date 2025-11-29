@@ -4689,7 +4689,8 @@ class DynastyProjectsCacheGeneratorDuckDB:
             
             if validated_candidates:
                 # If project_year is provided and multiple candidates match, prioritize the one whose term best matches
-                if project_year is not None and len(validated_candidates) > 1:
+                # CRITICAL: Use project_year_int (converted to int) instead of project_year (may be string)
+                if project_year_int is not None and len(validated_candidates) > 1:
                     # Score each candidate based on how well their term matches the project year
                     best_candidate = None
                     best_score = -1
@@ -4702,10 +4703,11 @@ class DynastyProjectsCacheGeneratorDuckDB:
                                 term_start = term.get('start')
                                 term_end = term.get('end')
                                 if term_start is not None and term_end is not None:
-                                    if term_start <= project_year <= term_end:
+                                    # CRITICAL: Use project_year_int (int) instead of project_year (may be string)
+                                    if term_start <= project_year_int <= term_end:
                                         # Exact match - calculate score based on how centered the year is in the term
                                         term_length = term_end - term_start + 1
-                                        year_position = project_year - term_start
+                                        year_position = project_year_int - term_start
                                         # Score: prefer terms where the year is in the middle (higher score)
                                         # But also prefer shorter terms (more specific)
                                         score = 1000 - abs(year_position - term_length / 2) + (100 / term_length)
@@ -6253,11 +6255,34 @@ class DynastyProjectsCacheGeneratorDuckDB:
                         # CRITICAL: Additional validation - check if project's district_congressman or contractor_congressman
                         # actually matches this congressman, not just _all_congressmen
                         # This prevents Isidro Ungab from getting Paolo Duterte's projects
+                        
+                        # Get the project's actual assigned congressmen
+                        project_district_cm = p.get('district_congressman', '')
+                        project_contractor_cm = p.get('contractor_congressman', '')
+                        
+                        # CRITICAL: For district matches, verify the project's district_congressman actually matches this congressman
+                        # This prevents incorrect district assignments (e.g., Isidro Ungab getting Paolo Duterte's district matches)
+                        if district_match and project_district_cm:
+                            # Check if this congressman (or any name variation) is actually the district_congressman
+                            if project_district_cm not in name_variations:
+                                # The project's district_congressman doesn't match this congressman
+                                # This is a false positive - REJECT
+                                should_include = False
+                                continue
+                        
+                        # CRITICAL: For contractor matches, verify the project's contractor_congressman actually matches this congressman
+                        if contractor_match and project_contractor_cm:
+                            # Check if this congressman (or any name variation) is actually the contractor_congressman
+                            if project_contractor_cm not in name_variations:
+                                # The project's contractor_congressman doesn't match this congressman
+                                # This is a false positive - REJECT
+                                should_include = False
+                                continue
+                        
+                        # For _all_congressmen matches (not direct district/contractor), be extra strict
                         if should_include and all_congressmen_match and not district_match and not contractor_match:
                             # This project is only in _all_congressmen, not directly assigned
                             # Double-check: is this congressman actually in the project's direct assignments?
-                            project_district_cm = p.get('district_congressman', '')
-                            project_contractor_cm = p.get('contractor_congressman', '')
                             
                             # Check if this congressman (or any variation) is the actual district or contractor match
                             is_actual_match = (
