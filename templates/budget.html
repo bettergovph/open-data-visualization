@@ -8291,7 +8291,7 @@ async function copyChartToClipboard(containerId, buttonId) {
                         <div style="font-size: 0.9em;">
                             <div>
                                 <span style="color: #666;">${match.historical?.year} Amount: </span>
-                                <span style="font-weight: bold; color: #667eea;">₱${(match.historical?.amount || 0).toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</span>
+                                <span style="font-weight: bold; color: #dc3545;">₱${(match.historical?.amount || 0).toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</span>
                             </div>
                         </div>
                         ${match.historical?.description ? `<p style="font-size: 0.85em; color: #666; margin-top: 0.5rem; font-style: italic;">${match.historical.description.substring(0, 200)}${match.historical.description.length > 200 ? '...' : ''}</p>` : ''}
