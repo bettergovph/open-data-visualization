@@ -563,23 +563,74 @@
         const listEl = document.getElementById('mobile-resu-projects-list');
         listEl.innerHTML = '';
 
-        matches.forEach((match, index) => {
+        // Group matches by 2026 project (using ID or name as key)
+        const groupedByProject = {};
+        matches.forEach(match => {
+            const projectKey = match.year_2026?.id || match.year_2026?.name || 'unknown';
+            if (!groupedByProject[projectKey]) {
+                groupedByProject[projectKey] = {
+                    project: match.year_2026,
+                    historicalMatches: []
+                };
+            }
+            groupedByProject[projectKey].historicalMatches.push(match);
+        });
+        
+        // Sort historical matches by year (newest first)
+        Object.values(groupedByProject).forEach(group => {
+            group.historicalMatches.sort((a, b) => (b.historical?.year || 0) - (a.historical?.year || 0));
+        });
+
+        // Display one card per 2026 project with all historical year matches
+        Object.values(groupedByProject).forEach((group, index) => {
+            const project = group.project;
+            const historicalMatches = group.historicalMatches;
+            
             const card = document.createElement('div');
             card.style.cssText = 'background: white; padding: 1rem; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); margin-bottom: 0.75rem; border-left: 3px solid #dc3545;';
+            
+            // Calculate average similarity
+            const avgSimilarity = historicalMatches.reduce((sum, m) => sum + (m.similarity?.name || 0), 0) / historicalMatches.length;
+            
+            // Show matched years as badges
+            const yearsList = historicalMatches.map(m => m.historical?.year).filter(Boolean).sort((a, b) => b - a);
+            const yearsBadges = yearsList.map(year => {
+                const yearsAgo = 2026 - year;
+                return `<span style="background: ${yearsAgo === 1 ? '#28a745' : yearsAgo <= 3 ? '#ffc107' : '#dc3545'}; color: white; padding: 0.2rem 0.4rem; border-radius: 3px; font-size: 0.7rem; margin-right: 0.3rem; display: inline-block; margin-bottom: 0.3rem;">${year}</span>`;
+            }).join('');
+            
+            let historicalMatchesHTML = '';
+            historicalMatches.forEach((match) => {
+                historicalMatchesHTML += `
+                    <div style="border-left: 2px solid #667eea; padding-left: 0.75rem; margin-bottom: 0.75rem; padding-top: 0.5rem;">
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 0.3rem;">
+                            <strong style="color: #667eea; font-size: 0.85rem;">${match.historical?.year || 'Unknown'}</strong>
+                            <span style="background: #667eea; color: white; padding: 0.15rem 0.4rem; border-radius: 3px; font-size: 0.7rem;">${((match.similarity?.name || 0) * 100).toFixed(1)}%</span>
+                        </div>
+                        <div style="font-size: 0.8rem;">
+                            <div style="margin-bottom: 0.25rem;">
+                                <span style="color: #666;">2026: </span>
+                                <span style="font-weight: bold; color: #dc3545;">₱${((match.year_2026?.amount || 0) / 1000000).toFixed(1)}M</span>
+                            </div>
+                            <div>
+                                <span style="color: #666;">${match.historical?.year}: </span>
+                                <span style="font-weight: bold; color: #667eea;">₱${((match.historical?.amount || 0) / 1000000).toFixed(1)}M</span>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+            
             card.innerHTML = `
                 <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 0.5rem;">
-                    <h5 style="color: #0038A8; margin: 0; font-size: 0.9rem; flex: 1;">${escapeHtml((match.year_2026?.name || match.year_2026?.description || 'Unknown').substring(0, 80))}${(match.year_2026?.name || match.year_2026?.description || '').length > 80 ? '...' : ''}</h5>
-                    <span style="background: #dc3545; color: white; padding: 0.2rem 0.5rem; border-radius: 4px; font-size: 0.75rem; font-weight: bold; margin-left: 0.5rem;">${((match.similarity?.name || 0) * 100).toFixed(1)}%</span>
+                    <h5 style="color: #0038A8; margin: 0; font-size: 0.9rem; flex: 1;">${escapeHtml((project?.name || project?.description || 'Unknown').substring(0, 80))}${(project?.name || project?.description || '').length > 80 ? '...' : ''}</h5>
+                    <span style="background: #dc3545; color: white; padding: 0.2rem 0.5rem; border-radius: 4px; font-size: 0.75rem; font-weight: bold; margin-left: 0.5rem;">Avg ${(avgSimilarity * 100).toFixed(1)}%</span>
                 </div>
-                <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 0.5rem; margin-top: 0.5rem; font-size: 0.85rem;">
-                    <div>
-                        <p style="color: #666; margin: 0; font-size: 0.75rem;">Found in ${match.historical?.year || 'Unknown'}</p>
-                        <p style="font-weight: bold; color: #667eea; margin: 0;">${match.years_apart || 0} year(s) ago</p>
-                    </div>
-                    <div>
-                        <p style="color: #666; margin: 0; font-size: 0.75rem;">2026 Amount</p>
-                        <p style="font-weight: bold; color: #dc3545; margin: 0;">₱${((match.year_2026?.amount || 0) / 1000000).toFixed(1)}M</p>
-                    </div>
+                <div style="margin-bottom: 0.5rem; font-size: 0.75rem; color: #666;">
+                    Found in ${historicalMatches.length} year(s): ${yearsBadges}
+                </div>
+                <div style="margin-top: 0.75rem; padding-top: 0.75rem; border-top: 1px solid #dee2e6;">
+                    ${historicalMatchesHTML}
                 </div>
             `;
             listEl.appendChild(card);
