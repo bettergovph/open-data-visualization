@@ -8227,29 +8227,80 @@ async function copyChartToClipboard(containerId, buttonId) {
         const listEl = document.getElementById('resu-projects-list');
         listEl.innerHTML = '';
         
-        matches.forEach((match, index) => {
+        // Group matches by 2026 project (using ID or name as key)
+        const groupedByProject = {};
+        matches.forEach(match => {
+            const projectKey = match.year_2026?.id || match.year_2026?.name || 'unknown';
+            if (!groupedByProject[projectKey]) {
+                groupedByProject[projectKey] = {
+                    project: match.year_2026,
+                    historicalMatches: []
+                };
+            }
+            groupedByProject[projectKey].historicalMatches.push(match);
+        });
+        
+        // Sort historical matches by year (newest first)
+        Object.values(groupedByProject).forEach(group => {
+            group.historicalMatches.sort((a, b) => (b.historical?.year || 0) - (a.historical?.year || 0));
+        });
+        
+        // Display one card per 2026 project with all historical year matches
+        Object.values(groupedByProject).forEach((group, index) => {
+            const project = group.project;
+            const historicalMatches = group.historicalMatches;
+            
             const card = document.createElement('div');
-            card.style.cssText = 'background: white; padding: 1.5rem; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); border-left: 4px solid #dc3545;';
+            card.className = 'resurrected-project-card';
+            card.style.cssText = 'background: white; padding: 1.5rem; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); border-left: 4px solid #dc3545; margin-bottom: 1rem;';
+            
+            // Show all matched years as badges
+            const yearsList = historicalMatches.map(m => m.historical?.year).filter(Boolean).sort((a, b) => b - a);
+            const yearsBadges = yearsList.map(year => {
+                const match = historicalMatches.find(m => m.historical?.year === year);
+                const yearsAgo = 2026 - year;
+                return `<span style="background: ${yearsAgo === 1 ? '#28a745' : yearsAgo <= 3 ? '#ffc107' : '#dc3545'}; color: white; padding: 0.25rem 0.5rem; border-radius: 4px; font-size: 0.8em; margin-right: 0.5rem; display: inline-block; margin-bottom: 0.5rem;">${year} (${yearsAgo}y ago)</span>`;
+            }).join('');
+            
+            // Calculate average similarity
+            const avgSimilarity = historicalMatches.reduce((sum, m) => sum + (m.similarity?.name || 0), 0) / historicalMatches.length;
+            
+            let historicalMatchesHTML = '';
+            historicalMatches.forEach((match, idx) => {
+                historicalMatchesHTML += `
+                    <div style="border-left: 3px solid #667eea; padding-left: 1rem; margin-bottom: 1rem; padding-top: 0.5rem; padding-bottom: 0.5rem;">
+                        <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 0.5rem;">
+                            <strong style="color: #667eea;">Found in ${match.historical?.year || 'Unknown'}</strong>
+                            <span style="background: #667eea; color: white; padding: 0.2rem 0.5rem; border-radius: 4px; font-size: 0.8em;">${(match.similarity?.name * 100).toFixed(1)}%</span>
+                        </div>
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; font-size: 0.9em;">
+                            <div>
+                                <span style="color: #666;">2026: </span>
+                                <span style="font-weight: bold; color: #dc3545;">₱${(match.year_2026?.amount || 0).toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</span>
+                            </div>
+                            <div>
+                                <span style="color: #666;">${match.historical?.year}: </span>
+                                <span style="font-weight: bold; color: #667eea;">₱${(match.historical?.amount || 0).toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</span>
+                            </div>
+                        </div>
+                        ${match.historical?.description ? `<p style="font-size: 0.85em; color: #666; margin-top: 0.5rem; font-style: italic;">${match.historical.description.substring(0, 200)}${match.historical.description.length > 200 ? '...' : ''}</p>` : ''}
+                    </div>
+                `;
+            });
+            
             card.innerHTML = `
                 <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 1rem;">
-                    <h5 style="color: #0038A8; margin: 0; flex: 1;">${(match.year_2026?.name || match.year_2026?.description || 'Unknown').substring(0, 100)}${(match.year_2026?.name || match.year_2026?.description || '').length > 100 ? '...' : ''}</h5>
-                    <span style="background: #dc3545; color: white; padding: 0.25rem 0.75rem; border-radius: 4px; font-size: 0.85em; font-weight: bold;">${(match.similarity?.name * 100).toFixed(1)}%</span>
+                    <h5 style="color: #0038A8; margin: 0; flex: 1;">${(project?.name || project?.description || 'Unknown').substring(0, 120)}${(project?.name || project?.description || '').length > 120 ? '...' : ''}</h5>
+                    <span style="background: #dc3545; color: white; padding: 0.25rem 0.75rem; border-radius: 4px; font-size: 0.85em; font-weight: bold;">Avg ${(avgSimilarity * 100).toFixed(1)}%</span>
                 </div>
-                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-top: 1rem;">
-                    <div>
-                        <p style="font-size: 0.85em; color: #666; margin: 0;">Found in ${match.historical?.year || 'Unknown'}</p>
-                        <p style="font-size: 1.1em; font-weight: bold; color: #667eea; margin: 0;">${match.years_apart || 0} year(s) ago</p>
-                    </div>
-                    <div>
-                        <p style="font-size: 0.85em; color: #666; margin: 0;">2026 Amount</p>
-                        <p style="font-size: 1.1em; font-weight: bold; color: #dc3545; margin: 0;">₱${(match.year_2026?.amount || 0).toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</p>
-                    </div>
-                    <div>
-                        <p style="font-size: 0.85em; color: #666; margin: 0;">${match.historical?.year || 'Historical'} Amount</p>
-                        <p style="font-size: 1.1em; font-weight: bold; color: #667eea; margin: 0;">₱${(match.historical?.amount || 0).toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</p>
-                    </div>
+                <div style="margin-bottom: 1rem;">
+                    <p style="font-size: 0.85em; color: #666; margin: 0 0 0.5rem 0;">Found in ${historicalMatches.length} year(s):</p>
+                    ${yearsBadges}
                 </div>
-                ${match.historical?.description ? `<p style="font-size: 0.9em; color: #666; margin-top: 0.5rem; font-style: italic;">${match.historical.description.substring(0, 150)}${match.historical.description.length > 150 ? '...' : ''}</p>` : ''}
+                <div style="margin-top: 1rem; padding-top: 1rem; border-top: 2px solid #dee2e6;">
+                    <h6 style="color: #495057; margin-bottom: 0.75rem; font-size: 0.95em;">Historical Matches:</h6>
+                    ${historicalMatchesHTML}
+                </div>
             `;
             listEl.appendChild(card);
         });
