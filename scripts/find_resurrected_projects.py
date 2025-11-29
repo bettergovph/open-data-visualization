@@ -262,6 +262,30 @@ class ResurrectedProjectFinder:
         
         return historical_data
     
+    def load_existing_matches(self, output_path: Path):
+        """Load existing matches from JSON file if it exists"""
+        if not output_path.exists():
+            return [], set()
+        
+        try:
+            with open(output_path, 'r', encoding='utf-8') as f:
+                data = json.load(f)
+            
+            existing_matches = data.get('matches', [])
+            # Track which 2026 project IDs have already been processed
+            processed_ids = set()
+            for match in existing_matches:
+                project_id = match.get('year_2026', {}).get('id')
+                if project_id:
+                    processed_ids.add(project_id)
+            
+            print(f"   📂 Loaded {len(existing_matches)} existing matches")
+            print(f"   ✅ Found {len(processed_ids)} already processed 2026 projects")
+            return existing_matches, processed_ids
+        except Exception as e:
+            print(f"   ⚠️  Could not load existing matches: {e}")
+            return [], set()
+    
     def find_resurrected_projects(self, 
                                    source_filter: str,
                                    name_similarity_threshold: float = 0.95,  # Very strict: 95%
@@ -270,6 +294,7 @@ class ResurrectedProjectFinder:
                                    amounts_in_thousands: bool = True):  # Budget amounts are in thousands
         """
         Find projects in 2026 that match projects from 2025 or earlier (strict name matching)
+        Incrementally processes items, preserving existing matches.
         
         Args:
             source_filter: Source sheet to filter (Annex A-1, A-4, or A-5)
@@ -280,13 +305,30 @@ class ResurrectedProjectFinder:
         print(f" FINDING RESURRECTED PROJECTS: {source_filter}")
         print(f"{'='*100}")
         
+        # Load existing matches to preserve them
+        output_path = Path("static/data/resurrected_projects_dpwh.json")
+        existing_matches, processed_ids = self.load_existing_matches(output_path)
+        
         # Load 2026 data
         print(f"\n📁 Loading 2026 data from {source_filter}...")
         year_2026_items = self.load_2026_data(source_filter)
         print(f"   Found {len(year_2026_items)} items from {source_filter}")
         
+        # Filter out already processed items
+        items_to_process = [
+            item for item in year_2026_items
+            if item.get('id') not in processed_ids
+        ]
+        
+        if len(items_to_process) < len(year_2026_items):
+            print(f"   ⏭️  Skipping {len(year_2026_items) - len(items_to_process)} already processed items")
+            print(f"   🔄 Processing {len(items_to_process)} remaining items")
+        
+        year_2026_items = items_to_process
+        
         # Limit items if specified (for large datasets like Annex A-5)
-        if max_items and len(year_2026_items) > max_items:
+        # But only limit if we're not doing incremental processing
+        if max_items and len(year_2026_items) > max_items and len(processed_ids) == 0:
             print(f"   Limiting to first {max_items} items for faster processing")
             year_2026_items = year_2026_items[:max_items]
         
@@ -349,9 +391,10 @@ class ResurrectedProjectFinder:
         print(f"   Created word index with {len(word_index)} unique words")
         
         # Compare each 2026 item with historical items
-        matches = []
+        # Start with existing matches, track new ones separately
+        new_matches = []
         total_comparisons = 0
-        processed = 0
+        processed = len(processed_ids)  # Start from where we left off
         
         for item_2026 in year_2026_items:
             amount_2026 = abs(item_2026.get('final_amount', 0) or item_2026.get('original_amount', 0))
@@ -463,7 +506,7 @@ class ResurrectedProjectFinder:
                 item_historical = match['historical']['item']
                 amount_historical = match['historical']['amount']
                 
-                matches.append({
+                new_match = {
                     'source_sheet': source_filter,
                     'year_2026': {
                         'id': item_2026.get('id'),
@@ -492,15 +535,16 @@ class ResurrectedProjectFinder:
                         'chainage_penalty': match['chainage_penalty']
                     },
                     'years_apart': 2026 - item_historical['year']
-                })
+                }
+                new_matches.append(new_match)
+                matches.append(new_match)
             
             processed += 1
             if processed % 100 == 0:
-                print(f"   Processed {processed}/{len(year_2026_items)} 2026 items, found {len(matches)} matches so far...")
+                print(f"   Processed {processed}/{len(year_2026_items) + len(processed_ids)} total 2026 items, found {len(new_matches)} new matches ({len(matches)} total)...")
                 # Save intermediate results every 100 items
                 if matches:
                     try:
-                        output_path = Path("static/data/resurrected_projects_dpwh.json")
                         output_data = {
                             "metadata": {
                                 "total_matches": len(matches),
@@ -511,17 +555,20 @@ class ResurrectedProjectFinder:
                                 "generated_at": datetime.now().isoformat(),
                                 "status": "in_progress",
                                 "processed_items": processed,
-                                "total_items": len(year_2026_items)
+                                "total_items": len(year_2026_items) + len(processed_ids),
+                                "new_matches_this_run": len(new_matches)
                             },
                             "matches": matches
                         }
                         with open(output_path, 'w', encoding='utf-8') as f:
                             json.dump(output_data, f, indent=2, ensure_ascii=False)
+                        print(f"   💾 Saved {len(matches)} total matches (including {len(existing_matches)} existing)")
                     except Exception as e:
                         print(f"   ⚠️  Could not save intermediate results: {e}")
         
         print(f"\n   Compared {total_comparisons:,} pairs")
-        print(f"   Found {len(matches)} resurrected projects")
+        print(f"   Found {len(new_matches)} new resurrected projects")
+        print(f"   Total matches: {len(matches)} (including {len(existing_matches)} existing)")
         
         return matches
 
@@ -548,25 +595,37 @@ if __name__ == "__main__":
         amounts_in_thousands=True  # Budget amounts are stored in thousands
     )
     
-    # Save results to JSON
+    # Final save (results are already saved incrementally, but update status to completed)
     output_path = Path("static/data/resurrected_projects_dpwh.json")
-    output_data = {
-        "metadata": {
-            "total_matches": len(all_matches),
-            "source_filter": "Annex A-5 (DPWH)",
-            "name_similarity_threshold": 0.92,
-            "min_amount": 100000,
-            "search_years": list(range(2016, 2026)),
-            "generated_at": datetime.now().isoformat(),
-            "status": "completed"
-        },
-        "matches": all_matches
-    }
-    
-    with open(output_path, 'w', encoding='utf-8') as f:
-        json.dump(output_data, f, indent=2, ensure_ascii=False)
-    
-    print(f"\n💾 Results saved to: {output_path}")
+    if output_path.exists():
+        try:
+            with open(output_path, 'r', encoding='utf-8') as f:
+                output_data = json.load(f)
+            output_data['metadata']['status'] = 'completed'
+            output_data['metadata']['generated_at'] = datetime.now().isoformat()
+            with open(output_path, 'w', encoding='utf-8') as f:
+                json.dump(output_data, f, indent=2, ensure_ascii=False)
+            print(f"\n💾 Final results saved to: {output_path}")
+            print(f"   Total matches: {len(all_matches)}")
+        except Exception as e:
+            print(f"\n⚠️  Could not update final status: {e}")
+    else:
+        # If file doesn't exist, create it
+        output_data = {
+            "metadata": {
+                "total_matches": len(all_matches),
+                "source_filter": "Annex A-5 (DPWH)",
+                "name_similarity_threshold": 0.92,
+                "min_amount": 100000,
+                "search_years": list(range(2016, 2026)),
+                "generated_at": datetime.now().isoformat(),
+                "status": "completed"
+            },
+            "matches": all_matches
+        }
+        with open(output_path, 'w', encoding='utf-8') as f:
+            json.dump(output_data, f, indent=2, ensure_ascii=False)
+        print(f"\n💾 Results saved to: {output_path}")
     
     # Print Summary
     print("\n" + "=" * 100)
