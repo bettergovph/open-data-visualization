@@ -472,7 +472,8 @@ class ResurrectedProjectFinder:
                         'amount': amount_2026,
                         'region': item_2026.get('location', {}).get('region') if isinstance(item_2026.get('location'), dict) else None,
                         'source_row': item_2026.get('source_row'),
-                        'source_col': item_2026.get('source_col_b') or item_2026.get('source_col_c')
+                        'source_col': item_2026.get('source_col_b') or item_2026.get('source_col_c'),
+                        'contractor': item_2026.get('contractor') or item_2026.get('contractors', [None])[0] if isinstance(item_2026.get('contractors'), list) else None
                     },
                     'historical': {
                         'id': item_historical['id'],
