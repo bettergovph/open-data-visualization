@@ -7901,8 +7901,9 @@ async function copyChartToClipboard(containerId, buttonId) {
                     <!-- Projects List -->
                     <div id="resu-projects" style="display: none; margin-top: 2rem;">
                         <h4 style="color: #0038A8; margin-bottom: 1rem;">Resurrected Projects</h4>
-                        <div style="margin-bottom: 1rem;">
-                            <input type="text" id="resu-search" placeholder="Search projects..." style="width: 100%; padding: 0.75rem; border: 2px solid #ddd; border-radius: 6px; font-size: 14px;">
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem;">
+                            <input type="text" id="resu-search" placeholder="Search projects..." style="padding: 0.75rem; border: 2px solid #ddd; border-radius: 6px; font-size: 14px;">
+                            <input type="text" id="resu-contractor-search" placeholder="Search contractor..." style="padding: 0.75rem; border: 2px solid #ddd; border-radius: 6px; font-size: 14px;">
                         </div>
                         <div id="resu-projects-list" style="display: grid; gap: 1rem;"></div>
                     </div>
@@ -8332,16 +8333,27 @@ async function copyChartToClipboard(containerId, buttonId) {
             listEl.appendChild(card);
         });
         
-        // Add search functionality
+        // Add search functionality for both project and contractor
         const searchEl = document.getElementById('resu-search');
-        if (searchEl) {
-            searchEl.addEventListener('input', (e) => {
-                const searchTerm = e.target.value.toLowerCase();
-                Array.from(listEl.children).forEach(card => {
-                    const text = card.textContent.toLowerCase();
-                    card.style.display = text.includes(searchTerm) ? 'block' : 'none';
-                });
+        const contractorSearchEl = document.getElementById('resu-contractor-search');
+        
+        const performSearch = () => {
+            const projectTerm = (searchEl?.value || '').toLowerCase();
+            const contractorTerm = (contractorSearchEl?.value || '').toLowerCase();
+            
+            Array.from(listEl.children).forEach(card => {
+                const text = card.textContent.toLowerCase();
+                const projectMatch = !projectTerm || text.includes(projectTerm);
+                const contractorMatch = !contractorTerm || text.includes(contractorTerm);
+                card.style.display = (projectMatch && contractorMatch) ? 'block' : 'none';
             });
+        };
+        
+        if (searchEl) {
+            searchEl.addEventListener('input', performSearch);
+        }
+        if (contractorSearchEl) {
+            contractorSearchEl.addEventListener('input', performSearch);
         }
     }
     
