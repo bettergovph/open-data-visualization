@@ -7905,7 +7905,9 @@ async function copyChartToClipboard(containerId, buttonId) {
                             <input type="text" id="resu-search" placeholder="Search projects..." style="padding: 0.75rem; border: 2px solid #ddd; border-radius: 6px; font-size: 14px;">
                             <input type="text" id="resu-contractor-search" placeholder="Search contractor..." style="padding: 0.75rem; border: 2px solid #ddd; border-radius: 6px; font-size: 14px;">
                         </div>
+                        <div id="resu-pagination-info" style="margin-bottom: 1rem; color: #666; font-size: 0.9em;"></div>
                         <div id="resu-projects-list" style="display: grid; gap: 1rem;"></div>
+                        <div id="resu-pagination-controls" style="display: flex; justify-content: center; align-items: center; gap: 1rem; margin-top: 2rem; padding: 1rem;"></div>
                     </div>
                 </div>
                 
@@ -8150,6 +8152,12 @@ async function copyChartToClipboard(containerId, buttonId) {
         }
     });
     
+    // Pagination state for resurrected projects
+    let resuAllMatches = [];
+    let resuGroupedProjects = [];
+    let resuCurrentPage = 1;
+    let resuItemsPerPage = 20;
+    
     // Load resurrected projects data
     async function loadResurrectedProjects() {
         const loadingEl = document.getElementById('resu-loading');
@@ -8171,6 +8179,9 @@ async function copyChartToClipboard(containerId, buttonId) {
             
             const matches = data.matches || [];
             const metadata = data.metadata || {};
+            
+            // Store all matches globally for pagination
+            resuAllMatches = matches;
             
             // Update stats
             document.getElementById('resu-total').textContent = matches.length.toLocaleString();
@@ -8194,6 +8205,7 @@ async function copyChartToClipboard(containerId, buttonId) {
             
             // Display by year
             const yearBreakdown = document.getElementById('resu-year-breakdown');
+            yearBreakdown.innerHTML = ''; // Clear previous
             Object.keys(byYear).sort((a, b) => parseInt(b) - parseInt(a)).forEach(year => {
                 const stats = byYear[year];
                 const card = document.createElement('div');
@@ -8207,8 +8219,11 @@ async function copyChartToClipboard(containerId, buttonId) {
                 yearBreakdown.appendChild(card);
             });
             
-            // Display projects
-            displayResurrectedProjects(matches);
+            // Group and prepare projects for display
+            prepareResurrectedProjects(matches);
+            
+            // Display projects with pagination
+            displayResurrectedProjects();
             
             // Hide loading, show content
             loadingEl.style.display = 'none';
@@ -8224,10 +8239,7 @@ async function copyChartToClipboard(containerId, buttonId) {
         }
     }
     
-    function displayResurrectedProjects(matches) {
-        const listEl = document.getElementById('resu-projects-list');
-        listEl.innerHTML = '';
-        
+    function prepareResurrectedProjects(matches) {
         // Group matches by 2026 project (using ID or name as key)
         const groupedByProject = {};
         matches.forEach(match => {
@@ -8247,7 +8259,7 @@ async function copyChartToClipboard(containerId, buttonId) {
         });
         
         // Sort projects by: 1) highest 2026 amount, 2) highest number of year matches
-        const sortedProjects = Object.values(groupedByProject).sort((a, b) => {
+        resuGroupedProjects = Object.values(groupedByProject).sort((a, b) => {
             const amountA = a.historicalMatches[0]?.year_2026?.amount || a.project?.amount || 0;
             const amountB = b.historicalMatches[0]?.year_2026?.amount || b.project?.amount || 0;
             const yearsA = a.historicalMatches.length;
@@ -8260,9 +8272,61 @@ async function copyChartToClipboard(containerId, buttonId) {
             // Then by number of year matches (descending)
             return yearsB - yearsA;
         });
+    }
+    
+    function displayResurrectedProjects() {
+        const listEl = document.getElementById('resu-projects-list');
+        const paginationInfoEl = document.getElementById('resu-pagination-info');
+        const paginationControlsEl = document.getElementById('resu-pagination-controls');
+        
+        // Get search filters
+        const searchEl = document.getElementById('resu-search');
+        const contractorSearchEl = document.getElementById('resu-contractor-search');
+        const projectTerm = (searchEl?.value || '').toLowerCase().trim();
+        const contractorTerm = (contractorSearchEl?.value || '').toLowerCase().trim();
+        
+        // Filter projects based on search
+        let filteredProjects = resuGroupedProjects;
+        if (projectTerm || contractorTerm) {
+            filteredProjects = resuGroupedProjects.filter(group => {
+                const project = group.project;
+                const text = (project?.name || project?.description || '').toLowerCase();
+                
+                // Project name/description match
+                const projectMatch = !projectTerm || text.includes(projectTerm);
+                
+                // Contractor match
+                let contractorMatch = true;
+                if (contractorTerm) {
+                    const contractor2026 = (project?.contractor || project?.contractors?.[0] || '').toLowerCase();
+                    const historicalContractors = group.historicalMatches
+                        .map(m => m.historical?.contractor || '')
+                        .filter(Boolean)
+                        .join(' ')
+                        .toLowerCase();
+                    const allContractorText = (contractor2026 + ' ' + historicalContractors).trim();
+                    contractorMatch = allContractorText.includes(contractorTerm);
+                }
+                
+                return projectMatch && contractorMatch;
+            });
+        }
+        
+        // Calculate pagination
+        const totalItems = filteredProjects.length;
+        const totalPages = Math.ceil(totalItems / resuItemsPerPage);
+        const startIndex = (resuCurrentPage - 1) * resuItemsPerPage;
+        const endIndex = Math.min(startIndex + resuItemsPerPage, totalItems);
+        const currentPageItems = filteredProjects.slice(startIndex, endIndex);
+        
+        // Update pagination info
+        paginationInfoEl.textContent = `Showing ${startIndex + 1}-${endIndex} of ${totalItems.toLocaleString()} projects`;
+        
+        // Clear and display current page
+        listEl.innerHTML = '';
         
         // Display one card per 2026 project with all historical year matches
-        sortedProjects.forEach((group, index) => {
+        currentPageItems.forEach((group, index) => {
             const project = group.project;
             const historicalMatches = group.historicalMatches;
             
@@ -8333,42 +8397,141 @@ async function copyChartToClipboard(containerId, buttonId) {
             listEl.appendChild(card);
         });
         
-        // Add search functionality for both project and contractor
-        const searchEl = document.getElementById('resu-search');
-        const contractorSearchEl = document.getElementById('resu-contractor-search');
+        // Display pagination controls
+        displayResurrectedPagination(totalPages, totalItems);
         
-        const performSearch = () => {
-            const projectTerm = (searchEl?.value || '').toLowerCase().trim();
-            const contractorTerm = (contractorSearchEl?.value || '').toLowerCase().trim();
-            
-            Array.from(listEl.children).forEach(card => {
-                const text = card.textContent.toLowerCase();
-                
-                // For project search, check project name/description
-                const projectMatch = !projectTerm || text.includes(projectTerm);
-                
-                // For contractor search, specifically check contractor fields
-                let contractorMatch = true;
-                if (contractorTerm) {
-                    // Check 2026 contractor
-                    const contractor2026 = card.querySelector('[data-contractor-2026]')?.textContent?.toLowerCase() || '';
-                    // Check historical contractors
-                    const historicalContractors = Array.from(card.querySelectorAll('[data-contractor-historical]'))
-                        .map(el => el.textContent?.toLowerCase() || '').join(' ');
-                    // Combine all contractor text
-                    const allContractorText = (contractor2026 + ' ' + historicalContractors).trim();
-                    contractorMatch = allContractorText.includes(contractorTerm);
-                }
-                
-                card.style.display = (projectMatch && contractorMatch) ? 'block' : 'none';
-            });
-        };
-        
+        // Add search functionality - reload display on input
         if (searchEl) {
-            searchEl.addEventListener('input', performSearch);
+            searchEl.oninput = () => {
+                resuCurrentPage = 1; // Reset to first page on search
+                displayResurrectedProjects();
+            };
         }
         if (contractorSearchEl) {
-            contractorSearchEl.addEventListener('input', performSearch);
+            contractorSearchEl.oninput = () => {
+                resuCurrentPage = 1; // Reset to first page on search
+                displayResurrectedProjects();
+            };
+        }
+    }
+    
+    function displayResurrectedPagination(totalPages, totalItems) {
+        const paginationControlsEl = document.getElementById('resu-pagination-controls');
+        if (!paginationControlsEl) return;
+        
+        if (totalPages <= 1) {
+            paginationControlsEl.innerHTML = '';
+            return;
+        }
+        
+        let html = '';
+        
+        // Previous button
+        html += `<button id="resu-prev" ${resuCurrentPage === 1 ? 'disabled' : ''} 
+                 style="padding: 0.5rem 1rem; border: 1px solid #ddd; border-radius: 4px; background: ${resuCurrentPage === 1 ? '#f5f5f5' : 'white'}; 
+                 color: ${resuCurrentPage === 1 ? '#999' : '#0038A8'}; cursor: ${resuCurrentPage === 1 ? 'not-allowed' : 'pointer'}; 
+                 font-size: 14px;">Previous</button>`;
+        
+        // Page numbers (show max 7 pages around current)
+        const maxVisible = 7;
+        let startPage = Math.max(1, resuCurrentPage - Math.floor(maxVisible / 2));
+        let endPage = Math.min(totalPages, startPage + maxVisible - 1);
+        if (endPage - startPage < maxVisible - 1) {
+            startPage = Math.max(1, endPage - maxVisible + 1);
+        }
+        
+        // First page + ellipsis
+        if (startPage > 1) {
+            html += `<button class="resu-page-btn" data-page="1" 
+                     style="padding: 0.5rem 0.75rem; border: 1px solid #ddd; border-radius: 4px; background: white; 
+                     color: #0038A8; cursor: pointer; font-size: 14px;">1</button>`;
+            if (startPage > 2) {
+                html += `<span style="padding: 0.5rem; color: #666;">...</span>`;
+            }
+        }
+        
+        // Page numbers
+        for (let i = startPage; i <= endPage; i++) {
+            html += `<button class="resu-page-btn" data-page="${i}" 
+                     style="padding: 0.5rem 0.75rem; border: 1px solid #ddd; border-radius: 4px; 
+                     background: ${i === resuCurrentPage ? '#0038A8' : 'white'}; 
+                     color: ${i === resuCurrentPage ? 'white' : '#0038A8'}; 
+                     cursor: pointer; font-size: 14px; font-weight: ${i === resuCurrentPage ? 'bold' : 'normal'};">${i}</button>`;
+        }
+        
+        // Ellipsis + last page
+        if (endPage < totalPages) {
+            if (endPage < totalPages - 1) {
+                html += `<span style="padding: 0.5rem; color: #666;">...</span>`;
+            }
+            html += `<button class="resu-page-btn" data-page="${totalPages}" 
+                     style="padding: 0.5rem 0.75rem; border: 1px solid #ddd; border-radius: 4px; background: white; 
+                     color: #0038A8; cursor: pointer; font-size: 14px;">${totalPages}</button>`;
+        }
+        
+        // Next button
+        html += `<button id="resu-next" ${resuCurrentPage === totalPages ? 'disabled' : ''} 
+                 style="padding: 0.5rem 1rem; border: 1px solid #ddd; border-radius: 4px; 
+                 background: ${resuCurrentPage === totalPages ? '#f5f5f5' : 'white'}; 
+                 color: ${resuCurrentPage === totalPages ? '#999' : '#0038A8'}; 
+                 cursor: ${resuCurrentPage === totalPages ? 'not-allowed' : 'pointer'}; font-size: 14px;">Next</button>`;
+        
+        // Items per page selector
+        html += `<div style="margin-left: 1rem; display: flex; align-items: center; gap: 0.5rem;">
+                    <label style="color: #666; font-size: 14px;">Items per page:</label>
+                    <select id="resu-items-per-page" style="padding: 0.5rem; border: 1px solid #ddd; border-radius: 4px; font-size: 14px;">
+                        <option value="10" ${resuItemsPerPage === 10 ? 'selected' : ''}>10</option>
+                        <option value="20" ${resuItemsPerPage === 20 ? 'selected' : ''}>20</option>
+                        <option value="50" ${resuItemsPerPage === 50 ? 'selected' : ''}>50</option>
+                        <option value="100" ${resuItemsPerPage === 100 ? 'selected' : ''}>100</option>
+                    </select>
+                 </div>`;
+        
+        paginationControlsEl.innerHTML = html;
+        
+        // Add event listeners
+        const prevBtn = document.getElementById('resu-prev');
+        const nextBtn = document.getElementById('resu-next');
+        const pageBtns = document.querySelectorAll('.resu-page-btn');
+        const itemsPerPageSelect = document.getElementById('resu-items-per-page');
+        
+        if (prevBtn) {
+            prevBtn.addEventListener('click', () => {
+                if (resuCurrentPage > 1) {
+                    resuCurrentPage--;
+                    displayResurrectedProjects();
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                }
+            });
+        }
+        
+        if (nextBtn) {
+            nextBtn.addEventListener('click', () => {
+                if (resuCurrentPage < totalPages) {
+                    resuCurrentPage++;
+                    displayResurrectedProjects();
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                }
+            });
+        }
+        
+        pageBtns.forEach(btn => {
+            btn.addEventListener('click', () => {
+                const page = parseInt(btn.dataset.page);
+                if (page !== resuCurrentPage) {
+                    resuCurrentPage = page;
+                    displayResurrectedProjects();
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                }
+            });
+        });
+        
+        if (itemsPerPageSelect) {
+            itemsPerPageSelect.addEventListener('change', (e) => {
+                resuItemsPerPage = parseInt(e.target.value);
+                resuCurrentPage = 1; // Reset to first page
+                displayResurrectedProjects();
+            });
         }
     }
     

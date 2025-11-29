@@ -99,7 +99,9 @@
                 <input type="text" id="mobile-resu-search" placeholder="Search projects..." style="padding: 0.5rem; border: 1px solid #ddd; border-radius: 4px; font-size: 14px;">
                 <input type="text" id="mobile-resu-contractor-search" placeholder="Search contractor..." style="padding: 0.5rem; border: 1px solid #ddd; border-radius: 4px; font-size: 14px;">
             </div>
+            <div id="mobile-resu-pagination-info" style="margin-bottom: 0.75rem; color: #666; font-size: 0.8em;"></div>
             <div id="mobile-resu-projects-list"></div>
+            <div id="mobile-resu-pagination-controls" style="display: flex; justify-content: center; align-items: center; gap: 0.5rem; margin-top: 1rem; padding: 0.75rem; flex-wrap: wrap;"></div>
         </div>
     </div>
 
@@ -522,6 +524,12 @@
         }
     }
 
+    // Pagination state for mobile resurrected projects
+    let mobileResuAllMatches = [];
+    let mobileResuGroupedProjects = [];
+    let mobileResuCurrentPage = 1;
+    let mobileResuItemsPerPage = 10;
+    
     // Load mobile resurrected projects
     async function loadMobileResurrectedProjects() {
         const loadingEl = document.getElementById('mobile-resu-loading');
@@ -537,6 +545,9 @@
 
             const matches = data.matches || [];
             const metadata = data.metadata || {};
+            
+            // Store all matches globally for pagination
+            mobileResuAllMatches = matches;
 
             // Update stats
             document.getElementById('mobile-resu-total').textContent = matches.length.toLocaleString();
@@ -546,8 +557,11 @@
             document.getElementById('mobile-resu-amount-historical').textContent = '₱' + (totalHistorical / 1000000).toFixed(1) + 'M';
             document.getElementById('mobile-resu-years').textContent = metadata.search_years?.slice(0, 3).join(', ') + '...' || '2016-2025';
 
-            // Display projects
-            displayMobileResurrectedProjects(matches);
+            // Group and prepare projects for display
+            prepareMobileResurrectedProjects(matches);
+            
+            // Display projects with pagination
+            displayMobileResurrectedProjects();
 
             loadingEl.style.display = 'none';
             statsEl.style.display = 'grid';
@@ -559,11 +573,8 @@
             errorEl.style.display = 'block';
         }
     }
-
-    function displayMobileResurrectedProjects(matches) {
-        const listEl = document.getElementById('mobile-resu-projects-list');
-        listEl.innerHTML = '';
-
+    
+    function prepareMobileResurrectedProjects(matches) {
         // Group matches by 2026 project (using ID or name as key)
         const groupedByProject = {};
         matches.forEach(match => {
@@ -581,9 +592,9 @@
         Object.values(groupedByProject).forEach(group => {
             group.historicalMatches.sort((a, b) => (b.historical?.year || 0) - (a.historical?.year || 0));
         });
-
+        
         // Sort projects by: 1) highest 2026 amount, 2) highest number of year matches
-        const sortedProjects = Object.values(groupedByProject).sort((a, b) => {
+        mobileResuGroupedProjects = Object.values(groupedByProject).sort((a, b) => {
             const amountA = a.historicalMatches[0]?.year_2026?.amount || a.project?.amount || 0;
             const amountB = b.historicalMatches[0]?.year_2026?.amount || b.project?.amount || 0;
             const yearsA = a.historicalMatches.length;
@@ -596,9 +607,61 @@
             // Then by number of year matches (descending)
             return yearsB - yearsA;
         });
+    }
+
+    function displayMobileResurrectedProjects() {
+        const listEl = document.getElementById('mobile-resu-projects-list');
+        const paginationInfoEl = document.getElementById('mobile-resu-pagination-info');
+        const paginationControlsEl = document.getElementById('mobile-resu-pagination-controls');
+        
+        // Get search filters
+        const searchEl = document.getElementById('mobile-resu-search');
+        const contractorSearchEl = document.getElementById('mobile-resu-contractor-search');
+        const projectTerm = (searchEl?.value || '').toLowerCase().trim();
+        const contractorTerm = (contractorSearchEl?.value || '').toLowerCase().trim();
+        
+        // Filter projects based on search
+        let filteredProjects = mobileResuGroupedProjects;
+        if (projectTerm || contractorTerm) {
+            filteredProjects = mobileResuGroupedProjects.filter(group => {
+                const project = group.project;
+                const text = (project?.name || project?.description || '').toLowerCase();
+                
+                // Project name/description match
+                const projectMatch = !projectTerm || text.includes(projectTerm);
+                
+                // Contractor match
+                let contractorMatch = true;
+                if (contractorTerm) {
+                    const contractor2026 = (project?.contractor || project?.contractors?.[0] || '').toLowerCase();
+                    const historicalContractors = group.historicalMatches
+                        .map(m => m.historical?.contractor || '')
+                        .filter(Boolean)
+                        .join(' ')
+                        .toLowerCase();
+                    const allContractorText = (contractor2026 + ' ' + historicalContractors).trim();
+                    contractorMatch = allContractorText.includes(contractorTerm);
+                }
+                
+                return projectMatch && contractorMatch;
+            });
+        }
+        
+        // Calculate pagination
+        const totalItems = filteredProjects.length;
+        const totalPages = Math.ceil(totalItems / mobileResuItemsPerPage);
+        const startIndex = (mobileResuCurrentPage - 1) * mobileResuItemsPerPage;
+        const endIndex = Math.min(startIndex + mobileResuItemsPerPage, totalItems);
+        const currentPageItems = filteredProjects.slice(startIndex, endIndex);
+        
+        // Update pagination info
+        paginationInfoEl.textContent = `Showing ${startIndex + 1}-${endIndex} of ${totalItems.toLocaleString()}`;
+        
+        // Clear and display current page
+        listEl.innerHTML = '';
 
         // Display one card per 2026 project with all historical year matches
-        sortedProjects.forEach((group, index) => {
+        currentPageItems.forEach((group, index) => {
             const project = group.project;
             const historicalMatches = group.historicalMatches;
             
@@ -661,43 +724,92 @@
             `;
             listEl.appendChild(card);
         });
-
-        // Search functionality for both project and contractor
-        const searchEl = document.getElementById('mobile-resu-search');
-        const contractorSearchEl = document.getElementById('mobile-resu-contractor-search');
         
-        const performSearch = () => {
-            const projectTerm = (searchEl?.value || '').toLowerCase().trim();
-            const contractorTerm = (contractorSearchEl?.value || '').toLowerCase().trim();
-            
-            Array.from(listEl.children).forEach(card => {
-                const text = card.textContent.toLowerCase();
-                
-                // For project search, check project name/description
-                const projectMatch = !projectTerm || text.includes(projectTerm);
-                
-                // For contractor search, specifically check contractor fields
-                let contractorMatch = true;
-                if (contractorTerm) {
-                    // Check 2026 contractor
-                    const contractor2026 = card.querySelector('[data-contractor-2026]')?.textContent?.toLowerCase() || '';
-                    // Check historical contractors
-                    const historicalContractors = Array.from(card.querySelectorAll('[data-contractor-historical]'))
-                        .map(el => el.textContent?.toLowerCase() || '').join(' ');
-                    // Combine all contractor text
-                    const allContractorText = (contractor2026 + ' ' + historicalContractors).trim();
-                    contractorMatch = allContractorText.includes(contractorTerm);
-                }
-                
-                card.style.display = (projectMatch && contractorMatch) ? 'block' : 'none';
-            });
-        };
+        // Display pagination controls
+        displayMobileResurrectedPagination(totalPages, totalItems);
         
+        // Add search functionality - reload display on input
         if (searchEl) {
-            searchEl.addEventListener('input', performSearch);
+            searchEl.oninput = () => {
+                mobileResuCurrentPage = 1; // Reset to first page on search
+                displayMobileResurrectedProjects();
+            };
         }
         if (contractorSearchEl) {
-            contractorSearchEl.addEventListener('input', performSearch);
+            contractorSearchEl.oninput = () => {
+                mobileResuCurrentPage = 1; // Reset to first page on search
+                displayMobileResurrectedProjects();
+            };
+        }
+    }
+    
+    function displayMobileResurrectedPagination(totalPages, totalItems) {
+        const paginationControlsEl = document.getElementById('mobile-resu-pagination-controls');
+        if (!paginationControlsEl) return;
+        
+        if (totalPages <= 1) {
+            paginationControlsEl.innerHTML = '';
+            return;
+        }
+        
+        let html = '';
+        
+        // Previous button
+        html += `<button id="mobile-resu-prev" ${mobileResuCurrentPage === 1 ? 'disabled' : ''} 
+                 style="padding: 0.4rem 0.75rem; border: 1px solid #ddd; border-radius: 4px; background: ${mobileResuCurrentPage === 1 ? '#f5f5f5' : 'white'}; 
+                 color: ${mobileResuCurrentPage === 1 ? '#999' : '#0038A8'}; cursor: ${mobileResuCurrentPage === 1 ? 'not-allowed' : 'pointer'}; 
+                 font-size: 12px;">Prev</button>`;
+        
+        // Page number (mobile: show current page and total)
+        html += `<span style="padding: 0.4rem 0.75rem; color: #666; font-size: 12px;">Page ${mobileResuCurrentPage} of ${totalPages}</span>`;
+        
+        // Next button
+        html += `<button id="mobile-resu-next" ${mobileResuCurrentPage === totalPages ? 'disabled' : ''} 
+                 style="padding: 0.4rem 0.75rem; border: 1px solid #ddd; border-radius: 4px; 
+                 background: ${mobileResuCurrentPage === totalPages ? '#f5f5f5' : 'white'}; 
+                 color: ${mobileResuCurrentPage === totalPages ? '#999' : '#0038A8'}; 
+                 cursor: ${mobileResuCurrentPage === totalPages ? 'not-allowed' : 'pointer'}; font-size: 12px;">Next</button>`;
+        
+        // Items per page selector (smaller for mobile)
+        html += `<select id="mobile-resu-items-per-page" style="padding: 0.4rem; border: 1px solid #ddd; border-radius: 4px; font-size: 12px;">
+                    <option value="5" ${mobileResuItemsPerPage === 5 ? 'selected' : ''}>5</option>
+                    <option value="10" ${mobileResuItemsPerPage === 10 ? 'selected' : ''}>10</option>
+                    <option value="20" ${mobileResuItemsPerPage === 20 ? 'selected' : ''}>20</option>
+                 </select>`;
+        
+        paginationControlsEl.innerHTML = html;
+        
+        // Add event listeners
+        const prevBtn = document.getElementById('mobile-resu-prev');
+        const nextBtn = document.getElementById('mobile-resu-next');
+        const itemsPerPageSelect = document.getElementById('mobile-resu-items-per-page');
+        
+        if (prevBtn) {
+            prevBtn.addEventListener('click', () => {
+                if (mobileResuCurrentPage > 1) {
+                    mobileResuCurrentPage--;
+                    displayMobileResurrectedProjects();
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                }
+            });
+        }
+        
+        if (nextBtn) {
+            nextBtn.addEventListener('click', () => {
+                if (mobileResuCurrentPage < totalPages) {
+                    mobileResuCurrentPage++;
+                    displayMobileResurrectedProjects();
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                }
+            });
+        }
+        
+        if (itemsPerPageSelect) {
+            itemsPerPageSelect.addEventListener('change', (e) => {
+                mobileResuItemsPerPage = parseInt(e.target.value);
+                mobileResuCurrentPage = 1; // Reset to first page
+                displayMobileResurrectedProjects();
+            });
         }
     }
 
