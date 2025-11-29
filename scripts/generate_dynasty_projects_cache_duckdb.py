@@ -4449,11 +4449,19 @@ class DynastyProjectsCacheGeneratorDuckDB:
         
         # Filter by term if project_year is provided
         # Prioritize candidates whose terms match, but allow fallback if no matches
+        # CRITICAL: Convert project_year to int at the start to avoid type errors
+        project_year_int = None
+        if project_year is not None:
+            try:
+                project_year_int = int(project_year) if project_year else None
+            except (ValueError, TypeError):
+                project_year_int = None
+        
         term_matched_candidates = []
         no_term_candidates = []
         term_mismatch_candidates = []
         
-        if project_year is not None and candidates:
+        if project_year_int is not None and candidates:
             for cm_name, cm_data in candidates:
                 terms = cm_data.get('terms', [])
                 
@@ -4487,14 +4495,15 @@ class DynastyProjectsCacheGeneratorDuckDB:
                         term_start = term.get('start')
                         term_end = term.get('end')
                         
-                        if term_start is not None and term_end is not None:
+                        if term_start is not None and term_end is not None and project_year_int is not None:
                             # CRITICAL: Only match if project_year is within term range
                             # Don't allow future terms to match past projects
-                            if term_start <= project_year <= term_end:
+                            # project_year_int is already converted to int above
+                            if term_start <= project_year_int <= term_end:
                                 # Score: prefer exact matches, then closer to term start
                                 # Long terms are OK - they should match more projects
                                 term_length = term_end - term_start + 1
-                                distance_from_start = abs(project_year - term_start)
+                                distance_from_start = abs(project_year_int - term_start)
                                 
                                 # Score: prefer closer matches to term start, slight preference for shorter terms
                                 score = 100 - (term_length * 1) - distance_from_start
@@ -5681,6 +5690,18 @@ class DynastyProjectsCacheGeneratorDuckDB:
             )
             print(f"✅ Processed {len(all_projects)} projects")
             
+            # CRITICAL: Save ALL projects (before deduplication) to integrated_projects.parquet
+            # This is needed for the API to show the total processed count (523,655)
+            try:
+                print(f"💾 Saving ALL projects (before deduplication) to {INTEGRATED_PARQUET}...")
+                df_all = pd.DataFrame(all_projects)
+                duckdb.sql("SELECT * FROM df_all").write_parquet(str(INTEGRATED_PARQUET))
+                print(f"✅ Saved {len(all_projects)} total projects to {INTEGRATED_PARQUET}")
+            except Exception as e:
+                print(f"⚠️  Failed to save all projects to Parquet: {e}")
+                import traceback
+                traceback.print_exc()
+            
             # Update skipped counter from results (since parallel processing doesn't share instance variables)
             # Count skipped projects before deduplication
             total_skipped = len([p for p in all_projects if p.get('_skipped_reclassification')])
@@ -5726,11 +5747,16 @@ class DynastyProjectsCacheGeneratorDuckDB:
                 
                 if contract_id:
                     # Use contract_id as primary key (most reliable for cross-source matching)
-                    contractor = self._normalize_text_for_key(proj.get('contractor'))
-                    amount = self._normalize_amount_for_key(proj.get('amount'))
-                    key = f"ID:{contract_id}|{contractor}|{amount}"
+                    # Normalize contract_id to handle variations (e.g., "19Z00043" vs "19Z00043-001")
+                    contract_id_normalized = str(contract_id).strip().upper()
+                    # Remove common suffixes/prefixes that might differ across sources
+                    # Note: re is imported at the top of the file
+                    contract_id_normalized = re.sub(r'[-_]\d+$', '', contract_id_normalized)  # Remove trailing -001, _001
+                    # For contract_id-based keys, we can be more lenient - just use contract_id alone
+                    # This allows matching even if contractor/amount differ slightly across sources
+                    key = f"ID:{contract_id_normalized}"
                 else:
-                    # Fallback to project key
+                    # Fallback to project key (uses project_name, contractor, amount, location)
                     key = self._build_project_key(proj)
                 
                 # Determine primary congressman (district takes precedence)
@@ -5802,26 +5828,37 @@ class DynastyProjectsCacheGeneratorDuckDB:
                 
                 # CRITICAL: Fix project_name for PhilGEPS projects BEFORE saving to parquet
                 # For PhilGEPS projects, use award_title instead of contract_id
-                if 'PhilGEPS' in proj.get('sources_list', []):
-                    # Check if project_name looks like a contract ID (e.g., "19Z00043")
-                    project_name = proj.get('project_name', '')
-                    if project_name and re.match(r'^\d{2}[A-Z]\d{5}$', str(project_name)):
-                        # This is a contract ID, replace with award_title
-                        award_title = proj.get('philgeps_award_title') or proj.get('award_title')
-                        if award_title and str(award_title).strip():
-                            proj['project_name'] = award_title
-                        else:
-                            # Try notice_title as fallback
-                            notice_title = proj.get('notice_title')
-                            if notice_title and str(notice_title).strip():
-                                proj['project_name'] = notice_title
-                    # Also ensure project_name is set if empty
-                    elif not project_name or project_name == '':
+                # Also fix ANY project with contract ID pattern, not just PhilGEPS
+                project_name = proj.get('project_name', '')
+                project_name_str = str(project_name) if project_name else ''
+                
+                # Check if project_name looks like a contract ID (e.g., "19Z00043")
+                if project_name_str and re.match(r'^\d{2}[A-Z]\d{5}$', project_name_str):
+                    # This is a contract ID, replace with award_title (for any source, but especially PhilGEPS)
+                    award_title = proj.get('philgeps_award_title') or proj.get('award_title')
+                    if award_title and str(award_title).strip():
+                        proj['project_name'] = award_title
+                    else:
+                        # Try notice_title as fallback
+                        notice_title = proj.get('notice_title')
+                        if notice_title and str(notice_title).strip():
+                            proj['project_name'] = notice_title
+                # Also ensure project_name is set if empty (especially for PhilGEPS)
+                elif not project_name or project_name == '':
+                    # For PhilGEPS projects, prioritize award_title
+                    if 'PhilGEPS' in proj.get('sources_list', []):
                         proj['project_name'] = (
                             proj.get('philgeps_award_title') or 
                             proj.get('award_title') or
                             proj.get('notice_title') or
                             proj.get('project_description') or
+                            ''
+                        )
+                    else:
+                        proj['project_name'] = (
+                            proj.get('project_description') or
+                            proj.get('award_title') or
+                            proj.get('notice_title') or
                             ''
                         )
                 
@@ -5994,11 +6031,56 @@ class DynastyProjectsCacheGeneratorDuckDB:
             # This ensures the API endpoint gets unique projects with correct project_name for PhilGEPS
             try:
                 print(f"💾 Saving deduplicated classified projects to {CLASSIFIED_PARQUET}...")
+                print(f"   Preparing {len(unique_projects)} unique projects for saving...")
+                
                 # Use pandas to create DataFrame from unique_projects (already deduplicated)
                 df = pd.DataFrame(unique_projects)
+                print(f"   Created DataFrame with {len(df)} rows and {len(df.columns)} columns")
+                
+                # Verify critical columns exist
+                critical_cols = ['project_name', 'sources_list', 'contract_id']
+                missing_cols = [col for col in critical_cols if col not in df.columns]
+                if missing_cols:
+                    print(f"   ⚠️  Warning: Missing columns: {missing_cols}")
+                else:
+                    print(f"   ✅ All critical columns present")
+                
+                # Check how many projects have contract ID pattern in project_name
+                # Note: re is already imported at the top of the file
+                if 'project_name' in df.columns:
+                    contract_id_pattern = r'^\d{2}[A-Z]\d{5}$'
+                    contract_id_count = df['project_name'].astype(str).str.match(contract_id_pattern, na=False).sum()
+                    print(f"   Projects with contract ID pattern in project_name: {contract_id_count}")
+                    if contract_id_count > 0 and 'philgeps_award_title' in df.columns:
+                        # Check how many have award_title available
+                        has_award_title = df[df['project_name'].astype(str).str.match(contract_id_pattern, na=False)]['philgeps_award_title'].notna().sum()
+                        print(f"   Of those, {has_award_title} have philgeps_award_title available")
+                
                 # DuckDB handles lists fine in Parquet (sources_list will be preserved)
+                print(f"   Writing to parquet file...")
                 duckdb.sql("SELECT * FROM df").write_parquet(str(CLASSIFIED_PARQUET))
-                print(f"✅ Saved {len(unique_projects)} unique projects to {CLASSIFIED_PARQUET}")
+                
+                # Verify the file was written
+                if CLASSIFIED_PARQUET.exists():
+                    file_size_mb = CLASSIFIED_PARQUET.stat().st_size / (1024 * 1024)
+                    print(f"✅ Saved {len(unique_projects)} unique projects to {CLASSIFIED_PARQUET}")
+                    print(f"   File size: {file_size_mb:.2f} MB")
+                    
+                    # Quick verification: read back a few rows
+                    try:
+                        # Read parquet and take first 5 rows for verification
+                        verify_df = pd.read_parquet(CLASSIFIED_PARQUET)
+                        verify_sample = verify_df.head(5)
+                        print(f"   ✅ Verification: File contains {len(verify_df)} total rows")
+                        print(f"   Sample rows checked: {len(verify_sample)}")
+                        if 'project_name' in verify_sample.columns:
+                            print(f"   Sample project_name values:")
+                            for idx, name in verify_sample['project_name'].head(3).items():
+                                print(f"      - {name}")
+                    except Exception as verify_err:
+                        print(f"   ⚠️  Could not verify file contents: {verify_err}")
+                else:
+                    print(f"   ❌ ERROR: File was not created at {CLASSIFIED_PARQUET}")
             except Exception as e:
                 print(f"⚠️  Failed to save classified projects to Parquet: {e}")
                 import traceback

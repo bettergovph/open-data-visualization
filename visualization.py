@@ -506,10 +506,22 @@ async def get_integrated_projects(
     """Get integrated projects from parquet file using DuckDB with filtering and pagination"""
     try:
         # Get the parquet file path (use absolute path)
+        # CRITICAL: Use classified parquet (deduplicated) instead of integrated_projects.parquet
         base_dir = Path(__file__).parent.absolute()
-        parquet_file = base_dir / "data" / "parquet" / "integrated_projects.parquet"
+        classified_file = base_dir / "data" / "parquet" / "integrated_projects_classified.parquet"
+        integrated_file = base_dir / "data" / "parquet" / "integrated_projects.parquet"
         
-        if not parquet_file.exists():
+        # Prefer classified (deduplicated) over integrated (all projects)
+        if classified_file.exists():
+            parquet_file = classified_file
+            print(f"📊 Using classified parquet (deduplicated): {parquet_file.name}")
+        elif integrated_file.exists():
+            parquet_file = integrated_file
+            print(f"⚠️  Using integrated parquet (not deduplicated): {parquet_file.name}")
+        else:
+            parquet_file = None
+        
+        if not parquet_file or not parquet_file.exists():
             return JSONResponse(
                 content={
                     "success": False,
@@ -534,18 +546,20 @@ async def get_integrated_projects(
             
             if project_name:
                 escaped_name = escape_sql_string(project_name)
+                # Note: The parquet file has 'award_title' not 'philgeps_award_title'
                 where_conditions.append(
                     f"(project_name ILIKE '%{escaped_name}%' OR "
-                    f"philgeps_award_title ILIKE '%{escaped_name}%' OR "
+                    f"award_title ILIKE '%{escaped_name}%' OR "
                     f"project_description ILIKE '%{escaped_name}%')"
                 )
             
             if contractor:
                 escaped_contractor = escape_sql_string(contractor)
+                # Note: The parquet file has 'contractor' not 'contractor_name'
+                # philgeps_awardee_name and organization_name don't exist in the parquet
+                # Only search in contractor column
                 where_conditions.append(
-                    f"(contractor_name ILIKE '%{escaped_contractor}%' OR "
-                    f"philgeps_awardee_name ILIKE '%{escaped_contractor}%' OR "
-                    f"organization_name ILIKE '%{escaped_contractor}%')"
+                    f"contractor ILIKE '%{escaped_contractor}%'"
                 )
             
             where_clause = " AND ".join(where_conditions) if where_conditions else "1=1"
@@ -568,28 +582,18 @@ async def get_integrated_projects(
             total_pages = max(1, (total + limit - 1) // limit)
             
             # Get projects with pagination
+            # Use SELECT * to get all columns, then filter/rename in Python
+            # This avoids BinderException for columns that don't exist
+            # Don't use ORDER BY in SQL - sort in Python after fetching to avoid column existence issues
+            # For proper sorting, we need to fetch all matching rows, sort, then paginate
+            # This is less efficient but avoids column existence errors
             select_query = f"""
-                SELECT 
-                    project_name,
-                    project_description,
-                    philgeps_award_title,
-                    contractor_name,
-                    philgeps_awardee_name,
-                    organization_name,
-                    amount,
-                    contract_amount,
-                    dime_cost,
-                    infrawatch_contract_price,
-                    source
+                SELECT *
                 FROM read_parquet('{parquet_path_str}')
                 WHERE {where_clause}
-                ORDER BY 
-                    COALESCE(amount, contract_amount, CAST(dime_cost AS DOUBLE), infrawatch_contract_price) DESC NULLS LAST,
-                    project_name
-                LIMIT {limit} OFFSET {offset}
             """
             
-            # Execute query
+            # Execute query (fetch all matching rows, we'll sort and paginate in Python)
             results = conn.execute(select_query).fetchall()
             columns = [desc[0] for desc in conn.description]
             
@@ -605,15 +609,91 @@ async def get_integrated_projects(
                             project_dict[col] = value.isoformat()
                         elif hasattr(value, 'isoformat'):  # Handle other datetime-like objects
                             project_dict[col] = value.isoformat()
+                        elif isinstance(value, list):
+                            # Handle list columns (like sources_list) - preserve as-is
+                            project_dict[col] = value
+                        elif col == 'sources_list':
+                            # sources_list might come as a string or other format from DuckDB
+                            # Try to parse it if it's a string representation of a list
+                            try:
+                                import ast
+                                if isinstance(value, str):
+                                    # Try to parse string representation of list
+                                    parsed = ast.literal_eval(value)
+                                    if isinstance(parsed, list):
+                                        project_dict[col] = parsed
+                                    else:
+                                        project_dict[col] = [parsed] if parsed else []
+                                else:
+                                    project_dict[col] = [value] if value else []
+                            except (ValueError, SyntaxError):
+                                # If parsing fails, treat as single value
+                                project_dict[col] = [value] if value else []
                         else:
                             project_dict[col] = value
                     else:
                         project_dict[col] = None
+                
+                # CRITICAL: Ensure sources_list is properly formatted as a list
+                # This is essential for showing multiple DBs for each project
+                if 'sources_list' in project_dict:
+                    sources_list = project_dict['sources_list']
+                    if not isinstance(sources_list, list):
+                        # Convert to list if it's not already
+                        if sources_list is not None and sources_list != '':
+                            sources_list = [sources_list] if not isinstance(sources_list, list) else sources_list
+                        else:
+                            sources_list = []
+                    project_dict['sources_list'] = sources_list
+                else:
+                    # If sources_list doesn't exist, try to create it from source field
+                    if 'source' in project_dict and project_dict['source']:
+                        project_dict['sources_list'] = [project_dict['source']]
+                    else:
+                        project_dict['sources_list'] = []
+                
+                # Source (for backward compatibility - use first source from sources_list)
+                if 'source' not in project_dict or not project_dict['source']:
+                    sources_list = project_dict.get('sources_list', [])
+                    project_dict['source'] = sources_list[0] if sources_list else 'N/A'
+                
+                # Map award_title to philgeps_award_title for frontend compatibility
+                if 'award_title' in project_dict and project_dict['award_title']:
+                    project_dict['philgeps_award_title'] = project_dict['award_title']
+                
+                # Map contractor to contractor_name for frontend compatibility
+                if 'contractor' in project_dict and project_dict['contractor']:
+                    project_dict['contractor_name'] = project_dict['contractor']
+                elif 'contractor_name' not in project_dict:
+                    # Set empty if contractor column doesn't exist
+                    project_dict['contractor_name'] = 'N/A'
+                
+                # Set philgeps_awardee_name and organization_name to N/A if not in parquet
+                # These columns don't exist in the parquet file, so always set to N/A
+                project_dict['philgeps_awardee_name'] = 'N/A'
+                project_dict['organization_name'] = 'N/A'
+                
                 projects.append(project_dict)
+            
+            # Sort projects by amount (descending) then by project_name (ascending) in Python
+            # This avoids SQL column existence issues
+            def sort_key(proj):
+                amount = proj.get('amount') or proj.get('dime_cost') or proj.get('infrawatch_contract_price') or 0
+                try:
+                    amount = float(amount) if amount else 0
+                except (ValueError, TypeError):
+                    amount = 0
+                project_name = str(proj.get('project_name', '')).lower()
+                return (-amount, project_name)  # Negative for descending amount
+            
+            projects.sort(key=sort_key)
+            
+            # Apply pagination after sorting
+            paginated_projects = projects[offset:offset + limit]
             
             return JSONResponse(content={
                 "success": True,
-                "projects": projects,
+                "projects": paginated_projects,
                 "total": total,
                 "page": page,
                 "limit": limit,
@@ -7787,6 +7867,353 @@ async def zaldy_dpwh_projects_api():
             "success": False,
             "error": str(e)
         })
+
+@app.get("/api/integrated/projects")
+async def integrated_projects_api(
+    page: int = Query(1, ge=1, description="Page number"),
+    limit: int = Query(50, ge=1, le=10000, description="Number of records per page"),
+    project_name: str = Query(None, description="Filter by project name"),
+    contractor: str = Query(None, description="Filter by contractor name"),
+    source: str = Query(None, description="Filter by source")
+):
+    """Get unique integrated projects from classified parquet with sources_list"""
+    import inspect
+    current_file = inspect.getfile(inspect.currentframe())
+    print(f"🔵 [DEBUG] /api/integrated/projects endpoint called - page={page}, limit={limit}")
+    print(f"🔵 [DEBUG] Executing from file: {current_file}")
+    print(f"🔵 [DEBUG] This is the NEW version without DuckDB - timestamp check")
+    try:
+        import pandas as pd
+        from pathlib import Path
+        # CRITICAL: Ensure we're NOT using DuckDB - check if it's imported
+        import sys
+        duckdb_imported = 'duckdb' in sys.modules
+        print(f"🔵 [DEBUG] DuckDB imported: {duckdb_imported}")
+        if duckdb_imported:
+            print(f"⚠️  WARNING: DuckDB is imported but we should NOT be using it in this endpoint")
+        
+        # CRITICAL: Use classified parquet (deduplicated) - this is the correct file for the API
+        # The classified parquet contains deduplicated projects with sources_list showing all databases
+        classified_path = Path(__file__).parent / "data" / "parquet" / "integrated_projects_classified.parquet"
+        integrated_path = Path(__file__).parent / "data" / "parquet" / "integrated_projects.parquet"
+        
+        # ALWAYS prefer classified (deduplicated) - this is the correct output from the script
+        if classified_path.exists():
+            parquet_path = classified_path
+            print(f"📊 Using classified parquet (deduplicated, includes all 5 sources): {parquet_path.name}")
+            # Count will be determined after reading the file with pandas
+        elif integrated_path.exists():
+            # Fallback to integrated if classified doesn't exist (shouldn't happen after script runs)
+            parquet_path = integrated_path
+            print(f"⚠️  WARNING: Using integrated parquet (all projects, not deduplicated): {integrated_path.name}")
+            print(f"   Please regenerate cache with --force to create classified parquet")
+        else:
+            parquet_path = None
+        
+        if not parquet_path or not parquet_path.exists():
+            return JSONResponse({
+                "success": False,
+                "error": "Integrated projects parquet file not found. Please run the cache generation script first.",
+                "projects": [],
+                "total": 0
+            })
+        
+        # Calculate pagination first
+        offset = (page - 1) * limit
+        
+        # Read parquet file with pandas (handles list columns and all column types)
+        # CRITICAL: We are NOT using DuckDB - using pandas only
+        print(f"📖 Reading parquet file: {parquet_path}")
+        print(f"🔵 [DEBUG] Confirming: use_duckdb = False, using pandas only")
+        use_duckdb = False
+        # Double-check: ensure no DuckDB connection is created
+        assert use_duckdb == False, "DuckDB should NOT be used in this endpoint"
+        
+        try:
+            # Read with pyarrow first (faster)
+            print(f"   Reading data with pandas/PyArrow (this may take a moment for large files)...")
+            df = pd.read_parquet(parquet_path, engine='pyarrow')
+            print(f"   ✅ Successfully read {len(df)} rows")
+        except Exception as pyarrow_err:
+            print(f"⚠️ PyArrow failed: {pyarrow_err}")
+            print(f"   Trying default engine...")
+            try:
+                df = pd.read_parquet(parquet_path)
+                print(f"   ✅ Successfully read {len(df)} rows with default engine")
+            except Exception as final_err:
+                print(f"❌ All parquet read methods failed: {final_err}")
+                import traceback
+                traceback.print_exc()
+                raise final_err
+        
+        # Get total count from dataframe
+        total = len(df)
+        
+        # Check if dataframe is empty
+        if len(df) == 0:
+            print(f"⚠️  Parquet file is empty or has no rows")
+            return JSONResponse({
+                "success": True,
+                "projects": [],
+                "total": 0,
+                "page": page,
+                "limit": limit,
+                "total_pages": 0
+            })
+        
+        print(f"   DataFrame shape: {df.shape}, Columns: {list(df.columns)[:10]}...")
+        
+        # Ensure sources_list is a list (it might be stored as string or other format)
+        # Handle this more efficiently for large datasets
+        if 'sources_list' in df.columns:
+            # Check if it's already a list type
+            try:
+                sample_val = df['sources_list'].iloc[0] if len(df) > 0 else None
+                if not isinstance(sample_val, list):
+                    # Only convert if needed
+                    print(f"   Converting sources_list to list format...")
+                    df['sources_list'] = df['sources_list'].apply(
+                        lambda x: x if isinstance(x, list) else ([x] if pd.notna(x) and x else [])
+                    )
+            except Exception as sources_err:
+                print(f"⚠️  Error processing sources_list: {sources_err}")
+                # Create empty list if conversion fails
+                df['sources_list'] = [[]] * len(df)
+        else:
+            # If sources_list doesn't exist, create it from source field
+            if 'source' in df.columns:
+                df['sources_list'] = df['source'].apply(
+                    lambda x: [x] if pd.notna(x) and x else []
+                )
+            else:
+                df['sources_list'] = [[]] * len(df)
+        
+        # CRITICAL: Ensure project_name is properly set for PhilGEPS projects
+        # For PhilGEPS, we MUST use award_title, NOT contract_id
+        if 'project_name' not in df.columns:
+            df['project_name'] = ''
+        
+        # CRITICAL: First, detect and fix contract IDs (e.g., "19Z00043") BEFORE other logic
+        # Contract IDs follow pattern: 2 digits, 1 letter, 5 digits
+        import re
+        contract_id_pattern = r'^\d{2}[A-Z]\d{5}$'
+        is_contract_id = df['project_name'].astype(str).str.match(contract_id_pattern, na=False)
+        
+        if is_contract_id.any():
+            contract_id_count = is_contract_id.sum()
+            print(f"🔧 Fixing {contract_id_count} projects with contract ID pattern in project_name...")
+            
+            # For rows where project_name is a contract ID, replace with award_title
+            # Note: The parquet file has 'award_title' not 'philgeps_award_title'
+            # If still contract ID, try award_title
+            still_contract_id = df['project_name'].astype(str).str.match(contract_id_pattern, na=False)
+            if still_contract_id.any() and 'award_title' in df.columns:
+                mask = still_contract_id & df['award_title'].notna() & (df['award_title'].astype(str).str.strip() != '')
+                fixed_count = mask.sum()
+                if fixed_count > 0:
+                    df.loc[mask, 'project_name'] = df.loc[mask, 'award_title']
+                    print(f"   ✅ Fixed {fixed_count} using award_title")
+            
+            # If still contract ID, try notice_title
+            still_contract_id = df['project_name'].astype(str).str.match(contract_id_pattern, na=False)
+            if still_contract_id.any() and 'notice_title' in df.columns:
+                mask = still_contract_id & df['notice_title'].notna() & (df['notice_title'].astype(str).str.strip() != '')
+                fixed_count = mask.sum()
+                if fixed_count > 0:
+                    df.loc[mask, 'project_name'] = df.loc[mask, 'notice_title']
+                    print(f"   ✅ Fixed {fixed_count} using notice_title")
+            
+            # Log remaining contract IDs that couldn't be fixed
+            still_contract_id = df['project_name'].astype(str).str.match(contract_id_pattern, na=False)
+            if still_contract_id.any():
+                remaining = still_contract_id.sum()
+                print(f"   ⚠️  {remaining} projects still have contract ID (no award_title/notice_title available)")
+        
+        # For PhilGEPS projects, ALWAYS prefer award_title over contract_id (if not already fixed above)
+        # Note: The parquet file has 'award_title' not 'philgeps_award_title'
+        if 'award_title' in df.columns:
+            # Check if project has PhilGEPS in sources_list or source field
+            has_philgeps = False
+            if 'sources_list' in df.columns:
+                has_philgeps = df['sources_list'].apply(
+                    lambda x: any('PhilGEPS' in str(s) for s in (x if isinstance(x, list) else [x]) if pd.notna(s))
+                )
+            elif 'source' in df.columns:
+                has_philgeps = df['source'].astype(str).str.contains('PhilGEPS', case=False, na=False)
+            
+            # For PhilGEPS projects, use award_title if project_name is empty or still looks like contract ID
+            if has_philgeps.any():
+                empty_or_contract = (df['project_name'].isna() | (df['project_name'] == '') | 
+                                   df['project_name'].astype(str).str.match(contract_id_pattern, na=False))
+                philgeps_mask = has_philgeps & empty_or_contract & df['award_title'].notna()
+                df.loc[philgeps_mask, 'project_name'] = df.loc[philgeps_mask, 'award_title']
+        
+        # Fallback: if project_name is still empty or looks like a contract ID, try other fields
+        empty_or_contract_id = (df['project_name'].isna() | (df['project_name'] == '') | 
+                               df['project_name'].astype(str).str.match(contract_id_pattern, na=False))
+        if empty_or_contract_id.any():
+            # Try project_description
+            if 'project_description' in df.columns:
+                df.loc[empty_or_contract_id & df['project_description'].notna(), 'project_name'] = \
+                    df.loc[empty_or_contract_id & df['project_description'].notna(), 'project_description']
+            # Try notice_title for PhilGEPS
+            if 'notice_title' in df.columns:
+                still_empty = empty_or_contract_id & (df['project_name'].isna() | (df['project_name'] == ''))
+                df.loc[still_empty & df['notice_title'].notna(), 'project_name'] = \
+                    df.loc[still_empty & df['notice_title'].notna(), 'notice_title']
+        
+        # Apply filters using pandas (since we're not using DuckDB)
+        if project_name:
+            if 'project_name' in df.columns:
+                mask = df['project_name'].astype(str).str.contains(project_name, case=False, na=False)
+                df = df[mask]
+        
+        if contractor:
+            contractor_cols = ['contractor_name', 'philgeps_awardee_name', 'organization_name', 'contractor']
+            contractor_mask = pd.Series([False] * len(df))
+            for col in contractor_cols:
+                if col in df.columns:
+                    contractor_mask |= df[col].astype(str).str.contains(contractor, case=False, na=False)
+            df = df[contractor_mask]
+        
+        # Apply source filter
+        if source:
+            # Filter by sources_list containing the source
+            if 'sources_list' in df.columns:
+                df = df[df['sources_list'].apply(
+                    lambda x: any(source.lower() in str(s).lower() for s in (x if isinstance(x, list) else [x]) if pd.notna(s))
+                )]
+            elif 'source' in df.columns:
+                df = df[df['source'].astype(str).str.contains(source, case=False, na=False)]
+        
+        # Calculate total and paginate
+        # total is already set from dataframe length above
+        total_pages = (total + limit - 1) // limit
+        
+        # Apply pagination
+        try:
+            df_page = df.iloc[offset:offset + limit]
+            print(f"   Paginated: showing rows {offset} to {offset + limit} of {total}")
+        except Exception as pagination_err:
+            print(f"⚠️ Pagination error: {pagination_err}")
+            # Return empty if pagination fails
+            df_page = pd.DataFrame()
+        
+        # Convert to dict more efficiently
+        projects = []
+        for idx, row in df_page.iterrows():
+            project = {}
+            
+            # Project name - CRITICAL: For PhilGEPS, use award_title, NOT contract_id
+            # Note: project_name should already be fixed in the DataFrame above, but double-check here
+            project_name = row.get('project_name', '')
+            project_name_str = str(project_name) if project_name else ''
+            
+            # CRITICAL: If project_name still looks like a contract ID (e.g., "19Z00043"), replace with award_title
+            # Contract IDs follow pattern: 2 digits, 1 letter, 5 digits (e.g., "19Z00043", "23Z00041")
+            # Note: The parquet file has 'award_title' not 'philgeps_award_title'
+            if project_name_str and re.match(r'^\d{2}[A-Z]\d{5}$', project_name_str):
+                # This is a contract ID, get the actual project name from award_title
+                award_title = row.get('award_title')
+                if award_title and str(award_title).strip() and str(award_title).strip() != 'nan':
+                    project_name = award_title
+                else:
+                    # Try notice_title as fallback
+                    notice_title = row.get('notice_title')
+                    if notice_title and str(notice_title).strip() and str(notice_title).strip() != 'nan':
+                        project_name = notice_title
+                    # Otherwise keep contract_id (better than nothing)
+            elif not project_name or project_name == '' or project_name == 'N/A' or project_name == 'nan':
+                # If project_name is empty, try to get it from other fields
+                project_name = (
+                    row.get('award_title') or
+                    row.get('notice_title') or
+                    row.get('project_description') or 
+                    'N/A'
+                )
+            
+            project['project_name'] = str(project_name) if project_name and str(project_name) != 'nan' else 'N/A'
+            
+            # Contractor
+            project['contractor_name'] = (
+                row.get('contractor_name') or 
+                row.get('philgeps_awardee_name') or 
+                row.get('organization_name') or 
+                'N/A'
+            )
+            
+            # Amount
+            amount_cols = ['amount', 'contract_amount', 'dime_cost', 'infrawatch_contract_price']
+            project['amount'] = None
+            for col in amount_cols:
+                if col in row.index and pd.notna(row[col]):
+                    try:
+                        project['amount'] = float(row[col])
+                        break
+                    except (ValueError, TypeError):
+                        continue
+            
+            # Sources list - ensure it's a list
+            sources_list = row.get('sources_list', [])
+            if not isinstance(sources_list, list):
+                sources_list = [sources_list] if pd.notna(sources_list) and sources_list else []
+            project['sources_list'] = sources_list
+            
+            # Source (for backward compatibility)
+            project['source'] = row.get('source') or (sources_list[0] if sources_list else 'N/A')
+            
+            # CRITICAL: Include award_title, notice_title, and project_description for frontend
+            # Note: The parquet file has 'award_title' not 'philgeps_award_title'
+            # Frontend will concatenate these with contract_id to show more complete project information
+            if 'award_title' in row.index and pd.notna(row['award_title']):
+                award_title_val = str(row['award_title']).strip()
+                if award_title_val and award_title_val != 'nan':
+                    project['award_title'] = award_title_val
+                    # Also set as philgeps_award_title for frontend compatibility
+                    project['philgeps_award_title'] = award_title_val
+            if 'notice_title' in row.index and pd.notna(row['notice_title']):
+                notice_title_val = str(row['notice_title']).strip()
+                if notice_title_val and notice_title_val != 'nan':
+                    project['notice_title'] = notice_title_val
+            if 'project_description' in row.index and pd.notna(row['project_description']):
+                desc_val = str(row['project_description']).strip()
+                if desc_val and desc_val != 'nan':
+                    project['project_description'] = desc_val
+            
+            # Only add essential fields to reduce payload size
+            essential_fields = ['contract_id', 'year', 'status', 'location', 'province', 'city']
+            for col in essential_fields:
+                if col in row.index and pd.notna(row[col]):
+                    project[col] = row[col]
+        
+            projects.append(project)
+        
+        return JSONResponse({
+            "success": True,
+            "projects": projects,
+            "total": total,
+            "page": page,
+            "limit": limit,
+            "total_pages": total_pages
+        })
+        
+    except Exception as e:
+        import traceback
+        error_traceback = traceback.format_exc()
+        print(f"❌ ERROR in /api/integrated/projects: {str(e)}")
+        print(f"❌ ERROR TYPE: {type(e).__name__}")
+        print(f"❌ FULL TRACEBACK:\n{error_traceback}")
+        # Check if DuckDB is involved
+        if 'duckdb' in str(e).lower() or 'BinderException' in str(type(e)):
+            print(f"❌ ERROR IS DUCKDB-RELATED - This should NOT happen as we removed all DuckDB code!")
+        return JSONResponse({
+            "success": False,
+            "error": f"Server error: {str(e)}",
+            "error_type": type(e).__name__,
+            "error_traceback": error_traceback if "duckdb" in str(e).lower() else None,  # Only include traceback for DuckDB errors
+            "projects": [],
+            "total": 0
+        }, status_code=500)
 
 if __name__ == "__main__":
     uvicorn.run(app, host="127.0.0.1", port=8000)
