@@ -3,8 +3,14 @@
 Find Resurrected Projects
 Identifies projects in 2026 that also existed in 2025 or earlier years (strict name matching).
 
+This script focuses on fast matching and is incremental (saves progress periodically).
+Contractor enrichment is done separately via enrich_resurrected_with_contractors.py
+to keep this script fast and allow periodic contractor updates.
+
 Usage:
     python3 scripts/find_resurrected_projects.py
+    
+Note: Run enrich_resurrected_with_contractors.py periodically to add/update contractor data.
 """
 
 import json
@@ -28,19 +34,13 @@ class ResurrectedProjectFinder:
             'user': 'budget_admin',
             'password': 'wuQ5gBYCKkZiOGb61chLcByMu'
         }
-        self.dime_db_config = {
-            'host': 'localhost',
-            'port': 5432,
-            'database': 'dime',
-            'user': 'budget_admin',
-            'password': 'wuQ5gBYCKkZiOGb61chLcByMu'
-        }
+        # Note: Contractor enrichment is done separately via enrich_resurrected_with_contractors.py
+        # This keeps the main matching script fast and allows periodic contractor updates
         self.year_2026_data = {}
         self.year_2025_data = []
         self.year_2024_data = []
         self.year_2023_data = []
         self.matches = []
-        self.contractor_cache = {}  # Cache contractor lookups by project name/description
         
     def extract_chainage_range(self, name: str) -> tuple:
         """Extract chainage range from project name
@@ -182,61 +182,6 @@ class ResurrectedProjectFinder:
             return 0.0
         
         return SequenceMatcher(None, norm1, norm2).ratio()
-    
-    def get_contractor_for_project(self, project_name: str, project_description: str = None):
-        """Try to get contractor information for a project from DIME database
-        Uses fuzzy matching on project name/description
-        """
-        if not project_name:
-            return None
-        
-        # Check cache first
-        cache_key = project_name.lower().strip()
-        if cache_key in self.contractor_cache:
-            return self.contractor_cache[cache_key]
-        
-        try:
-            import psycopg2
-            from psycopg2.extras import RealDictCursor
-            
-            conn = psycopg2.connect(**self.dime_db_config)
-            cursor = conn.cursor(cursor_factory=RealDictCursor)
-            
-            # Try to match by project name (fuzzy match)
-            # Search for projects with similar names
-            search_term = f"%{project_name[:50]}%"  # Use first 50 chars for matching
-            
-            query = """
-                SELECT DISTINCT contractors
-                FROM projects
-                WHERE (project_name ILIKE %s OR description ILIKE %s)
-                AND contractors IS NOT NULL
-                AND array_length(contractors, 1) > 0
-                LIMIT 1
-            """
-            
-            cursor.execute(query, (search_term, search_term))
-            row = cursor.fetchone()
-            
-            contractor = None
-            if row and row['contractors']:
-                # Get first contractor from array
-                contractors_list = row['contractors']
-                if isinstance(contractors_list, list) and len(contractors_list) > 0:
-                    contractor = contractors_list[0]
-            
-            cursor.close()
-            conn.close()
-            
-            # Cache result (even if None)
-            self.contractor_cache[cache_key] = contractor
-            return contractor
-            
-        except Exception as e:
-            # If DIME database is not available or query fails, return None
-            # Don't print error to avoid cluttering output
-            self.contractor_cache[cache_key] = None
-            return None
     
     def load_2026_data(self, source_filter: str):
         """Load 2026 data from JSON file"""
@@ -564,10 +509,10 @@ class ResurrectedProjectFinder:
                 if year not in matches_by_year or match['adjusted_sim'] > matches_by_year[year]['adjusted_sim']:
                     matches_by_year[year] = match
             
-            # Get contractor information for this 2026 project (once per project, not per match)
-            # Prefer DIME lookup over JSON data to get the most up-to-date contractor info
+            # Contractor enrichment is done separately via enrich_resurrected_with_contractors.py
+            # This keeps the main matching script fast and allows periodic contractor updates
+            # For now, use existing contractor data from JSON if available (will be enriched later)
             contractor = (
-                self.get_contractor_for_project(name_2026, item_2026.get('description', '')) or
                 item_2026.get('contractor') or 
                 (item_2026.get('contractors', [None])[0] if isinstance(item_2026.get('contractors'), list) else None)
             )
@@ -577,11 +522,8 @@ class ResurrectedProjectFinder:
                 item_historical = match['historical']['item']
                 amount_historical = match['historical']['amount']
                 
-                # Get contractor for historical project too
-                historical_contractor = self.get_contractor_for_project(
-                    item_historical['description'], 
-                    item_historical.get('description', '')
-                )
+                # Historical contractor (will be enriched later via separate script)
+                historical_contractor = None
                 
                 new_match = {
                     'source_sheet': source_filter,

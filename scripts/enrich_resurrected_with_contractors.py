@@ -8,8 +8,16 @@ Adds contractor information from multiple sources:
 - Transparency projects parquet
 - Infrawatch (microsite) projects parquet
 
+This script is designed to be run periodically (e.g., daily/weekly) to enrich
+existing matches with contractor data. It's separate from the main matching script
+to keep matching fast and allow independent contractor updates.
+
 Usage:
     python3 scripts/enrich_resurrected_with_contractors.py
+    
+Note: This script is incremental - it preserves existing contractor data and only
+enriches matches that don't have contractors yet, or updates them if better matches
+are found in the data sources.
 """
 
 import json
