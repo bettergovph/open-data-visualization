@@ -35,7 +35,7 @@ async def export_to_parquet():
         print("📋 Exporting political_dynasties...")
         dynasties = await conn.fetch("""
             SELECT id, first_name, last_name, middle_name, party, region, province, 
-                   municipality_city, position, year, fat, nickname
+                   municipality_city, position, year, fat, nickname, normalized_name
             FROM political_dynasties
             ORDER BY id
         """)
