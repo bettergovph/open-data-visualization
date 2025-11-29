@@ -95,8 +95,9 @@
 
         <!-- Projects List -->
         <div id="mobile-resu-projects" style="display: none; margin-top: 1rem;">
-            <div style="margin-bottom: 0.75rem;">
-                <input type="text" id="mobile-resu-search" placeholder="Search projects..." style="width: 100%; padding: 0.5rem; border: 1px solid #ddd; border-radius: 4px; font-size: 14px;">
+            <div style="margin-bottom: 0.75rem; display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem;">
+                <input type="text" id="mobile-resu-search" placeholder="Search projects..." style="padding: 0.5rem; border: 1px solid #ddd; border-radius: 4px; font-size: 14px;">
+                <input type="text" id="mobile-resu-contractor-search" placeholder="Search contractor..." style="padding: 0.5rem; border: 1px solid #ddd; border-radius: 4px; font-size: 14px;">
             </div>
             <div id="mobile-resu-projects-list"></div>
         </div>
@@ -661,16 +662,27 @@
             listEl.appendChild(card);
         });
 
-        // Search functionality
+        // Search functionality for both project and contractor
         const searchEl = document.getElementById('mobile-resu-search');
-        if (searchEl) {
-            searchEl.addEventListener('input', (e) => {
-                const searchTerm = e.target.value.toLowerCase();
-                Array.from(listEl.children).forEach(card => {
-                    const text = card.textContent.toLowerCase();
-                    card.style.display = text.includes(searchTerm) ? 'block' : 'none';
-                });
+        const contractorSearchEl = document.getElementById('mobile-resu-contractor-search');
+        
+        const performSearch = () => {
+            const projectTerm = (searchEl?.value || '').toLowerCase();
+            const contractorTerm = (contractorSearchEl?.value || '').toLowerCase();
+            
+            Array.from(listEl.children).forEach(card => {
+                const text = card.textContent.toLowerCase();
+                const projectMatch = !projectTerm || text.includes(projectTerm);
+                const contractorMatch = !contractorTerm || text.includes(contractorTerm);
+                card.style.display = (projectMatch && contractorMatch) ? 'block' : 'none';
             });
+        };
+        
+        if (searchEl) {
+            searchEl.addEventListener('input', performSearch);
+        }
+        if (contractorSearchEl) {
+            contractorSearchEl.addEventListener('input', performSearch);
         }
     }
 
