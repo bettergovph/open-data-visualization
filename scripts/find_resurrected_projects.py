@@ -383,11 +383,9 @@ class ResurrectedProjectFinder:
                     candidate_indices.update(word_index[word])
             
             # Find matches in candidate items only
-            best_match = None
-            best_name_sim = 0.0
-            best_adjusted_sim = 0.0
-            best_time_penalty = 0.0
-            best_chainage_penalty = 0.0
+            # Save ALL matches that meet the threshold, not just the best one
+            # This allows us to see matches from all years
+            item_matches = []  # Store all valid matches for this 2026 item
             
             for idx in candidate_indices:
                 if idx >= len(normalized_historical):
@@ -439,18 +437,31 @@ class ResurrectedProjectFinder:
                 # Apply penalties to similarity score (for ranking/display only)
                 adjusted_sim = name_sim * (1.0 - chainage_penalty) * (1.0 - time_penalty)
                 
-                # Use adjusted similarity for comparison (to find best match)
-                # But we already checked that name_sim >= threshold above
-                if adjusted_sim > best_adjusted_sim:
-                    best_match = norm_historical
-                    best_name_sim = name_sim  # Store original similarity for display
-                    best_adjusted_sim = adjusted_sim  # Store adjusted for comparison
-                    best_time_penalty = time_penalty  # Store for reference
-                    best_chainage_penalty = chainage_penalty  # Store for reference
+                # Save this match (name similarity already meets threshold)
+                item_matches.append({
+                    'historical': norm_historical,
+                    'name_sim': name_sim,
+                    'adjusted_sim': adjusted_sim,
+                    'time_penalty': time_penalty,
+                    'chainage_penalty': chainage_penalty,
+                    'historical_year': historical_year
+                })
             
-            if best_match:
-                item_historical = best_match['item']
-                amount_historical = best_match['amount']
+            # Sort matches by adjusted similarity (best first) and save all that meet threshold
+            # But limit to one match per historical year to avoid duplicates
+            item_matches.sort(key=lambda x: x['adjusted_sim'], reverse=True)
+            
+            # Group by year and take best from each year
+            matches_by_year = {}
+            for match in item_matches:
+                year = match['historical_year']
+                if year not in matches_by_year or match['adjusted_sim'] > matches_by_year[year]['adjusted_sim']:
+                    matches_by_year[year] = match
+            
+            # Save all matches (one per year)
+            for match in matches_by_year.values():
+                item_historical = match['historical']['item']
+                amount_historical = match['historical']['amount']
                 
                 matches.append({
                     'source_sheet': source_filter,
@@ -474,10 +485,10 @@ class ResurrectedProjectFinder:
                         'source_file': item_historical['source_file']
                     },
                     'similarity': {
-                        'name': best_name_sim,  # Original similarity
-                        'adjusted': best_adjusted_sim,  # After penalties
-                        'time_penalty': best_time_penalty,
-                        'chainage_penalty': best_chainage_penalty
+                        'name': match['name_sim'],  # Original similarity
+                        'adjusted': match['adjusted_sim'],  # After penalties
+                        'time_penalty': match['time_penalty'],
+                        'chainage_penalty': match['chainage_penalty']
                     },
                     'years_apart': 2026 - item_historical['year']
                 })
