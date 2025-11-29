@@ -8288,10 +8288,19 @@ async function copyChartToClipboard(containerId, buttonId) {
                 `;
             });
             
+            // Get 2026 amount (should be same across all matches for same project)
+            const amount2026 = historicalMatches[0]?.year_2026?.amount || project?.amount || 0;
+            
             card.innerHTML = `
                 <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 1rem;">
                     <h5 style="color: #0038A8; margin: 0; flex: 1;">${(project?.name || project?.description || 'Unknown').substring(0, 120)}${(project?.name || project?.description || '').length > 120 ? '...' : ''}</h5>
                     <span style="background: #dc3545; color: white; padding: 0.25rem 0.75rem; border-radius: 4px; font-size: 0.85em; font-weight: bold;">Avg ${(avgSimilarity * 100).toFixed(1)}%</span>
+                </div>
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-bottom: 1rem; padding: 0.75rem; background: #f8f9fa; border-radius: 6px;">
+                    <div>
+                        <p style="font-size: 0.85em; color: #666; margin: 0;">2026 Amount</p>
+                        <p style="font-size: 1.1em; font-weight: bold; color: #dc3545; margin: 0;">₱${amount2026.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</p>
+                    </div>
                 </div>
                 <div style="margin-bottom: 1rem;">
                     <p style="font-size: 0.85em; color: #666; margin: 0 0 0.5rem 0;">Found in ${historicalMatches.length} year(s):</p>
