@@ -565,10 +565,11 @@ class ResurrectedProjectFinder:
                     matches_by_year[year] = match
             
             # Get contractor information for this 2026 project (once per project, not per match)
+            # Prefer DIME lookup over JSON data to get the most up-to-date contractor info
             contractor = (
+                self.get_contractor_for_project(name_2026, item_2026.get('description', '')) or
                 item_2026.get('contractor') or 
-                (item_2026.get('contractors', [None])[0] if isinstance(item_2026.get('contractors'), list) else None) or
-                self.get_contractor_for_project(name_2026, item_2026.get('description', ''))
+                (item_2026.get('contractors', [None])[0] if isinstance(item_2026.get('contractors'), list) else None)
             )
             
             # Save all matches (one per year)
