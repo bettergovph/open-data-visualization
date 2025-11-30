@@ -691,12 +691,31 @@
             historicalMatches.forEach((match) => {
                 const histDesc = match.historical?.description || match.historical?.name || 'No description available';
                 const sourceFile = match.historical?.source_file || '';
+                const historicalYear = match.historical?.year || '';
+                
+                // Extract year from historical year (handle both int and string formats)
+                let yearNum = historicalYear;
+                if (typeof historicalYear === 'string') {
+                    const yearMatch = historicalYear.match(/(\d{4})/);
+                    if (yearMatch) {
+                        yearNum = yearMatch[1];
+                    }
+                }
+                
                 // Determine source database from source_file
                 let sourceDb = 'GAA/PostgreSQL';
                 if (sourceFile.includes('gaa_') || sourceFile.includes('GAA')) {
-                    sourceDb = 'GAA/PostgreSQL';
+                    sourceDb = `GAA ${yearNum}`;
                 } else if (sourceFile) {
                     sourceDb = 'PostgreSQL';
+                } else {
+                    sourceDb = `GAA ${yearNum}`;
+                }
+                
+                // Extract just filename from source_file path
+                let filename = sourceFile;
+                if (sourceFile) {
+                    filename = sourceFile.split('/').pop() || sourceFile.split('\\').pop() || sourceFile;
                 }
                 
                 historicalMatchesHTML += `
@@ -711,7 +730,7 @@
                         <div style="font-size: 0.75rem; margin-bottom: 0.3rem; color: #6c757d;">
                             <span style="color: #666;">Source: </span>
                             <span style="font-weight: 600; color: #495057;">${sourceDb}</span>
-                            ${match.historical?.source_display ? ` <span style="color: #999; font-size: 0.7rem;">(${escapeHtml(match.historical.source_display)})</span>` : sourceFile ? ` <span style="color: #999; font-size: 0.7rem;">(${escapeHtml(sourceFile)})</span>` : ''}
+                            ${filename ? ` <span style="color: #999; font-size: 0.7rem;">(${escapeHtml(filename)})</span>` : ''}
                             ${match.historical?.source_row ? ` <span style="color: #999; font-size: 0.7rem;">Row ${match.historical.source_row}</span>` : ''}
                         </div>
                         <div style="font-size: 0.8rem;">
