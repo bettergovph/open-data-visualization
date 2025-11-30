@@ -543,7 +543,15 @@ class ResurrectedProjectFinder:
                 
                 # Apply time-based penalty: 10% per year (roads require maintenance)
                 item_historical = norm_historical['item']
-                historical_year = item_historical.get('year', 2025)
+                historical_year_raw = item_historical.get('year', 2025)
+                # Handle year as string (e.g., 'GAA-2024') or integer (e.g., 2020)
+                if isinstance(historical_year_raw, str):
+                    # Extract year from string like 'GAA-2024' -> 2024
+                    import re
+                    year_match = re.search(r'(\d{4})', str(historical_year_raw))
+                    historical_year = int(year_match.group(1)) if year_match else 2025
+                else:
+                    historical_year = int(historical_year_raw) if historical_year_raw else 2025
                 years_old = 2026 - historical_year
                 time_penalty = min(0.50, years_old * 0.10)  # Max 50% penalty (5+ years)
                 
