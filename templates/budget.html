@@ -7856,6 +7856,16 @@ async function copyChartToClipboard(containerId, buttonId) {
                     <h3 class="budget-section-title">🔄 Resurrected Projects</h3>
                     <p class="budget-section-desc">DPWH projects in 2026 that also existed in previous years (2020-2025)</p>
                     
+                    <!-- Download Buttons -->
+                    <div id="resu-download-buttons" style="display: none; margin: 1.5rem 0; display: flex; gap: 1rem; flex-wrap: wrap;">
+                        <button onclick="downloadResurrectedCSV()" style="background: #28a745; color: white; border: none; padding: 0.75rem 1.5rem; border-radius: 6px; cursor: pointer; font-size: 14px; font-weight: 600; display: flex; align-items: center; gap: 0.5rem; box-shadow: 0 2px 4px rgba(0,0,0,0.1); transition: background 0.2s;">
+                            <span>📥</span> Download CSV
+                        </button>
+                        <button onclick="downloadResurrectedJSON()" style="background: #0038A8; color: white; border: none; padding: 0.75rem 1.5rem; border-radius: 6px; cursor: pointer; font-size: 14px; font-weight: 600; display: flex; align-items: center; gap: 0.5rem; box-shadow: 0 2px 4px rgba(0,0,0,0.1); transition: background 0.2s;">
+                            <span>📥</span> Download JSON
+                        </button>
+                    </div>
+                    
                     <!-- Info Note -->
                     <div style="background: #fff3cd; border-left: 4px solid #ffc107; padding: 1rem; margin: 1.5rem 0; border-radius: 4px;">
                         <p style="margin: 0; color: #856404; font-size: 0.95em;">
@@ -8227,6 +8237,7 @@ async function copyChartToClipboard(containerId, buttonId) {
             
             // Hide loading, show content
             loadingEl.style.display = 'none';
+            document.getElementById('resu-download-buttons').style.display = 'flex';
             statsEl.style.display = 'grid';
             byYearEl.style.display = 'block';
             projectsEl.style.display = 'block';
@@ -8832,6 +8843,115 @@ async function copyChartToClipboard(containerId, buttonId) {
                 });
             });
         }
+    }
+    
+    // Download functions for resurrected projects
+    function downloadResurrectedCSV() {
+        if (!resuAllMatches || resuAllMatches.length === 0) {
+            alert('No data available to download');
+            return;
+        }
+        
+        // Flatten matches for CSV (one row per match)
+        const rows = [];
+        
+        // Header row
+        rows.push([
+            '2026 Project ID',
+            '2026 Project Name',
+            '2026 Project Description',
+            '2026 Amount',
+            '2026 Source Row',
+            '2026 Source Col',
+            'Historical Year',
+            'Historical Project ID',
+            'Historical Project Description',
+            'Historical Amount',
+            'Historical Contractor',
+            'Historical Contract ID',
+            'Historical Source File',
+            'Historical Source Row',
+            'Historical Source Col',
+            'Similarity Score',
+            'Match Type'
+        ].join(','));
+        
+        // Data rows
+        resuAllMatches.forEach(match => {
+            const proj2026 = match.year_2026 || {};
+            const hist = match.historical || {};
+            
+            const row = [
+                escapeCSV(proj2026.id || ''),
+                escapeCSV(proj2026.name || ''),
+                escapeCSV(proj2026.description || ''),
+                proj2026.amount || '',
+                proj2026.source_row || '',
+                proj2026.source_col || '',
+                hist.year || '',
+                hist.id || '',
+                escapeCSV(hist.description || ''),
+                hist.amount || '',
+                escapeCSV(hist.contractor || ''),
+                escapeCSV(hist.contract_id || ''),
+                escapeCSV(hist.source_file || ''),
+                hist.source_row || '',
+                hist.source_col || '',
+                match.similarity || '',
+                match.match_type || ''
+            ];
+            rows.push(row.join(','));
+        });
+        
+        // Create and download
+        const csvContent = rows.join('\n');
+        const blob = new Blob(['\ufeff' + csvContent], { type: 'text/csv;charset=utf-8;' }); // BOM for Excel
+        const link = document.createElement('a');
+        const url = URL.createObjectURL(blob);
+        link.setAttribute('href', url);
+        link.setAttribute('download', `resurrected_projects_dpwh_${new Date().toISOString().split('T')[0]}.csv`);
+        link.style.visibility = 'hidden';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    }
+    
+    function downloadResurrectedJSON() {
+        if (!resuAllMatches || resuAllMatches.length === 0) {
+            alert('No data available to download');
+            return;
+        }
+        
+        // Create JSON structure
+        const jsonData = {
+            metadata: {
+                exported_at: new Date().toISOString(),
+                total_matches: resuAllMatches.length,
+                description: 'DPWH Resurrected Projects - Projects in 2026 that also existed in previous years (2020-2025)'
+            },
+            matches: resuAllMatches
+        };
+        
+        // Create and download
+        const jsonContent = JSON.stringify(jsonData, null, 2);
+        const blob = new Blob([jsonContent], { type: 'application/json' });
+        const link = document.createElement('a');
+        const url = URL.createObjectURL(blob);
+        link.setAttribute('href', url);
+        link.setAttribute('download', `resurrected_projects_dpwh_${new Date().toISOString().split('T')[0]}.json`);
+        link.style.visibility = 'hidden';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    }
+    
+    function escapeCSV(str) {
+        if (str === null || str === undefined) return '';
+        const s = String(str);
+        if (s.includes(',') || s.includes('"') || s.includes('\n')) {
+            return '"' + s.replace(/"/g, '""') + '"';
+        }
+        return s;
     }
     </script>
     
