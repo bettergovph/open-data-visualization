@@ -689,7 +689,7 @@
                                 <span style="color: #666;">${match.historical?.year} Amount: </span>
                                 <span style="font-weight: bold; color: #dc3545;">₱${((match.historical?.amount || 0) / 1000000).toFixed(1)}M</span>
                             </div>
-                            ${match.historical?.contractor ? `<div style="margin-top: 0.25rem;"><span style="color: #666; font-size: 0.75rem;">Contractor: </span><span style="font-weight: bold; color: #667eea; font-size: 0.75rem;" data-contractor-historical>${escapeHtml(match.historical.contractor)}</span>${match.historical?.contract_id ? ` <span style="color: #999; font-size: 0.7rem;">(ID: ${escapeHtml(match.historical.contract_id)})</span>` : ''}</div>` : ''}
+                            ${match.historical?.contractor ? `<div style="margin-top: 0.25rem;"><span style="color: #666; font-size: 0.75rem;">Predicted Contractor: </span><span style="font-weight: bold; color: #ff9800; font-size: 0.75rem;" data-contractor-historical>${escapeHtml(match.historical.contractor)}</span>${match.historical?.contract_id ? ` <span style="color: #999; font-size: 0.7rem;">(ID: ${escapeHtml(match.historical.contract_id)})</span>` : ''} <span style="font-size: 0.7rem; color: #999;">(GAA)</span></div>` : ''}
                         </div>
                     </div>
                 `;
