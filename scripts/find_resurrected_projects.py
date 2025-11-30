@@ -202,6 +202,19 @@ class ResurrectedProjectFinder:
         
         return line_items
     
+    def _extract_year_for_calculation(self, year_value):
+        """Extract numeric year from year value (handles both int and string formats like 'GAA-2024')
+        Returns the year as an integer for calculation purposes
+        """
+        if isinstance(year_value, (int, float)):
+            return int(year_value)
+        elif isinstance(year_value, str):
+            import re
+            year_match = re.search(r'(\d{4})', str(year_value))
+            if year_match:
+                return int(year_match.group(1))
+        return 0  # Fallback
+    
     def load_historical_data(self, year: int, source_filter: str = None, amounts_in_thousands: bool = True):
         """Load historical budget data from PostgreSQL database
         
@@ -624,7 +637,7 @@ class ResurrectedProjectFinder:
                         'time_penalty': match['time_penalty'],
                         'chainage_penalty': match['chainage_penalty']
                     },
-                    'years_apart': 2026 - (int(item_historical['year']) if isinstance(item_historical['year'], (int, float)) else int(re.search(r'(\d{4})', str(item_historical['year'])).group(1)) if re.search(r'(\d{4})', str(item_historical['year'])) else 0)
+                    'years_apart': self._extract_year_for_calculation(item_historical['year'])
                 }
                 new_matches.append(new_match)
                 matches.append(new_match)
