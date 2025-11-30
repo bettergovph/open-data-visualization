@@ -645,7 +645,8 @@ class DynastyProjectsCacheGeneratorDuckDB:
             'is_flood_related', 'district_congressman', 'district_match_type',
             'district_match_score', 'district_is_city_wide', 'congressman_district',
             'contractor_congressman', 'contractor_match_type', 'contractor_match_score',
-            'contractor_congressman_district', 'match_type', 'match_score'
+            'contractor_congressman_district', 'contractor_congressman_2', 'contractor_congressman_2_district',
+            'match_type', 'match_score'
         ]
         
         # CRITICAL: Handle district and contractor congressmen separately to preserve both
@@ -665,6 +666,7 @@ class DynastyProjectsCacheGeneratorDuckDB:
         
         # Contractor congressman: preserve both if they exist, prefer incoming if it's new
         # Note: Both can exist simultaneously (different congressmen)
+        # Support up to 2 contractor congressmen for JVs
         if incoming.get('contractor_congressman'):
             # Incoming has a contractor match - use it (may be same or different from merged)
             merged['contractor_congressman'] = incoming.get('contractor_congressman')
@@ -672,6 +674,12 @@ class DynastyProjectsCacheGeneratorDuckDB:
             merged['contractor_match_score'] = incoming.get('contractor_match_score')
             merged['contractor_congressman_district'] = incoming.get('contractor_congressman_district')
         # Don't overwrite contractor_congressman with None - preserve existing
+        
+        # Handle second contractor congressman (for JVs)
+        if incoming.get('contractor_congressman_2'):
+            merged['contractor_congressman_2'] = incoming.get('contractor_congressman_2')
+            merged['contractor_congressman_2_district'] = incoming.get('contractor_congressman_2_district')
+        # Don't overwrite contractor_congressman_2 with None - preserve existing
         
         # Now handle other classification fields (excluding congressman fields which we handled above)
         other_classification_fields = [
@@ -750,10 +758,10 @@ class DynastyProjectsCacheGeneratorDuckDB:
                              district_lookup: Dict,
                              contractor_lookup: Dict,
                              contractor_inverted_index: Dict,
-                             project_data: Optional[Dict] = None) -> tuple[Optional[str], Optional[str], int, Optional[str], Optional[str]]:
+                             project_data: Optional[Dict] = None) -> tuple[Optional[str], Optional[str], int, Optional[str], Optional[str], Optional[str]]:
         """
         Unified matching logic using O(1) lookups.
-        Returns: (congressman_name, match_type, match_score, district_congressman, contractor_congressman)
+        Returns: (congressman_name, match_type, match_score, district_congressman, contractor_congressman, contractor_congressman_2)
         
         Args:
             project_data: Optional project dict to extract project code for short-circuit matching and month for election transitions
@@ -765,6 +773,7 @@ class DynastyProjectsCacheGeneratorDuckDB:
             self._current_project_data = {}
         district_congressman = None
         contractor_congressman = None
+        contractor_congressman_2 = None
         match_type = 'unknown'
         match_score = 0
         final_congressman = 'Unknown'
@@ -788,11 +797,23 @@ class DynastyProjectsCacheGeneratorDuckDB:
                     contractor_match = self._find_congressman_by_contractor(
                         contractor, contractor_lookup, contractor_inverted_index, congressmen_data
                     )
+                    contractor_congressman = None
+                    contractor_congressman_2 = None
                     if contractor_match:
-                        contractor_congressman, c_score = contractor_match
-                        if contractor_congressman and hasattr(self, 'canonical_name_map'):
-                            contractor_congressman = self.canonical_name_map.get(contractor_congressman, contractor_congressman)
-                    return final_congressman, match_type, match_score, district_congressman, contractor_congressman
+                        if isinstance(contractor_match, list):
+                            if len(contractor_match) >= 1:
+                                contractor_congressman, c_score = contractor_match[0]
+                                if contractor_congressman and hasattr(self, 'canonical_name_map'):
+                                    contractor_congressman = self.canonical_name_map.get(contractor_congressman, contractor_congressman)
+                            if len(contractor_match) >= 2:
+                                contractor_congressman_2, c_score_2 = contractor_match[1]
+                                if contractor_congressman_2 and hasattr(self, 'canonical_name_map'):
+                                    contractor_congressman_2 = self.canonical_name_map.get(contractor_congressman_2, contractor_congressman_2)
+                        else:
+                            contractor_congressman, c_score = contractor_match
+                            if contractor_congressman and hasattr(self, 'canonical_name_map'):
+                                contractor_congressman = self.canonical_name_map.get(contractor_congressman, contractor_congressman)
+                    return final_congressman, match_type, match_score, district_congressman, contractor_congressman, contractor_congressman_2
 
         # 1. Try District Match
         # Pass project_district if available to help with district number matching
@@ -816,15 +837,31 @@ class DynastyProjectsCacheGeneratorDuckDB:
                 district_congressman = self.canonical_name_map.get(district_congressman, district_congressman)
             match_score = d_score
         
-        # 2. Try Contractor Match
+        # 2. Try Contractor Match (supports up to 2 matches for JVs)
         contractor_match = self._find_congressman_by_contractor(
             contractor, contractor_lookup, contractor_inverted_index, congressmen_data
         )
+        contractor_congressman = None
+        contractor_congressman_2 = None
+        c_score = 0
+        
         if contractor_match:
-            contractor_congressman, c_score = contractor_match
-            # Normalize congressman name to canonical form
-            if contractor_congressman and hasattr(self, 'canonical_name_map'):
-                contractor_congressman = self.canonical_name_map.get(contractor_congressman, contractor_congressman)
+            # Handle both single match (tuple) and multiple matches (list) for JVs
+            if isinstance(contractor_match, list):
+                # Multiple matches (up to 2) - JV scenario
+                if len(contractor_match) >= 1:
+                    contractor_congressman, c_score = contractor_match[0]
+                    if contractor_congressman and hasattr(self, 'canonical_name_map'):
+                        contractor_congressman = self.canonical_name_map.get(contractor_congressman, contractor_congressman)
+                if len(contractor_match) >= 2:
+                    contractor_congressman_2, c_score_2 = contractor_match[1]
+                    if contractor_congressman_2 and hasattr(self, 'canonical_name_map'):
+                        contractor_congressman_2 = self.canonical_name_map.get(contractor_congressman_2, contractor_congressman_2)
+            else:
+                # Single match (tuple) - backward compatible
+                contractor_congressman, c_score = contractor_match
+                if contractor_congressman and hasattr(self, 'canonical_name_map'):
+                    contractor_congressman = self.canonical_name_map.get(contractor_congressman, contractor_congressman)
             
             # Note: Contractor matching is based solely on owner/officer relationship, not location
             # Location validation is NOT applied to contractor matches
@@ -860,7 +897,7 @@ class DynastyProjectsCacheGeneratorDuckDB:
         if final_congressman and hasattr(self, 'canonical_name_map'):
             final_congressman = self.canonical_name_map.get(final_congressman, final_congressman)
             
-        return final_congressman, match_type, match_score, district_congressman, contractor_congressman
+        return final_congressman, match_type, match_score, district_congressman, contractor_congressman, contractor_congressman_2
 
     def _update_progress(self, match_type: str, congressman_name: str, is_city_district: bool = False, is_barangay_match: bool = False):
         """Update progress counters safely."""
@@ -1005,7 +1042,7 @@ class DynastyProjectsCacheGeneratorDuckDB:
                     pass
 
             # Unified Match
-            final_congressman, match_type, match_score, district_cm, contractor_cm = self._match_project_unified(
+            final_congressman, match_type, match_score, district_cm, contractor_cm, contractor_cm_2 = self._match_project_unified(
                 project_text="", # DIME doesn't rely on text matching as much as location columns
                 province=proj_province,
                 municipality_barangay=location_key,
@@ -1038,6 +1075,12 @@ class DynastyProjectsCacheGeneratorDuckDB:
                 cm_data = congressmen_data[contractor_cm]
                 if cm_data.get('district_number') and cm_data.get('provinces'):
                     contractor_congressman_district = f"{cm_data.get('district_number')} District {cm_data.get('provinces')[0]}"
+            
+            contractor_congressman_2_district = None
+            if contractor_cm_2 and contractor_cm_2 in congressmen_data:
+                cm_data = congressmen_data[contractor_cm_2]
+                if cm_data.get('district_number') and cm_data.get('provinces'):
+                    contractor_congressman_2_district = f"{cm_data.get('district_number')} District {cm_data.get('provinces')[0]}"
 
             # Determine project district type and name
             project_district_type = "city" if is_city_district else ("province" if proj_province else None)
@@ -1089,6 +1132,8 @@ class DynastyProjectsCacheGeneratorDuckDB:
                 "contractor_match_type": "contractor" if contractor_cm else None,
                 "contractor_match_score": 50 if contractor_cm else 0,
                 "contractor_congressman_district": contractor_congressman_district,
+                "contractor_congressman_2": contractor_cm_2,
+                "contractor_congressman_2_district": contractor_congressman_2_district,
                 "project_district_type": project_district_type,
                 "project_district": project_district,
                 "project_barangay_municipality": project_barangay_municipality,
@@ -1259,7 +1304,7 @@ class DynastyProjectsCacheGeneratorDuckDB:
                     pass
 
             # Unified Match
-            final_congressman, match_type, match_score, district_cm, contractor_cm = self._match_project_unified(
+            final_congressman, match_type, match_score, district_cm, contractor_cm, contractor_cm_2 = self._match_project_unified(
                 project_text=location_text,
                 province=proj_province,
                 municipality_barangay=proj_municipality_barangay,
@@ -1291,6 +1336,12 @@ class DynastyProjectsCacheGeneratorDuckDB:
                 cm_data = congressmen_data[contractor_cm]
                 if cm_data.get('district_number') and cm_data.get('provinces'):
                     contractor_congressman_district = f"{cm_data.get('district_number')} District {cm_data.get('provinces')[0]}"
+            
+            contractor_congressman_2_district = None
+            if contractor_cm_2 and contractor_cm_2 in congressmen_data:
+                cm_data = congressmen_data[contractor_cm_2]
+                if cm_data.get('district_number') and cm_data.get('provinces'):
+                    contractor_congressman_2_district = f"{cm_data.get('district_number')} District {cm_data.get('provinces')[0]}"
 
             # Determine project district type and name
             project_district_type = "city" if "CITY" in location_str.upper() else ("province" if proj_province else "province")
@@ -1361,6 +1412,8 @@ class DynastyProjectsCacheGeneratorDuckDB:
                 "contractor_match_type": "contractor" if contractor_cm else None,
                 "contractor_match_score": 50 if contractor_cm else 0,
                 "contractor_congressman_district": contractor_congressman_district,
+                "contractor_congressman_2": contractor_cm_2,
+                "contractor_congressman_2_district": contractor_congressman_2_district,
                 "project_district_type": project_district_type,
                 "project_district": project_district,
                 "project_barangay_municipality": project_barangay_municipality,
@@ -1463,7 +1516,7 @@ class DynastyProjectsCacheGeneratorDuckDB:
             combined_text = f"{proj_name} {proj_desc} {location}".strip()
 
             # Unified Match
-            final_congressman, match_type, match_score, district_cm, contractor_cm = self._match_project_unified(
+            final_congressman, match_type, match_score, district_cm, contractor_cm, contractor_cm_2 = self._match_project_unified(
                 project_text=combined_text,
                 province=proj_province,
                 municipality_barangay=proj_municipality_barangay,
@@ -1494,6 +1547,12 @@ class DynastyProjectsCacheGeneratorDuckDB:
                 cm_data = congressmen_data[contractor_cm]
                 if cm_data.get('district_number') and cm_data.get('provinces'):
                     contractor_congressman_district = f"{cm_data.get('district_number')} District {cm_data.get('provinces')[0]}"
+            
+            contractor_congressman_2_district = None
+            if contractor_cm_2 and contractor_cm_2 in congressmen_data:
+                cm_data = congressmen_data[contractor_cm_2]
+                if cm_data.get('district_number') and cm_data.get('provinces'):
+                    contractor_congressman_2_district = f"{cm_data.get('district_number')} District {cm_data.get('provinces')[0]}"
 
             # Determine project district type and name
             project_district_type = "city" if "CITY" in (project_location or "").upper() else ("province" if proj_province else "province")
@@ -1536,6 +1595,7 @@ class DynastyProjectsCacheGeneratorDuckDB:
                         "status": record.get("status") or record.get("Contract Status") or "N/A",
                         "district_congressman": None,
                         "contractor_congressman": None,
+                        "contractor_congressman_2": None,
                         "match_type": "unmatched",
                         "match_score": 0,
                         "project_district_type": None,
@@ -1566,6 +1626,8 @@ class DynastyProjectsCacheGeneratorDuckDB:
                 "contractor_match_type": "contractor" if contractor_cm else None,
                 "contractor_match_score": 50 if contractor_cm else 0,
                 "contractor_congressman_district": contractor_congressman_district,
+                "contractor_congressman_2": contractor_cm_2,
+                "contractor_congressman_2_district": contractor_congressman_2_district,
                 "project_district_type": project_district_type,
                 "project_district": project_district,
                 "project_barangay_municipality": project_barangay_municipality,
@@ -1713,7 +1775,7 @@ class DynastyProjectsCacheGeneratorDuckDB:
             combined_text = f"{proj_name} {proj_desc} {location}".strip()
 
             # Unified Match
-            final_congressman, match_type, match_score, district_cm, contractor_cm = self._match_project_unified(
+            final_congressman, match_type, match_score, district_cm, contractor_cm, contractor_cm_2 = self._match_project_unified(
                 project_text=combined_text,
                 province=proj_province,
                 municipality_barangay=proj_municipality_barangay,
@@ -1744,6 +1806,12 @@ class DynastyProjectsCacheGeneratorDuckDB:
                 cm_data = congressmen_data[contractor_cm]
                 if cm_data.get('district_number') and cm_data.get('provinces'):
                     contractor_congressman_district = f"{cm_data.get('district_number')} District {cm_data.get('provinces')[0]}"
+            
+            contractor_congressman_2_district = None
+            if contractor_cm_2 and contractor_cm_2 in congressmen_data:
+                cm_data = congressmen_data[contractor_cm_2]
+                if cm_data.get('district_number') and cm_data.get('provinces'):
+                    contractor_congressman_2_district = f"{cm_data.get('district_number')} District {cm_data.get('provinces')[0]}"
 
             # Determine project district type and name
             project_district_type = "city" if "CITY" in (project_location or "").upper() else ("province" if proj_province else "province")
@@ -1790,6 +1858,7 @@ class DynastyProjectsCacheGeneratorDuckDB:
                         "status": record.get("Contract Status") or "N/A",
                         "district_congressman": None,
                         "contractor_congressman": None,
+                        "contractor_congressman_2": None,
                         "match_type": "unmatched",
                         "match_score": 0,
                         "project_district_type": None,
@@ -1819,6 +1888,8 @@ class DynastyProjectsCacheGeneratorDuckDB:
                 "contractor_match_type": "contractor" if contractor_cm else None,
                 "contractor_match_score": 50 if contractor_cm else 0,
                 "contractor_congressman_district": contractor_congressman_district,
+                "contractor_congressman_2": contractor_cm_2,
+                "contractor_congressman_2_district": contractor_congressman_2_district,
                 "project_district_type": project_district_type,
                 "project_district": project_district,
                 "project_barangay_municipality": project_barangay_municipality,
@@ -1958,7 +2029,7 @@ class DynastyProjectsCacheGeneratorDuckDB:
                 project_year = self._get_project_year(year_field)
 
             # Unified Match
-            final_congressman, match_type, match_score, district_cm, contractor_cm = self._match_project_unified(
+            final_congressman, match_type, match_score, district_cm, contractor_cm, contractor_cm_2 = self._match_project_unified(
                 project_text=combined_text,
                 province=final_province,
                 municipality_barangay=final_muni,
@@ -1989,6 +2060,12 @@ class DynastyProjectsCacheGeneratorDuckDB:
                 cm_data = congressmen_data[contractor_cm]
                 if cm_data.get('district_number') and cm_data.get('provinces'):
                     contractor_congressman_district = f"{cm_data.get('district_number')} District {cm_data.get('provinces')[0]}"
+            
+            contractor_congressman_2_district = None
+            if contractor_cm_2 and contractor_cm_2 in congressmen_data:
+                cm_data = congressmen_data[contractor_cm_2]
+                if cm_data.get('district_number') and cm_data.get('provinces'):
+                    contractor_congressman_2_district = f"{cm_data.get('district_number')} District {cm_data.get('provinces')[0]}"
 
             # Determine project district type and name
             project_district_type = "city" if "CITY" in (final_muni or "").upper() or "CITY" in (final_province or "").upper() else "province"
@@ -2042,6 +2119,8 @@ class DynastyProjectsCacheGeneratorDuckDB:
                 "contractor_match_type": "contractor" if contractor_cm else None,
                 "contractor_match_score": 50 if contractor_cm else 0,
                 "contractor_congressman_district": contractor_congressman_district,
+                "contractor_congressman_2": contractor_cm_2,
+                "contractor_congressman_2_district": contractor_congressman_2_district,
                 "project_district_type": project_district_type,
                 "project_district": project_district,
                 "project_barangay_municipality": project_barangay_municipality,
@@ -5737,7 +5816,9 @@ class DynastyProjectsCacheGeneratorDuckDB:
         """
         O(1) lookup for congressman by contractor.
         CRITICAL: Only matches verified contractor relationships from contractor_dynasty_matches.
-        Returns: (congressman_name, match_score) or None
+        Supports JVs (joint ventures) - can return up to 2 matches for projects with "/" separator.
+        Returns: (congressman_name, match_score) or None (for single contractor)
+                 For JVs, returns the best match (first contractor takes priority)
         
         Matching strategy:
         1. Exact match on company name (highest priority) - score 100
@@ -5749,184 +5830,226 @@ class DynastyProjectsCacheGeneratorDuckDB:
             return None
         
         contractor_upper = contractor_name.upper().strip()
-        normalized = re.sub(r'[^A-Z0-9]+', ' ', contractor_upper).strip()
         
-        # Try exact match first (highest priority)
-        candidates = contractor_lookup.get(contractor_upper, [])
-        match_score = 100
+        # CRITICAL: Handle JVs (joint ventures) - split by "/" to get individual contractors
+        # Example: "MACROPRIME BUILDERS / SUNWEST, INC." -> ["MACROPRIME BUILDERS", "SUNWEST, INC."]
+        contractor_parts = [part.strip() for part in contractor_upper.split('/')]
         
-        # Try normalized match (removes special chars, normalizes spaces)
-        if not candidates:
-            candidates = contractor_lookup.get(normalized, [])
+        # For JVs, we'll process each part and return the best match
+        # Store all matches to potentially return up to 2
+        all_matches = []
+        
+        # Process each contractor part in the JV
+        for contractor_part in contractor_parts:
+            if not contractor_part:
+                continue
+            
+            normalized = re.sub(r'[^A-Z0-9]+', ' ', contractor_part).strip()
+            
+            # Try exact match first (highest priority)
+            candidates = contractor_lookup.get(contractor_part, [])
             match_score = 100
-        
-        # CRITICAL: Also try partial matching for verified contractors
-        # This handles cases like "SUNWEST" matching "SUNWEST, INC." or "SUNWEST CONSTRUCTION"
-        # Only do this for verified contractors (those in contractor_lookup)
-        if not candidates:
-            # Normalize contractor name for better matching
-            normalized_contractor = re.sub(r'[^A-Z0-9]+', ' ', contractor_upper).strip()
             
-            # Extract key tokens from contractor name (words of 2+ chars for better matching)
-            # CRITICAL: Filter out common words - only match on proper names
-            contractor_tokens = set()
-            for token in re.split(r'[^A-Z0-9]+', normalized_contractor):
-                token = token.strip()
-                if len(token) >= 2 and token not in self.COMMON_TOKENS:  # Exclude common words
-                    contractor_tokens.add(token)
+            # Try normalized match (removes special chars, normalizes spaces)
+            if not candidates:
+                candidates = contractor_lookup.get(normalized, [])
+                match_score = 100
             
-            # Check if any lookup key matches (either direction)
-            for lookup_key in contractor_lookup.keys():
-                lookup_key_clean = lookup_key.strip()
-                if len(lookup_key_clean) < 2:  # Changed from 3 to 2 to allow "FS", "CO", etc.
-                    continue
+            # CRITICAL: Also try partial matching for verified contractors
+            # This handles cases like "SUNWEST" matching "SUNWEST, INC." or "SUNWEST CONSTRUCTION"
+            # Only do this for verified contractors (those in contractor_lookup)
+            if not candidates:
+                # Normalize contractor name for better matching
+                normalized_contractor = re.sub(r'[^A-Z0-9]+', ' ', contractor_part).strip()
                 
-                # Normalize lookup key
-                normalized_lookup = re.sub(r'[^A-Z0-9]+', ' ', lookup_key_clean).strip()
-                
-                # Extract tokens from lookup key
+                # Extract key tokens from contractor name (words of 2+ chars for better matching)
                 # CRITICAL: Filter out common words - only match on proper names
-                lookup_tokens = set()
-                for token in re.split(r'[^A-Z0-9]+', normalized_lookup):
+                contractor_tokens = set()
+                for token in re.split(r'[^A-Z0-9]+', normalized_contractor):
                     token = token.strip()
                     if len(token) >= 2 and token not in self.COMMON_TOKENS:  # Exclude common words
-                        lookup_tokens.add(token)
+                        contractor_tokens.add(token)
                 
-                # Check if there's significant token overlap on PROPER NAMES only
-                # This handles cases like:
-                # - "SUNWEST" (lookup) matches "SUNWEST, INC." (project) - both have "SUNWEST" (proper name)
-                # - "FS CO" (lookup) matches "FS CO BUILDERS" (project) - both have "FS" and "CO" (proper names)
-                # - "NEWINGTON BUILDERS" (lookup) matches "NEWINGTON BUILDERS, INC." (project) - "NEWINGTON" (proper name)
-                # We ignore common words like "CONSTRUCTION", "INC", "FORMERLY", etc.
-                common_proper_names = contractor_tokens.intersection(lookup_tokens)
-                
-                if common_proper_names:
-                    # CRITICAL: Require at least ONE proper name match (not common words)
-                    # This ensures we're matching on actual company names, not generic terms
-                    if len(common_proper_names) >= 1:
-                        # Additional validation: ensure we have meaningful proper name matches
-                        # For very short names (2 chars like "FS", "CO"), require at least 1 match
-                        # For longer names, require at least 1 proper name match
+                # Check if any lookup key matches (either direction)
+                for lookup_key in contractor_lookup.keys():
+                    lookup_key_clean = lookup_key.strip()
+                    if len(lookup_key_clean) < 2:  # Changed from 3 to 2 to allow "FS", "CO", etc.
+                        continue
+                    
+                    # Normalize lookup key
+                    normalized_lookup = re.sub(r'[^A-Z0-9]+', ' ', lookup_key_clean).strip()
+                    
+                    # Extract tokens from lookup key
+                    # CRITICAL: Filter out common words - only match on proper names
+                    lookup_tokens = set()
+                    for token in re.split(r'[^A-Z0-9]+', normalized_lookup):
+                        token = token.strip()
+                        if len(token) >= 2 and token not in self.COMMON_TOKENS:  # Exclude common words
+                            lookup_tokens.add(token)
+                    
+                    # Check if there's significant token overlap on PROPER NAMES only
+                    # This handles cases like:
+                    # - "SUNWEST" (lookup) matches "SUNWEST, INC." (project) - both have "SUNWEST" (proper name)
+                    # - "FS CO" (lookup) matches "FS CO BUILDERS" (project) - both have "FS" and "CO" (proper names)
+                    # - "NEWINGTON BUILDERS" (lookup) matches "NEWINGTON BUILDERS, INC." (project) - "NEWINGTON" (proper name)
+                    # We ignore common words like "CONSTRUCTION", "INC", "FORMERLY", etc.
+                    common_proper_names = contractor_tokens.intersection(lookup_tokens)
+                    
+                    if common_proper_names:
+                        # CRITICAL: Require at least ONE proper name match (not common words)
+                        # This ensures we're matching on actual company names, not generic terms
+                        if len(common_proper_names) >= 1:
+                            # Additional validation: ensure we have meaningful proper name matches
+                            # For very short names (2 chars like "FS", "CO"), require at least 1 match
+                            # For longer names, require at least 1 proper name match
+                            candidates = contractor_lookup[lookup_key]
+                            match_score = 90
+                            break
+                    
+                    # Also try substring matching as fallback (for cases where tokenization might miss)
+                    # Check if lookup key is contained in contractor name (with word boundaries)
+                    if re.search(r'\b' + re.escape(lookup_key_clean) + r'\b', contractor_part):
                         candidates = contractor_lookup[lookup_key]
                         match_score = 90
                         break
-                
-                # Also try substring matching as fallback (for cases where tokenization might miss)
-                # Check if lookup key is contained in contractor name (with word boundaries)
-                if re.search(r'\b' + re.escape(lookup_key_clean) + r'\b', contractor_upper):
-                    candidates = contractor_lookup[lookup_key]
-                    match_score = 90
-                    break
-                
-                # For short names (2-5 chars), also try without word boundaries
-                # This handles "FS CO" matching "FS CO BUILDERS" when "FS" or "CO" alone might not match
-                # Also handles "S-ANG" matching "S-ANG CONSTRUCTION"
-                if len(lookup_key_clean) <= 5 and lookup_key_clean in contractor_upper:
-                    # Make sure it's not a false match (e.g., "CO" matching "CONSTRUCTION")
-                    # Check if it's followed by space, comma, dash, slash, or end of string
-                    if re.search(re.escape(lookup_key_clean) + r'[\s,)\-/]', contractor_upper) or \
-                       contractor_upper.endswith(lookup_key_clean) or \
-                       contractor_upper.startswith(lookup_key_clean):
-                        # Additional safety: for very short names (2 chars), check it's not part of a longer word
-                        if len(lookup_key_clean) <= 2:
-                            # Only match if it's at word boundaries or standalone
-                            if re.search(r'\b' + re.escape(lookup_key_clean) + r'\b', contractor_upper) or \
-                               contractor_upper == lookup_key_clean:
+                    
+                    # For short names (2-5 chars), also try without word boundaries
+                    # This handles "FS CO" matching "FS CO BUILDERS" when "FS" or "CO" alone might not match
+                    # Also handles "S-ANG" matching "S-ANG CONSTRUCTION"
+                    if len(lookup_key_clean) <= 5 and lookup_key_clean in contractor_part:
+                        # Make sure it's not a false match (e.g., "CO" matching "CONSTRUCTION")
+                        # Check if it's followed by space, comma, dash, slash, or end of string
+                        if re.search(re.escape(lookup_key_clean) + r'[\s,)\-/]', contractor_part) or \
+                           contractor_part.endswith(lookup_key_clean) or \
+                           contractor_part.startswith(lookup_key_clean):
+                            # Additional safety: for very short names (2 chars), check it's not part of a longer word
+                            if len(lookup_key_clean) <= 2:
+                                # Only match if it's at word boundaries or standalone
+                                if re.search(r'\b' + re.escape(lookup_key_clean) + r'\b', contractor_part) or \
+                                   contractor_part == lookup_key_clean:
+                                    candidates = contractor_lookup[lookup_key]
+                                    match_score = 90
+                                    break
+                            else:
                                 candidates = contractor_lookup[lookup_key]
                                 match_score = 90
                                 break
-                        else:
-                            candidates = contractor_lookup[lookup_key]
-                            match_score = 90
-                            break
-                
-                # Check reverse: if contractor name (normalized) appears in lookup key
-                if normalized_contractor and len(normalized_contractor) >= 3:
-                    if re.search(r'\b' + re.escape(normalized_contractor) + r'\b', lookup_key_clean):
-                        candidates = contractor_lookup[lookup_key]
-                        match_score = 90
-                        break
                     
-                    # For short contractor names, also try without word boundaries
-                    if len(normalized_contractor) <= 5 and normalized_contractor in lookup_key_clean:
-                        if re.search(re.escape(normalized_contractor) + r'[\s,)]', lookup_key_clean) or \
-                           lookup_key_clean.endswith(normalized_contractor):
+                    # Check reverse: if contractor name (normalized) appears in lookup key
+                    if normalized_contractor and len(normalized_contractor) >= 3:
+                        if re.search(r'\b' + re.escape(normalized_contractor) + r'\b', lookup_key_clean):
                             candidates = contractor_lookup[lookup_key]
                             match_score = 90
                             break
-        
-        # Only proceed if we have matches
-        # This ensures we only match verified contractor relationships
-        if candidates:
-            # CRITICAL: Collect ALL non-excluded candidates, then prioritize
-            # Party-list congressmen should be prioritized since contractor matching
-            # is their primary method (they don't have districts)
-            valid_candidates = []
-            
-            for cm_name, cm_data in candidates:
-                contractor_exclusions = cm_data.get('contractor_exclusions', {})
-                excluded = False
-                for base, exclusions in contractor_exclusions.items():
-                    if base in contractor_upper:
-                        for exclusion_value in exclusions:
-                            if exclusion_value in contractor_upper:
-                                excluded = True
+                        
+                        # For short contractor names, also try without word boundaries
+                        if len(normalized_contractor) <= 5 and normalized_contractor in lookup_key_clean:
+                            if re.search(re.escape(normalized_contractor) + r'[\s,)]', lookup_key_clean) or \
+                               lookup_key_clean.endswith(normalized_contractor):
+                                candidates = contractor_lookup[lookup_key]
+                                match_score = 90
                                 break
-                    if excluded:
-                        break
-                
-                if not excluded:
-                    is_partylist = cm_data.get('is_partylist', False)
-                    # Check if this contractor is in the congressman's family_connections
-                    # (more specific match = higher priority)
-                    family_contractors = cm_data.get('contractors', [])
-                    is_family_contractor = any(
-                        contractor_upper in fc.upper() or fc.upper() in contractor_upper
-                        for fc in family_contractors
-                    )
-                    valid_candidates.append((cm_name, cm_data, is_partylist, is_family_contractor))
             
-            if valid_candidates:
-                # CRITICAL FIX: For Elizaldy Co, only match if contractor is explicitly in his contractor list
-                # This prevents over-matching contractors not linked to him
-                elizaldy_co_name_variants = ['ELIZALDY', 'ELIZALDY CO', 'ELIZALDY SALCEDO CO']
-                filtered_valid_candidates = []
+            # Only proceed if we have matches for this contractor part
+            # This ensures we only match verified contractor relationships
+            if candidates:
+                # CRITICAL: Collect ALL non-excluded candidates, then prioritize
+                # Party-list congressmen should be prioritized since contractor matching
+                # is their primary method (they don't have districts)
+                valid_candidates = []
                 
-                for cm_name, cm_data, is_partylist, is_family_contractor in valid_candidates:
-                    cm_name_upper = cm_name.upper()
-                    is_elizaldy_co = any(variant in cm_name_upper for variant in elizaldy_co_name_variants)
+                for cm_name, cm_data in candidates:
+                    contractor_exclusions = cm_data.get('contractor_exclusions', {})
+                    excluded = False
+                    for base, exclusions in contractor_exclusions.items():
+                        if base in contractor_part:
+                            for exclusion_value in exclusions:
+                                if exclusion_value in contractor_part:
+                                    excluded = True
+                                    break
+                        if excluded:
+                            break
                     
-                    if is_elizaldy_co:
-                        # For Elizaldy Co, require explicit contractor match
-                        # Only include if this contractor is in his contractor list
+                    if not excluded:
+                        is_partylist = cm_data.get('is_partylist', False)
+                        # Check if this contractor is in the congressman's family_connections
+                        # (more specific match = higher priority)
                         family_contractors = cm_data.get('contractors', [])
-                        contractor_matches = any(
-                            contractor_upper in fc.upper() or fc.upper() in contractor_upper
+                        is_family_contractor = any(
+                            contractor_part in fc.upper() or fc.upper() in contractor_part
                             for fc in family_contractors
                         )
-                        if contractor_matches:
-                            filtered_valid_candidates.append((cm_name, cm_data, is_partylist, is_family_contractor))
-                        # Otherwise, skip Elizaldy Co for this contractor
-                    else:
-                        # For other congressmen, include as normal
-                        filtered_valid_candidates.append((cm_name, cm_data, is_partylist, is_family_contractor))
-                
-                if not filtered_valid_candidates:
-                    return None
-                
-                # Sort candidates: prioritize party-list AND family contractor matches
-                # Priority order:
-                # 1. Party-list with family contractor match (highest)
-                # 2. Party-list without family contractor match
-                # 3. Non-party-list with family contractor match
-                # 4. Non-party-list without family contractor match (lowest)
-                filtered_valid_candidates.sort(key=lambda x: (
-                    not (x[2] and x[3]),  # Party-list + family match first
-                    not x[2],              # Then party-list
-                    not x[3],              # Then family match
-                ))
-                
-                return (filtered_valid_candidates[0][0], match_score)
+                        valid_candidates.append((cm_name, cm_data, is_partylist, is_family_contractor, match_score))
+            
+                if valid_candidates:
+                    # CRITICAL FIX: For Elizaldy Co, only match if contractor is explicitly in his contractor list
+                    # This prevents over-matching contractors not linked to him
+                    elizaldy_co_name_variants = ['ELIZALDY', 'ELIZALDY CO', 'ELIZALDY SALCEDO CO']
+                    filtered_valid_candidates = []
+                    
+                    for cm_name, cm_data, is_partylist, is_family_contractor, part_score in valid_candidates:
+                        cm_name_upper = cm_name.upper()
+                        is_elizaldy_co = any(variant in cm_name_upper for variant in elizaldy_co_name_variants)
+                        
+                        if is_elizaldy_co:
+                            # For Elizaldy Co, require explicit contractor match
+                            # Only include if this contractor part is in his contractor list
+                            family_contractors = cm_data.get('contractors', [])
+                            
+                            contractor_matches = any(
+                                contractor_part in fc.upper() or fc.upper() in contractor_part or
+                                # Also check token-based matching for better coverage
+                                any(token in fc.upper() for token in contractor_part.split() if len(token) >= 3) or
+                                any(token in contractor_part for token in fc.upper().split() if len(token) >= 3)
+                                for fc in family_contractors
+                            )
+                            
+                            if contractor_matches:
+                                filtered_valid_candidates.append((cm_name, cm_data, is_partylist, is_family_contractor, part_score))
+                            # Otherwise, skip Elizaldy Co for this contractor part
+                        else:
+                            # For other congressmen, include as normal
+                            filtered_valid_candidates.append((cm_name, cm_data, is_partylist, is_family_contractor, part_score))
+                    
+                    if filtered_valid_candidates:
+                        # Sort candidates: prioritize party-list AND family contractor matches
+                        # Priority order:
+                        # 1. Party-list with family contractor match (highest)
+                        # 2. Party-list without family contractor match
+                        # 3. Non-party-list with family contractor match
+                        # 4. Non-party-list without family contractor match (lowest)
+                        filtered_valid_candidates.sort(key=lambda x: (
+                            not (x[2] and x[3]),  # Party-list + family match first
+                            not x[2],              # Then party-list
+                            not x[3],              # Then family match
+                            -x[4]                  # Then by score (higher is better)
+                        ))
+                        
+                        # Store match for this contractor part
+                        all_matches.append((filtered_valid_candidates[0][0], filtered_valid_candidates[0][4]))
+        
+        # Return up to 2 unique matches for JVs
+        if all_matches:
+            # Get unique congressmen (by name) and their best scores
+            unique_matches = {}
+            for cm_name, score in all_matches:
+                if cm_name not in unique_matches or score > unique_matches[cm_name]:
+                    unique_matches[cm_name] = score
+            
+            # Sort by score (descending) and return up to 2
+            sorted_matches = sorted(unique_matches.items(), key=lambda x: x[1], reverse=True)
+            
+            if len(sorted_matches) == 1:
+                # Single match - return as tuple for backward compatibility
+                return (sorted_matches[0][0], sorted_matches[0][1])
+            elif len(sorted_matches) >= 2:
+                # Multiple matches - return list of up to 2
+                return [
+                    (sorted_matches[0][0], sorted_matches[0][1]),
+                    (sorted_matches[1][0], sorted_matches[1][1])
+                ]
+            else:
+                return (sorted_matches[0][0], sorted_matches[0][1])
         
         return None
 
