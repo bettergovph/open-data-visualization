@@ -700,6 +700,7 @@
                         <div style="font-size: 0.75rem; margin-bottom: 0.3rem; color: #6c757d;">
                             <span style="color: #666;">Source: </span>
                             <span style="font-weight: 600; color: #495057;">${sourceDb}</span>
+                            ${sourceFile ? ` <span style="color: #999; font-size: 0.7rem;">(${escapeHtml(sourceFile)})</span>` : ''}
                         </div>
                         <div style="font-size: 0.8rem;">
                             <div>
@@ -714,6 +715,18 @@
             
             // Get 2026 amount (should be same across all matches for same project)
             const amount2026 = historicalMatches[0]?.year_2026?.amount || project?.amount || 0;
+            
+            // Get source information for 2026
+            const sourceRow = project?.source_row;
+            const sourceCol = project?.source_col;
+            let source2026 = 'GAB 2026';
+            if (sourceRow) {
+                source2026 += ` (Row ${sourceRow}`;
+                if (sourceCol) {
+                    source2026 += `, Col ${sourceCol}`;
+                }
+                source2026 += ')';
+            }
             
             // 2026 is proposed budget - no contractor/contract_id should be shown (they're just predictions)
             card.innerHTML = `
