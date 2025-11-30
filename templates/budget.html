@@ -8361,12 +8361,31 @@ async function copyChartToClipboard(containerId, buttonId) {
                 historicalMatches.forEach((match, idx) => {
                     const histDesc = match.historical?.description || match.historical?.name || 'No description available';
                     const sourceFile = match.historical?.source_file || '';
+                    const historicalYear = match.historical?.year || '';
+                    
+                    // Extract year from historical year (handle both int and string formats)
+                    let yearNum = historicalYear;
+                    if (typeof historicalYear === 'string') {
+                        const yearMatch = historicalYear.match(/(\d{4})/);
+                        if (yearMatch) {
+                            yearNum = yearMatch[1];
+                        }
+                    }
+                    
                     // Determine source database from source_file
                     let sourceDb = 'GAA/PostgreSQL';
                     if (sourceFile.includes('gaa_') || sourceFile.includes('GAA')) {
-                        sourceDb = 'GAA/PostgreSQL';
+                        sourceDb = `GAA ${yearNum}`;
                     } else if (sourceFile) {
                         sourceDb = 'PostgreSQL';
+                    } else {
+                        sourceDb = `GAA ${yearNum}`;
+                    }
+                    
+                    // Extract just filename from source_file path
+                    let filename = sourceFile;
+                    if (sourceFile) {
+                        filename = sourceFile.split('/').pop() || sourceFile.split('\\').pop() || sourceFile;
                     }
                     
                     historicalMatchesHTML += `
