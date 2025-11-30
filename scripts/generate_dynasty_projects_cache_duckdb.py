@@ -712,6 +712,22 @@ class DynastyProjectsCacheGeneratorDuckDB:
         except (ValueError, TypeError):
             pass
         return None
+    
+    def _get_project_month(self, date_val: Any) -> Optional[int]:
+        """Extract month from date (for election year transition handling)."""
+        try:
+            if date_val:
+                if isinstance(date_val, str):
+                    from dateutil.parser import parse
+                    parsed_date = parse(date_val)
+                    return parsed_date.month
+                elif hasattr(date_val, 'month'):
+                    return date_val.month
+                elif hasattr(date_val, 'year'):  # datetime object
+                    return date_val.month
+        except (ValueError, TypeError, AttributeError):
+            pass
+        return None
 
     def _parse_amount(self, amount_val: Any) -> float:
         """Parse amount to float."""
@@ -740,8 +756,13 @@ class DynastyProjectsCacheGeneratorDuckDB:
         Returns: (congressman_name, match_type, match_score, district_congressman, contractor_congressman)
         
         Args:
-            project_data: Optional project dict to extract project code for short-circuit matching
+            project_data: Optional project dict to extract project code for short-circuit matching and month for election transitions
         """
+        # Store project data for election year transition handling
+        if project_data:
+            self._current_project_data = project_data
+        else:
+            self._current_project_data = {}
         district_congressman = None
         contractor_congressman = None
         match_type = 'unknown'
@@ -1248,7 +1269,7 @@ class DynastyProjectsCacheGeneratorDuckDB:
                 district_lookup=district_lookup_dict,
                 contractor_lookup=contractor_lookup_dict,
                 contractor_inverted_index=contractor_inverted_index,
-                project_data=contract  # Pass contract data for project code extraction
+                project_data=contract  # Pass contract data for project code extraction and month for election transitions
             )
 
             # Update Progress
@@ -4897,7 +4918,60 @@ class DynastyProjectsCacheGeneratorDuckDB:
                             # CRITICAL: Only match if project_year is within term range
                             # Don't allow future terms to match past projects
                             # project_year_int is already converted to int above
-                            if term_start <= project_year_int <= term_end:
+                            
+                            # ELECTION YEAR TRANSITION HANDLING (2022)
+                            # In election years, the transition happens in June
+                            # Projects before June go to the outgoing congressman
+                            # Projects after June go to the incoming congressman
+                            term_matches = False
+                            
+                            # Check if this is an election year transition (2022)
+                            # Congressional terms are 3 years: e.g., 2019-2022, 2022-2025, 2025-2028
+                            # Transition happens in June: outgoing serves Jan-Jun, incoming serves Jul-Dec
+                            is_election_year_transition = (project_year_int == 2022)
+                            
+                            if is_election_year_transition:
+                                # Both outgoing and incoming congressmen have 2022 in their 3-year terms
+                                # Outgoing: term_start < 2022, term_end = 2022 (e.g., 2019-2022)
+                                # Incoming: term_start = 2022, term_end > 2022 (e.g., 2022-2025)
+                                # Need to check month to determine which congressman
+                                
+                                # Try to get project month from project data
+                                project_month = None
+                                if hasattr(self, '_current_project_data'):
+                                    proj_data = getattr(self, '_current_project_data', {})
+                                    # Try to extract month from date fields
+                                    date_field = proj_data.get('date_started') or proj_data.get('start_date') or \
+                                                proj_data.get('award_date') or proj_data.get('contract_date')
+                                    if date_field:
+                                        project_month = self._get_project_month(date_field)
+                                
+                                if project_month is not None:
+                                    # June 30 is the transition date (projects in June go to outgoing)
+                                    # Projects Jan-Jun 2022: outgoing congressman (term ending in 2022, typically 3-year term like 2019-2022)
+                                    # Projects Jul-Dec 2022: incoming congressman (term starting in 2022, typically 3-year term like 2022-2025)
+                                    if project_month <= 6:
+                                        # Before/on June - match if this is the outgoing congressman
+                                        # Outgoing has term_start < 2022 and term_end >= 2022 (term includes 2022 and started before it)
+                                        # This handles standard 3-year terms (2019-2022) and edge cases
+                                        if term_start < 2022 and term_end >= 2022:
+                                            term_matches = True
+                                    else:
+                                        # After June - match if this is the incoming congressman
+                                        # Incoming has term_start = 2022 and term_end > 2022 (term starts in 2022)
+                                        # This handles standard 3-year terms (2022-2025) and edge cases
+                                        if term_start == 2022 and term_end > 2022:
+                                            term_matches = True
+                                else:
+                                    # Can't determine month - use default behavior (match if year is in range)
+                                    # This will match both, but the scoring will prioritize based on term overlap
+                                    term_matches = (term_start <= project_year_int <= term_end)
+                            else:
+                                # Normal year matching (not 2022 transition)
+                                # Check if project year falls within the 3-year term range
+                                term_matches = (term_start <= project_year_int <= term_end)
+                            
+                            if term_matches:
                                 # Score: prefer exact matches, then closer to term start
                                 # Long terms are OK - they should match more projects
                                 term_length = term_end - term_start + 1
@@ -5582,7 +5656,58 @@ class DynastyProjectsCacheGeneratorDuckDB:
                                 term_end = term.get('end')
                                 if term_start is not None and term_end is not None:
                                     # CRITICAL: Use project_year_int (int) instead of project_year (may be string)
-                                    if term_start <= project_year_int <= term_end:
+                                    
+                                    # ELECTION YEAR TRANSITION HANDLING (2022)
+                                    # In election years, the transition happens in June
+                                    # Projects before June go to the outgoing congressman
+                                    # Projects after June go to the incoming congressman
+                                    term_matches = False
+                                    
+                                    # Check if this is an election year transition (2022)
+                                    # Congressional terms are 3 years: e.g., 2019-2022, 2022-2025, 2025-2028
+                                    # Transition happens in June: outgoing serves Jan-Jun, incoming serves Jul-Dec
+                                    is_election_year_transition = (project_year_int == 2022)
+                                    
+                                    if is_election_year_transition:
+                                        # Both outgoing and incoming congressmen have 2022 in their 3-year terms
+                                        # Outgoing: term_start < 2022, term_end = 2022 (e.g., 2019-2022)
+                                        # Incoming: term_start = 2022, term_end > 2022 (e.g., 2022-2025)
+                                        # Need to check month to determine which congressman
+                                        
+                                        # Try to get project month from project data
+                                        project_month = None
+                                        if hasattr(self, '_current_project_data'):
+                                            proj_data = getattr(self, '_current_project_data', {})
+                                            # Try to extract month from date fields
+                                            date_field = proj_data.get('date_started') or proj_data.get('start_date') or \
+                                                        proj_data.get('award_date') or proj_data.get('contract_date')
+                                            if date_field:
+                                                project_month = self._get_project_month(date_field)
+                                        
+                                        if project_month is not None:
+                                            # June 30 is the transition date (projects in June go to outgoing)
+                                            # Projects Jan-Jun 2022: outgoing congressman (3-year term ending in 2022)
+                                            # Projects Jul-Dec 2022: incoming congressman (3-year term starting in 2022)
+                                            if project_month <= 6:
+                                                # Before/on June - match if this is the outgoing congressman
+                                                # Outgoing has term_start < 2022 and term_end = 2022 (3-year term ending in 2022)
+                                                if term_start < 2022 and term_end == 2022:
+                                                    term_matches = True
+                                            else:
+                                                # After June - match if this is the incoming congressman
+                                                # Incoming has term_start = 2022 and term_end = 2025 (3-year term starting in 2022)
+                                                if term_start == 2022 and term_end == 2025:
+                                                    term_matches = True
+                                        else:
+                                            # Can't determine month - use default behavior
+                                            # This will match both, but the scoring will prioritize based on term overlap
+                                            term_matches = (term_start <= project_year_int <= term_end)
+                                    else:
+                                        # Normal year matching (not 2022 transition)
+                                        # Check if project year falls within the 3-year term range
+                                        term_matches = (term_start <= project_year_int <= term_end)
+                                    
+                                    if term_matches:
                                         # Exact match - calculate score based on how centered the year is in the term
                                         term_length = term_end - term_start + 1
                                         year_position = project_year_int - term_start
@@ -5762,19 +5887,46 @@ class DynastyProjectsCacheGeneratorDuckDB:
                     valid_candidates.append((cm_name, cm_data, is_partylist, is_family_contractor))
             
             if valid_candidates:
+                # CRITICAL FIX: For Elizaldy Co, only match if contractor is explicitly in his contractor list
+                # This prevents over-matching contractors not linked to him
+                elizaldy_co_name_variants = ['ELIZALDY', 'ELIZALDY CO', 'ELIZALDY SALCEDO CO']
+                filtered_valid_candidates = []
+                
+                for cm_name, cm_data, is_partylist, is_family_contractor in valid_candidates:
+                    cm_name_upper = cm_name.upper()
+                    is_elizaldy_co = any(variant in cm_name_upper for variant in elizaldy_co_name_variants)
+                    
+                    if is_elizaldy_co:
+                        # For Elizaldy Co, require explicit contractor match
+                        # Only include if this contractor is in his contractor list
+                        family_contractors = cm_data.get('contractors', [])
+                        contractor_matches = any(
+                            contractor_upper in fc.upper() or fc.upper() in contractor_upper
+                            for fc in family_contractors
+                        )
+                        if contractor_matches:
+                            filtered_valid_candidates.append((cm_name, cm_data, is_partylist, is_family_contractor))
+                        # Otherwise, skip Elizaldy Co for this contractor
+                    else:
+                        # For other congressmen, include as normal
+                        filtered_valid_candidates.append((cm_name, cm_data, is_partylist, is_family_contractor))
+                
+                if not filtered_valid_candidates:
+                    return None
+                
                 # Sort candidates: prioritize party-list AND family contractor matches
                 # Priority order:
                 # 1. Party-list with family contractor match (highest)
                 # 2. Party-list without family contractor match
                 # 3. Non-party-list with family contractor match
                 # 4. Non-party-list without family contractor match (lowest)
-                valid_candidates.sort(key=lambda x: (
+                filtered_valid_candidates.sort(key=lambda x: (
                     not (x[2] and x[3]),  # Party-list + family match first
                     not x[2],              # Then party-list
                     not x[3],              # Then family match
                 ))
                 
-                return (valid_candidates[0][0], match_score)
+                return (filtered_valid_candidates[0][0], match_score)
         
         return None
 

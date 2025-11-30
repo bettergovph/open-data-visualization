@@ -32,20 +32,24 @@
       "project_municipality_barangay": "KALILANGAN",
       "is_flood_related": true,
       "match_type": "district",
-      "match_score": 80,
+      "match_score": 70,
       "_source": "PhilGEPS",
       "congressman": "Rogelio Roque",
-      "sources_count": 2,
+      "sources_count": 1,
       "sources_list": [
-        "PhilGEPS",
-        "Transparency"
-      ]
+        "PhilGEPS"
+      ],
+      "_skipped_reclassification": true
     },
     {
       "source": "Transparency",
       "meilisearch_id": null,
       "contract_id": "21K00170",
       "project_name": "CONSTRUCTION/IMPROVEMENT OF ACCESS ROADS LEADING TO TRADES, INDUSTRIES AND ECONOMIC ZONES (ROLL-IT) CONSTRUCTION OF SOUTHERN BUKIDNON AGRI-INDUSTRIAL ECONOMIC ZONE, ROAD NETWORK DEVELOPMENT PROJECT (PACKAGE 2), PANGANTUCAN, BUKIDNON",
+      "project_description": null,
+      "notice_title": null,
+      "award_description": null,
+      "award_title": null,
       "contractor": "N/A",
       "amount": 126005231.81,
       "location": "Region X",
@@ -73,13 +77,18 @@
       "sources_count": 1,
       "sources_list": [
         "Transparency"
-      ]
+      ],
+      "_skipped_reclassification": true
     },
     {
       "source": "Transparency",
       "meilisearch_id": null,
       "contract_id": "21K00163",
       "project_name": "CONSTRUCTION/IMPROVEMENT OF ACCESS ROADS LEADING TO TRADES, INDUSTRIES AND ECONOMIC ZONES (ROLL-IT) CONSTRUCTION OF SOUTHERN BUKIDNON AGRI-INDUSTRIAL ECONOMIC ZONE, ROAD NETWORK DEVELOPMENT PROJECT (PACKAGE 1), PANGANTUCAN, BUKIDNON",
+      "project_description": null,
+      "notice_title": null,
+      "award_description": null,
+      "award_title": null,
       "contractor": "N/A",
       "amount": 112056463.11,
       "location": "Region X",
@@ -107,13 +116,18 @@
       "sources_count": 1,
       "sources_list": [
         "Transparency"
-      ]
+      ],
+      "_skipped_reclassification": true
     },
     {
       "source": "Transparency",
       "meilisearch_id": null,
       "contract_id": "21K00164",
       "project_name": "CONSTRUCTION/IMPROVEMENT OF ACCESS ROADS LEADING TO TRADES, INDUSTRIES AND ECONOMIC ZONES (ROLL-IT) CONSTRUCTION/IMPROVEMENT OF SOUTHERN BUKIDNON AGRI-INDUSTRIAL ECONOMIC ZONE ROAD (PANGANTUCAN SECTION), PANGANTUCAN, BUKIDNON",
+      "project_description": null,
+      "notice_title": null,
+      "award_description": null,
+      "award_title": null,
       "contractor": "N/A",
       "amount": 70966117.46,
       "location": "Region X",
@@ -141,13 +155,18 @@
       "sources_count": 1,
       "sources_list": [
         "Transparency"
-      ]
+      ],
+      "_skipped_reclassification": true
     },
     {
       "source": "Transparency",
       "meilisearch_id": null,
       "contract_id": "21K00162",
       "project_name": "CONSTRUCTION/IMPROVEMENT OF ACCESS ROADS LEADING TO TRADES, INDUSTRIES AND ECONOMIC ZONES (ROLL-IT) SOUTHERN BUKIDNON AGRI-INDUSTRIAL ECONOMIC ZONE ROAD (PANGANTUCAN SECTION), PANGANTUCAN, BUKIDNON",
+      "project_description": null,
+      "notice_title": null,
+      "award_description": null,
+      "award_title": null,
       "contractor": "N/A",
       "amount": 45644788.24,
       "location": "Region X",
@@ -175,7 +194,8 @@
       "sources_count": 1,
       "sources_list": [
         "Transparency"
-      ]
+      ],
+      "_skipped_reclassification": true
     }
   ],
   "summary": {
@@ -185,7 +205,7 @@
     "ssp": 0,
     "infrawatch": 0,
     "microsite": 0,
-    "transparency": 5,
+    "transparency": 4,
     "district_projects": 5,
     "contractor_projects": 0,
     "flood_projects": 1
@@ -200,6 +220,6 @@
     "flood_count": 1,
     "flood_cost": 128344905.8
   },
-  "generated_at": "2025-11-29T23:49:00.035338",
+  "generated_at": "2025-11-30T18:30:55.063780",
   "cache_version": "1.0"
 }

@@ -32,14 +32,14 @@
       "project_municipality_barangay": "MANDAUE CITY",
       "is_flood_related": true,
       "match_type": "district",
-      "match_score": 80,
+      "match_score": 70,
       "_source": "PhilGEPS",
       "congressman": "Daphne Lagon",
-      "sources_count": 2,
+      "sources_count": 1,
       "sources_list": [
-        "PhilGEPS",
-        "Transparency"
-      ]
+        "PhilGEPS"
+      ],
+      "_skipped_reclassification": true
     },
     {
       "source": "PhilGEPS",
@@ -71,14 +71,53 @@
       "project_municipality_barangay": "1-PACMAN PARTY-LIST",
       "is_flood_related": true,
       "match_type": "district",
-      "match_score": 80,
+      "match_score": 70,
       "_source": "PhilGEPS",
       "congressman": "Daphne Lagon",
-      "sources_count": 2,
+      "sources_count": 1,
       "sources_list": [
-        "PhilGEPS",
+        "PhilGEPS"
+      ],
+      "_skipped_reclassification": true
+    },
+    {
+      "source": "Transparency",
+      "meilisearch_id": null,
+      "contract_id": "24H00085",
+      "project_name": "CSSP, SUSTAINABLE INFRASTRUCTURE PROJECTS ALLEVIATING GAPS (SIPAG) - ACCESS ROADS AND/OR BRIDGES FROM THE NATIONAL ROAD/S LEADING TO MAJOR/ STRATEGIC PUBLIC BUILDINGS/ FACILITIES, CONSTRUCTION OF MARIGONDON-BASAK BYPASS ROAD, LAPU-LAPU CITY, CEBU",
+      "project_description": null,
+      "notice_title": null,
+      "award_description": null,
+      "award_title": null,
+      "contractor": "N/A",
+      "amount": 173599888.0,
+      "location": "Region VII",
+      "year": "2024",
+      "status": "On-Going",
+      "district_congressman": "Daphne Lagon",
+      "district_match_type": "district",
+      "district_match_score": 100,
+      "district_is_city_wide": false,
+      "congressman_district": "6th District District Cebu",
+      "contractor_congressman": null,
+      "contractor_match_type": null,
+      "contractor_match_score": 0,
+      "contractor_congressman_district": null,
+      "project_district_type": "province",
+      "project_district": "Cebu 6th District District",
+      "project_barangay_municipality": "LAPU-LAPU CITY",
+      "project_province_city_district": "Province",
+      "project_municipality_barangay": "LAPU-LAPU CITY",
+      "is_flood_related": false,
+      "match_type": "district",
+      "match_score": 70,
+      "_source": "Transparency",
+      "congressman": "Daphne Lagon",
+      "sources_count": 1,
+      "sources_list": [
         "Transparency"
-      ]
+      ],
+      "_skipped_reclassification": true
     },
     {
       "source": "PhilGEPS",
@@ -110,14 +149,14 @@
       "project_municipality_barangay": "MANDAUE CITY",
       "is_flood_related": true,
       "match_type": "district",
-      "match_score": 80,
+      "match_score": 70,
       "_source": "PhilGEPS",
       "congressman": "Daphne Lagon",
-      "sources_count": 2,
+      "sources_count": 1,
       "sources_list": [
-        "PhilGEPS",
-        "Transparency"
-      ]
+        "PhilGEPS"
+      ],
+      "_skipped_reclassification": true
     },
     {
       "source": "PhilGEPS",
@@ -149,54 +188,24 @@
       "project_municipality_barangay": "MANDAUE CITY",
       "is_flood_related": true,
       "match_type": "district",
-      "match_score": 80,
-      "_source": "PhilGEPS",
-      "congressman": "Daphne Lagon",
-      "sources_count": 2,
-      "sources_list": [
-        "PhilGEPS",
-        "Transparency"
-      ]
-    },
-    {
-      "source": "Transparency",
-      "meilisearch_id": null,
-      "contract_id": "24H00085",
-      "project_name": "CSSP, SUSTAINABLE INFRASTRUCTURE PROJECTS ALLEVIATING GAPS (SIPAG) - ACCESS ROADS AND/OR BRIDGES FROM THE NATIONAL ROAD/S LEADING TO MAJOR/ STRATEGIC PUBLIC BUILDINGS/ FACILITIES, CONSTRUCTION OF MARIGONDON-BASAK BYPASS ROAD, LAPU-LAPU CITY, CEBU",
-      "contractor": "N/A",
-      "amount": 173599888.0,
-      "location": "Region VII",
-      "year": "2024",
-      "status": "On-Going",
-      "district_congressman": "Daphne Lagon",
-      "district_match_type": "district",
-      "district_match_score": 100,
-      "district_is_city_wide": false,
-      "congressman_district": "6th District District Cebu",
-      "contractor_congressman": null,
-      "contractor_match_type": null,
-      "contractor_match_score": 0,
-      "contractor_congressman_district": null,
-      "project_district_type": "province",
-      "project_district": "Cebu 6th District District",
-      "project_barangay_municipality": "LAPU-LAPU CITY",
-      "project_province_city_district": "Province",
-      "project_municipality_barangay": "LAPU-LAPU CITY",
-      "is_flood_related": false,
-      "match_type": "district",
       "match_score": 70,
-      "_source": "Transparency",
+      "_source": "PhilGEPS",
       "congressman": "Daphne Lagon",
       "sources_count": 1,
       "sources_list": [
-        "Transparency"
-      ]
+        "PhilGEPS"
+      ],
+      "_skipped_reclassification": true
     },
     {
       "source": "Transparency",
       "meilisearch_id": null,
       "contract_id": "25H00121",
       "project_name": "CONVERGENCE AND SPECIAL SUPPORT PROGRAM, BASIC INFRASTRUCTURE PROGRAM (BIP) - MULTI-PURPOSE BUILDINGS/ FACILITIES TO SUPPORT SOCIAL SERVICES, CONSTRUCTION OF MULTI-PURPOSE BUILDINGS INCLUDING OTHER FACILITIES, LAPU-LAPU CITY, CEBU (PACKAGE 1)",
+      "project_description": null,
+      "notice_title": null,
+      "award_description": null,
+      "award_title": null,
       "contractor": "N/A",
       "amount": 146272443.06,
       "location": "Region VII",
@@ -224,7 +233,8 @@
       "sources_count": 1,
       "sources_list": [
         "Transparency"
-      ]
+      ],
+      "_skipped_reclassification": true
     },
     {
       "source": "PhilGEPS",
@@ -256,14 +266,14 @@
       "project_municipality_barangay": "1-PACMAN PARTY-LIST",
       "is_flood_related": true,
       "match_type": "district",
-      "match_score": 69,
+      "match_score": 59,
       "_source": "PhilGEPS",
       "congressman": "Daphne Lagon",
-      "sources_count": 2,
+      "sources_count": 1,
       "sources_list": [
-        "PhilGEPS",
-        "Transparency"
-      ]
+        "PhilGEPS"
+      ],
+      "_skipped_reclassification": true
     },
     {
       "source": "PhilGEPS",
@@ -295,20 +305,24 @@
       "project_municipality_barangay": "1-PACMAN PARTY-LIST",
       "is_flood_related": true,
       "match_type": "district",
-      "match_score": 68,
+      "match_score": 58,
       "_source": "PhilGEPS",
       "congressman": "Daphne Lagon",
-      "sources_count": 2,
+      "sources_count": 1,
       "sources_list": [
-        "PhilGEPS",
-        "Transparency"
-      ]
+        "PhilGEPS"
+      ],
+      "_skipped_reclassification": true
     },
     {
       "source": "Transparency",
       "meilisearch_id": null,
       "contract_id": "23H00048",
       "project_name": "CONVERGENCE AND SPECIAL SUPPORT PROG., CONST./IMPROVEMENT OF VARIOUS INFRASTRUCTURES IN SUPPORT OF NATIONAL SECURITY (TATAG NG IMPRASTRAKTURA PARA SA KAPAYAPAAN AT SEGURIDAD PROGRAM - TIKAS), CONST. OF MANDAUE POLICE STATION 3 BUILDING, MANDAUE CITY, CEBU",
+      "project_description": null,
+      "notice_title": null,
+      "award_description": null,
+      "award_title": null,
       "contractor": "N/A",
       "amount": 57900000.0,
       "location": "Region VII",
@@ -336,13 +350,18 @@
       "sources_count": 1,
       "sources_list": [
         "Transparency"
-      ]
+      ],
+      "_skipped_reclassification": true
     },
     {
       "source": "Transparency",
       "meilisearch_id": null,
       "contract_id": "23H00055",
       "project_name": "ORGANIZATIONAL OUTCOME 1: ENSURE SAFE AND RELIABLE NATIONAL ROAD SYSTEM, NETWORK DEVELOPMENT, ROAD WIDENING - SECONDARY ROADS, MACTAN CIRCUMFERENTIAL RD - K0030 + 726 - K0031 + 436, BRGY. BABAG 2, LAPU-LAPU CITY, CEBU",
+      "project_description": null,
+      "notice_title": null,
+      "award_description": null,
+      "award_title": null,
       "contractor": "N/A",
       "amount": 14420491.32,
       "location": "Region VII",
@@ -370,13 +389,18 @@
       "sources_count": 1,
       "sources_list": [
         "Transparency"
-      ]
+      ],
+      "_skipped_reclassification": true
     },
     {
       "source": "Transparency",
       "meilisearch_id": null,
       "contract_id": "24H00127",
       "project_name": "CSSP, CONSTRUCTION/ IMPROVEMENT OF VARIOUS INFRASTRUCTURE IN SUPPORT OF NATIONAL SECURITY (TATAG NG IMPRASTRAKTURA PARA SA KAPAYAPAAN AT SEGURIDAD PROGRAM-TIKAS), CONST. OF MISSILE STORAGE FACILITY, NAVAL BASE RAFAEL RAMOS (NBRR), LAPU-LAPU CITY, CEBU",
+      "project_description": null,
+      "notice_title": null,
+      "award_description": null,
+      "award_title": null,
       "contractor": "N/A",
       "amount": 9644999.95,
       "location": "Region VII",
@@ -404,7 +428,8 @@
       "sources_count": 1,
       "sources_list": [
         "Transparency"
-      ]
+      ],
+      "_skipped_reclassification": true
     }
   ],
   "summary": {
@@ -414,7 +439,7 @@
     "ssp": 0,
     "infrawatch": 0,
     "microsite": 0,
-    "transparency": 11,
+    "transparency": 5,
     "district_projects": 11,
     "contractor_projects": 0,
     "flood_projects": 6
@@ -429,6 +454,6 @@
     "flood_count": 6,
     "flood_cost": 879869887.9
   },
-  "generated_at": "2025-11-29T23:48:02.786773",
+  "generated_at": "2025-11-30T18:30:14.490159",
   "cache_version": "1.0"
 }

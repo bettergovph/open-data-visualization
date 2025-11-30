@@ -32,14 +32,14 @@
       "project_municipality_barangay": "1-PACMAN PARTY-LIST",
       "is_flood_related": true,
       "match_type": "district",
-      "match_score": 80,
+      "match_score": 70,
       "_source": "PhilGEPS",
       "congressman": "Victor Yap",
-      "sources_count": 2,
+      "sources_count": 1,
       "sources_list": [
-        "PhilGEPS",
-        "Transparency"
-      ]
+        "PhilGEPS"
+      ],
+      "_skipped_reclassification": true
     },
     {
       "source": "PhilGEPS",
@@ -71,20 +71,24 @@
       "project_municipality_barangay": "1-PACMAN PARTY-LIST",
       "is_flood_related": true,
       "match_type": "district",
-      "match_score": 67,
+      "match_score": 57,
       "_source": "PhilGEPS",
       "congressman": "Victor Yap",
-      "sources_count": 2,
+      "sources_count": 1,
       "sources_list": [
-        "PhilGEPS",
-        "Transparency"
-      ]
+        "PhilGEPS"
+      ],
+      "_skipped_reclassification": true
     },
     {
       "source": "Transparency",
       "meilisearch_id": null,
       "contract_id": "19BK0095",
       "project_name": "CONSTRUCTION/REHABILITATION OF WATER SUPPLY/SEPTAGE AND SEWERAGE/RAIN WATER COLLECTORS A)LIGAYA ELEMENTARY SCHOOL, LIGAYA, AGLIPAY B) PINARIPAD SUR ELEMENTARY SCHOOL, PINARIPAD SUR, AGLIPAY C) VICTORIA SOUTH ELEMENTARY SCHOOL, VICTORIA, AGLIPAY D) SAN PED",
+      "project_description": null,
+      "notice_title": null,
+      "award_description": null,
+      "award_title": null,
       "contractor": "N/A",
       "amount": 1453553.42,
       "location": "Quirino District Engineering Office",
@@ -112,7 +116,8 @@
       "sources_count": 1,
       "sources_list": [
         "Transparency"
-      ]
+      ],
+      "_skipped_reclassification": true
     }
   ],
   "summary": {
@@ -122,7 +127,7 @@
     "ssp": 0,
     "infrawatch": 0,
     "microsite": 0,
-    "transparency": 3,
+    "transparency": 1,
     "district_projects": 3,
     "contractor_projects": 0,
     "flood_projects": 2
@@ -137,6 +142,6 @@
     "flood_count": 2,
     "flood_cost": 237619570.54999998
   },
-  "generated_at": "2025-11-29T23:49:07.937715",
+  "generated_at": "2025-11-30T18:31:01.034686",
   "cache_version": "1.0"
 }
