@@ -64,6 +64,16 @@
             </p>
         </div>
 
+        <!-- Download Buttons -->
+        <div id="mobile-resu-download-buttons" style="display: none; margin: 1rem 0; display: flex; gap: 0.5rem; flex-wrap: wrap;">
+            <button onclick="downloadMobileResurrectedCSV()" style="background: #28a745; color: white; border: none; padding: 0.5rem 1rem; border-radius: 6px; cursor: pointer; font-size: 12px; font-weight: 600; flex: 1; min-width: 120px;">
+                📥 CSV
+            </button>
+            <button onclick="downloadMobileResurrectedJSON()" style="background: #0038A8; color: white; border: none; padding: 0.5rem 1rem; border-radius: 6px; cursor: pointer; font-size: 12px; font-weight: 600; flex: 1; min-width: 120px;">
+                📥 JSON
+            </button>
+        </div>
+
         <!-- Loading -->
         <div id="mobile-resu-loading" class="text-center py-8">
             <div class="inline-block w-8 h-8 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin"></div>
