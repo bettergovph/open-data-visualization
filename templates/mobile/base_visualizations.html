@@ -71,6 +71,19 @@
             margin: 0 !important;
             padding: 0 !important;
         }
+        
+        /* Hide only Integrated menu item globally */
+        a[href="/integrated"],
+        a[href="/integrated"]:hover,
+        nav a[href^="/integrated"],
+        #mobile-nav-menu a[href="/integrated"],
+        #mobile-nav-menu a[href^="/integrated"],
+        .visualizations-mobile-nav-menu a[href="/integrated"],
+        .visualizations-mobile-nav-menu a[href^="/integrated"],
+        #mobileMenu a[href="/integrated"],
+        #mobileMenu a[href^="/integrated"] {
+            display: none !important;
+        }
     </style>
 
     {% block head %}{% endblock %}

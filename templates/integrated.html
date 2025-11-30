@@ -173,7 +173,8 @@
             <a href="/dime" class="text-black hover:text-gray-600 font-medium transition">DIME</a>
             <a href="/map" class="text-black hover:text-gray-600 font-medium transition">Map</a>
             <a href="/dynasty" class="text-black hover:text-gray-600 font-medium transition">Dynasties</a>
-            <a href="/integrated" class="text-black hover:text-gray-600 font-medium transition border-b-2 border-black">Integrated</a>
+            <!-- Integrated menu item hidden -->
+            <!-- <a href="/integrated" class="text-black hover:text-gray-600 font-medium transition border-b-2 border-black">Integrated</a> -->
             <a href="/sources" class="text-black hover:text-gray-600 font-medium transition">Sources</a>
         </div>
         <div class="md:hidden">
@@ -193,7 +194,8 @@
         <a href="/dime" class="block text-black hover:text-gray-600 font-medium py-2">DIME</a>
         <a href="/map" class="block text-black hover:text-gray-600 font-medium py-2">Map</a>
         <a href="/dynasty" class="block text-black hover:text-gray-600 font-medium py-2">Dynasties</a>
-        <a href="/integrated" class="block text-black hover:text-gray-600 font-medium py-2 border-b-2 border-black">Integrated</a>
+        <!-- Integrated menu item hidden -->
+        <!-- <a href="/integrated" class="block text-black hover:text-gray-600 font-medium py-2 border-b-2 border-black">Integrated</a> -->
         <a href="/sources" class="block text-black hover:text-gray-600 font-medium py-2">Sources</a>
     </div>
 </nav>
@@ -6657,10 +6659,104 @@ function downloadCongressmanChartCSV() {
     const btn = document.getElementById('download-congressman-csv-btn');
     if (!btn) return;
     
-    // Get current data based on sort mode
-    const data = currentSortMode === 'count' ? rankingByCount : rankingByCost;
+    // Get ALL congressmen by combining both datasets to ensure we have everyone
+    // First, try to get complete data from visualOverviewDataAll if available
+    let allData = [];
+    if (visualOverviewDataAll && visualOverviewDataAll.chart_data_by_count && visualOverviewDataAll.chart_data_by_cost) {
+        // Use the complete dataset from the API
+        const countData = Array.isArray(visualOverviewDataAll.chart_data_by_count) ? visualOverviewDataAll.chart_data_by_count : [];
+        const costData = Array.isArray(visualOverviewDataAll.chart_data_by_cost) ? visualOverviewDataAll.chart_data_by_cost : [];
+        
+        // Create a map to merge both datasets
+        const congressmenMap = new Map();
+        
+        // Add all from count data
+        countData.forEach(item => {
+            const name = item.name || '';
+            if (name) {
+                congressmenMap.set(name, {
+                    name: name,
+                    count: item.count || 0,
+                    cost: item.total_cost || item.cost || 0
+                });
+            }
+        });
+        
+        // Add/update from cost data
+        costData.forEach(item => {
+            const name = item.name || '';
+            if (name) {
+                const existing = congressmenMap.get(name);
+                if (existing) {
+                    // Update cost if it's missing or zero
+                    if ((existing.cost === 0 || !existing.cost) && (item.total_cost || item.cost)) {
+                        existing.cost = item.total_cost || item.cost;
+                    }
+                } else {
+                    // Add new entry
+                    congressmenMap.set(name, {
+                        name: name,
+                        count: item.count || 0,
+                        cost: item.total_cost || item.cost || 0
+                    });
+                }
+            }
+        });
+        
+        allData = Array.from(congressmenMap.values());
+    } else {
+        // Fallback: combine rankingByCount and rankingByCost
+        const congressmenMap = new Map();
+        
+        // Add all from rankingByCount
+        if (Array.isArray(rankingByCount) && rankingByCount.length > 0) {
+            rankingByCount.forEach(item => {
+                const name = item.name || '';
+                if (name) {
+                    congressmenMap.set(name, {
+                        name: name,
+                        count: item.count || 0,
+                        cost: item.total_cost || item.cost || 0
+                    });
+                }
+            });
+        }
+        
+        // Add all from rankingByCost
+        if (Array.isArray(rankingByCost) && rankingByCost.length > 0) {
+            rankingByCost.forEach(item => {
+                const name = item.name || '';
+                if (name) {
+                    const existing = congressmenMap.get(name);
+                    if (existing) {
+                        // Update cost if it's missing or zero
+                        if ((existing.cost === 0 || !existing.cost) && (item.total_cost || item.cost)) {
+                            existing.cost = item.total_cost || item.cost;
+                        }
+                    } else {
+                        // Add new entry
+                        congressmenMap.set(name, {
+                            name: name,
+                            count: item.count || 0,
+                            cost: item.total_cost || item.cost || 0
+                        });
+                    }
+                }
+            });
+        }
+        
+        allData = Array.from(congressmenMap.values());
+    }
     
-    if (!data || data.length === 0) {
+    // Sort based on current sort mode
+    let data = allData;
+    if (currentSortMode === 'count') {
+        data.sort((a, b) => (b.count || 0) - (a.count || 0));
+    } else {
+        data.sort((a, b) => (b.cost || 0) - (a.cost || 0));
+    }
+    
+    if (data.length === 0) {
         alert('No data available to export');
         return;
     }
@@ -6678,7 +6774,7 @@ function downloadCongressmanChartCSV() {
         const rows = data.map(item => {
             const name = escapeCSV(item.name || '');
             const count = item.count || 0;
-            const cost = item.total_cost || item.cost || 0;
+            const cost = item.cost || 0;
             const costFormatted = formatCostForCSV(cost);
             return [name, count, cost, costFormatted];
         });

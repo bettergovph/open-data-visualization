@@ -30,6 +30,14 @@
     header { 
         display: none !important; 
     }
+    /* Hide only Integrated menu item */
+    .visualizations-nav a[href="/integrated"],
+    .visualizations-nav a[href="/integrated"]:hover,
+    nav.visualizations-nav a[href^="/integrated"],
+    #mobileMenu a[href="/integrated"],
+    #mobileMenu a[href^="/integrated"] {
+        display: none !important;
+    }
     /* Ensure our BetterGov nav is visible with maximum specificity */
     html body nav.visualizations-nav,
     html body main nav.visualizations-nav,
@@ -95,7 +103,8 @@
             <a href="/dime" class="text-black hover:text-gray-600 font-medium transition">DIME</a>
             <a href="/map" class="text-black hover:text-gray-600 font-medium transition">Map</a>
             <a href="/dynasty" class="text-black hover:text-gray-600 font-medium transition">Dynasties</a>
-            <a href="/integrated" class="text-black hover:text-gray-600 font-medium transition">Integrated</a>
+            <!-- Integrated menu item hidden -->
+            <!-- <a href="/integrated" class="text-black hover:text-gray-600 font-medium transition">Integrated</a> -->
             <a href="/sources" class="text-black hover:text-gray-600 font-medium transition">Sources</a>
         </div>
         <div class="md:hidden">
@@ -115,7 +124,8 @@
         <a href="/dime" class="block text-black hover:text-gray-600 font-medium py-2">DIME</a>
         <a href="/map" class="block text-black hover:text-gray-600 font-medium py-2">Map</a>
         <a href="/dynasty" class="block text-black hover:text-gray-600 font-medium py-2">Dynasties</a>
-        <a href="/integrated" class="block text-black hover:text-gray-600 font-medium py-2">Integrated</a>
+        <!-- Integrated menu item hidden -->
+        <!-- <a href="/integrated" class="block text-black hover:text-gray-600 font-medium py-2">Integrated</a> -->
         <a href="/sources" class="block text-black hover:text-gray-600 font-medium py-2">Sources</a>
     </div>
 </nav>
@@ -183,7 +193,7 @@
             </div>
 
             <!-- Integrated Card -->
-            <div class="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition">
+            <div class="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition" style="display: none !important;">
                 <h3 class="text-2xl font-semibold text-black mb-3">🎯 Integrated Analysis</h3>
                 <p class="text-gray-600 mb-4">Comprehensive province project analysis with integrated data from multiple sources, including visualizations and detailed project breakdowns.</p>
                 <a href="/integrated" class="inline-block bg-black text-white px-6 py-2 rounded-lg hover:bg-gray-800 transition">View Integrated Analysis</a>

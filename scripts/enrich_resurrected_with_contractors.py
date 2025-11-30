@@ -673,8 +673,11 @@ class ContractorEnricher:
             cursor.close()
             conn.close()
         except Exception as e:
-            # Silently fail - source info is optional
-            pass
+            # Log error but don't fail - source info is optional
+            import traceback
+            print(f"⚠️  Warning: Could not enrich source info for historical ID {hist_id}, year {hist_year}: {str(e)}")
+            # Uncomment for debugging:
+            # traceback.print_exc()
     
     def enrich_matches(self, json_path: Path):
         """Enrich all matches with contractor data"""
@@ -724,6 +727,7 @@ class ContractorEnricher:
             for match in project_matches:
                 historical = match.get('historical', {})
                 if historical and historical.get('id'):
+                    # Enrich source info (row/cell)
                     self._enrich_historical_source_info(historical)
             project_2026 = first_match.get('year_2026', {})
             project_name = project_2026.get('name', '')
