@@ -630,17 +630,15 @@
                 // Project name/description match
                 const projectMatch = !projectTerm || text.includes(projectTerm);
                 
-                // Contractor match
+                // Contractor match (only search historical contractors, 2026 is proposed budget)
                 let contractorMatch = true;
                 if (contractorTerm) {
-                    const contractor2026 = (project?.contractor || project?.contractors?.[0] || '').toLowerCase();
                     const historicalContractors = group.historicalMatches
                         .map(m => m.historical?.contractor || '')
                         .filter(Boolean)
                         .join(' ')
                         .toLowerCase();
-                    const allContractorText = (contractor2026 + ' ' + historicalContractors).trim();
-                    contractorMatch = allContractorText.includes(contractorTerm);
+                    contractorMatch = historicalContractors.includes(contractorTerm);
                 }
                 
                 return projectMatch && contractorMatch;
@@ -691,7 +689,7 @@
                                 <span style="color: #666;">${match.historical?.year} Amount: </span>
                                 <span style="font-weight: bold; color: #dc3545;">₱${((match.historical?.amount || 0) / 1000000).toFixed(1)}M</span>
                             </div>
-                            ${match.historical?.contractor ? `<div style="margin-top: 0.25rem;"><span style="color: #666; font-size: 0.75rem;">Contractor: </span><span style="font-weight: bold; color: #667eea; font-size: 0.75rem;" data-contractor-historical>${escapeHtml(match.historical.contractor)}</span></div>` : ''}
+                            ${match.historical?.contractor ? `<div style="margin-top: 0.25rem;"><span style="color: #666; font-size: 0.75rem;">Contractor: </span><span style="font-weight: bold; color: #667eea; font-size: 0.75rem;" data-contractor-historical>${escapeHtml(match.historical.contractor)}</span>${match.historical?.contract_id ? ` <span style="color: #999; font-size: 0.7rem;">(ID: ${escapeHtml(match.historical.contract_id)})</span>` : ''}</div>` : ''}
                         </div>
                     </div>
                 `;
@@ -700,14 +698,11 @@
             // Get 2026 amount (should be same across all matches for same project)
             const amount2026 = historicalMatches[0]?.year_2026?.amount || project?.amount || 0;
             
-            // Get contractor information if available
-            const contractor = project?.contractor || project?.contractors?.[0] || historicalMatches[0]?.year_2026?.contractor || null;
-            
+            // 2026 is proposed budget - no contractor/contract_id should be shown (they're just predictions)
             card.innerHTML = `
                 <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 0.5rem;">
                     <div style="flex: 1;">
                         <h5 style="color: #0038A8; margin: 0 0 0.25rem 0; font-size: 0.9rem;">${escapeHtml(project?.name || project?.description || 'Unknown')}</h5>
-                        ${contractor ? `<p style="font-size: 0.8em; color: #666; margin: 0; font-style: italic;">Contractor: <strong data-contractor-2026>${escapeHtml(contractor)}</strong></p>` : ''}
                     </div>
                     <span style="background: #dc3545; color: white; padding: 0.2rem 0.5rem; border-radius: 4px; font-size: 0.75rem; font-weight: bold; margin-left: 0.5rem; align-self: flex-start;">Avg ${(avgSimilarity * 100).toFixed(1)}%</span>
                 </div>

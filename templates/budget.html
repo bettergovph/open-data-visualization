@@ -7906,7 +7906,7 @@ async function copyChartToClipboard(containerId, buttonId) {
                             <input type="text" id="resu-contractor-search" placeholder="Search contractor..." style="padding: 0.75rem; border: 2px solid #ddd; border-radius: 6px; font-size: 14px;">
                         </div>
                         <div id="resu-pagination-info" style="margin-bottom: 1rem; color: #666; font-size: 0.9em;"></div>
-                        <div id="resu-projects-list" style="display: grid; gap: 1rem;"></div>
+                        <div id="resu-projects-list" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(480px, 1fr)); gap: 1rem; align-items: start;"></div>
                         <div id="resu-pagination-controls" style="display: flex; justify-content: center; align-items: center; gap: 1rem; margin-top: 2rem; padding: 1rem;"></div>
                     </div>
                 </div>
@@ -8295,17 +8295,15 @@ async function copyChartToClipboard(containerId, buttonId) {
                 // Project name/description match
                 const projectMatch = !projectTerm || text.includes(projectTerm);
                 
-                // Contractor match
+                // Contractor match (only search historical contractors, 2026 is proposed budget)
                 let contractorMatch = true;
                 if (contractorTerm) {
-                    const contractor2026 = (project?.contractor || project?.contractors?.[0] || '').toLowerCase();
                     const historicalContractors = group.historicalMatches
                         .map(m => m.historical?.contractor || '')
                         .filter(Boolean)
                         .join(' ')
                         .toLowerCase();
-                    const allContractorText = (contractor2026 + ' ' + historicalContractors).trim();
-                    contractorMatch = allContractorText.includes(contractorTerm);
+                    contractorMatch = historicalContractors.includes(contractorTerm);
                 }
                 
                 return projectMatch && contractorMatch;
@@ -8332,7 +8330,7 @@ async function copyChartToClipboard(containerId, buttonId) {
             
             const card = document.createElement('div');
             card.className = 'resurrected-project-card';
-            card.style.cssText = 'background: white; padding: 1.5rem; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); border-left: 4px solid #dc3545; margin-bottom: 1rem;';
+            card.style.cssText = 'background: white; padding: 1.25rem; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); border-left: 4px solid #dc3545; height: fit-content;';
             
             // Show all matched years as badges
             const yearsList = historicalMatches.map(m => m.historical?.year).filter(Boolean).sort((a, b) => b - a);
@@ -8345,52 +8343,55 @@ async function copyChartToClipboard(containerId, buttonId) {
             // Calculate average similarity
             const avgSimilarity = historicalMatches.reduce((sum, m) => sum + (m.similarity?.name || 0), 0) / historicalMatches.length;
             
+            // Display historical matches in a more compact grid layout
             let historicalMatchesHTML = '';
-            historicalMatches.forEach((match, idx) => {
-                historicalMatchesHTML += `
-                    <div style="border-left: 3px solid #667eea; padding-left: 1rem; margin-bottom: 1rem; padding-top: 0.5rem; padding-bottom: 0.5rem;">
-                        <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 0.5rem;">
-                            <strong style="color: #667eea;">Found in ${match.historical?.year || 'Unknown'}</strong>
-                            <span style="background: #667eea; color: white; padding: 0.2rem 0.5rem; border-radius: 4px; font-size: 0.8em;">${(match.similarity?.name * 100).toFixed(1)}%</span>
-                        </div>
-                        <div style="font-size: 0.9em;">
-                            <div>
-                                <span style="color: #666;">${match.historical?.year} Amount: </span>
-                                <span style="font-weight: bold; color: #dc3545;">₱${(match.historical?.amount || 0).toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</span>
+            if (historicalMatches.length > 0) {
+                historicalMatchesHTML = '<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 0.75rem;">';
+                historicalMatches.forEach((match, idx) => {
+                    historicalMatchesHTML += `
+                        <div style="border-left: 3px solid #667eea; padding-left: 0.75rem; padding-top: 0.5rem; padding-bottom: 0.5rem; background: #f8f9fa; border-radius: 4px;">
+                            <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 0.4rem;">
+                                <strong style="color: #667eea; font-size: 0.85em;">${match.historical?.year || 'Unknown'}</strong>
+                                <span style="background: #667eea; color: white; padding: 0.15rem 0.4rem; border-radius: 3px; font-size: 0.75em;">${(match.similarity?.name * 100).toFixed(1)}%</span>
                             </div>
-                            ${match.historical?.contractor ? `<div style="margin-top: 0.5rem;"><span style="color: #666; font-size: 0.85em;">Contractor: </span><span style="font-weight: bold; color: #667eea; font-size: 0.85em;" data-contractor-historical>${match.historical.contractor}</span></div>` : ''}
+                            <div style="font-size: 0.85em; margin-bottom: 0.3rem;">
+                                <div style="margin-bottom: 0.25rem;">
+                                    <span style="color: #666;">Amount: </span>
+                                    <span style="font-weight: bold; color: #dc3545; font-size: 0.9em;">₱${(match.historical?.amount || 0).toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</span>
+                                </div>
+                                ${match.historical?.contractor ? `<div style="margin-top: 0.3rem;"><span style="color: #666; font-size: 0.8em;">Contractor: </span><span style="font-weight: bold; color: #667eea; font-size: 0.8em;" data-contractor-historical>${match.historical.contractor}</span>${match.historical?.contract_id ? ` <span style="color: #999; font-size: 0.75em;">(ID: ${match.historical.contract_id})</span>` : ''}</div>` : ''}
+                            </div>
                         </div>
-                        ${match.historical?.description ? `<p style="font-size: 0.85em; color: #666; margin-top: 0.5rem; font-style: italic;">${match.historical.description.substring(0, 200)}${match.historical.description.length > 200 ? '...' : ''}</p>` : ''}
-                    </div>
-                `;
-            });
+                    `;
+                });
+                historicalMatchesHTML += '</div>';
+            }
             
             // Get 2026 amount (should be same across all matches for same project)
             const amount2026 = historicalMatches[0]?.year_2026?.amount || project?.amount || 0;
             
-            // Get contractor information if available
-            const contractor = project?.contractor || project?.contractors?.[0] || historicalMatches[0]?.year_2026?.contractor || null;
-            
+            // 2026 is proposed budget - no contractor/contract_id should be shown (they're just predictions)
             card.innerHTML = `
-                <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 1rem;">
-                    <div style="flex: 1;">
-                        <h5 style="color: #0038A8; margin: 0 0 0.5rem 0;">${project?.name || project?.description || 'Unknown'}</h5>
-                        ${contractor ? `<p style="font-size: 0.9em; color: #666; margin: 0; font-style: italic;">Contractor: <strong data-contractor-2026>${contractor}</strong></p>` : ''}
+                <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 0.75rem;">
+                    <div style="flex: 1; min-width: 0;">
+                        <h5 style="color: #0038A8; margin: 0 0 0.4rem 0; font-size: 1em; line-height: 1.3;">${project?.name || project?.description || 'Unknown'}</h5>
                     </div>
-                    <span style="background: #dc3545; color: white; padding: 0.25rem 0.75rem; border-radius: 4px; font-size: 0.85em; font-weight: bold; margin-left: 1rem; align-self: flex-start;">Avg ${(avgSimilarity * 100).toFixed(1)}%</span>
+                    <span style="background: #dc3545; color: white; padding: 0.2rem 0.6rem; border-radius: 4px; font-size: 0.8em; font-weight: bold; margin-left: 0.5rem; flex-shrink: 0;">${(avgSimilarity * 100).toFixed(1)}%</span>
                 </div>
-                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-bottom: 1rem; padding: 0.75rem; background: #f8f9fa; border-radius: 6px;">
+                <div style="display: grid; grid-template-columns: 1fr auto; gap: 0.75rem; margin-bottom: 0.75rem; padding: 0.6rem; background: #f8f9fa; border-radius: 6px; align-items: center;">
                     <div>
-                        <p style="font-size: 0.85em; color: #666; margin: 0;">2026 Amount</p>
-                        <p style="font-size: 1.1em; font-weight: bold; color: #dc3545; margin: 0;">₱${amount2026.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</p>
+                        <p style="font-size: 0.8em; color: #666; margin: 0;">2026 Amount</p>
+                        <p style="font-size: 1em; font-weight: bold; color: #dc3545; margin: 0;">₱${amount2026.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</p>
+                    </div>
+                    <div style="text-align: right;">
+                        <p style="font-size: 0.75em; color: #666; margin: 0 0 0.2rem 0;">Years:</p>
+                        <div style="display: flex; flex-wrap: wrap; gap: 0.3rem; justify-content: flex-end;">
+                            ${yearsBadges}
+                        </div>
                     </div>
                 </div>
-                <div style="margin-bottom: 1rem;">
-                    <p style="font-size: 0.85em; color: #666; margin: 0 0 0.5rem 0;">Found in ${historicalMatches.length} year(s):</p>
-                    ${yearsBadges}
-                </div>
-                <div style="margin-top: 1rem; padding-top: 1rem; border-top: 2px solid #dee2e6;">
-                    <h6 style="color: #495057; margin-bottom: 0.75rem; font-size: 0.95em;">Historical Matches:</h6>
+                <div style="margin-top: 0.75rem; padding-top: 0.75rem; border-top: 2px solid #dee2e6;">
+                    <h6 style="color: #495057; margin-bottom: 0.5rem; font-size: 0.9em; font-weight: 600;">Historical Matches (${historicalMatches.length}):</h6>
                     ${historicalMatchesHTML}
                 </div>
             `;
