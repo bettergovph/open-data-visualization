@@ -263,27 +263,37 @@ class ResurrectedProjectFinder:
             ORDER BY amt DESC, dsc
         """
         
-        cursor.execute(query)
-        rows = cursor.fetchall()
+        try:
+            cursor.execute(query)
+            rows = cursor.fetchall()
+        except Exception as e:
+            cursor.close()
+            conn.close()
+            raise Exception(f"Query execution failed: {type(e).__name__}: {str(e)}")
         
         # Convert to list of dicts
         historical_data = []
         for row in rows:
-            amt = float(row['amt']) if row['amt'] else 0.0
-            # Convert from thousands to real pesos if needed
-            if amounts_in_thousands:
-                amt = amt * 1000
-            
-            historical_data.append({
-                'id': row['id'],
-                'amount': amt,
-                'description': row['dsc'] or '',
-                'department_desc': row['uacs_dpt_dsc'],
-                'region_id': row['uacs_reg_id'],
-                'agency_desc': row['uacs_agy_dsc'],
-                'year': row['year'],
-                'source_file': row['source_file']
-            })
+            try:
+                amt = float(row['amt']) if row['amt'] else 0.0
+                # Convert from thousands to real pesos if needed
+                if amounts_in_thousands:
+                    amt = amt * 1000
+                
+                historical_data.append({
+                    'id': row['id'],
+                    'amount': amt,
+                    'description': row['dsc'] or '',
+                    'department_desc': row['uacs_dpt_dsc'],
+                    'region_id': row['uacs_reg_id'],
+                    'agency_desc': row['uacs_agy_dsc'],
+                    'year': row['year'],
+                    'source_file': row['source_file']
+                })
+            except Exception as e:
+                # Skip problematic rows but log them
+                print(f"   ⚠️  Skipping row {row.get('id', 'unknown')}: {type(e).__name__}: {str(e)}")
+                continue
         
         cursor.close()
         conn.close()
@@ -387,11 +397,14 @@ class ResurrectedProjectFinder:
                 continue  # Continue to next year
             except Exception as e:
                 error_msg = str(e)
+                error_type = type(e).__name__
                 if "does not exist" in error_msg.lower() or "relation" in error_msg.lower():
                     print(f"   Table budget_{year} does not exist, continuing to next year")
                     continue
                 else:
-                    print(f"   ⚠️  Error loading {year} data: {e}")
+                    print(f"   ⚠️  Error loading {year} data: {error_type}: {error_msg}")
+                    import traceback
+                    print(f"   Traceback: {traceback.format_exc()}")
                     continue
         
         print(f"\n   Total historical items: {len(historical_data)}")
