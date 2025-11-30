@@ -213,6 +213,26 @@ class ResurrectedProjectFinder:
         conn = psycopg2.connect(**self.db_config)
         cursor = conn.cursor(cursor_factory=RealDictCursor)
         
+        # First, check if table exists and has required columns
+        cursor.execute("""
+            SELECT column_name 
+            FROM information_schema.columns 
+            WHERE table_name = %s
+        """, (f'budget_{year}',))
+        
+        available_columns = {row[0] for row in cursor.fetchall()}
+        
+        # Required columns for the query
+        required_columns = {'id', 'amt', 'dsc', 'uacs_dpt_dsc', 'uacs_reg_id', 'uacs_agy_dsc', 'year', 'source_file'}
+        
+        # Check if all required columns exist
+        missing_columns = required_columns - available_columns
+        if missing_columns:
+            print(f"   ⚠️  Table budget_{year} missing required columns: {missing_columns}")
+            cursor.close()
+            conn.close()
+            return []  # Return empty list if columns are missing
+        
         # Determine department filter based on source
         if source_filter == "Annex A-1":
             dept_filter = "(uacs_dpt_dsc ILIKE '%AGRICULTURE%' OR dsc ILIKE '%farm%market%' OR dsc ILIKE '%FMR%')"
