@@ -516,6 +516,64 @@ class ContractorEnricher:
         
         return best_match
     
+    def _resolve_source_file(self, source_file: str, year: int) -> Optional[str]:
+        """Resolve source_file path to actual file, handling naming/extension variations
+        Returns the actual file path if found, None otherwise
+        """
+        if not source_file:
+            return None
+        
+        import os
+        from pathlib import Path
+        
+        # Base directory where GAA files are stored
+        docs_dir = Path(os.path.expanduser("~/AI/kenchlightyear_web/docs"))
+        
+        # Normalize source_file: remove 'docs/' prefix if present
+        normalized = source_file.replace('docs/', '').replace('\\', '/')
+        filename = os.path.basename(normalized)
+        
+        # Remove extension to match variations
+        name_without_ext = os.path.splitext(filename)[0]
+        
+        # Try exact match first
+        exact_path = docs_dir / filename
+        if exact_path.exists():
+            return str(exact_path)
+        
+        # Try with different extensions (.xlsx, .xls)
+        for ext in ['.xlsx', '.xls']:
+            alt_path = docs_dir / f"{name_without_ext}{ext}"
+            if alt_path.exists():
+                return str(alt_path)
+        
+        # Try year-based patterns
+        # Pattern 1: GAA-YYYY.xlsx
+        pattern1 = docs_dir / f"GAA-{year}.xlsx"
+        if pattern1.exists():
+            return str(pattern1)
+        
+        pattern1_xls = docs_dir / f"GAA-{year}.xls"
+        if pattern1_xls.exists():
+            return str(pattern1_xls)
+        
+        # Pattern 2: YYYY-GAA.xlsx
+        pattern2 = docs_dir / f"{year}-GAA.xlsx"
+        if pattern2.exists():
+            return str(pattern2)
+        
+        pattern2_xls = docs_dir / f"{year}-GAA.xls"
+        if pattern2_xls.exists():
+            return str(pattern2_xls)
+        
+        # Pattern 3: gaa_YYYY_*.json (for 2020)
+        if year == 2020:
+            json_files = list(docs_dir.glob(f"gaa_{year}_*.json"))
+            if json_files:
+                return str(json_files[0])  # Return first match
+        
+        return None
+    
     def _enrich_historical_source_info(self, historical: Dict):
         """Add source row/cell information to historical match
         Uses the historical ID to look up row information from PostgreSQL
@@ -567,6 +625,11 @@ class ContractorEnricher:
             row = cursor.fetchone()
             
             if row:
+                # Update source_file from database if different
+                db_source_file = row.get('source_file', source_file)
+                if db_source_file:
+                    source_file = db_source_file
+                
                 # Get row number from sourceline if available, otherwise use ID
                 source_row = None
                 if 'sourceline' in row and row['sourceline'] is not None:
@@ -583,9 +646,19 @@ class ContractorEnricher:
                 historical['source_row'] = source_row
                 historical['source_col'] = source_col
                 
+                # Resolve actual file path
+                resolved_file = self._resolve_source_file(source_file, hist_year)
+                
                 # Format source display
                 import os
-                if source_file:
+                if resolved_file:
+                    filename = os.path.basename(resolved_file)
+                    if source_col:
+                        historical['source_display'] = f"{filename} (Row {source_row}, Col {source_col})"
+                    else:
+                        historical['source_display'] = f"{filename} (Row {source_row})"
+                elif source_file:
+                    # Fallback to original filename if resolution failed
                     filename = os.path.basename(source_file)
                     if source_col:
                         historical['source_display'] = f"{filename} (Row {source_row}, Col {source_col})"
