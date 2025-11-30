@@ -28,15 +28,21 @@ The `budget_2020` table contains data for:
 - ✅ 6 GAA batch files found
 
 ## Conclusion
-**2020 DPWH data exists in JSON files but has NOT been imported into PostgreSQL.**
+**✅ 2020 DPWH data has been successfully imported into PostgreSQL.**
 
-The matching script (`find_resurrected_projects.py`) currently only loads data from PostgreSQL, so it cannot find 2020 matches until the data is imported.
+## Import Results
+- **Total records imported**: 584,991 records
+- **DPWH records**: 24,290 records (department code 18)
+- **Total amount**: ₱2,544,460,764.00
+- **Department descriptions**: Updated from 2021 lookup table
+- **Agency descriptions**: Updated for DPWH records
+- **Year format**: Integer (2020) - compatible with matching script query
 
-## Recommendation
-To enable 2020 matching:
-1. Import 2020 GAA JSON files into PostgreSQL `budget_2020` table
-2. Ensure DPWH records are properly tagged with department information
-3. Verify the import includes all required columns (`amt`, `dsc`, `uacs_dpt_dsc`, `uacs_reg_id`, `uacs_agy_dsc`, `year`, `source_file`)
+## Verification
+The matching script query now successfully finds **24,290 DPWH records** for year 2020.
+
+## Status
+✅ **2020 data is now available for matching in `find_resurrected_projects.py`**
 
 ## Related Years Status
 - **2016-2019**: No data available (no JSON files, no PostgreSQL tables with data)
