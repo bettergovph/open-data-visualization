@@ -71,8 +71,9 @@ class GAAReloader:
         columns = self.get_table_columns(cursor, table_name)
         has_sorder = 'sorder' in columns
         has_operdiv = 'uacs_operdiv_id' in columns and 'uacs_div_dsc' in columns
+        has_prexc_level = 'prexc_level' in columns
         
-        print(f"   Table schema: sorder={has_sorder}, operdiv={has_operdiv}")
+        print(f"   Table schema: sorder={has_sorder}, operdiv={has_operdiv}, prexc_level={has_prexc_level}")
         
         # Get current count
         cursor.execute(f"SELECT COUNT(*), COALESCE(SUM(amt), 0) FROM {table_name}")
@@ -112,8 +113,11 @@ class GAAReloader:
                     None,  # uacs_dpt_dsc
                     agency,
                     None,  # uacs_agy_dsc
-                    int(record.get('prexc_fpap_id')) if record.get('prexc_fpap_id') else None,
-                    None,  # prexc_level
+                    str(record.get('prexc_fpap_id')) if record.get('prexc_fpap_id') else None,  # prexc_fpap_id is text in 2020
+                ])
+                if has_prexc_level:
+                    row_data.append(None)  # prexc_level
+                row_data.extend([
                     record.get('description'),  # dsc
                     operunit,
                     None,  # uacs_oper_dsc
@@ -142,8 +146,10 @@ class GAAReloader:
             if has_sorder:
                 cols.append('sorder')
             cols.extend(['department', 'uacs_dpt_dsc', 'agency', 'uacs_agy_dsc',
-                        'prexc_fpap_id', 'prexc_level', 'dsc', 'operunit', 'uacs_oper_dsc',
-                        'uacs_reg_id'])
+                        'prexc_fpap_id'])
+            if has_prexc_level:
+                cols.append('prexc_level')
+            cols.extend(['dsc', 'operunit', 'uacs_oper_dsc', 'uacs_reg_id'])
             if has_operdiv:
                 cols.extend(['uacs_operdiv_id', 'uacs_div_dsc'])
             cols.extend(['fundcd', 'uacs_fundsubcat_dsc',
