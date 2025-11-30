@@ -54,8 +54,9 @@ class ContractorEnricher:
             if flood_path.exists():
                 print(f"   Loading flood_projects.parquet...")
                 df_flood = pd.read_parquet(flood_path)
-                # Keep only relevant columns (including contract_id)
-                cols = ['project_description', 'contractor_name', 'contract_id']
+                # Keep only relevant columns (including contract_id and year columns)
+                cols = ['project_description', 'contractor_name', 'contract_id', 
+                       'contract_year', 'project_year']
                 available_cols = [c for c in cols if c in df_flood.columns]
                 self.parquet_data['flood'] = df_flood[available_cols].copy()
                 print(f"      ✅ Loaded {len(df_flood):,} flood projects")
@@ -72,10 +73,11 @@ class ContractorEnricher:
             if philgeps_path.exists():
                 print(f"   Loading philgeps_contracts.parquet...")
                 df_philgeps = pd.read_parquet(philgeps_path)
-                # Keep relevant columns (including contract_id)
+                # Keep relevant columns (including contract_id and year columns)
                 cols = ['project_name', 'project_description', 'philgeps_award_title', 
                        'contractor_name', 'philgeps_awardee_name', 'contract_id', 
-                       'philgeps_contract_no', 'philgeps_reference_id']
+                       'philgeps_contract_no', 'philgeps_reference_id',
+                       'contract_year', 'project_year']
                 available_cols = [c for c in cols if c in df_philgeps.columns]
                 self.parquet_data['philgeps'] = df_philgeps[available_cols].copy()
                 print(f"      ✅ Loaded {len(df_philgeps):,} PhilGEPS contracts")
@@ -92,10 +94,10 @@ class ContractorEnricher:
             if transparency_path.exists():
                 print(f"   Loading transparency_projects.parquet...")
                 df_transparency = pd.read_parquet(transparency_path)
-                # Keep relevant columns (including multiple contractors and contract_id)
+                # Keep relevant columns (including multiple contractors, contract_id, and year)
                 cols = ['project_description', 'description', 'contractor_name', 
                        'contractor_name_2', 'contractor_name_3', 'contractor_name_4',
-                       'contract_id']
+                       'contract_id', 'year']
                 available_cols = [c for c in cols if c in df_transparency.columns]
                 self.parquet_data['transparency'] = df_transparency[available_cols].copy()
                 print(f"      ✅ Loaded {len(df_transparency):,} transparency projects")
@@ -112,8 +114,9 @@ class ContractorEnricher:
             if infrawatch_path.exists():
                 print(f"   Loading infrawatch_projects.parquet...")
                 df_infrawatch = pd.read_parquet(infrawatch_path)
-                # Keep relevant columns (including contract_id)
-                cols = ['project_description', 'contractor_name', 'contract_id']
+                # Keep relevant columns (including contract_id and year columns)
+                cols = ['project_description', 'contractor_name', 'contract_id',
+                       'contract_year', 'project_year']
                 available_cols = [c for c in cols if c in df_infrawatch.columns]
                 self.parquet_data['infrawatch'] = df_infrawatch[available_cols].copy()
                 print(f"      ✅ Loaded {len(df_infrawatch):,} infrawatch projects")
