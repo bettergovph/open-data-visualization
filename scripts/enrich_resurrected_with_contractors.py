@@ -24,7 +24,7 @@ import json
 import psycopg2
 from psycopg2.extras import RealDictCursor
 from pathlib import Path
-from typing import Optional, List, Dict
+from typing import Optional, List, Dict, Tuple
 from collections import defaultdict
 from datetime import datetime
 import pandas as pd
@@ -54,8 +54,10 @@ class ContractorEnricher:
             if flood_path.exists():
                 print(f"   Loading flood_projects.parquet...")
                 df_flood = pd.read_parquet(flood_path)
-                # Keep only relevant columns
-                self.parquet_data['flood'] = df_flood[['project_description', 'contractor_name']].copy()
+                # Keep only relevant columns (including contract_id)
+                cols = ['project_description', 'contractor_name', 'contract_id']
+                available_cols = [c for c in cols if c in df_flood.columns]
+                self.parquet_data['flood'] = df_flood[available_cols].copy()
                 print(f"      ✅ Loaded {len(df_flood):,} flood projects")
             else:
                 print(f"      ⚠️  flood_projects.parquet not found")
@@ -70,9 +72,10 @@ class ContractorEnricher:
             if philgeps_path.exists():
                 print(f"   Loading philgeps_contracts.parquet...")
                 df_philgeps = pd.read_parquet(philgeps_path)
-                # Keep relevant columns
+                # Keep relevant columns (including contract_id)
                 cols = ['project_name', 'project_description', 'philgeps_award_title', 
-                       'contractor_name', 'philgeps_awardee_name']
+                       'contractor_name', 'philgeps_awardee_name', 'contract_id', 
+                       'philgeps_contract_no', 'philgeps_reference_id']
                 available_cols = [c for c in cols if c in df_philgeps.columns]
                 self.parquet_data['philgeps'] = df_philgeps[available_cols].copy()
                 print(f"      ✅ Loaded {len(df_philgeps):,} PhilGEPS contracts")
@@ -89,9 +92,10 @@ class ContractorEnricher:
             if transparency_path.exists():
                 print(f"   Loading transparency_projects.parquet...")
                 df_transparency = pd.read_parquet(transparency_path)
-                # Keep relevant columns (including multiple contractors)
+                # Keep relevant columns (including multiple contractors and contract_id)
                 cols = ['project_description', 'description', 'contractor_name', 
-                       'contractor_name_2', 'contractor_name_3', 'contractor_name_4']
+                       'contractor_name_2', 'contractor_name_3', 'contractor_name_4',
+                       'contract_id']
                 available_cols = [c for c in cols if c in df_transparency.columns]
                 self.parquet_data['transparency'] = df_transparency[available_cols].copy()
                 print(f"      ✅ Loaded {len(df_transparency):,} transparency projects")
@@ -108,8 +112,8 @@ class ContractorEnricher:
             if infrawatch_path.exists():
                 print(f"   Loading infrawatch_projects.parquet...")
                 df_infrawatch = pd.read_parquet(infrawatch_path)
-                # Keep relevant columns
-                cols = ['project_description', 'contractor_name']
+                # Keep relevant columns (including contract_id)
+                cols = ['project_description', 'contractor_name', 'contract_id']
                 available_cols = [c for c in cols if c in df_infrawatch.columns]
                 self.parquet_data['infrawatch'] = df_infrawatch[available_cols].copy()
                 print(f"      ✅ Loaded {len(df_infrawatch):,} infrawatch projects")
@@ -131,8 +135,28 @@ class ContractorEnricher:
         text = re.sub(r'\s+', ' ', text)
         return text
     
-    def _search_parquet(self, source: str, search_text: str) -> Optional[str]:
-        """Search a parquet source for contractor by project name/description"""
+    def _extract_year_from_contract_id(self, contract_id: str) -> Optional[int]:
+        """Extract year from contract_id (first 2 digits often indicate year)
+        Examples: '22C00083' -> 2022, '15DN0136' -> 2015
+        """
+        if not contract_id or pd.isna(contract_id):
+            return None
+        contract_id_str = str(contract_id).strip()
+        if len(contract_id_str) >= 2 and contract_id_str[:2].isdigit():
+            year_part = int(contract_id_str[:2])
+            # Assume 20xx if < 50, else 19xx
+            if year_part < 50:
+                return 2000 + year_part
+            else:
+                return 1900 + year_part
+        return None
+    
+    def _search_parquet(self, source: str, search_text: str, year: Optional[int] = None) -> Optional[Dict[str, str]]:
+        """Search a parquet source for contractor and contract_id by project name/description
+        Optionally filter by year to ensure year-qualified matches
+        If year column is empty, extracts year from contract_id
+        Returns dict with 'contractor' and 'contract_id' keys, or None if not found
+        """
         if source not in self.parquet_data or self.parquet_data[source] is None:
             return None
         
@@ -155,10 +179,31 @@ class ContractorEnricher:
                 # Search in project_description
                 mask = df['project_description'].astype(str).str.lower().str.contains(pattern, na=False, regex=True)
                 matches = df[mask & df['contractor_name'].notna()]
+                
+                # Filter by year if provided
+                if year is not None and len(matches) > 0:
+                    # Try year column first
+                    year_col = 'contract_year' if 'contract_year' in df.columns else 'project_year'
+                    if year_col in matches.columns:
+                        year_series = pd.to_numeric(matches[year_col], errors='coerce')
+                        year_mask = (year_series == year)
+                        # Also check contract_id for rows where year column is null
+                        if 'contract_id' in matches.columns:
+                            contract_id_years = matches['contract_id'].apply(self._extract_year_from_contract_id)
+                            # Use contract_id year when year column is null
+                            year_mask = year_mask | (year_series.isna() & (contract_id_years == year))
+                        matches = matches[year_mask]
+                
                 if len(matches) > 0:
                     contractor = matches.iloc[0]['contractor_name']
                     if contractor and str(contractor).strip() and str(contractor).strip() != 'No Data Available':
-                        return str(contractor).strip()
+                        result = {'contractor': str(contractor).strip()}
+                        # Get contract_id if available
+                        if 'contract_id' in matches.columns:
+                            contract_id = matches.iloc[0]['contract_id']
+                            if contract_id and not pd.isna(contract_id):
+                                result['contract_id'] = str(contract_id).strip()
+                        return result
             
             elif source == 'philgeps':
                 # Search in project_name, project_description, or philgeps_award_title
@@ -170,6 +215,20 @@ class ContractorEnricher:
                     mask = mask | df['philgeps_award_title'].astype(str).str.lower().str.contains(pattern, na=False, regex=True)
                 
                 matches = df[mask]
+                
+                # Filter by year if provided
+                if year is not None and len(matches) > 0:
+                    # Try year column first
+                    year_col = 'contract_year' if 'contract_year' in df.columns else 'project_year'
+                    if year_col in matches.columns:
+                        year_series = pd.to_numeric(matches[year_col], errors='coerce')
+                        year_mask = (year_series == year)
+                        # Also check contract_id for rows where year column is null
+                        if 'contract_id' in matches.columns:
+                            contract_id_years = matches['contract_id'].apply(self._extract_year_from_contract_id)
+                            # Use contract_id year when year column is null
+                            year_mask = year_mask | (year_series.isna() & (contract_id_years == year))
+                        matches = matches[year_mask]
                 # Try contractor_name first, then philgeps_awardee_name
                 for col in ['contractor_name', 'philgeps_awardee_name']:
                     if col in matches.columns:
@@ -177,7 +236,15 @@ class ContractorEnricher:
                         if len(contractor_col) > 0:
                             contractor = contractor_col.iloc[0][col]
                             if contractor and str(contractor).strip() and str(contractor).strip() != 'No Data Available':
-                                return str(contractor).strip()
+                                result = {'contractor': str(contractor).strip()}
+                                # Get contract_id (try multiple column names)
+                                for id_col in ['contract_id', 'philgeps_contract_no', 'philgeps_reference_id']:
+                                    if id_col in matches.columns:
+                                        contract_id = matches.iloc[0][id_col]
+                                        if contract_id and not pd.isna(contract_id):
+                                            result['contract_id'] = str(contract_id).strip()
+                                            break
+                                return result
             
             elif source == 'transparency':
                 # Search in project_description or description
@@ -186,6 +253,19 @@ class ContractorEnricher:
                     df['description'].astype(str).str.lower().str.contains(pattern, na=False, regex=True)
                 )
                 matches = df[mask]
+                
+                # Filter by year if provided
+                if year is not None and len(matches) > 0:
+                    # Try year column first
+                    if 'year' in matches.columns:
+                        year_series = pd.to_numeric(matches['year'], errors='coerce')
+                        year_mask = (year_series == year)
+                        # Also check contract_id for rows where year column is null or doesn't match
+                        if 'contract_id' in matches.columns:
+                            contract_id_years = matches['contract_id'].apply(self._extract_year_from_contract_id)
+                            # Use contract_id year when year column is null or doesn't match
+                            year_mask = year_mask | (year_series.isna() & (contract_id_years == year))
+                        matches = matches[year_mask]
                 # Try all contractor columns (contractor_name, contractor_name_2, etc.)
                 for col in ['contractor_name', 'contractor_name_2', 'contractor_name_3', 'contractor_name_4']:
                     if col in matches.columns:
@@ -193,16 +273,42 @@ class ContractorEnricher:
                         if len(contractor_col) > 0:
                             contractor = contractor_col.iloc[0][col]
                             if contractor and str(contractor).strip() and str(contractor).strip() != 'No Data Available':
-                                return str(contractor).strip()
+                                result = {'contractor': str(contractor).strip()}
+                                # Get contract_id if available
+                                if 'contract_id' in matches.columns:
+                                    contract_id = matches.iloc[0]['contract_id']
+                                    if contract_id and not pd.isna(contract_id):
+                                        result['contract_id'] = str(contract_id).strip()
+                                return result
             
             elif source == 'infrawatch':
                 # Search in project_description
                 mask = df['project_description'].astype(str).str.lower().str.contains(pattern, na=False, regex=True)
                 matches = df[mask & df['contractor_name'].notna()]
+                
+                # Filter by year if provided
+                if year is not None and len(matches) > 0:
+                    # Try year column first
+                    year_col = 'contract_year' if 'contract_year' in df.columns else 'project_year'
+                    if year_col in matches.columns:
+                        year_series = pd.to_numeric(matches[year_col], errors='coerce')
+                        year_mask = (year_series == year)
+                        # Also check contract_id for rows where year column is null
+                        if 'contract_id' in matches.columns:
+                            contract_id_years = matches['contract_id'].apply(self._extract_year_from_contract_id)
+                            # Use contract_id year when year column is null
+                            year_mask = year_mask | (year_series.isna() & (contract_id_years == year))
+                        matches = matches[year_mask]
                 if len(matches) > 0:
                     contractor = matches.iloc[0]['contractor_name']
                     if contractor and str(contractor).strip() and str(contractor).strip() != 'No Data Available':
-                        return str(contractor).strip()
+                        result = {'contractor': str(contractor).strip()}
+                        # Get contract_id if available
+                        if 'contract_id' in matches.columns:
+                            contract_id = matches.iloc[0]['contract_id']
+                            if contract_id and not pd.isna(contract_id):
+                                result['contract_id'] = str(contract_id).strip()
+                        return result
         
         except Exception as e:
             # Silently fail for individual source errors
@@ -210,8 +316,11 @@ class ContractorEnricher:
         
         return None
     
-    def _get_contractor_from_dime(self, project_name: str, project_description: str = None) -> Optional[str]:
-        """Get contractor from DIME database"""
+    def _get_contractor_from_dime(self, project_name: str, project_description: str = None, year: Optional[int] = None) -> Optional[Dict[str, str]]:
+        """Get contractor and contract_id from DIME database
+        Note: DIME doesn't have a year column, so year filtering is not applied
+        Returns dict with 'contractor' and optionally 'contract_id' keys, or None if not found
+        """
         if not project_name:
             return None
         
@@ -222,8 +331,9 @@ class ContractorEnricher:
             # Try to match by project name (fuzzy match)
             search_term = f"%{project_name[:50]}%"
             
+            # Get contractor and id (if available as contract_id or project id)
             query = """
-                SELECT DISTINCT contractors
+                SELECT DISTINCT contractors, id
                 FROM projects
                 WHERE (project_name ILIKE %s OR description ILIKE %s)
                 AND contractors IS NOT NULL
@@ -234,33 +344,42 @@ class ContractorEnricher:
             cursor.execute(query, (search_term, search_term))
             row = cursor.fetchone()
             
-            contractor = None
             if row and row['contractors']:
                 contractors_list = row['contractors']
                 if isinstance(contractors_list, list) and len(contractors_list) > 0:
                     contractor = contractors_list[0]
                     if contractor and contractor.strip() and contractor != 'No Data Available':
-                        contractor = contractor.strip()
-                    else:
-                        contractor = None
+                        result = {'contractor': contractor.strip()}
+                        # Use project id as contract_id if available
+                        if row.get('id'):
+                            result['contract_id'] = str(row['id']).strip()
+                        cursor.close()
+                        conn.close()
+                        return result
             
             cursor.close()
             conn.close()
-            return contractor
+            return None
             
         except Exception as e:
             # Silently fail
             return None
         
-    def get_contractor_for_project(self, project_name: str, project_description: str = None) -> Optional[str]:
-        """Try to get contractor information from all sources
+    def get_contractor_for_project(self, project_name: str, project_description: str = None, year: Optional[int] = None) -> Optional[Dict[str, str]]:
+        """Try to get contractor and contract_id information from all sources
         Priority: DIME > Flood > PhilGEPS > Transparency > Infrawatch
+        If year is provided, filters parquet sources by year for year-qualified matches
+        Returns dict with 'contractor' and optionally 'contract_id' keys, or None if not found
         """
         if not project_name:
             return None
         
-        # Check cache first
+        # Check cache first (include year in cache key if provided)
         cache_key = project_name.lower().strip()
+        if year:
+            cache_key_with_year = f"{cache_key}_y{year}"
+            if cache_key_with_year in self.contractor_cache:
+                return self.contractor_cache[cache_key_with_year]
         if cache_key in self.contractor_cache:
             return self.contractor_cache[cache_key]
         
@@ -271,20 +390,23 @@ class ContractorEnricher:
         
         # Try sources in priority order
         sources = [
-            ('dime', self._get_contractor_from_dime),
-            ('flood', lambda n, d: self._search_parquet('flood', search_text)),
-            ('philgeps', lambda n, d: self._search_parquet('philgeps', search_text)),
-            ('transparency', lambda n, d: self._search_parquet('transparency', search_text)),
-            ('infrawatch', lambda n, d: self._search_parquet('infrawatch', search_text)),
+            ('dime', lambda n, d, y: self._get_contractor_from_dime(n, d, y)),
+            ('flood', lambda n, d, y: self._search_parquet('flood', search_text, y)),
+            ('philgeps', lambda n, d, y: self._search_parquet('philgeps', search_text, y)),
+            ('transparency', lambda n, d, y: self._search_parquet('transparency', search_text, y)),
+            ('infrawatch', lambda n, d, y: self._search_parquet('infrawatch', search_text, y)),
         ]
         
         for source_name, source_func in sources:
             try:
-                contractor = source_func(project_name, project_description)
-                if contractor:
-                    # Cache result
-                    self.contractor_cache[cache_key] = contractor
-                    return contractor
+                result = source_func(project_name, project_description, year)
+                if result and result.get('contractor'):
+                    # Cache result (include year in cache key for year-specific caching)
+                    if year:
+                        cache_key_with_year = f"{cache_key}_y{year}"
+                        self.contractor_cache[cache_key_with_year] = result
+                    self.contractor_cache[cache_key] = result
+                    return result
             except Exception as e:
                 # Continue to next source
                 continue
@@ -315,6 +437,7 @@ class ContractorEnricher:
             'total_matches': len(matches),
             'enriched_2026': 0,
             'enriched_historical': 0,
+            're_enriched_historical': 0,  # Re-enriched with year filtering
             'already_had_2026': 0,
             'already_had_historical': 0,
             'not_found_2026': 0,
@@ -339,41 +462,60 @@ class ContractorEnricher:
             project_name = project_2026.get('name', '')
             project_description = project_2026.get('description', '')
             
-            # Check if already has contractor
+            # 2026 projects: Skip contractor enrichment (2026 is proposed budget, no real contractors)
+            # But we still track stats for consistency
             existing_contractor = project_2026.get('contractor')
             if existing_contractor:
                 stats['already_had_2026'] += len(project_matches)
             else:
-                # Look up contractor
-                contractor = self.get_contractor_for_project(project_name, project_description)
-                
-                if contractor:
-                    # Update all matches for this project
-                    for match in project_matches:
-                        match['year_2026']['contractor'] = contractor
-                    stats['enriched_2026'] += len(project_matches)
-                else:
-                    stats['not_found_2026'] += len(project_matches)
+                stats['not_found_2026'] += len(project_matches)
+            # Note: We don't enrich 2026 projects since they're proposed budget
             
             # Get contractors for historical projects
+            # FORCE re-enrichment to ensure year-qualified contractors
             for match in project_matches:
                 historical = match.get('historical', {})
                 historical_description = historical.get('description', '')
+                historical_year = historical.get('year')
                 
-                # Check if already has contractor
-                existing_historical_contractor = historical.get('contractor')
-                if existing_historical_contractor:
-                    stats['already_had_historical'] += 1
-                else:
-                    # Look up contractor for historical project
-                    historical_contractor = self.get_contractor_for_project(
-                        historical_description,
-                        historical_description
-                    )
+                # Always re-check with year filtering to ensure year-qualified matches
+                # This ensures contractors are from the correct year, not just any year
+                historical_contractor_data = self.get_contractor_for_project(
+                    historical_description,
+                    historical_description,
+                    year=historical_year  # Filter by year for year-qualified matches
+                )
+                
+                if historical_contractor_data and historical_contractor_data.get('contractor'):
+                    # Update contractor (may be same or different due to year filtering)
+                    previous_contractor = historical.get('contractor')
+                    previous_contract_id = historical.get('contract_id')
+                    new_contractor = historical_contractor_data['contractor']
+                    new_contract_id = historical_contractor_data.get('contract_id')
                     
-                    if historical_contractor:
-                        historical['contractor'] = historical_contractor
+                    # Check if contractor actually changed
+                    contractor_changed = (previous_contractor != new_contractor) or (previous_contract_id != new_contract_id)
+                    
+                    historical['contractor'] = new_contractor
+                    # Add/update contract_id if available
+                    if new_contract_id:
+                        historical['contract_id'] = new_contract_id
+                    
+                    if previous_contractor:
+                        if contractor_changed:
+                            # Was re-enriched with different contractor (year-qualified)
+                            stats['re_enriched_historical'] += 1
+                        else:
+                            # Had same contractor, verified with year filtering
+                            stats['already_had_historical'] += 1
+                    else:
+                        # Was newly enriched
                         stats['enriched_historical'] += 1
+                else:
+                    # Not found with year filtering
+                    if historical.get('contractor'):
+                        # Had contractor before but not found with year filter - keep existing
+                        stats['already_had_historical'] += 1
                     else:
                         stats['not_found_historical'] += 1
             
@@ -403,8 +545,9 @@ class ContractorEnricher:
         print(f"  📋 Already had contractor: {stats['already_had_2026']:,}")
         print(f"  ❌ Not found in any source: {stats['not_found_2026']:,}")
         print(f"\nHistorical Matches:")
-        print(f"  ✅ Enriched: {stats['enriched_historical']:,}")
-        print(f"  📋 Already had contractor: {stats['already_had_historical']:,}")
+        print(f"  ✅ Newly enriched: {stats['enriched_historical']:,}")
+        print(f"  🔄 Re-enriched (year-qualified): {stats['re_enriched_historical']:,}")
+        print(f"  📋 Already had contractor (kept): {stats['already_had_historical']:,}")
         print(f"  ❌ Not found in any source: {stats['not_found_historical']:,}")
         print(f"\n💾 Saved to: {json_path}")
         print("=" * 100)
