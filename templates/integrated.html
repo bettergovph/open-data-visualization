@@ -391,6 +391,10 @@ function toggleMobileMenu() {
                                     <span style="display: inline-flex; align-items: center; justify-content: center; min-width: 54px; height: 28px; padding: 0 12px; border-radius: 999px; font-size: 12px; font-weight: 700; letter-spacing: 0.5px; color: #d97706; background: #fff4e6; border: 1px solid #fbbf24;">Microsite</span>
                                     <span style="color: #1e293b; font-weight: 600;">DPWH Microsite</span>
                                 </div>
+                                <div style="display: flex; align-items: center; gap: 12px; padding: 12px 14px; border-radius: 8px; background: rgba(34, 197, 94, 0.08); border: 1px solid rgba(22, 163, 74, 0.2);">
+                                    <span style="display: inline-flex; align-items: center; justify-content: center; min-width: 54px; height: 28px; padding: 0 12px; border-radius: 999px; font-size: 12px; font-weight: 700; letter-spacing: 0.5px; color: #15803d; background: #dcfce7; border: 1px solid #86efac;">Transparency</span>
+                                    <span style="color: #1e293b; font-weight: 600;">DPWH Transparency</span>
+                                </div>
                             </div>
                         </div>
                         
@@ -453,7 +457,7 @@ function toggleMobileMenu() {
                                 <thead>
                                     <tr style="background: #f8f9fa; border-bottom: 2px solid #dee2e6;">
                                         <th style="padding: 12px; text-align: left; font-weight: 600; color: #333;">Congressman</th>
-                                        <th style="padding: 12px; text-align: left; font-weight: 600; color: #333; white-space: nowrap;">Source / Match Type</th>
+                                        <th style="padding: 12px; text-align: left; font-weight: 600; color: #333; white-space: normal; word-wrap: break-word;">Source / Match Type</th>
                                         <th style="padding: 12px; text-align: left; font-weight: 600; color: #333;">Project Name/Title</th>
                                         <th style="padding: 12px; text-align: left; font-weight: 600; color: #333;">Contractor</th>
                                         <th style="padding: 12px; text-align: right; font-weight: 600; color: #333;">Amount</th>
@@ -519,8 +523,8 @@ function toggleMobileMenu() {
                                             <input id="chart-focus-input" list="congressman-list" placeholder="Focus on congressman..." style="padding: 8px 12px; border: 2px solid #facc15; border-radius: 6px; font-size: 13px; font-weight: 600; min-width: 220px;" />
                                             <button id="chart-focus-clear-btn" style="padding: 8px 14px; background: white; color: #92400e; border: 2px solid #facc15; border-radius: 6px; font-size: 13px; font-weight: 600; cursor: pointer; transition: all 0.3s ease;" onmouseover="this.style.background='#fef3c7'; this.style.transform='translateY(-2px)';" onmouseout="this.style.background='white'; this.style.transform='translateY(0)';">↺ Reset Top 10</button>
                         </div>
-                                <button id="sort-by-count-btn" style="padding: 10px 20px; background: #333; color: white; border: 2px solid #333; border-radius: 6px; font-size: 14px; font-weight: 600; cursor: pointer; transition: all 0.3s ease; box-shadow: 0 4px 12px rgba(0,0,0,0.2);" onclick="sortChartBy('count')">🔢 By Count</button>
-                                <button id="sort-by-cost-btn" style="padding: 10px 20px; background: #7b1fa2; color: white; border: 2px solid #7b1fa2; border-radius: 6px; font-size: 14px; font-weight: 600; cursor: pointer; transition: all 0.3s ease; box-shadow: 0 4px 12px rgba(0,0,0,0.2);" onclick="sortChartBy('cost')">💰 By Cost</button>
+                                <button id="sort-by-count-btn" style="padding: 10px 20px; background: #7b1fa2; color: white; border: 2px solid #7b1fa2; border-radius: 6px; font-size: 14px; font-weight: 600; cursor: pointer; transition: all 0.3s ease; box-shadow: 0 4px 12px rgba(0,0,0,0.2);" onclick="sortChartBy('count')">🔢 By Count</button>
+                                <button id="sort-by-cost-btn" style="padding: 10px 20px; background: #333; color: white; border: 2px solid #333; border-radius: 6px; font-size: 14px; font-weight: 600; cursor: pointer; transition: all 0.3s ease; box-shadow: 0 4px 12px rgba(0,0,0,0.2);" onclick="sortChartBy('cost')">💰 By Cost</button>
                                 <button id="copy-chart-btn" style="padding: 10px 20px; background: #333; color: white; border: 2px solid #333; border-radius: 6px; font-size: 14px; font-weight: 600; cursor: pointer; transition: all 0.3s ease; box-shadow: 0 4px 12px rgba(0,0,0,0.2);" onmouseover="this.style.background='#667eea'; this.style.borderColor='#667eea'; this.style.transform='translateY(-2px)'; this.style.boxShadow='0 6px 16px rgba(102, 126, 234, 0.4)';" onmouseout="this.style.background='#333'; this.style.borderColor='#333'; this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 12px rgba(0,0,0,0.2)';">📋 Copy</button>
                             </div>
                                 </div>
@@ -682,6 +686,10 @@ function toggleMobileMenu() {
                                     <span style="display: inline-flex; align-items: center; justify-content: center; min-width: 54px; height: 28px; padding: 0 12px; border-radius: 999px; font-size: 12px; font-weight: 700; letter-spacing: 0.5px; color: #d97706; background: #fff4e6; border: 1px solid #fbbf24;">Microsite</span>
                                     <span style="color: #1e293b; font-weight: 600;">DPWH Microsite</span>
                                 </div>
+                                <div style="display: flex; align-items: center; gap: 12px; padding: 12px 14px; border-radius: 8px; background: rgba(34, 197, 94, 0.08); border: 1px solid rgba(22, 163, 74, 0.2);">
+                                    <span style="display: inline-flex; align-items: center; justify-content: center; min-width: 54px; height: 28px; padding: 0 12px; border-radius: 999px; font-size: 12px; font-weight: 700; letter-spacing: 0.5px; color: #15803d; background: #dcfce7; border: 1px solid #86efac;">Transparency</span>
+                                    <span style="color: #1e293b; font-weight: 600;">DPWH Transparency</span>
+                                </div>
                             </div>
                         </div>
                         
@@ -736,7 +744,7 @@ function toggleMobileMenu() {
                             <table id="province-projects-table" style="width: 100%; border-collapse: collapse;">
                                 <thead>
                                     <tr style="background: #f8f9fa; border-bottom: 2px solid #dee2e6;">
-                                        <th style="padding: 12px; text-align: left; font-weight: 600; color: #333; white-space: nowrap;">Source / Match Type</th>
+                                        <th style="padding: 12px; text-align: left; font-weight: 600; color: #333; white-space: normal; word-wrap: break-word;">Source / Match Type</th>
                                         <th style="padding: 12px; text-align: left; font-weight: 600; color: #333;">Project Name/Title</th>
                                         <th style="padding: 12px; text-align: left; font-weight: 600; color: #333;">Contractor</th>
                                         <th style="padding: 12px; text-align: right; font-weight: 600; color: #333;">Amount</th>
@@ -984,6 +992,39 @@ function toggleMobileMenu() {
                             </div>
                         </div>
                         
+                        <!-- Data Sources Legend -->
+                        <div style="margin-bottom: 20px; padding: 18px; border-radius: 10px; border: 1px solid rgba(51, 65, 85, 0.08); background: linear-gradient(135deg, rgba(255,255,255,0.95) 0%, rgba(248,250,252,0.95) 100%); box-shadow: 0 8px 24px rgba(15, 23, 42, 0.08);">
+                            <div style="display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap; margin-bottom: 16px;">
+                                <h4 style="margin: 0; color: #0f172a; font-size: 15px; font-weight: 700; letter-spacing: 0.6px; text-transform: uppercase;">Data Sources</h4>
+                                <span style="display: inline-flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 600; color: #475569; background: rgba(148, 163, 184, 0.15); padding: 6px 10px; border-radius: 999px;">
+                                    <span style="display: inline-block; width: 8px; height: 8px; border-radius: 999px; background: #14b8a6; box-shadow: 0 0 0 3px rgba(20, 184, 166, 0.15);"></span>
+                                    Unified Pipeline
+                                </span>
+                            </div>
+                            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 18px; font-size: 13px;">
+                                <a href="/flood" style="display: flex; align-items: center; gap: 12px; padding: 12px 14px; border-radius: 8px; background: rgba(59, 130, 246, 0.08); border: 1px solid rgba(59, 130, 246, 0.2); text-decoration: none;">
+                                    <span style="display: inline-flex; align-items: center; justify-content: center; min-width: 54px; height: 28px; padding: 0 12px; border-radius: 999px; font-size: 12px; font-weight: 700; letter-spacing: 0.5px; color: #1565c0; background: #e3f2fd; border: 1px solid #90caf9;">SSP</span>
+                                    <span style="color: #1e293b; font-weight: 600;">Sumbong sa Pangulo website</span>
+                                </a>
+                                <a href="/dime" style="display: flex; align-items: center; gap: 12px; padding: 12px 14px; border-radius: 8px; background: rgba(168, 85, 247, 0.08); border: 1px solid rgba(139, 92, 246, 0.2); text-decoration: none;">
+                                    <span style="display: inline-flex; align-items: center; justify-content: center; min-width: 54px; height: 28px; padding: 0 12px; border-radius: 999px; font-size: 12px; font-weight: 700; letter-spacing: 0.5px; color: #7b1fa2; background: #f3e5f5; border: 1px solid #ba68c8;">DIME</span>
+                                    <span style="color: #1e293b; font-weight: 600;">DBM Project DIME</span>
+                                </a>
+                                <a href="/philgeps" style="display: flex; align-items: center; gap: 12px; padding: 12px 14px; border-radius: 8px; background: rgba(249, 115, 22, 0.08); border: 1px solid rgba(234, 88, 12, 0.2); text-decoration: none;">
+                                    <span style="display: inline-flex; align-items: center; justify-content: center; min-width: 54px; height: 28px; padding: 0 12px; border-radius: 999px; font-size: 12px; font-weight: 700; letter-spacing: 0.5px; color: #e65100; background: #fff3e0; border: 1px solid #ffb74d;">PhilGEPS</span>
+                                    <span style="color: #1e293b; font-weight: 600;">PhilGEPS</span>
+                                </a>
+                                <div style="display: flex; align-items: center; gap: 12px; padding: 12px 14px; border-radius: 8px; background: rgba(236, 72, 153, 0.08); border: 1px solid rgba(219, 39, 119, 0.2);">
+                                    <span style="display: inline-flex; align-items: center; justify-content: center; min-width: 54px; height: 28px; padding: 0 12px; border-radius: 999px; font-size: 12px; font-weight: 700; letter-spacing: 0.5px; color: #d97706; background: #fff4e6; border: 1px solid #fbbf24;">Microsite</span>
+                                    <span style="color: #1e293b; font-weight: 600;">DPWH Microsite</span>
+                                </div>
+                                <div style="display: flex; align-items: center; gap: 12px; padding: 12px 14px; border-radius: 8px; background: rgba(34, 197, 94, 0.08); border: 1px solid rgba(22, 163, 74, 0.2);">
+                                    <span style="display: inline-flex; align-items: center; justify-content: center; min-width: 54px; height: 28px; padding: 0 12px; border-radius: 999px; font-size: 12px; font-weight: 700; letter-spacing: 0.5px; color: #15803d; background: #dcfce7; border: 1px solid #86efac;">Transparency</span>
+                                    <span style="color: #1e293b; font-weight: 600;">DPWH Transparency</span>
+                                </div>
+                            </div>
+                        </div>
+                        
                         <!-- Loading Indicator -->
                         <div id="projects-loading" style="text-align: center; padding: 40px; display: none;">
                             <div style="display: inline-block; width: 40px; height: 40px; border: 4px solid #f3f3f3; border-top: 4px solid #333; border-radius: 50%; animation: spin 1s linear infinite;"></div>
@@ -1123,7 +1164,7 @@ let floodControlOnly = false;
 // Chart instance and data
 let combinedChart = null;
 let currentChartData = [];
-let currentSortMode = 'cost';
+let currentSortMode = 'count';
 let prefetchedVisualData = null;
 let visualOverviewDataAll = null;
 let visualOverviewDataFlood = null;
@@ -1844,7 +1885,7 @@ function updateCongressmanFilterStatus(mode, filteredItems, availableNames, proj
         if (!availableNames || availableNames.length === 0) {
             message = 'We are still loading congressman coverage. Please check back soon as we complete 2016–2025 data processing.';
         } else if (knownProjects === 0) {
-            message = 'Project-level data is still being ingested for the current filters, so results may be limited.';
+            message = 'While we have implemented many rules to classify projects to their respective districts and correlate years to congressmen, there could still be incorrect logic that we are continually fixing.';
         }
     }
 
@@ -2599,7 +2640,7 @@ function displayProjects(projects) {
         return `
             <tr style="border-bottom: 1px solid #e9ecef;">
                 <td style="padding: 12px; font-weight: 600; color: #333;">${congressman}</td>
-                <td style="padding: 12px; white-space: nowrap;">
+                <td style="padding: 12px; white-space: normal; word-wrap: break-word; max-width: 200px;">
                     ${(project.sources_list || [source]).map(src => {
                         const meta = getSourceDisplayMeta(src);
                         return `<span style="padding: 4px 8px; border-radius: 4px; font-size: 12px; font-weight: 600; 
@@ -2607,6 +2648,7 @@ function displayProjects(projects) {
                             color: ${meta.color};
                             border: 1px solid ${meta.border};
                             margin-right: 4px;
+                            margin-bottom: 4px;
                             display: inline-block;
                             white-space: nowrap;">${meta.label}</span>`;
                     }).join('')}
@@ -2823,8 +2865,8 @@ function applyVisualOverviewData(data, options = {}) {
     if (preserveSort && (currentSortMode === 'count' || currentSortMode === 'cost')) {
         updateChartWithSort(currentSortMode);
     } else {
-        currentSortMode = 'cost';
-        sortChartBy('cost');
+        currentSortMode = 'count';
+        sortChartBy('count');
     }
 }
 
@@ -2895,8 +2937,8 @@ function sortChartBy(mode) {
     const costBtn = document.getElementById('sort-by-cost-btn');
     
     if (mode === 'count') {
-        countBtn.style.background = '#1565c0';
-        countBtn.style.borderColor = '#1565c0';
+        countBtn.style.background = '#7b1fa2';
+        countBtn.style.borderColor = '#7b1fa2';
         costBtn.style.background = '#333';
         costBtn.style.borderColor = '#333';
     } else {
@@ -3807,7 +3849,7 @@ function provinceDisplayProjects(projects) {
         
         return `
             <tr style="border-bottom: 1px solid #e9ecef;">
-                <td style="padding: 12px; white-space: nowrap;">
+                <td style="padding: 12px; white-space: normal; word-wrap: break-word; max-width: 200px;">
                     ${(project.sources_list || [source]).map(src => {
                         const meta = getSourceDisplayMeta(src);
                         return `<span style="padding: 4px 8px; border-radius: 4px; font-size: 12px; font-weight: 600; 
@@ -3815,6 +3857,7 @@ function provinceDisplayProjects(projects) {
                             color: ${meta.color};
                             border: 1px solid ${meta.border};
                             margin-right: 4px;
+                            margin-bottom: 4px;
                             display: inline-block;
                             white-space: nowrap;">${meta.label}</span>`;
                     }).join('')}
@@ -5739,11 +5782,11 @@ function clearChartFocus({ resetInput = true } = {}) {
         }
     }
     chartPage = 1;
-    currentSortMode = 'cost';
+    currentSortMode = 'count';
     if (hadSelection) {
-        sortChartBy('cost');
+        sortChartBy('count');
     } else {
-        updateChartWithSort('cost');
+        updateChartWithSort('count');
     }
     visualDashboardSelectionStats = { name: null, base: null, derived: null };
     if (visualDashboardOverallStats.derived) {
