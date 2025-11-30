@@ -169,13 +169,16 @@ class ContractorEnricher:
         if not search_normalized:
             return None
         
-        # Extract key words from search text (first 50 chars, split into words)
-        search_words = search_normalized[:50].split()
-        if len(search_words) < 2:
-            return None  # Need at least 2 words for meaningful matching
+        # Extract key words from search text (use longer words for better matching)
+        search_words = search_normalized.split()
+        # Filter to words longer than 4 characters for more specific matching
+        key_words = [w for w in search_words if len(w) > 4]
+        if len(key_words) < 2:
+            # Fallback to all words if not enough long words
+            key_words = search_words[:5]
         
-        # Build search pattern (match if at least 2 key words appear)
-        pattern = '|'.join([re.escape(word) for word in search_words[:5]])  # Use first 5 words
+        # Build search pattern (match if key words appear)
+        pattern = '|'.join([re.escape(word) for word in key_words[:5]])  # Use first 5 key words
         
         try:
             if source == 'flood':
@@ -250,36 +253,67 @@ class ContractorEnricher:
                                 return result
             
             elif source == 'transparency':
-                # Search in project_description or description
-                mask = (
-                    df['project_description'].astype(str).str.lower().str.contains(pattern, na=False, regex=True) |
-                    df['description'].astype(str).str.lower().str.contains(pattern, na=False, regex=True)
+                # First try exact or near-exact matches using fuzzy matching (more accurate)
+                from difflib import SequenceMatcher
+                matches_with_sim = []
+                
+                # Use more specific pattern: require key words to appear together
+                # Try both case-sensitive and case-insensitive patterns
+                # Build a more specific pattern that requires multiple key words
+                key_word_pattern = '.*'.join([re.escape(word) for word in key_words[:3]])  # Require first 3 key words in order
+                
+                # Limit search to reasonable subset first (use pattern to narrow down)
+                initial_mask = (
+                    df['project_description'].astype(str).str.contains(key_word_pattern, case=False, na=False, regex=True) |
+                    df['description'].astype(str).str.contains(key_word_pattern, case=False, na=False, regex=True)
                 )
-                matches = df[mask]
+                candidate_df = df[initial_mask]
+                
+                # If too many candidates, limit to first 2000 for performance
+                if len(candidate_df) > 2000:
+                    candidate_df = candidate_df.head(2000)
+                
+                # Calculate similarity for each candidate (use FULL search_normalized, not truncated)
+                for idx, row in candidate_df.iterrows():
+                    desc1 = str(row.get('project_description', '')).lower()
+                    desc2 = str(row.get('description', '')).lower()
+                    sim1 = SequenceMatcher(None, search_normalized, desc1).ratio() if desc1 else 0
+                    sim2 = SequenceMatcher(None, search_normalized, desc2).ratio() if desc2 else 0
+                    sim = max(sim1, sim2)
+                    if sim > 0.75:  # 75% similarity threshold for transparency (lowered for better matching)
+                        matches_with_sim.append((sim, row))
+                
+                # Sort by similarity (highest first)
+                matches_with_sim.sort(reverse=True, key=lambda x: x[0])
                 
                 # Filter by year if provided
-                if year is not None and len(matches) > 0:
-                    # Try year column first
-                    if 'year' in matches.columns:
-                        year_series = pd.to_numeric(matches['year'], errors='coerce')
-                        year_mask = (year_series == year)
-                        # Also check contract_id for rows where year column is null or doesn't match
-                        if 'contract_id' in matches.columns:
-                            contract_id_years = matches['contract_id'].apply(self._extract_year_from_contract_id)
-                            # Use contract_id year when year column is null or doesn't match
-                            year_mask = year_mask | (year_series.isna() & (contract_id_years == year))
-                        matches = matches[year_mask]
-                # Try all contractor columns (contractor_name, contractor_name_2, etc.)
-                for col in ['contractor_name', 'contractor_name_2', 'contractor_name_3', 'contractor_name_4']:
-                    if col in matches.columns:
-                        contractor_col = matches[matches[col].notna()]
-                        if len(contractor_col) > 0:
-                            contractor = contractor_col.iloc[0][col]
-                            if contractor and str(contractor).strip() and str(contractor).strip() != 'No Data Available':
+                if year is not None:
+                    year_filtered = []
+                    for sim, row in matches_with_sim:
+                        row_year = None
+                        if 'year' in row.index:
+                            try:
+                                row_year = int(pd.to_numeric(row['year'], errors='coerce'))
+                            except:
+                                pass
+                        if row_year is None and 'contract_id' in row.index:
+                            row_year = self._extract_year_from_contract_id(row['contract_id'])
+                        if row_year == year:
+                            year_filtered.append((sim, row))
+                    matches_with_sim = year_filtered
+                
+                # Use best match (highest similarity)
+                if matches_with_sim:
+                    best_match = matches_with_sim[0][1]
+                    # Try all contractor columns (contractor_name, contractor_name_2, etc.)
+                    for col in ['contractor_name', 'contractor_name_2', 'contractor_name_3', 'contractor_name_4']:
+                        if col in best_match.index:
+                            contractor = best_match[col]
+                            if contractor and not pd.isna(contractor) and str(contractor).strip() and str(contractor).strip() != 'No Data Available':
                                 result = {'contractor': str(contractor).strip()}
                                 # Get contract_id if available
-                                if 'contract_id' in matches.columns:
-                                    contract_id = matches.iloc[0]['contract_id']
+                                if 'contract_id' in best_match.index:
+                                    contract_id = best_match['contract_id']
                                     if contract_id and not pd.isna(contract_id):
                                         result['contract_id'] = str(contract_id).strip()
                                 return result
