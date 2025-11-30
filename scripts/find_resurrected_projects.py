@@ -253,8 +253,8 @@ class ResurrectedProjectFinder:
             FROM information_schema.columns 
             WHERE table_name = 'budget_{year}' AND column_name = 'year'
         """)
-        year_col_type = cursor.fetchone()
-        year_type = year_col_type[0] if year_col_type else 'text'
+        year_col_result = cursor.fetchone()
+        year_type = year_col_result['data_type'] if year_col_result else 'text'
         
         # Build year filter based on column type
         if year_type == 'integer':
