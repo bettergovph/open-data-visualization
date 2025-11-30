@@ -700,7 +700,8 @@
                         <div style="font-size: 0.75rem; margin-bottom: 0.3rem; color: #6c757d;">
                             <span style="color: #666;">Source: </span>
                             <span style="font-weight: 600; color: #495057;">${sourceDb}</span>
-                            ${sourceFile ? ` <span style="color: #999; font-size: 0.7rem;">(${escapeHtml(sourceFile)})</span>` : ''}
+                            ${match.historical?.source_display ? ` <span style="color: #999; font-size: 0.7rem;">(${escapeHtml(match.historical.source_display)})</span>` : sourceFile ? ` <span style="color: #999; font-size: 0.7rem;">(${escapeHtml(sourceFile)})</span>` : ''}
+                            ${match.historical?.source_row ? ` <span style="color: #999; font-size: 0.7rem;">Row ${match.historical.source_row}</span>` : ''}
                         </div>
                         <div style="font-size: 0.8rem;">
                             <div>

@@ -40,6 +40,13 @@ class ContractorEnricher:
             'user': 'budget_admin',
             'password': 'wuQ5gBYCKkZiOGb61chLcByMu'
         }
+        self.budget_db_config = {
+            'host': 'localhost',
+            'port': 5432,
+            'database': 'budget_analysis',
+            'user': 'budget_admin',
+            'password': 'wuQ5gBYCKkZiOGb61chLcByMu'
+        }
         self.contractor_cache = {}  # Cache contractor lookups
         self.parquet_data = {}  # Cache loaded parquet data
         self._load_parquet_sources()
@@ -552,6 +559,12 @@ class ContractorEnricher:
         for project_id, project_matches in matches_by_project.items():
             # Get contractor for 2026 project (once per project)
             first_match = project_matches[0]
+            
+            # Enrich historical matches with source row/cell information
+            for match in project_matches:
+                historical = match.get('historical', {})
+                if historical and historical.get('id'):
+                    self._enrich_historical_source_info(historical)
             project_2026 = first_match.get('year_2026', {})
             project_name = project_2026.get('name', '')
             project_description = project_2026.get('description', '')
