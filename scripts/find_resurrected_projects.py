@@ -246,6 +246,24 @@ class ResurrectedProjectFinder:
         # For amounts in thousands, minimum is 100 (which equals 100,000 in real pesos)
         min_amt = 100 if amounts_in_thousands else 100000
         
+        # Handle different year formats: integer (2020) or string ('GAA-2024')
+        # Try to detect year column type first
+        cursor.execute(f"""
+            SELECT data_type 
+            FROM information_schema.columns 
+            WHERE table_name = 'budget_{year}' AND column_name = 'year'
+        """)
+        year_col_type = cursor.fetchone()
+        year_type = year_col_type[0] if year_col_type else 'text'
+        
+        # Build year filter based on column type
+        if year_type == 'integer':
+            # Integer column: use direct comparison
+            year_filter = f"year = {year}"
+        else:
+            # Text column: use LIKE pattern (handles 'GAA-2024', '2024', etc.)
+            year_filter = f"(year::text = '{year}' OR year::text LIKE '%{year}%')"
+        
         query = f"""
             SELECT 
                 id,
@@ -257,7 +275,7 @@ class ResurrectedProjectFinder:
                 year,
                 source_file
             FROM budget_{year}
-            WHERE (year::text = '{year}' OR year::text LIKE '%{year}%' OR year::integer = {year})
+            WHERE {year_filter}
             AND amt >= {min_amt}
             AND {dept_filter}
             ORDER BY amt DESC, dsc
