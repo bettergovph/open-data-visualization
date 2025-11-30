@@ -220,7 +220,7 @@ class ResurrectedProjectFinder:
             WHERE table_name = %s
         """, (f'budget_{year}',))
         
-        available_columns = {row[0] for row in cursor.fetchall()}
+        available_columns = {row['column_name'] for row in cursor.fetchall()}
         
         # Required columns for the query
         required_columns = {'id', 'amt', 'dsc', 'uacs_dpt_dsc', 'uacs_reg_id', 'uacs_agy_dsc', 'year', 'source_file'}
