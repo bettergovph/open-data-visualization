@@ -257,7 +257,7 @@ class ResurrectedProjectFinder:
                 year,
                 source_file
             FROM budget_{year}
-            WHERE year::text = '{year}'
+            WHERE (year::text = '{year}' OR year::text LIKE '%{year}%' OR year::integer = {year})
             AND amt >= {min_amt}
             AND {dept_filter}
             ORDER BY amt DESC, dsc
