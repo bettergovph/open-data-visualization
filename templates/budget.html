@@ -7854,7 +7854,7 @@ async function copyChartToClipboard(containerId, buttonId) {
                 <!-- Resurrection Tab -->
                 <div id="tab-resu" class="budget-tab-panel">
                     <h3 class="budget-section-title">🔄 Resurrected Projects</h3>
-                    <p class="budget-section-desc">DPWH projects in 2026 that also existed in previous years (2016-2025)</p>
+                    <p class="budget-section-desc">DPWH projects in 2026 that also existed in previous years (2020-2025)</p>
                     
                     <!-- Info Note -->
                     <div style="background: #fff3cd; border-left: 4px solid #ffc107; padding: 1rem; margin: 1.5rem 0; border-radius: 4px;">
@@ -8189,7 +8189,7 @@ async function copyChartToClipboard(containerId, buttonId) {
             const totalHistorical = matches.reduce((sum, m) => sum + (m.historical?.amount || 0), 0);
             document.getElementById('resu-amount-2026').textContent = '₱' + total2026.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
             document.getElementById('resu-amount-historical').textContent = '₱' + totalHistorical.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
-            document.getElementById('resu-years').textContent = metadata.search_years?.join(', ') || '2016-2025';
+            document.getElementById('resu-years').textContent = metadata.search_years?.join(', ') || '2020-2025';
             
             // Group by year
             const byYear = {};
