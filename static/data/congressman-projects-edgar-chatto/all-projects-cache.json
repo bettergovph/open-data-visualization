@@ -32,14 +32,14 @@
       "project_municipality_barangay": "1-PACMAN PARTY-LIST",
       "is_flood_related": true,
       "match_type": "district",
-      "match_score": 80,
+      "match_score": 70,
       "_source": "PhilGEPS",
       "congressman": "Edgar Chatto",
-      "sources_count": 2,
+      "sources_count": 1,
       "sources_list": [
-        "PhilGEPS",
-        "Transparency"
-      ]
+        "PhilGEPS"
+      ],
+      "_skipped_reclassification": true
     },
     {
       "source": "PhilGEPS",
@@ -71,20 +71,24 @@
       "project_municipality_barangay": "CONSTRUCTION OF FLOOD MITIGATION STRUCTURES AT BALILIHAN",
       "is_flood_related": true,
       "match_type": "district",
-      "match_score": 80,
+      "match_score": 70,
       "_source": "PhilGEPS",
       "congressman": "Edgar Chatto",
-      "sources_count": 2,
+      "sources_count": 1,
       "sources_list": [
-        "PhilGEPS",
-        "Transparency"
-      ]
+        "PhilGEPS"
+      ],
+      "_skipped_reclassification": true
     },
     {
       "source": "Transparency",
       "meilisearch_id": null,
       "contract_id": "25H00088",
       "project_name": "CONVERGENCE AND SPECIAL SUPPORT PROGRAM, BASIC INFRASTRUCTURE PROGRAM (BIP) - ACCESS ROADS AND/OR BRIDGES FROM THE NATIONAL ROAD/S LEADING TO MAJOR/ STRATEGIC PUBLIC BUILDINGS/ FACILITIES, REHABILITATION OF CALAPE-PANGGANGAN ROAD IN BOHOL",
+      "project_description": null,
+      "notice_title": null,
+      "award_description": null,
+      "award_title": null,
       "contractor": "N/A",
       "amount": 163278000.0,
       "location": "Region VII",
@@ -112,13 +116,18 @@
       "sources_count": 1,
       "sources_list": [
         "Transparency"
-      ]
+      ],
+      "_skipped_reclassification": true
     },
     {
       "source": "Transparency",
       "meilisearch_id": null,
       "contract_id": "21H00008",
       "project_name": "LOCAL PROGRAM, CONSTRUCTION/REPAIR/REHABILITATION/IMPROVEMENT OF VARIOUS INFRASTRUCTURE INCLUDING LOCAL PROJECTS BUILDINGS AND OTHER STRUCTURES, MULTIPURPOSE/FACILITIES,  CONSTRUCTION OF THE REGIONAL CULTURAL HUB, PHASE I, TAGBILARAN CITY, BOHOL PROVINCE",
+      "project_description": null,
+      "notice_title": null,
+      "award_description": null,
+      "award_title": null,
       "contractor": "N/A",
       "amount": 135099916.12,
       "location": "Region VII",
@@ -146,7 +155,47 @@
       "sources_count": 1,
       "sources_list": [
         "Transparency"
-      ]
+      ],
+      "_skipped_reclassification": true
+    },
+    {
+      "source": "Transparency",
+      "meilisearch_id": null,
+      "contract_id": "21H00007",
+      "project_name": "ORGANIZATIONAL OUTCOME 1: ENSURE SAFE AND RELIABLE NATIONAL ROAD SYSTEM, BRIDGE PROGRAM, WIDENING OF PERMANENT BRIDGES, ABATAN PARALLEL BR. ALONG TAGBILARAN NORTH ROAD (TAGBILARAN-JETAFE SECTION), K010+051.122-K010+425.00, BOHOL PROVINCE",
+      "project_description": null,
+      "notice_title": null,
+      "award_description": null,
+      "award_title": null,
+      "contractor": "N/A",
+      "amount": 115800000.0,
+      "location": "Region VII",
+      "year": "2021",
+      "status": "Completed",
+      "district_congressman": "Edgar Chatto",
+      "district_match_type": "district",
+      "district_match_score": 10,
+      "district_is_city_wide": false,
+      "congressman_district": "1st District District Bohol",
+      "contractor_congressman": null,
+      "contractor_match_type": null,
+      "contractor_match_score": 0,
+      "contractor_congressman_district": null,
+      "project_district_type": "province",
+      "project_district": "Bohol 1st District District",
+      "project_barangay_municipality": "K010+051.122-K010+425.00",
+      "project_province_city_district": "Province",
+      "project_municipality_barangay": "K010+051.122-K010+425.00",
+      "is_flood_related": false,
+      "match_type": "district",
+      "match_score": 67,
+      "_source": "Transparency",
+      "congressman": "Edgar Chatto",
+      "sources_count": 1,
+      "sources_list": [
+        "Transparency"
+      ],
+      "_skipped_reclassification": true
     },
     {
       "source": "PhilGEPS",
@@ -178,54 +227,24 @@
       "project_municipality_barangay": "ANTEQUERA",
       "is_flood_related": true,
       "match_type": "district",
-      "match_score": 70,
+      "match_score": 60,
       "_source": "PhilGEPS",
-      "congressman": "Edgar Chatto",
-      "sources_count": 2,
-      "sources_list": [
-        "PhilGEPS",
-        "Transparency"
-      ]
-    },
-    {
-      "source": "Transparency",
-      "meilisearch_id": null,
-      "contract_id": "21H00007",
-      "project_name": "ORGANIZATIONAL OUTCOME 1: ENSURE SAFE AND RELIABLE NATIONAL ROAD SYSTEM, BRIDGE PROGRAM, WIDENING OF PERMANENT BRIDGES, ABATAN PARALLEL BR. ALONG TAGBILARAN NORTH ROAD (TAGBILARAN-JETAFE SECTION), K010+051.122-K010+425.00, BOHOL PROVINCE",
-      "contractor": "N/A",
-      "amount": 115800000.0,
-      "location": "Region VII",
-      "year": "2021",
-      "status": "Completed",
-      "district_congressman": "Edgar Chatto",
-      "district_match_type": "district",
-      "district_match_score": 10,
-      "district_is_city_wide": false,
-      "congressman_district": "1st District District Bohol",
-      "contractor_congressman": null,
-      "contractor_match_type": null,
-      "contractor_match_score": 0,
-      "contractor_congressman_district": null,
-      "project_district_type": "province",
-      "project_district": "Bohol 1st District District",
-      "project_barangay_municipality": "K010+051.122-K010+425.00",
-      "project_province_city_district": "Province",
-      "project_municipality_barangay": "K010+051.122-K010+425.00",
-      "is_flood_related": false,
-      "match_type": "district",
-      "match_score": 67,
-      "_source": "Transparency",
       "congressman": "Edgar Chatto",
       "sources_count": 1,
       "sources_list": [
-        "Transparency"
-      ]
+        "PhilGEPS"
+      ],
+      "_skipped_reclassification": true
     },
     {
       "source": "Transparency",
       "meilisearch_id": null,
       "contract_id": "23H00007",
       "project_name": "ORGANIZATIONAL OUTCOME 1: ENSURE SAFE AND RELIABLE NATIONAL ROAD SYSTEM, NETWORK DEVELOPMENT PROGRAM, CONSTRUCTION OF FLYOVERS/ INTERCHANGES/ UNDERPASSES/ LONG SPAN BRIDGES, PANGLAO-TAGBILARAN CITY OFFSHORE BRIDGE CONNECTOR, BOHOL",
+      "project_description": null,
+      "notice_title": null,
+      "award_description": null,
+      "award_title": null,
       "contractor": "N/A",
       "amount": 97464986.03,
       "location": "Region VII",
@@ -253,13 +272,18 @@
       "sources_count": 1,
       "sources_list": [
         "Transparency"
-      ]
+      ],
+      "_skipped_reclassification": true
     },
     {
       "source": "Transparency",
       "meilisearch_id": null,
       "contract_id": "22H00075",
       "project_name": "CSSP-SUSTAINABLE INFRASTRUCTURE PROJECTS ALLEVIATING GAPS (SIPAG)-ACCESS ROADS AND/OR BRIDGES FROM THE NATIONAL ROAD/S LEADING TO MAJOR/STRATEGIC PUBLIC BUILDINGS/FACILITIES-RETROFITTING OF JACINTO BORJA 1 BRIDGE, (B00001BH), TAGBILARAN CITY, BOHOL",
+      "project_description": null,
+      "notice_title": null,
+      "award_description": null,
+      "award_title": null,
       "contractor": "N/A",
       "amount": 96499948.13,
       "location": "Region VII",
@@ -287,7 +311,86 @@
       "sources_count": 1,
       "sources_list": [
         "Transparency"
-      ]
+      ],
+      "_skipped_reclassification": true
+    },
+    {
+      "source": "Transparency",
+      "meilisearch_id": null,
+      "contract_id": "20H00052",
+      "project_name": "CONVERGENCE AND SPECIAL SUPPORT PROGRAM: CONSTRUCTION/IMPROVEMENT OF ACCESS ROADS LEADING TO DECLARED TOURISM DESTINATIONS, CONCRETING OF MONTAÑA-SAN JUAN-BUENAVINTURA ROAD LEADING TO EDITH GRAND GARDEN RESORT AND ADVENTURE PARK, BACLAYON, BOHOL",
+      "project_description": null,
+      "notice_title": null,
+      "award_description": null,
+      "award_title": null,
+      "contractor": "N/A",
+      "amount": 67550000.0,
+      "location": "Region VII",
+      "year": "2020",
+      "status": "Completed",
+      "district_congressman": "Edgar Chatto",
+      "district_match_type": "district",
+      "district_match_score": 100,
+      "district_is_city_wide": false,
+      "congressman_district": "1st District District Bohol",
+      "contractor_congressman": null,
+      "contractor_match_type": null,
+      "contractor_match_score": 0,
+      "contractor_congressman_district": null,
+      "project_district_type": "province",
+      "project_district": "Bohol 1st District District",
+      "project_barangay_municipality": "BACLAYON",
+      "project_province_city_district": "Province",
+      "project_municipality_barangay": "BACLAYON",
+      "is_flood_related": false,
+      "match_type": "district",
+      "match_score": 43,
+      "_source": "Transparency",
+      "congressman": "Edgar Chatto",
+      "sources_count": 1,
+      "sources_list": [
+        "Transparency"
+      ],
+      "_skipped_reclassification": true
+    },
+    {
+      "source": "Transparency",
+      "meilisearch_id": null,
+      "contract_id": "20H00054",
+      "project_name": "CONVERGENCE AND SPECIAL SUPPORT PROGRAM: CONSTRUCTION/IMPROVEMENT OF ACCESS ROADS LEADING TO DECLARED TOURISM DESTINATIONS, CONCRETING OF BRGY. LAYA GOING TO CAMBANAC LEADING TO SAN JUAN BUENAVENTURA, BACLAYON, BOHOL, STA.0+000-STA.2+670, BOHOL PROVINCE",
+      "project_description": null,
+      "notice_title": null,
+      "award_description": null,
+      "award_title": null,
+      "contractor": "N/A",
+      "amount": 67550000.0,
+      "location": "Region VII",
+      "year": "2020",
+      "status": "Completed",
+      "district_congressman": "Edgar Chatto",
+      "district_match_type": "district",
+      "district_match_score": 10,
+      "district_is_city_wide": false,
+      "congressman_district": "1st District District Bohol",
+      "contractor_congressman": null,
+      "contractor_match_type": null,
+      "contractor_match_score": 0,
+      "contractor_congressman_district": null,
+      "project_district_type": "province",
+      "project_district": "Bohol 1st District District",
+      "project_barangay_municipality": "STA.0+000-STA.2+670",
+      "project_province_city_district": "Province",
+      "project_municipality_barangay": "STA.0+000-STA.2+670",
+      "is_flood_related": false,
+      "match_type": "district",
+      "match_score": 43,
+      "_source": "Transparency",
+      "congressman": "Edgar Chatto",
+      "sources_count": 1,
+      "sources_list": [
+        "Transparency"
+      ],
+      "_skipped_reclassification": true
     },
     {
       "source": "PhilGEPS",
@@ -319,14 +422,14 @@
       "project_municipality_barangay": "1-PACMAN PARTY-LIST",
       "is_flood_related": true,
       "match_type": "district",
-      "match_score": 44,
+      "match_score": 34,
       "_source": "PhilGEPS",
       "congressman": "Edgar Chatto",
-      "sources_count": 2,
+      "sources_count": 1,
       "sources_list": [
-        "PhilGEPS",
-        "Transparency"
-      ]
+        "PhilGEPS"
+      ],
+      "_skipped_reclassification": true
     },
     {
       "source": "PhilGEPS",
@@ -358,88 +461,24 @@
       "project_municipality_barangay": "CAHAYAG TUBIGON",
       "is_flood_related": true,
       "match_type": "district",
-      "match_score": 44,
+      "match_score": 34,
       "_source": "PhilGEPS",
       "congressman": "Edgar Chatto",
-      "sources_count": 2,
-      "sources_list": [
-        "PhilGEPS",
-        "Transparency"
-      ]
-    },
-    {
-      "source": "Transparency",
-      "meilisearch_id": null,
-      "contract_id": "20H00052",
-      "project_name": "CONVERGENCE AND SPECIAL SUPPORT PROGRAM: CONSTRUCTION/IMPROVEMENT OF ACCESS ROADS LEADING TO DECLARED TOURISM DESTINATIONS, CONCRETING OF MONTAÑA-SAN JUAN-BUENAVINTURA ROAD LEADING TO EDITH GRAND GARDEN RESORT AND ADVENTURE PARK, BACLAYON, BOHOL",
-      "contractor": "N/A",
-      "amount": 67550000.0,
-      "location": "Region VII",
-      "year": "2020",
-      "status": "Completed",
-      "district_congressman": "Edgar Chatto",
-      "district_match_type": "district",
-      "district_match_score": 100,
-      "district_is_city_wide": false,
-      "congressman_district": "1st District District Bohol",
-      "contractor_congressman": null,
-      "contractor_match_type": null,
-      "contractor_match_score": 0,
-      "contractor_congressman_district": null,
-      "project_district_type": "province",
-      "project_district": "Bohol 1st District District",
-      "project_barangay_municipality": "BACLAYON",
-      "project_province_city_district": "Province",
-      "project_municipality_barangay": "BACLAYON",
-      "is_flood_related": false,
-      "match_type": "district",
-      "match_score": 43,
-      "_source": "Transparency",
-      "congressman": "Edgar Chatto",
       "sources_count": 1,
       "sources_list": [
-        "Transparency"
-      ]
-    },
-    {
-      "source": "Transparency",
-      "meilisearch_id": null,
-      "contract_id": "20H00054",
-      "project_name": "CONVERGENCE AND SPECIAL SUPPORT PROGRAM: CONSTRUCTION/IMPROVEMENT OF ACCESS ROADS LEADING TO DECLARED TOURISM DESTINATIONS, CONCRETING OF BRGY. LAYA GOING TO CAMBANAC LEADING TO SAN JUAN BUENAVENTURA, BACLAYON, BOHOL, STA.0+000-STA.2+670, BOHOL PROVINCE",
-      "contractor": "N/A",
-      "amount": 67550000.0,
-      "location": "Region VII",
-      "year": "2020",
-      "status": "Completed",
-      "district_congressman": "Edgar Chatto",
-      "district_match_type": "district",
-      "district_match_score": 10,
-      "district_is_city_wide": false,
-      "congressman_district": "1st District District Bohol",
-      "contractor_congressman": null,
-      "contractor_match_type": null,
-      "contractor_match_score": 0,
-      "contractor_congressman_district": null,
-      "project_district_type": "province",
-      "project_district": "Bohol 1st District District",
-      "project_barangay_municipality": "STA.0+000-STA.2+670",
-      "project_province_city_district": "Province",
-      "project_municipality_barangay": "STA.0+000-STA.2+670",
-      "is_flood_related": false,
-      "match_type": "district",
-      "match_score": 43,
-      "_source": "Transparency",
-      "congressman": "Edgar Chatto",
-      "sources_count": 1,
-      "sources_list": [
-        "Transparency"
-      ]
+        "PhilGEPS"
+      ],
+      "_skipped_reclassification": true
     },
     {
       "source": "Transparency",
       "meilisearch_id": null,
       "contract_id": "22H00028",
       "project_name": "CONVERGENCE AND SPECIAL SUPPORT PROGRAM, SUSTAINABLE INFRASTRUCTURE PROJECTS ALLEVIATING GAPS (SIPAG), INTERJURISDICTIONAL ROADS AND/OR BRIDGES (OR, ROADS THAT TRAVERSE MULTIPLE LGU JURISDICTIONS), CONSTRUCTION OF ROAD, SIKATUNA TO SEVILLA, BOHOL",
+      "project_description": null,
+      "notice_title": null,
+      "award_description": null,
+      "award_title": null,
       "contractor": "N/A",
       "amount": 38600000.0,
       "location": "Region VII",
@@ -467,13 +506,18 @@
       "sources_count": 1,
       "sources_list": [
         "Transparency"
-      ]
+      ],
+      "_skipped_reclassification": true
     },
     {
       "source": "Transparency",
       "meilisearch_id": null,
       "contract_id": "23H00003",
       "project_name": "ORGANIZATIONAL OUTCOME 1: ENSURE SAFE AND RELIABLE NATIONAL ROAD SYSTEM, BRIDGE PROGRAM, WIDENING OF PERMANENT BRIDGES, ABATAN BR. (B00227BH) ALONG TAGBILARAN NORTH RD (TAGBILARAN-JETAFE SECT), BOHOL PROVINCE",
+      "project_description": null,
+      "notice_title": null,
+      "award_description": null,
+      "award_title": null,
       "contractor": "N/A",
       "amount": 38599990.7,
       "location": "Region VII",
@@ -501,13 +545,18 @@
       "sources_count": 1,
       "sources_list": [
         "Transparency"
-      ]
+      ],
+      "_skipped_reclassification": true
     },
     {
       "source": "Transparency",
       "meilisearch_id": null,
       "contract_id": "20H00063",
       "project_name": "CONSTRUCTION/REPAIR/REHABILITATION/IMPROVEMENT OF VARIOUS INFRASTRUCTURE INCLUDING LOCAL PROJECTS-STRUCTURAL IMPROVEMENT OF PUBLIC BUILDINGS AND CONSTRUCTION OF EVACUATION CENTERS-CONSTRUCTION OF EVACUATION CENTER AT BRGY. GENONOCAN, TUBIGON, BOHOL",
+      "project_description": null,
+      "notice_title": null,
+      "award_description": null,
+      "award_title": null,
       "contractor": "N/A",
       "amount": 34740000.0,
       "location": "Region VII",
@@ -535,13 +584,18 @@
       "sources_count": 1,
       "sources_list": [
         "Transparency"
-      ]
+      ],
+      "_skipped_reclassification": true
     },
     {
       "source": "Transparency",
       "meilisearch_id": null,
       "contract_id": "21H00070",
       "project_name": "CONSTRUCTION/REPAIR/REHABILITATION/IMPROVEMENT OF VARIOUS INFRASTRUCTURE INCLUDING LOCAL PROJECTS-STRUCTURAL IMPROVEMENT OF PUBLIC BUILDINGS AND CONSTRUCTION OF EVACUATION CENTERS/QUARANTINE FACILITIES-REGION VII, BRGY. POBLACION WESTE, CATIGBIAN, BOHOL",
+      "project_description": null,
+      "notice_title": null,
+      "award_description": null,
+      "award_title": null,
       "contractor": "N/A",
       "amount": 34740000.0,
       "location": "Region VII",
@@ -569,13 +623,18 @@
       "sources_count": 1,
       "sources_list": [
         "Transparency"
-      ]
+      ],
+      "_skipped_reclassification": true
     },
     {
       "source": "Transparency",
       "meilisearch_id": null,
       "contract_id": "22H00053",
       "project_name": "STRUCTURAL IMPROVEMENT OF PUBLIC BUILDINGS AND CONSTRUCTION OF EVACUATION CENTERS/QUARANTINE FACILITIES-REGION VII, MUNICIPALITY OF ALBURQUERQUE, BOHOL",
+      "project_description": null,
+      "notice_title": null,
+      "award_description": null,
+      "award_title": null,
       "contractor": "N/A",
       "amount": 32166345.0,
       "location": "Region VII",
@@ -603,7 +662,8 @@
       "sources_count": 1,
       "sources_list": [
         "Transparency"
-      ]
+      ],
+      "_skipped_reclassification": true
     },
     {
       "source": "PhilGEPS",
@@ -635,14 +695,14 @@
       "project_municipality_barangay": "CATIGBIAN",
       "is_flood_related": true,
       "match_type": "district",
-      "match_score": 24,
+      "match_score": 14,
       "_source": "PhilGEPS",
       "congressman": "Edgar Chatto",
-      "sources_count": 2,
+      "sources_count": 1,
       "sources_list": [
-        "PhilGEPS",
-        "Transparency"
-      ]
+        "PhilGEPS"
+      ],
+      "_skipped_reclassification": true
     },
     {
       "source": "PhilGEPS",
@@ -674,20 +734,24 @@
       "project_municipality_barangay": "TUBIGON",
       "is_flood_related": true,
       "match_type": "district",
-      "match_score": 24,
+      "match_score": 14,
       "_source": "PhilGEPS",
       "congressman": "Edgar Chatto",
-      "sources_count": 2,
+      "sources_count": 1,
       "sources_list": [
-        "PhilGEPS",
-        "Transparency"
-      ]
+        "PhilGEPS"
+      ],
+      "_skipped_reclassification": true
     },
     {
       "source": "Transparency",
       "meilisearch_id": null,
       "contract_id": "24H00125",
       "project_name": "CSSP, CONSTRUCTION/IMPROVEMENT OF VARIOUS INFRASTRUCTURES IN SUPPORT OF NATIONAL SECURITY (TATAG NG IMPRASTRAKTURA PARA SA KAPAYAPAAN AT SEGURIDAD PROGRAM - TIKAS), REHABILITATION OF PHILIPPINE ARMY CAMP, CARMEN, BOHOL, PHASE II",
+      "project_description": null,
+      "notice_title": null,
+      "award_description": null,
+      "award_title": null,
       "contractor": "N/A",
       "amount": 9639516.53,
       "location": "Region VII",
@@ -715,13 +779,18 @@
       "sources_count": 1,
       "sources_list": [
         "Transparency"
-      ]
+      ],
+      "_skipped_reclassification": true
     },
     {
       "source": "Transparency",
       "meilisearch_id": null,
       "contract_id": "23H00072",
       "project_name": "CONSTRUCTION/REHABILITATION/IMPROVEMENT OF FACILITIES FOR PERSONS WITH DISABILITIES (PWD) AND ELDERLIES/SENIOR CITIZENS, INCLUDING GENDER-RESPONSIVE FACILITIES-REPAIR/REHABILITATION OF HOME FOR THE AGED CALAPE BOHOL",
+      "project_description": null,
+      "notice_title": null,
+      "award_description": null,
+      "award_title": null,
       "contractor": "N/A",
       "amount": 6750359.7,
       "location": "Region VII",
@@ -749,7 +818,8 @@
       "sources_count": 1,
       "sources_list": [
         "Transparency"
-      ]
+      ],
+      "_skipped_reclassification": true
     }
   ],
   "summary": {
@@ -759,7 +829,7 @@
     "ssp": 0,
     "infrawatch": 0,
     "microsite": 0,
-    "transparency": 21,
+    "transparency": 14,
     "district_projects": 21,
     "contractor_projects": 0,
     "flood_projects": 7
@@ -774,6 +844,6 @@
     "flood_count": 7,
     "flood_cost": 607754633.62
   },
-  "generated_at": "2025-11-29T23:48:06.595171",
+  "generated_at": "2025-11-30T18:30:17.386468",
   "cache_version": "1.0"
 }

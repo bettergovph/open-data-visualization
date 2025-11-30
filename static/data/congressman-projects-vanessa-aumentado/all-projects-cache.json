@@ -32,14 +32,14 @@
       "project_municipality_barangay": "1-PACMAN PARTY-LIST",
       "is_flood_related": true,
       "match_type": "district",
-      "match_score": 80,
+      "match_score": 70,
       "_source": "PhilGEPS",
       "congressman": "Vanessa Aumentado",
-      "sources_count": 2,
+      "sources_count": 1,
       "sources_list": [
-        "PhilGEPS",
-        "Transparency"
-      ]
+        "PhilGEPS"
+      ],
+      "_skipped_reclassification": true
     },
     {
       "source": "PhilGEPS",
@@ -71,14 +71,14 @@
       "project_municipality_barangay": "UBAY",
       "is_flood_related": true,
       "match_type": "district",
-      "match_score": 80,
+      "match_score": 70,
       "_source": "PhilGEPS",
       "congressman": "Vanessa Aumentado",
-      "sources_count": 2,
+      "sources_count": 1,
       "sources_list": [
-        "PhilGEPS",
-        "Transparency"
-      ]
+        "PhilGEPS"
+      ],
+      "_skipped_reclassification": true
     },
     {
       "source": "PhilGEPS",
@@ -110,20 +110,24 @@
       "project_municipality_barangay": "1-PACMAN PARTY-LIST",
       "is_flood_related": true,
       "match_type": "district",
-      "match_score": 48,
+      "match_score": 38,
       "_source": "PhilGEPS",
       "congressman": "Vanessa Aumentado",
-      "sources_count": 2,
+      "sources_count": 1,
       "sources_list": [
-        "PhilGEPS",
-        "Transparency"
-      ]
+        "PhilGEPS"
+      ],
+      "_skipped_reclassification": true
     },
     {
       "source": "Transparency",
       "meilisearch_id": null,
       "contract_id": "25H00025",
       "project_name": "CSSP, SUSTAINABLE INFRASTRUCTURE PROJECTS ALLEVIATING GAPS (SIPAG) - ACCESS ROADS AND/OR BRIDGES FROM THE NATIONAL ROAD/S LEADING TO MAJOR/ STRATEGIC PUBLIC BUILDINGS/ FACILITIES, CONSTRUCTION OF ROAD, BARANGAY VILLA TERESITA,UBAY, BOHOL",
+      "project_description": null,
+      "notice_title": null,
+      "award_description": null,
+      "award_title": null,
       "contractor": "N/A",
       "amount": 28920000.0,
       "location": "Region VII",
@@ -151,13 +155,18 @@
       "sources_count": 1,
       "sources_list": [
         "Transparency"
-      ]
+      ],
+      "_skipped_reclassification": true
     },
     {
       "source": "Transparency",
       "meilisearch_id": null,
       "contract_id": "23H00105",
       "project_name": "STRUCTURAL IMPROVEMENT OF PUBLIC BUILDINGS AND CONSTRUCTION OF EVACUATION CENTERS-REGION VII, BRGY. TAYTAY, GETAFE, BOHOL",
+      "project_description": null,
+      "notice_title": null,
+      "award_description": null,
+      "award_title": null,
       "contractor": "N/A",
       "amount": 28859484.51,
       "location": "Region VII",
@@ -185,13 +194,18 @@
       "sources_count": 1,
       "sources_list": [
         "Transparency"
-      ]
+      ],
+      "_skipped_reclassification": true
     },
     {
       "source": "Transparency",
       "meilisearch_id": null,
       "contract_id": "25H00022",
       "project_name": "CSSP, SUSTAINABLE INFRASTRUCTURE PROJECTS ALLEVIATING GAPS (SIPAG) - ACCESS ROADS AND/OR BRIDGES FROM THE NATIONAL ROAD/S LEADING TO MAJOR/ STRATEGIC PUBLIC BUILDINGS/ FACILITIES, CONSTRUCTION OF ROAD, BARANGAY ILIHAN, UBAY, BOHOL",
+      "project_description": null,
+      "notice_title": null,
+      "award_description": null,
+      "award_title": null,
       "contractor": "N/A",
       "amount": 4820000.0,
       "location": "Region VII",
@@ -219,13 +233,18 @@
       "sources_count": 1,
       "sources_list": [
         "Transparency"
-      ]
+      ],
+      "_skipped_reclassification": true
     },
     {
       "source": "Transparency",
       "meilisearch_id": null,
       "contract_id": "25LD0090",
       "project_name": "IMPROVEMENT OF MPB, SINAWILAN NATIONAL HIGH SCHOOL, SINAWILAN, MATANAO, DANAO, DAVAO DEL SUR",
+      "project_description": null,
+      "notice_title": null,
+      "award_description": null,
+      "award_title": null,
       "contractor": "N/A",
       "amount": 4801696.11,
       "location": "Davao del Sur District Engineering Office",
@@ -253,13 +272,18 @@
       "sources_count": 1,
       "sources_list": [
         "Transparency"
-      ]
+      ],
+      "_skipped_reclassification": true
     },
     {
       "source": "Transparency",
       "meilisearch_id": null,
       "contract_id": "25ND0065",
       "project_name": "COMPLETION OF MULTI-PURPOSE BUILDING (COVERED COURT), BARANGAY DAGOHOY, BUTUAN CITY",
+      "project_description": null,
+      "notice_title": null,
+      "award_description": null,
+      "award_title": null,
       "contractor": "N/A",
       "amount": 2964423.6,
       "location": "Butuan City District Engineering Office",
@@ -287,7 +311,8 @@
       "sources_count": 1,
       "sources_list": [
         "Transparency"
-      ]
+      ],
+      "_skipped_reclassification": true
     }
   ],
   "summary": {
@@ -297,7 +322,7 @@
     "ssp": 0,
     "infrawatch": 0,
     "microsite": 0,
-    "transparency": 8,
+    "transparency": 5,
     "district_projects": 8,
     "contractor_projects": 0,
     "flood_projects": 3
@@ -312,6 +337,6 @@
     "flood_count": 3,
     "flood_cost": 439134381.95
   },
-  "generated_at": "2025-11-29T23:49:07.600116",
+  "generated_at": "2025-11-30T18:31:00.782903",
   "cache_version": "1.0"
 }
