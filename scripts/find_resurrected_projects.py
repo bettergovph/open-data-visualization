@@ -370,10 +370,10 @@ class ResurrectedProjectFinder:
             print(f"   Limiting to first {max_items} items for faster processing")
             year_2026_items = year_2026_items[:max_items]
         
-        # Load historical data (2025, 2024, 2023, ..., 2016) - filtered by source
-        # Search all available years
+        # Load historical data (2025, 2024, 2023, ..., 2020) - filtered by source
+        # Search all available years (2016-2019 not available in PostgreSQL)
         historical_data = []
-        years_to_check = list(range(2025, 2015, -1))  # 2025 down to 2016
+        years_to_check = list(range(2025, 2019, -1))  # 2025 down to 2020
         
         for year in years_to_check:
             print(f"\n💾 Loading {year} budget data...")
@@ -604,7 +604,7 @@ class ResurrectedProjectFinder:
                                 "source_filter": source_filter,
                                 "name_similarity_threshold": name_similarity_threshold,
                                 "min_amount": min_amount,
-                                "search_years": list(range(2016, 2026)),
+                                "search_years": list(range(2020, 2026)),
                                 "generated_at": datetime.now().isoformat(),
                                 "status": "in_progress",
                                 "processed_items": processed,
