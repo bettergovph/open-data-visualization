@@ -1,0 +1,65 @@
+{
+  "timestamp": "2025-11-28T21:47:57.582764",
+  "source_files": {
+    "dpwh_csv": "/home/joebert/dpwh-infra-data-scraper/csv/contracts_all_years_all_offices.csv",
+    "microsite_parquet": "/home/joebert/open-data-visualization/data/parquet/infrawatch_projects.parquet",
+    "output_parquet": "/home/joebert/open-data-visualization/data/parquet/infrawatch_projects_enriched.parquet"
+  },
+  "statistics": {
+    "total": 186942,
+    "matched": 127031,
+    "unmatched": 59911,
+    "high_confidence": 127031,
+    "medium_confidence": 0
+  },
+  "new_columns_added": [
+    "dpwh_matched",
+    "dpwh_match_confidence",
+    "dpwh_contract_id",
+    "contractor_id",
+    "contractor_id_2",
+    "contractor_id_3",
+    "contractor_id_4",
+    "contractor_name_2",
+    "contractor_name_3",
+    "contractor_name_4",
+    "effectivity_date",
+    "expiry_date",
+    "accomplishment_pct",
+    "source_of_funds",
+    "dpwh_region",
+    "dpwh_implementing_office",
+    "dpwh_status",
+    "dpwh_year"
+  ],
+  "columns_enriched": [
+    "project_name",
+    "project_description",
+    "Contract Price",
+    "Contract Status",
+    "region",
+    "implementing_office",
+    "organization_name"
+  ],
+  "columns_preserved_from_microsite": [
+    "All original microsite columns are preserved, including:",
+    "- Bidding dates (bidding_date, award_date, notice_date, pre_bid_date, etc.) if they exist",
+    "- Location coordinates (latitude, longitude, lat, lng, coordinates, etc.) if they exist",
+    "- Personnel names (AMO, BAC, DE, district_engineer, amo_name, bac_chairman, etc.) if they exist",
+    "- Any other custom columns from the original microsite parquet"
+  ],
+  "notes": {
+    "bidding_columns": "Bidding-related date columns are not in DPWH scraper CSV but are preserved from microsite if they exist",
+    "location_coordinates": "Latitude/longitude columns are not in DPWH scraper CSV but are preserved from microsite if they exist",
+    "personnel_columns": "Personnel columns (AMO, BAC, DE names) are not in DPWH scraper CSV. The scraper only extracts contract data, not personnel information. These are preserved from microsite if they exist.",
+    "date_columns": "DPWH provides effectivity_date and expiry_date. All other date columns from microsite are preserved."
+  },
+  "columns_not_available_in_dpwh_scraper": [
+    "AMO (Authorized Managing Officer) names",
+    "BAC (Bids and Awards Committee) personnel names",
+    "DE (District Engineer) names",
+    "Bidding dates (bidding_date, award_date, notice_date)",
+    "Location coordinates (latitude, longitude)",
+    "Note: These fields are not present in the source HTML tables that the DPWH scraper parses"
+  ]
+}

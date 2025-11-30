@@ -273,13 +273,14 @@ class ResurrectedProjectFinder:
     def load_existing_matches(self, output_path: Path):
         """Load existing matches from JSON file if it exists"""
         if not output_path.exists():
-            return [], set()
+            return [], set(), 0, 0
         
         try:
             with open(output_path, 'r', encoding='utf-8') as f:
                 data = json.load(f)
             
             existing_matches = data.get('matches', [])
+            metadata = data.get('metadata', {})
             # Track which 2026 project IDs have already been processed
             processed_ids = set()
             for match in existing_matches:
@@ -287,12 +288,21 @@ class ResurrectedProjectFinder:
                 if project_id:
                     processed_ids.add(project_id)
             
+            # Get processed_items and total_items from metadata to resume from correct progress
+            processed_items_count = metadata.get('processed_items', len(processed_ids))
+            total_items_from_metadata = metadata.get('total_items', 0)
+            
             print(f"   📂 Loaded {len(existing_matches)} existing matches")
             print(f"   ✅ Found {len(processed_ids)} already processed 2026 projects")
-            return existing_matches, processed_ids
+            if total_items_from_metadata > 0:
+                progress_pct = (processed_items_count / total_items_from_metadata) * 100
+                print(f"   📊 Resuming from {processed_items_count:,}/{total_items_from_metadata:,} items ({progress_pct:.1f}%)")
+            else:
+                print(f"   📊 Resuming from {processed_items_count:,} processed items")
+            return existing_matches, processed_ids, processed_items_count, total_items_from_metadata
         except Exception as e:
             print(f"   ⚠️  Could not load existing matches: {e}")
-            return [], set()
+            return [], set(), 0, 0
     
     def find_resurrected_projects(self, 
                                    source_filter: str,
@@ -315,7 +325,7 @@ class ResurrectedProjectFinder:
         
         # Load existing matches to preserve them
         output_path = Path("static/data/resurrected_projects_dpwh.json")
-        existing_matches, processed_ids = self.load_existing_matches(output_path)
+        existing_matches, processed_ids, processed_items_count, total_items_from_metadata = self.load_existing_matches(output_path)
         
         # Load 2026 data
         print(f"\n📁 Loading 2026 data from {source_filter}...")
@@ -403,7 +413,7 @@ class ResurrectedProjectFinder:
         matches = existing_matches.copy()  # Start with existing matches
         new_matches = []
         total_comparisons = 0
-        processed = len(processed_ids)  # Start from where we left off
+        processed = processed_items_count  # Start from where we left off (use metadata count for accurate progress)
         
         for item_2026 in year_2026_items:
             amount_2026 = abs(item_2026.get('final_amount', 0) or item_2026.get('original_amount', 0))
@@ -562,7 +572,9 @@ class ResurrectedProjectFinder:
             
             processed += 1
             if processed % 100 == 0:
-                print(f"   Processed {processed}/{len(year_2026_items) + len(processed_ids)} total 2026 items, found {len(new_matches)} new matches ({len(matches)} total)...")
+                # Use metadata total_items if available, otherwise calculate from current data
+                total_items = total_items_from_metadata if total_items_from_metadata > 0 else (len(year_2026_items) + len(processed_ids))
+                print(f"   Processed {processed}/{total_items} total 2026 items, found {len(new_matches)} new matches ({len(matches)} total)...")
                 # Save intermediate results every 100 items
                 if matches:
                     try:
@@ -576,7 +588,7 @@ class ResurrectedProjectFinder:
                                 "generated_at": datetime.now().isoformat(),
                                 "status": "in_progress",
                                 "processed_items": processed,
-                                "total_items": len(year_2026_items) + len(processed_ids),
+                                "total_items": total_items,
                                 "new_matches_this_run": len(new_matches)
                             },
                             "matches": matches

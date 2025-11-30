@@ -2,44 +2,57 @@
   "person": {
     "normalized_name": "JAMES ANG JR",
     "display_name": "JAMES ANG JR",
-    "chain_count": 1
+    "chain_count": 2
   },
   "chains": [
     {
       "length": 2,
-      "start_surname": "ANG",
-      "end_surname": "ANG",
       "path": [
-        4145248
+        {
+          "id": 4162649,
+          "first_name": "JAMES",
+          "last_name": "ANG JR",
+          "middle_name": null,
+          "suffix": null,
+          "position": "CONGRESSMAN",
+          "relationship_description": "Starting person"
+        }
       ],
       "relationships": [
         "Starting person"
       ],
-      "source_urls": [],
-      "is_standalone_party_list": true,
-      "party_list_connection": {
-        "party_code": "156",
-        "party_list_number": 156,
-        "party_name": "USWAG ILONGGO",
-        "party_full_name": "156, USWAG ILONGGO",
-        "relationship_type": "Party-List Membership"
+      "contractor_connection": {
+        "contractor_name": "ALLENCON CORP",
+        "start_company_role": null,
+        "end_company_role": null,
+        "start_position": "CONGRESSMAN",
+        "end_position": "CONGRESSMAN"
+      }
+    },
+    {
+      "length": 2,
+      "path": [
+        {
+          "id": 4162649,
+          "first_name": "JAMES",
+          "last_name": "ANG JR",
+          "middle_name": null,
+          "suffix": null,
+          "position": "CONGRESSMAN",
+          "relationship_description": "Starting person"
+        }
+      ],
+      "relationships": [
+        "Starting person"
+      ],
+      "contractor_connection": {
+        "contractor_name": "IBC INTERNATIONAL CORP",
+        "start_company_role": null,
+        "end_company_role": null,
+        "start_position": "CONGRESSMAN",
+        "end_position": "CONGRESSMAN"
       }
     }
   ],
-  "people": {
-    "4145248": {
-      "id": 4145248,
-      "first_name": "JAMES",
-      "middle_name": null,
-      "last_name": "ANG",
-      "suffix": "JR",
-      "full_name": "JAMES ANG JR",
-      "canonical_name": null,
-      "position": "PARTY-LIST REPRESENTATIVE",
-      "region": null,
-      "province": null,
-      "municipality_city": null,
-      "location": "Location unknown"
-    }
-  }
+  "people": {}
 }

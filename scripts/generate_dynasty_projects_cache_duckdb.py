@@ -2353,8 +2353,9 @@ class DynastyProjectsCacheGeneratorDuckDB:
                 import duckdb
                 conn = duckdb.connect()
                 try:
-                    contractor_rows = conn.execute(f"SELECT dynasty_first_name, dynasty_last_name, company_name, role FROM read_parquet('{contractor_parquet}')").fetchall()
-                    print(f"✅ Loaded {len(contractor_rows)} contractor matches from contractor_dynasty_matches.parquet")
+                    # Only load contractor relationships that have a source (verified relationships)
+                    contractor_rows = conn.execute(f"SELECT dynasty_first_name, dynasty_last_name, company_name, role FROM read_parquet('{contractor_parquet}') WHERE source_csv_file IS NOT NULL AND source_csv_file != ''").fetchall()
+                    print(f"✅ Loaded {len(contractor_rows)} verified contractor matches (with sources) from contractor_dynasty_matches.parquet")
                 finally:
                     conn.close()
             except Exception as e:
@@ -2379,11 +2380,11 @@ class DynastyProjectsCacheGeneratorDuckDB:
                         # Option 3: politician_first_name, politician_last_name, contractor_name, relationship_type
                         
                         if 'first_name' in columns and 'last_name' in columns:
-                            # Standard format
+                            # Standard format - only load relationships with sources (verified)
                             if 'company_name' in columns:
-                                contractor_rows = conn.execute(f"SELECT first_name, last_name, company_name, COALESCE(role, 'owner') as role FROM read_parquet('{politician_contractors_parquet}')").fetchall()
+                                contractor_rows = conn.execute(f"SELECT first_name, last_name, company_name, COALESCE(role, 'owner') as role FROM read_parquet('{politician_contractors_parquet}') WHERE source IS NOT NULL AND source != ''").fetchall()
                             elif 'contractor_name' in columns:
-                                contractor_rows = conn.execute(f"SELECT first_name, last_name, contractor_name as company_name, COALESCE(relationship_type, 'owner') as role FROM read_parquet('{politician_contractors_parquet}')").fetchall()
+                                contractor_rows = conn.execute(f"SELECT first_name, last_name, contractor_name as company_name, COALESCE(relationship_type, 'owner') as role FROM read_parquet('{politician_contractors_parquet}') WHERE source IS NOT NULL AND source != ''").fetchall()
                             else:
                                 # Try to find company/contractor column
                                 company_col = None
@@ -2394,20 +2395,42 @@ class DynastyProjectsCacheGeneratorDuckDB:
                                 if company_col:
                                     role_col = 'role' if 'role' in columns else ('relationship_type' if 'relationship_type' in columns else None)
                                     if role_col:
-                                        contractor_rows = conn.execute(f"SELECT first_name, last_name, {company_col} as company_name, COALESCE({role_col}, 'owner') as role FROM read_parquet('{politician_contractors_parquet}')").fetchall()
+                                        contractor_rows = conn.execute(f"SELECT first_name, last_name, {company_col} as company_name, COALESCE({role_col}, 'owner') as role FROM read_parquet('{politician_contractors_parquet}') WHERE source IS NOT NULL AND source != ''").fetchall()
                                     else:
-                                        contractor_rows = conn.execute(f"SELECT first_name, last_name, {company_col} as company_name, 'owner' as role FROM read_parquet('{politician_contractors_parquet}')").fetchall()
+                                        contractor_rows = conn.execute(f"SELECT first_name, last_name, {company_col} as company_name, 'owner' as role FROM read_parquet('{politician_contractors_parquet}') WHERE source IS NOT NULL AND source != ''").fetchall()
                         elif 'dynasty_first_name' in columns and 'dynasty_last_name' in columns:
-                            # Already in correct format
-                            contractor_rows = conn.execute(f"SELECT dynasty_first_name, dynasty_last_name, company_name, COALESCE(role, 'owner') as role FROM read_parquet('{politician_contractors_parquet}')").fetchall()
+                            # Already in correct format - only load relationships with sources
+                            contractor_rows = conn.execute(f"SELECT dynasty_first_name, dynasty_last_name, company_name, COALESCE(role, 'owner') as role FROM read_parquet('{politician_contractors_parquet}') WHERE source IS NOT NULL AND source != ''").fetchall()
                         elif 'politician_first_name' in columns and 'politician_last_name' in columns:
-                            # Alternative format
+                            # Alternative format - only load relationships with sources
                             company_col = 'contractor_name' if 'contractor_name' in columns else 'company_name'
                             role_col = 'relationship_type' if 'relationship_type' in columns else 'role'
-                            contractor_rows = conn.execute(f"SELECT politician_first_name as dynasty_first_name, politician_last_name as dynasty_last_name, {company_col} as company_name, COALESCE({role_col}, 'owner') as role FROM read_parquet('{politician_contractors_parquet}')").fetchall()
+                            contractor_rows = conn.execute(f"SELECT politician_first_name as dynasty_first_name, politician_last_name as dynasty_last_name, {company_col} as company_name, COALESCE({role_col}, 'owner') as role FROM read_parquet('{politician_contractors_parquet}') WHERE source IS NOT NULL AND source != ''").fetchall()
+                        elif 'politician_id' in columns:
+                            # Need to join with political_dynasties to get names - only load relationships with sources
+                            company_col = 'contractor_name' if 'contractor_name' in columns else 'company_name'
+                            role_col = 'role' if 'role' in columns else ('relationship_type' if 'relationship_type' in columns else None)
+                            political_dynasties_parquet = PARQUET_DIR / 'political_dynasties.parquet'
+                            if political_dynasties_parquet.exists():
+                                if role_col:
+                                    contractor_rows = conn.execute(f"""
+                                        SELECT pd.first_name, pd.last_name, pc.{company_col} as company_name, COALESCE(pc.{role_col}, 'owner') as role
+                                        FROM read_parquet('{politician_contractors_parquet}') pc
+                                        JOIN read_parquet('{political_dynasties_parquet}') pd ON pc.politician_id = pd.id
+                                        WHERE pc.source IS NOT NULL AND pc.source != ''
+                                    """).fetchall()
+                                else:
+                                    contractor_rows = conn.execute(f"""
+                                        SELECT pd.first_name, pd.last_name, pc.{company_col} as company_name, 'owner' as role
+                                        FROM read_parquet('{politician_contractors_parquet}') pc
+                                        JOIN read_parquet('{political_dynasties_parquet}') pd ON pc.politician_id = pd.id
+                                        WHERE pc.source IS NOT NULL AND pc.source != ''
+                                    """).fetchall()
+                            else:
+                                print(f"⚠️  political_dynasties.parquet not found, cannot join with politician_contractors")
                         
                         if contractor_rows:
-                            print(f"✅ Loaded {len(contractor_rows)} contractor matches from politician_contractors.parquet")
+                            print(f"✅ Loaded {len(contractor_rows)} verified contractor matches (with sources) from politician_contractors.parquet")
                     finally:
                         conn.close()
                 except Exception as e:
@@ -2423,9 +2446,10 @@ class DynastyProjectsCacheGeneratorDuckDB:
                     import duckdb
                     conn = duckdb.connect(str(duckdb_path))
                     try:
-                        contractor_rows = conn.execute("SELECT dynasty_first_name, dynasty_last_name, company_name, role FROM contractor_dynasty_matches").fetchall()
+                        # Only load contractor relationships that have a source (verified relationships)
+                        contractor_rows = conn.execute("SELECT dynasty_first_name, dynasty_last_name, company_name, role FROM contractor_dynasty_matches WHERE source_csv_file IS NOT NULL AND source_csv_file != ''").fetchall()
                         # Convert to asyncpg.Record-like objects
-                        print(f"✅ Loaded {len(contractor_rows)} contractor matches from DuckDB")
+                        print(f"✅ Loaded {len(contractor_rows)} verified contractor matches (with sources) from DuckDB")
                     finally:
                         conn.close()
                 except Exception as e:
@@ -2678,22 +2702,32 @@ class DynastyProjectsCacheGeneratorDuckDB:
 
             contractor_names = []
             contractor_patterns = []
-            for contractor in direct_contractors:
-                company_name = contractor['company_name']
-                if not company_name:
-                    continue
-                if _should_exclude(company_name):
-                    continue
-                if verified_patterns:
-                    upper_name = company_name.upper()
-                    if not any(pattern.upper() in upper_name for pattern in verified_patterns):
-                        pass
-                    contractor_names.append(company_name)
-                contractor_patterns.extend(_expand_patterns(company_name))
-
-            # Load contractors from family_connections in config
+            
+            # Load contractors from family_connections in config FIRST
+            # This determines if the congressman should have contractor matching enabled
             family_connections = congressman_config.get('family_connections') or {}
             family_contractors = family_connections.get('contractors', []) if isinstance(family_connections, dict) else []
+            has_explicit_contractors = len(family_contractors) > 0 or len(verified_patterns) > 0
+            
+            # Only add contractors from parquet files if:
+            # 1. The congressman has explicit contractors in family_connections, OR
+            # 2. The congressman has verified_contractors.patterns
+            # This prevents false matches for congressmen who shouldn't have contractor matching
+            if has_explicit_contractors:
+                for contractor in direct_contractors:
+                    company_name = contractor['company_name']
+                    if not company_name:
+                        continue
+                    if _should_exclude(company_name):
+                        continue
+                    if verified_patterns:
+                        upper_name = company_name.upper()
+                        if not any(pattern.upper() in upper_name for pattern in verified_patterns):
+                            continue  # Changed from pass to continue - skip if doesn't match verified patterns
+                    contractor_names.append(company_name)
+                    contractor_patterns.extend(_expand_patterns(company_name))
+            
+            # Always add contractors from family_connections in config
             for company_name in family_contractors:
                 if not company_name or _should_exclude(company_name):
                     continue
@@ -2707,12 +2741,15 @@ class DynastyProjectsCacheGeneratorDuckDB:
                 if not party_numbers:
                     party_numbers.extend(party_memberships_by_name.get(name_key, []))
 
-            for party_number in party_numbers:
-                for company_name in party_contractors.get(party_number, set()):
-                    if not company_name or _should_exclude(company_name):
-                        continue
-                    contractor_names.append(company_name)
-                    contractor_patterns.extend(_expand_patterns(company_name))
+            # Only add party contractors if the congressman has explicit contractors
+            # This prevents false matches for party-list members who shouldn't have contractor matching
+            if has_explicit_contractors:
+                for party_number in party_numbers:
+                    for company_name in party_contractors.get(party_number, set()):
+                        if not company_name or _should_exclude(company_name):
+                            continue
+                        contractor_names.append(company_name)
+                        contractor_patterns.extend(_expand_patterns(company_name))
             
             contractor_names = sorted(set(name for name in contractor_names if name))
             contractor_patterns = sorted(set(p for p in contractor_patterns if p))
@@ -3289,7 +3326,36 @@ class DynastyProjectsCacheGeneratorDuckDB:
         municipalities = set()
         barangays = set()
         
-        # Extract from congressmen_data
+        # CRITICAL: Load comprehensive location database first (same as _extract_provinces_and_cities_from_data)
+        # This ensures both extraction and matching systems use the same comprehensive data
+        location_db_path = Path(__file__).parent.parent / 'database' / 'philippine_locations.json'
+        if location_db_path.exists():
+            try:
+                with open(location_db_path, 'r', encoding='utf-8') as f:
+                    location_db = json.load(f)
+                
+                # Add all provinces from comprehensive database
+                for prov_name_norm, prov_data in location_db.get('provinces', {}).items():
+                    prov_name = prov_data.get('name', prov_name_norm)
+                    provinces.add(prov_name.upper().strip())
+                    provinces.add(prov_name_norm)  # Also add normalized version
+                
+                # Add all cities from comprehensive database
+                for city_name_norm, city_data in location_db.get('cities', {}).items():
+                    city_name = city_data.get('name', city_name_norm)
+                    cities.add(city_name.upper().strip())
+                    cities.add(city_name_norm)  # Also add normalized version
+                    # Also add province if city is in a province
+                    prov_name = city_data.get('province', '')
+                    if prov_name:
+                        provinces.add(prov_name.upper().strip())
+                
+                print(f"✅ Loaded comprehensive location database into location_dicts: {len(provinces)} provinces, {len(cities)} cities")
+            except Exception as e:
+                print(f"⚠️  Warning: Could not load comprehensive location database: {e}")
+                print("   Falling back to congressmen data only")
+        
+        # Extract from congressmen_data (for backward compatibility and to catch any missing)
         for cm_name, cm_data in congressmen_data.items():
             cm_provinces = cm_data.get('provinces', [])
             is_city_district = cm_data.get('is_city_district', False)
@@ -3603,13 +3669,42 @@ class DynastyProjectsCacheGeneratorDuckDB:
     
     def _extract_provinces_and_cities_from_data(self, congressmen_data: Dict, district_lookup_dict: Dict) -> tuple[set[str], set[str]]:
         """
-        Extract all provinces and cities from the loaded data instead of hardcoding.
+        Extract all provinces and cities from comprehensive location database + congressmen data.
         Returns: (provinces_set, cities_set)
         """
         provinces = set()
         cities = set()
         
-        # Extract from congressmen_data
+        # CRITICAL: Load comprehensive location database if available
+        # This includes all 82 provinces, 146 cities, and municipalities
+        location_db_path = Path(__file__).parent.parent / 'database' / 'philippine_locations.json'
+        if location_db_path.exists():
+            try:
+                with open(location_db_path, 'r', encoding='utf-8') as f:
+                    location_db = json.load(f)
+                
+                # Add all provinces from comprehensive database
+                for prov_name_norm, prov_data in location_db.get('provinces', {}).items():
+                    prov_name = prov_data.get('name', prov_name_norm)
+                    provinces.add(prov_name.upper().strip())
+                    provinces.add(prov_name_norm)  # Also add normalized version
+                
+                # Add all cities from comprehensive database
+                for city_name_norm, city_data in location_db.get('cities', {}).items():
+                    city_name = city_data.get('name', city_name_norm)
+                    cities.add(city_name.upper().strip())
+                    cities.add(city_name_norm)  # Also add normalized version
+                    # Also add province if city is in a province
+                    prov_name = city_data.get('province', '')
+                    if prov_name:
+                        provinces.add(prov_name.upper().strip())
+                
+                print(f"✅ Loaded comprehensive location database: {len(provinces)} provinces, {len(cities)} cities")
+            except Exception as e:
+                print(f"⚠️  Warning: Could not load comprehensive location database: {e}")
+                print("   Falling back to congressmen data only")
+        
+        # Also extract from congressmen_data (for backward compatibility and to catch any missing)
         for cm_name, cm_data in congressmen_data.items():
             cm_provinces = cm_data.get('provinces', [])
             is_city_district = cm_data.get('is_city_district', False)
@@ -3855,7 +3950,16 @@ class DynastyProjectsCacheGeneratorDuckDB:
                             city_upper = known_city.upper()
                             city_base = city_upper.replace(' CITY', '').strip()
                             
+                            city_base = city_upper.replace(' CITY', '').strip()
+                            
                             # Special handling for Davao City: also check if text mentions "Davao City" 
+                            # CRITICAL: Ensure Davao City is treated as a city district, not just Davao del Sur
+                            if city_upper == 'DAVAO CITY':
+                                if 'DAVAO CITY' in text_upper:
+                                    result['province'] = 'DAVAO DEL SUR' # Technically in Davao del Sur but independent
+                                    result['municipality_barangay'] = 'DAVAO CITY'
+                                    result['is_city_district'] = True
+                                    return result 
                             # even if province_city_part is "Davao Del Sur"
                             is_davao_city = (city_upper == 'DAVAO CITY' or city_base == 'DAVAO')
                             if is_davao_city and 'DAVAO CITY' in text_upper:
@@ -4325,27 +4429,13 @@ class DynastyProjectsCacheGeneratorDuckDB:
             return None
             
         province_upper = province.upper().strip()
-        
-        # CRITICAL FIX: Prevent "METRO MANILA" from matching "MANILA"
-        # Also prevent "MANILA" from matching "METRO MANILA" projects
-        if province_upper == 'METRO MANILA':
-            return None
-        # If province is "MANILA" (not Metro Manila), we should only match Manila districts
-        # This prevents Metro Manila projects from matching to Manila congressmen
-        
-        # Special handling for Davao City: if province is "Davao Del Sur" but we're looking for Davao City,
-        # also try "Davao City" as a variant
-        # CRITICAL: Only allow Davao variants if the project is actually in Davao region
-        # This prevents non-Davao projects from matching Paolo Duterte
-        province_variants_for_davao = []
-        # Only add variants if the province is actually a Davao variant
-        if province_upper in ['DAVAO DEL SUR', 'DAVAO CITY', 'DAVAO DEL NORTE', 'DAVAO ORIENTAL', 'DAVAO DE ORO']:
-            if province_upper == 'DAVAO DEL SUR':
-                province_variants_for_davao.append('DAVAO CITY')
-            elif province_upper == 'DAVAO CITY':
-                province_variants_for_davao.append('DAVAO DEL SUR')
-        
         location_upper = (municipality_barangay or '').upper().strip()
+        
+        # CRITICAL FIX: If municipality/barangay is "DAVAO CITY", override province to "DAVAO CITY"
+        # This ensures Davao City projects match to Davao City districts (Paolo Duterte, etc.)
+        # instead of Davao del Sur province districts (John Tracy Cagas)
+        if location_upper == 'DAVAO CITY' and province_upper in ['DAVAO DEL SUR', 'DAVAO CITY', 'DAVAO DEL NORTE']:
+            province_upper = 'DAVAO CITY'
         
         # Get location dictionaries for normalization and fuzzy matching
         location_dicts = getattr(self, 'location_dicts', {})
@@ -4407,10 +4497,6 @@ class DynastyProjectsCacheGeneratorDuckDB:
             # Split by en-dash or hyphen
             parts = re.split(r'[–-]', province_upper)
             province_variants.extend([p.strip() for p in parts if p.strip()])
-        
-        # Add Davao City variants if applicable
-        if province_variants_for_davao:
-            province_variants.extend(province_variants_for_davao)
         
         # Special handling for city districts where projects have "CITY" suffix but config doesn't
         # Example: Project has "Marikina City" but config has "Marikina"
@@ -4494,6 +4580,7 @@ class DynastyProjectsCacheGeneratorDuckDB:
                 # 1. Exact match: (province, municipality/barangay) - score 100
                 # CRITICAL: This should give us the specific district if the municipality/barangay is properly mapped
                 variant_candidates = district_lookup.get((prov_variant, location_upper), [])
+                
                 if variant_candidates:
                     candidates.extend(variant_candidates)
                     match_score = 100
@@ -4512,6 +4599,7 @@ class DynastyProjectsCacheGeneratorDuckDB:
                 if not variant_candidates:
                     # Check if this is a city district and we need stricter matching
                     province_only_candidates = district_lookup.get((prov_variant, ''), [])
+                    
                     if province_only_candidates:
                         # Filter candidates to only city districts if we have location
                         # For province districts, allow province-only match BUT validate directional variants
@@ -4851,6 +4939,126 @@ class DynastyProjectsCacheGeneratorDuckDB:
                 cm_provinces = cm_data.get('provinces', [])
                 is_city_district = cm_data.get('is_city_district', False)
                 
+                # CRITICAL: Negative validation - check if project is clearly from a different region/province
+                # This prevents Jose Manuel Alba (Region X) from getting non-Region X projects
+                # and Jose Alvarez (Palawan) from getting non-Palawan projects
+                region_province_conflict = False
+                
+                if location_upper:
+                    # Load region mappings from comprehensive location database if available
+                    region_mappings = {}
+                    location_db_path = Path(__file__).parent.parent / 'database' / 'philippine_locations.json'
+                    if location_db_path.exists():
+                        try:
+                            with open(location_db_path, 'r', encoding='utf-8') as f:
+                                location_db = json.load(f)
+                            # Build region mappings from database
+                            for region_id, region_data in location_db.get('region_province_mappings', {}).items():
+                                prov_list = [p.upper().strip() for p in region_data.get('provinces', [])]
+                                # Normalize region IDs
+                                if region_id == '10':
+                                    region_mappings['X'] = prov_list
+                                    region_mappings['10'] = prov_list
+                                elif region_id in ['IV-B', 'IVB', '4-B', '4B']:
+                                    region_mappings['IV-B'] = prov_list
+                                    region_mappings['IVB'] = prov_list
+                                    region_mappings['4-B'] = prov_list
+                                    region_mappings['4B'] = prov_list
+                                else:
+                                    region_mappings[region_id] = prov_list
+                        except Exception:
+                            pass
+                    
+                    # Fallback to hardcoded mappings if database not available
+                    if not region_mappings:
+                        region_mappings = {
+                            'X': ['BUKIDNON', 'CAMIGUIN', 'MISAMIS OCCIDENTAL', 'MISAMIS ORIENTAL', 'LANAO DEL NORTE'],
+                            'IV-B': ['PALAWAN', 'MARINDUQUE', 'OCCIDENTAL MINDORO', 'ORIENTAL MINDORO', 'ROMBLON'],
+                            'IVB': ['PALAWAN', 'MARINDUQUE', 'OCCIDENTAL MINDORO', 'ORIENTAL MINDORO', 'ROMBLON'],
+                            '4-B': ['PALAWAN', 'MARINDUQUE', 'OCCIDENTAL MINDORO', 'ORIENTAL MINDORO', 'ROMBLON'],
+                            '4B': ['PALAWAN', 'MARINDUQUE', 'OCCIDENTAL MINDORO', 'ORIENTAL MINDORO', 'ROMBLON'],
+                        }
+                    
+                    # Extract region from location if present
+                    region_match = re.search(r'REGION\s+([IVX]+|\d+[-\s]?[A-Z]?|\d+)', location_upper, re.IGNORECASE)
+                    if region_match:
+                        region_key = region_match.group(1).upper().strip()
+                        # Normalize region key
+                        if region_key == '10':
+                            region_key = 'X'
+                        elif region_key in ['4-B', '4B']:
+                            region_key = 'IV-B'
+                        
+                        # Check if congressman's province is in a specific region
+                        cm_province_main = cm_provinces[0].upper() if cm_provinces else ''
+                        
+                        # Jose Manuel Alba - Bukidnon (Region X)
+                        if cm_province_main == 'BUKIDNON':
+                            if region_key != 'X' and region_key in region_mappings:
+                                # Location mentions a different region - REJECT
+                                region_province_conflict = True
+                            elif region_key not in ['X', '10'] and region_key:
+                                # Location mentions a region that's not Region X - REJECT
+                                region_province_conflict = True
+                            # Also check if province_upper is explicitly NOT from Region X
+                            if province_upper and province_upper not in region_mappings.get('X', []):
+                                # Check if it's from another region
+                                for reg_key, reg_provinces in region_mappings.items():
+                                    if reg_key != 'X' and province_upper in reg_provinces:
+                                        # Project is from a different region - REJECT
+                                        region_province_conflict = True
+                                        break
+                        
+                        # Jose Alvarez - Palawan (Region IV-B / MIMAROPA)
+                        if cm_province_main == 'PALAWAN':
+                            if region_key not in ['IV-B', 'IVB', '4-B', '4B'] and region_key in region_mappings:
+                                # Location mentions a different region - REJECT
+                                region_province_conflict = True
+                            # Also check if province_upper is explicitly NOT from MIMAROPA
+                            if province_upper and province_upper not in region_mappings.get('IV-B', []):
+                                # Check if it's from another region
+                                for reg_key, reg_provinces in region_mappings.items():
+                                    if reg_key not in ['IV-B', 'IVB', '4-B', '4B'] and province_upper in reg_provinces:
+                                        # Project is from a different region - REJECT
+                                        region_province_conflict = True
+                                        break
+                    
+                    # Also check for explicit province contradictions in location
+                    # CRITICAL: Only reject CLEAR contradictions, not unknown locations
+                    # Since our database is incomplete (we only know ~162 districts, not all 82 provinces, 146 cities, 1,490 municipalities),
+                    # we should be more lenient and only reject when we're CERTAIN there's a conflict
+                    
+                    # Define clear province contradictions (only for major, unambiguous provinces)
+                    # These are provinces that are geographically distant and unlikely to be confused
+                    clear_contradictions = {
+                        'BUKIDNON': ['PALAWAN', 'CEBU', 'ILOILO', 'LEYTE', 'BOHOL', 'NEGROS', 'SAMAR', 'BILIRAN', 'SIQUIJOR'],
+                        'PALAWAN': ['BUKIDNON', 'CEBU', 'ILOILO', 'LEYTE', 'BOHOL', 'NEGROS', 'SAMAR', 'BILIRAN', 'SIQUIJOR', 'CAMIGUIN'],
+                        'CEBU': ['BUKIDNON', 'PALAWAN', 'CAMIGUIN'],
+                        'ILOILO': ['BUKIDNON', 'PALAWAN', 'CAMIGUIN'],
+                    }
+                    
+                    cm_province_main = cm_provinces[0].upper() if cm_provinces else ''
+                    
+                    # Only check for contradictions if congressman's province is in our contradiction map
+                    if cm_province_main in clear_contradictions:
+                        contradictory_provinces = clear_contradictions[cm_province_main]
+                        for contrad_prov in contradictory_provinces:
+                            if contrad_prov in location_upper:
+                                # Check if this is a standalone mention (not part of a larger word)
+                                # This prevents false positives like "CEBU" in "CEBULAN" matching "CEBU"
+                                contrad_pattern = r'\b' + re.escape(contrad_prov) + r'\b'
+                                if re.search(contrad_pattern, location_upper, re.IGNORECASE):
+                                    # Location clearly mentions contradictory province - REJECT
+                                    region_province_conflict = True
+                                    break
+                        
+                        if region_province_conflict:
+                            break
+                
+                # If there's a region/province conflict, skip this candidate
+                if region_province_conflict:
+                    continue
+                
                 # Check if any of the congressman's provinces match the requested province
                 province_matches = False
                 for cm_province in cm_provinces:
@@ -4977,8 +5185,77 @@ class DynastyProjectsCacheGeneratorDuckDB:
                         continue
                     
                     # Only allow compound matching for non-directional provinces
+                    # CRITICAL: Be more strict - require that the match is meaningful and not just a substring
+                    # Example: "Bukidnon" should match "Bukidnon" but NOT match "Region X - Bukidnon" unless
+                    # the project province is actually "Bukidnon"
+                    # Also: "Palawan" should match "Palawan" but NOT match "Rizal (PALAWAN)" unless explicitly in Palawan
+                    compound_match = False
                     if re.search(r'\b' + re.escape(province_upper) + r'\b', cm_prov_upper) or \
                        re.search(r'\b' + re.escape(cm_prov_upper) + r'\b', province_upper):
+                        # CRITICAL: For specific provinces, require exact or near-exact match
+                        # This prevents false matches like "Rizal (PALAWAN)" matching "Palawan" congressman
+                        # or "Region X - Bukidnon" matching when project is not from Bukidnon
+                        
+                        # Check if this is a known province that needs strict matching
+                        strict_provinces = ['BUKIDNON', 'PALAWAN', 'RIZAL', 'CEBU', 'DAVAO', 'ILOILO']
+                        needs_strict_match = (cm_prov_upper in strict_provinces) or (province_upper in strict_provinces)
+                        
+                        if needs_strict_match:
+                            # For strict provinces, require that the province name appears as a standalone word
+                            # and not just as part of a larger string like "Region X - Bukidnon" or "Rizal (PALAWAN)"
+                            
+                            # Check if province appears as a standalone word in the other string
+                            cm_standalone = bool(re.search(r'^' + re.escape(cm_prov_upper) + r'$|^' + re.escape(cm_prov_upper) + r'\s|,\s*' + re.escape(cm_prov_upper) + r'\s|,\s*' + re.escape(cm_prov_upper) + r'$', province_upper))
+                            prov_standalone = bool(re.search(r'^' + re.escape(province_upper) + r'$|^' + re.escape(province_upper) + r'\s|,\s*' + re.escape(province_upper) + r'\s|,\s*' + re.escape(province_upper) + r'$', cm_prov_upper))
+                            
+                            if not (cm_standalone or prov_standalone):
+                                # Province doesn't appear as standalone - check if it's in a contradictory context
+                                if location_upper:
+                                    # Check for parenthetical contradictions (e.g., "Rizal (PALAWAN)")
+                                    # But ONLY if the parenthetical province is different from what we're matching
+                                    paren_matches = re.findall(r'\(([^)]+)\)', location_upper)
+                                    for paren_text in paren_matches:
+                                        paren_upper = paren_text.upper().strip()
+                                        # If parentheses contain a different province, reject
+                                        if paren_upper in strict_provinces:
+                                            if (cm_prov_upper == 'PALAWAN' and paren_upper != 'PALAWAN') or \
+                                               (cm_prov_upper != 'PALAWAN' and paren_upper == 'PALAWAN'):
+                                                # Parenthetical contradicts - reject
+                                                continue
+                                    
+                                    # Check for region mentions that might contradict
+                                    # CRITICAL: For Bukidnon (Jose Manuel Alba), only match if project is from Region X
+                                    if cm_prov_upper == 'BUKIDNON':
+                                        # Check if location mentions a different region
+                                        region_match = re.search(r'REGION\s+([IVX]+|\d+)', location_upper, re.IGNORECASE)
+                                        if region_match:
+                                            region_num = region_match.group(1).upper()
+                                            if region_num not in ['X', '10']:
+                                                # Location mentions a different region - reject
+                                                continue
+                                        # Also check if province_upper is not a Region X province
+                                        region_x_provinces = ['BUKIDNON', 'CAMIGUIN', 'MISAMIS OCCIDENTAL', 'MISAMIS ORIENTAL', 'LANAO DEL NORTE']
+                                        if province_upper and province_upper not in region_x_provinces:
+                                            # Project province is not from Region X - reject
+                                            continue
+                                    
+                                    # CRITICAL: For Palawan (Jose Alvarez), ensure we're matching Palawan projects
+                                    # Don't reject if parenthetical says Palawan - that's actually correct
+                                    if cm_prov_upper == 'PALAWAN':
+                                        # Check if location mentions Palawan (which is good)
+                                        if 'PALAWAN' in location_upper:
+                                            # Location mentions Palawan - this is correct, allow match
+                                            pass
+                                        # Check if province_upper is Palawan or a MIMAROPA province
+                                        elif province_upper:
+                                            mimaropa_provinces = ['PALAWAN', 'MARINDUQUE', 'OCCIDENTAL MINDORO', 'ORIENTAL MINDORO', 'ROMBLON']
+                                            if province_upper not in mimaropa_provinces:
+                                                # Project province is not from MIMAROPA - reject
+                                                continue
+                        
+                        compound_match = True
+                    
+                    if compound_match:
                         province_matches = True
                         break
                     
@@ -5226,19 +5503,68 @@ class DynastyProjectsCacheGeneratorDuckDB:
                         # and we have a location, this indicates the municipality/barangay dictionary
                         # might be missing or incomplete
                         # For Davao City specifically, if we can't determine district, reject all candidates to be safe
-                        elif location_upper and len(validated_candidates) > 1:
-                            # Check if this is Davao City
+                        elif len(validated_candidates) > 1:
+                            # Check if this is Davao City (check both province_upper and location_upper)
                             davao_variants = ['DAVAO CITY', 'DAVAO DEL SUR']
-                            if province_upper in davao_variants:
-                                # For Davao City, if we can't determine district number, reject to prevent cross-contamination
-                                # This prevents Paolo Duterte (1st) from getting Isidro Ungab's (3rd) projects
-                                # and vice versa
-                                validated_candidates = []
+                            is_davao_city = (province_upper in davao_variants) or \
+                                           (location_upper and any(variant in location_upper for variant in davao_variants))
+                            
+                            if is_davao_city:
+                                # For Davao City, if we can't determine district number, default to 1st District (Paolo Duterte)
+                                # This prevents cross-contamination while ensuring projects aren't lost
+                                if not district_number:
+                                    # Find Paolo Duterte (1st District) in the candidates
+                                    paolo_duterte_candidate = None
+                                    for cm_name, cm_data in validated_candidates:
+                                        cm_district = cm_data.get('district_number', '')
+                                        if '1ST' in str(cm_district).upper() or '1ST DISTRICT' in str(cm_district).upper():
+                                            # Check if this is Paolo Duterte
+                                            if 'DUTERTE' in cm_name.upper() and 'PAOLO' in cm_name.upper():
+                                                paolo_duterte_candidate = (cm_name, cm_data)
+                                                break
+                                    
+                                    if paolo_duterte_candidate:
+                                        # Default to Paolo Duterte (1st District)
+                                        validated_candidates = [paolo_duterte_candidate]
+                                    else:
+                                        # Paolo Duterte not in candidates - reject to be safe
+                                        validated_candidates = []
+                                # If we have a district number but multiple candidates still match,
+                                # this means the district number validation failed - default to 1st District
+                                elif district_number and not district_matched_candidates:
+                                    # Find Paolo Duterte (1st District) in the candidates
+                                    paolo_duterte_candidate = None
+                                    for cm_name, cm_data in validated_candidates:
+                                        cm_district = cm_data.get('district_number', '')
+                                        if '1ST' in str(cm_district).upper() or '1ST DISTRICT' in str(cm_district).upper():
+                                            if 'DUTERTE' in cm_name.upper() and 'PAOLO' in cm_name.upper():
+                                                paolo_duterte_candidate = (cm_name, cm_data)
+                                                break
+                                    
+                                    if paolo_duterte_candidate:
+                                        # Default to Paolo Duterte (1st District)
+                                        validated_candidates = [paolo_duterte_candidate]
+                                    else:
+                                        # Paolo Duterte not in candidates - reject to be safe
+                                        validated_candidates = []
                             else:
                                 # For other provinces, log a warning but proceed
                                 # Municipality/barangay exists but district number not found or doesn't match
                                 # This suggests the municipality/barangay-to-district mapping might be missing
                                 pass
+                
+                # CRITICAL FIX: For Davao City, if we have candidates but no specific district determined,
+                # and the location is explicitly "DAVAO CITY", default to Paolo Duterte (1st District)
+                # This catches cases where district_lookup didn't narrow it down
+                if len(validated_candidates) > 1 and location_upper == 'DAVAO CITY':
+                     paolo_duterte_candidate = None
+                     for cm_name, cm_data in validated_candidates:
+                         if 'DUTERTE' in cm_name.upper() and 'PAOLO' in cm_name.upper():
+                             paolo_duterte_candidate = (cm_name, cm_data)
+                             break
+                     
+                     if paolo_duterte_candidate:
+                         validated_candidates = [paolo_duterte_candidate]
                 
                 # If project_year is provided and multiple candidates match, prioritize the one whose term best matches
                 # CRITICAL: Use project_year_int (converted to int) instead of project_year (may be string)
@@ -7012,15 +7338,74 @@ class DynastyProjectsCacheGeneratorDuckDB:
                                         should_include = False
                                         continue
                             
-                            # Check for direct match (any variation)
-                            if district_match or contractor_match:
-                                should_include = True
-                            # For _all_congressmen matches, ONLY allow if province validation passed
-                            # CRITICAL: Don't allow _all_congressmen matches if province validation failed
-                            elif all_congressmen_match:
-                                # Only allow if we didn't reject due to province mismatch
-                                # If we got here, province validation passed (or wasn't checked)
-                                should_include = True
+                            # CRITICAL: For Davao City, require district number validation
+                            # This prevents Paolo Duterte (1st), Vincent Garcia (2nd), and Isidro Ungab (3rd)
+                            # from getting each other's projects
+                            davao_variants = ['DAVAO CITY', 'DAVAO DEL SUR']
+                            is_davao_city = (cm_province in davao_variants) or \
+                                           (project_province and any(variant in project_province for variant in davao_variants)) or \
+                                           (location and any(variant in location for variant in davao_variants))
+                            
+                            if is_davao_city and cm_data:
+                                # For Davao City, we MUST have a district number match
+                                cm_district_number = cm_data.get('district_number')
+                                if cm_district_number:
+                                    # Extract district number from congressman (e.g., "1st District" -> 1)
+                                    cm_district_match = re.search(r'\b(\d+)(ST|ND|RD|TH)\s+DISTRICT\b', str(cm_district_number).upper(), re.IGNORECASE)
+                                    if cm_district_match:
+                                        cm_district_num = int(cm_district_match.group(1))
+                                        
+                                        # Try to extract district number from project
+                                        project_district_num = None
+                                        project_district_str = str(p.get('project_district', '')).upper()
+                                        if project_district_str:
+                                            proj_district_match = re.search(r'\b(\d+)(ST|ND|RD|TH)\s+DISTRICT\b', project_district_str, re.IGNORECASE)
+                                            if proj_district_match:
+                                                project_district_num = int(proj_district_match.group(1))
+                                        
+                                        # If project doesn't have district number, try location
+                                        if project_district_num is None and location:
+                                            loc_district_match = re.search(r'\b(\d+)(ST|ND|RD|TH)\s+DISTRICT\b', location, re.IGNORECASE)
+                                            if loc_district_match:
+                                                project_district_num = int(loc_district_match.group(1))
+                                        
+                                        # CRITICAL: For Davao City, require district number match
+                                        # If we can't determine the project's district number, default to 1st District (Paolo Duterte)
+                                        if project_district_num is None:
+                                            # Can't determine district - default to 1st District if this is Paolo Duterte
+                                            if cm_district_num == 1:
+                                                # This is Paolo Duterte (1st District) - allow as default
+                                                should_include = True
+                                            else:
+                                                # Not 1st District - reject to prevent cross-contamination
+                                                should_include = False
+                                                continue
+                                        elif project_district_num != cm_district_num:
+                                            # District numbers don't match - reject
+                                            should_include = False
+                                            continue
+                                        else:
+                                            # District numbers match - allow
+                                            should_include = True
+                                    else:
+                                        # Congressman has district_number but we can't parse it - be safe and reject
+                                        should_include = False
+                                        continue
+                                else:
+                                    # Congressman doesn't have district_number but is in Davao City - reject
+                                    should_include = False
+                                    continue
+                            else:
+                                # Not Davao City - use normal matching logic
+                                # Check for direct match (any variation)
+                                if district_match or contractor_match:
+                                    should_include = True
+                                # For _all_congressmen matches, ONLY allow if province validation passed
+                                # CRITICAL: Don't allow _all_congressmen matches if province validation failed
+                                elif all_congressmen_match:
+                                    # Only allow if we didn't reject due to province mismatch
+                                    # If we got here, province validation passed (or wasn't checked)
+                                    should_include = True
                         else:
                             # No province info, use default logic
                             # CRITICAL: For _all_congressmen matches without province info, be more strict
@@ -7087,25 +7472,41 @@ class DynastyProjectsCacheGeneratorDuckDB:
                                                 continue
                                         elif cm_district_match and not proj_district_match:
                                             # Congressman has district number but project doesn't - be cautious
-                                            # For Davao City, if we can't determine project district, we need to check location
-                                            # If location contains district info (like "Matina, Davao City 1st District"), extract it
+                                            # For Davao City, if we can't determine project district, default to 1st District (Paolo Duterte)
                                             location = p.get('location', '') or ''
                                             location_upper = str(location).upper()
                                             
                                             # Try to extract district from location
                                             location_district_match = re.search(r'\b(\d+)(ST|ND|RD|TH)\s*DISTRICT\b', location_upper, re.IGNORECASE)
-                                            if location_district_match:
-                                                proj_num = int(location_district_match.group(1))
+                                            
+                                            # If still can't determine district, default to 1st District
+                                            if not location_district_match:
                                                 cm_num = int(cm_district_match.group(1))
-                                                if cm_num != proj_num:
-                                                    # District numbers don't match - REJECT
+                                                if cm_num == 1:
+                                                    # This is Paolo Duterte (1st District) - allow as default
+                                                    should_include = True
+                                                else:
+                                                    # Not 1st District - reject to prevent cross-contamination
                                                     should_include = False
                                                     continue
                                             else:
-                                                # Can't determine project district from location either
-                                                # For Davao City specifically, if we can't determine district, reject to be safe
-                                                # This prevents Paolo Duterte (1st) from getting projects that might be 3rd District
-                                                # and vice versa
+                                                # Found district in location - validate it matches
+                                                loc_num = int(location_district_match.group(1))
+                                                cm_num = int(cm_district_match.group(1))
+                                                if loc_num != cm_num:
+                                                    # District numbers don't match - reject
+                                                    should_include = False
+                                                    continue
+                                                else:
+                                                    # District numbers match
+                                                    should_include = True
+                                        elif not cm_district_match and not proj_district_match:
+                                            # Neither has district number - default to 1st District (Paolo Duterte)
+                                            # Check if this is Paolo Duterte
+                                            if 'DUTERTE' in name_variations[0].upper() and 'PAOLO' in name_variations[0].upper():
+                                                should_include = True
+                                            else:
+                                                # Not Paolo Duterte - reject to prevent cross-contamination
                                                 should_include = False
                                                 continue
                                     elif cm_base == proj_base and cm_base:

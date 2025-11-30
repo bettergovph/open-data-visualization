@@ -191,3 +191,4 @@ if __name__ == "__main__":
     
     print(f"\n✅ Analysis complete! Found {len(patterns)} uniform decrease patterns.")
 
+
