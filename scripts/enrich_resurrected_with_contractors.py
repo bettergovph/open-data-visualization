@@ -201,14 +201,20 @@ class ContractorEnricher:
                         matches = matches[year_mask]
                 
                 if len(matches) > 0:
-                    contractor = matches.iloc[0]['contractor_name']
+                    best_match = matches.iloc[0]
+                    contractor = best_match['contractor_name']
                     if contractor and str(contractor).strip() and str(contractor).strip() != 'No Data Available':
                         result = {'contractor': str(contractor).strip()}
                         # Get contract_id if available
                         if 'contract_id' in matches.columns:
-                            contract_id = matches.iloc[0]['contract_id']
+                            contract_id = best_match['contract_id']
                             if contract_id and not pd.isna(contract_id):
                                 result['contract_id'] = str(contract_id).strip()
+                        # Calculate similarity for comparison
+                        matched_desc = str(best_match.get('project_description', ''))
+                        similarity = self._calculate_similarity(search_normalized, matched_desc.lower())
+                        result['similarity'] = similarity
+                        result['matched_text'] = matched_desc
                         return result
             
             elif source == 'philgeps':
@@ -240,16 +246,22 @@ class ContractorEnricher:
                     if col in matches.columns:
                         contractor_col = matches[matches[col].notna()]
                         if len(contractor_col) > 0:
-                            contractor = contractor_col.iloc[0][col]
+                            best_match = contractor_col.iloc[0]
+                            contractor = best_match[col]
                             if contractor and str(contractor).strip() and str(contractor).strip() != 'No Data Available':
                                 result = {'contractor': str(contractor).strip()}
                                 # Get contract_id (try multiple column names)
                                 for id_col in ['contract_id', 'philgeps_contract_no', 'philgeps_reference_id']:
                                     if id_col in matches.columns:
-                                        contract_id = matches.iloc[0][id_col]
+                                        contract_id = best_match[id_col]
                                         if contract_id and not pd.isna(contract_id):
                                             result['contract_id'] = str(contract_id).strip()
                                             break
+                                # Calculate similarity for comparison
+                                matched_text = str(best_match.get('project_name', '') or best_match.get('project_description', ''))
+                                similarity = self._calculate_similarity(search_normalized, matched_text.lower())
+                                result['similarity'] = similarity
+                                result['matched_text'] = matched_text
                                 return result
             
             elif source == 'transparency':
@@ -304,7 +316,7 @@ class ContractorEnricher:
                 
                 # Use best match (highest similarity)
                 if matches_with_sim:
-                    best_match = matches_with_sim[0][1]
+                    best_sim, best_match = matches_with_sim[0]
                     # Try all contractor columns (contractor_name, contractor_name_2, etc.)
                     for col in ['contractor_name', 'contractor_name_2', 'contractor_name_3', 'contractor_name_4']:
                         if col in best_match.index:
@@ -316,6 +328,10 @@ class ContractorEnricher:
                                     contract_id = best_match['contract_id']
                                     if contract_id and not pd.isna(contract_id):
                                         result['contract_id'] = str(contract_id).strip()
+                                # Include similarity and matched text for comparison
+                                matched_desc = str(best_match.get('project_description', '') or best_match.get('description', ''))
+                                result['similarity'] = best_sim
+                                result['matched_text'] = matched_desc
                                 return result
             
             elif source == 'infrawatch':
@@ -337,14 +353,20 @@ class ContractorEnricher:
                             year_mask = year_mask | (year_series.isna() & (contract_id_years == year))
                         matches = matches[year_mask]
                 if len(matches) > 0:
-                    contractor = matches.iloc[0]['contractor_name']
+                    best_match = matches.iloc[0]
+                    contractor = best_match['contractor_name']
                     if contractor and str(contractor).strip() and str(contractor).strip() != 'No Data Available':
                         result = {'contractor': str(contractor).strip()}
                         # Get contract_id if available
                         if 'contract_id' in matches.columns:
-                            contract_id = matches.iloc[0]['contract_id']
+                            contract_id = best_match['contract_id']
                             if contract_id and not pd.isna(contract_id):
                                 result['contract_id'] = str(contract_id).strip()
+                        # Calculate similarity for comparison
+                        matched_desc = str(best_match.get('project_description', ''))
+                        similarity = self._calculate_similarity(search_normalized, matched_desc.lower())
+                        result['similarity'] = similarity
+                        result['matched_text'] = matched_desc
                         return result
         
         except Exception as e:
@@ -390,6 +412,11 @@ class ContractorEnricher:
                         # Use project id as contract_id if available
                         if row.get('id'):
                             result['contract_id'] = str(row['id']).strip()
+                        # Calculate similarity for comparison
+                        matched_text = str(row.get('project_name', '') or row.get('description', ''))
+                        similarity = self._calculate_similarity(project_name, matched_text)
+                        result['similarity'] = similarity
+                        result['matched_text'] = matched_text
                         cursor.close()
                         conn.close()
                         return result
@@ -402,9 +429,16 @@ class ContractorEnricher:
             # Silently fail
             return None
         
+    def _calculate_similarity(self, text1: str, text2: str) -> float:
+        """Calculate similarity between two texts using SequenceMatcher"""
+        from difflib import SequenceMatcher
+        if not text1 or not text2:
+            return 0.0
+        return SequenceMatcher(None, text1.lower().strip(), text2.lower().strip()).ratio()
+    
     def get_contractor_for_project(self, project_name: str, project_description: str = None, year: Optional[int] = None) -> Optional[Dict[str, str]]:
         """Try to get contractor and contract_id information from all sources
-        Priority: DIME > Flood > PhilGEPS > Transparency > Infrawatch
+        Prioritizes matches by similarity score, not source priority
         If year is provided, filters parquet sources by year for year-qualified matches
         Returns dict with 'contractor' and optionally 'contract_id' keys, or None if not found
         """
@@ -425,32 +459,55 @@ class ContractorEnricher:
         if project_description:
             search_text = f"{project_name} {project_description}"
         
-        # Try sources in priority order
+        # Search all sources and collect matches with similarity scores
+        # Priority order: Transparency > Infrawatch (Microsite) > PhilGEPS > DIME > Flood
+        all_matches = []
+        
         sources = [
-            ('dime', lambda n, d, y: self._get_contractor_from_dime(n, d, y)),
-            ('flood', lambda n, d, y: self._search_parquet('flood', search_text, y)),
-            ('philgeps', lambda n, d, y: self._search_parquet('philgeps', search_text, y)),
             ('transparency', lambda n, d, y: self._search_parquet('transparency', search_text, y)),
             ('infrawatch', lambda n, d, y: self._search_parquet('infrawatch', search_text, y)),
+            ('philgeps', lambda n, d, y: self._search_parquet('philgeps', search_text, y)),
+            ('dime', lambda n, d, y: self._get_contractor_from_dime(n, d, y)),
+            ('flood', lambda n, d, y: self._search_parquet('flood', search_text, y)),
         ]
         
         for source_name, source_func in sources:
             try:
                 result = source_func(project_name, project_description, year)
                 if result and result.get('contractor'):
-                    # Cache result (include year in cache key for year-specific caching)
-                    if year:
-                        cache_key_with_year = f"{cache_key}_y{year}"
-                        self.contractor_cache[cache_key_with_year] = result
-                    self.contractor_cache[cache_key] = result
-                    return result
+                    # Get the matched project name/description from the source for similarity calculation
+                    matched_text = result.get('matched_text', search_text)
+                    similarity = result.get('similarity', 0.5)  # Default to 0.5 if not provided
+                    
+                    # If similarity not provided, calculate it
+                    if similarity == 0.5 and matched_text:
+                        similarity = self._calculate_similarity(project_name, matched_text)
+                    
+                    all_matches.append({
+                        'source': source_name,
+                        'result': result,
+                        'similarity': similarity
+                    })
             except Exception as e:
                 # Continue to next source
                 continue
         
-        # Cache None result
-        self.contractor_cache[cache_key] = None
-        return None
+        # If no matches found
+        if not all_matches:
+            self.contractor_cache[cache_key] = None
+            return None
+        
+        # Sort by similarity (highest first) and return best match
+        all_matches.sort(key=lambda x: x['similarity'], reverse=True)
+        best_match = all_matches[0]['result']
+        
+        # Cache result (include year in cache key for year-specific caching)
+        if year:
+            cache_key_with_year = f"{cache_key}_y{year}"
+            self.contractor_cache[cache_key_with_year] = best_match
+        self.contractor_cache[cache_key] = best_match
+        
+        return best_match
     
     def enrich_matches(self, json_path: Path):
         """Enrich all matches with contractor data"""
