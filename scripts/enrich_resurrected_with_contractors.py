@@ -516,6 +516,93 @@ class ContractorEnricher:
         
         return best_match
     
+    def _enrich_historical_source_info(self, historical: Dict):
+        """Add source row/cell information to historical match
+        Uses the historical ID to look up row information from PostgreSQL
+        """
+        if not historical.get('id') or not historical.get('year'):
+            return
+        
+        hist_id = historical.get('id')
+        hist_year = historical.get('year')
+        source_file = historical.get('source_file', '')
+        
+        # Extract year from string format if needed (e.g., 'GAA-2024' -> 2024)
+        if isinstance(hist_year, str):
+            year_match = re.search(r'(\d{4})', str(hist_year))
+            if year_match:
+                hist_year = int(year_match.group(1))
+            else:
+                return
+        
+        try:
+            conn = psycopg2.connect(**self.budget_db_config)
+            cursor = conn.cursor(cursor_factory=RealDictCursor)
+            
+            # Check if table has sourceline column
+            cursor.execute(f"""
+                SELECT column_name 
+                FROM information_schema.columns 
+                WHERE table_name = 'budget_{hist_year}'
+                AND column_name IN ('sourceline', 'source_row', 'source_col', 'row', 'cell')
+            """)
+            available_cols = [row[0] for row in cursor.fetchall()]
+            
+            # Build query with available columns
+            cols_to_select = ['id', 'source_file']
+            if 'sourceline' in available_cols:
+                cols_to_select.append('sourceline')
+            if 'source_row' in available_cols:
+                cols_to_select.append('source_row')
+            if 'source_col' in available_cols:
+                cols_to_select.append('source_col')
+            
+            query = f"""
+                SELECT {', '.join(cols_to_select)}
+                FROM budget_{hist_year}
+                WHERE id = %s
+            """
+            
+            cursor.execute(query, (hist_id,))
+            row = cursor.fetchone()
+            
+            if row:
+                # Get row number from sourceline if available, otherwise use ID
+                source_row = None
+                if 'sourceline' in row and row['sourceline'] is not None:
+                    source_row = row['sourceline']
+                elif 'source_row' in row and row['source_row'] is not None:
+                    source_row = row['source_row']
+                else:
+                    source_row = hist_id  # Fallback to ID
+                
+                source_col = None
+                if 'source_col' in row and row['source_col'] is not None:
+                    source_col = row['source_col']
+                
+                historical['source_row'] = source_row
+                historical['source_col'] = source_col
+                
+                # Format source display
+                import os
+                if source_file:
+                    filename = os.path.basename(source_file)
+                    if source_col:
+                        historical['source_display'] = f"{filename} (Row {source_row}, Col {source_col})"
+                    else:
+                        historical['source_display'] = f"{filename} (Row {source_row})"
+                else:
+                    if source_col:
+                        historical['source_display'] = f"Row {source_row}, Col {source_col}"
+                    else:
+                        historical['source_display'] = f"Row {source_row}"
+            
+            cursor.close()
+            conn.close()
+        except Exception as e:
+            # Silently fail - source info is optional
+            pass
+    
     def enrich_matches(self, json_path: Path):
         """Enrich all matches with contractor data"""
         print("=" * 100)
