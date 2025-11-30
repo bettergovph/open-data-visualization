@@ -25,7 +25,7 @@
     <!-- Mobile Tabs -->
     <div class="budget-tab-nav" style="display: flex; gap: 0.5rem; margin-bottom: 1rem; overflow-x: auto; -webkit-overflow-scrolling: touch; padding-bottom: 0.5rem;">
         <a href="#trends" class="mobile-tab-link active" data-tab="trends" style="padding: 0.75rem 1rem; white-space: nowrap; border-bottom: 2px solid #0038A8; color: #0038A8; text-decoration: none; font-weight: 600;">📈 Trends</a>
-        <a href="#resu" class="mobile-tab-link" data-tab="resu" style="padding: 0.75rem 1rem; white-space: nowrap; border-bottom: 2px solid transparent; color: #666; text-decoration: none; font-weight: 500;">🔄 Resurrection</a>
+        <a href="#resu" class="mobile-tab-link" data-tab="resu" style="padding: 0.75rem 1rem; white-space: nowrap; border-bottom: 2px solid transparent; color: #666; text-decoration: none; font-weight: 500;">🔄 Repeated</a>
         <a href="#roads" class="mobile-tab-link" data-tab="roads" style="padding: 0.75rem 1rem; white-space: nowrap; border-bottom: 2px solid transparent; color: #666; text-decoration: none; font-weight: 500;">🛣️ Roads</a>
         <a href="#zero" class="mobile-tab-link" data-tab="zero" style="padding: 0.75rem 1rem; white-space: nowrap; border-bottom: 2px solid transparent; color: #666; text-decoration: none; font-weight: 500;">🚫 Anti-zero</a>
     </div>
@@ -51,7 +51,7 @@
         </div>
     </div>
 
-    <!-- Resurrection Tab -->
+    <!-- Repeated Projects Tab -->
     <div id="tab-resu" class="mobile-tab-panel" style="display: none;">
         <p class="text-xs text-gray-600 mb-3 bg-blue-50 p-3 rounded">
             🔄 DPWH projects in 2026 that existed in previous years (2020-2025)
@@ -77,7 +77,7 @@
         <!-- Loading -->
         <div id="mobile-resu-loading" class="text-center py-8">
             <div class="inline-block w-8 h-8 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin"></div>
-            <p class="text-sm text-gray-500 mt-2">Loading resurrected projects...</p>
+            <p class="text-sm text-gray-500 mt-2">Loading repeated projects...</p>
         </div>
 
         <!-- Error -->
@@ -87,7 +87,7 @@
         <div id="mobile-resu-stats" style="display: none; display: grid; grid-template-columns: repeat(2, 1fr); gap: 0.75rem; margin: 1rem 0;">
             <div class="mobile-stat-card" style="background: white; padding: 1rem; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); text-align: center;">
                 <div class="text-xl font-bold text-red-600" id="mobile-resu-total">-</div>
-                <div class="text-xs text-gray-600 mt-1">Total Resurrected</div>
+                <div class="text-xs text-gray-600 mt-1">Total Repeated</div>
             </div>
             <div class="mobile-stat-card" style="background: white; padding: 1rem; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); text-align: center;">
                 <div class="text-lg font-bold text-red-600" id="mobile-resu-amount-2026">-</div>
@@ -534,13 +534,13 @@
         }
     }
 
-    // Pagination state for mobile resurrected projects
+    // Pagination state for mobile repeated projects
     let mobileResuAllMatches = [];
     let mobileResuGroupedProjects = [];
     let mobileResuCurrentPage = 1;
     let mobileResuItemsPerPage = 10;
     
-    // Load mobile resurrected projects
+    // Load mobile repeated projects
     async function loadMobileResurrectedProjects() {
         const loadingEl = document.getElementById('mobile-resu-loading');
         const errorEl = document.getElementById('mobile-resu-error');
@@ -578,7 +578,7 @@
             statsEl.style.display = 'grid';
             projectsEl.style.display = 'block';
         } catch (error) {
-            console.error('Error loading resurrected projects:', error);
+            console.error('Error loading repeated projects:', error);
             loadingEl.style.display = 'none';
             errorEl.textContent = `Error: ${error.message}`;
             errorEl.style.display = 'block';
@@ -944,7 +944,7 @@
         return div.innerHTML;
     }
     
-    // Download functions for mobile resurrected projects
+    // Download functions for mobile repeated projects
     function downloadMobileResurrectedCSV() {
         if (!mobileResuAllMatches || mobileResuAllMatches.length === 0) {
             alert('No data available to download');
@@ -1026,7 +1026,7 @@
             metadata: {
                 exported_at: new Date().toISOString(),
                 total_matches: mobileResuAllMatches.length,
-                description: 'DPWH Resurrected Projects - Projects in 2026 that also existed in previous years (2020-2025)'
+                description: 'DPWH Repeated Projects - Projects in 2026 that also existed in previous years (2020-2025)'
             },
             matches: mobileResuAllMatches
         };
