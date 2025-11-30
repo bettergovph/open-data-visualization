@@ -36,6 +36,22 @@
     <!-- Custom CSS -->
     <link rel="stylesheet" href="/static/css/style.css">
     
+    <!-- Hide Integrated menu item globally -->
+    <style>
+        /* Hide Integrated menu item from all navbars */
+        a[href="/integrated"],
+        a[href="/integrated"]:hover,
+        nav a[href^="/integrated"],
+        .visualizations-nav a[href="/integrated"],
+        .visualizations-nav a[href^="/integrated"],
+        #mobileMenu a[href="/integrated"],
+        #mobileMenu a[href^="/integrated"],
+        #mobile-nav-menu a[href="/integrated"],
+        #mobile-nav-menu a[href^="/integrated"] {
+            display: none !important;
+        }
+    </style>
+    
     {% block head %}{% endblock %}
     <link rel="stylesheet" href="/static/css/mobile-fixes.css">
 </head>

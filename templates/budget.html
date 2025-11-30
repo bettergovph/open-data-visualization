@@ -15,6 +15,8 @@
 
     <script src="/static/js/chart.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <!-- D3.js for reblocking visualization -->
+    <script src="https://d3js.org/d3.v7.min.js"></script>
 
     <!-- Cache Control -->
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
@@ -74,7 +76,8 @@
             <a href="/dime" class="text-black hover:text-gray-600 font-medium transition">DIME</a>
             <a href="/map" class="text-black hover:text-gray-600 font-medium transition">Map</a>
             <a href="/dynasty" class="text-black hover:text-gray-600 font-medium transition">Dynasties</a>
-            <a href="/integrated" class="text-black hover:text-gray-600 font-medium transition">Integrated</a>
+            <!-- Integrated menu item hidden -->
+            <!-- <a href="/integrated" class="text-black hover:text-gray-600 font-medium transition">Integrated</a> -->
             <a href="/sources" class="text-black hover:text-gray-600 font-medium transition">Sources</a>
         </div>
         <div class="md:hidden">
@@ -94,7 +97,8 @@
         <a href="/dime" class="block text-black hover:text-gray-600 font-medium py-2">DIME</a>
         <a href="/map" class="block text-black hover:text-gray-600 font-medium py-2">Map</a>
         <a href="/dynasty" class="block text-black hover:text-gray-600 font-medium py-2">Dynasties</a>
-        <a href="/integrated" class="block text-black hover:text-gray-600 font-medium py-2">Integrated</a>
+        <!-- Integrated menu item hidden -->
+        <!-- <a href="/integrated" class="block text-black hover:text-gray-600 font-medium py-2">Integrated</a> -->
     </div>
 </nav>
 
@@ -122,6 +126,7 @@ function toggleMobileMenu() {
                     <a href="#trends" class="budget-tab-btn" data-tab="trends">📈 Trends</a>
                     <a href="#resu" class="budget-tab-btn" data-tab="resu">🔄 Repeated</a>
                     <a href="#roads" class="budget-tab-btn" data-tab="roads">🛣️ Roads</a>
+                    <a href="#reblock" class="budget-tab-btn" data-tab="reblock">🛣️ Reblocking</a>
                     <a href="#zero" class="budget-tab-btn" data-tab="zero">🚫 Anti-zero</a>
                 </div>
                 
@@ -7962,6 +7967,15 @@ async function copyChartToClipboard(containerId, buttonId) {
                         </div>
                     </div>
                     
+                    <!-- Dark Red Segments Chart -->
+                    <div id="roads-dark-red-chart" style="display: none; margin-top: 2rem; margin-bottom: 2rem; background: white; padding: 2rem; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
+                        <h4 style="color: #0038A8; margin: 0 0 1rem 0;">Highways with Highest Percentage of Very Dark Red Segments (Top Red Flags)</h4>
+                        <p style="color: #666; font-size: 0.9em; margin: 0 0 1.5rem 0;">Shows highways with the highest percentage of segments in the top cost tier (very dark red). Calculated as segments above 66th percentile cost per km.</p>
+                        <div id="roads-dark-red-chart-container" style="width: 100%; min-height: 400px;">
+                            <svg id="roads-dark-red-svg" style="display: block; width: 100%; height: 100%;"></svg>
+                        </div>
+                    </div>
+                    
                     <!-- Projects Table -->
                     <div id="roads-table-container" style="display: none; margin-top: 2rem;">
                         <div style="margin-bottom: 1rem;">
@@ -7982,6 +7996,161 @@ async function copyChartToClipboard(containerId, buttonId) {
                                 <tbody id="roads-table-body">
                                 </tbody>
                             </table>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Reblocking Tab -->
+                <div id="tab-reblock" class="budget-tab-panel">
+                    <h3 class="budget-section-title">🛣️ Highway Reblocking Analysis</h3>
+                    <p class="budget-section-desc">Analyze major highways (Maharlika, Andaya, etc.) by comparing cost per kilometer across segments. Visualize highway segments arranged by chainage position with color coding for cost anomalies.</p>
+                    
+                    <!-- Loading Spinner -->
+                    <div id="reblock-loading" style="text-align: center; padding: 2rem;">
+                        <div class="spinner" style="width: 40px; height: 40px; border: 4px solid #f3f3f3; border-top: 4px solid #0038A8; border-radius: 50%; animation: spin 1s linear infinite; margin: 0 auto;"></div>
+                        <p style="color: #666; margin-top: 1rem;">Loading highway reblocking analysis...</p>
+                    </div>
+                    
+                    <!-- Error Message -->
+                    <div id="reblock-error" style="display: none; text-align: center; padding: 2rem; color: #dc3545; background: #f8d7da; border-radius: 8px; margin: 2rem 0;"></div>
+                    
+                    <!-- Info Note -->
+                    <div style="background: #e7f3ff; border-left: 4px solid #0038A8; padding: 1rem; margin: 1.5rem 0; border-radius: 4px;">
+                        <p style="margin: 0; color: #0038A8; font-size: 0.95em;">
+                            <strong>Note:</strong> This analysis identifies major highways using keywords (highway, hiway, etc.) and chainage data. Projects are classified as new construction, repair, rehabilitation, or maintenance. Segments are arranged by chainage position with darker colors indicating higher costs per kilometer, especially when repairs exceed new construction costs.
+                        </p>
+                    </div>
+                    
+                    <!-- Stats Summary -->
+                    <div id="reblock-stats" style="display: none; display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin: 2rem 0;">
+                        <div class="stat-card" style="background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); text-align: center;">
+                            <h3 style="color: #0038A8; margin: 0 0 10px 0; font-size: 1.1em;">Highways Analyzed</h3>
+                            <p id="reblock-highways-count" style="font-size: 2em; font-weight: bold; color: #28a745; margin: 0;">-</p>
+                        </div>
+                        <div class="stat-card" style="background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); text-align: center;">
+                            <h3 style="color: #0038A8; margin: 0 0 10px 0; font-size: 1.1em;">Total Segments</h3>
+                            <p id="reblock-segments-count" style="font-size: 1.6em; font-weight: bold; color: #667eea; margin: 0;">-</p>
+                        </div>
+                        <div class="stat-card" style="background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); text-align: center;">
+                            <h3 style="color: #0038A8; margin: 0 0 10px 0; font-size: 1.1em;">Total Distance</h3>
+                            <p id="reblock-total-distance" style="font-size: 1.6em; font-weight: bold; color: #667eea; margin: 0;">-</p>
+                        </div>
+                        <div class="stat-card" style="background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); text-align: center;">
+                            <h3 style="color: #0038A8; margin: 0 0 10px 0; font-size: 1.1em;">Anomalies</h3>
+                            <p id="reblock-anomalies-count" style="font-size: 1.6em; font-weight: bold; color: #dc3545; margin: 0;">-</p>
+                        </div>
+                    </div>
+                    
+                    <!-- Highway Selection -->
+                    <div id="reblock-highway-selector" style="display: none; margin: 2rem 0;">
+                        <label for="highway-filter" style="font-weight: bold; color: #333; margin-right: 10px; display: block; margin-bottom: 0.5rem;">Select Highway:</label>
+                        <div style="position: relative; display: flex; align-items: center; gap: 0.5rem; min-width: 300px; width: 100%; max-width: 500px;">
+                            <div style="position: relative; flex: 1;">
+                                <input type="text" id="highway-filter" placeholder="Type to search or enter any highway name..." autocomplete="off" style="padding: 8px 12px; padding-right: 35px; border: 2px solid #ddd; border-radius: 6px; font-size: 14px; background: white; color: #333; width: 100%; box-sizing: border-box;">
+                                <button id="highway-filter-clear" onclick="clearHighwayFilter(event)" style="display: none; position: absolute; right: 8px; top: 50%; transform: translateY(-50%); background: none; border: none; color: #999; cursor: pointer; font-size: 18px; padding: 0; width: 24px; height: 24px; line-height: 1; z-index: 10;" title="Clear">×</button>
+                                <div id="highway-autocomplete-suggestions" style="display: none; position: absolute; top: 100%; left: 0; right: 0; background: white; border: 2px solid #ddd; border-top: none; border-radius: 0 0 6px 6px; max-height: 300px; overflow-y: auto; z-index: 1000; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
+                                </div>
+                            </div>
+                        </div>
+                        <p style="color: #666; font-size: 0.85em; margin-top: 0.5rem; font-style: italic;">💡 Tip: You can type any highway name, not just the suggestions shown. The autocomplete helps you find existing highways faster.</p>
+                        
+                        <!-- Legend -->
+                        <div id="reblock-legend" style="display: none; margin-top: 1.5rem; padding: 1rem; background: #f8f9fa; border-radius: 6px; border: 1px solid #dee2e6;">
+                            <div style="display: flex; flex-wrap: wrap; gap: 1.5rem; align-items: center;">
+                                <div style="display: flex; align-items: center; gap: 0.5rem;">
+                                    <div style="width: 30px; height: 15px; background: #0038A8; border-radius: 2px;"></div>
+                                    <span style="font-size: 0.9em; color: #333;">Main Project</span>
+                                </div>
+                                <div style="display: flex; align-items: center; gap: 0.5rem;">
+                                    <div style="width: 30px; height: 15px; background: #ffcccc; border: 2px solid #333; border-radius: 2px;"></div>
+                                    <span style="font-size: 0.9em; color: #333;">New Construction (with outline)</span>
+                                </div>
+                                <div style="display: flex; align-items: center; gap: 0.5rem;">
+                                    <div style="width: 30px; height: 15px; background: #ffcccc; border-radius: 2px;"></div>
+                                    <span style="font-size: 0.9em; color: #333;">Repair/Rehab (no outline)</span>
+                                </div>
+                                <div style="display: flex; align-items: center; gap: 0.5rem;">
+                                    <div style="width: 30px; height: 15px; background: linear-gradient(to right, #ffcccc, #ff6666, #cc0000, #800000); border-radius: 2px;"></div>
+                                    <span style="font-size: 0.9em; color: #333;">Light to Dark Red = Cost/km</span>
+                                </div>
+                                <div style="display: flex; align-items: center; gap: 0.5rem;">
+                                    <span style="font-size: 1.2em;">🚩</span>
+                                    <span style="font-size: 0.9em; color: #333;">Cost/km Indicator</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Visualization Container -->
+                    <div id="reblock-visualization" style="display: none; margin: 2rem 0; background: white; padding: 2rem; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                            <div>
+                                <h4 style="color: #0038A8; margin: 0 0 0.5rem 0;">Highway Segments Gantt Chart</h4>
+                                <p style="color: #666; font-size: 0.9em; margin: 0;">Gantt chart showing highway segments by chainage position. Main project bar at top (full width). Segments below positioned horizontally by chainage. Light to dark red indicates cost per kilometer. New construction has thin outline, repairs do not. Red flags (🚩) mark each segment.</p>
+                            </div>
+                            <div style="display: flex; gap: 0.5rem; align-items: center;">
+                                <button id="reblock-zoom-out" onclick="adjustReblockZoom(-0.2)" style="padding: 8px 16px; border: 2px solid #0038A8; background: white; color: #0038A8; border-radius: 6px; cursor: pointer; font-size: 18px; font-weight: bold;">−</button>
+                                <span id="reblock-zoom-level" style="min-width: 80px; text-align: center; font-weight: bold; color: #0038A8;">100%</span>
+                                <button id="reblock-zoom-in" onclick="adjustReblockZoom(0.2)" style="padding: 8px 16px; border: 2px solid #0038A8; background: white; color: #0038A8; border-radius: 6px; cursor: pointer; font-size: 18px; font-weight: bold;">+</button>
+                                <button id="reblock-zoom-reset" onclick="resetReblockZoom()" style="padding: 8px 16px; border: 2px solid #666; background: white; color: #666; border-radius: 6px; cursor: pointer; font-size: 12px; margin-left: 0.5rem;">Reset</button>
+                            </div>
+                        </div>
+                        <div id="reblock-chart-container" style="position: relative; height: calc((100vh - 400px) * 3); width: 100%; background: #f8f9fa; border: 1px solid #dee2e6; border-radius: 6px; overflow: auto;">
+                            <svg id="reblock-chart" style="display: block; width: 100%; height: 100%;"></svg>
+                        </div>
+                    </div>
+                    
+                    <!-- Projects Table -->
+                    <div id="reblock-table-container" style="display: none; margin-top: 2rem;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                            <h4 style="color: #0038A8; margin: 0;">Highway Segments Details</h4>
+                            <button id="reblock-download-csv" onclick="downloadReblockingCSV()" style="padding: 8px 16px; border: 2px solid #0038A8; background: #0038A8; color: white; border-radius: 6px; cursor: pointer; font-size: 14px; font-weight: bold; display: flex; align-items: center; gap: 0.5rem;">
+                                <span>📥</span>
+                                <span>Download CSV</span>
+                            </button>
+                        </div>
+                        <div style="margin-bottom: 1rem;">
+                            <input type="text" id="reblock-search" placeholder="Search projects..." style="width: 100%; padding: 0.75rem; border: 2px solid #ddd; border-radius: 6px; font-size: 14px;">
+                        </div>
+                        <div style="overflow-x: auto;">
+                            <table id="reblock-table" style="width: 100%; border-collapse: collapse; background: white; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
+                                <thead>
+                                    <tr style="background: linear-gradient(135deg, #0038A8 0%, #003087 100%); color: white;">
+                                        <th style="padding: 1rem; text-align: left; font-weight: 600;">Highway</th>
+                                        <th style="padding: 1rem; text-align: left; font-weight: 600;">Project Name</th>
+                                        <th style="padding: 1rem; text-align: left; font-weight: 600;">Type</th>
+                                        <th style="padding: 1rem; text-align: right; font-weight: 600;">Chainage</th>
+                                        <th style="padding: 1rem; text-align: right; font-weight: 600;">Distance (km)</th>
+                                        <th style="padding: 1rem; text-align: right; font-weight: 600;">Amount</th>
+                                        <th style="padding: 1rem; text-align: right; font-weight: 600;">Cost/km</th>
+                                        <th style="padding: 1rem; text-align: center; font-weight: 600;">Flag</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="reblock-table-body">
+                                </tbody>
+                            </table>
+                        </div>
+                        <!-- Pagination Controls -->
+                        <div id="reblock-pagination" style="margin-top: 1rem; display: flex; justify-content: space-between; align-items: center; padding: 1rem; background: #f8f9fa; border-radius: 6px;">
+                            <div style="color: #666; font-size: 0.9em;">
+                                Showing <span id="reblock-page-start">0</span> - <span id="reblock-page-end">0</span> of <span id="reblock-total-items">0</span> segments
+                            </div>
+                            <div style="display: flex; gap: 0.5rem; align-items: center;">
+                                <button id="reblock-prev-page" onclick="reblockChangePage(-1)" style="padding: 8px 16px; border: 2px solid #0038A8; background: white; color: #0038A8; border-radius: 6px; cursor: pointer; font-size: 14px;" disabled>Previous</button>
+                                <span style="font-weight: bold; color: #0038A8; min-width: 100px; text-align: center;">
+                                    Page <span id="reblock-page-number">1</span> of <span id="reblock-total-pages">1</span>
+                                </span>
+                                <button id="reblock-next-page" onclick="reblockChangePage(1)" style="padding: 8px 16px; border: 2px solid #0038A8; background: white; color: #0038A8; border-radius: 6px; cursor: pointer; font-size: 14px;" disabled>Next</button>
+                            </div>
+                            <div style="display: flex; align-items: center; gap: 0.5rem;">
+                                <label style="font-size: 0.9em; color: #666;">Items per page:</label>
+                                <select id="reblock-items-per-page" onchange="reblockChangeItemsPerPage()" style="padding: 6px 10px; border: 2px solid #ddd; border-radius: 4px; font-size: 14px;">
+                                    <option value="25">25</option>
+                                    <option value="50" selected>50</option>
+                                    <option value="100">100</option>
+                                    <option value="200">200</option>
+                                </select>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -8094,6 +8263,9 @@ async function copyChartToClipboard(containerId, buttonId) {
             // Display table
             displayRoadsTable(projects);
             
+            // Load and display dark red segments chart
+            await loadAndDisplayDarkRedChart();
+            
             // Hide loading, show content
             loadingEl.style.display = 'none';
             statsEl.style.display = 'grid';
@@ -8106,6 +8278,154 @@ async function copyChartToClipboard(containerId, buttonId) {
             errorEl.style.display = 'block';
         }
     }
+    
+    async function loadAndDisplayDarkRedChart() {
+        if (typeof d3 === 'undefined') {
+            console.error('D3.js not loaded');
+            return;
+        }
+        
+        try {
+            // Load reblocking data
+            const response = await fetch('/api/budget/reblocking-analysis');
+            if (!response.ok) {
+                console.warn('Could not load reblocking data for dark red chart');
+                return;
+            }
+            
+            const data = await response.json();
+            if (!data.success || !data.highways) {
+                console.warn('No reblocking data available');
+                return;
+            }
+            
+            // Calculate percentage of very dark red segments for each highway
+            const highwayStats = [];
+            
+            data.highways.forEach(highway => {
+                if (!highway.segments || highway.segments.length === 0) return;
+                
+                // Get all cost per km values for this highway
+                const allCosts = highway.segments.map(s => s.cost_per_km).filter(c => c > 0);
+                if (allCosts.length === 0) return;
+                
+                // Sort costs to find 66th percentile (top third threshold)
+                const sortedCosts = [...allCosts].sort((a, b) => a - b);
+                const highThreshold = sortedCosts[Math.floor(sortedCosts.length * 0.66)] || sortedCosts[sortedCosts.length - 1];
+                
+                // Count segments above threshold (very dark red)
+                const veryDarkRedCount = highway.segments.filter(s => s.cost_per_km >= highThreshold).length;
+                const totalSegments = highway.segments.length;
+                const percentage = totalSegments > 0 ? (veryDarkRedCount / totalSegments) * 100 : 0;
+                
+                highwayStats.push({
+                    highway: highway.highway,
+                    veryDarkRedCount: veryDarkRedCount,
+                    totalSegments: totalSegments,
+                    percentage: percentage,
+                    // Score that factors in both percentage and total segments
+                    score: percentage * totalSegments
+                });
+            });
+            
+            // Sort by score (percentage * total segments) - factors in both percentage and volume
+            // This ensures highways with high percentage AND many segments rank higher
+            highwayStats.sort((a, b) => b.score - a.score);
+            
+            // Store data and render table
+            roadsDarkRedData = highwayStats;
+            renderDarkRedTable();
+            
+        } catch (error) {
+            console.error('Error loading dark red table data:', error);
+        }
+    }
+    
+    function renderDarkRedTable() {
+        const tableContainer = document.getElementById('roads-dark-red-table');
+        if (!tableContainer) return;
+        
+        if (roadsDarkRedData.length === 0) {
+            tableContainer.style.display = 'none';
+            return;
+        }
+        
+        tableContainer.style.display = 'block';
+        
+        // Calculate pagination
+        const totalItems = roadsDarkRedData.length;
+        const totalPages = Math.ceil(totalItems / roadsDarkRedItemsPerPage);
+        roadsDarkRedCurrentPage = Math.min(roadsDarkRedCurrentPage, Math.max(1, totalPages));
+        
+        const startIndex = (roadsDarkRedCurrentPage - 1) * roadsDarkRedItemsPerPage;
+        const endIndex = Math.min(startIndex + roadsDarkRedItemsPerPage, totalItems);
+        const pageData = roadsDarkRedData.slice(startIndex, endIndex);
+        
+        // Render table
+        const tbody = document.getElementById('roads-dark-red-table-body');
+        tbody.innerHTML = '';
+        
+        pageData.forEach((item, index) => {
+            const row = document.createElement('tr');
+            row.style.borderBottom = '1px solid #eee';
+            if (index % 2 === 0) {
+                row.style.backgroundColor = '#f8f9fa';
+            }
+            
+            // Color based on percentage - darker red for higher percentage
+            const pct = item.percentage / 100;
+            const r = Math.floor(255 - (pct * 175)); // 255 to 80
+            const g = Math.floor(204 - (pct * 204)); // 204 to 0
+            const b = Math.floor(204 - (pct * 204)); // 204 to 0
+            const barColor = `rgb(${r}, ${g}, ${b})`;
+            
+            row.innerHTML = `
+                <td style="padding: 1rem; font-weight: bold;">${escapeHtml(item.highway)}</td>
+                <td style="padding: 1rem; text-align: right;">${item.veryDarkRedCount.toLocaleString()}</td>
+                <td style="padding: 1rem; text-align: right;">${item.totalSegments.toLocaleString()}</td>
+                <td style="padding: 1rem; text-align: right;">
+                    <div style="display: flex; align-items: center; justify-content: flex-end; gap: 10px;">
+                        <div style="flex: 1; max-width: 200px; background: #f0f0f0; border-radius: 4px; height: 24px; position: relative; overflow: hidden;">
+                            <div style="position: absolute; left: 0; top: 0; height: 100%; width: ${item.percentage}%; background: ${barColor}; border-radius: 4px;"></div>
+                        </div>
+                        <span style="font-weight: bold; color: ${item.percentage > 50 ? '#dc3545' : item.percentage > 25 ? '#fd7e14' : '#666'}; min-width: 70px; text-align: right;">
+                            ${item.percentage.toFixed(2)}%
+                        </span>
+                    </div>
+                </td>
+            `;
+            tbody.appendChild(row);
+        });
+        
+        // Update pagination controls
+        document.getElementById('roads-dark-red-page-start').textContent = totalItems > 0 ? (startIndex + 1).toLocaleString() : '0';
+        document.getElementById('roads-dark-red-page-end').textContent = endIndex.toLocaleString();
+        document.getElementById('roads-dark-red-total-items').textContent = totalItems.toLocaleString();
+        document.getElementById('roads-dark-red-page-number').textContent = roadsDarkRedCurrentPage;
+        document.getElementById('roads-dark-red-total-pages').textContent = Math.max(1, totalPages);
+        
+        // Update button states
+        document.getElementById('roads-dark-red-prev-page').disabled = roadsDarkRedCurrentPage <= 1;
+        document.getElementById('roads-dark-red-next-page').disabled = roadsDarkRedCurrentPage >= totalPages;
+    }
+    
+    function roadsDarkRedChangePage(delta) {
+        roadsDarkRedCurrentPage += delta;
+        renderDarkRedTable();
+        // Scroll to top of table
+        const tableContainer = document.getElementById('roads-dark-red-table');
+        if (tableContainer) {
+            tableContainer.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+    }
+    
+    function roadsDarkRedChangeItemsPerPage() {
+        const select = document.getElementById('roads-dark-red-items-per-page');
+        roadsDarkRedItemsPerPage = parseInt(select.value);
+        roadsDarkRedCurrentPage = 1; // Reset to first page
+        renderDarkRedTable();
+    }
+    
     
     function displayRoadsTable(projects) {
         const tbody = document.getElementById('roads-table-body');
@@ -8160,7 +8480,891 @@ async function copyChartToClipboard(containerId, buttonId) {
                 }
             });
         }
+        
+        const reblockTab = document.querySelector('[data-tab="reblock"]');
+        if (reblockTab) {
+            reblockTab.addEventListener('click', () => {
+                const panel = document.getElementById('tab-reblock');
+                if (panel && !panel.dataset.loaded) {
+                    loadReblockingData();
+                    panel.dataset.loaded = 'true';
+                }
+            });
+        }
     });
+    
+    // Reblocking data
+    let reblockingData = null;
+    let currentHighwayFilter = 'Maharlika';
+    
+    // Pagination state for reblocking table
+    let reblockCurrentPage = 1;
+    let reblockItemsPerPage = 50;
+    let reblockFilteredSegments = [];
+    
+    async function loadReblockingData() {
+        const loadingEl = document.getElementById('reblock-loading');
+        const errorEl = document.getElementById('reblock-error');
+        const statsEl = document.getElementById('reblock-stats');
+        const selectorEl = document.getElementById('reblock-highway-selector');
+        const visualizationEl = document.getElementById('reblock-visualization');
+        const tableEl = document.getElementById('reblock-table-container');
+        
+        try {
+            const response = await fetch('/api/budget/reblocking-analysis');
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            const data = await response.json();
+            
+            if (!data.success) {
+                throw new Error(data.error || 'Failed to load data');
+            }
+            
+            reblockingData = data;
+            
+            // Hide loading IMMEDIATELY (before any processing)
+            loadingEl.style.display = 'none';
+            
+            // Update stats (all pre-calculated in Python)
+            document.getElementById('reblock-highways-count').textContent = data.total_highways.toLocaleString();
+            document.getElementById('reblock-segments-count').textContent = data.total_segments.toLocaleString();
+            document.getElementById('reblock-total-distance').textContent = (data.total_distance_km || 0).toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2}) + ' km';
+            document.getElementById('reblock-anomalies-count').textContent = data.total_anomalies.toLocaleString();
+            
+            // Show stats and selector immediately
+            statsEl.style.display = 'grid';
+            selectorEl.style.display = 'block';
+            
+            // Show legend
+            const legendEl = document.getElementById('reblock-legend');
+            if (legendEl) legendEl.style.display = 'block';
+            
+            // Setup autocomplete for highway filter
+            const highwayFilter = document.getElementById('highway-filter');
+            const suggestionsList = document.getElementById('highway-autocomplete-suggestions');
+            
+            // Store all highways for autocomplete
+            const allHighways = [...data.highways].sort((a, b) => (b.total_amount || 0) - (a.total_amount || 0));
+            
+            // Set default to Maharlika if it exists
+            if (data.highways.find(h => h.highway === 'Maharlika')) {
+                currentHighwayFilter = 'Maharlika';
+                highwayFilter.value = 'Maharlika';
+            } else if (allHighways.length > 0) {
+                currentHighwayFilter = allHighways[0].highway;
+                highwayFilter.value = allHighways[0].highway;
+            }
+            
+            // Autocomplete functionality
+            let currentFocus = -1;
+            
+            function filterHighways(query) {
+                suggestionsList.innerHTML = '';
+                currentFocus = -1;
+                
+                const queryLower = (query || '').toLowerCase().trim();
+                let filtered = allHighways;
+                
+                if (queryLower) {
+                    filtered = allHighways.filter(h => 
+                        h.highway.toLowerCase().includes(queryLower)
+                    );
+                }
+                
+                if (filtered.length === 0) {
+                    suggestionsList.style.display = 'none';
+                    return;
+                }
+                
+                filtered.slice(0, 15).forEach((highway, index) => {
+                    const item = document.createElement('div');
+                    item.className = 'autocomplete-item';
+                    item.style.padding = '10px 12px';
+                    item.style.cursor = 'pointer';
+                    item.style.borderBottom = '1px solid #eee';
+                    
+                    // Highlight matching text
+                    let displayText = highway.highway;
+                    if (queryLower) {
+                        const regex = new RegExp(`(${queryLower})`, 'gi');
+                        displayText = highway.highway.replace(regex, '<strong>$1</strong>');
+                    }
+                    
+                    item.innerHTML = `${displayText} <span style="color: #666; font-size: 0.9em;">(${highway.total_segments} segments, ₱${(highway.total_amount / 1000000).toFixed(1)}M)</span>`;
+                    
+                    item.addEventListener('click', () => {
+                        currentHighwayFilter = highway.highway;
+                        highwayFilter.value = highway.highway;
+                        suggestionsList.style.display = 'none';
+                        // Ensure clear button shows after selection
+                        setTimeout(() => {
+                            updateClearButton();
+                        }, 10);
+                        renderReblockingVisualization();
+                        displayReblockingTable();
+                    });
+                    
+                    item.addEventListener('mouseenter', () => {
+                        item.style.backgroundColor = '#f0f0f0';
+                    });
+                    
+                    item.addEventListener('mouseleave', () => {
+                        item.style.backgroundColor = 'white';
+                    });
+                    
+                    suggestionsList.appendChild(item);
+                });
+                
+                suggestionsList.style.display = 'block';
+            }
+            
+            
+            // Show/hide clear button based on input value
+            function updateClearButton() {
+                const clearBtn = document.getElementById('highway-filter-clear');
+                if (clearBtn && highwayFilter) {
+                    // Read the actual value from the input element
+                    const currentValue = highwayFilter.value || highwayFilter.getAttribute('value') || '';
+                    clearBtn.style.display = currentValue.trim() ? 'block' : 'none';
+                }
+            }
+            
+            highwayFilter.addEventListener('input', (e) => {
+                filterHighways(e.target.value);
+                updateClearButton();
+            });
+            
+            highwayFilter.addEventListener('focus', () => {
+                filterHighways(highwayFilter.value);
+            });
+            
+            // Clear button function
+            window.clearHighwayFilter = function(e) {
+                if (e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                }
+                
+                // Clear the input field text
+                highwayFilter.value = '';
+                suggestionsList.style.display = 'none';
+                updateClearButton();
+                
+                // Focus the input so user can type
+                highwayFilter.focus();
+                
+                // Don't reset to default immediately - let user type or select
+                // The visualization will show "No data" until a highway is selected
+            };
+            
+            // Initial clear button state
+            updateClearButton();
+            
+            highwayFilter.addEventListener('keydown', (e) => {
+                const items = suggestionsList.querySelectorAll('.autocomplete-item');
+                
+                if (e.key === 'ArrowDown') {
+                    e.preventDefault();
+                    currentFocus = Math.min(currentFocus + 1, items.length - 1);
+                    items[currentFocus]?.scrollIntoView({ block: 'nearest' });
+                } else if (e.key === 'ArrowUp') {
+                    e.preventDefault();
+                    currentFocus = Math.max(currentFocus - 1, -1);
+                    items[currentFocus]?.scrollIntoView({ block: 'nearest' });
+                } else if (e.key === 'Enter') {
+                    e.preventDefault();
+                    if (currentFocus >= 0 && items[currentFocus]) {
+                        items[currentFocus].click();
+                    } else if (highwayFilter.value.trim()) {
+                        // If user typed something and pressed Enter, use that value
+                        currentHighwayFilter = highwayFilter.value.trim();
+                        suggestionsList.style.display = 'none';
+                        updateClearButton();
+                        renderReblockingVisualization();
+                        displayReblockingTable();
+                    }
+                }
+                
+                // Update active item styling
+                items.forEach((item, idx) => {
+                    if (idx === currentFocus) {
+                        item.style.backgroundColor = '#e3f2fd';
+                    } else {
+                        item.style.backgroundColor = 'white';
+                    }
+                });
+            });
+            
+            // Ensure clear button updates after any value change
+            // Use a simple approach: check on various events
+            highwayFilter.addEventListener('change', updateClearButton);
+            highwayFilter.addEventListener('blur', updateClearButton);
+            
+            // Also check periodically to catch programmatic changes
+            let clearButtonCheckInterval = setInterval(() => {
+                updateClearButton();
+            }, 200);
+            
+            // Clear interval when page unloads
+            window.addEventListener('beforeunload', () => {
+                if (clearButtonCheckInterval) {
+                    clearInterval(clearButtonCheckInterval);
+                }
+            });
+            
+            // Hide suggestions when clicking outside
+            document.addEventListener('click', (e) => {
+                if (!highwayFilter.contains(e.target) && !suggestionsList.contains(e.target)) {
+                    suggestionsList.style.display = 'none';
+                }
+            });
+            
+            // Show visualization and table containers
+            visualizationEl.style.display = 'block';
+            tableEl.style.display = 'block';
+            
+            // Initialize zoom display
+            updateReblockZoomDisplay();
+            
+            // Render table immediately (lightweight)
+            displayReblockingTable();
+            
+            // Render visualization after a short delay to ensure container is visible
+            setTimeout(() => {
+                try {
+                    renderReblockingVisualization();
+                } catch (err) {
+                    console.error('Error in renderReblockingVisualization:', err);
+                    const svg = d3.select('#reblock-chart');
+                    if (!svg.empty()) {
+                        svg.selectAll('*').remove();
+                        svg.append('text')
+                            .attr('x', '50%')
+                            .attr('y', '50%')
+                            .attr('text-anchor', 'middle')
+                            .attr('fill', '#dc3545')
+                            .attr('font-size', '14px')
+                            .text('Error rendering: ' + err.message);
+                    }
+                }
+            }, 50);
+            
+            // Add window resize handler to re-render visualization
+            window.addEventListener('resize', () => {
+                if (reblockingData) {
+                    renderReblockingVisualization();
+                }
+            });
+            
+            // D3.js handles mouse wheel zoom automatically
+            
+        } catch (error) {
+            console.error('Error loading reblocking data:', error);
+            // Always hide loading spinner
+            if (loadingEl) loadingEl.style.display = 'none';
+            // Show error
+            if (errorEl) {
+                errorEl.textContent = `Error: ${error.message}`;
+                errorEl.style.display = 'block';
+            }
+        }
+    }
+    
+    function adjustReblockZoom(delta) {
+        if (typeof d3 === 'undefined') return;
+        const svg = d3.select('#reblock-chart');
+        if (svg.empty()) return;
+        
+        const currentTransform = d3.zoomTransform(svg.node());
+        const newScale = Math.max(0.1, Math.min(10, currentTransform.k + delta));
+        const zoom = d3.zoom().scaleExtent([0.1, 10]);
+        
+        svg.transition()
+            .duration(200)
+            .call(zoom.transform, d3.zoomIdentity.scale(newScale));
+    }
+    
+    function resetReblockZoom() {
+        if (typeof d3 === 'undefined') return;
+        const svg = d3.select('#reblock-chart');
+        if (svg.empty()) return;
+        
+        // Get the stored zoom behavior from the SVG node
+        const zoomBehavior = svg.node()._reblockZoom;
+        
+        if (zoomBehavior) {
+            // Reset transform to identity (no zoom, no pan)
+            svg.transition()
+                .duration(200)
+                .call(zoomBehavior.transform, d3.zoomIdentity);
+        } else {
+            // Fallback: create new zoom behavior if not found
+            const zoom = d3.zoom().scaleExtent([0.1, 10]);
+            svg.transition()
+                .duration(200)
+                .call(zoom.transform, d3.zoomIdentity);
+        }
+        
+        // Update zoom display
+        updateReblockZoomDisplay(1.0);
+    }
+    
+    function updateReblockZoomDisplay(scale) {
+        const zoomDisplay = document.getElementById('reblock-zoom-level');
+        if (zoomDisplay && scale !== undefined) {
+            zoomDisplay.textContent = Math.round(scale * 100) + '%';
+        }
+    }
+    
+    function renderReblockingVisualization() {
+        if (!reblockingData || typeof d3 === 'undefined') {
+            console.error('No reblocking data available or D3.js not loaded');
+            return;
+        }
+        
+        try {
+            const svg = d3.select('#reblock-chart');
+            if (svg.empty()) {
+                console.error('SVG element not found');
+                return;
+            }
+            
+            // Clear previous content
+            svg.selectAll('*').remove();
+            
+            // Get selected highway
+            const highway = reblockingData.highways.find(h => h.highway === currentHighwayFilter);
+            
+            if (!highway || !highway.segments || highway.segments.length === 0) {
+                svg.append('text')
+                    .attr('x', '50%')
+                    .attr('y', '50%')
+                    .attr('text-anchor', 'middle')
+                    .attr('fill', '#666')
+                    .attr('font-size', '16px')
+                    .text('No data to display for ' + (currentHighwayFilter || 'selected highway'));
+                return;
+            }
+            
+            // Get container dimensions
+            const container = document.getElementById('reblock-chart-container');
+            if (!container) {
+                console.error('Container element not found');
+                return;
+            }
+            
+            const containerWidth = container.clientWidth || container.offsetWidth || 1200;
+            const containerHeight = container.clientHeight || container.offsetHeight || (window.innerHeight - 400) * 3;
+            const padding = { top: 80, right: 20, bottom: 100, left: 20 };
+            const availableWidth = containerWidth - padding.left - padding.right;
+            
+            // Set SVG width to match container
+            svg.attr('width', containerWidth);
+            
+            // Create main group for zoom/pan
+            const g = svg.append('g');
+            
+            // Find min and max chainage for positioning
+            const allChainageStarts = highway.segments.map(s => s.chainage_start_m);
+            const allChainageEnds = highway.segments.flatMap(s => 
+                s.chainage_ranges.map(cr => {
+                    const end_km = cr[2];
+                    const end_m = cr[3];
+                    return end_km * 1000 + end_m;
+                })
+            );
+            const minChainage = Math.min(...allChainageStarts);
+            const maxChainage = Math.max(...allChainageEnds);
+            const highwayLengthM = Math.max(1000, maxChainage - minChainage);
+            const highwayLengthKm = highwayLengthM / 1000;
+            
+            // Create scales
+            const xScale = d3.scaleLinear()
+                .domain([minChainage / 1000, maxChainage / 1000])
+                .range([padding.left, padding.left + availableWidth]);
+            
+            const segmentBarHeight = 20;
+            const mainBarHeight = 30;
+            const spacing = 15;
+            const rowSpacing = segmentBarHeight + 8;
+            const totalHeight = padding.top + mainBarHeight + spacing + (highway.segments.length * rowSpacing) + padding.bottom;
+            
+            // SVG height should match content height (for scrolling), but container is viewport height
+            svg.attr('height', Math.max(containerHeight, totalHeight));
+            
+            // Find main project and cost ranges
+            const mainProject = highway.main_project;
+            const mainCostPerKm = mainProject ? mainProject.cost_per_km : 0;
+            
+            // Get all cost per km values for color scale
+            const allCosts = highway.segments.map(s => s.cost_per_km);
+            const minCost = Math.min(...allCosts, 0);
+            const maxCost = Math.max(...allCosts, mainCostPerKm);
+            
+            // Create monotonic red color scale (light to dark)
+            const colorScale = d3.scaleSequential()
+                .domain([minCost, maxCost])
+                .interpolator(d3.interpolateRgb('#ffcccc', '#800000')); // Light red to dark red
+            
+            // Determine flag thresholds (33rd and 66th percentiles)
+            const sortedCosts = [...allCosts].sort((a, b) => a - b);
+            const lowThreshold = sortedCosts[Math.floor(sortedCosts.length * 0.33)] || 0;
+            const highThreshold = sortedCosts[Math.floor(sortedCosts.length * 0.66)] || maxCost;
+            
+            // Helper function to get flag emoji (all red flags since no amber flag emoji exists)
+            function getFlagEmoji(cost) {
+                return '🚩';
+            }
+            
+            // Helper function to check if it's new construction
+            function isNewConstruction(projectType) {
+                if (!projectType) return false;
+                const type = projectType.toLowerCase();
+                return type.includes('new') || type.includes('construction') || 
+                       (!type.includes('repair') && !type.includes('rehab') && !type.includes('rehabilitation') && !type.includes('maintenance'));
+            }
+            
+            // Helper function to check if it's repair/rehab
+            function isRepair(projectType) {
+                if (!projectType) return false;
+                const type = projectType.toLowerCase();
+                return type.includes('repair') || type.includes('rehab') || type.includes('rehabilitation');
+            }
+            
+            // Draw highway name
+            g.append('text')
+                .attr('x', padding.left)
+                .attr('y', 30)
+                .attr('fill', '#0038A8')
+                .attr('font-size', '20px')
+                .attr('font-weight', 'bold')
+                .text(highway.highway);
+            
+            // Draw main project bar
+            const mainY = padding.top;
+            g.append('rect')
+                .attr('x', padding.left)
+                .attr('y', mainY)
+                .attr('width', availableWidth)
+                .attr('height', mainBarHeight)
+                .attr('fill', '#0038A8')
+                .attr('data-type', 'main')
+                .attr('data-name', mainProject ? mainProject.name : 'Total Highway')
+                .attr('data-length', highway.estimated_length_km)
+                .attr('data-cost', mainCostPerKm)
+                .attr('data-total', highway.total_amount);
+            
+            // Sort segments by chainage
+            const sortedSegments = [...highway.segments].sort((a, b) => a.chainage_start_m - b.chainage_start_m);
+            
+            // Draw segments
+            const segments = g.selectAll('.segment')
+                .data(sortedSegments)
+                .enter()
+                .append('g')
+                .attr('class', 'segment');
+            
+            segments.each(function(segment, index) {
+                const seg = d3.select(this);
+                
+                // Calculate position and width
+                const segmentStartM = segment.chainage_start_m;
+                const segmentEndM = segment.chainage_ranges.reduce((max, cr) => {
+                    const end_km = cr[2];
+                    const end_m = cr[3];
+                    return Math.max(max, end_km * 1000 + end_m);
+                }, segmentStartM);
+                
+                const segmentStartKm = segmentStartM / 1000;
+                const segmentEndKm = segmentEndM / 1000;
+                const segmentLengthKm = segmentEndKm - segmentStartKm;
+                
+                const segmentX = xScale(segmentStartKm);
+                const segmentWidth = Math.max(2, xScale(segmentEndKm) - segmentX);
+                const segmentY = padding.top + mainBarHeight + spacing + (index * rowSpacing);
+                
+                // Get color from monotonic red scale
+                const color = colorScale(segment.cost_per_km);
+                
+                // Check if new construction or repair
+                const isNew = isNewConstruction(segment.project_type);
+                const isRep = isRepair(segment.project_type);
+                
+                // Draw segment bar
+                const rect = seg.append('rect')
+                    .attr('x', segmentX)
+                    .attr('y', segmentY)
+                    .attr('width', segmentWidth)
+                    .attr('height', segmentBarHeight)
+                    .attr('fill', color)
+                    .attr('stroke', isNew ? '#333' : 'none')
+                    .attr('stroke-width', isNew ? 0.5 : 0)
+                    .attr('data-segment', JSON.stringify(segment));
+                
+                // Add flag emoji
+                const flag = getFlagEmoji(segment.cost_per_km);
+                seg.append('text')
+                    .attr('x', segmentX + 5)
+                    .attr('y', segmentY + segmentBarHeight / 2 + 5)
+                    .attr('font-size', '14px')
+                    .attr('pointer-events', 'none')
+                    .text(flag);
+            });
+            
+            // Draw scale at bottom (relative to total content height)
+            const scaleY = totalHeight - padding.bottom + 20;
+            g.append('line')
+                .attr('x1', padding.left)
+                .attr('x2', padding.left + availableWidth)
+                .attr('y1', scaleY)
+                .attr('y2', scaleY)
+                .attr('stroke', '#ccc')
+                .attr('stroke-width', 1);
+            
+            // Draw chainage markers (offset km from start of main project)
+            const numMarkers = Math.min(20, Math.max(5, Math.floor(highwayLengthKm / 10)));
+            for (let i = 0; i <= numMarkers; i++) {
+                const ratio = i / numMarkers;
+                const offsetKm = ratio * highwayLengthKm; // Offset from start (0 to highway length)
+                const absoluteChainageKm = (minChainage / 1000) + offsetKm;
+                const x = xScale(absoluteChainageKm);
+                
+                // Tick mark
+                g.append('line')
+                    .attr('x1', x)
+                    .attr('x2', x)
+                    .attr('y1', scaleY)
+                    .attr('y2', scaleY + 10)
+                    .attr('stroke', '#999')
+                    .attr('stroke-width', 1);
+                
+                // Label (show offset km, not absolute chainage)
+                g.append('text')
+                    .attr('x', x)
+                    .attr('y', scaleY + 25)
+                    .attr('text-anchor', 'middle')
+                    .attr('fill', '#666')
+                    .attr('font-size', '10px')
+                    .text(offsetKm.toFixed(1) + ' km');
+            }
+            
+            // Setup zoom behavior
+            const zoom = d3.zoom()
+                .scaleExtent([0.1, 10])
+                .on('zoom', (event) => {
+                    g.attr('transform', event.transform);
+                    updateReblockZoomDisplay(event.transform.k);
+                });
+            
+            svg.call(zoom);
+            
+            // Store zoom behavior on SVG for reset function
+            svg.node()._reblockZoom = zoom;
+            
+            // Initialize zoom display
+            updateReblockZoomDisplay(1.0);
+            
+            // Setup tooltips
+            setupReblockTooltipD3(svg, g, padding, mainProject, highway);
+            
+        } catch (error) {
+            console.error('Error rendering reblocking visualization:', error);
+            const svg = d3.select('#reblock-chart');
+            svg.selectAll('*').remove();
+            svg.append('text')
+                .attr('x', '50%')
+                .attr('y', '50%')
+                .attr('text-anchor', 'middle')
+                .attr('fill', '#dc3545')
+                .attr('font-size', '14px')
+                .text('Error rendering chart: ' + error.message);
+        }
+    }
+    
+    function setupReblockTooltipD3(svg, g, padding, mainProject, highway) {
+        // Create tooltip div if it doesn't exist
+        let tooltip = d3.select('body').select('.reblock-tooltip');
+        if (tooltip.empty()) {
+            tooltip = d3.select('body').append('div')
+                .attr('class', 'reblock-tooltip')
+                .style('position', 'absolute')
+                .style('background', 'white')
+                .style('border', '2px solid #0038A8')
+                .style('border-radius', '6px')
+                .style('padding', '1rem')
+                .style('box-shadow', '0 4px 12px rgba(0,0,0,0.15)')
+                .style('pointer-events', 'none')
+                .style('opacity', 0)
+                .style('z-index', 1000)
+                .style('max-width', '300px')
+                .style('font-size', '0.9em');
+        }
+        
+        // Handle mouseover on main bar
+        g.selectAll('rect[data-type="main"]')
+            .on('mouseover', function(event) {
+                const rect = this;
+                const name = rect.getAttribute('data-name');
+                const length = parseFloat(rect.getAttribute('data-length'));
+                const cost = parseFloat(rect.getAttribute('data-cost'));
+                const total = parseFloat(rect.getAttribute('data-total'));
+                
+                tooltip.html(`
+                    <div style="font-weight: bold; color: #0038A8; margin-bottom: 0.5rem; font-size: 1.1em;">${name}</div>
+                    <div style="color: #666; margin-bottom: 0.25rem;">Total Highway: ${length.toFixed(2)} km</div>
+                    <div style="color: #666; margin-bottom: 0.25rem;">Type: Main Project</div>
+                    <div style="color: #666; margin-bottom: 0.25rem;">₱${(cost / 1000000).toFixed(2)}M/km</div>
+                    <div style="color: #666; margin-bottom: 0.25rem;">Total: ₱${(total / 1000000).toFixed(2)}M</div>
+                `)
+                .style('opacity', 1);
+            })
+            .on('mousemove', function(event) {
+                tooltip.style('left', (event.pageX + 15) + 'px')
+                       .style('top', (event.pageY + 15) + 'px');
+            })
+            .on('mouseout', function() {
+                tooltip.style('opacity', 0);
+            });
+        
+        // Handle mouseover on segments
+        g.selectAll('.segment rect')
+            .on('mouseover', function(event, segment) {
+                const seg = JSON.parse(this.getAttribute('data-segment'));
+                const isRepair = seg.project_type && (
+                    seg.project_type.toLowerCase().includes('repair') ||
+                    seg.project_type.toLowerCase().includes('rehab') ||
+                    seg.project_type.toLowerCase().includes('rehabilitation')
+                );
+                
+                tooltip.html(`
+                    <div style="font-weight: bold; color: #0038A8; margin-bottom: 0.5rem; font-size: 1.1em;">${seg.name || 'Segment'}</div>
+                    <div style="color: #666; margin-bottom: 0.25rem;">Chainage: ${seg.chainage_display}</div>
+                    <div style="color: #666; margin-bottom: 0.25rem;">Distance: ${seg.distance_km.toFixed(2)} km</div>
+                    <div style="color: #666; margin-bottom: 0.25rem;">Type: ${seg.project_type.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase())}${isRepair ? ' (Repair/Rehab)' : ''}</div>
+                    <div style="color: #666; margin-bottom: 0.25rem;">₱${(seg.cost_per_km / 1000000).toFixed(2)}M/km</div>
+                    <div style="color: #666; margin-bottom: 0.25rem;">Total: ₱${((seg.amount || 0) / 1000000).toFixed(2)}M</div>
+                    ${seg.is_anomaly ? '<div style="color: #dc3545; font-weight: bold; margin-top: 0.5rem;">⚠️ Anomaly: More expensive than main project</div>' : ''}
+                `)
+                .style('opacity', 1);
+            })
+            .on('mousemove', function(event) {
+                tooltip.style('left', (event.pageX + 15) + 'px')
+                       .style('top', (event.pageY + 15) + 'px');
+            })
+            .on('mouseout', function() {
+                tooltip.style('opacity', 0);
+            });
+    }
+    
+    function downloadReblockingCSV() {
+        if (!reblockingData || !reblockingData.highways) {
+            alert('No data available to download');
+            return;
+        }
+        
+        // Prepare CSV data
+        const rows = [];
+        
+        // Header row
+        rows.push([
+            'Highway',
+            'Segment Name',
+            'Chainage Display',
+            'Chainage Start (km)',
+            'Chainage End (km)',
+            'Distance (km)',
+            'Project Type',
+            'Amount (PHP)',
+            'Cost per km (PHP)',
+            'Is Anomaly',
+            'Flag Reason',
+            'Region',
+            'Source Sheet'
+        ].join(','));
+        
+        // Data rows - iterate through all highways and their segments
+        reblockingData.highways.forEach(highway => {
+            highway.segments.forEach(segment => {
+                // Calculate chainage end from ranges
+                let chainageEndKm = 0;
+                if (segment.chainage_ranges && segment.chainage_ranges.length > 0) {
+                    const lastRange = segment.chainage_ranges[segment.chainage_ranges.length - 1];
+                    chainageEndKm = lastRange[2] + (lastRange[3] / 1000);
+                }
+                const chainageStartKm = segment.chainage_start_m / 1000;
+                
+                // Escape CSV values (handle commas, quotes, newlines)
+                const escapeCSV = (value) => {
+                    if (value === null || value === undefined) return '';
+                    const str = String(value);
+                    if (str.includes(',') || str.includes('"') || str.includes('\n')) {
+                        return `"${str.replace(/"/g, '""')}"`;
+                    }
+                    return str;
+                };
+                
+                rows.push([
+                    escapeCSV(highway.highway),
+                    escapeCSV(segment.name || ''),
+                    escapeCSV(segment.chainage_display || ''),
+                    chainageStartKm.toFixed(3),
+                    chainageEndKm.toFixed(3),
+                    segment.distance_km.toFixed(3),
+                    escapeCSV(segment.project_type || ''),
+                    segment.amount || 0,
+                    segment.cost_per_km.toFixed(2),
+                    segment.is_anomaly ? 'Yes' : 'No',
+                    escapeCSV(segment.flag_reason || ''),
+                    escapeCSV(segment.region || ''),
+                    escapeCSV(segment.source_sheet || '')
+                ].join(','));
+            });
+        });
+        
+        // Create CSV content
+        const csvContent = rows.join('\n');
+        
+        // Create blob and download
+        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+        const link = document.createElement('a');
+        const url = URL.createObjectURL(blob);
+        
+        link.setAttribute('href', url);
+        link.setAttribute('download', `highway_reblocking_analysis_${new Date().toISOString().split('T')[0]}.csv`);
+        link.style.visibility = 'hidden';
+        
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        
+        URL.revokeObjectURL(url);
+    }
+    
+    function displayReblockingTable() {
+        if (!reblockingData) return;
+        
+        // Collect all segments from all highways
+        const allSegments = [];
+        reblockingData.highways.forEach(highway => {
+            highway.segments.forEach(segment => {
+                allSegments.push(segment);
+            });
+        });
+        
+        // Apply search filter
+        const searchEl = document.getElementById('reblock-search');
+        const searchTerm = searchEl ? searchEl.value.toLowerCase() : '';
+        
+        // Filter segments based on search
+        reblockFilteredSegments = allSegments.filter(segment => {
+            if (!searchTerm) return true;
+            const searchableText = [
+                segment.highway,
+                segment.name || '',
+                segment.project_type || '',
+                segment.chainage_display || '',
+                segment.region || ''
+            ].join(' ').toLowerCase();
+            return searchableText.includes(searchTerm);
+        });
+        
+        // Sort by highway, then by chainage
+        reblockFilteredSegments.sort((a, b) => {
+            if (a.highway !== b.highway) {
+                return a.highway.localeCompare(b.highway);
+            }
+            return a.chainage_start_m - b.chainage_start_m;
+        });
+        
+        // Calculate pagination
+        const totalItems = reblockFilteredSegments.length;
+        const totalPages = Math.ceil(totalItems / reblockItemsPerPage);
+        reblockCurrentPage = Math.min(reblockCurrentPage, Math.max(1, totalPages));
+        
+        const startIndex = (reblockCurrentPage - 1) * reblockItemsPerPage;
+        const endIndex = Math.min(startIndex + reblockItemsPerPage, totalItems);
+        const pageSegments = reblockFilteredSegments.slice(startIndex, endIndex);
+        
+        // Render table
+        const tbody = document.getElementById('reblock-table-body');
+        tbody.innerHTML = '';
+        
+        pageSegments.forEach((segment, index) => {
+            const row = document.createElement('tr');
+            row.style.borderBottom = '1px solid #eee';
+            if (index % 2 === 0) {
+                row.style.backgroundColor = '#f8f9fa';
+            }
+            if (segment.is_anomaly) {
+                row.style.borderLeft = '4px solid #dc3545';
+            }
+            
+            const typeLabel = segment.project_type.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase());
+            const flagIcon = segment.is_anomaly ? '🚨' : '';
+            const flagText = segment.flag_reason || '';
+            
+            row.innerHTML = `
+                <td style="padding: 1rem; font-weight: ${segment.is_anomaly ? 'bold' : 'normal'};">${escapeHtml(segment.highway)}</td>
+                <td style="padding: 1rem;">${escapeHtml(segment.name || 'N/A')}</td>
+                <td style="padding: 1rem;">${escapeHtml(typeLabel)}</td>
+                <td style="padding: 1rem; text-align: right; font-family: monospace;">${escapeHtml(segment.chainage_display || 'N/A')}</td>
+                <td style="padding: 1rem; text-align: right;">${(segment.distance_km || 0).toLocaleString('en-US', {minimumFractionDigits: 3, maximumFractionDigits: 3})} km</td>
+                <td style="padding: 1rem; text-align: right;">₱${(segment.amount || 0).toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
+                <td style="padding: 1rem; text-align: right; font-weight: bold; color: ${segment.is_anomaly ? '#dc3545' : segment.cost_per_km > 100000000 ? '#dc3545' : segment.cost_per_km > 50000000 ? '#fd7e14' : '#28a745'};">
+                    ₱${(segment.cost_per_km || 0).toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}/km
+                </td>
+                <td style="padding: 1rem; text-align: center;" title="${escapeHtml(flagText)}">${flagIcon}</td>
+            `;
+            tbody.appendChild(row);
+        });
+        
+        // Update pagination controls
+        document.getElementById('reblock-page-start').textContent = totalItems > 0 ? (startIndex + 1).toLocaleString() : '0';
+        document.getElementById('reblock-page-end').textContent = endIndex.toLocaleString();
+        document.getElementById('reblock-total-items').textContent = totalItems.toLocaleString();
+        document.getElementById('reblock-page-number').textContent = reblockCurrentPage;
+        document.getElementById('reblock-total-pages').textContent = Math.max(1, totalPages);
+        
+        // Update button states
+        document.getElementById('reblock-prev-page').disabled = reblockCurrentPage <= 1;
+        document.getElementById('reblock-next-page').disabled = reblockCurrentPage >= totalPages;
+        
+        // Show pagination if there are items
+        const paginationEl = document.getElementById('reblock-pagination');
+        if (paginationEl) {
+            paginationEl.style.display = totalItems > 0 ? 'flex' : 'none';
+        }
+        
+        // Add search functionality (re-render on search)
+        if (searchEl) {
+            // Remove existing listeners to avoid duplicates
+            const newSearchEl = searchEl.cloneNode(true);
+            searchEl.parentNode.replaceChild(newSearchEl, searchEl);
+            
+            newSearchEl.addEventListener('input', () => {
+                reblockCurrentPage = 1; // Reset to first page on search
+                displayReblockingTable();
+            });
+        }
+    }
+    
+    function reblockChangePage(delta) {
+        reblockCurrentPage += delta;
+        displayReblockingTable();
+        // Scroll to top of table
+        const tableContainer = document.getElementById('reblock-table-container');
+        if (tableContainer) {
+            tableContainer.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+    }
+    
+    function reblockChangeItemsPerPage() {
+        const select = document.getElementById('reblock-items-per-page');
+        reblockItemsPerPage = parseInt(select.value);
+        reblockCurrentPage = 1; // Reset to first page
+        displayReblockingTable();
+    }
     
     // Pagination state for repeated projects
     let resuAllMatches = [];

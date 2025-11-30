@@ -1274,6 +1274,38 @@ async def budget_roads_cost_analysis_api():
     except Exception as e:
         return JSONResponse({"success": False, "error": str(e)}, status_code=500)
 
+_reblocking_cache = None
+_reblocking_cache_mtime = None
+
+def _load_reblocking_cache():
+    """Load reblocking analysis cache (cached in memory with file modification time check)"""
+    global _reblocking_cache, _reblocking_cache_mtime
+    
+    json_path = Path('static/data/reblocking_analysis.json')
+    if not json_path.exists():
+        return None
+    
+    # Check if file was modified
+    current_mtime = json_path.stat().st_mtime
+    if _reblocking_cache is None or _reblocking_cache_mtime != current_mtime:
+        with open(json_path, 'r', encoding='utf-8') as f:
+            _reblocking_cache = json.load(f)
+        _reblocking_cache_mtime = current_mtime
+    
+    return _reblocking_cache
+
+@app.get("/api/budget/reblocking-analysis")
+async def budget_reblocking_analysis_api():
+    """Get highway reblocking analysis - major highways with chainage data, cost per km, and anomaly detection"""
+    try:
+        data = _load_reblocking_cache()
+        if data is None:
+            return JSONResponse({"success": False, "error": "Reblocking analysis data not available. Please run: python3 scripts/generate_reblocking_cache.py"}, status_code=404)
+        
+        return JSONResponse({"success": True, **data})
+    except Exception as e:
+        return JSONResponse({"success": False, "error": str(e)}, status_code=500)
+
 @app.get("/api/budget/anti-zero-analysis")
 async def budget_anti_zero_analysis_api():
     """Get analysis of uniform decrease patterns in Annex A-5 projects (Column O to Column S)"""
