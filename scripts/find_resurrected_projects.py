@@ -624,7 +624,7 @@ class ResurrectedProjectFinder:
                         'time_penalty': match['time_penalty'],
                         'chainage_penalty': match['chainage_penalty']
                     },
-                    'years_apart': 2026 - item_historical['year']
+                    'years_apart': 2026 - (int(item_historical['year']) if isinstance(item_historical['year'], (int, float)) else int(re.search(r'(\d{4})', str(item_historical['year'])).group(1)) if re.search(r'(\d{4})', str(item_historical['year'])) else 0)
                 }
                 new_matches.append(new_match)
                 matches.append(new_match)
