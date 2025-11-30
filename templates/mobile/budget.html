@@ -733,6 +733,10 @@
                 <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 0.5rem;">
                     <div style="flex: 1;">
                         <h5 style="color: #0038A8; margin: 0 0 0.25rem 0; font-size: 0.9rem;">${escapeHtml(project?.name || project?.description || 'Unknown')}</h5>
+                        <div style="font-size: 0.7rem; color: #6c757d; margin-top: 0.2rem;">
+                            <span style="color: #666;">Source: </span>
+                            <span style="font-weight: 600; color: #495057;">${source2026}</span>
+                        </div>
                     </div>
                     <span style="background: #dc3545; color: white; padding: 0.2rem 0.5rem; border-radius: 4px; font-size: 0.75rem; font-weight: bold; margin-left: 0.5rem; align-self: flex-start;">Avg ${(avgSimilarity * 100).toFixed(1)}%</span>
                 </div>
