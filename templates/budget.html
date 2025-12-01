@@ -8332,11 +8332,43 @@ async function copyChartToClipboard(containerId, buttonId) {
                     </div>
                     
                     <!-- Statistics Bar Chart (similar to trends tab) -->
-                    <div id="stats-bar-chart-container" style="display: none; margin-top: 2rem; background: white; padding: 2rem; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
-                        <h4 style="color: #0038A8; margin: 0 0 1rem 0;">Cost per Kilometer Statistics by Category (2020-2026)</h4>
-                        <p style="color: #666; font-size: 0.9em; margin: 0 0 1.5rem 0;">Horizontal bar chart showing Min, Max, Median, and Standard Deviation cost/km statistics for National Roads, Secondary Roads, Bridges, and Traffic Signs/Lights across years.</p>
-                        <div style="position: relative; height: 600px; overflow: hidden;">
-                            <canvas id="statsBarChart" height="600"></canvas>
+                    <div id="stats-bar-chart-container" style="display: none; margin-top: 2rem;">
+                        <!-- Main Statistics Chart (Min, Mean, Median, Mode) -->
+                        <div style="background: white; padding: 2rem; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); position: relative; margin-bottom: 2rem;">
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                                <div style="flex: 1;">
+                                    <h4 style="color: #0038A8; margin: 0 0 0.5rem 0;">Cost per Kilometer Statistics by Category (2020-2026) - Min, Mean, Median, Mode</h4>
+                                    <p style="color: #666; font-size: 0.9em; margin: 0;">Stacked bar chart showing Min, Mean, Median, and Mode cost/km statistics. Each bar represents a year, stacked with National Roads (bottom), Secondary Roads, Bridges, and Traffic Signs/Lights (top).</p>
+                                </div>
+                                <button id="copyStatsBarChartBtn" 
+                                        onclick="copyChartToClipboard('stats-bar-chart-main', 'copyStatsBarChartBtn')"
+                                        style="margin-left: 1rem; padding: 0.5rem 1rem; background: #0038A8; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: 600; font-size: 0.9em; white-space: nowrap;"
+                                        title="Copy chart image to clipboard">
+                                    📋 Copy Chart
+                                </button>
+                            </div>
+                            <div id="stats-bar-chart-main" style="position: relative; height: 600px; overflow: hidden;">
+                                <canvas id="statsBarChart" height="600"></canvas>
+                            </div>
+                        </div>
+                        
+                        <!-- Max Statistics Chart (separate, as outlier) -->
+                        <div style="background: white; padding: 2rem; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); position: relative;">
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                                <div style="flex: 1;">
+                                    <h4 style="color: #0038A8; margin: 0 0 0.5rem 0;">Cost per Kilometer Statistics by Category (2020-2026) - Max (Outlier)</h4>
+                                    <p style="color: #666; font-size: 0.9em; margin: 0;">Max cost/km statistics shown separately as outliers. Each bar represents a year, stacked with National Roads (bottom), Secondary Roads, Bridges, and Traffic Signs/Lights (top).</p>
+                                </div>
+                                <button id="copyStatsMaxChartBtn" 
+                                        onclick="copyChartToClipboard('stats-bar-chart-max', 'copyStatsMaxChartBtn')"
+                                        style="margin-left: 1rem; padding: 0.5rem 1rem; background: #0038A8; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: 600; font-size: 0.9em; white-space: nowrap;"
+                                        title="Copy chart image to clipboard">
+                                    📋 Copy Chart
+                                </button>
+                            </div>
+                            <div id="stats-bar-chart-max" style="position: relative; height: 600px; overflow: hidden;">
+                                <canvas id="statsMaxChart" height="600"></canvas>
+                            </div>
                         </div>
                     </div>
                     
@@ -9393,8 +9425,10 @@ async function copyChartToClipboard(containerId, buttonId) {
         });
     }
     
-    // Statistics bar chart (similar to trends tab department chart)
+    // Statistics stacked bar chart: Each bar is a year, stacked with 4 categories (2 roads, 1 bridge, 1 traffic)
+    // Separated into two charts: Main stats (Min, Mean, Median, Mode) and Max (outlier, separate chart)
     let statsBarChart = null;
+    let statsMaxChart = null;
     
     function createStatsBarChart(allYearsStats) {
         if (typeof Chart === 'undefined') {
@@ -9403,74 +9437,93 @@ async function copyChartToClipboard(containerId, buttonId) {
         }
         
         const canvas = document.getElementById('statsBarChart');
-        if (!canvas) {
+        const maxCanvas = document.getElementById('statsMaxChart');
+        
+        if (!canvas || !maxCanvas) {
             console.error('Stats bar chart canvas not found');
             return;
         }
         
-        // Destroy existing chart if it exists
+        // Destroy existing charts if they exist
         if (statsBarChart) {
             statsBarChart.destroy();
         }
+        if (statsMaxChart) {
+            statsMaxChart.destroy();
+        }
         
         const years = [2020, 2021, 2022, 2023, 2024, 2025, 2026];
-        const categories = ['national_roads', 'secondary_roads', 'bridges', 'traffic_signs'];
-        const categoryNames = {
-            national_roads: 'National Roads',
-            secondary_roads: 'Secondary Roads',
-            bridges: 'Bridges',
-            traffic_signs: 'Traffic Signs/Lights'
-        };
         
-        // Prepare data for each statistic type
-        const statsToShow = ['min', 'max', 'median', 'std_dev'];
+        // Statistics to show: Min (left), Mean, Median (middle), Mode
+        const statsToShow = ['min', 'mean', 'median', 'mode'];
         const statLabels = {
             min: 'Min',
-            max: 'Max',
+            mean: 'Mean',
             median: 'Median',
-            std_dev: 'Std Dev'
+            mode: 'Mode',
+            max: 'Max'
         };
         
-        // Create labels: "Category - Stat" for each combination
+        // Stacking order: National Roads (bottom), Secondary Roads, Bridges, Traffic Signs (top)
+        const stackCategories = [
+            { key: 'national_roads', name: 'National Roads', color: 'rgba(0, 56, 168, 0.7)' },      // Blue - bottom
+            { key: 'secondary_roads', name: 'Secondary Roads', color: 'rgba(54, 162, 235, 0.7)' },  // Light blue
+            { key: 'bridges', name: 'Bridges', color: 'rgba(220, 53, 69, 0.7)' },                  // Red - middle
+            { key: 'traffic_signs', name: 'Traffic Signs/Lights', color: 'rgba(40, 167, 69, 0.7)' } // Green - top
+        ];
+        
+        // Create labels for main chart: "Year - Stat" for Min, Mean, Median, Mode
         const labels = [];
-        categories.forEach(category => {
-            statsToShow.forEach(stat => {
-                labels.push(`${categoryNames[category]} - ${statLabels[stat]}`);
+        statsToShow.forEach(stat => {
+            years.forEach(year => {
+                labels.push(`${year} ${statLabels[stat]}`);
             });
         });
         
-        // Prepare datasets for each year
-        const datasets = years.map((year, yearIndex) => {
+        // Create labels for Max chart: "Year - Max"
+        const maxLabels = years.map(year => `${year} ${statLabels.max}`);
+        
+        // Create datasets for main chart (Min, Mean, Median, Mode)
+        const datasets = stackCategories.map((stackCat) => {
             const data = [];
-            categories.forEach(category => {
-                statsToShow.forEach(stat => {
-                    const statValue = allYearsStats[year]?.[category]?.[stat];
-                    // Convert to millions for display
+            
+            statsToShow.forEach(stat => {
+                years.forEach(year => {
+                    const statValue = allYearsStats[year]?.[stackCat.key]?.[stat];
                     const value = statValue !== null && statValue !== undefined ? statValue / 1000000 : null;
                     data.push(value);
                 });
             });
             
-            const colors = [
-                'rgba(153, 102, 255, 0.7)',  // 2020 - purple
-                'rgba(255, 99, 132, 0.7)',    // 2021 - red
-                'rgba(255, 206, 86, 0.7)',    // 2022 - yellow
-                'rgba(54, 162, 235, 0.7)',    // 2023 - blue
-                'rgba(255, 159, 64, 0.7)',    // 2024 - orange
-                'rgba(75, 192, 192, 0.7)',    // 2025 - teal
-                'rgba(0, 56, 168, 0.7)'       // 2026 - dark blue
-            ];
-            
             return {
-                label: year.toString(),
+                label: stackCat.name,
                 data: data,
-                backgroundColor: colors[yearIndex],
-                borderColor: colors[yearIndex].replace('0.7', '1'),
+                backgroundColor: stackCat.color,
+                borderColor: stackCat.color.replace('0.7', '1'),
                 borderWidth: 1
             };
         });
         
-        // Create horizontal bar chart
+        // Create datasets for Max chart
+        const maxDatasets = stackCategories.map((stackCat) => {
+            const data = [];
+            
+            years.forEach(year => {
+                const statValue = allYearsStats[year]?.[stackCat.key]?.['max'];
+                const value = statValue !== null && statValue !== undefined ? statValue / 1000000 : null;
+                data.push(value);
+            });
+            
+            return {
+                label: stackCat.name,
+                data: data,
+                backgroundColor: stackCat.color,
+                borderColor: stackCat.color.replace('0.7', '1'),
+                borderWidth: 1
+            };
+        });
+        
+        // Create main stacked vertical bar chart (Min, Mean, Median, Mode)
         statsBarChart = new Chart(canvas, {
             type: 'bar',
             data: {
@@ -9478,7 +9531,6 @@ async function copyChartToClipboard(containerId, buttonId) {
                 datasets: datasets
             },
             options: {
-                indexAxis: 'y', // Horizontal bar chart
                 responsive: true,
                 maintainAspectRatio: false,
                 plugins: {
@@ -9497,7 +9549,7 @@ async function copyChartToClipboard(containerId, buttonId) {
                         callbacks: {
                             label: function(context) {
                                 const label = context.dataset.label || '';
-                                const value = context.parsed.x || 0;
+                                const value = context.parsed.y || 0;
                                 if (value === null) return `${label}: N/A`;
                                 return `${label}: ₱${value.toFixed(2)}M/km`;
                             }
@@ -9506,6 +9558,25 @@ async function copyChartToClipboard(containerId, buttonId) {
                 },
                 scales: {
                     x: {
+                        stacked: true,
+                        ticks: {
+                            color: '#333',
+                            font: { size: 10 },
+                            maxRotation: 45,
+                            minRotation: 45
+                        },
+                        title: {
+                            display: true,
+                            text: 'Year - Statistic (Min | Mean | Median | Mode)',
+                            color: '#333',
+                            font: { size: 13, weight: 'bold' }
+                        },
+                        grid: {
+                            display: false
+                        }
+                    },
+                    y: {
+                        stacked: true,
                         beginAtZero: true,
                         ticks: {
                             color: '#666',
@@ -9523,23 +9594,81 @@ async function copyChartToClipboard(containerId, buttonId) {
                         grid: {
                             color: 'rgba(0, 0, 0, 0.05)'
                         }
+                    }
+                }
+            }
+        });
+        
+        // Create Max stacked vertical bar chart (separate, as outlier)
+        statsMaxChart = new Chart(maxCanvas, {
+            type: 'bar',
+            data: {
+                labels: maxLabels,
+                datasets: maxDatasets
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'top',
+                        labels: {
+                            color: '#333',
+                            font: { size: 12, weight: 'bold' },
+                            padding: 15
+                        }
                     },
-                    y: {
+                    title: {
+                        display: false
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                const label = context.dataset.label || '';
+                                const value = context.parsed.y || 0;
+                                if (value === null) return `${label}: N/A`;
+                                return `${label}: ₱${value.toFixed(2)}M/km`;
+                            }
+                        }
+                    }
+                },
+                scales: {
+                    x: {
+                        stacked: true,
                         ticks: {
                             color: '#333',
-                            font: { size: 9 },
-                            maxRotation: 0,
-                            minRotation: 0,
-                            autoSkip: false
+                            font: { size: 11 },
+                            maxRotation: 45,
+                            minRotation: 45
                         },
                         title: {
                             display: true,
-                            text: 'Category - Statistic',
+                            text: 'Year - Max (Outlier)',
                             color: '#333',
                             font: { size: 13, weight: 'bold' }
                         },
                         grid: {
                             display: false
+                        }
+                    },
+                    y: {
+                        stacked: true,
+                        beginAtZero: true,
+                        ticks: {
+                            color: '#666',
+                            font: { size: 11 },
+                            callback: function(value) {
+                                return '₱' + value.toFixed(1) + 'M';
+                            }
+                        },
+                        title: {
+                            display: true,
+                            text: 'Cost per Kilometer (Millions PHP/km)',
+                            color: '#333',
+                            font: { size: 13, weight: 'bold' }
+                        },
+                        grid: {
+                            color: 'rgba(0, 0, 0, 0.05)'
                         }
                     }
                 }

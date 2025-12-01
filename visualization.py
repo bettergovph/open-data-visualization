@@ -1371,10 +1371,10 @@ async def budget_roads_cost_analysis_api():
             traffic_keywords = ['installation', 'road safety', 'guardrail', 'traffic facilities', 'traffic facility']
             is_traffic = any(keyword in name_lower for keyword in traffic_keywords)
             
-            # Bridges: projects with bridge-related keywords OR very short distances (< 1 km)
+            # Bridges: projects with bridge-related keywords ONLY (no distance heuristic to avoid false positives)
             # Include: bridge, viaduct, flyover, overpass, underpass, footbridge, pedestrian bridge
             bridge_keywords = ['bridge', 'viaduct', 'flyover', 'overpass', 'underpass', 'footbridge', 'pedestrian bridge']
-            is_bridge_keyword = any(keyword in name_lower for keyword in bridge_keywords)
+            is_bridge = any(keyword in name_lower for keyword in bridge_keywords)
             
             # Road-related terms (these indicate roads, not bridges)
             # Includes: road, rd, highway, hiway, hway, h-way, boulevard, blvd, avenue, ave, junction, jct, 
@@ -1387,14 +1387,6 @@ async def budget_roads_cost_analysis_api():
                 'expressway'
             ]
             is_road_term = any(term in name_lower for term in road_terms)
-            
-            # Also consider very short projects (< 1 km) as potential bridges
-            # But exclude if it's clearly a road segment or traffic facility
-            # Also exclude very tiny segments (< 0.01 km = 10m) which are likely just road repairs
-            is_short_distance = distance_km < 1.0
-            is_very_short = distance_km < 0.01  # Less than 10 meters
-            
-            is_bridge = is_bridge_keyword or (is_short_distance and not is_very_short and not is_traffic and not is_road_term)
             
             if is_traffic:
                 traffic_signs_projects.append(project_data)
@@ -1627,9 +1619,9 @@ async def budget_roads_statistics_all_years_api():
             traffic_keywords = ['installation', 'road safety', 'guardrail', 'traffic facilities', 'traffic facility']
             is_traffic = any(keyword in name_lower for keyword in traffic_keywords)
             
-            # Bridges: projects with bridge-related keywords OR very short distances (< 1 km)
+            # Bridges: projects with bridge-related keywords ONLY (no distance heuristic to avoid false positives)
             bridge_keywords = ['bridge', 'viaduct', 'flyover', 'overpass', 'underpass', 'footbridge', 'pedestrian bridge']
-            is_bridge_keyword = any(keyword in name_lower for keyword in bridge_keywords)
+            is_bridge = any(keyword in name_lower for keyword in bridge_keywords)
             
             # Road-related terms (these indicate roads, not bridges)
             road_terms = [
@@ -1640,10 +1632,6 @@ async def budget_roads_statistics_all_years_api():
                 'expressway'
             ]
             is_road_term = any(term in name_lower for term in road_terms)
-            
-            is_short_distance = distance_km < 1.0
-            is_very_short = distance_km < 0.01
-            is_bridge = is_bridge_keyword or (is_short_distance and not is_very_short and not is_traffic and not is_road_term)
             
             project_data = {'cost_per_km': cost_per_km, 'amount': amount, 'distance_km': distance_km}
             if is_traffic:

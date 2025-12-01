@@ -121,6 +121,13 @@
             🛣️ Road infrastructure projects (2026) - Cost per kilometer analysis
         </p>
 
+        <!-- Category Tabs -->
+        <div style="display: flex; gap: 0.5rem; margin: 1rem 0; border-bottom: 2px solid #e0e0e0; overflow-x: auto;">
+            <button class="mobile-roads-category-btn active" data-category="roads" style="padding: 0.5rem 1rem; border: none; background: #0038A8; color: white; border-radius: 6px 6px 0 0; cursor: pointer; font-weight: 600; font-size: 0.85em; white-space: nowrap;">🛣️ Roads</button>
+            <button class="mobile-roads-category-btn" data-category="bridges" style="padding: 0.5rem 1rem; border: none; background: #6c757d; color: white; border-radius: 6px 6px 0 0; cursor: pointer; font-weight: 600; font-size: 0.85em; white-space: nowrap;">🌉 Bridges</button>
+            <button class="mobile-roads-category-btn" data-category="traffic_signs" style="padding: 0.5rem 1rem; border: none; background: #6c757d; color: white; border-radius: 6px 6px 0 0; cursor: pointer; font-weight: 600; font-size: 0.85em; white-space: nowrap;">🚦 Traffic Signs</button>
+        </div>
+
         <!-- Loading -->
         <div id="mobile-roads-loading" class="text-center py-8">
             <div class="inline-block w-8 h-8 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin"></div>
@@ -130,8 +137,8 @@
         <!-- Error -->
         <div id="mobile-roads-error" style="display: none; text-align: center; padding: 1rem; color: #dc3545; background: #f8d7da; border-radius: 8px; margin: 1rem 0;"></div>
 
-        <!-- Stats -->
-        <div id="mobile-roads-stats" style="display: none; display: grid; grid-template-columns: repeat(2, 1fr); gap: 0.75rem; margin: 1rem 0;">
+        <!-- Stats - Roads -->
+        <div id="mobile-roads-stats" class="mobile-roads-category-panel" data-category="roads" style="display: none; display: grid; grid-template-columns: repeat(2, 1fr); gap: 0.75rem; margin: 1rem 0;">
             <div class="mobile-stat-card" style="background: white; padding: 1rem; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); text-align: center;">
                 <div class="text-xl font-bold text-green-600" id="mobile-roads-total-projects">-</div>
                 <div class="text-xs text-gray-600 mt-1">Total Projects</div>
@@ -150,12 +157,68 @@
             </div>
         </div>
 
-        <!-- Projects List -->
-        <div id="mobile-roads-projects" style="display: none; margin-top: 1rem;">
+        <!-- Stats - Bridges -->
+        <div id="mobile-bridges-stats" class="mobile-roads-category-panel" data-category="bridges" style="display: none; display: grid; grid-template-columns: repeat(2, 1fr); gap: 0.75rem; margin: 1rem 0;">
+            <div class="mobile-stat-card" style="background: white; padding: 1rem; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); text-align: center;">
+                <div class="text-xl font-bold text-green-600" id="mobile-bridges-total-projects">-</div>
+                <div class="text-xs text-gray-600 mt-1">Total Projects</div>
+            </div>
+            <div class="mobile-stat-card" style="background: white; padding: 1rem; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); text-align: center;">
+                <div class="text-lg font-bold text-purple-600" id="mobile-bridges-total-distance">-</div>
+                <div class="text-xs text-gray-600 mt-1">Total Distance</div>
+            </div>
+            <div class="mobile-stat-card" style="background: white; padding: 1rem; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); text-align: center;">
+                <div class="text-lg font-bold text-red-600" id="mobile-bridges-total-amount">-</div>
+                <div class="text-xs text-gray-600 mt-1">Total Amount</div>
+            </div>
+            <div class="mobile-stat-card" style="background: white; padding: 1rem; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); text-align: center;">
+                <div class="text-lg font-bold text-orange-600" id="mobile-bridges-avg-cost">-</div>
+                <div class="text-xs text-gray-600 mt-1">Avg Cost/km</div>
+            </div>
+        </div>
+
+        <!-- Stats - Traffic Signs -->
+        <div id="mobile-traffic-signs-stats" class="mobile-roads-category-panel" data-category="traffic_signs" style="display: none; display: grid; grid-template-columns: repeat(2, 1fr); gap: 0.75rem; margin: 1rem 0;">
+            <div class="mobile-stat-card" style="background: white; padding: 1rem; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); text-align: center;">
+                <div class="text-xl font-bold text-green-600" id="mobile-traffic-signs-total-projects">-</div>
+                <div class="text-xs text-gray-600 mt-1">Total Projects</div>
+            </div>
+            <div class="mobile-stat-card" style="background: white; padding: 1rem; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); text-align: center;">
+                <div class="text-lg font-bold text-purple-600" id="mobile-traffic-signs-total-distance">-</div>
+                <div class="text-xs text-gray-600 mt-1">Total Distance</div>
+            </div>
+            <div class="mobile-stat-card" style="background: white; padding: 1rem; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); text-align: center;">
+                <div class="text-lg font-bold text-red-600" id="mobile-traffic-signs-total-amount">-</div>
+                <div class="text-xs text-gray-600 mt-1">Total Amount</div>
+            </div>
+            <div class="mobile-stat-card" style="background: white; padding: 1rem; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); text-align: center;">
+                <div class="text-lg font-bold text-orange-600" id="mobile-traffic-signs-avg-cost">-</div>
+                <div class="text-xs text-gray-600 mt-1">Avg Cost/km</div>
+            </div>
+        </div>
+
+        <!-- Projects List - Roads -->
+        <div id="mobile-roads-projects" class="mobile-roads-category-panel" data-category="roads" style="display: none; margin-top: 1rem;">
             <div style="margin-bottom: 0.75rem;">
-                <input type="text" id="mobile-roads-search" placeholder="Search projects..." style="width: 100%; padding: 0.5rem; border: 1px solid #ddd; border-radius: 4px; font-size: 14px;">
+                <input type="text" id="mobile-roads-search" placeholder="Search road projects..." style="width: 100%; padding: 0.5rem; border: 1px solid #ddd; border-radius: 4px; font-size: 14px;">
             </div>
             <div id="mobile-roads-list"></div>
+        </div>
+
+        <!-- Projects List - Bridges -->
+        <div id="mobile-bridges-projects" class="mobile-roads-category-panel" data-category="bridges" style="display: none; margin-top: 1rem;">
+            <div style="margin-bottom: 0.75rem;">
+                <input type="text" id="mobile-bridges-search" placeholder="Search bridge projects..." style="width: 100%; padding: 0.5rem; border: 1px solid #ddd; border-radius: 4px; font-size: 14px;">
+            </div>
+            <div id="mobile-bridges-list"></div>
+        </div>
+
+        <!-- Projects List - Traffic Signs -->
+        <div id="mobile-traffic-signs-projects" class="mobile-roads-category-panel" data-category="traffic_signs" style="display: none; margin-top: 1rem;">
+            <div style="margin-bottom: 0.75rem;">
+                <input type="text" id="mobile-traffic-signs-search" placeholder="Search traffic signs/lights projects..." style="width: 100%; padding: 0.5rem; border: 1px solid #ddd; border-radius: 4px; font-size: 14px;">
+            </div>
+            <div id="mobile-traffic-signs-list"></div>
         </div>
     </div>
 
@@ -392,6 +455,14 @@
                     loadMobileAntiZeroData();
                     targetPanel.dataset.loaded = 'true';
                 }
+            });
+        });
+        
+        // Mobile roads category tab switching
+        document.querySelectorAll('.mobile-roads-category-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const category = btn.dataset.category;
+                showMobileRoadsCategory(category);
             });
         });
     });
@@ -873,6 +944,9 @@
         }
     }
 
+    let mobileRoadsDataCache = null;
+    let currentMobileRoadsCategory = 'roads';
+    
     // Load mobile roads data
     async function loadMobileRoadsData() {
         const loadingEl = document.getElementById('mobile-roads-loading');
@@ -886,25 +960,26 @@
             const data = await response.json();
             if (!data.success) throw new Error(data.error || 'Failed to load data');
 
-            const projects = data.projects || [];
+            // Cache the data
+            mobileRoadsDataCache = {
+                roads: data.roads?.projects || [],
+                bridges: data.bridges?.projects || [],
+                traffic_signs: data.traffic_signs?.projects || []
+            };
 
-            // Update stats
-            const totalProjects = projects.length;
-            const totalDistance = projects.reduce((sum, p) => sum + (p.distance_km || 0), 0);
-            const totalAmount = projects.reduce((sum, p) => sum + (p.amount || 0), 0);
-            const avgCost = totalDistance > 0 ? totalAmount / totalDistance : 0;
-
-            document.getElementById('mobile-roads-total-projects').textContent = totalProjects.toLocaleString();
-            document.getElementById('mobile-roads-total-distance').textContent = totalDistance.toFixed(2) + ' km';
-            document.getElementById('mobile-roads-total-amount').textContent = '₱' + (totalAmount / 1000000000).toFixed(2) + 'B';
-            document.getElementById('mobile-roads-avg-cost').textContent = '₱' + (avgCost / 1000000).toFixed(1) + 'M/km';
+            // Update stats for each category
+            updateMobileRoadsStats('roads', mobileRoadsDataCache.roads);
+            updateMobileRoadsStats('bridges', mobileRoadsDataCache.bridges);
+            updateMobileRoadsStats('traffic_signs', mobileRoadsDataCache.traffic_signs);
 
             // Display projects
-            displayMobileRoadsProjects(projects);
+            displayMobileRoadsProjects('roads', mobileRoadsDataCache.roads);
+            displayMobileRoadsProjects('bridges', mobileRoadsDataCache.bridges);
+            displayMobileRoadsProjects('traffic_signs', mobileRoadsDataCache.traffic_signs);
 
             loadingEl.style.display = 'none';
             statsEl.style.display = 'grid';
-            projectsEl.style.display = 'block';
+            showMobileRoadsCategory('roads'); // Show roads by default
         } catch (error) {
             console.error('Error loading roads data:', error);
             loadingEl.style.display = 'none';
@@ -912,9 +987,53 @@
             errorEl.style.display = 'block';
         }
     }
+    
+    function updateMobileRoadsStats(category, projects) {
+        const totalProjects = projects.length;
+        const totalDistance = projects.reduce((sum, p) => sum + (p.distance_km || 0), 0);
+        const totalAmount = projects.reduce((sum, p) => sum + (p.amount || 0), 0);
+        const avgCost = totalDistance > 0 ? totalAmount / totalDistance : 0;
+        
+        const prefix = category === 'roads' ? 'mobile-roads' : category === 'bridges' ? 'mobile-bridges' : 'mobile-traffic-signs';
+        const statsEl = document.getElementById(`${prefix}-stats`);
+        if (statsEl) {
+            document.getElementById(`${prefix}-total-projects`).textContent = totalProjects.toLocaleString();
+            document.getElementById(`${prefix}-total-distance`).textContent = totalDistance.toFixed(2) + ' km';
+            document.getElementById(`${prefix}-total-amount`).textContent = '₱' + (totalAmount / 1000000000).toFixed(2) + 'B';
+            document.getElementById(`${prefix}-avg-cost`).textContent = '₱' + (avgCost / 1000000).toFixed(1) + 'M/km';
+        }
+    }
+    
+    function showMobileRoadsCategory(category) {
+        currentMobileRoadsCategory = category;
+        
+        // Hide all category panels
+        document.querySelectorAll('.mobile-roads-category-panel').forEach(panel => {
+            panel.style.display = 'none';
+        });
+        
+        // Show selected category panels
+        document.querySelectorAll(`.mobile-roads-category-panel[data-category="${category}"]`).forEach(panel => {
+            panel.style.display = panel.id.includes('stats') ? 'grid' : 'block';
+        });
+        
+        // Update button styles
+        document.querySelectorAll('.mobile-roads-category-btn').forEach(btn => {
+            if (btn.dataset.category === category) {
+                btn.style.background = '#0038A8';
+            } else {
+                btn.style.background = '#6c757d';
+            }
+        });
+    }
 
-    function displayMobileRoadsProjects(projects) {
-        const listEl = document.getElementById('mobile-roads-list');
+    function displayMobileRoadsProjects(category, projects) {
+        const listId = category === 'roads' ? 'mobile-roads-list' : category === 'bridges' ? 'mobile-bridges-list' : 'mobile-traffic-signs-list';
+        const searchId = category === 'roads' ? 'mobile-roads-search' : category === 'bridges' ? 'mobile-bridges-search' : 'mobile-traffic-signs-search';
+        
+        const listEl = document.getElementById(listId);
+        if (!listEl) return;
+        
         listEl.innerHTML = '';
 
         projects.forEach((project, index) => {
@@ -945,9 +1064,13 @@
         });
 
         // Search functionality
-        const searchEl = document.getElementById('mobile-roads-search');
+        const searchEl = document.getElementById(searchId);
         if (searchEl) {
-            searchEl.addEventListener('input', (e) => {
+            // Remove existing listeners by cloning
+            const newSearchEl = searchEl.cloneNode(true);
+            searchEl.parentNode.replaceChild(newSearchEl, searchEl);
+            
+            newSearchEl.addEventListener('input', (e) => {
                 const searchTerm = e.target.value.toLowerCase();
                 Array.from(listEl.children).forEach(card => {
                     const text = card.textContent.toLowerCase();
