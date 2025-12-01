@@ -1127,6 +1127,103 @@ async def budget_resurrected_projects_api():
     except Exception as e:
         return JSONResponse({"success": False, "error": str(e)}, status_code=500)
 
+def _is_national_road(name: str, distance_km: float) -> bool:
+    """Determine if a road project is a national road
+    National roads are typically:
+    - Named after regions, provinces, cities, or municipalities
+    - Have "national" in the name
+    - Are longer highways (typically > 1km, often > 5km)
+    - Connect major locations (cross-municipality/city roads)
+    """
+    name_lower = name.lower()
+    
+    # Check for explicit "national" keyword
+    if 'national' in name_lower:
+        return True
+    
+    # Common Philippine provinces, cities, and regions (partial list - can be expanded)
+    # These are common in national road names
+    major_locations = [
+        'manila', 'cebu', 'davao', 'iloilo', 'baguio', 'quezon', 'laguna', 'cavite',
+        'bulacan', 'pampanga', 'bataan', 'nueva ecija', 'tarlac', 'pangasinan',
+        'batangas', 'rizal', 'antipolo', 'caloocan', 'las piñas', 'makati', 'malabon',
+        'mandaluyong', 'marikina', 'muntinlupa', 'navotas', 'parañaque', 'pasay',
+        'pasig', 'pateros', 'san juan', 'taguig', 'valenzuela', 'bacoor', 'dasmarinas', 'dasmariñas',
+        'calamba', 'san pedro', 'biñan', 'santa rosa', 'cabuyao', 'los baños',
+        'bay', 'calauan', 'liliw', 'magdalena', 'pagsanjan', 'paete', 'pila',
+        'riizal', 'victoria', 'nagcarlan', 'lumban', 'kalayaan', 'cavinti',
+        'pila', 'siniloan', 'famy', 'mabitac', 'pangil', 'pakil', 'paete',
+        'kalayaan', 'lumban', 'cavinti', 'luisiana', 'majayjay', 'liliw',
+        'magdalena', 'pagsanjan', 'pila', 'riizal', 'victoria', 'nagcarlan',
+        'zamboanga', 'cagayan', 'isabela', 'nueva vizcaya', 'quirino', 'aurora',
+        'bataan', 'bataan', 'pampanga', 'tarlac', 'pangasinan', 'la union',
+        'ilocos sur', 'ilocos norte', 'ilocos', 'abra', 'apayao', 'benguet', 'ifugao',
+        'kalinga', 'mountain province', 'albay', 'camarines norte', 'camarines sur',
+        'catanduanes', 'masbate', 'sorsogon', 'aklan', 'antique', 'capiz', 'guimaras',
+        'negros occidental', 'negros oriental', 'bohol', 'cebu', 'leyte', 'southern leyte',
+        'eastern samar', 'northern samar', 'samar', 'biliran', 'zamboanga del norte',
+        'zamboanga del sur', 'zamboanga sibugay', 'bukidnon', 'malaybalay', 'camiguin', 'lanao del norte',
+        'misamis occidental', 'misamis oriental', 'davao del norte', 'davao del sur',
+        'davao oriental', 'davao de oro', 'davao occidental', 'compostela valley',
+        'south cotabato', 'north cotabato', 'sultan kudarat', 'sarangani', 'cotabato',
+        'agusan del norte', 'agusan del sur', 'agusan', 'surigao del norte', 'surigao del sur',
+        'dinagat islands', 'basilan', 'lanao del sur', 'maguindanao', 'sulu', 'tawi-tawi',
+        'roxas', 'toledo', 'infanta', 'dumaguete', 'north'
+    ]
+    
+    # Check for cross-municipality/city roads (e.g., "Bacoor-Dasmariñas", "City1 to City2", "City1–City2")
+    # These are almost always national roads
+    import re
+    # Pattern: City1-City2, City1–City2 (en dash), City1 to City2, City1/City2
+    cross_municipality_patterns = [
+        r'([a-záéíóúñ\s]+)[\s]*[-–—][\s]*([a-záéíóúñ\s]+)',  # hyphen, en dash, em dash
+        r'([a-záéíóúñ\s]+)[\s]+to[\s]+([a-záéíóúñ\s]+)',  # "to" separator
+        r'([a-záéíóúñ\s]+)[\s]*/[\s]*([a-záéíóúñ\s]+)',  # slash separator
+    ]
+    
+    for pattern in cross_municipality_patterns:
+        matches = re.finditer(pattern, name_lower)
+        for match in matches:
+            city1 = match.group(1).strip()
+            city2 = match.group(2).strip()
+            # Remove common road terms that might be in the name
+            city1 = re.sub(r'\s+(road|highway|national|rd|hway|hiway)\s*$', '', city1).strip()
+            city2 = re.sub(r'\s+(road|highway|national|rd|hway|hiway)\s*$', '', city2).strip()
+            
+            # Check if both cities are in major locations
+            city1_match = any(loc in city1 or city1 in loc for loc in major_locations)
+            city2_match = any(loc in city2 or city2 in loc for loc in major_locations)
+            
+            if city1_match and city2_match:
+                return True  # Cross-municipality road = national road
+    
+    # Check if name contains major location names (indicating inter-city/province roads)
+    contains_major_location = any(loc in name_lower for loc in major_locations)
+    
+    # Check for highway designations that typically indicate national roads
+    highway_indicators = ['maharlika', 'andaya', 'pan-philippine', 'philippine-japan', 'jica']
+    is_highway = any(indicator in name_lower for indicator in highway_indicators)
+    
+    # National roads are typically longer (but not always - some segments are short)
+    # If it's a longer road (> 1km) with location names, it's likely national
+    # If it's explicitly a highway, it's national
+    # If it has "national" in name, it's national
+    if is_highway:
+        return True
+    
+    # If it contains major location names, it's likely a national road (regardless of length)
+    # Roads named after major provinces/cities are national roads
+    if contains_major_location:
+        return True
+    
+    # Very long roads (> 5km) are likely national roads
+    if distance_km > 5.0:
+        return True
+    
+    # Secondary roads are typically very short (< 1km) and don't contain major location names
+    # If it's short and doesn't have major locations, it's secondary (return False)
+    return False
+
 @app.get("/api/budget/roads-cost-analysis")
 async def budget_roads_cost_analysis_api():
     """Get road infrastructure projects (roads, bridges, traffic signs, etc.) with chainage, calculate distance and cost per km from 2026 budget amendments data"""
@@ -1225,6 +1322,10 @@ async def budget_roads_cost_analysis_api():
             return None
         
         road_projects = []
+        national_road_projects = []
+        secondary_road_projects = []
+        bridge_projects = []
+        traffic_signs_projects = []
         
         for item in all_items:
             name = item.get('name', '') or item.get('description', '')
@@ -1250,7 +1351,7 @@ async def budget_roads_cost_analysis_api():
             
             chainage_display = format_chainage_display(name, chainage_ranges) or 'N/A'
             
-            road_projects.append({
+            project_data = {
                 'name': name,
                 'chainage_display': chainage_display,
                 'chainage_ranges': chainage_ranges,  # Store all ranges
@@ -1260,18 +1361,361 @@ async def budget_roads_cost_analysis_api():
                 'cost_per_km': cost_per_km,
                 'source_sheet': item.get('source_sheet'),
                 'region': item.get('location', {}).get('region') if isinstance(item.get('location'), dict) else None
-            })
+            }
+            
+            # Categorize projects
+            name_lower = name.lower()
+            
+            # Traffic signs/lights: road safety facilities, installations, guardrails
+            # Includes: installation, road safety, guardrail, traffic facilities
+            traffic_keywords = ['installation', 'road safety', 'guardrail', 'traffic facilities', 'traffic facility']
+            is_traffic = any(keyword in name_lower for keyword in traffic_keywords)
+            
+            # Bridges: projects with bridge-related keywords OR very short distances (< 1 km)
+            # Include: bridge, viaduct, flyover, overpass, underpass, footbridge, pedestrian bridge
+            bridge_keywords = ['bridge', 'viaduct', 'flyover', 'overpass', 'underpass', 'footbridge', 'pedestrian bridge']
+            is_bridge_keyword = any(keyword in name_lower for keyword in bridge_keywords)
+            
+            # Road-related terms (these indicate roads, not bridges)
+            # Includes: road, rd, highway, hiway, hway, h-way, boulevard, blvd, avenue, ave, junction, jct, 
+            #           old route, diversion, extension, ext, street, st, expressway
+            road_terms = [
+                ' road', ' rd', ' highway', ' hiway', ' hway', ' h-way',
+                'boulevard', ' blvd', ' avenue', ' ave', ' ave.',
+                'junction', ' jct', ' old route', ' diversion',
+                'extension', ' ext', ' street', ' st', ' st.',
+                'expressway'
+            ]
+            is_road_term = any(term in name_lower for term in road_terms)
+            
+            # Also consider very short projects (< 1 km) as potential bridges
+            # But exclude if it's clearly a road segment or traffic facility
+            # Also exclude very tiny segments (< 0.01 km = 10m) which are likely just road repairs
+            is_short_distance = distance_km < 1.0
+            is_very_short = distance_km < 0.01  # Less than 10 meters
+            
+            is_bridge = is_bridge_keyword or (is_short_distance and not is_very_short and not is_traffic and not is_road_term)
+            
+            if is_traffic:
+                traffic_signs_projects.append(project_data)
+            elif is_bridge:
+                bridge_projects.append(project_data)
+            # Roads: separate into national roads and secondary roads
+            elif is_road_term or not is_bridge:
+                # Determine if it's a national road
+                is_national_road = _is_national_road(name, distance_km)
+                
+                if is_national_road:
+                    national_road_projects.append(project_data)
+                else:
+                    secondary_road_projects.append(project_data)
+            else:
+                # Fallback - treat as secondary road
+                secondary_road_projects.append(project_data)
         
-        # Sort by cost per km descending
-        road_projects.sort(key=lambda x: x['cost_per_km'], reverse=True)
+        # Sort each category by cost per km descending
+        national_road_projects.sort(key=lambda x: x['cost_per_km'], reverse=True)
+        secondary_road_projects.sort(key=lambda x: x['cost_per_km'], reverse=True)
+        bridge_projects.sort(key=lambda x: x['cost_per_km'], reverse=True)
+        traffic_signs_projects.sort(key=lambda x: x['cost_per_km'], reverse=True)
+        
+        # Combine all roads for backward compatibility
+        road_projects = national_road_projects + secondary_road_projects
+        
+        # Calculate statistics for each category
+        def calculate_statistics(projects):
+            if not projects:
+                return {
+                    "min": None,
+                    "max": None,
+                    "mean": None,
+                    "median": None,
+                    "mode": None,
+                    "std_dev": None,
+                    "count": 0
+                }
+            
+            import statistics
+            from collections import Counter
+            
+            costs = [p['cost_per_km'] for p in projects if p.get('cost_per_km', 0) > 0]
+            if not costs:
+                return {
+                    "min": None,
+                    "max": None,
+                    "mean": None,
+                    "median": None,
+                    "mode": None,
+                    "std_dev": None,
+                    "count": 0
+                }
+            
+            costs_sorted = sorted(costs)
+            mean = statistics.mean(costs)
+            
+            # Calculate mode (most frequent value, rounded to nearest million for practical purposes)
+            # Round to nearest 1M for mode calculation to avoid too many unique values
+            rounded_costs = [round(c / 1000000) * 1000000 for c in costs]
+            cost_counter = Counter(rounded_costs)
+            mode_value = cost_counter.most_common(1)[0][0] if cost_counter else None
+            
+            try:
+                std_dev = statistics.stdev(costs) if len(costs) > 1 else 0
+            except:
+                std_dev = 0
+            
+            return {
+                "min": min(costs),
+                "max": max(costs),
+                "mean": mean,
+                "median": statistics.median(costs),
+                "mode": mode_value,
+                "std_dev": std_dev,
+                "count": len(costs)
+            }
+        
+        national_roads_stats = calculate_statistics(national_road_projects)
+        secondary_roads_stats = calculate_statistics(secondary_road_projects)
+        roads_stats = calculate_statistics(road_projects)  # Combined stats
+        bridges_stats = calculate_statistics(bridge_projects)
+        traffic_signs_stats = calculate_statistics(traffic_signs_projects)
         
         return JSONResponse({
             "success": True,
-            "projects": road_projects,
-            "total": len(road_projects)
+            "roads": {
+                "projects": road_projects,
+                "total": len(road_projects),
+                "statistics": roads_stats
+            },
+            "national_roads": {
+                "projects": national_road_projects,
+                "total": len(national_road_projects),
+                "statistics": national_roads_stats
+            },
+            "secondary_roads": {
+                "projects": secondary_road_projects,
+                "total": len(secondary_road_projects),
+                "statistics": secondary_roads_stats
+            },
+            "bridges": {
+                "projects": bridge_projects,
+                "total": len(bridge_projects),
+                "statistics": bridges_stats
+            },
+            "traffic_signs": {
+                "projects": traffic_signs_projects,
+                "total": len(traffic_signs_projects),
+                "statistics": traffic_signs_stats
+            }
         })
         
     except Exception as e:
+        return JSONResponse({"success": False, "error": str(e)}, status_code=500)
+
+@app.get("/api/budget/roads-statistics-all-years")
+async def budget_roads_statistics_all_years_api():
+    """Get road infrastructure statistics for all years (2020-2026) including historical data"""
+    try:
+        import statistics
+        from collections import Counter
+        
+        # Load 2026 data
+        json_path_2026 = Path('static/data/budget_amendments_2026.json')
+        historical_path = Path('static/data/historical_roads_2020_2025.json')
+        
+        if not json_path_2026.exists():
+            return JSONResponse({"success": False, "error": "2026 budget amendments data not available"}, status_code=404)
+        
+        if not historical_path.exists():
+            return JSONResponse({"success": False, "error": "Historical roads data not available. Please run: python3 scripts/extract_historical_roads.py"}, status_code=404)
+        
+        # Load 2026 data
+        with open(json_path_2026, 'r', encoding='utf-8') as f:
+            data_2026 = json.load(f)
+        
+        # Load historical data
+        with open(historical_path, 'r', encoding='utf-8') as f:
+            historical_data = json.load(f)
+        
+        # Process 2026 data (same logic as roads-cost-analysis)
+        import re
+        all_items_2026 = data_2026.get('line_items', []) + data_2026.get('projects', [])
+        
+        def extract_all_chainage_ranges(name: str):
+            ranges = []
+            pattern_k = r'K(\d+)\s*\+\s*\(?(-?\d+)\)?\s*-\s*K(\d+)\s*\+\s*\(?(-?\d+)\)?'
+            for match in re.finditer(pattern_k, name, re.IGNORECASE):
+                ranges.append((int(match.group(1)), int(match.group(2)), int(match.group(3)), int(match.group(4))))
+            pattern_chainage = r'Chainage\s+(\d+)\s*-\s*Chainage\s+(\d+)'
+            for match in re.finditer(pattern_chainage, name, re.IGNORECASE):
+                start_total = int(match.group(1))
+                end_total = int(match.group(2))
+                start_km = start_total // 1000
+                start_m = start_total % 1000
+                end_km = end_total // 1000
+                end_m = end_total % 1000
+                ranges.append((start_km, start_m, end_km, end_m))
+            return ranges
+        
+        def calculate_distance(chainage_ranges):
+            if not chainage_ranges:
+                return None, None, []
+            total_distance_m = 0
+            individual_distances_m = []
+            def to_meters(km, m):
+                return km * 1000 + m
+            for chainage_range in chainage_ranges:
+                start_km, start_m, end_km, end_m = chainage_range
+                start_total = to_meters(start_km, start_m)
+                end_total = to_meters(end_km, end_m)
+                distance_m = abs(end_total - start_total)
+                individual_distances_m.append(distance_m)
+                total_distance_m += distance_m
+            distance_km = total_distance_m / 1000.0
+            if len(individual_distances_m) > 1:
+                breakdown = ' + '.join([f'{int(d)}m' for d in individual_distances_m]) + f' = {int(total_distance_m)}m'
+            else:
+                breakdown = None
+            return distance_km, breakdown, individual_distances_m
+        
+        def calculate_statistics(projects):
+            if not projects:
+                return {
+                    "min": None, "max": None, "mean": None, "median": None,
+                    "mode": None, "std_dev": None, "count": 0
+                }
+            costs = [p['cost_per_km'] for p in projects if p.get('cost_per_km', 0) > 0]
+            if not costs:
+                return {
+                    "min": None, "max": None, "mean": None, "median": None,
+                    "mode": None, "std_dev": None, "count": 0
+                }
+            costs_sorted = sorted(costs)
+            mean = statistics.mean(costs)
+            rounded_costs = [round(c / 1000000) * 1000000 for c in costs]
+            cost_counter = Counter(rounded_costs)
+            mode_value = cost_counter.most_common(1)[0][0] if cost_counter else None
+            try:
+                std_dev = statistics.stdev(costs) if len(costs) > 1 else 0
+            except:
+                std_dev = 0
+            return {
+                "min": min(costs), "max": max(costs), "mean": mean,
+                "median": statistics.median(costs), "mode": mode_value,
+                "std_dev": std_dev, "count": len(costs)
+            }
+        
+        # Process 2026 projects
+        projects_2026 = {'roads': [], 'national_roads': [], 'secondary_roads': [], 'bridges': [], 'traffic_signs': []}
+        for item in all_items_2026:
+            name = item.get('name', '') or item.get('description', '')
+            if not name:
+                continue
+            chainage_ranges = extract_all_chainage_ranges(name)
+            if not chainage_ranges:
+                continue
+            amount = abs(item.get('final_amount', 0) or item.get('original_amount', 0))
+            if amount <= 0:
+                continue
+            distance_km, breakdown, individual_distances = calculate_distance(chainage_ranges)
+            if not distance_km or distance_km <= 0:
+                continue
+            cost_per_km = amount / distance_km
+            name_lower = name.lower()
+            
+            # Traffic signs/lights: road safety facilities, installations, guardrails
+            traffic_keywords = ['installation', 'road safety', 'guardrail', 'traffic facilities', 'traffic facility']
+            is_traffic = any(keyword in name_lower for keyword in traffic_keywords)
+            
+            # Bridges: projects with bridge-related keywords OR very short distances (< 1 km)
+            bridge_keywords = ['bridge', 'viaduct', 'flyover', 'overpass', 'underpass', 'footbridge', 'pedestrian bridge']
+            is_bridge_keyword = any(keyword in name_lower for keyword in bridge_keywords)
+            
+            # Road-related terms (these indicate roads, not bridges)
+            road_terms = [
+                ' road', ' rd', ' highway', ' hiway', ' hway', ' h-way',
+                'boulevard', ' blvd', ' avenue', ' ave', ' ave.',
+                'junction', ' jct', ' old route', ' diversion',
+                'extension', ' ext', ' street', ' st', ' st.',
+                'expressway'
+            ]
+            is_road_term = any(term in name_lower for term in road_terms)
+            
+            is_short_distance = distance_km < 1.0
+            is_very_short = distance_km < 0.01
+            is_bridge = is_bridge_keyword or (is_short_distance and not is_very_short and not is_traffic and not is_road_term)
+            
+            project_data = {'cost_per_km': cost_per_km, 'amount': amount, 'distance_km': distance_km}
+            if is_traffic:
+                projects_2026['traffic_signs'].append(project_data)
+            elif is_bridge:
+                projects_2026['bridges'].append(project_data)
+            else:
+                # Separate into national and secondary roads
+                is_national = _is_national_road(name, distance_km)
+                if is_national:
+                    projects_2026['national_roads'].append(project_data)
+                else:
+                    projects_2026['secondary_roads'].append(project_data)
+                projects_2026['roads'].append(project_data)  # Combined for backward compatibility
+        
+        # Combine historical data (2020-2025) with 2026
+        all_years_data = {}
+        years = [2020, 2021, 2022, 2023, 2024, 2025, 2026]
+        
+        # Process historical years (handle both string and int keys)
+        for year in years[:-1]:  # 2020-2025
+            year_key = str(year)  # Historical data uses string keys
+            if year_key in historical_data.get('data', {}):
+                year_data = historical_data['data'][year_key]
+                all_years_data[year] = {
+                    'roads': [{'cost_per_km': p['cost_per_km'], 'amount': p['amount'], 'distance_km': p['distance_km']} for p in year_data.get('roads', [])],
+                    'national_roads': [{'cost_per_km': p['cost_per_km'], 'amount': p['amount'], 'distance_km': p['distance_km']} for p in year_data.get('national_roads', [])],
+                    'secondary_roads': [{'cost_per_km': p['cost_per_km'], 'amount': p['amount'], 'distance_km': p['distance_km']} for p in year_data.get('secondary_roads', [])],
+                    'bridges': [{'cost_per_km': p['cost_per_km'], 'amount': p['amount'], 'distance_km': p['distance_km']} for p in year_data.get('bridges', [])],
+                    'traffic_signs': [{'cost_per_km': p['cost_per_km'], 'amount': p['amount'], 'distance_km': p['distance_km']} for p in year_data.get('traffic_signs', [])]
+                }
+        
+        # Add 2026
+        all_years_data[2026] = projects_2026
+        
+        # Calculate statistics for each year and category
+        result = {}
+        for year in years:
+            result[year] = {
+                'roads': calculate_statistics(all_years_data.get(year, {}).get('roads', [])),
+                'national_roads': calculate_statistics(all_years_data.get(year, {}).get('national_roads', [])),
+                'secondary_roads': calculate_statistics(all_years_data.get(year, {}).get('secondary_roads', [])),
+                'bridges': calculate_statistics(all_years_data.get(year, {}).get('bridges', [])),
+                'traffic_signs': calculate_statistics(all_years_data.get(year, {}).get('traffic_signs', []))
+            }
+        
+        # Calculate totals (aggregate all years)
+        total_roads = []
+        total_national_roads = []
+        total_secondary_roads = []
+        total_bridges = []
+        total_traffic_signs = []
+        for year in years:
+            total_roads.extend(all_years_data.get(year, {}).get('roads', []))
+            total_national_roads.extend(all_years_data.get(year, {}).get('national_roads', []))
+            total_secondary_roads.extend(all_years_data.get(year, {}).get('secondary_roads', []))
+            total_bridges.extend(all_years_data.get(year, {}).get('bridges', []))
+            total_traffic_signs.extend(all_years_data.get(year, {}).get('traffic_signs', []))
+        
+        result['total'] = {
+            'roads': calculate_statistics(total_roads),
+            'national_roads': calculate_statistics(total_national_roads),
+            'secondary_roads': calculate_statistics(total_secondary_roads),
+            'bridges': calculate_statistics(total_bridges),
+            'traffic_signs': calculate_statistics(total_traffic_signs)
+        }
+        
+        return JSONResponse({"success": True, "statistics": result})
+        
+    except Exception as e:
+        import traceback
+        traceback.print_exc()
         return JSONResponse({"success": False, "error": str(e)}, status_code=500)
 
 _reblocking_cache = None

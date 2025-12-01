@@ -126,6 +126,7 @@ function toggleMobileMenu() {
                     <a href="#trends" class="budget-tab-btn" data-tab="trends">📈 Trends</a>
                     <a href="#resu" class="budget-tab-btn" data-tab="resu">🔄 Repeated</a>
                     <a href="#roads" class="budget-tab-btn" data-tab="roads">🛣️ Roads</a>
+                    <a href="#stats" class="budget-tab-btn" data-tab="stats">📊 Road Statistics</a>
                     <a href="#reblock" class="budget-tab-btn" data-tab="reblock">🛣️ Reblocking</a>
                     <a href="#zero" class="budget-tab-btn" data-tab="zero">🚫 Anti-zero</a>
                 </div>
@@ -5534,14 +5535,14 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Check for hash in URL and switch to that tab
     const hash = window.location.hash.substring(1); // Remove the # character
-    if (hash && ['visual', 'browser', 'analysis', 'trends'].includes(hash)) {
+    if (hash && ['visual', 'browser', 'analysis', 'trends', 'stats'].includes(hash)) {
         switchToTab(hash, false); // Don't update hash since we're reading from it
     }
     
     // Listen for hash changes
     window.addEventListener('hashchange', function() {
         const newHash = window.location.hash.substring(1);
-        if (newHash && ['visual', 'browser', 'analysis', 'trends'].includes(newHash)) {
+        if (newHash && ['visual', 'browser', 'analysis', 'trends', 'stats'].includes(newHash)) {
             switchToTab(newHash, false);
         }
     });
@@ -7929,7 +7930,15 @@ async function copyChartToClipboard(containerId, buttonId) {
                 <!-- Roads Tab -->
                 <div id="tab-roads" class="budget-tab-panel">
                     <h3 class="budget-section-title">🛣️ Road Infrastructure Projects Cost Analysis (2026)</h3>
-                    <p class="budget-section-desc">Analyze road infrastructure projects (roads, bridges, traffic signs, etc.) from 2026 budget by calculating distance from chainage and cost per kilometer</p>
+                    <p class="budget-section-desc">Analyze road infrastructure projects from 2026 budget by calculating distance from chainage and cost per kilometer. Projects are separated into Roads, Bridges, and Traffic Signs/Lights.</p>
+                    
+                    <!-- Category Tabs -->
+                    <div style="display: flex; gap: 1rem; margin: 2rem 0; border-bottom: 2px solid #e0e0e0; flex-wrap: wrap;">
+                        <button id="roads-category-national-roads" class="roads-category-btn active" data-category="national_roads" style="padding: 0.75rem 1.5rem; border: none; background: #0038A8; color: white; border-radius: 6px 6px 0 0; cursor: pointer; font-weight: 600; font-size: 1em;">🛣️ National Roads</button>
+                        <button id="roads-category-secondary-roads" class="roads-category-btn" data-category="secondary_roads" style="padding: 0.75rem 1.5rem; border: none; background: #6c757d; color: white; border-radius: 6px 6px 0 0; cursor: pointer; font-weight: 600; font-size: 1em;">🛤️ Secondary Roads</button>
+                        <button id="roads-category-bridges" class="roads-category-btn" data-category="bridges" style="padding: 0.75rem 1.5rem; border: none; background: #6c757d; color: white; border-radius: 6px 6px 0 0; cursor: pointer; font-weight: 600; font-size: 1em;">🌉 Bridges</button>
+                        <button id="roads-category-traffic-signs" class="roads-category-btn" data-category="traffic_signs" style="padding: 0.75rem 1.5rem; border: none; background: #6c757d; color: white; border-radius: 6px 6px 0 0; cursor: pointer; font-weight: 600; font-size: 1em;">🚦 Traffic Signs/Lights</button>
+                    </div>
                     
                     <!-- Loading Spinner -->
                     <div id="roads-loading" style="text-align: center; padding: 2rem;">
@@ -7943,43 +7952,282 @@ async function copyChartToClipboard(containerId, buttonId) {
                     <!-- Info Note -->
                     <div style="background: #e7f3ff; border-left: 4px solid #0038A8; padding: 1rem; margin: 1.5rem 0; border-radius: 4px;">
                         <p style="margin: 0; color: #0038A8; font-size: 0.95em;">
-                            <strong>Note:</strong> This analysis includes mixed road infrastructure projects from <strong>2026 budget amendments</strong>, including roads, bridges, traffic signs, and other related infrastructure with chainage notation. Projects are sorted by cost per kilometer (most expensive first).
+                            <strong>Note:</strong> This analysis includes road infrastructure projects from <strong>2026 budget amendments</strong> with chainage notation. Projects are categorized into Roads, Bridges, and Traffic Signs/Lights. Projects are sorted by cost per kilometer (most expensive first).
                         </p>
                     </div>
                     
-                    <!-- Stats Summary -->
-                    <div id="roads-stats" style="display: none; display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin: 2rem 0;">
+                    <!-- Stats Summary - National Roads -->
+                    <div id="national-roads-stats" class="roads-category-panel" data-category="national_roads" style="display: none; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin: 2rem 0;">
                         <div class="stat-card" style="background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); text-align: center;">
-                            <h3 style="color: #0038A8; margin: 0 0 10px 0; font-size: 1.1em;">Total Projects (2026)</h3>
-                            <p id="roads-total-projects" style="font-size: 2em; font-weight: bold; color: #28a745; margin: 0;">-</p>
+                            <h3 style="color: #0038A8; margin: 0 0 10px 0; font-size: 1.1em;">Total Projects</h3>
+                            <p id="national-roads-total-projects" style="font-size: 2em; font-weight: bold; color: #28a745; margin: 0;">-</p>
                         </div>
                         <div class="stat-card" style="background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); text-align: center;">
                             <h3 style="color: #0038A8; margin: 0 0 10px 0; font-size: 1.1em;">Total Distance</h3>
-                            <p id="roads-total-distance" style="font-size: 1.6em; font-weight: bold; color: #667eea; margin: 0;">-</p>
+                            <p id="national-roads-total-distance" style="font-size: 1.6em; font-weight: bold; color: #667eea; margin: 0;">-</p>
                         </div>
                         <div class="stat-card" style="background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); text-align: center;">
                             <h3 style="color: #0038A8; margin: 0 0 10px 0; font-size: 1.1em;">Total Amount</h3>
-                            <p id="roads-total-amount" style="font-size: 1.6em; font-weight: bold; color: #dc3545; margin: 0;">-</p>
+                            <p id="national-roads-total-amount" style="font-size: 1.6em; font-weight: bold; color: #dc3545; margin: 0;">-</p>
                         </div>
                         <div class="stat-card" style="background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); text-align: center;">
                             <h3 style="color: #0038A8; margin: 0 0 10px 0; font-size: 1.1em;">Avg Cost/km</h3>
-                            <p id="roads-avg-cost" style="font-size: 1.6em; font-weight: bold; color: #fd7e14; margin: 0;">-</p>
+                            <p id="national-roads-avg-cost" style="font-size: 1.6em; font-weight: bold; color: #fd7e14; margin: 0;">-</p>
                         </div>
                     </div>
                     
-                    <!-- Dark Red Segments Chart -->
-                    <div id="roads-dark-red-chart" style="display: none; margin-top: 2rem; margin-bottom: 2rem; background: white; padding: 2rem; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
-                        <h4 style="color: #0038A8; margin: 0 0 1rem 0;">Highways with Highest Percentage of Very Dark Red Segments (Top Red Flags)</h4>
-                        <p style="color: #666; font-size: 0.9em; margin: 0 0 1.5rem 0;">Shows highways with the highest percentage of segments in the top cost tier (very dark red). Calculated as segments above 66th percentile cost per km.</p>
-                        <div id="roads-dark-red-chart-container" style="width: 100%; min-height: 400px;">
-                            <svg id="roads-dark-red-svg" style="display: block; width: 100%; height: 100%;"></svg>
+                    <!-- Stats Summary - Secondary Roads -->
+                    <div id="secondary-roads-stats" class="roads-category-panel" data-category="secondary_roads" style="display: none; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin: 2rem 0;">
+                        <div class="stat-card" style="background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); text-align: center;">
+                            <h3 style="color: #0038A8; margin: 0 0 10px 0; font-size: 1.1em;">Total Projects</h3>
+                            <p id="secondary-roads-total-projects" style="font-size: 2em; font-weight: bold; color: #28a745; margin: 0;">-</p>
+                        </div>
+                        <div class="stat-card" style="background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); text-align: center;">
+                            <h3 style="color: #0038A8; margin: 0 0 10px 0; font-size: 1.1em;">Total Distance</h3>
+                            <p id="secondary-roads-total-distance" style="font-size: 1.6em; font-weight: bold; color: #667eea; margin: 0;">-</p>
+                        </div>
+                        <div class="stat-card" style="background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); text-align: center;">
+                            <h3 style="color: #0038A8; margin: 0 0 10px 0; font-size: 1.1em;">Total Amount</h3>
+                            <p id="secondary-roads-total-amount" style="font-size: 1.6em; font-weight: bold; color: #dc3545; margin: 0;">-</p>
+                        </div>
+                        <div class="stat-card" style="background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); text-align: center;">
+                            <h3 style="color: #0038A8; margin: 0 0 10px 0; font-size: 1.1em;">Avg Cost/km</h3>
+                            <p id="secondary-roads-avg-cost" style="font-size: 1.6em; font-weight: bold; color: #fd7e14; margin: 0;">-</p>
                         </div>
                     </div>
                     
-                    <!-- Projects Table -->
-                    <div id="roads-table-container" style="display: none; margin-top: 2rem;">
+                    <!-- Stats Summary - Bridges -->
+                    <div id="bridges-stats" class="roads-category-panel" data-category="bridges" style="display: none; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin: 2rem 0;">
+                        <div class="stat-card" style="background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); text-align: center;">
+                            <h3 style="color: #0038A8; margin: 0 0 10px 0; font-size: 1.1em;">Total Projects</h3>
+                            <p id="bridges-total-projects" style="font-size: 2em; font-weight: bold; color: #28a745; margin: 0;">-</p>
+                        </div>
+                        <div class="stat-card" style="background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); text-align: center;">
+                            <h3 style="color: #0038A8; margin: 0 0 10px 0; font-size: 1.1em;">Total Distance</h3>
+                            <p id="bridges-total-distance" style="font-size: 1.6em; font-weight: bold; color: #667eea; margin: 0;">-</p>
+                        </div>
+                        <div class="stat-card" style="background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); text-align: center;">
+                            <h3 style="color: #0038A8; margin: 0 0 10px 0; font-size: 1.1em;">Total Amount</h3>
+                            <p id="bridges-total-amount" style="font-size: 1.6em; font-weight: bold; color: #dc3545; margin: 0;">-</p>
+                        </div>
+                        <div class="stat-card" style="background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); text-align: center;">
+                            <h3 style="color: #0038A8; margin: 0 0 10px 0; font-size: 1.1em;">Avg Cost/km</h3>
+                            <p id="bridges-avg-cost" style="font-size: 1.6em; font-weight: bold; color: #fd7e14; margin: 0;">-</p>
+                        </div>
+                    </div>
+                    
+                    <!-- Stats Summary - Traffic Signs -->
+                    <div id="traffic-signs-stats" class="roads-category-panel" data-category="traffic_signs" style="display: none; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin: 2rem 0;">
+                        <div class="stat-card" style="background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); text-align: center;">
+                            <h3 style="color: #0038A8; margin: 0 0 10px 0; font-size: 1.1em;">Total Projects</h3>
+                            <p id="traffic-signs-total-projects" style="font-size: 2em; font-weight: bold; color: #28a745; margin: 0;">-</p>
+                        </div>
+                        <div class="stat-card" style="background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); text-align: center;">
+                            <h3 style="color: #0038A8; margin: 0 0 10px 0; font-size: 1.1em;">Total Distance</h3>
+                            <p id="traffic-signs-total-distance" style="font-size: 1.6em; font-weight: bold; color: #667eea; margin: 0;">-</p>
+                        </div>
+                        <div class="stat-card" style="background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); text-align: center;">
+                            <h3 style="color: #0038A8; margin: 0 0 10px 0; font-size: 1.1em;">Total Amount</h3>
+                            <p id="traffic-signs-total-amount" style="font-size: 1.6em; font-weight: bold; color: #dc3545; margin: 0;">-</p>
+                        </div>
+                        <div class="stat-card" style="background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); text-align: center;">
+                            <h3 style="color: #0038A8; margin: 0 0 10px 0; font-size: 1.1em;">Avg Cost/km</h3>
+                            <p id="traffic-signs-avg-cost" style="font-size: 1.6em; font-weight: bold; color: #fd7e14; margin: 0;">-</p>
+                        </div>
+                    </div>
+                    
+                    <!-- Dark Red Segments Chart - National Roads -->
+                    <div id="national-roads-dark-red-chart" class="roads-category-panel" data-category="national_roads" style="display: none; margin-top: 2rem; margin-bottom: 2rem; background: white; padding: 2rem; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
+                        <h4 style="color: #0038A8; margin: 0 0 0.5rem 0;">National Roads: Highways with Highest Percentage of Very Dark Red Segments (Top Red Flags)</h4>
+                        <p style="color: #666; font-size: 0.9em; margin: 0 0 1rem 0;">Shows national highways with the highest percentage of segments in the top cost tier (very dark red). Calculated as segments above 66th percentile cost per km for national roads only.</p>
+                        
+                        <!-- Dark Red Table -->
+                        <div id="national-roads-dark-red-table" style="display: none; margin-top: 0;">
+                            <div style="margin-bottom: 1rem;">
+                                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+                                    <label for="national-roads-dark-red-items-per-page" style="font-weight: 600; color: #333;">Items per page:</label>
+                                    <select id="national-roads-dark-red-items-per-page" onchange="nationalRoadsDarkRedChangeItemsPerPage()" style="padding: 0.5rem; border: 1px solid #ddd; border-radius: 4px;">
+                                        <option value="10">10</option>
+                                        <option value="25" selected>25</option>
+                                        <option value="50">50</option>
+                                        <option value="100">100</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div style="overflow-x: auto;">
+                                <table style="width: 100%; border-collapse: collapse; background: white; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
+                                    <thead>
+                                        <tr style="background: linear-gradient(135deg, #0038A8 0%, #003087 100%); color: white;">
+                                            <th style="padding: 1rem; text-align: left; font-weight: 600;">Highway</th>
+                                            <th style="padding: 1rem; text-align: right; font-weight: 600;">Very Dark Red Segments</th>
+                                            <th style="padding: 1rem; text-align: right; font-weight: 600;">Total Segments</th>
+                                            <th style="padding: 1rem; text-align: right; font-weight: 600;">Percentage</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="national-roads-dark-red-table-body">
+                                    </tbody>
+                                </table>
+                            </div>
+                            <div style="margin-top: 1rem; display: flex; justify-content: space-between; align-items: center; padding: 1rem; background: #f8f9fa; border-radius: 6px;">
+                                <div style="color: #666; font-size: 0.9em;">
+                                    Showing <span id="national-roads-dark-red-page-start">0</span> to <span id="national-roads-dark-red-page-end">0</span> of <span id="national-roads-dark-red-total-items">0</span> items
+                                </div>
+                                <div style="display: flex; gap: 0.5rem; align-items: center;">
+                                    <button id="national-roads-dark-red-prev-page" onclick="nationalRoadsDarkRedChangePage(-1)" style="padding: 0.5rem 1rem; border: 1px solid #ddd; background: white; color: #333; border-radius: 4px; cursor: pointer;" disabled>Previous</button>
+                                    <span style="color: #666; font-size: 0.9em;">
+                                        Page <span id="national-roads-dark-red-page-number">1</span> of <span id="national-roads-dark-red-total-pages">1</span>
+                                    </span>
+                                    <button id="national-roads-dark-red-next-page" onclick="nationalRoadsDarkRedChangePage(1)" style="padding: 0.5rem 1rem; border: 1px solid #ddd; background: white; color: #333; border-radius: 4px; cursor: pointer;" disabled>Next</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Dark Red Segments Chart - Secondary Roads -->
+                    <div id="secondary-roads-dark-red-chart" class="roads-category-panel" data-category="secondary_roads" style="display: none; margin-top: 2rem; margin-bottom: 2rem; background: white; padding: 2rem; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
+                        <h4 style="color: #0038A8; margin: 0 0 0.5rem 0;">Secondary Roads: Highways with Highest Percentage of Very Dark Red Segments (Top Red Flags)</h4>
+                        <p style="color: #666; font-size: 0.9em; margin: 0 0 1rem 0;">Shows secondary roads with the highest percentage of segments in the top cost tier (very dark red). Calculated as segments above 66th percentile cost per km for secondary roads only.</p>
+                        
+                        <!-- Dark Red Table -->
+                        <div id="secondary-roads-dark-red-table" style="display: none; margin-top: 0;">
+                            <div style="margin-bottom: 1rem;">
+                                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+                                    <label for="secondary-roads-dark-red-items-per-page" style="font-weight: 600; color: #333;">Items per page:</label>
+                                    <select id="secondary-roads-dark-red-items-per-page" onchange="secondaryRoadsDarkRedChangeItemsPerPage()" style="padding: 0.5rem; border: 1px solid #ddd; border-radius: 4px;">
+                                        <option value="10">10</option>
+                                        <option value="25" selected>25</option>
+                                        <option value="50">50</option>
+                                        <option value="100">100</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div style="overflow-x: auto;">
+                                <table style="width: 100%; border-collapse: collapse; background: white; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
+                                    <thead>
+                                        <tr style="background: linear-gradient(135deg, #0038A8 0%, #003087 100%); color: white;">
+                                            <th style="padding: 1rem; text-align: left; font-weight: 600;">Highway</th>
+                                            <th style="padding: 1rem; text-align: right; font-weight: 600;">Very Dark Red Segments</th>
+                                            <th style="padding: 1rem; text-align: right; font-weight: 600;">Total Segments</th>
+                                            <th style="padding: 1rem; text-align: right; font-weight: 600;">Percentage</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="secondary-roads-dark-red-table-body">
+                                    </tbody>
+                                </table>
+                            </div>
+                            <div style="margin-top: 1rem; display: flex; justify-content: space-between; align-items: center; padding: 1rem; background: #f8f9fa; border-radius: 6px;">
+                                <div style="color: #666; font-size: 0.9em;">
+                                    Showing <span id="secondary-roads-dark-red-page-start">0</span> to <span id="secondary-roads-dark-red-page-end">0</span> of <span id="secondary-roads-dark-red-total-items">0</span> items
+                                </div>
+                                <div style="display: flex; gap: 0.5rem; align-items: center;">
+                                    <button id="secondary-roads-dark-red-prev-page" onclick="secondaryRoadsDarkRedChangePage(-1)" style="padding: 0.5rem 1rem; border: 1px solid #ddd; background: white; color: #333; border-radius: 4px; cursor: pointer;" disabled>Previous</button>
+                                    <span style="color: #666; font-size: 0.9em;">
+                                        Page <span id="secondary-roads-dark-red-page-number">1</span> of <span id="secondary-roads-dark-red-total-pages">1</span>
+                                    </span>
+                                    <button id="secondary-roads-dark-red-next-page" onclick="secondaryRoadsDarkRedChangePage(1)" style="padding: 0.5rem 1rem; border: 1px solid #ddd; background: white; color: #333; border-radius: 4px; cursor: pointer;" disabled>Next</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Dark Red Segments Chart (legacy - for combined roads, kept for backward compatibility) -->
+                    <div id="roads-dark-red-chart" class="roads-category-panel" data-category="roads" style="display: none; margin-top: 2rem; margin-bottom: 2rem; background: white; padding: 2rem; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
+                        <h4 style="color: #0038A8; margin: 0 0 0.5rem 0;">Highways with Highest Percentage of Very Dark Red Segments (Top Red Flags)</h4>
+                        <p style="color: #666; font-size: 0.9em; margin: 0 0 1rem 0;">Shows highways with the highest percentage of segments in the top cost tier (very dark red). Calculated as segments above 66th percentile cost per km.</p>
+                        
+                        <!-- Dark Red Table -->
+                        <div id="roads-dark-red-table" style="display: none; margin-top: 0;">
+                            <div style="margin-bottom: 1rem;">
+                                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+                                    <label for="roads-dark-red-items-per-page" style="font-weight: 600; color: #333;">Items per page:</label>
+                                    <select id="roads-dark-red-items-per-page" onchange="roadsDarkRedChangeItemsPerPage()" style="padding: 0.5rem; border: 1px solid #ddd; border-radius: 4px;">
+                                        <option value="10">10</option>
+                                        <option value="25" selected>25</option>
+                                        <option value="50">50</option>
+                                        <option value="100">100</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div style="overflow-x: auto;">
+                                <table style="width: 100%; border-collapse: collapse; background: white; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
+                                    <thead>
+                                        <tr style="background: linear-gradient(135deg, #0038A8 0%, #003087 100%); color: white;">
+                                            <th style="padding: 1rem; text-align: left; font-weight: 600;">Highway</th>
+                                            <th style="padding: 1rem; text-align: right; font-weight: 600;">Very Dark Red Segments</th>
+                                            <th style="padding: 1rem; text-align: right; font-weight: 600;">Total Segments</th>
+                                            <th style="padding: 1rem; text-align: right; font-weight: 600;">Percentage</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="roads-dark-red-table-body">
+                                    </tbody>
+                                </table>
+                            </div>
+                            <!-- Pagination Controls -->
+                            <div style="margin-top: 1rem; display: flex; justify-content: space-between; align-items: center; padding: 1rem; background: #f8f9fa; border-radius: 6px;">
+                                <div style="color: #666; font-size: 0.9em;">
+                                    Showing <span id="roads-dark-red-page-start">0</span> to <span id="roads-dark-red-page-end">0</span> of <span id="roads-dark-red-total-items">0</span> items
+                                </div>
+                                <div style="display: flex; gap: 0.5rem; align-items: center;">
+                                    <button id="roads-dark-red-prev-page" onclick="roadsDarkRedChangePage(-1)" style="padding: 0.5rem 1rem; border: 1px solid #ddd; background: white; color: #333; border-radius: 4px; cursor: pointer;" disabled>Previous</button>
+                                    <span style="color: #666; font-size: 0.9em;">
+                                        Page <span id="roads-dark-red-page-number">1</span> of <span id="roads-dark-red-total-pages">1</span>
+                                    </span>
+                                    <button id="roads-dark-red-next-page" onclick="roadsDarkRedChangePage(1)" style="padding: 0.5rem 1rem; border: 1px solid #ddd; background: white; color: #333; border-radius: 4px; cursor: pointer;" disabled>Next</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Projects Table - National Roads -->
+                    <div id="national-roads-table-container" class="roads-category-panel" data-category="national_roads" style="display: none; margin-top: 2rem;">
                         <div style="margin-bottom: 1rem;">
-                            <input type="text" id="roads-search" placeholder="Search projects..." style="width: 100%; padding: 0.75rem; border: 2px solid #ddd; border-radius: 6px; font-size: 14px;">
+                            <input type="text" id="national-roads-search" placeholder="Search national road projects..." style="width: 100%; padding: 0.75rem; border: 2px solid #ddd; border-radius: 6px; font-size: 14px;">
+                        </div>
+                        <div style="overflow-x: auto;">
+                            <table id="national-roads-table" style="width: 100%; border-collapse: collapse; background: white; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
+                                <thead>
+                                    <tr style="background: linear-gradient(135deg, #0038A8 0%, #003087 100%); color: white;">
+                                        <th style="padding: 1rem; text-align: left; font-weight: 600;">Project Name</th>
+                                        <th style="padding: 1rem; text-align: right; font-weight: 600;">Chainage</th>
+                                        <th style="padding: 1rem; text-align: right; font-weight: 600;">Distance Breakdown</th>
+                                        <th style="padding: 1rem; text-align: right; font-weight: 600;">Distance (km)</th>
+                                        <th style="padding: 1rem; text-align: right; font-weight: 600;">Amount</th>
+                                        <th style="padding: 1rem; text-align: right; font-weight: 600;">Cost/km</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="national-roads-table-body">
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    
+                    <!-- Projects Table - Secondary Roads -->
+                    <div id="secondary-roads-table-container" class="roads-category-panel" data-category="secondary_roads" style="display: none; margin-top: 2rem;">
+                        <div style="margin-bottom: 1rem;">
+                            <input type="text" id="secondary-roads-search" placeholder="Search secondary road projects..." style="width: 100%; padding: 0.75rem; border: 2px solid #ddd; border-radius: 6px; font-size: 14px;">
+                        </div>
+                        <div style="overflow-x: auto;">
+                            <table id="secondary-roads-table" style="width: 100%; border-collapse: collapse; background: white; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
+                                <thead>
+                                    <tr style="background: linear-gradient(135deg, #0038A8 0%, #003087 100%); color: white;">
+                                        <th style="padding: 1rem; text-align: left; font-weight: 600;">Project Name</th>
+                                        <th style="padding: 1rem; text-align: right; font-weight: 600;">Chainage</th>
+                                        <th style="padding: 1rem; text-align: right; font-weight: 600;">Distance Breakdown</th>
+                                        <th style="padding: 1rem; text-align: right; font-weight: 600;">Distance (km)</th>
+                                        <th style="padding: 1rem; text-align: right; font-weight: 600;">Amount</th>
+                                        <th style="padding: 1rem; text-align: right; font-weight: 600;">Cost/km</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="secondary-roads-table-body">
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    
+                    <!-- Projects Table - Roads (combined, kept for backward compatibility) -->
+                    <div id="roads-table-container" class="roads-category-panel" data-category="roads" style="display: none; margin-top: 2rem;">
+                        <div style="margin-bottom: 1rem;">
+                            <input type="text" id="roads-search" placeholder="Search road projects..." style="width: 100%; padding: 0.75rem; border: 2px solid #ddd; border-radius: 6px; font-size: 14px;">
                         </div>
                         <div style="overflow-x: auto;">
                             <table id="roads-table" style="width: 100%; border-collapse: collapse; background: white; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
@@ -7996,6 +8244,282 @@ async function copyChartToClipboard(containerId, buttonId) {
                                 <tbody id="roads-table-body">
                                 </tbody>
                             </table>
+                        </div>
+                    </div>
+                    
+                    <!-- Projects Table - Bridges -->
+                    <div id="bridges-table-container" class="roads-category-panel" data-category="bridges" style="display: none; margin-top: 2rem;">
+                        <div style="margin-bottom: 1rem;">
+                            <input type="text" id="bridges-search" placeholder="Search bridge projects..." style="width: 100%; padding: 0.75rem; border: 2px solid #ddd; border-radius: 6px; font-size: 14px;">
+                        </div>
+                        <div style="overflow-x: auto;">
+                            <table id="bridges-table" style="width: 100%; border-collapse: collapse; background: white; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
+                                <thead>
+                                    <tr style="background: linear-gradient(135deg, #0038A8 0%, #003087 100%); color: white;">
+                                        <th style="padding: 1rem; text-align: left; font-weight: 600;">Project Name</th>
+                                        <th style="padding: 1rem; text-align: right; font-weight: 600;">Chainage</th>
+                                        <th style="padding: 1rem; text-align: right; font-weight: 600;">Distance Breakdown</th>
+                                        <th style="padding: 1rem; text-align: right; font-weight: 600;">Distance (km)</th>
+                                        <th style="padding: 1rem; text-align: right; font-weight: 600;">Amount</th>
+                                        <th style="padding: 1rem; text-align: right; font-weight: 600;">Cost/km</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="bridges-table-body">
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    
+                    <!-- Projects Table - Traffic Signs -->
+                    <div id="traffic-signs-table-container" class="roads-category-panel" data-category="traffic_signs" style="display: none; margin-top: 2rem;">
+                        <div style="margin-bottom: 1rem;">
+                            <input type="text" id="traffic-signs-search" placeholder="Search traffic signs/lights projects..." style="width: 100%; padding: 0.75rem; border: 2px solid #ddd; border-radius: 6px; font-size: 14px;">
+                        </div>
+                        <div style="overflow-x: auto;">
+                            <table id="traffic-signs-table" style="width: 100%; border-collapse: collapse; background: white; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
+                                <thead>
+                                    <tr style="background: linear-gradient(135deg, #0038A8 0%, #003087 100%); color: white;">
+                                        <th style="padding: 1rem; text-align: left; font-weight: 600;">Project Name</th>
+                                        <th style="padding: 1rem; text-align: right; font-weight: 600;">Chainage</th>
+                                        <th style="padding: 1rem; text-align: right; font-weight: 600;">Distance Breakdown</th>
+                                        <th style="padding: 1rem; text-align: right; font-weight: 600;">Distance (km)</th>
+                                        <th style="padding: 1rem; text-align: right; font-weight: 600;">Amount</th>
+                                        <th style="padding: 1rem; text-align: right; font-weight: 600;">Cost/km</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="traffic-signs-table-body">
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Road Statistics Tab -->
+                <div id="tab-stats" class="budget-tab-panel">
+                    <h3 class="budget-section-title">📊 Road Statistics</h3>
+                    <p class="budget-section-desc">Statistical analysis of cost per kilometer for road infrastructure projects, including distribution charts and key metrics.</p>
+                    
+                    <!-- Loading Spinner -->
+                    <div id="stats-loading" style="text-align: center; padding: 2rem;">
+                        <div class="spinner" style="width: 40px; height: 40px; border: 4px solid #f3f3f3; border-top: 4px solid #0038A8; border-radius: 50%; animation: spin 1s linear infinite; margin: 0 auto;"></div>
+                        <p style="color: #666; margin-top: 1rem;">Loading road statistics...</p>
+                    </div>
+                    
+                    <!-- Error Message -->
+                    <div id="stats-error" style="display: none; text-align: center; padding: 2rem; color: #dc3545; background: #f8d7da; border-radius: 8px; margin: 2rem 0;"></div>
+                    
+                    <!-- Year Selector -->
+                    <div style="display: flex; gap: 0.5rem; margin: 2rem 0; flex-wrap: wrap; align-items: center;">
+                        <label style="font-weight: 600; color: #333; margin-right: 0.5rem;">Year:</label>
+                        <select id="stats-year-selector" style="padding: 0.75rem 1rem; border: 2px solid #0038A8; border-radius: 6px; font-size: 1em; font-weight: 600; background: white; color: #0038A8; cursor: pointer;">
+                            <option value="2026">2026</option>
+                            <option value="2025">2025</option>
+                            <option value="2024">2024</option>
+                            <option value="2023">2023</option>
+                            <option value="2022">2022</option>
+                            <option value="2021">2021</option>
+                            <option value="2020">2020</option>
+                            <option value="total">Total (All Years)</option>
+                        </select>
+                    </div>
+                    
+                    <!-- Category Tabs -->
+                    <div style="display: flex; gap: 1rem; margin: 2rem 0; border-bottom: 2px solid #e0e0e0; flex-wrap: wrap;">
+                        <button id="stats-category-national-roads" class="stats-category-btn active" data-category="national_roads" style="padding: 0.75rem 1.5rem; border: none; background: #0038A8; color: white; border-radius: 6px 6px 0 0; cursor: pointer; font-weight: 600; font-size: 1em;">🛣️ National Roads</button>
+                        <button id="stats-category-secondary-roads" class="stats-category-btn" data-category="secondary_roads" style="padding: 0.75rem 1.5rem; border: none; background: #6c757d; color: white; border-radius: 6px 6px 0 0; cursor: pointer; font-weight: 600; font-size: 1em;">🛤️ Secondary Roads</button>
+                        <button id="stats-category-bridges" class="stats-category-btn" data-category="bridges" style="padding: 0.75rem 1.5rem; border: none; background: #6c757d; color: white; border-radius: 6px 6px 0 0; cursor: pointer; font-weight: 600; font-size: 1em;">🌉 Bridges</button>
+                        <button id="stats-category-traffic-signs" class="stats-category-btn" data-category="traffic_signs" style="padding: 0.75rem 1.5rem; border: none; background: #6c757d; color: white; border-radius: 6px 6px 0 0; cursor: pointer; font-weight: 600; font-size: 1em;">🚦 Traffic Signs/Lights</button>
+                    </div>
+                    
+                    <!-- Statistics Bar Chart (similar to trends tab) -->
+                    <div id="stats-bar-chart-container" style="display: none; margin-top: 2rem; background: white; padding: 2rem; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
+                        <h4 style="color: #0038A8; margin: 0 0 1rem 0;">Cost per Kilometer Statistics by Category (2020-2026)</h4>
+                        <p style="color: #666; font-size: 0.9em; margin: 0 0 1.5rem 0;">Horizontal bar chart showing Min, Max, Median, and Standard Deviation cost/km statistics for National Roads, Secondary Roads, Bridges, and Traffic Signs/Lights across years.</p>
+                        <div style="position: relative; height: 600px; overflow: hidden;">
+                            <canvas id="statsBarChart" height="600"></canvas>
+                        </div>
+                    </div>
+                    
+                    <!-- Trend Charts -->
+                    <div id="stats-trend-container" style="display: none; margin-top: 2rem; background: white; padding: 2rem; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
+                        <h4 style="color: #0038A8; margin: 0 0 1rem 0;">Year-on-Year Statistics Trends (2020-2026)</h4>
+                        <p style="color: #666; font-size: 0.9em; margin: 0 0 1.5rem 0;">Trends showing how each statistic (Min, Max, Mean, Median, Mode, Std Dev) changes over time for Roads, Bridges, and Traffic Signs/Lights.</p>
+                        <div id="stats-trend-chart" style="width: 100%;">
+                            <!-- Charts will be dynamically created here -->
+                        </div>
+                    </div>
+                    
+                    <!-- Statistics Cards -->
+                    <div id="stats-cards-container" style="display: none;">
+                        <!-- National Roads Stats -->
+                        <div id="stats-cards-national-roads" class="stats-category-panel" data-category="national_roads" style="display: none;">
+                            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin: 2rem 0;">
+                                <div class="stat-card" style="background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); text-align: center;">
+                                    <h3 style="color: #0038A8; margin: 0 0 10px 0; font-size: 1.1em;">Min Cost/km</h3>
+                                    <p id="stats-national-roads-min" style="font-size: 1.6em; font-weight: bold; color: #28a745; margin: 0;">-</p>
+                                </div>
+                                <div class="stat-card" style="background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); text-align: center;">
+                                    <h3 style="color: #0038A8; margin: 0 0 10px 0; font-size: 1.1em;">Max Cost/km</h3>
+                                    <p id="stats-national-roads-max" style="font-size: 1.6em; font-weight: bold; color: #dc3545; margin: 0;">-</p>
+                                </div>
+                                <div class="stat-card" style="background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); text-align: center;">
+                                    <h3 style="color: #0038A8; margin: 0 0 10px 0; font-size: 1.1em;">Mean (Average)</h3>
+                                    <p id="stats-national-roads-mean" style="font-size: 1.6em; font-weight: bold; color: #667eea; margin: 0;">-</p>
+                                </div>
+                                <div class="stat-card" style="background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); text-align: center;">
+                                    <h3 style="color: #0038A8; margin: 0 0 10px 0; font-size: 1.1em;">Median</h3>
+                                    <p id="stats-national-roads-median" style="font-size: 1.6em; font-weight: bold; color: #fd7e14; margin: 0;">-</p>
+                                </div>
+                                <div class="stat-card" style="background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); text-align: center;">
+                                    <h3 style="color: #0038A8; margin: 0 0 10px 0; font-size: 1.1em;">Mode</h3>
+                                    <p id="stats-national-roads-mode" style="font-size: 1.6em; font-weight: bold; color: #6c757d; margin: 0;">-</p>
+                                </div>
+                                <div class="stat-card" style="background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); text-align: center;">
+                                    <h3 style="color: #0038A8; margin: 0 0 10px 0; font-size: 1.1em;">Std Deviation</h3>
+                                    <p id="stats-national-roads-stddev" style="font-size: 1.6em; font-weight: bold; color: #17a2b8; margin: 0;">-</p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Secondary Roads Stats -->
+                        <div id="stats-cards-secondary-roads" class="stats-category-panel" data-category="secondary_roads" style="display: none;">
+                            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin: 2rem 0;">
+                                <div class="stat-card" style="background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); text-align: center;">
+                                    <h3 style="color: #0038A8; margin: 0 0 10px 0; font-size: 1.1em;">Min Cost/km</h3>
+                                    <p id="stats-secondary-roads-min" style="font-size: 1.6em; font-weight: bold; color: #28a745; margin: 0;">-</p>
+                                </div>
+                                <div class="stat-card" style="background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); text-align: center;">
+                                    <h3 style="color: #0038A8; margin: 0 0 10px 0; font-size: 1.1em;">Max Cost/km</h3>
+                                    <p id="stats-secondary-roads-max" style="font-size: 1.6em; font-weight: bold; color: #dc3545; margin: 0;">-</p>
+                                </div>
+                                <div class="stat-card" style="background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); text-align: center;">
+                                    <h3 style="color: #0038A8; margin: 0 0 10px 0; font-size: 1.1em;">Mean (Average)</h3>
+                                    <p id="stats-secondary-roads-mean" style="font-size: 1.6em; font-weight: bold; color: #667eea; margin: 0;">-</p>
+                                </div>
+                                <div class="stat-card" style="background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); text-align: center;">
+                                    <h3 style="color: #0038A8; margin: 0 0 10px 0; font-size: 1.1em;">Median</h3>
+                                    <p id="stats-secondary-roads-median" style="font-size: 1.6em; font-weight: bold; color: #fd7e14; margin: 0;">-</p>
+                                </div>
+                                <div class="stat-card" style="background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); text-align: center;">
+                                    <h3 style="color: #0038A8; margin: 0 0 10px 0; font-size: 1.1em;">Mode</h3>
+                                    <p id="stats-secondary-roads-mode" style="font-size: 1.6em; font-weight: bold; color: #6c757d; margin: 0;">-</p>
+                                </div>
+                                <div class="stat-card" style="background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); text-align: center;">
+                                    <h3 style="color: #0038A8; margin: 0 0 10px 0; font-size: 1.1em;">Std Deviation</h3>
+                                    <p id="stats-secondary-roads-stddev" style="font-size: 1.6em; font-weight: bold; color: #17a2b8; margin: 0;">-</p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Roads Stats (combined, kept for backward compatibility) -->
+                        <div id="stats-cards-roads" class="stats-category-panel" data-category="roads" style="display: none;">
+                            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin: 2rem 0;">
+                                <div class="stat-card" style="background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); text-align: center;">
+                                    <h3 style="color: #0038A8; margin: 0 0 10px 0; font-size: 1.1em;">Min Cost/km</h3>
+                                    <p id="stats-roads-min" style="font-size: 1.6em; font-weight: bold; color: #28a745; margin: 0;">-</p>
+                                </div>
+                                <div class="stat-card" style="background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); text-align: center;">
+                                    <h3 style="color: #0038A8; margin: 0 0 10px 0; font-size: 1.1em;">Max Cost/km</h3>
+                                    <p id="stats-roads-max" style="font-size: 1.6em; font-weight: bold; color: #dc3545; margin: 0;">-</p>
+                                </div>
+                                <div class="stat-card" style="background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); text-align: center;">
+                                    <h3 style="color: #0038A8; margin: 0 0 10px 0; font-size: 1.1em;">Mean (Average)</h3>
+                                    <p id="stats-roads-mean" style="font-size: 1.6em; font-weight: bold; color: #667eea; margin: 0;">-</p>
+                                </div>
+                                <div class="stat-card" style="background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); text-align: center;">
+                                    <h3 style="color: #0038A8; margin: 0 0 10px 0; font-size: 1.1em;">Median</h3>
+                                    <p id="stats-roads-median" style="font-size: 1.6em; font-weight: bold; color: #fd7e14; margin: 0;">-</p>
+                                </div>
+                                <div class="stat-card" style="background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); text-align: center;">
+                                    <h3 style="color: #0038A8; margin: 0 0 10px 0; font-size: 1.1em;">Mode</h3>
+                                    <p id="stats-roads-mode" style="font-size: 1.6em; font-weight: bold; color: #6c757d; margin: 0;">-</p>
+                                </div>
+                                <div class="stat-card" style="background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); text-align: center;">
+                                    <h3 style="color: #0038A8; margin: 0 0 10px 0; font-size: 1.1em;">Std Deviation</h3>
+                                    <p id="stats-roads-stddev" style="font-size: 1.6em; font-weight: bold; color: #17a2b8; margin: 0;">-</p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Bridges Stats -->
+                        <div id="stats-cards-bridges" class="stats-category-panel" data-category="bridges" style="display: none;">
+                            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin: 2rem 0;">
+                                <div class="stat-card" style="background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); text-align: center;">
+                                    <h3 style="color: #0038A8; margin: 0 0 10px 0; font-size: 1.1em;">Min Cost/km</h3>
+                                    <p id="stats-bridges-min" style="font-size: 1.6em; font-weight: bold; color: #28a745; margin: 0;">-</p>
+                                </div>
+                                <div class="stat-card" style="background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); text-align: center;">
+                                    <h3 style="color: #0038A8; margin: 0 0 10px 0; font-size: 1.1em;">Max Cost/km</h3>
+                                    <p id="stats-bridges-max" style="font-size: 1.6em; font-weight: bold; color: #dc3545; margin: 0;">-</p>
+                                </div>
+                                <div class="stat-card" style="background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); text-align: center;">
+                                    <h3 style="color: #0038A8; margin: 0 0 10px 0; font-size: 1.1em;">Mean (Average)</h3>
+                                    <p id="stats-bridges-mean" style="font-size: 1.6em; font-weight: bold; color: #667eea; margin: 0;">-</p>
+                                </div>
+                                <div class="stat-card" style="background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); text-align: center;">
+                                    <h3 style="color: #0038A8; margin: 0 0 10px 0; font-size: 1.1em;">Median</h3>
+                                    <p id="stats-bridges-median" style="font-size: 1.6em; font-weight: bold; color: #fd7e14; margin: 0;">-</p>
+                                </div>
+                                <div class="stat-card" style="background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); text-align: center;">
+                                    <h3 style="color: #0038A8; margin: 0 0 10px 0; font-size: 1.1em;">Mode</h3>
+                                    <p id="stats-bridges-mode" style="font-size: 1.6em; font-weight: bold; color: #6c757d; margin: 0;">-</p>
+                                </div>
+                                <div class="stat-card" style="background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); text-align: center;">
+                                    <h3 style="color: #0038A8; margin: 0 0 10px 0; font-size: 1.1em;">Std Deviation</h3>
+                                    <p id="stats-bridges-stddev" style="font-size: 1.6em; font-weight: bold; color: #17a2b8; margin: 0;">-</p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Traffic Signs Stats -->
+                        <div id="stats-cards-traffic-signs" class="stats-category-panel" data-category="traffic_signs" style="display: none;">
+                            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin: 2rem 0;">
+                                <div class="stat-card" style="background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); text-align: center;">
+                                    <h3 style="color: #0038A8; margin: 0 0 10px 0; font-size: 1.1em;">Min Cost/km</h3>
+                                    <p id="stats-traffic-signs-min" style="font-size: 1.6em; font-weight: bold; color: #28a745; margin: 0;">-</p>
+                                </div>
+                                <div class="stat-card" style="background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); text-align: center;">
+                                    <h3 style="color: #0038A8; margin: 0 0 10px 0; font-size: 1.1em;">Max Cost/km</h3>
+                                    <p id="stats-traffic-signs-max" style="font-size: 1.6em; font-weight: bold; color: #dc3545; margin: 0;">-</p>
+                                </div>
+                                <div class="stat-card" style="background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); text-align: center;">
+                                    <h3 style="color: #0038A8; margin: 0 0 10px 0; font-size: 1.1em;">Mean (Average)</h3>
+                                    <p id="stats-traffic-signs-mean" style="font-size: 1.6em; font-weight: bold; color: #667eea; margin: 0;">-</p>
+                                </div>
+                                <div class="stat-card" style="background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); text-align: center;">
+                                    <h3 style="color: #0038A8; margin: 0 0 10px 0; font-size: 1.1em;">Median</h3>
+                                    <p id="stats-traffic-signs-median" style="font-size: 1.6em; font-weight: bold; color: #fd7e14; margin: 0;">-</p>
+                                </div>
+                                <div class="stat-card" style="background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); text-align: center;">
+                                    <h3 style="color: #0038A8; margin: 0 0 10px 0; font-size: 1.1em;">Mode</h3>
+                                    <p id="stats-traffic-signs-mode" style="font-size: 1.6em; font-weight: bold; color: #6c757d; margin: 0;">-</p>
+                                </div>
+                                <div class="stat-card" style="background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); text-align: center;">
+                                    <h3 style="color: #0038A8; margin: 0 0 10px 0; font-size: 1.1em;">Std Deviation</h3>
+                                    <p id="stats-traffic-signs-stddev" style="font-size: 1.6em; font-weight: bold; color: #17a2b8; margin: 0;">-</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Distribution Charts -->
+                    <div id="stats-chart-container" style="display: none; margin-top: 2rem; background: white; padding: 2rem; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
+                        <h4 style="color: #0038A8; margin: 0 0 1rem 0;">Cost per Kilometer Distribution</h4>
+                        <p style="color: #666; font-size: 0.9em; margin: 0 0 1.5rem 0;">Histogram showing the distribution of cost per kilometer values across all projects in this category.</p>
+                        <div id="stats-chart-national-roads" class="stats-category-panel" data-category="national_roads" style="display: none; width: 100%; min-height: 400px;">
+                            <canvas id="stats-chart-national-roads-canvas"></canvas>
+                        </div>
+                        <div id="stats-chart-secondary-roads" class="stats-category-panel" data-category="secondary_roads" style="display: none; width: 100%; min-height: 400px;">
+                            <canvas id="stats-chart-secondary-roads-canvas"></canvas>
+                        </div>
+                        <div id="stats-chart-roads" class="stats-category-panel" data-category="roads" style="display: none; width: 100%; min-height: 400px;">
+                            <canvas id="stats-chart-roads-canvas"></canvas>
+                        </div>
+                        <div id="stats-chart-bridges" class="stats-category-panel" data-category="bridges" style="display: none; width: 100%; min-height: 400px;">
+                            <canvas id="stats-chart-bridges-canvas"></canvas>
+                        </div>
+                        <div id="stats-chart-traffic-signs" class="stats-category-panel" data-category="traffic_signs" style="display: none; width: 100%; min-height: 400px;">
+                            <canvas id="stats-chart-traffic-signs-canvas"></canvas>
                         </div>
                     </div>
                 </div>
@@ -8230,11 +8754,15 @@ async function copyChartToClipboard(containerId, buttonId) {
     
     <script>
     // Load road projects data
+    let roadsDataCache = null;
+    let currentRoadsCategory = 'roads';
+    let roadsDarkRedData = [];
+    let roadsDarkRedCurrentPage = 1;
+    let roadsDarkRedItemsPerPage = 25;
+    
     async function loadRoadsData() {
         const loadingEl = document.getElementById('roads-loading');
         const errorEl = document.getElementById('roads-error');
-        const statsEl = document.getElementById('roads-stats');
-        const tableEl = document.getElementById('roads-table-container');
         
         try {
             const response = await fetch('/api/budget/roads-cost-analysis');
@@ -8247,29 +8775,34 @@ async function copyChartToClipboard(containerId, buttonId) {
                 throw new Error(data.error || 'Failed to load data');
             }
             
-            const projects = data.projects || [];
+            // Cache the data
+            roadsDataCache = {
+                roads: data.roads?.projects || [],
+                national_roads: data.national_roads?.projects || [],
+                secondary_roads: data.secondary_roads?.projects || [],
+                bridges: data.bridges?.projects || [],
+                traffic_signs: data.traffic_signs?.projects || []
+            };
             
-            // Update stats
-            const totalProjects = projects.length;
-            const totalDistance = projects.reduce((sum, p) => sum + (p.distance_km || 0), 0);
-            const totalAmount = projects.reduce((sum, p) => sum + (p.amount || 0), 0);
-            const avgCost = totalDistance > 0 ? totalAmount / totalDistance : 0;
+            // Update stats for each category
+            updateRoadsStats('national_roads', roadsDataCache.national_roads);
+            updateRoadsStats('secondary_roads', roadsDataCache.secondary_roads);
+            updateRoadsStats('bridges', roadsDataCache.bridges);
+            updateRoadsStats('traffic_signs', roadsDataCache.traffic_signs);
             
-            document.getElementById('roads-total-projects').textContent = totalProjects.toLocaleString();
-            document.getElementById('roads-total-distance').textContent = totalDistance.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2}) + ' km';
-            document.getElementById('roads-total-amount').textContent = '₱' + totalAmount.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
-            document.getElementById('roads-avg-cost').textContent = '₱' + avgCost.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2}) + '/km';
+            // Display tables
+            displayRoadsTable('national_roads', roadsDataCache.national_roads);
+            displayRoadsTable('secondary_roads', roadsDataCache.secondary_roads);
+            displayRoadsTable('bridges', roadsDataCache.bridges);
+            displayRoadsTable('traffic_signs', roadsDataCache.traffic_signs);
             
-            // Display table
-            displayRoadsTable(projects);
-            
-            // Load and display dark red segments chart
-            await loadAndDisplayDarkRedChart();
+            // Load and display dark red segments charts (for national and secondary roads)
+            await loadAndDisplayDarkRedChart('national_roads', roadsDataCache.national_roads);
+            await loadAndDisplayDarkRedChart('secondary_roads', roadsDataCache.secondary_roads);
             
             // Hide loading, show content
             loadingEl.style.display = 'none';
-            statsEl.style.display = 'grid';
-            tableEl.style.display = 'block';
+            showRoadsCategory('national_roads'); // Show national roads by default
             
         } catch (error) {
             console.error('Error loading roads data:', error);
@@ -8279,9 +8812,74 @@ async function copyChartToClipboard(containerId, buttonId) {
         }
     }
     
-    async function loadAndDisplayDarkRedChart() {
+    function updateRoadsStats(category, projects) {
+        const totalProjects = projects.length;
+        const totalDistance = projects.reduce((sum, p) => sum + (p.distance_km || 0), 0);
+        const totalAmount = projects.reduce((sum, p) => sum + (p.amount || 0), 0);
+        const avgCost = totalDistance > 0 ? totalAmount / totalDistance : 0;
+        
+        let prefix;
+        if (category === 'national_roads') {
+            prefix = 'national-roads';
+        } else if (category === 'secondary_roads') {
+            prefix = 'secondary-roads';
+        } else if (category === 'bridges') {
+            prefix = 'bridges';
+        } else if (category === 'traffic_signs') {
+            prefix = 'traffic-signs';
+        } else {
+            prefix = 'roads';
+        }
+        
+        document.getElementById(`${prefix}-total-projects`).textContent = totalProjects.toLocaleString();
+        document.getElementById(`${prefix}-total-distance`).textContent = totalDistance.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2}) + ' km';
+        document.getElementById(`${prefix}-total-amount`).textContent = '₱' + totalAmount.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+        document.getElementById(`${prefix}-avg-cost`).textContent = '₱' + avgCost.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2}) + '/km';
+    }
+    
+    function showRoadsCategory(category) {
+        currentRoadsCategory = category;
+        
+        // Hide all category panels
+        document.querySelectorAll('.roads-category-panel').forEach(panel => {
+            panel.style.display = 'none';
+        });
+        
+        // Show selected category panels
+        document.querySelectorAll(`.roads-category-panel[data-category="${category}"]`).forEach(panel => {
+            if (panel.id.includes('stats')) {
+                panel.style.display = 'grid';
+            } else {
+                panel.style.display = 'block';
+            }
+        });
+        
+        // Update button styles
+        document.querySelectorAll('.roads-category-btn').forEach(btn => {
+            if (btn.dataset.category === category) {
+                btn.style.background = '#0038A8';
+            } else {
+                btn.style.background = '#6c757d';
+            }
+        });
+    }
+    
+    // Store dark red data for each category
+    let nationalRoadsDarkRedData = [];
+    let nationalRoadsDarkRedCurrentPage = 1;
+    let nationalRoadsDarkRedItemsPerPage = 25;
+    let secondaryRoadsDarkRedData = [];
+    let secondaryRoadsDarkRedCurrentPage = 1;
+    let secondaryRoadsDarkRedItemsPerPage = 25;
+    
+    async function loadAndDisplayDarkRedChart(category, projects) {
         if (typeof d3 === 'undefined') {
             console.error('D3.js not loaded');
+            return;
+        }
+        
+        if (!projects || projects.length === 0) {
+            console.warn(`No projects available for ${category}`);
             return;
         }
         
@@ -8299,23 +8897,40 @@ async function copyChartToClipboard(containerId, buttonId) {
                 return;
             }
             
+            // Create a set of project names for this category to filter segments
+            const categoryProjectNames = new Set(projects.map(p => (p.name || '').toLowerCase()));
+            
             // Calculate percentage of very dark red segments for each highway
             const highwayStats = [];
+            
+            // First, get all cost per km values for this category to calculate threshold
+            const categoryCosts = projects
+                .map(p => p.cost_per_km)
+                .filter(c => c > 0);
+            
+            if (categoryCosts.length === 0) {
+                console.warn(`No valid cost per km values for ${category}`);
+                return;
+            }
+            
+            // Sort costs to find 66th percentile (top third threshold) for this category
+            const sortedCategoryCosts = [...categoryCosts].sort((a, b) => a - b);
+            const categoryThreshold = sortedCategoryCosts[Math.floor(sortedCategoryCosts.length * 0.66)] || sortedCategoryCosts[sortedCategoryCosts.length - 1];
             
             data.highways.forEach(highway => {
                 if (!highway.segments || highway.segments.length === 0) return;
                 
-                // Get all cost per km values for this highway
-                const allCosts = highway.segments.map(s => s.cost_per_km).filter(c => c > 0);
-                if (allCosts.length === 0) return;
+                // Filter segments to only include those from this category
+                const categorySegments = highway.segments.filter(segment => {
+                    const segmentName = (segment.project_name || segment.name || '').toLowerCase();
+                    return categoryProjectNames.has(segmentName);
+                });
                 
-                // Sort costs to find 66th percentile (top third threshold)
-                const sortedCosts = [...allCosts].sort((a, b) => a - b);
-                const highThreshold = sortedCosts[Math.floor(sortedCosts.length * 0.66)] || sortedCosts[sortedCosts.length - 1];
+                if (categorySegments.length === 0) return;
                 
-                // Count segments above threshold (very dark red)
-                const veryDarkRedCount = highway.segments.filter(s => s.cost_per_km >= highThreshold).length;
-                const totalSegments = highway.segments.length;
+                // Count segments above category threshold (very dark red)
+                const veryDarkRedCount = categorySegments.filter(s => s.cost_per_km >= categoryThreshold).length;
+                const totalSegments = categorySegments.length;
                 const percentage = totalSegments > 0 ? (veryDarkRedCount / totalSegments) * 100 : 0;
                 
                 highwayStats.push({
@@ -8332,20 +8947,38 @@ async function copyChartToClipboard(containerId, buttonId) {
             // This ensures highways with high percentage AND many segments rank higher
             highwayStats.sort((a, b) => b.score - a.score);
             
-            // Store data and render table
-            roadsDarkRedData = highwayStats;
-            renderDarkRedTable();
+            // Store data based on category
+            if (category === 'national_roads') {
+                nationalRoadsDarkRedData = highwayStats;
+                if (highwayStats.length > 0) {
+                    renderDarkRedTable('national_roads', nationalRoadsDarkRedData, nationalRoadsDarkRedCurrentPage, nationalRoadsDarkRedItemsPerPage);
+                    const tableContainer = document.getElementById('national-roads-dark-red-table');
+                    if (tableContainer) {
+                        tableContainer.style.display = 'block';
+                    }
+                }
+            } else if (category === 'secondary_roads') {
+                secondaryRoadsDarkRedData = highwayStats;
+                if (highwayStats.length > 0) {
+                    renderDarkRedTable('secondary_roads', secondaryRoadsDarkRedData, secondaryRoadsDarkRedCurrentPage, secondaryRoadsDarkRedItemsPerPage);
+                    const tableContainer = document.getElementById('secondary-roads-dark-red-table');
+                    if (tableContainer) {
+                        tableContainer.style.display = 'block';
+                    }
+                }
+            }
             
         } catch (error) {
-            console.error('Error loading dark red table data:', error);
+            console.error(`Error loading dark red table data for ${category}:`, error);
         }
     }
     
-    function renderDarkRedTable() {
-        const tableContainer = document.getElementById('roads-dark-red-table');
+    function renderDarkRedTable(category, data, currentPage, itemsPerPage) {
+        const prefix = category === 'national_roads' ? 'national-roads' : category === 'secondary_roads' ? 'secondary-roads' : 'roads';
+        const tableContainer = document.getElementById(`${prefix}-dark-red-table`);
         if (!tableContainer) return;
         
-        if (roadsDarkRedData.length === 0) {
+        if (!data || data.length === 0) {
             tableContainer.style.display = 'none';
             return;
         }
@@ -8353,16 +8986,17 @@ async function copyChartToClipboard(containerId, buttonId) {
         tableContainer.style.display = 'block';
         
         // Calculate pagination
-        const totalItems = roadsDarkRedData.length;
-        const totalPages = Math.ceil(totalItems / roadsDarkRedItemsPerPage);
-        roadsDarkRedCurrentPage = Math.min(roadsDarkRedCurrentPage, Math.max(1, totalPages));
+        const totalItems = data.length;
+        const totalPages = Math.ceil(totalItems / itemsPerPage);
+        const page = Math.min(currentPage, Math.max(1, totalPages));
         
-        const startIndex = (roadsDarkRedCurrentPage - 1) * roadsDarkRedItemsPerPage;
-        const endIndex = Math.min(startIndex + roadsDarkRedItemsPerPage, totalItems);
-        const pageData = roadsDarkRedData.slice(startIndex, endIndex);
+        const startIndex = (page - 1) * itemsPerPage;
+        const endIndex = Math.min(startIndex + itemsPerPage, totalItems);
+        const pageData = data.slice(startIndex, endIndex);
         
         // Render table
-        const tbody = document.getElementById('roads-dark-red-table-body');
+        const tbody = document.getElementById(`${prefix}-dark-red-table-body`);
+        if (!tbody) return;
         tbody.innerHTML = '';
         
         pageData.forEach((item, index) => {
@@ -8398,21 +9032,61 @@ async function copyChartToClipboard(containerId, buttonId) {
         });
         
         // Update pagination controls
-        document.getElementById('roads-dark-red-page-start').textContent = totalItems > 0 ? (startIndex + 1).toLocaleString() : '0';
-        document.getElementById('roads-dark-red-page-end').textContent = endIndex.toLocaleString();
-        document.getElementById('roads-dark-red-total-items').textContent = totalItems.toLocaleString();
-        document.getElementById('roads-dark-red-page-number').textContent = roadsDarkRedCurrentPage;
-        document.getElementById('roads-dark-red-total-pages').textContent = Math.max(1, totalPages);
+        const pageStartEl = document.getElementById(`${prefix}-dark-red-page-start`);
+        const pageEndEl = document.getElementById(`${prefix}-dark-red-page-end`);
+        const totalItemsEl = document.getElementById(`${prefix}-dark-red-total-items`);
+        const pageNumberEl = document.getElementById(`${prefix}-dark-red-page-number`);
+        const totalPagesEl = document.getElementById(`${prefix}-dark-red-total-pages`);
+        const prevBtn = document.getElementById(`${prefix}-dark-red-prev-page`);
+        const nextBtn = document.getElementById(`${prefix}-dark-red-next-page`);
         
-        // Update button states
-        document.getElementById('roads-dark-red-prev-page').disabled = roadsDarkRedCurrentPage <= 1;
-        document.getElementById('roads-dark-red-next-page').disabled = roadsDarkRedCurrentPage >= totalPages;
+        if (pageStartEl) pageStartEl.textContent = totalItems > 0 ? (startIndex + 1).toLocaleString() : '0';
+        if (pageEndEl) pageEndEl.textContent = endIndex.toLocaleString();
+        if (totalItemsEl) totalItemsEl.textContent = totalItems.toLocaleString();
+        if (pageNumberEl) pageNumberEl.textContent = page;
+        if (totalPagesEl) totalPagesEl.textContent = Math.max(1, totalPages);
+        if (prevBtn) prevBtn.disabled = page <= 1;
+        if (nextBtn) nextBtn.disabled = page >= totalPages;
     }
     
+    // National Roads pagination functions
+    function nationalRoadsDarkRedChangePage(delta) {
+        nationalRoadsDarkRedCurrentPage += delta;
+        renderDarkRedTable('national_roads', nationalRoadsDarkRedData, nationalRoadsDarkRedCurrentPage, nationalRoadsDarkRedItemsPerPage);
+        const tableContainer = document.getElementById('national-roads-dark-red-table');
+        if (tableContainer) {
+            tableContainer.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+    }
+    
+    function nationalRoadsDarkRedChangeItemsPerPage() {
+        const select = document.getElementById('national-roads-dark-red-items-per-page');
+        nationalRoadsDarkRedItemsPerPage = parseInt(select.value);
+        nationalRoadsDarkRedCurrentPage = 1;
+        renderDarkRedTable('national_roads', nationalRoadsDarkRedData, nationalRoadsDarkRedCurrentPage, nationalRoadsDarkRedItemsPerPage);
+    }
+    
+    // Secondary Roads pagination functions
+    function secondaryRoadsDarkRedChangePage(delta) {
+        secondaryRoadsDarkRedCurrentPage += delta;
+        renderDarkRedTable('secondary_roads', secondaryRoadsDarkRedData, secondaryRoadsDarkRedCurrentPage, secondaryRoadsDarkRedItemsPerPage);
+        const tableContainer = document.getElementById('secondary-roads-dark-red-table');
+        if (tableContainer) {
+            tableContainer.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+    }
+    
+    function secondaryRoadsDarkRedChangeItemsPerPage() {
+        const select = document.getElementById('secondary-roads-dark-red-items-per-page');
+        secondaryRoadsDarkRedItemsPerPage = parseInt(select.value);
+        secondaryRoadsDarkRedCurrentPage = 1;
+        renderDarkRedTable('secondary_roads', secondaryRoadsDarkRedData, secondaryRoadsDarkRedCurrentPage, secondaryRoadsDarkRedItemsPerPage);
+    }
+    
+    // Legacy functions for combined roads (backward compatibility)
     function roadsDarkRedChangePage(delta) {
         roadsDarkRedCurrentPage += delta;
-        renderDarkRedTable();
-        // Scroll to top of table
+        renderDarkRedTable('roads', roadsDarkRedData, roadsDarkRedCurrentPage, roadsDarkRedItemsPerPage);
         const tableContainer = document.getElementById('roads-dark-red-table');
         if (tableContainer) {
             tableContainer.scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -8422,13 +9096,33 @@ async function copyChartToClipboard(containerId, buttonId) {
     function roadsDarkRedChangeItemsPerPage() {
         const select = document.getElementById('roads-dark-red-items-per-page');
         roadsDarkRedItemsPerPage = parseInt(select.value);
-        roadsDarkRedCurrentPage = 1; // Reset to first page
-        renderDarkRedTable();
+        roadsDarkRedCurrentPage = 1;
+        renderDarkRedTable('roads', roadsDarkRedData, roadsDarkRedCurrentPage, roadsDarkRedItemsPerPage);
     }
     
     
-    function displayRoadsTable(projects) {
-        const tbody = document.getElementById('roads-table-body');
+    function displayRoadsTable(category, projects) {
+        let tbodyId, searchId;
+        if (category === 'national_roads') {
+            tbodyId = 'national-roads-table-body';
+            searchId = 'national-roads-search';
+        } else if (category === 'secondary_roads') {
+            tbodyId = 'secondary-roads-table-body';
+            searchId = 'secondary-roads-search';
+        } else if (category === 'bridges') {
+            tbodyId = 'bridges-table-body';
+            searchId = 'bridges-search';
+        } else if (category === 'traffic_signs') {
+            tbodyId = 'traffic-signs-table-body';
+            searchId = 'traffic-signs-search';
+        } else {
+            tbodyId = 'roads-table-body';
+            searchId = 'roads-search';
+        }
+        
+        const tbody = document.getElementById(tbodyId);
+        if (!tbody) return;
+        
         tbody.innerHTML = '';
         
         projects.forEach((project, index) => {
@@ -8450,9 +9144,13 @@ async function copyChartToClipboard(containerId, buttonId) {
         });
         
         // Add search functionality
-        const searchEl = document.getElementById('roads-search');
+        const searchEl = document.getElementById(searchId);
         if (searchEl) {
-            searchEl.addEventListener('input', (e) => {
+            // Remove existing listeners by cloning
+            const newSearchEl = searchEl.cloneNode(true);
+            searchEl.parentNode.replaceChild(newSearchEl, searchEl);
+            
+            newSearchEl.addEventListener('input', (e) => {
                 const searchTerm = e.target.value.toLowerCase();
                 Array.from(tbody.children).forEach(row => {
                     const text = row.textContent.toLowerCase();
@@ -8468,6 +9166,572 @@ async function copyChartToClipboard(containerId, buttonId) {
         return div.innerHTML;
     }
     
+    let statsDataCache = null;
+    let allYearsStatsCache = null;
+    let currentStatsCategory = 'roads';
+    let currentStatsYear = '2026';
+    
+    async function loadRoadsStatistics() {
+        const loadingEl = document.getElementById('stats-loading');
+        const errorEl = document.getElementById('stats-error');
+        const cardsEl = document.getElementById('stats-cards-container');
+        const chartEl = document.getElementById('stats-chart-container');
+        const trendEl = document.getElementById('stats-trend-container');
+        
+        try {
+            // Load both 2026 data and all years statistics
+            const [response2026, responseAllYears] = await Promise.all([
+                fetch('/api/budget/roads-cost-analysis'),
+                fetch('/api/budget/roads-statistics-all-years')
+            ]);
+            
+            if (!response2026.ok) {
+                throw new Error(`HTTP error! status: ${response2026.status}`);
+            }
+            const data = await response2026.json();
+            
+            if (!data.success) {
+                throw new Error(data.error || 'Failed to load data');
+            }
+            
+            // Cache the data
+            statsDataCache = {
+                roads: data.roads,
+                national_roads: data.national_roads,
+                secondary_roads: data.secondary_roads,
+                bridges: data.bridges,
+                traffic_signs: data.traffic_signs
+            };
+            
+            // Load all years statistics if available
+            if (responseAllYears.ok) {
+                const allYearsData = await responseAllYears.json();
+                if (allYearsData.success) {
+                    allYearsStatsCache = allYearsData.statistics;
+                    createTrendCharts(allYearsData.statistics);
+                    createStatsBarChart(allYearsData.statistics);
+                    if (trendEl) trendEl.style.display = 'block';
+                    const barChartEl = document.getElementById('stats-bar-chart-container');
+                    if (barChartEl) barChartEl.style.display = 'block';
+                }
+            }
+            
+            // Display statistics for selected year (default 2026)
+            updateStatisticsForYear(currentStatsYear);
+            
+            // Create distribution charts for 2026
+            console.log('Creating charts...');
+            console.log('National roads projects:', data.national_roads?.projects?.length || 0);
+            console.log('Secondary roads projects:', data.secondary_roads?.projects?.length || 0);
+            console.log('Bridges projects:', data.bridges?.projects?.length || 0);
+            console.log('Traffic signs projects:', data.traffic_signs?.projects?.length || 0);
+            
+            createDistributionChart('national_roads', data.national_roads?.projects || []);
+            createDistributionChart('secondary_roads', data.secondary_roads?.projects || []);
+            createDistributionChart('bridges', data.bridges?.projects || []);
+            createDistributionChart('traffic_signs', data.traffic_signs?.projects || []);
+            
+            // Hide loading, show content
+            loadingEl.style.display = 'none';
+            cardsEl.style.display = 'block';
+            chartEl.style.display = 'block';
+            showStatsCategory('national_roads'); // Show national roads by default
+            
+        } catch (error) {
+            console.error('Error loading roads statistics:', error);
+            loadingEl.style.display = 'none';
+            errorEl.textContent = `Error: ${error.message}`;
+            errorEl.style.display = 'block';
+        }
+    }
+    
+    function updateStatisticsForYear(year) {
+        if (!allYearsStatsCache || !allYearsStatsCache[year]) {
+            // Fallback to 2026 data if year not available
+            if (statsDataCache) {
+                displayStatistics('national_roads', statsDataCache.national_roads?.statistics);
+                displayStatistics('secondary_roads', statsDataCache.secondary_roads?.statistics);
+                displayStatistics('bridges', statsDataCache.bridges?.statistics);
+                displayStatistics('traffic_signs', statsDataCache.traffic_signs?.statistics);
+            }
+            return;
+        }
+        
+        const yearData = allYearsStatsCache[year];
+        displayStatistics('national_roads', yearData.national_roads);
+        displayStatistics('secondary_roads', yearData.secondary_roads);
+        displayStatistics('bridges', yearData.bridges);
+        displayStatistics('traffic_signs', yearData.traffic_signs);
+    }
+    
+    function createTrendCharts(allYearsStats) {
+        if (typeof Chart === 'undefined') {
+            console.warn('Chart.js not available for trend charts');
+            return;
+        }
+        
+        const canvas = document.getElementById('stats-trend-canvas');
+        if (!canvas) return;
+        
+        const years = [2020, 2021, 2022, 2023, 2024, 2025, 2026];
+        const categories = ['roads', 'bridges', 'traffic_signs'];
+        const categoryNames = { roads: 'Roads', bridges: 'Bridges', traffic_signs: 'Traffic Signs' };
+        const stats = ['min', 'max', 'mean', 'median', 'mode', 'std_dev'];
+        const statNames = {
+            min: 'Min',
+            max: 'Max',
+            mean: 'Mean',
+            median: 'Median',
+            mode: 'Mode',
+            std_dev: 'Std Dev'
+        };
+        
+        // Create 6 charts (one for each statistic)
+        const chartContainer = document.getElementById('stats-trend-chart');
+        chartContainer.innerHTML = ''; // Clear existing content
+        
+        stats.forEach((stat, statIndex) => {
+            const chartDiv = document.createElement('div');
+            chartDiv.style.marginBottom = '2rem';
+            chartDiv.style.background = '#f8f9fa';
+            chartDiv.style.padding = '1.5rem';
+            chartDiv.style.borderRadius = '8px';
+            
+            const chartTitle = document.createElement('h5');
+            chartTitle.textContent = `${statNames[stat]} Cost/km Trends (2020-2026)`;
+            chartTitle.style.color = '#0038A8';
+            chartTitle.style.margin = '0 0 1rem 0';
+            chartDiv.appendChild(chartTitle);
+            
+            const canvas = document.createElement('canvas');
+            canvas.id = `stats-trend-${stat}-canvas`;
+            canvas.style.maxHeight = '300px';
+            chartDiv.appendChild(canvas);
+            
+            chartContainer.appendChild(chartDiv);
+            
+            // Prepare data
+            const datasets = categories.map((category, catIndex) => {
+                const data = years.map(year => {
+                    const statValue = allYearsStats[year]?.[category]?.[stat];
+                    return statValue !== null && statValue !== undefined ? statValue / 1000000 : null; // Convert to millions
+                });
+                
+                const colors = [
+                    'rgba(0, 56, 168, 0.8)',   // Roads - blue
+                    'rgba(220, 53, 69, 0.8)',  // Bridges - red
+                    'rgba(40, 167, 69, 0.8)'   // Traffic Signs - green
+                ];
+                
+                return {
+                    label: categoryNames[category],
+                    data: data,
+                    borderColor: colors[catIndex],
+                    backgroundColor: colors[catIndex].replace('0.8', '0.2'),
+                    borderWidth: 2,
+                    fill: false,
+                    tension: 0.1
+                };
+            });
+            
+            // Create chart
+            setTimeout(() => {
+                const ctx = canvas.getContext('2d');
+                if (window[`statsTrendChart_${stat}`]) {
+                    window[`statsTrendChart_${stat}`].destroy();
+                }
+                
+                window[`statsTrendChart_${stat}`] = new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        labels: years.map(y => y.toString()),
+                        datasets: datasets
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                display: true,
+                                position: 'top'
+                            },
+                            title: {
+                                display: false
+                            },
+                            tooltip: {
+                                callbacks: {
+                                    label: function(context) {
+                                        const value = context.parsed.y;
+                                        return value !== null ? `${context.dataset.label}: ₱${value.toFixed(2)}M/km` : 'N/A';
+                                    }
+                                }
+                            }
+                        },
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                title: {
+                                    display: true,
+                                    text: 'Cost per Kilometer (₱M/km)'
+                                },
+                                ticks: {
+                                    callback: function(value) {
+                                        return '₱' + value.toFixed(1) + 'M';
+                                    }
+                                }
+                            },
+                            x: {
+                                title: {
+                                    display: true,
+                                    text: 'Year'
+                                }
+                            }
+                        }
+                    }
+                });
+            }, 100 * statIndex);
+        });
+    }
+    
+    // Statistics bar chart (similar to trends tab department chart)
+    let statsBarChart = null;
+    
+    function createStatsBarChart(allYearsStats) {
+        if (typeof Chart === 'undefined') {
+            console.warn('Chart.js not available for stats bar chart');
+            return;
+        }
+        
+        const canvas = document.getElementById('statsBarChart');
+        if (!canvas) {
+            console.error('Stats bar chart canvas not found');
+            return;
+        }
+        
+        // Destroy existing chart if it exists
+        if (statsBarChart) {
+            statsBarChart.destroy();
+        }
+        
+        const years = [2020, 2021, 2022, 2023, 2024, 2025, 2026];
+        const categories = ['national_roads', 'secondary_roads', 'bridges', 'traffic_signs'];
+        const categoryNames = {
+            national_roads: 'National Roads',
+            secondary_roads: 'Secondary Roads',
+            bridges: 'Bridges',
+            traffic_signs: 'Traffic Signs/Lights'
+        };
+        
+        // Prepare data for each statistic type
+        const statsToShow = ['min', 'max', 'median', 'std_dev'];
+        const statLabels = {
+            min: 'Min',
+            max: 'Max',
+            median: 'Median',
+            std_dev: 'Std Dev'
+        };
+        
+        // Create labels: "Category - Stat" for each combination
+        const labels = [];
+        categories.forEach(category => {
+            statsToShow.forEach(stat => {
+                labels.push(`${categoryNames[category]} - ${statLabels[stat]}`);
+            });
+        });
+        
+        // Prepare datasets for each year
+        const datasets = years.map((year, yearIndex) => {
+            const data = [];
+            categories.forEach(category => {
+                statsToShow.forEach(stat => {
+                    const statValue = allYearsStats[year]?.[category]?.[stat];
+                    // Convert to millions for display
+                    const value = statValue !== null && statValue !== undefined ? statValue / 1000000 : null;
+                    data.push(value);
+                });
+            });
+            
+            const colors = [
+                'rgba(153, 102, 255, 0.7)',  // 2020 - purple
+                'rgba(255, 99, 132, 0.7)',    // 2021 - red
+                'rgba(255, 206, 86, 0.7)',    // 2022 - yellow
+                'rgba(54, 162, 235, 0.7)',    // 2023 - blue
+                'rgba(255, 159, 64, 0.7)',    // 2024 - orange
+                'rgba(75, 192, 192, 0.7)',    // 2025 - teal
+                'rgba(0, 56, 168, 0.7)'       // 2026 - dark blue
+            ];
+            
+            return {
+                label: year.toString(),
+                data: data,
+                backgroundColor: colors[yearIndex],
+                borderColor: colors[yearIndex].replace('0.7', '1'),
+                borderWidth: 1
+            };
+        });
+        
+        // Create horizontal bar chart
+        statsBarChart = new Chart(canvas, {
+            type: 'bar',
+            data: {
+                labels: labels,
+                datasets: datasets
+            },
+            options: {
+                indexAxis: 'y', // Horizontal bar chart
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'top',
+                        labels: {
+                            color: '#333',
+                            font: { size: 12, weight: 'bold' },
+                            padding: 15
+                        }
+                    },
+                    title: {
+                        display: false
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                const label = context.dataset.label || '';
+                                const value = context.parsed.x || 0;
+                                if (value === null) return `${label}: N/A`;
+                                return `${label}: ₱${value.toFixed(2)}M/km`;
+                            }
+                        }
+                    }
+                },
+                scales: {
+                    x: {
+                        beginAtZero: true,
+                        ticks: {
+                            color: '#666',
+                            font: { size: 11 },
+                            callback: function(value) {
+                                return '₱' + value.toFixed(1) + 'M';
+                            }
+                        },
+                        title: {
+                            display: true,
+                            text: 'Cost per Kilometer (Millions PHP/km)',
+                            color: '#333',
+                            font: { size: 13, weight: 'bold' }
+                        },
+                        grid: {
+                            color: 'rgba(0, 0, 0, 0.05)'
+                        }
+                    },
+                    y: {
+                        ticks: {
+                            color: '#333',
+                            font: { size: 9 },
+                            maxRotation: 0,
+                            minRotation: 0,
+                            autoSkip: false
+                        },
+                        title: {
+                            display: true,
+                            text: 'Category - Statistic',
+                            color: '#333',
+                            font: { size: 13, weight: 'bold' }
+                        },
+                        grid: {
+                            display: false
+                        }
+                    }
+                }
+            }
+        });
+    }
+    
+    function displayStatistics(category, stats) {
+        if (!stats) return;
+        
+        let prefix;
+        if (category === 'national_roads') {
+            prefix = 'stats-national-roads';
+        } else if (category === 'secondary_roads') {
+            prefix = 'stats-secondary-roads';
+        } else if (category === 'bridges') {
+            prefix = 'stats-bridges';
+        } else if (category === 'traffic_signs') {
+            prefix = 'stats-traffic-signs';
+        } else {
+            prefix = 'stats-roads';
+        }
+        
+        const formatValue = (value) => {
+            if (value === null || value === undefined) return 'N/A';
+            return '₱' + value.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+        };
+        
+        const minEl = document.getElementById(`${prefix}-min`);
+        const maxEl = document.getElementById(`${prefix}-max`);
+        const meanEl = document.getElementById(`${prefix}-mean`);
+        const medianEl = document.getElementById(`${prefix}-median`);
+        const modeEl = document.getElementById(`${prefix}-mode`);
+        const stddevEl = document.getElementById(`${prefix}-stddev`);
+        
+        if (minEl) minEl.textContent = formatValue(stats.min);
+        if (maxEl) maxEl.textContent = formatValue(stats.max);
+        if (meanEl) meanEl.textContent = formatValue(stats.mean);
+        if (medianEl) medianEl.textContent = formatValue(stats.median);
+        if (modeEl) modeEl.textContent = formatValue(stats.mode);
+        if (stddevEl) stddevEl.textContent = formatValue(stats.std_dev);
+    }
+    
+    function showStatsCategory(category) {
+        currentStatsCategory = category;
+        
+        // Hide all category panels
+        document.querySelectorAll('.stats-category-panel').forEach(panel => {
+            panel.style.display = 'none';
+        });
+        
+        // Show selected category panels
+        document.querySelectorAll(`.stats-category-panel[data-category="${category}"]`).forEach(panel => {
+            panel.style.display = 'grid';
+        });
+        
+        // Update button styles
+        document.querySelectorAll('.stats-category-btn').forEach(btn => {
+            if (btn.dataset.category === category) {
+                btn.style.background = '#0038A8';
+            } else {
+                btn.style.background = '#6c757d';
+            }
+        });
+        
+        // Show corresponding chart
+        // Convert category name from underscore to hyphen for HTML element IDs
+        const chartId = `stats-chart-${category.replace(/_/g, '-')}`;
+        document.querySelectorAll('.stats-category-panel[data-category]').forEach(panel => {
+            if (panel.id && panel.id.startsWith('stats-chart-')) {
+                panel.style.display = 'none';
+            }
+        });
+        const chartEl = document.getElementById(chartId);
+        if (chartEl) {
+            chartEl.style.display = 'block';
+        }
+    }
+    
+    function createDistributionChart(category, projects) {
+        if (!projects || projects.length === 0) {
+            console.warn(`No projects for ${category} chart`);
+            return;
+        }
+        
+        // Convert category name from underscore to hyphen for HTML element IDs
+        const categoryId = category.replace(/_/g, '-');
+        const canvasId = `stats-chart-${categoryId}-canvas`;
+        const canvas = document.getElementById(canvasId);
+        if (!canvas) {
+            console.error(`Canvas element not found: ${canvasId} for category ${category}`);
+            return;
+        }
+        
+        console.log(`Creating chart for ${category} with ${projects.length} projects`);
+        
+        const costs = projects
+            .map(p => p.cost_per_km)
+            .filter(c => c > 0)
+            .sort((a, b) => a - b);
+        
+        if (costs.length === 0) {
+            console.warn(`No valid costs for ${category} chart`);
+            return;
+        }
+        
+        console.log(`${category} chart: ${costs.length} valid costs, min=${Math.min(...costs)}, max=${Math.max(...costs)}`);
+        
+        // Calculate bins (20 bins)
+        const min = Math.min(...costs);
+        const max = Math.max(...costs);
+        const binWidth = (max - min) / 20;
+        const bins = Array(20).fill(0);
+        const binLabels = [];
+        
+        for (let i = 0; i < 20; i++) {
+            const binStart = min + i * binWidth;
+            const binEnd = min + (i + 1) * binWidth;
+            binLabels.push(`₱${(binStart / 1000000).toFixed(1)}M`);
+            
+            costs.forEach(cost => {
+                if (cost >= binStart && (i === 19 ? cost <= binEnd : cost < binEnd)) {
+                    bins[i]++;
+                }
+            });
+        }
+        
+        // Use Chart.js if available
+        if (typeof Chart !== 'undefined') {
+            // Destroy existing chart if it exists
+            if (window[`statsChart_${category}`]) {
+                window[`statsChart_${category}`].destroy();
+            }
+            
+            const ctx = canvas.getContext('2d');
+            window[`statsChart_${category}`] = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: binLabels,
+                    datasets: [{
+                        label: 'Number of Projects',
+                        data: bins,
+                        backgroundColor: 'rgba(0, 56, 168, 0.6)',
+                        borderColor: 'rgba(0, 56, 168, 1)',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            title: {
+                                display: true,
+                                text: 'Number of Projects'
+                            }
+                        },
+                        x: {
+                            title: {
+                                display: true,
+                                text: 'Cost per Kilometer (₱)'
+                            },
+                            ticks: {
+                                maxRotation: 45,
+                                minRotation: 45,
+                                maxTicksLimit: 20
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            display: false
+                        },
+                        title: {
+                            display: true,
+                            text: `Distribution of Cost per Kilometer - ${category === 'roads' ? 'Roads' : category === 'bridges' ? 'Bridges' : 'Traffic Signs/Lights'}`
+                        }
+                    }
+                }
+            });
+        } else {
+            // Fallback: simple text display
+            canvas.style.display = 'block';
+            const ctx = canvas.getContext('2d');
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            ctx.fillStyle = '#333';
+            ctx.font = '14px Arial';
+            ctx.fillText('Chart.js not loaded. Please install Chart.js for visualization.', 10, 20);
+        }
+    }
+    
     // Load data when tab is activated
     document.addEventListener('DOMContentLoaded', () => {
         const roadsTab = document.querySelector('[data-tab="roads"]');
@@ -8478,6 +9742,43 @@ async function copyChartToClipboard(containerId, buttonId) {
                     loadRoadsData();
                     panel.dataset.loaded = 'true';
                 }
+            });
+        }
+        
+        // Category tab switching
+        document.querySelectorAll('.roads-category-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const category = btn.dataset.category;
+                showRoadsCategory(category);
+            });
+        });
+        
+        // Stats tab loading
+        const statsTab = document.querySelector('[data-tab="stats"]');
+        if (statsTab) {
+            statsTab.addEventListener('click', () => {
+                const panel = document.getElementById('tab-stats');
+                if (panel && !panel.dataset.loaded) {
+                    loadRoadsStatistics();
+                    panel.dataset.loaded = 'true';
+                }
+            });
+        }
+        
+        // Stats category tab switching
+        document.querySelectorAll('.stats-category-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const category = btn.dataset.category;
+                showStatsCategory(category);
+            });
+        });
+        
+        // Year selector change
+        const yearSelector = document.getElementById('stats-year-selector');
+        if (yearSelector) {
+            yearSelector.addEventListener('change', (e) => {
+                currentStatsYear = e.target.value;
+                updateStatisticsForYear(currentStatsYear);
             });
         }
         
