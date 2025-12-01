@@ -1706,35 +1706,185 @@ async def budget_roads_statistics_all_years_api():
         traceback.print_exc()
         return JSONResponse({"success": False, "error": str(e)}, status_code=500)
 
-_reblocking_cache = None
-_reblocking_cache_mtime = None
+_reblocking_cache_by_year = {}
+_reblocking_cache_mtime_by_year = {}
 
-def _load_reblocking_cache():
-    """Load reblocking analysis cache (cached in memory with file modification time check)"""
-    global _reblocking_cache, _reblocking_cache_mtime
+def _load_reblocking_cache(year: str = "2026"):
+    """Load reblocking analysis cache for a specific year (cached in memory with file modification time check)"""
+    global _reblocking_cache_by_year, _reblocking_cache_mtime_by_year
     
-    json_path = Path('static/data/reblocking_analysis.json')
+    # Try year-specific cache file first
+    json_path = Path(f'static/data/reblocking_analysis_{year}.json')
+    
+    # Fallback to old format for 2026 only if year-specific doesn't exist
+    if not json_path.exists() and year == "2026":
+        old_path = Path('static/data/reblocking_analysis.json')
+        if old_path.exists():
+            json_path = old_path
+    
     if not json_path.exists():
+        print(f"⚠️ Reblocking cache file not found for year {year}: {json_path}")
         return None
     
     # Check if file was modified
-    current_mtime = json_path.stat().st_mtime
-    if _reblocking_cache is None or _reblocking_cache_mtime != current_mtime:
-        with open(json_path, 'r', encoding='utf-8') as f:
-            _reblocking_cache = json.load(f)
-        _reblocking_cache_mtime = current_mtime
-    
-    return _reblocking_cache
+    try:
+        current_mtime = json_path.stat().st_mtime
+        cache_key = f"{year}_{json_path}"
+        
+        if cache_key not in _reblocking_cache_by_year or _reblocking_cache_mtime_by_year.get(cache_key) != current_mtime:
+            print(f"📂 Loading reblocking cache for year {year} from {json_path}")
+            with open(json_path, 'r', encoding='utf-8') as f:
+                cache_data = json.load(f)
+                _reblocking_cache_by_year[cache_key] = cache_data
+                _reblocking_cache_mtime_by_year[cache_key] = current_mtime
+            print(f"✅ Loaded {cache_data.get('total_highways', 0)} highways for year {year}")
+        
+        return _reblocking_cache_by_year[cache_key]
+    except Exception as e:
+        print(f"❌ Error loading reblocking cache for year {year}: {e}")
+        import traceback
+        traceback.print_exc()
+        return None
 
 @app.get("/api/budget/reblocking-analysis")
-async def budget_reblocking_analysis_api():
+async def budget_reblocking_analysis_api(year: str = Query("2026", description="Year to filter by (2020-2026 or 'total' for all years)")):
     """Get highway reblocking analysis - major highways with chainage data, cost per km, and anomaly detection"""
     try:
-        data = _load_reblocking_cache()
+        # Handle "total" or "all" to combine all years
+        if year.lower() in ['total', 'all', 'combined']:
+            from collections import defaultdict
+            
+            all_years = ['2020', '2021', '2022', '2023', '2024', '2025', '2026']
+            combined_highways = defaultdict(lambda: {
+                'highway': None,
+                'estimated_length_km': 0,
+                'main_project': None,
+                'total_segments': 0,
+                'total_distance_km': 0,
+                'total_amount': 0,
+                'segments': [],
+                'years': []
+            })
+            
+            total_highways = 0
+            total_segments = 0
+            total_distance_km = 0
+            total_amount = 0
+            total_anomalies = 0
+            
+            # Load and combine data from all years
+            for year_str in all_years:
+                year_data = _load_reblocking_cache(year_str)
+                if year_data and year_data.get('highways'):
+                    for highway_data in year_data['highways']:
+                        highway_name = highway_data.get('highway')
+                        if not highway_name:
+                            continue
+                        
+                        hw = combined_highways[highway_name]
+                        if hw['highway'] is None:
+                            hw['highway'] = highway_name
+                            hw['estimated_length_km'] = highway_data.get('estimated_length_km', 0)
+                            hw['main_project'] = highway_data.get('main_project')
+                            total_highways += 1
+                        
+                        # Add segments from this year
+                        segments = highway_data.get('segments', [])
+                        for segment in segments:
+                            # Add year info to segment
+                            segment_with_year = segment.copy()
+                            segment_with_year['year'] = year_str
+                            hw['segments'].append(segment_with_year)
+                        
+                        # Aggregate totals
+                        hw['total_segments'] += highway_data.get('total_segments', 0)
+                        hw['total_distance_km'] += highway_data.get('total_distance_km', 0)
+                        hw['total_amount'] += highway_data.get('total_amount', 0)
+                        
+                        # Track which years this highway appears in
+                        if year_str not in hw['years']:
+                            hw['years'].append(year_str)
+                        
+                        # Count anomalies
+                        for segment in segments:
+                            if segment.get('is_anomaly', False):
+                                total_anomalies += 1
+                    
+                    # Update overall totals
+                    total_segments += year_data.get('total_segments', 0)
+                    total_distance_km += year_data.get('total_distance_km', 0)
+                    total_amount += year_data.get('total_amount', 0)
+            
+            # Convert to list and sort by highway name
+            highways_list = list(combined_highways.values())
+            highways_list.sort(key=lambda x: x['highway'] or '')
+            
+            # Update main_project to be the one with highest amount
+            for hw in highways_list:
+                if hw['segments']:
+                    hw['main_project'] = max(hw['segments'], key=lambda s: s.get('amount', 0))
+            
+            return JSONResponse({
+                "success": True,
+                "year": "total",
+                "highways": highways_list,
+                "total_highways": total_highways,
+                "total_segments": total_segments,
+                "total_distance_km": total_distance_km,
+                "total_amount": total_amount,
+                "total_anomalies": total_anomalies
+            })
+        
+        # Handle individual year
+        data = _load_reblocking_cache(year)
         if data is None:
-            return JSONResponse({"success": False, "error": "Reblocking analysis data not available. Please run: python3 scripts/generate_reblocking_cache.py"}, status_code=404)
+            return JSONResponse({
+                "success": False, 
+                "error": f"Reblocking analysis data for {year} not available. Please run: python3 scripts/generate_reblocking_cache.py {year}",
+                "year": year,
+                "highways": [],
+                "total_highways": 0,
+                "total_segments": 0,
+                "total_distance_km": 0,
+                "total_anomalies": 0
+            }, status_code=404)
+        
+        # Ensure year is set in response
+        if "year" not in data:
+            data["year"] = year
         
         return JSONResponse({"success": True, **data})
+    except Exception as e:
+        return JSONResponse({"success": False, "error": str(e)}, status_code=500)
+
+@app.get("/api/budget/reblocking-statistics-all-years")
+async def budget_reblocking_statistics_all_years_api():
+    """Get reblocking statistics for all years (2020-2026) for year-on-year trend analysis"""
+    try:
+        all_years = ['2020', '2021', '2022', '2023', '2024', '2025', '2026']
+        statistics = {}
+        
+        for year in all_years:
+            data = _load_reblocking_cache(year)
+            if data:
+                statistics[year] = {
+                    'total_highways': data.get('total_highways', 0),
+                    'total_segments': data.get('total_segments', 0),
+                    'total_distance_km': data.get('total_distance_km', 0),
+                    'total_anomalies': data.get('total_anomalies', 0)
+                }
+            else:
+                statistics[year] = {
+                    'total_highways': 0,
+                    'total_segments': 0,
+                    'total_distance_km': 0,
+                    'total_anomalies': 0
+                }
+        
+        return JSONResponse({
+            "success": True,
+            "statistics": statistics
+        })
     except Exception as e:
         return JSONResponse({"success": False, "error": str(e)}, status_code=500)
 
