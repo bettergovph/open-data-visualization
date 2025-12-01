@@ -20,16 +20,36 @@ Output:
 
 import json
 import re
+import psycopg2
+from psycopg2.extras import RealDictCursor
+from psycopg2 import errors as psycopg2_errors
 from pathlib import Path
 from collections import defaultdict
 from datetime import datetime
 from typing import Dict, List, Any, Tuple, Optional
+import os
+from dotenv import load_dotenv
+
+load_dotenv()
 
 
 class ReblockingAnalysisGenerator:
-    def __init__(self):
-        self.input_path = Path("static/data/budget_amendments_2026.json")
-        self.output_path = Path("static/data/reblocking_analysis.json")
+    def __init__(self, year: int = 2026):
+        self.year = year
+        if year == 2026:
+            self.input_path = Path("static/data/budget_amendments_2026.json")
+        else:
+            self.input_path = None  # Will load from database
+        self.output_path = Path(f"static/data/reblocking_analysis_{year}.json")
+        
+        # Database configuration
+        self.db_config = {
+            'host': os.getenv('POSTGRES_HOST', 'localhost'),
+            'port': int(os.getenv('POSTGRES_PORT', 5432)),
+            'user': os.getenv('POSTGRES_USER', 'budget_admin'),
+            'password': os.getenv('POSTGRES_PASSWORD', ''),
+            'database': os.getenv('POSTGRES_DB_BUDGET', 'budget_analysis')
+        }
         
         # Highway keywords for identification
         self.highway_keywords = {
@@ -222,18 +242,121 @@ class ReblockingAnalysisGenerator:
             return ', '.join(chainage_strings)
         return None
     
+    def load_historical_data(self) -> List[Dict[str, Any]]:
+        """Load historical budget data from PostgreSQL database"""
+        if self.year == 2026:
+            return []  # 2026 uses JSON file
+        
+        conn = psycopg2.connect(**self.db_config)
+        cursor = conn.cursor(cursor_factory=RealDictCursor)
+        
+        try:
+            # Check if table exists
+            cursor.execute("""
+                SELECT column_name
+                FROM information_schema.columns
+                WHERE table_name = %s
+            """, (f'budget_{self.year}',))
+            
+            available_columns = {row['column_name'] for row in cursor.fetchall()}
+            
+            required_columns = {'id', 'amt', 'dsc', 'year', 'source_file'}
+            missing_columns = required_columns - available_columns
+            if missing_columns:
+                print(f"   ⚠️  Table budget_{self.year} missing required columns: {missing_columns}")
+                cursor.close()
+                conn.close()
+                return []
+            
+            # Handle different year formats
+            cursor.execute(f"""
+                SELECT data_type 
+                FROM information_schema.columns 
+                WHERE table_name = 'budget_{self.year}' AND column_name = 'year'
+            """)
+            year_col_result = cursor.fetchone()
+            year_type = year_col_result['data_type'] if year_col_result else 'text'
+            
+            if year_type == 'integer':
+                year_filter = f"year = {self.year}"
+            else:
+                year_filter = f"(year::text = '{self.year}' OR year::text LIKE '%{self.year}%')"
+            
+            # Filter for road/highway projects with chainage notation
+            query = f"""
+                SELECT
+                    id,
+                    amt,
+                    dsc,
+                    year,
+                    source_file
+                FROM budget_{self.year}
+                WHERE {year_filter}
+                AND amt >= 100
+                AND (dsc ILIKE '%chainage%' OR dsc ILIKE '%K%d+%' OR dsc ILIKE '%road%' OR dsc ILIKE '%highway%')
+                ORDER BY amt DESC, dsc
+            """
+            
+            cursor.execute(query)
+            rows = cursor.fetchall()
+            
+            historical_data = []
+            for row in rows:
+                try:
+                    amt = float(row['amt']) if row['amt'] else 0.0
+                    amt = amt * 1000  # Convert from thousands to actual amount
+                    
+                    historical_data.append({
+                        'name': row['dsc'] or '',
+                        'final_amount': amt,
+                        'original_amount': amt,
+                        'source_sheet': row.get('source_file', ''),
+                        'location': {'region': None}  # Can be enhanced later
+                    })
+                except Exception as row_e:
+                    print(f"   ⚠️  Error processing row (ID: {row.get('id', 'N/A')}): {type(row_e).__name__}: {str(row_e)}")
+                    continue
+            
+            cursor.close()
+            conn.close()
+            
+            return historical_data
+            
+        except psycopg2_errors.UndefinedTable:
+            print(f"   Table budget_{self.year} does not exist, skipping")
+            cursor.close()
+            conn.close()
+            return []
+        except Exception as e:
+            error_msg = str(e)
+            if "does not exist" in error_msg.lower() or "relation" in error_msg.lower():
+                print(f"   Table budget_{self.year} does not exist, skipping")
+                cursor.close()
+                conn.close()
+                return []
+            else:
+                print(f"   ⚠️  Error loading {self.year} data: {type(e).__name__}: {str(e)}")
+                cursor.close()
+                conn.close()
+                return []
+    
     def generate(self):
         """Generate the reblocking analysis cache"""
-        print(f"Loading data from {self.input_path}...")
+        if self.year == 2026:
+            print(f"Loading data from {self.input_path}...")
+            
+            if not self.input_path.exists():
+                raise FileNotFoundError(f"Input file not found: {self.input_path}")
+            
+            with open(self.input_path, 'r', encoding='utf-8') as f:
+                data = json.load(f)
+            
+            all_items = data.get('line_items', []) + data.get('projects', [])
+        else:
+            print(f"Loading data from database for year {self.year}...")
+            all_items = self.load_historical_data()
         
-        if not self.input_path.exists():
-            raise FileNotFoundError(f"Input file not found: {self.input_path}")
-        
-        with open(self.input_path, 'r', encoding='utf-8') as f:
-            data = json.load(f)
-        
-        all_items = data.get('line_items', []) + data.get('projects', [])
-        print(f"Processing {len(all_items)} items...")
+        print(f"Processing {len(all_items)} items for year {self.year}...")
         
         # Process all items
         highway_projects = defaultdict(list)
@@ -377,10 +500,12 @@ class ReblockingAnalysisGenerator:
             'total_anomalies': total_anomalies,
             'total_distance_km': total_distance_km,
             # Note: all_segments removed to reduce JSON size - use highways[].segments instead
+            'year': self.year,
             'metadata': {
                 'generated_at': datetime.now().isoformat(),
-                'source_file': str(self.input_path),
-                'processed_items': processed_count
+                'source_file': str(self.input_path) if self.input_path else f'database: budget_{self.year}',
+                'processed_items': processed_count,
+                'year': self.year
             }
         }
         
@@ -399,11 +524,27 @@ class ReblockingAnalysisGenerator:
 
 
 if __name__ == '__main__':
-    generator = ReblockingAnalysisGenerator()
-    try:
-        generator.generate()
-    except Exception as e:
-        print(f"Error: {e}")
-        import traceback
-        traceback.print_exc()
-        exit(1)
+    import sys
+    
+    # Generate for all years (2020-2026) or specific year if provided
+    if len(sys.argv) > 1:
+        years = [int(sys.argv[1])]
+    else:
+        years = [2020, 2021, 2022, 2023, 2024, 2025, 2026]
+    
+    for year in years:
+        print(f"\n{'='*80}")
+        print(f"GENERATING REBLOCKING CACHE FOR YEAR {year}")
+        print(f"{'='*80}")
+        generator = ReblockingAnalysisGenerator(year=year)
+        try:
+            generator.generate()
+        except Exception as e:
+            print(f"Error generating cache for {year}: {e}")
+            import traceback
+            traceback.print_exc()
+            continue
+    
+    print(f"\n{'='*80}")
+    print("✓ All reblocking caches generated successfully!")
+    print(f"{'='*80}")

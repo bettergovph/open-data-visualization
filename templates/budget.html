@@ -8308,21 +8308,6 @@ async function copyChartToClipboard(containerId, buttonId) {
                     <!-- Error Message -->
                     <div id="stats-error" style="display: none; text-align: center; padding: 2rem; color: #dc3545; background: #f8d7da; border-radius: 8px; margin: 2rem 0;"></div>
                     
-                    <!-- Year Selector -->
-                    <div style="display: flex; gap: 0.5rem; margin: 2rem 0; flex-wrap: wrap; align-items: center;">
-                        <label style="font-weight: 600; color: #333; margin-right: 0.5rem;">Year:</label>
-                        <select id="stats-year-selector" style="padding: 0.75rem 1rem; border: 2px solid #0038A8; border-radius: 6px; font-size: 1em; font-weight: 600; background: white; color: #0038A8; cursor: pointer;">
-                            <option value="2026">2026</option>
-                            <option value="2025">2025</option>
-                            <option value="2024">2024</option>
-                            <option value="2023">2023</option>
-                            <option value="2022">2022</option>
-                            <option value="2021">2021</option>
-                            <option value="2020">2020</option>
-                            <option value="total">Total (All Years)</option>
-                        </select>
-                    </div>
-                    
                     <!-- Category Tabs -->
                     <div style="display: flex; gap: 1rem; margin: 2rem 0; border-bottom: 2px solid #e0e0e0; flex-wrap: wrap;">
                         <button id="stats-category-national-roads" class="stats-category-btn active" data-category="national_roads" style="padding: 0.75rem 1.5rem; border: none; background: #0038A8; color: white; border-radius: 6px 6px 0 0; cursor: pointer; font-weight: 600; font-size: 1em;">🛣️ National Roads</button>
@@ -8333,12 +8318,31 @@ async function copyChartToClipboard(containerId, buttonId) {
                     
                     <!-- Statistics Bar Chart (similar to trends tab) -->
                     <div id="stats-bar-chart-container" style="display: none; margin-top: 2rem;">
-                        <!-- Main Statistics Chart (Min, Mean, Median, Mode) -->
+                        <!-- Min Statistics Chart (separate, as outlier) -->
                         <div style="background: white; padding: 2rem; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); position: relative; margin-bottom: 2rem;">
                             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
                                 <div style="flex: 1;">
-                                    <h4 style="color: #0038A8; margin: 0 0 0.5rem 0;">Cost per Kilometer Statistics by Category (2020-2026) - Min, Mean, Median, Mode</h4>
-                                    <p style="color: #666; font-size: 0.9em; margin: 0;">Stacked bar chart showing Min, Mean, Median, and Mode cost/km statistics. Each bar represents a year, stacked with National Roads (bottom), Secondary Roads, Bridges, and Traffic Signs/Lights (top).</p>
+                                    <h4 style="color: #0038A8; margin: 0 0 0.5rem 0;">Cost per Kilometer Statistics by Category (2020-2026) - Min (Outlier)</h4>
+                                    <p style="color: #666; font-size: 0.9em; margin: 0;">Min cost/km statistics shown separately. Each bar represents a year, colored by year for the selected category.</p>
+                                </div>
+                                <button id="copyStatsMinChartBtn" 
+                                        onclick="copyChartToClipboard('stats-bar-chart-min', 'copyStatsMinChartBtn')"
+                                        style="margin-left: 1rem; padding: 0.5rem 1rem; background: #0038A8; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: 600; font-size: 0.9em; white-space: nowrap;"
+                                        title="Copy chart image to clipboard">
+                                    📋 Copy Chart
+                                </button>
+                            </div>
+                            <div id="stats-bar-chart-min" style="position: relative; height: 600px; overflow: hidden;">
+                                <canvas id="statsMinChart" height="600"></canvas>
+                            </div>
+                        </div>
+                        
+                        <!-- Main Statistics Chart (Mean, Median, Mode) -->
+                        <div style="background: white; padding: 2rem; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); position: relative; margin-bottom: 2rem;">
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                                <div style="flex: 1;">
+                                    <h4 style="color: #0038A8; margin: 0 0 0.5rem 0;">Cost per Kilometer Statistics by Category (2020-2026) - Mean, Median, Mode</h4>
+                                    <p style="color: #666; font-size: 0.9em; margin: 0;">Bar chart showing Mean, Median, and Mode cost/km statistics. Each bar represents a year, colored by year for the selected category.</p>
                                 </div>
                                 <button id="copyStatsBarChartBtn" 
                                         onclick="copyChartToClipboard('stats-bar-chart-main', 'copyStatsBarChartBtn')"
@@ -8357,7 +8361,7 @@ async function copyChartToClipboard(containerId, buttonId) {
                             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
                                 <div style="flex: 1;">
                                     <h4 style="color: #0038A8; margin: 0 0 0.5rem 0;">Cost per Kilometer Statistics by Category (2020-2026) - Max (Outlier)</h4>
-                                    <p style="color: #666; font-size: 0.9em; margin: 0;">Max cost/km statistics shown separately as outliers. Each bar represents a year, stacked with National Roads (bottom), Secondary Roads, Bridges, and Traffic Signs/Lights (top).</p>
+                                    <p style="color: #666; font-size: 0.9em; margin: 0;">Max cost/km statistics shown separately as outliers. Each bar represents a year, colored by year for the selected category.</p>
                                 </div>
                                 <button id="copyStatsMaxChartBtn" 
                                         onclick="copyChartToClipboard('stats-bar-chart-max', 'copyStatsMaxChartBtn')"
@@ -8383,6 +8387,27 @@ async function copyChartToClipboard(containerId, buttonId) {
                     
                     <!-- Statistics Cards -->
                     <div id="stats-cards-container" style="display: none;">
+                        <!-- Year Selector - Next to Dashboard -->
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin: 2rem 0; flex-wrap: wrap; gap: 1rem;">
+                            <div style="flex: 1; min-width: 200px;">
+                                <h4 style="color: #0038A8; margin: 0 0 0.5rem 0; font-size: 1.2em;">Statistics Dashboard</h4>
+                                <p style="color: #666; font-size: 0.9em; margin: 0;">Select a year to view statistics for that period</p>
+                            </div>
+                            <div style="display: flex; gap: 0.5rem; align-items: center; flex-shrink: 0;">
+                                <label style="font-weight: 600; color: #333; margin-right: 0.5rem; white-space: nowrap;">Year:</label>
+                                <select id="stats-year-selector" style="padding: 0.75rem 1rem; border: 2px solid #0038A8; border-radius: 6px; font-size: 1em; font-weight: 600; background: white; color: #0038A8; cursor: pointer; min-width: 150px;">
+                                    <option value="2026">2026</option>
+                                    <option value="2025">2025</option>
+                                    <option value="2024">2024</option>
+                                    <option value="2023">2023</option>
+                                    <option value="2022">2022</option>
+                                    <option value="2021">2021</option>
+                                    <option value="2020">2020</option>
+                                    <option value="total">Total (All Years)</option>
+                                </select>
+                            </div>
+                        </div>
+                        
                         <!-- National Roads Stats -->
                         <div id="stats-cards-national-roads" class="stats-category-panel" data-category="national_roads" style="display: none;">
                             <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin: 2rem 0;">
@@ -8597,9 +8622,33 @@ async function copyChartToClipboard(containerId, buttonId) {
                         </div>
                     </div>
                     
-                    <!-- Highway Selection -->
+                    <!-- Year-on-Year Trends Chart -->
+                    <div id="reblock-trend-container" style="display: none; margin-top: 2rem; background: white; padding: 2rem; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
+                        <h4 style="color: #0038A8; margin: 0 0 1rem 0;">Year-on-Year Reblocking Statistics Trends (2020-2026)</h4>
+                        <p style="color: #666; font-size: 0.9em; margin: 0 0 1.5rem 0;">Trends showing how reblocking statistics change over time across all years.</p>
+                        <div id="reblock-trend-chart" style="width: 100%;">
+                            <!-- Charts will be dynamically created here -->
+                        </div>
+                    </div>
+                    
+                    <!-- Year and Highway Selection -->
                     <div id="reblock-highway-selector" style="display: none; margin: 2rem 0;">
-                        <label for="highway-filter" style="font-weight: bold; color: #333; margin-right: 10px; display: block; margin-bottom: 0.5rem;">Select Highway:</label>
+                        <div style="display: flex; gap: 2rem; margin-bottom: 1.5rem; flex-wrap: wrap;">
+                            <div style="flex: 1; min-width: 200px;">
+                                <label for="reblock-year-filter" style="font-weight: bold; color: #333; margin-right: 10px; display: block; margin-bottom: 0.5rem;">Select Year:</label>
+                                <select id="reblock-year-filter" onchange="handleReblockYearChange()" style="padding: 8px 12px; border: 2px solid #ddd; border-radius: 6px; font-size: 14px; background: white; color: #333; width: 100%; cursor: pointer;">
+                                    <option value="2026" selected>2026</option>
+                                    <option value="2025">2025</option>
+                                    <option value="2024">2024</option>
+                                    <option value="2023">2023</option>
+                                    <option value="2022">2022</option>
+                                    <option value="2021">2021</option>
+                                    <option value="2020">2020</option>
+                                    <option value="total">Total (All Years)</option>
+                                </select>
+                            </div>
+                            <div style="flex: 2; min-width: 300px;">
+                                <label for="highway-filter" style="font-weight: bold; color: #333; margin-right: 10px; display: block; margin-bottom: 0.5rem;">Select Highway:</label>
                         <div style="position: relative; display: flex; align-items: center; gap: 0.5rem; min-width: 300px; width: 100%; max-width: 500px;">
                             <div style="position: relative; flex: 1;">
                                 <input type="text" id="highway-filter" placeholder="Type to search or enter any highway name..." autocomplete="off" style="padding: 8px 12px; padding-right: 35px; border: 2px solid #ddd; border-radius: 6px; font-size: 14px; background: white; color: #333; width: 100%; box-sizing: border-box;">
@@ -8607,11 +8656,25 @@ async function copyChartToClipboard(containerId, buttonId) {
                                 <div id="highway-autocomplete-suggestions" style="display: none; position: absolute; top: 100%; left: 0; right: 0; background: white; border: 2px solid #ddd; border-top: none; border-radius: 0 0 6px 6px; max-height: 300px; overflow-y: auto; z-index: 1000; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
                                 </div>
                             </div>
+                            </div>
                         </div>
                         <p style="color: #666; font-size: 0.85em; margin-top: 0.5rem; font-style: italic;">💡 Tip: You can type any highway name, not just the suggestions shown. The autocomplete helps you find existing highways faster.</p>
                         
                         <!-- Legend -->
                         <div id="reblock-legend" style="display: none; margin-top: 1.5rem; padding: 1rem; background: #f8f9fa; border-radius: 6px; border: 1px solid #dee2e6;">
+                            <div style="margin-bottom: 1rem;">
+                                <h5 style="color: #0038A8; margin: 0 0 0.75rem 0; font-size: 1em; font-weight: 600;">Legend</h5>
+                            </div>
+                            
+                            <!-- Year Colors Section -->
+                            <div id="reblock-legend-years" style="margin-bottom: 1rem; padding-bottom: 1rem; border-bottom: 1px solid #dee2e6;">
+                                <div style="font-size: 0.85em; font-weight: 600; color: #666; margin-bottom: 0.5rem;">Year Colors:</div>
+                                <div id="reblock-year-colors" style="display: flex; flex-wrap: wrap; gap: 1rem; align-items: center;">
+                                    <!-- Year colors will be dynamically inserted here -->
+                                </div>
+                            </div>
+                            
+                            <!-- Other Legend Items -->
                             <div style="display: flex; flex-wrap: wrap; gap: 1.5rem; align-items: center;">
                                 <div style="display: flex; align-items: center; gap: 0.5rem;">
                                     <div style="width: 30px; height: 15px; background: #0038A8; border-radius: 2px;"></div>
@@ -8625,9 +8688,9 @@ async function copyChartToClipboard(containerId, buttonId) {
                                     <div style="width: 30px; height: 15px; background: #ffcccc; border-radius: 2px;"></div>
                                     <span style="font-size: 0.9em; color: #333;">Repair/Rehab (no outline)</span>
                                 </div>
-                                <div style="display: flex; align-items: center; gap: 0.5rem;">
-                                    <div style="width: 30px; height: 15px; background: linear-gradient(to right, #ffcccc, #ff6666, #cc0000, #800000); border-radius: 2px;"></div>
-                                    <span style="font-size: 0.9em; color: #333;">Light to Dark Red = Cost/km</span>
+                                <div id="reblock-legend-cost-scale" style="display: flex; align-items: center; gap: 0.5rem;">
+                                    <div id="reblock-year-color-preview" style="width: 30px; height: 15px; background: linear-gradient(to right, #ffcccc, #800000); border-radius: 2px;"></div>
+                                    <span style="font-size: 0.9em; color: #333;">Light to Dark = Cost/km (Current Year)</span>
                                 </div>
                                 <div style="display: flex; align-items: center; gap: 0.5rem;">
                                     <span style="font-size: 1.2em;">🚩</span>
@@ -9241,7 +9304,7 @@ async function copyChartToClipboard(containerId, buttonId) {
                 if (allYearsData.success) {
                     allYearsStatsCache = allYearsData.statistics;
                     createTrendCharts(allYearsData.statistics);
-                    createStatsBarChart(allYearsData.statistics);
+                    // Don't create bar charts here - showStatsCategory will handle it with the correct category
                     if (trendEl) trendEl.style.display = 'block';
                     const barChartEl = document.getElementById('stats-bar-chart-container');
                     if (barChartEl) barChartEl.style.display = 'block';
@@ -9425,28 +9488,62 @@ async function copyChartToClipboard(containerId, buttonId) {
         });
     }
     
-    // Statistics stacked bar chart: Each bar is a year, stacked with 4 categories (2 roads, 1 bridge, 1 traffic)
-    // Separated into two charts: Main stats (Min, Mean, Median, Mode) and Max (outlier, separate chart)
+    // Statistics bar chart: Shows selected category only, with year-specific colors
+    // Separated into three charts: Min (separate), Mean/Median/Mode (combined), Max (separate)
     let statsBarChart = null;
+    let statsMinChart = null;
     let statsMaxChart = null;
     
-    function createStatsBarChart(allYearsStats) {
+    // Year color mapping for stats charts
+    const statsYearColors = {
+        '2020': 'rgba(255, 153, 153, 0.8)',  // Light pink
+        '2021': 'rgba(255, 204, 153, 0.8)',  // Light orange
+        '2022': 'rgba(255, 255, 153, 0.8)',  // Light yellow
+        '2023': 'rgba(153, 255, 153, 0.8)',  // Light green
+        '2024': 'rgba(153, 204, 255, 0.8)',  // Light blue
+        '2025': 'rgba(204, 153, 255, 0.8)',  // Light purple
+        '2026': 'rgba(255, 102, 102, 0.8)'   // Light red
+    };
+    
+    function createStatsBarChart(allYearsStats, category) {
         if (typeof Chart === 'undefined') {
             console.warn('Chart.js not available for stats bar chart');
             return;
         }
         
+        // Ensure category is provided
+        if (!category) {
+            console.warn('createStatsBarChart called without category, defaulting to national_roads');
+            category = 'national_roads';
+        }
+        
         const canvas = document.getElementById('statsBarChart');
+        const minCanvas = document.getElementById('statsMinChart');
         const maxCanvas = document.getElementById('statsMaxChart');
         
-        if (!canvas || !maxCanvas) {
+        if (!canvas || !minCanvas || !maxCanvas) {
             console.error('Stats bar chart canvas not found');
             return;
         }
         
+        // Debug: Check if data exists for this category
+        console.log(`Creating stats bar charts for category: ${category}`);
+        const sampleYear = '2026';
+        const sampleData = allYearsStats?.[sampleYear]?.[category];
+        console.log(`Sample data for ${sampleYear} ${category}:`, {
+            min: sampleData?.min,
+            max: sampleData?.max,
+            mean: sampleData?.mean,
+            median: sampleData?.median,
+            mode: sampleData?.mode
+        });
+        
         // Destroy existing charts if they exist
         if (statsBarChart) {
             statsBarChart.destroy();
+        }
+        if (statsMinChart) {
+            statsMinChart.destroy();
         }
         if (statsMaxChart) {
             statsMaxChart.destroy();
@@ -9454,8 +9551,8 @@ async function copyChartToClipboard(containerId, buttonId) {
         
         const years = [2020, 2021, 2022, 2023, 2024, 2025, 2026];
         
-        // Statistics to show: Min (left), Mean, Median (middle), Mode
-        const statsToShow = ['min', 'mean', 'median', 'mode'];
+        // Statistics to show in main chart: Mean, Median, Mode (Min and Max are separate)
+        const statsToShow = ['mean', 'median', 'mode'];
         const statLabels = {
             min: 'Min',
             mean: 'Mean',
@@ -9464,15 +9561,16 @@ async function copyChartToClipboard(containerId, buttonId) {
             max: 'Max'
         };
         
-        // Stacking order: National Roads (bottom), Secondary Roads, Bridges, Traffic Signs (top)
-        const stackCategories = [
-            { key: 'national_roads', name: 'National Roads', color: 'rgba(0, 56, 168, 0.7)' },      // Blue - bottom
-            { key: 'secondary_roads', name: 'Secondary Roads', color: 'rgba(54, 162, 235, 0.7)' },  // Light blue
-            { key: 'bridges', name: 'Bridges', color: 'rgba(220, 53, 69, 0.7)' },                  // Red - middle
-            { key: 'traffic_signs', name: 'Traffic Signs/Lights', color: 'rgba(40, 167, 69, 0.7)' } // Green - top
-        ];
+        // Category name mapping
+        const categoryNames = {
+            'national_roads': 'National Roads',
+            'secondary_roads': 'Secondary Roads',
+            'bridges': 'Bridges',
+            'traffic_signs': 'Traffic Signs/Lights'
+        };
         
-        // Create labels for main chart: "Year - Stat" for Min, Mean, Median, Mode
+        // Create labels grouped by statistic: Min (all years), Mean (all years), Median (all years), Mode (all years)
+        // Structure: [2020 Min, 2021 Min, ..., 2026 Min, 2020 Mean, 2021 Mean, ..., 2026 Mean, ...]
         const labels = [];
         statsToShow.forEach(stat => {
             years.forEach(year => {
@@ -9480,50 +9578,101 @@ async function copyChartToClipboard(containerId, buttonId) {
             });
         });
         
-        // Create labels for Max chart: "Year - Max"
-        const maxLabels = years.map(year => `${year} ${statLabels.max}`);
+        // Create labels for Min chart: "Year"
+        const minLabels = years.map(year => `${year}`);
         
-        // Create datasets for main chart (Min, Mean, Median, Mode)
-        const datasets = stackCategories.map((stackCat) => {
+        // Create labels for Max chart: "Year"
+        const maxLabels = years.map(year => `${year}`);
+        
+        // Create datasets for main chart (Mean, Median, Mode) - one dataset per year (colored by year)
+        // Each dataset has values at positions corresponding to that year's statistics
+        // Labels order: [2020 Mean, 2021 Mean, ..., 2026 Mean, 2020 Median, 2021 Median, ..., 2026 Median, 2020 Mode, ...]
+        const datasets = years.map(year => {
             const data = [];
             
+            // For each statistic group (Mean, Median, Mode)
             statsToShow.forEach(stat => {
-                years.forEach(year => {
-                    const statValue = allYearsStats[year]?.[stackCat.key]?.[stat];
-                    const value = statValue !== null && statValue !== undefined ? statValue / 1000000 : null;
-                    data.push(value);
+                // For each year position in this stat group
+                years.forEach((y) => {
+                    if (y === year) {
+                        // This is our year - add the stat value
+                        // Convert year to string for data access
+                        const yearStr = year.toString();
+                        const statValue = allYearsStats[yearStr]?.[category]?.[stat];
+                        const value = statValue !== null && statValue !== undefined ? statValue / 1000000 : null;
+                        data.push(value);
+                    } else {
+                        // Not our year - add null
+                        data.push(null);
+                    }
                 });
             });
             
             return {
-                label: stackCat.name,
+                label: `${year}`,
                 data: data,
-                backgroundColor: stackCat.color,
-                borderColor: stackCat.color.replace('0.7', '1'),
+                backgroundColor: statsYearColors[year.toString()] || statsYearColors['2026'],
+                borderColor: statsYearColors[year.toString()]?.replace('0.8', '1') || statsYearColors['2026'].replace('0.8', '1'),
                 borderWidth: 1
             };
         });
         
-        // Create datasets for Max chart
-        const maxDatasets = stackCategories.map((stackCat) => {
-            const data = [];
-            
-            years.forEach(year => {
-                const statValue = allYearsStats[year]?.[stackCat.key]?.['max'];
-                const value = statValue !== null && statValue !== undefined ? statValue / 1000000 : null;
-                data.push(value);
+        // Create datasets for Min chart - one dataset per year (colored by year)
+        // Each dataset has 7 values (one per year), with nulls for other years
+        const minDatasets = years.map(year => {
+            const data = years.map(y => {
+                if (y === year) {
+                    // Convert year to string for data access
+                    const yearStr = y.toString();
+                    const statValue = allYearsStats[yearStr]?.[category]?.['min'];
+                    const value = statValue !== null && statValue !== undefined ? statValue / 1000000 : null;
+                    if (value !== null) {
+                        console.log(`Min chart: ${yearStr} ${category} min = ${value}M`);
+                    }
+                    return value;
+                }
+                return null;
             });
             
             return {
-                label: stackCat.name,
+                label: `${year}`,
                 data: data,
-                backgroundColor: stackCat.color,
-                borderColor: stackCat.color.replace('0.7', '1'),
+                backgroundColor: statsYearColors[year.toString()] || statsYearColors['2026'],
+                borderColor: statsYearColors[year.toString()]?.replace('0.8', '1') || statsYearColors['2026'].replace('0.8', '1'),
                 borderWidth: 1
             };
         });
         
-        // Create main stacked vertical bar chart (Min, Mean, Median, Mode)
+        // Debug: Log Min datasets summary
+        const minDataSummary = minDatasets.map(ds => {
+            const nonNullValues = ds.data.filter(v => v !== null);
+            return { label: ds.label, values: nonNullValues.length, data: nonNullValues };
+        });
+        console.log('Min chart datasets summary:', minDataSummary);
+        
+        // Create datasets for Max chart - one dataset per year (colored by year)
+        // Each dataset has 7 values (one per year), with nulls for other years
+        const maxDatasets = years.map(year => {
+            const data = years.map(y => {
+                if (y === year) {
+                    // Convert year to string for data access
+                    const yearStr = y.toString();
+                    const statValue = allYearsStats[yearStr]?.[category]?.['max'];
+                    return statValue !== null && statValue !== undefined ? statValue / 1000000 : null;
+                }
+                return null;
+            });
+            
+            return {
+                label: `${year}`,
+                data: data,
+                backgroundColor: statsYearColors[year.toString()] || statsYearColors['2026'],
+                borderColor: statsYearColors[year.toString()]?.replace('0.8', '1') || statsYearColors['2026'].replace('0.8', '1'),
+                borderWidth: 1
+            };
+        });
+        
+        // Create main grouped bar chart (Min, Mean, Median, Mode) - grouped by statistic, colored by year
         statsBarChart = new Chart(canvas, {
             type: 'bar',
             data: {
@@ -9543,7 +9692,11 @@ async function copyChartToClipboard(containerId, buttonId) {
                         }
                     },
                     title: {
-                        display: false
+                        display: true,
+                        text: `${categoryNames[category] || category} - Cost per Kilometer Statistics`,
+                        color: '#333',
+                        font: { size: 14, weight: 'bold' },
+                        padding: { bottom: 10 }
                     },
                     tooltip: {
                         callbacks: {
@@ -9558,7 +9711,7 @@ async function copyChartToClipboard(containerId, buttonId) {
                 },
                 scales: {
                     x: {
-                        stacked: true,
+                        grouped: true,
                         ticks: {
                             color: '#333',
                             font: { size: 10 },
@@ -9567,7 +9720,7 @@ async function copyChartToClipboard(containerId, buttonId) {
                         },
                         title: {
                             display: true,
-                            text: 'Year - Statistic (Min | Mean | Median | Mode)',
+                            text: 'Year - Statistic (Mean | Median | Mode)',
                             color: '#333',
                             font: { size: 13, weight: 'bold' }
                         },
@@ -9576,7 +9729,6 @@ async function copyChartToClipboard(containerId, buttonId) {
                         }
                     },
                     y: {
-                        stacked: true,
                         beginAtZero: true,
                         ticks: {
                             color: '#666',
@@ -9599,7 +9751,86 @@ async function copyChartToClipboard(containerId, buttonId) {
             }
         });
         
-        // Create Max stacked vertical bar chart (separate, as outlier)
+        // Create Min grouped bar chart (separate, as outlier) - colored by year
+        statsMinChart = new Chart(minCanvas, {
+            type: 'bar',
+            data: {
+                labels: minLabels,
+                datasets: minDatasets
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'top',
+                        labels: {
+                            color: '#333',
+                            font: { size: 12, weight: 'bold' },
+                            padding: 15
+                        }
+                    },
+                    title: {
+                        display: true,
+                        text: `${categoryNames[category] || category} - Min (Outlier)`,
+                        color: '#333',
+                        font: { size: 14, weight: 'bold' },
+                        padding: { bottom: 10 }
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                const label = context.dataset.label || '';
+                                const value = context.parsed.y || 0;
+                                if (value === null) return `${label}: N/A`;
+                                return `${label}: ₱${value.toFixed(2)}M/km`;
+                            }
+                        }
+                    }
+                },
+                scales: {
+                    x: {
+                        grouped: true,
+                        ticks: {
+                            color: '#333',
+                            font: { size: 11 },
+                            maxRotation: 45,
+                            minRotation: 45
+                        },
+                        title: {
+                            display: true,
+                            text: 'Year - Min (Outlier)',
+                            color: '#333',
+                            font: { size: 13, weight: 'bold' }
+                        },
+                        grid: {
+                            display: false
+                        }
+                    },
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            color: '#666',
+                            font: { size: 11 },
+                            callback: function(value) {
+                                return '₱' + value.toFixed(1) + 'M';
+                            }
+                        },
+                        title: {
+                            display: true,
+                            text: 'Cost per Kilometer (Millions PHP/km)',
+                            color: '#333',
+                            font: { size: 13, weight: 'bold' }
+                        },
+                        grid: {
+                            color: 'rgba(0, 0, 0, 0.05)'
+                        }
+                    }
+                }
+            }
+        });
+        
+        // Create Max grouped bar chart (separate, as outlier) - colored by year
         statsMaxChart = new Chart(maxCanvas, {
             type: 'bar',
             data: {
@@ -9619,7 +9850,11 @@ async function copyChartToClipboard(containerId, buttonId) {
                         }
                     },
                     title: {
-                        display: false
+                        display: true,
+                        text: `${categoryNames[category] || category} - Max (Outlier)`,
+                        color: '#333',
+                        font: { size: 14, weight: 'bold' },
+                        padding: { bottom: 10 }
                     },
                     tooltip: {
                         callbacks: {
@@ -9634,7 +9869,7 @@ async function copyChartToClipboard(containerId, buttonId) {
                 },
                 scales: {
                     x: {
-                        stacked: true,
+                        grouped: true,
                         ticks: {
                             color: '#333',
                             font: { size: 11 },
@@ -9652,7 +9887,6 @@ async function copyChartToClipboard(containerId, buttonId) {
                         }
                     },
                     y: {
-                        stacked: true,
                         beginAtZero: true,
                         ticks: {
                             color: '#666',
@@ -9734,17 +9968,44 @@ async function copyChartToClipboard(containerId, buttonId) {
             }
         });
         
-        // Show corresponding chart
+        // Show corresponding distribution chart
         // Convert category name from underscore to hyphen for HTML element IDs
         const chartId = `stats-chart-${category.replace(/_/g, '-')}`;
-        document.querySelectorAll('.stats-category-panel[data-category]').forEach(panel => {
-            if (panel.id && panel.id.startsWith('stats-chart-')) {
+        // Hide all distribution chart panels
+        document.querySelectorAll('[id^="stats-chart-"]').forEach(panel => {
+            if (panel.classList.contains('stats-category-panel')) {
                 panel.style.display = 'none';
             }
         });
+        // Show the selected category's chart
         const chartEl = document.getElementById(chartId);
         if (chartEl) {
             chartEl.style.display = 'block';
+            console.log(`showStatsCategory: Showing chart panel ${chartId} for category ${category}`);
+        } else {
+            console.error(`showStatsCategory: Chart panel not found: ${chartId} for category ${category}`);
+        }
+        
+        // Update distribution chart for selected category
+        if (statsDataCache) {
+            const categoryKey = category === 'roads' ? 'roads' : category;
+            const categoryData = statsDataCache[categoryKey];
+            const projects = categoryData?.projects || [];
+            console.log(`showStatsCategory: Updating distribution chart for ${category}, categoryKey=${categoryKey}, projects=${projects.length}, categoryData exists:`, !!categoryData);
+            if (projects.length === 0) {
+                console.warn(`showStatsCategory: No projects found for category ${category} (key: ${categoryKey})`);
+            }
+            // Use setTimeout to ensure the chart panel is visible before creating chart
+            setTimeout(() => {
+                createDistributionChart(category, projects);
+            }, 10);
+        } else {
+            console.warn(`showStatsCategory: statsDataCache is null for category ${category}`);
+        }
+        
+        // Update bar charts for selected category
+        if (allYearsStatsCache) {
+            createStatsBarChart(allYearsStatsCache, category);
         }
     }
     
@@ -9760,10 +10021,19 @@ async function copyChartToClipboard(containerId, buttonId) {
         const canvas = document.getElementById(canvasId);
         if (!canvas) {
             console.error(`Canvas element not found: ${canvasId} for category ${category}`);
+            const availableCanvases = Array.from(document.querySelectorAll('[id^="stats-chart-"][id$="-canvas"]')).map(el => el.id);
+            console.error(`Available canvas elements:`, availableCanvases);
             return;
         }
         
-        console.log(`Creating chart for ${category} with ${projects.length} projects`);
+        // Verify this is the correct canvas for this category
+        const expectedPanelId = `stats-chart-${categoryId}`;
+        const actualPanelId = canvas.closest('.stats-category-panel')?.id;
+        if (actualPanelId !== expectedPanelId) {
+            console.error(`Canvas mismatch! Expected panel ${expectedPanelId}, found ${actualPanelId} for category ${category}`);
+        }
+        
+        console.log(`Creating chart for ${category} with ${projects.length} projects on canvas ${canvasId}, panel: ${actualPanelId}`);
         
         const costs = projects
             .map(p => p.cost_per_km)
@@ -9798,18 +10068,61 @@ async function copyChartToClipboard(containerId, buttonId) {
         
         // Use Chart.js if available
         if (typeof Chart !== 'undefined') {
-            // Destroy existing chart if it exists
-            if (window[`statsChart_${category}`]) {
-                window[`statsChart_${category}`].destroy();
+            // Destroy existing chart if it exists for this category
+            const chartKey = `statsChart_${category}`;
+            if (window[chartKey]) {
+                console.log(`Destroying existing chart for ${category}`);
+                try {
+                    window[chartKey].destroy();
+                } catch (e) {
+                    console.warn(`Error destroying chart for ${category}:`, e);
+                }
+                window[chartKey] = null;
             }
             
+            // Destroy ALL chart instances that might be using any stats chart canvas (safety check)
+            // This ensures no chart instances are interfering
+            const allStatsCanvases = ['stats-chart-national-roads-canvas', 'stats-chart-secondary-roads-canvas', 
+                                     'stats-chart-bridges-canvas', 'stats-chart-traffic-signs-canvas'];
+            allStatsCanvases.forEach(canvasIdToCheck => {
+                const canvasToCheck = document.getElementById(canvasIdToCheck);
+                if (canvasToCheck && canvasToCheck.chart) {
+                    console.log(`Destroying chart instance on canvas ${canvasIdToCheck}`);
+                    try {
+                        canvasToCheck.chart.destroy();
+                        canvasToCheck.chart = null;
+                    } catch (e) {
+                        console.warn(`Error destroying chart on ${canvasIdToCheck}:`, e);
+                    }
+                }
+            });
+            
+            // Clear the canvas before creating new chart
             const ctx = canvas.getContext('2d');
-            window[`statsChart_${category}`] = new Chart(ctx, {
+            // Reset canvas size to ensure proper rendering
+            const container = canvas.parentElement;
+            if (container) {
+                canvas.width = container.clientWidth || 800;
+                canvas.height = 400;
+            }
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            // Ensure the chart panel is visible before creating chart
+            const chartPanel = canvas.closest('.stats-category-panel');
+            if (chartPanel) {
+                chartPanel.style.display = 'block';
+                console.log(`Chart panel ${chartPanel.id} is now visible`);
+            } else {
+                console.error(`Chart panel not found for canvas ${canvasId}`);
+            }
+            
+            console.log(`Creating new chart for ${category} on canvas ${canvasId}, canvas parent:`, canvas.parentElement?.id, 'chartPanel visible:', chartPanel?.style.display, 'projects:', projects.length);
+            const newChart = new Chart(ctx, {
                 type: 'bar',
                 data: {
                     labels: binLabels,
                     datasets: [{
-                        label: 'Number of Projects',
+                        label: `Number of Projects (${category})`,
                         data: bins,
                         backgroundColor: 'rgba(0, 56, 168, 0.6)',
                         borderColor: 'rgba(0, 56, 168, 1)',
@@ -9819,6 +10132,7 @@ async function copyChartToClipboard(containerId, buttonId) {
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
+                    animation: false,
                     scales: {
                         y: {
                             beginAtZero: true,
@@ -9845,11 +10159,16 @@ async function copyChartToClipboard(containerId, buttonId) {
                         },
                         title: {
                             display: true,
-                            text: `Distribution of Cost per Kilometer - ${category === 'roads' ? 'Roads' : category === 'bridges' ? 'Bridges' : 'Traffic Signs/Lights'}`
+                            text: `Distribution of Cost per Kilometer - ${category === 'national_roads' ? 'National Roads' : category === 'secondary_roads' ? 'Secondary Roads' : category === 'bridges' ? 'Bridges' : category === 'traffic_signs' ? 'Traffic Signs/Lights' : 'Roads'}`
                         }
                     }
                 }
             });
+            
+            // Store chart reference both in window and on canvas
+            window[chartKey] = newChart;
+            canvas.chart = newChart;
+            console.log(`Chart created and stored for ${category} on canvas ${canvasId}, bins:`, bins.filter(b => b > 0).length, 'non-zero bins');
         } else {
             // Fallback: simple text display
             canvas.style.display = 'block';
@@ -9917,6 +10236,7 @@ async function copyChartToClipboard(containerId, buttonId) {
                 const panel = document.getElementById('tab-reblock');
                 if (panel && !panel.dataset.loaded) {
                     loadReblockingData();
+                    loadReblockingTrends(); // Load year-on-year trends
                     panel.dataset.loaded = 'true';
                 }
             });
@@ -9926,11 +10246,298 @@ async function copyChartToClipboard(containerId, buttonId) {
     // Reblocking data
     let reblockingData = null;
     let currentHighwayFilter = 'Maharlika';
+    let currentReblockYear = '2026';
     
     // Pagination state for reblocking table
     let reblockCurrentPage = 1;
     let reblockItemsPerPage = 50;
     let reblockFilteredSegments = [];
+    
+    // Year color mapping (different shades for each year)
+    const yearColors = {
+        '2020': { light: '#ffe6e6', dark: '#990000' },  // Light pink to dark red
+        '2021': { light: '#ffe6cc', dark: '#cc6600' },  // Light orange to dark orange
+        '2022': { light: '#ffffcc', dark: '#999900' },  // Light yellow to dark yellow
+        '2023': { light: '#e6ffe6', dark: '#006600' },  // Light green to dark green
+        '2024': { light: '#e6f3ff', dark: '#003399' },  // Light blue to dark blue
+        '2025': { light: '#f0e6ff', dark: '#6600cc' },  // Light purple to dark purple
+        '2026': { light: '#ffcccc', dark: '#800000' },  // Light red to dark red (original)
+        'total': { light: '#e0e0e0', dark: '#424242' }   // Light gray to dark gray for combined years
+    };
+    
+    function updateReblockLegend(selectedYear) {
+        const yearColorsContainer = document.getElementById('reblock-year-colors');
+        if (!yearColorsContainer) return;
+        
+        yearColorsContainer.innerHTML = ''; // Clear existing
+        
+        const allYears = ['2020', '2021', '2022', '2023', '2024', '2025', '2026'];
+        
+        // If viewing "total", show all years
+        if (selectedYear === 'total') {
+            allYears.forEach(year => {
+                const yearColorScheme = yearColors[year] || yearColors['2026'];
+                const yearItem = document.createElement('div');
+                yearItem.style.display = 'flex';
+                yearItem.style.alignItems = 'center';
+                yearItem.style.gap = '0.5rem';
+                
+                const colorBox = document.createElement('div');
+                colorBox.style.width = '30px';
+                colorBox.style.height = '15px';
+                colorBox.style.background = `linear-gradient(to right, ${yearColorScheme.light}, ${yearColorScheme.dark})`;
+                colorBox.style.borderRadius = '2px';
+                
+                const yearLabel = document.createElement('span');
+                yearLabel.style.fontSize = '0.9em';
+                yearLabel.style.color = '#333';
+                yearLabel.textContent = year;
+                
+                yearItem.appendChild(colorBox);
+                yearItem.appendChild(yearLabel);
+                yearColorsContainer.appendChild(yearItem);
+            });
+        } else {
+            // Show only the selected year
+            const yearColorScheme = yearColors[selectedYear] || yearColors['2026'];
+            const yearItem = document.createElement('div');
+            yearItem.style.display = 'flex';
+            yearItem.style.alignItems = 'center';
+            yearItem.style.gap = '0.5rem';
+            
+            const colorBox = document.createElement('div');
+            colorBox.style.width = '30px';
+            colorBox.style.height = '15px';
+            colorBox.style.background = `linear-gradient(to right, ${yearColorScheme.light}, ${yearColorScheme.dark})`;
+            colorBox.style.borderRadius = '2px';
+            
+            const yearLabel = document.createElement('span');
+            yearLabel.style.fontSize = '0.9em';
+            yearLabel.style.color = '#333';
+            yearLabel.textContent = selectedYear;
+            
+            yearItem.appendChild(colorBox);
+            yearItem.appendChild(yearLabel);
+            yearColorsContainer.appendChild(yearItem);
+        }
+    }
+    
+    function handleReblockYearChange() {
+        const yearSelect = document.getElementById('reblock-year-filter');
+        if (yearSelect) {
+            currentReblockYear = yearSelect.value;
+            loadReblockingData();
+        }
+    }
+    
+    // Load reblocking statistics for all years
+    let reblockingStatsCache = null;
+    
+    async function loadReblockingTrends() {
+        try {
+            const response = await fetch('/api/budget/reblocking-statistics-all-years');
+            if (response.ok) {
+                const data = await response.json();
+                if (data.success) {
+                    reblockingStatsCache = data.statistics;
+                    createReblockingTrendCharts(data.statistics);
+                    const trendEl = document.getElementById('reblock-trend-container');
+                    if (trendEl) trendEl.style.display = 'block';
+                }
+            }
+        } catch (error) {
+            console.error('Error loading reblocking trends:', error);
+        }
+    }
+    
+    function createReblockingTrendCharts(allYearsStats) {
+        if (typeof Chart === 'undefined') {
+            console.warn('Chart.js not available for reblocking trend charts');
+            return;
+        }
+        
+        const years = [2020, 2021, 2022, 2023, 2024, 2025, 2026];
+        const metrics = [
+            { key: 'total_highways', name: 'Highways Analyzed', format: (v) => v.toLocaleString() },
+            { key: 'total_segments', name: 'Total Segments', format: (v) => v.toLocaleString() },
+            { key: 'total_distance_km', name: 'Total Distance (km)', format: (v) => v.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2}) },
+            { key: 'total_anomalies', name: 'Anomalies', format: (v) => v.toLocaleString() }
+        ];
+        
+        // Year colors matching stats tab
+        const yearColors = {
+            '2020': 'rgba(255, 153, 153, 0.8)',  // Light pink
+            '2021': 'rgba(255, 204, 153, 0.8)',  // Light orange
+            '2022': 'rgba(255, 255, 153, 0.8)',  // Light yellow
+            '2023': 'rgba(153, 255, 153, 0.8)',  // Light green
+            '2024': 'rgba(153, 204, 255, 0.8)',  // Light blue
+            '2025': 'rgba(204, 153, 255, 0.8)',  // Light purple
+            '2026': 'rgba(255, 102, 102, 0.8)'   // Light red
+        };
+        
+        const chartContainer = document.getElementById('reblock-trend-chart');
+        chartContainer.innerHTML = ''; // Clear existing content
+        
+        metrics.forEach((metric, metricIndex) => {
+            const chartDiv = document.createElement('div');
+            chartDiv.style.marginBottom = '2rem';
+            chartDiv.style.background = 'white';
+            chartDiv.style.padding = '2rem';
+            chartDiv.style.borderRadius = '8px';
+            chartDiv.style.boxShadow = '0 2px 10px rgba(0,0,0,0.1)';
+            chartDiv.style.position = 'relative';
+            
+            // Header with title and copy button
+            const headerDiv = document.createElement('div');
+            headerDiv.style.display = 'flex';
+            headerDiv.style.justifyContent = 'space-between';
+            headerDiv.style.alignItems = 'center';
+            headerDiv.style.marginBottom = '1rem';
+            
+            const titleDiv = document.createElement('div');
+            titleDiv.style.flex = '1';
+            titleDiv.style.minWidth = '0'; // Allow text to wrap if needed
+            
+            const chartTitle = document.createElement('h5');
+            chartTitle.textContent = `${metric.name} Trends (2020-2026)`;
+            chartTitle.style.color = '#0038A8';
+            chartTitle.style.margin = '0 0 0.5rem 0';
+            titleDiv.appendChild(chartTitle);
+            
+            const chartDesc = document.createElement('p');
+            chartDesc.textContent = `Year-on-year trends for ${metric.name.toLowerCase()}. Each bar represents a year, colored by year.`;
+            chartDesc.style.color = '#666';
+            chartDesc.style.fontSize = '0.9em';
+            chartDesc.style.margin = '0';
+            titleDiv.appendChild(chartDesc);
+            
+            headerDiv.appendChild(titleDiv);
+            
+            // Copy button
+            const copyButtonId = `copyReblockTrend${metric.key.charAt(0).toUpperCase() + metric.key.slice(1)}Btn`;
+            const containerId = `reblock-trend-${metric.key}-container`;
+            const copyButton = document.createElement('button');
+            copyButton.id = copyButtonId;
+            copyButton.textContent = '📋 Copy Chart';
+            copyButton.setAttribute('onclick', `copyChartToClipboard('${containerId}', '${copyButtonId}')`);
+            copyButton.style.marginLeft = '1rem';
+            copyButton.style.padding = '0.5rem 1rem';
+            copyButton.style.background = '#0038A8';
+            copyButton.style.color = 'white';
+            copyButton.style.border = 'none';
+            copyButton.style.borderRadius = '6px';
+            copyButton.style.cursor = 'pointer';
+            copyButton.style.fontWeight = '600';
+            copyButton.style.fontSize = '0.9em';
+            copyButton.style.whiteSpace = 'nowrap';
+            copyButton.style.flexShrink = '0'; // Prevent button from shrinking
+            copyButton.setAttribute('title', 'Copy chart image to clipboard');
+            headerDiv.appendChild(copyButton);
+            
+            chartDiv.appendChild(headerDiv);
+            
+            // Chart container (for copying)
+            const chartWrapper = document.createElement('div');
+            chartWrapper.id = containerId;
+            chartWrapper.style.position = 'relative';
+            chartWrapper.style.width = '100%';
+            chartWrapper.style.height = '300px';
+            chartWrapper.style.overflow = 'hidden';
+            
+            const canvas = document.createElement('canvas');
+            canvas.id = `reblock-trend-${metric.key}-canvas`;
+            chartWrapper.appendChild(canvas);
+            
+            chartDiv.appendChild(chartWrapper);
+            chartContainer.appendChild(chartDiv);
+            
+            // Prepare data - one dataset with bars colored by year
+            const data = years.map(year => {
+                const yearStr = year.toString();
+                const value = allYearsStats[yearStr]?.[metric.key] || 0;
+                return value;
+            });
+            
+            // Create datasets - one bar per year, each with its own color
+            const datasets = years.map((year, yearIndex) => {
+                const yearStr = year.toString();
+                const yearData = new Array(years.length).fill(null);
+                yearData[yearIndex] = allYearsStats[yearStr]?.[metric.key] || 0;
+                
+                return {
+                    label: yearStr,
+                    data: yearData,
+                    backgroundColor: yearColors[yearStr] || yearColors['2026'],
+                    borderColor: (yearColors[yearStr] || yearColors['2026']).replace('0.8', '1'),
+                    borderWidth: 1
+                };
+            });
+            
+            // Create chart
+            setTimeout(() => {
+                const ctx = canvas.getContext('2d');
+                if (window[`reblockTrendChart_${metric.key}`]) {
+                    window[`reblockTrendChart_${metric.key}`].destroy();
+                }
+                
+                window[`reblockTrendChart_${metric.key}`] = new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: years.map(y => y.toString()),
+                        datasets: datasets
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        layout: {
+                            padding: {
+                                top: 10,
+                                bottom: 10
+                            }
+                        },
+                        plugins: {
+                            legend: {
+                                display: true,
+                                position: 'top'
+                            },
+                            title: {
+                                display: false
+                            },
+                            tooltip: {
+                                callbacks: {
+                                    label: function(context) {
+                                        const value = context.parsed.y;
+                                        if (value === null) return 'N/A';
+                                        return `${context.dataset.label}: ${metric.format(value)}`;
+                                    }
+                                }
+                            }
+                        },
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                title: {
+                                    display: true,
+                                    text: metric.name
+                                },
+                                ticks: {
+                                    callback: function(value) {
+                                        return metric.format(value);
+                                    }
+                                }
+                            },
+                            x: {
+                                title: {
+                                    display: true,
+                                    text: 'Year'
+                                }
+                            }
+                        }
+                    }
+                });
+            }, 100 * metricIndex);
+        });
+    }
     
     async function loadReblockingData() {
         const loadingEl = document.getElementById('reblock-loading');
@@ -9941,7 +10548,7 @@ async function copyChartToClipboard(containerId, buttonId) {
         const tableEl = document.getElementById('reblock-table-container');
         
         try {
-            const response = await fetch('/api/budget/reblocking-analysis');
+            const response = await fetch(`/api/budget/reblocking-analysis?year=${currentReblockYear}`);
             if (!response.ok) {
                 throw new Error(`HTTP error! status: ${response.status}`);
             }
@@ -9953,8 +10560,42 @@ async function copyChartToClipboard(containerId, buttonId) {
             
             reblockingData = data;
             
+            // Update current year
+            if (data.year) {
+                currentReblockYear = data.year;
+            }
+            
+            // Update year display
+            const yearDisplay = document.getElementById('reblock-current-year-display');
+            if (yearDisplay) {
+                const displayYear = data.year === 'total' ? 'Total (All Years)' : (data.year || currentReblockYear);
+                yearDisplay.textContent = displayYear;
+            }
+            
+            // Update year color preview in legend
+            const yearColorPreview = document.getElementById('reblock-year-color-preview');
+            if (yearColorPreview) {
+                const yearKey = data.year === 'total' ? 'total' : (data.year || currentReblockYear);
+                const yearColorScheme = yearColors[yearKey] || yearColors['2026'];
+                yearColorPreview.style.background = `linear-gradient(to right, ${yearColorScheme.light}, ${yearColorScheme.dark})`;
+            }
+            
+            // Update legend with year colors
+            updateReblockLegend(data.year || currentReblockYear);
+            
             // Hide loading IMMEDIATELY (before any processing)
             loadingEl.style.display = 'none';
+            
+            // Show note if historical data not available
+            if (data.note) {
+                errorEl.style.display = 'block';
+                errorEl.style.background = '#fff3cd';
+                errorEl.style.color = '#856404';
+                errorEl.style.border = '1px solid #ffc107';
+                errorEl.textContent = data.note;
+            } else {
+                errorEl.style.display = 'none';
+            }
             
             // Update stats (all pre-calculated in Python)
             document.getElementById('reblock-highways-count').textContent = data.total_highways.toLocaleString();
@@ -9966,6 +10607,13 @@ async function copyChartToClipboard(containerId, buttonId) {
             statsEl.style.display = 'grid';
             selectorEl.style.display = 'block';
             
+            // Set selected year filter
+            const yearSelect = document.getElementById('reblock-year-filter');
+            if (yearSelect) {
+                yearSelect.value = data.year || currentReblockYear;
+                currentReblockYear = data.year || currentReblockYear;
+            }
+            
             // Show legend
             const legendEl = document.getElementById('reblock-legend');
             if (legendEl) legendEl.style.display = 'block';
@@ -9973,24 +10621,66 @@ async function copyChartToClipboard(containerId, buttonId) {
             // Setup autocomplete for highway filter
             const highwayFilter = document.getElementById('highway-filter');
             const suggestionsList = document.getElementById('highway-autocomplete-suggestions');
+            const clearBtn = document.getElementById('highway-filter-clear');
             
-            // Store all highways for autocomplete
-            const allHighways = [...data.highways].sort((a, b) => (b.total_amount || 0) - (a.total_amount || 0));
-            
-            // Set default to Maharlika if it exists
-            if (data.highways.find(h => h.highway === 'Maharlika')) {
-                currentHighwayFilter = 'Maharlika';
-                highwayFilter.value = 'Maharlika';
-            } else if (allHighways.length > 0) {
-                currentHighwayFilter = allHighways[0].highway;
-                highwayFilter.value = allHighways[0].highway;
+            if (!highwayFilter || !suggestionsList) {
+                console.error('Highway filter elements not found');
+                return;
             }
             
-            // Autocomplete functionality
+            // Clear any existing interval for clear button checking
+            if (window.reblockClearButtonInterval) {
+                clearInterval(window.reblockClearButtonInterval);
+                window.reblockClearButtonInterval = null;
+            }
+            
+            // Clear previous autocomplete event listeners by removing and re-adding the element
+            // This ensures we don't have duplicate listeners when year changes
+            if (highwayFilter) {
+                const newHighwayFilter = highwayFilter.cloneNode(true);
+                highwayFilter.parentNode.replaceChild(newHighwayFilter, highwayFilter);
+            }
+            
+            // Get fresh references after replacement
+            const freshHighwayFilter = document.getElementById('highway-filter');
+            const freshSuggestionsList = document.getElementById('highway-autocomplete-suggestions');
+            
+            // Store all highways for autocomplete (from current year's data) - update this when year changes
+            const allHighways = data.highways && data.highways.length > 0 
+                ? [...data.highways].sort((a, b) => (b.total_amount || 0) - (a.total_amount || 0))
+                : [];
+            
+            // Reset highway filter and select first available highway for the new year
+            if (allHighways.length > 0) {
+                // Try to find Maharlika first, otherwise use the first highway
+                const maharlika = allHighways.find(h => h.highway === 'Maharlika' || h.highway.toLowerCase().includes('maharlika'));
+                if (maharlika) {
+                    currentHighwayFilter = maharlika.highway;
+                    freshHighwayFilter.value = maharlika.highway;
+                } else {
+                    currentHighwayFilter = allHighways[0].highway;
+                    freshHighwayFilter.value = allHighways[0].highway;
+                }
+                freshHighwayFilter.placeholder = 'Type to search or enter any highway name...';
+            } else {
+                // No highways available for this year
+                currentHighwayFilter = '';
+                freshHighwayFilter.value = '';
+                freshHighwayFilter.placeholder = 'No highways available for ' + (data.year || currentReblockYear);
+            }
+            
+            // Update clear button visibility immediately
+            if (clearBtn) {
+                clearBtn.style.display = freshHighwayFilter.value.trim() ? 'block' : 'none';
+            }
+            
+            // Autocomplete functionality (using fresh references)
             let currentFocus = -1;
             
             function filterHighways(query) {
-                suggestionsList.innerHTML = '';
+                if (!freshSuggestionsList) return;
+                
+                freshSuggestionsList.innerHTML = '';
                 currentFocus = -1;
                 
                 const queryLower = (query || '').toLowerCase().trim();
@@ -10003,7 +10693,7 @@ async function copyChartToClipboard(containerId, buttonId) {
                 }
                 
                 if (filtered.length === 0) {
-                    suggestionsList.style.display = 'none';
+                    freshSuggestionsList.style.display = 'none';
                     return;
                 }
                 
@@ -10025,12 +10715,9 @@ async function copyChartToClipboard(containerId, buttonId) {
                     
                     item.addEventListener('click', () => {
                         currentHighwayFilter = highway.highway;
-                        highwayFilter.value = highway.highway;
-                        suggestionsList.style.display = 'none';
-                        // Ensure clear button shows after selection
-                        setTimeout(() => {
-                            updateClearButton();
-                        }, 10);
+                        freshHighwayFilter.value = highway.highway;
+                        freshSuggestionsList.style.display = 'none';
+                        if (clearBtn) clearBtn.style.display = 'block';
                         renderReblockingVisualization();
                         displayReblockingTable();
                     });
@@ -10043,56 +10730,35 @@ async function copyChartToClipboard(containerId, buttonId) {
                         item.style.backgroundColor = 'white';
                     });
                     
-                    suggestionsList.appendChild(item);
+                    freshSuggestionsList.appendChild(item);
                 });
                 
-                suggestionsList.style.display = 'block';
+                freshSuggestionsList.style.display = 'block';
             }
-            
             
             // Show/hide clear button based on input value
             function updateClearButton() {
-                const clearBtn = document.getElementById('highway-filter-clear');
-                if (clearBtn && highwayFilter) {
-                    // Read the actual value from the input element
-                    const currentValue = highwayFilter.value || highwayFilter.getAttribute('value') || '';
+                if (clearBtn && freshHighwayFilter) {
+                    const currentValue = freshHighwayFilter.value || '';
                     clearBtn.style.display = currentValue.trim() ? 'block' : 'none';
                 }
             }
             
-            highwayFilter.addEventListener('input', (e) => {
+            // Event listeners using fresh references
+            freshHighwayFilter.addEventListener('input', (e) => {
                 filterHighways(e.target.value);
                 updateClearButton();
             });
             
-            highwayFilter.addEventListener('focus', () => {
-                filterHighways(highwayFilter.value);
+            freshHighwayFilter.addEventListener('focus', () => {
+                filterHighways(freshHighwayFilter.value);
             });
             
-            // Clear button function
-            window.clearHighwayFilter = function(e) {
-                if (e) {
-                    e.preventDefault();
-                    e.stopPropagation();
-                }
-                
-                // Clear the input field text
-                highwayFilter.value = '';
-                suggestionsList.style.display = 'none';
-                updateClearButton();
-                
-                // Focus the input so user can type
-                highwayFilter.focus();
-                
-                // Don't reset to default immediately - let user type or select
-                // The visualization will show "No data" until a highway is selected
-            };
+            freshHighwayFilter.addEventListener('change', updateClearButton);
+            freshHighwayFilter.addEventListener('blur', updateClearButton);
             
-            // Initial clear button state
-            updateClearButton();
-            
-            highwayFilter.addEventListener('keydown', (e) => {
-                const items = suggestionsList.querySelectorAll('.autocomplete-item');
+            freshHighwayFilter.addEventListener('keydown', (e) => {
+                const items = freshSuggestionsList.querySelectorAll('.autocomplete-item');
                 
                 if (e.key === 'ArrowDown') {
                     e.preventDefault();
@@ -10106,10 +10772,10 @@ async function copyChartToClipboard(containerId, buttonId) {
                     e.preventDefault();
                     if (currentFocus >= 0 && items[currentFocus]) {
                         items[currentFocus].click();
-                    } else if (highwayFilter.value.trim()) {
+                    } else if (freshHighwayFilter.value.trim()) {
                         // If user typed something and pressed Enter, use that value
-                        currentHighwayFilter = highwayFilter.value.trim();
-                        suggestionsList.style.display = 'none';
+                        currentHighwayFilter = freshHighwayFilter.value.trim();
+                        freshSuggestionsList.style.display = 'none';
                         updateClearButton();
                         renderReblockingVisualization();
                         displayReblockingTable();
@@ -10126,29 +10792,35 @@ async function copyChartToClipboard(containerId, buttonId) {
                 });
             });
             
-            // Ensure clear button updates after any value change
-            // Use a simple approach: check on various events
-            highwayFilter.addEventListener('change', updateClearButton);
-            highwayFilter.addEventListener('blur', updateClearButton);
-            
-            // Also check periodically to catch programmatic changes
-            let clearButtonCheckInterval = setInterval(() => {
+            // Clear button function
+            window.clearHighwayFilter = function(e) {
+                if (e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                }
+                
+                // Clear the input field text
+                freshHighwayFilter.value = '';
+                currentHighwayFilter = '';
+                freshSuggestionsList.innerHTML = '';
+                freshSuggestionsList.style.display = 'none';
                 updateClearButton();
-            }, 200);
+                
+                // Focus the input so user can type
+                freshHighwayFilter.focus();
+            };
             
-            // Clear interval when page unloads
-            window.addEventListener('beforeunload', () => {
-                if (clearButtonCheckInterval) {
-                    clearInterval(clearButtonCheckInterval);
-                }
-            });
+            // Remove old click outside handler and add new one
+            if (window.reblockClickOutsideHandler) {
+                document.removeEventListener('click', window.reblockClickOutsideHandler);
+            }
             
-            // Hide suggestions when clicking outside
-            document.addEventListener('click', (e) => {
-                if (!highwayFilter.contains(e.target) && !suggestionsList.contains(e.target)) {
-                    suggestionsList.style.display = 'none';
+            window.reblockClickOutsideHandler = (e) => {
+                if (!freshHighwayFilter.contains(e.target) && !freshSuggestionsList.contains(e.target)) {
+                    freshSuggestionsList.style.display = 'none';
                 }
-            });
+            };
+            document.addEventListener('click', window.reblockClickOutsideHandler);
             
             // Show visualization and table containers
             visualizationEl.style.display = 'block';
@@ -10332,10 +11004,34 @@ async function copyChartToClipboard(containerId, buttonId) {
             const minCost = Math.min(...allCosts, 0);
             const maxCost = Math.max(...allCosts, mainCostPerKm);
             
-            // Create monotonic red color scale (light to dark)
+            // Helper function to get color for a segment
+            // When viewing "total", use the segment's year to determine color scheme
+            function getSegmentColor(segment) {
+                let segmentYear = currentReblockYear;
+                
+                // If viewing "total", use the segment's year field
+                if (currentReblockYear === 'total' && segment.year) {
+                    segmentYear = segment.year;
+                }
+                
+                // Get color scheme for this segment's year
+                const yearKey = segmentYear === 'total' ? 'total' : segmentYear;
+                const yearColorScheme = yearColors[yearKey] || yearColors['2026'];
+                
+                // Create a color scale for this specific segment's year
+                const segmentColorScale = d3.scaleSequential()
+                    .domain([minCost, maxCost])
+                    .interpolator(d3.interpolateRgb(yearColorScheme.light, yearColorScheme.dark));
+                
+                return segmentColorScale(segment.cost_per_km);
+            }
+            
+            // For backward compatibility, keep a default color scale
+            const yearKey = currentReblockYear === 'total' ? 'total' : currentReblockYear;
+            const yearColorScheme = yearColors[yearKey] || yearColors['2026'];
             const colorScale = d3.scaleSequential()
                 .domain([minCost, maxCost])
-                .interpolator(d3.interpolateRgb('#ffcccc', '#800000')); // Light red to dark red
+                .interpolator(d3.interpolateRgb(yearColorScheme.light, yearColorScheme.dark));
             
             // Determine flag thresholds (33rd and 66th percentiles)
             const sortedCosts = [...allCosts].sort((a, b) => a - b);
@@ -10414,8 +11110,8 @@ async function copyChartToClipboard(containerId, buttonId) {
                 const segmentWidth = Math.max(2, xScale(segmentEndKm) - segmentX);
                 const segmentY = padding.top + mainBarHeight + spacing + (index * rowSpacing);
                 
-                // Get color from monotonic red scale
-                const color = colorScale(segment.cost_per_km);
+                // Get color - use year-specific color if viewing "total", otherwise use default scale
+                const color = currentReblockYear === 'total' ? getSegmentColor(segment) : colorScale(segment.cost_per_km);
                 
                 // Check if new construction or repair
                 const isNew = isNewConstruction(segment.project_type);
