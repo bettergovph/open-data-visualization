@@ -1225,15 +1225,20 @@ def _is_national_road(name: str, distance_km: float) -> bool:
     return False
 
 @app.get("/api/budget/roads-cost-analysis")
-async def budget_roads_cost_analysis_api():
-    """Get road infrastructure projects (roads, bridges, traffic signs, etc.) with chainage, calculate distance and cost per km from 2026 budget amendments data"""
+async def budget_roads_cost_analysis_api(year: str = Query("2026", description="Year to filter by (2020-2026)")):
+    """Get road infrastructure projects (roads, bridges, traffic signs, etc.) with chainage, calculate distance and cost per km from budget amendments data"""
     try:
         import re
         from difflib import SequenceMatcher
         
-        json_path = Path('static/data/budget_amendments_2026.json')
+        # Try year-specific file first, fallback to 2026
+        json_path = Path(f'static/data/budget_amendments_{year}.json')
         if not json_path.exists():
-            return JSONResponse({"success": False, "error": "Budget amendments 2026 data not available"}, status_code=404)
+            # Fallback to 2026 if year-specific file doesn't exist
+            if year != "2026":
+                json_path = Path('static/data/budget_amendments_2026.json')
+            if not json_path.exists():
+                return JSONResponse({"success": False, "error": f"Budget amendments {year} data not available"}, status_code=404)
         
         with open(json_path, 'r', encoding='utf-8') as f:
             data = json.load(f)
@@ -1502,6 +1507,199 @@ async def budget_roads_cost_analysis_api():
         })
         
     except Exception as e:
+        return JSONResponse({"success": False, "error": str(e)}, status_code=500)
+
+@app.get("/api/budget/roads-cost-analysis-all-years")
+async def budget_roads_cost_analysis_all_years_api():
+    """Get aggregated road infrastructure projects cost analysis for all years (2020-2026)"""
+    try:
+        from collections import defaultdict
+        
+        all_years = ['2020', '2021', '2022', '2023', '2024', '2025', '2026']
+        aggregated_stats = defaultdict(lambda: {
+            'total_projects': 0,
+            'total_distance_km': 0.0,
+            'total_amount': 0.0
+        })
+        
+        # Helper function to process roads data (reuse logic from budget_roads_cost_analysis_api)
+        def _process_roads_data(all_items):
+            """Process items and categorize into national_roads, secondary_roads, bridges, traffic_signs"""
+            import re
+            
+            def extract_all_chainage_ranges(name: str):
+                """Extract all chainage ranges from name and return list of (start_km, start_m, end_km, end_m)"""
+                ranges = []
+                pattern_k = r'K(\d+)\s*\+\s*\(?(-?\d+)\)?\s*-\s*K(\d+)\s*\+\s*\(?(-?\d+)\)?'
+                for match in re.finditer(pattern_k, name, re.IGNORECASE):
+                    ranges.append((int(match.group(1)), int(match.group(2)), int(match.group(3)), int(match.group(4))))
+                pattern_chainage = r'Chainage\s+(\d+)\s*-\s*Chainage\s+(\d+)'
+                for match in re.finditer(pattern_chainage, name, re.IGNORECASE):
+                    start_total = int(match.group(1))
+                    end_total = int(match.group(2))
+                    start_km = start_total // 1000
+                    start_m = start_total % 1000
+                    end_km = end_total // 1000
+                    end_m = end_total % 1000
+                    ranges.append((start_km, start_m, end_km, end_m))
+                return ranges
+            
+            def calculate_distance(chainage_ranges):
+                """Calculate total distance in kilometers from list of chainage ranges"""
+                if not chainage_ranges:
+                    return 0.0
+                total_distance_m = 0
+                def to_meters(km, m):
+                    return km * 1000 + m
+                for chainage_range in chainage_ranges:
+                    start_km, start_m, end_km, end_m = chainage_range
+                    start_total = to_meters(start_km, start_m)
+                    end_total = to_meters(end_km, end_m)
+                    distance_m = abs(end_total - start_total)
+                    total_distance_m += distance_m
+                return total_distance_m / 1000.0
+            
+            national_road_projects = []
+            secondary_road_projects = []
+            bridge_projects = []
+            traffic_signs_projects = []
+            
+            for item in all_items:
+                name = item.get('name', '') or item.get('description', '')
+                if not name:
+                    continue
+                
+                chainage_ranges = extract_all_chainage_ranges(name)
+                if not chainage_ranges:
+                    continue
+                
+                amount = abs(item.get('final_amount', 0) or item.get('original_amount', 0))
+                if amount <= 0:
+                    continue
+                
+                distance_km = calculate_distance(chainage_ranges)
+                if distance_km <= 0:
+                    continue
+                
+                project_data = {
+                    'name': name,
+                    'distance_km': distance_km,
+                    'amount': amount
+                }
+                
+                # Categorize projects
+                name_lower = name.lower()
+                
+                traffic_keywords = ['installation', 'road safety', 'guardrail', 'traffic facilities', 'traffic facility']
+                is_traffic = any(keyword in name_lower for keyword in traffic_keywords)
+                
+                bridge_keywords = ['bridge', 'viaduct', 'flyover', 'overpass', 'underpass', 'footbridge', 'pedestrian bridge']
+                is_bridge = any(keyword in name_lower for keyword in bridge_keywords)
+                
+                road_terms = [
+                    ' road', ' rd', ' highway', ' hiway', ' hway', ' h-way',
+                    'boulevard', ' blvd', ' avenue', ' ave', ' ave.',
+                    'junction', ' jct', ' old route', ' diversion',
+                    'extension', ' ext', ' street', ' st', ' st.',
+                    'expressway'
+                ]
+                is_road_term = any(term in name_lower for term in road_terms)
+                
+                if is_traffic:
+                    traffic_signs_projects.append(project_data)
+                elif is_bridge:
+                    bridge_projects.append(project_data)
+                elif is_road_term or not is_bridge:
+                    is_national_road = _is_national_road(name, distance_km)
+                    if is_national_road:
+                        national_road_projects.append(project_data)
+                    else:
+                        secondary_road_projects.append(project_data)
+                else:
+                    secondary_road_projects.append(project_data)
+            
+            return {
+                'national_roads': national_road_projects,
+                'secondary_roads': secondary_road_projects,
+                'bridges': bridge_projects,
+                'traffic_signs': traffic_signs_projects
+            }
+        
+        # Load historical data for 2020-2025
+        historical_path = Path('static/data/historical_roads_2020_2025.json')
+        historical_data = {}
+        if historical_path.exists():
+            with open(historical_path, 'r', encoding='utf-8') as f:
+                historical_data = json.load(f)
+                print(f"✅ [All Years API] Loaded historical data with years: {list(historical_data.get('data', {}).keys())}")
+        else:
+            print(f"⚠️ [All Years API] Historical data file not found: {historical_path}")
+        
+        # Process each year
+        for year in all_years:
+            if year == '2026':
+                # Use budget_amendments_2026.json for 2026
+                json_path = Path(f'static/data/budget_amendments_{year}.json')
+                if not json_path.exists():
+                    print(f"⚠️ [All Years API] 2026 data file not found: {json_path}")
+                    continue
+                
+                with open(json_path, 'r', encoding='utf-8') as f:
+                    data = json.load(f)
+                
+                all_items = data.get('line_items', []) + data.get('projects', [])
+                processed_data = _process_roads_data(all_items)
+                print(f"✅ [All Years API] Processed 2026: {sum(len(projects) for projects in processed_data.values())} total projects")
+            else:
+                # Use historical_roads_2020_2025.json for 2020-2025
+                # Historical data is already processed, so we can use it directly
+                year_data = historical_data.get('data', {}).get(year, {})
+                if not year_data:
+                    print(f"⚠️ [All Years API] No data found for year {year}")
+                    continue
+                
+                # Historical data already has processed projects by category
+                processed_data = {
+                    'national_roads': year_data.get('national_roads', []),
+                    'secondary_roads': year_data.get('secondary_roads', []),
+                    'bridges': year_data.get('bridges', []),
+                    'traffic_signs': year_data.get('traffic_signs', [])
+                }
+                total_projects_year = sum(len(projects) for projects in processed_data.values())
+                print(f"✅ [All Years API] Processed {year}: {total_projects_year} total projects")
+            
+            # Aggregate statistics for each category
+            for category, projects in processed_data.items():
+                aggregated_stats[category]['total_projects'] += len(projects)
+                aggregated_stats[category]['total_distance_km'] += sum(p.get('distance_km', 0) for p in projects)
+                aggregated_stats[category]['total_amount'] += sum(p.get('amount', 0) for p in projects)
+        
+        # Log final aggregated stats
+        print(f"📊 [All Years API] Final aggregated stats:")
+        for category, stats in aggregated_stats.items():
+            print(f"  {category}: {stats['total_projects']} projects, {stats['total_distance_km']:.2f} km, ₱{stats['total_amount']/1e9:.2f}B")
+        
+        # Convert defaultdict to regular dict for JSONResponse
+        result = {category: dict(stats) for category, stats in aggregated_stats.items()}
+        
+        # Ensure all categories are present even if empty
+        for category in ['national_roads', 'secondary_roads', 'bridges', 'traffic_signs']:
+            if category not in result:
+                result[category] = {
+                    'total_projects': 0,
+                    'total_distance_km': 0.0,
+                    'total_amount': 0.0
+                }
+        
+        print(f"📊 [All Years API] Returning result with categories: {list(result.keys())}")
+        for category, stats in result.items():
+            print(f"  {category}: {stats['total_projects']} projects, {stats['total_distance_km']:.2f} km, ₱{stats['total_amount']/1e9:.2f}B")
+        
+        return JSONResponse({"success": True, **result})
+        
+    except Exception as e:
+        import traceback
+        traceback.print_exc()
         return JSONResponse({"success": False, "error": str(e)}, status_code=500)
 
 @app.get("/api/budget/roads-statistics-all-years")

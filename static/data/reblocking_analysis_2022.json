@@ -2,33 +2,122 @@
   "success": true,
   "highways": [
     {
-      "highway": "Abra",
-      "estimated_length_km": 526.436,
+      "highway": "Abanao Ext",
+      "estimated_length_km": 0.275,
       "main_project": {
-        "name": "Installation/Construction of Road Safety Devices (Solar Studs and Solar LED Street Lights) along Lubuagan-Batong Buhay-Abra Bdry Rd - K0459 + 917 - K0469 + 483, Lubuagan and Pasil, Kalinga",
-        "highway": "Abra",
-        "chainage_display": "K0459 + 917 - K0469 + 483",
+        "name": "Abanao Ext - (S00429LZ) Chainage 0 - Chainage 29, Chainage 156 - Chainage 275, Chainage 29 - Chainage 156, (S05052LZ) Chainage 111 - Chainage 232",
+        "highway": "Abanao Ext",
+        "chainage_display": "Chainage 0 - Chainage 29, Chainage 156 - Chainage 275, Chainage 29 - Chainage 156, Chainage 111 - Chainage 232",
         "chainage_ranges": [
           [
-            459,
-            917,
-            469,
-            483
+            0,
+            0,
+            0,
+            29
+          ],
+          [
+            0,
+            156,
+            0,
+            275
+          ],
+          [
+            0,
+            29,
+            0,
+            156
+          ],
+          [
+            0,
+            111,
+            0,
+            232
           ]
         ],
-        "chainage_start_m": 459917,
-        "distance_km": 9.566,
-        "amount": 50000000.0,
-        "cost_per_km": 5226845.0763119375,
+        "chainage_start_m": 0,
+        "distance_km": 0.396,
+        "amount": 5145000.0,
+        "cost_per_km": 12992424.242424242,
         "project_type": "new_construction",
         "source_sheet": "docs/GAA-2022.xlsx",
         "region": null,
         "is_anomaly": false,
         "flag_reason": null
       },
-      "total_segments": 3,
-      "total_distance_km": 13.733,
-      "total_amount": 146690000.0,
+      "total_segments": 1,
+      "total_distance_km": 0.396,
+      "total_amount": 5145000.0,
+      "segments": [
+        {
+          "name": "Abanao Ext - (S00429LZ) Chainage 0 - Chainage 29, Chainage 156 - Chainage 275, Chainage 29 - Chainage 156, (S05052LZ) Chainage 111 - Chainage 232",
+          "highway": "Abanao Ext",
+          "chainage_display": "Chainage 0 - Chainage 29, Chainage 156 - Chainage 275, Chainage 29 - Chainage 156, Chainage 111 - Chainage 232",
+          "chainage_ranges": [
+            [
+              0,
+              0,
+              0,
+              29
+            ],
+            [
+              0,
+              156,
+              0,
+              275
+            ],
+            [
+              0,
+              29,
+              0,
+              156
+            ],
+            [
+              0,
+              111,
+              0,
+              232
+            ]
+          ],
+          "chainage_start_m": 0,
+          "distance_km": 0.396,
+          "amount": 5145000.0,
+          "cost_per_km": 12992424.242424242,
+          "project_type": "new_construction",
+          "source_sheet": "docs/GAA-2022.xlsx",
+          "region": null,
+          "is_anomaly": false,
+          "flag_reason": null
+        }
+      ]
+    },
+    {
+      "highway": "Abra",
+      "estimated_length_km": 0.045,
+      "main_project": {
+        "name": "Lubuagan-Batong Buhay-Abra Bdry Rd - (S00563LZ) Chainage 075 - Chainage 120",
+        "highway": "Abra",
+        "chainage_display": "Chainage 075 - Chainage 120",
+        "chainage_ranges": [
+          [
+            0,
+            75,
+            0,
+            120
+          ]
+        ],
+        "chainage_start_m": 75,
+        "distance_km": 0.045,
+        "amount": 1690000.0,
+        "cost_per_km": 37555555.55555556,
+        "project_type": "new_construction",
+        "source_sheet": "docs/GAA-2022.xlsx",
+        "region": null,
+        "is_anomaly": false,
+        "flag_reason": null
+      },
+      "total_segments": 1,
+      "total_distance_km": 0.045,
+      "total_amount": 1690000.0,
       "segments": [
         {
           "name": "Lubuagan-Batong Buhay-Abra Bdry Rd - (S00563LZ) Chainage 075 - Chainage 120",
@@ -49,52 +138,8 @@
           "project_type": "new_construction",
           "source_sheet": "docs/GAA-2022.xlsx",
           "region": null,
-          "is_anomaly": true,
-          "flag_reason": "Cost per km significantly higher than main project"
-        },
-        {
-          "name": "Installation/Construction of Road Safety Devices (Solar Studs and Solar LED Street Lights) along Lubuagan-Batong Buhay-Abra Bdry Rd - K0459 + 917 - K0469 + 483, Lubuagan and Pasil, Kalinga",
-          "highway": "Abra",
-          "chainage_display": "K0459 + 917 - K0469 + 483",
-          "chainage_ranges": [
-            [
-              459,
-              917,
-              469,
-              483
-            ]
-          ],
-          "chainage_start_m": 459917,
-          "distance_km": 9.566,
-          "amount": 50000000.0,
-          "cost_per_km": 5226845.0763119375,
-          "project_type": "new_construction",
-          "source_sheet": "docs/GAA-2022.xlsx",
-          "region": null,
           "is_anomaly": false,
           "flag_reason": null
-        },
-        {
-          "name": "Installation/Construction of Road Safety Devices (Solar Studs and Solar LED Street Lights) along Kalinga-Abra Rd - K0522 + 389 - K0526 + 511, Balbalan, Kalinga",
-          "highway": "Abra",
-          "chainage_display": "K0522 + 389 - K0526 + 511",
-          "chainage_ranges": [
-            [
-              522,
-              389,
-              526,
-              511
-            ]
-          ],
-          "chainage_start_m": 522389,
-          "distance_km": 4.122,
-          "amount": 95000000.0,
-          "cost_per_km": 23047064.53178069,
-          "project_type": "new_construction",
-          "source_sheet": "docs/GAA-2022.xlsx",
-          "region": null,
-          "is_anomaly": true,
-          "flag_reason": "Cost per km significantly higher than main project"
         }
       ]
     },
@@ -379,51 +424,75 @@
       ]
     },
     {
-      "highway": "Along Gen Alejo Santos",
-      "estimated_length_km": 1.003,
+      "highway": "Antipolo",
+      "estimated_length_km": 14.796,
       "main_project": {
-        "name": "Preventive Maintenance (Asphalt Overlay) along Gen Alejo Santos Highway - K0058 + (-153) - K0058 + 850",
-        "highway": "Along Gen Alejo Santos",
-        "chainage_display": "K0058 + (-153) - K0058 + 850",
+        "name": "Installation of Road Safety Facilities at Marikina Victoria - Valley-Antipolo Road, K0017 + (-615) - K0018 + 777, K0019 + (-196) - K0021 + 537, K0028 + 092 - K0031 + 181",
+        "highway": "Antipolo",
+        "chainage_display": "K0017 + (-615) - K0018 + 777, K0019 + (-196) - K0021 + 537, K0028 + 092 - K0031 + 181",
         "chainage_ranges": [
           [
-            58,
-            -153,
-            58,
-            850
+            17,
+            -615,
+            18,
+            777
+          ],
+          [
+            19,
+            -196,
+            21,
+            537
+          ],
+          [
+            28,
+            92,
+            31,
+            181
           ]
         ],
-        "chainage_start_m": 57847,
-        "distance_km": 1.003,
-        "amount": 16300000.0,
-        "cost_per_km": 16251246.261216354,
-        "project_type": "maintenance",
+        "chainage_start_m": 16385,
+        "distance_km": 8.214,
+        "amount": 10080000.0,
+        "cost_per_km": 1227173.119065011,
+        "project_type": "new_construction",
         "source_sheet": "docs/GAA-2022.xlsx",
         "region": null,
         "is_anomaly": false,
         "flag_reason": null
       },
       "total_segments": 1,
-      "total_distance_km": 1.003,
-      "total_amount": 16300000.0,
+      "total_distance_km": 8.214,
+      "total_amount": 10080000.0,
       "segments": [
         {
-          "name": "Preventive Maintenance (Asphalt Overlay) along Gen Alejo Santos Highway - K0058 + (-153) - K0058 + 850",
-          "highway": "Along Gen Alejo Santos",
-          "chainage_display": "K0058 + (-153) - K0058 + 850",
+          "name": "Installation of Road Safety Facilities at Marikina Victoria - Valley-Antipolo Road, K0017 + (-615) - K0018 + 777, K0019 + (-196) - K0021 + 537, K0028 + 092 - K0031 + 181",
+          "highway": "Antipolo",
+          "chainage_display": "K0017 + (-615) - K0018 + 777, K0019 + (-196) - K0021 + 537, K0028 + 092 - K0031 + 181",
           "chainage_ranges": [
             [
-              58,
-              -153,
-              58,
-              850
+              17,
+              -615,
+              18,
+              777
+            ],
+            [
+              19,
+              -196,
+              21,
+              537
+            ],
+            [
+              28,
+              92,
+              31,
+              181
             ]
           ],
-          "chainage_start_m": 57847,
-          "distance_km": 1.003,
-          "amount": 16300000.0,
-          "cost_per_km": 16251246.261216354,
-          "project_type": "maintenance",
+          "chainage_start_m": 16385,
+          "distance_km": 8.214,
+          "amount": 10080000.0,
+          "cost_per_km": 1227173.119065011,
+          "project_type": "new_construction",
           "source_sheet": "docs/GAA-2022.xlsx",
           "region": null,
           "is_anomaly": false,
@@ -520,38 +589,32 @@
     },
     {
       "highway": "Aquino",
-      "estimated_length_km": 5.307,
+      "estimated_length_km": 31.643,
       "main_project": {
-        "name": "President Corazon C. Aquino Ave. (S00094PN) - Chainage 000 - Chainage 1190, Chainage 3057 - Chainage 5307",
+        "name": "Installation of Road Safety Facilities at Corazon C. Aquino Avenue, K0024 + 600 - K0031 + 643",
         "highway": "Aquino",
-        "chainage_display": "Chainage 000 - Chainage 1190, Chainage 3057 - Chainage 5307",
+        "chainage_display": "K0024 + 600 - K0031 + 643",
         "chainage_ranges": [
           [
-            0,
-            0,
-            1,
-            190
-          ],
-          [
-            3,
-            57,
-            5,
-            307
+            24,
+            600,
+            31,
+            643
           ]
         ],
-        "chainage_start_m": 0,
-        "distance_km": 3.44,
-        "amount": 140000000.0,
-        "cost_per_km": 40697674.41860465,
+        "chainage_start_m": 24600,
+        "distance_km": 7.043,
+        "amount": 8750000.0,
+        "cost_per_km": 1242368.3089592503,
         "project_type": "new_construction",
         "source_sheet": "docs/GAA-2022.xlsx",
         "region": null,
         "is_anomaly": false,
         "flag_reason": null
       },
-      "total_segments": 2,
-      "total_distance_km": 5.907,
-      "total_amount": 295000000.0,
+      "total_segments": 3,
+      "total_distance_km": 12.95,
+      "total_amount": 303750000.0,
       "segments": [
         {
           "name": "President Corazon C. Aquino Ave. (S00558PN) - Chainage 000 - Chainage 2467",
@@ -572,8 +635,8 @@
           "project_type": "new_construction",
           "source_sheet": "docs/GAA-2022.xlsx",
           "region": null,
-          "is_anomaly": false,
-          "flag_reason": null
+          "is_anomaly": true,
+          "flag_reason": "Cost per km significantly higher than main project"
         },
         {
           "name": "President Corazon C. Aquino Ave. (S00094PN) - Chainage 000 - Chainage 1190, Chainage 3057 - Chainage 5307",
@@ -597,6 +660,28 @@
           "distance_km": 3.44,
           "amount": 140000000.0,
           "cost_per_km": 40697674.41860465,
+          "project_type": "new_construction",
+          "source_sheet": "docs/GAA-2022.xlsx",
+          "region": null,
+          "is_anomaly": true,
+          "flag_reason": "Cost per km significantly higher than main project"
+        },
+        {
+          "name": "Installation of Road Safety Facilities at Corazon C. Aquino Avenue, K0024 + 600 - K0031 + 643",
+          "highway": "Aquino",
+          "chainage_display": "K0024 + 600 - K0031 + 643",
+          "chainage_ranges": [
+            [
+              24,
+              600,
+              31,
+              643
+            ]
+          ],
+          "chainage_start_m": 24600,
+          "distance_km": 7.043,
+          "amount": 8750000.0,
+          "cost_per_km": 1242368.3089592503,
           "project_type": "new_construction",
           "source_sheet": "docs/GAA-2022.xlsx",
           "region": null,
@@ -662,6 +747,136 @@
           "distance_km": 1.167,
           "amount": 30000000.0,
           "cost_per_km": 25706940.874035988,
+          "project_type": "new_construction",
+          "source_sheet": "docs/GAA-2022.xlsx",
+          "region": null,
+          "is_anomaly": false,
+          "flag_reason": null
+        }
+      ]
+    },
+    {
+      "highway": "Arroyo St",
+      "estimated_length_km": 0.201,
+      "main_project": {
+        "name": "Arroyo St (S00077PN) - Chainage 0 - Chainage 77.8, Chainage 127 - Chainage 201, Chainage 77.8 - Chainage 127",
+        "highway": "Arroyo St",
+        "chainage_display": "Chainage 0 - Chainage 77, Chainage 127 - Chainage 201",
+        "chainage_ranges": [
+          [
+            0,
+            0,
+            0,
+            77
+          ],
+          [
+            0,
+            127,
+            0,
+            201
+          ]
+        ],
+        "chainage_start_m": 0,
+        "distance_km": 0.151,
+        "amount": 10519000.0,
+        "cost_per_km": 69662251.65562914,
+        "project_type": "new_construction",
+        "source_sheet": "docs/GAA-2022.xlsx",
+        "region": null,
+        "is_anomaly": false,
+        "flag_reason": null
+      },
+      "total_segments": 1,
+      "total_distance_km": 0.151,
+      "total_amount": 10519000.0,
+      "segments": [
+        {
+          "name": "Arroyo St (S00077PN) - Chainage 0 - Chainage 77.8, Chainage 127 - Chainage 201, Chainage 77.8 - Chainage 127",
+          "highway": "Arroyo St",
+          "chainage_display": "Chainage 0 - Chainage 77, Chainage 127 - Chainage 201",
+          "chainage_ranges": [
+            [
+              0,
+              0,
+              0,
+              77
+            ],
+            [
+              0,
+              127,
+              0,
+              201
+            ]
+          ],
+          "chainage_start_m": 0,
+          "distance_km": 0.151,
+          "amount": 10519000.0,
+          "cost_per_km": 69662251.65562914,
+          "project_type": "new_construction",
+          "source_sheet": "docs/GAA-2022.xlsx",
+          "region": null,
+          "is_anomaly": false,
+          "flag_reason": null
+        }
+      ]
+    },
+    {
+      "highway": "Asin",
+      "estimated_length_km": 23.82,
+      "main_project": {
+        "name": "Installation of Road Safety Devices along Asin (Km 8)-Nangalisan-Sn Pascual, Tuba Rd - K0258 + 100 - K0264 + 370, K0265 + 200 - K0281 + 920",
+        "highway": "Asin",
+        "chainage_display": "K0258 + 100 - K0264 + 370, K0265 + 200 - K0281 + 920",
+        "chainage_ranges": [
+          [
+            258,
+            100,
+            264,
+            370
+          ],
+          [
+            265,
+            200,
+            281,
+            920
+          ]
+        ],
+        "chainage_start_m": 258100,
+        "distance_km": 22.99,
+        "amount": 80000000.0,
+        "cost_per_km": 3479773.8147020447,
+        "project_type": "new_construction",
+        "source_sheet": "docs/GAA-2022.xlsx",
+        "region": null,
+        "is_anomaly": false,
+        "flag_reason": null
+      },
+      "total_segments": 1,
+      "total_distance_km": 22.99,
+      "total_amount": 80000000.0,
+      "segments": [
+        {
+          "name": "Installation of Road Safety Devices along Asin (Km 8)-Nangalisan-Sn Pascual, Tuba Rd - K0258 + 100 - K0264 + 370, K0265 + 200 - K0281 + 920",
+          "highway": "Asin",
+          "chainage_display": "K0258 + 100 - K0264 + 370, K0265 + 200 - K0281 + 920",
+          "chainage_ranges": [
+            [
+              258,
+              100,
+              264,
+              370
+            ],
+            [
+              265,
+              200,
+              281,
+              920
+            ]
+          ],
+          "chainage_start_m": 258100,
+          "distance_km": 22.99,
+          "amount": 80000000.0,
+          "cost_per_km": 3479773.8147020447,
           "project_type": "new_construction",
           "source_sheet": "docs/GAA-2022.xlsx",
           "region": null,
@@ -1083,6 +1298,112 @@
       ]
     },
     {
+      "highway": "Balbalan",
+      "estimated_length_km": 7.52,
+      "main_project": {
+        "name": "Installation/Construction of Road Safety Devices (Solar Studs and Solar LED Street Lights) along Balbalan-Pinukpuk Rd - K0479 + 624 - K0487 + 144",
+        "highway": "Balbalan",
+        "chainage_display": "K0479 + 624 - K0487 + 144",
+        "chainage_ranges": [
+          [
+            479,
+            624,
+            487,
+            144
+          ]
+        ],
+        "chainage_start_m": 479624,
+        "distance_km": 7.52,
+        "amount": 50000000.0,
+        "cost_per_km": 6648936.170212766,
+        "project_type": "new_construction",
+        "source_sheet": "docs/GAA-2022.xlsx",
+        "region": null,
+        "is_anomaly": false,
+        "flag_reason": null
+      },
+      "total_segments": 1,
+      "total_distance_km": 7.52,
+      "total_amount": 50000000.0,
+      "segments": [
+        {
+          "name": "Installation/Construction of Road Safety Devices (Solar Studs and Solar LED Street Lights) along Balbalan-Pinukpuk Rd - K0479 + 624 - K0487 + 144",
+          "highway": "Balbalan",
+          "chainage_display": "K0479 + 624 - K0487 + 144",
+          "chainage_ranges": [
+            [
+              479,
+              624,
+              487,
+              144
+            ]
+          ],
+          "chainage_start_m": 479624,
+          "distance_km": 7.52,
+          "amount": 50000000.0,
+          "cost_per_km": 6648936.170212766,
+          "project_type": "new_construction",
+          "source_sheet": "docs/GAA-2022.xlsx",
+          "region": null,
+          "is_anomaly": false,
+          "flag_reason": null
+        }
+      ]
+    },
+    {
+      "highway": "Barotac Viejo",
+      "estimated_length_km": 0.607,
+      "main_project": {
+        "name": "Construction of Road Slope Protection Structure along Barotac Viejo-Sn Rafael Rd - K0079 + 714 - K0080 + 321",
+        "highway": "Barotac Viejo",
+        "chainage_display": "K0079 + 714 - K0080 + 321",
+        "chainage_ranges": [
+          [
+            79,
+            714,
+            80,
+            321
+          ]
+        ],
+        "chainage_start_m": 79714,
+        "distance_km": 0.607,
+        "amount": 75000000.0,
+        "cost_per_km": 123558484.34925865,
+        "project_type": "new_construction",
+        "source_sheet": "docs/GAA-2022.xlsx",
+        "region": null,
+        "is_anomaly": false,
+        "flag_reason": null
+      },
+      "total_segments": 1,
+      "total_distance_km": 0.607,
+      "total_amount": 75000000.0,
+      "segments": [
+        {
+          "name": "Construction of Road Slope Protection Structure along Barotac Viejo-Sn Rafael Rd - K0079 + 714 - K0080 + 321",
+          "highway": "Barotac Viejo",
+          "chainage_display": "K0079 + 714 - K0080 + 321",
+          "chainage_ranges": [
+            [
+              79,
+              714,
+              80,
+              321
+            ]
+          ],
+          "chainage_start_m": 79714,
+          "distance_km": 0.607,
+          "amount": 75000000.0,
+          "cost_per_km": 123558484.34925865,
+          "project_type": "new_construction",
+          "source_sheet": "docs/GAA-2022.xlsx",
+          "region": null,
+          "is_anomaly": false,
+          "flag_reason": null
+        }
+      ]
+    },
+    {
       "highway": "Batangas",
       "estimated_length_km": 87.507,
       "main_project": {
@@ -1264,6 +1585,228 @@
       ]
     },
     {
+      "highway": "Bislig",
+      "estimated_length_km": 55.6,
+      "main_project": {
+        "name": "Rehabilitation and Road Slope Protection Structures along Bislig-Trento Road, K1500+300 -K1500+700",
+        "highway": "Bislig",
+        "chainage_display": "K1500+300 -K1500+700",
+        "chainage_ranges": [
+          [
+            1500,
+            300,
+            1500,
+            700
+          ]
+        ],
+        "chainage_start_m": 1500300,
+        "distance_km": 0.4,
+        "amount": 100000000.0,
+        "cost_per_km": 250000000.0,
+        "project_type": "rehabilitation",
+        "source_sheet": "docs/GAA-2022.xlsx",
+        "region": null,
+        "is_anomaly": false,
+        "flag_reason": null
+      },
+      "total_segments": 5,
+      "total_distance_km": 1.4499999999999997,
+      "total_amount": 500000000.0,
+      "segments": [
+        {
+          "name": "Rehabilitation and Road Slope Protection Structures along Bislig-Trento Road, K1445+100 -K1445+300",
+          "highway": "Bislig",
+          "chainage_display": "K1445+100 -K1445+300",
+          "chainage_ranges": [
+            [
+              1445,
+              100,
+              1445,
+              300
+            ]
+          ],
+          "chainage_start_m": 1445100,
+          "distance_km": 0.2,
+          "amount": 100000000.0,
+          "cost_per_km": 500000000.0,
+          "project_type": "rehabilitation",
+          "source_sheet": "docs/GAA-2022.xlsx",
+          "region": null,
+          "is_anomaly": true,
+          "flag_reason": "Rehabilitation more expensive than main project"
+        },
+        {
+          "name": "Rehabilitation and Road Slope Protection Structures along Bislig-Trento Road, K1477+530 -K1477+770",
+          "highway": "Bislig",
+          "chainage_display": "K1477+530 -K1477+770",
+          "chainage_ranges": [
+            [
+              1477,
+              530,
+              1477,
+              770
+            ]
+          ],
+          "chainage_start_m": 1477530,
+          "distance_km": 0.24,
+          "amount": 100000000.0,
+          "cost_per_km": 416666666.6666667,
+          "project_type": "rehabilitation",
+          "source_sheet": "docs/GAA-2022.xlsx",
+          "region": null,
+          "is_anomaly": true,
+          "flag_reason": "Rehabilitation more expensive than main project"
+        },
+        {
+          "name": "Rehabilitation and Road Slope Protection Structures along Bislig-Trento Road, K1479+255 -K1479+515",
+          "highway": "Bislig",
+          "chainage_display": "K1479+255 -K1479+515",
+          "chainage_ranges": [
+            [
+              1479,
+              255,
+              1479,
+              515
+            ]
+          ],
+          "chainage_start_m": 1479255,
+          "distance_km": 0.26,
+          "amount": 100000000.0,
+          "cost_per_km": 384615384.6153846,
+          "project_type": "rehabilitation",
+          "source_sheet": "docs/GAA-2022.xlsx",
+          "region": null,
+          "is_anomaly": true,
+          "flag_reason": "Rehabilitation more expensive than main project"
+        },
+        {
+          "name": "Rehabilitation and Road Slope Protection Structures along Bislig-Trento Road, K1484+400 -K1484+750",
+          "highway": "Bislig",
+          "chainage_display": "K1484+400 -K1484+750",
+          "chainage_ranges": [
+            [
+              1484,
+              400,
+              1484,
+              750
+            ]
+          ],
+          "chainage_start_m": 1484400,
+          "distance_km": 0.35,
+          "amount": 100000000.0,
+          "cost_per_km": 285714285.71428573,
+          "project_type": "rehabilitation",
+          "source_sheet": "docs/GAA-2022.xlsx",
+          "region": null,
+          "is_anomaly": true,
+          "flag_reason": "Rehabilitation more expensive than main project"
+        },
+        {
+          "name": "Rehabilitation and Road Slope Protection Structures along Bislig-Trento Road, K1500+300 -K1500+700",
+          "highway": "Bislig",
+          "chainage_display": "K1500+300 -K1500+700",
+          "chainage_ranges": [
+            [
+              1500,
+              300,
+              1500,
+              700
+            ]
+          ],
+          "chainage_start_m": 1500300,
+          "distance_km": 0.4,
+          "amount": 100000000.0,
+          "cost_per_km": 250000000.0,
+          "project_type": "rehabilitation",
+          "source_sheet": "docs/GAA-2022.xlsx",
+          "region": null,
+          "is_anomaly": false,
+          "flag_reason": null
+        }
+      ]
+    },
+    {
+      "highway": "Blumentritt St",
+      "estimated_length_km": 0.125,
+      "main_project": {
+        "name": "Blumentritt St (Pasig Market) - (S03902LZ) Chainage 0 - Chainage 125",
+        "highway": "Blumentritt St",
+        "chainage_display": "Chainage 0 - Chainage 125",
+        "chainage_ranges": [
+          [
+            0,
+            0,
+            0,
+            125
+          ]
+        ],
+        "chainage_start_m": 0,
+        "distance_km": 0.125,
+        "amount": 1000000.0,
+        "cost_per_km": 8000000.0,
+        "project_type": "new_construction",
+        "source_sheet": "docs/GAA-2022.xlsx",
+        "region": null,
+        "is_anomaly": false,
+        "flag_reason": null
+      },
+      "total_segments": 2,
+      "total_distance_km": 0.247,
+      "total_amount": 16000000.0,
+      "segments": [
+        {
+          "name": "Blumentritt St (LZ) - (S02552LZ) Chainage 0 - Chainage 66, Chainage 122.1 - Chainage 400, Chainage 66 - Chainage 122.1",
+          "highway": "Blumentritt St",
+          "chainage_display": "Chainage 0 - Chainage 66, Chainage 66 - Chainage 122",
+          "chainage_ranges": [
+            [
+              0,
+              0,
+              0,
+              66
+            ],
+            [
+              0,
+              66,
+              0,
+              122
+            ]
+          ],
+          "chainage_start_m": 0,
+          "distance_km": 0.122,
+          "amount": 15000000.0,
+          "cost_per_km": 122950819.67213115,
+          "project_type": "new_construction",
+          "source_sheet": "docs/GAA-2022.xlsx",
+          "region": null,
+          "is_anomaly": true,
+          "flag_reason": "Cost per km significantly higher than main project"
+        },
+        {
+          "name": "Blumentritt St (Pasig Market) - (S03902LZ) Chainage 0 - Chainage 125",
+          "highway": "Blumentritt St",
+          "chainage_display": "Chainage 0 - Chainage 125",
+          "chainage_ranges": [
+            [
+              0,
+              0,
+              0,
+              125
+            ]
+          ],
+          "chainage_start_m": 0,
+          "distance_km": 0.125,
+          "amount": 1000000.0,
+          "cost_per_km": 8000000.0,
+          "project_type": "new_construction",
+          "source_sheet": "docs/GAA-2022.xlsx",
+          "region": null,
+          "is_anomaly": false,
+          "flag_reason": null
+        }
+      ]
+    },
+    {
       "highway": "Buguias",
       "estimated_length_km": 1.953,
       "main_project": {
@@ -1317,8 +1860,73 @@
       ]
     },
     {
+      "highway": "Buhangin",
+      "estimated_length_km": 1506.006,
+      "main_project": {
+        "name": "Buhangin-Lapanday Flyover - K1506 + 172 - K1506 + 219, (S01470MN) Chainage 213 - Chainage 294",
+        "highway": "Buhangin",
+        "chainage_display": "K1506 + 172 - K1506 + 219, Chainage 213 - Chainage 294",
+        "chainage_ranges": [
+          [
+            1506,
+            172,
+            1506,
+            219
+          ],
+          [
+            0,
+            213,
+            0,
+            294
+          ]
+        ],
+        "chainage_start_m": 1506172,
+        "distance_km": 0.128,
+        "amount": 2431000.0,
+        "cost_per_km": 18992187.5,
+        "project_type": "new_construction",
+        "source_sheet": "docs/GAA-2022.xlsx",
+        "region": null,
+        "is_anomaly": false,
+        "flag_reason": null
+      },
+      "total_segments": 1,
+      "total_distance_km": 0.128,
+      "total_amount": 2431000.0,
+      "segments": [
+        {
+          "name": "Buhangin-Lapanday Flyover - K1506 + 172 - K1506 + 219, (S01470MN) Chainage 213 - Chainage 294",
+          "highway": "Buhangin",
+          "chainage_display": "K1506 + 172 - K1506 + 219, Chainage 213 - Chainage 294",
+          "chainage_ranges": [
+            [
+              1506,
+              172,
+              1506,
+              219
+            ],
+            [
+              0,
+              213,
+              0,
+              294
+            ]
+          ],
+          "chainage_start_m": 1506172,
+          "distance_km": 0.128,
+          "amount": 2431000.0,
+          "cost_per_km": 18992187.5,
+          "project_type": "new_construction",
+          "source_sheet": "docs/GAA-2022.xlsx",
+          "region": null,
+          "is_anomaly": false,
+          "flag_reason": null
+        }
+      ]
+    },
+    {
       "highway": "Bulacan",
-      "estimated_length_km": 64.495,
+      "estimated_length_km": 11.495,
       "main_project": {
         "name": "General Alejo Santos Highway K0042 + (-495) - K0043 + 000, K0046 + 380 - K0047 + 204, K0049 + 100 - K0053 + 000, Bulacan",
         "highway": "Bulacan",
@@ -1353,9 +1961,9 @@
         "is_anomaly": false,
         "flag_reason": null
       },
-      "total_segments": 2,
-      "total_distance_km": 12.219000000000001,
-      "total_amount": 120000000.0,
+      "total_segments": 1,
+      "total_distance_km": 6.219,
+      "total_amount": 100000000.0,
       "segments": [
         {
           "name": "General Alejo Santos Highway K0042 + (-495) - K0043 + 000, K0046 + 380 - K0047 + 204, K0049 + 100 - K0053 + 000, Bulacan",
@@ -1385,28 +1993,6 @@
           "distance_km": 6.219,
           "amount": 100000000.0,
           "cost_per_km": 16079755.587715065,
-          "project_type": "new_construction",
-          "source_sheet": "docs/GAA-2022.xlsx",
-          "region": null,
-          "is_anomaly": false,
-          "flag_reason": null
-        },
-        {
-          "name": "Installation of Guardrails along Eastern Bulacan Road, K0100 + 000 - K0106 + 000, Do±a Remedios Trinidad, Bulacan",
-          "highway": "Bulacan",
-          "chainage_display": "K0100 + 000 - K0106 + 000",
-          "chainage_ranges": [
-            [
-              100,
-              0,
-              106,
-              0
-            ]
-          ],
-          "chainage_start_m": 100000,
-          "distance_km": 6.0,
-          "amount": 20000000.0,
-          "cost_per_km": 3333333.3333333335,
           "project_type": "new_construction",
           "source_sheet": "docs/GAA-2022.xlsx",
           "region": null,
@@ -1977,6 +2563,178 @@
       ]
     },
     {
+      "highway": "Calapan North Rd",
+      "estimated_length_km": 13.6,
+      "main_project": {
+        "name": "Installation of Road Safety Devices along Calapan North Rd - K0007 + 400 - K0021 + 000, Calapan-Baco, Oriental Mindoro",
+        "highway": "Calapan North Rd",
+        "chainage_display": "K0007 + 400 - K0021 + 000",
+        "chainage_ranges": [
+          [
+            7,
+            400,
+            21,
+            0
+          ]
+        ],
+        "chainage_start_m": 7400,
+        "distance_km": 13.6,
+        "amount": 79221000.0,
+        "cost_per_km": 5825073.529411765,
+        "project_type": "new_construction",
+        "source_sheet": "docs/GAA-2022.xlsx",
+        "region": null,
+        "is_anomaly": false,
+        "flag_reason": null
+      },
+      "total_segments": 1,
+      "total_distance_km": 13.6,
+      "total_amount": 79221000.0,
+      "segments": [
+        {
+          "name": "Installation of Road Safety Devices along Calapan North Rd - K0007 + 400 - K0021 + 000, Calapan-Baco, Oriental Mindoro",
+          "highway": "Calapan North Rd",
+          "chainage_display": "K0007 + 400 - K0021 + 000",
+          "chainage_ranges": [
+            [
+              7,
+              400,
+              21,
+              0
+            ]
+          ],
+          "chainage_start_m": 7400,
+          "distance_km": 13.6,
+          "amount": 79221000.0,
+          "cost_per_km": 5825073.529411765,
+          "project_type": "new_construction",
+          "source_sheet": "docs/GAA-2022.xlsx",
+          "region": null,
+          "is_anomaly": false,
+          "flag_reason": null
+        }
+      ]
+    },
+    {
+      "highway": "Calapan South Rd",
+      "estimated_length_km": 53.4,
+      "main_project": {
+        "name": "Installation of Road Safety Devices along Calapan South Rd - K0007 + 400 - K0021 + 000, Calapan City-Naujan, Oriental Mindoro",
+        "highway": "Calapan South Rd",
+        "chainage_display": "K0007 + 400 - K0021 + 000",
+        "chainage_ranges": [
+          [
+            7,
+            400,
+            21,
+            0
+          ]
+        ],
+        "chainage_start_m": 7400,
+        "distance_km": 13.6,
+        "amount": 79221000.0,
+        "cost_per_km": 5825073.529411765,
+        "project_type": "new_construction",
+        "source_sheet": "docs/GAA-2022.xlsx",
+        "region": null,
+        "is_anomaly": false,
+        "flag_reason": null
+      },
+      "total_segments": 4,
+      "total_distance_km": 53.4,
+      "total_amount": 316884000.0,
+      "segments": [
+        {
+          "name": "Installation of Road Safety Devices along Calapan South Rd - K0007 + 400 - K0021 + 000, Calapan City-Naujan, Oriental Mindoro",
+          "highway": "Calapan South Rd",
+          "chainage_display": "K0007 + 400 - K0021 + 000",
+          "chainage_ranges": [
+            [
+              7,
+              400,
+              21,
+              0
+            ]
+          ],
+          "chainage_start_m": 7400,
+          "distance_km": 13.6,
+          "amount": 79221000.0,
+          "cost_per_km": 5825073.529411765,
+          "project_type": "new_construction",
+          "source_sheet": "docs/GAA-2022.xlsx",
+          "region": null,
+          "is_anomaly": false,
+          "flag_reason": null
+        },
+        {
+          "name": "Installation of Road Safety Devices along Calapan South Rd - K0021 + 000 - K0033 + 600, Naujan-Victoria, Oriental Mindoro",
+          "highway": "Calapan South Rd",
+          "chainage_display": "K0021 + 000 - K0033 + 600",
+          "chainage_ranges": [
+            [
+              21,
+              0,
+              33,
+              600
+            ]
+          ],
+          "chainage_start_m": 21000,
+          "distance_km": 12.6,
+          "amount": 79221000.0,
+          "cost_per_km": 6287380.952380952,
+          "project_type": "new_construction",
+          "source_sheet": "docs/GAA-2022.xlsx",
+          "region": null,
+          "is_anomaly": false,
+          "flag_reason": null
+        },
+        {
+          "name": "Installation of Road Safety Devices along Calapan South Rd - K0033 + 600 - K0047 + 200, Victoria, Oriental Mindoro",
+          "highway": "Calapan South Rd",
+          "chainage_display": "K0033 + 600 - K0047 + 200",
+          "chainage_ranges": [
+            [
+              33,
+              600,
+              47,
+              200
+            ]
+          ],
+          "chainage_start_m": 33600,
+          "distance_km": 13.6,
+          "amount": 79221000.0,
+          "cost_per_km": 5825073.529411765,
+          "project_type": "new_construction",
+          "source_sheet": "docs/GAA-2022.xlsx",
+          "region": null,
+          "is_anomaly": false,
+          "flag_reason": null
+        },
+        {
+          "name": "Installation of Road Safety Devices along Calapan South Rd - K0047 + 200 - K0060 + 800, Socorro, Oriental Mindoro",
+          "highway": "Calapan South Rd",
+          "chainage_display": "K0047 + 200 - K0060 + 800",
+          "chainage_ranges": [
+            [
+              47,
+              200,
+              60,
+              800
+            ]
+          ],
+          "chainage_start_m": 47200,
+          "distance_km": 13.6,
+          "amount": 79221000.0,
+          "cost_per_km": 5825073.529411765,
+          "project_type": "new_construction",
+          "source_sheet": "docs/GAA-2022.xlsx",
+          "region": null,
+          "is_anomaly": false,
+          "flag_reason": null
+        }
+      ]
+    },
+    {
       "highway": "Calinog",
       "estimated_length_km": 1.224,
       "main_project": {
@@ -2086,6 +2844,59 @@
           "distance_km": 0.49,
           "amount": 16285000.0,
           "cost_per_km": 33234693.87755102,
+          "project_type": "new_construction",
+          "source_sheet": "docs/GAA-2022.xlsx",
+          "region": null,
+          "is_anomaly": false,
+          "flag_reason": null
+        }
+      ]
+    },
+    {
+      "highway": "Capas",
+      "estimated_length_km": 6.395,
+      "main_project": {
+        "name": "Installation of Solar LED Street Lights and Road Safety Devices along Capas-San Jose-Mayantoc-Malacampa Rd - K0115 + (-752) - K0120 +643, Capas, Tarlac",
+        "highway": "Capas",
+        "chainage_display": "K0115 + (-752) - K0120 +643",
+        "chainage_ranges": [
+          [
+            115,
+            -752,
+            120,
+            643
+          ]
+        ],
+        "chainage_start_m": 114248,
+        "distance_km": 6.395,
+        "amount": 60000000.0,
+        "cost_per_km": 9382329.945269743,
+        "project_type": "new_construction",
+        "source_sheet": "docs/GAA-2022.xlsx",
+        "region": null,
+        "is_anomaly": false,
+        "flag_reason": null
+      },
+      "total_segments": 1,
+      "total_distance_km": 6.395,
+      "total_amount": 60000000.0,
+      "segments": [
+        {
+          "name": "Installation of Solar LED Street Lights and Road Safety Devices along Capas-San Jose-Mayantoc-Malacampa Rd - K0115 + (-752) - K0120 +643, Capas, Tarlac",
+          "highway": "Capas",
+          "chainage_display": "K0115 + (-752) - K0120 +643",
+          "chainage_ranges": [
+            [
+              115,
+              -752,
+              120,
+              643
+            ]
+          ],
+          "chainage_start_m": 114248,
+          "distance_km": 6.395,
+          "amount": 60000000.0,
+          "cost_per_km": 9382329.945269743,
           "project_type": "new_construction",
           "source_sheet": "docs/GAA-2022.xlsx",
           "region": null,
@@ -2249,11 +3060,11 @@
       ]
     },
     {
-      "highway": "Catanduanes",
+      "highway": "Catanduanes Cir Rd",
       "estimated_length_km": 3.5,
       "main_project": {
         "name": "Preventive Maintenance (Asphalt Overlay) along Catanduanes Cir Rd - K0187 + 000 - K0190 + 500 (with exceptions), San Andres-Virac Road Section, Catanduanes",
-        "highway": "Catanduanes",
+        "highway": "Catanduanes Cir Rd",
         "chainage_display": "K0187 + 000 - K0190 + 500",
         "chainage_ranges": [
           [
@@ -2279,7 +3090,7 @@
       "segments": [
         {
           "name": "Preventive Maintenance (Asphalt Overlay) along Catanduanes Cir Rd - K0187 + 000 - K0190 + 500 (with exceptions), San Andres-Virac Road Section, Catanduanes",
-          "highway": "Catanduanes",
+          "highway": "Catanduanes Cir Rd",
           "chainage_display": "K0187 + 000 - K0190 + 500",
           "chainage_ranges": [
             [
@@ -2719,6 +3530,124 @@
       ]
     },
     {
+      "highway": "Chainage",
+      "estimated_length_km": 1.68,
+      "main_project": {
+        "name": "(S00656LZ) Chainage 12230 - Chainage 13180, Chainage 13660 - Chainage 13910",
+        "highway": "Chainage",
+        "chainage_display": "Chainage 12230 - Chainage 13180, Chainage 13660 - Chainage 13910",
+        "chainage_ranges": [
+          [
+            12,
+            230,
+            13,
+            180
+          ],
+          [
+            13,
+            660,
+            13,
+            910
+          ]
+        ],
+        "chainage_start_m": 12230,
+        "distance_km": 1.2,
+        "amount": 30000000.0,
+        "cost_per_km": 25000000.0,
+        "project_type": "new_construction",
+        "source_sheet": "docs/GAA-2022.xlsx",
+        "region": null,
+        "is_anomaly": false,
+        "flag_reason": null
+      },
+      "total_segments": 1,
+      "total_distance_km": 1.2,
+      "total_amount": 30000000.0,
+      "segments": [
+        {
+          "name": "(S00656LZ) Chainage 12230 - Chainage 13180, Chainage 13660 - Chainage 13910",
+          "highway": "Chainage",
+          "chainage_display": "Chainage 12230 - Chainage 13180, Chainage 13660 - Chainage 13910",
+          "chainage_ranges": [
+            [
+              12,
+              230,
+              13,
+              180
+            ],
+            [
+              13,
+              660,
+              13,
+              910
+            ]
+          ],
+          "chainage_start_m": 12230,
+          "distance_km": 1.2,
+          "amount": 30000000.0,
+          "cost_per_km": 25000000.0,
+          "project_type": "new_construction",
+          "source_sheet": "docs/GAA-2022.xlsx",
+          "region": null,
+          "is_anomaly": false,
+          "flag_reason": null
+        }
+      ]
+    },
+    {
+      "highway": "Chuntug",
+      "estimated_length_km": 0.218,
+      "main_project": {
+        "name": "Chuntug #1 - (S00427LZ) Chainage 0 - Chainage 218",
+        "highway": "Chuntug",
+        "chainage_display": "Chainage 0 - Chainage 218",
+        "chainage_ranges": [
+          [
+            0,
+            0,
+            0,
+            218
+          ]
+        ],
+        "chainage_start_m": 0,
+        "distance_km": 0.218,
+        "amount": 4482000.0,
+        "cost_per_km": 20559633.027522936,
+        "project_type": "new_construction",
+        "source_sheet": "docs/GAA-2022.xlsx",
+        "region": null,
+        "is_anomaly": false,
+        "flag_reason": null
+      },
+      "total_segments": 1,
+      "total_distance_km": 0.218,
+      "total_amount": 4482000.0,
+      "segments": [
+        {
+          "name": "Chuntug #1 - (S00427LZ) Chainage 0 - Chainage 218",
+          "highway": "Chuntug",
+          "chainage_display": "Chainage 0 - Chainage 218",
+          "chainage_ranges": [
+            [
+              0,
+              0,
+              0,
+              218
+            ]
+          ],
+          "chainage_start_m": 0,
+          "distance_km": 0.218,
+          "amount": 4482000.0,
+          "cost_per_km": 20559633.027522936,
+          "project_type": "new_construction",
+          "source_sheet": "docs/GAA-2022.xlsx",
+          "region": null,
+          "is_anomaly": false,
+          "flag_reason": null
+        }
+      ]
+    },
+    {
       "highway": "City Bdry",
       "estimated_length_km": 3.285,
       "main_project": {
@@ -2772,160 +3701,50 @@
       ]
     },
     {
-      "highway": "Construction Of",
-      "estimated_length_km": 418.558,
+      "highway": "Cloverleaf",
+      "estimated_length_km": 0.258,
       "main_project": {
-        "name": "Installation/Construction of Road Safety Devices (Solar Studs and Solar LED Street Lights) along Mt Province Bdry-Calanan-Pinukpuk-Abbut - K0447 + 000 - K0469 + 916",
-        "highway": "Construction Of",
-        "chainage_display": "K0447 + 000 - K0469 + 916",
+        "name": "Cloverleaf - (S05169LZ) Chainage 0 - Chainage 258",
+        "highway": "Cloverleaf",
+        "chainage_display": "Chainage 0 - Chainage 258",
         "chainage_ranges": [
           [
-            447,
             0,
-            469,
-            916
+            0,
+            0,
+            258
           ]
         ],
-        "chainage_start_m": 447000,
-        "distance_km": 22.916,
-        "amount": 96000000.0,
-        "cost_per_km": 4189212.77709897,
+        "chainage_start_m": 0,
+        "distance_km": 0.258,
+        "amount": 6187000.0,
+        "cost_per_km": 23980620.15503876,
         "project_type": "new_construction",
         "source_sheet": "docs/GAA-2022.xlsx",
         "region": null,
         "is_anomaly": false,
         "flag_reason": null
       },
-      "total_segments": 7,
-      "total_distance_km": 31.209000000000003,
-      "total_amount": 291000000.0,
+      "total_segments": 6,
+      "total_distance_km": 1.2820000000000003,
+      "total_amount": 21161000.0,
       "segments": [
         {
-          "name": "Construction of Road Slope Protection Structure (Active Protection) - along Ternate-Nasugbu Rd - K0068+586 - K0068+641",
-          "highway": "Construction Of",
-          "chainage_display": "K0068+586 - K0068+641",
+          "name": "Cloverleaf - (S05169LZ) Chainage 0 - Chainage 258",
+          "highway": "Cloverleaf",
+          "chainage_display": "Chainage 0 - Chainage 258",
           "chainage_ranges": [
             [
-              68,
-              586,
-              68,
-              641
-            ]
-          ],
-          "chainage_start_m": 68586,
-          "distance_km": 0.055,
-          "amount": 20000000.0,
-          "cost_per_km": 363636363.6363636,
-          "project_type": "new_construction",
-          "source_sheet": "docs/GAA-2022.xlsx",
-          "region": null,
-          "is_anomaly": true,
-          "flag_reason": "Cost per km significantly higher than main project"
-        },
-        {
-          "name": "Construction of Road Slope Protection Structure (Active Protection) - along Ternate-Nasugbu Rd - K0071+145 - K0071+166",
-          "highway": "Construction Of",
-          "chainage_display": "K0071+145 - K0071+166",
-          "chainage_ranges": [
-            [
-              71,
-              145,
-              71,
-              166
-            ]
-          ],
-          "chainage_start_m": 71145,
-          "distance_km": 0.021,
-          "amount": 10000000.0,
-          "cost_per_km": 476190476.1904762,
-          "project_type": "new_construction",
-          "source_sheet": "docs/GAA-2022.xlsx",
-          "region": null,
-          "is_anomaly": true,
-          "flag_reason": "Cost per km significantly higher than main project"
-        },
-        {
-          "name": "Construction of Road Slope Protection Structure (Active Protection) - along Ternate-Nasugbu Rd - K0071+187 - K0071+232",
-          "highway": "Construction Of",
-          "chainage_display": "K0071+187 - K0071+232",
-          "chainage_ranges": [
-            [
-              71,
-              187,
-              71,
-              232
-            ]
-          ],
-          "chainage_start_m": 71187,
-          "distance_km": 0.045,
-          "amount": 20000000.0,
-          "cost_per_km": 444444444.4444445,
-          "project_type": "new_construction",
-          "source_sheet": "docs/GAA-2022.xlsx",
-          "region": null,
-          "is_anomaly": true,
-          "flag_reason": "Cost per km significantly higher than main project"
-        },
-        {
-          "name": "Construction of Road Slope Protection Structure (Active Protection) - along Ternate-Nasugbu Rd - K0071+232 - K0071+277",
-          "highway": "Construction Of",
-          "chainage_display": "K0071+232 - K0071+277",
-          "chainage_ranges": [
-            [
-              71,
-              232,
-              71,
-              277
-            ]
-          ],
-          "chainage_start_m": 71232,
-          "distance_km": 0.045,
-          "amount": 20000000.0,
-          "cost_per_km": 444444444.4444445,
-          "project_type": "new_construction",
-          "source_sheet": "docs/GAA-2022.xlsx",
-          "region": null,
-          "is_anomaly": true,
-          "flag_reason": "Cost per km significantly higher than main project"
-        },
-        {
-          "name": "Construction of Road Slope Protection Structure along Barotac Viejo-Sn Rafael Rd - K0079 + 714 - K0080 + 321",
-          "highway": "Construction Of",
-          "chainage_display": "K0079 + 714 - K0080 + 321",
-          "chainage_ranges": [
-            [
-              79,
-              714,
-              80,
-              321
-            ]
-          ],
-          "chainage_start_m": 79714,
-          "distance_km": 0.607,
-          "amount": 75000000.0,
-          "cost_per_km": 123558484.34925865,
-          "project_type": "new_construction",
-          "source_sheet": "docs/GAA-2022.xlsx",
-          "region": null,
-          "is_anomaly": true,
-          "flag_reason": "Cost per km significantly higher than main project"
-        },
-        {
-          "name": "Installation/Construction of Road Safety Devices (Solar Studs and Solar LED Street Lights) along Mt Province Bdry-Calanan-Pinukpuk-Abbut - K0447 + 000 - K0469 + 916",
-          "highway": "Construction Of",
-          "chainage_display": "K0447 + 000 - K0469 + 916",
-          "chainage_ranges": [
-            [
-              447,
               0,
-              469,
-              916
+              0,
+              0,
+              258
             ]
           ],
-          "chainage_start_m": 447000,
-          "distance_km": 22.916,
-          "amount": 96000000.0,
-          "cost_per_km": 4189212.77709897,
+          "chainage_start_m": 0,
+          "distance_km": 0.258,
+          "amount": 6187000.0,
+          "cost_per_km": 23980620.15503876,
           "project_type": "new_construction",
           "source_sheet": "docs/GAA-2022.xlsx",
           "region": null,
@@ -2933,21 +3752,162 @@
           "flag_reason": null
         },
         {
-          "name": "Installation/Construction of Road Safety Devices (Solar Studs and Solar LED Street Lights) along Balbalan-Pinukpuk Rd - K0479 + 624 - K0487 + 144",
-          "highway": "Construction Of",
-          "chainage_display": "K0479 + 624 - K0487 + 144",
+          "name": "Cloverleaf - (S05129LZ) Chainage 0 - Chainage 203",
+          "highway": "Cloverleaf",
+          "chainage_display": "Chainage 0 - Chainage 203",
           "chainage_ranges": [
             [
-              479,
-              624,
-              487,
-              144
+              0,
+              0,
+              0,
+              203
             ]
           ],
-          "chainage_start_m": 479624,
-          "distance_km": 7.52,
-          "amount": 50000000.0,
-          "cost_per_km": 6648936.170212766,
+          "chainage_start_m": 0,
+          "distance_km": 0.203,
+          "amount": 4868000.0,
+          "cost_per_km": 23980295.566502463,
+          "project_type": "new_construction",
+          "source_sheet": "docs/GAA-2022.xlsx",
+          "region": null,
+          "is_anomaly": false,
+          "flag_reason": null
+        },
+        {
+          "name": "Cloverleaf - (S05131LZ) Chainage 0 - Chainage 234",
+          "highway": "Cloverleaf",
+          "chainage_display": "Chainage 0 - Chainage 234",
+          "chainage_ranges": [
+            [
+              0,
+              0,
+              0,
+              234
+            ]
+          ],
+          "chainage_start_m": 0,
+          "distance_km": 0.234,
+          "amount": 3741000.0,
+          "cost_per_km": 15987179.487179486,
+          "project_type": "new_construction",
+          "source_sheet": "docs/GAA-2022.xlsx",
+          "region": null,
+          "is_anomaly": false,
+          "flag_reason": null
+        },
+        {
+          "name": "Cloverleaf - (S05175LZ) Chainage 0 - Chainage 199",
+          "highway": "Cloverleaf",
+          "chainage_display": "Chainage 0 - Chainage 199",
+          "chainage_ranges": [
+            [
+              0,
+              0,
+              0,
+              199
+            ]
+          ],
+          "chainage_start_m": 0,
+          "distance_km": 0.199,
+          "amount": 3181000.0,
+          "cost_per_km": 15984924.623115577,
+          "project_type": "new_construction",
+          "source_sheet": "docs/GAA-2022.xlsx",
+          "region": null,
+          "is_anomaly": false,
+          "flag_reason": null
+        },
+        {
+          "name": "Cloverleaf - (S05176LZ) Chainage 0 - Chainage 215",
+          "highway": "Cloverleaf",
+          "chainage_display": "Chainage 0 - Chainage 215",
+          "chainage_ranges": [
+            [
+              0,
+              0,
+              0,
+              215
+            ]
+          ],
+          "chainage_start_m": 0,
+          "distance_km": 0.215,
+          "amount": 1757000.0,
+          "cost_per_km": 8172093.023255814,
+          "project_type": "new_construction",
+          "source_sheet": "docs/GAA-2022.xlsx",
+          "region": null,
+          "is_anomaly": false,
+          "flag_reason": null
+        },
+        {
+          "name": "Cloverleaf - (S05170LZ) Chainage 0 - Chainage 173",
+          "highway": "Cloverleaf",
+          "chainage_display": "Chainage 0 - Chainage 173",
+          "chainage_ranges": [
+            [
+              0,
+              0,
+              0,
+              173
+            ]
+          ],
+          "chainage_start_m": 0,
+          "distance_km": 0.173,
+          "amount": 1427000.0,
+          "cost_per_km": 8248554.913294799,
+          "project_type": "new_construction",
+          "source_sheet": "docs/GAA-2022.xlsx",
+          "region": null,
+          "is_anomaly": false,
+          "flag_reason": null
+        }
+      ]
+    },
+    {
+      "highway": "Colon St",
+      "estimated_length_km": 0.148,
+      "main_project": {
+        "name": "Colon St - (S00095CB) Chainage 841 - Chainage 989",
+        "highway": "Colon St",
+        "chainage_display": "Chainage 841 - Chainage 989",
+        "chainage_ranges": [
+          [
+            0,
+            841,
+            0,
+            989
+          ]
+        ],
+        "chainage_start_m": 841,
+        "distance_km": 0.148,
+        "amount": 7000000.0,
+        "cost_per_km": 47297297.2972973,
+        "project_type": "new_construction",
+        "source_sheet": "docs/GAA-2022.xlsx",
+        "region": null,
+        "is_anomaly": false,
+        "flag_reason": null
+      },
+      "total_segments": 1,
+      "total_distance_km": 0.148,
+      "total_amount": 7000000.0,
+      "segments": [
+        {
+          "name": "Colon St - (S00095CB) Chainage 841 - Chainage 989",
+          "highway": "Colon St",
+          "chainage_display": "Chainage 841 - Chainage 989",
+          "chainage_ranges": [
+            [
+              0,
+              841,
+              0,
+              989
+            ]
+          ],
+          "chainage_start_m": 841,
+          "distance_km": 0.148,
+          "amount": 7000000.0,
+          "cost_per_km": 47297297.2972973,
           "project_type": "new_construction",
           "source_sheet": "docs/GAA-2022.xlsx",
           "region": null,
@@ -3075,6 +4035,59 @@
       ]
     },
     {
+      "highway": "Corregidor St",
+      "estimated_length_km": 0.272,
+      "main_project": {
+        "name": "Corregidor St - (S05159LZ) Chainage 0 - Chainage 272",
+        "highway": "Corregidor St",
+        "chainage_display": "Chainage 0 - Chainage 272",
+        "chainage_ranges": [
+          [
+            0,
+            0,
+            0,
+            272
+          ]
+        ],
+        "chainage_start_m": 0,
+        "distance_km": 0.272,
+        "amount": 4446000.0,
+        "cost_per_km": 16345588.235294117,
+        "project_type": "new_construction",
+        "source_sheet": "docs/GAA-2022.xlsx",
+        "region": null,
+        "is_anomaly": false,
+        "flag_reason": null
+      },
+      "total_segments": 1,
+      "total_distance_km": 0.272,
+      "total_amount": 4446000.0,
+      "segments": [
+        {
+          "name": "Corregidor St - (S05159LZ) Chainage 0 - Chainage 272",
+          "highway": "Corregidor St",
+          "chainage_display": "Chainage 0 - Chainage 272",
+          "chainage_ranges": [
+            [
+              0,
+              0,
+              0,
+              272
+            ]
+          ],
+          "chainage_start_m": 0,
+          "distance_km": 0.272,
+          "amount": 4446000.0,
+          "cost_per_km": 16345588.235294117,
+          "project_type": "new_construction",
+          "source_sheet": "docs/GAA-2022.xlsx",
+          "region": null,
+          "is_anomaly": false,
+          "flag_reason": null
+        }
+      ]
+    },
+    {
       "highway": "Cotabato",
       "estimated_length_km": 60.58,
       "main_project": {
@@ -3168,6 +4181,81 @@
           "region": null,
           "is_anomaly": true,
           "flag_reason": "Cost per km significantly higher than main project"
+        }
+      ]
+    },
+    {
+      "highway": "Daang Maharlika",
+      "estimated_length_km": 112.456,
+      "main_project": {
+        "name": "Installation of Road Signages along Daang Maharlika (LZ) - K0181 + 000 - K0246 + 724, Package B",
+        "highway": "Daang Maharlika",
+        "chainage_display": "K0181 + 000 - K0246 + 724",
+        "chainage_ranges": [
+          [
+            181,
+            0,
+            246,
+            724
+          ]
+        ],
+        "chainage_start_m": 181000,
+        "distance_km": 65.724,
+        "amount": 50000000.0,
+        "cost_per_km": 760757.105471365,
+        "project_type": "new_construction",
+        "source_sheet": "docs/GAA-2022.xlsx",
+        "region": null,
+        "is_anomaly": false,
+        "flag_reason": null
+      },
+      "total_segments": 2,
+      "total_distance_km": 90.456,
+      "total_amount": 100000000.0,
+      "segments": [
+        {
+          "name": "Installation of Road Signages along Daang Maharlika (LZ) - K0135 + (-732) - K0159 + 000, Package A",
+          "highway": "Daang Maharlika",
+          "chainage_display": "K0135 + (-732) - K0159 + 000",
+          "chainage_ranges": [
+            [
+              135,
+              -732,
+              159,
+              0
+            ]
+          ],
+          "chainage_start_m": 134268,
+          "distance_km": 24.732,
+          "amount": 50000000.0,
+          "cost_per_km": 2021672.3273491834,
+          "project_type": "new_construction",
+          "source_sheet": "docs/GAA-2022.xlsx",
+          "region": null,
+          "is_anomaly": true,
+          "flag_reason": "Cost per km significantly higher than main project"
+        },
+        {
+          "name": "Installation of Road Signages along Daang Maharlika (LZ) - K0181 + 000 - K0246 + 724, Package B",
+          "highway": "Daang Maharlika",
+          "chainage_display": "K0181 + 000 - K0246 + 724",
+          "chainage_ranges": [
+            [
+              181,
+              0,
+              246,
+              724
+            ]
+          ],
+          "chainage_start_m": 181000,
+          "distance_km": 65.724,
+          "amount": 50000000.0,
+          "cost_per_km": 760757.105471365,
+          "project_type": "new_construction",
+          "source_sheet": "docs/GAA-2022.xlsx",
+          "region": null,
+          "is_anomaly": false,
+          "flag_reason": null
         }
       ]
     },
@@ -3636,6 +4724,83 @@
       ]
     },
     {
+      "highway": "Diversion",
+      "estimated_length_km": 19.18,
+      "main_project": {
+        "name": "Installation of Road Safety Facilities at Marikina-Diversion Road, Chainage 000-Chainage 260, K0018 + (-721) - K0018 + 1169, K0018 + (-970) - K0018 + 1180",
+        "highway": "Diversion",
+        "chainage_display": "K0018 + (-721) - K0018 + 1169, K0018 + (-970) - K0018 + 1180, Chainage 000-Chainage 260",
+        "chainage_ranges": [
+          [
+            18,
+            -721,
+            18,
+            1169
+          ],
+          [
+            18,
+            -970,
+            18,
+            1180
+          ],
+          [
+            0,
+            0,
+            0,
+            260
+          ]
+        ],
+        "chainage_start_m": 17279,
+        "distance_km": 4.3,
+        "amount": 33640000.0,
+        "cost_per_km": 7823255.813953489,
+        "project_type": "new_construction",
+        "source_sheet": "docs/GAA-2022.xlsx",
+        "region": null,
+        "is_anomaly": false,
+        "flag_reason": null
+      },
+      "total_segments": 1,
+      "total_distance_km": 4.3,
+      "total_amount": 33640000.0,
+      "segments": [
+        {
+          "name": "Installation of Road Safety Facilities at Marikina-Diversion Road, Chainage 000-Chainage 260, K0018 + (-721) - K0018 + 1169, K0018 + (-970) - K0018 + 1180",
+          "highway": "Diversion",
+          "chainage_display": "K0018 + (-721) - K0018 + 1169, K0018 + (-970) - K0018 + 1180, Chainage 000-Chainage 260",
+          "chainage_ranges": [
+            [
+              18,
+              -721,
+              18,
+              1169
+            ],
+            [
+              18,
+              -970,
+              18,
+              1180
+            ],
+            [
+              0,
+              0,
+              0,
+              260
+            ]
+          ],
+          "chainage_start_m": 17279,
+          "distance_km": 4.3,
+          "amount": 33640000.0,
+          "cost_per_km": 7823255.813953489,
+          "project_type": "new_construction",
+          "source_sheet": "docs/GAA-2022.xlsx",
+          "region": null,
+          "is_anomaly": false,
+          "flag_reason": null
+        }
+      ]
+    },
+    {
       "highway": "Dock Topside Div",
       "estimated_length_km": 0.297,
       "main_project": {
@@ -3689,33 +4854,86 @@
       ]
     },
     {
-      "highway": "Edsa",
-      "estimated_length_km": 20.17,
+      "highway": "Eastern Bulacan Road",
+      "estimated_length_km": 6.0,
       "main_project": {
-        "name": "Improvement/ Installation of Road Safety along Epifanio Delos Santos Ave (EDSA), Southbound, K0016 + (-530) - K0020 + 170, Quezon City",
-        "highway": "Edsa",
-        "chainage_display": "K0016 + (-530) - K0020 + 170",
+        "name": "Installation of Guardrails along Eastern Bulacan Road, K0100 + 000 - K0106 + 000, Do±a Remedios Trinidad, Bulacan",
+        "highway": "Eastern Bulacan Road",
+        "chainage_display": "K0100 + 000 - K0106 + 000",
         "chainage_ranges": [
           [
-            16,
-            -530,
-            20,
-            170
+            100,
+            0,
+            106,
+            0
           ]
         ],
-        "chainage_start_m": 15470,
-        "distance_km": 4.7,
-        "amount": 23000000.0,
-        "cost_per_km": 4893617.021276596,
+        "chainage_start_m": 100000,
+        "distance_km": 6.0,
+        "amount": 20000000.0,
+        "cost_per_km": 3333333.3333333335,
         "project_type": "new_construction",
         "source_sheet": "docs/GAA-2022.xlsx",
         "region": null,
         "is_anomaly": false,
         "flag_reason": null
       },
-      "total_segments": 2,
-      "total_distance_km": 4.945,
-      "total_amount": 26917000.0,
+      "total_segments": 1,
+      "total_distance_km": 6.0,
+      "total_amount": 20000000.0,
+      "segments": [
+        {
+          "name": "Installation of Guardrails along Eastern Bulacan Road, K0100 + 000 - K0106 + 000, Do±a Remedios Trinidad, Bulacan",
+          "highway": "Eastern Bulacan Road",
+          "chainage_display": "K0100 + 000 - K0106 + 000",
+          "chainage_ranges": [
+            [
+              100,
+              0,
+              106,
+              0
+            ]
+          ],
+          "chainage_start_m": 100000,
+          "distance_km": 6.0,
+          "amount": 20000000.0,
+          "cost_per_km": 3333333.3333333335,
+          "project_type": "new_construction",
+          "source_sheet": "docs/GAA-2022.xlsx",
+          "region": null,
+          "is_anomaly": false,
+          "flag_reason": null
+        }
+      ]
+    },
+    {
+      "highway": "Edsa",
+      "estimated_length_km": 0.245,
+      "main_project": {
+        "name": "EDSA Service Rd 1 (North Bound) - (S03372LZ) Chainage 0 - Chainage 245",
+        "highway": "Edsa",
+        "chainage_display": "Chainage 0 - Chainage 245",
+        "chainage_ranges": [
+          [
+            0,
+            0,
+            0,
+            245
+          ]
+        ],
+        "chainage_start_m": 0,
+        "distance_km": 0.245,
+        "amount": 3917000.0,
+        "cost_per_km": 15987755.102040816,
+        "project_type": "new_construction",
+        "source_sheet": "docs/GAA-2022.xlsx",
+        "region": null,
+        "is_anomaly": false,
+        "flag_reason": null
+      },
+      "total_segments": 1,
+      "total_distance_km": 0.245,
+      "total_amount": 3917000.0,
       "segments": [
         {
           "name": "EDSA Service Rd 1 (North Bound) - (S03372LZ) Chainage 0 - Chainage 245",
@@ -3736,12 +4954,96 @@
           "project_type": "new_construction",
           "source_sheet": "docs/GAA-2022.xlsx",
           "region": null,
-          "is_anomaly": true,
-          "flag_reason": "Cost per km significantly higher than main project"
-        },
+          "is_anomaly": false,
+          "flag_reason": null
+        }
+      ]
+    },
+    {
+      "highway": "Elizondo St",
+      "estimated_length_km": 0.25,
+      "main_project": {
+        "name": "Elizondo St - (S05844LZ) Chainage 000 - Chainage 250",
+        "highway": "Elizondo St",
+        "chainage_display": "Chainage 000 - Chainage 250",
+        "chainage_ranges": [
+          [
+            0,
+            0,
+            0,
+            250
+          ]
+        ],
+        "chainage_start_m": 0,
+        "distance_km": 0.25,
+        "amount": 7500000.0,
+        "cost_per_km": 30000000.0,
+        "project_type": "new_construction",
+        "source_sheet": "docs/GAA-2022.xlsx",
+        "region": null,
+        "is_anomaly": false,
+        "flag_reason": null
+      },
+      "total_segments": 1,
+      "total_distance_km": 0.25,
+      "total_amount": 7500000.0,
+      "segments": [
+        {
+          "name": "Elizondo St - (S05844LZ) Chainage 000 - Chainage 250",
+          "highway": "Elizondo St",
+          "chainage_display": "Chainage 000 - Chainage 250",
+          "chainage_ranges": [
+            [
+              0,
+              0,
+              0,
+              250
+            ]
+          ],
+          "chainage_start_m": 0,
+          "distance_km": 0.25,
+          "amount": 7500000.0,
+          "cost_per_km": 30000000.0,
+          "project_type": "new_construction",
+          "source_sheet": "docs/GAA-2022.xlsx",
+          "region": null,
+          "is_anomaly": false,
+          "flag_reason": null
+        }
+      ]
+    },
+    {
+      "highway": "Epifanio Delos Santos Ave",
+      "estimated_length_km": 4.7,
+      "main_project": {
+        "name": "Improvement/ Installation of Road Safety along Epifanio Delos Santos Ave (EDSA), Southbound, K0016 + (-530) - K0020 + 170, Quezon City",
+        "highway": "Epifanio Delos Santos Ave",
+        "chainage_display": "K0016 + (-530) - K0020 + 170",
+        "chainage_ranges": [
+          [
+            16,
+            -530,
+            20,
+            170
+          ]
+        ],
+        "chainage_start_m": 15470,
+        "distance_km": 4.7,
+        "amount": 23000000.0,
+        "cost_per_km": 4893617.021276596,
+        "project_type": "maintenance",
+        "source_sheet": "docs/GAA-2022.xlsx",
+        "region": null,
+        "is_anomaly": false,
+        "flag_reason": null
+      },
+      "total_segments": 1,
+      "total_distance_km": 4.7,
+      "total_amount": 23000000.0,
+      "segments": [
         {
           "name": "Improvement/ Installation of Road Safety along Epifanio Delos Santos Ave (EDSA), Southbound, K0016 + (-530) - K0020 + 170, Quezon City",
-          "highway": "Edsa",
+          "highway": "Epifanio Delos Santos Ave",
           "chainage_display": "K0016 + (-530) - K0020 + 170",
           "chainage_ranges": [
             [
@@ -3755,6 +5057,83 @@
           "distance_km": 4.7,
           "amount": 23000000.0,
           "cost_per_km": 4893617.021276596,
+          "project_type": "maintenance",
+          "source_sheet": "docs/GAA-2022.xlsx",
+          "region": null,
+          "is_anomaly": false,
+          "flag_reason": null
+        }
+      ]
+    },
+    {
+      "highway": "Escario St",
+      "estimated_length_km": 1.009,
+      "main_project": {
+        "name": "Escario St - (S00049CB) K0001 + (-676) - K0001 + 009, (S00318CB) Chainage 0 - Chainage 425, (S00319CB) Chainage 0 - Chainage 335",
+        "highway": "Escario St",
+        "chainage_display": "K0001 + (-676) - K0001 + 009, Chainage 0 - Chainage 425, Chainage 0 - Chainage 335",
+        "chainage_ranges": [
+          [
+            1,
+            -676,
+            1,
+            9
+          ],
+          [
+            0,
+            0,
+            0,
+            425
+          ],
+          [
+            0,
+            0,
+            0,
+            335
+          ]
+        ],
+        "chainage_start_m": 324,
+        "distance_km": 1.445,
+        "amount": 52620000.0,
+        "cost_per_km": 36415224.91349481,
+        "project_type": "new_construction",
+        "source_sheet": "docs/GAA-2022.xlsx",
+        "region": null,
+        "is_anomaly": false,
+        "flag_reason": null
+      },
+      "total_segments": 1,
+      "total_distance_km": 1.445,
+      "total_amount": 52620000.0,
+      "segments": [
+        {
+          "name": "Escario St - (S00049CB) K0001 + (-676) - K0001 + 009, (S00318CB) Chainage 0 - Chainage 425, (S00319CB) Chainage 0 - Chainage 335",
+          "highway": "Escario St",
+          "chainage_display": "K0001 + (-676) - K0001 + 009, Chainage 0 - Chainage 425, Chainage 0 - Chainage 335",
+          "chainage_ranges": [
+            [
+              1,
+              -676,
+              1,
+              9
+            ],
+            [
+              0,
+              0,
+              0,
+              425
+            ],
+            [
+              0,
+              0,
+              0,
+              335
+            ]
+          ],
+          "chainage_start_m": 324,
+          "distance_km": 1.445,
+          "amount": 52620000.0,
+          "cost_per_km": 36415224.91349481,
           "project_type": "new_construction",
           "source_sheet": "docs/GAA-2022.xlsx",
           "region": null,
@@ -4100,6 +5479,189 @@
       ]
     },
     {
+      "highway": "Gen Alejo Santos Highway",
+      "estimated_length_km": 1.003,
+      "main_project": {
+        "name": "Preventive Maintenance (Asphalt Overlay) along Gen Alejo Santos Highway - K0058 + (-153) - K0058 + 850",
+        "highway": "Gen Alejo Santos Highway",
+        "chainage_display": "K0058 + (-153) - K0058 + 850",
+        "chainage_ranges": [
+          [
+            58,
+            -153,
+            58,
+            850
+          ]
+        ],
+        "chainage_start_m": 57847,
+        "distance_km": 1.003,
+        "amount": 16300000.0,
+        "cost_per_km": 16251246.261216354,
+        "project_type": "maintenance",
+        "source_sheet": "docs/GAA-2022.xlsx",
+        "region": null,
+        "is_anomaly": false,
+        "flag_reason": null
+      },
+      "total_segments": 1,
+      "total_distance_km": 1.003,
+      "total_amount": 16300000.0,
+      "segments": [
+        {
+          "name": "Preventive Maintenance (Asphalt Overlay) along Gen Alejo Santos Highway - K0058 + (-153) - K0058 + 850",
+          "highway": "Gen Alejo Santos Highway",
+          "chainage_display": "K0058 + (-153) - K0058 + 850",
+          "chainage_ranges": [
+            [
+              58,
+              -153,
+              58,
+              850
+            ]
+          ],
+          "chainage_start_m": 57847,
+          "distance_km": 1.003,
+          "amount": 16300000.0,
+          "cost_per_km": 16251246.261216354,
+          "project_type": "maintenance",
+          "source_sheet": "docs/GAA-2022.xlsx",
+          "region": null,
+          "is_anomaly": false,
+          "flag_reason": null
+        }
+      ]
+    },
+    {
+      "highway": "Gen Maxilom Ext",
+      "estimated_length_km": 0.3,
+      "main_project": {
+        "name": "Gen Maxilom Ext - (S00337CB) Chainage 000 - Chainage 300",
+        "highway": "Gen Maxilom Ext",
+        "chainage_display": "Chainage 000 - Chainage 300",
+        "chainage_ranges": [
+          [
+            0,
+            0,
+            0,
+            300
+          ]
+        ],
+        "chainage_start_m": 0,
+        "distance_km": 0.3,
+        "amount": 18500000.0,
+        "cost_per_km": 61666666.66666667,
+        "project_type": "new_construction",
+        "source_sheet": "docs/GAA-2022.xlsx",
+        "region": null,
+        "is_anomaly": false,
+        "flag_reason": null
+      },
+      "total_segments": 1,
+      "total_distance_km": 0.3,
+      "total_amount": 18500000.0,
+      "segments": [
+        {
+          "name": "Gen Maxilom Ext - (S00337CB) Chainage 000 - Chainage 300",
+          "highway": "Gen Maxilom Ext",
+          "chainage_display": "Chainage 000 - Chainage 300",
+          "chainage_ranges": [
+            [
+              0,
+              0,
+              0,
+              300
+            ]
+          ],
+          "chainage_start_m": 0,
+          "distance_km": 0.3,
+          "amount": 18500000.0,
+          "cost_per_km": 61666666.66666667,
+          "project_type": "new_construction",
+          "source_sheet": "docs/GAA-2022.xlsx",
+          "region": null,
+          "is_anomaly": false,
+          "flag_reason": null
+        }
+      ]
+    },
+    {
+      "highway": "General Alejo Santos Highway",
+      "estimated_length_km": 6.92,
+      "main_project": {
+        "name": "Installation and Furnishing of Safety Devices Solar Studs and Pavement Markings along General Alejo Santos Highway, Baliuag-Candaba Road and Baliuag - Bustos Road - General Alejo Santos, K0051 + 103 - K0052 + 126, Baliuag-Candaba Rd - K0052 + (-1570) - K0057 + 350, Baliuag-Bustos Rd - K0051 + (-103) - K0052 + 126",
+        "highway": "General Alejo Santos Highway",
+        "chainage_display": "K0051 + 103 - K0052 + 126, K0052 + (-1570) - K0057 + 350, K0051 + (-103) - K0052 + 126",
+        "chainage_ranges": [
+          [
+            51,
+            103,
+            52,
+            126
+          ],
+          [
+            52,
+            -1570,
+            57,
+            350
+          ],
+          [
+            51,
+            -103,
+            52,
+            126
+          ]
+        ],
+        "chainage_start_m": 51103,
+        "distance_km": 9.172,
+        "amount": 50000000.0,
+        "cost_per_km": 5451373.746184038,
+        "project_type": "new_construction",
+        "source_sheet": "docs/GAA-2022.xlsx",
+        "region": null,
+        "is_anomaly": false,
+        "flag_reason": null
+      },
+      "total_segments": 1,
+      "total_distance_km": 9.172,
+      "total_amount": 50000000.0,
+      "segments": [
+        {
+          "name": "Installation and Furnishing of Safety Devices Solar Studs and Pavement Markings along General Alejo Santos Highway, Baliuag-Candaba Road and Baliuag - Bustos Road - General Alejo Santos, K0051 + 103 - K0052 + 126, Baliuag-Candaba Rd - K0052 + (-1570) - K0057 + 350, Baliuag-Bustos Rd - K0051 + (-103) - K0052 + 126",
+          "highway": "General Alejo Santos Highway",
+          "chainage_display": "K0051 + 103 - K0052 + 126, K0052 + (-1570) - K0057 + 350, K0051 + (-103) - K0052 + 126",
+          "chainage_ranges": [
+            [
+              51,
+              103,
+              52,
+              126
+            ],
+            [
+              52,
+              -1570,
+              57,
+              350
+            ],
+            [
+              51,
+              -103,
+              52,
+              126
+            ]
+          ],
+          "chainage_start_m": 51103,
+          "distance_km": 9.172,
+          "amount": 50000000.0,
+          "cost_per_km": 5451373.746184038,
+          "project_type": "new_construction",
+          "source_sheet": "docs/GAA-2022.xlsx",
+          "region": null,
+          "is_anomaly": false,
+          "flag_reason": null
+        }
+      ]
+    },
+    {
       "highway": "Harrison",
       "estimated_length_km": 0.807,
       "main_project": {
@@ -4298,36 +5860,24 @@
       ]
     },
     {
-      "highway": "Installation And Furnishing Of Safety Devices Solar Studs And Pavement Markings Along General Alejo Santos",
-      "estimated_length_km": 6.92,
+      "highway": "Infanta",
+      "estimated_length_km": 18.716,
       "main_project": {
-        "name": "Installation and Furnishing of Safety Devices Solar Studs and Pavement Markings along General Alejo Santos Highway, Baliuag-Candaba Road and Baliuag - Bustos Road - General Alejo Santos, K0051 + 103 - K0052 + 126, Baliuag-Candaba Rd - K0052 + (-1570) - K0057 + 350, Baliuag-Bustos Rd - K0051 + (-103) - K0052 + 126",
-        "highway": "Installation And Furnishing Of Safety Devices Solar Studs And Pavement Markings Along General Alejo Santos",
-        "chainage_display": "K0051 + 103 - K0052 + 126, K0052 + (-1570) - K0057 + 350, K0051 + (-103) - K0052 + 126",
+        "name": "Installation of Road Safety Facilities at Marikina-Infanta Road, K0019 + (-218) - K0037 + 498",
+        "highway": "Infanta",
+        "chainage_display": "K0019 + (-218) - K0037 + 498",
         "chainage_ranges": [
           [
-            51,
-            103,
-            52,
-            126
-          ],
-          [
-            52,
-            -1570,
-            57,
-            350
-          ],
-          [
-            51,
-            -103,
-            52,
-            126
+            19,
+            -218,
+            37,
+            498
           ]
         ],
-        "chainage_start_m": 51103,
-        "distance_km": 9.172,
-        "amount": 50000000.0,
-        "cost_per_km": 5451373.746184038,
+        "chainage_start_m": 18782,
+        "distance_km": 18.716,
+        "amount": 24460000.0,
+        "cost_per_km": 1306903.18444112,
         "project_type": "new_construction",
         "source_sheet": "docs/GAA-2022.xlsx",
         "region": null,
@@ -4335,179 +5885,12 @@
         "flag_reason": null
       },
       "total_segments": 1,
-      "total_distance_km": 9.172,
-      "total_amount": 50000000.0,
+      "total_distance_km": 18.716,
+      "total_amount": 24460000.0,
       "segments": [
-        {
-          "name": "Installation and Furnishing of Safety Devices Solar Studs and Pavement Markings along General Alejo Santos Highway, Baliuag-Candaba Road and Baliuag - Bustos Road - General Alejo Santos, K0051 + 103 - K0052 + 126, Baliuag-Candaba Rd - K0052 + (-1570) - K0057 + 350, Baliuag-Bustos Rd - K0051 + (-103) - K0052 + 126",
-          "highway": "Installation And Furnishing Of Safety Devices Solar Studs And Pavement Markings Along General Alejo Santos",
-          "chainage_display": "K0051 + 103 - K0052 + 126, K0052 + (-1570) - K0057 + 350, K0051 + (-103) - K0052 + 126",
-          "chainage_ranges": [
-            [
-              51,
-              103,
-              52,
-              126
-            ],
-            [
-              52,
-              -1570,
-              57,
-              350
-            ],
-            [
-              51,
-              -103,
-              52,
-              126
-            ]
-          ],
-          "chainage_start_m": 51103,
-          "distance_km": 9.172,
-          "amount": 50000000.0,
-          "cost_per_km": 5451373.746184038,
-          "project_type": "new_construction",
-          "source_sheet": "docs/GAA-2022.xlsx",
-          "region": null,
-          "is_anomaly": false,
-          "flag_reason": null
-        }
-      ]
-    },
-    {
-      "highway": "Installation Of",
-      "estimated_length_km": 964.038,
-      "main_project": {
-        "name": "Installation of Road Safety Devices along Asin (Km 8)-Nangalisan-Sn Pascual, Tuba Rd - K0258 + 100 - K0264 + 370, K0265 + 200 - K0281 + 920",
-        "highway": "Installation Of",
-        "chainage_display": "K0258 + 100 - K0264 + 370, K0265 + 200 - K0281 + 920",
-        "chainage_ranges": [
-          [
-            258,
-            100,
-            264,
-            370
-          ],
-          [
-            265,
-            200,
-            281,
-            920
-          ]
-        ],
-        "chainage_start_m": 258100,
-        "distance_km": 22.99,
-        "amount": 80000000.0,
-        "cost_per_km": 3479773.8147020447,
-        "project_type": "new_construction",
-        "source_sheet": "docs/GAA-2022.xlsx",
-        "region": null,
-        "is_anomaly": false,
-        "flag_reason": null
-      },
-      "total_segments": 9,
-      "total_distance_km": 115.432,
-      "total_amount": 288730000.0,
-      "segments": [
-        {
-          "name": "Installation of Road Safety Devices (Solar Pavement Studs) - Jct. (TER) Dauis-Panglao Road - K0003 + (-776) - K0003 + 000 (S00020BH), K0003 + 000 - K0018 + 084",
-          "highway": "Installation Of",
-          "chainage_display": "K0003 + (-776) - K0003 + 000, K0003 + 000 - K0018 + 084",
-          "chainage_ranges": [
-            [
-              3,
-              -776,
-              3,
-              0
-            ],
-            [
-              3,
-              0,
-              18,
-              84
-            ]
-          ],
-          "chainage_start_m": 2224,
-          "distance_km": 15.86,
-          "amount": 30000000.0,
-          "cost_per_km": 1891551.0718789408,
-          "project_type": "new_construction",
-          "source_sheet": "docs/GAA-2022.xlsx",
-          "region": null,
-          "is_anomaly": false,
-          "flag_reason": null
-        },
-        {
-          "name": "Installation of Road Safety Facilities at Marikina Victoria - Valley-Antipolo Road, K0017 + (-615) - K0018 + 777, K0019 + (-196) - K0021 + 537, K0028 + 092 - K0031 + 181",
-          "highway": "Installation Of",
-          "chainage_display": "K0017 + (-615) - K0018 + 777, K0019 + (-196) - K0021 + 537, K0028 + 092 - K0031 + 181",
-          "chainage_ranges": [
-            [
-              17,
-              -615,
-              18,
-              777
-            ],
-            [
-              19,
-              -196,
-              21,
-              537
-            ],
-            [
-              28,
-              92,
-              31,
-              181
-            ]
-          ],
-          "chainage_start_m": 16385,
-          "distance_km": 8.214,
-          "amount": 10080000.0,
-          "cost_per_km": 1227173.119065011,
-          "project_type": "new_construction",
-          "source_sheet": "docs/GAA-2022.xlsx",
-          "region": null,
-          "is_anomaly": false,
-          "flag_reason": null
-        },
-        {
-          "name": "Installation of Road Safety Facilities at Marikina-Diversion Road, Chainage 000-Chainage 260, K0018 + (-721) - K0018 + 1169, K0018 + (-970) - K0018 + 1180",
-          "highway": "Installation Of",
-          "chainage_display": "K0018 + (-721) - K0018 + 1169, K0018 + (-970) - K0018 + 1180, Chainage 000-Chainage 260",
-          "chainage_ranges": [
-            [
-              18,
-              -721,
-              18,
-              1169
-            ],
-            [
-              18,
-              -970,
-              18,
-              1180
-            ],
-            [
-              0,
-              0,
-              0,
-              260
-            ]
-          ],
-          "chainage_start_m": 17279,
-          "distance_km": 4.3,
-          "amount": 33640000.0,
-          "cost_per_km": 7823255.813953489,
-          "project_type": "new_construction",
-          "source_sheet": "docs/GAA-2022.xlsx",
-          "region": null,
-          "is_anomaly": true,
-          "flag_reason": "Cost per km significantly higher than main project"
-        },
         {
           "name": "Installation of Road Safety Facilities at Marikina-Infanta Road, K0019 + (-218) - K0037 + 498",
-          "highway": "Installation Of",
+          "highway": "Infanta",
           "chainage_display": "K0019 + (-218) - K0037 + 498",
           "chainage_ranges": [
             [
@@ -4521,128 +5904,6 @@
           "distance_km": 18.716,
           "amount": 24460000.0,
           "cost_per_km": 1306903.18444112,
-          "project_type": "new_construction",
-          "source_sheet": "docs/GAA-2022.xlsx",
-          "region": null,
-          "is_anomaly": false,
-          "flag_reason": null
-        },
-        {
-          "name": "Installation of Road Safety Facilities at Corazon C. Aquino Avenue, K0024 + 600 - K0031 + 643",
-          "highway": "Installation Of",
-          "chainage_display": "K0024 + 600 - K0031 + 643",
-          "chainage_ranges": [
-            [
-              24,
-              600,
-              31,
-              643
-            ]
-          ],
-          "chainage_start_m": 24600,
-          "distance_km": 7.043,
-          "amount": 8750000.0,
-          "cost_per_km": 1242368.3089592503,
-          "project_type": "new_construction",
-          "source_sheet": "docs/GAA-2022.xlsx",
-          "region": null,
-          "is_anomaly": false,
-          "flag_reason": null
-        },
-        {
-          "name": "Installation of Road Lights along Noveleta-Rosario Div Rd, K0026 + (-575) - K0027 + 000",
-          "highway": "Installation Of",
-          "chainage_display": "K0026 + (-575) - K0027 + 000",
-          "chainage_ranges": [
-            [
-              26,
-              -575,
-              27,
-              0
-            ]
-          ],
-          "chainage_start_m": 25425,
-          "distance_km": 1.575,
-          "amount": 31800000.0,
-          "cost_per_km": 20190476.19047619,
-          "project_type": "new_construction",
-          "source_sheet": "docs/GAA-2022.xlsx",
-          "region": null,
-          "is_anomaly": true,
-          "flag_reason": "Cost per km significantly higher than main project"
-        },
-        {
-          "name": "Installation of Road Signages along MSR Jct-Lopez-Buenavista Rd - K0218 + (-808) - K0236 + 988",
-          "highway": "Installation Of",
-          "chainage_display": "K0218 + (-808) - K0236 + 988",
-          "chainage_ranges": [
-            [
-              218,
-              -808,
-              236,
-              988
-            ]
-          ],
-          "chainage_start_m": 217192,
-          "distance_km": 19.796,
-          "amount": 50000000.0,
-          "cost_per_km": 2525762.7803596687,
-          "project_type": "new_construction",
-          "source_sheet": "docs/GAA-2022.xlsx",
-          "region": null,
-          "is_anomaly": false,
-          "flag_reason": null
-        },
-        {
-          "name": "Installation of Road Safety Devices along Asin (Km 8)-Nangalisan-Sn Pascual, Tuba Rd - K0258 + 100 - K0264 + 370, K0265 + 200 - K0281 + 920",
-          "highway": "Installation Of",
-          "chainage_display": "K0258 + 100 - K0264 + 370, K0265 + 200 - K0281 + 920",
-          "chainage_ranges": [
-            [
-              258,
-              100,
-              264,
-              370
-            ],
-            [
-              265,
-              200,
-              281,
-              920
-            ]
-          ],
-          "chainage_start_m": 258100,
-          "distance_km": 22.99,
-          "amount": 80000000.0,
-          "cost_per_km": 3479773.8147020447,
-          "project_type": "new_construction",
-          "source_sheet": "docs/GAA-2022.xlsx",
-          "region": null,
-          "is_anomaly": false,
-          "flag_reason": null
-        },
-        {
-          "name": "?Installation of Road Stud (Solar) along Palo-Carigara-Ormoc Rd - K0941 + 100 - K0956 + 000, K0962 + 000 - K0964 + 038",
-          "highway": "Installation Of",
-          "chainage_display": "K0941 + 100 - K0956 + 000, K0962 + 000 - K0964 + 038",
-          "chainage_ranges": [
-            [
-              941,
-              100,
-              956,
-              0
-            ],
-            [
-              962,
-              0,
-              964,
-              38
-            ]
-          ],
-          "chainage_start_m": 941100,
-          "distance_km": 16.938,
-          "amount": 20000000.0,
-          "cost_per_km": 1180776.951233912,
           "project_type": "new_construction",
           "source_sheet": "docs/GAA-2022.xlsx",
           "region": null,
@@ -4879,6 +6140,165 @@
       ]
     },
     {
+      "highway": "Jct Potia",
+      "estimated_length_km": 16.8,
+      "main_project": {
+        "name": "Reconstruction of Damaged Paved Road along Jct Potia-Mt Province Bdry Rd - K0436 + 700 - K0453 + 500 (Intermittent Sections)",
+        "highway": "Jct Potia",
+        "chainage_display": "K0436 + 700 - K0453 + 500",
+        "chainage_ranges": [
+          [
+            436,
+            700,
+            453,
+            500
+          ]
+        ],
+        "chainage_start_m": 436700,
+        "distance_km": 16.8,
+        "amount": 4625000.0,
+        "cost_per_km": 275297.61904761905,
+        "project_type": "new_construction",
+        "source_sheet": "docs/GAA-2022.xlsx",
+        "region": null,
+        "is_anomaly": false,
+        "flag_reason": null
+      },
+      "total_segments": 1,
+      "total_distance_km": 16.8,
+      "total_amount": 4625000.0,
+      "segments": [
+        {
+          "name": "Reconstruction of Damaged Paved Road along Jct Potia-Mt Province Bdry Rd - K0436 + 700 - K0453 + 500 (Intermittent Sections)",
+          "highway": "Jct Potia",
+          "chainage_display": "K0436 + 700 - K0453 + 500",
+          "chainage_ranges": [
+            [
+              436,
+              700,
+              453,
+              500
+            ]
+          ],
+          "chainage_start_m": 436700,
+          "distance_km": 16.8,
+          "amount": 4625000.0,
+          "cost_per_km": 275297.61904761905,
+          "project_type": "new_construction",
+          "source_sheet": "docs/GAA-2022.xlsx",
+          "region": null,
+          "is_anomaly": false,
+          "flag_reason": null
+        }
+      ]
+    },
+    {
+      "highway": "Justice Romualdez St",
+      "estimated_length_km": 0.085,
+      "main_project": {
+        "name": "Justice Romualdez St - (S00005LT) Chainage 0 - Chainage 85",
+        "highway": "Justice Romualdez St",
+        "chainage_display": "Chainage 0 - Chainage 85",
+        "chainage_ranges": [
+          [
+            0,
+            0,
+            0,
+            85
+          ]
+        ],
+        "chainage_start_m": 0,
+        "distance_km": 0.085,
+        "amount": 6183000.0,
+        "cost_per_km": 72741176.47058824,
+        "project_type": "new_construction",
+        "source_sheet": "docs/GAA-2022.xlsx",
+        "region": null,
+        "is_anomaly": false,
+        "flag_reason": null
+      },
+      "total_segments": 1,
+      "total_distance_km": 0.085,
+      "total_amount": 6183000.0,
+      "segments": [
+        {
+          "name": "Justice Romualdez St - (S00005LT) Chainage 0 - Chainage 85",
+          "highway": "Justice Romualdez St",
+          "chainage_display": "Chainage 0 - Chainage 85",
+          "chainage_ranges": [
+            [
+              0,
+              0,
+              0,
+              85
+            ]
+          ],
+          "chainage_start_m": 0,
+          "distance_km": 0.085,
+          "amount": 6183000.0,
+          "cost_per_km": 72741176.47058824,
+          "project_type": "new_construction",
+          "source_sheet": "docs/GAA-2022.xlsx",
+          "region": null,
+          "is_anomaly": false,
+          "flag_reason": null
+        }
+      ]
+    },
+    {
+      "highway": "Kalinga",
+      "estimated_length_km": 4.122,
+      "main_project": {
+        "name": "Installation/Construction of Road Safety Devices (Solar Studs and Solar LED Street Lights) along Kalinga-Abra Rd - K0522 + 389 - K0526 + 511, Balbalan, Kalinga",
+        "highway": "Kalinga",
+        "chainage_display": "K0522 + 389 - K0526 + 511",
+        "chainage_ranges": [
+          [
+            522,
+            389,
+            526,
+            511
+          ]
+        ],
+        "chainage_start_m": 522389,
+        "distance_km": 4.122,
+        "amount": 95000000.0,
+        "cost_per_km": 23047064.53178069,
+        "project_type": "new_construction",
+        "source_sheet": "docs/GAA-2022.xlsx",
+        "region": null,
+        "is_anomaly": false,
+        "flag_reason": null
+      },
+      "total_segments": 1,
+      "total_distance_km": 4.122,
+      "total_amount": 95000000.0,
+      "segments": [
+        {
+          "name": "Installation/Construction of Road Safety Devices (Solar Studs and Solar LED Street Lights) along Kalinga-Abra Rd - K0522 + 389 - K0526 + 511, Balbalan, Kalinga",
+          "highway": "Kalinga",
+          "chainage_display": "K0522 + 389 - K0526 + 511",
+          "chainage_ranges": [
+            [
+              522,
+              389,
+              526,
+              511
+            ]
+          ],
+          "chainage_start_m": 522389,
+          "distance_km": 4.122,
+          "amount": 95000000.0,
+          "cost_per_km": 23047064.53178069,
+          "project_type": "new_construction",
+          "source_sheet": "docs/GAA-2022.xlsx",
+          "region": null,
+          "is_anomaly": false,
+          "flag_reason": null
+        }
+      ]
+    },
+    {
       "highway": "Kasibu Bdry",
       "estimated_length_km": 2.0,
       "main_project": {
@@ -4977,6 +6397,59 @@
           "amount": 10920000.0,
           "cost_per_km": 45500000.0,
           "project_type": "new_construction",
+          "source_sheet": "docs/GAA-2022.xlsx",
+          "region": null,
+          "is_anomaly": false,
+          "flag_reason": null
+        }
+      ]
+    },
+    {
+      "highway": "Kaybiga Road",
+      "estimated_length_km": 2.082,
+      "main_project": {
+        "name": "Rehabilitation/ Upgrading along Kaybiga Road - K0019 + (-328) -K0020 + 754, Caloocan City",
+        "highway": "Kaybiga Road",
+        "chainage_display": "K0019 + (-328) -K0020 + 754",
+        "chainage_ranges": [
+          [
+            19,
+            -328,
+            20,
+            754
+          ]
+        ],
+        "chainage_start_m": 18672,
+        "distance_km": 2.082,
+        "amount": 22500000.0,
+        "cost_per_km": 10806916.42651297,
+        "project_type": "rehabilitation",
+        "source_sheet": "docs/GAA-2022.xlsx",
+        "region": null,
+        "is_anomaly": false,
+        "flag_reason": null
+      },
+      "total_segments": 1,
+      "total_distance_km": 2.082,
+      "total_amount": 22500000.0,
+      "segments": [
+        {
+          "name": "Rehabilitation/ Upgrading along Kaybiga Road - K0019 + (-328) -K0020 + 754, Caloocan City",
+          "highway": "Kaybiga Road",
+          "chainage_display": "K0019 + (-328) -K0020 + 754",
+          "chainage_ranges": [
+            [
+              19,
+              -328,
+              20,
+              754
+            ]
+          ],
+          "chainage_start_m": 18672,
+          "distance_km": 2.082,
+          "amount": 22500000.0,
+          "cost_per_km": 10806916.42651297,
+          "project_type": "rehabilitation",
           "source_sheet": "docs/GAA-2022.xlsx",
           "region": null,
           "is_anomaly": false,
@@ -5578,6 +7051,59 @@
       ]
     },
     {
+      "highway": "Lubuagan",
+      "estimated_length_km": 9.566,
+      "main_project": {
+        "name": "Installation/Construction of Road Safety Devices (Solar Studs and Solar LED Street Lights) along Lubuagan-Batong Buhay-Abra Bdry Rd - K0459 + 917 - K0469 + 483, Lubuagan and Pasil, Kalinga",
+        "highway": "Lubuagan",
+        "chainage_display": "K0459 + 917 - K0469 + 483",
+        "chainage_ranges": [
+          [
+            459,
+            917,
+            469,
+            483
+          ]
+        ],
+        "chainage_start_m": 459917,
+        "distance_km": 9.566,
+        "amount": 50000000.0,
+        "cost_per_km": 5226845.0763119375,
+        "project_type": "new_construction",
+        "source_sheet": "docs/GAA-2022.xlsx",
+        "region": null,
+        "is_anomaly": false,
+        "flag_reason": null
+      },
+      "total_segments": 1,
+      "total_distance_km": 9.566,
+      "total_amount": 50000000.0,
+      "segments": [
+        {
+          "name": "Installation/Construction of Road Safety Devices (Solar Studs and Solar LED Street Lights) along Lubuagan-Batong Buhay-Abra Bdry Rd - K0459 + 917 - K0469 + 483, Lubuagan and Pasil, Kalinga",
+          "highway": "Lubuagan",
+          "chainage_display": "K0459 + 917 - K0469 + 483",
+          "chainage_ranges": [
+            [
+              459,
+              917,
+              469,
+              483
+            ]
+          ],
+          "chainage_start_m": 459917,
+          "distance_km": 9.566,
+          "amount": 50000000.0,
+          "cost_per_km": 5226845.0763119375,
+          "project_type": "new_construction",
+          "source_sheet": "docs/GAA-2022.xlsx",
+          "region": null,
+          "is_anomaly": false,
+          "flag_reason": null
+        }
+      ]
+    },
+    {
       "highway": "Luna",
       "estimated_length_km": 0.645,
       "main_project": {
@@ -5988,6 +7514,59 @@
       ]
     },
     {
+      "highway": "Magallanes St",
+      "estimated_length_km": 0.411,
+      "main_project": {
+        "name": "Magallanes St. - (S00082CB) Chainage 022 - Chainage 433",
+        "highway": "Magallanes St",
+        "chainage_display": "Chainage 022 - Chainage 433",
+        "chainage_ranges": [
+          [
+            0,
+            22,
+            0,
+            433
+          ]
+        ],
+        "chainage_start_m": 22,
+        "distance_km": 0.411,
+        "amount": 16834000.0,
+        "cost_per_km": 40958637.46958638,
+        "project_type": "new_construction",
+        "source_sheet": "docs/GAA-2022.xlsx",
+        "region": null,
+        "is_anomaly": false,
+        "flag_reason": null
+      },
+      "total_segments": 1,
+      "total_distance_km": 0.411,
+      "total_amount": 16834000.0,
+      "segments": [
+        {
+          "name": "Magallanes St. - (S00082CB) Chainage 022 - Chainage 433",
+          "highway": "Magallanes St",
+          "chainage_display": "Chainage 022 - Chainage 433",
+          "chainage_ranges": [
+            [
+              0,
+              22,
+              0,
+              433
+            ]
+          ],
+          "chainage_start_m": 22,
+          "distance_km": 0.411,
+          "amount": 16834000.0,
+          "cost_per_km": 40958637.46958638,
+          "project_type": "new_construction",
+          "source_sheet": "docs/GAA-2022.xlsx",
+          "region": null,
+          "is_anomaly": false,
+          "flag_reason": null
+        }
+      ]
+    },
+    {
       "highway": "Magsaysay",
       "estimated_length_km": 1511.047,
       "main_project": {
@@ -6056,30 +7635,30 @@
       "highway": "Maharlika",
       "estimated_length_km": 1508.0,
       "main_project": {
-        "name": "Installation of Road Signages along Daang Maharlika (LZ) - K0181 + 000 - K0246 + 724, Package B",
+        "name": "Installation of Road Safety Facilities - Daang Maharlika K1497 + 700 - K1508 + 000, Davao City",
         "highway": "Maharlika",
-        "chainage_display": "K0181 + 000 - K0246 + 724",
+        "chainage_display": "K1497 + 700 - K1508 + 000",
         "chainage_ranges": [
           [
-            181,
-            0,
-            246,
-            724
+            1497,
+            700,
+            1508,
+            0
           ]
         ],
-        "chainage_start_m": 181000,
-        "distance_km": 65.724,
+        "chainage_start_m": 1497700,
+        "distance_km": 10.3,
         "amount": 50000000.0,
-        "cost_per_km": 760757.105471365,
+        "cost_per_km": 4854368.932038834,
         "project_type": "new_construction",
         "source_sheet": "docs/GAA-2022.xlsx",
         "region": null,
         "is_anomaly": false,
         "flag_reason": null
       },
-      "total_segments": 5,
-      "total_distance_km": 101.342,
-      "total_amount": 169693000.0,
+      "total_segments": 3,
+      "total_distance_km": 10.886000000000001,
+      "total_amount": 69693000.0,
       "segments": [
         {
           "name": "Daang Maharlika (LZ) - (S03286LZ) Chainage 0 - Chainage 142",
@@ -6126,50 +7705,6 @@
           "flag_reason": "Cost per km significantly higher than main project"
         },
         {
-          "name": "Installation of Road Signages along Daang Maharlika (LZ) - K0135 + (-732) - K0159 + 000, Package A",
-          "highway": "Maharlika",
-          "chainage_display": "K0135 + (-732) - K0159 + 000",
-          "chainage_ranges": [
-            [
-              135,
-              -732,
-              159,
-              0
-            ]
-          ],
-          "chainage_start_m": 134268,
-          "distance_km": 24.732,
-          "amount": 50000000.0,
-          "cost_per_km": 2021672.3273491834,
-          "project_type": "new_construction",
-          "source_sheet": "docs/GAA-2022.xlsx",
-          "region": null,
-          "is_anomaly": true,
-          "flag_reason": "Cost per km significantly higher than main project"
-        },
-        {
-          "name": "Installation of Road Signages along Daang Maharlika (LZ) - K0181 + 000 - K0246 + 724, Package B",
-          "highway": "Maharlika",
-          "chainage_display": "K0181 + 000 - K0246 + 724",
-          "chainage_ranges": [
-            [
-              181,
-              0,
-              246,
-              724
-            ]
-          ],
-          "chainage_start_m": 181000,
-          "distance_km": 65.724,
-          "amount": 50000000.0,
-          "cost_per_km": 760757.105471365,
-          "project_type": "new_construction",
-          "source_sheet": "docs/GAA-2022.xlsx",
-          "region": null,
-          "is_anomaly": false,
-          "flag_reason": null
-        },
-        {
           "name": "Installation of Road Safety Facilities - Daang Maharlika K1497 + 700 - K1508 + 000, Davao City",
           "highway": "Maharlika",
           "chainage_display": "K1497 + 700 - K1508 + 000",
@@ -6188,8 +7723,8 @@
           "project_type": "new_construction",
           "source_sheet": "docs/GAA-2022.xlsx",
           "region": null,
-          "is_anomaly": true,
-          "flag_reason": "Cost per km significantly higher than main project"
+          "is_anomaly": false,
+          "flag_reason": null
         }
       ]
     },
@@ -6525,6 +8060,93 @@
       ]
     },
     {
+      "highway": "Manila North Road",
+      "estimated_length_km": 66.543,
+      "main_project": {
+        "name": "Rehabilitation/Reconstruction/Upgrading along Manila North Road - K0031 + 579 - K0032 + 929, K0035 + 000 - K0035 + 600",
+        "highway": "Manila North Road",
+        "chainage_display": "K0031 + 579 - K0032 + 929, K0035 + 000 - K0035 + 600",
+        "chainage_ranges": [
+          [
+            31,
+            579,
+            32,
+            929
+          ],
+          [
+            35,
+            0,
+            35,
+            600
+          ]
+        ],
+        "chainage_start_m": 31579,
+        "distance_km": 1.95,
+        "amount": 87938000.0,
+        "cost_per_km": 45096410.256410256,
+        "project_type": "rehabilitation",
+        "source_sheet": "docs/GAA-2022.xlsx",
+        "region": null,
+        "is_anomaly": false,
+        "flag_reason": null
+      },
+      "total_segments": 2,
+      "total_distance_km": 2.142,
+      "total_amount": 187938000.0,
+      "segments": [
+        {
+          "name": "Rehabilitation/Reconstruction/Upgrading along Manila North Road - K0031 + 579 - K0032 + 929, K0035 + 000 - K0035 + 600",
+          "highway": "Manila North Road",
+          "chainage_display": "K0031 + 579 - K0032 + 929, K0035 + 000 - K0035 + 600",
+          "chainage_ranges": [
+            [
+              31,
+              579,
+              32,
+              929
+            ],
+            [
+              35,
+              0,
+              35,
+              600
+            ]
+          ],
+          "chainage_start_m": 31579,
+          "distance_km": 1.95,
+          "amount": 87938000.0,
+          "cost_per_km": 45096410.256410256,
+          "project_type": "rehabilitation",
+          "source_sheet": "docs/GAA-2022.xlsx",
+          "region": null,
+          "is_anomaly": false,
+          "flag_reason": null
+        },
+        {
+          "name": "Reconstruction of National Road with Slips, Slope Collapse and Landslide along Manila North Road - K0098+ (-070) - K0098 + 122, Bamban, Tarlac",
+          "highway": "Manila North Road",
+          "chainage_display": "K0098+ (-070) - K0098 + 122",
+          "chainage_ranges": [
+            [
+              98,
+              -70,
+              98,
+              122
+            ]
+          ],
+          "chainage_start_m": 97930,
+          "distance_km": 0.192,
+          "amount": 100000000.0,
+          "cost_per_km": 520833333.3333333,
+          "project_type": "new_construction",
+          "source_sheet": "docs/GAA-2022.xlsx",
+          "region": null,
+          "is_anomaly": true,
+          "flag_reason": "Cost per km significantly higher than main project"
+        }
+      ]
+    },
+    {
       "highway": "Marcos",
       "estimated_length_km": 1.946,
       "main_project": {
@@ -6646,6 +8268,59 @@
           "distance_km": 1.396,
           "amount": 58000000.0,
           "cost_per_km": 41547277.93696275,
+          "project_type": "new_construction",
+          "source_sheet": "docs/GAA-2022.xlsx",
+          "region": null,
+          "is_anomaly": false,
+          "flag_reason": null
+        }
+      ]
+    },
+    {
+      "highway": "Maria Orosa St",
+      "estimated_length_km": 0.148,
+      "main_project": {
+        "name": "Maria Orosa St - (S02794LZ) Chainage 189 - Chainage 337",
+        "highway": "Maria Orosa St",
+        "chainage_display": "Chainage 189 - Chainage 337",
+        "chainage_ranges": [
+          [
+            0,
+            189,
+            0,
+            337
+          ]
+        ],
+        "chainage_start_m": 189,
+        "distance_km": 0.148,
+        "amount": 4405000.0,
+        "cost_per_km": 29763513.513513517,
+        "project_type": "new_construction",
+        "source_sheet": "docs/GAA-2022.xlsx",
+        "region": null,
+        "is_anomaly": false,
+        "flag_reason": null
+      },
+      "total_segments": 1,
+      "total_distance_km": 0.148,
+      "total_amount": 4405000.0,
+      "segments": [
+        {
+          "name": "Maria Orosa St - (S02794LZ) Chainage 189 - Chainage 337",
+          "highway": "Maria Orosa St",
+          "chainage_display": "Chainage 189 - Chainage 337",
+          "chainage_ranges": [
+            [
+              0,
+              189,
+              0,
+              337
+            ]
+          ],
+          "chainage_start_m": 189,
+          "distance_km": 0.148,
+          "amount": 4405000.0,
+          "cost_per_km": 29763513.513513517,
           "project_type": "new_construction",
           "source_sheet": "docs/GAA-2022.xlsx",
           "region": null,
@@ -6823,6 +8498,59 @@
       ]
     },
     {
+      "highway": "Mayor Ramon",
+      "estimated_length_km": 1.283,
+      "main_project": {
+        "name": "Preventive Maintenance (Asphalt Overlay) along Mayor Ramon T. Pastor Sr. St. Chainage 0 - Chainage 1283",
+        "highway": "Mayor Ramon",
+        "chainage_display": "Chainage 0 - Chainage 1283",
+        "chainage_ranges": [
+          [
+            0,
+            0,
+            1,
+            283
+          ]
+        ],
+        "chainage_start_m": 0,
+        "distance_km": 1.283,
+        "amount": 26321000.0,
+        "cost_per_km": 20515198.752922837,
+        "project_type": "maintenance",
+        "source_sheet": "docs/GAA-2022.xlsx",
+        "region": null,
+        "is_anomaly": false,
+        "flag_reason": null
+      },
+      "total_segments": 1,
+      "total_distance_km": 1.283,
+      "total_amount": 26321000.0,
+      "segments": [
+        {
+          "name": "Preventive Maintenance (Asphalt Overlay) along Mayor Ramon T. Pastor Sr. St. Chainage 0 - Chainage 1283",
+          "highway": "Mayor Ramon",
+          "chainage_display": "Chainage 0 - Chainage 1283",
+          "chainage_ranges": [
+            [
+              0,
+              0,
+              1,
+              283
+            ]
+          ],
+          "chainage_start_m": 0,
+          "distance_km": 1.283,
+          "amount": 26321000.0,
+          "cost_per_km": 20515198.752922837,
+          "project_type": "maintenance",
+          "source_sheet": "docs/GAA-2022.xlsx",
+          "region": null,
+          "is_anomaly": false,
+          "flag_reason": null
+        }
+      ]
+    },
+    {
       "highway": "Mindanao",
       "estimated_length_km": 0.649,
       "main_project": {
@@ -6868,147 +8596,6 @@
           "amount": 50000000.0,
           "cost_per_km": 77041602.46533127,
           "project_type": "rehabilitation",
-          "source_sheet": "docs/GAA-2022.xlsx",
-          "region": null,
-          "is_anomaly": false,
-          "flag_reason": null
-        }
-      ]
-    },
-    {
-      "highway": "Mindoro",
-      "estimated_length_km": 53.4,
-      "main_project": {
-        "name": "Installation of Road Safety Devices along Calapan North Rd - K0007 + 400 - K0021 + 000, Calapan-Baco, Oriental Mindoro",
-        "highway": "Mindoro",
-        "chainage_display": "K0007 + 400 - K0021 + 000",
-        "chainage_ranges": [
-          [
-            7,
-            400,
-            21,
-            0
-          ]
-        ],
-        "chainage_start_m": 7400,
-        "distance_km": 13.6,
-        "amount": 79221000.0,
-        "cost_per_km": 5825073.529411765,
-        "project_type": "new_construction",
-        "source_sheet": "docs/GAA-2022.xlsx",
-        "region": null,
-        "is_anomaly": false,
-        "flag_reason": null
-      },
-      "total_segments": 5,
-      "total_distance_km": 67.0,
-      "total_amount": 396105000.0,
-      "segments": [
-        {
-          "name": "Installation of Road Safety Devices along Calapan North Rd - K0007 + 400 - K0021 + 000, Calapan-Baco, Oriental Mindoro",
-          "highway": "Mindoro",
-          "chainage_display": "K0007 + 400 - K0021 + 000",
-          "chainage_ranges": [
-            [
-              7,
-              400,
-              21,
-              0
-            ]
-          ],
-          "chainage_start_m": 7400,
-          "distance_km": 13.6,
-          "amount": 79221000.0,
-          "cost_per_km": 5825073.529411765,
-          "project_type": "new_construction",
-          "source_sheet": "docs/GAA-2022.xlsx",
-          "region": null,
-          "is_anomaly": false,
-          "flag_reason": null
-        },
-        {
-          "name": "Installation of Road Safety Devices along Calapan South Rd - K0007 + 400 - K0021 + 000, Calapan City-Naujan, Oriental Mindoro",
-          "highway": "Mindoro",
-          "chainage_display": "K0007 + 400 - K0021 + 000",
-          "chainage_ranges": [
-            [
-              7,
-              400,
-              21,
-              0
-            ]
-          ],
-          "chainage_start_m": 7400,
-          "distance_km": 13.6,
-          "amount": 79221000.0,
-          "cost_per_km": 5825073.529411765,
-          "project_type": "new_construction",
-          "source_sheet": "docs/GAA-2022.xlsx",
-          "region": null,
-          "is_anomaly": false,
-          "flag_reason": null
-        },
-        {
-          "name": "Installation of Road Safety Devices along Calapan South Rd - K0021 + 000 - K0033 + 600, Naujan-Victoria, Oriental Mindoro",
-          "highway": "Mindoro",
-          "chainage_display": "K0021 + 000 - K0033 + 600",
-          "chainage_ranges": [
-            [
-              21,
-              0,
-              33,
-              600
-            ]
-          ],
-          "chainage_start_m": 21000,
-          "distance_km": 12.6,
-          "amount": 79221000.0,
-          "cost_per_km": 6287380.952380952,
-          "project_type": "new_construction",
-          "source_sheet": "docs/GAA-2022.xlsx",
-          "region": null,
-          "is_anomaly": false,
-          "flag_reason": null
-        },
-        {
-          "name": "Installation of Road Safety Devices along Calapan South Rd - K0033 + 600 - K0047 + 200, Victoria, Oriental Mindoro",
-          "highway": "Mindoro",
-          "chainage_display": "K0033 + 600 - K0047 + 200",
-          "chainage_ranges": [
-            [
-              33,
-              600,
-              47,
-              200
-            ]
-          ],
-          "chainage_start_m": 33600,
-          "distance_km": 13.6,
-          "amount": 79221000.0,
-          "cost_per_km": 5825073.529411765,
-          "project_type": "new_construction",
-          "source_sheet": "docs/GAA-2022.xlsx",
-          "region": null,
-          "is_anomaly": false,
-          "flag_reason": null
-        },
-        {
-          "name": "Installation of Road Safety Devices along Calapan South Rd - K0047 + 200 - K0060 + 800, Socorro, Oriental Mindoro",
-          "highway": "Mindoro",
-          "chainage_display": "K0047 + 200 - K0060 + 800",
-          "chainage_ranges": [
-            [
-              47,
-              200,
-              60,
-              800
-            ]
-          ],
-          "chainage_start_m": 47200,
-          "distance_km": 13.6,
-          "amount": 79221000.0,
-          "cost_per_km": 5825073.529411765,
-          "project_type": "new_construction",
           "source_sheet": "docs/GAA-2022.xlsx",
           "region": null,
           "is_anomaly": false,
@@ -7097,6 +8684,112 @@
           "distance_km": 0.562,
           "amount": 10000000.0,
           "cost_per_km": 17793594.30604982,
+          "project_type": "new_construction",
+          "source_sheet": "docs/GAA-2022.xlsx",
+          "region": null,
+          "is_anomaly": false,
+          "flag_reason": null
+        }
+      ]
+    },
+    {
+      "highway": "Msr Jct",
+      "estimated_length_km": 19.796,
+      "main_project": {
+        "name": "Installation of Road Signages along MSR Jct-Lopez-Buenavista Rd - K0218 + (-808) - K0236 + 988",
+        "highway": "Msr Jct",
+        "chainage_display": "K0218 + (-808) - K0236 + 988",
+        "chainage_ranges": [
+          [
+            218,
+            -808,
+            236,
+            988
+          ]
+        ],
+        "chainage_start_m": 217192,
+        "distance_km": 19.796,
+        "amount": 50000000.0,
+        "cost_per_km": 2525762.7803596687,
+        "project_type": "new_construction",
+        "source_sheet": "docs/GAA-2022.xlsx",
+        "region": null,
+        "is_anomaly": false,
+        "flag_reason": null
+      },
+      "total_segments": 1,
+      "total_distance_km": 19.796,
+      "total_amount": 50000000.0,
+      "segments": [
+        {
+          "name": "Installation of Road Signages along MSR Jct-Lopez-Buenavista Rd - K0218 + (-808) - K0236 + 988",
+          "highway": "Msr Jct",
+          "chainage_display": "K0218 + (-808) - K0236 + 988",
+          "chainage_ranges": [
+            [
+              218,
+              -808,
+              236,
+              988
+            ]
+          ],
+          "chainage_start_m": 217192,
+          "distance_km": 19.796,
+          "amount": 50000000.0,
+          "cost_per_km": 2525762.7803596687,
+          "project_type": "new_construction",
+          "source_sheet": "docs/GAA-2022.xlsx",
+          "region": null,
+          "is_anomaly": false,
+          "flag_reason": null
+        }
+      ]
+    },
+    {
+      "highway": "Mt Province Bdry",
+      "estimated_length_km": 22.916,
+      "main_project": {
+        "name": "Installation/Construction of Road Safety Devices (Solar Studs and Solar LED Street Lights) along Mt Province Bdry-Calanan-Pinukpuk-Abbut - K0447 + 000 - K0469 + 916",
+        "highway": "Mt Province Bdry",
+        "chainage_display": "K0447 + 000 - K0469 + 916",
+        "chainage_ranges": [
+          [
+            447,
+            0,
+            469,
+            916
+          ]
+        ],
+        "chainage_start_m": 447000,
+        "distance_km": 22.916,
+        "amount": 96000000.0,
+        "cost_per_km": 4189212.77709897,
+        "project_type": "new_construction",
+        "source_sheet": "docs/GAA-2022.xlsx",
+        "region": null,
+        "is_anomaly": false,
+        "flag_reason": null
+      },
+      "total_segments": 1,
+      "total_distance_km": 22.916,
+      "total_amount": 96000000.0,
+      "segments": [
+        {
+          "name": "Installation/Construction of Road Safety Devices (Solar Studs and Solar LED Street Lights) along Mt Province Bdry-Calanan-Pinukpuk-Abbut - K0447 + 000 - K0469 + 916",
+          "highway": "Mt Province Bdry",
+          "chainage_display": "K0447 + 000 - K0469 + 916",
+          "chainage_ranges": [
+            [
+              447,
+              0,
+              469,
+              916
+            ]
+          ],
+          "chainage_start_m": 447000,
+          "distance_km": 22.916,
+          "amount": 96000000.0,
+          "cost_per_km": 4189212.77709897,
           "project_type": "new_construction",
           "source_sheet": "docs/GAA-2022.xlsx",
           "region": null,
@@ -7419,6 +9112,112 @@
       ]
     },
     {
+      "highway": "Noveleta",
+      "estimated_length_km": 1.575,
+      "main_project": {
+        "name": "Installation of Road Lights along Noveleta-Rosario Div Rd, K0026 + (-575) - K0027 + 000",
+        "highway": "Noveleta",
+        "chainage_display": "K0026 + (-575) - K0027 + 000",
+        "chainage_ranges": [
+          [
+            26,
+            -575,
+            27,
+            0
+          ]
+        ],
+        "chainage_start_m": 25425,
+        "distance_km": 1.575,
+        "amount": 31800000.0,
+        "cost_per_km": 20190476.19047619,
+        "project_type": "new_construction",
+        "source_sheet": "docs/GAA-2022.xlsx",
+        "region": null,
+        "is_anomaly": false,
+        "flag_reason": null
+      },
+      "total_segments": 1,
+      "total_distance_km": 1.575,
+      "total_amount": 31800000.0,
+      "segments": [
+        {
+          "name": "Installation of Road Lights along Noveleta-Rosario Div Rd, K0026 + (-575) - K0027 + 000",
+          "highway": "Noveleta",
+          "chainage_display": "K0026 + (-575) - K0027 + 000",
+          "chainage_ranges": [
+            [
+              26,
+              -575,
+              27,
+              0
+            ]
+          ],
+          "chainage_start_m": 25425,
+          "distance_km": 1.575,
+          "amount": 31800000.0,
+          "cost_per_km": 20190476.19047619,
+          "project_type": "new_construction",
+          "source_sheet": "docs/GAA-2022.xlsx",
+          "region": null,
+          "is_anomaly": false,
+          "flag_reason": null
+        }
+      ]
+    },
+    {
+      "highway": "Noveleta Naic",
+      "estimated_length_km": 1.07,
+      "main_project": {
+        "name": "Construction of Drainage along Noveleta Naic-Tagaytay Road, Rosario, Cavite, K0027 + 383-K0028 + 453.375 (Both Sides) (Phase 1)",
+        "highway": "Noveleta Naic",
+        "chainage_display": "K0027 + 383-K0028 + 453",
+        "chainage_ranges": [
+          [
+            27,
+            383,
+            28,
+            453
+          ]
+        ],
+        "chainage_start_m": 27383,
+        "distance_km": 1.07,
+        "amount": 25000000.0,
+        "cost_per_km": 23364485.981308408,
+        "project_type": "new_construction",
+        "source_sheet": "docs/GAA-2022.xlsx",
+        "region": null,
+        "is_anomaly": false,
+        "flag_reason": null
+      },
+      "total_segments": 1,
+      "total_distance_km": 1.07,
+      "total_amount": 25000000.0,
+      "segments": [
+        {
+          "name": "Construction of Drainage along Noveleta Naic-Tagaytay Road, Rosario, Cavite, K0027 + 383-K0028 + 453.375 (Both Sides) (Phase 1)",
+          "highway": "Noveleta Naic",
+          "chainage_display": "K0027 + 383-K0028 + 453",
+          "chainage_ranges": [
+            [
+              27,
+              383,
+              28,
+              453
+            ]
+          ],
+          "chainage_start_m": 27383,
+          "distance_km": 1.07,
+          "amount": 25000000.0,
+          "cost_per_km": 23364485.981308408,
+          "project_type": "new_construction",
+          "source_sheet": "docs/GAA-2022.xlsx",
+          "region": null,
+          "is_anomaly": false,
+          "flag_reason": null
+        }
+      ]
+    },
+    {
       "highway": "Nueva Ecija",
       "estimated_length_km": 59.092,
       "main_project": {
@@ -7667,6 +9466,71 @@
       ]
     },
     {
+      "highway": "Palo",
+      "estimated_length_km": 22.938,
+      "main_project": {
+        "name": "?Installation of Road Stud (Solar) along Palo-Carigara-Ormoc Rd - K0941 + 100 - K0956 + 000, K0962 + 000 - K0964 + 038",
+        "highway": "Palo",
+        "chainage_display": "K0941 + 100 - K0956 + 000, K0962 + 000 - K0964 + 038",
+        "chainage_ranges": [
+          [
+            941,
+            100,
+            956,
+            0
+          ],
+          [
+            962,
+            0,
+            964,
+            38
+          ]
+        ],
+        "chainage_start_m": 941100,
+        "distance_km": 16.938,
+        "amount": 20000000.0,
+        "cost_per_km": 1180776.951233912,
+        "project_type": "new_construction",
+        "source_sheet": "docs/GAA-2022.xlsx",
+        "region": null,
+        "is_anomaly": false,
+        "flag_reason": null
+      },
+      "total_segments": 1,
+      "total_distance_km": 16.938,
+      "total_amount": 20000000.0,
+      "segments": [
+        {
+          "name": "?Installation of Road Stud (Solar) along Palo-Carigara-Ormoc Rd - K0941 + 100 - K0956 + 000, K0962 + 000 - K0964 + 038",
+          "highway": "Palo",
+          "chainage_display": "K0941 + 100 - K0956 + 000, K0962 + 000 - K0964 + 038",
+          "chainage_ranges": [
+            [
+              941,
+              100,
+              956,
+              0
+            ],
+            [
+              962,
+              0,
+              964,
+              38
+            ]
+          ],
+          "chainage_start_m": 941100,
+          "distance_km": 16.938,
+          "amount": 20000000.0,
+          "cost_per_km": 1180776.951233912,
+          "project_type": "new_construction",
+          "source_sheet": "docs/GAA-2022.xlsx",
+          "region": null,
+          "is_anomaly": false,
+          "flag_reason": null
+        }
+      ]
+    },
+    {
       "highway": "Panalingaan Cross Country",
       "estimated_length_km": 3.692,
       "main_project": {
@@ -7755,6 +9619,124 @@
           "distance_km": 0.03,
           "amount": 1500000.0,
           "cost_per_km": 50000000.0,
+          "project_type": "new_construction",
+          "source_sheet": "docs/GAA-2022.xlsx",
+          "region": null,
+          "is_anomaly": false,
+          "flag_reason": null
+        }
+      ]
+    },
+    {
+      "highway": "Panglao",
+      "estimated_length_km": 15.86,
+      "main_project": {
+        "name": "Installation of Road Safety Devices (Solar Pavement Studs) - Jct. (TER) Dauis-Panglao Road - K0003 + (-776) - K0003 + 000 (S00020BH), K0003 + 000 - K0018 + 084",
+        "highway": "Panglao",
+        "chainage_display": "K0003 + (-776) - K0003 + 000, K0003 + 000 - K0018 + 084",
+        "chainage_ranges": [
+          [
+            3,
+            -776,
+            3,
+            0
+          ],
+          [
+            3,
+            0,
+            18,
+            84
+          ]
+        ],
+        "chainage_start_m": 2224,
+        "distance_km": 15.86,
+        "amount": 30000000.0,
+        "cost_per_km": 1891551.0718789408,
+        "project_type": "new_construction",
+        "source_sheet": "docs/GAA-2022.xlsx",
+        "region": null,
+        "is_anomaly": false,
+        "flag_reason": null
+      },
+      "total_segments": 1,
+      "total_distance_km": 15.86,
+      "total_amount": 30000000.0,
+      "segments": [
+        {
+          "name": "Installation of Road Safety Devices (Solar Pavement Studs) - Jct. (TER) Dauis-Panglao Road - K0003 + (-776) - K0003 + 000 (S00020BH), K0003 + 000 - K0018 + 084",
+          "highway": "Panglao",
+          "chainage_display": "K0003 + (-776) - K0003 + 000, K0003 + 000 - K0018 + 084",
+          "chainage_ranges": [
+            [
+              3,
+              -776,
+              3,
+              0
+            ],
+            [
+              3,
+              0,
+              18,
+              84
+            ]
+          ],
+          "chainage_start_m": 2224,
+          "distance_km": 15.86,
+          "amount": 30000000.0,
+          "cost_per_km": 1891551.0718789408,
+          "project_type": "new_construction",
+          "source_sheet": "docs/GAA-2022.xlsx",
+          "region": null,
+          "is_anomaly": false,
+          "flag_reason": null
+        }
+      ]
+    },
+    {
+      "highway": "Pasig Line",
+      "estimated_length_km": 0.564,
+      "main_project": {
+        "name": "Pasig Line - (S02838LZ) Chainage 107 - Chainage 671",
+        "highway": "Pasig Line",
+        "chainage_display": "Chainage 107 - Chainage 671",
+        "chainage_ranges": [
+          [
+            0,
+            107,
+            0,
+            671
+          ]
+        ],
+        "chainage_start_m": 107,
+        "distance_km": 0.564,
+        "amount": 11617000.0,
+        "cost_per_km": 20597517.730496455,
+        "project_type": "new_construction",
+        "source_sheet": "docs/GAA-2022.xlsx",
+        "region": null,
+        "is_anomaly": false,
+        "flag_reason": null
+      },
+      "total_segments": 1,
+      "total_distance_km": 0.564,
+      "total_amount": 11617000.0,
+      "segments": [
+        {
+          "name": "Pasig Line - (S02838LZ) Chainage 107 - Chainage 671",
+          "highway": "Pasig Line",
+          "chainage_display": "Chainage 107 - Chainage 671",
+          "chainage_ranges": [
+            [
+              0,
+              107,
+              0,
+              671
+            ]
+          ],
+          "chainage_start_m": 107,
+          "distance_km": 0.564,
+          "amount": 11617000.0,
+          "cost_per_km": 20597517.730496455,
           "project_type": "new_construction",
           "source_sheet": "docs/GAA-2022.xlsx",
           "region": null,
@@ -8229,6 +10211,59 @@
       ]
     },
     {
+      "highway": "Quezon Hill Drive",
+      "estimated_length_km": 0.259,
+      "main_project": {
+        "name": "Quezon Hill Drive - (S00526LZ) Chainage 514 - Chainage 773",
+        "highway": "Quezon Hill Drive",
+        "chainage_display": "Chainage 514 - Chainage 773",
+        "chainage_ranges": [
+          [
+            0,
+            514,
+            0,
+            773
+          ]
+        ],
+        "chainage_start_m": 514,
+        "distance_km": 0.259,
+        "amount": 9500000.0,
+        "cost_per_km": 36679536.67953668,
+        "project_type": "new_construction",
+        "source_sheet": "docs/GAA-2022.xlsx",
+        "region": null,
+        "is_anomaly": false,
+        "flag_reason": null
+      },
+      "total_segments": 1,
+      "total_distance_km": 0.259,
+      "total_amount": 9500000.0,
+      "segments": [
+        {
+          "name": "Quezon Hill Drive - (S00526LZ) Chainage 514 - Chainage 773",
+          "highway": "Quezon Hill Drive",
+          "chainage_display": "Chainage 514 - Chainage 773",
+          "chainage_ranges": [
+            [
+              0,
+              514,
+              0,
+              773
+            ]
+          ],
+          "chainage_start_m": 514,
+          "distance_km": 0.259,
+          "amount": 9500000.0,
+          "cost_per_km": 36679536.67953668,
+          "project_type": "new_construction",
+          "source_sheet": "docs/GAA-2022.xlsx",
+          "region": null,
+          "is_anomaly": false,
+          "flag_reason": null
+        }
+      ]
+    },
+    {
       "highway": "Rawis",
       "estimated_length_km": 0.1,
       "main_project": {
@@ -8274,253 +10309,6 @@
           "amount": 9500000.0,
           "cost_per_km": 95000000.0,
           "project_type": "new_construction",
-          "source_sheet": "docs/GAA-2022.xlsx",
-          "region": null,
-          "is_anomaly": false,
-          "flag_reason": null
-        }
-      ]
-    },
-    {
-      "highway": "Reconstruction Of Damaged Paved",
-      "estimated_length_km": 16.8,
-      "main_project": {
-        "name": "Reconstruction of Damaged Paved Road along Jct Potia-Mt Province Bdry Rd - K0436 + 700 - K0453 + 500 (Intermittent Sections)",
-        "highway": "Reconstruction Of Damaged Paved",
-        "chainage_display": "K0436 + 700 - K0453 + 500",
-        "chainage_ranges": [
-          [
-            436,
-            700,
-            453,
-            500
-          ]
-        ],
-        "chainage_start_m": 436700,
-        "distance_km": 16.8,
-        "amount": 4625000.0,
-        "cost_per_km": 275297.61904761905,
-        "project_type": "new_construction",
-        "source_sheet": "docs/GAA-2022.xlsx",
-        "region": null,
-        "is_anomaly": false,
-        "flag_reason": null
-      },
-      "total_segments": 1,
-      "total_distance_km": 16.8,
-      "total_amount": 4625000.0,
-      "segments": [
-        {
-          "name": "Reconstruction of Damaged Paved Road along Jct Potia-Mt Province Bdry Rd - K0436 + 700 - K0453 + 500 (Intermittent Sections)",
-          "highway": "Reconstruction Of Damaged Paved",
-          "chainage_display": "K0436 + 700 - K0453 + 500",
-          "chainage_ranges": [
-            [
-              436,
-              700,
-              453,
-              500
-            ]
-          ],
-          "chainage_start_m": 436700,
-          "distance_km": 16.8,
-          "amount": 4625000.0,
-          "cost_per_km": 275297.61904761905,
-          "project_type": "new_construction",
-          "source_sheet": "docs/GAA-2022.xlsx",
-          "region": null,
-          "is_anomaly": false,
-          "flag_reason": null
-        }
-      ]
-    },
-    {
-      "highway": "Rehabilitation And",
-      "estimated_length_km": 55.6,
-      "main_project": {
-        "name": "Rehabilitation and Road Slope Protection Structures along Bislig-Trento Road, K1500+300 -K1500+700",
-        "highway": "Rehabilitation And",
-        "chainage_display": "K1500+300 -K1500+700",
-        "chainage_ranges": [
-          [
-            1500,
-            300,
-            1500,
-            700
-          ]
-        ],
-        "chainage_start_m": 1500300,
-        "distance_km": 0.4,
-        "amount": 100000000.0,
-        "cost_per_km": 250000000.0,
-        "project_type": "rehabilitation",
-        "source_sheet": "docs/GAA-2022.xlsx",
-        "region": null,
-        "is_anomaly": false,
-        "flag_reason": null
-      },
-      "total_segments": 5,
-      "total_distance_km": 1.4499999999999997,
-      "total_amount": 500000000.0,
-      "segments": [
-        {
-          "name": "Rehabilitation and Road Slope Protection Structures along Bislig-Trento Road, K1445+100 -K1445+300",
-          "highway": "Rehabilitation And",
-          "chainage_display": "K1445+100 -K1445+300",
-          "chainage_ranges": [
-            [
-              1445,
-              100,
-              1445,
-              300
-            ]
-          ],
-          "chainage_start_m": 1445100,
-          "distance_km": 0.2,
-          "amount": 100000000.0,
-          "cost_per_km": 500000000.0,
-          "project_type": "rehabilitation",
-          "source_sheet": "docs/GAA-2022.xlsx",
-          "region": null,
-          "is_anomaly": true,
-          "flag_reason": "Rehabilitation more expensive than main project"
-        },
-        {
-          "name": "Rehabilitation and Road Slope Protection Structures along Bislig-Trento Road, K1477+530 -K1477+770",
-          "highway": "Rehabilitation And",
-          "chainage_display": "K1477+530 -K1477+770",
-          "chainage_ranges": [
-            [
-              1477,
-              530,
-              1477,
-              770
-            ]
-          ],
-          "chainage_start_m": 1477530,
-          "distance_km": 0.24,
-          "amount": 100000000.0,
-          "cost_per_km": 416666666.6666667,
-          "project_type": "rehabilitation",
-          "source_sheet": "docs/GAA-2022.xlsx",
-          "region": null,
-          "is_anomaly": true,
-          "flag_reason": "Rehabilitation more expensive than main project"
-        },
-        {
-          "name": "Rehabilitation and Road Slope Protection Structures along Bislig-Trento Road, K1479+255 -K1479+515",
-          "highway": "Rehabilitation And",
-          "chainage_display": "K1479+255 -K1479+515",
-          "chainage_ranges": [
-            [
-              1479,
-              255,
-              1479,
-              515
-            ]
-          ],
-          "chainage_start_m": 1479255,
-          "distance_km": 0.26,
-          "amount": 100000000.0,
-          "cost_per_km": 384615384.6153846,
-          "project_type": "rehabilitation",
-          "source_sheet": "docs/GAA-2022.xlsx",
-          "region": null,
-          "is_anomaly": true,
-          "flag_reason": "Rehabilitation more expensive than main project"
-        },
-        {
-          "name": "Rehabilitation and Road Slope Protection Structures along Bislig-Trento Road, K1484+400 -K1484+750",
-          "highway": "Rehabilitation And",
-          "chainage_display": "K1484+400 -K1484+750",
-          "chainage_ranges": [
-            [
-              1484,
-              400,
-              1484,
-              750
-            ]
-          ],
-          "chainage_start_m": 1484400,
-          "distance_km": 0.35,
-          "amount": 100000000.0,
-          "cost_per_km": 285714285.71428573,
-          "project_type": "rehabilitation",
-          "source_sheet": "docs/GAA-2022.xlsx",
-          "region": null,
-          "is_anomaly": true,
-          "flag_reason": "Rehabilitation more expensive than main project"
-        },
-        {
-          "name": "Rehabilitation and Road Slope Protection Structures along Bislig-Trento Road, K1500+300 -K1500+700",
-          "highway": "Rehabilitation And",
-          "chainage_display": "K1500+300 -K1500+700",
-          "chainage_ranges": [
-            [
-              1500,
-              300,
-              1500,
-              700
-            ]
-          ],
-          "chainage_start_m": 1500300,
-          "distance_km": 0.4,
-          "amount": 100000000.0,
-          "cost_per_km": 250000000.0,
-          "project_type": "rehabilitation",
-          "source_sheet": "docs/GAA-2022.xlsx",
-          "region": null,
-          "is_anomaly": false,
-          "flag_reason": null
-        }
-      ]
-    },
-    {
-      "highway": "Rehabilitation Of",
-      "estimated_length_km": 0.8,
-      "main_project": {
-        "name": "Rehabilitation of Road and Drainage along A. Mabini Street (S02084LZ) K0008 +200- K0009+ 000, Barangays 15, 17, 18, 19, 20, 21 & 23, Caloocan City",
-        "highway": "Rehabilitation Of",
-        "chainage_display": "K0008 +200- K0009+ 000",
-        "chainage_ranges": [
-          [
-            8,
-            200,
-            9,
-            0
-          ]
-        ],
-        "chainage_start_m": 8200,
-        "distance_km": 0.8,
-        "amount": 20000000.0,
-        "cost_per_km": 25000000.0,
-        "project_type": "rehabilitation",
-        "source_sheet": "docs/GAA-2022.xlsx",
-        "region": null,
-        "is_anomaly": false,
-        "flag_reason": null
-      },
-      "total_segments": 1,
-      "total_distance_km": 0.8,
-      "total_amount": 20000000.0,
-      "segments": [
-        {
-          "name": "Rehabilitation of Road and Drainage along A. Mabini Street (S02084LZ) K0008 +200- K0009+ 000, Barangays 15, 17, 18, 19, 20, 21 & 23, Caloocan City",
-          "highway": "Rehabilitation Of",
-          "chainage_display": "K0008 +200- K0009+ 000",
-          "chainage_ranges": [
-            [
-              8,
-              200,
-              9,
-              0
-            ]
-          ],
-          "chainage_start_m": 8200,
-          "distance_km": 0.8,
-          "amount": 20000000.0,
-          "cost_per_km": 25000000.0,
-          "project_type": "rehabilitation",
           "source_sheet": "docs/GAA-2022.xlsx",
           "region": null,
           "is_anomaly": false,
@@ -8663,59 +10451,6 @@
       ]
     },
     {
-      "highway": "Samar",
-      "estimated_length_km": 0.073,
-      "main_project": {
-        "name": "Rehabilitation/Improvement of Flood Control Structure Protecting National Road along Jct. Bunavista-Lawaan-Marabut Rd, K0955+220-K0955+293 (R/S) ; 955+345-995+555 (R/S), Brgy. Guinob-an, Lawaan, Eastern Samar",
-        "highway": "Samar",
-        "chainage_display": "K0955+220-K0955+293",
-        "chainage_ranges": [
-          [
-            955,
-            220,
-            955,
-            293
-          ]
-        ],
-        "chainage_start_m": 955220,
-        "distance_km": 0.073,
-        "amount": 30000000.0,
-        "cost_per_km": 410958904.10958904,
-        "project_type": "rehabilitation",
-        "source_sheet": "docs/GAA-2022.xlsx",
-        "region": null,
-        "is_anomaly": false,
-        "flag_reason": null
-      },
-      "total_segments": 1,
-      "total_distance_km": 0.073,
-      "total_amount": 30000000.0,
-      "segments": [
-        {
-          "name": "Rehabilitation/Improvement of Flood Control Structure Protecting National Road along Jct. Bunavista-Lawaan-Marabut Rd, K0955+220-K0955+293 (R/S) ; 955+345-995+555 (R/S), Brgy. Guinob-an, Lawaan, Eastern Samar",
-          "highway": "Samar",
-          "chainage_display": "K0955+220-K0955+293",
-          "chainage_ranges": [
-            [
-              955,
-              220,
-              955,
-              293
-            ]
-          ],
-          "chainage_start_m": 955220,
-          "distance_km": 0.073,
-          "amount": 30000000.0,
-          "cost_per_km": 410958904.10958904,
-          "project_type": "rehabilitation",
-          "source_sheet": "docs/GAA-2022.xlsx",
-          "region": null,
-          "is_anomaly": false,
-          "flag_reason": null
-        }
-      ]
-    },
-    {
       "highway": "San Juan",
       "estimated_length_km": 0.872,
       "main_project": {
@@ -8822,6 +10557,59 @@
       ]
     },
     {
+      "highway": "Sanciangko St",
+      "estimated_length_km": 0.488,
+      "main_project": {
+        "name": "Sanciangko St - (S00077CB) Chainage 000 - Chainage 488",
+        "highway": "Sanciangko St",
+        "chainage_display": "Chainage 000 - Chainage 488",
+        "chainage_ranges": [
+          [
+            0,
+            0,
+            0,
+            488
+          ]
+        ],
+        "chainage_start_m": 0,
+        "distance_km": 0.488,
+        "amount": 10000000.0,
+        "cost_per_km": 20491803.278688524,
+        "project_type": "new_construction",
+        "source_sheet": "docs/GAA-2022.xlsx",
+        "region": null,
+        "is_anomaly": false,
+        "flag_reason": null
+      },
+      "total_segments": 1,
+      "total_distance_km": 0.488,
+      "total_amount": 10000000.0,
+      "segments": [
+        {
+          "name": "Sanciangko St - (S00077CB) Chainage 000 - Chainage 488",
+          "highway": "Sanciangko St",
+          "chainage_display": "Chainage 000 - Chainage 488",
+          "chainage_ranges": [
+            [
+              0,
+              0,
+              0,
+              488
+            ]
+          ],
+          "chainage_start_m": 0,
+          "distance_km": 0.488,
+          "amount": 10000000.0,
+          "cost_per_km": 20491803.278688524,
+          "project_type": "new_construction",
+          "source_sheet": "docs/GAA-2022.xlsx",
+          "region": null,
+          "is_anomaly": false,
+          "flag_reason": null
+        }
+      ]
+    },
+    {
       "highway": "Sanga",
       "estimated_length_km": 5.0,
       "main_project": {
@@ -8867,6 +10655,109 @@
           "amount": 61175000.0,
           "cost_per_km": 12235000.0,
           "project_type": "new_construction",
+          "source_sheet": "docs/GAA-2022.xlsx",
+          "region": null,
+          "is_anomaly": false,
+          "flag_reason": null
+        }
+      ]
+    },
+    {
+      "highway": "Santander",
+      "estimated_length_km": 38.87,
+      "main_project": {
+        "name": "Preventive Maintenance (Asphalt Overlay) along Santander-Barili-Toledo Rd - K0214 + 884 - K0217 + 000, with Installation of Road Safety Devices (Internally Illuminated (Solar) Pavement Levelled Marker/Stud Flush Type)",
+        "highway": "Santander",
+        "chainage_display": "K0214 + 884 - K0217 + 000",
+        "chainage_ranges": [
+          [
+            214,
+            884,
+            217,
+            0
+          ]
+        ],
+        "chainage_start_m": 214884,
+        "distance_km": 2.116,
+        "amount": 50000000.0,
+        "cost_per_km": 23629489.603024572,
+        "project_type": "maintenance",
+        "source_sheet": "docs/GAA-2022.xlsx",
+        "region": null,
+        "is_anomaly": false,
+        "flag_reason": null
+      },
+      "total_segments": 3,
+      "total_distance_km": 4.066,
+      "total_amount": 100000000.0,
+      "segments": [
+        {
+          "name": "Preventive Maintenance (Asphalt Overlay) along Santander-Barili-Toledo Rd - K0179 + 000 - K0180 + 000, with Installation of Road Safety Devices (Internally Illuminated (Solar) Pavement Levelled Marker/Stud Flush Type)",
+          "highway": "Santander",
+          "chainage_display": "K0179 + 000 - K0180 + 000",
+          "chainage_ranges": [
+            [
+              179,
+              0,
+              180,
+              0
+            ]
+          ],
+          "chainage_start_m": 179000,
+          "distance_km": 1.0,
+          "amount": 25000000.0,
+          "cost_per_km": 25000000.0,
+          "project_type": "maintenance",
+          "source_sheet": "docs/GAA-2022.xlsx",
+          "region": null,
+          "is_anomaly": true,
+          "flag_reason": "Maintenance more expensive than main project"
+        },
+        {
+          "name": "Preventive Maintenance (Asphalt Overlay) along Santander-Barili-Toledo Rd - K0207 + 013 - K0207+093, K0217 + 000 - K0217 + 870, with Installation of Road Safety Devices (Internally Illuminated (Solar) Pavement Levelled Marker/Stud Flush Type)",
+          "highway": "Santander",
+          "chainage_display": "K0207 + 013 - K0207+093, K0217 + 000 - K0217 + 870",
+          "chainage_ranges": [
+            [
+              207,
+              13,
+              207,
+              93
+            ],
+            [
+              217,
+              0,
+              217,
+              870
+            ]
+          ],
+          "chainage_start_m": 207013,
+          "distance_km": 0.95,
+          "amount": 25000000.0,
+          "cost_per_km": 26315789.47368421,
+          "project_type": "maintenance",
+          "source_sheet": "docs/GAA-2022.xlsx",
+          "region": null,
+          "is_anomaly": true,
+          "flag_reason": "Maintenance more expensive than main project"
+        },
+        {
+          "name": "Preventive Maintenance (Asphalt Overlay) along Santander-Barili-Toledo Rd - K0214 + 884 - K0217 + 000, with Installation of Road Safety Devices (Internally Illuminated (Solar) Pavement Levelled Marker/Stud Flush Type)",
+          "highway": "Santander",
+          "chainage_display": "K0214 + 884 - K0217 + 000",
+          "chainage_ranges": [
+            [
+              214,
+              884,
+              217,
+              0
+            ]
+          ],
+          "chainage_start_m": 214884,
+          "distance_km": 2.116,
+          "amount": 50000000.0,
+          "cost_per_km": 23629489.603024572,
+          "project_type": "maintenance",
           "source_sheet": "docs/GAA-2022.xlsx",
           "region": null,
           "is_anomaly": false,
@@ -10125,55 +12016,33 @@
     },
     {
       "highway": "Tagaytay",
-      "estimated_length_km": 35.485,
+      "estimated_length_km": 4.151,
       "main_project": {
-        "name": "Construction of Drainage along Noveleta Naic-Tagaytay Road, Rosario, Cavite, K0027 + 383-K0028 + 453.375 (Both Sides) (Phase 1)",
+        "name": "Construction of Road Slope Protection Structure (Active Protection) - along Tagaytay-Taal Lake Rd. K0062+802 - K0062+868",
         "highway": "Tagaytay",
-        "chainage_display": "K0027 + 383-K0028 + 453",
+        "chainage_display": "K0062+802 - K0062+868",
         "chainage_ranges": [
           [
-            27,
-            383,
-            28,
-            453
+            62,
+            802,
+            62,
+            868
           ]
         ],
-        "chainage_start_m": 27383,
-        "distance_km": 1.07,
-        "amount": 25000000.0,
-        "cost_per_km": 23364485.981308408,
+        "chainage_start_m": 62802,
+        "distance_km": 0.066,
+        "amount": 19967000.0,
+        "cost_per_km": 302530303.030303,
         "project_type": "new_construction",
         "source_sheet": "docs/GAA-2022.xlsx",
         "region": null,
         "is_anomaly": false,
         "flag_reason": null
       },
-      "total_segments": 4,
-      "total_distance_km": 1.2360000000000002,
-      "total_amount": 83563000.0,
+      "total_segments": 3,
+      "total_distance_km": 0.166,
+      "total_amount": 58563000.0,
       "segments": [
-        {
-          "name": "Construction of Drainage along Noveleta Naic-Tagaytay Road, Rosario, Cavite, K0027 + 383-K0028 + 453.375 (Both Sides) (Phase 1)",
-          "highway": "Tagaytay",
-          "chainage_display": "K0027 + 383-K0028 + 453",
-          "chainage_ranges": [
-            [
-              27,
-              383,
-              28,
-              453
-            ]
-          ],
-          "chainage_start_m": 27383,
-          "distance_km": 1.07,
-          "amount": 25000000.0,
-          "cost_per_km": 23364485.981308408,
-          "project_type": "new_construction",
-          "source_sheet": "docs/GAA-2022.xlsx",
-          "region": null,
-          "is_anomaly": false,
-          "flag_reason": null
-        },
         {
           "name": "Construction of Road Slope Protection Structure (Active Protection) - along Tagaytay-Taal Lake Rd. K0058+717 - K0058+767",
           "highway": "Tagaytay",
@@ -10193,8 +12062,8 @@
           "project_type": "new_construction",
           "source_sheet": "docs/GAA-2022.xlsx",
           "region": null,
-          "is_anomaly": true,
-          "flag_reason": "Cost per km significantly higher than main project"
+          "is_anomaly": false,
+          "flag_reason": null
         },
         {
           "name": "Construction of Road Slope Protection Structure (Active Protection) - along Tagaytay-Taal Lake Rd. K0058+767 - K0058+817",
@@ -10215,8 +12084,8 @@
           "project_type": "new_construction",
           "source_sheet": "docs/GAA-2022.xlsx",
           "region": null,
-          "is_anomaly": true,
-          "flag_reason": "Cost per km significantly higher than main project"
+          "is_anomaly": false,
+          "flag_reason": null
         },
         {
           "name": "Construction of Road Slope Protection Structure (Active Protection) - along Tagaytay-Taal Lake Rd. K0062+802 - K0062+868",
@@ -10237,8 +12106,8 @@
           "project_type": "new_construction",
           "source_sheet": "docs/GAA-2022.xlsx",
           "region": null,
-          "is_anomaly": true,
-          "flag_reason": "Cost per km significantly higher than main project"
+          "is_anomaly": false,
+          "flag_reason": null
         }
       ]
     },
@@ -10425,77 +12294,45 @@
     },
     {
       "highway": "Tarlac",
-      "estimated_length_km": 30.27,
+      "estimated_length_km": 12.077,
       "main_project": {
-        "name": "Installation of Solar LED Street Lights and Road Safety Devices along Capas-San Jose-Mayantoc-Malacampa Rd - K0115 + (-752) - K0120 +643, Capas, Tarlac",
+        "name": "Installation of Solar LED Street Lights and Road Safety Devices along Tarlac-Zambales Rd - K0116 + 123 - K0116 +758, K0120+960 - K0122+800, K0125+000-K0128+200, Capas, Tarlac",
         "highway": "Tarlac",
-        "chainage_display": "K0115 + (-752) - K0120 +643",
+        "chainage_display": "K0116 + 123 - K0116 +758, K0120+960 - K0122+800, K0125+000-K0128+200",
         "chainage_ranges": [
           [
-            115,
-            -752,
+            116,
+            123,
+            116,
+            758
+          ],
+          [
             120,
-            643
+            960,
+            122,
+            800
+          ],
+          [
+            125,
+            0,
+            128,
+            200
           ]
         ],
-        "chainage_start_m": 114248,
-        "distance_km": 6.395,
-        "amount": 60000000.0,
-        "cost_per_km": 9382329.945269743,
+        "chainage_start_m": 116123,
+        "distance_km": 5.675,
+        "amount": 40000000.0,
+        "cost_per_km": 7048458.149779736,
         "project_type": "new_construction",
         "source_sheet": "docs/GAA-2022.xlsx",
         "region": null,
         "is_anomaly": false,
         "flag_reason": null
       },
-      "total_segments": 3,
-      "total_distance_km": 12.262,
-      "total_amount": 200000000.0,
+      "total_segments": 1,
+      "total_distance_km": 5.675,
+      "total_amount": 40000000.0,
       "segments": [
-        {
-          "name": "Reconstruction of National Road with Slips, Slope Collapse and Landslide along Manila North Road - K0098+ (-070) - K0098 + 122, Bamban, Tarlac",
-          "highway": "Tarlac",
-          "chainage_display": "K0098+ (-070) - K0098 + 122",
-          "chainage_ranges": [
-            [
-              98,
-              -70,
-              98,
-              122
-            ]
-          ],
-          "chainage_start_m": 97930,
-          "distance_km": 0.192,
-          "amount": 100000000.0,
-          "cost_per_km": 520833333.3333333,
-          "project_type": "new_construction",
-          "source_sheet": "docs/GAA-2022.xlsx",
-          "region": null,
-          "is_anomaly": true,
-          "flag_reason": "Cost per km significantly higher than main project"
-        },
-        {
-          "name": "Installation of Solar LED Street Lights and Road Safety Devices along Capas-San Jose-Mayantoc-Malacampa Rd - K0115 + (-752) - K0120 +643, Capas, Tarlac",
-          "highway": "Tarlac",
-          "chainage_display": "K0115 + (-752) - K0120 +643",
-          "chainage_ranges": [
-            [
-              115,
-              -752,
-              120,
-              643
-            ]
-          ],
-          "chainage_start_m": 114248,
-          "distance_km": 6.395,
-          "amount": 60000000.0,
-          "cost_per_km": 9382329.945269743,
-          "project_type": "new_construction",
-          "source_sheet": "docs/GAA-2022.xlsx",
-          "region": null,
-          "is_anomaly": false,
-          "flag_reason": null
-        },
         {
           "name": "Installation of Solar LED Street Lights and Road Safety Devices along Tarlac-Zambales Rd - K0116 + 123 - K0116 +758, K0120+960 - K0122+800, K0125+000-K0128+200, Capas, Tarlac",
           "highway": "Tarlac",
@@ -10524,6 +12361,125 @@
           "distance_km": 5.675,
           "amount": 40000000.0,
           "cost_per_km": 7048458.149779736,
+          "project_type": "new_construction",
+          "source_sheet": "docs/GAA-2022.xlsx",
+          "region": null,
+          "is_anomaly": false,
+          "flag_reason": null
+        }
+      ]
+    },
+    {
+      "highway": "Ternate",
+      "estimated_length_km": 2.691,
+      "main_project": {
+        "name": "Construction of Road Slope Protection Structure (Active Protection) - along Ternate-Nasugbu Rd - K0068+586 - K0068+641",
+        "highway": "Ternate",
+        "chainage_display": "K0068+586 - K0068+641",
+        "chainage_ranges": [
+          [
+            68,
+            586,
+            68,
+            641
+          ]
+        ],
+        "chainage_start_m": 68586,
+        "distance_km": 0.055,
+        "amount": 20000000.0,
+        "cost_per_km": 363636363.6363636,
+        "project_type": "new_construction",
+        "source_sheet": "docs/GAA-2022.xlsx",
+        "region": null,
+        "is_anomaly": false,
+        "flag_reason": null
+      },
+      "total_segments": 4,
+      "total_distance_km": 0.166,
+      "total_amount": 70000000.0,
+      "segments": [
+        {
+          "name": "Construction of Road Slope Protection Structure (Active Protection) - along Ternate-Nasugbu Rd - K0068+586 - K0068+641",
+          "highway": "Ternate",
+          "chainage_display": "K0068+586 - K0068+641",
+          "chainage_ranges": [
+            [
+              68,
+              586,
+              68,
+              641
+            ]
+          ],
+          "chainage_start_m": 68586,
+          "distance_km": 0.055,
+          "amount": 20000000.0,
+          "cost_per_km": 363636363.6363636,
+          "project_type": "new_construction",
+          "source_sheet": "docs/GAA-2022.xlsx",
+          "region": null,
+          "is_anomaly": false,
+          "flag_reason": null
+        },
+        {
+          "name": "Construction of Road Slope Protection Structure (Active Protection) - along Ternate-Nasugbu Rd - K0071+145 - K0071+166",
+          "highway": "Ternate",
+          "chainage_display": "K0071+145 - K0071+166",
+          "chainage_ranges": [
+            [
+              71,
+              145,
+              71,
+              166
+            ]
+          ],
+          "chainage_start_m": 71145,
+          "distance_km": 0.021,
+          "amount": 10000000.0,
+          "cost_per_km": 476190476.1904762,
+          "project_type": "new_construction",
+          "source_sheet": "docs/GAA-2022.xlsx",
+          "region": null,
+          "is_anomaly": false,
+          "flag_reason": null
+        },
+        {
+          "name": "Construction of Road Slope Protection Structure (Active Protection) - along Ternate-Nasugbu Rd - K0071+187 - K0071+232",
+          "highway": "Ternate",
+          "chainage_display": "K0071+187 - K0071+232",
+          "chainage_ranges": [
+            [
+              71,
+              187,
+              71,
+              232
+            ]
+          ],
+          "chainage_start_m": 71187,
+          "distance_km": 0.045,
+          "amount": 20000000.0,
+          "cost_per_km": 444444444.4444445,
+          "project_type": "new_construction",
+          "source_sheet": "docs/GAA-2022.xlsx",
+          "region": null,
+          "is_anomaly": false,
+          "flag_reason": null
+        },
+        {
+          "name": "Construction of Road Slope Protection Structure (Active Protection) - along Ternate-Nasugbu Rd - K0071+232 - K0071+277",
+          "highway": "Ternate",
+          "chainage_display": "K0071+232 - K0071+277",
+          "chainage_ranges": [
+            [
+              71,
+              232,
+              71,
+              277
+            ]
+          ],
+          "chainage_start_m": 71232,
+          "distance_km": 0.045,
+          "amount": 20000000.0,
+          "cost_per_km": 444444444.4444445,
           "project_type": "new_construction",
           "source_sheet": "docs/GAA-2022.xlsx",
           "region": null,
@@ -10586,101 +12542,73 @@
       ]
     },
     {
-      "highway": "Toledo",
-      "estimated_length_km": 38.87,
+      "highway": "Trece Martirez St",
+      "estimated_length_km": 0.533,
       "main_project": {
-        "name": "Preventive Maintenance (Asphalt Overlay) along Santander-Barili-Toledo Rd - K0214 + 884 - K0217 + 000, with Installation of Road Safety Devices (Internally Illuminated (Solar) Pavement Levelled Marker/Stud Flush Type)",
-        "highway": "Toledo",
-        "chainage_display": "K0214 + 884 - K0217 + 000",
+        "name": "Trece Martirez St - (S00010LT) Chainage 000 - Chainage 533",
+        "highway": "Trece Martirez St",
+        "chainage_display": "Chainage 000 - Chainage 533",
         "chainage_ranges": [
           [
-            214,
-            884,
-            217,
-            0
+            0,
+            0,
+            0,
+            533
           ]
         ],
-        "chainage_start_m": 214884,
-        "distance_km": 2.116,
-        "amount": 50000000.0,
-        "cost_per_km": 23629489.603024572,
-        "project_type": "maintenance",
+        "chainage_start_m": 0,
+        "distance_km": 0.533,
+        "amount": 29000000.0,
+        "cost_per_km": 54409005.62851782,
+        "project_type": "new_construction",
         "source_sheet": "docs/GAA-2022.xlsx",
         "region": null,
         "is_anomaly": false,
         "flag_reason": null
       },
-      "total_segments": 3,
-      "total_distance_km": 4.066,
-      "total_amount": 100000000.0,
+      "total_segments": 2,
+      "total_distance_km": 0.5890000000000001,
+      "total_amount": 30285000.0,
       "segments": [
         {
-          "name": "Preventive Maintenance (Asphalt Overlay) along Santander-Barili-Toledo Rd - K0179 + 000 - K0180 + 000, with Installation of Road Safety Devices (Internally Illuminated (Solar) Pavement Levelled Marker/Stud Flush Type)",
-          "highway": "Toledo",
-          "chainage_display": "K0179 + 000 - K0180 + 000",
+          "name": "Trece Martirez St - (S00010LT) Chainage 000 - Chainage 533",
+          "highway": "Trece Martirez St",
+          "chainage_display": "Chainage 000 - Chainage 533",
           "chainage_ranges": [
             [
-              179,
               0,
-              180,
-              0
+              0,
+              0,
+              533
             ]
           ],
-          "chainage_start_m": 179000,
-          "distance_km": 1.0,
-          "amount": 25000000.0,
-          "cost_per_km": 25000000.0,
-          "project_type": "maintenance",
+          "chainage_start_m": 0,
+          "distance_km": 0.533,
+          "amount": 29000000.0,
+          "cost_per_km": 54409005.62851782,
+          "project_type": "new_construction",
           "source_sheet": "docs/GAA-2022.xlsx",
           "region": null,
-          "is_anomaly": true,
-          "flag_reason": "Maintenance more expensive than main project"
+          "is_anomaly": false,
+          "flag_reason": null
         },
         {
-          "name": "Preventive Maintenance (Asphalt Overlay) along Santander-Barili-Toledo Rd - K0207 + 013 - K0207+093, K0217 + 000 - K0217 + 870, with Installation of Road Safety Devices (Internally Illuminated (Solar) Pavement Levelled Marker/Stud Flush Type)",
-          "highway": "Toledo",
-          "chainage_display": "K0207 + 013 - K0207+093, K0217 + 000 - K0217 + 870",
+          "name": "Trece Martirez St - (S00010LT) Chainage 062 - Chainage 118",
+          "highway": "Trece Martirez St",
+          "chainage_display": "Chainage 062 - Chainage 118",
           "chainage_ranges": [
             [
-              207,
-              13,
-              207,
-              93
-            ],
-            [
-              217,
               0,
-              217,
-              870
+              62,
+              0,
+              118
             ]
           ],
-          "chainage_start_m": 207013,
-          "distance_km": 0.95,
-          "amount": 25000000.0,
-          "cost_per_km": 26315789.47368421,
-          "project_type": "maintenance",
-          "source_sheet": "docs/GAA-2022.xlsx",
-          "region": null,
-          "is_anomaly": true,
-          "flag_reason": "Maintenance more expensive than main project"
-        },
-        {
-          "name": "Preventive Maintenance (Asphalt Overlay) along Santander-Barili-Toledo Rd - K0214 + 884 - K0217 + 000, with Installation of Road Safety Devices (Internally Illuminated (Solar) Pavement Levelled Marker/Stud Flush Type)",
-          "highway": "Toledo",
-          "chainage_display": "K0214 + 884 - K0217 + 000",
-          "chainage_ranges": [
-            [
-              214,
-              884,
-              217,
-              0
-            ]
-          ],
-          "chainage_start_m": 214884,
-          "distance_km": 2.116,
-          "amount": 50000000.0,
-          "cost_per_km": 23629489.603024572,
-          "project_type": "maintenance",
+          "chainage_start_m": 62,
+          "distance_km": 0.056,
+          "amount": 1285000.0,
+          "cost_per_km": 22946428.57142857,
+          "project_type": "new_construction",
           "source_sheet": "docs/GAA-2022.xlsx",
           "region": null,
           "is_anomaly": false,
@@ -10742,6 +12670,59 @@
       ]
     },
     {
+      "highway": "Ugbo St",
+      "estimated_length_km": 0.128,
+      "main_project": {
+        "name": "Ugbo St. - (S02385LZ) Chainage 0 - Chainage 128",
+        "highway": "Ugbo St",
+        "chainage_display": "Chainage 0 - Chainage 128",
+        "chainage_ranges": [
+          [
+            0,
+            0,
+            0,
+            128
+          ]
+        ],
+        "chainage_start_m": 0,
+        "distance_km": 0.128,
+        "amount": 5000000.0,
+        "cost_per_km": 39062500.0,
+        "project_type": "new_construction",
+        "source_sheet": "docs/GAA-2022.xlsx",
+        "region": null,
+        "is_anomaly": false,
+        "flag_reason": null
+      },
+      "total_segments": 1,
+      "total_distance_km": 0.128,
+      "total_amount": 5000000.0,
+      "segments": [
+        {
+          "name": "Ugbo St. - (S02385LZ) Chainage 0 - Chainage 128",
+          "highway": "Ugbo St",
+          "chainage_display": "Chainage 0 - Chainage 128",
+          "chainage_ranges": [
+            [
+              0,
+              0,
+              0,
+              128
+            ]
+          ],
+          "chainage_start_m": 0,
+          "distance_km": 0.128,
+          "amount": 5000000.0,
+          "cost_per_km": 39062500.0,
+          "project_type": "new_construction",
+          "source_sheet": "docs/GAA-2022.xlsx",
+          "region": null,
+          "is_anomaly": false,
+          "flag_reason": null
+        }
+      ]
+    },
+    {
       "highway": "Umingan",
       "estimated_length_km": 1.963,
       "main_project": {
@@ -10787,124 +12768,6 @@
           "amount": 64308000.0,
           "cost_per_km": 32760061.130922057,
           "project_type": "new_construction",
-          "source_sheet": "docs/GAA-2022.xlsx",
-          "region": null,
-          "is_anomaly": false,
-          "flag_reason": null
-        }
-      ]
-    },
-    {
-      "highway": "Upgrading Along Kaybiga",
-      "estimated_length_km": 2.082,
-      "main_project": {
-        "name": "Rehabilitation/ Upgrading along Kaybiga Road - K0019 + (-328) -K0020 + 754, Caloocan City",
-        "highway": "Upgrading Along Kaybiga",
-        "chainage_display": "K0019 + (-328) -K0020 + 754",
-        "chainage_ranges": [
-          [
-            19,
-            -328,
-            20,
-            754
-          ]
-        ],
-        "chainage_start_m": 18672,
-        "distance_km": 2.082,
-        "amount": 22500000.0,
-        "cost_per_km": 10806916.42651297,
-        "project_type": "rehabilitation",
-        "source_sheet": "docs/GAA-2022.xlsx",
-        "region": null,
-        "is_anomaly": false,
-        "flag_reason": null
-      },
-      "total_segments": 1,
-      "total_distance_km": 2.082,
-      "total_amount": 22500000.0,
-      "segments": [
-        {
-          "name": "Rehabilitation/ Upgrading along Kaybiga Road - K0019 + (-328) -K0020 + 754, Caloocan City",
-          "highway": "Upgrading Along Kaybiga",
-          "chainage_display": "K0019 + (-328) -K0020 + 754",
-          "chainage_ranges": [
-            [
-              19,
-              -328,
-              20,
-              754
-            ]
-          ],
-          "chainage_start_m": 18672,
-          "distance_km": 2.082,
-          "amount": 22500000.0,
-          "cost_per_km": 10806916.42651297,
-          "project_type": "rehabilitation",
-          "source_sheet": "docs/GAA-2022.xlsx",
-          "region": null,
-          "is_anomaly": false,
-          "flag_reason": null
-        }
-      ]
-    },
-    {
-      "highway": "Upgrading Along Manila North",
-      "estimated_length_km": 4.021,
-      "main_project": {
-        "name": "Rehabilitation/Reconstruction/Upgrading along Manila North Road - K0031 + 579 - K0032 + 929, K0035 + 000 - K0035 + 600",
-        "highway": "Upgrading Along Manila North",
-        "chainage_display": "K0031 + 579 - K0032 + 929, K0035 + 000 - K0035 + 600",
-        "chainage_ranges": [
-          [
-            31,
-            579,
-            32,
-            929
-          ],
-          [
-            35,
-            0,
-            35,
-            600
-          ]
-        ],
-        "chainage_start_m": 31579,
-        "distance_km": 1.95,
-        "amount": 87938000.0,
-        "cost_per_km": 45096410.256410256,
-        "project_type": "rehabilitation",
-        "source_sheet": "docs/GAA-2022.xlsx",
-        "region": null,
-        "is_anomaly": false,
-        "flag_reason": null
-      },
-      "total_segments": 1,
-      "total_distance_km": 1.95,
-      "total_amount": 87938000.0,
-      "segments": [
-        {
-          "name": "Rehabilitation/Reconstruction/Upgrading along Manila North Road - K0031 + 579 - K0032 + 929, K0035 + 000 - K0035 + 600",
-          "highway": "Upgrading Along Manila North",
-          "chainage_display": "K0031 + 579 - K0032 + 929, K0035 + 000 - K0035 + 600",
-          "chainage_ranges": [
-            [
-              31,
-              579,
-              32,
-              929
-            ],
-            [
-              35,
-              0,
-              35,
-              600
-            ]
-          ],
-          "chainage_start_m": 31579,
-          "distance_km": 1.95,
-          "amount": 87938000.0,
-          "cost_per_km": 45096410.256410256,
-          "project_type": "rehabilitation",
           "source_sheet": "docs/GAA-2022.xlsx",
           "region": null,
           "is_anomaly": false,
@@ -11139,17 +13002,135 @@
           "flag_reason": null
         }
       ]
+    },
+    {
+      "highway": "Zapote",
+      "estimated_length_km": 0.2,
+      "main_project": {
+        "name": "Zapote-Alabang Y-Length - (S03272LZ) Chainage 0 - Chainage 200",
+        "highway": "Zapote",
+        "chainage_display": "Chainage 0 - Chainage 200",
+        "chainage_ranges": [
+          [
+            0,
+            0,
+            0,
+            200
+          ]
+        ],
+        "chainage_start_m": 0,
+        "distance_km": 0.2,
+        "amount": 12374000.0,
+        "cost_per_km": 61870000.0,
+        "project_type": "new_construction",
+        "source_sheet": "docs/GAA-2022.xlsx",
+        "region": null,
+        "is_anomaly": false,
+        "flag_reason": null
+      },
+      "total_segments": 1,
+      "total_distance_km": 0.2,
+      "total_amount": 12374000.0,
+      "segments": [
+        {
+          "name": "Zapote-Alabang Y-Length - (S03272LZ) Chainage 0 - Chainage 200",
+          "highway": "Zapote",
+          "chainage_display": "Chainage 0 - Chainage 200",
+          "chainage_ranges": [
+            [
+              0,
+              0,
+              0,
+              200
+            ]
+          ],
+          "chainage_start_m": 0,
+          "distance_km": 0.2,
+          "amount": 12374000.0,
+          "cost_per_km": 61870000.0,
+          "project_type": "new_construction",
+          "source_sheet": "docs/GAA-2022.xlsx",
+          "region": null,
+          "is_anomaly": false,
+          "flag_reason": null
+        }
+      ]
+    },
+    {
+      "highway": "Zaragosa St",
+      "estimated_length_km": 0.308,
+      "main_project": {
+        "name": "Zaragosa St - (S02268LZ) Chainage 0 - Chainage 308, (S02387LZ) Chainage 0 - Chainage 308",
+        "highway": "Zaragosa St",
+        "chainage_display": "Chainage 0 - Chainage 308, Chainage 0 - Chainage 308",
+        "chainage_ranges": [
+          [
+            0,
+            0,
+            0,
+            308
+          ],
+          [
+            0,
+            0,
+            0,
+            308
+          ]
+        ],
+        "chainage_start_m": 0,
+        "distance_km": 0.616,
+        "amount": 16000000.0,
+        "cost_per_km": 25974025.974025976,
+        "project_type": "new_construction",
+        "source_sheet": "docs/GAA-2022.xlsx",
+        "region": null,
+        "is_anomaly": false,
+        "flag_reason": null
+      },
+      "total_segments": 1,
+      "total_distance_km": 0.616,
+      "total_amount": 16000000.0,
+      "segments": [
+        {
+          "name": "Zaragosa St - (S02268LZ) Chainage 0 - Chainage 308, (S02387LZ) Chainage 0 - Chainage 308",
+          "highway": "Zaragosa St",
+          "chainage_display": "Chainage 0 - Chainage 308, Chainage 0 - Chainage 308",
+          "chainage_ranges": [
+            [
+              0,
+              0,
+              0,
+              308
+            ],
+            [
+              0,
+              0,
+              0,
+              308
+            ]
+          ],
+          "chainage_start_m": 0,
+          "distance_km": 0.616,
+          "amount": 16000000.0,
+          "cost_per_km": 25974025.974025976,
+          "project_type": "new_construction",
+          "source_sheet": "docs/GAA-2022.xlsx",
+          "region": null,
+          "is_anomaly": false,
+          "flag_reason": null
+        }
+      ]
     }
   ],
-  "total_highways": 127,
-  "total_segments": 281,
-  "total_anomalies": 90,
-  "total_distance_km": 14127.543999999994,
+  "total_highways": 166,
+  "total_segments": 309,
+  "total_anomalies": 79,
+  "total_distance_km": 853.2410000000006,
   "year": 2022,
   "metadata": {
-    "generated_at": "2025-12-01T12:26:26.055797",
+    "generated_at": "2025-12-02T14:10:33.309190",
     "source_file": "database: budget_2022",
-    "processed_items": 281,
+    "processed_items": 309,
     "year": 2022
   }
 }

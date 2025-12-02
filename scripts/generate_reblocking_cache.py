@@ -167,8 +167,188 @@ class ReblockingAnalysisGenerator:
     def identify_highway(self, name: str) -> Optional[str]:
         """Identify which highway a project belongs to"""
         name_lower = name.lower()
+        original_name = name
         
-        # Check specific highways first
+        # Exclude flood control projects (not roads/highways)
+        # Check for flood control patterns first
+        flood_control_patterns = [
+            r'^flood\s+control\s+structures?\s+(?:protecting|along)',
+            r'^flood\s+control\s+structure\s+(?:protecting|along)',
+            r'flood\s+control\s+structures?\s+along',
+            r'flood\s+control\s+structure\s+along',
+            r'^flood\s+relief\s+along',  # "Flood Relief Along ..."
+        ]
+        for pattern in flood_control_patterns:
+            if re.match(pattern, name, re.IGNORECASE):
+                return None  # Not a highway project
+        
+        flood_control_keywords = [
+            'flood control', 'floodcontrol', 'flood-control',
+            'flood relief', 'floodrelief', 'flood-relief',
+            'flood mitigation', 'flood management',
+            'drainage system', 'drainage canal', 'drainage channel',
+            'seawall', 'sea wall', 'dike', 'levee',
+            'flood protection', 'flood barrier',
+            'protecting national'  # Common pattern: "Flood Control Structures Protecting National"
+        ]
+        if any(keyword in name_lower for keyword in flood_control_keywords):
+            return None  # Not a highway project
+        
+        # Remove codes in parentheses like (S00025Gr), (S00028Gr), etc.
+        name = re.sub(r'\s*\([A-Z]\d+[A-Za-z]+\)', '', name, flags=re.IGNORECASE).strip()
+        
+        # Remove work type indicators in parentheses first (e.g., "Road (Asphalt Overlay)" -> "Road")
+        # Common patterns: (Asphalt Overlay), (Repair), (Rehabilitation), (Maintenance), etc.
+        work_type_parentheses_patterns = [
+            r'\s*\(asphalt\s+overlay\)',
+            r'\s*\(repair\)',
+            r'\s*\(rehabilitation\)',
+            r'\s*\(maintenance\)',
+            r'\s*\(reconstruction\)',
+            r'\s*\(improvement\)',
+            r'\s*\(upgrading\)',
+            r'\s*\(widening\)',
+            r'\s*\(construction\)',
+            r'\s*\(installation\)',
+            r'\s*\(concreting\)',
+            r'\s*\(paving\)',
+        ]
+        for pattern in work_type_parentheses_patterns:
+            name = re.sub(pattern, '', name, flags=re.IGNORECASE).strip()
+        
+        # Also remove generic work descriptions in parentheses
+        name = re.sub(r'\s*\([^)]*(?:overlay|repair|rehab|maintenance|construction|improvement|upgrading|widening|installation|concreting|paving)[^)]*\)', '', name, flags=re.IGNORECASE).strip()
+        
+        # Update name_lower after cleaning
+        name_lower = name.lower()
+        
+        # Pattern 0: Handle "Road: <work_type> At Specific Locations Along <highway_name>"
+        # Example: "Road: Asphalt Overlay At Specific Locations Along Central Rd, San Miguel- Constancia- Cabano- Igcawayan"
+        #          -> extract "Central Rd, San Miguel- Constancia- Cabano- Igcawayan"
+        # Example: "Road: Asphalt Overlay At Specific Locations Along Guimaras Circumferential Rd (S00028Gr)"
+        #          -> extract "Guimaras Circumferential Rd"
+        # This is a maintenance indicator, so we drop the prefix and extract the highway name
+        # Make the pattern more flexible to handle variations
+        road_work_along_pattern = r'^road:\s*(?:asphalt\s+overlay|repair|rehabilitation|improvement|maintenance|construction|reconstruction|upgrading|widening)\s+at\s+specific\s+locations\s+along\s+(.+?)(?:\s*$|\s*\[|\s*\([A-Z]\d+[A-Za-z]+\)|\s*\([^)]*\)\s*$)'
+        road_work_along_match = re.match(road_work_along_pattern, name, re.IGNORECASE)
+        if road_work_along_match:
+            potential_highway = road_work_along_match.group(1).strip()
+            # Remove any trailing brackets, codes, or parentheses
+            potential_highway = re.sub(r'\s*\[.*$', '', potential_highway).strip()
+            # Remove codes like (S00025Gr), (S00028Gr) at the end
+            potential_highway = re.sub(r'\s*\([A-Z]\d+[A-Za-z]+\)\s*$', '', potential_highway, flags=re.IGNORECASE).strip()
+            # Remove other trailing parentheses content
+            potential_highway = re.sub(r'\s*\([^)]*\)\s*$', '', potential_highway).strip()
+            potential_lower = potential_highway.lower()
+            
+            # Validate it's a valid highway name
+            if potential_lower not in self.invalid_highway_names and len(potential_highway) > 3:
+                work_words = ['slope', 'protection', 'retaining', 'wall', 'street', 'lights', 'traffic', 'signs', 'drainage', 'damaged', 'paved', 'specific', 'locations']
+                if not any(word in potential_lower for word in work_words):
+                    # Check if it starts with a capital letter or contains road/highway keywords
+                    if re.match(r'^[A-Z]', potential_highway) or any(kw in potential_lower for kw in ['road', 'rd', 'highway', 'hiway', 'avenue', 'boulevard', 'blvd', 'ave']):
+                        # Preserve the original capitalization but title case if needed
+                        return potential_highway if potential_highway[0].isupper() else potential_highway.title()
+        
+        # Pattern 0.5: Handle "Road: <work_type> Of <highway_name>"
+        # Example: "Road: Asphalt Overlay Of Quezon" -> extract "Quezon"
+        road_work_of_pattern = r'^road:\s*(?:asphalt\s+overlay|repair|rehabilitation|improvement|maintenance|construction|reconstruction|upgrading|widening)\s+of\s+(.+?)(?:\s*$|\s*\[|\s*\(|\s+-|\s+with)'
+        road_work_of_match = re.match(road_work_of_pattern, name, re.IGNORECASE)
+        if road_work_of_match:
+            potential_highway = road_work_of_match.group(1).strip()
+            # Remove any trailing brackets, codes, or project details
+            potential_highway = re.sub(r'\s*\[.*$', '', potential_highway).strip()
+            potential_highway = re.sub(r'\s*\([^)]*\)\s*$', '', potential_highway).strip()
+            potential_highway = re.sub(r'\s+-\s+.*$', '', potential_highway).strip()
+            potential_highway = re.sub(r'\s+with\s+.*$', '', potential_highway, flags=re.IGNORECASE).strip()
+            potential_lower = potential_highway.lower()
+            
+            if potential_lower not in self.invalid_highway_names and len(potential_highway) > 3:
+                work_words = ['slope', 'protection', 'retaining', 'wall', 'street', 'lights', 'traffic', 'signs', 'drainage', 'damaged', 'paved']
+                if not any(word in potential_lower for word in work_words):
+                    if re.match(r'^[A-Z]', potential_highway):
+                        return potential_highway.title()
+        
+        # Pattern 0.6: Handle "Road:Asphalt Overlay/..." (no space after colon)
+        # Example: "Road:Asphalt Overlay/Item 304-A (Slurry Surface Treatment 12Mm) With Correction"
+        # This is maintenance work but may not have a clear highway name - skip if no highway name found
+        road_work_slash_pattern = r'^road:\s*(?:asphalt\s+overlay|repair|rehabilitation|improvement|maintenance|construction|reconstruction|upgrading|widening)\s*/'
+        if re.match(road_work_slash_pattern, name, re.IGNORECASE):
+            # Try to extract highway name after the work type, but if it's just technical details, skip
+            # For now, we'll let it fall through to other patterns or return None
+            pass
+        
+        # Pattern 1: Extract highway name from "<work_type> Of <highway_name>" pattern
+        # Examples: "Improvement Of Manila South" -> "Manila South"
+        #           "Rehabilitation Of Manila East" -> "Manila East"
+        #           "Reconstruction Of <name>" -> extract name after "Of"
+        work_type_of_pattern = r'^(?:preventive\s+maintenance|construction|reconstruction|improvement|rehabilitation|repair|maintenance|upgrading|road\s+widening|repair\s+and\s+rehabilitation|rehabilitation\s+and\s+improvement|improvement\s+and\s+upgrading)\s+of\s+(.+?)(?:\s+-\s+|\s+K\d+|\s*$)'
+        work_type_of_match = re.match(work_type_of_pattern, name, re.IGNORECASE)
+        if work_type_of_match:
+            potential_highway = work_type_of_match.group(1).strip()
+            # Remove any trailing work-related words, chainage notation, or other project details
+            potential_highway = re.sub(r'\s+(?:road|highway|avenue|boulevard|expressway).*$', '', potential_highway, flags=re.IGNORECASE)
+            potential_highway = re.sub(r'\s+-\s+.*$', '', potential_highway)  # Remove anything after " - "
+            potential_highway = re.sub(r'\s+K\d+.*$', '', potential_highway, flags=re.IGNORECASE)  # Remove chainage
+            potential_highway = re.sub(r'\s+Chainage.*$', '', potential_highway, flags=re.IGNORECASE)  # Remove chainage text
+            potential_highway = potential_highway.strip()
+            potential_lower = potential_highway.lower()
+            
+            # Validate it's not a work-related word
+            if potential_lower not in self.invalid_highway_names and len(potential_highway) > 3:
+                work_words = ['slope', 'protection', 'retaining', 'wall', 'street', 'lights', 'traffic', 'signs', 'drainage', 'damaged', 'paved', 'improvement', 'repair', 'rehabilitation', 'maintenance', 'construction', 'reconstruction']
+                if not any(word in potential_lower for word in work_words):
+                    # Additional check: make sure it looks like a highway name (has at least one capitalized word)
+                    if re.match(r'^[A-Z]', potential_highway):
+                        return potential_highway.title()
+        
+        # Pattern 2: Handle "Along" in the middle: "Some Text Along Highway Name"
+        # Extract what comes after "Along"
+        along_pattern = r'\balong\s+([A-Z][a-z]+(?:\s+[A-Z][a-z]+)*(?:\s+(?:North|South|East|West|National|Provincial|Vicinal|Road|Highway|Avenue|Boulevard))?)'
+        along_match = re.search(along_pattern, name, re.IGNORECASE)
+        if along_match:
+            potential_highway = along_match.group(1).strip()
+            potential_lower = potential_highway.lower()
+            # Validate it's not a work-related word
+            if potential_lower not in self.invalid_highway_names and len(potential_highway) > 3:
+                work_words = ['slope', 'protection', 'retaining', 'wall', 'street', 'lights', 'traffic', 'signs', 'drainage']
+                if not any(word in potential_lower for word in work_words):
+                    return potential_highway.title()
+        
+        # Pattern 3: Remove work type prefixes that are not highway names
+        # Handle patterns like "Construction Of Slope Protection Along Old Zigzag" -> extract "Old Zigzag"
+        work_type_patterns = [
+            r'^preventive\s+maintenance\s+of\s+',
+            r'^construction\s+of\s+(?:slope\s+protection|retaining\s+wall|drainage|bridge|culvert)\s+along\s+',
+            r'^construction\s+of\s+',
+            r'^reconstruction\s+of\s+',
+            r'^installation\s+of\s+(?:street\s+lights|traffic\s+lights|signs|signals)\s+along\s+',
+            r'^installation\s+of\s+',
+            r'^upgrading\s+of\s+damaged\s+paved\s+',
+            r'^improvement\s+of\s+',
+            r'^asphalt\s+overlay\s+along\s+',
+            r'^rehabilitation\s+of\s+',
+            r'^road\s+widening\s+of\s+',
+            r'^repair\s+of\s+',
+            r'^repair\s+and\s+rehabilitation\s+of\s+',
+            r'^rehabilitation\s+and\s+improvement\s+of\s+',
+            r'^maintenance\s+of\s+',
+            r'^upgrading\s+of\s+',
+            r'^improvement\s+and\s+upgrading\s+of\s+',
+            r'^along\s+',  # Remove "Along" at the start
+        ]
+        
+        # Clean the name by removing work type prefixes
+        cleaned_name = name
+        for pattern in work_type_patterns:
+            cleaned_name = re.sub(pattern, '', cleaned_name, flags=re.IGNORECASE).strip()
+        
+        # If cleaning removed something, use the cleaned name
+        if cleaned_name != name and len(cleaned_name) > 3:
+            name = cleaned_name
+            name_lower = name.lower()
+        
+        # Check specific highways first (using cleaned name)
         for highway_name, keywords in self.highway_keywords.items():
             for keyword in keywords:
                 if keyword in name_lower:
@@ -197,9 +377,38 @@ class ReblockingAnalysisGenerator:
                         continue
                     
                     return extracted_name.title()
-            return None  # Don't return "Other Highway" - filter it out
         
-        return None
+        # If no highway keyword found, try to extract name after work type prefixes
+        # Look for patterns like "Name Road", "Name Highway", or just capitalized names
+        if not has_highway_keyword and cleaned_name != original_name:
+            # Try to find a meaningful name (capitalized words, possibly with location indicators)
+            # Pattern 1: Highway name with direction/location suffix (North, South, East, West, National, etc.)
+            name_patterns = [
+                r'^([A-Z][a-z]+(?:\s+[A-Z][a-z]+)*(?:\s+(?:North|South|East|West|National|Provincial|Vicinal))?)\s*',
+                r'^([A-Z][a-z]+(?:\s+[A-Z][a-z]+)*(?:\s+(?:Road|Highway|Avenue|Boulevard|Expressway))?)\s*',
+                r'^([A-Z][a-z]+(?:\s+[A-Z][a-z]+)+)\s*',  # Multiple capitalized words
+            ]
+            
+            for name_pattern in name_patterns:
+                match = re.match(name_pattern, name)
+                if match:
+                    extracted_name = match.group(1).strip()
+                    extracted_lower = extracted_name.lower()
+                    
+                    # Filter out invalid/generic names
+                    if extracted_lower not in self.invalid_highway_names and len(extracted_name) > 3:
+                        # Check if it's just a single generic word
+                        if len(extracted_name.split()) == 1 and extracted_lower in ['national', 'application', 'other', 'the', 'a', 'an']:
+                            continue
+                        
+                        # Additional filtering: skip if it's just work-related words
+                        work_words = ['slope', 'protection', 'retaining', 'wall', 'street', 'lights', 'traffic', 'signs']
+                        if extracted_lower in work_words or any(word in extracted_lower for word in work_words if len(word) > 4):
+                            continue
+                        
+                        return extracted_name.title()
+        
+        return None  # Don't return "Other Highway" - filter it out
     
     def classify_project_type(self, name: str) -> str:
         """Classify project as new construction, repair, rehabilitation, or maintenance"""
@@ -209,8 +418,15 @@ class ReblockingAnalysisGenerator:
         repair_keywords = ['repair', 'repaired', 'repairing', 'repairs']
         # Rehabilitation keywords
         rehab_keywords = ['rehabilitation', 'rehabilitate', 'rehabilitated', 'rehabilitating', 'rehab']
-        # Maintenance keywords
-        maintenance_keywords = ['maintenance', 'maintain', 'maintained', 'maintaining', 'maintainance']
+        # Maintenance keywords (including improvement, upgrading, asphalt overlay, road widening)
+        maintenance_keywords = [
+            'maintenance', 'maintain', 'maintained', 'maintaining', 'maintainance',
+            'improvement', 'improve', 'improved', 'improving',
+            'upgrading', 'upgrade', 'upgraded',
+            'asphalt overlay', 'overlay',
+            'road widening', 'widening',
+            'preventive maintenance'
+        ]
         # New construction keywords
         construction_keywords = ['construction', 'construct', 'constructed', 'constructing', 'concreting', 'concrete', 'paving', 'paved', 'new']
         
@@ -367,6 +583,37 @@ class ReblockingAnalysisGenerator:
             if not name:
                 continue
             
+            # Exclude flood control projects (not roads/highways)
+            name_lower = name.lower()
+            # Check for flood control patterns first
+            flood_control_patterns = [
+                r'^flood\s+control\s+structures?\s+(?:protecting|along)',
+                r'^flood\s+control\s+structure\s+(?:protecting|along)',
+                r'flood\s+control\s+structures?\s+along',
+                r'flood\s+control\s+structure\s+along',
+                r'^flood\s+relief\s+along',  # "Flood Relief Along ..."
+            ]
+            is_flood_control = False
+            for pattern in flood_control_patterns:
+                if re.match(pattern, name, re.IGNORECASE):
+                    is_flood_control = True
+                    break
+            
+            if not is_flood_control:
+                flood_control_keywords = [
+                    'flood control', 'floodcontrol', 'flood-control',
+                    'flood relief', 'floodrelief', 'flood-relief',
+                    'flood mitigation', 'flood management',
+                    'drainage system', 'drainage canal', 'drainage channel',
+                    'seawall', 'sea wall', 'dike', 'levee',
+                    'flood protection', 'flood barrier',
+                ]
+                if any(keyword in name_lower for keyword in flood_control_keywords):
+                    is_flood_control = True
+            
+            if is_flood_control:
+                continue  # Skip flood control projects
+            
             # Check if it has chainage notation
             chainage_ranges = self.extract_all_chainage_ranges(name)
             if not chainage_ranges:
@@ -488,8 +735,8 @@ class ReblockingAnalysisGenerator:
         # Sort highways by name
         highways_data.sort(key=lambda x: x['highway'])
         
-        # Calculate total distance across all highways
-        total_distance_km = sum(h['estimated_length_km'] for h in highways_data)
+        # Calculate total distance across all highways (sum of all segment distances, not estimated lengths)
+        total_distance_km = sum(h['total_distance_km'] for h in highways_data)
         
         # Prepare output data (don't include all_segments to reduce file size - segments are in each highway)
         output_data = {
