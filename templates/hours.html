@@ -1,0 +1,372 @@
+{% extends "base.html" %}
+
+{% block head %}
+<link rel="stylesheet" href="/static/css/tailwind.css">
+<style>
+    /* Hide navigation, header, and hero */
+    nav.navbar,
+    header.navbar,
+    header,
+    .navbar,
+    .visualizations-header,
+    .visualizations-nav {
+        display: none !important;
+    }
+    
+    body {
+        padding-top: 0 !important;
+        margin-top: 0 !important;
+    }
+    
+    main {
+        margin-top: 0 !important;
+        padding-top: 0 !important;
+    }
+    
+    .hours-container {
+        max-width: 1400px;
+        margin: 2rem auto;
+        padding: 0 1rem;
+    }
+    .hours-summary {
+        background: #f8f9fa;
+        padding: 1.5rem;
+        border-radius: 8px;
+        margin-bottom: 2rem;
+    }
+    .hours-table {
+        width: 100%;
+        border-collapse: collapse;
+        background: white;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        border-radius: 8px;
+        overflow: hidden;
+    }
+    .hours-table thead {
+        background: #343a40;
+        color: white;
+    }
+    .hours-table th {
+        padding: 1rem;
+        text-align: left;
+        font-weight: 600;
+    }
+    .hours-table td {
+        padding: 0.75rem 1rem;
+        border-bottom: 1px solid #dee2e6;
+    }
+    .hours-table tbody tr:hover {
+        background: #f8f9fa;
+    }
+    .hours-table tbody tr:last-child td {
+        border-bottom: none;
+    }
+    .project-name {
+        font-weight: 600;
+        color: #495057;
+    }
+    .hours-value {
+        font-weight: 600;
+        color: #28a745;
+    }
+    .date-value {
+        color: #6c757d;
+    }
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1rem;
+        margin-bottom: 2rem;
+    }
+    .payment-card {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 1.5rem;
+        border-radius: 8px;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    }
+    @media (min-width: 768px) {
+        .payment-card {
+            grid-column: span 2;
+        }
+    }
+    .payment-value {
+        font-size: 2.5rem;
+        font-weight: 700;
+        margin-bottom: 0.5rem;
+    }
+    .payment-label {
+        font-size: 0.9rem;
+        opacity: 0.9;
+    }
+    .payment-rate {
+        font-size: 0.8rem;
+        opacity: 0.8;
+        margin-top: 0.5rem;
+    }
+    .stat-card {
+        background: white;
+        padding: 1.5rem;
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    .stat-value {
+        font-size: 2rem;
+        font-weight: 700;
+        color: #007bff;
+        margin-bottom: 0.5rem;
+    }
+    .stat-label {
+        color: #6c757d;
+        font-size: 0.9rem;
+    }
+    .refresh-btn {
+        background: #007bff;
+        color: white;
+        border: none;
+        padding: 0.5rem 1.5rem;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 0.9rem;
+        margin-bottom: 1rem;
+    }
+    .refresh-btn:hover {
+        background: #0056b3;
+    }
+    .print-btn {
+        background: #28a745;
+        color: white;
+        border: none;
+        padding: 0.5rem 1.5rem;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 0.9rem;
+        margin-bottom: 1rem;
+        margin-left: 0.5rem;
+    }
+    .print-btn:hover {
+        background: #218838;
+    }
+    .loading {
+        text-align: center;
+        padding: 2rem;
+        color: #6c757d;
+    }
+    
+    @media print {
+        .hours-container {
+            margin: 0;
+            padding: 0;
+        }
+        .refresh-btn,
+        .print-btn,
+        #year-filter,
+        label[for="year-filter"],
+        .hours-summary {
+            display: none;
+        }
+        .hours-table {
+            box-shadow: none;
+        }
+        body {
+            margin: 0;
+            padding: 1rem;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="hours-container">
+    <h1 style="font-size: 2rem; font-weight: 700; margin-bottom: 1rem;">Hours Tracking</h1>
+    <p style="color: #6c757d; margin-bottom: 2rem;">Track time spent across all projects based on file dates and git commits</p>
+    <p id="year-display" style="color: #6c757d; margin-bottom: 1rem; font-weight: 600;"></p>
+    
+    <div style="margin-bottom: 1rem; display: flex; gap: 1rem; align-items: center;">
+        <label for="year-filter" style="font-weight: 600;">Year:</label>
+        <select id="year-filter" onchange="loadHours()" style="padding: 0.5rem; border-radius: 4px; border: 1px solid #ccc;"></select>
+        <button class="refresh-btn" onclick="loadHours()">🔄 Refresh Data</button>
+        <button class="print-btn" onclick="window.print()">🖨️ Print Table</button>
+    </div>
+    
+    <div id="loading" class="loading">Loading hours data...</div>
+    <div id="hours-content" style="display: none;">
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-value" id="total-hours">0</div>
+                <div class="stat-label">Total Hours</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="total-days">0</div>
+                <div class="stat-label">Days Tracked</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="total-projects">0</div>
+                <div class="stat-label">Projects</div>
+            </div>
+            <div class="payment-card">
+                <div class="payment-value" id="total-payment">€0</div>
+                <div class="payment-label">Estimated Payment</div>
+                <div class="payment-rate">@ €100/hour (Senior Engineer Rate)</div>
+            </div>
+        </div>
+        
+        <div class="hours-summary">
+            <h2 style="font-size: 1.5rem; font-weight: 600; margin-bottom: 1rem;">Hours by Project</h2>
+            <div id="project-summary"></div>
+        </div>
+        
+        <div class="hours-summary" style="margin-top: 2rem;">
+            <h2 style="font-size: 1.5rem; font-weight: 600; margin-bottom: 1rem;">Payment by Project</h2>
+            <div id="payment-summary"></div>
+        </div>
+        
+        <h2 style="font-size: 1.5rem; font-weight: 600; margin-bottom: 1rem; margin-top: 2rem;">Detailed Log</h2>
+        <div style="overflow-x: auto;">
+            <table class="hours-table">
+                <thead>
+                    <tr>
+                        <th>Project</th>
+                        <th>Date</th>
+                        <th>Hours</th>
+                        <th>Files</th>
+                    </tr>
+                </thead>
+                <tbody id="hours-table-body">
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<script>
+// Initialize year filter dropdown
+function initYearFilter() {
+    const yearFilter = document.getElementById('year-filter');
+    if (!yearFilter) return;
+    
+    const currentYear = new Date().getFullYear();
+    for (let year = 2024; year <= currentYear; year++) {
+        const option = document.createElement('option');
+        option.value = year;
+        option.textContent = year;
+        if (year === currentYear) {
+            option.selected = true;
+        }
+        yearFilter.appendChild(option);
+    }
+}
+
+async function loadHours() {
+    const loading = document.getElementById('loading');
+    const content = document.getElementById('hours-content');
+    const yearFilter = document.getElementById('year-filter');
+    const selectedYear = yearFilter ? parseInt(yearFilter.value) : new Date().getFullYear();
+    
+    loading.style.display = 'block';
+    content.style.display = 'none';
+    
+    try {
+        const response = await fetch('/static/data/hours.json');
+        if (!response.ok) {
+            throw new Error('Failed to load hours data');
+        }
+        
+        let data = await response.json();
+        
+        // Filter by selected year if year filter exists
+        if (yearFilter && data.year !== selectedYear) {
+            // Filter entries by year
+            const filteredData = {
+                ...data,
+                entries: data.entries.filter(entry => {
+                    const entryYear = new Date(entry.date).getFullYear();
+                    return entryYear === selectedYear;
+                })
+            };
+            
+            // Recalculate totals for filtered data
+            filteredData.total_hours = filteredData.entries.reduce((sum, entry) => sum + entry.hours, 0);
+            filteredData.projects = {};
+            filteredData.entries.forEach(entry => {
+                filteredData.projects[entry.project] = (filteredData.projects[entry.project] || 0) + entry.hours;
+            });
+            
+            // Use filtered data
+            data = filteredData;
+        }
+        
+        // Update summary stats
+        const totalHours = data.total_hours || 0;
+        document.getElementById('total-hours').textContent = totalHours.toFixed(2);
+        document.getElementById('total-days').textContent = data.entries.length;
+        document.getElementById('total-projects').textContent = Object.keys(data.projects).length;
+        
+        // Calculate payment at €100/hour
+        const hourlyRate = 100;
+        const totalPayment = totalHours * hourlyRate;
+        document.getElementById('total-payment').textContent = `€${totalPayment.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
+        
+        // Update year filter and display if data has year field
+        if (data.year) {
+            if (yearFilter) {
+                yearFilter.value = data.year;
+            }
+            const yearDisplay = document.getElementById('year-display');
+            if (yearDisplay) {
+                yearDisplay.textContent = `Showing data for year ${data.year}`;
+            }
+        }
+        
+        // Update project summary
+        const projectSummary = document.getElementById('project-summary');
+        const projectsHtml = Object.entries(data.projects)
+            .sort((a, b) => b[1] - a[1])
+            .map(([project, hours]) => `
+                <div style="display: flex; justify-content: space-between; padding: 0.5rem 0; border-bottom: 1px solid #dee2e6;">
+                    <span class="project-name">${project}</span>
+                    <span class="hours-value">${hours.toFixed(2)} hours</span>
+                </div>
+            `).join('');
+        projectSummary.innerHTML = projectsHtml;
+        
+        // Update payment summary by project
+        const paymentSummary = document.getElementById('payment-summary');
+        const paymentHtml = Object.entries(data.projects)
+            .sort((a, b) => b[1] - a[1])
+            .map(([project, hours]) => {
+                const payment = hours * hourlyRate;
+                return `
+                    <div style="display: flex; justify-content: space-between; padding: 0.5rem 0; border-bottom: 1px solid #dee2e6;">
+                        <span class="project-name">${project}</span>
+                        <span style="font-weight: 600; color: #667eea;">€${payment.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</span>
+                    </div>
+                `;
+            }).join('');
+        paymentSummary.innerHTML = paymentHtml;
+        
+        // Update table
+        const tableBody = document.getElementById('hours-table-body');
+        tableBody.innerHTML = data.entries.map(entry => `
+            <tr>
+                <td class="project-name">${entry.project}</td>
+                <td class="date-value">${new Date(entry.date).toLocaleDateString()}</td>
+                <td class="hours-value">${entry.hours.toFixed(2)}</td>
+                <td>${entry.files_count || 0}</td>
+            </tr>
+        `).join('');
+        
+        loading.style.display = 'none';
+        content.style.display = 'block';
+    } catch (error) {
+        loading.innerHTML = `<div style="color: #dc3545;">Error loading hours data: ${error.message}<br><br>Make sure to run: python3 scripts/build_hours.py</div>`;
+    }
+}
+
+// Initialize on page load
+initYearFilter();
+loadHours();
+</script>
+{% endblock %}
+
+

@@ -87,3 +87,7 @@ huggingface_*.log
 # Congressman project cache files (do not ignore)
 !static/data/congressman-projects-*/
 !static/data/congressman-projects-*/*.json
+
+# Cursor cookie (contains sensitive session token)
+cursor_cookie.txt
+.cursor_cookie
