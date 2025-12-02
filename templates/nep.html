@@ -128,13 +128,12 @@
                         <div class="budget-tab-nav">
                             <a href="#visual" class="budget-tab-btn active" data-tab="visual">📊 Visual</a>
                             <a href="#browser" class="budget-tab-btn" data-tab="browser">📋 Data Browser</a>
-                            <a href="#analysis" class="budget-tab-btn" data-tab="analysis">🚨 NEP 2026 Analysis</a>
-                            <a href="#gab2026" class="budget-tab-btn" data-tab="gab2026">📕 GAB 2026</a>
                             <a href="#insertion" class="budget-tab-btn" data-tab="insertion">🧩 Insertions</a>
                             <a href="#win" class="budget-tab-btn" data-tab="win">📊 Amendments</a>
                             <a href="#duplicate" class="budget-tab-btn" data-tab="duplicate">🚜 Farm to Market</a>
                             <a href="#dpwh" class="budget-tab-btn" data-tab="dpwh">🛣️ DPWH (Annex A-5)</a>
                             <a href="#nia" class="budget-tab-btn" data-tab="nia">💧 NIA (Annex A-4)</a>
+                            <a href="#zero" class="budget-tab-btn" data-tab="zero">🚫 Anti-zero</a>
                         </div>
 
                         <div class="budget-tab-content">
@@ -252,6 +251,132 @@
                                     <h3 style="color: #0038A8; margin: 0 0 15px 0;">🎯 Top 20 Programs by Budget</h3>
                                     <div style="height: calc(100% - 50px); position: relative;">
                                         <canvas id="topProgramsChart"></canvas>
+                                    </div>
+                                </div>
+
+                                <!-- GAB 2026 (PBC) Section -->
+                                <div style="background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); margin-bottom: 30px;">
+                                    <h3 class="budget-section-title">📕 GAB 2026 (PBC)</h3>
+                                    <p class="budget-section-desc">Automated first-sheet chart preview.</p>
+                                    <div id="gab2026ChartContainer" class="relative"
+                                        style="background:white; padding: 16px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.06); width: 100%;">
+                                        <button id="copyGabBtn" style="position: absolute; top: 16px; right: 16px;"
+                                            class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded text-base transition-colors duration-200 flex items-center gap-2"
+                                            onclick="copyChartToClipboard('gab2026ChartContainer', 'copyGabBtn')"
+                                            title="Copy chart image to clipboard">
+                                            📋 Copy
+                                        </button>
+                                        <canvas id="pbcChart" style="width: 100% !important;"></canvas>
+                                    </div>
+                                </div>
+
+                                <!-- NEP 2026 Analysis Section -->
+                                <div style="background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); margin-bottom: 30px;">
+                                    <h3 class="budget-section-title">🚨 NEP 2026 Analysis: Flood Control Pattern Detection</h3>
+                                    <p class="budget-section-desc">Using the known Bulacan flood control scheme as a baseline to identify similar suspicious patterns in NEP 2026</p>
+
+                                    <!-- Alert Box -->
+                                    <div
+                                        style="background: #fff3cd; border-left: 4px solid #ffc107; padding: 20px; margin-bottom: 30px; border-radius: 8px;">
+                                        <h4 style="color: #856404; margin: 0 0 10px 0; font-size: 1.2em;">⚠️ Red Flag
+                                            Detected</h4>
+                                        <p style="color: #856404; margin: 0; line-height: 1.6;">
+                                            Road infrastructure spending in NEP 2026 shows a <strong>+61.9%
+                                                increase</strong> vs historical average (2020-2025),
+                                            exceeding the flood control pattern threshold of ≥50% YoY growth.
+                                        </p>
+                                    </div>
+
+                                    <!-- Charts Grid -->
+                                    <div
+                                        style="display: grid; grid-template-columns: repeat(auto-fit, minmax(500px, 1fr)); gap: 20px; margin-bottom: 30px;">
+
+                                        <!-- Chart 1: Red Flag - Road Infrastructure -->
+                                        <div id="redFlagChartContainer" class="relative"
+                                            style="background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); height: 450px;">
+                                            <button id="copyRedFlagBtn" style="position: absolute; top: 20px; right: 20px;"
+                                                class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded text-base transition-colors duration-200 flex items-center gap-2"
+                                                onclick="copyChartToClipboard('redFlagChartContainer', 'copyRedFlagBtn')"
+                                                title="Copy chart image to clipboard">
+                                                📋 Copy
+                                            </button>
+                                            <h3 style="color: #dc3545; margin: 0 0 15px 0;">🔴 Red Flag: Road Infrastructure
+                                                (2020-2026)</h3>
+                                            <p style="color: #666; font-size: 0.9em; margin-bottom: 15px;">
+                                                +61.9% increase vs historical average exceeds flood control threshold (≥50%)
+                                            </p>
+                                            <div style="height: calc(100% - 70px); position: relative;">
+                                                <canvas id="redFlagChart"></canvas>
+                                            </div>
+                                        </div>
+
+                                        <!-- Chart 2: Flood Control Baseline Pattern -->
+                                        <div id="baselineChartContainer" class="relative"
+                                            style="background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); height: 450px;">
+                                            <button id="copyBaselineBtn" style="position: absolute; top: 20px; right: 20px;"
+                                                class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded text-base transition-colors duration-200 flex items-center gap-2"
+                                                onclick="copyChartToClipboard('baselineChartContainer', 'copyBaselineBtn')"
+                                                title="Copy chart image to clipboard">
+                                                📋 Copy
+                                            </button>
+                                            <h3 style="color: #0038A8; margin: 0 0 15px 0;">📊 Flood Control Baseline:
+                                                Bulacan Pattern (2020-2024)</h3>
+                                            <p style="color: #666; font-size: 0.9em; margin-bottom: 15px;">
+                                                Reference pattern: +118% growth (2022→2023) with geographic concentration
+                                            </p>
+                                            <div style="height: calc(100% - 70px); position: relative;">
+                                                <canvas id="baselineChart"></canvas>
+                                            </div>
+                                        </div>
+
+                                    </div>
+
+                                    <!-- Key Findings Section -->
+                                    <div
+                                        style="background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); margin-bottom: 20px;">
+                                        <h3 style="color: #0038A8; margin: 0 0 15px 0;">🔍 Key Findings</h3>
+
+                                        <div
+                                            style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 15px;">
+                                            <div
+                                                style="background: #f8f9fa; padding: 15px; border-radius: 8px; border-left: 4px solid #28a745;">
+                                                <strong style="color: #28a745;">✅ Overall Budget Growth</strong>
+                                                <p style="margin: 5px 0 0 0; color: #666;">+7.4% (Normal)</p>
+                                            </div>
+                                            <div
+                                                style="background: #f8f9fa; padding: 15px; border-radius: 8px; border-left: 4px solid #28a745;">
+                                                <strong style="color: #28a745;">✅ Geographic Distribution</strong>
+                                                <p style="margin: 5px 0 0 0; color: #666;">27.2% in top 3 regions (Better
+                                                    than flood's 60%)</p>
+                                            </div>
+                                            <div
+                                                style="background: #f8f9fa; padding: 15px; border-radius: 8px; border-left: 4px solid #dc3545;">
+                                                <strong style="color: #dc3545;">🚨 Road Infrastructure</strong>
+                                                <p style="margin: 5px 0 0 0; color: #666;">+61.9% increase (Exceeds 50%
+                                                    threshold)</p>
+                                            </div>
+                                            <div
+                                                style="background: #f8f9fa; padding: 15px; border-radius: 8px; border-left: 4px solid #28a745;">
+                                                <strong style="color: #28a745;">✅ Flood Control Spending</strong>
+                                                <p style="margin: 5px 0 0 0; color: #666;">+33.6% (Below threshold)</p>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Methodology -->
+                                    <div
+                                        style="background: #e7f3ff; padding: 20px; border-radius: 8px; border-left: 4px solid #0038A8;">
+                                        <h4 style="color: #0038A8; margin: 0 0 10px 0;">📋 Methodology</h4>
+                                        <p style="color: #666; margin: 0; line-height: 1.6;">
+                                            This analysis uses the known Bulacan flood control scheme (2020-2024) as a
+                                            baseline pattern.
+                                            The Bulacan pattern showed <strong>+118% growth in 2022→2023</strong> with
+                                            <strong>60% geographic concentration</strong>.
+                                            We compared NEP 2026 against Budget history (2020-2025) to identify similar
+                                            patterns.
+                                            <strong>Threshold: ≥50% YoY growth</strong> is flagged as matching the flood
+                                            control scheme.
+                                        </p>
                                     </div>
                                 </div>
 
@@ -394,22 +519,6 @@
                                 </div>
                             </div>
 
-                            <!-- GAB 2026 (PBC) Tab -->
-                            <div id="tab-gab2026" class="budget-tab-panel" style="width: 100%;">
-                                <h3 class="budget-section-title">📕 GAB 2026 (PBC)</h3>
-                                <p class="budget-section-desc">Automated first-sheet chart preview.</p>
-                                <div id="gab2026ChartContainer" class="relative"
-                                    style="background:white; padding: 16px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.06); width: 100%;">
-                                    <button id="copyGabBtn" style="position: absolute; top: 16px; right: 16px;"
-                                        class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded text-base transition-colors duration-200 flex items-center gap-2"
-                                        onclick="copyChartToClipboard('gab2026ChartContainer', 'copyGabBtn')"
-                                        title="Copy chart image to clipboard">
-                                        📋 Copy
-                                    </button>
-                                    <canvas id="pbcChart" style="width: 100% !important;"></canvas>
-                                </div>
-                            </div>
-
                             <!-- Insertions Pivot Tab -->
                             <div id="tab-insertion" class="budget-tab-panel">
                                 <h3 class="budget-section-title">🧩 NEP 2026 Insertions Pivot</h3>
@@ -494,119 +603,6 @@
                                     style="display: none; padding: 20px; background: #fff3cd; border-left: 4px solid #ffc107; border-radius: 8px; color: #856404; margin-top: 20px;">
                                     Unable to load insertion pivot data. Please try again later.
                                 </div>
-                            </div>
-
-                            <!-- NEP 2026 Analysis Tab -->
-                            <div id="tab-analysis" class="budget-tab-panel">
-                                <h3 class="budget-section-title">🚨 NEP 2026 Analysis: Flood Control Pattern Detection
-                                </h3>
-                                <p class="budget-section-desc">Using the known Bulacan flood control scheme as a
-                                    baseline to identify similar suspicious patterns in NEP 2026</p>
-
-                                <!-- Alert Box -->
-                                <div
-                                    style="background: #fff3cd; border-left: 4px solid #ffc107; padding: 20px; margin-bottom: 30px; border-radius: 8px;">
-                                    <h4 style="color: #856404; margin: 0 0 10px 0; font-size: 1.2em;">⚠️ Red Flag
-                                        Detected</h4>
-                                    <p style="color: #856404; margin: 0; line-height: 1.6;">
-                                        Road infrastructure spending in NEP 2026 shows a <strong>+61.9%
-                                            increase</strong> vs historical average (2020-2025),
-                                        exceeding the flood control pattern threshold of ≥50% YoY growth.
-                                    </p>
-                                </div>
-
-                                <!-- Charts Grid -->
-                                <div
-                                    style="display: grid; grid-template-columns: repeat(auto-fit, minmax(500px, 1fr)); gap: 20px; margin-bottom: 30px;">
-
-                                    <!-- Chart 1: Red Flag - Road Infrastructure -->
-                                    <div id="redFlagChartContainer" class="relative"
-                                        style="background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); height: 450px;">
-                                        <button id="copyRedFlagBtn" style="position: absolute; top: 20px; right: 20px;"
-                                            class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded text-base transition-colors duration-200 flex items-center gap-2"
-                                            onclick="copyChartToClipboard('redFlagChartContainer', 'copyRedFlagBtn')"
-                                            title="Copy chart image to clipboard">
-                                            📋 Copy
-                                        </button>
-                                        <h3 style="color: #dc3545; margin: 0 0 15px 0;">🔴 Red Flag: Road Infrastructure
-                                            (2020-2026)</h3>
-                                        <p style="color: #666; font-size: 0.9em; margin-bottom: 15px;">
-                                            +61.9% increase vs historical average exceeds flood control threshold (≥50%)
-                                        </p>
-                                        <div style="height: calc(100% - 70px); position: relative;">
-                                            <canvas id="redFlagChart"></canvas>
-                                        </div>
-                                    </div>
-
-                                    <!-- Chart 2: Flood Control Baseline Pattern -->
-                                    <div id="baselineChartContainer" class="relative"
-                                        style="background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); height: 450px;">
-                                        <button id="copyBaselineBtn" style="position: absolute; top: 20px; right: 20px;"
-                                            class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded text-base transition-colors duration-200 flex items-center gap-2"
-                                            onclick="copyChartToClipboard('baselineChartContainer', 'copyBaselineBtn')"
-                                            title="Copy chart image to clipboard">
-                                            📋 Copy
-                                        </button>
-                                        <h3 style="color: #0038A8; margin: 0 0 15px 0;">📊 Flood Control Baseline:
-                                            Bulacan Pattern (2020-2024)</h3>
-                                        <p style="color: #666; font-size: 0.9em; margin-bottom: 15px;">
-                                            Reference pattern: +118% growth (2022→2023) with geographic concentration
-                                        </p>
-                                        <div style="height: calc(100% - 70px); position: relative;">
-                                            <canvas id="baselineChart"></canvas>
-                                        </div>
-                                    </div>
-
-                                </div>
-
-                                <!-- Key Findings Section -->
-                                <div
-                                    style="background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); margin-bottom: 20px;">
-                                    <h3 style="color: #0038A8; margin: 0 0 15px 0;">🔍 Key Findings</h3>
-
-                                    <div
-                                        style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 15px;">
-                                        <div
-                                            style="background: #f8f9fa; padding: 15px; border-radius: 8px; border-left: 4px solid #28a745;">
-                                            <strong style="color: #28a745;">✅ Overall Budget Growth</strong>
-                                            <p style="margin: 5px 0 0 0; color: #666;">+7.4% (Normal)</p>
-                                        </div>
-                                        <div
-                                            style="background: #f8f9fa; padding: 15px; border-radius: 8px; border-left: 4px solid #28a745;">
-                                            <strong style="color: #28a745;">✅ Geographic Distribution</strong>
-                                            <p style="margin: 5px 0 0 0; color: #666;">27.2% in top 3 regions (Better
-                                                than flood's 60%)</p>
-                                        </div>
-                                        <div
-                                            style="background: #f8f9fa; padding: 15px; border-radius: 8px; border-left: 4px solid #dc3545;">
-                                            <strong style="color: #dc3545;">🚨 Road Infrastructure</strong>
-                                            <p style="margin: 5px 0 0 0; color: #666;">+61.9% increase (Exceeds 50%
-                                                threshold)</p>
-                                        </div>
-                                        <div
-                                            style="background: #f8f9fa; padding: 15px; border-radius: 8px; border-left: 4px solid #28a745;">
-                                            <strong style="color: #28a745;">✅ Flood Control Spending</strong>
-                                            <p style="margin: 5px 0 0 0; color: #666;">+33.6% (Below threshold)</p>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <!-- Methodology -->
-                                <div
-                                    style="background: #e7f3ff; padding: 20px; border-radius: 8px; border-left: 4px solid #0038A8;">
-                                    <h4 style="color: #0038A8; margin: 0 0 10px 0;">📋 Methodology</h4>
-                                    <p style="color: #666; margin: 0; line-height: 1.6;">
-                                        This analysis uses the known Bulacan flood control scheme (2020-2024) as a
-                                        baseline pattern.
-                                        The Bulacan pattern showed <strong>+118% growth in 2022→2023</strong> with
-                                        <strong>60% geographic concentration</strong>.
-                                        We compared NEP 2026 against Budget history (2020-2025) to identify similar
-                                        patterns.
-                                        <strong>Threshold: ≥50% YoY growth</strong> is flagged as matching the flood
-                                        control scheme.
-                                    </p>
-                                </div>
-
                             </div>
 
                             <!-- Win (Budget Amendments) Tab -->
@@ -2286,11 +2282,17 @@
                                     return '₱' + Math.abs(amount).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
                                 }
 
+                                // Store duplicate data globally for CSV export
+                                let duplicateGroupsData = null;
+                                
                                 function displayDuplicates(data) {
                                     document.getElementById('duplicate-loading').style.display = 'none';
                                     
                                     const metadata = data.metadata || {};
                                     const groups = data.duplicate_groups || [];
+                                    
+                                    // Store data globally for CSV export
+                                    duplicateGroupsData = data;
                                     
                                     // Update stats
                                     document.getElementById('duplicate-total-groups').textContent = metadata.total_groups || groups.length;
@@ -2314,7 +2316,32 @@
                                     // Sort by total amount descending
                                     const sortedGroups = [...groups].sort((a, b) => (b.total_amount || 0) - (a.total_amount || 0));
                                     
-                                    container.innerHTML = sortedGroups.map((group, idx) => {
+                                    // Get or create header
+                                    let headerDiv = container.querySelector('div[style*="justify-content: space-between"]');
+                                    if (!headerDiv) {
+                                        headerDiv = document.createElement('div');
+                                        headerDiv.style.cssText = 'display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;';
+                                        headerDiv.innerHTML = `
+                                            <h4 style="margin: 0; color: #333; font-size: 1.2em;">Duplicate Groups</h4>
+                                            <button id="duplicate-download-csv" onclick="downloadDuplicateCSV()" style="padding: 8px 16px; border: 2px solid #0038A8; background: #0038A8; color: white; border-radius: 6px; cursor: pointer; font-size: 14px; font-weight: bold; display: flex; align-items: center; gap: 0.5rem;">
+                                                <span>📥</span>
+                                                <span>Download CSV</span>
+                                            </button>
+                                        `;
+                                        container.insertBefore(headerDiv, container.firstChild);
+                                    } else {
+                                        headerDiv.style.display = 'flex';
+                                    }
+                                    
+                                    // Get the groups content area (after the header)
+                                    let groupsContent = container.querySelector('.duplicate-groups-content');
+                                    if (!groupsContent) {
+                                        groupsContent = document.createElement('div');
+                                        groupsContent.className = 'duplicate-groups-content';
+                                        container.appendChild(groupsContent);
+                                    }
+                                    
+                                    groupsContent.innerHTML = sortedGroups.map((group, idx) => {
                                         const items = group.items || [];
                                         const groupId = `duplicate-group-${group.group_id}`;
                                         const itemsId = `duplicate-items-${group.group_id}`;
@@ -2714,12 +2741,18 @@
                                     `;
                                 }
 
+                                // Store DPWH duplicate data globally for CSV export
+                                let dpwhDuplicateGroupsData = null;
+                                
                                 // Display DPWH duplicate groups
                                 function displayDPWHDuplicates(data) {
                                     console.log('displayDPWHDuplicates called with data:', {
                                         hasMetadata: !!data.metadata,
                                         groupsCount: data.duplicate_groups?.length || 0
                                     });
+                                    
+                                    // Store data globally for CSV export
+                                    dpwhDuplicateGroupsData = data;
                                     
                                     const metadata = data.metadata || {};
                                     const groups = data.duplicate_groups || [];
@@ -2777,7 +2810,32 @@
                                     // Sort by total amount descending
                                     const sortedGroups = [...groups].sort((a, b) => (b.total_amount || 0) - (a.total_amount || 0));
                                     
-                                    container.innerHTML = sortedGroups.map((group, idx) => {
+                                    // Get or create header
+                                    let headerDiv = container.querySelector('div[style*="justify-content: space-between"]');
+                                    if (!headerDiv) {
+                                        headerDiv = document.createElement('div');
+                                        headerDiv.style.cssText = 'display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;';
+                                        headerDiv.innerHTML = `
+                                            <h4 style="margin: 0; color: #333; font-size: 1.2em;">Duplicate Groups</h4>
+                                            <button id="dpwh-download-csv" onclick="downloadDPWHCSV()" style="padding: 8px 16px; border: 2px solid #0038A8; background: #0038A8; color: white; border-radius: 6px; cursor: pointer; font-size: 14px; font-weight: bold; display: flex; align-items: center; gap: 0.5rem;">
+                                                <span>📥</span>
+                                                <span>Download CSV</span>
+                                            </button>
+                                        `;
+                                        container.insertBefore(headerDiv, container.firstChild);
+                                    } else {
+                                        headerDiv.style.display = 'flex';
+                                    }
+                                    
+                                    // Get the groups content area (after the header)
+                                    let groupsContent = container.querySelector('.dpwh-duplicate-groups-content');
+                                    if (!groupsContent) {
+                                        groupsContent = document.createElement('div');
+                                        groupsContent.className = 'dpwh-duplicate-groups-content';
+                                        container.appendChild(groupsContent);
+                                    }
+                                    
+                                    groupsContent.innerHTML = sortedGroups.map((group, idx) => {
                                         const items = group.items || [];
                                         const groupId = `dpwh-group-${group.group_id}`;
                                         const itemsId = `dpwh-items-${group.group_id}`;
@@ -3220,12 +3278,18 @@
                                     `;
                                 }
 
+                                // Store NIA duplicate data globally for CSV export
+                                let niaDuplicateGroupsData = null;
+                                
                                 // Display NIA duplicate groups
                                 function displayNIADuplicates(data) {
                                     console.log('displayNIADuplicates called with data:', {
                                         hasMetadata: !!data.metadata,
                                         groupsCount: data.duplicate_groups?.length || 0
                                     });
+                                    
+                                    // Store data globally for CSV export
+                                    niaDuplicateGroupsData = data;
                                     
                                     const metadata = data.metadata || {};
                                     const groups = data.duplicate_groups || [];
@@ -3262,7 +3326,32 @@
                                         return;
                                     }
                                     
-                                    let html = '<h4 style="margin: 0 0 1.5rem 0; color: #333; font-size: 1.2em;">Duplicate Groups</h4>';
+                                    // Get or create header
+                                    let headerDiv = container.querySelector('div[style*="justify-content: space-between"]');
+                                    if (!headerDiv) {
+                                        headerDiv = document.createElement('div');
+                                        headerDiv.style.cssText = 'display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;';
+                                        headerDiv.innerHTML = `
+                                            <h4 style="margin: 0; color: #333; font-size: 1.2em;">Duplicate Groups</h4>
+                                            <button id="nia-download-csv" onclick="downloadNIACSV()" style="padding: 8px 16px; border: 2px solid #0038A8; background: #0038A8; color: white; border-radius: 6px; cursor: pointer; font-size: 14px; font-weight: bold; display: flex; align-items: center; gap: 0.5rem;">
+                                                <span>📥</span>
+                                                <span>Download CSV</span>
+                                            </button>
+                                        `;
+                                        container.insertBefore(headerDiv, container.firstChild);
+                                    } else {
+                                        headerDiv.style.display = 'flex';
+                                    }
+                                    
+                                    // Get the groups content area (after the header)
+                                    let groupsContent = container.querySelector('.nia-duplicate-groups-content');
+                                    if (!groupsContent) {
+                                        groupsContent = document.createElement('div');
+                                        groupsContent.className = 'nia-duplicate-groups-content';
+                                        container.appendChild(groupsContent);
+                                    }
+                                    
+                                    let html = '';
                                     
                                     groups.forEach((group, idx) => {
                                         const groupId = group.group_id || (idx + 1);
@@ -3307,7 +3396,7 @@
                                         `;
                                     });
                                     
-                                    container.innerHTML = html;
+                                    groupsContent.innerHTML = html;
                                 }
 
                                 function toggleNIADuplicateGroup(groupId) {
@@ -3725,6 +3814,77 @@
                                     }
                                 }
                             </script>
+
+                <!-- Anti-zero Tab -->
+                <div id="tab-zero" class="budget-tab-panel">
+                    <h3 class="budget-section-title">🚫 Anti-zero: Uniform Percentage Decrease Analysis</h3>
+                    <p class="budget-section-desc">Analysis of Annex A-5 projects revealing 105 different uniform decrease patterns affecting 9,183 projects (53.5%). Each pattern represents a fixed percentage decrease from Column O (GAB/original) to Column S (Final) applied systematically across multiple projects, suggesting uniform budget adjustments that may obscure original rounded allocations.</p>
+                    
+                    <!-- Loading Spinner -->
+                    <div id="zero-loading" style="text-align: center; padding: 2rem;">
+                        <div class="spinner" style="width: 40px; height: 40px; border: 4px solid #f3f3f3; border-top: 4px solid #0038A8; border-radius: 50%; animation: spin 1s linear infinite; margin: 0 auto;"></div>
+                        <p style="color: #666; margin-top: 1rem;">Loading analysis data...</p>
+                    </div>
+                    
+                    <!-- Error Message -->
+                    <div id="zero-error" style="display: none; text-align: center; padding: 2rem; color: #dc3545; background: #f8d7da; border-radius: 8px; margin: 2rem 0;"></div>
+                    
+                    <!-- Info Note -->
+                    <div style="background: #fff3cd; border-left: 4px solid #ffc107; padding: 1rem; margin: 1.5rem 0; border-radius: 4px; display: none;" id="zero-info">
+                        <p style="margin: 0; color: #856404; font-size: 0.95em;">
+                            <strong>Finding:</strong> Analysis of 17,179 Annex A-5 projects revealed <strong>105 different uniform decrease patterns</strong>, affecting <strong>9,183 projects (53.5%)</strong>. Each pattern represents a fixed percentage decrease from Column O (GAB/original) to Column S (Final) applied systematically across multiple projects. The top pattern affects 544 projects with a 17.80% decrease. This systematic application of fixed percentage reductions suggests uniform budget adjustments that may obscure original rounded allocations.
+                        </p>
+                    </div>
+                    
+                    <!-- Stats Cards -->
+                    <div id="zero-stats" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1rem; margin: 2rem 0;">
+                        <div class="stat-card" style="background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); text-align: center;">
+                            <h3 style="color: #0038A8; margin: 0 0 10px 0; font-size: 1.1em;">Total Matches</h3>
+                            <p id="zero-total-matches" style="font-size: 2em; font-weight: bold; color: #dc3545; margin: 0;">-</p>
+                        </div>
+                        <div class="stat-card" style="background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); text-align: center;">
+                            <h3 style="color: #0038A8; margin: 0 0 10px 0; font-size: 1.1em;">Total Projects</h3>
+                            <p id="zero-total-projects" style="font-size: 1.6em; font-weight: bold; color: #667eea; margin: 0;">-</p>
+                        </div>
+                        <div class="stat-card" style="background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); text-align: center;">
+                            <h3 style="color: #0038A8; margin: 0 0 10px 0; font-size: 1.1em;">Percentage</h3>
+                            <p id="zero-percentage" style="font-size: 1.6em; font-weight: bold; color: #667eea; margin: 0;">-</p>
+                        </div>
+                        <div class="stat-card" style="background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); text-align: center;">
+                            <h3 style="color: #0038A8; margin: 0 0 10px 0; font-size: 1.1em;">Unique Patterns</h3>
+                            <p id="zero-unique-patterns" style="font-size: 1.6em; font-weight: bold; color: #28a745; margin: 0;">-</p>
+                        </div>
+                    </div>
+                    
+                    <!-- Chart Container -->
+                    <div id="zero-chart-container" style="display: block; margin: 2rem 0; background: white; padding: 2rem; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
+                        <h4 style="color: #0038A8; margin-bottom: 1rem;">Uniform Decrease Patterns: Percentage Decrease vs Number of Projects</h4>
+                        <p style="color: #666; font-size: 0.9em; margin-bottom: 1rem;">This chart shows the pattern of uniform percentage decreases applied across Annex A-5 projects. Each bar represents a specific decrease percentage and how many projects use that exact percentage.</p>
+                        <canvas id="zero-chart" style="height: 500px; width: 100%;"></canvas>
+                    </div>
+                    
+                    <!-- Summary Table -->
+                    <div id="zero-table-container" style="display: block; margin-top: 2rem;">
+                        <h4 style="color: #0038A8; margin-bottom: 1rem;">Uniform Decrease Patterns - Fixed Percentages</h4>
+                        <p style="color: #666; font-size: 0.9em; margin-bottom: 1rem;">Each row shows a fixed percentage decrease and how many projects use that exact percentage, demonstrating systematic uniform reductions.</p>
+                        <div style="margin-bottom: 1rem;">
+                            <input type="text" id="zero-search" placeholder="Search by percentage..." style="width: 100%; padding: 0.75rem; border: 2px solid #ddd; border-radius: 6px; font-size: 14px;">
+                        </div>
+                        <div style="overflow-x: auto;">
+                            <table id="zero-table" style="width: 100%; border-collapse: collapse; background: white; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
+                                <thead>
+                                    <tr style="background: linear-gradient(135deg, #0038A8 0%, #003087 100%); color: white;">
+                                        <th style="padding: 1rem; text-align: right; font-weight: 600;">Rank</th>
+                                        <th style="padding: 1rem; text-align: right; font-weight: 600;">Fixed Decrease %</th>
+                                        <th style="padding: 1rem; text-align: right; font-weight: 600;">Number of Projects</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="zero-table-body">
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
 
                         </div>
                     </div>
@@ -7177,14 +7337,28 @@
                     // Load data based on selected tab
                     if (tabName === 'visual') {
                         loadVisualCharts();
+                        // Also load analysis and GAB 2026 charts
+                        setTimeout(loadAnalysisCharts, 100);
+                        setTimeout(() => {
+                            if (typeof loadPBCSheets === 'function') {
+                                loadPBCSheets();
+                            } else {
+                                console.warn('⚠️ loadPBCSheets function not available yet, retrying...');
+                                setTimeout(() => {
+                                    if (typeof loadPBCSheets === 'function') {
+                                        loadPBCSheets();
+                                    } else {
+                                        console.error('❌ loadPBCSheets function not found');
+                                    }
+                                }, 500);
+                            }
+                        }, 200);
                     } else if (tabName === 'browser') {
                         loadDataBrowser();
-                    } else if (tabName === 'analysis') {
-                        // Load NEP 2026 Analysis charts
+                    } else if (tabName === 'visual') {
+                        // Load visual charts and also load analysis and GAB 2026 charts
+                        loadVisualCharts();
                         setTimeout(loadAnalysisCharts, 100);
-                    } else if (tabName === 'gab2026') {
-                        // Load GAB 2026 (PBC) charts
-                        // Wait a bit for the function to be available, then load
                         setTimeout(() => {
                             if (typeof loadPBCSheets === 'function') {
                                 loadPBCSheets();
@@ -7228,6 +7402,13 @@
                             loadNIAData();
                         } else {
                             console.warn('⚠️ loadNIAData function not available yet');
+                        }
+                    } else if (tabName === 'zero') {
+                        // Load anti-zero data when tab is activated
+                        const panel = document.getElementById('tab-zero');
+                        if (panel && !panel.dataset.loaded) {
+                            loadAntiZeroData();
+                            panel.dataset.loaded = 'true';
                         }
                     } else if (tabName === 'trends') {
                         // Load trends data when tab is activated (v2.0 - 2025-01-05)
@@ -9230,14 +9411,14 @@
 
                 // Check for hash in URL and switch to that tab
                 const hash = window.location.hash.substring(1); // Remove the # character
-                if (hash && ['visual', 'browser', 'analysis', 'gab2026', 'insertion', 'win', 'duplicate'].includes(hash)) {
+                if (hash && ['visual', 'browser', 'insertion', 'win', 'duplicate', 'dpwh', 'nia', 'zero'].includes(hash)) {
                     switchToTab(hash, false); // Don't update hash since we're reading from it
                 }
 
                 // Listen for hash changes
                 window.addEventListener('hashchange', function () {
                     const newHash = window.location.hash.substring(1);
-                    if (newHash && ['visual', 'browser', 'analysis', 'gab2026', 'insertion', 'win', 'duplicate'].includes(newHash)) {
+                    if (newHash && ['visual', 'browser', 'insertion', 'win', 'duplicate', 'dpwh', 'nia', 'zero'].includes(newHash)) {
                         switchToTab(newHash, false);
                     }
                 });
@@ -9269,6 +9450,13 @@
                         const visualTab = document.getElementById('tab-visual');
                         if (visualTab && visualTab.classList.contains('active')) {
                             loadVisualCharts();
+                            // Also reload analysis and GAB 2026 charts
+                            setTimeout(loadAnalysisCharts, 100);
+                            setTimeout(() => {
+                                if (typeof loadPBCSheets === 'function') {
+                                    loadPBCSheets();
+                                }
+                            }, 200);
                         }
                     });
                 }
@@ -9327,6 +9515,22 @@
                         // Always load visual charts after data loading completes or fails
                         console.log('🚀 [BUDGET] Loading visual charts...');
                         loadVisualCharts();
+                        // Also load analysis and GAB 2026 charts
+                        setTimeout(loadAnalysisCharts, 100);
+                        setTimeout(() => {
+                            if (typeof loadPBCSheets === 'function') {
+                                loadPBCSheets();
+                            } else {
+                                console.warn('⚠️ loadPBCSheets function not available yet, retrying...');
+                                setTimeout(() => {
+                                    if (typeof loadPBCSheets === 'function') {
+                                        loadPBCSheets();
+                                    } else {
+                                        console.error('❌ loadPBCSheets function not found');
+                                    }
+                                }, 500);
+                            }
+                        }, 200);
                     });
 
                 console.log('🚀 [BUDGET] About to initialize tabs...');
@@ -12199,6 +12403,460 @@
                 });
             }
         });
+
+        // CSV download helper function
+        function escapeCSV(str) {
+            if (str === null || str === undefined) return '';
+            const s = String(str);
+            if (s.includes(',') || s.includes('"') || s.includes('\n')) {
+                return '"' + s.replace(/"/g, '""') + '"';
+            }
+            return s;
+        }
+        
+        // Download CSV for duplicate tab (Farm to Market)
+        function downloadDuplicateCSV() {
+            if (!duplicateGroupsData || !duplicateGroupsData.duplicate_groups || duplicateGroupsData.duplicate_groups.length === 0) {
+                alert('No data available to download');
+                return;
+            }
+            
+            const rows = [];
+            const groups = duplicateGroupsData.duplicate_groups || [];
+            
+            // Header row
+            rows.push([
+                'Group ID',
+                'Item Name',
+                'Description',
+                'Original Amount',
+                'Final Amount',
+                'Net Change',
+                'Department',
+                'Source Sheet',
+                'Region',
+                'Source Row',
+                'Source Column B',
+                'Source Column C',
+                'Cell Reference',
+                'Total Group Amount',
+                'Group Count'
+            ].join(','));
+            
+            // Data rows - flatten groups
+            groups.forEach(group => {
+                const items = group.items || [];
+                items.forEach(item => {
+                    const childProjectName = item.name || item.description || 'Unknown';
+                    const description = item.description || '';
+                    const originalAmount = item.original_amount || 0;
+                    const finalAmount = item.final_amount || 0;
+                    const netChange = finalAmount - originalAmount;
+                    const dept = item.department_id || 'UNKNOWN';
+                    const source = item.source_sheet || 'Unknown';
+                    const region = item.location && item.location.region ? item.location.region : '';
+                    const sourceRow = item.source_row || '';
+                    const sourceColB = item.source_col_b || '';
+                    const sourceColC = item.source_col_c || '';
+                    const cellRef = sourceRow ? `${sourceColB}${sourceRow}:${sourceColC}${sourceRow}` : '';
+                    
+                    rows.push([
+                        group.group_id || '',
+                        escapeCSV(childProjectName),
+                        escapeCSV(description),
+                        originalAmount,
+                        finalAmount,
+                        netChange,
+                        escapeCSV(dept),
+                        escapeCSV(source),
+                        escapeCSV(region),
+                        sourceRow,
+                        sourceColB,
+                        sourceColC,
+                        escapeCSV(cellRef),
+                        group.total_amount || 0,
+                        group.count || items.length
+                    ].join(','));
+                });
+            });
+            
+            // Create and download
+            const csvContent = rows.join('\n');
+            const blob = new Blob(['\ufeff' + csvContent], { type: 'text/csv;charset=utf-8;' }); // BOM for Excel
+            const link = document.createElement('a');
+            const url = URL.createObjectURL(blob);
+            link.setAttribute('href', url);
+            link.setAttribute('download', `nep_duplicate_annex_a1_${new Date().toISOString().split('T')[0]}.csv`);
+            link.style.visibility = 'hidden';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+        
+        // Download CSV for DPWH tab
+        function downloadDPWHCSV() {
+            if (!dpwhDuplicateGroupsData || !dpwhDuplicateGroupsData.duplicate_groups || dpwhDuplicateGroupsData.duplicate_groups.length === 0) {
+                alert('No data available to download');
+                return;
+            }
+            
+            const rows = [];
+            const groups = dpwhDuplicateGroupsData.duplicate_groups || [];
+            
+            // Header row
+            rows.push([
+                'Group ID',
+                'Project Name',
+                'Description',
+                'Original Amount',
+                'Final Amount',
+                'Net Change',
+                'Department',
+                'Source Sheet',
+                'Region',
+                'Source Row',
+                'Total Group Amount',
+                'Group Count'
+            ].join(','));
+            
+            // Data rows - flatten groups
+            groups.forEach(group => {
+                const items = group.items || [];
+                items.forEach(item => {
+                    const projectName = item.name || item.description || 'Unknown';
+                    const description = item.description || '';
+                    const originalAmount = item.original_amount || 0;
+                    const finalAmount = item.final_amount || 0;
+                    const netChange = finalAmount - originalAmount;
+                    const dept = item.department_id || 'DPWH';
+                    const source = item.source_sheet || 'Annex A-5';
+                    const region = item.location && item.location.region ? item.location.region : '';
+                    const sourceRow = item.source_row || '';
+                    
+                    rows.push([
+                        group.group_id || '',
+                        escapeCSV(projectName),
+                        escapeCSV(description),
+                        originalAmount,
+                        finalAmount,
+                        netChange,
+                        escapeCSV(dept),
+                        escapeCSV(source),
+                        escapeCSV(region),
+                        sourceRow,
+                        group.total_amount || 0,
+                        group.count || items.length
+                    ].join(','));
+                });
+            });
+            
+            // Create and download
+            const csvContent = rows.join('\n');
+            const blob = new Blob(['\ufeff' + csvContent], { type: 'text/csv;charset=utf-8;' }); // BOM for Excel
+            const link = document.createElement('a');
+            const url = URL.createObjectURL(blob);
+            link.setAttribute('href', url);
+            link.setAttribute('download', `nep_dpwh_annex_a5_${new Date().toISOString().split('T')[0]}.csv`);
+            link.style.visibility = 'hidden';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+        
+        // Download CSV for NIA tab
+        function downloadNIACSV() {
+            if (!niaDuplicateGroupsData || !niaDuplicateGroupsData.duplicate_groups || niaDuplicateGroupsData.duplicate_groups.length === 0) {
+                alert('No data available to download');
+                return;
+            }
+            
+            const rows = [];
+            const groups = niaDuplicateGroupsData.duplicate_groups || [];
+            
+            // Header row
+            rows.push([
+                'Group ID',
+                'Project Name',
+                'Description',
+                'Original Amount',
+                'Final Amount',
+                'Net Change',
+                'Region',
+                'Source Excel',
+                'Source Row',
+                'Source Column B',
+                'Source Column C',
+                'Total Group Amount',
+                'Group Count'
+            ].join(','));
+            
+            // Data rows - flatten groups
+            groups.forEach(group => {
+                const items = group.items || [];
+                items.forEach(item => {
+                    const name = item.name || item.description || 'Unknown';
+                    const description = item.description || '';
+                    const originalAmount = item.original_amount || 0;
+                    const finalAmount = item.final_amount || 0;
+                    const netChange = finalAmount - originalAmount;
+                    const region = item.location?.region || 'N/A';
+                    const sourceRow = item.source_row || 'N/A';
+                    const sourceColB = item.source_col_b || 'N/A';
+                    const sourceColC = item.source_col_c || 'N/A';
+                    const sourceExcel = group.source_excel || 'Annex A-4';
+                    
+                    rows.push([
+                        group.group_id || '',
+                        escapeCSV(name),
+                        escapeCSV(description),
+                        originalAmount,
+                        finalAmount,
+                        netChange,
+                        escapeCSV(region),
+                        escapeCSV(sourceExcel),
+                        sourceRow,
+                        sourceColB,
+                        sourceColC,
+                        group.total_amount || 0,
+                        group.count || items.length
+                    ].join(','));
+                });
+            });
+            
+            // Create and download
+            const csvContent = rows.join('\n');
+            const blob = new Blob(['\ufeff' + csvContent], { type: 'text/csv;charset=utf-8;' }); // BOM for Excel
+            const link = document.createElement('a');
+            const url = URL.createObjectURL(blob);
+            link.setAttribute('href', url);
+            link.setAttribute('download', `nep_nia_annex_a4_${new Date().toISOString().split('T')[0]}.csv`);
+            link.style.visibility = 'hidden';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+        
+        // Anti-zero analysis functions
+        let antiZeroChart = null;
+        
+        async function loadAntiZeroData() {
+            const loadingEl = document.getElementById('zero-loading');
+            const errorEl = document.getElementById('zero-error');
+            const statsEl = document.getElementById('zero-stats');
+            const chartEl = document.getElementById('zero-chart-container');
+            const tableEl = document.getElementById('zero-table-container');
+            const infoEl = document.getElementById('zero-info');
+            
+            try {
+                const response = await fetch('/api/budget/anti-zero-analysis');
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                const data = await response.json();
+                
+                if (!data.success) {
+                    throw new Error(data.error || 'Failed to load data');
+                }
+                
+                const summary = data.summary || {};
+                const byPercentage = data.by_percentage || [];
+                const topPatterns = data.top_patterns || [];
+                
+                // Update stats
+                const totalMatchesEl = document.getElementById('zero-total-matches');
+                const totalProjectsEl = document.getElementById('zero-total-projects');
+                const percentageEl = document.getElementById('zero-percentage');
+                const uniquePatternsEl = document.getElementById('zero-unique-patterns');
+                
+                if (totalMatchesEl) totalMatchesEl.textContent = (summary.total_matches || 0).toLocaleString();
+                if (totalProjectsEl) totalProjectsEl.textContent = (summary.total_projects || 0).toLocaleString();
+                if (percentageEl) percentageEl.textContent = (summary.percentage || 0).toFixed(2) + '%';
+                if (uniquePatternsEl) uniquePatternsEl.textContent = (summary.unique_patterns || 0).toLocaleString();
+                
+                // Hide loading, show content
+                if (loadingEl) loadingEl.style.display = 'none';
+                if (statsEl) statsEl.style.display = 'grid';
+                if (chartEl) chartEl.style.display = 'block';
+                if (tableEl) tableEl.style.display = 'block';
+                if (infoEl) infoEl.style.display = 'block';
+                
+                // Display chart - wait for tab to be visible
+                if (byPercentage && byPercentage.length > 0) {
+                    // Wait for tab panel to be visible before creating chart
+                    const waitForTab = () => {
+                        const tabPanel = document.getElementById('tab-zero');
+                        if (tabPanel && tabPanel.classList.contains('active')) {
+                            const style = window.getComputedStyle(tabPanel);
+                            if (style.display !== 'none') {
+                                displayAntiZeroChart(byPercentage);
+                            } else {
+                                setTimeout(waitForTab, 50);
+                            }
+                        } else {
+                            setTimeout(waitForTab, 50);
+                        }
+                    };
+                    setTimeout(waitForTab, 100);
+                }
+                
+                // Display table
+                if (topPatterns && topPatterns.length > 0) {
+                    displayAntiZeroTable(topPatterns);
+                } else if (byPercentage && byPercentage.length > 0) {
+                    const sorted = [...byPercentage].sort((a, b) => b.match_count - a.match_count).slice(0, 20);
+                    displayAntiZeroTable(sorted);
+                }
+                
+            } catch (error) {
+                console.error('Error loading anti-zero data:', error);
+                if (loadingEl) loadingEl.style.display = 'none';
+                if (errorEl) {
+                    errorEl.textContent = `Error: ${error.message}`;
+                    errorEl.style.display = 'block';
+                }
+            }
+        }
+        
+        function displayAntiZeroChart(data) {
+            const canvas = document.getElementById('zero-chart');
+            if (!canvas) {
+                console.error('Canvas element not found: zero-chart');
+                return;
+            }
+            
+            if (typeof Chart === 'undefined') {
+                console.error('Chart.js not available');
+                return;
+            }
+            
+            // Destroy existing chart
+            if (antiZeroChart) {
+                try {
+                    antiZeroChart.destroy();
+                } catch (e) {
+                    console.warn('Error destroying existing chart:', e);
+                }
+                antiZeroChart = null;
+            }
+            
+            // Prepare data
+            const labels = data.map(d => d.decrease_percentage.toFixed(2) + '%');
+            const matchCounts = data.map(d => d.match_count);
+            
+            // Create chart
+            const ctx = canvas.getContext('2d');
+            antiZeroChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Number of Projects',
+                        data: matchCounts,
+                        backgroundColor: 'rgba(220, 53, 69, 0.7)',
+                        borderColor: 'rgba(220, 53, 69, 1)',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: true,
+                    plugins: {
+                        legend: {
+                            display: true,
+                            position: 'top'
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    const index = context.dataIndex;
+                                    const item = data[index];
+                                    return [
+                                        `Fixed Decrease: ${item.decrease_percentage.toFixed(4)}%`,
+                                        `Number of Projects: ${item.match_count.toLocaleString()}`
+                                    ];
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            ticks: {
+                                maxRotation: 90,
+                                minRotation: 90,
+                                font: { size: 9 },
+                                callback: function(value, index) {
+                                    // Show every Nth label to avoid crowding
+                                    const step = Math.max(1, Math.floor(data.length / 20));
+                                    if (index % step === 0 || index === data.length - 1) {
+                                        return data[index].decrease_percentage.toFixed(2) + '%';
+                                    }
+                                    return '';
+                                }
+                            },
+                            title: {
+                                display: true,
+                                text: 'Percentage Decrease (Column O to Column S)',
+                                font: { size: 13, weight: 'bold' }
+                            }
+                        },
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                callback: function(value) {
+                                    return value.toLocaleString();
+                                }
+                            },
+                            title: {
+                                display: true,
+                                text: 'Number of Projects',
+                                font: { size: 13, weight: 'bold' }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+        
+        function displayAntiZeroTable(data) {
+            const tbody = document.getElementById('zero-table-body');
+            tbody.innerHTML = '';
+            
+            if (!data || data.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="3" style="padding: 2rem; text-align: center; color: #666;">No data available</td></tr>';
+                return;
+            }
+            
+            const totalProjects = parseInt(document.getElementById('zero-total-projects').textContent.replace(/,/g, '')) || 1;
+            
+            data.forEach((item, index) => {
+                const row = document.createElement('tr');
+                row.style.borderBottom = '1px solid #eee';
+                if (index % 2 === 0) {
+                    row.style.backgroundColor = '#f8f9fa';
+                }
+                
+                const pctOfTotal = (item.match_count / totalProjects * 100);
+                
+                row.innerHTML = `
+                    <td style="padding: 1rem; text-align: right; font-weight: bold;">${index + 1}</td>
+                    <td style="padding: 1rem; text-align: right; font-weight: bold; color: #dc3545; font-size: 1.1em;">${item.decrease_percentage.toFixed(4)}%</td>
+                    <td style="padding: 1rem; text-align: right; font-weight: bold; color: #dc3545; font-size: 1.1em;">${item.match_count.toLocaleString()}</td>
+                `;
+                tbody.appendChild(row);
+            });
+            
+            // Add search functionality
+            const searchEl = document.getElementById('zero-search');
+            if (searchEl) {
+                searchEl.addEventListener('input', (e) => {
+                    const searchTerm = e.target.value.toLowerCase();
+                    Array.from(tbody.children).forEach(row => {
+                        const text = row.textContent.toLowerCase();
+                        row.style.display = text.includes(searchTerm) ? '' : 'none';
+                    });
+                });
+            }
+        }
     </script>
 
     {% include "footer.html" %}

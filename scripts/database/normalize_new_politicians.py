@@ -41,3 +41,11 @@ if __name__ == "__main__":
     asyncio.run(normalize_new_politicians())
 
 
+
+
+
+
+
+
+
+

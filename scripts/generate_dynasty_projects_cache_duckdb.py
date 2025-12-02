@@ -63,7 +63,8 @@ class DynastyProjectsCacheGeneratorDuckDB:
         'ENGINEERING', 'FORMERLY', 'GENERAL', 'FOR', 'GROUP', 'SYSTEMS', 'TECHNOLOGIES', 
         'INTERNATIONAL', 'GLOBAL', 'WORLDWIDE', 'ASSOCIATES', 'PARTNERS', 'MANAGEMENT', 'HOLDINGS',
         'INVESTMENTS', 'PROPERTIES', 'REALTY', 'ESTATE', 'PROJECTS', 'SOLUTIONS', 'CONSULTING',
-        'DISTRIBUTORS', 'MANUFACTURING', 'INDUSTRIES', 'PRODUCTS', 'EQUIPMENT', 'MATERIALS'
+        'DISTRIBUTORS', 'MANUFACTURING', 'INDUSTRIES', 'PRODUCTS', 'EQUIPMENT', 'MATERIALS',
+        'CONTRACTOR', 'GENERIC', 'GEN'
     }
     
     def __init__(self, force_reclassify: bool = False):
@@ -1594,10 +1595,10 @@ class DynastyProjectsCacheGeneratorDuckDB:
                         "year": record.get('year'),
                         "status": record.get("status") or record.get("Contract Status") or "N/A",
                         "district_congressman": None,
-                        "contractor_congressman": None,
-                        "contractor_congressman_2": None,
-                        "match_type": "unmatched",
-                        "match_score": 0,
+                        "contractor_congressman": contractor_cm,
+                        "contractor_congressman_2": contractor_cm_2,
+                        "match_type": "contractor" if contractor_cm else "unmatched",
+                        "match_score": 50 if contractor_cm else 0,
                         "project_district_type": None,
                         "project_district": None,
                         "project_barangay_municipality": None,
@@ -1857,10 +1858,10 @@ class DynastyProjectsCacheGeneratorDuckDB:
                         "year": None,
                         "status": record.get("Contract Status") or "N/A",
                         "district_congressman": None,
-                        "contractor_congressman": None,
-                        "contractor_congressman_2": None,
-                        "match_type": "unmatched",
-                        "match_score": 0,
+                        "contractor_congressman": contractor_cm,
+                        "contractor_congressman_2": contractor_cm_2,
+                        "match_type": "contractor" if contractor_cm else "unmatched",
+                        "match_score": 50 if contractor_cm else 0,
                         "project_district_type": None,
                         "project_district": None,
                         "project_barangay_municipality": None,
@@ -2098,8 +2099,10 @@ class DynastyProjectsCacheGeneratorDuckDB:
                 # is_flood is already set above
             else:
                 # In non-force mode, skip if we can't determine all required fields
+                # UNLESS we have a contractor match - then we must keep it!
                 if not (project_district_type and project_district and project_barangay_municipality):
-                    continue
+                    if not contractor_cm:
+                        continue
 
             chunk_results.append({
                 "source": self._normalize_source_label("Flood Control"), # Or "Flood"
@@ -2797,6 +2800,9 @@ class DynastyProjectsCacheGeneratorDuckDB:
                 for pattern in patterns:
                     clean = re.sub(r'\s+', ' ', pattern).strip()
                     if clean and len(clean) >= 2:  # Changed from 3 to 2
+                        # CRITICAL: Filter out common tokens to prevent false positives
+                        if clean in self.COMMON_TOKENS:
+                            continue
                         final.add(clean)
                 return list(final)
 

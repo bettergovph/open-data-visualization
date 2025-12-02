@@ -128,7 +128,6 @@ function toggleMobileMenu() {
                     <a href="#roads" class="budget-tab-btn" data-tab="roads">🛣️ Roads</a>
                     <a href="#stats" class="budget-tab-btn" data-tab="stats">📊 Road Statistics</a>
                     <a href="#reblock" class="budget-tab-btn" data-tab="reblock">🛣️ Reblocking</a>
-                    <a href="#zero" class="budget-tab-btn" data-tab="zero">🚫 Anti-zero</a>
                 </div>
                 
                 <div class="budget-tab-content">
@@ -203,15 +202,24 @@ function toggleMobileMenu() {
                         <!-- Budget by Region - Full Row (First Chart) -->
                         <div class="charts-grid" style="display: grid; grid-template-columns: 1fr; gap: 20px; margin-bottom: 30px;">
                             <div id="regionsChartContainer" class="chart-container relative" style="background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); overflow: hidden; width: 100%;">
-                                <button 
-                                    id="copyRegionsBtn" 
-                                    style="position: absolute; top: 20px; right: 20px;"
-                                    class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded text-base transition-colors duration-200 flex items-center gap-2"
-                                    onclick="copyChartToClipboard('regionsChartContainer', 'copyRegionsBtn')"
-                                    title="Copy chart image to clipboard"
-                                >
-                                    📋 Copy
-                                </button>
+                                <div style="position: absolute; top: 20px; right: 20px; display: flex; gap: 10px; z-index: 10;">
+                                    <button 
+                                        id="copyRegionsBtn" 
+                                        class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded text-base transition-colors duration-200 flex items-center gap-2"
+                                        onclick="copyChartToClipboard('regionsChartContainer', 'copyRegionsBtn')"
+                                        title="Copy chart image to clipboard"
+                                    >
+                                        📋 Copy
+                                    </button>
+                                    <button 
+                                        id="downloadRegionsCSVBtn" 
+                                        class="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded text-base transition-colors duration-200 flex items-center gap-2"
+                                        onclick="downloadRegionsCSV()"
+                                        title="Download chart data as CSV"
+                                    >
+                                        📥 CSV
+                                    </button>
+                                </div>
                                 <h3 style="color: #0038A8; margin: 0 0 15px 0;">🗺️ Budget by Region Over Time</h3>
                                 <div style="position: relative; height: 500px; overflow: hidden; width: 100%;">
                                     <canvas id="regionsChart" style="width: 100%; height: 100%;"></canvas>
@@ -3388,7 +3396,8 @@ async function loadRegionsChart() {
         Object.keys(data.regions_summary).forEach(regionId => {
             regionData[regionId] = {
                 name: `Region ${regionId}`,
-                data: new Array(years.length).fill(0)
+                data: new Array(years.length).fill(0),
+                exactData: new Array(years.length).fill(0) // Store exact values for CSV
             };
         });
         
@@ -3398,14 +3407,24 @@ async function loadRegionsChart() {
             yearData.forEach(region => {
                 const regionId = region.uacs_reg_id;
                 if (regionData[regionId]) {
-                    const amount = (region.total_amount || 0) * 1000 / 1000000000; // Convert to billions
+                    // total_amount is in thousands, so multiply by 1000 to get actual PHP amount
+                    const exactAmount = (region.total_amount || 0) * 1000;
+                    const amount = exactAmount / 1000000000; // Convert to billions for chart
                     regionData[regionId].data[yearIndex] = amount;
+                    regionData[regionId].exactData[yearIndex] = exactAmount; // Store exact value
                     console.log(`📈 Region ${regionId} for year ${year}: ₱${amount.toFixed(2)}B`);
                 }
             });
         });
         
         console.log('📊 Processed region data structure:', regionData);
+        
+        // Store data globally for CSV download (include raw data for exact values)
+        window.regionsChartData = {
+            years: years,
+            regionData: regionData,
+            rawYearlyData: data.yearly_data // Store raw data for CSV export
+        };
         
         // Convert to datasets for Chart.js
         const datasets = [];
@@ -3850,6 +3869,87 @@ function getDataBrowserApiYear() {
     // Use the Data Browser tab's year filter
     const selectedYear = document.getElementById('browser-year-filter')?.value || '2025';
     return selectedYear; // Allow 'all' to be passed through
+}
+
+// Anti-zero analysis functions (defined early for use in switchToTab)
+let antiZeroChart = null;
+
+async function loadAntiZeroData() {
+    const loadingEl = document.getElementById('zero-loading');
+    const errorEl = document.getElementById('zero-error');
+    const statsEl = document.getElementById('zero-stats');
+    const chartEl = document.getElementById('zero-chart-container');
+    const tableEl = document.getElementById('zero-table-container');
+    const infoEl = document.getElementById('zero-info');
+    
+    try {
+        const response = await fetch('/api/budget/anti-zero-analysis');
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        const data = await response.json();
+        
+        if (!data.success) {
+            throw new Error(data.error || 'Failed to load data');
+        }
+        
+        const summary = data.summary || {};
+        const byPercentage = data.by_percentage || [];
+        const topPatterns = data.top_patterns || [];
+        
+        // Update stats
+        const totalMatchesEl = document.getElementById('zero-total-matches');
+        const totalProjectsEl = document.getElementById('zero-total-projects');
+        const percentageEl = document.getElementById('zero-percentage');
+        const uniquePatternsEl = document.getElementById('zero-unique-patterns');
+        
+        if (totalMatchesEl) totalMatchesEl.textContent = (summary.total_matches || 0).toLocaleString();
+        if (totalProjectsEl) totalProjectsEl.textContent = (summary.total_projects || 0).toLocaleString();
+        if (percentageEl) percentageEl.textContent = (summary.percentage || 0).toFixed(2) + '%';
+        if (uniquePatternsEl) uniquePatternsEl.textContent = (summary.unique_patterns || 0).toLocaleString();
+        
+        // Hide loading, show content
+        if (loadingEl) loadingEl.style.display = 'none';
+        if (statsEl) statsEl.style.display = 'grid';
+        if (chartEl) chartEl.style.display = 'block';
+        if (tableEl) tableEl.style.display = 'block';
+        if (infoEl) infoEl.style.display = 'block';
+        
+        // Display chart - wait for tab to be visible
+        if (byPercentage && byPercentage.length > 0) {
+            // Wait for tab panel to be visible before creating chart
+            const waitForTab = () => {
+                const tabPanel = document.getElementById('tab-zero');
+                if (tabPanel && tabPanel.classList.contains('active')) {
+                    const style = window.getComputedStyle(tabPanel);
+                    if (style.display !== 'none') {
+                        displayAntiZeroChart(byPercentage);
+                    } else {
+                        setTimeout(waitForTab, 50);
+                    }
+                } else {
+                    setTimeout(waitForTab, 50);
+                }
+            };
+            setTimeout(waitForTab, 100);
+        }
+        
+        // Display table
+        if (topPatterns && topPatterns.length > 0) {
+            displayAntiZeroTable(topPatterns);
+        } else if (byPercentage && byPercentage.length > 0) {
+            const sorted = [...byPercentage].sort((a, b) => b.match_count - a.match_count).slice(0, 20);
+            displayAntiZeroTable(sorted);
+        }
+        
+    } catch (error) {
+        console.error('Error loading anti-zero data:', error);
+        if (loadingEl) loadingEl.style.display = 'none';
+        if (errorEl) {
+            errorEl.textContent = `Error: ${error.message}`;
+            errorEl.style.display = 'block';
+        }
+    }
 }
 
 // Function to programmatically switch to a specific tab
@@ -7960,19 +8060,31 @@ async function copyChartToClipboard(containerId, buttonId) {
                     <div id="national-roads-stats" class="roads-category-panel" data-category="national_roads" style="display: none; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin: 2rem 0;">
                         <div class="stat-card" style="background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); text-align: center;">
                             <h3 style="color: #0038A8; margin: 0 0 10px 0; font-size: 1.1em;">Total Projects</h3>
-                            <p id="national-roads-total-projects" style="font-size: 2em; font-weight: bold; color: #28a745; margin: 0;">-</p>
+                            <p style="color: #666; font-size: 0.85em; margin: 0 0 5px 0;">(2026)</p>
+                            <p id="national-roads-total-projects" style="font-size: 2em; font-weight: bold; color: #28a745; margin: 0 0 10px 0;">-</p>
+                            <p style="color: #666; font-size: 0.85em; margin: 5px 0 0 0;">(All Years)</p>
+                            <p id="national-roads-total-projects-all" style="font-size: 1.4em; font-weight: bold; color: #28a745; margin: 0;">-</p>
                         </div>
                         <div class="stat-card" style="background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); text-align: center;">
                             <h3 style="color: #0038A8; margin: 0 0 10px 0; font-size: 1.1em;">Total Distance</h3>
-                            <p id="national-roads-total-distance" style="font-size: 1.6em; font-weight: bold; color: #667eea; margin: 0;">-</p>
+                            <p style="color: #666; font-size: 0.85em; margin: 0 0 5px 0;">(2026)</p>
+                            <p id="national-roads-total-distance" style="font-size: 1.6em; font-weight: bold; color: #667eea; margin: 0 0 10px 0;">-</p>
+                            <p style="color: #666; font-size: 0.85em; margin: 5px 0 0 0;">(All Years)</p>
+                            <p id="national-roads-total-distance-all" style="font-size: 1.2em; font-weight: bold; color: #667eea; margin: 0;">-</p>
                         </div>
                         <div class="stat-card" style="background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); text-align: center;">
                             <h3 style="color: #0038A8; margin: 0 0 10px 0; font-size: 1.1em;">Total Amount</h3>
-                            <p id="national-roads-total-amount" style="font-size: 1.6em; font-weight: bold; color: #dc3545; margin: 0;">-</p>
+                            <p style="color: #666; font-size: 0.85em; margin: 0 0 5px 0;">(2026)</p>
+                            <p id="national-roads-total-amount" style="font-size: 1.6em; font-weight: bold; color: #dc3545; margin: 0 0 10px 0;">-</p>
+                            <p style="color: #666; font-size: 0.85em; margin: 5px 0 0 0;">(All Years)</p>
+                            <p id="national-roads-total-amount-all" style="font-size: 1.2em; font-weight: bold; color: #dc3545; margin: 0;">-</p>
                         </div>
                         <div class="stat-card" style="background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); text-align: center;">
                             <h3 style="color: #0038A8; margin: 0 0 10px 0; font-size: 1.1em;">Avg Cost/km</h3>
-                            <p id="national-roads-avg-cost" style="font-size: 1.6em; font-weight: bold; color: #fd7e14; margin: 0;">-</p>
+                            <p style="color: #666; font-size: 0.85em; margin: 0 0 5px 0;">(2026)</p>
+                            <p id="national-roads-avg-cost" style="font-size: 1.6em; font-weight: bold; color: #fd7e14; margin: 0 0 10px 0;">-</p>
+                            <p style="color: #666; font-size: 0.85em; margin: 5px 0 0 0;">(All Years)</p>
+                            <p id="national-roads-avg-cost-all" style="font-size: 1.2em; font-weight: bold; color: #fd7e14; margin: 0;">-</p>
                         </div>
                     </div>
                     
@@ -7980,19 +8092,31 @@ async function copyChartToClipboard(containerId, buttonId) {
                     <div id="secondary-roads-stats" class="roads-category-panel" data-category="secondary_roads" style="display: none; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin: 2rem 0;">
                         <div class="stat-card" style="background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); text-align: center;">
                             <h3 style="color: #0038A8; margin: 0 0 10px 0; font-size: 1.1em;">Total Projects</h3>
-                            <p id="secondary-roads-total-projects" style="font-size: 2em; font-weight: bold; color: #28a745; margin: 0;">-</p>
+                            <p style="color: #666; font-size: 0.85em; margin: 0 0 5px 0;">(2026)</p>
+                            <p id="secondary-roads-total-projects" style="font-size: 2em; font-weight: bold; color: #28a745; margin: 0 0 10px 0;">-</p>
+                            <p style="color: #666; font-size: 0.85em; margin: 5px 0 0 0;">(All Years)</p>
+                            <p id="secondary-roads-total-projects-all" style="font-size: 1.4em; font-weight: bold; color: #28a745; margin: 0;">-</p>
                         </div>
                         <div class="stat-card" style="background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); text-align: center;">
                             <h3 style="color: #0038A8; margin: 0 0 10px 0; font-size: 1.1em;">Total Distance</h3>
-                            <p id="secondary-roads-total-distance" style="font-size: 1.6em; font-weight: bold; color: #667eea; margin: 0;">-</p>
+                            <p style="color: #666; font-size: 0.85em; margin: 0 0 5px 0;">(2026)</p>
+                            <p id="secondary-roads-total-distance" style="font-size: 1.6em; font-weight: bold; color: #667eea; margin: 0 0 10px 0;">-</p>
+                            <p style="color: #666; font-size: 0.85em; margin: 5px 0 0 0;">(All Years)</p>
+                            <p id="secondary-roads-total-distance-all" style="font-size: 1.2em; font-weight: bold; color: #667eea; margin: 0;">-</p>
                         </div>
                         <div class="stat-card" style="background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); text-align: center;">
                             <h3 style="color: #0038A8; margin: 0 0 10px 0; font-size: 1.1em;">Total Amount</h3>
-                            <p id="secondary-roads-total-amount" style="font-size: 1.6em; font-weight: bold; color: #dc3545; margin: 0;">-</p>
+                            <p style="color: #666; font-size: 0.85em; margin: 0 0 5px 0;">(2026)</p>
+                            <p id="secondary-roads-total-amount" style="font-size: 1.6em; font-weight: bold; color: #dc3545; margin: 0 0 10px 0;">-</p>
+                            <p style="color: #666; font-size: 0.85em; margin: 5px 0 0 0;">(All Years)</p>
+                            <p id="secondary-roads-total-amount-all" style="font-size: 1.2em; font-weight: bold; color: #dc3545; margin: 0;">-</p>
                         </div>
                         <div class="stat-card" style="background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); text-align: center;">
                             <h3 style="color: #0038A8; margin: 0 0 10px 0; font-size: 1.1em;">Avg Cost/km</h3>
-                            <p id="secondary-roads-avg-cost" style="font-size: 1.6em; font-weight: bold; color: #fd7e14; margin: 0;">-</p>
+                            <p style="color: #666; font-size: 0.85em; margin: 0 0 5px 0;">(2026)</p>
+                            <p id="secondary-roads-avg-cost" style="font-size: 1.6em; font-weight: bold; color: #fd7e14; margin: 0 0 10px 0;">-</p>
+                            <p style="color: #666; font-size: 0.85em; margin: 5px 0 0 0;">(All Years)</p>
+                            <p id="secondary-roads-avg-cost-all" style="font-size: 1.2em; font-weight: bold; color: #fd7e14; margin: 0;">-</p>
                         </div>
                     </div>
                     
@@ -8000,19 +8124,31 @@ async function copyChartToClipboard(containerId, buttonId) {
                     <div id="bridges-stats" class="roads-category-panel" data-category="bridges" style="display: none; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin: 2rem 0;">
                         <div class="stat-card" style="background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); text-align: center;">
                             <h3 style="color: #0038A8; margin: 0 0 10px 0; font-size: 1.1em;">Total Projects</h3>
-                            <p id="bridges-total-projects" style="font-size: 2em; font-weight: bold; color: #28a745; margin: 0;">-</p>
+                            <p style="color: #666; font-size: 0.85em; margin: 0 0 5px 0;">(2026)</p>
+                            <p id="bridges-total-projects" style="font-size: 2em; font-weight: bold; color: #28a745; margin: 0 0 10px 0;">-</p>
+                            <p style="color: #666; font-size: 0.85em; margin: 5px 0 0 0;">(All Years)</p>
+                            <p id="bridges-total-projects-all" style="font-size: 1.4em; font-weight: bold; color: #28a745; margin: 0;">-</p>
                         </div>
                         <div class="stat-card" style="background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); text-align: center;">
                             <h3 style="color: #0038A8; margin: 0 0 10px 0; font-size: 1.1em;">Total Distance</h3>
-                            <p id="bridges-total-distance" style="font-size: 1.6em; font-weight: bold; color: #667eea; margin: 0;">-</p>
+                            <p style="color: #666; font-size: 0.85em; margin: 0 0 5px 0;">(2026)</p>
+                            <p id="bridges-total-distance" style="font-size: 1.6em; font-weight: bold; color: #667eea; margin: 0 0 10px 0;">-</p>
+                            <p style="color: #666; font-size: 0.85em; margin: 5px 0 0 0;">(All Years)</p>
+                            <p id="bridges-total-distance-all" style="font-size: 1.2em; font-weight: bold; color: #667eea; margin: 0;">-</p>
                         </div>
                         <div class="stat-card" style="background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); text-align: center;">
                             <h3 style="color: #0038A8; margin: 0 0 10px 0; font-size: 1.1em;">Total Amount</h3>
-                            <p id="bridges-total-amount" style="font-size: 1.6em; font-weight: bold; color: #dc3545; margin: 0;">-</p>
+                            <p style="color: #666; font-size: 0.85em; margin: 0 0 5px 0;">(2026)</p>
+                            <p id="bridges-total-amount" style="font-size: 1.6em; font-weight: bold; color: #dc3545; margin: 0 0 10px 0;">-</p>
+                            <p style="color: #666; font-size: 0.85em; margin: 5px 0 0 0;">(All Years)</p>
+                            <p id="bridges-total-amount-all" style="font-size: 1.2em; font-weight: bold; color: #dc3545; margin: 0;">-</p>
                         </div>
                         <div class="stat-card" style="background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); text-align: center;">
                             <h3 style="color: #0038A8; margin: 0 0 10px 0; font-size: 1.1em;">Avg Cost/km</h3>
-                            <p id="bridges-avg-cost" style="font-size: 1.6em; font-weight: bold; color: #fd7e14; margin: 0;">-</p>
+                            <p style="color: #666; font-size: 0.85em; margin: 0 0 5px 0;">(2026)</p>
+                            <p id="bridges-avg-cost" style="font-size: 1.6em; font-weight: bold; color: #fd7e14; margin: 0 0 10px 0;">-</p>
+                            <p style="color: #666; font-size: 0.85em; margin: 5px 0 0 0;">(All Years)</p>
+                            <p id="bridges-avg-cost-all" style="font-size: 1.2em; font-weight: bold; color: #fd7e14; margin: 0;">-</p>
                         </div>
                     </div>
                     
@@ -8020,19 +8156,31 @@ async function copyChartToClipboard(containerId, buttonId) {
                     <div id="traffic-signs-stats" class="roads-category-panel" data-category="traffic_signs" style="display: none; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin: 2rem 0;">
                         <div class="stat-card" style="background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); text-align: center;">
                             <h3 style="color: #0038A8; margin: 0 0 10px 0; font-size: 1.1em;">Total Projects</h3>
-                            <p id="traffic-signs-total-projects" style="font-size: 2em; font-weight: bold; color: #28a745; margin: 0;">-</p>
+                            <p style="color: #666; font-size: 0.85em; margin: 0 0 5px 0;">(2026)</p>
+                            <p id="traffic-signs-total-projects" style="font-size: 2em; font-weight: bold; color: #28a745; margin: 0 0 10px 0;">-</p>
+                            <p style="color: #666; font-size: 0.85em; margin: 5px 0 0 0;">(All Years)</p>
+                            <p id="traffic-signs-total-projects-all" style="font-size: 1.4em; font-weight: bold; color: #28a745; margin: 0;">-</p>
                         </div>
                         <div class="stat-card" style="background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); text-align: center;">
                             <h3 style="color: #0038A8; margin: 0 0 10px 0; font-size: 1.1em;">Total Distance</h3>
-                            <p id="traffic-signs-total-distance" style="font-size: 1.6em; font-weight: bold; color: #667eea; margin: 0;">-</p>
+                            <p style="color: #666; font-size: 0.85em; margin: 0 0 5px 0;">(2026)</p>
+                            <p id="traffic-signs-total-distance" style="font-size: 1.6em; font-weight: bold; color: #667eea; margin: 0 0 10px 0;">-</p>
+                            <p style="color: #666; font-size: 0.85em; margin: 5px 0 0 0;">(All Years)</p>
+                            <p id="traffic-signs-total-distance-all" style="font-size: 1.2em; font-weight: bold; color: #667eea; margin: 0;">-</p>
                         </div>
                         <div class="stat-card" style="background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); text-align: center;">
                             <h3 style="color: #0038A8; margin: 0 0 10px 0; font-size: 1.1em;">Total Amount</h3>
-                            <p id="traffic-signs-total-amount" style="font-size: 1.6em; font-weight: bold; color: #dc3545; margin: 0;">-</p>
+                            <p style="color: #666; font-size: 0.85em; margin: 0 0 5px 0;">(2026)</p>
+                            <p id="traffic-signs-total-amount" style="font-size: 1.6em; font-weight: bold; color: #dc3545; margin: 0 0 10px 0;">-</p>
+                            <p style="color: #666; font-size: 0.85em; margin: 5px 0 0 0;">(All Years)</p>
+                            <p id="traffic-signs-total-amount-all" style="font-size: 1.2em; font-weight: bold; color: #dc3545; margin: 0;">-</p>
                         </div>
                         <div class="stat-card" style="background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); text-align: center;">
                             <h3 style="color: #0038A8; margin: 0 0 10px 0; font-size: 1.1em;">Avg Cost/km</h3>
-                            <p id="traffic-signs-avg-cost" style="font-size: 1.6em; font-weight: bold; color: #fd7e14; margin: 0;">-</p>
+                            <p style="color: #666; font-size: 0.85em; margin: 0 0 5px 0;">(2026)</p>
+                            <p id="traffic-signs-avg-cost" style="font-size: 1.6em; font-weight: bold; color: #fd7e14; margin: 0 0 10px 0;">-</p>
+                            <p style="color: #666; font-size: 0.85em; margin: 5px 0 0 0;">(All Years)</p>
+                            <p id="traffic-signs-avg-cost-all" style="font-size: 1.2em; font-weight: bold; color: #fd7e14; margin: 0;">-</p>
                         </div>
                     </div>
                     
@@ -8062,6 +8210,12 @@ async function copyChartToClipboard(containerId, buttonId) {
                                             <th style="padding: 1rem; text-align: right; font-weight: 600;">Very Dark Red Segments</th>
                                             <th style="padding: 1rem; text-align: right; font-weight: 600;">Total Segments</th>
                                             <th style="padding: 1rem; text-align: right; font-weight: 600;">Percentage</th>
+                                            <th style="padding: 1rem; text-align: right; font-weight: 600;">Flagged Amount (₱M)</th>
+                                            <th style="padding: 1rem; text-align: right; font-weight: 600;">Total Amount (₱M)</th>
+                                            <th style="padding: 1rem; text-align: right; font-weight: 600;">Flagged %</th>
+                                            <th style="padding: 1rem; text-align: right; font-weight: 600;">Flagged Distance (km)</th>
+                                            <th style="padding: 1rem; text-align: right; font-weight: 600;">Total Distance (km)</th>
+                                            <th style="padding: 1rem; text-align: right; font-weight: 600;">Distance %</th>
                                         </tr>
                                     </thead>
                                     <tbody id="national-roads-dark-red-table-body">
@@ -8109,6 +8263,12 @@ async function copyChartToClipboard(containerId, buttonId) {
                                             <th style="padding: 1rem; text-align: right; font-weight: 600;">Very Dark Red Segments</th>
                                             <th style="padding: 1rem; text-align: right; font-weight: 600;">Total Segments</th>
                                             <th style="padding: 1rem; text-align: right; font-weight: 600;">Percentage</th>
+                                            <th style="padding: 1rem; text-align: right; font-weight: 600;">Flagged Amount (₱M)</th>
+                                            <th style="padding: 1rem; text-align: right; font-weight: 600;">Total Amount (₱M)</th>
+                                            <th style="padding: 1rem; text-align: right; font-weight: 600;">Flagged %</th>
+                                            <th style="padding: 1rem; text-align: right; font-weight: 600;">Flagged Distance (km)</th>
+                                            <th style="padding: 1rem; text-align: right; font-weight: 600;">Total Distance (km)</th>
+                                            <th style="padding: 1rem; text-align: right; font-weight: 600;">Distance %</th>
                                         </tr>
                                     </thead>
                                     <tbody id="secondary-roads-dark-red-table-body">
@@ -8187,12 +8347,24 @@ async function copyChartToClipboard(containerId, buttonId) {
                             <table id="national-roads-table" style="width: 100%; border-collapse: collapse; background: white; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
                                 <thead>
                                     <tr style="background: linear-gradient(135deg, #0038A8 0%, #003087 100%); color: white;">
-                                        <th style="padding: 1rem; text-align: left; font-weight: 600;">Project Name</th>
-                                        <th style="padding: 1rem; text-align: right; font-weight: 600;">Chainage</th>
-                                        <th style="padding: 1rem; text-align: right; font-weight: 600;">Distance Breakdown</th>
-                                        <th style="padding: 1rem; text-align: right; font-weight: 600;">Distance (km)</th>
-                                        <th style="padding: 1rem; text-align: right; font-weight: 600;">Amount</th>
-                                        <th style="padding: 1rem; text-align: right; font-weight: 600;">Cost/km</th>
+                                        <th style="padding: 1rem; text-align: left; font-weight: 600; cursor: pointer; user-select: none;" onclick="sortRoadsTable('national_roads', 'name')" title="Click to sort">
+                                            Project Name <span id="national-roads-sort-name" style="opacity: 0.5;">↕</span>
+                                        </th>
+                                        <th style="padding: 1rem; text-align: right; font-weight: 600; cursor: pointer; user-select: none;" onclick="sortRoadsTable('national_roads', 'chainage')" title="Click to sort">
+                                            Chainage <span id="national-roads-sort-chainage" style="opacity: 0.5;">↕</span>
+                                        </th>
+                                        <th style="padding: 1rem; text-align: right; font-weight: 600; cursor: pointer; user-select: none;" onclick="sortRoadsTable('national_roads', 'distance_breakdown')" title="Click to sort">
+                                            Distance Breakdown <span id="national-roads-sort-distance_breakdown" style="opacity: 0.5;">↕</span>
+                                        </th>
+                                        <th style="padding: 1rem; text-align: right; font-weight: 600; cursor: pointer; user-select: none;" onclick="sortRoadsTable('national_roads', 'distance')" title="Click to sort">
+                                            Distance (km) <span id="national-roads-sort-distance" style="opacity: 0.5;">↕</span>
+                                        </th>
+                                        <th style="padding: 1rem; text-align: right; font-weight: 600; cursor: pointer; user-select: none;" onclick="sortRoadsTable('national_roads', 'amount')" title="Click to sort">
+                                            Amount <span id="national-roads-sort-amount" style="opacity: 0.5;">↕</span>
+                                        </th>
+                                        <th style="padding: 1rem; text-align: right; font-weight: 600; cursor: pointer; user-select: none;" onclick="sortRoadsTable('national_roads', 'cost_per_km')" title="Click to sort">
+                                            Cost/km <span id="national-roads-sort-cost_per_km" style="opacity: 0.5;">↕</span>
+                                        </th>
                                     </tr>
                                 </thead>
                                 <tbody id="national-roads-table-body">
@@ -8210,12 +8382,24 @@ async function copyChartToClipboard(containerId, buttonId) {
                             <table id="secondary-roads-table" style="width: 100%; border-collapse: collapse; background: white; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
                                 <thead>
                                     <tr style="background: linear-gradient(135deg, #0038A8 0%, #003087 100%); color: white;">
-                                        <th style="padding: 1rem; text-align: left; font-weight: 600;">Project Name</th>
-                                        <th style="padding: 1rem; text-align: right; font-weight: 600;">Chainage</th>
-                                        <th style="padding: 1rem; text-align: right; font-weight: 600;">Distance Breakdown</th>
-                                        <th style="padding: 1rem; text-align: right; font-weight: 600;">Distance (km)</th>
-                                        <th style="padding: 1rem; text-align: right; font-weight: 600;">Amount</th>
-                                        <th style="padding: 1rem; text-align: right; font-weight: 600;">Cost/km</th>
+                                        <th style="padding: 1rem; text-align: left; font-weight: 600; cursor: pointer; user-select: none;" onclick="sortRoadsTable('secondary_roads', 'name')" title="Click to sort">
+                                            Project Name <span id="secondary-roads-sort-name" style="opacity: 0.5;">↕</span>
+                                        </th>
+                                        <th style="padding: 1rem; text-align: right; font-weight: 600; cursor: pointer; user-select: none;" onclick="sortRoadsTable('secondary_roads', 'chainage')" title="Click to sort">
+                                            Chainage <span id="secondary-roads-sort-chainage" style="opacity: 0.5;">↕</span>
+                                        </th>
+                                        <th style="padding: 1rem; text-align: right; font-weight: 600; cursor: pointer; user-select: none;" onclick="sortRoadsTable('secondary_roads', 'distance_breakdown')" title="Click to sort">
+                                            Distance Breakdown <span id="secondary-roads-sort-distance_breakdown" style="opacity: 0.5;">↕</span>
+                                        </th>
+                                        <th style="padding: 1rem; text-align: right; font-weight: 600; cursor: pointer; user-select: none;" onclick="sortRoadsTable('secondary_roads', 'distance')" title="Click to sort">
+                                            Distance (km) <span id="secondary-roads-sort-distance" style="opacity: 0.5;">↕</span>
+                                        </th>
+                                        <th style="padding: 1rem; text-align: right; font-weight: 600; cursor: pointer; user-select: none;" onclick="sortRoadsTable('secondary_roads', 'amount')" title="Click to sort">
+                                            Amount <span id="secondary-roads-sort-amount" style="opacity: 0.5;">↕</span>
+                                        </th>
+                                        <th style="padding: 1rem; text-align: right; font-weight: 600; cursor: pointer; user-select: none;" onclick="sortRoadsTable('secondary_roads', 'cost_per_km')" title="Click to sort">
+                                            Cost/km <span id="secondary-roads-sort-cost_per_km" style="opacity: 0.5;">↕</span>
+                                        </th>
                                     </tr>
                                 </thead>
                                 <tbody id="secondary-roads-table-body">
@@ -8256,12 +8440,24 @@ async function copyChartToClipboard(containerId, buttonId) {
                             <table id="bridges-table" style="width: 100%; border-collapse: collapse; background: white; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
                                 <thead>
                                     <tr style="background: linear-gradient(135deg, #0038A8 0%, #003087 100%); color: white;">
-                                        <th style="padding: 1rem; text-align: left; font-weight: 600;">Project Name</th>
-                                        <th style="padding: 1rem; text-align: right; font-weight: 600;">Chainage</th>
-                                        <th style="padding: 1rem; text-align: right; font-weight: 600;">Distance Breakdown</th>
-                                        <th style="padding: 1rem; text-align: right; font-weight: 600;">Distance (km)</th>
-                                        <th style="padding: 1rem; text-align: right; font-weight: 600;">Amount</th>
-                                        <th style="padding: 1rem; text-align: right; font-weight: 600;">Cost/km</th>
+                                        <th style="padding: 1rem; text-align: left; font-weight: 600; cursor: pointer; user-select: none;" onclick="sortRoadsTable('bridges', 'name')" title="Click to sort">
+                                            Project Name <span id="bridges-sort-name" style="opacity: 0.5;">↕</span>
+                                        </th>
+                                        <th style="padding: 1rem; text-align: right; font-weight: 600; cursor: pointer; user-select: none;" onclick="sortRoadsTable('bridges', 'chainage')" title="Click to sort">
+                                            Chainage <span id="bridges-sort-chainage" style="opacity: 0.5;">↕</span>
+                                        </th>
+                                        <th style="padding: 1rem; text-align: right; font-weight: 600; cursor: pointer; user-select: none;" onclick="sortRoadsTable('bridges', 'distance_breakdown')" title="Click to sort">
+                                            Distance Breakdown <span id="bridges-sort-distance_breakdown" style="opacity: 0.5;">↕</span>
+                                        </th>
+                                        <th style="padding: 1rem; text-align: right; font-weight: 600; cursor: pointer; user-select: none;" onclick="sortRoadsTable('bridges', 'distance')" title="Click to sort">
+                                            Distance (km) <span id="bridges-sort-distance" style="opacity: 0.5;">↕</span>
+                                        </th>
+                                        <th style="padding: 1rem; text-align: right; font-weight: 600; cursor: pointer; user-select: none;" onclick="sortRoadsTable('bridges', 'amount')" title="Click to sort">
+                                            Amount <span id="bridges-sort-amount" style="opacity: 0.5;">↕</span>
+                                        </th>
+                                        <th style="padding: 1rem; text-align: right; font-weight: 600; cursor: pointer; user-select: none;" onclick="sortRoadsTable('bridges', 'cost_per_km')" title="Click to sort">
+                                            Cost/km <span id="bridges-sort-cost_per_km" style="opacity: 0.5;">↕</span>
+                                        </th>
                                     </tr>
                                 </thead>
                                 <tbody id="bridges-table-body">
@@ -8279,12 +8475,24 @@ async function copyChartToClipboard(containerId, buttonId) {
                             <table id="traffic-signs-table" style="width: 100%; border-collapse: collapse; background: white; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
                                 <thead>
                                     <tr style="background: linear-gradient(135deg, #0038A8 0%, #003087 100%); color: white;">
-                                        <th style="padding: 1rem; text-align: left; font-weight: 600;">Project Name</th>
-                                        <th style="padding: 1rem; text-align: right; font-weight: 600;">Chainage</th>
-                                        <th style="padding: 1rem; text-align: right; font-weight: 600;">Distance Breakdown</th>
-                                        <th style="padding: 1rem; text-align: right; font-weight: 600;">Distance (km)</th>
-                                        <th style="padding: 1rem; text-align: right; font-weight: 600;">Amount</th>
-                                        <th style="padding: 1rem; text-align: right; font-weight: 600;">Cost/km</th>
+                                        <th style="padding: 1rem; text-align: left; font-weight: 600; cursor: pointer; user-select: none;" onclick="sortRoadsTable('traffic_signs', 'name')" title="Click to sort">
+                                            Project Name <span id="traffic-signs-sort-name" style="opacity: 0.5;">↕</span>
+                                        </th>
+                                        <th style="padding: 1rem; text-align: right; font-weight: 600; cursor: pointer; user-select: none;" onclick="sortRoadsTable('traffic_signs', 'chainage')" title="Click to sort">
+                                            Chainage <span id="traffic-signs-sort-chainage" style="opacity: 0.5;">↕</span>
+                                        </th>
+                                        <th style="padding: 1rem; text-align: right; font-weight: 600; cursor: pointer; user-select: none;" onclick="sortRoadsTable('traffic_signs', 'distance_breakdown')" title="Click to sort">
+                                            Distance Breakdown <span id="traffic-signs-sort-distance_breakdown" style="opacity: 0.5;">↕</span>
+                                        </th>
+                                        <th style="padding: 1rem; text-align: right; font-weight: 600; cursor: pointer; user-select: none;" onclick="sortRoadsTable('traffic_signs', 'distance')" title="Click to sort">
+                                            Distance (km) <span id="traffic-signs-sort-distance" style="opacity: 0.5;">↕</span>
+                                        </th>
+                                        <th style="padding: 1rem; text-align: right; font-weight: 600; cursor: pointer; user-select: none;" onclick="sortRoadsTable('traffic_signs', 'amount')" title="Click to sort">
+                                            Amount <span id="traffic-signs-sort-amount" style="opacity: 0.5;">↕</span>
+                                        </th>
+                                        <th style="padding: 1rem; text-align: right; font-weight: 600; cursor: pointer; user-select: none;" onclick="sortRoadsTable('traffic_signs', 'cost_per_km')" title="Click to sort">
+                                            Cost/km <span id="traffic-signs-sort-cost_per_km" style="opacity: 0.5;">↕</span>
+                                        </th>
                                     </tr>
                                 </thead>
                                 <tbody id="traffic-signs-table-body">
@@ -8605,6 +8813,10 @@ async function copyChartToClipboard(containerId, buttonId) {
                     <!-- Stats Summary -->
                     <div id="reblock-stats" style="display: none; display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin: 2rem 0;">
                         <div class="stat-card" style="background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); text-align: center;">
+                            <h3 style="color: #0038A8; margin: 0 0 10px 0; font-size: 1.1em;">Years Analyzed</h3>
+                            <p id="reblock-years-display" style="font-size: 1.6em; font-weight: bold; color: #0038A8; margin: 0;">-</p>
+                        </div>
+                        <div class="stat-card" style="background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); text-align: center;">
                             <h3 style="color: #0038A8; margin: 0 0 10px 0; font-size: 1.1em;">Highways Analyzed</h3>
                             <p id="reblock-highways-count" style="font-size: 2em; font-weight: bold; color: #28a745; margin: 0;">-</p>
                         </div>
@@ -8615,6 +8827,7 @@ async function copyChartToClipboard(containerId, buttonId) {
                         <div class="stat-card" style="background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); text-align: center;">
                             <h3 style="color: #0038A8; margin: 0 0 10px 0; font-size: 1.1em;">Total Distance</h3>
                             <p id="reblock-total-distance" style="font-size: 1.6em; font-weight: bold; color: #667eea; margin: 0;">-</p>
+                            <p style="color: #666; font-size: 0.75em; margin: 5px 0 0 0;">(of all segments)</p>
                         </div>
                         <div class="stat-card" style="background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); text-align: center;">
                             <h3 style="color: #0038A8; margin: 0 0 10px 0; font-size: 1.1em;">Anomalies</h3>
@@ -8628,6 +8841,65 @@ async function copyChartToClipboard(containerId, buttonId) {
                         <p style="color: #666; font-size: 0.9em; margin: 0 0 1.5rem 0;">Trends showing how reblocking statistics change over time across all years.</p>
                         <div id="reblock-trend-chart" style="width: 100%;">
                             <!-- Charts will be dynamically created here -->
+                        </div>
+                    </div>
+                    
+                    <!-- Highway Summary Table -->
+                    <div id="reblock-summary-table-container" style="display: none; margin: 2rem 0; background: white; padding: 2rem; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
+                        <h4 style="color: #0038A8; margin: 0 0 1rem 0;">Highway Summary Dashboard</h4>
+                        <p style="color: #666; font-size: 0.9em; margin: 0 0 1.5rem 0;">Complete overview of all highways in the autocomplete with detailed statistics.</p>
+                        
+                        <!-- Items per page selector -->
+                        <div style="margin-bottom: 1rem;">
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+                                <label for="reblock-summary-items-per-page" style="font-weight: 600; color: #333;">Items per page:</label>
+                                <select id="reblock-summary-items-per-page" onchange="reblockSummaryChangeItemsPerPage()" style="padding: 0.5rem; border: 1px solid #ddd; border-radius: 4px;">
+                                    <option value="25">25</option>
+                                    <option value="50" selected>50</option>
+                                    <option value="100">100</option>
+                                    <option value="200">200</option>
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <div style="overflow-x: auto;">
+                            <table id="reblock-summary-table" style="width: 100%; border-collapse: collapse; font-size: 0.9em;">
+                                <thead>
+                                    <tr style="background: linear-gradient(135deg, #0038A8 0%, #003087 100%); color: white;">
+                                        <th style="padding: 0.75rem; text-align: left; font-weight: 600; border: 1px solid #003087;">Year</th>
+                                        <th style="padding: 0.75rem; text-align: left; font-weight: 600; border: 1px solid #003087;">Highway</th>
+                                        <th style="padding: 0.75rem; text-align: right; font-weight: 600; border: 1px solid #003087;">Segments</th>
+                                        <th style="padding: 0.75rem; text-align: right; font-weight: 600; border: 1px solid #003087;">Amount (₱M)</th>
+                                        <th style="padding: 0.75rem; text-align: right; font-weight: 600; border: 1px solid #003087;">Distance (km)</th>
+                                        <th style="padding: 0.75rem; text-align: right; font-weight: 600; border: 1px solid #003087;">Flags</th>
+                                        <th style="padding: 0.75rem; text-align: right; font-weight: 600; border: 1px solid #003087;">Flags % (All)</th>
+                                        <th style="padding: 0.75rem; text-align: right; font-weight: 600; border: 1px solid #003087;">Amount % (All)</th>
+                                        <th style="padding: 0.75rem; text-align: right; font-weight: 600; border: 1px solid #003087;">Distance % (All)</th>
+                                        <th style="padding: 0.75rem; text-align: right; font-weight: 600; border: 1px solid #003087;">Flags % (Year)</th>
+                                        <th style="padding: 0.75rem; text-align: right; font-weight: 600; border: 1px solid #003087;">Amount % (Year)</th>
+                                        <th style="padding: 0.75rem; text-align: right; font-weight: 600; border: 1px solid #003087;">Distance % (Year)</th>
+                                        <th style="padding: 0.75rem; text-align: right; font-weight: 600; border: 1px solid #003087;">Amount Flagged (₱M)</th>
+                                        <th style="padding: 0.75rem; text-align: right; font-weight: 600; border: 1px solid #003087;">Distance Flagged (km)</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="reblock-summary-table-body">
+                                    <!-- Table rows will be populated dynamically -->
+                                </tbody>
+                            </table>
+                        </div>
+                        
+                        <!-- Pagination controls -->
+                        <div style="margin-top: 1rem; display: flex; justify-content: space-between; align-items: center; padding: 1rem; background: #f8f9fa; border-radius: 6px;">
+                            <div style="color: #666; font-size: 0.9em;">
+                                Showing <span id="reblock-summary-page-start">0</span> to <span id="reblock-summary-page-end">0</span> of <span id="reblock-summary-total-items">0</span> items
+                            </div>
+                            <div style="display: flex; gap: 0.5rem; align-items: center;">
+                                <button id="reblock-summary-prev-page" onclick="reblockSummaryChangePage(-1)" style="padding: 0.5rem 1rem; border: 1px solid #ddd; background: white; color: #333; border-radius: 4px; cursor: pointer;" disabled>Previous</button>
+                                <span style="color: #666; font-size: 0.9em;">
+                                    Page <span id="reblock-summary-page-number">1</span> of <span id="reblock-summary-total-pages">1</span>
+                                </span>
+                                <button id="reblock-summary-next-page" onclick="reblockSummaryChangePage(1)" style="padding: 0.5rem 1rem; border: 1px solid #ddd; background: white; color: #333; border-radius: 4px; cursor: pointer;" disabled>Next</button>
+                            </div>
                         </div>
                     </div>
                     
@@ -8773,77 +9045,6 @@ async function copyChartToClipboard(containerId, buttonId) {
                         </div>
                     </div>
                 </div>
-                
-                <!-- Anti-zero Tab -->
-                <div id="tab-zero" class="budget-tab-panel">
-                    <h3 class="budget-section-title">🚫 Anti-zero: Uniform Percentage Decrease Analysis</h3>
-                    <p class="budget-section-desc">Analysis of Annex A-5 projects revealing 105 different uniform decrease patterns affecting 9,183 projects (53.5%). Each pattern represents a fixed percentage decrease from Column O (GAB/original) to Column S (Final) applied systematically across multiple projects, suggesting uniform budget adjustments that may obscure original rounded allocations.</p>
-                    
-                    <!-- Loading Spinner -->
-                    <div id="zero-loading" style="text-align: center; padding: 2rem;">
-                        <div class="spinner" style="width: 40px; height: 40px; border: 4px solid #f3f3f3; border-top: 4px solid #0038A8; border-radius: 50%; animation: spin 1s linear infinite; margin: 0 auto;"></div>
-                        <p style="color: #666; margin-top: 1rem;">Loading analysis data...</p>
-                    </div>
-                    
-                    <!-- Error Message -->
-                    <div id="zero-error" style="display: none; text-align: center; padding: 2rem; color: #dc3545; background: #f8d7da; border-radius: 8px; margin: 2rem 0;"></div>
-                    
-                    <!-- Info Note -->
-                    <div style="background: #fff3cd; border-left: 4px solid #ffc107; padding: 1rem; margin: 1.5rem 0; border-radius: 4px; display: none;" id="zero-info">
-                        <p style="margin: 0; color: #856404; font-size: 0.95em;">
-                            <strong>Finding:</strong> Analysis of 17,179 Annex A-5 projects revealed <strong>105 different uniform decrease patterns</strong>, affecting <strong>9,183 projects (53.5%)</strong>. Each pattern represents a fixed percentage decrease from Column O (GAB/original) to Column S (Final) applied systematically across multiple projects. The top pattern affects 544 projects with a 17.80% decrease. This systematic application of fixed percentage reductions suggests uniform budget adjustments that may obscure original rounded allocations.
-                        </p>
-                    </div>
-                    
-                    <!-- Stats Cards -->
-                    <div id="zero-stats" style="display: none; display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1rem; margin: 2rem 0;">
-                        <div class="stat-card" style="background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); text-align: center;">
-                            <h3 style="color: #0038A8; margin: 0 0 10px 0; font-size: 1.1em;">Total Matches</h3>
-                            <p id="zero-total-matches" style="font-size: 2em; font-weight: bold; color: #dc3545; margin: 0;">-</p>
-                        </div>
-                        <div class="stat-card" style="background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); text-align: center;">
-                            <h3 style="color: #0038A8; margin: 0 0 10px 0; font-size: 1.1em;">Total Projects</h3>
-                            <p id="zero-total-projects" style="font-size: 1.6em; font-weight: bold; color: #667eea; margin: 0;">-</p>
-                        </div>
-                        <div class="stat-card" style="background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); text-align: center;">
-                            <h3 style="color: #0038A8; margin: 0 0 10px 0; font-size: 1.1em;">Percentage</h3>
-                            <p id="zero-percentage" style="font-size: 1.6em; font-weight: bold; color: #667eea; margin: 0;">-</p>
-                        </div>
-                        <div class="stat-card" style="background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); text-align: center;">
-                            <h3 style="color: #0038A8; margin: 0 0 10px 0; font-size: 1.1em;">Unique Patterns</h3>
-                            <p id="zero-unique-patterns" style="font-size: 1.6em; font-weight: bold; color: #28a745; margin: 0;">-</p>
-                        </div>
-                    </div>
-                    
-                    <!-- Chart Container -->
-                    <div id="zero-chart-container" style="display: none; margin: 2rem 0; background: white; padding: 2rem; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
-                        <h4 style="color: #0038A8; margin-bottom: 1rem;">Uniform Decrease Patterns: Percentage Decrease vs Number of Projects</h4>
-                        <p style="color: #666; font-size: 0.9em; margin-bottom: 1rem;">This chart shows the pattern of uniform percentage decreases applied across Annex A-5 projects. Each bar represents a specific decrease percentage and how many projects use that exact percentage.</p>
-                        <canvas id="zero-chart" style="max-height: 500px;"></canvas>
-                    </div>
-                    
-                    <!-- Summary Table -->
-                    <div id="zero-table-container" style="display: none; margin-top: 2rem;">
-                        <h4 style="color: #0038A8; margin-bottom: 1rem;">Uniform Decrease Patterns - Fixed Percentages</h4>
-                        <p style="color: #666; font-size: 0.9em; margin-bottom: 1rem;">Each row shows a fixed percentage decrease and how many projects use that exact percentage, demonstrating systematic uniform reductions.</p>
-                        <div style="margin-bottom: 1rem;">
-                            <input type="text" id="zero-search" placeholder="Search by percentage..." style="width: 100%; padding: 0.75rem; border: 2px solid #ddd; border-radius: 6px; font-size: 14px;">
-                        </div>
-                        <div style="overflow-x: auto;">
-                            <table id="zero-table" style="width: 100%; border-collapse: collapse; background: white; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
-                                <thead>
-                                    <tr style="background: linear-gradient(135deg, #0038A8 0%, #003087 100%); color: white;">
-                                        <th style="padding: 1rem; text-align: right; font-weight: 600;">Rank</th>
-                                        <th style="padding: 1rem; text-align: right; font-weight: 600;">Fixed Decrease %</th>
-                                        <th style="padding: 1rem; text-align: right; font-weight: 600;">Number of Projects</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="zero-table-body">
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                </div>
             </div>
     </div>
     
@@ -8879,11 +9080,14 @@ async function copyChartToClipboard(containerId, buttonId) {
                 traffic_signs: data.traffic_signs?.projects || []
             };
             
-            // Update stats for each category
+            // Update stats for each category (2026 data)
             updateRoadsStats('national_roads', roadsDataCache.national_roads);
             updateRoadsStats('secondary_roads', roadsDataCache.secondary_roads);
             updateRoadsStats('bridges', roadsDataCache.bridges);
             updateRoadsStats('traffic_signs', roadsDataCache.traffic_signs);
+            
+            // Load and update all-years stats
+            await loadRoadsAllYearsStats();
             
             // Display tables
             displayRoadsTable('national_roads', roadsDataCache.national_roads);
@@ -8930,6 +9134,155 @@ async function copyChartToClipboard(containerId, buttonId) {
         document.getElementById(`${prefix}-total-distance`).textContent = totalDistance.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2}) + ' km';
         document.getElementById(`${prefix}-total-amount`).textContent = '₱' + totalAmount.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
         document.getElementById(`${prefix}-avg-cost`).textContent = '₱' + avgCost.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2}) + '/km';
+    }
+    
+    async function loadRoadsAllYearsStats() {
+        // Use the dedicated all-years endpoint that aggregates data from all years
+        try {
+            const response = await fetch('/api/budget/roads-cost-analysis-all-years');
+            if (response.ok) {
+                const data = await response.json();
+                console.log('[All Years Stats] API Response:', data);
+                if (data.success) {
+                    // The API returns aggregated stats, not individual projects
+                    // Update stats directly from the aggregated data
+                    const categories = ['national_roads', 'secondary_roads', 'bridges', 'traffic_signs'];
+                    categories.forEach(category => {
+                        const stats = data[category] || {};
+                        const totalProjects = stats.total_projects || 0;
+                        const totalDistance = parseFloat(stats.total_distance_km || 0);
+                        const totalAmount = parseFloat(stats.total_amount || 0);
+                        // Calculate average cost per km from the aggregated totals
+                        const avgCost = totalDistance > 0 ? totalAmount / totalDistance : 0;
+                        
+                        console.log(`[All Years Stats] ${category}:`, {
+                            totalProjects,
+                            totalDistance,
+                            totalAmount,
+                            avgCost
+                        });
+                        
+                        let prefix;
+                        if (category === 'national_roads') prefix = 'national-roads';
+                        else if (category === 'secondary_roads') prefix = 'secondary-roads';
+                        else if (category === 'bridges') prefix = 'bridges';
+                        else if (category === 'traffic_signs') prefix = 'traffic-signs';
+                        else prefix = 'roads';
+                        
+                        const projectsEl = document.getElementById(`${prefix}-total-projects-all`);
+                        const distanceEl = document.getElementById(`${prefix}-total-distance-all`);
+                        const amountEl = document.getElementById(`${prefix}-total-amount-all`);
+                        const avgCostEl = document.getElementById(`${prefix}-avg-cost-all`);
+                        
+                        if (projectsEl) projectsEl.textContent = totalProjects.toLocaleString();
+                        if (distanceEl) distanceEl.textContent = totalDistance.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2}) + ' km';
+                        if (amountEl) amountEl.textContent = '₱' + totalAmount.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+                        if (avgCostEl) {
+                            // Recalculate to ensure we're using the correct values
+                            const calculatedAvg = totalDistance > 0 ? totalAmount / totalDistance : 0;
+                            console.log(`[All Years Stats] ${category} calculated avg:`, calculatedAvg);
+                            avgCostEl.textContent = '₱' + calculatedAvg.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2}) + '/km';
+                        }
+                    });
+                    return; // Successfully loaded from all-years endpoint
+                } else {
+                    console.warn('[All Years Stats] API returned success=false:', data);
+                }
+            } else {
+                console.warn('[All Years Stats] API response not OK:', response.status, response.statusText);
+            }
+        } catch (error) {
+            console.warn('Failed to load all-years data from dedicated endpoint:', error);
+        }
+        
+        // Fallback: Try to load data from each year individually
+        const years = ['2020', '2021', '2022', '2023', '2024', '2025', '2026'];
+        const allYearsData = {
+            national_roads: [],
+            secondary_roads: [],
+            bridges: [],
+            traffic_signs: []
+        };
+        
+        const loadPromises = years.map(async (year) => {
+            try {
+                const response = await fetch(`/api/budget/roads-cost-analysis?year=${year}`);
+                if (response.ok) {
+                    const data = await response.json();
+                    if (data.success) {
+                        return {
+                            year,
+                            data: {
+                                national_roads: data.national_roads?.projects || [],
+                                secondary_roads: data.secondary_roads?.projects || [],
+                                bridges: data.bridges?.projects || [],
+                                traffic_signs: data.traffic_signs?.projects || []
+                            }
+                        };
+                    }
+                }
+            } catch (error) {
+                console.warn(`Failed to load roads data for year ${year}:`, error);
+            }
+            return null;
+        });
+        
+        const results = await Promise.all(loadPromises);
+        
+        // Aggregate data from all years
+        results.forEach(result => {
+            if (result && result.data) {
+                allYearsData.national_roads.push(...result.data.national_roads);
+                allYearsData.secondary_roads.push(...result.data.secondary_roads);
+                allYearsData.bridges.push(...result.data.bridges);
+                allYearsData.traffic_signs.push(...result.data.traffic_signs);
+            }
+        });
+        
+        // If still no data, fall back to 2026 data
+        if (allYearsData.national_roads.length === 0 && roadsDataCache) {
+            console.warn('No multi-year data available, using 2026 data only.');
+            allYearsData.national_roads.push(...(roadsDataCache.national_roads || []));
+            allYearsData.secondary_roads.push(...(roadsDataCache.secondary_roads || []));
+            allYearsData.bridges.push(...(roadsDataCache.bridges || []));
+            allYearsData.traffic_signs.push(...(roadsDataCache.traffic_signs || []));
+        }
+        
+        // Update all-years stats for each category
+        updateRoadsAllYearsStats('national_roads', allYearsData.national_roads);
+        updateRoadsAllYearsStats('secondary_roads', allYearsData.secondary_roads);
+        updateRoadsAllYearsStats('bridges', allYearsData.bridges);
+        updateRoadsAllYearsStats('traffic_signs', allYearsData.traffic_signs);
+    }
+    
+    function updateRoadsAllYearsStats(category, projects) {
+        const totalProjects = projects.length;
+        const totalDistance = projects.reduce((sum, p) => sum + (p.distance_km || 0), 0);
+        const totalAmount = projects.reduce((sum, p) => sum + (p.amount || 0), 0);
+        const avgCost = totalDistance > 0 ? totalAmount / totalDistance : 0;
+        
+        let prefix;
+        if (category === 'national_roads') {
+            prefix = 'national-roads';
+        } else if (category === 'secondary_roads') {
+            prefix = 'secondary-roads';
+        } else if (category === 'bridges') {
+            prefix = 'bridges';
+        } else if (category === 'traffic_signs') {
+            prefix = 'traffic-signs';
+        } else {
+            prefix = 'roads';
+        }
+        
+        const projectsEl = document.getElementById(`${prefix}-total-projects-all`);
+        const distanceEl = document.getElementById(`${prefix}-total-distance-all`);
+        const amountEl = document.getElementById(`${prefix}-total-amount-all`);
+        const avgCostEl = document.getElementById(`${prefix}-avg-cost-all`);
+        
+        if (projectsEl) projectsEl.textContent = totalProjects.toLocaleString();
+        if (distanceEl) distanceEl.textContent = totalDistance.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2}) + ' km';
+        if (amountEl) amountEl.textContent = '₱' + totalAmount.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+        if (avgCostEl) avgCostEl.textContent = '₱' + avgCost.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2}) + '/km';
     }
     
     function showRoadsCategory(category) {
@@ -9024,15 +9377,31 @@ async function copyChartToClipboard(containerId, buttonId) {
                 if (categorySegments.length === 0) return;
                 
                 // Count segments above category threshold (very dark red)
-                const veryDarkRedCount = categorySegments.filter(s => s.cost_per_km >= categoryThreshold).length;
+                const veryDarkRedSegments = categorySegments.filter(s => s.cost_per_km >= categoryThreshold);
+                const veryDarkRedCount = veryDarkRedSegments.length;
                 const totalSegments = categorySegments.length;
                 const percentage = totalSegments > 0 ? (veryDarkRedCount / totalSegments) * 100 : 0;
+                
+                // Calculate flagged amount and distance
+                const flaggedAmount = veryDarkRedSegments.reduce((sum, s) => sum + (s.amount || 0), 0);
+                const totalAmount = categorySegments.reduce((sum, s) => sum + (s.amount || 0), 0);
+                const flaggedAmountPct = totalAmount > 0 ? (flaggedAmount / totalAmount * 100) : 0;
+                
+                const flaggedDistance = veryDarkRedSegments.reduce((sum, s) => sum + (s.distance_km || 0), 0);
+                const totalDistance = categorySegments.reduce((sum, s) => sum + (s.distance_km || 0), 0);
+                const flaggedDistancePct = totalDistance > 0 ? (flaggedDistance / totalDistance * 100) : 0;
                 
                 highwayStats.push({
                     highway: highway.highway,
                     veryDarkRedCount: veryDarkRedCount,
                     totalSegments: totalSegments,
                     percentage: percentage,
+                    flaggedAmount: flaggedAmount,
+                    totalAmount: totalAmount,
+                    flaggedAmountPct: flaggedAmountPct,
+                    flaggedDistance: flaggedDistance,
+                    totalDistance: totalDistance,
+                    flaggedDistancePct: flaggedDistancePct,
                     // Score that factors in both percentage and total segments
                     score: percentage * totalSegments
                 });
@@ -9094,6 +9463,26 @@ async function copyChartToClipboard(containerId, buttonId) {
         if (!tbody) return;
         tbody.innerHTML = '';
         
+        // Calculate totals for the total row (across ALL data, not just current page)
+        const totals = {
+            veryDarkRedCount: 0,
+            totalSegments: 0,
+            flaggedAmount: 0,
+            totalAmount: 0,
+            flaggedDistance: 0,
+            totalDistance: 0
+        };
+        
+        // Calculate totals from all data
+        data.forEach((item) => {
+            totals.veryDarkRedCount += item.veryDarkRedCount || 0;
+            totals.totalSegments += item.totalSegments || 0;
+            totals.flaggedAmount += item.flaggedAmount || 0;
+            totals.totalAmount += item.totalAmount || 0;
+            totals.flaggedDistance += item.flaggedDistance || 0;
+            totals.totalDistance += item.totalDistance || 0;
+        });
+        
         pageData.forEach((item, index) => {
             const row = document.createElement('tr');
             row.style.borderBottom = '1px solid #eee';
@@ -9107,6 +9496,9 @@ async function copyChartToClipboard(containerId, buttonId) {
             const g = Math.floor(204 - (pct * 204)); // 204 to 0
             const b = Math.floor(204 - (pct * 204)); // 204 to 0
             const barColor = `rgb(${r}, ${g}, ${b})`;
+            
+            const flaggedAmountPct = item.totalAmount > 0 ? (item.flaggedAmount / item.totalAmount * 100) : 0;
+            const flaggedDistancePct = item.totalDistance > 0 ? (item.flaggedDistance / item.totalDistance * 100) : 0;
             
             row.innerHTML = `
                 <td style="padding: 1rem; font-weight: bold;">${escapeHtml(item.highway)}</td>
@@ -9122,9 +9514,38 @@ async function copyChartToClipboard(containerId, buttonId) {
                         </span>
                     </div>
                 </td>
+                <td style="padding: 1rem; text-align: right; color: ${item.flaggedAmount > 0 ? '#dc3545' : '#666'}; font-weight: ${item.flaggedAmount > 0 ? '600' : 'normal'};">₱${((item.flaggedAmount || 0) / 1000000).toFixed(1)}M</td>
+                <td style="padding: 1rem; text-align: right;">₱${((item.totalAmount || 0) / 1000000).toFixed(1)}M</td>
+                <td style="padding: 1rem; text-align: right; color: ${flaggedAmountPct > 10 ? '#dc3545' : '#666'}; font-weight: ${flaggedAmountPct > 10 ? '600' : 'normal'};">${flaggedAmountPct.toFixed(2)}%</td>
+                <td style="padding: 1rem; text-align: right; color: ${item.flaggedDistance > 0 ? '#dc3545' : '#666'}; font-weight: ${item.flaggedDistance > 0 ? '600' : 'normal'};">${(item.flaggedDistance || 0).toFixed(2)}</td>
+                <td style="padding: 1rem; text-align: right;">${(item.totalDistance || 0).toFixed(2)}</td>
+                <td style="padding: 1rem; text-align: right; color: ${flaggedDistancePct > 10 ? '#dc3545' : '#666'}; font-weight: ${flaggedDistancePct > 10 ? '600' : 'normal'};">${flaggedDistancePct.toFixed(2)}%</td>
             `;
             tbody.appendChild(row);
         });
+        
+        // Add total row
+        const totalPercentage = totals.totalSegments > 0 ? (totals.veryDarkRedCount / totals.totalSegments * 100) : 0;
+        const totalFlaggedAmountPct = totals.totalAmount > 0 ? (totals.flaggedAmount / totals.totalAmount * 100) : 0;
+        const totalFlaggedDistancePct = totals.totalDistance > 0 ? (totals.flaggedDistance / totals.totalDistance * 100) : 0;
+        
+        const totalRow = document.createElement('tr');
+        totalRow.style.backgroundColor = '#e7f3ff';
+        totalRow.style.borderTop = '3px solid #0038A8';
+        totalRow.style.fontWeight = 'bold';
+        totalRow.innerHTML = `
+            <td style="padding: 1rem; font-weight: 700; color: #0038A8;">Total</td>
+            <td style="padding: 1rem; text-align: right; font-weight: 700; color: #dc3545;">${totals.veryDarkRedCount.toLocaleString()}</td>
+            <td style="padding: 1rem; text-align: right; font-weight: 700; color: #0038A8;">${totals.totalSegments.toLocaleString()}</td>
+            <td style="padding: 1rem; text-align: right; font-weight: 700; color: #0038A8;">${totalPercentage.toFixed(2)}%</td>
+            <td style="padding: 1rem; text-align: right; font-weight: 700; color: #dc3545;">₱${(totals.flaggedAmount / 1000000).toFixed(1)}M</td>
+            <td style="padding: 1rem; text-align: right; font-weight: 700; color: #0038A8;">₱${(totals.totalAmount / 1000000).toFixed(1)}M</td>
+            <td style="padding: 1rem; text-align: right; font-weight: 700; color: ${totalFlaggedAmountPct > 10 ? '#dc3545' : '#0038A8'};">${totalFlaggedAmountPct.toFixed(2)}%</td>
+            <td style="padding: 1rem; text-align: right; font-weight: 700; color: #dc3545;">${totals.flaggedDistance.toFixed(2)}</td>
+            <td style="padding: 1rem; text-align: right; font-weight: 700; color: #0038A8;">${totals.totalDistance.toFixed(2)}</td>
+            <td style="padding: 1rem; text-align: right; font-weight: 700; color: ${totalFlaggedDistancePct > 10 ? '#dc3545' : '#0038A8'};">${totalFlaggedDistancePct.toFixed(2)}%</td>
+        `;
+        tbody.appendChild(totalRow);
         
         // Update pagination controls
         const pageStartEl = document.getElementById(`${prefix}-dark-red-page-start`);
@@ -9197,27 +9618,110 @@ async function copyChartToClipboard(containerId, buttonId) {
     
     
     function displayRoadsTable(category, projects) {
-        let tbodyId, searchId;
+        // Store the original data for sorting and filtering
+        roadsTableData[category] = projects;
+        
+        // Render the table with current sort state
+        renderRoadsTable(category);
+    }
+    
+    function renderRoadsTable(category) {
+        let tbodyId, searchId, tableId;
         if (category === 'national_roads') {
             tbodyId = 'national-roads-table-body';
             searchId = 'national-roads-search';
+            tableId = 'national-roads-table';
         } else if (category === 'secondary_roads') {
             tbodyId = 'secondary-roads-table-body';
             searchId = 'secondary-roads-search';
+            tableId = 'secondary-roads-table';
         } else if (category === 'bridges') {
             tbodyId = 'bridges-table-body';
             searchId = 'bridges-search';
+            tableId = 'bridges-table';
         } else if (category === 'traffic_signs') {
             tbodyId = 'traffic-signs-table-body';
             searchId = 'traffic-signs-search';
+            tableId = 'traffic-signs-table';
         } else {
             tbodyId = 'roads-table-body';
             searchId = 'roads-search';
+            tableId = 'roads-table';
         }
         
         const tbody = document.getElementById(tbodyId);
         if (!tbody) return;
         
+        // Get the search term
+        const searchEl = document.getElementById(searchId);
+        const searchTerm = searchEl ? searchEl.value.toLowerCase() : '';
+        
+        // Get and filter projects
+        let projects = [...(roadsTableData[category] || [])];
+        
+        // Apply search filter
+        if (searchTerm) {
+            projects = projects.filter(project => {
+                const searchableText = [
+                    project.name || '',
+                    project.chainage_display || '',
+                    project.distance_breakdown || '',
+                    (project.distance_km || 0).toString(),
+                    (project.amount || 0).toString(),
+                    (project.cost_per_km || 0).toString()
+                ].join(' ').toLowerCase();
+                return searchableText.includes(searchTerm);
+            });
+        }
+        
+        // Apply sorting
+        const sortState = roadsTableSortState[category];
+        if (sortState.column) {
+            projects.sort((a, b) => {
+                let aVal, bVal;
+                
+                switch (sortState.column) {
+                    case 'name':
+                        aVal = (a.name || '').toLowerCase();
+                        bVal = (b.name || '').toLowerCase();
+                        break;
+                    case 'chainage':
+                        aVal = a.chainage_display || '';
+                        bVal = b.chainage_display || '';
+                        break;
+                    case 'distance_breakdown':
+                        aVal = a.distance_breakdown || '';
+                        bVal = b.distance_breakdown || '';
+                        break;
+                    case 'distance':
+                        aVal = a.distance_km || 0;
+                        bVal = b.distance_km || 0;
+                        break;
+                    case 'amount':
+                        aVal = a.amount || 0;
+                        bVal = b.amount || 0;
+                        break;
+                    case 'cost_per_km':
+                        aVal = a.cost_per_km || 0;
+                        bVal = b.cost_per_km || 0;
+                        break;
+                    default:
+                        return 0;
+                }
+                
+                if (typeof aVal === 'string') {
+                    return sortState.direction === 'asc' 
+                        ? aVal.localeCompare(bVal)
+                        : bVal.localeCompare(aVal);
+                } else {
+                    return sortState.direction === 'asc' 
+                        ? aVal - bVal
+                        : bVal - aVal;
+                }
+            });
+        }
+        
+        // Clear and render
         tbody.innerHTML = '';
         
         projects.forEach((project, index) => {
@@ -9238,20 +9742,74 @@ async function copyChartToClipboard(containerId, buttonId) {
             tbody.appendChild(row);
         });
         
-        // Add search functionality
-        const searchEl = document.getElementById(searchId);
+        // Update sort indicators
+        updateRoadsTableSortIndicators(category);
+        
+        // Setup search with debouncing
         if (searchEl) {
+            // Clear existing timeout
+            if (roadsTableSearchTimeouts[searchId]) {
+                clearTimeout(roadsTableSearchTimeouts[searchId]);
+            }
+            
             // Remove existing listeners by cloning
             const newSearchEl = searchEl.cloneNode(true);
             searchEl.parentNode.replaceChild(newSearchEl, searchEl);
             
             newSearchEl.addEventListener('input', (e) => {
-                const searchTerm = e.target.value.toLowerCase();
-                Array.from(tbody.children).forEach(row => {
-                    const text = row.textContent.toLowerCase();
-                    row.style.display = text.includes(searchTerm) ? '' : 'none';
-                });
+                // Clear existing timeout
+                if (roadsTableSearchTimeouts[searchId]) {
+                    clearTimeout(roadsTableSearchTimeouts[searchId]);
+                }
+                
+                // Debounce the search
+                roadsTableSearchTimeouts[searchId] = setTimeout(() => {
+                    renderRoadsTable(category);
+                }, 150); // 150ms debounce
             });
+        }
+    }
+    
+    function sortRoadsTable(category, column) {
+        const sortState = roadsTableSortState[category];
+        
+        // Toggle direction if clicking the same column, otherwise set to ascending
+        if (sortState.column === column) {
+            sortState.direction = sortState.direction === 'asc' ? 'desc' : 'asc';
+        } else {
+            sortState.column = column;
+            sortState.direction = 'asc';
+        }
+        
+        // Re-render the table
+        renderRoadsTable(category);
+    }
+    
+    function updateRoadsTableSortIndicators(category) {
+        const sortState = roadsTableSortState[category];
+        const prefix = category === 'national_roads' ? 'national-roads' 
+                     : category === 'secondary_roads' ? 'secondary-roads'
+                     : category === 'bridges' ? 'bridges'
+                     : category === 'traffic_signs' ? 'traffic-signs'
+                     : 'roads';
+        
+        // Reset all indicators
+        const columns = ['name', 'chainage', 'distance_breakdown', 'distance', 'amount', 'cost_per_km'];
+        columns.forEach(col => {
+            const indicatorEl = document.getElementById(`${prefix}-sort-${col}`);
+            if (indicatorEl) {
+                indicatorEl.textContent = '↕';
+                indicatorEl.style.opacity = '0.5';
+            }
+        });
+        
+        // Set active indicator
+        if (sortState.column) {
+            const indicatorEl = document.getElementById(`${prefix}-sort-${sortState.column}`);
+            if (indicatorEl) {
+                indicatorEl.textContent = sortState.direction === 'asc' ? '↑' : '↓';
+                indicatorEl.style.opacity = '1';
+            }
         }
     }
     
@@ -10213,6 +10771,18 @@ async function copyChartToClipboard(containerId, buttonId) {
             });
         }
         
+        // Anti-zero tab loading
+        const zeroTab = document.querySelector('[data-tab="zero"]');
+        if (zeroTab) {
+            zeroTab.addEventListener('click', () => {
+                const panel = document.getElementById('tab-zero');
+                if (panel && !panel.dataset.loaded) {
+                    loadAntiZeroData();
+                    panel.dataset.loaded = 'true';
+                }
+            });
+        }
+        
         // Stats category tab switching
         document.querySelectorAll('.stats-category-btn').forEach(btn => {
             btn.addEventListener('click', () => {
@@ -10250,6 +10820,28 @@ async function copyChartToClipboard(containerId, buttonId) {
     
     // Pagination state for reblocking table
     let reblockCurrentPage = 1;
+    
+    // Pagination state for reblock summary table
+    let reblockSummaryData = [];
+    let reblockSummaryCurrentPage = 1;
+    let reblockSummaryItemsPerPage = 50;
+    
+    // Roads table state for sorting and filtering
+    let roadsTableData = {
+        national_roads: [],
+        secondary_roads: [],
+        bridges: [],
+        traffic_signs: []
+    };
+    let roadsTableSortState = {
+        national_roads: { column: null, direction: 'asc' },
+        secondary_roads: { column: null, direction: 'asc' },
+        bridges: { column: null, direction: 'asc' },
+        traffic_signs: { column: null, direction: 'asc' }
+    };
+    let roadsTableSearchTimeouts = {};
+    let reblockSummaryTotals = null;
+    let reblockSummaryYearTotals = null;
     let reblockItemsPerPage = 50;
     let reblockFilteredSegments = [];
     
@@ -10598,14 +11190,35 @@ async function copyChartToClipboard(containerId, buttonId) {
             }
             
             // Update stats (all pre-calculated in Python)
+            // Check both data.year and currentReblockYear to determine if showing all years
+            const isTotalYear = (data.year && (data.year === 'total' || data.year === 'all' || data.year === 'combined')) || 
+                                (currentReblockYear && (currentReblockYear === 'total' || currentReblockYear === 'all' || currentReblockYear === 'combined'));
+            const reblockYearDisplay = isTotalYear ? 'All Years (2020-2026)' : (data.year || currentReblockYear || '2026');
+            const yearsEl = document.getElementById('reblock-years-display');
+            if (yearsEl) {
+                yearsEl.textContent = reblockYearDisplay;
+            }
+            
             document.getElementById('reblock-highways-count').textContent = data.total_highways.toLocaleString();
             document.getElementById('reblock-segments-count').textContent = data.total_segments.toLocaleString();
-            document.getElementById('reblock-total-distance').textContent = (data.total_distance_km || 0).toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2}) + ' km';
+            
+            // Update total distance with clarification
+            const totalDistanceEl = document.getElementById('reblock-total-distance');
+            if (totalDistanceEl) {
+                const distanceKm = (data.total_distance_km || 0).toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+                totalDistanceEl.textContent = distanceKm + ' km';
+                // Add tooltip or update parent to show it's the sum of all segments
+                totalDistanceEl.title = `Total distance across ${data.total_segments.toLocaleString()} segments`;
+            }
+            
             document.getElementById('reblock-anomalies-count').textContent = data.total_anomalies.toLocaleString();
             
             // Show stats and selector immediately
             statsEl.style.display = 'grid';
             selectorEl.style.display = 'block';
+            
+            // Load and display summary table with all years' data
+            loadReblockSummaryTable();
             
             // Set selected year filter
             const yearSelect = document.getElementById('reblock-year-filter');
@@ -11367,6 +11980,281 @@ async function copyChartToClipboard(containerId, buttonId) {
         URL.revokeObjectURL(url);
     }
     
+    async function loadReblockSummaryTable() {
+        const container = document.getElementById('reblock-summary-table-container');
+        const tbody = document.getElementById('reblock-summary-table-body');
+        
+        if (!container || !tbody) return;
+        
+        try {
+            // Load data from all years
+            const years = ['2020', '2021', '2022', '2023', '2024', '2025', '2026'];
+            const allHighwaysData = [];
+            
+            // Fetch data from all years in parallel
+            const promises = years.map(year => 
+                fetch(`/api/budget/reblocking-analysis?year=${year}`)
+                    .then(res => res.json())
+                    .then(data => ({ year, data }))
+                    .catch(err => {
+                        console.warn(`Failed to load data for year ${year}:`, err);
+                        return { year, data: null };
+                    })
+            );
+            
+            const results = await Promise.all(promises);
+            
+            // Collect all highways with their year
+            results.forEach(({ year, data }) => {
+                if (data && data.success && data.highways) {
+                    data.highways.forEach(highway => {
+                        // Calculate anomalies from segments
+                        const flaggedSegments = (highway.segments || []).filter(s => s.is_anomaly === true);
+                        const anomalies = flaggedSegments.length;
+                        
+                        // Calculate flagged amount and distance
+                        const flaggedAmount = flaggedSegments.reduce((sum, s) => sum + (s.amount || 0), 0);
+                        const flaggedDistance = flaggedSegments.reduce((sum, s) => sum + (s.distance_km || 0), 0);
+                        
+                        allHighwaysData.push({
+                            year: year,
+                            highway: highway.highway,
+                            segments: highway.total_segments || 0,
+                            amount: highway.total_amount || 0,
+                            distance: highway.total_distance_km || 0,
+                            anomalies: anomalies,
+                            flaggedAmount: flaggedAmount,
+                            flaggedDistance: flaggedDistance
+                        });
+                    });
+                }
+            });
+            
+            // Calculate totals for percentages (all years)
+            const totalSegments = allHighwaysData.reduce((sum, h) => sum + h.segments, 0);
+            const totalAmount = allHighwaysData.reduce((sum, h) => sum + h.amount, 0);
+            const totalDistance = allHighwaysData.reduce((sum, h) => sum + h.distance, 0);
+            const totalAnomalies = allHighwaysData.reduce((sum, h) => sum + h.anomalies, 0);
+            const totalFlaggedAmount = allHighwaysData.reduce((sum, h) => sum + h.flaggedAmount, 0);
+            const totalFlaggedDistance = allHighwaysData.reduce((sum, h) => sum + h.flaggedDistance, 0);
+            
+            // Calculate totals per year for year-specific percentages
+            const yearTotals = {};
+            allHighwaysData.forEach(h => {
+                if (!yearTotals[h.year]) {
+                    yearTotals[h.year] = {
+                        segments: 0,
+                        amount: 0,
+                        distance: 0,
+                        anomalies: 0,
+                        flaggedAmount: 0,
+                        flaggedDistance: 0
+                    };
+                }
+                yearTotals[h.year].segments += h.segments;
+                yearTotals[h.year].amount += h.amount;
+                yearTotals[h.year].distance += h.distance;
+                yearTotals[h.year].anomalies += h.anomalies;
+                yearTotals[h.year].flaggedAmount += h.flaggedAmount;
+                yearTotals[h.year].flaggedDistance += h.flaggedDistance;
+            });
+            
+            // Sort by year, then by amount (descending)
+            allHighwaysData.sort((a, b) => {
+                if (a.year !== b.year) return a.year.localeCompare(b.year);
+                return b.amount - a.amount;
+            });
+            
+            // Store data for pagination
+            reblockSummaryData = allHighwaysData;
+            reblockSummaryTotals = {
+                totalSegments,
+                totalAmount,
+                totalDistance,
+                totalAnomalies,
+                totalFlaggedAmount,
+                totalFlaggedDistance
+            };
+            reblockSummaryYearTotals = yearTotals;
+            
+            // Render table with pagination
+            renderReblockSummaryTable();
+            
+            // Show table
+            container.style.display = 'block';
+            
+        } catch (error) {
+            console.error('Error loading reblock summary table:', error);
+            if (tbody) {
+                tbody.innerHTML = '<tr><td colspan="14" style="padding: 2rem; text-align: center; color: #dc3545;">Error loading summary data</td></tr>';
+            }
+            container.style.display = 'block';
+        }
+    }
+    
+    function renderReblockSummaryTable() {
+        const tbody = document.getElementById('reblock-summary-table-body');
+        if (!tbody || !reblockSummaryData || reblockSummaryData.length === 0) {
+            if (tbody) {
+                tbody.innerHTML = '<tr><td colspan="14" style="padding: 2rem; text-align: center; color: #666;">No highway data available</td></tr>';
+            }
+            return;
+        }
+        
+        // Calculate pagination
+        const totalItems = reblockSummaryData.length;
+        const totalPages = Math.ceil(totalItems / reblockSummaryItemsPerPage);
+        const page = Math.min(reblockSummaryCurrentPage, Math.max(1, totalPages));
+        
+        const startIndex = (page - 1) * reblockSummaryItemsPerPage;
+        const endIndex = Math.min(startIndex + reblockSummaryItemsPerPage, totalItems);
+        const pageData = reblockSummaryData.slice(startIndex, endIndex);
+        
+        // Clear and populate table
+        tbody.innerHTML = '';
+        
+        const totals = reblockSummaryTotals;
+        const yearTotals = reblockSummaryYearTotals;
+        
+        // Add summary row for "All Years" at the top (always show)
+        // Calculate percentages for "All Years" row
+        const allYearsFlagsPct = totals.totalSegments > 0 ? (totals.totalAnomalies / totals.totalSegments * 100) : 0;
+        const allYearsAmountPct = totals.totalAmount > 0 ? (totals.totalFlaggedAmount / totals.totalAmount * 100) : 0;
+        const allYearsDistancePct = totals.totalDistance > 0 ? (totals.totalFlaggedDistance / totals.totalDistance * 100) : 0;
+        
+        const allYearsSummaryRow = document.createElement('tr');
+        allYearsSummaryRow.style.backgroundColor = '#e7f3ff';
+        allYearsSummaryRow.style.borderBottom = '3px solid #0038A8';
+        allYearsSummaryRow.style.fontWeight = 'bold';
+        allYearsSummaryRow.innerHTML = `
+            <td style="padding: 0.75rem; border: 1px solid #dee2e6; font-weight: 700; color: #0038A8;">All Years</td>
+            <td style="padding: 0.75rem; border: 1px solid #dee2e6; font-weight: 700; color: #0038A8;">Total</td>
+            <td style="padding: 0.75rem; border: 1px solid #dee2e6; text-align: right; font-weight: 700; color: #0038A8;">${totals.totalSegments.toLocaleString()}</td>
+            <td style="padding: 0.75rem; border: 1px solid #dee2e6; text-align: right; font-weight: 700; color: #0038A8;">₱${(totals.totalAmount / 1000000).toFixed(1)}M</td>
+            <td style="padding: 0.75rem; border: 1px solid #dee2e6; text-align: right; font-weight: 700; color: #0038A8;">${totals.totalDistance.toFixed(2)} km</td>
+            <td style="padding: 0.75rem; border: 1px solid #dee2e6; text-align: right; font-weight: 700; color: #dc3545;">${totals.totalAnomalies.toLocaleString()}</td>
+            <td style="padding: 0.75rem; border: 1px solid #dee2e6; text-align: right; font-weight: 700; color: ${allYearsFlagsPct > 20 ? '#dc3545' : '#0038A8'};">${allYearsFlagsPct.toFixed(1)}%</td>
+            <td style="padding: 0.75rem; border: 1px solid #dee2e6; text-align: right; font-weight: 700; color: ${allYearsAmountPct > 20 ? '#dc3545' : '#0038A8'};">${allYearsAmountPct.toFixed(1)}%</td>
+            <td style="padding: 0.75rem; border: 1px solid #dee2e6; text-align: right; font-weight: 700; color: ${allYearsDistancePct > 20 ? '#dc3545' : '#0038A8'};">${allYearsDistancePct.toFixed(1)}%</td>
+            <td style="padding: 0.75rem; border: 1px solid #dee2e6; text-align: right; font-weight: 700; color: #666;">-</td>
+            <td style="padding: 0.75rem; border: 1px solid #dee2e6; text-align: right; font-weight: 700; color: #666;">-</td>
+            <td style="padding: 0.75rem; border: 1px solid #dee2e6; text-align: right; font-weight: 700; color: #666;">-</td>
+            <td style="padding: 0.75rem; border: 1px solid #dee2e6; text-align: right; font-weight: 700; color: #dc3545;">₱${(totals.totalFlaggedAmount / 1000000).toFixed(1)}M</td>
+            <td style="padding: 0.75rem; border: 1px solid #dee2e6; text-align: right; font-weight: 700; color: #dc3545;">${totals.totalFlaggedDistance.toFixed(2)} km</td>
+        `;
+        tbody.appendChild(allYearsSummaryRow);
+        
+        // Add summary rows for each year (only show if on first page)
+        if (page === 1) {
+            const sortedYears = Object.keys(yearTotals).sort();
+            sortedYears.forEach(year => {
+                const yearTotal = yearTotals[year];
+                const yearSummaryRow = document.createElement('tr');
+                yearSummaryRow.style.backgroundColor = '#f8f9fa';
+                yearSummaryRow.style.borderBottom = '2px solid #dee2e6';
+                yearSummaryRow.style.fontWeight = '600';
+                
+                // Percentages against all years total
+                const yearFlagsPctAll = totals.totalAnomalies > 0 ? (yearTotal.anomalies / totals.totalAnomalies * 100) : 0;
+                const yearAmountPctAll = totals.totalAmount > 0 ? (yearTotal.amount / totals.totalAmount * 100) : 0;
+                const yearDistancePctAll = totals.totalDistance > 0 ? (yearTotal.distance / totals.totalDistance * 100) : 0;
+                
+                // Percentages against year total (flagged items / year total)
+                const yearFlagsPctYear = yearTotal.segments > 0 ? (yearTotal.anomalies / yearTotal.segments * 100) : 0;
+                const yearAmountPctYear = yearTotal.amount > 0 ? (yearTotal.flaggedAmount / yearTotal.amount * 100) : 0;
+                const yearDistancePctYear = yearTotal.distance > 0 ? (yearTotal.flaggedDistance / yearTotal.distance * 100) : 0;
+                
+                yearSummaryRow.innerHTML = `
+                    <td style="padding: 0.75rem; border: 1px solid #dee2e6; font-weight: 700; color: #0038A8;">${year}</td>
+                    <td style="padding: 0.75rem; border: 1px solid #dee2e6; font-weight: 700; color: #0038A8;">Year Total</td>
+                    <td style="padding: 0.75rem; border: 1px solid #dee2e6; text-align: right; font-weight: 700; color: #0038A8;">${yearTotal.segments.toLocaleString()}</td>
+                    <td style="padding: 0.75rem; border: 1px solid #dee2e6; text-align: right; font-weight: 700; color: #0038A8;">₱${(yearTotal.amount / 1000000).toFixed(1)}M</td>
+                    <td style="padding: 0.75rem; border: 1px solid #dee2e6; text-align: right; font-weight: 700; color: #0038A8;">${yearTotal.distance.toFixed(2)} km</td>
+                    <td style="padding: 0.75rem; border: 1px solid #dee2e6; text-align: right; font-weight: 700; color: #dc3545;">${yearTotal.anomalies.toLocaleString()}</td>
+                    <td style="padding: 0.75rem; border: 1px solid #dee2e6; text-align: right; font-weight: 700; color: ${yearFlagsPctAll > 20 ? '#dc3545' : '#0038A8'};">${yearFlagsPctAll.toFixed(1)}%</td>
+                    <td style="padding: 0.75rem; border: 1px solid #dee2e6; text-align: right; font-weight: 700; color: ${yearAmountPctAll > 20 ? '#dc3545' : '#0038A8'};">${yearAmountPctAll.toFixed(1)}%</td>
+                    <td style="padding: 0.75rem; border: 1px solid #dee2e6; text-align: right; font-weight: 700; color: ${yearDistancePctAll > 20 ? '#dc3545' : '#0038A8'};">${yearDistancePctAll.toFixed(1)}%</td>
+                    <td style="padding: 0.75rem; border: 1px solid #dee2e6; text-align: right; font-weight: 700; color: ${yearFlagsPctYear > 20 ? '#dc3545' : '#0038A8'};">${yearFlagsPctYear.toFixed(1)}%</td>
+                    <td style="padding: 0.75rem; border: 1px solid #dee2e6; text-align: right; font-weight: 700; color: ${yearAmountPctYear > 20 ? '#dc3545' : '#0038A8'};">${yearAmountPctYear.toFixed(1)}%</td>
+                    <td style="padding: 0.75rem; border: 1px solid #dee2e6; text-align: right; font-weight: 700; color: ${yearDistancePctYear > 20 ? '#dc3545' : '#0038A8'};">${yearDistancePctYear.toFixed(1)}%</td>
+                    <td style="padding: 0.75rem; border: 1px solid #dee2e6; text-align: right; font-weight: 700; color: #dc3545;">₱${(yearTotal.flaggedAmount / 1000000).toFixed(1)}M</td>
+                    <td style="padding: 0.75rem; border: 1px solid #dee2e6; text-align: right; font-weight: 700; color: #dc3545;">${yearTotal.flaggedDistance.toFixed(2)} km</td>
+                `;
+                tbody.appendChild(yearSummaryRow);
+            });
+        }
+        
+        // Add individual highway rows (paginated)
+        pageData.forEach((h, index) => {
+            const row = document.createElement('tr');
+            row.style.borderBottom = '1px solid #eee';
+            if (index % 2 === 0) {
+                row.style.backgroundColor = '#f8f9fa';
+            }
+            
+            // Percentages against all years total
+            const flagsPctAll = totals.totalAnomalies > 0 ? (h.anomalies / totals.totalAnomalies * 100) : 0;
+            const amountPctAll = totals.totalAmount > 0 ? (h.amount / totals.totalAmount * 100) : 0;
+            const distancePctAll = totals.totalDistance > 0 ? (h.distance / totals.totalDistance * 100) : 0;
+            
+            // Percentages against year total
+            const yearTotal = yearTotals[h.year];
+            const flagsPctYear = yearTotal && yearTotal.anomalies > 0 ? (h.anomalies / yearTotal.anomalies * 100) : 0;
+            const amountPctYear = yearTotal && yearTotal.amount > 0 ? (h.amount / yearTotal.amount * 100) : 0;
+            const distancePctYear = yearTotal && yearTotal.distance > 0 ? (h.distance / yearTotal.distance * 100) : 0;
+            
+            row.innerHTML = `
+                <td style="padding: 0.75rem; border: 1px solid #dee2e6; font-weight: 600; color: #0038A8;">${h.year}</td>
+                <td style="padding: 0.75rem; border: 1px solid #dee2e6; font-weight: 600;">${escapeHtml(h.highway)}</td>
+                <td style="padding: 0.75rem; border: 1px solid #dee2e6; text-align: right;">${h.segments.toLocaleString()}</td>
+                <td style="padding: 0.75rem; border: 1px solid #dee2e6; text-align: right; font-weight: 600;">₱${(h.amount / 1000000).toFixed(1)}M</td>
+                <td style="padding: 0.75rem; border: 1px solid #dee2e6; text-align: right;">${h.distance.toFixed(2)} km</td>
+                <td style="padding: 0.75rem; border: 1px solid #dee2e6; text-align: right; color: ${h.anomalies > 0 ? '#dc3545' : '#28a745'}; font-weight: ${h.anomalies > 0 ? '600' : 'normal'};">${h.anomalies.toLocaleString()}</td>
+                <td style="padding: 0.75rem; border: 1px solid #dee2e6; text-align: right; color: ${flagsPctAll > 10 ? '#dc3545' : '#666'};">${flagsPctAll.toFixed(1)}%</td>
+                <td style="padding: 0.75rem; border: 1px solid #dee2e6; text-align: right; color: ${amountPctAll > 10 ? '#dc3545' : '#666'};">${amountPctAll.toFixed(1)}%</td>
+                <td style="padding: 0.75rem; border: 1px solid #dee2e6; text-align: right; color: ${distancePctAll > 10 ? '#dc3545' : '#666'};">${distancePctAll.toFixed(1)}%</td>
+                <td style="padding: 0.75rem; border: 1px solid #dee2e6; text-align: right; color: ${flagsPctYear > 10 ? '#dc3545' : '#666'}; font-weight: ${flagsPctYear > 10 ? '600' : 'normal'};">${flagsPctYear.toFixed(1)}%</td>
+                <td style="padding: 0.75rem; border: 1px solid #dee2e6; text-align: right; color: ${amountPctYear > 10 ? '#dc3545' : '#666'}; font-weight: ${amountPctYear > 10 ? '600' : 'normal'};">${amountPctYear.toFixed(1)}%</td>
+                <td style="padding: 0.75rem; border: 1px solid #dee2e6; text-align: right; color: ${distancePctYear > 10 ? '#dc3545' : '#666'}; font-weight: ${distancePctYear > 10 ? '600' : 'normal'};">${distancePctYear.toFixed(1)}%</td>
+                <td style="padding: 0.75rem; border: 1px solid #dee2e6; text-align: right; color: ${h.flaggedAmount > 0 ? '#dc3545' : '#666'}; font-weight: ${h.flaggedAmount > 0 ? '600' : 'normal'};">₱${(h.flaggedAmount / 1000000).toFixed(1)}M</td>
+                <td style="padding: 0.75rem; border: 1px solid #dee2e6; text-align: right; color: ${h.flaggedDistance > 0 ? '#dc3545' : '#666'}; font-weight: ${h.flaggedDistance > 0 ? '600' : 'normal'};">${h.flaggedDistance.toFixed(2)} km</td>
+            `;
+            tbody.appendChild(row);
+        });
+        
+        // Update pagination controls
+        const pageStartEl = document.getElementById('reblock-summary-page-start');
+        const pageEndEl = document.getElementById('reblock-summary-page-end');
+        const totalItemsEl = document.getElementById('reblock-summary-total-items');
+        const pageNumberEl = document.getElementById('reblock-summary-page-number');
+        const totalPagesEl = document.getElementById('reblock-summary-total-pages');
+        const prevBtn = document.getElementById('reblock-summary-prev-page');
+        const nextBtn = document.getElementById('reblock-summary-next-page');
+        
+        if (pageStartEl) pageStartEl.textContent = totalItems > 0 ? (startIndex + 1).toLocaleString() : '0';
+        if (pageEndEl) pageEndEl.textContent = endIndex.toLocaleString();
+        if (totalItemsEl) totalItemsEl.textContent = totalItems.toLocaleString();
+        if (pageNumberEl) pageNumberEl.textContent = page;
+        if (totalPagesEl) totalPagesEl.textContent = Math.max(1, totalPages);
+        if (prevBtn) prevBtn.disabled = page <= 1;
+        if (nextBtn) nextBtn.disabled = page >= totalPages;
+    }
+    
+    // Pagination functions for reblock summary table
+    function reblockSummaryChangePage(delta) {
+        reblockSummaryCurrentPage += delta;
+        renderReblockSummaryTable();
+    }
+    
+    function reblockSummaryChangeItemsPerPage() {
+        const selectEl = document.getElementById('reblock-summary-items-per-page');
+        if (selectEl) {
+            reblockSummaryItemsPerPage = parseInt(selectEl.value) || 50;
+            reblockSummaryCurrentPage = 1; // Reset to first page
+            renderReblockSummaryTable();
+        }
+    }
+    
     function displayReblockingTable() {
         if (!reblockingData) return;
         
@@ -11944,16 +12832,6 @@ async function copyChartToClipboard(containerId, buttonId) {
             });
         }
         
-        const zeroTab = document.querySelector('[data-tab="zero"]');
-        if (zeroTab) {
-            zeroTab.addEventListener('click', () => {
-                const panel = document.getElementById('tab-zero');
-                if (panel && !panel.dataset.loaded) {
-                    loadAntiZeroData();
-                    panel.dataset.loaded = 'true';
-                }
-            });
-        }
     });
     
     // Load budget summary stats
@@ -11969,230 +12847,6 @@ async function copyChartToClipboard(containerId, buttonId) {
             const rangeEl = document.getElementById('budget-range');
             if (rangeEl) rangeEl.textContent = '2017-2025';
         });
-    
-    // Load Anti-zero data
-    async function loadAntiZeroData() {
-        const loadingEl = document.getElementById('zero-loading');
-        const errorEl = document.getElementById('zero-error');
-        const statsEl = document.getElementById('zero-stats');
-        const chartEl = document.getElementById('zero-chart-container');
-        const tableEl = document.getElementById('zero-table-container');
-        const infoEl = document.getElementById('zero-info');
-        
-        try {
-            const response = await fetch('/api/budget/anti-zero-analysis');
-            if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
-            }
-            const data = await response.json();
-            
-            if (!data.success) {
-                throw new Error(data.error || 'Failed to load data');
-            }
-            
-            const summary = data.summary || {};
-            const byPercentage = data.by_percentage || [];
-            const topPatterns = data.top_patterns || [];
-            
-            console.log('✅ Anti-zero data loaded:', {
-                summary,
-                byPercentageCount: byPercentage.length,
-                topPatternsCount: topPatterns.length,
-                dataKeys: Object.keys(data),
-                hasByPercentage: 'by_percentage' in data,
-                hasTopPatterns: 'top_patterns' in data
-            });
-            
-            // Update stats
-            if (document.getElementById('zero-total-matches')) {
-                document.getElementById('zero-total-matches').textContent = (summary.total_matches || 0).toLocaleString();
-            }
-            if (document.getElementById('zero-total-projects')) {
-                document.getElementById('zero-total-projects').textContent = (summary.total_projects || 0).toLocaleString();
-            }
-            if (document.getElementById('zero-percentage')) {
-                document.getElementById('zero-percentage').textContent = (summary.percentage || 0).toFixed(2) + '%';
-            }
-            if (document.getElementById('zero-unique-patterns')) {
-                document.getElementById('zero-unique-patterns').textContent = (summary.unique_patterns || 0).toLocaleString();
-            }
-            
-            // Display chart - X-axis is percentage decrease, Y-axis is number of projects
-            if (byPercentage && byPercentage.length > 0) {
-                console.log('📊 Displaying chart with', byPercentage.length, 'data points');
-                displayAntiZeroChart(byPercentage);
-            } else {
-                console.warn('⚠️ No by_percentage data available for chart');
-                const chartEl = document.getElementById('zero-chart-container');
-                if (chartEl) chartEl.style.display = 'none';
-            }
-            
-            // Display table with top patterns - show all patterns sorted by match count
-            if (topPatterns && topPatterns.length > 0) {
-                console.log('📋 Displaying table with', topPatterns.length, 'patterns');
-                displayAntiZeroTable(topPatterns);
-            } else if (byPercentage && byPercentage.length > 0) {
-                // Fallback: use byPercentage data sorted by match count
-                const sorted = [...byPercentage].sort((a, b) => b.match_count - a.match_count).slice(0, 20);
-                console.log('📋 Using byPercentage data for table:', sorted.length, 'patterns');
-                displayAntiZeroTable(sorted);
-            } else {
-                console.warn('⚠️ No data available for table');
-                const tableEl = document.getElementById('zero-table-container');
-                if (tableEl) {
-                    const tbody = document.getElementById('zero-table-body');
-                    if (tbody) {
-                        tbody.innerHTML = '<tr><td colspan="4" style="padding: 2rem; text-align: center; color: #666;">No data available</td></tr>';
-                    }
-                }
-            }
-            
-            // Hide loading, show content
-            loadingEl.style.display = 'none';
-            statsEl.style.display = 'grid';
-            chartEl.style.display = 'block';
-            tableEl.style.display = 'block';
-            infoEl.style.display = 'block';
-            
-        } catch (error) {
-            console.error('Error loading anti-zero data:', error);
-            loadingEl.style.display = 'none';
-            errorEl.textContent = `Error: ${error.message}`;
-            errorEl.style.display = 'block';
-        }
-    }
-    
-    function displayAntiZeroChart(data) {
-        const ctx = document.getElementById('zero-chart');
-        if (!ctx || typeof Chart === 'undefined') {
-            console.error('Chart.js not available');
-            return;
-        }
-        
-        // Destroy existing chart if any
-        if (window.antiZeroChart) {
-            window.antiZeroChart.destroy();
-        }
-        
-        // X-axis: Percentage decrease, Y-axis: Number of projects
-        const labels = data.map(d => d.decrease_percentage.toFixed(4) + '%');
-        const matchCounts = data.map(d => d.match_count);
-        
-        window.antiZeroChart = new Chart(ctx, {
-            type: 'bar',
-            data: {
-                labels: labels,
-                datasets: [{
-                    label: 'Number of Projects',
-                    data: matchCounts,
-                    backgroundColor: 'rgba(220, 53, 69, 0.7)',
-                    borderColor: 'rgba(220, 53, 69, 1)',
-                    borderWidth: 1
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: true,
-                plugins: {
-                    legend: {
-                        display: true,
-                        position: 'top'
-                    },
-                    title: {
-                        display: false
-                    },
-                    tooltip: {
-                        callbacks: {
-                            label: function(context) {
-                                const index = context.dataIndex;
-                                const item = data[index];
-                                return [
-                                    `Fixed Decrease: ${item.decrease_percentage.toFixed(4)}%`,
-                                    `Number of Projects: ${item.match_count.toLocaleString()}`
-                                ];
-                            }
-                        }
-                    }
-                },
-                scales: {
-                    x: {
-                        ticks: {
-                            maxRotation: 90,
-                            minRotation: 90,
-                            font: { size: 9 },
-                            callback: function(value, index) {
-                                // Show every Nth label to avoid crowding
-                                const step = Math.max(1, Math.floor(data.length / 20));
-                                if (index % step === 0 || index === data.length - 1) {
-                                    return data[index].decrease_percentage.toFixed(2) + '%';
-                                }
-                                return '';
-                            }
-                        },
-                        title: {
-                            display: true,
-                            text: 'Percentage Decrease (Column O to Column S)',
-                            font: { size: 13, weight: 'bold' }
-                        }
-                    },
-                    y: {
-                        beginAtZero: true,
-                        ticks: {
-                            callback: function(value) {
-                                return value.toLocaleString();
-                            }
-                        },
-                        title: {
-                            display: true,
-                            text: 'Number of Projects',
-                            font: { size: 13, weight: 'bold' }
-                        }
-                    }
-                }
-            }
-        });
-    }
-    
-    function displayAntiZeroTable(data) {
-        const tbody = document.getElementById('zero-table-body');
-        tbody.innerHTML = '';
-        
-        if (!data || data.length === 0) {
-            tbody.innerHTML = '<tr><td colspan="3" style="padding: 2rem; text-align: center; color: #666;">No data available</td></tr>';
-            return;
-        }
-        
-        const totalProjects = parseInt(document.getElementById('zero-total-projects').textContent.replace(/,/g, '')) || 1;
-        
-        data.forEach((item, index) => {
-            const row = document.createElement('tr');
-            row.style.borderBottom = '1px solid #eee';
-            if (index % 2 === 0) {
-                row.style.backgroundColor = '#f8f9fa';
-            }
-            
-            const pctOfTotal = (item.match_count / totalProjects * 100);
-            
-            row.innerHTML = `
-                <td style="padding: 1rem; text-align: right; font-weight: bold;">${index + 1}</td>
-                <td style="padding: 1rem; text-align: right; font-weight: bold; color: #dc3545; font-size: 1.1em;">${item.decrease_percentage.toFixed(4)}%</td>
-                <td style="padding: 1rem; text-align: right; font-weight: bold; color: #dc3545; font-size: 1.1em;">${item.match_count.toLocaleString()}</td>
-            `;
-            tbody.appendChild(row);
-        });
-        
-        // Add search functionality
-        const searchEl = document.getElementById('zero-search');
-        if (searchEl) {
-            searchEl.addEventListener('input', (e) => {
-                const searchTerm = e.target.value.toLowerCase();
-                Array.from(tbody.children).forEach(row => {
-                    const text = row.textContent.toLowerCase();
-                    row.style.display = text.includes(searchTerm) ? '' : 'none';
-                });
-            });
-        }
-    }
     
     // Download functions for repeated projects
     function downloadResurrectedCSV() {
@@ -12301,6 +12955,57 @@ async function copyChartToClipboard(containerId, buttonId) {
             return '"' + s.replace(/"/g, '""') + '"';
         }
         return s;
+    }
+    
+    function downloadRegionsCSV() {
+        if (!window.regionsChartData || !window.regionsChartData.years || !window.regionsChartData.regionData) {
+            alert('No data available to download. Please wait for the chart to load.');
+            return;
+        }
+        
+        const { years, regionData, rawYearlyData } = window.regionsChartData;
+        const rows = [];
+        
+        // Get all region IDs and sort them
+        const regionIds = Object.keys(regionData).sort((a, b) => parseInt(a) - parseInt(b));
+        const regionNames = regionIds.map(id => regionData[id].name);
+        
+        // Header row
+        rows.push(['Year', ...regionNames].join(','));
+        
+        // Data rows - one per year, using raw data for exact values
+        years.forEach((year) => {
+            const row = [year.toString()];
+            const yearData = rawYearlyData[year] || [];
+            
+            // Create a map of region ID to amount for this year
+            const yearRegionMap = {};
+            yearData.forEach(region => {
+                // total_amount is in thousands, multiply by 1000 to get exact PHP amount
+                yearRegionMap[region.uacs_reg_id] = (region.total_amount || 0) * 1000;
+            });
+            
+            // Add data for each region (use exact value from raw data, or 0 if not present)
+            regionIds.forEach(regionId => {
+                const exactAmount = yearRegionMap[regionId] || 0;
+                row.push(exactAmount.toFixed(2)); // Exact budget amount in PHP
+            });
+            rows.push(row.join(','));
+        });
+        
+        // Create CSV content
+        const csvContent = rows.join('\n');
+        
+        // Create blob and download
+        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+        const link = document.createElement('a');
+        const url = URL.createObjectURL(blob);
+        link.setAttribute('href', url);
+        link.setAttribute('download', `budget_by_region_over_time_${new Date().toISOString().split('T')[0]}.csv`);
+        link.style.visibility = 'hidden';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
     }
     </script>
     
