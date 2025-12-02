@@ -9567,6 +9567,7 @@ async function copyChartToClipboard(containerId, buttonId) {
                 const flaggedAmountPct = totalAmount > 0 ? (flaggedAmount / totalAmount * 100) : 0;
                 
                 const flaggedDistance = veryDarkRedSegments.reduce((sum, s) => sum + (s.distance_km || 0), 0);
+                const totalDistance = categorySegments.reduce((sum, s) => sum + (s.distance_km || 0), 0);
                 const flaggedDistancePct = totalDistance > 0 ? (flaggedDistance / totalDistance * 100) : 0;
                 
                 highwayStats.push({

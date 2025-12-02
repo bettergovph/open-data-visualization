@@ -2983,8 +2983,8 @@ async def budget_roads_statistics_all_years_api():
                         project_data['work_type'] = work_type
                     
                     # Separate into national and secondary roads
-                    is_national = _is_national_road(name, distance_km)
-                    if is_national:
+                    is_major = _is_major_road(name, chainage_ranges)
+                    if is_major:
                         projects_2026['national_roads'].append(project_data)
                     else:
                         projects_2026['secondary_roads'].append(project_data)
