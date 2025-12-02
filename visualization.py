@@ -1127,18 +1127,430 @@ async def budget_resurrected_projects_api():
     except Exception as e:
         return JSONResponse({"success": False, "error": str(e)}, status_code=500)
 
-def _is_national_road(name: str, distance_km: float) -> bool:
-    """Determine if a road project is a national road
-    National roads are typically:
-    - Named after regions, provinces, cities, or municipalities
-    - Have "national" in the name
-    - Are longer highways (typically > 1km, often > 5km)
-    - Connect major locations (cross-municipality/city roads)
+def _categorize_road_safety_facilities(name: str, name_lower: str) -> list:
+    """Categorize road safety facilities into subcategories and handle composite projects.
+    Returns a list of subcategories found in the project name.
+    Handles composite projects like "Road Safety Facilities (Pedestrian Overpass, Barrier)" 
+    by counting each component separately.
+    
+    Based on actual data analysis, categories include:
+    - Roadway Lighting (most common: 170 instances)
+    - Pavement Markings (46 instances)
+    - Road Signs (16 instances)
+    - Guardrails (15 instances)
+    - Off-carriageway Improvement (8 instances)
+    - Traffic Signals (3 instances)
+    - Pedestrian Overpass (39 standalone, 1 composite)
+    - Solar LED Streetlights (14 instances)
+    - Barrier (1 instance)
     """
+    import re
+    subcategories = []
+    
+    # Check for composite projects with parentheses
+    # Pattern: "Road Safety Facilities (Item1, Item2, Item3)" or "Installation/Application of Road Safety Facilities (Item1, Item2)"
+    composite_pattern = r'(?:road\s+safety\s+facilities|installation/application\s+of\s+road\s+safety\s+facilities)\s*\(([^)]+)\)'
+    composite_match = re.search(composite_pattern, name_lower)
+    
+    if composite_match:
+        # Split by comma and process each component
+        components = [c.strip() for c in composite_match.group(1).split(',')]
+        for component in components:
+            component_lower = component.lower()
+            
+            # Handle composite components like "Street lights and Road Signs"
+            if ' and ' in component_lower:
+                # Split by "and" and process each part
+                parts = [p.strip() for p in component_lower.split(' and ')]
+                for part in parts:
+                    subcategories.extend(_categorize_single_component(part))
+            else:
+                subcategories.extend(_categorize_single_component(component_lower))
+    else:
+        # Single project - check for keywords in the full name
+        # Check for specific patterns first (more specific to less specific)
+        
+        # Solar LED Streetlights (specific pattern)
+        if 'solar led streetlight' in name_lower or 'solar led street light' in name_lower:
+            subcategories.append('Solar LED Streetlights')
+        # Solar Street Lights
+        elif 'solar street light' in name_lower:
+            subcategories.append('Solar Street Lights')
+        # Roadway Lighting
+        elif 'roadway lighting' in name_lower:
+            subcategories.append('Roadway Lighting')
+        # General lighting
+        elif any(kw in name_lower for kw in ['lighting', 'streetlight', 'street light', 'led']):
+            subcategories.append('Lighting')
+        
+        # Guardrails
+        if 'guardrail' in name_lower:
+            subcategories.append('Guardrails')
+        # Barrier (separate from guardrails)
+        if 'barrier' in name_lower and 'guardrail' not in name_lower:
+            subcategories.append('Barrier')
+        
+        # Traffic Signals (more specific than signs)
+        if 'traffic signal' in name_lower:
+            subcategories.append('Traffic Signals')
+        # Road Signs
+        elif 'road sign' in name_lower or ('sign' in name_lower and 'road' in name_lower and 'signal' not in name_lower):
+            subcategories.append('Road Signs')
+        
+        # Pavement Markings
+        if 'pavement marking' in name_lower or ('marking' in name_lower and 'pavement' in name_lower):
+            subcategories.append('Pavement Markings')
+        
+        # Pedestrian Overpass
+        if 'pedestrian overpass' in name_lower or ('overpass' in name_lower and 'pedestrian' in name_lower):
+            subcategories.append('Pedestrian Overpass')
+        
+        # Off-carriageway Improvement (case-insensitive)
+        if 'off-carriageway improvement' in name_lower or 'off-carriageway improvement' in name_lower:
+            subcategories.append('Off-carriageway Improvement')
+        
+        # If no specific subcategory found, mark as generic
+        if not subcategories:
+            subcategories.append('Road Safety Facilities')
+    
+    # Remove duplicates while preserving order
+    seen = set()
+    unique_subcategories = []
+    for subcat in subcategories:
+        if subcat and subcat not in seen:  # Ensure subcat is not empty/None
+            seen.add(subcat)
+            unique_subcategories.append(subcat)
+    
+    # CRITICAL: Ensure we always return at least one subcategory
+    # This should never happen, but defensive programming
+    if not unique_subcategories:
+        unique_subcategories.append('Road Safety Facilities')
+    
+    return unique_subcategories
+
+def _categorize_single_component(component_lower: str) -> list:
+    """Categorize a single component string into subcategories."""
+    subcategories = []
+    
+    # Solar LED Streetlights (most specific first)
+    if 'solar led streetlight' in component_lower or 'solar led street light' in component_lower:
+        subcategories.append('Solar LED Streetlights')
+    # Solar Street Lights
+    elif 'solar street light' in component_lower:
+        subcategories.append('Solar Street Lights')
+    # Roadway Lighting
+    elif 'roadway lighting' in component_lower:
+        subcategories.append('Roadway Lighting')
+    # General lighting
+    elif any(kw in component_lower for kw in ['lighting', 'streetlight', 'street light', 'led']):
+        subcategories.append('Lighting')
+    
+    # Guardrails
+    if 'guardrail' in component_lower:
+        subcategories.append('Guardrails')
+    # Barrier (separate from guardrails)
+    if 'barrier' in component_lower and 'guardrail' not in component_lower:
+        subcategories.append('Barrier')
+    
+    # Traffic Signals (more specific than signs)
+    if 'traffic signal' in component_lower:
+        subcategories.append('Traffic Signals')
+    # Road Signs
+    elif 'road sign' in component_lower or ('sign' in component_lower and 'road' in component_lower and 'signal' not in component_lower):
+        subcategories.append('Road Signs')
+    
+    # Pavement Markings
+    if 'pavement marking' in component_lower or ('marking' in component_lower and 'pavement' in component_lower):
+        subcategories.append('Pavement Markings')
+    
+    # Pedestrian Overpass
+    if 'pedestrian overpass' in component_lower or ('overpass' in component_lower and 'pedestrian' in component_lower):
+        subcategories.append('Pedestrian Overpass')
+    
+    # Off-carriageway Improvement (case-insensitive)
+    if 'off-carriageway improvement' in component_lower or 'off-carriageway improvement' in component_lower:
+        subcategories.append('Off-carriageway Improvement')
+    
+    # If no match, use the component name as-is (capitalized)
+    if not subcategories:
+        # Capitalize first letter of each word
+        if component_lower.strip():  # Only add if component is not empty
+            subcategories.append(component_lower.title())
+        else:
+            # Fallback if component is empty
+            subcategories.append('Road Safety Facilities')
+    
+    # CRITICAL: Ensure we always return at least one subcategory
+    if not subcategories:
+        subcategories.append('Road Safety Facilities')
+    
+    return subcategories
+
+def _is_new_installation(name: str, name_lower: str) -> bool:
+    """Determine if a road safety facility is a new installation or maintenance/upgrade.
+    Returns True for new installations, False for maintenance/upgrade.
+    """
+    # Keywords indicating maintenance/upgrade
+    maintenance_keywords = [
+        'maintenance', 'rehabilitation', 'repair', 'upgrade', 'upgrading',
+        'improvement', 'replacement', 'rehab', 'restoration', 'renovation'
+    ]
+    
+    # Keywords indicating new installation
+    new_keywords = [
+        'installation', 'install', 'construction', 'construct', 'new',
+        'provision', 'provide', 'establishment', 'establish'
+    ]
+    
+    # Check for maintenance keywords first (more specific)
+    has_maintenance = any(keyword in name_lower for keyword in maintenance_keywords)
+    has_new = any(keyword in name_lower for keyword in new_keywords)
+    
+    # If it has maintenance keywords, it's not new
+    if has_maintenance:
+        return False
+    
+    # If it has new keywords and no maintenance, it's new
+    if has_new:
+        return True
+    
+    # Default: if unclear, assume it's new (installation implies new)
+    return True
+
+def _categorize_road_work_type(name: str, name_lower: str) -> list:
+    """Categorize road work type based on project name.
+    Returns a list of work type categories (can be multiple for composite projects).
+    Returns empty list if no specific category is found.
+    
+    Categories include:
+    - Asphalt Overlay
+    - Concreting
+    - Rehabilitation
+    - Reconstruction
+    - Construction
+    - Improvement
+    - Widening
+    - Preventive Maintenance
+    - Upgrading
+    - Restoration
+    - Resurfacing
+    - Road Reblocking
+    - Drainage
+    - Slope Protection
+    - Bituminous Pavement
+    - Paving
+    """
+    import re
+    
+    work_types = []
+    
+    # Check patterns in order of specificity (most specific first)
+    work_type_patterns = [
+        # Road Reblocking (specific pattern)
+        (r'reblocking|road\s+reblocking', 'Road Reblocking'),
+        
+        # Asphalt Overlay
+        (r'asphalt\s+overlay|item\s+304(?:\s*[-a-z])?|\basphalt\s+overlay\b', 'Asphalt Overlay'),
+        
+        # Concreting
+        (r'concreting\s+of|concrete\s+pavement|pccp|portland\s+cement\s+concrete\s+pavement|item\s+311(?:\s*[-a-z])?', 'Concreting'),
+        
+        # Preventive Maintenance (specific pattern)
+        (r'preventive\s+maintenance|periodic\s+maintenance|routine\s+maintenance', 'Preventive Maintenance'),
+        
+        # Widening
+        (r'widening\s+of|road\s+widening|widening\s+with|widening\s+and|\bwidening\b', 'Widening'),
+        
+        # Rehabilitation
+        (r'rehabilitation\s+of|rehabilitation/|rehabilitation\s+with|\brehabilitation\b', 'Rehabilitation'),
+        
+        # Reconstruction
+        (r'reconstruction\s+of|reconstruction/', 'Reconstruction'),
+        
+        # Construction
+        (r'construction\s+of', 'Construction'),
+        
+        # Improvement
+        (r'improvement\s+of|road\s+improvement', 'Improvement'),
+        
+        # Upgrading
+        (r'upgrading\s+of|upgrading/', 'Upgrading'),
+        
+        # Restoration
+        (r'restoration\s+of', 'Restoration'),
+        
+        # Resurfacing
+        (r'resurfacing', 'Resurfacing'),
+        
+        # Drainage
+        (r'cross\s+drainage|drainage\s+structure|drainage\s+along', 'Drainage'),
+        
+        # Slope Protection
+        (r'slope\s+protection|retaining\s+wall|riprap', 'Slope Protection'),
+        
+        # Bituminous Pavement
+        (r'bituminous\s+pavement|bituminous\s+concrete', 'Bituminous Pavement'),
+        
+        # Paving
+        (r'paving\s+of', 'Paving'),
+    ]
+    
+    # Check all patterns to find multiple work types (for composite projects)
+    for pattern, work_type in work_type_patterns:
+        if re.search(pattern, name_lower, re.IGNORECASE):
+            if work_type not in work_types:  # Avoid duplicates
+                work_types.append(work_type)
+    
+    # Return list of work types (can be empty, single, or multiple)
+    return work_types
+
+def _is_new_construction(work_types: list, name: str, name_lower: str) -> bool:
+    """Determine if a road project is new construction or maintenance/upgrade.
+    Returns True for new construction, False for maintenance/upgrade.
+    
+    Rules:
+    - If no work type is specified, it's automatically new construction
+    - Work types that indicate new construction: Construction, Widening (new), Improvement (new)
+    - Work types that indicate maintenance: Rehabilitation, Reconstruction, Asphalt Overlay,
+      Preventive Maintenance, Road Reblocking, Resurfacing, Restoration, Upgrading, Concreting
+    """
+    # If no work types, it's automatically new construction
+    if not work_types or len(work_types) == 0:
+        return True
+    
+    # Maintenance/upgrade work types (if any of these are present, it's maintenance)
+    maintenance_keywords = [
+        'rehabilitation', 'reconstruction', 'asphalt overlay', 'preventive maintenance',
+        'road reblocking', 'reblocking', 'resurfacing', 'restoration', 'upgrading',
+        'concreting', 'repair', 'maintenance', 'restoration'
+    ]
+    
+    # Check if any work type indicates maintenance
+    for work_type in work_types:
+        work_type_lower = work_type.lower() if work_type else ''
+        if any(keyword in work_type_lower for keyword in maintenance_keywords):
+            return False
+    
+    # Check name for additional maintenance indicators
+    maintenance_name_patterns = [
+        r'rehabilitation', r'reconstruction', r'asphalt\s+overlay', r'preventive\s+maintenance',
+        r'reblocking', r'resurfacing', r'restoration', r'upgrading', r'repair', r'maintenance'
+    ]
+    import re
+    for pattern in maintenance_name_patterns:
+        if re.search(pattern, name_lower, re.IGNORECASE):
+            return False
+    
+    # If no maintenance indicators found, assume new construction
+    # (Construction, Widening, Improvement without maintenance context)
+    return True
+
+def _is_major_road(name: str, chainage_ranges: list) -> bool:
+    """Determine if a road project is a major road (formerly "national road")
+    Classification rules (in order):
+    1. Highways (highway, hiway, hi-way) are automatically major roads
+    2. Anything with "-" (dash) indicates cross-province or cross-municipality, so major road
+    3. Any province, municipality, city named roads are major roads
+    4. Any region named roads are major roads
+    5. Those who can't be classified as major road is a minor road
+    
+    NO distance or segments logic is used.
+    """
+    if not name:
+        return False
+    
+    name_lower = name.lower()
+    
+    # Rule 1: Highways are automatically major roads
+    if any(term in name_lower for term in ['highway', 'hiway', 'hi-way']):
+        return True
+    
+    # Rule 2: Anything with "-" (dash) indicates cross-province or cross-municipality
+    # Extract road name part (before chainage notation)
+    import re
+    road_name_part = re.split(r'\s*-\s*k\d+|chainage', name_lower, maxsplit=1, flags=re.IGNORECASE)[0]
+    
+    # Check for dash/hyphen pattern (but exclude chainage notation)
+    # Pattern: Location1-Location2 (min 3 chars each side, not just numbers)
+    dash_pattern = r'([a-záéíóúñ\s]{3,})[\s]*[-–—][\s]*([a-záéíóúñ\s]{3,})'
+    matches = re.finditer(dash_pattern, road_name_part)
+    for match in matches:
+        part1 = match.group(1).strip()
+        part2 = match.group(2).strip()
+        
+        # Skip if either looks like a number or chainage notation
+        if re.match(r'^[\d\s\+\-\(\)]+$', part1) or re.match(r'^[\d\s\+\-\(\)]+$', part2):
+            continue
+        
+        # Remove common road terms
+        part1 = re.sub(r'\s+(road|highway|national|rd|hway|hiway|jct|junction)\s*$', '', part1).strip()
+        part2 = re.sub(r'\s+(road|highway|national|rd|hway|hiway|jct|junction)\s*$', '', part2).strip()
+        
+        # If both parts are at least 3 chars, it's likely cross-province/municipality
+        if len(part1) >= 3 and len(part2) >= 3:
+            return True
+    
+    # Rule 3 & 4: Check for province, municipality, city, or region names
+    # Load comprehensive list of Philippine provinces, regions, cities, and municipalities
+    philippine_provinces = [
+        'abra', 'agusan del norte', 'agusan del sur', 'aklan', 'albay', 'antique', 'apayao', 'aurora',
+        'basilan', 'bataan', 'batanes', 'batangas', 'benguet', 'biliran', 'bohol', 'bukidnon',
+        'bulacan', 'cagayan', 'camarines norte', 'camarines sur', 'camiguin', 'capiz', 'catanduanes',
+        'cavite', 'cebu', 'compostela valley', 'cotabato', 'davao del norte', 'davao del sur',
+        'davao occidental', 'davao oriental', 'dinagat islands', 'eastern samar', 'guimaras',
+        'ifugao', 'ilocos norte', 'ilocos sur', 'iloilo', 'isabela', 'kalinga', 'la union',
+        'laguna', 'lanao del norte', 'lanao del sur', 'leyte', 'maguindanao', 'marinduque',
+        'masbate', 'misamis occidental', 'misamis oriental', 'mountain province',
+        'negros occidental', 'negros oriental', 'northern samar',
+        'nueva ecija', 'nueva vizcaya', 'occidental mindoro', 'oriental mindoro', 'palawan',
+        'pampanga', 'pangasinan', 'quezon', 'quirino', 'rizal', 'romblon', 'samar', 'sarangani',
+        'siquijor', 'sorsogon', 'south cotabato', 'southern leyte', 'sultan kudarat', 'sulu',
+        'surigao del norte', 'surigao del sur', 'tarlac', 'tawi-tawi', 'zambales',
+        'zamboanga del norte', 'zamboanga del sur', 'zamboanga sibugay'
+    ]
+    
+    philippine_regions = [
+        'region i', 'region ii', 'region iii', 'region iv-a', 'region iv-b', 'region v',
+        'region vi', 'region vii', 'region viii', 'region ix', 'region x', 'region xi',
+        'region xii', 'region xiii', 'ncr', 'national capital region', 'cordillera',
+        'car', 'bicol', 'cagayan valley', 'central luzon', 'calabarzon', 'mimaropa',
+        'western visayas', 'central visayas', 'eastern visayas', 'zamboanga peninsula',
+        'northern mindanao', 'davao', 'soccsksargen', 'caraga', 'bangsamoro', 'armm'
+    ]
+    
+    # Major cities (partial list - can be expanded)
+    major_cities = [
+        'manila', 'cebu', 'davao', 'iloilo', 'baguio', 'quezon city', 'caloocan',
+        'las piñas', 'makati', 'malabon', 'mandaluyong', 'marikina', 'muntinlupa',
+        'navotas', 'parañaque', 'pasay', 'pasig', 'san juan', 'taguig', 'valenzuela',
+        'bacoor', 'dasmarinas', 'dasmariñas', 'calamba', 'san pedro', 'biñan',
+        'santa rosa', 'cabuyao', 'los baños', 'tacloban', 'ormoc', 'dumaguete',
+        'bacolod', 'san carlos', 'silay', 'talisay', 'victorias', 'cadiz', 'roxas'
+    ]
+    
+    # Check if road name contains province, region, or major city name
+    for province in philippine_provinces:
+        if province in name_lower:
+            return True
+    
+    for region in philippine_regions:
+        if region in name_lower:
+            return True
+    
+    for city in major_cities:
+        if city in name_lower:
+            return True
+    
+    # Rule 5: If none of the above match, it's a minor road
+    return False
     name_lower = name.lower()
     
     # Check for explicit "national" keyword
     if 'national' in name_lower:
+        return True
+    
+    # Check for "highway" keyword - almost always indicates national road
+    if 'highway' in name_lower:
         return True
     
     # Common Philippine provinces, cities, and regions (partial list - can be expanded)
@@ -1171,31 +1583,47 @@ def _is_national_road(name: str, distance_km: float) -> bool:
         'roxas', 'toledo', 'infanta', 'dumaguete', 'north'
     ]
     
-    # Check for cross-municipality/city roads (e.g., "Bacoor-Dasmariñas", "City1 to City2", "City1–City2")
+    # Check for cross-municipality/city/province roads (e.g., "Bacoor-Dasmariñas", "Pangasinan-Tarlac", "City1 to City2")
     # These are almost always national roads
     import re
+    
+    # Extract the road name part (before chainage notation)
+    # Chainage typically starts with "K" or "Chainage", so split there
+    road_name_part = re.split(r'\s*-\s*k\d+|chainage', name_lower, maxsplit=1, flags=re.IGNORECASE)[0]
+    
     # Pattern: City1-City2, City1–City2 (en dash), City1 to City2, City1/City2
+    # But exclude matches that are just numbers or chainage notation
     cross_municipality_patterns = [
-        r'([a-záéíóúñ\s]+)[\s]*[-–—][\s]*([a-záéíóúñ\s]+)',  # hyphen, en dash, em dash
-        r'([a-záéíóúñ\s]+)[\s]+to[\s]+([a-záéíóúñ\s]+)',  # "to" separator
-        r'([a-záéíóúñ\s]+)[\s]*/[\s]*([a-záéíóúñ\s]+)',  # slash separator
+        r'([a-záéíóúñ\s]{3,})[\s]*[-–—][\s]*([a-záéíóúñ\s]{3,})',  # hyphen, en dash, em dash (min 3 chars each)
+        r'([a-záéíóúñ\s]{3,})[\s]+to[\s]+([a-záéíóúñ\s]{3,})',  # "to" separator (min 3 chars each)
+        r'([a-záéíóúñ\s]{3,})[\s]*/[\s]*([a-záéíóúñ\s]{3,})',  # slash separator (min 3 chars each)
     ]
     
     for pattern in cross_municipality_patterns:
-        matches = re.finditer(pattern, name_lower)
+        matches = re.finditer(pattern, road_name_part)
         for match in matches:
             city1 = match.group(1).strip()
             city2 = match.group(2).strip()
-            # Remove common road terms that might be in the name
-            city1 = re.sub(r'\s+(road|highway|national|rd|hway|hiway)\s*$', '', city1).strip()
-            city2 = re.sub(r'\s+(road|highway|national|rd|hway|hiway)\s*$', '', city2).strip()
             
-            # Check if both cities are in major locations
+            # Skip if either looks like a number or chainage notation
+            if re.match(r'^[\d\s\+\-\(\)]+$', city1) or re.match(r'^[\d\s\+\-\(\)]+$', city2):
+                continue
+            
+            # Remove common road terms that might be in the name
+            city1 = re.sub(r'\s+(road|highway|national|rd|hway|hiway|jct|junction)\s*$', '', city1).strip()
+            city2 = re.sub(r'\s+(road|highway|national|rd|hway|hiway|jct|junction)\s*$', '', city2).strip()
+            
+            # Skip if too short after cleaning
+            if len(city1) < 3 or len(city2) < 3:
+                continue
+            
+            # Check if both cities/provinces are in major locations
             city1_match = any(loc in city1 or city1 in loc for loc in major_locations)
             city2_match = any(loc in city2 or city2 in loc for loc in major_locations)
             
+            # If both match major locations, it's a cross-province/municipality road = national road
             if city1_match and city2_match:
-                return True  # Cross-municipality road = national road
+                return True  # Cross-province/municipality road = national road
     
     # Check if name contains major location names (indicating inter-city/province roads)
     contains_major_location = any(loc in name_lower for loc in major_locations)
@@ -1228,6 +1656,96 @@ def _is_national_road(name: str, distance_km: float) -> bool:
 async def budget_roads_cost_analysis_api(year: str = Query("2026", description="Year to filter by (2020-2026)")):
     """Get road infrastructure projects (roads, bridges, traffic signs, etc.) with chainage, calculate distance and cost per km from budget amendments data"""
     try:
+        # For 2026: Check for pre-generated cache first
+        if year == "2026":
+            cache_file = Path(__file__).parent / "static" / "data" / "api_cache" / "roads_cost_analysis_cache.json"
+            if cache_file.exists():
+                try:
+                    with open(cache_file, 'r', encoding='utf-8') as f:
+                        cache_data = json.load(f)
+                    if cache_data.get('success'):
+                        print(f"✅ [/api/budget/roads-cost-analysis] Using cached data from {cache_file.name} for year {year}")
+                        return JSONResponse(cache_data)
+                except Exception as cache_err:
+                    print(f"⚠️ [/api/budget/roads-cost-analysis] Error reading cache, falling back to processing: {cache_err}")
+        
+        # For historical years (2020-2025): Load from historical_roads_2020_2025.json
+        if year in ['2020', '2021', '2022', '2023', '2024', '2025']:
+            historical_file = Path(__file__).parent / "static" / "data" / "historical_roads_2020_2025.json"
+            if historical_file.exists():
+                try:
+                    with open(historical_file, 'r', encoding='utf-8') as f:
+                        historical_data = json.load(f)
+                    
+                    year_data = historical_data.get('data', {}).get(year)
+                    if year_data:
+                        # Format the response to match the 2026 cache structure
+                        # 2026 cache has: { "national_roads": { "projects": [...], "total": ..., "statistics": {...} } }
+                        national_roads_list = year_data.get('national_roads', [])
+                        secondary_roads_list = year_data.get('secondary_roads', [])
+                        bridges_list = year_data.get('bridges', [])
+                        traffic_signs_list = year_data.get('traffic_signs', [])
+                        nia_list = year_data.get('nia', [])
+                        fmr_list = year_data.get('fmr', [])
+                        
+                        # Calculate totals and basic statistics
+                        def calculate_basic_stats(projects):
+                            total = len(projects)
+                            total_distance = sum(p.get('distance_km', 0) for p in projects)
+                            total_amount = sum(p.get('amount', 0) for p in projects)
+                            avg_cost_km = total_amount / total_distance if total_distance > 0 else 0
+                            return {
+                                "total": total,
+                                "total_distance_km": total_distance,
+                                "total_amount": total_amount,
+                                "avg_cost_per_km": avg_cost_km
+                            }
+                        
+                        response_data = {
+                            "success": True,
+                            "year": year,
+                            "national_roads": {
+                                "projects": national_roads_list,
+                                **calculate_basic_stats(national_roads_list)
+                            },
+                            "secondary_roads": {
+                                "projects": secondary_roads_list,
+                                **calculate_basic_stats(secondary_roads_list)
+                            },
+                            "bridges": {
+                                "projects": bridges_list,
+                                **calculate_basic_stats(bridges_list)
+                            },
+                            "traffic_signs": {
+                                "projects": traffic_signs_list,
+                                **calculate_basic_stats(traffic_signs_list)
+                            },
+                            "nia": {
+                                "projects": nia_list,
+                                **calculate_basic_stats(nia_list)
+                            },
+                            "fmr": {
+                                "projects": fmr_list,
+                                **calculate_basic_stats(fmr_list)
+                            },
+                            "subcategory_statistics": {
+                                "national_roads": year_data.get('national_roads_work_type_statistics', {}),
+                                "secondary_roads": year_data.get('secondary_roads_work_type_statistics', {}),
+                                "traffic_signs": year_data.get('traffic_signs_subcategory_statistics', {}),
+                                "bridges": year_data.get('bridges_statistics', {})
+                            }
+                        }
+                        print(f"✅ [/api/budget/roads-cost-analysis] Loaded historical data for year {year}")
+                        return JSONResponse(response_data)
+                    else:
+                        return JSONResponse({"success": False, "error": f"Year {year} data not found in historical file"}, status_code=404)
+                except Exception as hist_err:
+                    print(f"⚠️ [/api/budget/roads-cost-analysis] Error reading historical file: {hist_err}")
+                    return JSONResponse({"success": False, "error": f"Error loading historical data: {str(hist_err)}"}, status_code=500)
+            else:
+                return JSONResponse({"success": False, "error": f"Historical roads data file not found"}, status_code=404)
+        
+        # For 2026 (fallback if cache doesn't exist) or other years: process from budget_amendments
         import re
         from difflib import SequenceMatcher
         
@@ -1331,6 +1849,8 @@ async def budget_roads_cost_analysis_api(year: str = Query("2026", description="
         secondary_road_projects = []
         bridge_projects = []
         traffic_signs_projects = []
+        nia_projects = []  # National Irrigation Administration projects with chainage
+        fmr_projects = []  # Farm-to-Market Road projects with chainage
         
         for item in all_items:
             name = item.get('name', '') or item.get('description', '')
@@ -1371,10 +1891,41 @@ async def budget_roads_cost_analysis_api(year: str = Query("2026", description="
             # Categorize projects
             name_lower = name.lower()
             
-            # Traffic signs/lights: road safety facilities, installations, guardrails
-            # Includes: installation, road safety, guardrail, traffic facilities
-            traffic_keywords = ['installation', 'road safety', 'guardrail', 'traffic facilities', 'traffic facility']
-            is_traffic = any(keyword in name_lower for keyword in traffic_keywords)
+            # Check for FMR (Farm-to-Market Road) projects first - Annex A-1
+            # FMR projects typically have "FMR" in the name or "farm to market" / "farm-to-market"
+            fmr_keywords = [' fmr', 'fmr ', 'farm to market', 'farm-to-market', 'farm to market road']
+            # Exclude false positives like "CNIA" (military base) - only match standalone "FMR" or with spaces
+            is_fmr = any(keyword in name_lower for keyword in fmr_keywords) and 'cnia' not in name_lower
+            
+            # Check for NIA (National Irrigation Administration) projects - Annex A-4
+            # NIA projects have "irrigation" keywords but exclude false positives
+            nia_keywords = [
+                'national irrigation', 'irrigation system', 'irrigation project', 
+                'irrigation canal', 'communal irrigation', 'irrigation sub-program',
+                'irrigation subprogram', 'irrigation facility', 'irrigation structure'
+            ]
+            # Exclude false positives: CNIA (military), XDP (medical), etc.
+            is_nia = any(keyword in name_lower for keyword in nia_keywords) and \
+                     'cnia' not in name_lower and \
+                     'xdp' not in name_lower and \
+                     'dystonia' not in name_lower
+            
+            if is_fmr:
+                fmr_projects.append(project_data)
+                continue  # Skip further categorization for FMR
+            elif is_nia:
+                nia_projects.append(project_data)
+                continue  # Skip further categorization for NIA
+            
+            # Road Safety Facilities: installations, guardrails, lighting, signs, markings
+            # Only categorize those WITH chainage (already filtered above)
+            # Includes: installation, road safety, guardrail, traffic facilities, lighting, signs, markings
+            road_safety_keywords = [
+                'installation', 'road safety', 'guardrail', 'traffic facilities', 'traffic facility',
+                'lighting', 'streetlight', 'street light', 'led', 'solar', 'roadway lighting',
+                'road sign', 'pavement marking', 'barrier', 'pedestrian overpass'
+            ]
+            is_road_safety = any(keyword in name_lower for keyword in road_safety_keywords)
             
             # Bridges: projects with bridge-related keywords ONLY (no distance heuristic to avoid false positives)
             # Include: bridge, viaduct, flyover, overpass, underpass, footbridge, pedestrian bridge
@@ -1393,31 +1944,39 @@ async def budget_roads_cost_analysis_api(year: str = Query("2026", description="
             ]
             is_road_term = any(term in name_lower for term in road_terms)
             
-            if is_traffic:
+            if is_road_safety:
+                # Categorize road safety facilities into subcategories
+                subcategories = _categorize_road_safety_facilities(name, name_lower)
+                # Defensive check: ensure subcategories is never empty
+                if not subcategories or len(subcategories) == 0:
+                    subcategories = ['Road Safety Facilities']
+                project_data['road_safety_subcategories'] = subcategories
+                project_data['is_new'] = _is_new_installation(name, name_lower)
                 traffic_signs_projects.append(project_data)
             elif is_bridge:
                 bridge_projects.append(project_data)
             # Roads: separate into national roads and secondary roads
             elif is_road_term or not is_bridge:
-                # Determine if it's a national road
-                is_national_road = _is_national_road(name, distance_km)
+                # Categorize road work type (if found)
+                work_types = _categorize_road_work_type(name, name_lower)
+                if work_types:
+                    # Store as list for composite work types
+                    project_data['work_type'] = work_types[0] if len(work_types) == 1 else work_types
+                    project_data['work_types'] = work_types  # Always store full list
+                else:
+                    project_data['work_type'] = None
+                    project_data['work_types'] = []
                 
-                if is_national_road:
+                # Determine if it's a major road using classification rules
+                is_major_road = _is_major_road(name, chainage_ranges)
+                
+                if is_major_road:
                     national_road_projects.append(project_data)
                 else:
                     secondary_road_projects.append(project_data)
             else:
                 # Fallback - treat as secondary road
                 secondary_road_projects.append(project_data)
-        
-        # Sort each category by cost per km descending
-        national_road_projects.sort(key=lambda x: x['cost_per_km'], reverse=True)
-        secondary_road_projects.sort(key=lambda x: x['cost_per_km'], reverse=True)
-        bridge_projects.sort(key=lambda x: x['cost_per_km'], reverse=True)
-        traffic_signs_projects.sort(key=lambda x: x['cost_per_km'], reverse=True)
-        
-        # Combine all roads for backward compatibility
-        road_projects = national_road_projects + secondary_road_projects
         
         # Calculate statistics for each category
         def calculate_statistics(projects):
@@ -1471,11 +2030,219 @@ async def budget_roads_cost_analysis_api(year: str = Query("2026", description="
                 "count": len(costs)
             }
         
+        # Calculate subcategory-specific statistics and flag projects
+        from collections import defaultdict
+        
+        # Group road safety facilities by subcategory
+        # For composite projects (multiple subcategories), count in ALL subcategories
+        # Use "average of average" approach: divide cost/km by number of components
+        road_safety_by_subcategory = defaultdict(list)
+        for project in traffic_signs_projects:
+            subcategories = project.get('road_safety_subcategories', [])
+            if subcategories:
+                # For composite projects, count in ALL subcategories
+                # Create a copy of project data with adjusted cost/km for statistics
+                num_components = len(subcategories)
+                original_cost_per_km = project.get('cost_per_km', 0)
+                
+                # For each subcategory, add project with cost/km divided by number of components
+                # This represents "average cost per component" (average of average)
+                for subcategory in subcategories:
+                    # Create a copy for this subcategory with adjusted cost/km
+                    project_copy = project.copy()
+                    project_copy['cost_per_km_for_stats'] = original_cost_per_km / num_components if num_components > 0 else original_cost_per_km
+                    project_copy['num_components'] = num_components
+                    project_copy['original_cost_per_km'] = original_cost_per_km
+                    road_safety_by_subcategory[subcategory].append(project_copy)
+            else:
+                # No subcategory - use "Road Safety Facilities" as default
+                project_copy = project.copy()
+                project_copy['cost_per_km_for_stats'] = project.get('cost_per_km', 0)
+                project_copy['num_components'] = 1
+                project_copy['original_cost_per_km'] = project.get('cost_per_km', 0)
+                road_safety_by_subcategory['Road Safety Facilities'].append(project_copy)
+        
+        # Group roads by work type (within national/secondary)
+        # For composite work types, count in ALL work types using "average of average"
+        national_roads_by_work_type = defaultdict(list)
+        secondary_roads_by_work_type = defaultdict(list)
+        
+        for project in national_road_projects:
+            work_types = project.get('work_types', [])
+            if not work_types:
+                # Fallback to single work_type for backward compatibility
+                work_type = project.get('work_type')
+                work_types = [work_type] if work_type else []
+            
+            if work_types:
+                # For composite work types, count in ALL work types
+                num_components = len(work_types)
+                original_cost_per_km = project.get('cost_per_km', 0)
+                
+                for work_type in work_types:
+                    project_copy = project.copy()
+                    project_copy['cost_per_km_for_stats'] = original_cost_per_km / num_components if num_components > 0 else original_cost_per_km
+                    project_copy['num_components'] = num_components
+                    project_copy['original_cost_per_km'] = original_cost_per_km
+                    national_roads_by_work_type[work_type].append(project_copy)
+            else:
+                # No work type - use "Major Road" as default
+                project_copy = project.copy()
+                project_copy['cost_per_km_for_stats'] = project.get('cost_per_km', 0)
+                project_copy['num_components'] = 1
+                project_copy['original_cost_per_km'] = project.get('cost_per_km', 0)
+                national_roads_by_work_type['Major Road'].append(project_copy)
+        
+        for project in secondary_road_projects:
+            work_types = project.get('work_types', [])
+            if not work_types:
+                # Fallback to single work_type for backward compatibility
+                work_type = project.get('work_type')
+                work_types = [work_type] if work_type else []
+            
+            if work_types:
+                # For composite work types, count in ALL work types
+                num_components = len(work_types)
+                original_cost_per_km = project.get('cost_per_km', 0)
+                
+                for work_type in work_types:
+                    project_copy = project.copy()
+                    project_copy['cost_per_km_for_stats'] = original_cost_per_km / num_components if num_components > 0 else original_cost_per_km
+                    project_copy['num_components'] = num_components
+                    project_copy['original_cost_per_km'] = original_cost_per_km
+                    secondary_roads_by_work_type[work_type].append(project_copy)
+            else:
+                # No work type - use "Minor Road" as default
+                project_copy = project.copy()
+                project_copy['cost_per_km_for_stats'] = project.get('cost_per_km', 0)
+                project_copy['num_components'] = 1
+                project_copy['original_cost_per_km'] = project.get('cost_per_km', 0)
+                secondary_roads_by_work_type['Minor Road'].append(project_copy)
+        
+        # Calculate statistics per subcategory/work_type and flag projects
+        def flag_projects_by_subcategory(projects_by_subcategory, category_name):
+            """Calculate subcategory statistics and flag projects that exceed threshold
+            Uses 'average of average' approach for composite projects:
+            - Statistics use cost_per_km_for_stats (divided by number of components)
+            - Flagging uses original_cost_per_km against threshold
+            """
+            subcategory_stats = {}
+            for subcategory, projects in projects_by_subcategory.items():
+                # Use cost_per_km_for_stats for statistics (average of average for composites)
+                stats_costs = [p.get('cost_per_km_for_stats', p.get('cost_per_km', 0)) for p in projects if p.get('cost_per_km_for_stats', p.get('cost_per_km', 0)) > 0]
+                
+                if not stats_costs:
+                    subcategory_stats[subcategory] = {
+                        "min": None, "max": None, "mean": None, "median": None,
+                        "mode": None, "std_dev": None, "count": 0
+                    }
+                    continue
+                
+                import statistics
+                from collections import Counter
+                
+                costs_sorted = sorted(stats_costs)
+                mean = statistics.mean(stats_costs)
+                rounded_costs = [round(c / 1000000) * 1000000 for c in stats_costs]
+                cost_counter = Counter(rounded_costs)
+                mode_value = cost_counter.most_common(1)[0][0] if cost_counter else None
+                try:
+                    std_dev = statistics.stdev(stats_costs) if len(stats_costs) > 1 else 0
+                except:
+                    std_dev = 0
+                
+                # Calculate threshold (mean + 2*std_dev)
+                threshold = None
+                if mean is not None and std_dev is not None:
+                    threshold = mean + (1 * std_dev) if std_dev else None
+                
+                stats = {
+                    "min": min(stats_costs),
+                    "max": max(stats_costs),
+                    "mean": mean,
+                    "median": statistics.median(stats_costs),
+                    "mode": mode_value,
+                    "std_dev": std_dev,
+                    "threshold": threshold,  # Add threshold to stats
+                    "count": len(projects)
+                }
+                subcategory_stats[subcategory] = stats
+                
+                # Flag projects that exceed mean + 2*std_dev (outlier threshold)
+                # Use original_cost_per_km for flagging (not the divided one)
+                
+                for project in projects:
+                    project['subcategory'] = subcategory
+                    project['subcategory_stats'] = stats
+                    # Use original_cost_per_km for flagging comparison
+                    cost_to_check = project.get('original_cost_per_km', project.get('cost_per_km', 0))
+                    if threshold and cost_to_check > threshold:
+                        project['is_flagged'] = True
+                        project['flag_reason'] = f"Cost/km ({cost_to_check:,.2f}) exceeds {subcategory} threshold ({threshold:,.2f})"
+                    else:
+                        project['is_flagged'] = False
+            
+            return subcategory_stats
+        
+        # Flag road safety facilities by subcategory
+        road_safety_subcategory_stats = flag_projects_by_subcategory(road_safety_by_subcategory, 'Road Safety Facilities')
+        
+        # Flag national roads by work type
+        national_roads_work_type_stats = flag_projects_by_subcategory(national_roads_by_work_type, 'National Roads')
+        
+        # Flag secondary roads by work type
+        secondary_roads_work_type_stats = flag_projects_by_subcategory(secondary_roads_by_work_type, 'Secondary Roads')
+        
+        # Merge flagged information back into original projects
+        # Create a lookup map: (name, distance_km) -> flagged_project_copy
+        def merge_flagging_back(original_projects, projects_by_subcategory_dict):
+            """Merge flagging info from copies back into original projects"""
+            flagged_map = {}
+            for subcategory, flagged_projects in projects_by_subcategory_dict.items():
+                for flagged_project in flagged_projects:
+                    # Use name + distance as unique identifier
+                    key = (flagged_project.get('name'), flagged_project.get('distance_km'))
+                    flagged_map[key] = flagged_project
+            
+            # Update original projects with flagging info
+            for project in original_projects:
+                key = (project.get('name'), project.get('distance_km'))
+                if key in flagged_map:
+                    flagged_project = flagged_map[key]
+                    # Merge flagging info, but keep original work_type/work_types
+                    project['subcategory'] = flagged_project.get('subcategory')
+                    project['subcategory_stats'] = flagged_project.get('subcategory_stats')
+                    project['is_flagged'] = flagged_project.get('is_flagged', False)
+                    project['flag_reason'] = flagged_project.get('flag_reason')
+                    # Also ensure work_type/work_types are preserved
+                    if flagged_project.get('work_type'):
+                        project['work_type'] = flagged_project.get('work_type')
+                    if flagged_project.get('work_types'):
+                        project['work_types'] = flagged_project.get('work_types')
+        
+        merge_flagging_back(traffic_signs_projects, road_safety_by_subcategory)
+        merge_flagging_back(national_road_projects, national_roads_by_work_type)
+        merge_flagging_back(secondary_road_projects, secondary_roads_by_work_type)
+        
+        # Sort each category by cost per km descending
+        national_road_projects.sort(key=lambda x: x['cost_per_km'], reverse=True)
+        secondary_road_projects.sort(key=lambda x: x['cost_per_km'], reverse=True)
+        bridge_projects.sort(key=lambda x: x['cost_per_km'], reverse=True)
+        traffic_signs_projects.sort(key=lambda x: x['cost_per_km'], reverse=True)
+        nia_projects.sort(key=lambda x: x['cost_per_km'], reverse=True)
+        fmr_projects.sort(key=lambda x: x['cost_per_km'], reverse=True)
+        
+        # Combine all roads for backward compatibility
+        road_projects = national_road_projects + secondary_road_projects
+        
+        # Calculate overall category statistics
         national_roads_stats = calculate_statistics(national_road_projects)
         secondary_roads_stats = calculate_statistics(secondary_road_projects)
         roads_stats = calculate_statistics(road_projects)  # Combined stats
         bridges_stats = calculate_statistics(bridge_projects)
         traffic_signs_stats = calculate_statistics(traffic_signs_projects)
+        nia_stats = calculate_statistics(nia_projects)
+        fmr_stats = calculate_statistics(fmr_projects)
         
         return JSONResponse({
             "success": True,
@@ -1487,12 +2254,14 @@ async def budget_roads_cost_analysis_api(year: str = Query("2026", description="
             "national_roads": {
                 "projects": national_road_projects,
                 "total": len(national_road_projects),
-                "statistics": national_roads_stats
+                "statistics": national_roads_stats,
+                "subcategory_statistics": national_roads_work_type_stats
             },
             "secondary_roads": {
                 "projects": secondary_road_projects,
                 "total": len(secondary_road_projects),
-                "statistics": secondary_roads_stats
+                "statistics": secondary_roads_stats,
+                "subcategory_statistics": secondary_roads_work_type_stats
             },
             "bridges": {
                 "projects": bridge_projects,
@@ -1502,11 +2271,304 @@ async def budget_roads_cost_analysis_api(year: str = Query("2026", description="
             "traffic_signs": {
                 "projects": traffic_signs_projects,
                 "total": len(traffic_signs_projects),
-                "statistics": traffic_signs_stats
+                "statistics": traffic_signs_stats,
+                "subcategory_statistics": road_safety_subcategory_stats
+            },
+            "nia": {
+                "projects": nia_projects,
+                "total": len(nia_projects),
+                "statistics": nia_stats
+            },
+            "fmr": {
+                "projects": fmr_projects,
+                "total": len(fmr_projects),
+                "statistics": fmr_stats
             }
         })
         
     except Exception as e:
+        return JSONResponse({"success": False, "error": str(e)}, status_code=500)
+
+@app.get("/api/budget/category-statistics")
+async def budget_category_statistics_api(year: str = "2026"):
+    """Get category statistics showing average cost/km and flagged cost per category/subcategory"""
+    try:
+        # Load data using the existing roads cost analysis endpoint logic
+        # We'll reuse the processing logic from budget_roads_cost_analysis_api
+        from pathlib import Path
+        import json
+        from collections import defaultdict
+        import statistics
+        
+        # Handle "all" years - load from pre-computed cache
+        if year.lower() == "all":
+            cache_path = Path(__file__).parent / "static" / "data" / "api_cache" / "roads_cost_analysis_cache.json"
+            
+            if cache_path.exists():
+                with open(cache_path, 'r', encoding='utf-8') as f:
+                    cache_data = json.load(f)
+                
+                # Use pre-computed all_years_category_statistics if available
+                if 'all_years_category_statistics' in cache_data:
+                    return JSONResponse({
+                        "success": True,
+                        "year": "all",
+                        "categories": cache_data['all_years_category_statistics']
+                    })
+            
+            # Fallback: return error if cache doesn't exist
+            return JSONResponse({"success": False, "error": "All years category statistics not found. Please regenerate cache files."}, status_code=404)
+        
+        # Load data based on year
+        if year == "2026":
+            json_path = Path(__file__).parent / "static" / "data" / "budget_amendments_2026.json"
+        else:
+            # For historical years, load from historical_roads_2020_2025.json
+            historical_path = Path(__file__).parent / "static" / "data" / "historical_roads_2020_2025.json"
+            if not historical_path.exists():
+                return JSONResponse({"success": False, "error": f"Historical data not found for year {year}"}, status_code=404)
+            
+            with open(historical_path, 'r', encoding='utf-8') as f:
+                historical_data = json.load(f)
+            
+            year_data = historical_data.get('data', {}).get(year, {})
+            if not year_data:
+                return JSONResponse({"success": False, "error": f"No data found for year {year}"}, status_code=404)
+            
+            # Process historical data to get category statistics
+            categories = []
+            
+            # Bridges
+            bridges = year_data.get('bridges', [])
+            if bridges:
+                bridges_flagged = [p for p in bridges if p.get('is_flagged', False)]
+                bridges_stats_data = year_data.get('bridges_statistics', {})
+                bridges_avg_cost_km = bridges_stats_data.get('mean', 0)
+                # Total cost (amount) of all flagged projects
+                bridges_flagged_cost = sum(p.get('amount', 0) for p in bridges_flagged)
+                
+                # Calculate threshold for bridges (mean + 1*std_dev)
+                bridges_threshold = 0
+                if bridges_stats_data.get('mean') is not None and bridges_stats_data.get('std_dev') is not None:
+                    bridges_threshold = bridges_stats_data['mean'] + (1 * bridges_stats_data['std_dev'])
+                
+                categories.append({
+                    "category": "Bridges",
+                    "subcategory": None,
+                    "average_cost_per_km": bridges_avg_cost_km,
+                    "threshold_cost_per_km": bridges_threshold,  # Cost/km threshold for flagging
+                    "flagged_cost": bridges_flagged_cost,  # Total cost (amount) of all flagged projects
+                    "flagged_count": len(bridges_flagged),
+                    "total_count": len(bridges)
+                })
+            
+            # Road Safety Facilities (subcategories)
+            traffic_signs = year_data.get('traffic_signs', [])
+            subcategory_stats = year_data.get('traffic_signs_subcategory_statistics', {})
+            for subcategory, stats in subcategory_stats.items():
+                # Match projects by subcategory field (set during flagging) or by road_safety_subcategories list
+                subcategory_projects = [
+                    p for p in traffic_signs 
+                    if p.get('subcategory') == subcategory or 
+                       (subcategory in (p.get('road_safety_subcategories') or []))
+                ]
+                flagged_projects = [p for p in subcategory_projects if p.get('is_flagged', False)]
+                flagged_cost = sum(p.get('amount', 0) for p in flagged_projects)
+                categories.append({
+                    "category": "Road Safety Facilities",
+                    "subcategory": subcategory,
+                    "average_cost_per_km": stats.get('mean', 0),
+                    "threshold_cost_per_km": stats.get('threshold', 0),  # Cost/km threshold for flagging
+                    "flagged_cost": flagged_cost,
+                    "flagged_count": len(flagged_projects),
+                    "total_count": stats.get('count', 0)
+                })
+            
+            # Major Roads (work types) - formerly "National Roads"
+            national_roads = year_data.get('national_roads', [])
+            national_work_type_stats = year_data.get('national_roads_work_type_statistics', {})
+            for work_type, stats in national_work_type_stats.items():
+                # Match projects by subcategory (set during flagging), work_type, or work_types list
+                work_type_projects = [
+                    p for p in national_roads 
+                    if p.get('subcategory') == work_type or
+                       p.get('work_type') == work_type or
+                       (work_type in (p.get('work_types') or []))
+                ]
+                flagged_projects = [p for p in work_type_projects if p.get('is_flagged', False)]
+                # Total cost (amount) of all flagged projects
+                flagged_cost = sum(p.get('amount', 0) for p in flagged_projects)
+                categories.append({
+                    "category": "Major Roads",
+                    "subcategory": work_type,
+                    "average_cost_per_km": stats.get('mean', 0),
+                    "threshold_cost_per_km": stats.get('threshold', 0),  # Cost/km threshold for flagging
+                    "flagged_cost": flagged_cost,  # Total cost (amount) of all flagged projects
+                    "flagged_count": len(flagged_projects),
+                    "total_count": stats.get('count', 0)
+                })
+            
+            # Minor Roads (work types) - formerly "Secondary Roads"
+            secondary_roads = year_data.get('secondary_roads', [])
+            secondary_work_type_stats = year_data.get('secondary_roads_work_type_statistics', {})
+            for work_type, stats in secondary_work_type_stats.items():
+                # Match projects by subcategory (set during flagging), work_type, or work_types list
+                work_type_projects = [
+                    p for p in secondary_roads 
+                    if p.get('subcategory') == work_type or
+                       p.get('work_type') == work_type or
+                       (work_type in (p.get('work_types') or []))
+                ]
+                flagged_projects = [p for p in work_type_projects if p.get('is_flagged', False)]
+                # Total cost (amount) of all flagged projects
+                flagged_cost = sum(p.get('amount', 0) for p in flagged_projects)
+                categories.append({
+                    "category": "Minor Roads",
+                    "subcategory": work_type,
+                    "average_cost_per_km": stats.get('mean', 0),
+                    "threshold_cost_per_km": stats.get('threshold', 0),  # Cost/km threshold for flagging
+                    "flagged_cost": flagged_cost,  # Total cost (amount) of all flagged projects
+                    "flagged_count": len(flagged_projects),
+                    "total_count": stats.get('count', 0)
+                })
+            
+            # Sort by average_cost_per_km descending
+            categories.sort(key=lambda x: x.get('average_cost_per_km', 0), reverse=True)
+            
+            return JSONResponse({
+                "success": True,
+                "year": year,
+                "categories": categories
+            })
+        
+        # For 2026, use the cache or process on the fly
+        cache_path = Path(__file__).parent / "static" / "data" / "api_cache" / "roads_cost_analysis_cache.json"
+        if cache_path.exists():
+            with open(cache_path, 'r', encoding='utf-8') as f:
+                cache_data = json.load(f)
+        else:
+            # Fallback: process from budget_amendments_2026.json
+            # For now, return error if cache doesn't exist
+            return JSONResponse({"success": False, "error": "Cache file not found. Please regenerate cache."}, status_code=404)
+        
+        categories = []
+        
+        # Bridges
+        bridges = cache_data.get('bridges', {}).get('projects', [])
+        bridges_stats = cache_data.get('bridges', {}).get('statistics', {})
+        bridges_flagged = [p for p in bridges if p.get('is_flagged', False)]
+        # Total cost (amount) of all flagged projects
+        bridges_flagged_cost = sum(p.get('amount', 0) for p in bridges_flagged)
+        
+        # Calculate threshold for bridges (mean + 2*std_dev)
+        bridges_threshold = 0
+        if bridges_stats.get('mean') is not None and bridges_stats.get('std_dev') is not None:
+            # Calculate threshold for bridges (mean + 1*std_dev)
+            bridges_threshold = 0
+            if bridges_stats.get('mean') is not None and bridges_stats.get('std_dev') is not None:
+                bridges_threshold = bridges_stats['mean'] + (1 * bridges_stats['std_dev'])
+        
+        categories.append({
+            "category": "Bridges",
+            "subcategory": None,
+            "average_cost_per_km": bridges_stats.get('mean', 0),
+            "threshold_cost_per_km": bridges_threshold,  # Cost/km threshold for flagging
+            "flagged_cost": bridges_flagged_cost,  # Total cost (amount) of all flagged projects
+            "flagged_count": len(bridges_flagged),
+            "total_count": len(bridges)
+        })
+        
+        # Road Safety Facilities (subcategories)
+        traffic_signs = cache_data.get('traffic_signs', {}).get('projects', [])
+        subcategory_stats = cache_data.get('traffic_signs', {}).get('subcategory_statistics', {})
+        for subcategory, stats in subcategory_stats.items():
+            # Match projects by subcategory field (set during flagging) or by road_safety_subcategories list
+            subcategory_projects = [
+                p for p in traffic_signs 
+                if p.get('subcategory') == subcategory or 
+                   (subcategory in (p.get('road_safety_subcategories') or []))
+            ]
+            flagged_projects = [p for p in subcategory_projects if p.get('is_flagged', False)]
+            # Total cost (amount) of all flagged projects
+            flagged_cost = sum(p.get('amount', 0) for p in flagged_projects)
+            categories.append({
+                "category": "Road Safety Facilities",
+                "subcategory": subcategory,
+                "average_cost_per_km": stats.get('mean', 0),
+                "threshold_cost_per_km": stats.get('threshold', 0),  # Cost/km threshold for flagging
+                "flagged_cost": flagged_cost,  # Total cost (amount) of all flagged projects
+                "flagged_count": len(flagged_projects),
+                "total_count": stats.get('count', 0)
+            })
+        
+        # Major Roads (work types) - formerly "National Roads"
+        national_roads = cache_data.get('national_roads', {}).get('projects', [])
+        national_work_type_stats = cache_data.get('national_roads', {}).get('subcategory_statistics', {})
+        for work_type, stats in national_work_type_stats.items():
+            # Match projects by subcategory (set during flagging), work_type, or work_types list
+            work_type_projects = [
+                p for p in national_roads 
+                if p.get('subcategory') == work_type or
+                   p.get('work_type') == work_type or
+                   (work_type in (p.get('work_types') or []))
+            ]
+            flagged_projects = [p for p in work_type_projects if p.get('is_flagged', False)]
+            # Calculate average cost/km of flagged projects (for comparison with threshold)
+            flagged_avg_cost_per_km = 0
+            if flagged_projects:
+                flagged_cost_per_km_values = [p.get('cost_per_km', 0) for p in flagged_projects if p.get('cost_per_km', 0) > 0]
+                if flagged_cost_per_km_values:
+                    flagged_avg_cost_per_km = sum(flagged_cost_per_km_values) / len(flagged_cost_per_km_values)
+            categories.append({
+                "category": "Major Roads",
+                "subcategory": work_type,
+                "average_cost_per_km": stats.get('mean', 0),
+                "threshold_cost_per_km": stats.get('threshold', 0),  # Cost/km threshold for flagging
+                "flagged_cost": flagged_avg_cost_per_km,  # Average cost/km of flagged projects
+                "flagged_count": len(flagged_projects),
+                "total_count": stats.get('count', 0)
+            })
+        
+        # Minor Roads (work types) - formerly "Secondary Roads"
+        secondary_roads = cache_data.get('secondary_roads', {}).get('projects', [])
+        secondary_work_type_stats = cache_data.get('secondary_roads', {}).get('subcategory_statistics', {})
+        for work_type, stats in secondary_work_type_stats.items():
+            # Match projects by subcategory (set during flagging), work_type, or work_types list
+            work_type_projects = [
+                p for p in secondary_roads 
+                if p.get('subcategory') == work_type or
+                   p.get('work_type') == work_type or
+                   (work_type in (p.get('work_types') or []))
+            ]
+            flagged_projects = [p for p in work_type_projects if p.get('is_flagged', False)]
+            # Calculate average cost/km of flagged projects (for comparison with threshold)
+            flagged_avg_cost_per_km = 0
+            if flagged_projects:
+                flagged_cost_per_km_values = [p.get('cost_per_km', 0) for p in flagged_projects if p.get('cost_per_km', 0) > 0]
+                if flagged_cost_per_km_values:
+                    flagged_avg_cost_per_km = sum(flagged_cost_per_km_values) / len(flagged_cost_per_km_values)
+            categories.append({
+                "category": "Minor Roads",
+                "subcategory": work_type,
+                "average_cost_per_km": stats.get('mean', 0),
+                "threshold_cost_per_km": stats.get('threshold', 0),  # Cost/km threshold for flagging
+                "flagged_cost": flagged_avg_cost_per_km,  # Average cost/km of flagged projects
+                "flagged_count": len(flagged_projects),
+                "total_count": stats.get('count', 0)
+            })
+        
+        # Sort by average_cost_per_km descending
+        categories.sort(key=lambda x: x.get('average_cost_per_km', 0), reverse=True)
+        
+        return JSONResponse({
+            "success": True,
+            "year": year,
+            "categories": categories
+        })
+        
+    except Exception as e:
+        import traceback
+        traceback.print_exc()
         return JSONResponse({"success": False, "error": str(e)}, status_code=500)
 
 @app.get("/api/budget/roads-cost-analysis-all-years")
@@ -1563,6 +2625,8 @@ async def budget_roads_cost_analysis_all_years_api():
             secondary_road_projects = []
             bridge_projects = []
             traffic_signs_projects = []
+            nia_projects = []
+            fmr_projects = []
             
             for item in all_items:
                 name = item.get('name', '') or item.get('description', '')
@@ -1581,17 +2645,44 @@ async def budget_roads_cost_analysis_all_years_api():
                 if distance_km <= 0:
                     continue
                 
+                # Categorize projects
+                name_lower = name.lower()
+                
+                # Check for FMR (Farm-to-Market Road) projects first - Annex A-1
+                fmr_keywords = [' fmr', 'fmr ', 'farm to market', 'farm-to-market', 'farm to market road']
+                is_fmr = any(keyword in name_lower for keyword in fmr_keywords) and 'cnia' not in name_lower
+                
+                # Check for NIA (National Irrigation Administration) projects - Annex A-4
+                nia_keywords = [
+                    'national irrigation', 'irrigation system', 'irrigation project', 
+                    'irrigation canal', 'communal irrigation', 'irrigation sub-program',
+                    'irrigation subprogram', 'irrigation facility', 'irrigation structure'
+                ]
+                is_nia = any(keyword in name_lower for keyword in nia_keywords) and \
+                         'cnia' not in name_lower and \
+                         'xdp' not in name_lower and \
+                         'dystonia' not in name_lower
+                
                 project_data = {
                     'name': name,
                     'distance_km': distance_km,
                     'amount': amount
                 }
                 
-                # Categorize projects
-                name_lower = name.lower()
+                if is_fmr:
+                    fmr_projects.append(project_data)
+                    continue  # Skip further categorization for FMR
+                elif is_nia:
+                    nia_projects.append(project_data)
+                    continue  # Skip further categorization for NIA
                 
-                traffic_keywords = ['installation', 'road safety', 'guardrail', 'traffic facilities', 'traffic facility']
-                is_traffic = any(keyword in name_lower for keyword in traffic_keywords)
+                # Road Safety Facilities: Only categorize those WITH chainage (already filtered above)
+                road_safety_keywords = [
+                    'installation', 'road safety', 'guardrail', 'traffic facilities', 'traffic facility',
+                    'lighting', 'streetlight', 'street light', 'led', 'solar', 'roadway lighting',
+                    'road sign', 'pavement marking', 'barrier', 'pedestrian overpass'
+                ]
+                is_road_safety = any(keyword in name_lower for keyword in road_safety_keywords)
                 
                 bridge_keywords = ['bridge', 'viaduct', 'flyover', 'overpass', 'underpass', 'footbridge', 'pedestrian bridge']
                 is_bridge = any(keyword in name_lower for keyword in bridge_keywords)
@@ -1605,13 +2696,35 @@ async def budget_roads_cost_analysis_all_years_api():
                 ]
                 is_road_term = any(term in name_lower for term in road_terms)
                 
-                if is_traffic:
+                if is_road_safety:
+                    # Categorize road safety facilities into subcategories (only those with chainage)
+                    subcategories = _categorize_road_safety_facilities(name, name_lower)
+                    # Defensive check: ensure subcategories is never empty
+                    if not subcategories or len(subcategories) == 0:
+                        subcategories = ['Road Safety Facilities']
+                    project_data['road_safety_subcategories'] = subcategories
+                    project_data['is_new'] = _is_new_installation(name, name_lower)
                     traffic_signs_projects.append(project_data)
                 elif is_bridge:
                     bridge_projects.append(project_data)
                 elif is_road_term or not is_bridge:
-                    is_national_road = _is_national_road(name, distance_km)
-                    if is_national_road:
+                    # Categorize road work type (if found)
+                    work_types = _categorize_road_work_type(name, name_lower)
+                    if work_types:
+                        # Store as list for composite work types
+                        project_data['work_type'] = work_types[0] if len(work_types) == 1 else work_types
+                        project_data['work_types'] = work_types  # Always store full list
+                    else:
+                        project_data['work_type'] = None
+                        project_data['work_types'] = []
+                    
+                    # Determine if it's new construction or maintenance
+                    # If no work type, it's automatically new construction
+                    project_data['is_new_construction'] = _is_new_construction(work_types, name, name_lower)
+                    
+                    # Determine if it's a major road using classification rules
+                    is_major_road = _is_major_road(name, chainage_ranges)
+                    if is_major_road:
                         national_road_projects.append(project_data)
                     else:
                         secondary_road_projects.append(project_data)
@@ -1622,7 +2735,9 @@ async def budget_roads_cost_analysis_all_years_api():
                 'national_roads': national_road_projects,
                 'secondary_roads': secondary_road_projects,
                 'bridges': bridge_projects,
-                'traffic_signs': traffic_signs_projects
+                'traffic_signs': traffic_signs_projects,
+                'nia': nia_projects,
+                'fmr': fmr_projects
             }
         
         # Load historical data for 2020-2025
@@ -1683,7 +2798,7 @@ async def budget_roads_cost_analysis_all_years_api():
         result = {category: dict(stats) for category, stats in aggregated_stats.items()}
         
         # Ensure all categories are present even if empty
-        for category in ['national_roads', 'secondary_roads', 'bridges', 'traffic_signs']:
+        for category in ['national_roads', 'secondary_roads', 'bridges', 'traffic_signs', 'nia', 'fmr']:
             if category not in result:
                 result[category] = {
                     'total_projects': 0,
@@ -1796,7 +2911,7 @@ async def budget_roads_statistics_all_years_api():
             }
         
         # Process 2026 projects
-        projects_2026 = {'roads': [], 'national_roads': [], 'secondary_roads': [], 'bridges': [], 'traffic_signs': []}
+        projects_2026 = {'roads': [], 'national_roads': [], 'secondary_roads': [], 'bridges': [], 'traffic_signs': [], 'nia': [], 'fmr': []}
         for item in all_items_2026:
             name = item.get('name', '') or item.get('description', '')
             if not name:
@@ -1813,36 +2928,66 @@ async def budget_roads_statistics_all_years_api():
             cost_per_km = amount / distance_km
             name_lower = name.lower()
             
-            # Traffic signs/lights: road safety facilities, installations, guardrails
-            traffic_keywords = ['installation', 'road safety', 'guardrail', 'traffic facilities', 'traffic facility']
-            is_traffic = any(keyword in name_lower for keyword in traffic_keywords)
+            # Check for FMR (Farm-to-Market Road) projects first - Annex A-1
+            fmr_keywords = [' fmr', 'fmr ', 'farm to market', 'farm-to-market', 'farm to market road']
+            is_fmr = any(keyword in name_lower for keyword in fmr_keywords) and 'cnia' not in name_lower
             
-            # Bridges: projects with bridge-related keywords ONLY (no distance heuristic to avoid false positives)
-            bridge_keywords = ['bridge', 'viaduct', 'flyover', 'overpass', 'underpass', 'footbridge', 'pedestrian bridge']
-            is_bridge = any(keyword in name_lower for keyword in bridge_keywords)
-            
-            # Road-related terms (these indicate roads, not bridges)
-            road_terms = [
-                ' road', ' rd', ' highway', ' hiway', ' hway', ' h-way',
-                'boulevard', ' blvd', ' avenue', ' ave', ' ave.',
-                'junction', ' jct', ' old route', ' diversion',
-                'extension', ' ext', ' street', ' st', ' st.',
-                'expressway'
+            # Check for NIA (National Irrigation Administration) projects - Annex A-4
+            nia_keywords = [
+                'national irrigation', 'irrigation system', 'irrigation project', 
+                'irrigation canal', 'communal irrigation', 'irrigation sub-program',
+                'irrigation subprogram', 'irrigation facility', 'irrigation structure'
             ]
-            is_road_term = any(term in name_lower for term in road_terms)
+            is_nia = any(keyword in name_lower for keyword in nia_keywords) and \
+                     'cnia' not in name_lower and \
+                     'xdp' not in name_lower and \
+                     'dystonia' not in name_lower
             
             project_data = {'cost_per_km': cost_per_km, 'amount': amount, 'distance_km': distance_km}
-            if is_traffic:
-                projects_2026['traffic_signs'].append(project_data)
-            elif is_bridge:
-                projects_2026['bridges'].append(project_data)
+            
+            if is_fmr:
+                projects_2026['fmr'].append(project_data)
+            elif is_nia:
+                projects_2026['nia'].append(project_data)
             else:
-                # Separate into national and secondary roads
-                is_national = _is_national_road(name, distance_km)
-                if is_national:
-                    projects_2026['national_roads'].append(project_data)
+                # Road Safety Facilities: Only categorize those WITH chainage (already filtered above)
+                road_safety_keywords = [
+                    'installation', 'road safety', 'guardrail', 'traffic facilities', 'traffic facility',
+                    'lighting', 'streetlight', 'street light', 'led', 'solar', 'roadway lighting',
+                    'road sign', 'pavement marking', 'barrier', 'pedestrian overpass'
+                ]
+                is_road_safety = any(keyword in name_lower for keyword in road_safety_keywords)
+                
+                # Bridges: projects with bridge-related keywords ONLY (no distance heuristic to avoid false positives)
+                bridge_keywords = ['bridge', 'viaduct', 'flyover', 'overpass', 'underpass', 'footbridge', 'pedestrian bridge']
+                is_bridge = any(keyword in name_lower for keyword in bridge_keywords)
+                
+                # Road-related terms (these indicate roads, not bridges)
+                road_terms = [
+                    ' road', ' rd', ' highway', ' hiway', ' hway', ' h-way',
+                    'boulevard', ' blvd', ' avenue', ' ave', ' ave.',
+                    'junction', ' jct', ' old route', ' diversion',
+                    'extension', ' ext', ' street', ' st', ' st.',
+                    'expressway'
+                ]
+                is_road_term = any(term in name_lower for term in road_terms)
+                
+                if is_road_safety:
+                    projects_2026['traffic_signs'].append(project_data)
+                elif is_bridge:
+                    projects_2026['bridges'].append(project_data)
                 else:
-                    projects_2026['secondary_roads'].append(project_data)
+                    # Categorize road work type (if found)
+                    work_type = _categorize_road_work_type(name, name_lower)
+                    if work_type:
+                        project_data['work_type'] = work_type
+                    
+                    # Separate into national and secondary roads
+                    is_national = _is_national_road(name, distance_km)
+                    if is_national:
+                        projects_2026['national_roads'].append(project_data)
+                    else:
+                        projects_2026['secondary_roads'].append(project_data)
                 projects_2026['roads'].append(project_data)  # Combined for backward compatibility
         
         # Combine historical data (2020-2025) with 2026
@@ -1859,7 +3004,9 @@ async def budget_roads_statistics_all_years_api():
                     'national_roads': [{'cost_per_km': p['cost_per_km'], 'amount': p['amount'], 'distance_km': p['distance_km']} for p in year_data.get('national_roads', [])],
                     'secondary_roads': [{'cost_per_km': p['cost_per_km'], 'amount': p['amount'], 'distance_km': p['distance_km']} for p in year_data.get('secondary_roads', [])],
                     'bridges': [{'cost_per_km': p['cost_per_km'], 'amount': p['amount'], 'distance_km': p['distance_km']} for p in year_data.get('bridges', [])],
-                    'traffic_signs': [{'cost_per_km': p['cost_per_km'], 'amount': p['amount'], 'distance_km': p['distance_km']} for p in year_data.get('traffic_signs', [])]
+                    'traffic_signs': [{'cost_per_km': p['cost_per_km'], 'amount': p['amount'], 'distance_km': p['distance_km']} for p in year_data.get('traffic_signs', [])],
+                    'nia': [{'cost_per_km': p['cost_per_km'], 'amount': p['amount'], 'distance_km': p['distance_km']} for p in year_data.get('nia', [])],
+                    'fmr': [{'cost_per_km': p['cost_per_km'], 'amount': p['amount'], 'distance_km': p['distance_km']} for p in year_data.get('fmr', [])]
                 }
         
         # Add 2026
@@ -1873,7 +3020,9 @@ async def budget_roads_statistics_all_years_api():
                 'national_roads': calculate_statistics(all_years_data.get(year, {}).get('national_roads', [])),
                 'secondary_roads': calculate_statistics(all_years_data.get(year, {}).get('secondary_roads', [])),
                 'bridges': calculate_statistics(all_years_data.get(year, {}).get('bridges', [])),
-                'traffic_signs': calculate_statistics(all_years_data.get(year, {}).get('traffic_signs', []))
+                'traffic_signs': calculate_statistics(all_years_data.get(year, {}).get('traffic_signs', [])),
+                'nia': calculate_statistics(all_years_data.get(year, {}).get('nia', [])),
+                'fmr': calculate_statistics(all_years_data.get(year, {}).get('fmr', []))
             }
         
         # Calculate totals (aggregate all years)
@@ -1882,19 +3031,25 @@ async def budget_roads_statistics_all_years_api():
         total_secondary_roads = []
         total_bridges = []
         total_traffic_signs = []
+        total_nia = []
+        total_fmr = []
         for year in years:
             total_roads.extend(all_years_data.get(year, {}).get('roads', []))
             total_national_roads.extend(all_years_data.get(year, {}).get('national_roads', []))
             total_secondary_roads.extend(all_years_data.get(year, {}).get('secondary_roads', []))
             total_bridges.extend(all_years_data.get(year, {}).get('bridges', []))
             total_traffic_signs.extend(all_years_data.get(year, {}).get('traffic_signs', []))
+            total_nia.extend(all_years_data.get(year, {}).get('nia', []))
+            total_fmr.extend(all_years_data.get(year, {}).get('fmr', []))
         
         result['total'] = {
             'roads': calculate_statistics(total_roads),
             'national_roads': calculate_statistics(total_national_roads),
             'secondary_roads': calculate_statistics(total_secondary_roads),
             'bridges': calculate_statistics(total_bridges),
-            'traffic_signs': calculate_statistics(total_traffic_signs)
+            'traffic_signs': calculate_statistics(total_traffic_signs),
+            'nia': calculate_statistics(total_nia),
+            'fmr': calculate_statistics(total_fmr)
         }
         
         return JSONResponse({"success": True, "statistics": result})
@@ -2288,6 +3443,18 @@ async def nep_data_browser_api(year: str = "2025", page: int = 1, limit: int = 1
 async def nep_year_over_year_api():
     """Get NEP year-over-year data - no authentication required"""
     try:
+        # Check for pre-generated cache first
+        cache_file = Path(__file__).parent / "static" / "data" / "api_cache" / "nep_year_over_year_cache.json"
+        if cache_file.exists():
+            try:
+                with open(cache_file, 'r', encoding='utf-8') as f:
+                    cache_data = json.load(f)
+                if cache_data.get('success'):
+                    print(f"✅ [/api/budget/nep/year-over-year] Using cached data from {cache_file.name}")
+                    return JSONResponse(cache_data)
+            except Exception as cache_err:
+                print(f"⚠️ [/api/budget/nep/year-over-year] Error reading cache, falling back to processing: {cache_err}")
+        
         from nep_client import get_nep_year_over_year
         result = await get_nep_year_over_year()
         return JSONResponse(result)
@@ -2298,6 +3465,25 @@ async def nep_year_over_year_api():
 async def nep_top_programs_api(year: str = "2025", limit: int = 10):
     """Get top NEP programs - no authentication required"""
     try:
+        # Check for pre-generated cache first
+        cache_file = Path(__file__).parent / "static" / "data" / "api_cache" / "nep_top_programs_cache.json"
+        if cache_file.exists():
+            try:
+                with open(cache_file, 'r', encoding='utf-8') as f:
+                    cache_data = json.load(f)
+                if cache_data.get('success'):
+                    # Check if year-specific data exists
+                    year_data = cache_data.get('data', {}).get(year)
+                    if year_data:
+                        print(f"✅ [/api/budget/nep/top-programs] Using cached data for year {year}")
+                        # Apply limit if needed
+                        if limit < 20 and year_data.get('programs'):
+                            year_data = year_data.copy()
+                            year_data['programs'] = year_data['programs'][:limit]
+                        return JSONResponse(year_data)
+            except Exception as cache_err:
+                print(f"⚠️ [/api/budget/nep/top-programs] Error reading cache, falling back to processing: {cache_err}")
+        
         from nep_client import get_nep_top_programs
         result = await get_nep_top_programs(year, limit)
         return JSONResponse(result)
@@ -2416,6 +3602,24 @@ async def budget_expense_categories_api(year: str = "2025", limit: int = 8):
 async def budget_regions_api(year: str = "2025", limit: int = 8):
     """Get budget regions - no authentication required"""
     try:
+        # Check for pre-generated cache first
+        cache_file = Path(__file__).parent / "static" / "data" / "api_cache" / "budget_regions_cache.json"
+        if cache_file.exists():
+            try:
+                with open(cache_file, 'r', encoding='utf-8') as f:
+                    cache_data = json.load(f)
+                if cache_data.get('success'):
+                    year_data = cache_data.get('data', {}).get(year)
+                    if year_data:
+                        print(f"✅ [/api/budget/regions] Using cached data for year {year}")
+                        # Apply limit if needed
+                        if limit < 1000 and year_data.get('regions'):
+                            year_data = year_data.copy()
+                            year_data['regions'] = year_data['regions'][:limit]
+                        return JSONResponse(year_data)
+            except Exception as cache_err:
+                print(f"⚠️ [/api/budget/regions] Error reading cache, falling back to processing: {cache_err}")
+        
         result = await get_budget_regions(year, limit)
         return JSONResponse(result)
     except Exception as e:
@@ -2434,6 +3638,18 @@ async def budget_agencies_api(year: str = "2025", limit: int = 10):
 async def budget_department_trends_api():
     """Get department spending trends for 2020-2025 with percent changes - no authentication required"""
     try:
+        # Check for pre-generated cache first
+        cache_file = Path(__file__).parent / "static" / "data" / "api_cache" / "budget_department_trends_cache.json"
+        if cache_file.exists():
+            try:
+                with open(cache_file, 'r', encoding='utf-8') as f:
+                    cache_data = json.load(f)
+                if cache_data.get('success'):
+                    print(f"✅ [/api/budget/department-trends] Using cached data from {cache_file.name}")
+                    return JSONResponse(cache_data)
+            except Exception as cache_err:
+                print(f"⚠️ [/api/budget/department-trends] Error reading cache, falling back to processing: {cache_err}")
+        
         from budget_postgres_client import get_budget_department_trends
         result = await get_budget_department_trends()
         return JSONResponse(result)
@@ -2525,6 +3741,18 @@ async def budget_amendments_summary():
 async def budget_amendments_departments():
     """Get all top-level departments (excluding agencies) with budget amendment summary"""
     try:
+        # Check for pre-generated cache first
+        cache_file = Path(__file__).parent / "static" / "data" / "api_cache" / "budget_amendments_departments_cache.json"
+        if cache_file.exists():
+            try:
+                with open(cache_file, 'r', encoding='utf-8') as f:
+                    cache_data = json.load(f)
+                if cache_data.get('success'):
+                    print(f"✅ [/api/budget/amendments/departments] Using cached data from {cache_file.name}")
+                    return JSONResponse(cache_data)
+            except Exception as cache_err:
+                print(f"⚠️ [/api/budget/amendments/departments] Error reading cache, falling back to processing: {cache_err}")
+        
         data = load_amendments_data()
         if not data:
             return JSONResponse({"success": False, "error": "Data not available"}, status_code=404)
@@ -2769,6 +3997,18 @@ async def budget_amendments_duplicates():
 async def budget_amendments_annex_a1_amounts():
     """Get just the amounts from Annex A-1 projects for histogram (lightweight)"""
     try:
+        # Check for pre-generated cache first
+        cache_file = Path(__file__).parent / "static" / "data" / "api_cache" / "annex_a1_amounts_cache.json"
+        if cache_file.exists():
+            try:
+                with open(cache_file, 'r', encoding='utf-8') as f:
+                    cache_data = json.load(f)
+                if cache_data.get('success'):
+                    print(f"✅ [/api/budget/amendments/annex-a1-amounts] Using cached data from {cache_file.name}")
+                    return JSONResponse(cache_data)
+            except Exception as cache_err:
+                print(f"⚠️ [/api/budget/amendments/annex-a1-amounts] Error reading cache, falling back to processing: {cache_err}")
+        
         json_path = Path('static/data/budget_amendments_2026.json')
         
         if not json_path.exists():
@@ -2804,6 +4044,18 @@ async def budget_amendments_annex_a1_amounts():
 async def budget_amendments_annex_a5_amounts():
     """Get just the amounts from Annex A-5 (DPWH) projects for histogram (lightweight)"""
     try:
+        # Check for pre-generated cache first
+        cache_file = Path(__file__).parent / "static" / "data" / "api_cache" / "annex_a5_amounts_cache.json"
+        if cache_file.exists():
+            try:
+                with open(cache_file, 'r', encoding='utf-8') as f:
+                    cache_data = json.load(f)
+                if cache_data.get('success'):
+                    print(f"✅ [/api/budget/amendments/annex-a5-amounts] Using cached data from {cache_file.name}")
+                    return JSONResponse(cache_data)
+            except Exception as cache_err:
+                print(f"⚠️ [/api/budget/amendments/annex-a5-amounts] Error reading cache, falling back to processing: {cache_err}")
+        
         json_path = Path('static/data/budget_amendments_2026.json')
         
         if not json_path.exists():
@@ -2839,6 +4091,18 @@ async def budget_amendments_annex_a5_amounts():
 async def budget_amendments_annex_a5_duplicates():
     """Get duplicate detection results for Annex A-5 (DPWH) projects"""
     try:
+        # Check for pre-generated cache first
+        cache_file = Path(__file__).parent / "static" / "data" / "api_cache" / "annex_a5_duplicates_cache.json"
+        if cache_file.exists():
+            try:
+                with open(cache_file, 'r', encoding='utf-8') as f:
+                    cache_data = json.load(f)
+                if cache_data.get('success'):
+                    print(f"✅ [/api/budget/amendments/annex-a5-duplicates] Using cached data from {cache_file.name}")
+                    return JSONResponse(cache_data)
+            except Exception as cache_err:
+                print(f"⚠️ [/api/budget/amendments/annex-a5-duplicates] Error reading cache, falling back to processing: {cache_err}")
+        
         json_path = Path('static/data/duplicates_a5_2026.json')
         
         if not json_path.exists():
@@ -2861,6 +4125,18 @@ async def budget_amendments_annex_a5_duplicates():
 async def budget_amendments_annex_a4_amounts():
     """Get just the amounts from Annex A-4 (NIA) projects for histogram (lightweight)"""
     try:
+        # Check for pre-generated cache first
+        cache_file = Path(__file__).parent / "static" / "data" / "api_cache" / "annex_a4_amounts_cache.json"
+        if cache_file.exists():
+            try:
+                with open(cache_file, 'r', encoding='utf-8') as f:
+                    cache_data = json.load(f)
+                if cache_data.get('success'):
+                    print(f"✅ [/api/budget/amendments/annex-a4-amounts] Using cached data from {cache_file.name}")
+                    return JSONResponse(cache_data)
+            except Exception as cache_err:
+                print(f"⚠️ [/api/budget/amendments/annex-a4-amounts] Error reading cache, falling back to processing: {cache_err}")
+        
         json_path = Path('static/data/budget_amendments_2026.json')
         
         if not json_path.exists():
@@ -2896,6 +4172,18 @@ async def budget_amendments_annex_a4_amounts():
 async def budget_amendments_annex_a4_duplicates():
     """Get duplicate detection results for Annex A-4 (NIA) projects"""
     try:
+        # Check for pre-generated cache first
+        cache_file = Path(__file__).parent / "static" / "data" / "api_cache" / "annex_a4_duplicates_cache.json"
+        if cache_file.exists():
+            try:
+                with open(cache_file, 'r', encoding='utf-8') as f:
+                    cache_data = json.load(f)
+                if cache_data.get('success'):
+                    print(f"✅ [/api/budget/amendments/annex-a4-duplicates] Using cached data from {cache_file.name}")
+                    return JSONResponse(cache_data)
+            except Exception as cache_err:
+                print(f"⚠️ [/api/budget/amendments/annex-a4-duplicates] Error reading cache, falling back to processing: {cache_err}")
+        
         json_path = Path('static/data/duplicates_a4_2026.json')
         
         if not json_path.exists():
@@ -3004,6 +4292,18 @@ async def budget_amendments_program_line_items(program_id: str):
 async def budget_analysis_comparison_chart_api():
     """Get data for Budget vs NEP comparison chart - no authentication required"""
     try:
+        # Check for pre-generated cache first
+        cache_file = Path(__file__).parent / "static" / "data" / "api_cache" / "budget_comparison_chart_cache.json"
+        if cache_file.exists():
+            try:
+                with open(cache_file, 'r', encoding='utf-8') as f:
+                    cache_data = json.load(f)
+                if cache_data.get('success'):
+                    print(f"✅ [/api/budget/analysis/comparison-chart] Using cached data from {cache_file.name}")
+                    return JSONResponse(cache_data)
+            except Exception as cache_err:
+                print(f"⚠️ [/api/budget/analysis/comparison-chart] Error reading cache, falling back to processing: {cache_err}")
+        
         print(f"📊 [API] DEBUG: Fetching Budget vs NEP comparison data")
 
         # Direct database queries to get yearly totals
@@ -3092,6 +4392,18 @@ async def budget_analysis_comparison_chart_api():
 async def budget_programs_comparison_api():
     """Get program comparison data between Budget and NEP databases - no authentication required"""
     try:
+        # Check for pre-generated cache first
+        cache_file = Path(__file__).parent / "static" / "data" / "api_cache" / "budget_programs_comparison_cache.json"
+        if cache_file.exists():
+            try:
+                with open(cache_file, 'r', encoding='utf-8') as f:
+                    cache_data = json.load(f)
+                if cache_data.get('success'):
+                    print(f"✅ [/api/budget/programs/comparison] Using cached data from {cache_file.name}")
+                    return JSONResponse(cache_data)
+            except Exception as cache_err:
+                print(f"⚠️ [/api/budget/programs/comparison] Error reading cache, falling back to processing: {cache_err}")
+        
         print(f"📊 [API] DEBUG: Fetching program comparison data")
 
         # Direct database queries to get program data
