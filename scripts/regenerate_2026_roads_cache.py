@@ -50,22 +50,77 @@ def categorize_multi_purpose_subcategory(name_lower: str) -> str:
                 return label
     return "Other Multi-Purpose Buildings"
 
+NIA_SUBCATEGORY_PATTERNS = [
+    ("Canal Lining", ['canal lining', 'lining of canal', 'lining canal']),
+    ("Drainage Canal", ['drainage canal', 'canal drainage']),
+    ("Diversion Intake", ['diversion intake', 'diversion dam', 'diversion weir']),
+    ("Intake of Main Canal", ['intake of main canal', 'main canal intake']),
+    ("Canal Excavation / Improvement", ['canal excavation', 'canal improvement', 'canal rehab', 'canal reconstruction']),
+    ("Canal Protection / Riprap", ['riprap', 'revetment', 'slope protection', 'bank protection']),
+    ("Irrigation Structures", ['headgate', 'sluice', 'check gate', 'turnout', 'appurtenant structure'])
+]
+
+def categorize_nia_subcategory(name_lower: str) -> str:
+    target = name_lower or ''
+    for label, keywords in NIA_SUBCATEGORY_PATTERNS:
+        for keyword in keywords:
+            if keyword in target:
+                return label
+    return "Other Irrigation Works"
+
 def extract_all_chainage_ranges(name: str):
     """Extract all chainage ranges from name"""
     import re
+    if not name:
+        return []
+
     ranges = []
-    pattern_k = r'K(\d+)\s*\+\s*\(?(-?\d+)\)?\s*-\s*K(\d+)\s*\+\s*\(?(-?\d+)\)?'
+    seen = set()
+
+    def parse_number(value) -> float:
+        if value is None:
+            return 0.0
+        if isinstance(value, (int, float)):
+            return float(value)
+        cleaned = str(value).replace(',', '')
+        try:
+            return float(cleaned)
+        except ValueError:
+            cleaned = re.sub(r'[^\d\.\-]', '', cleaned)
+            return float(cleaned) if cleaned else 0.0
+
+    def add_range(start_km, start_m, end_km, end_m):
+        key = (
+            float(parse_number(start_km)),
+            float(parse_number(start_m)),
+            float(parse_number(end_km)),
+            float(parse_number(end_m))
+        )
+        if key not in seen:
+            ranges.append(key)
+            seen.add(key)
+
+    dash = r'[-–—]'
+    number = r'\d+(?:[.,]\d+)?'
+
+    pattern_k = rf'K({number})\s*\+\s*\(?(-?{number})\)?\s*{dash}\s*K({number})\s*\+\s*\(?(-?{number})\)?'
     for match in re.finditer(pattern_k, name, re.IGNORECASE):
-        ranges.append((int(match.group(1)), int(match.group(2)), int(match.group(3)), int(match.group(4))))
-    pattern_chainage = r'Chainage\s+(\d+)\s*-\s*Chainage\s+(\d+)'
+        add_range(match.group(1), match.group(2), match.group(3), match.group(4))
+
+    pattern_chainage = rf'Chainage\s+({number})\s*{dash}\s*Chainage\s+({number})'
     for match in re.finditer(pattern_chainage, name, re.IGNORECASE):
-        start_total = int(match.group(1))
-        end_total = int(match.group(2))
-        ranges.append((start_total // 1000, start_total % 1000, end_total // 1000, end_total % 1000))
-    # Pattern 3: Sta. format - "Sta. 2+783 - Sta. 3+779"
-    pattern_sta = r'Sta\.\s*(\d+)\+(\d+)\s*-\s*Sta\.\s*(\d+)\+(\d+)'
+        start_total = parse_number(match.group(1))
+        end_total = parse_number(match.group(2))
+        add_range(start_total // 1000, start_total % 1000, end_total // 1000, end_total % 1000)
+
+    pattern_sta = rf'Sta\.?\s*({number})\s*\+\s*({number})\s*{dash}\s*(?:Sta\.?\s*)?({number})\s*\+\s*({number})'
     for match in re.finditer(pattern_sta, name, re.IGNORECASE):
-        ranges.append((int(match.group(1)), int(match.group(2)), int(match.group(3)), int(match.group(4))))
+        add_range(match.group(1), match.group(2), match.group(3), match.group(4))
+
+    pattern_plain = rf'(?<![A-Za-z0-9])({number})\s*\+\s*({number})\s*{dash}\s*({number})\s*\+\s*({number})'
+    for match in re.finditer(pattern_plain, name):
+        add_range(match.group(1), match.group(2), match.group(3), match.group(4))
+
     return ranges
 
 def calculate_distance(chainage_ranges):
@@ -96,11 +151,19 @@ def format_chainage_display(name: str, ranges):
         return None
     import re
     chainage_strings = []
-    pattern_k = r'(K\d+\s*\+\s*\(?-?\d+\)?\s*-\s*K\d+\s*\+\s*\(?-?\d+\)?)'
+    dash = r'[-–—]'
+    number = r'\d+(?:[.,]\d+)?'
+    pattern_k = rf'(K{number}\s*\+\s*\(?-?{number}\)?\s*{dash}\s*K{number}\s*\+\s*\(?-?{number}\)?)'
     for match in re.finditer(pattern_k, name, re.IGNORECASE):
         chainage_strings.append(match.group(1))
-    pattern_chainage = r'(Chainage\s+\d+\s*-\s*Chainage\s+\d+)'
+    pattern_chainage = rf'(Chainage\s+{number}\s*{dash}\s*Chainage\s+{number})'
     for match in re.finditer(pattern_chainage, name, re.IGNORECASE):
+        chainage_strings.append(match.group(1))
+    pattern_sta = rf'(Sta\.?\s*{number}\+{number}\s*{dash}\s*(?:Sta\.?\s*)?{number}\+{number})'
+    for match in re.finditer(pattern_sta, name, re.IGNORECASE):
+        chainage_strings.append(match.group(1))
+    pattern_plain = rf'(?<![A-Za-z0-9])({number}\s*\+\s*{number}\s*{dash}\s*{number}\s*\+\s*{number})'
+    for match in re.finditer(pattern_plain, name):
         chainage_strings.append(match.group(1))
     if chainage_strings:
         return ', '.join(chainage_strings)
@@ -156,6 +219,31 @@ def calculate_statistics(projects):
         "std_dev": std_dev,
         "count": len(costs)
     }
+
+
+def flag_projects_by_threshold(projects, category_name, stats):
+    """Flag projects when cost per km exceeds the category threshold (mean + 0.1 * std_dev)"""
+    if not projects or not stats:
+        return
+
+    mean = stats.get('mean')
+    std_dev = stats.get('std_dev') or 0
+    threshold = None
+    if mean is not None:
+        threshold = mean + (0.1 * std_dev)
+
+    if not threshold or threshold <= 0:
+        for project in projects:
+            project['is_flagged'] = False
+        return
+
+    for project in projects:
+        cost_per_km = project.get('cost_per_km', 0)
+        if cost_per_km and cost_per_km > threshold:
+            project['is_flagged'] = True
+            project['flag_reason'] = f"Cost/km ({cost_per_km:,.2f}) exceeds {category_name} threshold ({threshold:,.2f})"
+        else:
+            project['is_flagged'] = False
 
 def process_roads_data(all_items):
     """Process items and categorize into national_roads, secondary_roads, bridges, traffic_signs"""
@@ -284,11 +372,19 @@ def process_roads_data(all_items):
         
         # Check for NIA (National Irrigation Administration) projects
         nia_keywords = [
-            'national irrigation', 'irrigation system', 'irrigation project', 
+            'national irrigation', 'irrigation system', 'irrigation project',
             'irrigation canal', 'communal irrigation', 'irrigation sub-program',
-            'irrigation subprogram', 'irrigation facility', 'irrigation structure'
+            'irrigation subprogram', 'irrigation facility', 'irrigation structure',
+            'annex a-4', 'communal irrigation system', 'communal irrigation project',
+            'communal irrigation scheme'
         ]
-        is_nia = any(keyword in name_lower for keyword in nia_keywords) and \
+        nia_keyword_patterns = [
+            r'\bnis\b', r'\bnia\b', r'\bcis\b', r'\bcip\b', r'\bsip\b',
+            r'\bc\.i\.s\b', r'\bc\.i\.p\b', r'\bs\.i\.p\b'
+        ]
+
+        pattern_hit = any(re.search(pattern, name_lower) for pattern in nia_keyword_patterns)
+        is_nia = (any(keyword in name_lower for keyword in nia_keywords) or pattern_hit) and \
                  'cnia' not in name_lower and \
                  'xdp' not in name_lower and \
                  'dystonia' not in name_lower
@@ -297,6 +393,7 @@ def process_roads_data(all_items):
             fmr_projects.append(project_data)
             continue
         elif is_nia:
+            project_data['nia_subcategory'] = categorize_nia_subcategory(name_lower)
             nia_projects.append(project_data)
             continue
         
@@ -665,6 +762,7 @@ def process_roads_data(all_items):
     secondary_roads_stats = calculate_statistics(secondary_road_projects)
     roads_stats = calculate_statistics(road_projects)
     bridges_stats = calculate_statistics(bridge_projects)
+    flag_projects_by_threshold(bridge_projects, 'Bridges', bridges_stats)
     traffic_signs_stats = calculate_statistics(traffic_signs_projects)
     nia_stats = calculate_statistics(nia_projects)
     fmr_stats = calculate_statistics(fmr_projects)
@@ -683,12 +781,25 @@ def process_roads_data(all_items):
         subcategory = project.get('multi_purpose_subcategory', 'Other Multi-Purpose Buildings')
         multi_purpose_by_subcategory[subcategory].append(project)
     
+    nia_by_subcategory = defaultdict(list)
+    for project in nia_projects:
+        subcategory = project.get('nia_subcategory', 'Other Irrigation Works')
+        project_copy = project.copy()
+        project_copy['cost_per_km_for_stats'] = project.get('cost_per_km', 0)
+        project_copy['num_components'] = 1
+        project_copy['original_cost_per_km'] = project.get('cost_per_km', 0)
+        nia_by_subcategory[subcategory].append(project_copy)
+
     # Flag schools by subcategory using total cost (not cost_per_km)
     schools_subcategory_stats = flag_projects_by_total_cost(schools_by_subcategory, 'Schools')
-    
+
     # Flag multi-purpose buildings per subcategory using total cost (not cost_per_km)
     multi_purpose_subcategory_stats = flag_projects_by_total_cost(multi_purpose_by_subcategory, 'Multi-Purpose Buildings')
-    
+
+    # Flag NIA projects per subcategory using cost per km
+    nia_subcategory_stats = flag_projects_by_subcategory(nia_by_subcategory, 'Irrigation Works (NIA)')
+    merge_flagging_back(nia_projects, nia_by_subcategory)
+
     # Flag rockfall netting using total cost (not cost_per_km)
     rockfall_grouped = {'Rockfall Netting': rockfall_netting_projects}
     rockfall_stats_dict = flag_projects_by_total_cost(rockfall_grouped, 'Rockfall Netting')
@@ -727,7 +838,8 @@ def process_roads_data(all_items):
         "nia": {
             "projects": nia_projects,
             "total": len(nia_projects),
-            "statistics": nia_stats
+            "statistics": nia_stats,
+            "subcategory_statistics": nia_subcategory_stats
         },
         "fmr": {
             "projects": fmr_projects,
@@ -1054,11 +1166,78 @@ def calculate_all_years_category_statistics(cache_2026):
                     category_aggregates[key]['total_distance_km'] += project.get('distance_km', 0)
                 if project.get('is_flagged', False):
                     category_aggregates[key]['flagged_projects'].append(project)
+            
+            # Irrigation Works (NIA)
+            nia_projects = year_data.get('nia', [])
+            nia_sub_stats = year_data.get('nia_subcategory_statistics', {})
+            if nia_sub_stats:
+                for subcategory in nia_sub_stats.keys():
+                    subcategory_projects = [
+                        p for p in nia_projects
+                        if (p.get('nia_subcategory') or 'Other Irrigation Works') == subcategory
+                    ]
+                    key = ('Irrigation Works (NIA)', subcategory)
+                    for project in subcategory_projects:
+                        project['year'] = year_str
+                        project_id = get_project_id(project)
+                        category_aggregates[key]['projects'].append(project)
+                        if project_id not in category_aggregates[key]['unique_projects']:
+                            category_aggregates[key]['unique_projects'].add(project_id)
+                            category_aggregates[key]['total_amount'] += project.get('amount', 0)
+                            category_aggregates[key]['total_distance_km'] += project.get('distance_km', 0)
+                        if project.get('is_flagged', False):
+                            category_aggregates[key]['flagged_projects'].append(project)
+            elif nia_projects:
+                key = ('Irrigation Works (NIA)', None)
+                for project in nia_projects:
+                    project['year'] = year_str
+                    project_id = get_project_id(project)
+                    category_aggregates[key]['projects'].append(project)
+                    if project_id not in category_aggregates[key]['unique_projects']:
+                        category_aggregates[key]['unique_projects'].add(project_id)
+                        category_aggregates[key]['total_amount'] += project.get('amount', 0)
+                        category_aggregates[key]['total_distance_km'] += project.get('distance_km', 0)
+                    if project.get('is_flagged', False):
+                        category_aggregates[key]['flagged_projects'].append(project)
     else:
         for project in multi_purpose_buildings:
             project['year'] = '2026'
             project_id = get_project_id(project)
             key = ('Multi-Purpose Buildings', None)
+            category_aggregates[key]['projects'].append(project)
+            if project_id not in category_aggregates[key]['unique_projects']:
+                category_aggregates[key]['unique_projects'].add(project_id)
+                category_aggregates[key]['total_amount'] += project.get('amount', 0)
+                category_aggregates[key]['total_distance_km'] += project.get('distance_km', 0)
+            if project.get('is_flagged', False):
+                category_aggregates[key]['flagged_projects'].append(project)
+    
+    # Irrigation Works (NIA) from 2026
+    nia_data = cache_2026.get('nia', {})
+    nia_projects = nia_data.get('projects', [])
+    nia_sub_stats = nia_data.get('subcategory_statistics', {})
+    if nia_sub_stats:
+        for subcategory in nia_sub_stats.keys():
+            subcategory_projects = [
+                p for p in nia_projects
+                if (p.get('nia_subcategory') or 'Other Irrigation Works') == subcategory
+            ]
+            key = ('Irrigation Works (NIA)', subcategory)
+            for project in subcategory_projects:
+                project['year'] = '2026'
+                project_id = get_project_id(project)
+                category_aggregates[key]['projects'].append(project)
+                if project_id not in category_aggregates[key]['unique_projects']:
+                    category_aggregates[key]['unique_projects'].add(project_id)
+                    category_aggregates[key]['total_amount'] += project.get('amount', 0)
+                    category_aggregates[key]['total_distance_km'] += project.get('distance_km', 0)
+                if project.get('is_flagged', False):
+                    category_aggregates[key]['flagged_projects'].append(project)
+    elif nia_projects:
+        key = ('Irrigation Works (NIA)', None)
+        for project in nia_projects:
+            project['year'] = '2026'
+            project_id = get_project_id(project)
             category_aggregates[key]['projects'].append(project)
             if project_id not in category_aggregates[key]['unique_projects']:
                 category_aggregates[key]['unique_projects'].add(project_id)

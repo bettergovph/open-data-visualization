@@ -1780,29 +1780,56 @@ async def budget_roads_cost_analysis_api(year: str = Query("2026", description="
         
         def extract_all_chainage_ranges(name: str):
             """Extract all chainage ranges from name and return list of (start_km, start_m, end_km, end_m)"""
+            if not name:
+                return []
+
             ranges = []
-            
-            # Pattern 1: K format - find all occurrences
-            pattern_k = r'K(\d+)\s*\+\s*\(?(-?\d+)\)?\s*-\s*K(\d+)\s*\+\s*\(?(-?\d+)\)?'
+            seen = set()
+
+            def parse_number(value):
+                if value is None:
+                    return 0.0
+                if isinstance(value, (int, float)):
+                    return float(value)
+                cleaned = str(value).replace(',', '')
+                try:
+                    return float(cleaned)
+                except ValueError:
+                    cleaned = re.sub(r'[^\d\.\-]', '', cleaned)
+                    return float(cleaned) if cleaned else 0.0
+
+            def add_range(start_km, start_m, end_km, end_m):
+                key = (
+                    float(parse_number(start_km)),
+                    float(parse_number(start_m)),
+                    float(parse_number(end_km)),
+                    float(parse_number(end_m))
+                )
+                if key not in seen:
+                    ranges.append(key)
+                    seen.add(key)
+
+            dash = r'[-–—]'
+            number = r'\d+(?:[.,]\d+)?'
+
+            pattern_k = rf'K({number})\s*\+\s*\(?(-?{number})\)?\s*{dash}\s*K({number})\s*\+\s*\(?(-?{number})\)?'
             for match in re.finditer(pattern_k, name, re.IGNORECASE):
-                ranges.append((int(match.group(1)), int(match.group(2)), int(match.group(3)), int(match.group(4))))
-            
-            # Pattern 2: Chainage format - find all occurrences
-            pattern_chainage = r'Chainage\s+(\d+)\s*-\s*Chainage\s+(\d+)'
+                add_range(match.group(1), match.group(2), match.group(3), match.group(4))
+
+            pattern_chainage = rf'Chainage\s+({number})\s*{dash}\s*Chainage\s+({number})'
             for match in re.finditer(pattern_chainage, name, re.IGNORECASE):
-                start_total = int(match.group(1))
-                end_total = int(match.group(2))
-                start_km = start_total // 1000
-                start_m = start_total % 1000
-                end_km = end_total // 1000
-                end_m = end_total % 1000
-                ranges.append((start_km, start_m, end_km, end_m))
-            
-            # Pattern 3: Sta. format - "Sta. 2+783 - Sta. 3+779"
-            pattern_sta = r'Sta\.\s*(\d+)\+(\d+)\s*-\s*Sta\.\s*(\d+)\+(\d+)'
+                start_total = parse_number(match.group(1))
+                end_total = parse_number(match.group(2))
+                add_range(start_total // 1000, start_total % 1000, end_total // 1000, end_total % 1000)
+
+            pattern_sta = rf'Sta\.?\s*({number})\s*\+\s*({number})\s*{dash}\s*(?:Sta\.?\s*)?({number})\s*\+\s*({number})'
             for match in re.finditer(pattern_sta, name, re.IGNORECASE):
-                ranges.append((int(match.group(1)), int(match.group(2)), int(match.group(3)), int(match.group(4))))
-            
+                add_range(match.group(1), match.group(2), match.group(3), match.group(4))
+
+            pattern_plain = rf'(?<![A-Za-z0-9])({number})\s*\+\s*({number})\s*{dash}\s*({number})\s*\+\s*({number})'
+            for match in re.finditer(pattern_plain, name):
+                add_range(match.group(1), match.group(2), match.group(3), match.group(4))
+
             return ranges
         
         def calculate_distance(chainage_ranges):
@@ -1845,23 +1872,24 @@ async def budget_roads_cost_analysis_api(year: str = Query("2026", description="
             """Format all chainage ranges for display"""
             if not ranges:
                 return None
-            
-            # Extract all chainage strings from the name
+
             chainage_strings = []
-            
-            # K format
             pattern_k = r'(K\d+\s*\+\s*\(?-?\d+\)?\s*-\s*K\d+\s*\+\s*\(?-?\d+\)?)'
             for match in re.finditer(pattern_k, name, re.IGNORECASE):
                 chainage_strings.append(match.group(1))
-            
-            # Chainage format
             pattern_chainage = r'(Chainage\s+\d+\s*-\s*Chainage\s+\d+)'
             for match in re.finditer(pattern_chainage, name, re.IGNORECASE):
                 chainage_strings.append(match.group(1))
-            
+            pattern_sta = r'(Sta\.?\s*\d+\+\d+\s*-\s*(?:Sta\.?\s*)?\d+\+\d+)'
+            for match in re.finditer(pattern_sta, name, re.IGNORECASE):
+                chainage_strings.append(match.group(1))
+            pattern_plain = r'(?<![A-Za-z0-9])(\d+\s*\+\s*\d+\s*-\s*\d+\s*\+\s*\d+)'
+            for match in re.finditer(pattern_plain, name):
+                chainage_strings.append(match.group(1))
+
             if chainage_strings:
                 return ', '.join(chainage_strings)
-            
+
             return None
         
         road_projects = []
@@ -2274,8 +2302,32 @@ async def budget_roads_cost_analysis_api(year: str = Query("2026", description="
                         project['flag_reason'] = f"Cost/km ({cost_to_check:,.2f}) exceeds {subcategory} threshold ({threshold:,.2f})"
                     else:
                         project['is_flagged'] = False
-            
+
             return subcategory_stats
+
+        def flag_projects_by_threshold_simple(projects, stats, category_name):
+            """Flag projects using mean + 0.1 * std_dev threshold"""
+            if not projects or not stats:
+                return
+
+            mean = stats.get('mean')
+            std_dev = stats.get('std_dev') or 0
+            threshold = None
+            if mean is not None:
+                threshold = mean + (0.1 * std_dev)
+
+            if not threshold or threshold <= 0:
+                for project in projects:
+                    project['is_flagged'] = False
+                return
+
+            for project in projects:
+                cost_per_km = project.get('cost_per_km', 0)
+                if cost_per_km and cost_per_km > threshold:
+                    project['is_flagged'] = True
+                    project['flag_reason'] = f"Cost/km ({cost_per_km:,.2f}) exceeds {category_name} threshold ({threshold:,.2f})"
+                else:
+                    project['is_flagged'] = False
         
         # Flag road safety facilities by subcategory
         road_safety_subcategory_stats = flag_projects_by_subcategory(road_safety_by_subcategory, 'Road Safety Facilities')
@@ -2336,6 +2388,7 @@ async def budget_roads_cost_analysis_api(year: str = Query("2026", description="
         secondary_roads_stats = calculate_statistics(secondary_road_projects)
         roads_stats = calculate_statistics(road_projects)  # Combined stats
         bridges_stats = calculate_statistics(bridge_projects)
+        flag_projects_by_threshold_simple(bridge_projects, bridges_stats, 'Bridges')
         traffic_signs_stats = calculate_statistics(traffic_signs_projects)
         nia_stats = calculate_statistics(nia_projects)
         fmr_stats = calculate_statistics(fmr_projects)
@@ -2569,6 +2622,45 @@ async def budget_category_statistics_api(year: str = "2026"):
                     "flagged_cost": buildings_flagged_cost,
                     "flagged_count": len(buildings_flagged),
                     "total_count": len(multi_purpose_buildings)
+                })
+
+            # Irrigation Works (NIA)
+            nia_data = cache_data.get('nia', {})
+            nia_projects = nia_data.get('projects', [])
+            nia_sub_stats = nia_data.get('subcategory_statistics', {})
+            if nia_sub_stats:
+                for subcategory, stats in nia_sub_stats.items():
+                    subcategory_projects = [
+                        p for p in nia_projects
+                        if (p.get('nia_subcategory') or 'Other Irrigation Works') == subcategory
+                    ]
+                    flagged_projects = [p for p in subcategory_projects if p.get('is_flagged', False)]
+                    flagged_cost = sum(p.get('amount', 0) for p in flagged_projects)
+                    categories.append({
+                        "category": "Irrigation Works (NIA)",
+                        "subcategory": subcategory,
+                        "average_cost_per_km": stats.get('mean') or 0,
+                        "threshold_cost_per_km": stats.get('threshold', 0),
+                        "flagged_cost": flagged_cost,
+                        "flagged_count": len(flagged_projects),
+                        "total_count": stats.get('count', len(subcategory_projects))
+                    })
+            elif nia_projects:
+                nia_stats_data = nia_data.get('statistics', {})
+                nia_avg_cost_km = nia_stats_data.get('mean') or 0
+                nia_flagged = [p for p in nia_projects if p.get('is_flagged', False)]
+                nia_flagged_cost = sum(p.get('amount', 0) for p in nia_flagged)
+                nia_threshold = 0
+                if nia_stats_data.get('mean') is not None and nia_stats_data.get('std_dev') is not None:
+                    nia_threshold = nia_stats_data['mean'] + (0.1 * nia_stats_data['std_dev'])
+                categories.append({
+                    "category": "Irrigation Works (NIA)",
+                    "subcategory": None,
+                    "average_cost_per_km": nia_avg_cost_km,
+                    "threshold_cost_per_km": nia_threshold,
+                    "flagged_cost": nia_flagged_cost,
+                    "flagged_count": len(nia_flagged),
+                    "total_count": len(nia_projects)
                 })
             
             # Rockfall Netting (always include, even if empty)
@@ -2881,23 +2973,56 @@ async def budget_roads_cost_analysis_all_years_api():
             
             def extract_all_chainage_ranges(name: str):
                 """Extract all chainage ranges from name and return list of (start_km, start_m, end_km, end_m)"""
+                if not name:
+                    return []
+
                 ranges = []
-                pattern_k = r'K(\d+)\s*\+\s*\(?(-?\d+)\)?\s*-\s*K(\d+)\s*\+\s*\(?(-?\d+)\)?'
+                seen = set()
+
+                def parse_number(value):
+                    if value is None:
+                        return 0.0
+                    if isinstance(value, (int, float)):
+                        return float(value)
+                    cleaned = str(value).replace(',', '')
+                    try:
+                        return float(cleaned)
+                    except ValueError:
+                        cleaned = re.sub(r'[^\d\.\-]', '', cleaned)
+                        return float(cleaned) if cleaned else 0.0
+
+                def add_range(start_km, start_m, end_km, end_m):
+                    key = (
+                        float(parse_number(start_km)),
+                        float(parse_number(start_m)),
+                        float(parse_number(end_km)),
+                        float(parse_number(end_m))
+                    )
+                    if key not in seen:
+                        ranges.append(key)
+                        seen.add(key)
+
+                dash = r'[-–—]'
+                number = r'\d+(?:[.,]\d+)?'
+
+                pattern_k = rf'K({number})\s*\+\s*\(?(-?{number})\)?\s*{dash}\s*K({number})\s*\+\s*\(?(-?{number})\)?'
                 for match in re.finditer(pattern_k, name, re.IGNORECASE):
-                    ranges.append((int(match.group(1)), int(match.group(2)), int(match.group(3)), int(match.group(4))))
-                pattern_chainage = r'Chainage\s+(\d+)\s*-\s*Chainage\s+(\d+)'
+                    add_range(match.group(1), match.group(2), match.group(3), match.group(4))
+
+                pattern_chainage = rf'Chainage\s+({number})\s*{dash}\s*Chainage\s+({number})'
                 for match in re.finditer(pattern_chainage, name, re.IGNORECASE):
-                    start_total = int(match.group(1))
-                    end_total = int(match.group(2))
-                    start_km = start_total // 1000
-                    start_m = start_total % 1000
-                    end_km = end_total // 1000
-                    end_m = end_total % 1000
-                    ranges.append((start_km, start_m, end_km, end_m))
-                # Pattern 3: Sta. format - "Sta. 2+783 - Sta. 3+779"
-                pattern_sta = r'Sta\.\s*(\d+)\+(\d+)\s*-\s*Sta\.\s*(\d+)\+(\d+)'
+                    start_total = parse_number(match.group(1))
+                    end_total = parse_number(match.group(2))
+                    add_range(start_total // 1000, start_total % 1000, end_total // 1000, end_total % 1000)
+
+                pattern_sta = rf'Sta\.?\s*({number})\s*\+\s*({number})\s*{dash}\s*(?:Sta\.?\s*)?({number})\s*\+\s*({number})'
                 for match in re.finditer(pattern_sta, name, re.IGNORECASE):
-                    ranges.append((int(match.group(1)), int(match.group(2)), int(match.group(3)), int(match.group(4))))
+                    add_range(match.group(1), match.group(2), match.group(3), match.group(4))
+
+                pattern_plain = rf'(?<![A-Za-z0-9])({number})\s*\+\s*({number})\s*{dash}\s*({number})\s*\+\s*({number})'
+                for match in re.finditer(pattern_plain, name):
+                    add_range(match.group(1), match.group(2), match.group(3), match.group(4))
+
                 return ranges
             
             def calculate_distance(chainage_ranges):
@@ -2949,11 +3074,18 @@ async def budget_roads_cost_analysis_all_years_api():
                 
                 # Check for NIA (National Irrigation Administration) projects - Annex A-4
                 nia_keywords = [
-                    'national irrigation', 'irrigation system', 'irrigation project', 
+                    'national irrigation', 'irrigation system', 'irrigation project',
                     'irrigation canal', 'communal irrigation', 'irrigation sub-program',
-                    'irrigation subprogram', 'irrigation facility', 'irrigation structure'
+                    'irrigation subprogram', 'irrigation facility', 'irrigation structure',
+                    'annex a-4', 'communal irrigation system', 'communal irrigation project',
+                    'communal irrigation scheme'
                 ]
-                is_nia = any(keyword in name_lower for keyword in nia_keywords) and \
+                nia_keyword_patterns = [
+                    r'\bnis\b', r'\bnia\b', r'\bcis\b', r'\bcip\b', r'\bsip\b',
+                    r'\bc\.i\.s\b', r'\bc\.i\.p\b', r'\bs\.i\.p\b'
+                ]
+                pattern_hit = any(re.search(pattern, name_lower) for pattern in nia_keyword_patterns)
+                is_nia = (any(keyword in name_lower for keyword in nia_keywords) or pattern_hit) and \
                          'cnia' not in name_lower and \
                          'xdp' not in name_lower and \
                          'dystonia' not in name_lower
@@ -3145,23 +3277,36 @@ async def budget_roads_statistics_all_years_api():
         all_items_2026 = data_2026.get('line_items', []) + data_2026.get('projects', [])
         
         def extract_all_chainage_ranges(name: str):
+            if not name:
+                return []
+
             ranges = []
+            seen = set()
+
+            def add_range(start_km, start_m, end_km, end_m):
+                key = (int(start_km), int(start_m), int(end_km), int(end_m))
+                if key not in seen:
+                    seen.add(key)
+                    ranges.append(key)
+
             pattern_k = r'K(\d+)\s*\+\s*\(?(-?\d+)\)?\s*-\s*K(\d+)\s*\+\s*\(?(-?\d+)\)?'
             for match in re.finditer(pattern_k, name, re.IGNORECASE):
-                ranges.append((int(match.group(1)), int(match.group(2)), int(match.group(3)), int(match.group(4))))
+                add_range(match.group(1), match.group(2), match.group(3), match.group(4))
+
             pattern_chainage = r'Chainage\s+(\d+)\s*-\s*Chainage\s+(\d+)'
             for match in re.finditer(pattern_chainage, name, re.IGNORECASE):
                 start_total = int(match.group(1))
                 end_total = int(match.group(2))
-                start_km = start_total // 1000
-                start_m = start_total % 1000
-                end_km = end_total // 1000
-                end_m = end_total % 1000
-                ranges.append((start_km, start_m, end_km, end_m))
-            # Pattern 3: Sta. format - "Sta. 2+783 - Sta. 3+779"
-            pattern_sta = r'Sta\.\s*(\d+)\+(\d+)\s*-\s*Sta\.\s*(\d+)\+(\d+)'
+                add_range(start_total // 1000, start_total % 1000, end_total // 1000, end_total % 1000)
+
+            pattern_sta = r'Sta\.?\s*(\d+)\+(\d+)\s*-\s*(?:Sta\.?\s*)?(\d+)\+(\d+)'
             for match in re.finditer(pattern_sta, name, re.IGNORECASE):
-                ranges.append((int(match.group(1)), int(match.group(2)), int(match.group(3)), int(match.group(4))))
+                add_range(match.group(1), match.group(2), match.group(3), match.group(4))
+
+            pattern_plain = r'(?<![A-Za-z0-9])(\d+)\s*\+\s*(\d+)\s*-\s*(\d+)\s*\+\s*(\d+)'
+            for match in re.finditer(pattern_plain, name):
+                add_range(match.group(1), match.group(2), match.group(3), match.group(4))
+
             return ranges
         
         def calculate_distance(chainage_ranges):

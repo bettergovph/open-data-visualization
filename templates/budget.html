@@ -10619,20 +10619,52 @@
                 roadsProjectNames[category] = [];
             }
 
-            const uniqueNames = new Set();
+            const normalizedNames = new Map();
+            const candidateFields = [
+                'name',
+                'project_name',
+                'revised_name',
+                'highway',
+                'road',
+                'road_name',
+                'segment_name',
+                'package_name'
+            ];
+            const aliasFields = ['aliases', 'alias', 'alt_names', 'alternative_names'];
+
+            const addNameCandidate = (value) => {
+                if (typeof value !== 'string') return;
+                const trimmed = value.trim();
+                if (!trimmed) return;
+                const normalized = trimmed.toLowerCase();
+                if (!normalizedNames.has(normalized)) {
+                    normalizedNames.set(normalized, trimmed);
+                }
+            };
+
             projects.forEach(project => {
-                ['name', 'revised_name', 'highway'].forEach(field => {
-                    const value = project && project[field];
-                    if (typeof value === 'string') {
-                        const trimmed = value.trim();
-                        if (trimmed) {
-                            uniqueNames.add(trimmed);
-                        }
+                if (!project) {
+                    return;
+                }
+
+                candidateFields.forEach(field => addNameCandidate(project[field]));
+
+                aliasFields.forEach(field => {
+                    const rawValue = project[field];
+                    if (!rawValue) return;
+                    if (Array.isArray(rawValue)) {
+                        rawValue.forEach(alias => addNameCandidate(alias));
+                    } else {
+                        addNameCandidate(rawValue);
                     }
                 });
+
+                if (Array.isArray(project.road_safety_subcategories)) {
+                    project.road_safety_subcategories.forEach(subcategory => addNameCandidate(subcategory));
+                }
             });
 
-            roadsProjectNames[category] = Array.from(uniqueNames).sort((a, b) => a.localeCompare(b));
+            roadsProjectNames[category] = Array.from(normalizedNames.values()).sort((a, b) => a.localeCompare(b));
         }
 
         function showRoadsAutocomplete(category, searchTerm) {
@@ -10657,15 +10689,23 @@
             }
 
             autocompleteEl.innerHTML = '';
+            const createSelectionHandler = (name) => (event) => {
+                event.preventDefault();
+                selectRoadsAutocomplete(category, name);
+            };
+            const supportsPointerEvents = typeof window !== 'undefined' && window.PointerEvent;
+
             matches.forEach(name => {
                 const item = document.createElement('div');
                 item.className = 'autocomplete-item';
                 item.textContent = name;
-                item.addEventListener('mousedown', (event) => {
-                    // Prevent the input from losing focus before selection
-                    event.preventDefault();
-                    selectRoadsAutocomplete(category, name);
-                });
+                const handler = createSelectionHandler(name);
+                if (supportsPointerEvents) {
+                    item.addEventListener('pointerdown', handler);
+                } else {
+                    item.addEventListener('mousedown', handler);
+                    item.addEventListener('touchstart', handler, { passive: false });
+                }
                 autocompleteEl.appendChild(item);
             });
 
@@ -10676,6 +10716,11 @@
         function hideRoadsAutocomplete(category) {
             const config = roadsSearchConfig[category];
             if (!config) return;
+
+            if (roadsAutocompleteBlurTimers[category]) {
+                clearTimeout(roadsAutocompleteBlurTimers[category]);
+                roadsAutocompleteBlurTimers[category] = null;
+            }
 
             const autocompleteEl = document.getElementById(config.autocompleteId);
             if (autocompleteEl) {
@@ -10754,13 +10799,23 @@
             });
 
             searchEl.addEventListener('focus', () => {
+                if (roadsAutocompleteBlurTimers[category]) {
+                    clearTimeout(roadsAutocompleteBlurTimers[category]);
+                    roadsAutocompleteBlurTimers[category] = null;
+                }
                 if (searchEl.value) {
                     showRoadsAutocomplete(category, searchEl.value);
                 }
             });
 
             searchEl.addEventListener('blur', () => {
-                setTimeout(() => hideRoadsAutocomplete(category), 150);
+                roadsAutocompleteBlurTimers[category] = setTimeout(() => {
+                    const autocompleteEl = document.getElementById(config.autocompleteId);
+                    const activeEl = document.activeElement;
+                    if (!autocompleteEl || !autocompleteEl.contains(activeEl)) {
+                        hideRoadsAutocomplete(category);
+                    }
+                }, 120);
             });
 
             searchEl.addEventListener('keydown', (event) => {
@@ -10795,7 +10850,7 @@
                 }
             });
 
-            document.addEventListener('click', (event) => {
+            document.addEventListener('pointerdown', (event) => {
                 const autocompleteEl = document.getElementById(config.autocompleteId);
                 const inputEl = document.getElementById(config.inputId);
                 if (!autocompleteEl || autocompleteEl.style.display === 'none') {
@@ -11931,7 +11986,11 @@
             'rockfall netting': 'Rockfall Netting',
             'rock fall netting': 'Rockfall Netting',
             'schools': 'Schools',
-            'bridges': 'Bridges'
+            'bridges': 'Bridges',
+            'nia': 'Irrigation Works (NIA)',
+            'irrigation works (nia)': 'Irrigation Works (NIA)',
+            'irrigation works': 'Irrigation Works (NIA)',
+            'national irrigation administration': 'Irrigation Works (NIA)'
         };
 
         const multiPurposeCategoryPatterns = [
@@ -11996,6 +12055,13 @@
                     } else {
                         enhanced.push(normalizedItem);
                     }
+                } else if (normalizedCategory === 'Irrigation Works (NIA)') {
+                    normalizedItem.parentCategory = 'Irrigation Works (NIA)';
+                    const hasBackendSubcategory = normalizedSubcategory && normalizedSubcategory !== '-' && normalizedSubcategory.toLowerCase() !== 'none';
+                    if (!hasBackendSubcategory) {
+                        normalizedItem.subcategory = 'Other Irrigation Works';
+                    }
+                    enhanced.push(normalizedItem);
                 } else {
                     enhanced.push(normalizedItem);
                 }
@@ -12036,7 +12102,7 @@
 
             let html = '';
             const baseCategoryOrder = ['Bridges', 'Road Safety Facilities', 'Major Roads', 'Minor Roads'];
-            const categoryOrder = [...baseCategoryOrder, ...multiPurposeCategoryLabels, 'Multi-Purpose Buildings', 'Rockfall Netting', 'Schools'];
+            const categoryOrder = [...baseCategoryOrder, 'Irrigation Works (NIA)', ...multiPurposeCategoryLabels, 'Multi-Purpose Buildings', 'Rockfall Netting', 'Schools'];
 
             // Calculate totals for each category and grand total
             const categoryTotals = {};
@@ -12326,6 +12392,13 @@
             bridges: -1,
             traffic_signs: -1,
             roads: -1
+        };
+        const roadsAutocompleteBlurTimers = {
+            national_roads: null,
+            secondary_roads: null,
+            bridges: null,
+            traffic_signs: null,
+            roads: null
         };
         let reblockSummaryTotals = null;
         let reblockSummaryYearTotals = null;
