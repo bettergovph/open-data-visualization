@@ -2531,26 +2531,45 @@ async def budget_category_statistics_api(year: str = "2026"):
                     "total_count": stats.get('count', 0)
                 })
             
-            # Multi-Purpose Buildings (always include, even if empty)
-            multi_purpose_buildings = cache_data.get('multi_purpose_buildings', {}).get('projects', [])
-            buildings_flagged = [p for p in multi_purpose_buildings if p.get('is_flagged', False)]
-            buildings_stats_data = cache_data.get('multi_purpose_buildings', {}).get('statistics', {})
-            buildings_avg_cost_km = buildings_stats_data.get('mean') or 0
-            buildings_flagged_cost = sum(p.get('amount', 0) for p in buildings_flagged)
-            
-            buildings_threshold = 0
-            if buildings_stats_data.get('mean') is not None and buildings_stats_data.get('std_dev') is not None:
-                buildings_threshold = buildings_stats_data['mean'] + (0.1 * buildings_stats_data['std_dev'])
-            
-            categories.append({
-                "category": "Multi-Purpose Buildings",
-                "subcategory": None,
-                "average_cost_per_km": buildings_avg_cost_km,
-                "threshold_cost_per_km": buildings_threshold,
-                "flagged_cost": buildings_flagged_cost,
-                "flagged_count": len(buildings_flagged),
-                "total_count": len(multi_purpose_buildings)
-            })
+            # Multi-Purpose Buildings (grouped by derived subcategories when available)
+            multi_purpose_data = cache_data.get('multi_purpose_buildings', {})
+            multi_purpose_buildings = multi_purpose_data.get('projects', [])
+            multi_purpose_sub_stats = multi_purpose_data.get('subcategory_statistics', {})
+            if multi_purpose_sub_stats:
+                for subcategory, stats in multi_purpose_sub_stats.items():
+                    subcategory_projects = [
+                        p for p in multi_purpose_buildings
+                        if (p.get('multi_purpose_subcategory') or 'Other Multi-Purpose Buildings') == subcategory
+                    ]
+                    flagged_projects = [p for p in subcategory_projects if p.get('is_flagged', False)]
+                    flagged_cost = sum(p.get('amount', 0) for p in flagged_projects)
+                    categories.append({
+                        "category": "Multi-Purpose Buildings",
+                        "subcategory": subcategory,
+                        "average_cost_per_km": stats.get('mean') or 0,
+                        "threshold_cost_per_km": stats.get('threshold', 0),
+                        "flagged_cost": flagged_cost,
+                        "flagged_count": len(flagged_projects),
+                        "total_count": stats.get('count', len(subcategory_projects))
+                    })
+            else:
+                buildings_flagged = [p for p in multi_purpose_buildings if p.get('is_flagged', False)]
+                buildings_stats_data = multi_purpose_data.get('statistics', {})
+                buildings_avg_cost_km = buildings_stats_data.get('mean') or 0
+                buildings_flagged_cost = sum(p.get('amount', 0) for p in buildings_flagged)
+                buildings_threshold = 0
+                if buildings_stats_data.get('mean') is not None and buildings_stats_data.get('std_dev') is not None:
+                    buildings_threshold = buildings_stats_data['mean'] + (0.1 * buildings_stats_data['std_dev'])
+                
+                categories.append({
+                    "category": "Multi-Purpose Buildings",
+                    "subcategory": None,
+                    "average_cost_per_km": buildings_avg_cost_km,
+                    "threshold_cost_per_km": buildings_threshold,
+                    "flagged_cost": buildings_flagged_cost,
+                    "flagged_count": len(buildings_flagged),
+                    "total_count": len(multi_purpose_buildings)
+                })
             
             # Rockfall Netting (always include, even if empty)
             rockfall_netting = cache_data.get('rockfall_netting', {}).get('projects', [])
@@ -2729,26 +2748,45 @@ async def budget_category_statistics_api(year: str = "2026"):
                     "total_count": stats.get('count', 0)
                 })
             
-            # Multi-Purpose Buildings (always include, even if empty)
+            # Multi-Purpose Buildings (grouped by derived subcategories when available)
             multi_purpose_buildings = year_data.get('multi_purpose_buildings', [])
-            buildings_flagged = [p for p in multi_purpose_buildings if p.get('is_flagged', False)]
-            buildings_stats_data = year_data.get('multi_purpose_buildings_statistics', {})
-            buildings_avg_cost_km = buildings_stats_data.get('mean') or 0
-            buildings_flagged_cost = sum(p.get('amount', 0) for p in buildings_flagged)
-            
-            buildings_threshold = 0
-            if buildings_stats_data.get('mean') is not None and buildings_stats_data.get('std_dev') is not None:
-                buildings_threshold = buildings_stats_data['mean'] + (0.1 * buildings_stats_data['std_dev'])
-            
-            categories.append({
-                "category": "Multi-Purpose Buildings",
-                "subcategory": None,
-                "average_cost_per_km": buildings_avg_cost_km,
-                "threshold_cost_per_km": buildings_threshold,
-                "flagged_cost": buildings_flagged_cost,
-                "flagged_count": len(buildings_flagged),
-                "total_count": len(multi_purpose_buildings)
-            })
+            multi_purpose_sub_stats = year_data.get('multi_purpose_buildings_subcategory_statistics', {})
+            if multi_purpose_sub_stats:
+                for subcategory, stats in multi_purpose_sub_stats.items():
+                    subcategory_projects = [
+                        p for p in multi_purpose_buildings
+                        if (p.get('multi_purpose_subcategory') or 'Other Multi-Purpose Buildings') == subcategory
+                    ]
+                    flagged_projects = [p for p in subcategory_projects if p.get('is_flagged', False)]
+                    flagged_cost = sum(p.get('amount', 0) for p in flagged_projects)
+                    categories.append({
+                        "category": "Multi-Purpose Buildings",
+                        "subcategory": subcategory,
+                        "average_cost_per_km": stats.get('mean') or 0,
+                        "threshold_cost_per_km": stats.get('threshold', 0),
+                        "flagged_cost": flagged_cost,
+                        "flagged_count": len(flagged_projects),
+                        "total_count": stats.get('count', len(subcategory_projects))
+                    })
+            else:
+                buildings_flagged = [p for p in multi_purpose_buildings if p.get('is_flagged', False)]
+                buildings_stats_data = year_data.get('multi_purpose_buildings_statistics', {})
+                buildings_avg_cost_km = buildings_stats_data.get('mean') or 0
+                buildings_flagged_cost = sum(p.get('amount', 0) for p in buildings_flagged)
+                
+                buildings_threshold = 0
+                if buildings_stats_data.get('mean') is not None and buildings_stats_data.get('std_dev') is not None:
+                    buildings_threshold = buildings_stats_data['mean'] + (0.1 * buildings_stats_data['std_dev'])
+                
+                categories.append({
+                    "category": "Multi-Purpose Buildings",
+                    "subcategory": None,
+                    "average_cost_per_km": buildings_avg_cost_km,
+                    "threshold_cost_per_km": buildings_threshold,
+                    "flagged_cost": buildings_flagged_cost,
+                    "flagged_count": len(buildings_flagged),
+                    "total_count": len(multi_purpose_buildings)
+                })
             
             # Rockfall Netting (always include, even if empty)
             rockfall_netting = year_data.get('rockfall_netting', [])
