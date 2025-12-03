@@ -9409,22 +9409,43 @@
             document.addEventListener('DOMContentLoaded', function () {
                 console.log('🚀 [BUDGET] DOMContentLoaded fired!');
 
+                // Initialize tabs first so they're ready for hash navigation
+                console.log('🚀 [BUDGET] About to initialize tabs...');
+                initializeTabs();
+
+                // Initialize data browser
+                initializeDataBrowser();
+
                 // Check for hash in URL and switch to that tab
-                const hash = window.location.hash.substring(1); // Remove the # character
-                if (hash && ['visual', 'browser', 'insertion', 'win', 'duplicate', 'dpwh', 'nia', 'zero'].includes(hash)) {
-                    switchToTab(hash, false); // Don't update hash since we're reading from it
-                }
+                // Use a small delay to ensure DOM is fully ready
+                setTimeout(() => {
+                    const hash = window.location.hash.substring(1); // Remove the # character
+                    if (hash) {
+                        // Check if the tab exists by looking for the tab panel
+                        const tabPanel = document.getElementById(`tab-${hash}`);
+                        if (tabPanel) {
+                            console.log(`🔍 [Hash] Switching to tab: ${hash}`);
+                            switchToTab(hash, false); // Don't update hash since we're reading from it
+                        } else {
+                            console.warn(`⚠️ [Hash] Tab panel not found for: ${hash}`);
+                        }
+                    }
+                }, 100);
 
                 // Listen for hash changes
                 window.addEventListener('hashchange', function () {
                     const newHash = window.location.hash.substring(1);
-                    if (newHash && ['visual', 'browser', 'insertion', 'win', 'duplicate', 'dpwh', 'nia', 'zero'].includes(newHash)) {
-                        switchToTab(newHash, false);
+                    if (newHash) {
+                        // Check if the tab exists by looking for the tab panel
+                        const tabPanel = document.getElementById(`tab-${newHash}`);
+                        if (tabPanel) {
+                            console.log(`🔍 [HashChange] Switching to tab: ${newHash}`);
+                            switchToTab(newHash, false);
+                        } else {
+                            console.warn(`⚠️ [HashChange] Tab panel not found for: ${newHash}`);
+                        }
                     }
                 });
-
-                // Initialize data browser
-                initializeDataBrowser();
 
                 // Add year filter event listeners
                 const yearFilter = document.getElementById('year-filter');
@@ -9532,9 +9553,6 @@
                             }
                         }, 200);
                     });
-
-                console.log('🚀 [BUDGET] About to initialize tabs...');
-                initializeTabs();
 
                 // Load analysis overview data
                 loadAnalysisOverview();
