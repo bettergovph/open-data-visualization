@@ -8298,9 +8298,83 @@
             </div>
         </div>
 
+        <!-- Category Totals Charts -->
+        <div id="cat-chart-section" style="margin-top: 2rem; display: flex; flex-direction: column; gap: 1.5rem;">
+            <div
+                style="background: white; border-radius: 10px; padding: 1.5rem; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
+                <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 1rem;">
+                    <div>
+                        <h4 style="margin: 0 0 0.25rem 0; color: #0038A8;">Flagged Cost by Category (2020-2026)</h4>
+                        <p style="margin: 0; color: #666; font-size: 0.9rem;">Compare each category's total flagged cost
+                            per year. Bars are grouped by category and color-coded by year similar to the Road Statistics
+                            tab. Multi-Purpose Buildings and Major Roads have dedicated charts below.</p>
+                    </div>
+                    <button id="copyCategoryTotalsChartBtn"
+                        onclick="copyChartToClipboard('category-totals-chart-wrapper', 'copyCategoryTotalsChartBtn')"
+                        style="padding: 0.5rem 1rem; background: #0038A8; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: 600; font-size: 0.9em; white-space: nowrap;">
+                        📋 Copy Chart
+                    </button>
+                </div>
+                <div id="cat-chart-loading"
+                    style="display: flex; align-items: center; justify-content: center; padding: 2rem; color: #666;">
+                    Loading chart data...
+                </div>
+                <div id="category-totals-chart-wrapper" style="display: none; height: 420px;">
+                    <canvas id="categoryTotalsChart" height="420"></canvas>
+                </div>
+            </div>
+
+            <div
+                style="background: white; border-radius: 10px; padding: 1.5rem; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
+                <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 1rem;">
+                    <div>
+                        <h4 style="margin: 0 0 0.25rem 0; color: #0038A8;">Major Roads Flagged Cost (2020-2026)</h4>
+                        <p style="margin: 0; color: #666; font-size: 0.9rem;">Year-on-year flagged cost totals just for
+                            the Major Roads category.</p>
+                    </div>
+                    <button id="copyMajorRoadsChartBtn"
+                        onclick="copyChartToClipboard('major-roads-chart-wrapper', 'copyMajorRoadsChartBtn')"
+                        style="padding: 0.5rem 1rem; background: #0038A8; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: 600; font-size: 0.9em; white-space: nowrap;">
+                        📋 Copy Chart
+                    </button>
+                </div>
+                <div id="major-roads-chart-message"
+                    style="display: none; padding: 1rem 0; text-align: center; color: #666;">
+                    No Major Roads data available for the selected years.
+                </div>
+                <div id="major-roads-chart-wrapper" style="display: none; height: 360px;">
+                    <canvas id="majorRoadsTotalsChart" height="360"></canvas>
+                </div>
+            </div>
+
+            <div
+                style="background: white; border-radius: 10px; padding: 1.5rem; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
+                <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 1rem;">
+                    <div>
+                        <h4 style="margin: 0 0 0.25rem 0; color: #0038A8;">Multi-Purpose Buildings Flagged Cost
+                            (2020-2026)</h4>
+                        <p style="margin: 0; color: #666; font-size: 0.9rem;">Year-on-year flagged cost totals for
+                            Multi-Purpose Buildings.</p>
+                    </div>
+                    <button id="copyMultiPurposeChartBtn"
+                        onclick="copyChartToClipboard('multi-purpose-chart-wrapper', 'copyMultiPurposeChartBtn')"
+                        style="padding: 0.5rem 1rem; background: #0038A8; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: 600; font-size: 0.9em; white-space: nowrap;">
+                        📋 Copy Chart
+                    </button>
+                </div>
+                <div id="multi-purpose-chart-message"
+                    style="display: none; padding: 1rem 0; text-align: center; color: #666;">
+                    No Multi-Purpose Buildings data available for the selected years.
+                </div>
+                <div id="multi-purpose-chart-wrapper" style="display: none; height: 360px;">
+                    <canvas id="multiPurposeTotalsChart" height="360"></canvas>
+                </div>
+            </div>
+        </div>
+
         <!-- Category Statistics Table -->
         <div id="cat-table-container"
-            style="background: white; border-radius: 10px; padding: 1.5rem; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
+            style="margin-top: 2rem; background: white; border-radius: 10px; padding: 1.5rem; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
             <table id="cat-statistics-table" style="width: 100%; border-collapse: collapse; font-size: 0.9rem;">
                 <thead>
                     <tr style="background: linear-gradient(135deg, #0038A8 0%, #003087 100%); color: white;">
@@ -11947,6 +12021,25 @@
         }
 
         // Category Statistics Functions
+        async function fetchCategoryStatisticsData(year = '2026') {
+            if (categoryStatisticsCache[year]) {
+                return categoryStatisticsCache[year];
+            }
+
+            const response = await fetch(`/api/budget/category-statistics?year=${year}`);
+            if (!response.ok) {
+                throw new Error(`API error: ${response.status}`);
+            }
+
+            const data = await response.json();
+            if (!data.success) {
+                throw new Error(data.error || 'Failed to load category statistics');
+            }
+
+            categoryStatisticsCache[year] = data.categories || [];
+            return categoryStatisticsCache[year];
+        }
+
         async function loadCategoryStatistics(year = '2026') {
             const spinner = document.getElementById('cat-loading-spinner');
             const tbody = document.getElementById('cat-statistics-tbody');
@@ -11955,17 +12048,11 @@
             if (tbody) tbody.innerHTML = '<tr><td colspan="6" style="padding: 2rem; text-align: center; color: #666;">Loading...</td></tr>';
 
             try {
-                const response = await fetch(`/api/budget/category-statistics?year=${year}`);
-                if (!response.ok) {
-                    throw new Error(`API error: ${response.status}`);
+                const categories = await fetchCategoryStatisticsData(year);
+                displayCategoryStatistics(categories);
+                if (!categoryTotalsChartInitialized && !categoryTotalsChartLoading) {
+                    loadCategoryTotalsChart();
                 }
-
-                const data = await response.json();
-                if (!data.success) {
-                    throw new Error(data.error || 'Failed to load category statistics');
-                }
-
-                displayCategoryStatistics(data.categories);
             } catch (error) {
                 console.error('Error loading category statistics:', error);
                 if (tbody) {
@@ -11992,6 +12079,15 @@
             'irrigation works': 'Irrigation Works (NIA)',
             'national irrigation administration': 'Irrigation Works (NIA)'
         };
+
+        const categoryStatisticsCache = {};
+        const CATEGORY_CHART_YEARS = ['2020', '2021', '2022', '2023', '2024', '2025', '2026'];
+        const CATEGORY_CHART_EXCLUDED = new Set(['Major Roads', 'Multi-Purpose Buildings']);
+        let categoryTotalsChart = null;
+        let majorRoadsChart = null;
+        let multiPurposeChart = null;
+        let categoryTotalsChartInitialized = false;
+        let categoryTotalsChartLoading = false;
 
         const multiPurposeCategoryPatterns = [
             { label: 'Multi-Purpose Buildings - Barangay Facilities', patterns: [/\bbarangay\b/i, /\bbrgy\b/i] },
@@ -12217,6 +12313,237 @@
         `;
 
             tbody.innerHTML = html;
+        }
+
+        function formatCurrencyFull(value) {
+            const numericValue = Number(value) || 0;
+            return `₱${numericValue.toLocaleString('en-US', { maximumFractionDigits: 0 })}`;
+        }
+
+        function formatCurrencyShort(value) {
+            const numericValue = Number(value) || 0;
+            if (numericValue >= 1_000_000_000) {
+                return `₱${(numericValue / 1_000_000_000).toFixed(1)}B`;
+            }
+            if (numericValue >= 1_000_000) {
+                return `₱${(numericValue / 1_000_000).toFixed(1)}M`;
+            }
+            if (numericValue >= 1_000) {
+                return `₱${(numericValue / 1_000).toFixed(1)}K`;
+            }
+            return `₱${numericValue.toFixed(0)}`;
+        }
+
+        async function loadCategoryTotalsChart() {
+            if (categoryTotalsChartInitialized || categoryTotalsChartLoading) {
+                return;
+            }
+            if (typeof Chart === 'undefined') {
+                console.warn('Chart.js is not loaded. Category totals chart will not be rendered.');
+                return;
+            }
+
+            const loadingEl = document.getElementById('cat-chart-loading');
+            const chartWrapper = document.getElementById('category-totals-chart-wrapper');
+
+            categoryTotalsChartLoading = true;
+            if (loadingEl) {
+                loadingEl.style.display = 'flex';
+                loadingEl.textContent = 'Loading chart data...';
+            }
+
+            try {
+                const totalsByYear = {};
+                const categorySet = new Set();
+
+                for (const year of CATEGORY_CHART_YEARS) {
+                    const rawCategories = await fetchCategoryStatisticsData(year);
+                    const normalized = enhanceCategoryStatisticsData(rawCategories);
+                    const yearlyTotals = {};
+
+                    normalized.forEach(item => {
+                        const baseCategory = item.parentCategory || item.category;
+                        const flaggedCost = item.flagged_cost || 0;
+                        yearlyTotals[baseCategory] = (yearlyTotals[baseCategory] || 0) + flaggedCost;
+                    });
+
+                    totalsByYear[year] = yearlyTotals;
+                    Object.keys(yearlyTotals).forEach(category => categorySet.add(category));
+                }
+
+                const categoryLabels = Array.from(categorySet).sort((a, b) => a.localeCompare(b));
+                const filteredLabels = categoryLabels.filter(label => !CATEGORY_CHART_EXCLUDED.has(label));
+                if (!categoryLabels.length) {
+                    if (loadingEl) {
+                        loadingEl.textContent = 'No category data available for chart.';
+                    }
+                    return;
+                }
+
+                const canRenderTotals = filteredLabels.length > 0;
+                if (canRenderTotals) {
+                    if (loadingEl) {
+                        loadingEl.style.display = 'none';
+                    }
+                    if (chartWrapper) {
+                        chartWrapper.style.display = 'block';
+                    }
+                    renderCategoryTotalsChart(filteredLabels, totalsByYear);
+                } else if (loadingEl) {
+                    loadingEl.style.display = 'flex';
+                    loadingEl.textContent = 'No categories to display.';
+                }
+
+                renderSingleCategoryChart('Major Roads', totalsByYear, 'major-roads-chart-wrapper', 'major-roads-chart-message', 'majorRoadsTotalsChart');
+                renderSingleCategoryChart('Multi-Purpose Buildings', totalsByYear, 'multi-purpose-chart-wrapper', 'multi-purpose-chart-message', 'multiPurposeTotalsChart');
+                categoryTotalsChartInitialized = true;
+            } catch (error) {
+                console.error('Error loading category totals chart:', error);
+                if (loadingEl) {
+                    loadingEl.style.display = 'flex';
+                    loadingEl.textContent = `Error loading chart: ${error.message}`;
+                }
+            } finally {
+                categoryTotalsChartLoading = false;
+            }
+        }
+
+        function renderCategoryTotalsChart(categoryLabels, totalsByYear) {
+            const canvas = document.getElementById('categoryTotalsChart');
+            if (!canvas) return;
+
+            const ctx = canvas.getContext('2d');
+            if (categoryTotalsChart) {
+                categoryTotalsChart.destroy();
+            }
+
+            const datasets = CATEGORY_CHART_YEARS.map(year => {
+                const colors = yearColors[year] || yearColors['2026'];
+                return {
+                    label: year,
+                    data: categoryLabels.map(category => Math.round(totalsByYear[year]?.[category] || 0)),
+                    backgroundColor: colors ? colors.light : '#e0e0e0',
+                    borderColor: colors ? colors.dark : '#0038A8',
+                    borderWidth: 1
+                };
+            });
+
+            categoryTotalsChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: categoryLabels,
+                    datasets: datasets
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    interaction: {
+                        mode: 'index',
+                        intersect: false
+                    },
+                    scales: {
+                        x: {
+                            stacked: false,
+                            ticks: {
+                                autoSkip: false,
+                                maxRotation: 45,
+                                minRotation: 45
+                            }
+                        },
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                callback: (value) => formatCurrencyShort(value)
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            position: 'top'
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: (context) => {
+                                    const value = context.parsed.y ?? context.parsed;
+                                    return `${context.dataset.label}: ${formatCurrencyFull(value)}`;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        function renderSingleCategoryChart(categoryName, totalsByYear, wrapperId, messageId, canvasId) {
+            const wrapper = document.getElementById(wrapperId);
+            const message = document.getElementById(messageId);
+            const canvas = document.getElementById(canvasId);
+            if (!wrapper || !message || !canvas || typeof Chart === 'undefined') {
+                return;
+            }
+
+            const dataValues = CATEGORY_CHART_YEARS.map(year => Math.round(totalsByYear[year]?.[categoryName] || 0));
+            const hasData = dataValues.some(value => value > 0);
+            if (!hasData) {
+                message.style.display = 'block';
+                wrapper.style.display = 'none';
+                if (categoryName === 'Major Roads' && majorRoadsChart) {
+                    majorRoadsChart.destroy();
+                    majorRoadsChart = null;
+                } else if (categoryName === 'Multi-Purpose Buildings' && multiPurposeChart) {
+                    multiPurposeChart.destroy();
+                    multiPurposeChart = null;
+                }
+                return;
+            }
+
+            message.style.display = 'none';
+            wrapper.style.display = 'block';
+
+            const backgroundColors = CATEGORY_CHART_YEARS.map(year => (yearColors[year] || yearColors['2026']).light);
+            const borderColors = CATEGORY_CHART_YEARS.map(year => (yearColors[year] || yearColors['2026']).dark);
+            const ctx = canvas.getContext('2d');
+            const chartConfig = {
+                type: 'bar',
+                data: {
+                    labels: CATEGORY_CHART_YEARS,
+                    datasets: [{
+                        label: `${categoryName} Flagged Cost`,
+                        data: dataValues,
+                        backgroundColor: backgroundColors,
+                        borderColor: borderColors,
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                callback: (value) => formatCurrencyShort(value)
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            callbacks: {
+                                label: (context) => formatCurrencyFull(context.parsed.y ?? context.parsed)
+                            }
+                        }
+                    }
+                }
+            };
+
+            if (categoryName === 'Major Roads') {
+                if (majorRoadsChart) majorRoadsChart.destroy();
+                majorRoadsChart = new Chart(ctx, chartConfig);
+            } else if (categoryName === 'Multi-Purpose Buildings') {
+                if (multiPurposeChart) multiPurposeChart.destroy();
+                multiPurposeChart = new Chart(ctx, chartConfig);
+            }
         }
 
         // Load data when tab is activated
