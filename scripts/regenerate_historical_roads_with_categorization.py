@@ -22,6 +22,53 @@ from datetime import datetime
 import statistics
 from collections import Counter, defaultdict
 
+MULTI_PURPOSE_SUBCATEGORY_PATTERNS = [
+    ("Barangay Facilities", ['barangay', 'brgy']),
+    ("Religious / Church", ['church', 'chapel', 'parish', 'cathedral', 'shrine', 'basilica', 'convent', 'diocese', 'mission']),
+    ("Schools / Education", ['school', 'college', 'university', 'campus', 'academy', 'institute']),
+    ("Museums / Cultural", ['museum', 'cultural', 'heritage', 'history', 'arts center', 'art center', 'auditorium', 'library', 'theater']),
+    ("Government / Civic", ['municipal', 'city', 'provincial', 'capitol', 'government', 'civic', 'administrative', 'lgu', "people's center", 'peoples center']),
+    ("Health / Social Services", ['health', 'medical', 'hospital', 'clinic', 'birthing', 'wellness', 'senior citizen', 'social welfare', 'rehabilitation']),
+    ("Evacuation / DRRM", ['evacuation', 'disaster', 'drrm', 'rescue', 'operations center', 'command center', 'relief']),
+    ("Sports / Youth", ['sports', 'gymnasium', 'stadium', 'coliseum', 'covered court', 'youth', 'athletic']),
+    ("Markets / Economic Hubs", ['market', 'bagsakan', 'trading', 'trade', 'terminal', 'commerce'])
+]
+
+def _categorize_multi_purpose_subcategory(name_lower: str) -> str:
+    target = name_lower or ''
+    for label, keywords in MULTI_PURPOSE_SUBCATEGORY_PATTERNS:
+        for keyword in keywords:
+            if keyword in target:
+                return label
+    return "Other Multi-Purpose Buildings"
+
+def _calculate_amount_statistics(costs):
+    if not costs:
+        return {
+            "min": None,
+            "max": None,
+            "mean": None,
+            "median": None,
+            "mode": None,
+            "std_dev": None,
+            "threshold": None,
+            "count": 0
+        }
+    rounded_costs = [round(c / 1000000) * 1000000 for c in costs]
+    mode_value = Counter(rounded_costs).most_common(1)[0][0] if rounded_costs else None
+    std_dev = statistics.stdev(costs) if len(costs) > 1 else 0
+    threshold = statistics.mean(costs) + (0.1 * std_dev) if costs else None
+    return {
+        "min": min(costs),
+        "max": max(costs),
+        "mean": statistics.mean(costs),
+        "median": statistics.median(costs),
+        "mode": mode_value,
+        "std_dev": std_dev,
+        "threshold": threshold,
+        "count": len(costs)
+    }
+
 # Import categorization functions from visualization.py
 # We'll copy them here to avoid import issues
 def _categorize_single_component(component_lower: str) -> list:
@@ -554,6 +601,7 @@ class HistoricalRoadsRegenerator:
                 }
                 
                 if is_multi_purpose_building:
+                    project_data['multi_purpose_subcategory'] = _categorize_multi_purpose_subcategory(name_lower)
                     multi_purpose_buildings.append(project_data)
                     continue  # Skip further categorization
                 elif is_rockfall_netting:
@@ -915,19 +963,29 @@ class HistoricalRoadsRegenerator:
             subcategory = project.get('school_subcategory', 'Other School Projects')
             schools_by_subcategory[subcategory].append(project)
         
+        # Group multi-purpose buildings by derived subcategory
+        multi_purpose_by_subcategory = defaultdict(list)
+        for project in multi_purpose_buildings:
+            subcategory = project.get('multi_purpose_subcategory', 'Other Multi-Purpose Buildings')
+            multi_purpose_by_subcategory[subcategory].append(project)
+        
         # Calculate subcategory statistics for schools
         schools_subcategory_stats = {}
         for subcategory, subcategory_projects in schools_by_subcategory.items():
             schools_subcategory_stats[subcategory] = calculate_statistics(subcategory_projects)
         
-        # Flag new categories that exceed threshold
-        if multi_purpose_buildings_stats.get('mean') is not None and multi_purpose_buildings_stats.get('std_dev') is not None:
-            buildings_threshold = multi_purpose_buildings_stats['mean'] + (0.1 * multi_purpose_buildings_stats['std_dev'])
-            for building in multi_purpose_buildings:
-                cost_per_km = building.get('cost_per_km', 0)
-                if buildings_threshold and cost_per_km > buildings_threshold:
+        # Calculate subcategory statistics for multi-purpose buildings (amount-based) and flag
+        multi_purpose_subcategory_stats = {}
+        for subcategory, subcategory_projects in multi_purpose_by_subcategory.items():
+            costs = [p.get('amount', 0) for p in subcategory_projects if p.get('amount', 0) > 0]
+            stats = _calculate_amount_statistics(costs)
+            multi_purpose_subcategory_stats[subcategory] = stats
+            threshold = stats.get('threshold')
+            for building in subcategory_projects:
+                amount_value = building.get('amount', 0)
+                if threshold and amount_value > threshold:
                     building['is_flagged'] = True
-                    building['flag_reason'] = f"Cost/km ({cost_per_km:,.2f}) exceeds Multi-Purpose Building threshold ({buildings_threshold:,.2f})"
+                    building['flag_reason'] = f"Amount (₱{amount_value:,.2f}) exceeds {subcategory} threshold (₱{threshold:,.2f})"
                 else:
                     building['is_flagged'] = False
         
@@ -984,6 +1042,7 @@ class HistoricalRoadsRegenerator:
             'secondary_roads_work_type_statistics': secondary_roads_work_type_stats,
             'bridges_statistics': bridges_stats,
             'multi_purpose_buildings_statistics': multi_purpose_buildings_stats,
+            'multi_purpose_buildings_subcategory_statistics': multi_purpose_subcategory_stats,
             'rockfall_netting_statistics': rockfall_netting_stats,
             'schools_statistics': schools_stats,
             'schools_subcategory_statistics': schools_subcategory_stats
@@ -1105,14 +1164,33 @@ class HistoricalRoadsRegenerator:
             
             # Multi-Purpose Buildings
             multi_purpose_buildings = year_data.get('multi_purpose_buildings', [])
-            for project in multi_purpose_buildings:
-                project['year'] = year_str
-                project_id = get_project_id(project)
-                key = ('Multi-Purpose Buildings', None)
-                if project_id not in category_aggregates[key]['unique_projects']:
-                    category_aggregates[key]['unique_projects'].add(project_id)
-                    category_aggregates[key]['total_amount'] += project.get('amount', 0)
-                    category_aggregates[key]['total_distance_km'] += project.get('distance_km', 0)
+            multi_purpose_sub_stats = year_data.get('multi_purpose_buildings_subcategory_statistics', {})
+            if multi_purpose_sub_stats:
+                for subcategory in multi_purpose_sub_stats.keys():
+                    subcategory_projects = [
+                        p for p in multi_purpose_buildings
+                        if (p.get('multi_purpose_subcategory') or 'Other Multi-Purpose Buildings') == subcategory
+                    ]
+                    key = ('Multi-Purpose Buildings', subcategory)
+                    for project in subcategory_projects:
+                        project['year'] = year_str
+                        project_id = get_project_id(project)
+                        if project_id not in category_aggregates[key]['unique_projects']:
+                            category_aggregates[key]['unique_projects'].add(project_id)
+                            category_aggregates[key]['total_amount'] += project.get('amount', 0)
+                            category_aggregates[key]['total_distance_km'] += project.get('distance_km', 0)
+                        category_aggregates[key]['projects'].append(project)
+                        if project.get('is_flagged'):
+                            category_aggregates[key]['flagged_projects'].append(project)
+            else:
+                for project in multi_purpose_buildings:
+                    project['year'] = year_str
+                    project_id = get_project_id(project)
+                    key = ('Multi-Purpose Buildings', None)
+                    if project_id not in category_aggregates[key]['unique_projects']:
+                        category_aggregates[key]['unique_projects'].add(project_id)
+                        category_aggregates[key]['total_amount'] += project.get('amount', 0)
+                        category_aggregates[key]['total_distance_km'] += project.get('distance_km', 0)
                     category_aggregates[key]['projects'].append(project)
                     if project.get('is_flagged'):
                         category_aggregates[key]['flagged_projects'].append(project)
@@ -1290,4 +1368,3 @@ class HistoricalRoadsRegenerator:
 if __name__ == "__main__":
     regenerator = HistoricalRoadsRegenerator()
     regenerator.regenerate_all_years()
-

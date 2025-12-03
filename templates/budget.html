@@ -11921,6 +11921,89 @@
             }
         }
 
+        const CATEGORY_ALIAS_MAP = {
+            'multi purpose buildings': 'Multi-Purpose Buildings',
+            'multipurpose buildings': 'Multi-Purpose Buildings',
+            'multi-purpose building': 'Multi-Purpose Buildings',
+            'road safety facilities': 'Road Safety Facilities',
+            'minor roads': 'Minor Roads',
+            'major roads': 'Major Roads',
+            'rockfall netting': 'Rockfall Netting',
+            'rock fall netting': 'Rockfall Netting',
+            'schools': 'Schools',
+            'bridges': 'Bridges'
+        };
+
+        const multiPurposeCategoryPatterns = [
+            { label: 'Multi-Purpose Buildings - Barangay Facilities', patterns: [/\bbarangay\b/i, /\bbrgy\b/i] },
+            { label: 'Multi-Purpose Buildings - Religious / Church', patterns: [/church/i, /chapel/i, /parish/i, /cathedral/i, /shrine/i, /basilica/i, /convent/i, /diocese/i, /mission/i] },
+            { label: 'Multi-Purpose Buildings - Schools / Education', patterns: [/school/i, /college/i, /university/i, /campus/i, /academy/i, /institute/i, /training center/i, /learning/i] },
+            { label: 'Multi-Purpose Buildings - Museums / Cultural', patterns: [/museum/i, /cultural/i, /heritage/i, /history/i, /arts?\s?center/i, /auditorium/i, /library/i, /theater/i] },
+            { label: 'Multi-Purpose Buildings - Government / Civic', patterns: [/municipal/i, /city/i, /provincial/i, /capitol/i, /government/i, /civic/i, /administrative/i, /lgu/i, /people'?s center/i] },
+            { label: 'Multi-Purpose Buildings - Health / Social Services', patterns: [/health/i, /medical/i, /hospital/i, /clinic/i, /birthing/i, /wellness/i, /senior citizen/i, /social welfare/i, /rehabilitation/i] },
+            { label: 'Multi-Purpose Buildings - Evacuation / DRRM', patterns: [/evacuation/i, /disaster/i, /\bdrrm\b/i, /rescue/i, /operations center/i, /command center/i, /relief/i] },
+            { label: 'Multi-Purpose Buildings - Sports / Youth', patterns: [/sports?/i, /gymnasium/i, /stadium/i, /coliseum/i, /covered court/i, /youth/i, /athletic/i] },
+            { label: 'Multi-Purpose Buildings - Markets / Economic Hubs', patterns: [/market/i, /bagsakan/i, /trading/i, /trade/i, /terminal/i, /commerce/i] },
+            { label: 'Multi-Purpose Buildings - Others', patterns: [], isFallback: true }
+        ];
+
+        const multiPurposeCategoryLabels = multiPurposeCategoryPatterns.map(pattern => pattern.label);
+        const categoriesWithoutCostPerKm = new Set(['Schools', 'Rockfall Netting', 'Multi-Purpose Buildings', ...multiPurposeCategoryLabels]);
+
+        function normalizeCategoryName(name) {
+            if (!name) return 'Uncategorized';
+            const trimmed = name.trim();
+            if (!trimmed) return 'Uncategorized';
+            const alias = CATEGORY_ALIAS_MAP[trimmed.toLowerCase()];
+            return alias || trimmed;
+        }
+
+        function mapMultiPurposeCategory(subcategory) {
+            const text = (subcategory || '').toLowerCase();
+            for (const pattern of multiPurposeCategoryPatterns) {
+                if (pattern.isFallback) continue;
+                if (pattern.patterns.some(regex => regex.test(text))) {
+                    return pattern.label;
+                }
+            }
+            const fallback = multiPurposeCategoryPatterns.find(pattern => pattern.isFallback);
+            return fallback ? fallback.label : 'Multi-Purpose Buildings - Others';
+        }
+
+        function enhanceCategoryStatisticsData(categories) {
+            if (!Array.isArray(categories)) return [];
+
+            const enhanced = [];
+            categories.forEach(item => {
+                if (!item) return;
+
+                const normalizedCategory = normalizeCategoryName(item.category);
+                const normalizedSubcategory = item.subcategory ? item.subcategory.trim() : '-';
+                const normalizedItem = {
+                    ...item,
+                    category: normalizedCategory,
+                    subcategory: normalizedSubcategory
+                };
+
+                if (normalizedCategory === 'Multi-Purpose Buildings') {
+                    normalizedItem.parentCategory = 'Multi-Purpose Buildings';
+                    const hasBackendSubcategory = normalizedSubcategory && normalizedSubcategory !== '-' && normalizedSubcategory.toLowerCase() !== 'none';
+                    if (!hasBackendSubcategory) {
+                        enhanced.push({
+                            ...normalizedItem,
+                            category: mapMultiPurposeCategory(normalizedSubcategory)
+                        });
+                    } else {
+                        enhanced.push(normalizedItem);
+                    }
+                } else {
+                    enhanced.push(normalizedItem);
+                }
+            });
+
+            return enhanced;
+        }
+
         function displayCategoryStatistics(categories) {
             const tbody = document.getElementById('cat-statistics-tbody');
             if (!tbody) return;
@@ -11930,9 +12013,11 @@
                 return;
             }
 
+            const normalizedCategories = enhanceCategoryStatisticsData(categories);
+
             // Group by category for better organization
             const grouped = {};
-            categories.forEach(cat => {
+            normalizedCategories.forEach(cat => {
                 const categoryName = cat.category;
                 if (!grouped[categoryName]) {
                     grouped[categoryName] = [];
@@ -11950,7 +12035,8 @@
             });
 
             let html = '';
-            const categoryOrder = ['Bridges', 'Road Safety Facilities', 'Major Roads', 'Minor Roads', 'Multi-Purpose Buildings', 'Rockfall Netting', 'Schools'];
+            const baseCategoryOrder = ['Bridges', 'Road Safety Facilities', 'Major Roads', 'Minor Roads'];
+            const categoryOrder = [...baseCategoryOrder, ...multiPurposeCategoryLabels, 'Multi-Purpose Buildings', 'Rockfall Netting', 'Schools'];
 
             // Calculate totals for each category and grand total
             const categoryTotals = {};
@@ -11962,8 +12048,12 @@
                 totalCount: 0
             };
 
-            categoryOrder.forEach(categoryName => {
-                if (!grouped[categoryName]) {
+            const processedCategories = new Set();
+            const renderCategorySection = (categoryName) => {
+                processedCategories.add(categoryName);
+
+                const categoryItems = grouped[categoryName];
+                if (!categoryItems || categoryItems.length === 0) {
                     categoryTotals[categoryName] = {
                         avgCostKm: 0,
                         thresholdCostKm: 0,
@@ -11974,7 +12064,6 @@
                     return;
                 }
 
-                const categoryItems = grouped[categoryName];
                 const categoryTotal = {
                     avgCostKm: 0,
                     thresholdCostKm: 0,
@@ -11991,18 +12080,14 @@
                     const flaggedCount = item.flagged_count || 0;
                     const totalCount = item.total_count || 0;
 
-                    // Accumulate totals (for avgCostKm and thresholdCostKm, we'll use weighted average or sum)
                     categoryTotal.flaggedCost += flaggedCost;
                     categoryTotal.flaggedCount += flaggedCount;
                     categoryTotal.totalCount += totalCount;
 
-                    // For average cost/km, we need weighted average (sum of all / total count)
-                    // For threshold, we'll show the maximum threshold (most conservative)
-                    categoryTotal.avgCostKm += avgCostKm * totalCount; // Weighted sum
+                    categoryTotal.avgCostKm += avgCostKm * totalCount;
                     categoryTotal.thresholdCostKm = Math.max(categoryTotal.thresholdCostKm, thresholdCostKm);
 
-                    // Determine if this category uses cost per km or just total cost
-                    const useCostPerKm = !['Schools', 'Multi-Purpose Buildings', 'Rockfall Netting'].includes(categoryName);
+                    const useCostPerKm = !categoriesWithoutCostPerKm.has(categoryName);
 
                     html += `
                     <tr style="border-bottom: 1px solid #e0e0e0; ${isFirst ? 'border-top: 2px solid #0038A8;' : ''}">
@@ -12017,14 +12102,12 @@
                 `;
                 });
 
-                // Calculate weighted average for category
                 if (categoryTotal.totalCount > 0) {
                     categoryTotal.avgCostKm = categoryTotal.avgCostKm / categoryTotal.totalCount;
                 }
 
                 categoryTotals[categoryName] = categoryTotal;
 
-                // Add category total row
                 html += `
                 <tr style="background: #e3f2fd; border-top: 2px solid #0038A8; border-bottom: 2px solid #0038A8;">
                     <td style="padding: 1rem; font-weight: 700; color: #0038A8;" colspan="2">${categoryName} Total</td>
@@ -12036,12 +12119,18 @@
                 </tr>
             `;
 
-                // Accumulate grand total
                 grandTotal.flaggedCost += categoryTotal.flaggedCost;
                 grandTotal.flaggedCount += categoryTotal.flaggedCount;
                 grandTotal.totalCount += categoryTotal.totalCount;
-                grandTotal.avgCostKm += categoryTotal.avgCostKm * categoryTotal.totalCount; // Weighted sum
+                grandTotal.avgCostKm += categoryTotal.avgCostKm * categoryTotal.totalCount;
                 grandTotal.thresholdCostKm = Math.max(grandTotal.thresholdCostKm, categoryTotal.thresholdCostKm);
+            };
+
+            categoryOrder.forEach(categoryName => renderCategorySection(categoryName));
+
+            Object.keys(grouped).forEach(categoryName => {
+                if (processedCategories.has(categoryName)) return;
+                renderCategorySection(categoryName);
             });
 
             // Calculate grand total weighted average

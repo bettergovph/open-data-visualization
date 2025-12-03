@@ -13,6 +13,7 @@ Usage:
 """
 
 import json
+import re
 import sys
 from pathlib import Path
 
@@ -27,6 +28,27 @@ from visualization import (
     _is_major_road,
     _is_new_construction
 )
+
+MULTI_PURPOSE_SUBCATEGORY_PATTERNS = [
+    ("Barangay Facilities", ['barangay', 'brgy']),
+    ("Religious / Church", ['church', 'chapel', 'parish', 'cathedral', 'shrine', 'basilica', 'convent', 'diocese', 'mission']),
+    ("Schools / Education", ['school', 'college', 'university', 'campus', 'academy', 'institute']),
+    ("Museums / Cultural", ['museum', 'cultural', 'heritage', 'history', 'arts center', 'art center', 'auditorium', 'library', 'theater']),
+    ("Government / Civic", ['municipal', 'city', 'provincial', 'capitol', 'government', 'civic', 'administrative', 'lgu', "people's center", 'peoples center']),
+    ("Health / Social Services", ['health', 'medical', 'hospital', 'clinic', 'birthing', 'wellness', 'senior citizen', 'social welfare', 'rehabilitation']),
+    ("Evacuation / DRRM", ['evacuation', 'disaster', 'drrm', 'rescue', 'operations center', 'command center', 'relief']),
+    ("Sports / Youth", ['sports', 'gymnasium', 'stadium', 'coliseum', 'covered court', 'youth', 'athletic']),
+    ("Markets / Economic Hubs", ['market', 'bagsakan', 'trading', 'trade', 'terminal', 'commerce'])
+]
+
+def categorize_multi_purpose_subcategory(name_lower: str) -> str:
+    """Best-effort bucket for multi-purpose building projects"""
+    target = name_lower or ''
+    for label, keywords in MULTI_PURPOSE_SUBCATEGORY_PATTERNS:
+        for keyword in keywords:
+            if keyword in target:
+                return label
+    return "Other Multi-Purpose Buildings"
 
 def extract_all_chainage_ranges(name: str):
     """Extract all chainage ranges from name"""
@@ -209,6 +231,7 @@ def process_roads_data(all_items):
             }
             
             if is_multi_purpose_building:
+                project_data['multi_purpose_subcategory'] = categorize_multi_purpose_subcategory(name_lower)
                 multi_purpose_buildings_projects.append(project_data)
                 continue  # Skip further categorization
             elif is_rockfall_netting:
@@ -655,13 +678,16 @@ def process_roads_data(all_items):
         subcategory = project.get('school_subcategory', 'Other School Projects')
         schools_by_subcategory[subcategory].append(project)
     
+    multi_purpose_by_subcategory = defaultdict(list)
+    for project in multi_purpose_buildings_projects:
+        subcategory = project.get('multi_purpose_subcategory', 'Other Multi-Purpose Buildings')
+        multi_purpose_by_subcategory[subcategory].append(project)
+    
     # Flag schools by subcategory using total cost (not cost_per_km)
     schools_subcategory_stats = flag_projects_by_total_cost(schools_by_subcategory, 'Schools')
     
-    # Flag multi-purpose buildings using total cost (not cost_per_km)
-    buildings_grouped = {'Multi-Purpose Buildings': multi_purpose_buildings_projects}
-    buildings_stats_dict = flag_projects_by_total_cost(buildings_grouped, 'Multi-Purpose Buildings')
-    multi_purpose_buildings_stats_flagged = buildings_stats_dict.get('Multi-Purpose Buildings', {})
+    # Flag multi-purpose buildings per subcategory using total cost (not cost_per_km)
+    multi_purpose_subcategory_stats = flag_projects_by_total_cost(multi_purpose_by_subcategory, 'Multi-Purpose Buildings')
     
     # Flag rockfall netting using total cost (not cost_per_km)
     rockfall_grouped = {'Rockfall Netting': rockfall_netting_projects}
@@ -711,7 +737,8 @@ def process_roads_data(all_items):
         "multi_purpose_buildings": {
             "projects": multi_purpose_buildings_projects,
             "total": len(multi_purpose_buildings_projects),
-            "statistics": calculate_statistics(multi_purpose_buildings_projects)
+            "statistics": calculate_statistics(multi_purpose_buildings_projects),
+            "subcategory_statistics": multi_purpose_subcategory_stats
         },
         "rockfall_netting": {
             "projects": rockfall_netting_projects,
@@ -1006,19 +1033,39 @@ def calculate_all_years_category_statistics(cache_2026):
             if project.get('is_flagged', False):
                 category_aggregates[key]['flagged_projects'].append(project)
     
-    # Multi-Purpose Buildings (from 2026)
-    multi_purpose_buildings = cache_2026.get('multi_purpose_buildings', {}).get('projects', [])
-    for project in multi_purpose_buildings:
-        project['year'] = '2026'
-        project_id = get_project_id(project)
-        key = ('Multi-Purpose Buildings', None)
-        category_aggregates[key]['projects'].append(project)
-        if project_id not in category_aggregates[key]['unique_projects']:
-            category_aggregates[key]['unique_projects'].add(project_id)
-            category_aggregates[key]['total_amount'] += project.get('amount', 0)
-            category_aggregates[key]['total_distance_km'] += project.get('distance_km', 0)
-        if project.get('is_flagged', False):
-            category_aggregates[key]['flagged_projects'].append(project)
+    # Multi-Purpose Buildings (from 2026, grouped by derived subcategory)
+    multi_purpose_data = cache_2026.get('multi_purpose_buildings', {})
+    multi_purpose_buildings = multi_purpose_data.get('projects', [])
+    multi_purpose_sub_stats = multi_purpose_data.get('subcategory_statistics', {})
+    if multi_purpose_sub_stats:
+        for subcategory in multi_purpose_sub_stats.keys():
+            subcategory_projects = [
+                p for p in multi_purpose_buildings
+                if (p.get('multi_purpose_subcategory') or 'Other Multi-Purpose Buildings') == subcategory
+            ]
+            key = ('Multi-Purpose Buildings', subcategory)
+            for project in subcategory_projects:
+                project['year'] = '2026'
+                project_id = get_project_id(project)
+                category_aggregates[key]['projects'].append(project)
+                if project_id not in category_aggregates[key]['unique_projects']:
+                    category_aggregates[key]['unique_projects'].add(project_id)
+                    category_aggregates[key]['total_amount'] += project.get('amount', 0)
+                    category_aggregates[key]['total_distance_km'] += project.get('distance_km', 0)
+                if project.get('is_flagged', False):
+                    category_aggregates[key]['flagged_projects'].append(project)
+    else:
+        for project in multi_purpose_buildings:
+            project['year'] = '2026'
+            project_id = get_project_id(project)
+            key = ('Multi-Purpose Buildings', None)
+            category_aggregates[key]['projects'].append(project)
+            if project_id not in category_aggregates[key]['unique_projects']:
+                category_aggregates[key]['unique_projects'].add(project_id)
+                category_aggregates[key]['total_amount'] += project.get('amount', 0)
+                category_aggregates[key]['total_distance_km'] += project.get('distance_km', 0)
+            if project.get('is_flagged', False):
+                category_aggregates[key]['flagged_projects'].append(project)
     
     # Rockfall Netting (from 2026)
     rockfall_netting = cache_2026.get('rockfall_netting', {}).get('projects', [])
@@ -1113,4 +1160,3 @@ if __name__ == "__main__":
     else:
         print("\n❌ Cache regeneration failed!")
         sys.exit(1)
-
