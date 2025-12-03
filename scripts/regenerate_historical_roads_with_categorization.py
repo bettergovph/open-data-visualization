@@ -603,10 +603,10 @@ class HistoricalRoadsRegenerator:
                 std_dev = statistics.stdev(costs) if len(costs) > 1 else 0
             except:
                 std_dev = 0
-            # Calculate threshold (mean + 1*std_dev)
+            # Calculate threshold (mean + 0.1*std_dev)
             threshold = None
             if mean is not None and std_dev is not None:
-                threshold = mean + (1 * std_dev)
+                threshold = mean + (0.1 * std_dev)
             
             return {
                 "min": min(costs), "max": max(costs), "mean": mean,
@@ -643,10 +643,10 @@ class HistoricalRoadsRegenerator:
                 except:
                     std_dev = 0
                 
-                # Calculate threshold (mean + 1*std_dev)
+                # Calculate threshold (mean + 0.1*std_dev)
                 threshold = None
                 if mean is not None and std_dev is not None:
-                    threshold = mean + (1 * std_dev)
+                    threshold = mean + (0.1 * std_dev)
                 
                 stats = {
                     "min": min(stats_costs),
@@ -812,10 +812,10 @@ class HistoricalRoadsRegenerator:
         bridges_stats = calculate_statistics(bridges) if bridges else {}
         bridges_threshold = 0
         if bridges_stats.get('mean') is not None and bridges_stats.get('std_dev') is not None:
-            # Calculate threshold for bridges (mean + 1*std_dev)
+            # Calculate threshold for bridges (mean + 0.1*std_dev)
             bridges_threshold = 0
             if bridges_stats.get('mean') is not None and bridges_stats.get('std_dev') is not None:
-                bridges_threshold = bridges_stats['mean'] + (1 * bridges_stats['std_dev'])
+                bridges_threshold = bridges_stats['mean'] + (0.1 * bridges_stats['std_dev'])
         
         # Flag bridges that exceed threshold
         for bridge in bridges:
@@ -983,7 +983,7 @@ class HistoricalRoadsRegenerator:
                 mean = statistics.mean(cost_per_km_values)
                 try:
                     std_dev = statistics.stdev(cost_per_km_values)
-                    threshold_cost_per_km = mean + (1 * std_dev) if std_dev else 0
+                    threshold_cost_per_km = mean + (0.1 * std_dev) if std_dev else 0
                 except:
                     threshold_cost_per_km = 0
             elif cost_per_km_values and len(cost_per_km_values) == 1:

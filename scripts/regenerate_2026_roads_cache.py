@@ -381,10 +381,10 @@ def process_roads_data(all_items):
             except:
                 std_dev = 0
             
-            # Calculate threshold (mean + 1*std_dev)
+            # Calculate threshold (mean + 0.1*std_dev)
             threshold = None
             if mean is not None and std_dev is not None:
-                threshold = mean + (1 * std_dev)
+                threshold = mean + (0.1 * std_dev)
             
             stats = {
                 "min": min(stats_costs),
@@ -841,7 +841,7 @@ def calculate_all_years_category_statistics(cache_2026):
             mean = statistics.mean(cost_per_km_values)
             try:
                 std_dev = statistics.stdev(cost_per_km_values)
-                threshold_cost_per_km = mean + (1 * std_dev)
+                threshold_cost_per_km = mean + (0.1 * std_dev)
             except:
                 threshold_cost_per_km = 0
         elif cost_per_km_values and len(cost_per_km_values) == 1:

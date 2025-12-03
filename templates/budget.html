@@ -3986,6 +3986,58 @@ function switchToTab(tabName, updateHash = true) {
         } else if (tabName === 'trends') {
             // Load trends data when tab is activated (v2.0 - 2025-01-05)
             loadDepartmentTrends();
+        } else if (tabName === 'cat') {
+            // Load category statistics when tab is activated
+            const panel = document.getElementById('tab-cat');
+            if (panel && !panel.dataset.loaded) {
+                const yearFilter = document.getElementById('cat-year-filter');
+                const defaultYear = yearFilter ? yearFilter.value : '2026';
+                if (typeof loadCategoryStatistics === 'function') {
+                    loadCategoryStatistics(defaultYear);
+                }
+                panel.dataset.loaded = 'true';
+            }
+        } else if (tabName === 'roads') {
+            // Load roads data when tab is activated
+            const panel = document.getElementById('tab-roads');
+            if (panel && !panel.dataset.loaded) {
+                const yearFilter = document.getElementById('roads-year-filter');
+                const defaultYear = yearFilter ? yearFilter.value : '2026';
+                if (typeof loadRoadsData === 'function') {
+                    loadRoadsData(defaultYear);
+                }
+                panel.dataset.loaded = 'true';
+            }
+        } else if (tabName === 'stats') {
+            // Load stats data when tab is activated
+            const panel = document.getElementById('tab-stats');
+            if (panel && !panel.dataset.loaded) {
+                if (typeof loadRoadsStatistics === 'function') {
+                    loadRoadsStatistics();
+                }
+                panel.dataset.loaded = 'true';
+            }
+        } else if (tabName === 'reblock') {
+            // Load reblocking data when tab is activated
+            const panel = document.getElementById('tab-reblock');
+            if (panel && !panel.dataset.loaded) {
+                if (typeof loadReblockingData === 'function') {
+                    loadReblockingData();
+                }
+                if (typeof loadReblockingTrends === 'function') {
+                    loadReblockingTrends();
+                }
+                panel.dataset.loaded = 'true';
+            }
+        } else if (tabName === 'resu') {
+            // Load resurrected projects data when tab is activated
+            const panel = document.getElementById('tab-resu');
+            if (panel && !panel.dataset.loaded) {
+                if (typeof loadResurrectedProjects === 'function') {
+                    loadResurrectedProjects();
+                }
+                panel.dataset.loaded = 'true';
+            }
         }
         
     } else {
@@ -5636,14 +5688,15 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Check for hash in URL and switch to that tab
     const hash = window.location.hash.substring(1); // Remove the # character
-    if (hash && ['visual', 'browser', 'analysis', 'trends', 'stats'].includes(hash)) {
+    const validTabs = ['visual', 'browser', 'analysis', 'trends', 'resu', 'cat', 'roads', 'stats', 'reblock'];
+    if (hash && validTabs.includes(hash)) {
         switchToTab(hash, false); // Don't update hash since we're reading from it
     }
     
     // Listen for hash changes
     window.addEventListener('hashchange', function() {
         const newHash = window.location.hash.substring(1);
-        if (newHash && ['visual', 'browser', 'analysis', 'trends', 'stats'].includes(newHash)) {
+        if (newHash && validTabs.includes(newHash)) {
             switchToTab(newHash, false);
         }
     });
@@ -9103,8 +9156,10 @@ async function copyChartToClipboard(containerId, buttonId) {
                                 <span>Download CSV</span>
                             </button>
                         </div>
-                        <div style="margin-bottom: 1rem;">
-                            <input type="text" id="reblock-search" placeholder="Search projects..." style="width: 100%; padding: 0.75rem; border: 2px solid #ddd; border-radius: 6px; font-size: 14px;">
+                        <div style="margin-bottom: 1rem; position: relative;">
+                            <input type="text" id="reblock-search" placeholder="Search projects by name..." style="width: 100%; padding: 0.75rem; border: 2px solid #ddd; border-radius: 6px; font-size: 14px;">
+                            <div id="reblock-autocomplete" style="display: none; position: absolute; top: 100%; left: 0; right: 0; background: white; border: 2px solid #ddd; border-top: none; border-radius: 0 0 6px 6px; max-height: 300px; overflow-y: auto; z-index: 1000; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
+                            </div>
                         </div>
                         <div style="overflow-x: auto;">
                             <table id="reblock-table" style="width: 100%; border-collapse: collapse; background: white; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
@@ -11409,6 +11464,11 @@ async function copyChartToClipboard(containerId, buttonId) {
     let reblockItemsPerPage = 50;
     let reblockFilteredSegments = [];
     
+    // Autocomplete state for reblocking search
+    let reblockProjectNames = [];
+    let reblockAutocompleteVisible = false;
+    let reblockSearchListenersSetup = false;
+    
     // Year color mapping (different shades for each year)
     const yearColors = {
         '2020': { light: '#ffe6e6', dark: '#990000' },  // Light pink to dark red
@@ -11715,6 +11775,9 @@ async function copyChartToClipboard(containerId, buttonId) {
             }
             
             reblockingData = data;
+            
+            // Extract unique project names for autocomplete
+            extractReblockProjectNames();
             
             // Update current year
             if (data.year) {
@@ -12819,6 +12882,180 @@ async function copyChartToClipboard(containerId, buttonId) {
         }
     }
     
+    // Extract unique project names from reblocking data for autocomplete
+    function extractReblockProjectNames() {
+        if (!reblockingData || !reblockingData.highways) {
+            reblockProjectNames = [];
+            return;
+        }
+        
+        const nameSet = new Set();
+        reblockingData.highways.forEach(highway => {
+            highway.segments.forEach(segment => {
+                if (segment.name && segment.name.trim()) {
+                    nameSet.add(segment.name.trim());
+                }
+            });
+        });
+        
+        reblockProjectNames = Array.from(nameSet).sort();
+        console.log(`[Reblock] Extracted ${reblockProjectNames.length} unique project names for autocomplete`);
+    }
+    
+    // Show autocomplete suggestions
+    function showReblockAutocomplete(searchTerm) {
+        const autocompleteEl = document.getElementById('reblock-autocomplete');
+        if (!autocompleteEl || !searchTerm || searchTerm.length < 1) {
+            hideReblockAutocomplete();
+            return;
+        }
+        
+        const term = searchTerm.toLowerCase();
+        const matches = reblockProjectNames.filter(name => 
+            name.toLowerCase().includes(term)
+        ).slice(0, 10); // Limit to 10 suggestions
+        
+        if (matches.length === 0) {
+            hideReblockAutocomplete();
+            return;
+        }
+        
+        autocompleteEl.innerHTML = '';
+        matches.forEach(name => {
+            const item = document.createElement('div');
+            item.style.cssText = 'padding: 0.75rem; cursor: pointer; border-bottom: 1px solid #eee; transition: background 0.2s;';
+            item.textContent = name;
+            item.addEventListener('mouseenter', () => {
+                item.style.backgroundColor = '#f0f0f0';
+            });
+            item.addEventListener('mouseleave', () => {
+                item.style.backgroundColor = 'white';
+            });
+            item.addEventListener('click', () => {
+                selectReblockAutocomplete(name);
+            });
+            autocompleteEl.appendChild(item);
+        });
+        
+        autocompleteEl.style.display = 'block';
+        reblockAutocompleteVisible = true;
+    }
+    
+    // Hide autocomplete suggestions
+    function hideReblockAutocomplete() {
+        const autocompleteEl = document.getElementById('reblock-autocomplete');
+        if (autocompleteEl) {
+            autocompleteEl.style.display = 'none';
+            reblockAutocompleteVisible = false;
+        }
+    }
+    
+    // Select an autocomplete suggestion
+    function selectReblockAutocomplete(projectName) {
+        const searchEl = document.getElementById('reblock-search');
+        if (searchEl) {
+            searchEl.value = projectName;
+            hideReblockAutocomplete();
+            reblockCurrentPage = 1; // Reset to first page
+            displayReblockingTable();
+        }
+    }
+    
+    // Set up search input event listeners (only once)
+    function setupReblockSearchListeners() {
+        if (reblockSearchListenersSetup) {
+            return; // Already set up
+        }
+        
+        const searchEl = document.getElementById('reblock-search');
+        if (!searchEl) {
+            return;
+        }
+        
+        // Update autocomplete on input
+        searchEl.addEventListener('input', (e) => {
+            const searchTerm = e.target.value;
+            showReblockAutocomplete(searchTerm);
+            reblockCurrentPage = 1; // Reset to first page on search
+            displayReblockingTable();
+        });
+        
+        // Show autocomplete on focus if there's text
+        searchEl.addEventListener('focus', (e) => {
+            if (e.target.value) {
+                showReblockAutocomplete(e.target.value);
+            }
+        });
+        
+        // Handle keyboard navigation
+        searchEl.addEventListener('keydown', (e) => {
+            const autocompleteEl = document.getElementById('reblock-autocomplete');
+            if (!autocompleteEl || autocompleteEl.style.display === 'none') {
+                return;
+            }
+            
+            const items = autocompleteEl.querySelectorAll('div');
+            const currentFocused = autocompleteEl.querySelector('div[style*="background-color: #0038A8"]');
+            let currentIndex = -1;
+            
+            if (currentFocused) {
+                items.forEach((item, idx) => {
+                    if (item === currentFocused) {
+                        currentIndex = idx;
+                    }
+                });
+            }
+            
+            if (e.key === 'ArrowDown') {
+                e.preventDefault();
+                if (currentIndex < items.length - 1) {
+                    if (currentFocused) {
+                        currentFocused.style.backgroundColor = 'white';
+                        currentFocused.style.color = '';
+                    }
+                    const nextItem = items[currentIndex + 1];
+                    nextItem.style.backgroundColor = '#0038A8';
+                    nextItem.style.color = 'white';
+                    nextItem.scrollIntoView({ block: 'nearest' });
+                }
+            } else if (e.key === 'ArrowUp') {
+                e.preventDefault();
+                if (currentIndex > 0) {
+                    if (currentFocused) {
+                        currentFocused.style.backgroundColor = 'white';
+                        currentFocused.style.color = '';
+                    }
+                    const prevItem = items[currentIndex - 1];
+                    prevItem.style.backgroundColor = '#0038A8';
+                    prevItem.style.color = 'white';
+                    prevItem.scrollIntoView({ block: 'nearest' });
+                }
+            } else if (e.key === 'Enter') {
+                e.preventDefault();
+                if (currentFocused) {
+                    selectReblockAutocomplete(currentFocused.textContent);
+                }
+            } else if (e.key === 'Escape') {
+                hideReblockAutocomplete();
+            }
+        });
+        
+        // Hide autocomplete when clicking outside (set up once globally)
+        if (!reblockSearchListenersSetup) {
+            document.addEventListener('click', (e) => {
+                const searchEl = document.getElementById('reblock-search');
+                const autocompleteEl = document.getElementById('reblock-autocomplete');
+                if (searchEl && autocompleteEl && 
+                    !searchEl.contains(e.target) && 
+                    !autocompleteEl.contains(e.target)) {
+                    hideReblockAutocomplete();
+                }
+            });
+        }
+        
+        reblockSearchListenersSetup = true;
+    }
+    
     function displayReblockingTable() {
         if (!reblockingData) return;
         
@@ -12914,17 +13151,8 @@ async function copyChartToClipboard(containerId, buttonId) {
             paginationEl.style.display = totalItems > 0 ? 'flex' : 'none';
         }
         
-        // Add search functionality (re-render on search)
-        if (searchEl) {
-            // Remove existing listeners to avoid duplicates
-            const newSearchEl = searchEl.cloneNode(true);
-            searchEl.parentNode.replaceChild(newSearchEl, searchEl);
-            
-            newSearchEl.addEventListener('input', () => {
-                reblockCurrentPage = 1; // Reset to first page on search
-                displayReblockingTable();
-            });
-        }
+        // Set up search functionality with autocomplete (only once)
+        setupReblockSearchListeners();
     }
     
     function reblockChangePage(delta) {
