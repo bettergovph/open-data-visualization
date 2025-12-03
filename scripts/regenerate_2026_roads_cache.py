@@ -40,6 +40,10 @@ def extract_all_chainage_ranges(name: str):
         start_total = int(match.group(1))
         end_total = int(match.group(2))
         ranges.append((start_total // 1000, start_total % 1000, end_total // 1000, end_total % 1000))
+    # Pattern 3: Sta. format - "Sta. 2+783 - Sta. 3+779"
+    pattern_sta = r'Sta\.\s*(\d+)\+(\d+)\s*-\s*Sta\.\s*(\d+)\+(\d+)'
+    for match in re.finditer(pattern_sta, name, re.IGNORECASE):
+        ranges.append((int(match.group(1)), int(match.group(2)), int(match.group(3)), int(match.group(4))))
     return ranges
 
 def calculate_distance(chainage_ranges):
@@ -142,19 +146,95 @@ def process_roads_data(all_items):
     traffic_signs_projects = []
     nia_projects = []
     fmr_projects = []
+    multi_purpose_buildings_projects = []
+    rockfall_netting_projects = []
+    schools_projects = []
     
     for item in all_items:
-        name = item.get('name', '') or item.get('description', '')
+        # Use revised_name if available, otherwise fall back to name or description
+        name = item.get('revised_name') or item.get('name', '') or item.get('description', '')
         if not name:
-            continue
-        
-        chainage_ranges = extract_all_chainage_ranges(name)
-        if not chainage_ranges:
             continue
         
         amount = abs(item.get('final_amount', 0) or item.get('original_amount', 0))
         if amount <= 0:
             continue
+        
+        name_lower = name.lower()
+        
+        # Check for non-road categories FIRST (they don't need chainage)
+        # Multi-Purpose Building (also: bldg) - NO CHAINAGE REQUIRED
+        building_keywords = ['multi-purpose building', 'multipurpose building', ' multi-purpose bldg', ' multipurpose bldg', ' bldg']
+        is_multi_purpose_building = any(keyword in name_lower for keyword in building_keywords) and \
+                                    ('road' not in name_lower or 'building' in name_lower or 'bldg' in name_lower)
+        
+        # Rockfall Netting (also: rocknetting) - NO CHAINAGE REQUIRED
+        rockfall_keywords = ['rockfall netting', 'rocknetting', 'rock fall netting', 'rockfall protection', 'rockfall mitigation']
+        is_rockfall_netting = any(keyword in name_lower for keyword in rockfall_keywords)
+        
+        # School (focus on building/classroom construction, not salaries or equipment) - NO CHAINAGE REQUIRED
+        school_keywords = ['school', 'classroom', 'elementary school', 'high school', 'secondary school', 'primary school']
+        school_exclude_keywords = ['salary', 'salaries', 'equipment', 'supplies', 'textbook', 'furniture', 'computer', 'laptop', 'tablet']
+        is_school = any(keyword in name_lower for keyword in school_keywords) and \
+                   not any(exclude in name_lower for exclude in school_exclude_keywords) and \
+                   any(construct_keyword in name_lower for construct_keyword in ['construction', 'building', 'classroom', 'bldg', 'facility', 'repair', 'rehabilitation', 'renovation', 'improvement', 'completion'])
+        
+        # For non-road categories, process them even without chainage
+        if is_multi_purpose_building or is_rockfall_netting or is_school:
+            # Check if it has chainage notation - extract ALL ranges (optional for these categories)
+            chainage_ranges = extract_all_chainage_ranges(name)
+            distance_km = 0
+            breakdown = None
+            individual_distances = []
+            chainage_display = 'N/A'
+            cost_per_km = amount  # For non-road projects, use amount as cost_per_km (or 0 if we want to avoid division)
+            
+            if chainage_ranges:
+                # If chainage exists, calculate distance
+                distance_km, breakdown, individual_distances = calculate_distance(chainage_ranges)
+                if distance_km and distance_km > 0:
+                    cost_per_km = amount / distance_km
+                chainage_display = format_chainage_display(name, chainage_ranges) or 'N/A'
+            
+            project_data = {
+                'name': name,
+                'chainage_display': chainage_display,
+                'chainage_ranges': chainage_ranges or [],  # Store all ranges (empty if none)
+                'distance_km': distance_km,
+                'distance_breakdown': breakdown,
+                'amount': amount,
+                'cost_per_km': cost_per_km,
+                'source_sheet': item.get('source_sheet'),
+                'region': item.get('location', {}).get('region') if isinstance(item.get('location'), dict) else None
+            }
+            
+            if is_multi_purpose_building:
+                multi_purpose_buildings_projects.append(project_data)
+                continue  # Skip further categorization
+            elif is_rockfall_netting:
+                rockfall_netting_projects.append(project_data)
+                continue  # Skip further categorization
+            elif is_school:
+                # Categorize school projects into subcategories
+                school_subcategory = 'Other School Projects'
+                if any(kw in name_lower for kw in ['classroom', 'class room']):
+                    school_subcategory = 'Classroom Construction'
+                elif any(kw in name_lower for kw in ['building', 'bldg', 'facility']):
+                    school_subcategory = 'School Building Construction'
+                elif any(kw in name_lower for kw in ['repair', 'rehabilitation', 'renovation', 'improvement']):
+                    school_subcategory = 'School Building Repair/Rehabilitation'
+                elif any(kw in name_lower for kw in ['completion']):
+                    school_subcategory = 'School Building Completion'
+                
+                project_data['school_subcategory'] = school_subcategory
+                schools_projects.append(project_data)
+                continue  # Skip further categorization
+            # If none matched, continue to regular processing below
+        
+        # For road-related projects, require chainage notation
+        chainage_ranges = extract_all_chainage_ranges(name)
+        if not chainage_ranges:
+            continue  # Skip road projects without chainage
         
         distance_km, breakdown, individual_distances = calculate_distance(chainage_ranges)
         if not distance_km or distance_km <= 0:
@@ -174,8 +254,6 @@ def process_roads_data(all_items):
             'source_sheet': item.get('source_sheet'),
             'region': item.get('location', {}).get('region') if isinstance(item.get('location'), dict) else None
         }
-        
-        name_lower = name.lower()
         
         # Check for FMR (Farm-to-Market Road) projects first
         fmr_keywords = [' fmr', 'fmr ', 'farm to market', 'farm-to-market', 'farm to market road']
@@ -414,6 +492,70 @@ def process_roads_data(all_items):
         
         return subcategory_stats
     
+    def flag_projects_by_total_cost(projects_by_subcategory, category_name):
+        """Calculate subcategory statistics and flag projects based on total cost
+        This is used for categories that don't have distance metrics (Schools, Buildings, Rockfall)
+        - Statistics use total project amount
+        - Flagging uses total amount against threshold
+        """
+        subcategory_stats = {}
+        for subcategory, projects in projects_by_subcategory.items():
+            # Use total amount for statistics (not cost_per_km)
+            total_costs = [p.get('amount', 0) for p in projects if p.get('amount', 0) > 0]
+            
+            if not total_costs:
+                subcategory_stats[subcategory] = {
+                    "min": None, "max": None, "mean": None, "median": None,
+                    "mode": None, "std_dev": None, "count": 0
+                }
+                continue
+            
+            import statistics
+            from collections import Counter
+            
+            costs_sorted = sorted(total_costs)
+            mean = statistics.mean(total_costs)
+            rounded_costs = [round(c / 1000000) * 1000000 for c in total_costs]
+            cost_counter = Counter(rounded_costs)
+            mode_value = cost_counter.most_common(1)[0][0] if cost_counter else None
+            try:
+                std_dev = statistics.stdev(total_costs) if len(total_costs) > 1 else 0
+            except:
+                std_dev = 0
+            
+            # Calculate threshold (mean + 0.1*std_dev)
+            threshold = None
+            if mean is not None and std_dev is not None:
+                threshold = mean + (0.1 * std_dev)
+            
+            stats = {
+                "min": min(total_costs),
+                "max": max(total_costs),
+                "mean": mean,
+                "median": statistics.median(total_costs),
+                "mode": mode_value,
+                "std_dev": std_dev,
+                "threshold": threshold,  # Add threshold to stats
+                "count": len(projects)
+            }
+            subcategory_stats[subcategory] = stats
+            
+            # Flag projects that exceed mean + 0.1*std_dev (outlier threshold)
+            # Use total amount for flagging comparison
+            
+            for project in projects:
+                project['subcategory'] = subcategory
+                project['subcategory_stats'] = stats
+                # Use total amount for flagging comparison
+                total_cost = project.get('amount', 0)
+                if threshold and total_cost > threshold:
+                    project['is_flagged'] = True
+                    project['flag_reason'] = f"Total cost (₱{total_cost:,.2f}) exceeds {subcategory} threshold (₱{threshold:,.2f})"
+                else:
+                    project['is_flagged'] = False
+        
+        return subcategory_stats
+    
     # Flag road safety facilities by subcategory
     road_safety_subcategory_stats = flag_projects_by_subcategory(road_safety_by_subcategory, 'Road Safety Facilities')
     
@@ -503,6 +645,28 @@ def process_roads_data(all_items):
     traffic_signs_stats = calculate_statistics(traffic_signs_projects)
     nia_stats = calculate_statistics(nia_projects)
     fmr_stats = calculate_statistics(fmr_projects)
+    multi_purpose_buildings_stats = calculate_statistics(multi_purpose_buildings_projects)
+    rockfall_netting_stats = calculate_statistics(rockfall_netting_projects)
+    schools_stats = calculate_statistics(schools_projects)
+    
+    # Group schools by subcategory for statistics
+    schools_by_subcategory = defaultdict(list)
+    for project in schools_projects:
+        subcategory = project.get('school_subcategory', 'Other School Projects')
+        schools_by_subcategory[subcategory].append(project)
+    
+    # Flag schools by subcategory using total cost (not cost_per_km)
+    schools_subcategory_stats = flag_projects_by_total_cost(schools_by_subcategory, 'Schools')
+    
+    # Flag multi-purpose buildings using total cost (not cost_per_km)
+    buildings_grouped = {'Multi-Purpose Buildings': multi_purpose_buildings_projects}
+    buildings_stats_dict = flag_projects_by_total_cost(buildings_grouped, 'Multi-Purpose Buildings')
+    multi_purpose_buildings_stats_flagged = buildings_stats_dict.get('Multi-Purpose Buildings', {})
+    
+    # Flag rockfall netting using total cost (not cost_per_km)
+    rockfall_grouped = {'Rockfall Netting': rockfall_netting_projects}
+    rockfall_stats_dict = flag_projects_by_total_cost(rockfall_grouped, 'Rockfall Netting')
+    rockfall_netting_stats_flagged = rockfall_stats_dict.get('Rockfall Netting', {})
     
     return {
         "success": True,
@@ -543,6 +707,22 @@ def process_roads_data(all_items):
             "projects": fmr_projects,
             "total": len(fmr_projects),
             "statistics": fmr_stats
+        },
+        "multi_purpose_buildings": {
+            "projects": multi_purpose_buildings_projects,
+            "total": len(multi_purpose_buildings_projects),
+            "statistics": calculate_statistics(multi_purpose_buildings_projects)
+        },
+        "rockfall_netting": {
+            "projects": rockfall_netting_projects,
+            "total": len(rockfall_netting_projects),
+            "statistics": rockfall_netting_stats
+        },
+        "schools": {
+            "projects": schools_projects,
+            "total": len(schools_projects),
+            "statistics": schools_stats,
+            "subcategory_statistics": schools_subcategory_stats
         }
     }
 
@@ -578,6 +758,9 @@ def regenerate_2026_cache():
     print(f"   Road Safety Facilities: {result['traffic_signs']['total']:,}")
     print(f"   NIA Projects: {result['nia']['total']:,}")
     print(f"   FMR Projects: {result['fmr']['total']:,}")
+    print(f"   Multi-Purpose Buildings: {result['multi_purpose_buildings']['total']:,}")
+    print(f"   Rockfall Netting: {result['rockfall_netting']['total']:,}")
+    print(f"   Schools: {result['schools']['total']:,}")
     
     # Check categorization
     traffic_signs = result['traffic_signs']['projects']
@@ -814,6 +997,54 @@ def calculate_all_years_category_statistics(cache_2026):
         key = ('Minor Roads', work_type)
         for project in work_type_projects:
             project['year'] = '2026'  # Add year for uniqueness
+            project_id = get_project_id(project)
+            category_aggregates[key]['projects'].append(project)
+            if project_id not in category_aggregates[key]['unique_projects']:
+                category_aggregates[key]['unique_projects'].add(project_id)
+                category_aggregates[key]['total_amount'] += project.get('amount', 0)
+                category_aggregates[key]['total_distance_km'] += project.get('distance_km', 0)
+            if project.get('is_flagged', False):
+                category_aggregates[key]['flagged_projects'].append(project)
+    
+    # Multi-Purpose Buildings (from 2026)
+    multi_purpose_buildings = cache_2026.get('multi_purpose_buildings', {}).get('projects', [])
+    for project in multi_purpose_buildings:
+        project['year'] = '2026'
+        project_id = get_project_id(project)
+        key = ('Multi-Purpose Buildings', None)
+        category_aggregates[key]['projects'].append(project)
+        if project_id not in category_aggregates[key]['unique_projects']:
+            category_aggregates[key]['unique_projects'].add(project_id)
+            category_aggregates[key]['total_amount'] += project.get('amount', 0)
+            category_aggregates[key]['total_distance_km'] += project.get('distance_km', 0)
+        if project.get('is_flagged', False):
+            category_aggregates[key]['flagged_projects'].append(project)
+    
+    # Rockfall Netting (from 2026)
+    rockfall_netting = cache_2026.get('rockfall_netting', {}).get('projects', [])
+    for project in rockfall_netting:
+        project['year'] = '2026'
+        project_id = get_project_id(project)
+        key = ('Rockfall Netting', None)
+        category_aggregates[key]['projects'].append(project)
+        if project_id not in category_aggregates[key]['unique_projects']:
+            category_aggregates[key]['unique_projects'].add(project_id)
+            category_aggregates[key]['total_amount'] += project.get('amount', 0)
+            category_aggregates[key]['total_distance_km'] += project.get('distance_km', 0)
+        if project.get('is_flagged', False):
+            category_aggregates[key]['flagged_projects'].append(project)
+    
+    # Schools (from 2026, with subcategories)
+    schools = cache_2026.get('schools', {}).get('projects', [])
+    schools_subcategory_stats = cache_2026.get('schools', {}).get('subcategory_statistics', {})
+    for subcategory, stats in schools_subcategory_stats.items():
+        subcategory_projects = [
+            p for p in schools
+            if p.get('school_subcategory') == subcategory
+        ]
+        key = ('Schools', subcategory)
+        for project in subcategory_projects:
+            project['year'] = '2026'
             project_id = get_project_id(project)
             category_aggregates[key]['projects'].append(project)
             if project_id not in category_aggregates[key]['unique_projects']:

@@ -23,7 +23,9 @@ from difflib import SequenceMatcher
 
 class BudgetAmendmentParser:
     def __init__(self, base_dir: str = "database/win"):
-        self.base_dir = Path(base_dir)
+        # Convert to absolute path relative to script location
+        script_dir = Path(__file__).parent.parent
+        self.base_dir = script_dir / base_dir
         self.departments = []
         self.programs = []
         self.projects = []
@@ -745,7 +747,7 @@ class BudgetAmendmentParser:
             return []
     
     def parse_annex_a(self) -> List[Dict]:
-        """
+        r"""
         Parse Annex A - Line By Line Amendments (53 sheets) - Hybrid approach (Values + Formulas)
         
         ALGORITHM FOR READING ANNEX A:
@@ -756,7 +758,7 @@ class BudgetAmendmentParser:
            
         2. For each row:
            a. Column A: 
-              - If matches regex ^[A-Z]\.$ (letter followed by dot): This is an AGENCY CODE
+              - If matches regex ^[A-Z]\\.$ (letter followed by dot): This is an AGENCY CODE
               - Store agency code (A., B., C., G., J., etc.)
               - Get agency name from Column C (Column B is Line No)
               - All subsequent rows belong to this agency until a new agency code is read
@@ -843,7 +845,7 @@ class BudgetAmendmentParser:
                             row_str = ' '.join(row_values).lower()
                             if 'page' in row_str and 'line' in row_str:
                                 header_row = row_idx
-                                break
+                            break
                     
                     # Fallback: search other rows if 5-6 don't have it
                     if header_row is None:
@@ -1050,6 +1052,8 @@ class BudgetAmendmentParser:
                                         stored_page_no = str(int(page_num))
                                 except:
                                     pass
+                        
+                        # Continue with row processing
                         
                         # Column B: Line No (purely for line numbers)
                         col_b_val = ws_val.cell(row_idx, 2).value if ws_val.max_column >= 2 else None
@@ -2540,6 +2544,8 @@ class BudgetAmendmentParser:
         file_path = self.base_dir / "Annex A-5 Details of DPWH's Programs&Projects.xlsx"
         
         print(f"🛣️  Parsing DPWH Projects (Annex A-5)...")
+        print(f"   Looking for file at: {file_path}")
+        print(f"   File exists: {file_path.exists()}")
         
         try:
             import openpyxl
@@ -2674,7 +2680,7 @@ class BudgetAmendmentParser:
                     if cell_i.value:
                         current_subsubcategory = str(cell_i.value).strip()
                     
-                    # Get project name from J, K, or M (whichever has value)
+                    # Get project name from J, K, or M (whichever has value) - used for duplicate detection
                     project_name = None
                     if cell_j.value:
                         project_name = str(cell_j.value).strip()
@@ -2683,8 +2689,11 @@ class BudgetAmendmentParser:
                     elif cell_m.value:
                         project_name = str(cell_m.value).strip()
                     
-                    # Get revised name from column N
+                    # Get revised name from column N (use for frontend display - more detailed and correct)
                     revised_name = str(cell_n.value).strip() if cell_n.value else None
+                    
+                    # Store column M as old_project_name for reference
+                    old_project_name = str(cell_m.value).strip() if cell_m.value else None
                     
                     # Get amounts
                     original_amount = self.parse_amount(cell_o.value)  # GAB
@@ -2723,9 +2732,11 @@ class BudgetAmendmentParser:
                             "id": f"DPWH-Proj-{self.proj_counter:04d}",
                             "program_id": None,
                             "department_id": "DPWH",
-                            "name": project_name,
+                            "name": project_name,  # Column M/J/K - used for duplicate detection
                             "description": description,
-                            "revised_name": revised_name,
+                            "old_project_name": old_project_name,  # Column M - kept for reference
+                            "revised_name": revised_name,  # Column N - use for frontend display (more detailed and correct)
+                            "display_name": revised_name if revised_name else project_name,  # Column N preferred, fallback to name
                             "location": {
                                 "region": current_region,
                                 "province": None,
@@ -2745,8 +2756,9 @@ class BudgetAmendmentParser:
                             "source_cols": {
                                 "page": "A",
                                 "description": "C-I",
-                                "project": "J/K/M",
-                                "revised_name": "N",
+                                "old_project": "M",
+                                "revised_project": "N",
+                                "fallback_project": "J/K",
                                 "amounts": "O-S"
                             },
                             "hierarchy": {

@@ -1,145 +1,159 @@
-# 🇵🇭 DPWH Archive Data Visualization
+# 🇵🇭 Open Data Visualization Platform
 
-This project downloads, analyzes, and visualizes data from the Philippines Department of Public Works and Highways (DPWH) archive hosted on Internet Archive.
+A comprehensive platform for visualizing and analyzing Philippine government open data, including budget, infrastructure, flood control, and public works projects.
 
 ## 📋 Overview
 
-The DPWH archive contains approximately 60GB of data across 31 zip files, representing a comprehensive dataset of public works and infrastructure information from the Philippines government.
+This project provides a web-based visualization platform and analysis tools for various Philippine government datasets, including:
+
+- **Budget Data**: National Expenditure Program (NEP), General Appropriations Act (GAB), and budget amendments
+- **Infrastructure Projects**: DPWH projects, flood control initiatives, and public works
+- **Contractor Data**: PHILGEPS contracts and SEC registration information
+- **Political Relationships**: Family connections and political dynasty analysis
+- **Geographic Data**: City, municipality, and barangay mappings
 
 ## 🚀 Quick Start
 
 ### Prerequisites
 
 - Python 3.7+
-- Internet connection for downloading
-- Sufficient disk space (~60GB for full download)
+- PostgreSQL (for budget and infrastructure data)
+- Node.js (for frontend assets, if applicable)
+- Sufficient disk space for data storage
 
 ### Installation
 
-1. Clone or download this repository
-2. Install dependencies:
+1. Clone this repository
+2. Install Python dependencies:
 ```bash
 pip install -r requirements.txt
 ```
 
-### Running the Pipeline
-
-Execute the complete data pipeline:
+3. Set up environment variables (copy `visualization.env` and configure):
 ```bash
-python dpwh_pipeline_runner.py
+cp visualization.env .env
+# Edit .env with your database credentials
 ```
 
-This will:
-1. Download all 31 zip files (~60GB)
-2. Extract and analyze the data structure
-3. Generate interactive visualizations
-4. Create an HTML report
+4. Run the API server:
+```bash
+python visualization.py
+```
+
+The API will be available at `http://localhost:8000` (or as configured).
 
 ## 📁 Project Structure
 
 ```
 open-data-visualization/
-├── dpwh_archive_downloader.py  # Downloads all archive files
-├── dpwh_archive_analyzer.py    # Extracts and analyzes data
-├── dpwh_data_visualizer.py     # Creates visualizations
-├── dpwh_pipeline_runner.py     # Main orchestration script
-├── requirements.txt            # Python dependencies
-└── README.md                   # This file
+├── visualization.py              # Main FastAPI application
+├── *_client.py                   # Database clients (budget, NEP, flood, etc.)
+├── routes/                       # Additional API routes
+├── scripts/                      # Utility and analysis scripts
+├── analysis/                     # Data analysis notebooks and scripts
+├── sources/                      # Data source parsers and converters
+├── sec_scraper/                  # SEC data scraper
+├── family_analysis/              # Political relationship analysis
+├── static/                       # Frontend assets (CSS, JS, images, data)
+├── templates/                    # HTML templates
+├── data/                         # Processed data files (Parquet, DuckDB)
+├── database/                     # Database files and exports
+├── deployment/                   # Deployment scripts and configs
+└── utils/                        # Shared utilities
 ```
 
-## 🔧 Individual Scripts
+## 🔧 Main Components
 
-### Download Script
-```bash
-python dpwh_archive_downloader.py
-```
-- Downloads all 31 zip files from Internet Archive
-- Creates `dpwh_archive/` directory
-- Shows progress for each download
-- Handles resume for interrupted downloads
+### API Server (`visualization.py`)
 
-### Analysis Script
-```bash
-python dpwh_archive_analyzer.py
-```
-- Extracts all zip files to `dpwh_archive/extracted/`
-- Analyzes file structure and types
-- Examines metadata files (XML, SQLite)
-- Samples data files for content analysis
-- Generates `data_summary.json`
+The main FastAPI application providing REST endpoints for:
+- Budget data queries and analysis
+- Infrastructure project searches
+- Flood control project data
+- Integrated project data
+- Geographic and administrative data
 
-### Visualization Script
-```bash
-python dpwh_data_visualizer.py
-```
-- Creates interactive charts and graphs
-- Generates comprehensive HTML report
-- Shows file type distributions
-- Displays directory structure analysis
+### Database Clients
 
-## 📊 Output Files
+- `budget_client.py` - Budget database queries
+- `budget_postgres_client.py` - PostgreSQL budget client
+- `nep_postgres_client.py` - National Expenditure Program client
+- `flood_db_client.py` - Flood control projects client
+- `relationship_sources_client.py` - Political relationship data client
+- `infrawatch_postgres_client.py` - Infrastructure watch client
+- `dime_client.py` - DIME projects client
 
-After running the pipeline, you'll find:
+### Scripts and Analysis
 
-- `dpwh_archive/` - Downloaded zip files
-- `dpwh_archive/extracted/` - Extracted data files
-- `dpwh_archive/data_summary.json` - Analysis results
-- `dpwh_analysis_report.html` - Interactive visualization report
+- `scripts/` - Utility scripts for data processing, inspection, and maintenance
+- `analysis/` - Analysis notebooks and data exploration scripts
+- `sources/` - Data source parsers (PHILGEPS, DO 172, etc.)
+
+## 📊 Data Sources
+
+The platform integrates data from multiple sources:
+
+- **PHILGEPS** - Government procurement contracts
+- **DPWH** - Department of Public Works and Highways projects
+- **SEC** - Securities and Exchange Commission contractor registrations
+- **Budget Documents** - GAB, NEP, and budget amendments
+- **Flood Control Projects** - Infrastructure flood management data
 
 ## 🎯 Features
 
-- **Comprehensive Download**: All 31 archive files with progress tracking
-- **Smart Extraction**: Automatic zip file extraction with error handling
-- **Data Analysis**: File type analysis, size distribution, metadata examination
-- **Interactive Visualizations**: Plotly-based charts and graphs
-- **HTML Report**: Self-contained report with embedded visualizations
-- **Resume Capability**: Skip already downloaded files
-- **Error Handling**: Robust error handling throughout the pipeline
+- **Interactive Visualizations**: Web-based charts and maps
+- **Data Browser**: Search and filter across multiple datasets
+- **API Endpoints**: RESTful API for programmatic access
+- **Data Integration**: Combines multiple government data sources
+- **Geographic Analysis**: Location-based project mapping
+- **Contractor Analysis**: SEC and PHILGEPS contractor data integration
 
-## 📈 Visualizations
+## 🔍 Key Documentation
 
-The generated report includes:
+- `CLASSIFICATION_DICTIONARIES.md` - Location classification system
+- `CLASSIFICATION_WALKTHROUGH.md` - Classification process guide
+- `INVESTIGATION_REPORT.md` - Data investigation findings
+- `DAVAO_CITY_FIX_SUMMARY.md` - Data fixes documentation
 
-- File type distribution charts
-- File size analysis by extension
-- Directory structure overview
-- Archive metadata summary
-- Interactive data exploration tools
+## 🛠️ Development
 
-## 🔍 Data Insights
+### Running the API
 
-The DPWH archive contains various file types including:
-- CSV files with infrastructure data
-- PDF documents and reports
-- Excel spreadsheets
-- XML metadata files
-- Database files (SQLite)
-- Text documents
+```bash
+python visualization.py
+```
 
-## 🛠️ Customization
+### Running Analysis Scripts
 
-You can modify the scripts to:
-- Change download directory
-- Adjust visualization parameters
-- Add custom data analysis
-- Modify report styling
-- Add new file type handlers
+Analysis and utility scripts are located in:
+- `scripts/` - General utility scripts
+- `analysis/` - Data analysis scripts
+
+### Data Processing
+
+Data processing scripts are in:
+- `sources/` - Source data parsers
+- `scripts/` - Data transformation utilities
 
 ## 📝 Notes
 
-- The download process may take several hours depending on your internet connection
-- Ensure you have sufficient disk space (60GB+ recommended)
-- The analysis process may take time for large datasets
-- All scripts include progress indicators and error handling
+- The platform requires PostgreSQL databases for budget and infrastructure data
+- Large datasets are stored in Parquet format for efficient querying
+- Some features require MeiliSearch for full-text search capabilities
+- Environment variables must be configured for database connections
 
 ## 🤝 Contributing
 
-Feel free to submit issues, feature requests, or pull requests to improve this data visualization pipeline.
+Contributions are welcome! Please ensure:
+- Code follows existing style conventions
+- New features include appropriate documentation
+- Database migrations are handled properly
+- Tests are added for new functionality
 
 ## 📄 License
 
-This project is for educational and research purposes. Please respect the Internet Archive's terms of service and the DPWH's data usage policies.
+This project is for educational and research purposes. Please respect data source terms of service and usage policies.
 
 ---
 
-**Last Updated**: October 2025
+**Last Updated**: 2025
