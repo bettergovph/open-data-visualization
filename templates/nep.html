@@ -2865,7 +2865,8 @@
                                                 </div>
                                                 <div id="${itemsId}" style="margin-top: 1rem; display: none;">
                                                     ${items.map((item, itemIdx) => {
-                                                        const projectName = item.name || item.description || 'Unknown';
+                                                        // Use column N (Revised Project name) for display, fallback to name for duplicate detection
+                                                        const projectName = item.display_name || item.revised_name || item.name || item.description || 'Unknown';
                                                         const amount = item.final_amount || item.original_amount || 0;
                                                         const dept = item.department_id || 'DPWH';
                                                         const source = item.source_sheet || 'Annex A-5';
@@ -12541,7 +12542,8 @@
             groups.forEach(group => {
                 const items = group.items || [];
                 items.forEach(item => {
-                    const projectName = item.name || item.description || 'Unknown';
+                    // Use column N (Revised Project name) for display in CSV
+                    const projectName = item.display_name || item.revised_name || item.name || item.description || 'Unknown';
                     const description = item.description || '';
                     const originalAmount = item.original_amount || 0;
                     const finalAmount = item.final_amount || 0;

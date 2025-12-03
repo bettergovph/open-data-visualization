@@ -137,3 +137,11 @@ The script now loads contractor links from multiple sources in priority order:
 
 This ensures all 288 contractor links from the dynasty export are available for matching.
 
+
+
+
+
+
+
+
+

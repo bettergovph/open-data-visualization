@@ -44,3 +44,5 @@ python3 scripts/build_hours.py
 ```
 
 The script will automatically find and use your cookie from any of the above sources.
+
+

@@ -608,6 +608,7 @@ class ResurrectedProjectFinder:
                     'year_2026': {
                         'id': item_2026.get('id'),
                         'name': name_2026,
+                        'revised_name': item_2026.get('revised_name'),
                         'description': item_2026.get('description', ''),
                         'amount': amount_2026,
                         'region': item_2026.get('location', {}).get('region') if isinstance(item_2026.get('location'), dict) else None,

@@ -238,6 +238,10 @@ class HistoricalRoadsRegenerator:
             start_total = int(match.group(1))
             end_total = int(match.group(2))
             ranges.append((start_total // 1000, start_total % 1000, end_total // 1000, end_total % 1000))
+        # Pattern 3: Sta. format - "Sta. 2+783 - Sta. 3+779"
+        pattern_sta = r'Sta\.\s*(\d+)\+(\d+)\s*-\s*Sta\.\s*(\d+)\+(\d+)'
+        for match in re.finditer(pattern_sta, name, re.IGNORECASE):
+            ranges.append((int(match.group(1)), int(match.group(2)), int(match.group(3)), int(match.group(4))))
         return ranges
     
     def calculate_distance(self, chainage_ranges):
@@ -487,19 +491,95 @@ class HistoricalRoadsRegenerator:
         secondary_roads = []
         bridges = []
         traffic_signs = []
+        multi_purpose_buildings = []
+        rockfall_netting = []
+        schools = []
         
         for item in historical_data:
             name = item['description']
             if not name:
                 continue
             
-            chainage_ranges = self.extract_all_chainage_ranges(name)
-            if not chainage_ranges:
-                continue
-            
             amount = abs(item['amount'])
             if amount <= 0:
                 continue
+            
+            name_lower = name.lower()
+            
+            # Check for non-road categories FIRST (they don't need chainage)
+            # Multi-Purpose Building (also: bldg) - NO CHAINAGE REQUIRED
+            building_keywords = ['multi-purpose building', 'multipurpose building', ' multi-purpose bldg', ' multipurpose bldg', ' bldg']
+            is_multi_purpose_building = any(keyword in name_lower for keyword in building_keywords) and \
+                                        ('road' not in name_lower or 'building' in name_lower or 'bldg' in name_lower)
+            
+            # Rockfall Netting (also: rocknetting) - NO CHAINAGE REQUIRED
+            rockfall_keywords = ['rockfall netting', 'rocknetting', 'rock fall netting', 'rockfall protection', 'rockfall mitigation']
+            is_rockfall_netting = any(keyword in name_lower for keyword in rockfall_keywords)
+            
+            # School (focus on building/classroom construction, not salaries or equipment) - NO CHAINAGE REQUIRED
+            school_keywords = ['school', 'classroom', 'elementary school', 'high school', 'secondary school', 'primary school']
+            school_exclude_keywords = ['salary', 'salaries', 'equipment', 'supplies', 'textbook', 'furniture', 'computer', 'laptop', 'tablet']
+            is_school = any(keyword in name_lower for keyword in school_keywords) and \
+                       not any(exclude in name_lower for exclude in school_exclude_keywords) and \
+                       any(construct_keyword in name_lower for construct_keyword in ['construction', 'building', 'classroom', 'bldg', 'facility', 'repair', 'rehabilitation', 'renovation', 'improvement', 'completion'])
+            
+            # For non-road categories, process them even without chainage
+            if is_multi_purpose_building or is_rockfall_netting or is_school:
+                # Check if it has chainage notation - extract ALL ranges (optional for these categories)
+                chainage_ranges = self.extract_all_chainage_ranges(name)
+                distance_km = 0
+                breakdown = None
+                individual_distances = []
+                chainage_display = 'N/A'
+                cost_per_km = amount  # For non-road projects, use amount as cost_per_km
+                
+                if chainage_ranges:
+                    # If chainage exists, calculate distance
+                    distance_km, breakdown, individual_distances = self.calculate_distance(chainage_ranges)
+                    if distance_km and distance_km > 0:
+                        cost_per_km = amount / distance_km
+                    chainage_display = self.format_chainage_display(name, chainage_ranges) or 'N/A'
+                
+                project_data = {
+                    'id': item['id'],
+                    'name': name,
+                    'chainage_display': chainage_display,
+                    'chainage_ranges': chainage_ranges or [],  # Store all ranges (empty if none)
+                    'distance_km': distance_km,
+                    'distance_breakdown': breakdown,
+                    'amount': amount,
+                    'cost_per_km': cost_per_km,
+                    'year': year,
+                    'source_file': item.get('source_file')
+                }
+                
+                if is_multi_purpose_building:
+                    multi_purpose_buildings.append(project_data)
+                    continue  # Skip further categorization
+                elif is_rockfall_netting:
+                    rockfall_netting.append(project_data)
+                    continue  # Skip further categorization
+                elif is_school:
+                    # Categorize school projects into subcategories
+                    school_subcategory = 'Other School Projects'
+                    if any(kw in name_lower for kw in ['classroom', 'class room']):
+                        school_subcategory = 'Classroom Construction'
+                    elif any(kw in name_lower for kw in ['building', 'bldg', 'facility']):
+                        school_subcategory = 'School Building Construction'
+                    elif any(kw in name_lower for kw in ['repair', 'rehabilitation', 'renovation', 'improvement']):
+                        school_subcategory = 'School Building Repair/Rehabilitation'
+                    elif any(kw in name_lower for kw in ['completion']):
+                        school_subcategory = 'School Building Completion'
+                    
+                    project_data['school_subcategory'] = school_subcategory
+                    schools.append(project_data)
+                    continue  # Skip further categorization
+                # If none matched, continue to regular processing below
+            
+            # For road-related projects, require chainage notation
+            chainage_ranges = self.extract_all_chainage_ranges(name)
+            if not chainage_ranges:
+                continue  # Skip road projects without chainage
             
             distance_km, breakdown, individual_distances = self.calculate_distance(chainage_ranges)
             if not distance_km or distance_km <= 0:
@@ -520,8 +600,6 @@ class HistoricalRoadsRegenerator:
                 'year': year,
                 'source_file': item.get('source_file')
             }
-            
-            name_lower = name.lower()
             
             # Road Safety Facilities
             road_safety_keywords = [
@@ -826,14 +904,67 @@ class HistoricalRoadsRegenerator:
             else:
                 bridge['is_flagged'] = False
         
+        # Calculate statistics for new categories
+        multi_purpose_buildings_stats = calculate_statistics(multi_purpose_buildings) if multi_purpose_buildings else {}
+        rockfall_netting_stats = calculate_statistics(rockfall_netting) if rockfall_netting else {}
+        schools_stats = calculate_statistics(schools) if schools else {}
+        
+        # Group schools by subcategory for statistics
+        schools_by_subcategory = defaultdict(list)
+        for project in schools:
+            subcategory = project.get('school_subcategory', 'Other School Projects')
+            schools_by_subcategory[subcategory].append(project)
+        
+        # Calculate subcategory statistics for schools
+        schools_subcategory_stats = {}
+        for subcategory, subcategory_projects in schools_by_subcategory.items():
+            schools_subcategory_stats[subcategory] = calculate_statistics(subcategory_projects)
+        
+        # Flag new categories that exceed threshold
+        if multi_purpose_buildings_stats.get('mean') is not None and multi_purpose_buildings_stats.get('std_dev') is not None:
+            buildings_threshold = multi_purpose_buildings_stats['mean'] + (0.1 * multi_purpose_buildings_stats['std_dev'])
+            for building in multi_purpose_buildings:
+                cost_per_km = building.get('cost_per_km', 0)
+                if buildings_threshold and cost_per_km > buildings_threshold:
+                    building['is_flagged'] = True
+                    building['flag_reason'] = f"Cost/km ({cost_per_km:,.2f}) exceeds Multi-Purpose Building threshold ({buildings_threshold:,.2f})"
+                else:
+                    building['is_flagged'] = False
+        
+        if rockfall_netting_stats.get('mean') is not None and rockfall_netting_stats.get('std_dev') is not None:
+            rockfall_threshold = rockfall_netting_stats['mean'] + (0.1 * rockfall_netting_stats['std_dev'])
+            for rockfall in rockfall_netting:
+                cost_per_km = rockfall.get('cost_per_km', 0)
+                if rockfall_threshold and cost_per_km > rockfall_threshold:
+                    rockfall['is_flagged'] = True
+                    rockfall['flag_reason'] = f"Cost/km ({cost_per_km:,.2f}) exceeds Rockfall Netting threshold ({rockfall_threshold:,.2f})"
+                else:
+                    rockfall['is_flagged'] = False
+        
+        # Flag schools by subcategory
+        for subcategory, subcategory_projects in schools_by_subcategory.items():
+            subcategory_stats = schools_subcategory_stats.get(subcategory, {})
+            if subcategory_stats.get('mean') is not None and subcategory_stats.get('std_dev') is not None:
+                subcategory_threshold = subcategory_stats['mean'] + (0.1 * subcategory_stats['std_dev'])
+                for school in subcategory_projects:
+                    cost_per_km = school.get('cost_per_km', 0)
+                    if subcategory_threshold and cost_per_km > subcategory_threshold:
+                        school['is_flagged'] = True
+                        school['flag_reason'] = f"Cost/km ({cost_per_km:,.2f}) exceeds {subcategory} threshold ({subcategory_threshold:,.2f})"
+                    else:
+                        school['is_flagged'] = False
+        
         # Count flagged projects
         traffic_flagged = sum(1 for p in traffic_signs if p.get('is_flagged'))
         national_flagged = sum(1 for p in national_roads if p.get('is_flagged'))
         secondary_flagged = sum(1 for p in secondary_roads if p.get('is_flagged'))
         bridges_flagged = sum(1 for p in bridges if p.get('is_flagged'))
+        buildings_flagged = sum(1 for p in multi_purpose_buildings if p.get('is_flagged'))
+        rockfall_flagged = sum(1 for p in rockfall_netting if p.get('is_flagged'))
+        schools_flagged = sum(1 for p in schools if p.get('is_flagged'))
         
-        print(f"   ✅ Categorized: {len(national_roads)} national roads, {len(secondary_roads)} secondary roads, {len(bridges)} bridges, {len(traffic_signs)} traffic signs")
-        print(f"   🚩 Flagged: {traffic_flagged} traffic signs, {national_flagged} national roads, {secondary_flagged} secondary roads, {bridges_flagged} bridges")
+        print(f"   ✅ Categorized: {len(national_roads)} national roads, {len(secondary_roads)} secondary roads, {len(bridges)} bridges, {len(traffic_signs)} traffic signs, {len(multi_purpose_buildings)} multi-purpose buildings, {len(rockfall_netting)} rockfall netting, {len(schools)} schools")
+        print(f"   🚩 Flagged: {traffic_flagged} traffic signs, {national_flagged} national roads, {secondary_flagged} secondary roads, {bridges_flagged} bridges, {buildings_flagged} multi-purpose buildings, {rockfall_flagged} rockfall netting, {schools_flagged} schools")
         
         # Count projects with subcategories
         traffic_with_subcats = sum(1 for p in traffic_signs if p.get('road_safety_subcategories') and len(p.get('road_safety_subcategories', [])) > 0)
@@ -845,10 +976,17 @@ class HistoricalRoadsRegenerator:
             'secondary_roads': secondary_roads,
             'bridges': bridges,
             'traffic_signs': traffic_signs,
+            'multi_purpose_buildings': multi_purpose_buildings,
+            'rockfall_netting': rockfall_netting,
+            'schools': schools,
             'traffic_signs_subcategory_statistics': road_safety_subcategory_stats,
             'national_roads_work_type_statistics': national_roads_work_type_stats,
             'secondary_roads_work_type_statistics': secondary_roads_work_type_stats,
-            'bridges_statistics': bridges_stats
+            'bridges_statistics': bridges_stats,
+            'multi_purpose_buildings_statistics': multi_purpose_buildings_stats,
+            'rockfall_netting_statistics': rockfall_netting_stats,
+            'schools_statistics': schools_stats,
+            'schools_subcategory_statistics': schools_subcategory_stats
         }
     
     def _calculate_all_years_category_statistics(self, all_data):
@@ -964,6 +1102,54 @@ class HistoricalRoadsRegenerator:
                         category_aggregates[key]['total_distance_km'] += project.get('distance_km', 0)
                     if project.get('is_flagged', False):
                         category_aggregates[key]['flagged_projects'].append(project)
+            
+            # Multi-Purpose Buildings
+            multi_purpose_buildings = year_data.get('multi_purpose_buildings', [])
+            for project in multi_purpose_buildings:
+                project['year'] = year_str
+                project_id = get_project_id(project)
+                key = ('Multi-Purpose Buildings', None)
+                if project_id not in category_aggregates[key]['unique_projects']:
+                    category_aggregates[key]['unique_projects'].add(project_id)
+                    category_aggregates[key]['total_amount'] += project.get('amount', 0)
+                    category_aggregates[key]['total_distance_km'] += project.get('distance_km', 0)
+                    category_aggregates[key]['projects'].append(project)
+                    if project.get('is_flagged'):
+                        category_aggregates[key]['flagged_projects'].append(project)
+            
+            # Rockfall Netting
+            rockfall_netting = year_data.get('rockfall_netting', [])
+            for project in rockfall_netting:
+                project['year'] = year_str
+                project_id = get_project_id(project)
+                key = ('Rockfall Netting', None)
+                if project_id not in category_aggregates[key]['unique_projects']:
+                    category_aggregates[key]['unique_projects'].add(project_id)
+                    category_aggregates[key]['total_amount'] += project.get('amount', 0)
+                    category_aggregates[key]['total_distance_km'] += project.get('distance_km', 0)
+                    category_aggregates[key]['projects'].append(project)
+                    if project.get('is_flagged'):
+                        category_aggregates[key]['flagged_projects'].append(project)
+            
+            # Schools (with subcategories)
+            schools = year_data.get('schools', [])
+            schools_subcategory_stats = year_data.get('schools_subcategory_statistics', {})
+            for subcategory, stats in schools_subcategory_stats.items():
+                subcategory_projects = [
+                    p for p in schools
+                    if p.get('school_subcategory') == subcategory
+                ]
+                key = ('Schools', subcategory)
+                for project in subcategory_projects:
+                    project['year'] = year_str
+                    project_id = get_project_id(project)
+                    if project_id not in category_aggregates[key]['unique_projects']:
+                        category_aggregates[key]['unique_projects'].add(project_id)
+                        category_aggregates[key]['total_amount'] += project.get('amount', 0)
+                        category_aggregates[key]['total_distance_km'] += project.get('distance_km', 0)
+                        category_aggregates[key]['projects'].append(project)
+                        if project.get('is_flagged'):
+                            category_aggregates[key]['flagged_projects'].append(project)
         
         # Calculate aggregated statistics
         categories = []
@@ -1035,6 +1221,9 @@ class HistoricalRoadsRegenerator:
         total_secondary_roads = sum(len(all_data[y].get('secondary_roads', [])) for y in all_data)
         total_bridges = sum(len(all_data[y].get('bridges', [])) for y in all_data)
         total_traffic_signs = sum(len(all_data[y].get('traffic_signs', [])) for y in all_data)
+        total_multi_purpose_buildings = sum(len(all_data[y].get('multi_purpose_buildings', [])) for y in all_data)
+        total_rockfall_netting = sum(len(all_data[y].get('rockfall_netting', [])) for y in all_data)
+        total_schools = sum(len(all_data[y].get('schools', [])) for y in all_data)
         
         print("\n" + "=" * 100)
         print(" REGENERATION SUMMARY")
@@ -1042,7 +1231,10 @@ class HistoricalRoadsRegenerator:
         print(f"Total Roads: {total_roads:,} (National: {total_national_roads:,}, Secondary: {total_secondary_roads:,})")
         print(f"Total Bridges: {total_bridges:,}")
         print(f"Total Road Safety Facilities: {total_traffic_signs:,}")
-        print(f"Grand Total: {total_roads + total_bridges + total_traffic_signs:,}")
+        print(f"Total Multi-Purpose Buildings: {total_multi_purpose_buildings:,}")
+        print(f"Total Rockfall Netting: {total_rockfall_netting:,}")
+        print(f"Total Schools: {total_schools:,}")
+        print(f"Grand Total: {total_roads + total_bridges + total_traffic_signs + total_multi_purpose_buildings + total_rockfall_netting + total_schools:,}")
         
         for year in self.years:
             year_str = str(year)
