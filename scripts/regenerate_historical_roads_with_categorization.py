@@ -42,6 +42,24 @@ def _categorize_multi_purpose_subcategory(name_lower: str) -> str:
                 return label
     return "Other Multi-Purpose Buildings"
 
+NIA_SUBCATEGORY_PATTERNS = [
+    ("Canal Lining", ['canal lining', 'lining of canal', 'lining canal']),
+    ("Drainage Canal", ['drainage canal', 'canal drainage']),
+    ("Diversion Intake", ['diversion intake', 'diversion dam', 'diversion weir']),
+    ("Intake of Main Canal", ['intake of main canal', 'main canal intake']),
+    ("Canal Excavation / Improvement", ['canal excavation', 'canal improvement', 'canal rehab', 'canal reconstruction']),
+    ("Canal Protection / Riprap", ['riprap', 'revetment', 'slope protection', 'bank protection']),
+    ("Irrigation Structures", ['headgate', 'sluice', 'check gate', 'turnout', 'appurtenant structure'])
+]
+
+def _categorize_nia_subcategory(name_lower: str) -> str:
+    target = name_lower or ''
+    for label, keywords in NIA_SUBCATEGORY_PATTERNS:
+        for keyword in keywords:
+            if keyword in target:
+                return label
+    return "Other Irrigation Works"
+
 def _calculate_amount_statistics(costs):
     if not costs:
         return {
@@ -68,6 +86,31 @@ def _calculate_amount_statistics(costs):
         "threshold": threshold,
         "count": len(costs)
     }
+
+
+def _flag_projects_by_threshold(projects, stats, category_name):
+    """Flag projects when cost per km exceeds the category threshold (mean + 0.1 * std_dev)"""
+    if not projects or not stats:
+        return
+
+    mean = stats.get('mean')
+    std_dev = stats.get('std_dev') or 0
+    threshold = None
+    if mean is not None:
+        threshold = mean + (0.1 * std_dev)
+
+    if not threshold or threshold <= 0:
+        for project in projects:
+            project['is_flagged'] = False
+        return
+
+    for project in projects:
+        cost_per_km = project.get('cost_per_km', 0)
+        if cost_per_km and cost_per_km > threshold:
+            project['is_flagged'] = True
+            project['flag_reason'] = f"Cost/km ({cost_per_km:,.2f}) exceeds {category_name} threshold ({threshold:,.2f})"
+        else:
+            project['is_flagged'] = False
 
 # Import categorization functions from visualization.py
 # We'll copy them here to avoid import issues
@@ -276,19 +319,57 @@ class HistoricalRoadsRegenerator:
         
     def extract_all_chainage_ranges(self, name: str):
         """Extract all chainage ranges from name"""
+        import re
+        if not name:
+            return []
+
         ranges = []
-        pattern_k = r'K(\d+)\s*\+\s*\(?(-?\d+)\)?\s*-\s*K(\d+)\s*\+\s*\(?(-?\d+)\)?'
+        seen = set()
+
+        def parse_number(value):
+            if value is None:
+                return 0.0
+            if isinstance(value, (int, float)):
+                return float(value)
+            cleaned = str(value).replace(',', '')
+            try:
+                return float(cleaned)
+            except ValueError:
+                cleaned = re.sub(r'[^\d\.\-]', '', cleaned)
+                return float(cleaned) if cleaned else 0.0
+
+        def add_range(start_km, start_m, end_km, end_m):
+            key = (
+                float(parse_number(start_km)),
+                float(parse_number(start_m)),
+                float(parse_number(end_km)),
+                float(parse_number(end_m))
+            )
+            if key not in seen:
+                seen.add(key)
+                ranges.append(key)
+
+        dash = r'[-–—]'
+        number = r'\d+(?:[.,]\d+)?'
+
+        pattern_k = rf'K({number})\s*\+\s*\(?(-?{number})\)?\s*{dash}\s*K({number})\s*\+\s*\(?(-?{number})\)?'
         for match in re.finditer(pattern_k, name, re.IGNORECASE):
-            ranges.append((int(match.group(1)), int(match.group(2)), int(match.group(3)), int(match.group(4))))
-        pattern_chainage = r'Chainage\s+(\d+)\s*-\s*Chainage\s+(\d+)'
+            add_range(match.group(1), match.group(2), match.group(3), match.group(4))
+
+        pattern_chainage = rf'Chainage\s+({number})\s*{dash}\s*Chainage\s+({number})'
         for match in re.finditer(pattern_chainage, name, re.IGNORECASE):
-            start_total = int(match.group(1))
-            end_total = int(match.group(2))
-            ranges.append((start_total // 1000, start_total % 1000, end_total // 1000, end_total % 1000))
-        # Pattern 3: Sta. format - "Sta. 2+783 - Sta. 3+779"
-        pattern_sta = r'Sta\.\s*(\d+)\+(\d+)\s*-\s*Sta\.\s*(\d+)\+(\d+)'
+            start_total = parse_number(match.group(1))
+            end_total = parse_number(match.group(2))
+            add_range(start_total // 1000, start_total % 1000, end_total // 1000, end_total % 1000)
+
+        pattern_sta = rf'Sta\.?\s*({number})\s*\+\s*({number})\s*{dash}\s*(?:Sta\.?\s*)?({number})\s*\+\s*({number})'
         for match in re.finditer(pattern_sta, name, re.IGNORECASE):
-            ranges.append((int(match.group(1)), int(match.group(2)), int(match.group(3)), int(match.group(4))))
+            add_range(match.group(1), match.group(2), match.group(3), match.group(4))
+
+        pattern_plain = rf'(?<![A-Za-z0-9])({number})\s*\+\s*({number})\s*{dash}\s*({number})\s*\+\s*({number})'
+        for match in re.finditer(pattern_plain, name):
+            add_range(match.group(1), match.group(2), match.group(3), match.group(4))
+
         return ranges
     
     def calculate_distance(self, chainage_ranges):
@@ -318,11 +399,19 @@ class HistoricalRoadsRegenerator:
         if not ranges:
             return None
         chainage_strings = []
-        pattern_k = r'(K\d+\s*\+\s*\(?-?\d+\)?\s*-\s*K\d+\s*\+\s*\(?-?\d+\)?)'
+        dash = r'[-–—]'
+        number = r'\d+(?:[.,]\d+)?'
+        pattern_k = rf'(K{number}\s*\+\s*\(?-?{number}\)?\s*{dash}\s*K{number}\s*\+\s*\(?-?{number}\)?)'
         for match in re.finditer(pattern_k, name, re.IGNORECASE):
             chainage_strings.append(match.group(1))
-        pattern_chainage = r'(Chainage\s+\d+\s*-\s*Chainage\s+\d+)'
+        pattern_chainage = rf'(Chainage\s+{number}\s*{dash}\s*Chainage\s+{number})'
         for match in re.finditer(pattern_chainage, name, re.IGNORECASE):
+            chainage_strings.append(match.group(1))
+        pattern_sta = rf'(Sta\.?\s*{number}\+{number}\s*{dash}\s*(?:Sta\.?\s*)?{number}\+{number})'
+        for match in re.finditer(pattern_sta, name, re.IGNORECASE):
+            chainage_strings.append(match.group(1))
+        pattern_plain = rf'(?<![A-Za-z0-9])({number}\s*\+\s*{number}\s*{dash}\s*{number}\s*\+\s*{number})'
+        for match in re.finditer(pattern_plain, name):
             chainage_strings.append(match.group(1))
         if chainage_strings:
             return ', '.join(chainage_strings)
@@ -541,6 +630,7 @@ class HistoricalRoadsRegenerator:
         multi_purpose_buildings = []
         rockfall_netting = []
         schools = []
+        nia_projects = []
         
         for item in historical_data:
             name = item['description']
@@ -648,6 +738,35 @@ class HistoricalRoadsRegenerator:
                 'year': year,
                 'source_file': item.get('source_file')
             }
+            
+            # Farm-to-Market Roads (FMR) and NIA detection
+            fmr_keywords = [' fmr', 'fmr ', 'farm to market', 'farm-to-market', 'farm to market road']
+            is_fmr = any(keyword in name_lower for keyword in fmr_keywords) and 'cnia' not in name_lower
+            
+            nia_keywords = [
+                'national irrigation', 'irrigation system', 'irrigation project',
+                'irrigation canal', 'communal irrigation', 'irrigation sub-program',
+                'irrigation subprogram', 'irrigation facility', 'irrigation structure',
+                'annex a-4', 'communal irrigation system', 'communal irrigation project',
+                'communal irrigation scheme'
+            ]
+            nia_keyword_patterns = [
+                r'\bnis\b', r'\bnia\b', r'\bcis\b', r'\bcip\b', r'\bsip\b',
+                r'\bc\.i\.s\b', r'\bc\.i\.p\b', r'\bs\.i\.p\b'
+            ]
+            pattern_hit = any(re.search(pattern, name_lower) for pattern in nia_keyword_patterns)
+            is_nia = (any(keyword in name_lower for keyword in nia_keywords) or pattern_hit) and \
+                     'cnia' not in name_lower and \
+                     'xdp' not in name_lower and \
+                     'dystonia' not in name_lower
+            
+            if is_fmr:
+                roads.append(project_data)  # Historical extractor doesn't maintain dedicated FMR bucket
+                continue
+            if is_nia:
+                project_data['nia_subcategory'] = _categorize_nia_subcategory(name_lower)
+                nia_projects.append(project_data)
+                continue
             
             # Road Safety Facilities
             road_safety_keywords = [
@@ -956,6 +1075,7 @@ class HistoricalRoadsRegenerator:
         multi_purpose_buildings_stats = calculate_statistics(multi_purpose_buildings) if multi_purpose_buildings else {}
         rockfall_netting_stats = calculate_statistics(rockfall_netting) if rockfall_netting else {}
         schools_stats = calculate_statistics(schools) if schools else {}
+        nia_stats = calculate_statistics(nia_projects) if nia_projects else {}
         
         # Group schools by subcategory for statistics
         schools_by_subcategory = defaultdict(list)
@@ -974,6 +1094,11 @@ class HistoricalRoadsRegenerator:
         for subcategory, subcategory_projects in schools_by_subcategory.items():
             schools_subcategory_stats[subcategory] = calculate_statistics(subcategory_projects)
         
+        nia_by_subcategory = defaultdict(list)
+        for project in nia_projects:
+            subcategory = project.get('nia_subcategory', 'Other Irrigation Works')
+            nia_by_subcategory[subcategory].append(project)
+        
         # Calculate subcategory statistics for multi-purpose buildings (amount-based) and flag
         multi_purpose_subcategory_stats = {}
         for subcategory, subcategory_projects in multi_purpose_by_subcategory.items():
@@ -988,6 +1113,21 @@ class HistoricalRoadsRegenerator:
                     building['flag_reason'] = f"Amount (₱{amount_value:,.2f}) exceeds {subcategory} threshold (₱{threshold:,.2f})"
                 else:
                     building['is_flagged'] = False
+        
+        nia_subcategory_stats = {}
+        for subcategory, subcategory_projects in nia_by_subcategory.items():
+            stats = calculate_statistics(subcategory_projects)
+            nia_subcategory_stats[subcategory] = stats
+            threshold = 0
+            if stats.get('mean') is not None and stats.get('std_dev') is not None:
+                threshold = stats['mean'] + (0.1 * stats['std_dev'])
+            for irrigation in subcategory_projects:
+                cost_per_km = irrigation.get('cost_per_km', 0)
+                if threshold and cost_per_km > threshold:
+                    irrigation['is_flagged'] = True
+                    irrigation['flag_reason'] = f"Cost/km ({cost_per_km:,.2f}) exceeds {subcategory} threshold ({threshold:,.2f})"
+                else:
+                    irrigation['is_flagged'] = False
         
         if rockfall_netting_stats.get('mean') is not None and rockfall_netting_stats.get('std_dev') is not None:
             rockfall_threshold = rockfall_netting_stats['mean'] + (0.1 * rockfall_netting_stats['std_dev'])
@@ -1020,9 +1160,10 @@ class HistoricalRoadsRegenerator:
         buildings_flagged = sum(1 for p in multi_purpose_buildings if p.get('is_flagged'))
         rockfall_flagged = sum(1 for p in rockfall_netting if p.get('is_flagged'))
         schools_flagged = sum(1 for p in schools if p.get('is_flagged'))
+        nia_flagged = sum(1 for p in nia_projects if p.get('is_flagged'))
         
-        print(f"   ✅ Categorized: {len(national_roads)} national roads, {len(secondary_roads)} secondary roads, {len(bridges)} bridges, {len(traffic_signs)} traffic signs, {len(multi_purpose_buildings)} multi-purpose buildings, {len(rockfall_netting)} rockfall netting, {len(schools)} schools")
-        print(f"   🚩 Flagged: {traffic_flagged} traffic signs, {national_flagged} national roads, {secondary_flagged} secondary roads, {bridges_flagged} bridges, {buildings_flagged} multi-purpose buildings, {rockfall_flagged} rockfall netting, {schools_flagged} schools")
+        print(f"   ✅ Categorized: {len(national_roads)} national roads, {len(secondary_roads)} secondary roads, {len(bridges)} bridges, {len(traffic_signs)} traffic signs, {len(multi_purpose_buildings)} multi-purpose buildings, {len(rockfall_netting)} rockfall netting, {len(schools)} schools, {len(nia_projects)} irrigation works (NIA)")
+        print(f"   🚩 Flagged: {traffic_flagged} traffic signs, {national_flagged} national roads, {secondary_flagged} secondary roads, {bridges_flagged} bridges, {buildings_flagged} multi-purpose buildings, {rockfall_flagged} rockfall netting, {schools_flagged} schools, {nia_flagged} irrigation works")
         
         # Count projects with subcategories
         traffic_with_subcats = sum(1 for p in traffic_signs if p.get('road_safety_subcategories') and len(p.get('road_safety_subcategories', [])) > 0)
@@ -1037,6 +1178,7 @@ class HistoricalRoadsRegenerator:
             'multi_purpose_buildings': multi_purpose_buildings,
             'rockfall_netting': rockfall_netting,
             'schools': schools,
+            'nia': nia_projects,
             'traffic_signs_subcategory_statistics': road_safety_subcategory_stats,
             'national_roads_work_type_statistics': national_roads_work_type_stats,
             'secondary_roads_work_type_statistics': secondary_roads_work_type_stats,
@@ -1045,7 +1187,9 @@ class HistoricalRoadsRegenerator:
             'multi_purpose_buildings_subcategory_statistics': multi_purpose_subcategory_stats,
             'rockfall_netting_statistics': rockfall_netting_stats,
             'schools_statistics': schools_stats,
-            'schools_subcategory_statistics': schools_subcategory_stats
+            'schools_subcategory_statistics': schools_subcategory_stats,
+            'nia_statistics': nia_stats,
+            'nia_subcategory_statistics': nia_subcategory_stats
         }
     
     def _calculate_all_years_category_statistics(self, all_data):
@@ -1194,7 +1338,40 @@ class HistoricalRoadsRegenerator:
                     category_aggregates[key]['projects'].append(project)
                     if project.get('is_flagged'):
                         category_aggregates[key]['flagged_projects'].append(project)
-            
+
+            # Irrigation Works (NIA)
+            nia_projects = year_data.get('nia', [])
+            nia_subcategory_stats = year_data.get('nia_subcategory_statistics', {})
+            if nia_subcategory_stats:
+                for subcategory in nia_subcategory_stats.keys():
+                    subcategory_projects = [
+                        p for p in nia_projects
+                        if (p.get('nia_subcategory') or 'Other Irrigation Works') == subcategory
+                    ]
+                    key = ('Irrigation Works (NIA)', subcategory)
+                    for project in subcategory_projects:
+                        project['year'] = year_str
+                        project_id = get_project_id(project)
+                        if project_id not in category_aggregates[key]['unique_projects']:
+                            category_aggregates[key]['unique_projects'].add(project_id)
+                            category_aggregates[key]['total_amount'] += project.get('amount', 0)
+                            category_aggregates[key]['total_distance_km'] += project.get('distance_km', 0)
+                        category_aggregates[key]['projects'].append(project)
+                        if project.get('is_flagged'):
+                            category_aggregates[key]['flagged_projects'].append(project)
+            elif nia_projects:
+                key = ('Irrigation Works (NIA)', None)
+                for project in nia_projects:
+                    project['year'] = year_str
+                    project_id = get_project_id(project)
+                    if project_id not in category_aggregates[key]['unique_projects']:
+                        category_aggregates[key]['unique_projects'].add(project_id)
+                        category_aggregates[key]['total_amount'] += project.get('amount', 0)
+                        category_aggregates[key]['total_distance_km'] += project.get('distance_km', 0)
+                    category_aggregates[key]['projects'].append(project)
+                    if project.get('is_flagged'):
+                        category_aggregates[key]['flagged_projects'].append(project)
+
             # Rockfall Netting
             rockfall_netting = year_data.get('rockfall_netting', [])
             for project in rockfall_netting:
@@ -1205,9 +1382,9 @@ class HistoricalRoadsRegenerator:
                     category_aggregates[key]['unique_projects'].add(project_id)
                     category_aggregates[key]['total_amount'] += project.get('amount', 0)
                     category_aggregates[key]['total_distance_km'] += project.get('distance_km', 0)
-                    category_aggregates[key]['projects'].append(project)
-                    if project.get('is_flagged'):
-                        category_aggregates[key]['flagged_projects'].append(project)
+                category_aggregates[key]['projects'].append(project)
+                if project.get('is_flagged'):
+                    category_aggregates[key]['flagged_projects'].append(project)
             
             # Schools (with subcategories)
             schools = year_data.get('schools', [])
