@@ -2154,7 +2154,7 @@ async def budget_roads_cost_analysis_api(year: str = Query("2026", description="
                 # Calculate threshold (mean + 2*std_dev)
                 threshold = None
                 if mean is not None and std_dev is not None:
-                    threshold = mean + (1 * std_dev) if std_dev else None
+                    threshold = mean + (0.1 * std_dev) if std_dev else None
                 
                 stats = {
                     "min": min(stats_costs),
@@ -2347,10 +2347,10 @@ async def budget_category_statistics_api(year: str = "2026"):
                 # Total cost (amount) of all flagged projects
                 bridges_flagged_cost = sum(p.get('amount', 0) for p in bridges_flagged)
                 
-                # Calculate threshold for bridges (mean + 1*std_dev)
+                # Calculate threshold for bridges (mean + 0.1*std_dev)
                 bridges_threshold = 0
                 if bridges_stats_data.get('mean') is not None and bridges_stats_data.get('std_dev') is not None:
-                    bridges_threshold = bridges_stats_data['mean'] + (1 * bridges_stats_data['std_dev'])
+                    bridges_threshold = bridges_stats_data['mean'] + (0.1 * bridges_stats_data['std_dev'])
                 
                 categories.append({
                     "category": "Bridges",
@@ -2463,10 +2463,10 @@ async def budget_category_statistics_api(year: str = "2026"):
         # Calculate threshold for bridges (mean + 2*std_dev)
         bridges_threshold = 0
         if bridges_stats.get('mean') is not None and bridges_stats.get('std_dev') is not None:
-            # Calculate threshold for bridges (mean + 1*std_dev)
+            # Calculate threshold for bridges (mean + 0.1*std_dev)
             bridges_threshold = 0
             if bridges_stats.get('mean') is not None and bridges_stats.get('std_dev') is not None:
-                bridges_threshold = bridges_stats['mean'] + (1 * bridges_stats['std_dev'])
+                bridges_threshold = bridges_stats['mean'] + (0.1 * bridges_stats['std_dev'])
         
         categories.append({
             "category": "Bridges",
