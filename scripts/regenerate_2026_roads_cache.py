@@ -16,6 +16,7 @@ import json
 import re
 import sys
 from pathlib import Path
+import statistics
 
 # Add parent directory to path to import from visualization.py
 sys.path.insert(0, str(Path(__file__).parent.parent))
@@ -40,6 +41,8 @@ MULTI_PURPOSE_SUBCATEGORY_PATTERNS = [
     ("Sports / Youth", ['sports', 'gymnasium', 'stadium', 'coliseum', 'covered court', 'youth', 'athletic']),
     ("Markets / Economic Hubs", ['market', 'bagsakan', 'trading', 'trade', 'terminal', 'commerce'])
 ]
+
+MAD_SCALE = 1.4826
 
 def categorize_multi_purpose_subcategory(name_lower: str) -> str:
     """Best-effort bucket for multi-purpose building projects"""
@@ -179,12 +182,13 @@ def calculate_statistics(projects):
             "median": None,
             "mode": None,
             "std_dev": None,
+            "mad": None,
+            "threshold": None,
             "count": 0
         }
-    
-    import statistics
+
     from collections import Counter
-    
+
     costs = [p['cost_per_km'] for p in projects if p.get('cost_per_km', 0) > 0]
     if not costs:
         return {
@@ -194,43 +198,50 @@ def calculate_statistics(projects):
             "median": None,
             "mode": None,
             "std_dev": None,
+            "mad": None,
+            "threshold": None,
             "count": 0
         }
-    
+
     costs_sorted = sorted(costs)
     mean = statistics.mean(costs)
-    
-    # Calculate mode (rounded to nearest million)
+    median_val = statistics.median(costs_sorted)
+    deviations = [abs(c - median_val) for c in costs_sorted]
+    mad = statistics.median(deviations) if deviations else 0
+    threshold = median_val + (MAD_SCALE * mad) if mad else None
+
     rounded_costs = [round(c / 1000000) * 1000000 for c in costs]
     cost_counter = Counter(rounded_costs)
     mode_value = cost_counter.most_common(1)[0][0] if cost_counter else None
-    
+
     try:
         std_dev = statistics.stdev(costs) if len(costs) > 1 else 0
-    except:
+    except statistics.StatisticsError:
         std_dev = 0
-    
+
     return {
         "min": min(costs),
         "max": max(costs),
         "mean": mean,
-        "median": statistics.median(costs),
+        "median": median_val,
         "mode": mode_value,
         "std_dev": std_dev,
+        "mad": mad,
+        "threshold": threshold,
         "count": len(costs)
     }
 
 
 def flag_projects_by_threshold(projects, category_name, stats):
-    """Flag projects when cost per km exceeds the category threshold (mean + 0.1 * std_dev)"""
+    """Flag projects when cost per km exceeds the category threshold derived from MAD"""
     if not projects or not stats:
         return
 
-    mean = stats.get('mean')
-    std_dev = stats.get('std_dev') or 0
-    threshold = None
-    if mean is not None:
-        threshold = mean + (0.1 * std_dev)
+    median_val = stats.get('median')
+    mad = stats.get('mad') or 0
+    threshold = stats.get('threshold')
+    if mad and median_val is not None:
+        threshold = median_val + (MAD_SCALE * mad)
 
     if not threshold or threshold <= 0:
         for project in projects:
@@ -555,54 +566,52 @@ def process_roads_data(all_items):
         - Flagging uses original_cost_per_km against threshold
         """
         subcategory_stats = {}
+        from collections import Counter
         for subcategory, projects in projects_by_subcategory.items():
-            # Use cost_per_km_for_stats for statistics (average of average for composites)
-            stats_costs = [p.get('cost_per_km_for_stats', p.get('cost_per_km', 0)) for p in projects if p.get('cost_per_km_for_stats', p.get('cost_per_km', 0)) > 0]
-            
+            stats_costs = [p.get('cost_per_km_for_stats', p.get('cost_per_km', 0))
+                           for p in projects
+                           if p.get('cost_per_km_for_stats', p.get('cost_per_km', 0)) > 0]
+
             if not stats_costs:
                 subcategory_stats[subcategory] = {
                     "min": None, "max": None, "mean": None, "median": None,
-                    "mode": None, "std_dev": None, "count": 0
+                    "mode": None, "std_dev": None, "mad": None, "threshold": None, "count": 0
                 }
+                for project in projects:
+                    project['is_flagged'] = False
                 continue
-            
-            import statistics
-            from collections import Counter
-            
+
             costs_sorted = sorted(stats_costs)
             mean = statistics.mean(stats_costs)
+            median_val = statistics.median(costs_sorted)
+            deviations = [abs(c - median_val) for c in costs_sorted]
+            mad = statistics.median(deviations) if deviations else 0
+            threshold = median_val + (MAD_SCALE * mad) if mad else None
+
             rounded_costs = [round(c / 1000000) * 1000000 for c in stats_costs]
             cost_counter = Counter(rounded_costs)
             mode_value = cost_counter.most_common(1)[0][0] if cost_counter else None
             try:
                 std_dev = statistics.stdev(stats_costs) if len(stats_costs) > 1 else 0
-            except:
+            except statistics.StatisticsError:
                 std_dev = 0
-            
-            # Calculate threshold (mean + 0.1*std_dev)
-            threshold = None
-            if mean is not None and std_dev is not None:
-                threshold = mean + (0.1 * std_dev)
-            
+
             stats = {
                 "min": min(stats_costs),
                 "max": max(stats_costs),
                 "mean": mean,
-                "median": statistics.median(stats_costs),
+                "median": median_val,
                 "mode": mode_value,
                 "std_dev": std_dev,
-                "threshold": threshold,  # Add threshold to stats
+                "mad": mad,
+                "threshold": threshold,
                 "count": len(projects)
             }
             subcategory_stats[subcategory] = stats
-            
-            # Flag projects that exceed mean + 2*std_dev (outlier threshold)
-            # Use original_cost_per_km for flagging (not the divided one)
-            
+
             for project in projects:
                 project['subcategory'] = subcategory
                 project['subcategory_stats'] = stats
-                # Use original_cost_per_km for flagging comparison
                 cost_to_check = project.get('original_cost_per_km', project.get('cost_per_km', 0))
                 if threshold and cost_to_check > threshold:
                     project['is_flagged'] = True
@@ -619,61 +628,57 @@ def process_roads_data(all_items):
         - Flagging uses total amount against threshold
         """
         subcategory_stats = {}
+        from collections import Counter
         for subcategory, projects in projects_by_subcategory.items():
-            # Use total amount for statistics (not cost_per_km)
             total_costs = [p.get('amount', 0) for p in projects if p.get('amount', 0) > 0]
-            
+
             if not total_costs:
                 subcategory_stats[subcategory] = {
                     "min": None, "max": None, "mean": None, "median": None,
-                    "mode": None, "std_dev": None, "count": 0
+                    "mode": None, "std_dev": None, "mad": None, "threshold": None, "count": 0
                 }
+                for project in projects:
+                    project['is_flagged'] = False
                 continue
-            
-            import statistics
-            from collections import Counter
-            
+
             costs_sorted = sorted(total_costs)
             mean = statistics.mean(total_costs)
+            median_val = statistics.median(costs_sorted)
+            deviations = [abs(c - median_val) for c in costs_sorted]
+            mad = statistics.median(deviations) if deviations else 0
+            threshold = median_val + (MAD_SCALE * mad) if mad else None
+
             rounded_costs = [round(c / 1000000) * 1000000 for c in total_costs]
             cost_counter = Counter(rounded_costs)
             mode_value = cost_counter.most_common(1)[0][0] if cost_counter else None
             try:
                 std_dev = statistics.stdev(total_costs) if len(total_costs) > 1 else 0
-            except:
+            except statistics.StatisticsError:
                 std_dev = 0
-            
-            # Calculate threshold (mean + 0.1*std_dev)
-            threshold = None
-            if mean is not None and std_dev is not None:
-                threshold = mean + (0.1 * std_dev)
-            
+
             stats = {
                 "min": min(total_costs),
                 "max": max(total_costs),
                 "mean": mean,
-                "median": statistics.median(total_costs),
+                "median": median_val,
                 "mode": mode_value,
                 "std_dev": std_dev,
-                "threshold": threshold,  # Add threshold to stats
+                "mad": mad,
+                "threshold": threshold,
                 "count": len(projects)
             }
             subcategory_stats[subcategory] = stats
-            
-            # Flag projects that exceed mean + 0.1*std_dev (outlier threshold)
-            # Use total amount for flagging comparison
-            
+
             for project in projects:
                 project['subcategory'] = subcategory
                 project['subcategory_stats'] = stats
-                # Use total amount for flagging comparison
                 total_cost = project.get('amount', 0)
                 if threshold and total_cost > threshold:
                     project['is_flagged'] = True
                     project['flag_reason'] = f"Total cost (₱{total_cost:,.2f}) exceeds {subcategory} threshold (₱{threshold:,.2f})"
                 else:
                     project['is_flagged'] = False
-        
+
         return subcategory_stats
     
     # Flag road safety facilities by subcategory
@@ -1291,19 +1296,19 @@ def calculate_all_years_category_statistics(cache_2026):
             cost_per_km_values = [p.get('cost_per_km', 0) for p in data['projects'] if p.get('cost_per_km', 0) > 0]
             avg_cost_km = statistics.mean(cost_per_km_values) if cost_per_km_values else 0
         
-        # Calculate threshold (mean + 1*std_dev)
+        # Calculate threshold using MAD to match per-year stats
         cost_per_km_values = [p.get('cost_per_km', 0) for p in data['projects'] if p.get('cost_per_km', 0) > 0]
-        threshold_cost_per_km = 0
-        if cost_per_km_values and len(cost_per_km_values) > 1:
-            mean = statistics.mean(cost_per_km_values)
-            try:
-                std_dev = statistics.stdev(cost_per_km_values)
-                threshold_cost_per_km = mean + (0.1 * std_dev)
-            except:
-                threshold_cost_per_km = 0
-        elif cost_per_km_values and len(cost_per_km_values) == 1:
-            # Single project: threshold is the project's cost/km
-            threshold_cost_per_km = cost_per_km_values[0]
+        threshold_cost_per_km = None
+        if cost_per_km_values:
+            if len(cost_per_km_values) == 1:
+                threshold_cost_per_km = cost_per_km_values[0]
+            else:
+                sorted_costs = sorted(cost_per_km_values)
+                median_val = statistics.median(sorted_costs)
+                deviations = [abs(c - median_val) for c in sorted_costs]
+                mad = statistics.median(deviations) if deviations else 0
+                if mad:
+                    threshold_cost_per_km = median_val + (MAD_SCALE * mad)
         
         # For flagged_cost, only count each unique flagged project once
         unique_flagged_projects = {}

@@ -8240,34 +8240,16 @@
                     style="margin-top: 1rem; padding: 1rem; background: #e3f2fd; border-left: 4px solid #2196f3; border-radius: 4px; color: #1565c0; font-size: 0.9em;">
                     <strong>📊 Flagging Methodology:</strong>
                     <p style="margin: 0.5rem 0 0 0; line-height: 1.6;">
-                        Projects are flagged as outliers using statistical analysis:
+                        Projects are flagged as outliers using a robust Median Absolute Deviation (MAD) analysis:
                     </p>
                     <ul style="margin: 0.5rem 0 0 1.5rem; padding-left: 0.5rem; line-height: 1.8;">
-                        <li><strong>Threshold Formula:</strong> Mean + (1 × Standard Deviation)</li>
-                        <li><strong>Justification:</strong> Using 1× standard deviation provides a balanced threshold
-                            that identifies potential outliers. This approach is preferred because:
-                            <ul style="margin: 0.25rem 0 0 1rem; padding-left: 0.5rem;">
-                                <li>1× standard deviation captures approximately 68% of data within normal range,
-                                    flagging the top ~16% as potential outliers</li>
-                                <li>This threshold is sensitive enough to catch projects that deviate significantly from
-                                    the norm</li>
-                                <li>Projects above this threshold are likely to require closer scrutiny for cost
-                                    efficiency</li>
-                            </ul>
-                        </li>
-                        <li><strong>Per Category/Subcategory:</strong> Each category (Bridges, Road Safety Facilities
-                            subcategories, Major/Minor Roads work types) has its own threshold calculated from projects
-                            in that specific category</li>
-                        <li><strong>Flagging Rule:</strong> A project is flagged if its cost/km exceeds the threshold
-                            for its category</li>
-                        <li><strong>Composite Projects ("Average of Average"):</strong> For projects with multiple
-                            components (e.g., "Widening with Asphalt Overlay"), statistics use the average cost per
-                            component (total cost/km divided by number of components). However, flagging uses the
-                            original total cost/km against the threshold to ensure accurate outlier detection.</li>
+                        <li><strong>Threshold Formula:</strong> z = (x − median) / (1.4826 × MAD). Projects with z-scores above 1 are flagged.</li>
+                        <li><strong>Why MAD?</strong> MAD resists outliers, making thresholds more stable even when a few extreme values exist.</li>
+                        <li><strong>Per Category/Subcategory:</strong> Each bridge, road work type, or facility subtype gets its own median/MAD baseline.</li>
+                        <li><strong>Composite Projects:</strong> We still compute statistics on per-component averages, but compare the original cost/km against the MAD threshold.</li>
                     </ul>
                     <p style="margin: 0.75rem 0 0 0; font-style: italic; font-size: 0.85em;">
-                        This methodology ensures that flagging is contextually appropriate - a high-cost project in one
-                        category may be normal, while the same cost in another category would be an outlier.
+                        This keeps comparisons fair: a cost that’s typical for one category might be an outlier in another.
                     </p>
                 </div>
             </div>

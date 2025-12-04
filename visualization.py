@@ -54,6 +54,7 @@ from infrawatch_postgres_client import get_infrawatch_connection
 from flood_db_client import search_flood_projects
 
 DATA_ROOT = Path(__file__).resolve().parent / "static" / "data"
+MAD_SCALE = 1.4826
 
 _PHILGEPS_COORD_COLUMNS: Optional[Tuple[str, str]] = None
 _PHILGEPS_COORD_CACHE: Dict[str, Optional[Dict[str, Any]]] = {}
@@ -2109,6 +2110,8 @@ async def budget_roads_cost_analysis_api(year: str = Query("2026", description="
                     "median": None,
                     "mode": None,
                     "std_dev": None,
+                    "mad": None,
+                    "threshold": None,
                     "count": 0
                 }
             
@@ -2124,11 +2127,17 @@ async def budget_roads_cost_analysis_api(year: str = Query("2026", description="
                     "median": None,
                     "mode": None,
                     "std_dev": None,
+                    "mad": None,
+                    "threshold": None,
                     "count": 0
                 }
             
             costs_sorted = sorted(costs)
             mean = statistics.mean(costs)
+            median_val = statistics.median(costs_sorted)
+            deviations = [abs(c - median_val) for c in costs_sorted]
+            mad = statistics.median(deviations) if deviations else 0
+            threshold = median_val + (MAD_SCALE * mad) if mad else None
             
             # Calculate mode (most frequent value, rounded to nearest million for practical purposes)
             # Round to nearest 1M for mode calculation to avoid too many unique values
@@ -2138,16 +2147,18 @@ async def budget_roads_cost_analysis_api(year: str = Query("2026", description="
             
             try:
                 std_dev = statistics.stdev(costs) if len(costs) > 1 else 0
-            except:
+            except statistics.StatisticsError:
                 std_dev = 0
             
             return {
                 "min": min(costs),
                 "max": max(costs),
                 "mean": mean,
-                "median": statistics.median(costs),
+                "median": median_val,
                 "mode": mode_value,
                 "std_dev": std_dev,
+                "mad": mad,
+                "threshold": threshold,
                 "count": len(costs)
             }
         
@@ -2255,8 +2266,10 @@ async def budget_roads_cost_analysis_api(year: str = Query("2026", description="
                 if not stats_costs:
                     subcategory_stats[subcategory] = {
                         "min": None, "max": None, "mean": None, "median": None,
-                        "mode": None, "std_dev": None, "count": 0
+                        "mode": None, "std_dev": None, "mad": None, "threshold": None, "count": 0
                     }
+                    for project in projects:
+                        project['is_flagged'] = False
                     continue
                 
                 import statistics
@@ -2264,32 +2277,32 @@ async def budget_roads_cost_analysis_api(year: str = Query("2026", description="
                 
                 costs_sorted = sorted(stats_costs)
                 mean = statistics.mean(stats_costs)
+                median_val = statistics.median(costs_sorted)
+                deviations = [abs(c - median_val) for c in costs_sorted]
+                mad = statistics.median(deviations) if deviations else 0
+                threshold = median_val + (MAD_SCALE * mad) if mad else None
                 rounded_costs = [round(c / 1000000) * 1000000 for c in stats_costs]
                 cost_counter = Counter(rounded_costs)
                 mode_value = cost_counter.most_common(1)[0][0] if cost_counter else None
                 try:
                     std_dev = statistics.stdev(stats_costs) if len(stats_costs) > 1 else 0
-                except:
+                except statistics.StatisticsError:
                     std_dev = 0
-                
-                # Calculate threshold (mean + 2*std_dev)
-                threshold = None
-                if mean is not None and std_dev is not None:
-                    threshold = mean + (0.1 * std_dev) if std_dev else None
                 
                 stats = {
                     "min": min(stats_costs),
                     "max": max(stats_costs),
                     "mean": mean,
-                    "median": statistics.median(stats_costs),
+                    "median": median_val,
                     "mode": mode_value,
                     "std_dev": std_dev,
+                    "mad": mad,
                     "threshold": threshold,  # Add threshold to stats
                     "count": len(projects)
                 }
                 subcategory_stats[subcategory] = stats
                 
-                # Flag projects that exceed mean + 2*std_dev (outlier threshold)
+                # Flag projects that exceed MAD-derived threshold
                 # Use original_cost_per_km for flagging (not the divided one)
                 
                 for project in projects:
@@ -2306,15 +2319,15 @@ async def budget_roads_cost_analysis_api(year: str = Query("2026", description="
             return subcategory_stats
 
         def flag_projects_by_threshold_simple(projects, stats, category_name):
-            """Flag projects using mean + 0.1 * std_dev threshold"""
+            """Flag projects using MAD-derived threshold"""
             if not projects or not stats:
                 return
 
-            mean = stats.get('mean')
-            std_dev = stats.get('std_dev') or 0
-            threshold = None
-            if mean is not None:
-                threshold = mean + (0.1 * std_dev)
+            median_val = stats.get('median')
+            mad = stats.get('mad') or 0
+            threshold = stats.get('threshold')
+            if mad and median_val is not None:
+                threshold = median_val + (MAD_SCALE * mad)
 
             if not threshold or threshold <= 0:
                 for project in projects:
@@ -2505,9 +2518,7 @@ async def budget_category_statistics_api(year: str = "2026"):
             bridges_flagged = [p for p in bridges if p.get('is_flagged', False)]
             bridges_flagged_cost = sum(p.get('amount', 0) for p in bridges_flagged)
             
-            bridges_threshold = 0
-            if bridges_stats.get('mean') is not None and bridges_stats.get('std_dev') is not None:
-                bridges_threshold = bridges_stats['mean'] + (0.1 * bridges_stats['std_dev'])
+            bridges_threshold = bridges_stats.get('threshold', 0)
             
             categories.append({
                 "category": "Bridges",
@@ -2610,9 +2621,7 @@ async def budget_category_statistics_api(year: str = "2026"):
                 buildings_stats_data = multi_purpose_data.get('statistics', {})
                 buildings_avg_cost_km = buildings_stats_data.get('mean') or 0
                 buildings_flagged_cost = sum(p.get('amount', 0) for p in buildings_flagged)
-                buildings_threshold = 0
-                if buildings_stats_data.get('mean') is not None and buildings_stats_data.get('std_dev') is not None:
-                    buildings_threshold = buildings_stats_data['mean'] + (0.1 * buildings_stats_data['std_dev'])
+                buildings_threshold = buildings_stats_data.get('threshold', 0)
                 
                 categories.append({
                     "category": "Multi-Purpose Buildings",
@@ -2650,9 +2659,7 @@ async def budget_category_statistics_api(year: str = "2026"):
                 nia_avg_cost_km = nia_stats_data.get('mean') or 0
                 nia_flagged = [p for p in nia_projects if p.get('is_flagged', False)]
                 nia_flagged_cost = sum(p.get('amount', 0) for p in nia_flagged)
-                nia_threshold = 0
-                if nia_stats_data.get('mean') is not None and nia_stats_data.get('std_dev') is not None:
-                    nia_threshold = nia_stats_data['mean'] + (0.1 * nia_stats_data['std_dev'])
+                nia_threshold = nia_stats_data.get('threshold', 0)
                 categories.append({
                     "category": "Irrigation Works (NIA)",
                     "subcategory": None,
@@ -2670,9 +2677,7 @@ async def budget_category_statistics_api(year: str = "2026"):
             rockfall_avg_cost_km = rockfall_stats_data.get('mean') or 0
             rockfall_flagged_cost = sum(p.get('amount', 0) for p in rockfall_flagged)
             
-            rockfall_threshold = 0
-            if rockfall_stats_data.get('mean') is not None and rockfall_stats_data.get('std_dev') is not None:
-                rockfall_threshold = rockfall_stats_data['mean'] + (0.1 * rockfall_stats_data['std_dev'])
+            rockfall_threshold = rockfall_stats_data.get('threshold', 0)
             
             categories.append({
                 "category": "Rockfall Netting",
@@ -2693,9 +2698,7 @@ async def budget_category_statistics_api(year: str = "2026"):
                 schools_avg_cost_km = schools_stats_data.get('mean') or 0
                 schools_flagged = [p for p in schools if p.get('is_flagged', False)]
                 schools_flagged_cost = sum(p.get('amount', 0) for p in schools_flagged)
-                schools_threshold = 0
-                if schools_stats_data.get('mean') is not None and schools_stats_data.get('std_dev') is not None:
-                    schools_threshold = schools_stats_data['mean'] + (0.1 * schools_stats_data['std_dev'])
+                schools_threshold = schools_stats_data.get('threshold', 0)
                 categories.append({
                     "category": "Schools",
                     "subcategory": None,
@@ -2755,10 +2758,7 @@ async def budget_category_statistics_api(year: str = "2026"):
                 # Total cost (amount) of all flagged projects
                 bridges_flagged_cost = sum(p.get('amount', 0) for p in bridges_flagged)
                 
-                # Calculate threshold for bridges (mean + 0.1*std_dev)
-                bridges_threshold = 0
-                if bridges_stats_data.get('mean') is not None and bridges_stats_data.get('std_dev') is not None:
-                    bridges_threshold = bridges_stats_data['mean'] + (0.1 * bridges_stats_data['std_dev'])
+                bridges_threshold = bridges_stats_data.get('threshold', 0)
                 
                 categories.append({
                     "category": "Bridges",
@@ -2866,9 +2866,7 @@ async def budget_category_statistics_api(year: str = "2026"):
                 buildings_avg_cost_km = buildings_stats_data.get('mean') or 0
                 buildings_flagged_cost = sum(p.get('amount', 0) for p in buildings_flagged)
                 
-                buildings_threshold = 0
-                if buildings_stats_data.get('mean') is not None and buildings_stats_data.get('std_dev') is not None:
-                    buildings_threshold = buildings_stats_data['mean'] + (0.1 * buildings_stats_data['std_dev'])
+                buildings_threshold = buildings_stats_data.get('threshold', 0)
                 
                 categories.append({
                     "category": "Multi-Purpose Buildings",
@@ -2887,9 +2885,7 @@ async def budget_category_statistics_api(year: str = "2026"):
             rockfall_avg_cost_km = rockfall_stats_data.get('mean') or 0
             rockfall_flagged_cost = sum(p.get('amount', 0) for p in rockfall_flagged)
             
-            rockfall_threshold = 0
-            if rockfall_stats_data.get('mean') is not None and rockfall_stats_data.get('std_dev') is not None:
-                rockfall_threshold = rockfall_stats_data['mean'] + (0.1 * rockfall_stats_data['std_dev'])
+            rockfall_threshold = rockfall_stats_data.get('threshold', 0)
             
             categories.append({
                 "category": "Rockfall Netting",
@@ -2910,9 +2906,7 @@ async def budget_category_statistics_api(year: str = "2026"):
                 schools_avg_cost_km = schools_stats_data.get('mean') or 0
                 schools_flagged = [p for p in schools if p.get('is_flagged', False)]
                 schools_flagged_cost = sum(p.get('amount', 0) for p in schools_flagged)
-                schools_threshold = 0
-                if schools_stats_data.get('mean') is not None and schools_stats_data.get('std_dev') is not None:
-                    schools_threshold = schools_stats_data['mean'] + (0.1 * schools_stats_data['std_dev'])
+                schools_threshold = schools_stats_data.get('threshold', 0)
                 categories.append({
                     "category": "Schools",
                     "subcategory": None,
@@ -3334,27 +3328,32 @@ async def budget_roads_statistics_all_years_api():
             if not projects:
                 return {
                     "min": None, "max": None, "mean": None, "median": None,
-                    "mode": None, "std_dev": None, "count": 0
+                    "mode": None, "std_dev": None, "mad": None, "threshold": None, "count": 0
                 }
             costs = [p['cost_per_km'] for p in projects if p.get('cost_per_km', 0) > 0]
             if not costs:
                 return {
                     "min": None, "max": None, "mean": None, "median": None,
-                    "mode": None, "std_dev": None, "count": 0
+                    "mode": None, "std_dev": None, "mad": None, "threshold": None, "count": 0
                 }
             costs_sorted = sorted(costs)
             mean = statistics.mean(costs)
+            median_val = statistics.median(costs_sorted)
+            deviations = [abs(c - median_val) for c in costs_sorted]
+            mad = statistics.median(deviations) if deviations else 0
+            threshold = median_val + (MAD_SCALE * mad) if mad else None
+
             rounded_costs = [round(c / 1000000) * 1000000 for c in costs]
             cost_counter = Counter(rounded_costs)
             mode_value = cost_counter.most_common(1)[0][0] if cost_counter else None
             try:
                 std_dev = statistics.stdev(costs) if len(costs) > 1 else 0
-            except:
+            except statistics.StatisticsError:
                 std_dev = 0
             return {
                 "min": min(costs), "max": max(costs), "mean": mean,
-                "median": statistics.median(costs), "mode": mode_value,
-                "std_dev": std_dev, "count": len(costs)
+                "median": median_val, "mode": mode_value,
+                "std_dev": std_dev, "mad": mad, "threshold": threshold, "count": len(costs)
             }
         
         # Process 2026 projects
