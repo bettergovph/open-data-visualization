@@ -114,6 +114,8 @@ The platform integrates data from multiple sources:
 - `CLASSIFICATION_WALKTHROUGH.md` - Classification process guide
 - `INVESTIGATION_REPORT.md` - Data investigation findings
 - `DAVAO_CITY_FIX_SUMMARY.md` - Data fixes documentation
+- `docs/gis_integration_guide.md` - Guide for integrating DPWH GIS data and extracting engineering districts
+- `docs/location_data_integration.md` - Plan for creating a unified location database with district information
 
 ## 🛠️ Development
 
