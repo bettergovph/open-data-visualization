@@ -1,0 +1,108 @@
+{
+  "metadata": {
+    "total_matches": 3,
+    "source_filter": "Annex A-5 (DPWH)",
+    "generated_at": "2025-12-05T17:15:25.255956",
+    "status": "completed (duckdb)",
+    "description": "Resurrected projects matched using revised_name (DuckDB + Parquet)",
+    "contractor_enrichment": {
+      "enriched_at": "2025-12-05T17:15:35.612321",
+      "method": "duckdb_in_memory",
+      "stats": {
+        "not_found": 3
+      }
+    }
+  },
+  "matches": [
+    {
+      "source_sheet": "Annex A-5",
+      "year_2026": {
+        "id": "DPWH-Proj-5756",
+        "name": "BATANGAS CITY-SAN PASCUAL-BAUAN DIVERSION ROAD, PACKAGE R, BATANGAS",
+        "revised_name": null,
+        "matched_using": "name",
+        "description": "ORGANIZATIONAL OUTCOME 1 : Ensure Safe and Reliable National Road System | Network Development Program | Construction of By-Pass and Diversion Roads | Region IV-A | Batangas 2nd District Engineering Office",
+        "amount": 82203762.30661167,
+        "region": null,
+        "contractor": null
+      },
+      "historical": {
+        "id": 566725,
+        "description": "Batangas City-San Pascual-Bauan Diversion Road, Package J, Batangas",
+        "amount": 100000.0,
+        "year": 2023,
+        "region_id": 13,
+        "department_desc": "Department of Public Works and Highways (DPWH)",
+        "agency_desc": "Office of the Secretary",
+        "source_file": "docs/GAA-2023.xlsx"
+      },
+      "similarity": {
+        "name": 1.0,
+        "adjusted": 0.7,
+        "time_penalty": 0.30000000000000004,
+        "chainage_penalty": 0.0
+      },
+      "years_apart": 2023
+    },
+    {
+      "source_sheet": "Annex A-5",
+      "year_2026": {
+        "id": "DPWH-Proj-5974",
+        "name": "TUGUEGARAO CITY BOULEVARD (PINACANAUAN BRIDGE 2 AND APPROACHES), TUGUEGARAO CITY, CAGAYAN",
+        "revised_name": null,
+        "matched_using": "name",
+        "description": "ORGANIZATIONAL OUTCOME 1 : Ensure Safe and Reliable National Road System | Network Development Program | Construction of Missing Links/ New Roads | Region II | Cagayan 3rd District Engineering Office",
+        "amount": 25515559.449098315,
+        "region": null,
+        "contractor": null
+      },
+      "historical": {
+        "id": 548676,
+        "description": "Tuguegarao City Boulevard (Pinacanauan Bridge 2 and Approaches), Tuguegarao City, Cagayan",
+        "amount": 150000.0,
+        "year": 2022,
+        "region_id": 13,
+        "department_desc": "Department of Public Works and Highways (DPWH)",
+        "agency_desc": "Office of the Secretary",
+        "source_file": "docs/GAA-2022.xlsx"
+      },
+      "similarity": {
+        "name": 1.0,
+        "adjusted": 0.6,
+        "time_penalty": 0.4,
+        "chainage_penalty": 0.0
+      },
+      "years_apart": 2022
+    },
+    {
+      "source_sheet": "Annex A-5",
+      "year_2026": {
+        "id": "DPWH-Proj-8861",
+        "name": "Bridge Construction and Replacement Program II (Phase II) - Pampanga Delta Bridge and Approaches, Pampanga",
+        "revised_name": "Bridge Construction and Replacement Program II (Phase II) - Pampanga Delta Bridge and Approaches, Pampanga",
+        "matched_using": "revised_name",
+        "description": "CONVERGENCE AND SPECIAL SUPPORT PROGRAM | Sustainable Infrastructure Projects Alleviating Gaps (SIPAG) | SIPAG - Access Roads and/or Bridges from the National Road/s leading to Major/ Strategic Public Buildings/ Facilities | National Capital Region | Central Office | Region III",
+        "amount": 137075329.3204054,
+        "region": null,
+        "contractor": null
+      },
+      "historical": {
+        "id": 500818,
+        "description": "Bridge Construction and Replacement Program II - Pampanga Delta Bridge and Approaches, Pampanga",
+        "amount": 250000.0,
+        "year": 2020,
+        "region_id": 13,
+        "department_desc": "Department of Public Works and Highways (DPWH)",
+        "agency_desc": "Office of the Secretary",
+        "source_file": "gaa_2020_batch_0006.json"
+      },
+      "similarity": {
+        "name": 0.9371428571428572,
+        "adjusted": 0.4685714285714286,
+        "time_penalty": 0.5,
+        "chainage_penalty": 0.0
+      },
+      "years_apart": 2020
+    }
+  ]
+}

@@ -133,9 +133,10 @@
                             <a href="#analysis" class="budget-tab-btn" data-tab="analysis">🔍 Analysis</a>
                             <a href="#trends" class="budget-tab-btn" data-tab="trends">📈 Trends</a>
                             <a href="#resu" class="budget-tab-btn" data-tab="resu">🔄 Repeated</a>
+                            <a href="#resu2" class="budget-tab-btn" data-tab="resu2">🔄 Repeated (Revised)</a>
                             <a href="#cat" class="budget-tab-btn" data-tab="cat">📁 Category</a>
-                            <a href="#roads" class="budget-tab-btn" data-tab="roads">🛣️ Roads</a>
-                            <a href="#stats" class="budget-tab-btn" data-tab="stats">📊 Road Statistics</a>
+                            <a href="#roads" class="budget-tab-btn" data-tab="roads">🛠️ Projects</a>
+                            <a href="#stats" class="budget-tab-btn" data-tab="stats">📊 Project Statistics</a>
                             <a href="#reblock" class="budget-tab-btn" data-tab="reblock">🛣️ Reblocking</a>
                         </div>
 
@@ -8220,6 +8221,106 @@
         </div>
     </div>
 
+    <!-- Repeated Projects (Revised Names Only) Tab -->
+    <div id="tab-resu2" class="budget-tab-panel">
+        <h3 class="budget-section-title">🔄 Repeated Projects (Revised Names Only)</h3>
+        <p class="budget-section-desc">DPWH projects in 2026 matched using only <strong>revised_name</strong> field (not
+            the original name). This shows the effect of using revised names for matching.</p>
+
+        <!-- Download Buttons -->
+        <div id="resu2-download-buttons"
+            style="display: none; margin: 1.5rem 0; display: flex; gap: 1rem; flex-wrap: wrap;">
+            <button onclick="downloadResurrectedCSV2()"
+                style="background: #28a745; color: white; border: none; padding: 0.75rem 1.5rem; border-radius: 6px; cursor: pointer; font-size: 14px; font-weight: 600; display: flex; align-items: center; gap: 0.5rem; box-shadow: 0 2px 4px rgba(0,0,0,0.1); transition: background 0.2s;">
+                <span>📥</span> Download CSV
+            </button>
+            <button onclick="downloadResurrectedJSON2()"
+                style="background: #0038A8; color: white; border: none; padding: 0.75rem 1.5rem; border-radius: 6px; cursor: pointer; font-size: 14px; font-weight: 600; display: flex; align-items: center; gap: 0.5rem; box-shadow: 0 2px 4px rgba(0,0,0,0.1); transition: background 0.2s;">
+                <span>📥</span> Download JSON
+            </button>
+        </div>
+
+        <!-- Info Note -->
+        <div
+            style="background: #e7f3ff; border-left: 4px solid #0038A8; padding: 1rem; margin: 1.5rem 0; border-radius: 4px;">
+            <p style="margin: 0; color: #0038A8; font-size: 0.95em;">
+                <strong>Note:</strong> This tab only shows projects where the <code>revised_name</code> field exists in
+                the 2026 budget data.
+                The matching is done against the historical project descriptions using the revised name.
+                <br><br>
+                <strong>Preliminary Finding:</strong> Using revised names with chainage details reduces the number of
+                detected resurrected projects by approximately <strong>94%</strong> (from ~8,000 to ~450).
+                This suggests that adding specific station limits effectively breaks the link to previous generic
+                project descriptions, potentially obscuring the repetitive nature of these projects.
+            </p>
+        </div>
+
+        <!-- Loading Spinner -->
+        <div id="resu2-loading" style="text-align: center; padding: 2rem;">
+            <div class="spinner"
+                style="width: 40px; height: 40px; border: 4px solid #f3f3f3; border-top: 4px solid #0038A8; border-radius: 50%; animation: spin 1s linear infinite; margin: 0 auto;">
+            </div>
+            <p style="color: #666; margin-top: 1rem;">Loading repeated projects (revised names only)...</p>
+        </div>
+
+        <!-- Error Message -->
+        <div id="resu2-error"
+            style="display: none; text-align: center; padding: 2rem; color: #dc3545; background: #f8d7da; border-radius: 8px; margin: 2rem 0;">
+        </div>
+
+        <!-- Stats Cards -->
+        <div id="resu2-stats"
+            style="display: none; display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1rem; margin: 2rem 0;">
+            <div class="stat-card"
+                style="background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); text-align: center;">
+                <h3 style="color: #0038A8; margin: 0 0 10px 0; font-size: 1.1em;">Total Repeated (Revised)</h3>
+                <p id="resu2-total" style="font-size: 2em; font-weight: bold; color: #dc3545; margin: 0;">-</p>
+            </div>
+            <div class="stat-card"
+                style="background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); text-align: center;">
+                <h3 style="color: #0038A8; margin: 0 0 10px 0; font-size: 1.1em;">Total Amount (2026)</h3>
+                <p id="resu2-amount-2026" style="font-size: 1.6em; font-weight: bold; color: #dc3545; margin: 0;">-</p>
+            </div>
+            <div class="stat-card"
+                style="background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); text-align: center;">
+                <h3 style="color: #0038A8; margin: 0 0 10px 0; font-size: 1.1em;">Total Amount (Historical)</h3>
+                <p id="resu2-amount-historical" style="font-size: 1.6em; font-weight: bold; color: #667eea; margin: 0;">
+                    -
+                </p>
+            </div>
+            <div class="stat-card"
+                style="background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); text-align: center;">
+                <h3 style="color: #0038A8; margin: 0 0 10px 0; font-size: 1.1em;">Years Searched</h3>
+                <p id="resu2-years" style="font-size: 1.5em; font-weight: bold; color: #28a745; margin: 0;">-</p>
+            </div>
+        </div>
+
+        <!-- By Year Breakdown -->
+        <div id="resu2-by-year" style="display: none; margin: 2rem 0;">
+            <h4 style="color: #0038A8; margin-bottom: 1rem;">By Historical Year</h4>
+            <div id="resu2-year-breakdown"
+                style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem;"></div>
+        </div>
+
+        <!-- Projects List -->
+        <div id="resu2-projects" style="display: none; margin-top: 2rem;">
+            <h4 style="color: #0038A8; margin-bottom: 1rem;">Repeated Projects (Revised Names Only)</h4>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem;">
+                <input type="text" id="resu2-search" placeholder="Search projects..."
+                    style="padding: 0.75rem; border: 2px solid #ddd; border-radius: 6px; font-size: 14px;">
+                <input type="text" id="resu2-contractor-search" placeholder="Search contractor..."
+                    style="padding: 0.75rem; border: 2px solid #ddd; border-radius: 6px; font-size: 14px;">
+            </div>
+            <div id="resu2-pagination-info" style="margin-bottom: 1rem; color: #666; font-size: 0.9em;"></div>
+            <div id="resu2-projects-list"
+                style="display: grid; grid-template-columns: repeat(auto-fill, minmax(480px, 1fr)); gap: 1rem; align-items: start;">
+            </div>
+            <div id="resu2-pagination-controls"
+                style="display: flex; justify-content: center; align-items: center; gap: 1rem; margin-top: 2rem; padding: 1rem;">
+            </div>
+        </div>
+    </div>
+
     <!-- Category Tab -->
     <div id="tab-cat" class="budget-tab-panel">
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
@@ -8229,12 +8330,11 @@
                     Includes Bridges, Road Safety Facilities, Major Roads, and Minor Roads.</p>
                 <p
                     style="margin-top: 0.5rem; padding: 0.75rem; background: #fff3cd; border-left: 4px solid #ffc107; border-radius: 4px; color: #856404; font-size: 0.9em;">
-                    <strong>Note:</strong> Road classification (Major vs Minor) is based on segment count as a heuristic
-                    indicator.
-                    Roads with ≥10 segments are classified as "Major Roads", while roads with &lt;10 segments are
-                    classified as "Minor Roads".
-                    Without official documentation, it is difficult to definitively classify roads as national vs
-                    secondary.
+                    <strong>Note:</strong> Road classification (Major vs Minor) now relies on the location metadata
+                    captured for each project (e.g., inter-province trunk corridors automatically map to “Major Roads”,
+                    while purely local alignments fall under “Minor Roads”). Without official documentation we still
+                    treat this as a heuristic rather than a legal designation, but the split is no longer driven by
+                    segment counts alone.
                 </p>
                 <div
                     style="margin-top: 1rem; padding: 1rem; background: #e3f2fd; border-left: 4px solid #2196f3; border-radius: 4px; color: #1565c0; font-size: 0.9em;">
@@ -8243,13 +8343,18 @@
                         Projects are flagged as outliers using a robust Median Absolute Deviation (MAD) analysis:
                     </p>
                     <ul style="margin: 0.5rem 0 0 1.5rem; padding-left: 0.5rem; line-height: 1.8;">
-                        <li><strong>Threshold Formula:</strong> z = (x − median) / (1.4826 × MAD). Projects with z-scores above 1 are flagged.</li>
-                        <li><strong>Why MAD?</strong> MAD resists outliers, making thresholds more stable even when a few extreme values exist.</li>
-                        <li><strong>Per Category/Subcategory:</strong> Each bridge, road work type, or facility subtype gets its own median/MAD baseline.</li>
-                        <li><strong>Composite Projects:</strong> We still compute statistics on per-component averages, but compare the original cost/km against the MAD threshold.</li>
+                        <li><strong>Threshold Formula:</strong> z = (x − median) / (1.4826 × MAD). Projects with
+                            z-scores above 1 are flagged.</li>
+                        <li><strong>Why MAD?</strong> MAD resists outliers, making thresholds more stable even when a
+                            few extreme values exist.</li>
+                        <li><strong>Per Category/Subcategory:</strong> Each bridge, road work type, or facility subtype
+                            gets its own median/MAD baseline.</li>
+                        <li><strong>Composite Projects:</strong> We still compute statistics on per-component averages,
+                            but compare the original cost/km against the MAD threshold.</li>
                     </ul>
                     <p style="margin: 0.75rem 0 0 0; font-style: italic; font-size: 0.85em;">
-                        This keeps comparisons fair: a cost that’s typical for one category might be an outlier in another.
+                        This keeps comparisons fair: a cost that’s typical for one category might be an outlier in
+                        another.
                     </p>
                 </div>
             </div>
@@ -8288,7 +8393,8 @@
                     <div>
                         <h4 style="margin: 0 0 0.25rem 0; color: #0038A8;">Flagged Cost by Category (2020-2026)</h4>
                         <p style="margin: 0; color: #666; font-size: 0.9rem;">Compare each category's total flagged cost
-                            per year. Bars are grouped by category and color-coded by year similar to the Road Statistics
+                            per year. Bars are grouped by category and color-coded by year similar to the Road
+                            Statistics
                             tab. Multi-Purpose Buildings and Major Roads have dedicated charts below.</p>
                     </div>
                     <button id="copyCategoryTotalsChartBtn"
@@ -8383,10 +8489,10 @@
     <div id="tab-roads" class="budget-tab-panel">
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
             <div>
-                <h3 class="budget-section-title">🛣️ Road Infrastructure Projects Cost Analysis</h3>
-                <p class="budget-section-desc">Analyze road infrastructure projects by calculating distance from
-                    chainage and cost per kilometer. Projects are separated into Roads, Bridges, and Road Safety
-                    Facilities.</p>
+                <h3 class="budget-section-title">🛠️ Project Cost Analysis</h3>
+                <p class="budget-section-desc">Analyze infrastructure projects by calculating distance from
+                    chainage and cost per kilometer. View Major/Minor Roads, Bridges, Road Safety Facilities,
+                    Irrigation Works, Multi-Purpose Buildings, and Rockfall Netting side by side.</p>
             </div>
             <div style="display: flex; align-items: center; gap: 1rem;">
                 <label for="roads-year-filter" style="font-weight: 600; color: #333;">Year:</label>
@@ -8417,6 +8523,16 @@
             <button id="roads-category-traffic-signs" class="roads-category-btn" data-category="traffic_signs"
                 style="padding: 0.75rem 1.5rem; border: none; background: #6c757d; color: white; border-radius: 6px 6px 0 0; cursor: pointer; font-weight: 600; font-size: 1em;">🛡️
                 Road Safety Facilities</button>
+            <button id="roads-category-nia" class="roads-category-btn" data-category="nia"
+                style="padding: 0.75rem 1.5rem; border: none; background: #6c757d; color: white; border-radius: 6px 6px 0 0; cursor: pointer; font-weight: 600; font-size: 1em;">🚰
+                Irrigation Works (NIA)</button>
+            <button id="roads-category-multi-purpose-buildings" class="roads-category-btn"
+                data-category="multi_purpose_buildings"
+                style="padding: 0.75rem 1.5rem; border: none; background: #6c757d; color: white; border-radius: 6px 6px 0 0; cursor: pointer; font-weight: 600; font-size: 1em;">🏢
+                Multi-Purpose Buildings</button>
+            <button id="roads-category-rockfall-netting" class="roads-category-btn" data-category="rockfall_netting"
+                style="padding: 0.75rem 1.5rem; border: none; background: #6c757d; color: white; border-radius: 6px 6px 0 0; cursor: pointer; font-weight: 600; font-size: 1em;">🪨
+                Rockfall Netting</button>
         </div>
 
         <!-- Loading Spinner -->
@@ -8436,10 +8552,12 @@
         <div
             style="background: #e7f3ff; border-left: 4px solid #0038A8; padding: 1rem; margin: 1.5rem 0; border-radius: 4px;">
             <p style="margin: 0; color: #0038A8; font-size: 0.95em;">
-                <strong>Note:</strong> This analysis includes road infrastructure projects from <strong>2026 budget
-                    amendments</strong> with chainage notation. Projects are categorized into Roads, Bridges, and Road
-                Safety Facilities (Lighting, Guardrails, Signs, Pavement Markings). Composite projects are counted
-                separately for each component. Projects are sorted by cost per kilometer (most expensive first).
+                <strong>Note:</strong> This analysis includes infrastructure projects from <strong>2026 budget
+                    amendments</strong> (with historical context where available). Projects are categorized into
+                Major/Minor
+                Roads, Bridges, Road Safety Facilities, Irrigation Works (NIA), Multi-Purpose Buildings, and Rockfall
+                Netting. Composite projects are counted separately for each component and sorted by cost per kilometer
+                (most expensive first).
             </p>
         </div>
 
@@ -8633,6 +8751,148 @@
                     style="font-size: 1.6em; font-weight: bold; color: #fd7e14; margin: 0 0 10px 0;">-</p>
                 <p style="color: #666; font-size: 0.85em; margin: 5px 0 0 0;">(All Years)</p>
                 <p id="traffic-signs-avg-cost-all"
+                    style="font-size: 1.2em; font-weight: bold; color: #fd7e14; margin: 0;">-</p>
+            </div>
+        </div>
+
+        <!-- Stats Summary - Irrigation Works (NIA) -->
+        <div id="nia-stats" class="roads-category-panel" data-category="nia"
+            style="display: none; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin: 2rem 0;">
+            <div class="stat-card"
+                style="background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); text-align: center;">
+                <h3 style="color: #0038A8; margin: 0 0 10px 0; font-size: 1.1em;">Total Projects</h3>
+                <p id="nia-year-label-projects" style="color: #666; font-size: 0.85em; margin: 0 0 5px 0;">(2026)</p>
+                <p id="nia-total-projects"
+                    style="font-size: 2em; font-weight: bold; color: #28a745; margin: 0 0 10px 0;">-</p>
+                <p style="color: #666; font-size: 0.85em; margin: 5px 0 0 0;">(All Years)</p>
+                <p id="nia-total-projects-all" style="font-size: 1.4em; font-weight: bold; color: #28a745; margin: 0;">-
+                </p>
+            </div>
+            <div class="stat-card"
+                style="background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); text-align: center;">
+                <h3 style="color: #0038A8; margin: 0 0 10px 0; font-size: 1.1em;">Total Distance</h3>
+                <p id="nia-year-label-distance" style="color: #666; font-size: 0.85em; margin: 0 0 5px 0;">(2026)</p>
+                <p id="nia-total-distance"
+                    style="font-size: 1.6em; font-weight: bold; color: #667eea; margin: 0 0 10px 0;">-</p>
+                <p style="color: #666; font-size: 0.85em; margin: 5px 0 0 0;">(All Years)</p>
+                <p id="nia-total-distance-all" style="font-size: 1.2em; font-weight: bold; color: #667eea; margin: 0;">-
+                </p>
+            </div>
+            <div class="stat-card"
+                style="background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); text-align: center;">
+                <h3 style="color: #0038A8; margin: 0 0 10px 0; font-size: 1.1em;">Total Amount</h3>
+                <p id="nia-year-label-amount" style="color: #666; font-size: 0.85em; margin: 0 0 5px 0;">(2026)</p>
+                <p id="nia-total-amount"
+                    style="font-size: 1.6em; font-weight: bold; color: #dc3545; margin: 0 0 10px 0;">-</p>
+                <p style="color: #666; font-size: 0.85em; margin: 5px 0 0 0;">(All Years)</p>
+                <p id="nia-total-amount-all" style="font-size: 1.2em; font-weight: bold; color: #dc3545; margin: 0;">-
+                </p>
+            </div>
+            <div class="stat-card"
+                style="background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); text-align: center;">
+                <h3 style="color: #0038A8; margin: 0 0 10px 0; font-size: 1.1em;">Avg Cost/km</h3>
+                <p id="nia-year-label-avg" style="color: #666; font-size: 0.85em; margin: 0 0 5px 0;">(2026)</p>
+                <p id="nia-avg-cost" style="font-size: 1.6em; font-weight: bold; color: #fd7e14; margin: 0 0 10px 0;">-
+                </p>
+                <p style="color: #666; font-size: 0.85em; margin: 5px 0 0 0;">(All Years)</p>
+                <p id="nia-avg-cost-all" style="font-size: 1.2em; font-weight: bold; color: #fd7e14; margin: 0;">-</p>
+            </div>
+        </div>
+
+        <!-- Stats Summary - Multi-Purpose Buildings -->
+        <div id="multi-purpose-buildings-stats" class="roads-category-panel" data-category="multi_purpose_buildings"
+            style="display: none; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin: 2rem 0;">
+            <div class="stat-card"
+                style="background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); text-align: center;">
+                <h3 style="color: #0038A8; margin: 0 0 10px 0; font-size: 1.1em;">Total Projects</h3>
+                <p id="multi-purpose-buildings-year-label-projects"
+                    style="color: #666; font-size: 0.85em; margin: 0 0 5px 0;">(2026)</p>
+                <p id="multi-purpose-buildings-total-projects"
+                    style="font-size: 2em; font-weight: bold; color: #28a745; margin: 0 0 10px 0;">-</p>
+                <p style="color: #666; font-size: 0.85em; margin: 5px 0 0 0;">(All Years)</p>
+                <p id="multi-purpose-buildings-total-projects-all"
+                    style="font-size: 1.4em; font-weight: bold; color: #28a745; margin: 0;">-</p>
+            </div>
+            <div class="stat-card"
+                style="background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); text-align: center;">
+                <h3 style="color: #0038A8; margin: 0 0 10px 0; font-size: 1.1em;">Total Distance</h3>
+                <p id="multi-purpose-buildings-year-label-distance"
+                    style="color: #666; font-size: 0.85em; margin: 0 0 5px 0;">(2026)</p>
+                <p id="multi-purpose-buildings-total-distance"
+                    style="font-size: 1.6em; font-weight: bold; color: #667eea; margin: 0 0 10px 0;">-</p>
+                <p style="color: #666; font-size: 0.85em; margin: 5px 0 0 0;">(All Years)</p>
+                <p id="multi-purpose-buildings-total-distance-all"
+                    style="font-size: 1.2em; font-weight: bold; color: #667eea; margin: 0;">-</p>
+            </div>
+            <div class="stat-card"
+                style="background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); text-align: center;">
+                <h3 style="color: #0038A8; margin: 0 0 10px 0; font-size: 1.1em;">Total Amount</h3>
+                <p id="multi-purpose-buildings-year-label-amount"
+                    style="color: #666; font-size: 0.85em; margin: 0 0 5px 0;">(2026)</p>
+                <p id="multi-purpose-buildings-total-amount"
+                    style="font-size: 1.6em; font-weight: bold; color: #dc3545; margin: 0 0 10px 0;">-</p>
+                <p style="color: #666; font-size: 0.85em; margin: 5px 0 0 0;">(All Years)</p>
+                <p id="multi-purpose-buildings-total-amount-all"
+                    style="font-size: 1.2em; font-weight: bold; color: #dc3545; margin: 0;">-</p>
+            </div>
+            <div class="stat-card"
+                style="background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); text-align: center;">
+                <h3 style="color: #0038A8; margin: 0 0 10px 0; font-size: 1.1em;">Avg Cost/km</h3>
+                <p id="multi-purpose-buildings-year-label-avg"
+                    style="color: #666; font-size: 0.85em; margin: 0 0 5px 0;">(2026)</p>
+                <p id="multi-purpose-buildings-avg-cost"
+                    style="font-size: 1.6em; font-weight: bold; color: #fd7e14; margin: 0 0 10px 0;">-</p>
+                <p style="color: #666; font-size: 0.85em; margin: 5px 0 0 0;">(All Years)</p>
+                <p id="multi-purpose-buildings-avg-cost-all"
+                    style="font-size: 1.2em; font-weight: bold; color: #fd7e14; margin: 0;">-</p>
+            </div>
+        </div>
+
+        <!-- Stats Summary - Rockfall Netting -->
+        <div id="rockfall-netting-stats" class="roads-category-panel" data-category="rockfall_netting"
+            style="display: none; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin: 2rem 0;">
+            <div class="stat-card"
+                style="background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); text-align: center;">
+                <h3 style="color: #0038A8; margin: 0 0 10px 0; font-size: 1.1em;">Total Projects</h3>
+                <p id="rockfall-netting-year-label-projects" style="color: #666; font-size: 0.85em; margin: 0 0 5px 0;">
+                    (2026)</p>
+                <p id="rockfall-netting-total-projects"
+                    style="font-size: 2em; font-weight: bold; color: #28a745; margin: 0 0 10px 0;">-</p>
+                <p style="color: #666; font-size: 0.85em; margin: 5px 0 0 0;">(All Years)</p>
+                <p id="rockfall-netting-total-projects-all"
+                    style="font-size: 1.4em; font-weight: bold; color: #28a745; margin: 0;">-</p>
+            </div>
+            <div class="stat-card"
+                style="background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); text-align: center;">
+                <h3 style="color: #0038A8; margin: 0 0 10px 0; font-size: 1.1em;">Total Distance</h3>
+                <p id="rockfall-netting-year-label-distance" style="color: #666; font-size: 0.85em; margin: 0 0 5px 0;">
+                    (2026)</p>
+                <p id="rockfall-netting-total-distance"
+                    style="font-size: 1.6em; font-weight: bold; color: #667eea; margin: 0 0 10px 0;">-</p>
+                <p style="color: #666; font-size: 0.85em; margin: 5px 0 0 0;">(All Years)</p>
+                <p id="rockfall-netting-total-distance-all"
+                    style="font-size: 1.2em; font-weight: bold; color: #667eea; margin: 0;">-</p>
+            </div>
+            <div class="stat-card"
+                style="background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); text-align: center;">
+                <h3 style="color: #0038A8; margin: 0 0 10px 0; font-size: 1.1em;">Total Amount</h3>
+                <p id="rockfall-netting-year-label-amount" style="color: #666; font-size: 0.85em; margin: 0 0 5px 0;">
+                    (2026)</p>
+                <p id="rockfall-netting-total-amount"
+                    style="font-size: 1.6em; font-weight: bold; color: #dc3545; margin: 0 0 10px 0;">-</p>
+                <p style="color: #666; font-size: 0.85em; margin: 5px 0 0 0;">(All Years)</p>
+                <p id="rockfall-netting-total-amount-all"
+                    style="font-size: 1.2em; font-weight: bold; color: #dc3545; margin: 0;">-</p>
+            </div>
+            <div class="stat-card"
+                style="background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); text-align: center;">
+                <h3 style="color: #0038A8; margin: 0 0 10px 0; font-size: 1.1em;">Avg Cost/km</h3>
+                <p id="rockfall-netting-year-label-avg" style="color: #666; font-size: 0.85em; margin: 0 0 5px 0;">
+                    (2026)</p>
+                <p id="rockfall-netting-avg-cost"
+                    style="font-size: 1.6em; font-weight: bold; color: #fd7e14; margin: 0 0 10px 0;">-</p>
+                <p style="color: #666; font-size: 0.85em; margin: 5px 0 0 0;">(All Years)</p>
+                <p id="rockfall-netting-avg-cost-all"
                     style="font-size: 1.2em; font-weight: bold; color: #fd7e14; margin: 0;">-</p>
             </div>
         </div>
@@ -9074,13 +9334,162 @@
                 </table>
             </div>
         </div>
+
+        <!-- Projects Table - Irrigation Works (NIA) -->
+        <div id="nia-table-container" class="roads-category-panel" data-category="nia"
+            style="display: none; margin-top: 2rem;">
+            <div style="margin-bottom: 1rem;">
+                <input type="text" id="nia-search" placeholder="Search irrigation projects..."
+                    style="width: 100%; padding: 0.75rem; border: 2px solid #ddd; border-radius: 6px; font-size: 14px;">
+                <div id="nia-autocomplete" class="autocomplete-items"
+                    style="display: none; position: absolute; border: 1px solid #d4d4d4; border-bottom: none; border-top: none; z-index: 99; top: 100%; left: 0; right: 0; background-color: #fff; max-height: 300px; overflow-y: auto; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
+                </div>
+            </div>
+            <div style="overflow-x: auto;">
+                <table id="nia-table"
+                    style="width: 100%; border-collapse: collapse; background: white; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
+                    <thead>
+                        <tr style="background: linear-gradient(135deg, #0038A8 0%, #003087 100%); color: white;">
+                            <th style="padding: 1rem; text-align: left; font-weight: 600; cursor: pointer; user-select: none;"
+                                onclick="sortRoadsTable('nia', 'name')" title="Click to sort">
+                                Project Name <span id="nia-sort-name" style="opacity: 0.5;">↕</span>
+                            </th>
+                            <th style="padding: 1rem; text-align: right; font-weight: 600; cursor: pointer; user-select: none;"
+                                onclick="sortRoadsTable('nia', 'chainage')" title="Click to sort">
+                                Chainage <span id="nia-sort-chainage" style="opacity: 0.5;">↕</span>
+                            </th>
+                            <th style="padding: 1rem; text-align: right; font-weight: 600; cursor: pointer; user-select: none;"
+                                onclick="sortRoadsTable('nia', 'distance_breakdown')" title="Click to sort">
+                                Distance Breakdown <span id="nia-sort-distance_breakdown" style="opacity: 0.5;">↕</span>
+                            </th>
+                            <th style="padding: 1rem; text-align: right; font-weight: 600; cursor: pointer; user-select: none;"
+                                onclick="sortRoadsTable('nia', 'distance')" title="Click to sort">
+                                Distance (km) <span id="nia-sort-distance" style="opacity: 0.5;">↕</span>
+                            </th>
+                            <th style="padding: 1rem; text-align: right; font-weight: 600; cursor: pointer; user-select: none;"
+                                onclick="sortRoadsTable('nia', 'amount')" title="Click to sort">
+                                Amount <span id="nia-sort-amount" style="opacity: 0.5;">↕</span>
+                            </th>
+                            <th style="padding: 1rem; text-align: right; font-weight: 600; cursor: pointer; user-select: none;"
+                                onclick="sortRoadsTable('nia', 'cost_per_km')" title="Click to sort">
+                                Cost/km <span id="nia-sort-cost_per_km" style="opacity: 0.5;">↕</span>
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody id="nia-table-body">
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Projects Table - Multi-Purpose Buildings -->
+        <div id="multi-purpose-buildings-table-container" class="roads-category-panel"
+            data-category="multi_purpose_buildings" style="display: none; margin-top: 2rem;">
+            <div style="margin-bottom: 1rem;">
+                <input type="text" id="multi-purpose-buildings-search" placeholder="Search building projects..."
+                    style="width: 100%; padding: 0.75rem; border: 2px solid #ddd; border-radius: 6px; font-size: 14px;">
+                <div id="multi-purpose-buildings-autocomplete" class="autocomplete-items"
+                    style="display: none; position: absolute; border: 1px solid #d4d4d4; border-bottom: none; border-top: none; z-index: 99; top: 100%; left: 0; right: 0; background-color: #fff; max-height: 300px; overflow-y: auto; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
+                </div>
+            </div>
+            <div style="overflow-x: auto;">
+                <table id="multi-purpose-buildings-table"
+                    style="width: 100%; border-collapse: collapse; background: white; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
+                    <thead>
+                        <tr style="background: linear-gradient(135deg, #0038A8 0%, #003087 100%); color: white;">
+                            <th style="padding: 1rem; text-align: left; font-weight: 600; cursor: pointer; user-select: none;"
+                                onclick="sortRoadsTable('multi_purpose_buildings', 'name')" title="Click to sort">
+                                Project Name <span id="multi-purpose-buildings-sort-name" style="opacity: 0.5;">↕</span>
+                            </th>
+                            <th style="padding: 1rem; text-align: right; font-weight: 600; cursor: pointer; user-select: none;"
+                                onclick="sortRoadsTable('multi_purpose_buildings', 'chainage')" title="Click to sort">
+                                Chainage <span id="multi-purpose-buildings-sort-chainage" style="opacity: 0.5;">↕</span>
+                            </th>
+                            <th style="padding: 1rem; text-align: right; font-weight: 600; cursor: pointer; user-select: none;"
+                                onclick="sortRoadsTable('multi_purpose_buildings', 'distance_breakdown')"
+                                title="Click to sort">
+                                Distance Breakdown <span id="multi-purpose-buildings-sort-distance_breakdown"
+                                    style="opacity: 0.5;">↕</span>
+                            </th>
+                            <th style="padding: 1rem; text-align: right; font-weight: 600; cursor: pointer; user-select: none;"
+                                onclick="sortRoadsTable('multi_purpose_buildings', 'distance')" title="Click to sort">
+                                Distance (km) <span id="multi-purpose-buildings-sort-distance"
+                                    style="opacity: 0.5;">↕</span>
+                            </th>
+                            <th style="padding: 1rem; text-align: right; font-weight: 600; cursor: pointer; user-select: none;"
+                                onclick="sortRoadsTable('multi_purpose_buildings', 'amount')" title="Click to sort">
+                                Amount <span id="multi-purpose-buildings-sort-amount" style="opacity: 0.5;">↕</span>
+                            </th>
+                            <th style="padding: 1rem; text-align: right; font-weight: 600; cursor: pointer; user-select: none;"
+                                onclick="sortRoadsTable('multi_purpose_buildings', 'cost_per_km')"
+                                title="Click to sort">
+                                Cost/km <span id="multi-purpose-buildings-sort-cost_per_km"
+                                    style="opacity: 0.5;">↕</span>
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody id="multi-purpose-buildings-table-body">
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Projects Table - Rockfall Netting -->
+        <div id="rockfall-netting-table-container" class="roads-category-panel" data-category="rockfall_netting"
+            style="display: none; margin-top: 2rem;">
+            <div style="margin-bottom: 1rem;">
+                <input type="text" id="rockfall-netting-search" placeholder="Search rockfall netting projects..."
+                    style="width: 100%; padding: 0.75rem; border: 2px solid #ddd; border-radius: 6px; font-size: 14px;">
+                <div id="rockfall-netting-autocomplete" class="autocomplete-items"
+                    style="display: none; position: absolute; border: 1px solid #d4d4d4; border-bottom: none; border-top: none; z-index: 99; top: 100%; left: 0; right: 0; background-color: #fff; max-height: 300px; overflow-y: auto; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
+                </div>
+            </div>
+            <div style="overflow-x: auto;">
+                <table id="rockfall-netting-table"
+                    style="width: 100%; border-collapse: collapse; background: white; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
+                    <thead>
+                        <tr style="background: linear-gradient(135deg, #0038A8 0%, #003087 100%); color: white;">
+                            <th style="padding: 1rem; text-align: left; font-weight: 600; cursor: pointer; user-select: none;"
+                                onclick="sortRoadsTable('rockfall_netting', 'name')" title="Click to sort">
+                                Project Name <span id="rockfall-netting-sort-name" style="opacity: 0.5;">↕</span>
+                            </th>
+                            <th style="padding: 1rem; text-align: right; font-weight: 600; cursor: pointer; user-select: none;"
+                                onclick="sortRoadsTable('rockfall_netting', 'chainage')" title="Click to sort">
+                                Chainage <span id="rockfall-netting-sort-chainage" style="opacity: 0.5;">↕</span>
+                            </th>
+                            <th style="padding: 1rem; text-align: right; font-weight: 600; cursor: pointer; user-select: none;"
+                                onclick="sortRoadsTable('rockfall_netting', 'distance_breakdown')"
+                                title="Click to sort">
+                                Distance Breakdown <span id="rockfall-netting-sort-distance_breakdown"
+                                    style="opacity: 0.5;">↕</span>
+                            </th>
+                            <th style="padding: 1rem; text-align: right; font-weight: 600; cursor: pointer; user-select: none;"
+                                onclick="sortRoadsTable('rockfall_netting', 'distance')" title="Click to sort">
+                                Distance (km) <span id="rockfall-netting-sort-distance" style="opacity: 0.5;">↕</span>
+                            </th>
+                            <th style="padding: 1rem; text-align: right; font-weight: 600; cursor: pointer; user-select: none;"
+                                onclick="sortRoadsTable('rockfall_netting', 'amount')" title="Click to sort">
+                                Amount <span id="rockfall-netting-sort-amount" style="opacity: 0.5;">↕</span>
+                            </th>
+                            <th style="padding: 1rem; text-align: right; font-weight: 600; cursor: pointer; user-select: none;"
+                                onclick="sortRoadsTable('rockfall_netting', 'cost_per_km')" title="Click to sort">
+                                Cost/km <span id="rockfall-netting-sort-cost_per_km" style="opacity: 0.5;">↕</span>
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody id="rockfall-netting-table-body">
+                    </tbody>
+                </table>
+            </div>
+        </div>
     </div>
 
-    <!-- Road Statistics Tab -->
+    <!-- Project Statistics Tab -->
     <div id="tab-stats" class="budget-tab-panel">
-        <h3 class="budget-section-title" style="margin-bottom: 0.5rem;">📊 Road Statistics</h3>
+        <h3 class="budget-section-title" style="margin-bottom: 0.5rem;">📊 Project Statistics</h3>
         <p class="budget-section-desc" style="margin-bottom: 0.75rem;">Statistical analysis of cost per kilometer for
-            road infrastructure projects, including distribution charts and key metrics.</p>
+            major project categories, including roads, bridges, road safety facilities, irrigation works, multi-purpose
+            buildings, and rockfall netting.</p>
 
         <!-- Loading Spinner -->
         <div id="stats-loading" style="text-align: center; padding: 2rem;">
@@ -9109,6 +9518,16 @@
             <button id="stats-category-traffic-signs" class="stats-category-btn" data-category="traffic_signs"
                 style="padding: 0.75rem 1.5rem; border: none; background: #6c757d; color: white; border-radius: 6px 6px 0 0; cursor: pointer; font-weight: 600; font-size: 1em;">🚦
                 Road Safety Facilities</button>
+            <button id="stats-category-nia" class="stats-category-btn" data-category="nia"
+                style="padding: 0.75rem 1.5rem; border: none; background: #6c757d; color: white; border-radius: 6px 6px 0 0; cursor: pointer; font-weight: 600; font-size: 1em;">🚰
+                Irrigation Works (NIA)</button>
+            <button id="stats-category-multi-purpose-buildings" class="stats-category-btn"
+                data-category="multi_purpose_buildings"
+                style="padding: 0.75rem 1.5rem; border: none; background: #6c757d; color: white; border-radius: 6px 6px 0 0; cursor: pointer; font-weight: 600; font-size: 1em;">🏢
+                Multi-Purpose Buildings</button>
+            <button id="stats-category-rockfall-netting" class="stats-category-btn" data-category="rockfall_netting"
+                style="padding: 0.75rem 1.5rem; border: none; background: #6c757d; color: white; border-radius: 6px 6px 0 0; cursor: pointer; font-weight: 600; font-size: 1em;">🪨
+                Rockfall Netting</button>
         </div>
 
         <!-- Statistics Bar Chart (similar to trends tab) -->
@@ -9435,6 +9854,134 @@
                             style="font-size: 1.6em; font-weight: bold; color: #17a2b8; margin: 0;">-</p>
                     </div>
                 </div>
+
+                <div id="stats-cards-nia" class="stats-category-panel" data-category="nia" style="display: none;">
+                    <div
+                        style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin: 2rem 0;">
+                        <div class="stat-card"
+                            style="background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); text-align: center;">
+                            <h3 style="color: #0038A8; margin: 0 0 10px 0; font-size: 1.1em;">Min Cost/km</h3>
+                            <p id="stats-nia-min"
+                                style="font-size: 1.6em; font-weight: bold; color: #28a745; margin: 0;">-</p>
+                        </div>
+                        <div class="stat-card"
+                            style="background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); text-align: center;">
+                            <h3 style="color: #0038A8; margin: 0 0 10px 0; font-size: 1.1em;">Max Cost/km</h3>
+                            <p id="stats-nia-max"
+                                style="font-size: 1.6em; font-weight: bold; color: #dc3545; margin: 0;">-</p>
+                        </div>
+                        <div class="stat-card"
+                            style="background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); text-align: center;">
+                            <h3 style="color: #0038A8; margin: 0 0 10px 0; font-size: 1.1em;">Mean (Average)</h3>
+                            <p id="stats-nia-mean"
+                                style="font-size: 1.6em; font-weight: bold; color: #667eea; margin: 0;">-</p>
+                        </div>
+                        <div class="stat-card"
+                            style="background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); text-align: center;">
+                            <h3 style="color: #0038A8; margin: 0 0 10px 0; font-size: 1.1em;">Median</h3>
+                            <p id="stats-nia-median"
+                                style="font-size: 1.6em; font-weight: bold; color: #fd7e14; margin: 0;">-</p>
+                        </div>
+                        <div class="stat-card"
+                            style="background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); text-align: center;">
+                            <h3 style="color: #0038A8; margin: 0 0 10px 0; font-size: 1.1em;">Mode</h3>
+                            <p id="stats-nia-mode"
+                                style="font-size: 1.6em; font-weight: bold; color: #6c757d; margin: 0;">-</p>
+                        </div>
+                        <div class="stat-card"
+                            style="background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); text-align: center;">
+                            <h3 style="color: #0038A8; margin: 0 0 10px 0; font-size: 1.1em;">Std Deviation</h3>
+                            <p id="stats-nia-stddev"
+                                style="font-size: 1.6em; font-weight: bold; color: #17a2b8; margin: 0;">-</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="stats-cards-multi-purpose-buildings" class="stats-category-panel"
+                    data-category="multi_purpose_buildings" style="display: none;">
+                    <div
+                        style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin: 2rem 0;">
+                        <div class="stat-card"
+                            style="background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); text-align: center;">
+                            <h3 style="color: #0038A8; margin: 0 0 10px 0; font-size: 1.1em;">Min Cost/km</h3>
+                            <p id="stats-multi-purpose-buildings-min"
+                                style="font-size: 1.6em; font-weight: bold; color: #28a745; margin: 0;">-</p>
+                        </div>
+                        <div class="stat-card"
+                            style="background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); text-align: center;">
+                            <h3 style="color: #0038A8; margin: 0 0 10px 0; font-size: 1.1em;">Max Cost/km</h3>
+                            <p id="stats-multi-purpose-buildings-max"
+                                style="font-size: 1.6em; font-weight: bold; color: #dc3545; margin: 0;">-</p>
+                        </div>
+                        <div class="stat-card"
+                            style="background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); text-align: center;">
+                            <h3 style="color: #0038A8; margin: 0 0 10px 0; font-size: 1.1em;">Mean (Average)</h3>
+                            <p id="stats-multi-purpose-buildings-mean"
+                                style="font-size: 1.6em; font-weight: bold; color: #667eea; margin: 0;">-</p>
+                        </div>
+                        <div class="stat-card"
+                            style="background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); text-align: center;">
+                            <h3 style="color: #0038A8; margin: 0 0 10px 0; font-size: 1.1em;">Median</h3>
+                            <p id="stats-multi-purpose-buildings-median"
+                                style="font-size: 1.6em; font-weight: bold; color: #fd7e14; margin: 0;">-</p>
+                        </div>
+                        <div class="stat-card"
+                            style="background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); text-align: center;">
+                            <h3 style="color: #0038A8; margin: 0 0 10px 0; font-size: 1.1em;">Mode</h3>
+                            <p id="stats-multi-purpose-buildings-mode"
+                                style="font-size: 1.6em; font-weight: bold; color: #6c757d; margin: 0;">-</p>
+                        </div>
+                        <div class="stat-card"
+                            style="background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); text-align: center;">
+                            <h3 style="color: #0038A8; margin: 0 0 10px 0; font-size: 1.1em;">Std Deviation</h3>
+                            <p id="stats-multi-purpose-buildings-stddev"
+                                style="font-size: 1.6em; font-weight: bold; color: #17a2b8; margin: 0;">-</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="stats-cards-rockfall-netting" class="stats-category-panel" data-category="rockfall_netting"
+                    style="display: none;">
+                    <div
+                        style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin: 2rem 0;">
+                        <div class="stat-card"
+                            style="background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); text-align: center;">
+                            <h3 style="color: #0038A8; margin: 0 0 10px 0; font-size: 1.1em;">Min Cost/km</h3>
+                            <p id="stats-rockfall-netting-min"
+                                style="font-size: 1.6em; font-weight: bold; color: #28a745; margin: 0;">-</p>
+                        </div>
+                        <div class="stat-card"
+                            style="background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); text-align: center;">
+                            <h3 style="color: #0038A8; margin: 0 0 10px 0; font-size: 1.1em;">Max Cost/km</h3>
+                            <p id="stats-rockfall-netting-max"
+                                style="font-size: 1.6em; font-weight: bold; color: #dc3545; margin: 0;">-</p>
+                        </div>
+                        <div class="stat-card"
+                            style="background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); text-align: center;">
+                            <h3 style="color: #0038A8; margin: 0 0 10px 0; font-size: 1.1em;">Mean (Average)</h3>
+                            <p id="stats-rockfall-netting-mean"
+                                style="font-size: 1.6em; font-weight: bold; color: #667eea; margin: 0;">-</p>
+                        </div>
+                        <div class="stat-card"
+                            style="background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); text-align: center;">
+                            <h3 style="color: #0038A8; margin: 0 0 10px 0; font-size: 1.1em;">Median</h3>
+                            <p id="stats-rockfall-netting-median"
+                                style="font-size: 1.6em; font-weight: bold; color: #fd7e14; margin: 0;">-</p>
+                        </div>
+                        <div class="stat-card"
+                            style="background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); text-align: center;">
+                            <h3 style="color: #0038A8; margin: 0 0 10px 0; font-size: 1.1em;">Mode</h3>
+                            <p id="stats-rockfall-netting-mode"
+                                style="font-size: 1.6em; font-weight: bold; color: #6c757d; margin: 0;">-</p>
+                        </div>
+                        <div class="stat-card"
+                            style="background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); text-align: center;">
+                            <h3 style="color: #0038A8; margin: 0 0 10px 0; font-size: 1.1em;">Std Deviation</h3>
+                            <p id="stats-rockfall-netting-stddev"
+                                style="font-size: 1.6em; font-weight: bold; color: #17a2b8; margin: 0;">-</p>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
 
@@ -9463,6 +10010,18 @@
             <div id="stats-chart-traffic-signs" class="stats-category-panel" data-category="traffic_signs"
                 style="display: none; width: 100%; min-height: 400px;">
                 <canvas id="stats-chart-traffic-signs-canvas"></canvas>
+            </div>
+            <div id="stats-chart-nia" class="stats-category-panel" data-category="nia"
+                style="display: none; width: 100%; min-height: 400px;">
+                <canvas id="stats-chart-nia-canvas"></canvas>
+            </div>
+            <div id="stats-chart-multi-purpose-buildings" class="stats-category-panel"
+                data-category="multi_purpose_buildings" style="display: none; width: 100%; min-height: 400px;">
+                <canvas id="stats-chart-multi-purpose-buildings-canvas"></canvas>
+            </div>
+            <div id="stats-chart-rockfall-netting" class="stats-category-panel" data-category="rockfall_netting"
+                style="display: none; width: 100%; min-height: 400px;">
+                <canvas id="stats-chart-rockfall-netting-canvas"></canvas>
             </div>
         </div>
     </div>
@@ -9875,7 +10434,10 @@
                     national_roads: data.national_roads?.projects || data.national_roads || [],
                     secondary_roads: data.secondary_roads?.projects || data.secondary_roads || [],
                     bridges: data.bridges?.projects || data.bridges || [],
-                    traffic_signs: data.traffic_signs?.projects || data.traffic_signs || []
+                    traffic_signs: data.traffic_signs?.projects || data.traffic_signs || [],
+                    nia: data.nia?.projects || data.nia || [],
+                    multi_purpose_buildings: data.multi_purpose_buildings?.projects || data.multi_purpose_buildings || [],
+                    rockfall_netting: data.rockfall_netting?.projects || data.rockfall_netting || []
                 };
 
                 console.log(`[Roads] Cached data - National: ${roadsDataCache.national_roads.length}, Secondary: ${roadsDataCache.secondary_roads.length}`);
@@ -9894,7 +10456,7 @@
                 // Update title to show selected year
                 const titleEl = document.querySelector('#tab-roads .budget-section-title');
                 if (titleEl) {
-                    titleEl.textContent = `🛣️ Road Infrastructure Projects Cost Analysis (${year})`;
+                    titleEl.textContent = `🛠️ Project Cost Analysis (${year})`;
                 }
 
                 // Update year labels for all categories
@@ -9905,6 +10467,9 @@
                 updateRoadsStats('secondary_roads', roadsDataCache.secondary_roads);
                 updateRoadsStats('bridges', roadsDataCache.bridges);
                 updateRoadsStats('traffic_signs', roadsDataCache.traffic_signs);
+                updateRoadsStats('nia', roadsDataCache.nia);
+                updateRoadsStats('multi_purpose_buildings', roadsDataCache.multi_purpose_buildings);
+                updateRoadsStats('rockfall_netting', roadsDataCache.rockfall_netting);
 
                 // Load and update all-years stats (only for 2026, as historical data may not have all fields)
                 if (year === '2026') {
@@ -9916,6 +10481,9 @@
                 displayRoadsTable('secondary_roads', roadsDataCache.secondary_roads);
                 displayRoadsTable('bridges', roadsDataCache.bridges);
                 displayRoadsTable('traffic_signs', roadsDataCache.traffic_signs);
+                displayRoadsTable('nia', roadsDataCache.nia);
+                displayRoadsTable('multi_purpose_buildings', roadsDataCache.multi_purpose_buildings);
+                displayRoadsTable('rockfall_netting', roadsDataCache.rockfall_netting);
 
                 // Load and display dark red segments charts (for national and secondary roads)
                 await loadAndDisplayDarkRedChart('national_roads', roadsDataCache.national_roads);
@@ -9935,7 +10503,7 @@
 
         function updateRoadsYearLabels(year) {
             // Update year labels for all categories
-            const categories = ['national-roads', 'secondary-roads', 'bridges', 'traffic-signs'];
+            const categories = ['national-roads', 'secondary-roads', 'bridges', 'traffic-signs', 'nia', 'multi-purpose-buildings', 'rockfall-netting'];
             const labels = ['projects', 'distance', 'amount', 'avg'];
 
             categories.forEach(category => {
@@ -9963,6 +10531,12 @@
                 prefix = 'bridges';
             } else if (category === 'traffic_signs') {
                 prefix = 'traffic-signs';
+            } else if (category === 'nia') {
+                prefix = 'nia';
+            } else if (category === 'multi_purpose_buildings') {
+                prefix = 'multi-purpose-buildings';
+            } else if (category === 'rockfall_netting') {
+                prefix = 'rockfall-netting';
             } else {
                 prefix = 'roads';
             }
@@ -9983,7 +10557,7 @@
                     if (data.success) {
                         // The API returns aggregated stats, not individual projects
                         // Update stats directly from the aggregated data
-                        const categories = ['national_roads', 'secondary_roads', 'bridges', 'traffic_signs'];
+                        const categories = ['national_roads', 'secondary_roads', 'bridges', 'traffic_signs', 'nia', 'multi_purpose_buildings', 'rockfall_netting'];
                         categories.forEach(category => {
                             const stats = data[category] || {};
                             const totalProjects = stats.total_projects || 0;
@@ -10004,6 +10578,9 @@
                             else if (category === 'secondary_roads') prefix = 'secondary-roads';
                             else if (category === 'bridges') prefix = 'bridges';
                             else if (category === 'traffic_signs') prefix = 'traffic-signs';
+                            else if (category === 'nia') prefix = 'nia';
+                            else if (category === 'multi_purpose_buildings') prefix = 'multi-purpose-buildings';
+                            else if (category === 'rockfall_netting') prefix = 'rockfall-netting';
                             else prefix = 'roads';
 
                             const projectsEl = document.getElementById(`${prefix}-total-projects-all`);
@@ -10038,7 +10615,10 @@
                 national_roads: [],
                 secondary_roads: [],
                 bridges: [],
-                traffic_signs: []
+                traffic_signs: [],
+                nia: [],
+                multi_purpose_buildings: [],
+                rockfall_netting: []
             };
 
             const loadPromises = years.map(async (year) => {
@@ -10053,7 +10633,10 @@
                                     national_roads: data.national_roads?.projects || [],
                                     secondary_roads: data.secondary_roads?.projects || [],
                                     bridges: data.bridges?.projects || [],
-                                    traffic_signs: data.traffic_signs?.projects || []
+                                    traffic_signs: data.traffic_signs?.projects || [],
+                                    nia: data.nia?.projects || [],
+                                    multi_purpose_buildings: data.multi_purpose_buildings?.projects || [],
+                                    rockfall_netting: data.rockfall_netting?.projects || []
                                 }
                             };
                         }
@@ -10073,6 +10656,9 @@
                     allYearsData.secondary_roads.push(...result.data.secondary_roads);
                     allYearsData.bridges.push(...result.data.bridges);
                     allYearsData.traffic_signs.push(...result.data.traffic_signs);
+                    allYearsData.nia.push(...result.data.nia);
+                    allYearsData.multi_purpose_buildings.push(...result.data.multi_purpose_buildings);
+                    allYearsData.rockfall_netting.push(...result.data.rockfall_netting);
                 }
             });
 
@@ -10083,6 +10669,9 @@
                 allYearsData.secondary_roads.push(...(roadsDataCache.secondary_roads || []));
                 allYearsData.bridges.push(...(roadsDataCache.bridges || []));
                 allYearsData.traffic_signs.push(...(roadsDataCache.traffic_signs || []));
+                allYearsData.nia.push(...(roadsDataCache.nia || []));
+                allYearsData.multi_purpose_buildings.push(...(roadsDataCache.multi_purpose_buildings || []));
+                allYearsData.rockfall_netting.push(...(roadsDataCache.rockfall_netting || []));
             }
 
             // Update all-years stats for each category
@@ -10090,6 +10679,9 @@
             updateRoadsAllYearsStats('secondary_roads', allYearsData.secondary_roads);
             updateRoadsAllYearsStats('bridges', allYearsData.bridges);
             updateRoadsAllYearsStats('traffic_signs', allYearsData.traffic_signs);
+            updateRoadsAllYearsStats('nia', allYearsData.nia);
+            updateRoadsAllYearsStats('multi_purpose_buildings', allYearsData.multi_purpose_buildings);
+            updateRoadsAllYearsStats('rockfall_netting', allYearsData.rockfall_netting);
         }
 
         function updateRoadsAllYearsStats(category, projects) {
@@ -10107,6 +10699,12 @@
                 prefix = 'bridges';
             } else if (category === 'traffic_signs') {
                 prefix = 'traffic-signs';
+            } else if (category === 'nia') {
+                prefix = 'nia';
+            } else if (category === 'multi_purpose_buildings') {
+                prefix = 'multi-purpose-buildings';
+            } else if (category === 'rockfall_netting') {
+                prefix = 'rockfall-netting';
             } else {
                 prefix = 'roads';
             }
@@ -10506,6 +11104,18 @@
                 tbodyId = 'traffic-signs-table-body';
                 searchId = 'traffic-signs-search';
                 tableId = 'traffic-signs-table';
+            } else if (category === 'nia') {
+                tbodyId = 'nia-table-body';
+                searchId = 'nia-search';
+                tableId = 'nia-table';
+            } else if (category === 'multi_purpose_buildings') {
+                tbodyId = 'multi-purpose-buildings-table-body';
+                searchId = 'multi-purpose-buildings-search';
+                tableId = 'multi-purpose-buildings-table';
+            } else if (category === 'rockfall_netting') {
+                tbodyId = 'rockfall-netting-table-body';
+                searchId = 'rockfall-netting-search';
+                tableId = 'rockfall-netting-table';
             } else {
                 tbodyId = 'roads-table-body';
                 searchId = 'roads-search';
@@ -10945,7 +11555,10 @@
                 : category === 'secondary_roads' ? 'secondary-roads'
                     : category === 'bridges' ? 'bridges'
                         : category === 'traffic_signs' ? 'traffic-signs'
-                            : 'roads';
+                            : category === 'nia' ? 'nia'
+                                : category === 'multi_purpose_buildings' ? 'multi-purpose-buildings'
+                                    : category === 'rockfall_netting' ? 'rockfall-netting'
+                                        : 'roads';
 
             // Reset all indicators
             const columns = ['name', 'chainage', 'distance_breakdown', 'distance', 'amount', 'cost_per_km'];
@@ -11007,7 +11620,10 @@
                     national_roads: data.national_roads,
                     secondary_roads: data.secondary_roads,
                     bridges: data.bridges,
-                    traffic_signs: data.traffic_signs
+                    traffic_signs: data.traffic_signs,
+                    nia: data.nia,
+                    multi_purpose_buildings: data.multi_purpose_buildings,
+                    rockfall_netting: data.rockfall_netting
                 };
 
                 // Load all years statistics if available
@@ -11037,6 +11653,9 @@
                 createDistributionChart('secondary_roads', data.secondary_roads?.projects || []);
                 createDistributionChart('bridges', data.bridges?.projects || []);
                 createDistributionChart('traffic_signs', data.traffic_signs?.projects || []);
+                createDistributionChart('nia', data.nia?.projects || []);
+                createDistributionChart('multi_purpose_buildings', data.multi_purpose_buildings?.projects || []);
+                createDistributionChart('rockfall_netting', data.rockfall_netting?.projects || []);
 
                 // Hide loading, show content
                 loadingEl.style.display = 'none';
@@ -11117,11 +11736,14 @@
                             national_roads: data.national_roads,
                             secondary_roads: data.secondary_roads,
                             bridges: data.bridges,
-                            traffic_signs: data.traffic_signs
+                            traffic_signs: data.traffic_signs,
+                            nia: data.nia,
+                            multi_purpose_buildings: data.multi_purpose_buildings,
+                            rockfall_netting: data.rockfall_netting
                         };
 
                         // Calculate statistics from projects if not already present
-                        const categories = ['national_roads', 'secondary_roads', 'bridges', 'traffic_signs'];
+                        const categories = ['national_roads', 'secondary_roads', 'bridges', 'traffic_signs', 'nia', 'multi_purpose_buildings', 'rockfall_netting'];
                         categories.forEach(category => {
                             const categoryData = statsDataCache[category];
                             if (categoryData) {
@@ -11143,6 +11765,9 @@
                         createDistributionChart('secondary_roads', data.secondary_roads?.projects || []);
                         createDistributionChart('bridges', data.bridges?.projects || []);
                         createDistributionChart('traffic_signs', data.traffic_signs?.projects || []);
+                        createDistributionChart('nia', data.nia?.projects || []);
+                        createDistributionChart('multi_purpose_buildings', data.multi_purpose_buildings?.projects || []);
+                        createDistributionChart('rockfall_netting', data.rockfall_netting?.projects || []);
 
                         console.log(`[Stats] Loaded and updated distribution charts for year ${year}`);
                     }
@@ -11159,6 +11784,9 @@
                     displayStatistics('secondary_roads', statsDataCache.secondary_roads?.statistics);
                     displayStatistics('bridges', statsDataCache.bridges?.statistics);
                     displayStatistics('traffic_signs', statsDataCache.traffic_signs?.statistics);
+                    displayStatistics('nia', statsDataCache.nia?.statistics);
+                    displayStatistics('multi_purpose_buildings', statsDataCache.multi_purpose_buildings?.statistics);
+                    displayStatistics('rockfall_netting', statsDataCache.rockfall_netting?.statistics);
                 }
                 // Still update bar charts even if year data not available (use current category)
                 if (allYearsStatsCache && currentStatsCategory) {
@@ -11172,6 +11800,9 @@
             displayStatistics('secondary_roads', yearData.secondary_roads);
             displayStatistics('bridges', yearData.bridges);
             displayStatistics('traffic_signs', yearData.traffic_signs);
+            displayStatistics('nia', yearData.nia);
+            displayStatistics('multi_purpose_buildings', yearData.multi_purpose_buildings);
+            displayStatistics('rockfall_netting', yearData.rockfall_netting);
 
             // Update bar charts for the selected category when year changes
             if (currentStatsCategory) {
@@ -11192,8 +11823,15 @@
             }
 
             const years = [2020, 2021, 2022, 2023, 2024, 2025, 2026];
-            const categories = ['roads', 'bridges', 'traffic_signs'];
-            const categoryNames = { roads: 'Roads', bridges: 'Bridges', traffic_signs: 'Traffic Signs' };
+            const categories = ['roads', 'bridges', 'traffic_signs', 'nia', 'multi_purpose_buildings', 'rockfall_netting'];
+            const categoryNames = {
+                roads: 'Roads',
+                bridges: 'Bridges',
+                traffic_signs: 'Road Safety Facilities',
+                nia: 'Irrigation Works (NIA)',
+                multi_purpose_buildings: 'Multi-Purpose Buildings',
+                rockfall_netting: 'Rockfall Netting'
+            };
             const stats = ['min', 'max', 'mean', 'median', 'mode', 'std_dev'];
             const statNames = {
                 min: 'Min',
@@ -11237,7 +11875,10 @@
                     const colors = [
                         'rgba(0, 56, 168, 0.8)',   // Roads - blue
                         'rgba(220, 53, 69, 0.8)',  // Bridges - red
-                        'rgba(40, 167, 69, 0.8)'   // Traffic Signs - green
+                        'rgba(40, 167, 69, 0.8)',  // Traffic Signs - green
+                        'rgba(0, 150, 136, 0.8)',  // NIA - teal
+                        'rgba(123, 31, 162, 0.8)', // MPB - purple
+                        'rgba(121, 85, 72, 0.8)'   // Rockfall - brown
                     ];
 
                     return {
@@ -11388,7 +12029,10 @@
                 'national_roads': 'National Roads',
                 'secondary_roads': 'Secondary Roads',
                 'bridges': 'Bridges',
-                'traffic_signs': 'Road Safety Facilities'
+                'traffic_signs': 'Road Safety Facilities',
+                'nia': 'Irrigation Works (NIA)',
+                'multi_purpose_buildings': 'Multi-Purpose Buildings',
+                'rockfall_netting': 'Rockfall Netting'
             };
 
             // Create labels grouped by statistic: Min (all years), Mean (all years), Median (all years), Mode (all years)
@@ -11744,6 +12388,12 @@
                 prefix = 'stats-bridges';
             } else if (category === 'traffic_signs') {
                 prefix = 'stats-traffic-signs';
+            } else if (category === 'nia') {
+                prefix = 'stats-nia';
+            } else if (category === 'multi_purpose_buildings') {
+                prefix = 'stats-multi-purpose-buildings';
+            } else if (category === 'rockfall_netting') {
+                prefix = 'stats-rockfall-netting';
             } else {
                 prefix = 'stats-roads';
             }
@@ -11904,8 +12554,15 @@
 
                 // Destroy ALL chart instances that might be using any stats chart canvas (safety check)
                 // This ensures no chart instances are interfering
-                const allStatsCanvases = ['stats-chart-national-roads-canvas', 'stats-chart-secondary-roads-canvas',
-                    'stats-chart-bridges-canvas', 'stats-chart-traffic-signs-canvas'];
+                const allStatsCanvases = [
+                    'stats-chart-national-roads-canvas',
+                    'stats-chart-secondary-roads-canvas',
+                    'stats-chart-bridges-canvas',
+                    'stats-chart-traffic-signs-canvas',
+                    'stats-chart-nia-canvas',
+                    'stats-chart-multi-purpose-buildings-canvas',
+                    'stats-chart-rockfall-netting-canvas'
+                ];
                 allStatsCanvases.forEach(canvasIdToCheck => {
                     const canvasToCheck = document.getElementById(canvasIdToCheck);
                     if (canvasToCheck && canvasToCheck.chart) {
@@ -11981,7 +12638,15 @@
                             },
                             title: {
                                 display: true,
-                                text: `Distribution of Cost per Kilometer - ${category === 'national_roads' ? 'National Roads' : category === 'secondary_roads' ? 'Secondary Roads' : category === 'bridges' ? 'Bridges' : category === 'traffic_signs' ? 'Road Safety Facilities' : 'Roads'}`
+                                text: `Distribution of Cost per Kilometer - ${category === 'national_roads' ? 'National Roads'
+                                    : category === 'secondary_roads' ? 'Secondary Roads'
+                                        : category === 'bridges' ? 'Bridges'
+                                            : category === 'traffic_signs' ? 'Road Safety Facilities'
+                                                : category === 'nia' ? 'Irrigation Works (NIA)'
+                                                    : category === 'multi_purpose_buildings' ? 'Multi-Purpose Buildings'
+                                                        : category === 'rockfall_netting' ? 'Rockfall Netting'
+                                                            : 'Roads'
+                                    }`
                             }
                         }
                     }
@@ -12665,13 +13330,21 @@
             national_roads: [],
             secondary_roads: [],
             bridges: [],
-            traffic_signs: []
+            traffic_signs: [],
+            nia: [],
+            multi_purpose_buildings: [],
+            rockfall_netting: [],
+            roads: []
         };
         let roadsTableSortState = {
             national_roads: { column: null, direction: 'asc' },
             secondary_roads: { column: null, direction: 'asc' },
             bridges: { column: null, direction: 'asc' },
-            traffic_signs: { column: null, direction: 'asc' }
+            traffic_signs: { column: null, direction: 'asc' },
+            nia: { column: null, direction: 'asc' },
+            multi_purpose_buildings: { column: null, direction: 'asc' },
+            rockfall_netting: { column: null, direction: 'asc' },
+            roads: { column: null, direction: 'asc' }
         };
         let roadsTableSearchTimeouts = {};
         const roadsSearchConfig = {
@@ -12679,6 +13352,9 @@
             secondary_roads: { inputId: 'secondary-roads-search', autocompleteId: 'secondary-roads-autocomplete' },
             bridges: { inputId: 'bridges-search', autocompleteId: 'bridges-autocomplete' },
             traffic_signs: { inputId: 'traffic-signs-search', autocompleteId: 'traffic-signs-autocomplete' },
+            nia: { inputId: 'nia-search', autocompleteId: 'nia-autocomplete' },
+            multi_purpose_buildings: { inputId: 'multi-purpose-buildings-search', autocompleteId: 'multi-purpose-buildings-autocomplete' },
+            rockfall_netting: { inputId: 'rockfall-netting-search', autocompleteId: 'rockfall-netting-autocomplete' },
             roads: { inputId: 'roads-search', autocompleteId: 'roads-autocomplete' }
         };
         const roadsProjectNames = {
@@ -12686,6 +13362,9 @@
             secondary_roads: [],
             bridges: [],
             traffic_signs: [],
+            nia: [],
+            multi_purpose_buildings: [],
+            rockfall_netting: [],
             roads: []
         };
         const roadsSearchInitialized = {
@@ -12693,6 +13372,9 @@
             secondary_roads: false,
             bridges: false,
             traffic_signs: false,
+            nia: false,
+            multi_purpose_buildings: false,
+            rockfall_netting: false,
             roads: false
         };
         const roadsAutocompleteActiveIndex = {
@@ -12700,6 +13382,9 @@
             secondary_roads: -1,
             bridges: -1,
             traffic_signs: -1,
+            nia: -1,
+            multi_purpose_buildings: -1,
+            rockfall_netting: -1,
             roads: -1
         };
         const roadsAutocompleteBlurTimers = {
@@ -12707,6 +13392,9 @@
             secondary_roads: null,
             bridges: null,
             traffic_signs: null,
+            nia: null,
+            multi_purpose_buildings: null,
+            rockfall_netting: null,
             roads: null
         };
         let reblockSummaryTotals = null;
@@ -14998,6 +15686,541 @@
             link.click();
             document.body.removeChild(link);
         }
+
+        // ========================================
+        // RESU2 TAB - Repeated Projects (Revised Names Only)
+        // ========================================
+
+        // Pagination state for repeated projects (revised names only)
+        let resu2AllMatches = [];
+        let resu2GroupedProjects = [];
+        let resu2CurrentPage = 1;
+        let resu2ItemsPerPage = 20;
+
+        // Load repeated projects data (revised names only)
+        async function loadResurrectedProjects2() {
+            const loadingEl = document.getElementById('resu2-loading');
+            const errorEl = document.getElementById('resu2-error');
+            const statsEl = document.getElementById('resu2-stats');
+            const byYearEl = document.getElementById('resu2-by-year');
+            const projectsEl = document.getElementById('resu2-projects');
+
+            try {
+                // Load from the revised JSON file (generated by find_resurrected_projects_revised.py)
+                const response = await fetch('/static/data/resurrected_projects_dpwh_revised.json');
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                const data = await response.json();
+
+                const allMatches = data.matches || [];
+                const metadata = data.metadata || {};
+
+                // Use all matches (already filtered by revised_name in the script)
+                const matches = allMatches;
+
+                // Store filtered matches globally for pagination
+                resu2AllMatches = matches;
+
+                // Update stats
+                document.getElementById('resu2-total').textContent = matches.length.toLocaleString();
+                const total2026 = matches.reduce((sum, m) => sum + (m.year_2026?.amount || 0), 0);
+                const totalHistorical = matches.reduce((sum, m) => sum + (m.historical?.amount || 0), 0);
+                document.getElementById('resu2-amount-2026').textContent = '₱' + total2026.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+                document.getElementById('resu2-amount-historical').textContent = '₱' + totalHistorical.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+                document.getElementById('resu2-years').textContent = metadata.search_years?.join(', ') || '2020-2025';
+
+                // Group by year
+                const byYear = {};
+                matches.forEach(match => {
+                    const year = match.historical?.year || 'Unknown';
+                    if (!byYear[year]) {
+                        byYear[year] = { count: 0, amount2026: 0, amountHistorical: 0 };
+                    }
+                    byYear[year].count++;
+                    byYear[year].amount2026 += match.year_2026?.amount || 0;
+                    byYear[year].amountHistorical += match.historical?.amount || 0;
+                });
+
+                // Display by year
+                const yearBreakdown = document.getElementById('resu2-year-breakdown');
+                yearBreakdown.innerHTML = ''; // Clear previous
+                Object.keys(byYear).sort((a, b) => parseInt(b) - parseInt(a)).forEach(year => {
+                    const stats = byYear[year];
+                    const card = document.createElement('div');
+                    card.className = 'stat-card';
+                    card.style.cssText = 'background: white; padding: 15px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);';
+                    card.innerHTML = `
+                    <h5 style="color: #0038A8; margin: 0 0 10px 0;">${year}</h5>
+                    <p style="font-size: 1.5em; font-weight: bold; color: #dc3545; margin: 0;">${stats.count}</p>
+                    <p style="font-size: 0.85em; color: #666; margin-top: 5px;">projects</p>
+                `;
+                    yearBreakdown.appendChild(card);
+                });
+
+                // Group and prepare projects for display
+                prepareResurrectedProjects2(matches);
+
+                // Display projects with pagination
+                displayResurrectedProjects2();
+
+                // Hide loading, show content
+                loadingEl.style.display = 'none';
+                document.getElementById('resu2-download-buttons').style.display = 'flex';
+                statsEl.style.display = 'grid';
+                byYearEl.style.display = 'block';
+                projectsEl.style.display = 'block';
+
+            } catch (error) {
+                console.error('Error loading repeated projects (revised):', error);
+                loadingEl.style.display = 'none';
+                errorEl.textContent = `Error: ${error.message}`;
+                errorEl.style.display = 'block';
+            }
+        }
+
+        function prepareResurrectedProjects2(matches) {
+            // Group matches by 2026 project (using ID or revised_name as key)
+            const groupedByProject = {};
+            matches.forEach(match => {
+                // Use revised_name for the project key since we're filtering on it
+                const projectName = match.year_2026?.revised_name || 'unknown';
+                const projectKey = match.year_2026?.id || projectName;
+                if (!groupedByProject[projectKey]) {
+                    groupedByProject[projectKey] = {
+                        project: match.year_2026,
+                        historicalMatches: []
+                    };
+                }
+                groupedByProject[projectKey].historicalMatches.push(match);
+            });
+
+            // Sort historical matches by year (newest first)
+            Object.values(groupedByProject).forEach(group => {
+                group.historicalMatches.sort((a, b) => (b.historical?.year || 0) - (a.historical?.year || 0));
+            });
+
+            // Sort projects by: 1) highest 2026 amount, 2) highest number of year matches
+            resu2GroupedProjects = Object.values(groupedByProject).sort((a, b) => {
+                const amountA = a.historicalMatches[0]?.year_2026?.amount || a.project?.amount || 0;
+                const amountB = b.historicalMatches[0]?.year_2026?.amount || b.project?.amount || 0;
+                const yearsA = a.historicalMatches.length;
+                const yearsB = b.historicalMatches.length;
+
+                // First sort by amount (descending)
+                if (amountB !== amountA) {
+                    return amountB - amountA;
+                }
+                // Then by number of year matches (descending)
+                return yearsB - yearsA;
+            });
+        }
+
+        function displayResurrectedProjects2() {
+            const listEl = document.getElementById('resu2-projects-list');
+            const paginationInfoEl = document.getElementById('resu2-pagination-info');
+            const paginationControlsEl = document.getElementById('resu2-pagination-controls');
+
+            // Get search filters
+            const searchEl = document.getElementById('resu2-search');
+            const contractorSearchEl = document.getElementById('resu2-contractor-search');
+            const projectTerm = (searchEl?.value || '').toLowerCase().trim();
+            const contractorTerm = (contractorSearchEl?.value || '').toLowerCase().trim();
+
+            // Filter projects based on search
+            let filteredProjects = resu2GroupedProjects;
+            if (projectTerm || contractorTerm) {
+                filteredProjects = resu2GroupedProjects.filter(group => {
+                    const project = group.project;
+                    // Use revised_name since we're only showing those
+                    const projectName = project?.revised_name || '';
+                    const text = projectName.toLowerCase();
+
+                    // Project name/description match
+                    const projectMatch = !projectTerm || text.includes(projectTerm);
+
+                    // Contractor match (only search historical contractors, 2026 is proposed budget)
+                    let contractorMatch = true;
+                    if (contractorTerm) {
+                        const historicalContractors = group.historicalMatches
+                            .map(m => m.historical?.contractor || '')
+                            .filter(Boolean)
+                            .join(' ')
+                            .toLowerCase();
+                        contractorMatch = historicalContractors.includes(contractorTerm);
+                    }
+
+                    return projectMatch && contractorMatch;
+                });
+            }
+
+            // Calculate pagination
+            const totalItems = filteredProjects.length;
+            const totalPages = Math.ceil(totalItems / resu2ItemsPerPage);
+            const startIndex = (resu2CurrentPage - 1) * resu2ItemsPerPage;
+            const endIndex = Math.min(startIndex + resu2ItemsPerPage, totalItems);
+            const currentPageItems = filteredProjects.slice(startIndex, endIndex);
+
+            // Update pagination info
+            paginationInfoEl.textContent = `Showing ${startIndex + 1}-${endIndex} of ${totalItems.toLocaleString()} projects (revised names only)`;
+
+            // Clear and display current page
+            listEl.innerHTML = '';
+
+            // Display one card per 2026 project with all historical year matches
+            currentPageItems.forEach((group, index) => {
+                const project = group.project;
+                const historicalMatches = group.historicalMatches;
+
+                const card = document.createElement('div');
+                card.className = 'resurrected-project-card';
+                card.style.cssText = 'background: white; padding: 1.25rem; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); border-left: 4px solid #0038A8; height: fit-content;';
+
+                // Show all matched years as badges
+                const yearsList = historicalMatches.map(m => m.historical?.year).filter(Boolean).sort((a, b) => b - a);
+                const yearsBadges = yearsList.map(year => {
+                    const match = historicalMatches.find(m => m.historical?.year === year);
+                    const yearsAgo = 2026 - year;
+                    return `<span style="background: ${yearsAgo === 1 ? '#28a745' : yearsAgo <= 3 ? '#ffc107' : '#dc3545'}; color: white; padding: 0.25rem 0.5rem; border-radius: 4px; font-size: 0.8em; margin-right: 0.5rem; display: inline-block; margin-bottom: 0.5rem;">${year} (${yearsAgo}y ago)</span>`;
+                }).join('');
+
+                // Calculate average similarity
+                const avgSimilarity = historicalMatches.reduce((sum, m) => sum + (m.similarity?.name || 0), 0) / historicalMatches.length;
+
+                // Display historical matches in a more compact grid layout
+                let historicalMatchesHTML = '';
+                if (historicalMatches.length > 0) {
+                    historicalMatchesHTML = '<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 0.75rem;">';
+                    historicalMatches.forEach((match, idx) => {
+                        const histDesc = match.historical?.description || match.historical?.name || 'No description available';
+                        const sourceFile = match.historical?.source_file || '';
+                        const historicalYear = match.historical?.year || '';
+
+                        // Extract year from historical year (handle both int and string formats)
+                        let yearNum = historicalYear;
+                        if (typeof historicalYear === 'string') {
+                            const yearMatch = historicalYear.match(/(\d{4})/);
+                            if (yearMatch) {
+                                yearNum = yearMatch[1];
+                            }
+                        }
+
+                        // Determine source database from source_file
+                        let sourceDb = 'GAA/PostgreSQL';
+                        if (sourceFile.includes('gaa_') || sourceFile.includes('GAA')) {
+                            sourceDb = `GAA ${yearNum}`;
+                        } else if (sourceFile) {
+                            sourceDb = 'PostgreSQL';
+                        } else {
+                            sourceDb = `GAA ${yearNum}`;
+                        }
+
+                        historicalMatchesHTML += `
+                        <div style="border-left: 3px solid #667eea; padding-left: 0.75rem; padding-top: 0.5rem; padding-bottom: 0.5rem; background: #f8f9fa; border-radius: 4px;">
+                            <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 0.4rem;">
+                                <strong style="color: #667eea; font-size: 0.85em;">${match.historical?.year || 'Unknown'}</strong>
+                                <span style="background: #667eea; color: white; padding: 0.15rem 0.4rem; border-radius: 3px; font-size: 0.75em;">${(match.similarity?.name * 100).toFixed(1)}%</span>
+                            </div>
+                            <div style="font-size: 0.85em; margin-bottom: 0.5rem; color: #495057; font-weight: 500; line-height: 1.4;">
+                                ${histDesc}
+                            </div>
+                            <div style="font-size: 0.8em; margin-bottom: 0.3rem; color: #6c757d;">
+                                <span style="color: #666;">Source: </span>
+                                <span style="font-weight: 600; color: #495057;">${sourceDb}</span>
+                            </div>
+                            <div style="font-size: 0.85em; margin-bottom: 0.3rem;">
+                                <div style="margin-bottom: 0.25rem;">
+                                    <span style="color: #666;">Amount: </span>
+                                    <span style="font-weight: bold; color: #dc3545; font-size: 0.9em;">₱${(match.historical?.amount || 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+                                </div>
+                                ${match.historical?.contractor ? `<div style="margin-top: 0.3rem;"><span style="color: #666; font-size: 0.8em;">Predicted Contractor: </span><span style="font-weight: bold; color: #ff9800; font-size: 0.8em;" data-contractor-historical>${match.historical.contractor}</span></div>` : ''}
+                            </div>
+                        </div>
+                    `;
+                    });
+                    historicalMatchesHTML += '</div>';
+                }
+
+                // Get 2026 amount (should be same across all matches for same project)
+                const amount2026 = historicalMatches[0]?.year_2026?.amount || project?.amount || 0;
+
+                // Get source information for 2026
+                const sourceRow = project?.source_row;
+                const sourceCol = project?.source_col;
+                let source2026 = 'GAB 2026';
+                if (sourceRow) {
+                    source2026 += ` (Row ${sourceRow}`;
+                    if (sourceCol) {
+                        source2026 += `, Col ${sourceCol}`;
+                    }
+                    source2026 += ')';
+                }
+
+                // Use revised_name for display (since we're filtering on it)
+                const projectName = project?.revised_name || 'Unknown';
+                card.innerHTML = `
+                <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 0.75rem;">
+                    <div style="flex: 1; min-width: 0;">
+                        <h5 style="color: #0038A8; margin: 0 0 0.4rem 0; font-size: 1em; line-height: 1.3;">${projectName}</h5>
+                        <div style="font-size: 0.75em; color: #6c757d; margin-top: 0.2rem;">
+                            <span style="color: #666;">Source: </span>
+                            <span style="font-weight: 600; color: #495057;">${source2026}</span>
+                        </div>
+                    </div>
+                    <span style="background: #0038A8; color: white; padding: 0.2rem 0.6rem; border-radius: 4px; font-size: 0.8em; font-weight: bold; margin-left: 0.5rem; flex-shrink: 0;">${(avgSimilarity * 100).toFixed(1)}%</span>
+                </div>
+                <div style="display: grid; grid-template-columns: 1fr auto; gap: 0.75rem; margin-bottom: 0.75rem; padding: 0.6rem; background: #f8f9fa; border-radius: 6px; align-items: center;">
+                    <div>
+                        <p style="font-size: 0.8em; color: #666; margin: 0;">2026 Amount</p>
+                        <p style="font-size: 1em; font-weight: bold; color: #dc3545; margin: 0;">₱${amount2026.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
+                    </div>
+                    <div style="text-align: right;">
+                        <p style="font-size: 0.75em; color: #666; margin: 0 0 0.2rem 0;">Years:</p>
+                        <div style="display: flex; flex-wrap: wrap; gap: 0.3rem; justify-content: flex-end;">
+                            ${yearsBadges}
+                        </div>
+                    </div>
+                </div>
+                <div style="margin-top: 0.75rem; padding-top: 0.75rem; border-top: 2px solid #dee2e6;">
+                    <h6 style="color: #495057; margin-bottom: 0.5rem; font-size: 0.9em; font-weight: 600;">Historical Matches (${historicalMatches.length}):</h6>
+                    ${historicalMatchesHTML}
+                </div>
+            `;
+                listEl.appendChild(card);
+            });
+
+            // Display pagination controls
+            displayResurrectedPagination2(totalPages, totalItems);
+
+            // Add search functionality - reload display on input
+            if (searchEl) {
+                searchEl.oninput = () => {
+                    resu2CurrentPage = 1; // Reset to first page on search
+                    displayResurrectedProjects2();
+                };
+            }
+            if (contractorSearchEl) {
+                contractorSearchEl.oninput = () => {
+                    resu2CurrentPage = 1; // Reset to first page on search
+                    displayResurrectedProjects2();
+                };
+            }
+        }
+
+        function displayResurrectedPagination2(totalPages, totalItems) {
+            const paginationControlsEl = document.getElementById('resu2-pagination-controls');
+            if (!paginationControlsEl) return;
+
+            if (totalPages <= 1) {
+                paginationControlsEl.innerHTML = '';
+                return;
+            }
+
+            let html = '';
+
+            // Previous button
+            html += `<button id="resu2-prev" ${resu2CurrentPage === 1 ? 'disabled' : ''} 
+                 style="padding: 0.5rem 1rem; border: 1px solid #ddd; border-radius: 4px; background: ${resu2CurrentPage === 1 ? '#f5f5f5' : 'white'}; 
+                 color: ${resu2CurrentPage === 1 ? '#999' : '#0038A8'}; cursor: ${resu2CurrentPage === 1 ? 'not-allowed' : 'pointer'}; 
+                 font-size: 14px;">Previous</button>`;
+
+            // Page numbers (show max 7 pages around current)
+            const maxVisible = 7;
+            let startPage = Math.max(1, resu2CurrentPage - Math.floor(maxVisible / 2));
+            let endPage = Math.min(totalPages, startPage + maxVisible - 1);
+            if (endPage - startPage < maxVisible - 1) {
+                startPage = Math.max(1, endPage - maxVisible + 1);
+            }
+
+            // First page + ellipsis
+            if (startPage > 1) {
+                html += `<button class="resu2-page-btn" data-page="1" 
+                     style="padding: 0.5rem 0.75rem; border: 1px solid #ddd; border-radius: 4px; background: white; 
+                     color: #0038A8; cursor: pointer; font-size: 14px;">1</button>`;
+                if (startPage > 2) {
+                    html += `<span style="padding: 0.5rem; color: #666;">...</span>`;
+                }
+            }
+
+            // Page numbers
+            for (let i = startPage; i <= endPage; i++) {
+                html += `<button class="resu2-page-btn" data-page="${i}" 
+                     style="padding: 0.5rem 0.75rem; border: 1px solid #ddd; border-radius: 4px; 
+                     background: ${i === resu2CurrentPage ? '#0038A8' : 'white'}; 
+                     color: ${i === resu2CurrentPage ? 'white' : '#0038A8'}; 
+                     cursor: pointer; font-size: 14px; font-weight: ${i === resu2CurrentPage ? 'bold' : 'normal'};">${i}</button>`;
+            }
+
+            // Ellipsis + last page
+            if (endPage < totalPages) {
+                if (endPage < totalPages - 1) {
+                    html += `<span style="padding: 0.5rem; color: #666;">...</span>`;
+                }
+                html += `<button class="resu2-page-btn" data-page="${totalPages}" 
+                     style="padding: 0.5rem 0.75rem; border: 1px solid #ddd; border-radius: 4px; background: white; 
+                     color: #0038A8; cursor: pointer; font-size: 14px;">${totalPages}</button>`;
+            }
+
+            // Next button
+            html += `<button id="resu2-next" ${resu2CurrentPage === totalPages ? 'disabled' : ''} 
+                 style="padding: 0.5rem 1rem; border: 1px solid #ddd; border-radius: 4px; 
+                 background: ${resu2CurrentPage === totalPages ? '#f5f5f5' : 'white'}; 
+                 color: ${resu2CurrentPage === totalPages ? '#999' : '#0038A8'}; 
+                 cursor: ${resu2CurrentPage === totalPages ? 'not-allowed' : 'pointer'}; font-size: 14px;">Next</button>`;
+
+            // Items per page selector
+            html += `<div style="margin-left: 1rem; display: flex; align-items: center; gap: 0.5rem;">
+                    <label style="color: #666; font-size: 14px;">Items per page:</label>
+                    <select id="resu2-items-per-page" style="padding: 0.5rem; border: 1px solid #ddd; border-radius: 4px; font-size: 14px;">
+                        <option value="10" ${resu2ItemsPerPage === 10 ? 'selected' : ''}>10</option>
+                        <option value="20" ${resu2ItemsPerPage === 20 ? 'selected' : ''}>20</option>
+                        <option value="50" ${resu2ItemsPerPage === 50 ? 'selected' : ''}>50</option>
+                        <option value="100" ${resu2ItemsPerPage === 100 ? 'selected' : ''}>100</option>
+                    </select>
+                 </div>`;
+
+            paginationControlsEl.innerHTML = html;
+
+            // Add event listeners
+            const prevBtn = document.getElementById('resu2-prev');
+            const nextBtn = document.getElementById('resu2-next');
+            const pageBtns = document.querySelectorAll('.resu2-page-btn');
+            const itemsPerPageSelect = document.getElementById('resu2-items-per-page');
+
+            if (prevBtn) {
+                prevBtn.addEventListener('click', () => {
+                    if (resu2CurrentPage > 1) {
+                        resu2CurrentPage--;
+                        displayResurrectedProjects2();
+                        window.scrollTo({ top: 0, behavior: 'smooth' });
+                    }
+                });
+            }
+
+            if (nextBtn) {
+                nextBtn.addEventListener('click', () => {
+                    if (resu2CurrentPage < totalPages) {
+                        resu2CurrentPage++;
+                        displayResurrectedProjects2();
+                        window.scrollTo({ top: 0, behavior: 'smooth' });
+                    }
+                });
+            }
+
+            pageBtns.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const page = parseInt(btn.dataset.page);
+                    if (page !== resu2CurrentPage) {
+                        resu2CurrentPage = page;
+                        displayResurrectedProjects2();
+                        window.scrollTo({ top: 0, behavior: 'smooth' });
+                    }
+                });
+            });
+
+            if (itemsPerPageSelect) {
+                itemsPerPageSelect.addEventListener('change', (e) => {
+                    resu2ItemsPerPage = parseInt(e.target.value);
+                    resu2CurrentPage = 1; // Reset to first page
+                    displayResurrectedProjects2();
+                });
+            }
+        }
+
+        // Download functions for repeated projects (revised names only)
+        function downloadResurrectedCSV2() {
+            if (!resu2AllMatches || resu2AllMatches.length === 0) {
+                alert('No data available to download');
+                return;
+            }
+
+            // Flatten matches for CSV (one row per match)
+            const rows = [];
+
+            // Header row
+            rows.push([
+                '2026 Project ID',
+                '2026 Revised Name',
+                '2026 Original Name',
+                '2026 Amount',
+                'Historical Year',
+                'Historical Description',
+                'Historical Amount',
+                'Similarity Score',
+                'Historical Contractor'
+            ].join(','));
+
+            // Data rows
+            resu2AllMatches.forEach(match => {
+                const row = [
+                    escapeCSV(match.year_2026?.id),
+                    escapeCSV(match.year_2026?.revised_name),
+                    escapeCSV(match.year_2026?.name),
+                    match.year_2026?.amount || 0,
+                    match.historical?.year || '',
+                    escapeCSV(match.historical?.description),
+                    match.historical?.amount || 0,
+                    (match.similarity?.name * 100).toFixed(1) + '%',
+                    escapeCSV(match.historical?.contractor)
+                ];
+                rows.push(row.join(','));
+            });
+
+            // Create and download
+            const csvContent = rows.join('\n');
+            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement('a');
+            const url = URL.createObjectURL(blob);
+            link.setAttribute('href', url);
+            link.setAttribute('download', `resurrected_projects_revised_names_${new Date().toISOString().split('T')[0]}.csv`);
+            link.style.visibility = 'hidden';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+
+        function downloadResurrectedJSON2() {
+            if (!resu2AllMatches || resu2AllMatches.length === 0) {
+                alert('No data available to download');
+                return;
+            }
+
+            // Create JSON structure
+            const jsonData = {
+                metadata: {
+                    exported_at: new Date().toISOString(),
+                    total_matches: resu2AllMatches.length,
+                    description: 'DPWH Repeated Projects (Revised Names Only) - Projects in 2026 matched using revised_name field only'
+                },
+                matches: resu2AllMatches
+            };
+
+            // Create and download
+            const jsonContent = JSON.stringify(jsonData, null, 2);
+            const blob = new Blob([jsonContent], { type: 'application/json' });
+            const link = document.createElement('a');
+            const url = URL.createObjectURL(blob);
+            link.setAttribute('href', url);
+            link.setAttribute('download', `resurrected_projects_revised_names_${new Date().toISOString().split('T')[0]}.json`);
+            link.style.visibility = 'hidden';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+
+        // Load data when resu2 tab is activated
+        document.addEventListener('DOMContentLoaded', () => {
+            const resu2Tab = document.querySelector('[data-tab="resu2"]');
+            if (resu2Tab) {
+                resu2Tab.addEventListener('click', () => {
+                    const panel = document.getElementById('tab-resu2');
+                    if (panel && !panel.dataset.loaded) {
+                        loadResurrectedProjects2();
+                        panel.dataset.loaded = 'true';
+                    }
+                });
+            }
+        });
 
         function escapeCSV(str) {
             if (str === null || str === undefined) return '';
