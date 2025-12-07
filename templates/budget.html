@@ -15784,8 +15784,8 @@
             // Group matches by 2026 project (using ID or revised_name as key)
             const groupedByProject = {};
             matches.forEach(match => {
-                // Use revised_name for the project key since we're filtering on it
-                const projectName = match.year_2026?.revised_name || 'unknown';
+                // Use revised_name if available, otherwise fallback to name/description
+                const projectName = match.year_2026?.revised_name || match.year_2026?.name || match.year_2026?.description || 'unknown';
                 const projectKey = match.year_2026?.id || projectName;
                 if (!groupedByProject[projectKey]) {
                     groupedByProject[projectKey] = {
@@ -15957,8 +15957,8 @@
                     source2026 += ')';
                 }
 
-                // Use revised_name for display (since we're filtering on it)
-                const projectName = project?.revised_name || 'Unknown';
+                // Use revised_name for display, otherwise fallback to name/description
+                const projectName = project?.revised_name || project?.name || project?.description || 'Unknown';
                 card.innerHTML = `
                 <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 0.75rem;">
                     <div style="flex: 1; min-width: 0;">
