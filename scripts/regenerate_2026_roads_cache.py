@@ -42,7 +42,13 @@ MULTI_PURPOSE_SUBCATEGORY_PATTERNS = [
     ("Markets / Economic Hubs", ['market', 'bagsakan', 'trading', 'trade', 'terminal', 'commerce'])
 ]
 
+sys.path.insert(0, str(Path(__file__).parent)) # Add scripts dir to path
+from location_enricher import LocationEnricher
+
 MAD_SCALE = 1.4826
+
+enricher = LocationEnricher()
+enricher.load_db()
 
 def categorize_multi_purpose_subcategory(name_lower: str) -> str:
     """Best-effort bucket for multi-purpose building projects"""
@@ -318,6 +324,7 @@ def process_roads_data(all_items):
                 chainage_display = format_chainage_display(name, chainage_ranges) or 'N/A'
             
             project_data = {
+                'id': item.get('id'),
                 'name': name,
                 'chainage_display': chainage_display,
                 'chainage_ranges': chainage_ranges or [],  # Store all ranges (empty if none)
@@ -328,6 +335,8 @@ def process_roads_data(all_items):
                 'source_sheet': item.get('source_sheet'),
                 'region': item.get('location', {}).get('region') if isinstance(item.get('location'), dict) else None
             }
+            enricher.enrich_project(project_data)
+
             
             if is_multi_purpose_building:
                 project_data['multi_purpose_subcategory'] = categorize_multi_purpose_subcategory(name_lower)
@@ -366,6 +375,7 @@ def process_roads_data(all_items):
         chainage_display = format_chainage_display(name, chainage_ranges) or 'N/A'
         
         project_data = {
+            'id': item.get('id'),
             'name': name,
             'chainage_display': chainage_display,
             'chainage_ranges': chainage_ranges,
@@ -376,6 +386,8 @@ def process_roads_data(all_items):
             'source_sheet': item.get('source_sheet'),
             'region': item.get('location', {}).get('region') if isinstance(item.get('location'), dict) else None
         }
+        enricher.enrich_project(project_data)
+
         
         # Check for FMR (Farm-to-Market Road) projects first
         fmr_keywords = [' fmr', 'fmr ', 'farm to market', 'farm-to-market', 'farm to market road']
@@ -1325,11 +1337,24 @@ def calculate_all_years_category_statistics(cache_2026):
             "category": category,
             "subcategory": subcategory,
             "average_cost_per_km": avg_cost_km,
-            "threshold_cost_per_km": threshold_cost_per_km,  # Add threshold for all years
+            "threshold_cost_per_km": threshold_cost_per_km,
             "flagged_cost": flagged_cost,
             "flagged_count": len(unique_flagged_projects),
             "total_count": total_count
         })
+
+    # Save detailed flagged projects list for Integrated Matrix
+    all_flagged_projects = {}
+    for (category, subcategory), data in category_aggregates.items():
+        for p in data['flagged_projects']:
+            pid = p.get('id')
+            if pid:
+                all_flagged_projects[str(pid)] = p
+                
+    flagged_output_path = Path('static/data/flagged_amount_projects_2026.json')
+    print(f"\n💾 Saving {len(all_flagged_projects)} flagged projects to {flagged_output_path}...")
+    with open(flagged_output_path, 'w', encoding='utf-8') as f:
+        json.dump(list(all_flagged_projects.values()), f, indent=2, ensure_ascii=False)
     
     # Sort by average_cost_per_km descending
     categories.sort(key=lambda x: x.get('average_cost_per_km', 0), reverse=True)

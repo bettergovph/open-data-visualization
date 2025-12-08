@@ -1,7 +1,7 @@
 import uvicorn
 from fastapi import FastAPI, HTTPException, Query, Request
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import JSONResponse
+from fastapi.responses import JSONResponse, FileResponse
 from fastapi.staticfiles import StaticFiles
 import os
 import json
@@ -12,6 +12,8 @@ import time
 from functools import lru_cache
 from datetime import datetime, timezone
 from pathlib import Path
+
+
 from typing import Any, Dict, Optional, Set, List, Tuple
 from dotenv import load_dotenv
 from collections import defaultdict
@@ -10785,6 +10787,62 @@ async def integrated_projects_api(
             "projects": [],
             "total": 0
         }, status_code=500)
+
+
+@app.get("/integ2026")
+async def integrated_dashboard():
+    template_path = Path(__file__).parent / 'templates' / 'integrated_matrix.html'
+    return FileResponse(template_path)
+
+@app.get("/api/integrated/matrix")
+async def get_integrated_matrix():
+    path = DATA_ROOT / "integrated_matrix.json"
+    if not path.exists():
+        return {"error": "Matrix not generated yet", "metadata": {}, "ranking": []}
+    
+    with open(path, "r") as f:
+        return json.load(f)
+
+@app.get("/api/integrated/locations")
+async def get_integrated_locations():
+    """Get hierarchical location data for validation"""
+    parquet_path = DATA_ROOT / "unified_locations.parquet"
+    if not parquet_path.exists():
+        return {"error": "Unified locations DB not found"}
+
+    import duckdb
+    conn = duckdb.connect()
+    
+    # Read flat data
+    rows = conn.execute(f"""
+        SELECT 
+            COALESCE(region, 'Unknown') as region,
+            COALESCE(province, 'Unknown') as province,
+            COALESCE(district, 'Lone District') as district,
+            COALESCE(municipality, 'Unknown') as municipality,
+            barangay
+        FROM read_parquet('{parquet_path}')
+        ORDER BY region, province, district, municipality, barangay
+    """).fetchall()
+    
+    conn.close()
+    
+    # Build Tree
+    tree = {}
+    
+    for row in rows:
+        reg, prov, dist, muni, brgy = row
+        
+        if reg not in tree: tree[reg] = {}
+        if prov not in tree[reg]: tree[reg][prov] = {}
+        if dist not in tree[reg][prov]: tree[reg][prov][dist] = {}
+        if muni not in tree[reg][prov][dist]: tree[reg][prov][dist][muni] = []
+        
+        if brgy:
+            tree[reg][prov][dist][muni].append(brgy)
+            
+    return tree
+
 
 if __name__ == "__main__":
     uvicorn.run(app, host="127.0.0.1", port=8000)

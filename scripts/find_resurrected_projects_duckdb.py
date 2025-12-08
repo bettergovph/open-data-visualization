@@ -181,6 +181,192 @@ class ResurrectedProjectFinderDuckDB:
         
         return year_2026_items, historical_data
 
+
+    def load_location_db(self):
+        """Load unified location database for enrichment"""
+        print(f"\n   🦆 Loading Unified Location Database...")
+        location_db_path = Path("static/data/unified_locations.parquet")
+        if not location_db_path.exists():
+            print("   ⚠️  Unified Location DB not found. Skipping enrichment.")
+            return None
+            
+        # Load into DuckDB relation for querying
+        self.con.execute(f"CREATE OR REPLACE TABLE unified_locations AS SELECT * FROM read_parquet('{location_db_path}')")
+        
+        # Build optimized lookups
+        df = self.con.execute("SELECT region, province, municipality, district, congressman FROM unified_locations").fetch_df()
+        
+        # 1. Multi-level Lookup: Region -> Province -> Municipality -> Info
+        lookup = defaultdict(lambda: defaultdict(dict))
+        
+        # 2. Unique Municipality Lookup: Municipality -> Info (if unique across PH)
+        # We'll track counts to ensure uniqueness.
+        muni_counts = defaultdict(set) # Muni -> Set of Provinces
+        muni_info_map = {} # Muni -> {prov, district, cong} (only valid if len(provinces) == 1)
+        
+        for _, row in df.iterrows():
+            reg = str(row['region']).upper().strip()
+            prov = str(row['province']).upper().strip()
+            mun = str(row['municipality']).upper().strip()
+            
+            # Normalize Municipality for Lookup (remove CITY OF / CITY)
+            # We store BOTH the raw and the normalized keys in our lookups to be safe
+            
+            def norm(name):
+                t = name.upper().replace("(CAPITAL)", "").replace("(CAPITAL)", "").replace("(Capital)", "").strip()
+                if t.startswith("CITY OF "):
+                    t = t[8:].strip() + " CITY"
+                return t
+
+            mun_norm = norm(mun)
+            
+            data = {
+                'province': prov,
+                'municipality': mun,
+                'district': row['district'],
+                'congressman': row['congressman']
+            }
+            
+            # Populate Hierarchy Lookup
+            lookup[prov][mun] = data
+            lookup[prov][mun_norm] = data
+            
+            # Populate Unique Muni Tracker
+            muni_counts[mun].add(prov)
+            muni_counts[mun_norm].add(prov)
+            
+            # Store info candidates
+            if mun not in muni_info_map: muni_info_map[mun] = data
+            if mun_norm not in muni_info_map: muni_info_map[mun_norm] = data
+            
+        # Finalize Unique Lookup
+        unique_muni_lookup = {}
+        for m, provinces in muni_counts.items():
+            if len(provinces) == 1:
+                unique_muni_lookup[m] = muni_info_map[m]
+
+        # 3. Province-level Aggregation (for projects with only Province name)
+        province_defaults = {}
+        # Count districts per province
+        prov_districts = defaultdict(set)
+        prov_congressmen = defaultdict(set)
+        
+        for _, row in df.iterrows():
+            p = str(row['province']).upper().strip()
+            d = str(row['district'])
+            c = str(row['congressman'])
+            prov_districts[p].add(d)
+            prov_congressmen[p].add(c)
+            
+        for p, dists in prov_districts.items():
+            if len(dists) == 1:
+                # Single District Province -> Safe to assign
+                d = list(dists)[0]
+                c = list(prov_congressmen[p])[0]
+                province_defaults[p] = {
+                    'province': p,
+                    'municipality': 'Province-wide',
+                    'district': d,
+                    'congressman': c
+                }
+            else:
+                # Multiple Districts -> Mark as Multiple
+                province_defaults[p] = {
+                    'province': p,
+                    'municipality': 'Province-wide',
+                    'district': 'Multiple Districts',
+                    'congressman': 'Multiple'
+                }
+                
+        print(f"   ✅ Location DB loaded. Indexed {len(df)} locations.")
+        print(f"   ✅ Found {len(unique_muni_lookup)} unique municipalities/cities.")
+        print(f"   ✅ Computed defaults for {len(province_defaults)} provinces.")
+        
+        return {'hierarchy': lookup, 'unique': unique_muni_lookup, 'province_defaults': province_defaults}
+
+    def enrich_project(self, project, lookup_data):
+        """Enrich a single project with District/Congressman info"""
+        if not lookup_data: return project
+        
+        hierarchy = lookup_data['hierarchy']
+        unique_lookup = lookup_data['unique']
+        
+        # Text to search
+        text = (project.get('name', '') + " " + 
+                project.get('description', '') + " " + 
+                str(project.get('location', ''))).upper()
+        
+        # Helper to normalize for matching
+        def normalize_search_text(t):
+            t = t.replace("(CAPITAL)", "").replace("(CAPITAL)", "").replace("(Capital)", "").strip()
+            if t.startswith("CITY OF "):
+                t = t[8:].strip() + " CITY"
+            return t
+            
+        text_norm = normalize_search_text(text)
+        
+        found_info = None
+        
+        # Strategy 1 (formerly 2): Check strictly Unique Municipalities (e.g. "Quezon City", "Davao City")
+        # prioritized over Province match to avoid "Quezon City" matching "Quezon" (Province)
+        if not found_info:
+            # Sort keys by length descending to ensure "BACOLOD CITY" matches before "BACOLOD"
+            sorted_keys = sorted(unique_lookup.keys(), key=len, reverse=True)
+            
+            for mun_key in sorted_keys:
+                if len(mun_key) < 4: continue
+                info = unique_lookup[mun_key]
+                # Enforce boundaries for BOTH mun_key (raw match) and pattern (norm match)
+                # Check Norm
+                pattern_norm = r'\b' + re.escape(mun_key) + r'\b'
+                if re.search(pattern_norm, text_norm):
+                    found_info = info
+                    break
+                # Check Raw
+                pattern_raw = r'\b' + re.escape(mun_key) + r'\b'
+                if re.search(pattern_raw, text):
+                    found_info = info
+                    break
+                    
+        # Strategy 2 (formerly 1): Find Province first, then Municipality
+        # We prioritize this because it resolves ambiguity (e.g. San Isidro)
+        matched_province = None
+        
+        if not found_info:
+            for prov in hierarchy.keys():
+                if prov in text: # Check raw province name
+                    matched_province = prov
+                    # Check municipalities in this province
+                    # We check keys of hierarchy[prov] which contains both Raw and Normalized forms
+                    for mun_key, info in hierarchy[prov].items():
+                        if len(mun_key) < 4: continue
+                        # Check Norm
+                        pattern_norm = r'\b' + re.escape(mun_key) + r'\b'
+                        if re.search(pattern_norm, text_norm):
+                            found_info = info
+                            break
+                        # Check Raw
+                        pattern_raw = r'\b' + re.escape(mun_key) + r'\b'
+                        if re.search(pattern_raw, text):
+                            found_info = info
+                            break
+                    if found_info: break
+            
+            # Strategy 2.5: Province found but no Municipality
+            if not found_info and matched_province:
+                # Fallback to Province defaults
+                defaults = lookup_data.get('province_defaults', {})
+                if matched_province in defaults:
+                    found_info = defaults[matched_province]
+                    
+        if found_info:
+            project['province'] = found_info['province']
+            project['municipality'] = found_info['municipality']
+            project['district'] = found_info.get('district', 'Unknown')
+            project['congressman'] = found_info.get('congressman', 'Unknown')
+        
+        return project
+
     def process_data(self, year_2026_items, historical_data, name_similarity_threshold=0.95, min_amount=100000):
         """
         Phase 2: Process data in memory with INCREMENTAL SAVING.
@@ -188,6 +374,9 @@ class ResurrectedProjectFinderDuckDB:
         print(f"\n{'='*100}")
         print(f" PHASE 2: IN-MEMORY PROCESSING (INCREMENTAL)")
         print(f"{'='*100}")
+        
+        # Load Location DB for enrichment
+        location_lookup = self.load_location_db()
         
         # Check for existing progress to resume
         progress_file = Path("static/data/resurrected_progress.jsonl")
@@ -211,7 +400,7 @@ class ResurrectedProjectFinderDuckDB:
                 print(f"   ⚠️  Error loading progress file: {e}. Starting fresh.")
                 processed_ids = set()
                 existing_matches = []
-
+                
         print(f"   Name similarity threshold: {name_similarity_threshold:.0%} (strict)")
         print(f"   Minimum amount: ₱{min_amount:,.0f}")
         
@@ -330,18 +519,29 @@ class ResurrectedProjectFinderDuckDB:
                             for match in matches_by_year.values():
                                 item_historical = match['historical']['item']
                                 
+                                # Enrich 2026 item
+                                enriched_2026 = {
+                                    'id': item_2026.get('id'),
+                                    'name': item_2026.get('name', ''),
+                                    'revised_name': item_2026.get('revised_name'),
+                                    'matched_using': 'revised_name' if using_revised else 'name',
+                                    'description': item_2026.get('description', ''),
+                                    'amount': amount_2026,
+                                    'region': None, # Could enhance this too
+                                    'contractor': item_2026.get('contractor'),
+                                    # Base location fields (to be filled by enricher)
+                                    'province': None,
+                                    'municipality': None,
+                                    'district': None,
+                                    'congressman': None
+                                }
+                                
+                                # Apply Enrichment
+                                enriched_2026 = self.enrich_project(enriched_2026, location_lookup)
+                                
                                 new_match = {
                                     'source_sheet': "Annex A-5",
-                                    'year_2026': {
-                                        'id': item_2026.get('id'),
-                                        'name': item_2026.get('name', ''),
-                                        'revised_name': item_2026.get('revised_name'),
-                                        'matched_using': 'revised_name' if using_revised else 'name',
-                                        'description': item_2026.get('description', ''),
-                                        'amount': amount_2026,
-                                        'region': None,
-                                        'contractor': item_2026.get('contractor')
-                                    },
+                                    'year_2026': enriched_2026,
                                     'historical': {
                                         'id': item_historical['id'],
                                         'description': item_historical['description'],
@@ -388,8 +588,8 @@ class ResurrectedProjectFinderDuckDB:
                 "total_matches": len(matches),
                 "source_filter": "Annex A-5 (DPWH)",
                 "generated_at": datetime.now().isoformat(),
-                "status": "completed (duckdb + incremental)",
-                "description": "Resurrected projects matched using revised_name (DuckDB + Parquet)"
+                "status": "completed (duckdb + incremental + location_enriched)",
+                "description": "Resurrected projects matched using revised_name (DuckDB + Parquet) + District Info"
             },
             "matches": matches
         }
@@ -428,3 +628,4 @@ if __name__ == "__main__":
     finder.save_results(matches)
     
     print("\n✅ DONE.")
+
