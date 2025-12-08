@@ -1,0 +1,641 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Integrated Matrix 2026 - BetterGovPH</title>
+    <link rel="stylesheet" href="/static/css/tailwind.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f8fafc;
+            min-height: 100vh;
+            overflow-y: auto !important;
+        }
+
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(226, 232, 240, 0.8);
+        }
+
+        .toggle-checkbox:checked {
+            right: 0;
+            border-color: #4f46e5;
+        }
+
+        .toggle-checkbox:checked+.toggle-label {
+            background-color: #4f46e5;
+        }
+
+        /* Manual override for missing Tailwind classes */
+        .btn-active {
+            background-color: #4f46e5 !important;
+            color: #ffffff !important;
+        }
+
+        .btn-active:hover {
+            background-color: #4338ca !important;
+        }
+
+        .btn-inactive {
+            background-color: #e2e8f0 !important;
+            color: #1e293b !important;
+        }
+
+        .btn-inactive:hover {
+            background-color: #cbd5e1 !important;
+        }
+
+        /* CRITICAL: Force Modal Z-Index above everything */
+        .modal-z-override {
+            z-index: 9999 !important;
+            position: fixed !important;
+            top: 0 !important;
+            left: 0 !important;
+            right: 0 !important;
+            bottom: 0 !important;
+            width: 100vw !important;
+            height: 100vh !important;
+            overflow: hidden !important;
+        }
+
+        .modal-visible {
+            display: block !important;
+        }
+
+        /* Lock body scroll when modal is open */
+        body.modal-open {
+            overflow: hidden !important;
+            position: fixed !important;
+            width: 100% !important;
+        }
+    </style>
+</head>
+
+<body class="text-slate-800">
+    <nav class="bg-white border-b border-slate-200 py-4 px-6 sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto flex justify-between items-center">
+            <div class="flex items-center gap-3">
+                <img src="https://raw.githubusercontent.com/bettergovph/logo/main/png/BetterGov_Icon-Black.png"
+                    alt="Logo" class="h-8">
+                <h1
+                    class="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-slate-900 to-slate-700">
+                    Integrated Matrix 2026</h1>
+            </div>
+            <div class="text-sm font-medium text-slate-500">Resurrected Projects + Flagged Amounts</div>
+        </div>
+    </nav>
+
+    <main class="max-w-7xl mx-auto px-6 py-8">
+        <!-- Overview Stats -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+            <div class="glass-panel rounded-2xl p-6 shadow-sm">
+                <h3 class="text-sm font-medium text-slate-500 uppercase tracking-wider mb-2">High Priority Projects</h3>
+                <div class="text-4xl font-bold text-indigo-600" id="totalProjects">Loading...</div>
+                <div class="text-xs text-slate-400 mt-2" id="filterStatusText">Resurrected & Flagged Amount Overlap
+                </div>
+            </div>
+            <div class="glass-panel rounded-2xl p-6 shadow-sm">
+                <h3 class="text-sm font-medium text-slate-500 uppercase tracking-wider mb-2">Total Amount</h3>
+                <div class="text-4xl font-bold text-rose-600" id="totalAmount">Loading...</div>
+                <div class="text-xs text-slate-400 mt-2">Potential Risk Value</div>
+            </div>
+            <div class="glass-panel rounded-2xl p-6 shadow-sm">
+                <h3 class="text-sm font-medium text-slate-500 uppercase tracking-wider mb-2">Affected Districts</h3>
+                <div class="text-4xl font-bold text-amber-600" id="totalDistricts">Loading...</div>
+                <div class="text-xs text-slate-400 mt-2">Legislative Districts Involved</div>
+            </div>
+        </div>
+
+        <!-- Controls -->
+        <div class="flex flex-col md:flex-row justify-between items-center mb-6 gap-4">
+            <!-- Tabs -->
+            <div class="flex gap-6 border-b border-slate-200 w-full md:w-auto">
+                <a href="#" class="pb-3 border-b-2 border-indigo-500 text-indigo-600 font-medium transition-colors"
+                    id="tabMatrix">Matrix Ranking</a>
+                <a href="#loc"
+                    class="pb-3 border-b-2 border-transparent text-slate-500 hover:text-slate-700 hover:border-slate-300 font-medium transition-colors"
+                    id="tabLoc">Location Hierarchy</a>
+            </div>
+
+            <!-- Filter Toggle -->
+            <div class="flex items-center gap-3 bg-white p-2 rounded-lg border border-slate-200 shadow-sm"
+                id="matrixControls">
+                <button id="filterToggleBtn" onclick="toggleFilterMode()"
+                    class="flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white rounded-md text-sm font-medium hover:bg-indigo-700 transition-colors shadow-sm">
+                    <span id="filterStatusLabel">StrictMode: ON</span>
+                </button>
+                <div class="flex flex-col">
+                    <span class="text-xs font-semibold text-slate-600" id="filterLabelTitle">Strict Filtering</span>
+                    <span class="text-[10px] text-slate-400" id="filterLabelDesc">(Resurrected AND Flagged)</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Location View -->
+        <div id="viewLoc" class="hidden">
+            <div class="glass-panel rounded-2xl p-6 shadow-sm">
+                <div class="flex justify-between items-center mb-4">
+                    <h2 class="text-lg font-bold text-slate-800">Unified Location Database</h2>
+                    <span class="text-xs text-slate-400 font-mono">Source: unified_locations.parquet</span>
+                </div>
+                <div id="locationTree" class="space-y-1 overflow-y-auto max-h-[70vh] text-sm pr-2">
+                    <div class="flex items-center gap-2 text-slate-500 animate-pulse p-4">
+                        <div class="w-4 h-4 rounded-full bg-slate-200"></div>Loading hierarchy tree...
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Matrix Table -->
+        <div id="viewMatrix" class="glass-panel rounded-2xl shadow-sm overflow-hidden">
+            <div class="p-6 border-b border-slate-100 flex justify-between items-center bg-white">
+                <h2 class="text-lg font-bold text-slate-800">Priority Ranking by District</h2>
+                <input type="text" id="searchBox" placeholder="Search Congressman or District..."
+                    class="bg-slate-50 border border-slate-200 rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 w-64">
+            </div>
+            <div class="overflow-x-auto max-h-[70vh] overflow-y-auto">
+                <table class="w-full text-left border-collapse">
+                    <thead>
+                        <tr class="bg-slate-50 text-slate-500 text-xs uppercase tracking-wider select-none">
+                            <th class="px-6 py-4 font-semibold cursor-pointer hover:bg-slate-100 transition-colors"
+                                onclick="sortMatrix('rank')">
+                                Rank <span id="sort-rank" class="text-indigo-500 ml-1">↓</span>
+                            </th>
+                            <th class="px-6 py-4 font-semibold cursor-pointer hover:bg-slate-100 transition-colors"
+                                onclick="sortMatrix('congressman')">
+                                Congressman / District <span id="sort-congressman"
+                                    class="text-indigo-500 ml-1 opacity-0"></span>
+                            </th>
+                            <th class="px-6 py-4 font-semibold text-right cursor-pointer hover:bg-slate-100 transition-colors"
+                                onclick="sortMatrix('project_count')">
+                                Project Count <span id="sort-project_count"
+                                    class="text-indigo-500 ml-1 opacity-0"></span>
+                            </th>
+                            <th class="px-6 py-4 font-semibold text-right cursor-pointer hover:bg-slate-100 transition-colors"
+                                onclick="sortMatrix('total_amount')">
+                                Total Amount <span id="sort-total_amount" class="text-indigo-500 ml-1 opacity-0"></span>
+                            </th>
+                            <th class="px-6 py-4 font-semibold">Top Projects</th>
+                        </tr>
+                    </thead>
+                    <tbody id="rankingTableBody" class="divide-y divide-slate-100 bg-white">
+                        <!-- Rows injected via JS -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </main>
+
+    <!-- Project Modal -->
+    <div id="projectModal" class="fixed inset-0 hidden modal-z-override" aria-labelledby="modal-title" role="dialog"
+        aria-modal="true">
+        <div class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm transition-opacity" onclick="closeProjectModal()">
+        </div>
+        <div class="fixed inset-0 z-10 flex items-center justify-center p-4">
+            <div
+                class="relative transform rounded-lg bg-white text-left shadow-xl transition-all w-full max-w-4xl max-h-[85vh] flex flex-col border border-slate-200">
+                <div class="bg-slate-50 px-4 py-3 sm:px-6 border-b border-slate-100 flex justify-between items-center">
+                    <div>
+                        <h3 class="text-base font-semibold leading-6 text-slate-900" id="modalTitle">District
+                            Projects</h3>
+                        <p class="text-xs text-slate-500 mt-1" id="modalSubtitle">List of all priority projects</p>
+                    </div>
+                    <button type="button" class="text-slate-400 hover:text-slate-500 focus:outline-none"
+                        onclick="closeProjectModal()">
+                        <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                    </button>
+                </div>
+                <div class="px-4 py-4 sm:px-6 flex-1 min-h-0 overflow-y-auto">
+                    <!-- Top Pagination -->
+                    <div class="flex items-center justify-between bg-slate-50 px-4 py-2 mb-3 rounded-lg">
+                        <p class="text-sm text-slate-700">Showing <span class="font-medium" id="pageStartTop">1</span>
+                            to <span class="font-medium" id="pageEndTop">10</span> of
+                            <span class="font-medium" id="pageTotalTop">0</span> results
+                        </p>
+                        <div class="flex gap-2">
+                            <button onclick="changePage(-1)"
+                                class="px-3 py-1 text-sm bg-white border border-slate-300 rounded hover:bg-slate-50">←
+                                Prev</button>
+                            <button onclick="changePage(1)"
+                                class="px-3 py-1 text-sm bg-white border border-slate-300 rounded hover:bg-slate-50">Next
+                                →</button>
+                        </div>
+                    </div>
+                    <div class="overflow-hidden rounded-lg border border-slate-200">
+                        <table class="min-w-full divide-y divide-slate-200">
+                            <thead class="bg-slate-50">
+                                <tr>
+                                    <th scope="col"
+                                        class="px-4 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">
+                                        Project Name</th>
+                                    <th scope="col"
+                                        class="px-4 py-3 text-right text-xs font-medium text-slate-500 uppercase tracking-wider">
+                                        Amount</th>
+                                    <th scope="col"
+                                        class="px-4 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">
+                                        Reason</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-slate-200 bg-white" id="modalTableBody"></tbody>
+                        </table>
+                    </div>
+                    <div
+                        class="flex items-center justify-between border-t border-slate-200 bg-white px-4 py-3 sm:px-6 mt-4">
+                        <div class="flex flex-1 justify-between sm:hidden">
+                            <button onclick="changePage(-1)"
+                                class="relative inline-flex items-center rounded-md border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50">Previous</button>
+                            <button onclick="changePage(1)"
+                                class="relative ml-3 inline-flex items-center rounded-md border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50">Next</button>
+                        </div>
+                        <div class="hidden sm:flex sm:flex-1 sm:items-center sm:justify-between">
+                            <div>
+                                <p class="text-sm text-slate-700">Showing <span class="font-medium"
+                                        id="pageStart">1</span> to <span class="font-medium" id="pageEnd">10</span>
+                                    of <span class="font-medium" id="pageTotal">0</span> results</p>
+                            </div>
+                            <div>
+                                <nav class="isolate inline-flex -space-x-px rounded-md shadow-sm"
+                                    aria-label="Pagination">
+                                    <button onclick="changePage(-1)"
+                                        class="relative inline-flex items-center rounded-l-md px-2 py-2 text-slate-400 ring-1 ring-inset ring-slate-300 hover:bg-slate-50 focus:z-20 focus:outline-offset-0">
+                                        <span class="sr-only">Previous</span>
+                                        <svg class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                                            <path fill-rule="evenodd"
+                                                d="M12.79 5.23a.75.75 0 01-.02 1.06L8.832 10l3.938 3.71a.75.75 0 11-1.04 1.08l-4.5-4.25a.75.75 0 010-1.08l4.5-4.25a.75.75 0 011.06.02z"
+                                                clip-rule="evenodd"></path>
+                                        </svg>
+                                    </button>
+                                    <button onclick="changePage(1)"
+                                        class="relative inline-flex items-center rounded-r-md px-2 py-2 text-slate-400 ring-1 ring-inset ring-slate-300 hover:bg-slate-50 focus:z-20 focus:outline-offset-0">
+                                        <span class="sr-only">Next</span>
+                                        <svg class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                                            <path fill-rule="evenodd"
+                                                d="M7.21 14.77a.75.75 0 01.02-1.06L11.168 10 7.23 6.29a.75.75 0 111.04-1.08l4.5 4.25a.75.75 0 010 1.08l-4.5 4.25a.75.75 0 01-1.06-.02z"
+                                                clip-rule="evenodd"></path>
+                                        </svg>
+                                    </button>
+                                </nav>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    </div>
+
+    <script>
+        // --- Globals ---
+        let rawUnionData = [];
+        let filteredData = []; // Full list after search/filter
+        let currentModalProjects = [];
+        let currentPage = 1; // Modal Page
+        const ITEMS_PER_PAGE = 10; // Modal Items
+
+        // Main Table Pagination
+        let mainTablePage = 1;
+        const MAIN_TABLE_SIZE = 50;
+
+        let sortKey = 'rank';
+        let sortDesc = true;
+        let strictMode = true;
+
+        // --- Datasets ---
+        async function loadMatrix() {
+            try {
+                const response = await fetch('/api/integrated/matrix');
+                const data = await response.json();
+                if (data.error) { console.warn("Matrix data not ready:", data.error); return; }
+
+                rawUnionData = data.ranking;
+                applyFilter();
+                updateToggleButton();
+
+                // Optimized Search: Filter Data -> Re-render (No DOM Thrashing)
+                document.getElementById('searchBox').addEventListener('input', (e) => {
+                    const term = e.target.value.toLowerCase();
+                    applyFilter(term); // Pass search term to filter
+                });
+
+            } catch (err) {
+                console.error(err);
+                document.getElementById('totalProjects').textContent = "Error";
+            }
+        }
+
+        function toggleFilterMode() {
+            strictMode = !strictMode;
+            updateToggleButton();
+            const term = document.getElementById('searchBox').value.toLowerCase();
+            applyFilter(term);
+        }
+
+        function updateToggleButton() {
+            const btn = document.getElementById('filterToggleBtn');
+            const lbl = document.getElementById('filterStatusLabel');
+            const title = document.getElementById('filterLabelTitle');
+            const desc = document.getElementById('filterLabelDesc');
+
+            if (strictMode) {
+                btn.classList.remove('btn-inactive');
+                btn.classList.add('btn-active');
+                lbl.textContent = "StrictMode: ON";
+                title.textContent = "Strict Filtering";
+                desc.textContent = "(Resurrected AND Flagged)";
+            } else {
+                btn.classList.remove('btn-active');
+                btn.classList.add('btn-inactive');
+                lbl.textContent = "StrictMode: OFF";
+                title.textContent = "Broad Filtering";
+                desc.textContent = "(Resurrected OR Flagged)";
+            }
+        }
+
+        function applyFilter(searchTerm = "") {
+            // 1. Base Filter (Strict/Broad)
+            let baseList = strictMode ? rawUnionData.map(d => {
+                const strictProjects = d.projects.filter(p => p.historical_match && p.flag_reason);
+                if (strictProjects.length === 0) return null;
+                return {
+                    ...d, projects: strictProjects, project_count: strictProjects.length, total_amount:
+                        strictProjects.reduce((sum, p) => sum + p.amount, 0)
+                };
+            }).filter(Boolean) : [...rawUnionData];
+
+            if (strictMode) {
+                document.getElementById('filterStatusText').textContent = "Showing Resurrected AND Flagged (Overlap Only)";
+            } else {
+                document.getElementById('filterStatusText').textContent = "Showing Resurrected OR Flagged (All Items)";
+            }
+
+            // 2. Search Filter
+            if (searchTerm) {
+                baseList = baseList.filter(d =>
+                    d.congressman.toLowerCase().includes(searchTerm) ||
+                    d.district.toLowerCase().includes(searchTerm)
+                );
+            }
+
+            filteredData = baseList;
+            updateStats();
+
+            // Reset to Page 1 on new filter
+            mainTablePage = 1;
+            renderRankingTable();
+        }
+
+        function updateStats() {
+            let totalCount = 0;
+            let totalAmt = 0;
+            filteredData.forEach(d => { totalCount += d.project_count; totalAmt += d.total_amount; });
+
+            document.getElementById('totalProjects').textContent = totalCount.toLocaleString();
+            document.getElementById('totalDistricts').textContent = filteredData.length.toLocaleString();
+            document.getElementById('totalAmount').textContent = '₱ ' + (totalAmt / 1e9).toFixed(2) + ' B';
+        }
+
+        function sortMatrix(key) {
+            if (sortKey === key) { sortDesc = !sortDesc; } else { sortKey = key; sortDesc = true; }
+            renderRankingTable();
+        }
+
+        function renderRankingTable() {
+            const tbody = document.getElementById('rankingTableBody');
+            tbody.innerHTML = '';
+
+            // Sort
+            filteredData.sort((a, b) => {
+                let valA, valB;
+                if (sortKey === 'rank') {
+                    if (a.project_count !== b.project_count) return a.project_count - b.project_count;
+                    return a.total_amount - b.total_amount;
+                }
+                if (sortKey === 'congressman') {
+                    valA = a.congressman.toLowerCase(); valB = b.congressman.toLowerCase();
+                    return sortDesc ? valB.localeCompare(valA) : valA.localeCompare(valB);
+                }
+                valA = a[sortKey]; valB = b[sortKey];
+                return sortDesc ? valB - valA : valA - valB;
+            });
+
+            if (sortKey === 'rank') {
+                filteredData.sort((a, b) => {
+                    if (b.project_count !== a.project_count) return b.project_count - a.project_count;
+                    return b.total_amount - a.total_amount;
+                });
+                if (!sortDesc) filteredData.reverse();
+            }
+
+            // Update Sort Icons
+            ['rank', 'congressman', 'project_count', 'total_amount'].forEach(k => {
+                const el = document.getElementById(`sort-${k}`);
+                if (k === sortKey) { el.textContent = sortDesc ? '↓' : '↑'; el.classList.remove('opacity-0'); }
+                else { el.classList.add('opacity-0'); }
+            });
+
+            // Pagination Slice
+            const start = 0;
+            const end = mainTablePage * MAIN_TABLE_SIZE;
+            const pageItems = filteredData.slice(start, end);
+
+            pageItems.forEach((item, index) => {
+                const row = document.createElement('tr');
+                row.className = "hover:bg-slate-50 transition-colors group";
+
+                const projects = item.projects || [];
+                const projectsPreview = projects.slice(0, 3).map(p =>
+                    `<div class="text-xs truncate max-w-xs text-slate-600 mb-1" title="${p.name}">• ${p.name}</div>`
+                ).join('');
+
+                const moreCount = projects.length - 3;
+                const moreTag = moreCount > 0 ?
+                    `<button
+        class="open-modal-btn text-xs text-indigo-500 font-medium hover:text-indigo-700 hover:underline focus:outline-none transition-colors cursor-pointer"
+        data-index="${index}">+${moreCount} more</button>` : '';
+
+                row.innerHTML = `
+    <td class="px-6 py-4 text-slate-400 font-mono text-sm">#${index + 1}</td>
+    <td class="px-6 py-4">
+        <div class="font-bold text-slate-800">${item.congressman}</div>
+        <div class="text-xs text-slate-500 bg-slate-100 inline-block px-2 py-0.5 rounded mt-1">${item.district}
+            ${item.province && item.province !== 'Unknown' ? `<span
+                class="text-slate-400 mx-1">•</span>${item.province}` : ''}
+        </div>
+    </td>
+    <td class="px-6 py-4 text-right font-medium text-slate-700">${item.project_count}</td>
+    <td class="px-6 py-4 text-right font-mono text-slate-700">₱ ${(item.total_amount / 1e6).toFixed(1)} M</td>
+    <td class="px-6 py-4">${projectsPreview} ${moreTag}</td>
+    `;
+                tbody.appendChild(row);
+            });
+
+            // "Load More" Trigger
+            if (end < filteredData.length) {
+                const loadRow = document.createElement('tr'); loadRow.innerHTML = `<td colspan="5"
+        class="text-center py-4"><button onclick="loadMoreMainTable()"
+            class="text-indigo-600 font-medium hover:underline">Load More...</button></td>`;
+                tbody.appendChild(loadRow);
+            }
+        }
+
+        // Global functions
+        window.loadMoreMainTable = function () {
+            mainTablePage++;
+            renderRankingTable();
+        };
+
+        window.openProjectModal = function (index) {
+            console.log("Opening modal for index:", index);
+            const data = filteredData[index];
+            if (!data) {
+                console.error("No data for index:", index);
+                alert("Error: Data sync issue. Please reload.");
+                return;
+            }
+
+            document.getElementById('modalTitle').textContent = data.congressman;
+            document.getElementById('modalSubtitle').textContent = `${data.district} • ${data.project_count} Projects • ₱ ${(data.total_amount / 1e6).toFixed(1)}M`;
+
+            const modal = document.getElementById('projectModal');
+            modal.classList.remove('hidden');
+            modal.classList.add('modal-visible');
+            modal.style.display = 'block';
+
+            document.body.classList.add('modal-open');
+
+            currentModalProjects = data.projects || [];
+            currentPage = 1;
+            renderModalTable();
+        };
+
+        function renderModalTable() {
+            const tbody = document.getElementById('modalTableBody');
+            tbody.innerHTML = '';
+            const start = (currentPage - 1) * ITEMS_PER_PAGE;
+            const end = start + ITEMS_PER_PAGE;
+            const pageItems = currentModalProjects.slice(start, end);
+            document.getElementById('pageStart').textContent = start + 1;
+            document.getElementById('pageEnd').textContent = Math.min(end, currentModalProjects.length);
+            document.getElementById('pageTotal').textContent = currentModalProjects.length;
+            // Sync top pagination
+            document.getElementById('pageStartTop').textContent = start + 1;
+            document.getElementById('pageEndTop').textContent = Math.min(end, currentModalProjects.length);
+            document.getElementById('pageTotalTop').textContent = currentModalProjects.length;
+
+            pageItems.forEach(p => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `<td class="px-4 py-3 text-sm font-medium text-slate-900">
+            <div class="line-clamp-2" title="${p.name}">${p.name}</div>${p.historical_match ? `<div
+                class="text-xs text-indigo-500 mt-0.5 truncate" title="Resurrected Match: ${p.historical_match}">
+                Matched: ${p.historical_match}</div>` : ''}
+        </td>
+        <td class="px-4 py-3 text-sm text-slate-500 text-right whitespace-nowrap">₱ ${(p.amount / 1e6).toFixed(2)} M
+        </td>
+        <td class="px-4 py-3 text-sm text-slate-500">${p.flag_reason ? `<span
+                class="inline-flex items-center rounded-md bg-red-50 px-2 py-1 text-xs font-medium text-red-700 ring-1 ring-inset ring-red-600/10">${p.subcategory}</span>`
+                        : '<span class="text-xs text-slate-400">Resurrected</span>'}</td>`;
+                tbody.appendChild(tr);
+            });
+        }
+
+        function closeProjectModal() {
+            const modal = document.getElementById('projectModal');
+            modal.classList.add('hidden');
+            modal.classList.remove('modal-visible');
+            modal.style.display = 'none';
+            document.body.classList.remove('modal-open');
+        }
+
+        function changePage(delta) {
+            const maxPage = Math.ceil(currentModalProjects.length / ITEMS_PER_PAGE);
+            const newPage = currentPage + delta;
+            if (newPage >= 1 && newPage <= maxPage) {
+                currentPage = newPage;
+                renderModalTable();
+            }
+        }
+
+        // Event Delegation for Modal Buttons - with safety check
+        const tableBody = document.getElementById('rankingTableBody');
+        if (tableBody) {
+            tableBody.addEventListener('click', function (e) {
+                const btn = e.target.closest('.open-modal-btn');
+                if (btn) {
+                    const index = parseInt(btn.dataset.index, 10);
+                    openProjectModal(index);
+                }
+            });
+        }
+
+        async function loadLocations() {
+            const container = document.getElementById('locationTree');
+            if (!container || container.dataset.loaded) return;
+            try {
+                const response = await fetch('/api/integrated/locations');
+                const data = await response.json();
+                if (data.error) { container.textContent = "Error: " + data.error; return; }
+                function buildTree(node, level = 0) {
+                    if (Array.isArray(node)) {
+                        return `<ul class="pl-4 border-l border-slate-200 text-xs text-slate-500">${node.map(b => `<li class="py-0.5 hover:text-indigo-600 cursor-pointer" title="Barangay">${b}</li>`).join('')}</ul>`;
+                    }
+                    let html = `<div class="pl-4 border-l border-slate-200 space-y-1">`;
+                    Object.keys(node).sort().forEach(key => {
+                        const child = node[key];
+                        const count = Array.isArray(child) ? child.length : Object.keys(child).length;
+                        const meta = [{ type: 'Region', child: 'Provinces', icon: '🗺️' }, { type: 'Province', child: 'Districts', icon: '🏝️' }, { type: 'District', child: 'Municipalities', icon: '🗳️' }, { type: 'Municipality', child: 'Barangays', icon: '🏘️' }][level] || { type: 'Unit', child: 'Items', icon: '•' };
+                        html += `<details class="group"><summary class="cursor-pointer list-none py-1 px-2 rounded hover:bg-slate-50 flex items-center gap-2 select-none"><span class="text-slate-400 text-[10px] transform group-open:rotate-90 transition-transform">▶</span><span class="text-base leading-none">${meta.icon}</span><span class="font-medium text-slate-700">${key} ${meta.type}</span><span class="text-xs text-slate-400 ml-2 font-normal">(${count} ${meta.child})</span></summary>${buildTree(child, level + 1)}</details>`;
+                    });
+                    html += `</div>`;
+                    return html;
+                }
+                container.innerHTML = buildTree(data);
+                container.dataset.loaded = "true";
+            } catch (err) { console.error(err); container.textContent = "Failed to load hierarchy."; }
+        }
+
+        function handleHash() {
+            const hash = window.location.hash;
+            const tabMatrix = document.getElementById('tabMatrix');
+            const tabLoc = document.getElementById('tabLoc');
+            const viewMatrix = document.getElementById('viewMatrix');
+            const viewLoc = document.getElementById('viewLoc');
+            const matrixControls = document.getElementById('matrixControls');
+
+            if (hash === '#loc') {
+                tabMatrix.classList.replace('border-indigo-500', 'border-transparent');
+                tabMatrix.classList.replace('text-indigo-600', 'text-slate-500');
+                tabLoc.classList.replace('border-transparent', 'border-indigo-500');
+                tabLoc.classList.replace('text-slate-500', 'text-indigo-600');
+                viewMatrix.classList.add('hidden');
+                viewLoc.classList.remove('hidden');
+                matrixControls.classList.add('hidden');
+                loadLocations();
+            } else {
+                tabLoc.classList.replace('border-indigo-500', 'border-transparent');
+                tabLoc.classList.replace('text-indigo-600', 'text-slate-500');
+                tabMatrix.classList.replace('border-transparent', 'border-indigo-500');
+                tabMatrix.classList.replace('text-slate-500', 'text-indigo-600');
+                viewLoc.classList.add('hidden');
+                viewMatrix.classList.remove('hidden');
+                matrixControls.classList.remove('hidden');
+            }
+        }
+
+        window.addEventListener('hashchange', handleHash);
+        handleHash();
+
+        // Initialize
+        console.log('Initializing integ2026...');
+        updateToggleButton();
+        loadMatrix().then(() => console.log('Matrix loaded')).catch(e => console.error('Matrix load error:', e));
+    </script>
+</body>
+
+</html>
