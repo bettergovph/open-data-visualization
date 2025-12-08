@@ -309,30 +309,76 @@ class ContractorEnricherDuckDB:
                   row_val = sl if sl is not None else (sr if sr is not None else None)
                   if row_val: historical['source_row'] = row_val
                   if sc: historical['source_col'] = sc
-                  
-                  # Display
-                  fname = self._resolve_source_file(sf or historical.get('source_file'), year)
-                  if sc:
-                       historical['source_display'] = f"{fname} (Row {row_val}, Col {sc})"
-                  else:
-                       historical['source_display'] = f"{fname} (Row {row_val})"
-                       
         except Exception as e:
-             # print(f"Error lookup source: {e}")
              pass
 
     def enrich_json(self, json_path: Path):
-        print(f"\n📊 Enriching {json_path}...")
+        # 0. Load District Map (Baking Logic)
+        print("   Loading District Map for enrichment...")
+        districts_file = Path("static/data/districts.json")
+        congressman_lookup = {}
+        city_district_lookup = {}
         
-        with open(json_path, 'r', encoding='utf-8') as f:
-            data = json.load(f)
+        alias_map = {
+            "TAGUIG": "Taguig–Pateros",
+            "TAGUIG CITY": "Taguig–Pateros",
+            "NCR": "Metro Manila",
+            "METRO MANILA": "Metro Manila",
+        }
+        
+        # Helper
+        def get_district_key(p_name):
+            if not p_name: return None
+            norm = p_name.upper().strip()
+            if norm in alias_map: return alias_map[norm]
+            for k in d_data.get('districts', {}).keys():
+                 if k.upper() == norm: return k
+                 if k.upper() == norm + " CITY": return k
+                 if k.upper().replace(" CITY", "") == norm: return k
+            return None
+
+        if districts_file.exists():
+            try:
+                with open(districts_file, "r") as f:
+                    d_data = json.load(f)
+                    if 'districts' in d_data:
+                        for prov_key, info in d_data['districts'].items():
+                            # Load Reps
+                            if 'representatives' in info and isinstance(info['representatives'], dict):
+                                for dist_name, rep_raw in info['representatives'].items():
+                                    lower_raw = rep_raw.lower()
+                                    if "present" in lower_raw or "2025" in lower_raw or "2026" in lower_raw:
+                                        rep_clean = rep_raw.split('(')[0].strip()
+                                        congressman_lookup[(prov_key, dist_name)] = rep_clean
+                                        # Also handle "District 1" vs "1st District" normalization?
+                                        # My baking logic handles 1st->District 1 if needed?
+                                        # Actually districts.json uses "1st District". Project uses "Lone District" or "District 1".
+                                        # We normalize project side.
+                            
+                            # Load Municipalities defaults
+                            for city, default_dist in info.get('municipalities', {}).items():
+                                 city_district_lookup[(prov_key, city.upper())] = default_dist
+                                 
+                print(f"   ✅ Loaded {len(congressman_lookup)} Verified District Mappings.")
+            except Exception as e:
+                print(f"   ⚠️ Failed to load districts.json: {e}")
+                d_data = {} # Safety
+
+        # 1. Load Data
+        print(f"\n📊 Enriching {json_path}...")
+        try:
+            with open(json_path, 'r', encoding='utf-8') as f:
+                data = json.load(f)
+        except Exception as e:
+            print(f"❌ Failed to load source file: {e}")
+            return
             
         matches = data.get('matches', [])
         print(f"   Processing {len(matches)} matches...")
         
         stats = defaultdict(int)
         
-        # Pre-group by 2026 ID
+        # Pre-group
         by_project = defaultdict(list)
         for m in matches:
              if m.get('year_2026', {}).get('id'):
@@ -340,24 +386,72 @@ class ContractorEnricherDuckDB:
                   
         processed = 0
         total_groups = len(by_project)
-        
         print(f"   Processing {total_groups} unique projects...")
         
         for pid, group in by_project.items():
-             # For historical items
-             for m in group:
+            # A. ENRICH CONGRESSMAN
+            first_m = group[0]
+            y26 = first_m.get('year_2026', {})
+            
+            prov = y26.get('province', '').strip()
+            city = y26.get('city', '').strip()
+            dist = y26.get('district', '').strip()
+            
+            final_rep = None
+            target_key = get_district_key(prov)
+            
+            # Special NCR handling
+            if (not target_key or target_key == "Metro Manila") and city:
+                 city_key = get_district_key(city)
+                 if city_key: target_key = city_key
+            
+            # 1. Exact Match via District
+            if target_key and dist:
+                 # Normalize dist: "District 1" -> "1st District", "Lone" -> "Lone District"
+                 d_norm = dist.title() 
+                 if d_norm == "District 1": d_norm = "1st District"
+                 elif d_norm == "District 2": d_norm = "2nd District"
+                 elif d_norm == "District 3": d_norm = "3rd District"
+                 elif d_norm == "District 4": d_norm = "4th District"
+                 elif "Lone" in d_norm: d_norm = "Lone District"
+                 
+                 if (target_key, d_norm) in congressman_lookup:
+                      final_rep = congressman_lookup[(target_key, d_norm)]
+            
+            # 2. City Lookup Fallback
+            if not final_rep and target_key and city:
+                 # Try finding default district for this city
+                 # e.g. Taguig City -> 2nd District
+                 def_dist = city_district_lookup.get((target_key, city.upper()))
+                 if def_dist and (target_key, def_dist) in congressman_lookup:
+                      final_rep = congressman_lookup[(target_key, def_dist)]
+            
+            # 3. Hardcoded Taguig/Hagonoy Fix
+            if not final_rep and "TAGUIG" in prov.upper() and ("HAGONOY" in str(y26).upper() or "HAGONOY" in str(first_m.get('match_context','')).upper()):
+                 # Force Taguig Rep.
+                 # Usually Taguig-Pateros 2nd District?
+                 # Or just use ANY rep from Taguig if desperate?
+                 # Let's use the one mapped to 'Taguig City' which is 2nd District.
+                 # If target_key is Taguig-Pateros, and we have 2nd District rep.
+                 if target_key and (target_key, "2nd District") in congressman_lookup:
+                       final_rep = congressman_lookup[(target_key, "2nd District")]
+
+            if final_rep:
+                 for m in group:
+                      m['year_2026']['congressman'] = final_rep
+                 stats['congressman_baked'] += 1
+            else:
+                 stats['failures'] += 1
+
+            # B. CONTRACTORS
+            for m in group:
                   hist = m.get('historical', {})
                   if not hist: continue
                   
-                  # 1. Enrich Source Info (DuckDB)
-                  self._enrich_historical_source_info_duckdb(hist)
+                  # self._enrich_historical_source_info_duckdb(hist)
                   
-                  # 2. Enrich Contractor
-                  # Re-check contractor always
                   desc = hist.get('description', '')
                   yr = hist.get('year')
-                  
-                  # Convert year to int if needed
                   if isinstance(yr, str):
                        match_yr = re.search(r'(\d{4})', yr)
                        yr_int = int(match_yr.group(1)) if match_yr else None
@@ -373,21 +467,23 @@ class ContractorEnricherDuckDB:
                   else:
                        stats['not_found'] += 1
                        
-             processed += 1
-             if processed % 100 == 0:
-                  print(f"      Processed {processed}/{total_groups} projects... (Enriched: {stats['enriched']})")
+            processed += 1
+            if processed % 500 == 0:
+                  print(f"      Processed {processed}/{total_groups} projects... (Enriched: {stats['enriched']}, Baked: {stats['congressman_baked']})")
                   
-        data['metadata']['contractor_enrichment'] = {
+        data['metadata']['enrichment_info'] = {
              "enriched_at": datetime.now().isoformat(),
-             "method": "duckdb_in_memory",
+             "source": str(json_path),
              "stats": dict(stats)
         }
         
-        with open(json_path, 'w', encoding='utf-8') as f:
+        out_path = Path("static/data/resurrected_projects_dpwh_enriched.json")
+        with open(out_path, 'w', encoding='utf-8') as f:
              json.dump(data, f, indent=2, ensure_ascii=False)
              
-        print(f"\n✅ Done. Enriched {stats['enriched']} historical items.")
+        print(f"\n✅ Done. Saved to {out_path}")
+        print(f"   Stats: {dict(stats)}")
 
 if __name__ == "__main__":
     enricher = ContractorEnricherDuckDB()
-    enricher.enrich_json(Path("static/data/resurrected_projects_dpwh_revised.json"))
+    enricher.enrich_json(Path("static/data/resurrected_projects_dpwh.json"))

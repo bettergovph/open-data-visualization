@@ -500,6 +500,30 @@ async fn hours(_req: HttpRequest) -> Result<HttpResponse, ActixError> {
     Ok(HttpResponse::Ok().content_type("text/html").body(rendered))
 }
 
+// Integrated Matrix 2026 Dashboard
+async fn integ2026(_req: HttpRequest) -> Result<HttpResponse, ActixError> {
+    let tera = Tera::new("templates/**/*").map_err(|e| actix_web::error::ErrorInternalServerError(e))?;
+    let mut context = Context::new();
+
+    add_frontend_env_to_context(&mut context);
+
+    context.insert("title", "Integrated Matrix 2026 - BetterGovPH");
+    context.insert("company_name", "BetterGovPH");
+    context.insert("platform", "BetterGovPH");
+    context.insert("SITE_NAME", "BetterGovPH Data Visualizations");
+    context.insert("SITE_URL", "https://visualizations.bettergov.ph");
+
+    let template_name = "integrated_matrix.html";
+
+    let rendered = tera.render(template_name, &context).map_err(|e| actix_web::error::ErrorInternalServerError(e))?;
+    Ok(HttpResponse::Ok().content_type("text/html").body(rendered))
+}
+
+// API: Integrated Matrix JSON
+async fn api_integrated_matrix() -> Result<fs::NamedFile, ActixError> {
+    fs::NamedFile::open("static/data/integrated_matrix_slim.json").map_err(|e| actix_web::error::ErrorNotFound(e))
+}
+
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
     // Load environment variables from .env file
@@ -553,6 +577,8 @@ async fn main() -> std::io::Result<()> {
             .service(web::resource("/sources").to(sources))
             .service(web::resource("/circles").to(circles))
             .service(web::resource("/hours").to(hours))
+            .service(web::resource("/integ2026").to(integ2026))
+            .service(web::resource("/api/integrated/matrix").route(web::get().to(api_integrated_matrix)))
     })
     .bind(&bind_address)?
     .run()

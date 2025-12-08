@@ -27,6 +27,10 @@ from dotenv import load_dotenv
 
 # Add parent directory to path for imports
 sys.path.insert(0, str(Path(__file__).parent.parent))
+# Also add script directory to path to find sibling modules
+sys.path.insert(0, str(Path(__file__).parent))
+
+from scripts.location_enricher import LocationEnricher
 # FloodControlClient no longer needed - using Parquet files instead
 
 # Load environment variables
@@ -119,6 +123,11 @@ class DynastyProjectsCacheGeneratorDuckDB:
         
         # Initialize DuckDB connection
         self.duckdb_conn = duckdb.connect()
+        
+        # Initialize LocationEnricher
+        self.enricher = LocationEnricher()
+        if not self.enricher.load_db():
+            self._log("⚠️  Failed to load Location DB - enrichment will be skipped")
         
         # Load substring provinces config for strict word boundary matching
         self.substring_provinces = self._load_substring_provinces()
@@ -816,27 +825,51 @@ class DynastyProjectsCacheGeneratorDuckDB:
                                 contractor_congressman = self.canonical_name_map.get(contractor_congressman, contractor_congressman)
                     return final_congressman, match_type, match_score, district_congressman, contractor_congressman, contractor_congressman_2
 
-        # 1. Try District Match
-        # Pass project_district if available to help with district number matching
-        project_district = None
-        if project_data:
-            project_district = project_data.get('project_district') or project_data.get('district')
-        district_match = self._find_congressman_by_district(
-            province, municipality_barangay, year, district_lookup, congressmen_data, project_district
-        )
+        # 0.5. Unified Location Match (New)
+        # Use simple text matching against unified database
+        if hasattr(self, 'enricher') and self.enricher.loaded:
+            enrich_payload = {
+                'name': project_data.get('project_name') if project_data else '',
+                'description': project_data.get('project_description') if project_data else '',
+                'location': project_text
+            }
+            self.enricher.enrich_project(enrich_payload)
+            enricher_congressman = enrich_payload.get('congressman')
+            if enricher_congressman and enricher_congressman != 'Unknown':
+                # Try to find this congressman in our congressmen_data to insure name variance handling
+                # Normalize name first if possible
+                if enricher_congressman in congressmen_data:
+                    district_congressman = enricher_congressman
+                    match_score = 95
+                else:
+                    # Try simple lookup logic or name normalization
+                    # This part is simplified; might need better name matching
+                   district_congressman = enricher_congressman
+                   match_score = 90
         
-        # Fallback: Province-only match if strict match failed and we have a province
-        if not district_match and province and municipality_barangay:
-             district_match = self._find_congressman_by_district(
-                province, '', year, district_lookup, congressmen_data, project_district
+        # 1. Try District Match (Legacy/Fallback if simplified didn't work)
+        if not district_congressman:
+            # Pass project_district if available to help with district number matching
+            project_district = None
+            if project_data:
+                project_district = project_data.get('project_district') or project_data.get('district')
+            
+            district_match = self._find_congressman_by_district(
+                province, municipality_barangay, year, district_lookup, congressmen_data, project_district
             )
             
-        if district_match:
-            district_congressman, d_score = district_match
-            # Normalize congressman name to canonical form
-            if district_congressman and hasattr(self, 'canonical_name_map'):
-                district_congressman = self.canonical_name_map.get(district_congressman, district_congressman)
-            match_score = d_score
+            # Fallback: Province-only match if strict match failed and we have a province
+            if not district_match and province and municipality_barangay:
+                 district_match = self._find_congressman_by_district(
+                    province, '', year, district_lookup, congressmen_data, project_district
+                )
+                
+            if district_match:
+                district_congressman, d_score = district_match
+                # Normalize congressman name to canonical form
+                if district_congressman and hasattr(self, 'canonical_name_map'):
+                    district_congressman = self.canonical_name_map.get(district_congressman, district_congressman)
+                match_score = d_score
         
         # 2. Try Contractor Match (supports up to 2 matches for JVs)
         contractor_match = self._find_congressman_by_contractor(
@@ -868,28 +901,20 @@ class DynastyProjectsCacheGeneratorDuckDB:
             # Location validation is NOT applied to contractor matches
             
         # 3. Determine Primary Match
-        # CRITICAL: For party-list congressmen, prioritize contractor matches over district matches
-        # Party-list reps don't have specific districts, so contractor matching is their primary method
+        # CRITICAL: Prioritize contractor matches over district matches for EVERYONE
+        # A project linked to a dynasty contractor is a stronger signal than a generic district match
+        # This captures both Party-list reps and District reps contracting in/out of their districts
         if contractor_congressman:
-            # Check if contractor congressman is party-list
-            contractor_is_partylist = False
-            if contractor_congressman and contractor_congressman in congressmen_data:
-                contractor_is_partylist = congressmen_data[contractor_congressman].get('is_partylist', False)
-            
-            if contractor_is_partylist:
-                # Party-list: prioritize contractor match
-                final_congressman = contractor_congressman
-                match_type = 'contractor'
-                match_score = 50
-            elif district_congressman:
-                # Regular congressman: prioritize district match
-                final_congressman = district_congressman
-                match_type = 'district'
+            final_congressman = contractor_congressman
+            match_type = 'contractor'
+            # If we also have a district match, we still record it in district_congressman (already set)
+            # but the primary attribution goes to the contractor owner
+            if district_congressman and district_congressman != contractor_congressman:
+                match_score = 90 # High confidence due to contractor link
             else:
-                # No district match, use contractor
-                final_congressman = contractor_congressman
-                match_type = 'contractor'
-                match_score = 50
+                 # Match confirmed by both or just contractor
+                match_score = 95
+                
         elif district_congressman:
             final_congressman = district_congressman
             match_type = 'district'
@@ -934,6 +959,14 @@ class DynastyProjectsCacheGeneratorDuckDB:
         chunk_results: List[Dict] = []
         
         for proj in projects_chunk:
+            # FORCE Field Clean-up (User Request):
+            # Always remove these columns if they exist to prevent logic contamination
+            # The user stated DIME parquet contains these and it throws logic off
+            contaminated_fields = ['congressman_name', 'dynasty_member_id', 'dynasty_relationship']
+            for field in contaminated_fields:
+                if field in proj:
+                    del proj[field]
+
             # Check if already classified (unless force mode)
             # CRITICAL: In force mode, ALWAYS reclassify - never skip
             if not self.force_reclassify:
@@ -1164,6 +1197,13 @@ class DynastyProjectsCacheGeneratorDuckDB:
             location_context_map = getattr(self, 'location_dicts', {}).get('location_context_map', None) if hasattr(self, 'location_dicts') else None
 
         for contract in contracts_chunk:
+            # FORCE Field Clean-up (User Request):
+            # Always remove these columns if they exist to prevent logic contamination
+            contaminated_fields = ['congressman_name', 'dynasty_member_id', 'dynasty_relationship']
+            for field in contaminated_fields:
+                if field in contract:
+                    del contract[field]
+
             # Check if already classified (unless force mode)
             # CRITICAL: In force mode, ALWAYS reclassify - never skip
             # Check that all fields are not None and not empty strings
@@ -2457,6 +2497,7 @@ class DynastyProjectsCacheGeneratorDuckDB:
                 conn = duckdb.connect()
                 try:
                     # Only load contractor relationships that have a source (verified relationships)
+                    print(f"DEBUG: Executing DuckDB query for contractors from {contractor_parquet}...")
                     contractor_rows = conn.execute(f"SELECT dynasty_first_name, dynasty_last_name, company_name, role FROM read_parquet('{contractor_parquet}') WHERE source_csv_file IS NOT NULL AND source_csv_file != ''").fetchall()
                     print(f"✅ Loaded {len(contractor_rows)} verified contractor matches (with sources) from contractor_dynasty_matches.parquet")
                 finally:
@@ -2514,17 +2555,19 @@ class DynastyProjectsCacheGeneratorDuckDB:
                             company_col = 'contractor_name' if 'contractor_name' in columns else 'company_name'
                             role_col = 'role' if 'role' in columns else ('relationship_type' if 'relationship_type' in columns else None)
                             political_dynasties_parquet = PARQUET_DIR / 'political_dynasties.parquet'
+                            
                             if political_dynasties_parquet.exists():
+                                print(f"   🔄 Joining with {political_dynasties_parquet} to resolve politician IDs...")
                                 if role_col:
                                     contractor_rows = conn.execute(f"""
-                                        SELECT pd.first_name, pd.last_name, pc.{company_col} as company_name, COALESCE(pc.{role_col}, 'owner') as role
+                                        SELECT pd.first_name, pd.last_name, pc.{company_col} as company_name, COALESCE(pc.{role_col}, 'owner') as role 
                                         FROM read_parquet('{politician_contractors_parquet}') pc
                                         JOIN read_parquet('{political_dynasties_parquet}') pd ON pc.politician_id = pd.id
                                         WHERE pc.source IS NOT NULL AND pc.source != ''
                                     """).fetchall()
                                 else:
                                     contractor_rows = conn.execute(f"""
-                                        SELECT pd.first_name, pd.last_name, pc.{company_col} as company_name, 'owner' as role
+                                        SELECT pd.first_name, pd.last_name, pc.{company_col} as company_name, 'owner' as role 
                                         FROM read_parquet('{politician_contractors_parquet}') pc
                                         JOIN read_parquet('{political_dynasties_parquet}') pd ON pc.politician_id = pd.id
                                         WHERE pc.source IS NOT NULL AND pc.source != ''
@@ -3115,6 +3158,8 @@ class DynastyProjectsCacheGeneratorDuckDB:
                     if len(new_munis) != len(other_munis):
                         print(f"    Removed {len(other_munis) - len(new_munis)} municipalities from {name}")
                         data['district_municipalities'] = new_munis
+        
+        return congressmen_data
 
     def _build_lookup_dictionaries(self, congressmen_data: Dict, districts_data: Dict) -> tuple[Dict, Dict]:
         """
@@ -3317,15 +3362,29 @@ class DynastyProjectsCacheGeneratorDuckDB:
                     if normalized != pattern_upper:
                         contractor_lookup[normalized].append((congressman_name, cm_data))
         
+                    normalized = re.sub(r'[^A-Z0-9]+', ' ', pattern_upper).strip()
+                    if normalized != pattern_upper:
+                        contractor_lookup[normalized].append((congressman_name, cm_data))
+        
         # Build inverted index from contractor_lookup keys
+        # Optimized for speed and safety (avoid regex)
+        idx_count = 0
+        total_keys = len(contractor_lookup)
+        
         for key in contractor_lookup.keys():
-            # Tokenize key
-            # Use simple splitting by non-alphanumeric characters
-            tokens = re.split(r'[^A-Z0-9]+', key.upper())
+            idx_count += 1
+            if idx_count % 5000 == 0:
+                print(f"DEBUG: Inverted index progress: {idx_count}/{total_keys} keys...", end='\r')
+                
+            # Manual tokenization
+            normalized = ''.join([c if c.isalnum() else ' ' for c in key.upper()])
+            tokens = normalized.split()
+            
             for token in tokens:
                 if len(token) >= 3 and token not in self.COMMON_TOKENS:
                     contractor_inverted_index[token].add(key)
         
+        print(f"DEBUG: Finished building inverted index with {len(contractor_inverted_index)} tokens.")
         return dict(district_lookup), dict(contractor_lookup), dict(contractor_inverted_index)
 
     def _normalize_location_name(self, name: str) -> str:
@@ -6473,6 +6532,28 @@ class DynastyProjectsCacheGeneratorDuckDB:
                             print(f"   ❌ Transparency file not found at: {transparency_file}")
                             print(f"   📁 PARQUET_DIR: {PARQUET_DIR}")
                             print(f"   📁 PARQUET_DIR exists: {PARQUET_DIR.exists()}")
+                    
+                    # CRITICAL: For DIME, try loading from separate parquet file if it exists
+                    if source_name == 'DIME' and len(projects) == 0:
+                        dime_file = PARQUET_DIR / 'dime_projects.parquet'
+                        print(f"   🔍 Checking for separate DIME file: {dime_file}")
+                        if dime_file.exists():
+                            print(f"   📂 Loading DIME from separate file: {dime_file}")
+                            try:
+                                dime_data = self.load_projects_from_parquet(dime_file, source_name=None)
+                                print(f"   📊 Raw loaded: {len(dime_data)} projects")
+                                # Ensure all projects have DIME as source
+                                for p in dime_data:
+                                    p['_source'] = 'DIME'
+                                    p['source'] = 'DIME'
+                                projects = dime_data
+                                print(f"   ✅ Loaded {len(projects)} DIME projects from separate file")
+                            except Exception as e:
+                                print(f"   ⚠️  Error loading DIME from separate file: {e}")
+                                import traceback
+                                traceback.print_exc()
+                        else:
+                            print(f"   ❌ DIME file not found at: {dime_file}")
                     
                     # CRITICAL: For Microsite and Transparency, if no projects found, try alternative approaches
                     if source_name in ('Microsite', 'Transparency') and len(projects) == 0:
