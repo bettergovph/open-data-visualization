@@ -134,6 +134,149 @@ class DynastyProjectsCacheGeneratorDuckDB:
         
         # Load project code mapping for short-circuit district matching
         self.project_code_mapping = self._load_project_code_mapping()
+        
+        # Load unified locations for high-accuracy hierarchy matching (Source of Truth)
+        self.location_entries = self._load_unified_locations()
+
+    def _load_unified_locations(self) -> List[tuple]:
+        """Load unified location hierarchy from parquet"""
+        unified_path = Path(__file__).parent.parent / 'static' / 'data' / 'unified_locations.parquet'
+        location_entries = []
+        if unified_path.exists():
+            try:
+                # Use duckdb to read parquet efficiently
+                con = duckdb.connect()
+                # Select only entries with valid congressman
+                query = """
+                    SELECT province, municipality, barangay, district, congressman 
+                    FROM read_parquet(?) 
+                    WHERE congressman IS NOT NULL 
+                    AND congressman != 'TBD' 
+                    AND congressman != 'Unknown'
+                """
+                result = con.execute(query, [str(unified_path)]).fetchall()
+                for row in result:
+                    # Keep same tuple structure as generate_integrated_matrix.py
+                    location_entries.append(row)
+                con.close()
+                self._log(f"✅ Loaded {len(location_entries)} location entries from unified_locations.parquet")
+            except Exception as e:
+                self._log(f"⚠️ Failed to load unified_locations.parquet: {e}")
+        else:
+            self._log(f"⚠️ unified_locations.parquet not found at {unified_path}")
+        return location_entries
+
+    def _normalize_for_match(self, text: str) -> str:
+        """Normalize text for matching - lowercase, ASCII, clean.
+        IMPORTANT: Keep 'city' keyword for proper disambiguation"""
+        if not text:
+            return ""
+        import unicodedata
+        # Normalize unicode characters
+        text = str(text)
+        text = unicodedata.normalize('NFKD', text).encode('ASCII', 'ignore').decode('ASCII')
+        # Don't remove 'city' - we need it for disambiguation
+        # Just normalize 'city of X' to 'X city' for consistency
+        text = text.lower().strip()
+        text = text.replace("city of ", "").replace("municipality of ", "")
+        return text.strip()
+
+    def _find_best_location_match(self, project_name: str, project_province: Optional[str] = None) -> Optional[tuple]:
+        """Find the location entry with the most matching components.
+        Uses word-boundary matching and prefers longer/more specific matches.
+        Returns: (province, municipality, barangay, district, congressman) or None
+        """
+        if not project_name or not self.location_entries:
+            return None
+            
+        name_norm = self._normalize_for_match(project_name)
+        if not name_norm:
+            return None
+            
+        name_lower = project_name.lower()
+        prov_norm = self._normalize_for_match(project_province) if project_province else ""
+        
+        # --- DISAMBIGUATION: Check for multi-word province names FIRST ---
+        # These are problematic because "davao" matches both "davao city" and "davao de oro"
+        disambiguation_patterns = [
+            (r'davao\s+de\s+oro', 'DAVAO DE ORO'),
+            (r'davao\s+del\s+sur', 'DAVAO DEL SUR'),
+            (r'davao\s+del\s+norte', 'DAVAO DEL NORTE'),
+            (r'davao\s+oriental', 'DAVAO ORIENTAL'),
+            (r'davao\s+occidental', 'DAVAO OCCIDENTAL'),
+            (r'cebu\s+city', 'CEBU CITY'),  # Cebu City vs Cebu Province
+            (r'cagayan\s+de\s+oro', 'CITY OF CAGAYAN DE ORO'),
+            (r'quezon\s+city', 'QUEZON CITY'),  # QC vs Quezon Province
+            (r'zamboanga\s+del\s+norte', 'ZAMBOANGA DEL NORTE'),
+            (r'zamboanga\s+del\s+sur', 'ZAMBOANGA DEL SUR'),
+            (r'zamboanga\s+sibugay', 'ZAMBOANGA SIBUGAY'),
+        ]
+        
+        for pattern, target_prov in disambiguation_patterns:
+            if re.search(pattern, name_lower):
+                # Find entries matching this specific province
+                for entry in self.location_entries:
+                    prov, muni, brgy, dist, cong = entry
+                    if prov and target_prov.lower() in prov.lower():
+                        # Also check municipality/barangay match for better accuracy
+                        muni_norm = self._normalize_for_match(muni)
+                        brgy_norm = self._normalize_for_match(brgy)
+                        
+                        # Check strictly for municipality or barangay presence
+                        if muni_norm and len(muni_norm) > 3 and muni_norm in name_norm:
+                            return entry
+                        if brgy_norm and len(brgy_norm) > 3 and brgy_norm in name_norm:
+                            return entry
+        
+        best_match = None
+        best_score = 0
+        
+        def word_boundary_match(needle, haystack):
+            """Check if needle appears as whole word(s) in haystack"""
+            if not needle or len(needle) < 3:
+                return False
+            # Escape regex special chars in needle
+            pattern = r'\b' + re.escape(needle) + r'\b'
+            return bool(re.search(pattern, haystack))
+        
+        for entry in self.location_entries:
+            prov, muni, brgy, dist, cong = entry
+            score = 0
+            match_length_bonus = 0
+            
+            prov_entry = self._normalize_for_match(prov)
+            muni_entry = self._normalize_for_match(muni)
+            brgy_entry = self._normalize_for_match(brgy)
+            
+            # Province matching
+            if prov_entry and len(prov_entry) > 3:
+                if word_boundary_match(prov_entry, name_norm):
+                    score += 3
+                    match_length_bonus += len(prov_entry)
+                elif prov_norm and prov_entry == prov_norm:
+                    score += 2  # Match via passed province argument
+            
+            # Municipality matching - high value
+            if muni_entry and len(muni_entry) > 3:
+                if word_boundary_match(muni_entry, name_norm):
+                    score += 4
+                    match_length_bonus += len(muni_entry) * 2
+            
+            # Barangay matching
+            if brgy_entry and len(brgy_entry) > 3:
+                if word_boundary_match(brgy_entry, name_norm):
+                    score += 2
+                    match_length_bonus += len(brgy_entry)
+            
+            # Total score
+            total_score = score * 100 + match_length_bonus
+            
+            if total_score > best_score:
+                best_score = total_score
+                best_match = entry
+        
+        # Require at least one substantial match (score >= 200 means roughly municipality matched or strong combo)
+        return best_match if best_score >= 200 else None
 
     def _log(self, message: str, *, verbose_only: bool = False) -> None:
         if verbose_only and not self.verbose:
@@ -825,6 +968,20 @@ class DynastyProjectsCacheGeneratorDuckDB:
                                 contractor_congressman = self.canonical_name_map.get(contractor_congressman, contractor_congressman)
                     return final_congressman, match_type, match_score, district_congressman, contractor_congressman, contractor_congressman_2
 
+        # 0.4. Unified Location Match (Parquet) - Source of Truth
+        # Matches hierarchy directly from unified_locations.parquet (Highest Priority for location)
+        if not district_congressman and self.location_entries:
+             best_match = self._find_best_location_match(project_text, province)
+             if best_match:
+                 prov, muni, brgy, dist, cong = best_match
+                 if cong and cong not in ('Unknown', 'TBD', 'TBA'):
+                     district_congressman = cong
+                     match_score = 150 # High confidence for hierarchy match
+                     match_type = 'unified_location'
+                     # Normalize congressman name if possible
+                     if hasattr(self, 'canonical_name_map'):
+                         district_congressman = self.canonical_name_map.get(district_congressman, district_congressman)
+
         # 0.5. Unified Location Match (New)
         # Use simple text matching against unified database
         if hasattr(self, 'enricher') and self.enricher.loaded:
@@ -1056,9 +1213,9 @@ class DynastyProjectsCacheGeneratorDuckDB:
             contractor_str = ''
             contractors_field = proj.get('contractors') or proj.get('contractor_name') or proj.get('contractor')
             if isinstance(contractors_field, list):
-                contractor_str = ', '.join(contractors_field)
+                contractor_str = ', '.join(contractors_field).upper()
             elif contractors_field:
-                contractor_str = str(contractors_field)
+                contractor_str = str(contractors_field).upper()
 
             # Extract year
             project_year = None
@@ -1271,7 +1428,7 @@ class DynastyProjectsCacheGeneratorDuckDB:
             award_title = (contract.get('philgeps_award_title') or contract.get('award_title') or contract.get('project_name') or '')
             
             area_of_delivery = (contract.get('philgeps_area_of_delivery') or contract.get('area_of_delivery') or '')
-            awardee_name = (contract.get('contractor_name') or contract.get('philgeps_awardee_name') or contract.get('awardee_name') or '')
+            awardee_name = (contract.get('contractor_name') or contract.get('philgeps_awardee_name') or contract.get('awardee_name') or '').upper()
             
             # Helper function to detect if a string looks like a contract number
             def looks_like_contract_number(text):
@@ -7070,7 +7227,7 @@ class DynastyProjectsCacheGeneratorDuckDB:
         try:
     
             # Ensure latest districts and congressmen config are pulled from DB
-            self._refresh_source_json()
+            # self._refresh_source_json()
             
             # Load config
             config_data, districts_data = await self.load_config()
