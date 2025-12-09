@@ -10,44 +10,44 @@
         border-radius: 12px;
         padding: 1rem;
         margin-bottom: 1rem;
-        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
     }
-    
+
     .source-section h3 {
         font-size: 1.25rem;
         font-weight: 600;
         margin-bottom: 0.75rem;
         color: #1f2937;
     }
-    
+
     .source-list {
         list-style: none;
         padding-left: 0;
         margin: 0.75rem 0;
     }
-    
+
     .source-list li {
         padding: 0.75rem 0;
         border-bottom: 1px solid #f3f4f6;
         font-size: 0.875rem;
     }
-    
+
     .source-list li:last-child {
         border-bottom: none;
     }
-    
+
     .source-link {
         color: #2563eb;
         text-decoration: underline;
         word-break: break-all;
     }
-    
+
     .source-popup {
         position: fixed;
         background: white;
         border: 1px solid #e5e7eb;
         border-radius: 8px;
-        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
         padding: 12px;
         min-width: 280px;
         max-width: 90vw;
@@ -57,11 +57,11 @@
         display: none;
         font-size: 12px;
     }
-    
+
     .source-popup.show {
         display: block;
     }
-    
+
     .source-popup h4 {
         font-size: 14px;
         font-weight: 600;
@@ -70,19 +70,19 @@
         border-bottom: 2px solid #e5e7eb;
         padding-bottom: 6px;
     }
-    
+
     .source-popup-item {
         margin-bottom: 8px;
         padding-bottom: 8px;
         border-bottom: 1px solid #f3f4f6;
     }
-    
+
     .source-popup-item:last-child {
         border-bottom: none;
         margin-bottom: 0;
         padding-bottom: 0;
     }
-    
+
     .source-popup-item a {
         color: #2563eb;
         text-decoration: none;
@@ -90,12 +90,12 @@
         margin-bottom: 4px;
         word-break: break-all;
     }
-    
+
     .source-popup-item .source-date {
         font-size: 11px;
         color: #6b7280;
     }
-    
+
     .source-link-with-popup {
         position: relative;
         cursor: pointer;
@@ -117,93 +117,175 @@
         <ul class="source-list">
             <li>
                 <strong>Budget Data (GAA - General Appropriations Act):</strong><br>
-                <a href="https://github.com/bettergovph/open-budget-data" target="_blank" rel="noopener noreferrer" class="source-link">@bettergovph/open-budget-data</a><br>
-                <a href="https://budget.bettergov.ph/2025/index.html" target="_blank" rel="noopener noreferrer" class="source-link">Open Budget by BetterGov.ph</a><br>
-                <span class="text-gray-600 text-xs">Used in: Budget Analysis, Budget-NEP Correlation, Budget-Flood Correlation</span>
+                <a href="https://github.com/bettergovph/open-budget-data" target="_blank" rel="noopener noreferrer"
+                    class="source-link">@bettergovph/open-budget-data</a><br>
+                <a href="https://budget.bettergov.ph/2025/index.html" target="_blank" rel="noopener noreferrer"
+                    class="source-link">Open Budget by BetterGov.ph</a><br>
+                <span class="text-gray-600 text-xs">Used in: Budget Analysis, Budget-NEP Correlation, Budget-Flood
+                    Correlation</span>
             </li>
             <li>
                 <strong>National Expenditure Program (NEP):</strong><br>
-                <a href="https://github.com/bettergovph/open-budget-data" target="_blank" rel="noopener noreferrer" class="source-link">@bettergovph/open-budget-data</a><br>
-                <a href="https://budget.bettergov.ph/2025/index.html" target="_blank" rel="noopener noreferrer" class="source-link">Open Budget by BetterGov.ph</a><br>
+                <a href="https://github.com/bettergovph/open-budget-data" target="_blank" rel="noopener noreferrer"
+                    class="source-link">@bettergovph/open-budget-data</a><br>
+                <a href="https://budget.bettergov.ph/2025/index.html" target="_blank" rel="noopener noreferrer"
+                    class="source-link">Open Budget by BetterGov.ph</a><br>
                 <span class="text-gray-600 text-xs">Used in: NEP Analysis, Budget-NEP Correlation</span>
             </li>
             <li>
                 <strong>DPWH Program Budget Analysis:</strong><br>
                 <strong>People's Budget Coalition</strong> - Citizens' Budget Tracker<br>
-                <span class="text-gray-600 text-xs">Used in: Budget-NEP Program Correlation, Program-level Analysis</span><br>
-                <span class="text-gray-600 text-xs">Comprehensive analysis of DPWH budget programs including Convergence and Special Support Program, Asset Preservation Program, Flood Management Program, Bridge Program, Network Development Program, Local Program, General Administration and Support, and Support to Operations across fiscal years 2018-2025</span>
+                <span class="text-gray-600 text-xs">Used in: Budget-NEP Program Correlation, Program-level
+                    Analysis</span><br>
+                <span class="text-gray-600 text-xs">Comprehensive analysis of DPWH budget programs including Convergence
+                    and Special Support Program, Asset Preservation Program, Flood Management Program, Bridge Program,
+                    Network Development Program, Local Program, General Administration and Support, and Support to
+                    Operations across fiscal years 2018-2025</span>
             </li>
             <li>
                 <strong>Flood Control Projects (DPWH):</strong><br>
-                the team from <a href="https://extra.bayanwat.ch/" target="_blank" rel="noopener noreferrer" class="source-link source-link-with-popup" data-source="Sleeper Agent">extra.bayanwat.ch</a><br>
-                <a href="https://sumbongsapangulo.ph/flood-control-map/" target="_blank" rel="noopener noreferrer" class="source-link">Sumbong sa Pangulo - Flood Control Map</a><br>
-                <a href="https://bettergov.ph/flood-control-projects/map" target="_blank" rel="noopener noreferrer" class="source-link">BetterGov.ph - Flood Control Projects Map</a><br>
-                <span class="text-gray-600 text-xs">Used in: Flood Control Analysis, Interactive Map, Budget-Flood Correlation, Flood-DIME Correlation</span>
+                the team from <a href="https://extra.bayanwat.ch/" target="_blank" rel="noopener noreferrer"
+                    class="source-link source-link-with-popup" data-source="Sleeper Agent">extra.bayanwat.ch</a><br>
+                <a href="https://sumbongsapangulo.ph/flood-control-map/" target="_blank" rel="noopener noreferrer"
+                    class="source-link">Sumbong sa Pangulo - Flood Control Map</a><br>
+                <a href="https://bettergov.ph/flood-control-projects/map" target="_blank" rel="noopener noreferrer"
+                    class="source-link">BetterGov.ph - Flood Control Projects Map</a><br>
+                <span class="text-gray-600 text-xs">Used in: Flood Control Analysis, Interactive Map, Budget-Flood
+                    Correlation, Flood-DIME Correlation</span>
+            </li>
+            <li>
+                <strong>DILG Projects (Barangay Details):</strong><br>
+                the team from <a href="https://extra.bayanwat.ch/" target="_blank" rel="noopener noreferrer"
+                    class="source-link source-link-with-popup" data-source="Sleeper Agent">extra.bayanwat.ch</a><br>
+                <span class="text-gray-600 text-xs">Used in: Barangay-level Analysis, Local Government Projects</span>
             </li>
             <li>
                 <strong>DIME (Digital Information for Monitoring and Evaluation):</strong><br>
-                <a href="https://www.dime.gov.ph/" target="_blank" rel="noopener noreferrer" class="source-link">Department of Budget and Management</a><br>
-                <span class="text-gray-600 text-xs">Used in: DIME Infrastructure Analysis, Interactive Map, Flood-DIME Correlation</span>
+                <a href="https://www.dime.gov.ph/" target="_blank" rel="noopener noreferrer"
+                    class="source-link">Department of Budget and Management</a><br>
+                <span class="text-gray-600 text-xs">Used in: DIME Infrastructure Analysis, Interactive Map, Flood-DIME
+                    Correlation</span>
             </li>
             <li>
                 <strong>PhilGEPS Contract Data:</strong><br>
-                <a href="https://github.com/gabconcepcionph/dpwh-contracts-dashboard" target="_blank" rel="noopener noreferrer" class="source-link">@gabconcepcionph/dpwh-contracts-dashboard</a><br>
-                <a href="https://github.com/csiiiv/philgeps-awards-dashboard" target="_blank" rel="noopener noreferrer" class="source-link">@csiiiv/philgeps-awards-dashboard</a><br>
+                <a href="https://github.com/gabconcepcionph/dpwh-contracts-dashboard" target="_blank"
+                    rel="noopener noreferrer" class="source-link">@gabconcepcionph/dpwh-contracts-dashboard</a><br>
+                <a href="https://github.com/csiiiv/philgeps-awards-dashboard" target="_blank" rel="noopener noreferrer"
+                    class="source-link">@csiiiv/philgeps-awards-dashboard</a><br>
                 <span class="text-gray-600 text-xs">Used in: Interactive Map, Contractor Verification</span><br>
-                <span class="text-gray-600 text-xs">Comprehensive transparency dashboard providing access to Philippine government procurement data from 2013-2025</span>
+                <span class="text-gray-600 text-xs">Comprehensive transparency dashboard providing access to Philippine
+                    government procurement data from 2013-2025</span>
             </li>
             <li>
                 <strong>DPWH Integrated Project Code Classification (DO 172 s2016):</strong><br>
-                <a href="https://www.dpwh.gov.ph/dpwh/sites/default/files/issuances/DO_172_s2016.pdf" target="_blank" rel="noopener noreferrer" class="source-link">DO 172 s2016 - Integrated Project Code Classification Rules</a><br>
-                <span class="text-gray-600 text-xs">Used in: Project Code Decoding, District/Region Classification</span><br>
-                <span class="text-gray-600 text-xs">Official DPWH Department Order defining the integrated project code format (YYRDSSSS) and rules for classifying projects into regions and districts. Format: YY (Year) + R (Region letter) + D (District letter) + SSSS (Sequence).</span>
+                <a href="https://www.dpwh.gov.ph/dpwh/sites/default/files/issuances/DO_172_s2016.pdf" target="_blank"
+                    rel="noopener noreferrer" class="source-link">DO 172 s2016 - Integrated Project Code Classification
+                    Rules</a><br>
+                <span class="text-gray-600 text-xs">Used in: Project Code Decoding, District/Region
+                    Classification</span><br>
+                <span class="text-gray-600 text-xs">Official DPWH Department Order defining the integrated project code
+                    format (YYRDSSSS) and rules for classifying projects into regions and districts. Format: YY (Year) +
+                    R (Region letter) + D (District letter) + SSSS (Sequence).</span>
             </li>
             <li>
                 <strong>DPWH Project Code Mapping:</strong><br>
-                <span class="text-gray-700 text-xs">Mapping file (dpwh-project-code-mapping.json) containing region letters to region names and district letters to District Engineering Office (DEO) names for all DPWH regions.</span><br>
-                <span class="text-gray-600 text-xs">Used in: Project Code Decoding, District/Region Classification, DEO Name Resolution</span><br>
-                <span class="text-gray-600 text-xs">Credit: <a href="https://github.com/csiiiv" target="_blank" rel="noopener noreferrer" class="source-link">@csiiiv</a> - Comprehensive mapping of integrated project codes to regions and DEOs</span>
+                <span class="text-gray-700 text-xs">Mapping file (dpwh-project-code-mapping.json) containing region
+                    letters to region names and district letters to District Engineering Office (DEO) names for all DPWH
+                    regions.</span><br>
+                <span class="text-gray-600 text-xs">Used in: Project Code Decoding, District/Region Classification, DEO
+                    Name Resolution</span><br>
+                <span class="text-gray-600 text-xs">Credit: <a href="https://github.com/csiiiv" target="_blank"
+                        rel="noopener noreferrer" class="source-link">@csiiiv</a> - Comprehensive mapping of integrated
+                    project codes to regions and DEOs</span>
             </li>
             <li>
                 <strong>Raw Philippine Data (Persons, Memberships & Legislative Documents):</strong><br>
-                <a href="https://huggingface.co/datasets/bettergovph/raw-philippine-data" target="_blank" rel="noopener noreferrer" class="source-link">BetterGovPH Raw Philippine Data on HuggingFace</a><br>
-                <span class="text-gray-600 text-xs">Used in: Semantic Search, Political Analysis, Legislative Document Research</span><br>
-                <span class="text-gray-600 text-xs">Comprehensive dataset containing 45,400+ persons (politicians and public officials), 86,200+ memberships (political positions and party affiliations), and legislative documents (Senate and House bills). Available in Parquet format for easy analysis and DuckDB for SQL queries. Licensed under CC0 1.0 Universal (Public Domain).</span>
+                <a href="https://huggingface.co/datasets/bettergovph/raw-philippine-data" target="_blank"
+                    rel="noopener noreferrer" class="source-link">BetterGovPH Raw Philippine Data on HuggingFace</a><br>
+                <span class="text-gray-600 text-xs">Used in: Semantic Search, Political Analysis, Legislative Document
+                    Research</span><br>
+                <span class="text-gray-600 text-xs">Comprehensive dataset containing 45,400+ persons (politicians and
+                    public officials), 86,200+ memberships (political positions and party affiliations), and legislative
+                    documents (Senate and House bills). Available in Parquet format for easy analysis and DuckDB for SQL
+                    queries. Licensed under CC0 1.0 Universal (Public Domain).</span>
             </li>
             <li>
                 <strong>Political Dynasty Data:</strong><br>
-                <a href="https://www.inclusivedemocracy.ph/data-and-infographics" target="_blank" rel="noopener noreferrer" class="source-link">Ateneo School of Government (ASoG) - Participate Project</a><br>
-                <span class="text-gray-600 text-xs">Used in: Dynasty Analysis, Dynasty Map, Family Tree Visualization</span><br>
-                <span class="text-gray-600 text-xs">Comprehensive dataset tracking political dynasties at the local government level (2004-2016) with 86,234 records across all provinces. Data accuracy and consistency are the responsibility of the original ASoG source.</span>
+                <a href="https://www.inclusivedemocracy.ph/data-and-infographics" target="_blank"
+                    rel="noopener noreferrer" class="source-link">Ateneo School of Government (ASoG) - Participate
+                    Project</a><br>
+                <span class="text-gray-600 text-xs">Used in: Dynasty Analysis, Dynasty Map, Family Tree
+                    Visualization</span><br>
+                <span class="text-gray-600 text-xs">Comprehensive dataset tracking political dynasties at the local
+                    government level (2004-2016) with 86,234 records across all provinces. Data accuracy and consistency
+                    are the responsibility of the original ASoG source.</span>
             </li>
             <li>
                 <strong>Philippines GeoJSON Data:</strong><br>
-                <a href="https://github.com/OSSPhilippines/geoph" target="_blank" rel="noopener noreferrer" class="source-link">OSSPhilippines/geoph</a><br>
-                <span class="text-gray-600 text-xs">Used in: Dynasty Map, Province Boundaries, Interactive Visualizations</span><br>
-                <span class="text-gray-600 text-xs">Open source GeoJSON data formats for the Philippines, providing accurate province and regional boundaries for mapping</span>
+                <a href="https://github.com/OSSPhilippines/geoph" target="_blank" rel="noopener noreferrer"
+                    class="source-link">OSSPhilippines/geoph</a><br>
+                <span class="text-gray-600 text-xs">Used in: Dynasty Map, Province Boundaries, Interactive
+                    Visualizations</span><br>
+                <span class="text-gray-600 text-xs">Open source GeoJSON data formats for the Philippines, providing
+                    accurate province and regional boundaries for mapping</span>
             </li>
             <li>
                 <strong>Congressional District Mappings:</strong><br>
-                <span class="text-gray-700 text-xs">Comprehensive congressional district mappings for Philippine provinces and cities. For provinces, municipalities are mapped to their respective congressional districts (397 of 417 non-partylist congressmen, 95.2% coverage). For cities, barangays are mapped using official PSGC data (136 cities with 7,418 barangays). Data combines official government sources with geographic boundary data from OSSPhilippines/geoph.</span><br>
-                <span class="text-gray-600 text-xs">Used in: District Analysis, Dynasty Projects, Province-District Filtering, Municipality-District Mapping, Congressman Project Matching</span><br>
-                <span class="text-gray-600 text-xs">Credit: <a href="https://psa.gov.ph/classification/psgc/" target="_blank" rel="noopener noreferrer" class="source-link source-link-with-popup" data-source="PSA">Philippine Statistics Authority (PSA)</a> - Philippine Standard Geographic Code (PSGC) for official municipality and barangay listings, <a href="https://comelec.gov.ph" target="_blank" rel="noopener noreferrer" class="source-link source-link-with-popup" data-source="COMELEC">Commission on Elections (COMELEC)</a> - Official congressional district boundaries and electoral district maps, <a href="https://www.congress.gov.ph" target="_blank" rel="noopener noreferrer" class="source-link source-link-with-popup" data-source="House of Representatives">House of Representatives</a> - Congressional district assignments and representative listings (17th-20th Congress, 2016-2025), <a href="https://github.com/OSSPhilippines/geoph" target="_blank" rel="noopener noreferrer" class="source-link">OSSPhilippines/geoph</a> - Geographic boundary data for barangays and municipalities, <a href="https://www.philatlas.com/" target="_blank" rel="noopener noreferrer" class="source-link source-link-with-popup" data-source="PhilAtlas">PhilAtlas</a> - District, municipality, and barangay reference data</span>
+                <span class="text-gray-700 text-xs">Comprehensive congressional district mappings for Philippine
+                    provinces and cities. For provinces, municipalities are mapped to their respective congressional
+                    districts (397 of 417 non-partylist congressmen, 95.2% coverage). For cities, barangays are mapped
+                    using official PSGC data (136 cities with 7,418 barangays). Data combines official government
+                    sources with geographic boundary data from OSSPhilippines/geoph.</span><br>
+                <span class="text-gray-600 text-xs">Used in: District Analysis, Dynasty Projects, Province-District
+                    Filtering, Municipality-District Mapping, Congressman Project Matching</span><br>
+                <span class="text-gray-600 text-xs">Credit: <a href="https://psa.gov.ph/classification/psgc/"
+                        target="_blank" rel="noopener noreferrer" class="source-link source-link-with-popup"
+                        data-source="PSA">Philippine Statistics Authority (PSA)</a> - Philippine Standard Geographic
+                    Code (PSGC) for official municipality and barangay listings, <a href="https://comelec.gov.ph"
+                        target="_blank" rel="noopener noreferrer" class="source-link source-link-with-popup"
+                        data-source="COMELEC">Commission on Elections (COMELEC)</a> - Official congressional district
+                    boundaries and electoral district maps, <a href="https://www.congress.gov.ph" target="_blank"
+                        rel="noopener noreferrer" class="source-link source-link-with-popup"
+                        data-source="House of Representatives">House of Representatives</a> - Congressional district
+                    assignments and representative listings (17th-20th Congress, 2016-2025), <a
+                        href="https://github.com/OSSPhilippines/geoph" target="_blank" rel="noopener noreferrer"
+                        class="source-link">OSSPhilippines/geoph</a> - Geographic boundary data for barangays and
+                    municipalities, <a href="https://www.philatlas.com/" target="_blank" rel="noopener noreferrer"
+                        class="source-link source-link-with-popup" data-source="PhilAtlas">PhilAtlas</a> - District,
+                    municipality, and barangay reference data. Additional data from <a
+                        href="https://github.com/klescosia/ph-elections2025" target="_blank" rel="noopener noreferrer"
+                        class="source-link">@klescosia/ph-elections2025</a>, <a
+                        href="https://github.com/flores-jacob/philippine-regions-provinces-cities-municipalities-barangays"
+                        target="_blank" rel="noopener noreferrer" class="source-link">@flores-jacob</a>, and <a
+                        href="https://en.wikipedia.org/wiki/20th_Congress_of_the_Philippines#House_of_Representatives_2"
+                        target="_blank" rel="noopener noreferrer" class="source-link">Wikipedia: 20th
+                        Congress</a>.</span>
             </li>
             <li>
                 <strong>SEC (Securities and Exchange Commission):</strong><br>
-                <a href="https://checkwithsec.sec.gov.ph/check-with-sec/index" target="_blank" rel="noopener noreferrer" class="source-link">SEC Philippines - Check with SEC</a><br>
+                <a href="https://checkwithsec.sec.gov.ph/check-with-sec/index" target="_blank" rel="noopener noreferrer"
+                    class="source-link">SEC Philippines - Check with SEC</a><br>
                 <span class="text-gray-600 text-xs">Used in: SEC Contractors Database, Interactive Map</span>
             </li>
             <li>
                 <strong>PhilGEPS Merchant Information:</strong><br>
-                <a href="https://open.philgeps.gov.ph/analytics/load/merchantInfo" target="_blank" rel="noopener noreferrer" class="source-link">PhilGEPS Open Data - Merchant Information</a><br>
-                <span class="text-gray-600 text-xs">Used in: Contractor Registration Details, Merchant Verification</span><br>
-                <span class="text-gray-600 text-xs">Provides registration details and eligibility status for contractors registered in the PhilGEPS system. Data is queried using normalized contractor names from our database to extract registration information and compliance status.</span>
+                <a href="https://open.philgeps.gov.ph/analytics/load/merchantInfo" target="_blank"
+                    rel="noopener noreferrer" class="source-link">PhilGEPS Open Data - Merchant Information</a><br>
+                <span class="text-gray-600 text-xs">Used in: Contractor Registration Details, Merchant
+                    Verification</span><br>
+                <span class="text-gray-600 text-xs">Provides registration details and eligibility status for contractors
+                    registered in the PhilGEPS system. Data is queried using normalized contractor names from our
+                    database to extract registration information and compliance status.</span>
             </li>
             <li>
                 <strong>Political Dynasty Network (Dynasty5):</strong><br>
-                <a href="https://object404.com/dynasty5/" target="_blank" rel="noopener noreferrer" class="source-link">Dynasty5 Network Visualization</a><br>
-                <span class="text-gray-600 text-xs">Used in: Dynasty Analysis, Political Network Visualization</span><br>
-                <span class="text-gray-600 text-xs">Interactive network visualization of political dynasty relationships across regions in the Philippines, sourced from Ateneo School of Government (ASoG) Participate Project and Philippine Statistics Authority poverty data</span>
+                <a href="https://object404.com/dynasty5/" target="_blank" rel="noopener noreferrer"
+                    class="source-link">Dynasty5 Network Visualization</a><br>
+                <span class="text-gray-600 text-xs">Used in: Dynasty Analysis, Political Network
+                    Visualization</span><br>
+                <span class="text-gray-600 text-xs">Interactive network visualization of political dynasty relationships
+                    across regions in the Philippines, sourced from Ateneo School of Government (ASoG) Participate
+                    Project and Philippine Statistics Authority poverty data</span>
             </li>
         </ul>
     </div>
@@ -214,44 +296,92 @@
         <ul class="source-list">
             <li>
                 <strong>People's Budget Coalition (PBC):</strong><br>
-                <span class="text-gray-700 text-xs">2026 Budget Analysis (GAB 2026). Used for exploratory charts in the NEP → GAB 2026 tab.</span><br>
+                <span class="text-gray-700 text-xs">2026 Budget Analysis (GAB 2026). Used for exploratory charts in the
+                    NEP → GAB 2026 tab.</span><br>
                 <span class="text-gray-600 text-xs">Credit: People's Budget Coalition (PBC)</span>
             </li>
             <li>
                 <strong>Senator Relationships Data:</strong><br>
-                <span class="text-gray-700 text-xs">Additional senator family relationships data extracted from OCR images. Used in: Dynasty Analysis, Relationship Constellations.</span><br>
-                <span class="text-gray-600 text-xs">Credit: inyongmaasahan (<a href="mailto:inyongmaaasahan@gmail.com" class="source-link">inyongmaaasahan@gmail.com</a>)</span>
+                <span class="text-gray-700 text-xs">Additional senator family relationships data extracted from OCR
+                    images. Used in: Dynasty Analysis, Relationship Constellations.</span><br>
+                <span class="text-gray-600 text-xs">Credit: inyongmaasahan (<a href="mailto:inyongmaaasahan@gmail.com"
+                        class="source-link">inyongmaaasahan@gmail.com</a>)</span>
             </li>
             <li>
                 <strong>Records of flood-control contractors (PCIJ, 2025):</strong><br>
-                <span class="text-gray-700 text-xs">Primary investigative basis for contractor ownership, valuations, and joint ventures powering dynasty contractor profiles and `/integrated` tabs.</span><br>
-                <span class="text-gray-600 text-xs">Credit: <a href="https://pcij.org/2025/08/31/5-reveals-from-the-flood-control-data/" target="_blank" rel="noopener noreferrer" class="source-link source-link-with-popup" data-source="PCIJ Flood Control">Philippine Center for Investigative Journalism</a></span>
+                <span class="text-gray-700 text-xs">Primary investigative basis for contractor ownership, valuations,
+                    and joint ventures powering dynasty contractor profiles and `/integrated` tabs.</span><br>
+                <span class="text-gray-600 text-xs">Credit: <a
+                        href="https://pcij.org/2025/08/31/5-reveals-from-the-flood-control-data/" target="_blank"
+                        rel="noopener noreferrer" class="source-link source-link-with-popup"
+                        data-source="PCIJ Flood Control">Philippine Center for Investigative Journalism</a></span>
             </li>
             <li>
                 <strong>Rappler Politicontractors Tracker (2025):</strong><br>
-                <a href="https://www.rappler.com/newsbreak/investigative/politicians-government-contractors-connections-map/" target="_blank" rel="noopener noreferrer" class="source-link">TRACKER: Public officials with links to government contractors</a><br>
-                <span class="text-gray-600 text-xs">Used in: Contractor verification for congressmen with zero-cache entries, cross-referencing beneficial ownership of firms such as A.D. Gonzales Jr. Construction, Sunwest Construction, and Quezon-based Suarez companies. "Politicontractors" terminology originates from this Rappler series.</span><br>
-                <span class="text-gray-600 text-xs">Investigative map maintained by Rappler that documents public officials and the construction firms owned by their families. Provides vetted leads for integrating contractor patterns into autocomplete filters and cache generation.</span>
+                <a href="https://www.rappler.com/newsbreak/investigative/politicians-government-contractors-connections-map/"
+                    target="_blank" rel="noopener noreferrer" class="source-link">TRACKER: Public officials with links
+                    to government contractors</a><br>
+                <span class="text-gray-600 text-xs">Used in: Contractor verification for congressmen with zero-cache
+                    entries, cross-referencing beneficial ownership of firms such as A.D. Gonzales Jr. Construction,
+                    Sunwest Construction, and Quezon-based Suarez companies. "Politicontractors" terminology originates
+                    from this Rappler series.</span><br>
+                <span class="text-gray-600 text-xs">Investigative map maintained by Rappler that documents public
+                    officials and the construction firms owned by their families. Provides vetted leads for integrating
+                    contractor patterns into autocomplete filters and cache generation.</span>
             </li>
             <li>
                 <strong>Contractor-Dynasty Relationship Data:</strong><br>
-                <span class="text-gray-700 text-xs">Investigative data on construction companies and contractors linked to political dynasties. Used in: Dynasty Analysis, Relationship Constellations, Contractor Connections.</span><br>
-                <span class="text-gray-600 text-xs">Credit: <a href="https://www.rappler.com/newsbreak/investigative/politicians-government-contractors-connections-map/" target="_blank" rel="noopener noreferrer" class="source-link source-link-with-popup" data-source="Rappler">Rappler</a>, <a href="https://www.inquirer.net/" target="_blank" rel="noopener noreferrer" class="source-link source-link-with-popup" data-source="Philippine Daily Inquirer">Philippine Daily Inquirer</a>, <a href="https://manilastandard.net/" target="_blank" rel="noopener noreferrer" class="source-link source-link-with-popup" data-source="Manila Standard">Manila Standard</a>, <a href="https://www.manilatimes.net/" target="_blank" rel="noopener noreferrer" class="source-link source-link-with-popup" data-source="Manila Times">Manila Times</a>, <a href="https://www.wikipedia.org/" target="_blank" rel="noopener noreferrer" class="source-link source-link-with-popup" data-source="Wikipedia">Wikipedia</a>, <a href="https://bilyonaryo.com/" target="_blank" rel="noopener noreferrer" class="source-link source-link-with-popup" data-source="Bilyonaryo">Bilyonaryo</a>, <a href="https://www.philstar.com/" target="_blank" rel="noopener noreferrer" class="source-link source-link-with-popup" data-source="Philippine STAR">Philippine Star</a>, <a href="https://www.abs-cbn.com/" target="_blank" rel="noopener noreferrer" class="source-link source-link-with-popup" data-source="ABS-CBN">ABS-CBN</a>, <a href="https://pcij.org/" target="_blank" rel="noopener noreferrer" class="source-link source-link-with-popup" data-source="PCIJ Flood Control">PCIJ</a> - Investigative reporting and reference materials used to validate contractor-family linkages.</span>
+                <span class="text-gray-700 text-xs">Investigative data on construction companies and contractors linked
+                    to political dynasties. Used in: Dynasty Analysis, Relationship Constellations, Contractor
+                    Connections.</span><br>
+                <span class="text-gray-600 text-xs">Credit: <a
+                        href="https://www.rappler.com/newsbreak/investigative/politicians-government-contractors-connections-map/"
+                        target="_blank" rel="noopener noreferrer" class="source-link source-link-with-popup"
+                        data-source="Rappler">Rappler</a>, <a href="https://www.inquirer.net/" target="_blank"
+                        rel="noopener noreferrer" class="source-link source-link-with-popup"
+                        data-source="Philippine Daily Inquirer">Philippine Daily Inquirer</a>, <a
+                        href="https://manilastandard.net/" target="_blank" rel="noopener noreferrer"
+                        class="source-link source-link-with-popup" data-source="Manila Standard">Manila Standard</a>, <a
+                        href="https://www.manilatimes.net/" target="_blank" rel="noopener noreferrer"
+                        class="source-link source-link-with-popup" data-source="Manila Times">Manila Times</a>, <a
+                        href="https://www.wikipedia.org/" target="_blank" rel="noopener noreferrer"
+                        class="source-link source-link-with-popup" data-source="Wikipedia">Wikipedia</a>, <a
+                        href="https://bilyonaryo.com/" target="_blank" rel="noopener noreferrer"
+                        class="source-link source-link-with-popup" data-source="Bilyonaryo">Bilyonaryo</a>, <a
+                        href="https://www.philstar.com/" target="_blank" rel="noopener noreferrer"
+                        class="source-link source-link-with-popup" data-source="Philippine STAR">Philippine Star</a>, <a
+                        href="https://www.abs-cbn.com/" target="_blank" rel="noopener noreferrer"
+                        class="source-link source-link-with-popup" data-source="ABS-CBN">ABS-CBN</a>, <a
+                        href="https://pcij.org/" target="_blank" rel="noopener noreferrer"
+                        class="source-link source-link-with-popup" data-source="PCIJ Flood Control">PCIJ</a> -
+                    Investigative reporting and reference materials used to validate contractor-family linkages.</span>
             </li>
             <li>
                 <strong>InfraWatch Augmented Projects (2016-2025):</strong><br>
-                <span class="text-gray-700 text-xs">Supplemental infrastructure records used to highlight projects without matching PhilGEPS contracts and to enrich `/philgeps` search results.</span><br>
-                <span class="text-gray-600 text-xs">Credit: <a href="https://infrastructure.dpwh.gov.ph/" target="_blank" rel="noopener noreferrer" class="source-link">DPWH Infrastructure Status Microsite</a></span>
+                <span class="text-gray-700 text-xs">Supplemental infrastructure records used to highlight projects
+                    without matching PhilGEPS contracts and to enrich `/philgeps` search results.</span><br>
+                <span class="text-gray-600 text-xs">Credit: <a href="https://infrastructure.dpwh.gov.ph/"
+                        target="_blank" rel="noopener noreferrer" class="source-link">DPWH Infrastructure Status
+                        Microsite</a></span>
             </li>
             <li>
                 <strong>DPWH Infrastructure Projects Data Pipeline:</strong><br>
-                <span class="text-gray-700 text-xs">Automated scraping and parsing pipeline that converts DPWH infrastructure project tables into structured CSV datasets, providing contract coverage from 2016-2025 for validation of InfraWatch red-flag indicators.</span><br>
-                <span class="text-gray-600 text-xs">Credit: <a href="https://github.com/csiiiv/dpwh-infra-data-scraper" target="_blank" rel="noopener noreferrer" class="source-link">dpwh-infra-data-scraper</a> by csiiiv</span>
+                <span class="text-gray-700 text-xs">Automated scraping and parsing pipeline that converts DPWH
+                    infrastructure project tables into structured CSV datasets, providing contract coverage from
+                    2016-2025 for validation of InfraWatch red-flag indicators.</span><br>
+                <span class="text-gray-600 text-xs">Credit: <a href="https://github.com/csiiiv/dpwh-infra-data-scraper"
+                        target="_blank" rel="noopener noreferrer" class="source-link">dpwh-infra-data-scraper</a> and <a
+                        href="https://github.com/csiiiv/dpwh-transparency-data-api-scraper" target="_blank"
+                        rel="noopener noreferrer" class="source-link">dpwh-transparency-data-api-scraper</a> by
+                    csiiiv</span>
             </li>
             <li>
                 <strong>Flood Project Red Flag Classification:</strong><br>
-                <span class="text-gray-700 text-xs">Additional flood project risk indicators and qualitative assessments layered onto DPWH datasets to surface red-flag items in `/flood` dashboards.</span><br>
-                <span class="text-gray-600 text-xs">Credit: <a href="https://www.facebook.com/share/p/17qrBUEgvG/" target="_blank" rel="noopener noreferrer" class="source-link">UP-NCPAG GRIT Labs (NCPAGKilatis)</a></span>
+                <span class="text-gray-700 text-xs">Additional flood project risk indicators and qualitative assessments
+                    layered onto DPWH datasets to surface red-flag items in `/flood` dashboards.</span><br>
+                <span class="text-gray-600 text-xs">Credit: <a href="https://www.facebook.com/share/p/17qrBUEgvG/"
+                        target="_blank" rel="noopener noreferrer" class="source-link">UP-NCPAG GRIT Labs
+                        (NCPAGKilatis)</a></span>
             </li>
         </ul>
     </div>
@@ -265,9 +395,12 @@
             <li><strong>Flood Control Projects:</strong> Multi-year DPWH infrastructure projects</li>
             <li><strong>DIME Projects:</strong> 2016-2026 infrastructure monitoring data</li>
             <li><strong>Contractor Data:</strong> Active SEC-registered contractors with government projects</li>
-            <li><strong>Raw Philippine Data:</strong> 2004-2016 political memberships, legislative documents (various congress sessions)</li>
+            <li><strong>Raw Philippine Data:</strong> 2004-2016 political memberships, legislative documents (various
+                congress sessions)</li>
             <li><strong>Political Dynasty Data:</strong> 2004-2016 local government political dynasty records</li>
-            <li><strong>Congressional District Mappings:</strong> Working coverage of 85 provinces and 22 cities with municipality-to-district and barangay-to-district mappings across 256 districts (7,418 barangays) supporting 416 of 417 non-partylist congressmen (99.8% coverage)</li>
+            <li><strong>Congressional District Mappings:</strong> Working coverage of 85 provinces and 22 cities with
+                municipality-to-district and barangay-to-district mappings across 256 districts (7,418 barangays)
+                supporting 416 of 417 non-partylist congressmen (99.8% coverage)</li>
         </ul>
     </div>
 
@@ -280,39 +413,53 @@
             <li><strong>Flood Control Projects:</strong> DPWH flood control infrastructure nationwide</li>
             <li><strong>DIME Projects:</strong> 12,870+ major infrastructure projects worth ₱740B+</li>
             <li><strong>SEC Contractors:</strong> 2,100+ verified contractors with SEC registration data</li>
-            <li><strong>PhilGEPS Data:</strong> Philippine government procurement data from 2000-2025, providing comprehensive transparency on contract awards and government transactions</li>
-            <li><strong>Raw Philippine Data:</strong> 45,400+ persons, 86,200+ political memberships, and legislative documents (Senate and House bills) available for semantic search and analysis</li>
-            <li><strong>Political Dynasty Records:</strong> 86,234 political dynasty records across all 82 provinces (2004-2016)</li>
-            <li><strong>GeoJSON Boundaries:</strong> Complete province and regional boundary data for interactive mapping</li>
-            <li><strong>Congressional District Mappings:</strong> 256 districts mapped across 85 provinces and 22 cities, with municipality-to-district and barangay-to-district coverage (7,418 barangays) supporting 416 of 417 non-partylist congressmen (99.8% coverage)</li>
+            <li><strong>PhilGEPS Data:</strong> Philippine government procurement data from 2000-2025, providing
+                comprehensive transparency on contract awards and government transactions</li>
+            <li><strong>Raw Philippine Data:</strong> 45,400+ persons, 86,200+ political memberships, and legislative
+                documents (Senate and House bills) available for semantic search and analysis</li>
+            <li><strong>Political Dynasty Records:</strong> 86,234 political dynasty records across all 82 provinces
+                (2004-2016)</li>
+            <li><strong>GeoJSON Boundaries:</strong> Complete province and regional boundary data for interactive
+                mapping</li>
+            <li><strong>Congressional District Mappings:</strong> 256 districts mapped across 85 provinces and 22
+                cities, with municipality-to-district and barangay-to-district coverage (7,418 barangays) supporting 416
+                of 417 non-partylist congressmen (99.8% coverage)</li>
         </ul>
     </div>
 
     <!-- Methodology -->
     <div class="source-section">
         <h3>🔬 Methodology & Processing</h3>
-        <p class="text-gray-700 mb-4 text-xs">All data undergoes rigorous processing to ensure accuracy and usability:</p>
+        <p class="text-gray-700 mb-4 text-xs">All data undergoes rigorous processing to ensure accuracy and usability:
+        </p>
         <ul class="source-list">
-            <li><strong>Data Cleaning:</strong> Removal of duplicates, standardization of formats, and validation of entries</li>
-            <li><strong>Fuzzy Matching:</strong> Advanced string matching algorithms to correlate contractor names across different datasets</li>
+            <li><strong>Data Cleaning:</strong> Removal of duplicates, standardization of formats, and validation of
+                entries</li>
+            <li><strong>Fuzzy Matching:</strong> Advanced string matching algorithms to correlate contractor names
+                across different datasets</li>
             <li><strong>Geolocation:</strong> Coordinate validation and mapping for spatial analysis</li>
             <li><strong>SEC Verification:</strong> Automated scraping and verification of contractor registrations</li>
-            <li><strong>Correlation Analysis:</strong> Cross-referencing datasets to identify patterns and ensure consistency</li>
+            <li><strong>Correlation Analysis:</strong> Cross-referencing datasets to identify patterns and ensure
+                consistency</li>
         </ul>
     </div>
 
     <!-- Academic References -->
     <div class="source-section">
         <h3>📚 Academic References</h3>
-        <p class="text-gray-700 mb-4 text-xs">Our corruption risk analysis is based on peer-reviewed academic research:</p>
+        <p class="text-gray-700 mb-4 text-xs">Our corruption risk analysis is based on peer-reviewed academic research:
+        </p>
         <ul class="source-list">
             <li>
                 <strong>EOGO Corruption Risk Analysis:</strong><br>
-                <em>"Corruption risk and political dynasties: exploring the links using public procurement data in the Philippines"</em><br>
+                <em>"Corruption risk and political dynasties: exploring the links using public procurement data in the
+                    Philippines"</em><br>
                 <strong>Authors:</strong> Daniel Bruno Davis, Ronald U. Mendoza, Jurel K. Yap<br>
                 <strong>Journal:</strong> Economics of Governance (2023)<br>
-                <strong>DOI:</strong> <a href="https://doi.org/10.1007/s10101-023-00306-4" target="_blank" rel="noopener noreferrer" class="source-link">https://doi.org/10.1007/s10101-023-00306-4</a><br>
-                <span class="text-gray-600 text-xs">Used in: EOGO Corruption Risk Analysis, Political Dynasty Impact Assessment, CRI Implementation</span>
+                <strong>DOI:</strong> <a href="https://doi.org/10.1007/s10101-023-00306-4" target="_blank"
+                    rel="noopener noreferrer" class="source-link">https://doi.org/10.1007/s10101-023-00306-4</a><br>
+                <span class="text-gray-600 text-xs">Used in: EOGO Corruption Risk Analysis, Political Dynasty Impact
+                    Assessment, CRI Implementation</span>
             </li>
         </ul>
     </div>
@@ -324,15 +471,18 @@
         <ul class="source-list">
             <li>
                 <strong>Main Repository:</strong><br>
-                <a href="https://github.com/bettergovph/open-data-visualization" target="_blank" rel="noopener noreferrer" class="source-link">@bettergovph/open-data-visualization</a>
+                <a href="https://github.com/bettergovph/open-data-visualization" target="_blank"
+                    rel="noopener noreferrer" class="source-link">@bettergovph/open-data-visualization</a>
             </li>
             <li>
                 <strong>Maintainer:</strong><br>
-                <a href="https://github.com/joebertj" target="_blank" rel="noopener noreferrer" class="source-link">@joebertj</a>
+                <a href="https://github.com/joebertj" target="_blank" rel="noopener noreferrer"
+                    class="source-link">@joebertj</a>
             </li>
             <li>
                 <strong>BDFL:</strong><br>
-                <a href="https://github.com/jasontorres" target="_blank" rel="noopener noreferrer" class="source-link">@jasontorres</a>
+                <a href="https://github.com/jasontorres" target="_blank" rel="noopener noreferrer"
+                    class="source-link">@jasontorres</a>
             </li>
         </ul>
     </div>
@@ -340,287 +490,289 @@
     <!-- Contact & Contributions -->
     <div class="source-section">
         <h3>🤝 Contact & Contributions</h3>
-        <p class="text-gray-700 mb-4 text-xs">We welcome contributions, corrections, and suggestions to improve data quality and transparency.</p>
-        <p class="text-gray-700 text-xs">For questions about data sources or to report issues, please visit our GitHub repository or contact the maintainers.</p>
+        <p class="text-gray-700 mb-4 text-xs">We welcome contributions, corrections, and suggestions to improve data
+            quality and transparency.</p>
+        <p class="text-gray-700 text-xs">For questions about data sources or to report issues, please visit our GitHub
+            repository or contact the maintainers.</p>
     </div>
 </section>
 
 <script>
-// Sources data loaded from API (database/sources.csv)
-let SOURCES_DATA = {};
+    // Sources data loaded from API (database/sources.csv)
+    let SOURCES_DATA = {};
 
-// Load sources from API
-async function loadSourcesData() {
-    try {
-        const response = await fetch('/api/sources');
-        const data = await response.json();
-        
-        if (data.success && data.sources) {
-            SOURCES_DATA = data.sources;
-            console.log(`✅ Loaded ${data.total_sources} sources with ${data.total_articles} articles`);
-        } else {
-            console.warn('⚠️ Failed to load sources from API, using empty data');
+    // Load sources from API
+    async function loadSourcesData() {
+        try {
+            const response = await fetch('/api/sources');
+            const data = await response.json();
+
+            if (data.success && data.sources) {
+                SOURCES_DATA = data.sources;
+                console.log(`✅ Loaded ${data.total_sources} sources with ${data.total_articles} articles`);
+            } else {
+                console.warn('⚠️ Failed to load sources from API, using empty data');
+                SOURCES_DATA = {};
+            }
+        } catch (error) {
+            console.error('❌ Error loading sources:', error);
             SOURCES_DATA = {};
         }
-    } catch (error) {
-        console.error('❌ Error loading sources:', error);
-        SOURCES_DATA = {};
     }
-}
 
-// Filter out Facebook/YouTube links if not from legitimate news sources
-function isValidNewsSource(url, sourceName) {
-    if (url.includes('facebook.com') || url.includes('youtube.com')) {
-        const legitSources = ['VOV Philippines', 'Philippine STAR', 'Aviso Zamboanga', 'Philippine Daily Inquirer'];
-        return legitSources.some(legit => sourceName.includes(legit));
+    // Filter out Facebook/YouTube links if not from legitimate news sources
+    function isValidNewsSource(url, sourceName) {
+        if (url.includes('facebook.com') || url.includes('youtube.com')) {
+            const legitSources = ['VOV Philippines', 'Philippine STAR', 'Aviso Zamboanga', 'Philippine Daily Inquirer'];
+            return legitSources.some(legit => sourceName.includes(legit));
+        }
+        // Filter out generic homepage URLs (just domain with trailing slash or no path)
+        const genericHomepagePatterns = [
+            /^https?:\/\/(www\.)?manilastandard\.net\/?$/i,
+            /^https?:\/\/(www\.)?inquirer\.net\/?$/i,
+            /^https?:\/\/(www\.)?manilatimes\.net\/?$/i,
+            /^https?:\/\/(www\.)?philstar\.com\/?$/i,
+            /^https?:\/\/(www\.)?rappler\.com\/?$/i,
+            /^https?:\/\/(www\.)?bilyonaryo\.com\/?$/i,
+            /^https?:\/\/(www\.)?wikipedia\.org\/?$/i,
+            /^https?:\/\/(www\.)?abs-cbn\.com\/?$/i,
+            /^https?:\/\/(www\.)?pcij\.org\/?$/i
+        ];
+        for (const pattern of genericHomepagePatterns) {
+            if (pattern.test(url)) {
+                return false;
+            }
+        }
+        return true;
     }
-    // Filter out generic homepage URLs (just domain with trailing slash or no path)
-    const genericHomepagePatterns = [
-        /^https?:\/\/(www\.)?manilastandard\.net\/?$/i,
-        /^https?:\/\/(www\.)?inquirer\.net\/?$/i,
-        /^https?:\/\/(www\.)?manilatimes\.net\/?$/i,
-        /^https?:\/\/(www\.)?philstar\.com\/?$/i,
-        /^https?:\/\/(www\.)?rappler\.com\/?$/i,
-        /^https?:\/\/(www\.)?bilyonaryo\.com\/?$/i,
-        /^https?:\/\/(www\.)?wikipedia\.org\/?$/i,
-        /^https?:\/\/(www\.)?abs-cbn\.com\/?$/i,
-        /^https?:\/\/(www\.)?pcij\.org\/?$/i
-    ];
-    for (const pattern of genericHomepagePatterns) {
-        if (pattern.test(url)) {
-            return false;
+
+    // Create and show popup
+    function showSourcePopup(sourceName, linkElement) {
+        const sources = SOURCES_DATA[sourceName];
+        if (!sources || sources.length === 0) return;
+
+        const validSources = sources.filter(s => isValidNewsSource(s.url, sourceName));
+        if (validSources.length === 0) return;
+
+        const existingPopup = document.querySelector('.source-popup');
+        if (existingPopup) {
+            existingPopup.remove();
+        }
+
+        const popup = document.createElement('div');
+        popup.className = 'source-popup show';
+        popup.innerHTML = `<h4>${sourceName} Articles</h4>`;
+
+        const list = document.createElement('div');
+        validSources.forEach(source => {
+            const item = document.createElement('div');
+            item.className = 'source-popup-item';
+            const link = document.createElement('a');
+            link.href = source.url;
+            link.target = '_blank';
+            link.rel = 'noopener noreferrer';
+            link.textContent = source.title;
+            item.appendChild(link);
+            if (source.date) {
+                const date = document.createElement('div');
+                date.className = 'source-date';
+                date.textContent = `Published: ${source.date}`;
+                item.appendChild(date);
+            }
+            list.appendChild(item);
+        });
+        popup.appendChild(list);
+
+        document.body.appendChild(popup);
+        const rect = linkElement.getBoundingClientRect();
+        const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+        const scrollLeft = window.pageXOffset || document.documentElement.scrollLeft;
+
+        popup.style.top = (rect.bottom + scrollTop + 5) + 'px';
+        popup.style.left = (rect.left + scrollLeft) + 'px';
+
+        const popupRect = popup.getBoundingClientRect();
+        if (popupRect.right > window.innerWidth) {
+            popup.style.left = (window.innerWidth - popupRect.width - 10) + 'px';
+        }
+        if (popupRect.bottom > window.innerHeight) {
+            popup.style.top = (rect.top + scrollTop - popupRect.height - 5) + 'px';
         }
     }
-    return true;
-}
 
-// Create and show popup
-function showSourcePopup(sourceName, linkElement) {
-    const sources = SOURCES_DATA[sourceName];
-    if (!sources || sources.length === 0) return;
-    
-    const validSources = sources.filter(s => isValidNewsSource(s.url, sourceName));
-    if (validSources.length === 0) return;
-    
-    const existingPopup = document.querySelector('.source-popup');
-    if (existingPopup) {
-        existingPopup.remove();
-    }
-    
-    const popup = document.createElement('div');
-    popup.className = 'source-popup show';
-    popup.innerHTML = `<h4>${sourceName} Articles</h4>`;
-    
-    const list = document.createElement('div');
-    validSources.forEach(source => {
-        const item = document.createElement('div');
-        item.className = 'source-popup-item';
-        const link = document.createElement('a');
-        link.href = source.url;
-        link.target = '_blank';
-        link.rel = 'noopener noreferrer';
-        link.textContent = source.title;
-        item.appendChild(link);
-        if (source.date) {
-            const date = document.createElement('div');
-            date.className = 'source-date';
-            date.textContent = `Published: ${source.date}`;
-            item.appendChild(date);
+    function hideSourcePopup() {
+        const popup = document.querySelector('.source-popup');
+        if (popup) {
+            popup.remove();
         }
-        list.appendChild(item);
-    });
-    popup.appendChild(list);
-    
-    document.body.appendChild(popup);
-    const rect = linkElement.getBoundingClientRect();
-    const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
-    const scrollLeft = window.pageXOffset || document.documentElement.scrollLeft;
-    
-    popup.style.top = (rect.bottom + scrollTop + 5) + 'px';
-    popup.style.left = (rect.left + scrollLeft) + 'px';
-    
-    const popupRect = popup.getBoundingClientRect();
-    if (popupRect.right > window.innerWidth) {
-        popup.style.left = (window.innerWidth - popupRect.width - 10) + 'px';
     }
-    if (popupRect.bottom > window.innerHeight) {
-        popup.style.top = (rect.top + scrollTop - popupRect.height - 5) + 'px';
-    }
-}
 
-function hideSourcePopup() {
-    const popup = document.querySelector('.source-popup');
-    if (popup) {
-        popup.remove();
-    }
-}
+    document.addEventListener('DOMContentLoaded', async function () {
+        await loadSourcesData();
 
-document.addEventListener('DOMContentLoaded', async function() {
-    await loadSourcesData();
+        if (!SOURCES_DATA['Sleeper Agent']) {
+            SOURCES_DATA['Sleeper Agent'] = [];
+        }
+        const sleeperSources = SOURCES_DATA['Sleeper Agent'];
+        const archiveFiles = [
+            { base: 'https://archive.org/download/20251016.govph.dpwh.adscurrentarchive.raw/', name: '20251016.govph.dpwh.adscurrentarchive.raw.001.zip' },
+            { base: 'https://archive.org/download/20251016.govph.dpwh.adscurrentarchive.raw/', name: '20251016.govph.dpwh.adscurrentarchive.raw.002.zip' },
+            { base: 'https://archive.org/download/20251016.govph.dpwh.adscurrentarchive.raw/', name: '20251016.govph.dpwh.adscurrentarchive.raw.003.zip' },
+            { base: 'https://archive.org/download/20251016.govph.dpwh.adscurrentarchive.raw/', name: '20251016.govph.dpwh.adscurrentarchive.raw.004.zip' },
+            { base: 'https://archive.org/download/20251016.govph.dpwh.adscurrentarchive.raw/', name: '20251016.govph.dpwh.adscurrentarchive.raw.005.zip' },
+            { base: 'https://archive.org/download/20251016.govph.dpwh.adscurrentarchive.raw/', name: '20251016.govph.dpwh.adscurrentarchive.raw.006.zip' },
+            { base: 'https://archive.org/download/20251016.govph.dpwh.adscurrentarchive.raw/', name: '20251016.govph.dpwh.adscurrentarchive.raw.007.zip' },
+            { base: 'https://archive.org/download/20251016.govph.dpwh.adscurrentarchive.raw/', name: '20251016.govph.dpwh.adscurrentarchive.raw.008.zip' },
+            { base: 'https://archive.org/download/20251016.govph.dpwh.adscurrentarchive.raw/', name: '20251016.govph.dpwh.adscurrentarchive.raw.009.zip' },
+            { base: 'https://archive.org/download/20251016.govph.dpwh.adscurrentarchive.raw/', name: '20251016.govph.dpwh.adscurrentarchive.raw.010.zip' },
+            { base: 'https://archive.org/download/20251016.govph.dpwh.adscurrentarchive.raw/', name: '20251016.govph.dpwh.adscurrentarchive.raw.011.zip' },
+            { base: 'https://archive.org/download/20251016.govph.dpwh.adscurrentarchive.raw/', name: '20251016.govph.dpwh.adscurrentarchive.raw.012.zip' },
+            { base: 'https://archive.org/download/20251016.govph.dpwh.adscurrentarchive.raw/', name: '20251016.govph.dpwh.adscurrentarchive.raw.013.zip' },
+            { base: 'https://archive.org/download/20251016.govph.dpwh.adscurrentarchive.raw/', name: '20251016.govph.dpwh.adscurrentarchive.raw.014.zip' },
+            { base: 'https://archive.org/download/20251016.govph.dpwh.adscurrentarchive.raw/', name: '20251016.govph.dpwh.adscurrentarchive.raw.015.zip' },
+            { base: 'https://archive.org/download/20251016.govph.dpwh.adscurrentarchive.raw/', name: '20251016.govph.dpwh.adscurrentarchive.raw.016.zip' },
+            { base: 'https://archive.org/download/20251016.govph.dpwh.adscurrentarchive.raw/', name: '20251016.govph.dpwh.adscurrentarchive.raw.017.zip' },
+            { base: 'https://archive.org/download/20251016.govph.dpwh.adscurrentarchive.raw/', name: '20251016.govph.dpwh.adscurrentarchive.raw.018.zip' },
+            { base: 'https://archive.org/download/20251016.govph.dpwh.adscurrentarchive.raw/', name: '20251016.govph.dpwh.adscurrentarchive.raw.019.zip' },
+            { base: 'https://archive.org/download/20251016.govph.dpwh.adscurrentarchive.raw/', name: '20251016.govph.dpwh.adscurrentarchive.raw.020.zip' },
+            { base: 'https://archive.org/download/20251016.govph.dpwh.adscurrentarchive.raw/', name: '20251016.govph.dpwh.adscurrentarchive.raw.021.zip' },
+            { base: 'https://archive.org/download/20251016.govph.dpwh.adscurrentarchive.raw/', name: '20251016.govph.dpwh.adscurrentarchive.raw.022.zip' },
+            { base: 'https://archive.org/download/20251016.govph.dpwh.adscurrentarchive.raw/', name: '20251016.govph.dpwh.adscurrentarchive.raw.023.zip' },
+            { base: 'https://archive.org/download/20251016.govph.dpwh.adscurrentarchive.raw/', name: '20251016.govph.dpwh.adscurrentarchive.raw.024.zip' },
+            { base: 'https://archive.org/download/20251016.govph.dpwh.adscurrentarchive.raw/', name: '20251016.govph.dpwh.adscurrentarchive.raw.025.zip' },
+            { base: 'https://archive.org/download/20251016.govph.dpwh.adscurrentarchive.raw/', name: '20251016.govph.dpwh.adscurrentarchive.raw.026.zip' },
+            { base: 'https://archive.org/download/20251016.govph.dpwh.adscurrentarchive.raw/', name: '20251016.govph.dpwh.adscurrentarchive.raw.027.zip' },
+            { base: 'https://archive.org/download/20251016.govph.dpwh.adscurrentarchive.raw/', name: '20251016.govph.dpwh.adscurrentarchive.raw.028.zip' },
+            { base: 'https://archive.org/download/20251016.govph.dpwh.adscurrentarchive.raw/', name: '20251016.govph.dpwh.adscurrentarchive.raw.029.zip' },
+            { base: 'https://archive.org/download/20251016.govph.dpwh.adscurrentarchive.raw/', name: '20251016.govph.dpwh.adscurrentarchive.raw.030.zip' },
+            { base: 'https://archive.org/download/20251016.govph.dpwh.adscurrentarchive.raw/', name: '20251016.govph.dpwh.adscurrentarchive.raw.031.zip' },
+            { base: 'https://archive.org/download/20251016.govph.dpwh.adscurrentarchive.raw/', name: '20251016.govph.dpwh.adscurrentarchive.raw_archive.torrent' },
+            { base: 'https://archive.org/download/20251016.govph.dpwh.adscurrentarchive.raw/', name: '20251016.govph.dpwh.adscurrentarchive.raw_files.xml' },
+            { base: 'https://archive.org/download/20251016.govph.dpwh.adscurrentarchive.raw/', name: '20251016.govph.dpwh.adscurrentarchive.raw_meta.sqlite' },
+            { base: 'https://archive.org/download/20251016.govph.dpwh.adscurrentarchive.raw/', name: '20251016.govph.dpwh.adscurrentarchive.raw_meta.xml' },
+            { base: 'https://archive.org/download/20251016.govph.dpwh.adscurrentarchive.raw.02/', name: '20251016.govph.dpwh.adscurrentarchive.raw.032.zip' },
+            { base: 'https://archive.org/download/20251016.govph.dpwh.adscurrentarchive.raw.02/', name: '20251016.govph.dpwh.adscurrentarchive.raw.033.zip' },
+            { base: 'https://archive.org/download/20251016.govph.dpwh.adscurrentarchive.raw.02/', name: '20251016.govph.dpwh.adscurrentarchive.raw.034.zip' },
+            { base: 'https://archive.org/download/20251016.govph.dpwh.adscurrentarchive.raw.02/', name: '20251016.govph.dpwh.adscurrentarchive.raw.035.zip' },
+            { base: 'https://archive.org/download/20251016.govph.dpwh.adscurrentarchive.raw.02/', name: '20251016.govph.dpwh.adscurrentarchive.raw.036.zip' },
+            { base: 'https://archive.org/download/20251016.govph.dpwh.adscurrentarchive.raw.02/', name: '20251016.govph.dpwh.adscurrentarchive.raw.037.zip' },
+            { base: 'https://archive.org/download/20251016.govph.dpwh.adscurrentarchive.raw.02/', name: '20251016.govph.dpwh.adscurrentarchive.raw.038.zip' },
+            { base: 'https://archive.org/download/20251016.govph.dpwh.adscurrentarchive.raw.02/', name: '20251016.govph.dpwh.adscurrentarchive.raw.039.zip' },
+            { base: 'https://archive.org/download/20251016.govph.dpwh.adscurrentarchive.raw.02/', name: '20251016.govph.dpwh.adscurrentarchive.raw.040.zip' },
+            { base: 'https://archive.org/download/20251016.govph.dpwh.adscurrentarchive.raw.02/', name: '20251016.govph.dpwh.adscurrentarchive.raw.041.zip' },
+            { base: 'https://archive.org/download/20251016.govph.dpwh.adscurrentarchive.raw.02/', name: '20251016.govph.dpwh.adscurrentarchive.raw.042.zip' },
+            { base: 'https://archive.org/download/20251016.govph.dpwh.adscurrentarchive.raw.02/', name: '20251016.govph.dpwh.adscurrentarchive.raw.02_archive.torrent' },
+            { base: 'https://archive.org/download/20251016.govph.dpwh.adscurrentarchive.raw.02/', name: '20251016.govph.dpwh.adscurrentarchive.raw.02_files.xml' },
+            { base: 'https://archive.org/download/20251016.govph.dpwh.adscurrentarchive.raw.02/', name: '20251016.govph.dpwh.adscurrentarchive.raw.02_meta.sqlite' },
+            { base: 'https://archive.org/download/20251016.govph.dpwh.adscurrentarchive.raw.02/', name: '20251016.govph.dpwh.adscurrentarchive.raw.02_meta.xml' },
+            { base: 'https://archive.org/download/20251016.govph.dpwh.adscurrentarchive.raw.02/', name: '20251016.govph.dpwh.adscurrentarchive.raw.meta.map.zip' }
+        ];
+        archiveFiles.forEach(file => {
+            const fileUrl = `${file.base}${file.name}`;
+            const alreadyAdded = sleeperSources.some(source => source.url === fileUrl);
+            if (!alreadyAdded) {
+                sleeperSources.push({
+                    title: file.name,
+                    url: fileUrl,
+                    date: 'Internet Archive mirror (Oct 16, 2025)'
+                });
+            }
+        });
 
-    if (!SOURCES_DATA['Sleeper Agent']) {
-        SOURCES_DATA['Sleeper Agent'] = [];
-    }
-    const sleeperSources = SOURCES_DATA['Sleeper Agent'];
-    const archiveFiles = [
-        { base: 'https://archive.org/download/20251016.govph.dpwh.adscurrentarchive.raw/', name: '20251016.govph.dpwh.adscurrentarchive.raw.001.zip' },
-        { base: 'https://archive.org/download/20251016.govph.dpwh.adscurrentarchive.raw/', name: '20251016.govph.dpwh.adscurrentarchive.raw.002.zip' },
-        { base: 'https://archive.org/download/20251016.govph.dpwh.adscurrentarchive.raw/', name: '20251016.govph.dpwh.adscurrentarchive.raw.003.zip' },
-        { base: 'https://archive.org/download/20251016.govph.dpwh.adscurrentarchive.raw/', name: '20251016.govph.dpwh.adscurrentarchive.raw.004.zip' },
-        { base: 'https://archive.org/download/20251016.govph.dpwh.adscurrentarchive.raw/', name: '20251016.govph.dpwh.adscurrentarchive.raw.005.zip' },
-        { base: 'https://archive.org/download/20251016.govph.dpwh.adscurrentarchive.raw/', name: '20251016.govph.dpwh.adscurrentarchive.raw.006.zip' },
-        { base: 'https://archive.org/download/20251016.govph.dpwh.adscurrentarchive.raw/', name: '20251016.govph.dpwh.adscurrentarchive.raw.007.zip' },
-        { base: 'https://archive.org/download/20251016.govph.dpwh.adscurrentarchive.raw/', name: '20251016.govph.dpwh.adscurrentarchive.raw.008.zip' },
-        { base: 'https://archive.org/download/20251016.govph.dpwh.adscurrentarchive.raw/', name: '20251016.govph.dpwh.adscurrentarchive.raw.009.zip' },
-        { base: 'https://archive.org/download/20251016.govph.dpwh.adscurrentarchive.raw/', name: '20251016.govph.dpwh.adscurrentarchive.raw.010.zip' },
-        { base: 'https://archive.org/download/20251016.govph.dpwh.adscurrentarchive.raw/', name: '20251016.govph.dpwh.adscurrentarchive.raw.011.zip' },
-        { base: 'https://archive.org/download/20251016.govph.dpwh.adscurrentarchive.raw/', name: '20251016.govph.dpwh.adscurrentarchive.raw.012.zip' },
-        { base: 'https://archive.org/download/20251016.govph.dpwh.adscurrentarchive.raw/', name: '20251016.govph.dpwh.adscurrentarchive.raw.013.zip' },
-        { base: 'https://archive.org/download/20251016.govph.dpwh.adscurrentarchive.raw/', name: '20251016.govph.dpwh.adscurrentarchive.raw.014.zip' },
-        { base: 'https://archive.org/download/20251016.govph.dpwh.adscurrentarchive.raw/', name: '20251016.govph.dpwh.adscurrentarchive.raw.015.zip' },
-        { base: 'https://archive.org/download/20251016.govph.dpwh.adscurrentarchive.raw/', name: '20251016.govph.dpwh.adscurrentarchive.raw.016.zip' },
-        { base: 'https://archive.org/download/20251016.govph.dpwh.adscurrentarchive.raw/', name: '20251016.govph.dpwh.adscurrentarchive.raw.017.zip' },
-        { base: 'https://archive.org/download/20251016.govph.dpwh.adscurrentarchive.raw/', name: '20251016.govph.dpwh.adscurrentarchive.raw.018.zip' },
-        { base: 'https://archive.org/download/20251016.govph.dpwh.adscurrentarchive.raw/', name: '20251016.govph.dpwh.adscurrentarchive.raw.019.zip' },
-        { base: 'https://archive.org/download/20251016.govph.dpwh.adscurrentarchive.raw/', name: '20251016.govph.dpwh.adscurrentarchive.raw.020.zip' },
-        { base: 'https://archive.org/download/20251016.govph.dpwh.adscurrentarchive.raw/', name: '20251016.govph.dpwh.adscurrentarchive.raw.021.zip' },
-        { base: 'https://archive.org/download/20251016.govph.dpwh.adscurrentarchive.raw/', name: '20251016.govph.dpwh.adscurrentarchive.raw.022.zip' },
-        { base: 'https://archive.org/download/20251016.govph.dpwh.adscurrentarchive.raw/', name: '20251016.govph.dpwh.adscurrentarchive.raw.023.zip' },
-        { base: 'https://archive.org/download/20251016.govph.dpwh.adscurrentarchive.raw/', name: '20251016.govph.dpwh.adscurrentarchive.raw.024.zip' },
-        { base: 'https://archive.org/download/20251016.govph.dpwh.adscurrentarchive.raw/', name: '20251016.govph.dpwh.adscurrentarchive.raw.025.zip' },
-        { base: 'https://archive.org/download/20251016.govph.dpwh.adscurrentarchive.raw/', name: '20251016.govph.dpwh.adscurrentarchive.raw.026.zip' },
-        { base: 'https://archive.org/download/20251016.govph.dpwh.adscurrentarchive.raw/', name: '20251016.govph.dpwh.adscurrentarchive.raw.027.zip' },
-        { base: 'https://archive.org/download/20251016.govph.dpwh.adscurrentarchive.raw/', name: '20251016.govph.dpwh.adscurrentarchive.raw.028.zip' },
-        { base: 'https://archive.org/download/20251016.govph.dpwh.adscurrentarchive.raw/', name: '20251016.govph.dpwh.adscurrentarchive.raw.029.zip' },
-        { base: 'https://archive.org/download/20251016.govph.dpwh.adscurrentarchive.raw/', name: '20251016.govph.dpwh.adscurrentarchive.raw.030.zip' },
-        { base: 'https://archive.org/download/20251016.govph.dpwh.adscurrentarchive.raw/', name: '20251016.govph.dpwh.adscurrentarchive.raw.031.zip' },
-        { base: 'https://archive.org/download/20251016.govph.dpwh.adscurrentarchive.raw/', name: '20251016.govph.dpwh.adscurrentarchive.raw_archive.torrent' },
-        { base: 'https://archive.org/download/20251016.govph.dpwh.adscurrentarchive.raw/', name: '20251016.govph.dpwh.adscurrentarchive.raw_files.xml' },
-        { base: 'https://archive.org/download/20251016.govph.dpwh.adscurrentarchive.raw/', name: '20251016.govph.dpwh.adscurrentarchive.raw_meta.sqlite' },
-        { base: 'https://archive.org/download/20251016.govph.dpwh.adscurrentarchive.raw/', name: '20251016.govph.dpwh.adscurrentarchive.raw_meta.xml' },
-        { base: 'https://archive.org/download/20251016.govph.dpwh.adscurrentarchive.raw.02/', name: '20251016.govph.dpwh.adscurrentarchive.raw.032.zip' },
-        { base: 'https://archive.org/download/20251016.govph.dpwh.adscurrentarchive.raw.02/', name: '20251016.govph.dpwh.adscurrentarchive.raw.033.zip' },
-        { base: 'https://archive.org/download/20251016.govph.dpwh.adscurrentarchive.raw.02/', name: '20251016.govph.dpwh.adscurrentarchive.raw.034.zip' },
-        { base: 'https://archive.org/download/20251016.govph.dpwh.adscurrentarchive.raw.02/', name: '20251016.govph.dpwh.adscurrentarchive.raw.035.zip' },
-        { base: 'https://archive.org/download/20251016.govph.dpwh.adscurrentarchive.raw.02/', name: '20251016.govph.dpwh.adscurrentarchive.raw.036.zip' },
-        { base: 'https://archive.org/download/20251016.govph.dpwh.adscurrentarchive.raw.02/', name: '20251016.govph.dpwh.adscurrentarchive.raw.037.zip' },
-        { base: 'https://archive.org/download/20251016.govph.dpwh.adscurrentarchive.raw.02/', name: '20251016.govph.dpwh.adscurrentarchive.raw.038.zip' },
-        { base: 'https://archive.org/download/20251016.govph.dpwh.adscurrentarchive.raw.02/', name: '20251016.govph.dpwh.adscurrentarchive.raw.039.zip' },
-        { base: 'https://archive.org/download/20251016.govph.dpwh.adscurrentarchive.raw.02/', name: '20251016.govph.dpwh.adscurrentarchive.raw.040.zip' },
-        { base: 'https://archive.org/download/20251016.govph.dpwh.adscurrentarchive.raw.02/', name: '20251016.govph.dpwh.adscurrentarchive.raw.041.zip' },
-        { base: 'https://archive.org/download/20251016.govph.dpwh.adscurrentarchive.raw.02/', name: '20251016.govph.dpwh.adscurrentarchive.raw.042.zip' },
-        { base: 'https://archive.org/download/20251016.govph.dpwh.adscurrentarchive.raw.02/', name: '20251016.govph.dpwh.adscurrentarchive.raw.02_archive.torrent' },
-        { base: 'https://archive.org/download/20251016.govph.dpwh.adscurrentarchive.raw.02/', name: '20251016.govph.dpwh.adscurrentarchive.raw.02_files.xml' },
-        { base: 'https://archive.org/download/20251016.govph.dpwh.adscurrentarchive.raw.02/', name: '20251016.govph.dpwh.adscurrentarchive.raw.02_meta.sqlite' },
-        { base: 'https://archive.org/download/20251016.govph.dpwh.adscurrentarchive.raw.02/', name: '20251016.govph.dpwh.adscurrentarchive.raw.02_meta.xml' },
-        { base: 'https://archive.org/download/20251016.govph.dpwh.adscurrentarchive.raw.02/', name: '20251016.govph.dpwh.adscurrentarchive.raw.meta.map.zip' }
-    ];
-    archiveFiles.forEach(file => {
-        const fileUrl = `${file.base}${file.name}`;
-        const alreadyAdded = sleeperSources.some(source => source.url === fileUrl);
-        if (!alreadyAdded) {
-            sleeperSources.push({
-                title: file.name,
-                url: fileUrl,
-                date: 'Internet Archive mirror (Oct 16, 2025)'
+        if (!SOURCES_DATA['PCIJ Flood Control']) {
+            SOURCES_DATA['PCIJ Flood Control'] = [];
+        }
+        const pcijSources = SOURCES_DATA['PCIJ Flood Control'];
+        const pcijArticles = [
+            {
+                title: 'Five Reveals from the Flood-Control Data',
+                url: 'https://pcij.org/2025/08/31/5-reveals-from-the-flood-control-data/',
+                date: 'August 31, 2025'
+            },
+            {
+                title: 'Records of flood-control contractors',
+                url: 'https://pcij.org/2025/08/30/flood-control-records/',
+                date: 'August 30, 2025'
+            },
+            {
+                title: 'Marcos and Duterte received millions in contributions from contractors',
+                url: 'https://pcij.org/2025/09/18/marcos-and-duterte-contractors/',
+                date: 'September 18, 2025'
+            }
+        ];
+        pcijArticles.forEach(article => {
+            if (!pcijSources.some(source => source.url === article.url)) {
+                pcijSources.push(article);
+            }
+        });
+
+        if (!SOURCES_DATA['Philippine Daily Inquirer']) {
+            SOURCES_DATA['Philippine Daily Inquirer'] = [];
+        }
+        const inquirerSources = SOURCES_DATA['Philippine Daily Inquirer'];
+        const inquirerArticles = [
+            {
+                title: 'Facebook Post',
+                url: 'https://www.facebook.com/share/17TLrbbxGC/?mibextid=wwXIfr',
+                date: '2025'
+            }
+        ];
+        inquirerArticles.forEach(article => {
+            if (!inquirerSources.some(source => source.url === article.url)) {
+                inquirerSources.push(article);
+            }
+        });
+
+        if (!SOURCES_DATA['Bilyonaryo']) {
+            SOURCES_DATA['Bilyonaryo'] = [];
+        }
+        const bilyonaryoSources = SOURCES_DATA['Bilyonaryo'];
+        const bilyonaryoArticles = [
+            {
+                title: 'Heiresses of Maglanque, Bonoan and Bernardo bolt from P1-billion Wyndham Clark builder',
+                url: 'https://bilyonaryo.com/2025/11/24/nagtalunan-parang-daga-heiresses-of-maglanque-bonoan-and-bernardo-bolt-from-p1-billion-wyndham-clark-builder-as-flood-control-stink-spreads/business/',
+                date: 'November 24, 2025'
+            }
+        ];
+        bilyonaryoArticles.forEach(article => {
+            if (!bilyonaryoSources.some(source => source.url === article.url)) {
+                bilyonaryoSources.push(article);
+            }
+        });
+
+        if (!SOURCES_DATA['ABS-CBN']) {
+            SOURCES_DATA['ABS-CBN'] = [];
+        }
+        const abscbnSources = SOURCES_DATA['ABS-CBN'];
+        const abscbnArticles = [
+            {
+                title: "Gardiola-linked companies 'bought' some P22B in DPWH projects — Leviste",
+                url: 'https://www.abs-cbn.com/news/regions/2025/11/19/gardiola-linked-companies-bought-some-p22b-in-dpwh-projects-leviste-1924',
+                date: 'November 19, 2025'
+            }
+        ];
+        abscbnArticles.forEach(article => {
+            if (!abscbnSources.some(source => source.url === article.url)) {
+                abscbnSources.push(article);
+            }
+        });
+
+        const sourceLinks = document.querySelectorAll('.source-link-with-popup');
+
+        sourceLinks.forEach(link => {
+            const sourceName = link.getAttribute('data-source');
+
+            link.addEventListener('click', function (e) {
+                e.preventDefault();
+                showSourcePopup(sourceName, link);
             });
-        }
-    });
-    
-    if (!SOURCES_DATA['PCIJ Flood Control']) {
-        SOURCES_DATA['PCIJ Flood Control'] = [];
-    }
-    const pcijSources = SOURCES_DATA['PCIJ Flood Control'];
-    const pcijArticles = [
-        {
-            title: 'Five Reveals from the Flood-Control Data',
-            url: 'https://pcij.org/2025/08/31/5-reveals-from-the-flood-control-data/',
-            date: 'August 31, 2025'
-        },
-        {
-            title: 'Records of flood-control contractors',
-            url: 'https://pcij.org/2025/08/30/flood-control-records/',
-            date: 'August 30, 2025'
-        },
-        {
-            title: 'Marcos and Duterte received millions in contributions from contractors',
-            url: 'https://pcij.org/2025/09/18/marcos-and-duterte-contractors/',
-            date: 'September 18, 2025'
-        }
-    ];
-    pcijArticles.forEach(article => {
-        if (!pcijSources.some(source => source.url === article.url)) {
-            pcijSources.push(article);
-        }
-    });
+        });
 
-    if (!SOURCES_DATA['Philippine Daily Inquirer']) {
-        SOURCES_DATA['Philippine Daily Inquirer'] = [];
-    }
-    const inquirerSources = SOURCES_DATA['Philippine Daily Inquirer'];
-    const inquirerArticles = [
-        {
-            title: 'Facebook Post',
-            url: 'https://www.facebook.com/share/17TLrbbxGC/?mibextid=wwXIfr',
-            date: '2025'
-        }
-    ];
-    inquirerArticles.forEach(article => {
-        if (!inquirerSources.some(source => source.url === article.url)) {
-            inquirerSources.push(article);
-        }
-    });
-
-    if (!SOURCES_DATA['Bilyonaryo']) {
-        SOURCES_DATA['Bilyonaryo'] = [];
-    }
-    const bilyonaryoSources = SOURCES_DATA['Bilyonaryo'];
-    const bilyonaryoArticles = [
-        {
-            title: 'Heiresses of Maglanque, Bonoan and Bernardo bolt from P1-billion Wyndham Clark builder',
-            url: 'https://bilyonaryo.com/2025/11/24/nagtalunan-parang-daga-heiresses-of-maglanque-bonoan-and-bernardo-bolt-from-p1-billion-wyndham-clark-builder-as-flood-control-stink-spreads/business/',
-            date: 'November 24, 2025'
-        }
-    ];
-    bilyonaryoArticles.forEach(article => {
-        if (!bilyonaryoSources.some(source => source.url === article.url)) {
-            bilyonaryoSources.push(article);
-        }
-    });
-
-    if (!SOURCES_DATA['ABS-CBN']) {
-        SOURCES_DATA['ABS-CBN'] = [];
-    }
-    const abscbnSources = SOURCES_DATA['ABS-CBN'];
-    const abscbnArticles = [
-        {
-            title: "Gardiola-linked companies 'bought' some P22B in DPWH projects — Leviste",
-            url: 'https://www.abs-cbn.com/news/regions/2025/11/19/gardiola-linked-companies-bought-some-p22b-in-dpwh-projects-leviste-1924',
-            date: 'November 19, 2025'
-        }
-    ];
-    abscbnArticles.forEach(article => {
-        if (!abscbnSources.some(source => source.url === article.url)) {
-            abscbnSources.push(article);
-        }
-    });
-
-    const sourceLinks = document.querySelectorAll('.source-link-with-popup');
-    
-    sourceLinks.forEach(link => {
-        const sourceName = link.getAttribute('data-source');
-        
-        link.addEventListener('click', function(e) {
-            e.preventDefault();
-            showSourcePopup(sourceName, link);
+        document.addEventListener('click', function (e) {
+            if (!e.target.closest('.source-popup') && !e.target.closest('.source-link-with-popup')) {
+                hideSourcePopup();
+            }
         });
     });
-    
-    document.addEventListener('click', function(e) {
-        if (!e.target.closest('.source-popup') && !e.target.closest('.source-link-with-popup')) {
-            hideSourcePopup();
-        }
-    });
-});
 </script>
 {% endblock %}

@@ -73,6 +73,32 @@
             position: fixed !important;
             width: 100% !important;
         }
+
+        /* Custom Scrollbar */
+        .scrollbar-thin::-webkit-scrollbar {
+            width: 10px;
+            /* Slightly wider */
+            height: 10px;
+        }
+
+        .scrollbar-thin::-webkit-scrollbar-track {
+            background: #e2e8f0;
+            /* Darker slate-200 */
+            border-radius: 4px;
+        }
+
+        .scrollbar-thin::-webkit-scrollbar-thumb {
+            background: #94a3b8;
+            /* Slate-400 */
+            border-radius: 4px;
+            border: 2px solid #e2e8f0;
+            /* Padding effect */
+        }
+
+        .scrollbar-thin::-webkit-scrollbar-thumb:hover {
+            background: #64748b;
+            /* Slate-500 */
+        }
     </style>
 </head>
 
@@ -141,7 +167,13 @@
             <div class="glass-panel rounded-2xl p-6 shadow-sm">
                 <div class="flex justify-between items-center mb-4">
                     <h2 class="text-lg font-bold text-slate-800">Unified Location Database</h2>
-                    <span class="text-xs text-slate-400 font-mono">Source: unified_locations.parquet</span>
+                    <span class="text-xs text-slate-400 font-mono flex gap-3">
+                        <span>Source: unified_locations.parquet</span>
+                        <a href="/static/data/unified_locations.parquet" download
+                            class="text-indigo-500 hover:text-indigo-700 hover:underline">Download Parquet</a>
+                        <a href="/static/data/unified_locations.json" download
+                            class="text-indigo-500 hover:text-indigo-700 hover:underline">Download JSON</a>
+                    </span>
                 </div>
                 <div id="locationTree" class="space-y-1 overflow-y-auto max-h-[70vh] text-sm pr-2">
                     <div class="flex items-center gap-2 text-slate-500 animate-pulse p-4">
@@ -212,9 +244,9 @@
                         </svg>
                     </button>
                 </div>
-                <div class="px-4 py-4 sm:px-6 flex-1 min-h-0 overflow-y-auto">
+                <div class="px-4 py-4 sm:px-6 flex-1 min-h-0 overflow-hidden flex flex-col">
                     <!-- Top Pagination -->
-                    <div class="flex items-center justify-between bg-slate-50 px-4 py-2 mb-3 rounded-lg">
+                    <div class="flex items-center justify-between bg-slate-50 px-4 py-2 mb-3 rounded-lg flex-shrink-0">
                         <p class="text-sm text-slate-700">Showing <span class="font-medium" id="pageStartTop">1</span>
                             to <span class="font-medium" id="pageEndTop">10</span> of
                             <span class="font-medium" id="pageTotalTop">0</span> results
@@ -229,7 +261,8 @@
                         </div>
                     </div>
                     <!-- Table Container with Explicit Scroll -->
-                    <div class="overflow-y-auto max-h-[60vh] rounded-lg border border-slate-200">
+                    <div
+                        class="overflow-y-auto max-h-[60vh] rounded-lg border border-slate-200 scrollbar-thin scrollbar-thumb-slate-300 scrollbar-track-slate-100">
                         <table class="min-w-full divide-y divide-slate-200">
                             <thead class="bg-slate-50 sticky top-0 z-10">
                                 <tr>
@@ -248,7 +281,7 @@
                         </table>
                     </div>
                     <div
-                        class="flex items-center justify-between border-t border-slate-200 bg-white px-4 py-3 sm:px-6 mt-4">
+                        class="flex items-center justify-between border-t border-slate-200 bg-white px-4 py-3 sm:px-6 mt-4 flex-shrink-0">
                         <div class="flex flex-1 justify-between sm:hidden">
                             <button onclick="changePage(-1)"
                                 class="relative inline-flex items-center rounded-md border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50">Previous</button>
@@ -295,10 +328,9 @@
     <script>
         // --- Globals ---
         let rawUnionData = [];
-        let filteredData = []; // Full list after search/filter
         let currentModalProjects = [];
         let currentPage = 1; // Modal Page
-        const ITEMS_PER_PAGE = 10; // Modal Items
+        const ITEMS_PER_PAGE = 5; // Modal Items
 
         // Main Table Pagination
         let mainTablePage = 1;
