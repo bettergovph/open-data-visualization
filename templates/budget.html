@@ -8388,28 +8388,131 @@
 
         <!-- Category Totals Charts -->
         <div id="cat-chart-section" style="margin-top: 2rem; display: flex; flex-direction: column; gap: 1.5rem;">
+            <!-- Split Charts: New Categories -->
+
+            <!-- Bridges Chart -->
             <div
                 style="background: white; border-radius: 10px; padding: 1.5rem; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
                 <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 1rem;">
                     <div>
-                        <h4 style="margin: 0 0 0.25rem 0; color: #0038A8;">Flagged Cost by Category (2020-2026)</h4>
-                        <p style="margin: 0; color: #666; font-size: 0.9rem;">Compare each category's total flagged cost
-                            per year. Bars are grouped by category and color-coded by year similar to the Road
-                            Statistics
-                            tab. Multi-Purpose Buildings and Major Roads have dedicated charts below.</p>
+                        <h4 style="margin: 0 0 0.25rem 0; color: #0038A8;">Bridges Flagged Cost (2020-2026)</h4>
+                        <p style="margin: 0; color: #666; font-size: 0.9rem;">Year-on-year flagged cost totals for
+                            Bridges.
+                        </p>
                     </div>
-                    <button id="copyCategoryTotalsChartBtn"
-                        onclick="copyChartToClipboard('category-totals-chart-wrapper', 'copyCategoryTotalsChartBtn')"
+                    <button id="copyBridgesChartBtn"
+                        onclick="copyChartToClipboard('bridges-chart-wrapper', 'copyBridgesChartBtn')"
                         style="padding: 0.5rem 1rem; background: #0038A8; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: 600; font-size: 0.9em; white-space: nowrap;">
                         📋 Copy Chart
                     </button>
                 </div>
-                <div id="cat-chart-loading"
-                    style="display: flex; align-items: center; justify-content: center; padding: 2rem; color: #666;">
-                    Loading chart data...
+                <div id="bridges-chart-message"
+                    style="display: none; padding: 1rem 0; text-align: center; color: #666;">
+                    No Bridges data available for the selected years.
                 </div>
-                <div id="category-totals-chart-wrapper" style="display: none; height: 420px;">
-                    <canvas id="categoryTotalsChart" height="420"></canvas>
+                <div id="bridges-chart-wrapper" style="display: none; height: 360px;">
+                    <canvas id="bridgesTotalsChart" height="360"></canvas>
+                </div>
+            </div>
+
+            <!-- Road Safety Facilities Chart -->
+            <div
+                style="background: white; border-radius: 10px; padding: 1.5rem; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
+                <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 1rem;">
+                    <div>
+                        <h4 style="margin: 0 0 0.25rem 0; color: #0038A8;">Road Safety Facilities Flagged Cost
+                            (2020-2026)</h4>
+                        <p style="margin: 0; color: #666; font-size: 0.9rem;">Year-on-year flagged cost totals for Road
+                            Safety Facilities.
+                        </p>
+                    </div>
+                    <button id="copyRoadSafetyChartBtn"
+                        onclick="copyChartToClipboard('road-safety-chart-wrapper', 'copyRoadSafetyChartBtn')"
+                        style="padding: 0.5rem 1rem; background: #0038A8; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: 600; font-size: 0.9em; white-space: nowrap;">
+                        📋 Copy Chart
+                    </button>
+                </div>
+                <div id="road-safety-chart-message"
+                    style="display: none; padding: 1rem 0; text-align: center; color: #666;">
+                    No Road Safety Facilities data available for the selected years.
+                </div>
+                <div id="road-safety-chart-wrapper" style="display: none; height: 360px;">
+                    <canvas id="roadSafetyTotalsChart" height="360"></canvas>
+                </div>
+            </div>
+
+            <!-- Irrigation Works (NIA) Chart -->
+            <div
+                style="background: white; border-radius: 10px; padding: 1.5rem; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
+                <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 1rem;">
+                    <div>
+                        <h4 style="margin: 0 0 0.25rem 0; color: #0038A8;">Irrigation Works (NIA) Flagged Cost
+                            (2020-2026)</h4>
+                        <p style="margin: 0; color: #666; font-size: 0.9rem;">Year-on-year flagged cost totals for
+                            Irrigation Works (NIA).
+                        </p>
+                    </div>
+                    <button id="copyNiaChartBtn" onclick="copyChartToClipboard('nia-chart-wrapper', 'copyNiaChartBtn')"
+                        style="padding: 0.5rem 1rem; background: #0038A8; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: 600; font-size: 0.9em; white-space: nowrap;">
+                        📋 Copy Chart
+                    </button>
+                </div>
+                <div id="nia-chart-message" style="display: none; padding: 1rem 0; text-align: center; color: #666;">
+                    No Irrigation Works (NIA) data available for the selected years.
+                </div>
+                <div id="nia-chart-wrapper" style="display: none; height: 360px;">
+                    <canvas id="niaTotalsChart" height="360"></canvas>
+                </div>
+            </div>
+
+            <!-- Rockfall Netting Chart -->
+            <div
+                style="background: white; border-radius: 10px; padding: 1.5rem; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
+                <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 1rem;">
+                    <div>
+                        <h4 style="margin: 0 0 0.25rem 0; color: #0038A8;">Rockfall Netting Flagged Cost (2020-2026)
+                        </h4>
+                        <p style="margin: 0; color: #666; font-size: 0.9rem;">Year-on-year flagged cost totals for
+                            Rockfall Netting.
+                        </p>
+                    </div>
+                    <button id="copyRockfallChartBtn"
+                        onclick="copyChartToClipboard('rockfall-chart-wrapper', 'copyRockfallChartBtn')"
+                        style="padding: 0.5rem 1rem; background: #0038A8; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: 600; font-size: 0.9em; white-space: nowrap;">
+                        📋 Copy Chart
+                    </button>
+                </div>
+                <div id="rockfall-chart-message"
+                    style="display: none; padding: 1rem 0; text-align: center; color: #666;">
+                    No Rockfall Netting data available for the selected years.
+                </div>
+                <div id="rockfall-chart-wrapper" style="display: none; height: 360px;">
+                    <canvas id="rockfallTotalsChart" height="360"></canvas>
+                </div>
+            </div>
+
+            <!-- Schools Chart -->
+            <div
+                style="background: white; border-radius: 10px; padding: 1.5rem; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
+                <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 1rem;">
+                    <div>
+                        <h4 style="margin: 0 0 0.25rem 0; color: #0038A8;">Schools Flagged Cost (2020-2026)</h4>
+                        <p style="margin: 0; color: #666; font-size: 0.9rem;">Year-on-year flagged cost totals for
+                            Schools.
+                        </p>
+                    </div>
+                    <button id="copySchoolsChartBtn"
+                        onclick="copyChartToClipboard('schools-chart-wrapper', 'copySchoolsChartBtn')"
+                        style="padding: 0.5rem 1rem; background: #0038A8; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: 600; font-size: 0.9em; white-space: nowrap;">
+                        📋 Copy Chart
+                    </button>
+                </div>
+                <div id="schools-chart-message"
+                    style="display: none; padding: 1rem 0; text-align: center; color: #666;">
+                    No Schools data available for the selected years.
+                </div>
+                <div id="schools-chart-wrapper" style="display: none; height: 360px;">
+                    <canvas id="schoolsTotalsChart" height="360"></canvas>
                 </div>
             </div>
 
@@ -13019,30 +13122,17 @@
                     Object.keys(yearlyTotals).forEach(category => categorySet.add(category));
                 }
 
-                const categoryLabels = Array.from(categorySet).sort((a, b) => a.localeCompare(b));
-                const filteredLabels = categoryLabels.filter(label => !CATEGORY_CHART_EXCLUDED.has(label));
-                if (!categoryLabels.length) {
-                    if (loadingEl) {
-                        loadingEl.textContent = 'No category data available for chart.';
-                    }
-                    return;
+                if (loadingEl) {
+                    loadingEl.style.display = 'none';
                 }
 
-                const canRenderTotals = filteredLabels.length > 0;
-                if (canRenderTotals) {
-                    if (loadingEl) {
-                        loadingEl.style.display = 'none';
-                    }
-                    if (chartWrapper) {
-                        chartWrapper.style.display = 'block';
-                    }
-                    renderCategoryTotalsChart(filteredLabels, totalsByYear);
-                } else if (loadingEl) {
-                    loadingEl.style.display = 'flex';
-                    loadingEl.textContent = 'No categories to display.';
-                }
-
+                // Render detailed single category charts
                 renderSingleCategoryChart('Major Roads', totalsByYear, 'major-roads-chart-wrapper', 'major-roads-chart-message', 'majorRoadsTotalsChart');
+                renderSingleCategoryChart('Bridges', totalsByYear, 'bridges-chart-wrapper', 'bridges-chart-message', 'bridgesTotalsChart');
+                renderSingleCategoryChart('Road Safety Facilities', totalsByYear, 'road-safety-chart-wrapper', 'road-safety-chart-message', 'roadSafetyTotalsChart');
+                renderSingleCategoryChart('Irrigation Works (NIA)', totalsByYear, 'nia-chart-wrapper', 'nia-chart-message', 'niaTotalsChart');
+                renderSingleCategoryChart('Rockfall Netting', totalsByYear, 'rockfall-chart-wrapper', 'rockfall-chart-message', 'rockfallTotalsChart');
+                renderSingleCategoryChart('Schools', totalsByYear, 'schools-chart-wrapper', 'schools-chart-message', 'schoolsTotalsChart');
                 renderSingleCategoryChart('Multi-Purpose Buildings', totalsByYear, 'multi-purpose-chart-wrapper', 'multi-purpose-chart-message', 'multiPurposeTotalsChart');
                 categoryTotalsChartInitialized = true;
             } catch (error) {
@@ -13185,12 +13275,21 @@
                 }
             };
 
-            if (categoryName === 'Major Roads') {
-                if (majorRoadsChart) majorRoadsChart.destroy();
-                majorRoadsChart = new Chart(ctx, chartConfig);
-            } else if (categoryName === 'Multi-Purpose Buildings') {
-                if (multiPurposeChart) multiPurposeChart.destroy();
-                multiPurposeChart = new Chart(ctx, chartConfig);
+            // Global chart instance management
+            const chartMap = {
+                'Major Roads': { var: majorRoadsChart, set: (c) => majorRoadsChart = c },
+                'Multi-Purpose Buildings': { var: multiPurposeChart, set: (c) => multiPurposeChart = c },
+                'Bridges': { var: window.bridgesChart, set: (c) => window.bridgesChart = c },
+                'Road Safety Facilities': { var: window.roadSafetyChart, set: (c) => window.roadSafetyChart = c },
+                'Irrigation Works (NIA)': { var: window.niaChart, set: (c) => window.niaChart = c },
+                'Rockfall Netting': { var: window.rockfallChart, set: (c) => window.rockfallChart = c },
+                'Schools': { var: window.schoolsChart, set: (c) => window.schoolsChart = c }
+            };
+
+            const handler = chartMap[categoryName];
+            if (handler) {
+                if (handler.var) handler.var.destroy();
+                handler.set(new Chart(ctx, chartConfig));
             }
         }
 
