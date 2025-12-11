@@ -56,6 +56,163 @@ FLOOD_PARQUET = PARQUET_DIR / 'flood_projects.parquet'
 POLITICAL_DYNASTIES_PARQUET = PARQUET_DIR / 'political_dynasties.parquet'
 RELATIONSHIPS_PARQUET = PARQUET_DIR / 'relationships.parquet'
 CONNECTION_TYPES_PARQUET = PARQUET_DIR / 'connection_types.parquet'
+UNIFIED_LOCATIONS_PARQUET = Path(__file__).parent.parent / 'static' / 'data' / 'unified_locations.parquet'
+
+class LocationMatcher:
+    """
+    Optimized location matcher using an Inverted Index approach.
+    Replaces O(N) linear scans with O(1) token lookups.
+    """
+    def __init__(self, parquet_path: Path):
+        self.parquet_path = parquet_path
+        self.location_entries = []
+        self.token_map = defaultdict(set)
+        self.loaded = False
+        # Disambiguation patterns for tricky provinces
+        self.disambiguation_patterns = [
+            (re.compile(r'davao\s+de\s+oro', re.I), 'DAVAO DE ORO'),
+            (re.compile(r'davao\s+del\s+sur', re.I), 'DAVAO DEL SUR'),
+            (re.compile(r'davao\s+del\s+norte', re.I), 'DAVAO DEL NORTE'),
+            (re.compile(r'davao\s+oriental', re.I), 'DAVAO ORIENTAL'),
+            (re.compile(r'davao\s+occidental', re.I), 'DAVAO OCCIDENTAL'),
+            (re.compile(r'cebu\s+city', re.I), 'CEBU CITY'),
+            (re.compile(r'cagayan\s+de\s+oro', re.I), 'CITY OF CAGAYAN DE ORO'),
+            (re.compile(r'quezon\s+city', re.I), 'QUEZON CITY'),
+            (re.compile(r'zamboanga\s+del\s+norte', re.I), 'ZAMBOANGA DEL NORTE'),
+            (re.compile(r'zamboanga\s+del\s+sur', re.I), 'ZAMBOANGA DEL SUR'),
+            (re.compile(r'zamboanga\s+sibugay', re.I), 'ZAMBOANGA SIBUGAY'),
+        ]
+
+    def load(self):
+        if self.loaded: return
+        if not self.parquet_path.exists():
+            print(f"⚠️ unified_locations.parquet not found at {self.parquet_path}")
+            return
+            
+        print("🚀 Building Inverted Index for Locations...")
+        try:
+            import duckdb
+            con = duckdb.connect()
+            con.execute(f"CREATE TABLE ul AS SELECT * FROM read_parquet('{self.parquet_path}')")
+            # Select relevant columns: prov, muni, brgy, dist, cong
+            rows = con.execute("SELECT province, municipality, barangay, district, congressman FROM ul WHERE congressman IS NOT NULL AND congressman != 'TBD' AND congressman != 'Unknown'").fetchall()
+            con.close()
+            
+            for idx, row in enumerate(rows):
+                prov, muni, brgy, dist, cong = row
+                entry = {
+                    'id': idx,
+                    'prov': prov, 'muni': muni, 'brgy': brgy,
+                    'dist': dist, 'cong': cong,
+                    'prov_norm': self._normalize(prov),
+                    'muni_norm': self._normalize(muni),
+                    'brgy_norm': self._normalize(brgy)
+                }
+                self.location_entries.append(entry)
+                
+                # Index tokens
+                # Index Province (careful with common words, maybe index full prov string too)
+                self._index_tokens(entry['prov_norm'], idx)
+                self._index_tokens(entry['muni_norm'], idx)
+                self._index_tokens(entry['brgy_norm'], idx)
+            
+            self.loaded = True
+            print(f"✅ Indexed {len(self.location_entries)} locations.")
+            
+        except Exception as e:
+            print(f"⚠️ Failed to build location index: {e}")
+
+    def _normalize(self, text):
+        if not text: return ""
+        # Keep it simple: lowercase, strip, remove 'city of', 'municipality of'
+        text = str(text).lower().strip()
+        text = text.replace("city of ", "").replace("municipality of ", "")
+        return text
+
+    def _index_tokens(self, text, idx):
+        if not text: return
+        # Tokenize by space
+        tokens = text.split()
+        for token in tokens:
+            if len(token) > 2: # Skip small words
+                self.token_map[token].add(idx)
+
+    def find_best_match(self, text, province_hint=None):
+        if not self.loaded or not text: return None
+        
+        text_norm = self._normalize(text)
+        
+        # 1. Disambiguate Province Hint from Text
+        target_prov = None
+        for pattern, prov_name in self.disambiguation_patterns:
+            if pattern.search(text):
+                target_prov = prov_name
+                break
+        
+        if not target_prov and province_hint:
+             target_prov = province_hint
+
+        # 2. Get Candidate IDs
+        # Gather candidates based on tokens in the text
+        tokens = text_norm.split()
+        candidates = set()
+        
+        # If we have a strong province target, filter by that FIRST (simulating filter)
+        # But inverted index is bottom-up.
+        # Strategy: Collect candidates from tokens. If strict province, filter them.
+        
+        for token in tokens:
+            if len(token) > 2 and token in self.token_map:
+                candidates.update(self.token_map[token])
+                
+        if not candidates:
+            return None
+
+        # 3. Score Candidates (Subset only!)
+        best_entry = None
+        best_score = 0
+        
+        target_prov_norm = self._normalize(target_prov) if target_prov else None
+
+        for idx in candidates:
+            entry = self.location_entries[idx]
+            
+            # Filter by province if known
+            if target_prov_norm:
+                # If target prov is specified, the entry MUST match it (fuzzy or exact)
+                # But be careful: "Cebu" hint vs "Cebu City" entry.
+                # If target is "CEBU CITY", entry must be "CEBU CITY".
+                # If target is "CEBU", entry could be "CEBU" or "CEBU CITY"? No, distinguish.
+                if target_prov_norm not in entry['prov_norm']: 
+                    continue
+
+            score = 0
+            
+            # Muni/Brgy Match Check (Exact word in text)
+            # We use the normalized string checks for speed
+            
+            if entry['muni_norm'] and len(entry['muni_norm']) > 3:
+                # Check if whole muni matches
+                 if f" {entry['muni_norm']} " in f" {text_norm} ":
+                      score += 100
+            
+            if entry['brgy_norm'] and len(entry['brgy_norm']) > 3:
+                 if f" {entry['brgy_norm']} " in f" {text_norm} ":
+                      score += 50
+                      
+            # Penalty/Bonus for Province
+            if entry['prov_norm'] in text_norm:
+                score += 10
+            
+            if score > best_score:
+                best_score = score
+                best_entry = entry
+        
+        # Threshold
+        if best_score >= 50:
+             return (best_entry['prov'], best_entry['dist'], best_entry['cong'])
+        
+        return None
 
 class DynastyProjectsCacheGeneratorDuckDB:
     """Generate cached JSON for dynasty-projects using DuckDB"""
@@ -92,6 +249,9 @@ class DynastyProjectsCacheGeneratorDuckDB:
         self.executor = ThreadPoolExecutor(max_workers=self.max_workers)
         self.verbose = os.getenv('DYNASTY_CACHE_VERBOSE', '0') == '1'
         self.manila_barangay_tokens: Dict[str, List[str]] = {}
+        
+        # Initialize Location Matcher
+        self.location_matcher = LocationMatcher(UNIFIED_LOCATIONS_PARQUET)
         self.manila_barangay_numbers: Dict[str, List[int]] = {}
         self.manila_keyword_map: Dict[str, List[str]] = {}
         self.leyte_second_municipalities: set[str] = set()
@@ -501,6 +661,59 @@ class DynastyProjectsCacheGeneratorDuckDB:
                                 return (cm_name, 200)
         
         return None
+
+    def _calculate_project_hash(self, project: Dict) -> str:
+        """Calculate a deterministic hash for a project to detect changes."""
+        import hashlib
+        # Key fields that define project identity and content
+        fields = [
+            str(project.get('project_id', '')),
+            str(project.get('project_name', '')),
+            str(project.get('amount', '')),
+            str(project.get('location', '')),
+            str(project.get('contractor', '')),
+            str(project.get('source', '')),
+            str(project.get('status', ''))
+        ]
+        content = '|'.join(fields)
+        return hashlib.md5(content.encode('utf-8')).hexdigest()
+
+    def _load_existing_project_hashes(self) -> set:
+        """Load hashes of already classified projects from parquet."""
+        hashes = set()
+        if not CLASSIFIED_PARQUET.exists():
+            return hashes
+        
+        print(f"📊 Loading existing project hashes from {CLASSIFIED_PARQUET}...")
+        try:
+            import duckdb
+            con = duckdb.connect()
+            # We can't easily compute hash in SQL if logic is complex python
+            # But we can load the columns and compute hash in python
+            # Or assume classified projects don't change identity often?
+            # Better to load columns and compute.
+            df = con.execute(f"SELECT project_id, project_name, amount, location, contractor, source, status FROM read_parquet('{CLASSIFIED_PARQUET}')").fetchdf()
+            con.close()
+            
+            for _, row in df.iterrows():
+                # Reconstruct project dict for hashing (ensure keys match _calculate logic)
+                p = {
+                    'project_id': row['project_id'],
+                    'project_name': row['project_name'],
+                    'amount': row['amount'],
+                    'location': row['location'],
+                    'contractor': row['contractor'],
+                    'source': row['source'],
+                    'status': row['status']
+                }
+                hashes.add(self._calculate_project_hash(p))
+            
+            print(f"✅ Loaded {len(hashes)} existing project hashes.")
+            return hashes
+        except Exception as e:
+            print(f"⚠️ Failed to load existing hashes: {e}")
+            return set()
+
     
     def _is_flood_related(self, project_name: str, description: str = "", location: str = "") -> bool:
         """Detect if a project is flood-related based on keywords"""
@@ -1008,17 +1221,19 @@ class DynastyProjectsCacheGeneratorDuckDB:
         if not district_congressman:
             # Pass project_district if available to help with district number matching
             project_district = None
+            project_name_str = ""
             if project_data:
                 project_district = project_data.get('project_district') or project_data.get('district')
+                project_name_str = project_data.get('project_name', '') or project_data.get('name', '') or ""
             
             district_match = self._find_congressman_by_district(
-                province, municipality_barangay, year, district_lookup, congressmen_data, project_district
+                province, municipality_barangay, year, district_lookup, congressmen_data, project_district, project_name=project_name_str
             )
             
             # Fallback: Province-only match if strict match failed and we have a province
             if not district_match and province and municipality_barangay:
                  district_match = self._find_congressman_by_district(
-                    province, '', year, district_lookup, congressmen_data, project_district
+                    province, '', year, district_lookup, congressmen_data, project_district, project_name=project_name_str
                 )
                 
             if district_match:
@@ -2624,6 +2839,118 @@ class DynastyProjectsCacheGeneratorDuckDB:
                 'CATBALOGAN', 'SOUTHERN LEYTE'
             ]
     
+    def _enrich_congressmen_from_districts_json(self, congressmen_data: Dict) -> None:
+        """
+        Enrich congressmen_data with terms parsed from districts.json.
+        This parses strings like "Name (2016-2019); Name (2022-present)" to ensure
+        all historical terms are captured in memory for matching.
+        """
+        print("📜 Enriching congressmen data from districts.json...")
+        try:
+            # Assuming STATIC_DIR is available or relative path
+            districts_path = Path('static/data/districts.json')
+            if not districts_path.exists():
+                # Try finding it relative to script 
+                districts_path = Path(__file__).parent.parent / 'static' / 'data' / 'districts.json'
+            
+            if not districts_path.exists():
+                print(f"⚠️ districts.json not found at {districts_path}, skipping enrichment.")
+                return
+
+            with open(districts_path, 'r', encoding='utf-8') as f:
+                districts_json = json.load(f)
+
+            term_pattern = re.compile(r'(.*?)\s*\((\d{4})-(present|\d{4})\)')
+            
+            count_added = 0
+            count_updated = 0
+
+            for province, info in districts_json.items():
+                if not isinstance(info, dict) or 'representatives' not in info:
+                    continue
+                
+                reps = info['representatives']
+                for district, rep_str in reps.items():
+                    # Split by semicolon for multiple reps
+                    # e.g. "Rep 1 (2016-2019); Rep 2 (2019-present)"
+                    parts = [p.strip() for p in rep_str.split(';')]
+                    
+                    for part in parts:
+                        match = term_pattern.match(part)
+                        if match:
+                            name_raw = match.group(1).strip()
+                            start_year = int(match.group(2))
+                            end_str = match.group(3)
+                            
+                            if end_str.lower() == 'present':
+                                # Use a futuristic year or current year+something to denote present in logic
+                                # But typically we just want to ensure it covers 2025
+                                end_year = 2025 # Or 2028? Use 2025 to align with current context or 2030 to be safe.
+                                # Current logic in script might use 2025 or current year.
+                                # Let's use 2025 for now as the 'present' typically means current term.
+                                # Actually, 2025 is the end of the current term (2022-2025).
+                                # But if it is "2025-present", then it means 2025-2028.
+                                if start_year == 2025:
+                                    end_year = 2028
+                                else:
+                                    end_year = 2025
+                            else:
+                                end_year = int(end_str)
+
+                            # Create term object
+                            new_term = {"start": start_year, "end": end_year}
+
+                            # Find existing congressman or create new
+                            # Matching by name is fuzzy. 
+                            found = False
+                            for c_data in congressmen_data.values():
+                                # Simple check: is name contained?
+                                # Ideally use the _name_key or normalization logic
+                                if self._normalize_congressman_name(name_raw).upper() == self._normalize_congressman_name(c_data['name']).upper():
+                                    found = True
+                                    # Add term if not exists
+                                    existing_terms = c_data.get('terms', [])
+                                    # Check for duplicate
+                                    is_duplicate = False
+                                    for t in existing_terms:
+                                        if t.get('start') == start_year and (t.get('end') == end_year or (end_str == 'present' and t.get('end') >= 2025)):
+                                            is_duplicate = True
+                                            break
+                                    if not is_duplicate:
+                                        if isinstance(existing_terms, str):
+                                            try:
+                                                existing_terms = json.loads(existing_terms)
+                                            except:
+                                                existing_terms = []
+                                        existing_terms.append(new_term)
+                                        c_data['terms'] = existing_terms
+                                        count_updated += 1
+                                    break
+                            
+                            if not found:
+                                # Create new entry if not found (needed for purely historical matching)
+                                # Make sure to generate a unique key/display name
+                                display_name = name_raw
+                                if display_name not in congressmen_data:
+                                    congressmen_data[display_name] = {
+                                        "name": display_name,
+                                        "provinces": [province],
+                                        "district_number": district,
+                                        "is_city_district": False, # Unknown
+                                        "contractors": [], 
+                                        "contractor_patterns": [],
+                                        "barangays": [], # Could infer from district map but leave empty
+                                        "terms": [new_term]
+                                    }
+                                    count_added += 1
+
+            print(f"✅ Enriched congressmen data: Updated {count_updated} terms, Added {count_added} new congressmen")
+
+        except Exception as e:
+            print(f"⚠️ Error enriching from districts.json: {e}")
+            import traceback
+            traceback.print_exc()
+
     async def get_congressmen_data(self, dynasty_conn, config_data: Dict, districts_data: Dict, political_dynasties_available: bool) -> Dict:
         """Get congressmen data from parquet files using DuckDB (no PostgreSQL needed)"""
         """Get congressmen data from database - same logic as original"""
@@ -3213,6 +3540,9 @@ class DynastyProjectsCacheGeneratorDuckDB:
                 "barangays": barangays,
                 "terms": terms,
             }
+        
+        # Enrich coverage with historical terms from districts.json
+        self._enrich_congressmen_from_districts_json(congressmen_data)
         
         return congressmen_data
 
@@ -4729,8 +5059,68 @@ class DynastyProjectsCacheGeneratorDuckDB:
         
         return []
     
+    def _compare_districts(self, d1: str, d2: str) -> bool:
+        """Helper to compare district numbers/strings"""
+        def norm(d):
+            if not d: return "0"
+            s = str(d).upper()
+            if "LONE" in s: return "LONE"
+            s = s.replace("DISTRICT", "").replace("CITY", "").strip()
+            match = re.search(r'\d+', s)
+            if match: return match.group(0)
+            return s
+        
+        return norm(d1) == norm(d2)
+
     def _find_congressman_by_district(self, province: str, municipality_barangay: str, project_year: Optional[int], 
-                                     district_lookup: Dict, congressmen_data: Dict, project_district: Optional[str] = None) -> Optional[tuple]:
+                                     district_lookup: Dict, congressmen_data: Dict, 
+                                     project_district: Optional[str] = None,
+                                     project_name: str = "") -> Optional[tuple]:
+        """
+        O(1) lookup using Location Index + Historical Term Check.
+        Replaces slow fuzzy matching with O(1) index lookup + strict validation.
+        """
+        # 1. Construct Search Query
+        query_text = f"{province} {municipality_barangay} {project_name}"
+        
+        # 2. Fast Location Lookup
+        loc_match = self.location_matcher.find_best_match(query_text, province_hint=province)
+        
+        if loc_match:
+            match_prov, match_dist, match_cong_2025 = loc_match
+            
+            # 3. Resolve Historical Congressman for Project Year
+            target_year = project_year if project_year else datetime.now().year
+            
+            for c_name, c_data in congressmen_data.items():
+                # Check province match strict (normalized)
+                prov_match = False
+                for p in c_data.get('provinces', []):
+                     if self.location_matcher._normalize(p) == self.location_matcher._normalize(match_prov):
+                         prov_match = True
+                         break
+                if not prov_match: continue
+
+                # Check district match strict
+                c_dist = str(c_data.get('district_number', ''))
+                if not self._compare_districts(c_dist, match_dist):
+                    continue
+
+                # Check Term
+                terms = c_data.get('terms', [])
+                for term in terms:
+                    start = int(term.get('start', 0))
+                    end = int(term.get('end', 9999))
+                    
+                    if start <= target_year <= end:
+                        return (c_data['name'], 200)
+            
+            # Fallback: if we matched location but not history? 
+            # If project_year is 2025-2028, return the 2025 cong match directly
+            if target_year >= 2025 and match_cong_2025 and match_cong_2025 != 'Unknown':
+                 return (match_cong_2025, 150)
+
+        return None
         """
         O(1) lookup for congressman by district.
         Returns: (congressman_name, match_score) or None
@@ -6665,6 +7055,28 @@ class DynastyProjectsCacheGeneratorDuckDB:
                     if len(projects) == 0:
                         print(f"⚠️  No {source_name} projects found in integrated parquet after filtering")
                     
+                    # CRITICAL: For SSP/Flood, try loading from separate parquet file if it exists
+                    if source_name in ('SSP', 'Flood Control', 'Flood') and len(projects) == 0:
+                        flood_file = PARQUET_DIR / 'flood_projects.parquet'
+                        print(f"   🔍 Checking for separate Flood file: {flood_file}")
+                        if flood_file.exists():
+                            print(f"   📂 Loading Flood/SSP from separate file: {flood_file}")
+                            try:
+                                flood_data = self.load_projects_from_parquet(flood_file, source_name=None)
+                                print(f"   📊 Raw loaded: {len(flood_data)} projects")
+                                # Ensure all projects have SSP as source
+                                for p in flood_data:
+                                    p['_source'] = 'SSP'
+                                    p['source'] = 'SSP'
+                                projects = flood_data
+                                print(f"   ✅ Loaded {len(projects)} Flood/SSP projects from separate file")
+                            except Exception as e:
+                                print(f"   ⚠️  Error loading Flood from separate file: {e}")
+                                import traceback
+                                traceback.print_exc()
+                        else:
+                            print(f"   ❌ Flood file not found at: {flood_file}")
+
                     # CRITICAL: For Transparency, try loading from separate parquet file if it exists
                     if source_name == 'Transparency' and len(projects) == 0:
                         transparency_file = PARQUET_DIR / 'transparency_projects.parquet'
@@ -6791,6 +7203,10 @@ class DynastyProjectsCacheGeneratorDuckDB:
         else:
             # Fallback to separate files
             print("⚠️  Integrated file not found, using separate Parquet files")
+            
+            # Load existing hashes for incremental update
+            processed_hashes = self._load_existing_project_hashes()
+            
             print("💾 Loading ALL projects into memory (utilizing 64GB RAM)...")
             
             # Load all separate files into memory ONCE
@@ -6810,9 +7226,22 @@ class DynastyProjectsCacheGeneratorDuckDB:
             
             # Process SSP/Flood projects
             try:
+                # Ensure source is set correctly for separate file loading
+                for p in all_flood_projects:
+                    if not p.get('_source') and not p.get('source'):
+                        p['_source'] = 'SSP'
+                        p['source'] = 'SSP'
+
                 # Filter from in-memory data
                 flood_projects = [p for p in all_flood_projects if p.get('_source', p.get('source', '')).upper() in ('SSP', 'FLOOD')]
-                print(f"📊 Filtered {len(flood_projects)} flood/SSP projects from memory")
+                
+                # INCREMENTAL: Filter existing
+                f_orig_len = len(flood_projects)
+                flood_projects = [p for p in flood_projects if self._calculate_project_hash(p) not in processed_hashes]
+                if f_orig_len > len(flood_projects):
+                    print(f"⏩ Skipped {f_orig_len - len(flood_projects)} existing Flood/SSP projects")
+
+                print(f"📊 Processing {len(flood_projects)} flood/SSP projects from memory")
                 flood_chunks = self._chunk_list(flood_projects, self.max_workers)
                 # Submit tasks directly to ThreadPoolExecutor for better thread utilization
                 flood_futures = [
@@ -6837,10 +7266,23 @@ class DynastyProjectsCacheGeneratorDuckDB:
             
             # Process DIME projects
             try:
+                # Ensure source is set correctly for separate file loading
+                for p in all_dime_projects:
+                    if not p.get('_source') and not p.get('source'):
+                        p['_source'] = 'DIME'
+                        p['source'] = 'DIME'
+
                 # Filter from in-memory data
                 dime_projects = [p for p in all_dime_projects if p.get('_source', p.get('source', '')).upper() == 'DIME']
+                
+                # INCREMENTAL: Filter existing
+                d_orig_len = len(dime_projects)
+                dime_projects = [p for p in dime_projects if self._calculate_project_hash(p) not in processed_hashes]
+                if d_orig_len > len(dime_projects):
+                    print(f"⏩ Skipped {d_orig_len - len(dime_projects)} existing DIME projects")
+
                 if dime_projects:
-                    print(f"📊 Filtered {len(dime_projects)} DIME projects from memory")
+                    print(f"📊 Processing {len(dime_projects)} DIME projects from memory")
                     dime_chunks = self._chunk_list(dime_projects, self.max_workers)
                     # Submit tasks directly to ThreadPoolExecutor for better thread utilization
                     dime_futures = [
@@ -6865,10 +7307,23 @@ class DynastyProjectsCacheGeneratorDuckDB:
             
             # Process PhilGEPS projects
             try:
+                # Ensure source is set correctly for separate file loading
+                for p in all_philgeps_projects:
+                    if not p.get('_source') and not p.get('source'):
+                        p['_source'] = 'PhilGEPS'
+                        p['source'] = 'PhilGEPS'
+
                 # Filter from in-memory data
                 philgeps_projects = [p for p in all_philgeps_projects if p.get('_source', p.get('source', '')).upper() == 'PHILGEPS']
+                
+                # INCREMENTAL: Filter existing
+                p_orig_len = len(philgeps_projects)
+                philgeps_projects = [p for p in philgeps_projects if self._calculate_project_hash(p) not in processed_hashes]
+                if p_orig_len > len(philgeps_projects):
+                    print(f"⏩ Skipped {p_orig_len - len(philgeps_projects)} existing PhilGEPS contracts")
+
                 if philgeps_projects:
-                    print(f"📊 Filtered {len(philgeps_projects)} PhilGEPS contracts from memory")
+                    print(f"📊 Processing {len(philgeps_projects)} PhilGEPS contracts from memory")
                     philgeps_chunks = self._chunk_list(philgeps_projects, self.max_workers)
                     # Submit tasks directly to ThreadPoolExecutor for better thread utilization
                     philgeps_futures = [
@@ -6901,6 +7356,15 @@ class DynastyProjectsCacheGeneratorDuckDB:
                 for p in microsite_projects:
                     if not p.get('_source') and not p.get('source'):
                         p['_source'] = 'Microsite'
+                    if not p.get('source'):
+                        p['source'] = 'Microsite'
+                
+                # INCREMENTAL: Filter existing
+                m_orig_len = len(microsite_projects)
+                microsite_projects = [p for p in microsite_projects if self._calculate_project_hash(p) not in processed_hashes]
+                if m_orig_len > len(microsite_projects):
+                    print(f"⏩ Skipped {m_orig_len - len(microsite_projects)} existing Microsite projects")
+
                 if microsite_projects:
                     print(f"📊 Processing {len(microsite_projects)} Microsite projects from memory")
                     microsite_chunks = self._chunk_list(microsite_projects, self.max_workers)
@@ -6940,6 +7404,13 @@ class DynastyProjectsCacheGeneratorDuckDB:
                         p['source'] = p['_source']
                     elif p.get('source') and not p.get('_source'):
                         p['_source'] = p['source']
+                
+                # INCREMENTAL: Filter existing
+                t_orig_len = len(transparency_projects)
+                transparency_projects = [p for p in transparency_projects if self._calculate_project_hash(p) not in processed_hashes]
+                if t_orig_len > len(transparency_projects):
+                    print(f"⏩ Skipped {t_orig_len - len(transparency_projects)} existing Transparency projects")
+
                 if transparency_projects:
                     print(f"📊 Processing {len(transparency_projects)} Transparency projects from memory")
                     transparency_chunks = self._chunk_list(transparency_projects, self.max_workers)
@@ -7224,6 +7695,10 @@ class DynastyProjectsCacheGeneratorDuckDB:
     async def generate_cache(self):
         """Generate the cached JSON file using DuckDB"""
         print("🚀 Starting dynasty-projects cache generation (DuckDB version - Parquet only)...")
+        
+        # Load Location Index
+        self.location_matcher.load()
+        
         try:
     
             # Ensure latest districts and congressmen config are pulled from DB

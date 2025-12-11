@@ -1672,112 +1672,66 @@ async def budget_roads_cost_analysis_api(year: str = Query("2026", description="
                 except Exception as cache_err:
                     print(f"⚠️ [/api/budget/roads-cost-analysis] Error reading cache, falling back to processing: {cache_err}")
         
-        # For historical years (2020-2025): Load from historical_roads_2020_2025.json
+        # For historical years (2020-2025) AND 2026 fallback: Use PostgreSQL database
+        # This ensures we always use the same data source as the browser view
         if year in ['2020', '2021', '2022', '2023', '2024', '2025']:
-            historical_file = Path(__file__).parent / "static" / "data" / "historical_roads_2020_2025.json"
-            if historical_file.exists():
-                try:
-                    with open(historical_file, 'r', encoding='utf-8') as f:
-                        historical_data = json.load(f)
+            try:
+                from budget_client import get_all_budget_items_for_analysis
+                print(f"🔄 [/api/budget/roads-cost-analysis] Fetching {year} data from database...")
+                db_result = await get_all_budget_items_for_analysis(year)
+                
+                if db_result.get('success'):
+                    # Transform DB result to match expected format
+                    # db_result['line_items'] already has {name, original_amount, location}
+                    all_items = db_result.get('line_items', [])
+
+                    # Standardize units: Convert 'Thousands' to 'Pesos' for historical data
+                    # 2026 data is already in Pesos.
+                    print(f"⚡ Scaling {len(all_items)} items for {year} by 1000 (Thousands -> Pesos)")
+                    for item in all_items:
+                        if 'amount' in item and item['amount'] is not None:
+                             try:
+                                 item['amount'] = float(item['amount']) * 1000
+                             except (ValueError, TypeError):
+                                 pass
+                        
+                        if 'original_amount' in item and item['original_amount'] is not None:
+                             try:
+                                 item['original_amount'] = float(item['original_amount']) * 1000
+                             except (ValueError, TypeError):
+                                 pass
                     
-                    year_data = historical_data.get('data', {}).get(year)
-                    if year_data:
-                        # Format the response to match the 2026 cache structure
-                        # 2026 cache has: { "national_roads": { "projects": [...], "total": ..., "statistics": {...} } }
-                        national_roads_list = year_data.get('national_roads', [])
-                        secondary_roads_list = year_data.get('secondary_roads', [])
-                        bridges_list = year_data.get('bridges', [])
-                        traffic_signs_list = year_data.get('traffic_signs', [])
-                        nia_list = year_data.get('nia', [])
-                        fmr_list = year_data.get('fmr', [])
-                        multi_purpose_buildings_list = year_data.get('multi_purpose_buildings', [])
-                        rockfall_netting_list = year_data.get('rockfall_netting', [])
-                        schools_list = year_data.get('schools', [])
-                        
-                        # Calculate totals and basic statistics
-                        def calculate_basic_stats(projects):
-                            total = len(projects)
-                            total_distance = sum(p.get('distance_km', 0) for p in projects)
-                            total_amount = sum(p.get('amount', 0) for p in projects)
-                            avg_cost_km = total_amount / total_distance if total_distance > 0 else 0
-                            return {
-                                "total": total,
-                                "total_distance_km": total_distance,
-                                "total_amount": total_amount,
-                                "avg_cost_per_km": avg_cost_km
-                            }
-                        
-                        response_data = {
-                            "success": True,
-                            "year": year,
-                            "national_roads": {
-                                "projects": national_roads_list,
-                                **calculate_basic_stats(national_roads_list)
-                            },
-                            "secondary_roads": {
-                                "projects": secondary_roads_list,
-                                **calculate_basic_stats(secondary_roads_list)
-                            },
-                            "bridges": {
-                                "projects": bridges_list,
-                                **calculate_basic_stats(bridges_list)
-                            },
-                            "traffic_signs": {
-                                "projects": traffic_signs_list,
-                                **calculate_basic_stats(traffic_signs_list)
-                            },
-                            "nia": {
-                                "projects": nia_list,
-                                **calculate_basic_stats(nia_list)
-                            },
-                            "fmr": {
-                                "projects": fmr_list,
-                                **calculate_basic_stats(fmr_list)
-                            },
-                            "multi_purpose_buildings": {
-                                "projects": multi_purpose_buildings_list,
-                                **calculate_basic_stats(multi_purpose_buildings_list)
-                            },
-                            "rockfall_netting": {
-                                "projects": rockfall_netting_list,
-                                **calculate_basic_stats(rockfall_netting_list)
-                            },
-                            "schools": {
-                                "projects": schools_list,
-                                **calculate_basic_stats(schools_list)
-                            },
-                            "subcategory_statistics": {
-                                "national_roads": year_data.get('national_roads_work_type_statistics', {}),
-                                "secondary_roads": year_data.get('secondary_roads_work_type_statistics', {}),
-                                "traffic_signs": year_data.get('traffic_signs_subcategory_statistics', {}),
-                                "bridges": year_data.get('bridges_statistics', {})
-                            }
-                        }
-                        print(f"✅ [/api/budget/roads-cost-analysis] Loaded historical data for year {year}")
-                        return JSONResponse(response_data)
-                    else:
-                        return JSONResponse({"success": False, "error": f"Year {year} data not found in historical file"}, status_code=404)
-                except Exception as hist_err:
-                    print(f"⚠️ [/api/budget/roads-cost-analysis] Error reading historical file: {hist_err}")
-                    return JSONResponse({"success": False, "error": f"Error loading historical data: {str(hist_err)}"}, status_code=500)
-            else:
-                return JSONResponse({"success": False, "error": f"Historical roads data file not found"}, status_code=404)
+                    # We continue to the processing logic below, similar to how 2026 fallback works
+                    # But first we need to make sure we don't try to load the static file again
+                    # So we just assign to data like the 2026 fallback does
+                    data = {'line_items': all_items, 'projects': []}
+                    
+                    # Skip the file loading part below
+                    # We need to wrap this in a way that bypasses the file check
+                    pass 
+                else:
+                     return JSONResponse({"success": False, "error": f"Database error for {year}: {db_result.get('error')}"}, status_code=500)
+            except Exception as db_err:
+                print(f"⚠️ [/api/budget/roads-cost-analysis] Error fetching from DB: {db_err}")
+                return JSONResponse({"success": False, "error": f"Error fetching {year} data: {str(db_err)}"}, status_code=500)
         
         # For 2026 (fallback if cache doesn't exist) or other years: process from budget_amendments
-        import re
+        # If we already have data from DB (for 2020-2025), use it. Otherwise load file.
         from difflib import SequenceMatcher
-        
-        # Try year-specific file first, fallback to 2026
-        json_path = Path(f'static/data/budget_amendments_{year}.json')
-        if not json_path.exists():
-            # Fallback to 2026 if year-specific file doesn't exist
-            if year != "2026":
-                json_path = Path('static/data/budget_amendments_2026.json')
+
+        if 'data' not in locals():
+            
+            # Try year-specific file first, fallback to 2026
+            json_path = Path(f'static/data/budget_amendments_{year}.json')
             if not json_path.exists():
-                return JSONResponse({"success": False, "error": f"Budget amendments {year} data not available"}, status_code=404)
-        
-        with open(json_path, 'r', encoding='utf-8') as f:
-            data = json.load(f)
+                # Fallback to 2026 if year-specific file doesn't exist
+                if year != "2026":
+                    json_path = Path('static/data/budget_amendments_2026.json')
+                if not json_path.exists():
+                    return JSONResponse({"success": False, "error": f"Budget amendments {year} data not available"}, status_code=404)
+            
+            with open(json_path, 'r', encoding='utf-8') as f:
+                data = json.load(f)
         
         all_items = data.get('line_items', []) + data.get('projects', [])
         
@@ -2406,10 +2360,15 @@ async def budget_roads_cost_analysis_api(year: str = Query("2026", description="
         flag_projects_by_threshold_simple(bridge_projects, bridges_stats, 'Bridges')
         traffic_signs_stats = calculate_statistics(traffic_signs_projects)
         nia_stats = calculate_statistics(nia_projects)
+        flag_projects_by_threshold_simple(nia_projects, nia_stats, 'Irrigation Works (NIA)')
         fmr_stats = calculate_statistics(fmr_projects)
+        flag_projects_by_threshold_simple(fmr_projects, fmr_stats, 'Farm-to-Market Roads')
         multi_purpose_buildings_stats = calculate_statistics(multi_purpose_buildings_projects)
+        flag_projects_by_threshold_simple(multi_purpose_buildings_projects, multi_purpose_buildings_stats, 'Multi-Purpose Buildings')
         rockfall_netting_stats = calculate_statistics(rockfall_netting_projects)
+        flag_projects_by_threshold_simple(rockfall_netting_projects, rockfall_netting_stats, 'Rockfall Netting')
         schools_stats = calculate_statistics(schools_projects)
+        flag_projects_by_threshold_simple(schools_projects, schools_stats, 'Schools')
         
         return JSONResponse({
             "success": True,
@@ -2736,69 +2695,76 @@ async def budget_category_statistics_api(year: str = "2026"):
                 "categories": categories
             })
         else:
-            # For historical years, load from historical_roads_2020_2025.json
-            historical_path = Path(__file__).parent / "static" / "data" / "historical_roads_2020_2025.json"
-            if not historical_path.exists():
-                return JSONResponse({"success": False, "error": f"Historical data not found for year {year}"}, status_code=404)
+            # For historical years (and potentially others), reuse the logic from the roads cost analysis API
+            # This API now fetches from DB for 2020-2025 and handles 2026 fallback
+            print(f"🔄 [/api/budget/category-statistics] reuse budget_roads_cost_analysis_api for year {year}")
             
-            with open(historical_path, 'r', encoding='utf-8') as f:
-                historical_data = json.load(f)
+            # Call the API function directly (it's async)
+            response = await budget_roads_cost_analysis_api(year)
             
-            year_data = historical_data.get('data', {}).get(year, {})
-            if not year_data:
-                return JSONResponse({"success": False, "error": f"No data found for year {year}"}, status_code=404)
+            if response.status_code != 200:
+                return JSONResponse({"success": False, "error": f"Error fetching data from analysis API for {year}"}, status_code=response.status_code)
+            
+            # Parse the JSON response body
+            import json
+            year_data = json.loads(response.body)
+            
+            if not year_data.get('success'):
+                return JSONResponse({"success": False, "error": f"Analysis API returned failure for {year}: {year_data.get('error')}"}, status_code=500)
             
             # Process historical data to get category statistics
             categories = []
             
             # Bridges
-            bridges = year_data.get('bridges', [])
+            bridges_data = year_data.get('bridges', {})
+            bridges = bridges_data.get('projects', [])
             if bridges:
                 bridges_flagged = [p for p in bridges if p.get('is_flagged', False)]
-                bridges_stats_data = year_data.get('bridges_statistics', {})
-                bridges_avg_cost_km = bridges_stats_data.get('mean') or 0
-                # Total cost (amount) of all flagged projects
+                bridges_stats = bridges_data.get('statistics', {})
+                bridges_avg_cost_km = bridges_stats.get('mean') or 0
                 bridges_flagged_cost = sum(p.get('amount', 0) for p in bridges_flagged)
-                
-                bridges_threshold = bridges_stats_data.get('threshold', 0)
+                bridges_threshold = bridges_stats.get('threshold', 0)
                 
                 categories.append({
                     "category": "Bridges",
                     "subcategory": None,
                     "average_cost_per_km": bridges_avg_cost_km,
-                    "threshold_cost_per_km": bridges_threshold,  # Cost/km threshold for flagging
-                    "flagged_cost": bridges_flagged_cost,  # Total cost (amount) of all flagged projects
+                    "threshold_cost_per_km": bridges_threshold,
+                    "flagged_cost": bridges_flagged_cost,
                     "flagged_count": len(bridges_flagged),
                     "total_count": len(bridges)
                 })
             
-            # Road Safety Facilities (subcategories)
-            traffic_signs = year_data.get('traffic_signs', [])
-            subcategory_stats = year_data.get('traffic_signs_subcategory_statistics', {})
-            for subcategory, stats in subcategory_stats.items():
-                # Match projects by subcategory field (set during flagging) or by road_safety_subcategories list
-                subcategory_projects = [
-                    p for p in traffic_signs 
-                    if p.get('subcategory') == subcategory or 
-                       (subcategory in (p.get('road_safety_subcategories') or []))
-                ]
-                flagged_projects = [p for p in subcategory_projects if p.get('is_flagged', False)]
-                flagged_cost = sum(p.get('amount', 0) for p in flagged_projects)
-                categories.append({
-                    "category": "Road Safety Facilities",
-                    "subcategory": subcategory,
-                    "average_cost_per_km": stats.get('mean') or 0,
-                    "threshold_cost_per_km": stats.get('threshold', 0),  # Cost/km threshold for flagging
-                    "flagged_cost": flagged_cost,
-                    "flagged_count": len(flagged_projects),
-                    "total_count": stats.get('count', 0)
-                })
+            # Road Safety Facilities
+            traffic_data = year_data.get('traffic_signs', {})
+            traffic_signs = traffic_data.get('projects', [])
+            subcategory_stats = traffic_data.get('subcategory_statistics', {})
             
-            # Major Roads (work types) - formerly "National Roads"
-            national_roads = year_data.get('national_roads', [])
-            national_work_type_stats = year_data.get('national_roads_work_type_statistics', {})
+            if subcategory_stats:
+                for subcategory, stats in subcategory_stats.items():
+                    subcategory_projects = [
+                        p for p in traffic_signs 
+                        if p.get('subcategory') == subcategory or 
+                           (subcategory in (p.get('road_safety_subcategories') or []))
+                    ]
+                    flagged_projects = [p for p in subcategory_projects if p.get('is_flagged', False)]
+                    flagged_cost = sum(p.get('amount', 0) for p in flagged_projects)
+                    categories.append({
+                        "category": "Road Safety Facilities",
+                        "subcategory": subcategory,
+                        "average_cost_per_km": stats.get('mean') or 0,
+                        "threshold_cost_per_km": stats.get('threshold', 0),
+                        "flagged_cost": flagged_cost,
+                        "flagged_count": len(flagged_projects),
+                        "total_count": stats.get('count', 0)
+                    })
+            
+            # Major Roads (National Roads)
+            national_data = year_data.get('national_roads', {})
+            national_roads = national_data.get('projects', [])
+            national_work_type_stats = national_data.get('subcategory_statistics', {})
+
             for work_type, stats in national_work_type_stats.items():
-                # Match projects by subcategory (set during flagging), work_type, or work_types list
                 work_type_projects = [
                     p for p in national_roads 
                     if p.get('subcategory') == work_type or
@@ -2806,23 +2772,23 @@ async def budget_category_statistics_api(year: str = "2026"):
                        (work_type in (p.get('work_types') or []))
                 ]
                 flagged_projects = [p for p in work_type_projects if p.get('is_flagged', False)]
-                # Total cost (amount) of all flagged projects
                 flagged_cost = sum(p.get('amount', 0) for p in flagged_projects)
                 categories.append({
                     "category": "Major Roads",
                     "subcategory": work_type,
                     "average_cost_per_km": stats.get('mean') or 0,
-                    "threshold_cost_per_km": stats.get('threshold', 0),  # Cost/km threshold for flagging
-                    "flagged_cost": flagged_cost,  # Total cost (amount) of all flagged projects
+                    "threshold_cost_per_km": stats.get('threshold', 0),
+                    "flagged_cost": flagged_cost,
                     "flagged_count": len(flagged_projects),
                     "total_count": stats.get('count', 0)
                 })
+
+            # Minor Roads (Secondary Roads)
+            secondary_data = year_data.get('secondary_roads', {})
+            secondary_roads = secondary_data.get('projects', [])
+            secondary_work_type_stats = secondary_data.get('subcategory_statistics', {})
             
-            # Minor Roads (work types) - formerly "Secondary Roads"
-            secondary_roads = year_data.get('secondary_roads', [])
-            secondary_work_type_stats = year_data.get('secondary_roads_work_type_statistics', {})
             for work_type, stats in secondary_work_type_stats.items():
-                # Match projects by subcategory (set during flagging), work_type, or work_types list
                 work_type_projects = [
                     p for p in secondary_roads 
                     if p.get('subcategory') == work_type or
@@ -2830,26 +2796,27 @@ async def budget_category_statistics_api(year: str = "2026"):
                        (work_type in (p.get('work_types') or []))
                 ]
                 flagged_projects = [p for p in work_type_projects if p.get('is_flagged', False)]
-                # Total cost (amount) of all flagged projects
                 flagged_cost = sum(p.get('amount', 0) for p in flagged_projects)
                 categories.append({
                     "category": "Minor Roads",
                     "subcategory": work_type,
                     "average_cost_per_km": stats.get('mean') or 0,
-                    "threshold_cost_per_km": stats.get('threshold', 0),  # Cost/km threshold for flagging
-                    "flagged_cost": flagged_cost,  # Total cost (amount) of all flagged projects
+                    "threshold_cost_per_km": stats.get('threshold', 0),
+                    "flagged_cost": flagged_cost,
                     "flagged_count": len(flagged_projects),
                     "total_count": stats.get('count', 0)
                 })
             
-            # Multi-Purpose Buildings (grouped by derived subcategories when available)
-            multi_purpose_buildings = year_data.get('multi_purpose_buildings', [])
-            multi_purpose_sub_stats = year_data.get('multi_purpose_buildings_subcategory_statistics', {})
+            # Multi-Purpose Buildings
+            mpb_data = year_data.get('multi_purpose_buildings', {})
+            multi_purpose_buildings = mpb_data.get('projects', [])
+            multi_purpose_sub_stats = mpb_data.get('subcategory_statistics', {})
+            
             if multi_purpose_sub_stats:
                 for subcategory, stats in multi_purpose_sub_stats.items():
                     subcategory_projects = [
-                        p for p in multi_purpose_buildings
-                        if (p.get('multi_purpose_subcategory') or 'Other Multi-Purpose Buildings') == subcategory
+                         p for p in multi_purpose_buildings
+                         if (p.get('multi_purpose_subcategory') or 'Other Multi-Purpose Buildings') == subcategory
                     ]
                     flagged_projects = [p for p in subcategory_projects if p.get('is_flagged', False)]
                     flagged_cost = sum(p.get('amount', 0) for p in flagged_projects)
@@ -2863,76 +2830,99 @@ async def budget_category_statistics_api(year: str = "2026"):
                         "total_count": stats.get('count', len(subcategory_projects))
                     })
             else:
-                buildings_flagged = [p for p in multi_purpose_buildings if p.get('is_flagged', False)]
-                buildings_stats_data = year_data.get('multi_purpose_buildings_statistics', {})
-                buildings_avg_cost_km = buildings_stats_data.get('mean') or 0
-                buildings_flagged_cost = sum(p.get('amount', 0) for p in buildings_flagged)
-                
-                buildings_threshold = buildings_stats_data.get('threshold', 0)
-                
-                categories.append({
+                 buildings_flagged = [p for p in multi_purpose_buildings if p.get('is_flagged', False)]
+                 mpb_stats = mpb_data.get('statistics', {})
+                 categories.append({
                     "category": "Multi-Purpose Buildings",
                     "subcategory": None,
-                    "average_cost_per_km": buildings_avg_cost_km,
-                    "threshold_cost_per_km": buildings_threshold,
-                    "flagged_cost": buildings_flagged_cost,
+                    "average_cost_per_km": mpb_stats.get('mean') or 0,
+                    "threshold_cost_per_km": mpb_stats.get('threshold', 0),
+                    "flagged_cost": sum(p.get('amount', 0) for p in buildings_flagged),
                     "flagged_count": len(buildings_flagged),
                     "total_count": len(multi_purpose_buildings)
+                 })
+
+            # Irrigation Works (NIA)
+            nia_data = year_data.get('nia', {})
+            nia_projects = nia_data.get('projects', [])
+            nia_sub_stats = nia_data.get('subcategory_statistics', {})
+            
+            if nia_sub_stats:
+                for subcategory, stats in nia_sub_stats.items():
+                    subcategory_projects = [
+                        p for p in nia_projects
+                        if (p.get('nia_subcategory') or 'Other Irrigation Works') == subcategory
+                    ]
+                    flagged_projects = [p for p in subcategory_projects if p.get('is_flagged', False)]
+                    flagged_cost = sum(p.get('amount', 0) for p in flagged_projects)
+                    categories.append({
+                        "category": "Irrigation Works (NIA)",
+                        "subcategory": subcategory,
+                        "average_cost_per_km": stats.get('mean') or 0,
+                        "threshold_cost_per_km": stats.get('threshold', 0),
+                        "flagged_cost": flagged_cost,
+                        "flagged_count": len(flagged_projects),
+                        "total_count": stats.get('count', len(subcategory_projects))
+                    })
+            elif nia_projects:
+                nia_stats = nia_data.get('statistics', {})
+                nia_flagged = [p for p in nia_projects if p.get('is_flagged', False)]
+                categories.append({
+                    "category": "Irrigation Works (NIA)",
+                    "subcategory": None,
+                    "average_cost_per_km": nia_stats.get('mean') or 0,
+                    "threshold_cost_per_km": nia_stats.get('threshold', 0),
+                    "flagged_cost": sum(p.get('amount', 0) for p in nia_flagged),
+                    "flagged_count": len(nia_flagged),
+                    "total_count": len(nia_projects)
                 })
+
+            # Rockfall Netting
+            rockfall_data = year_data.get('rockfall_netting', {})
+            rockfall_netting = rockfall_data.get('projects', [])
+            if rockfall_netting:
+                rockfall_stats = rockfall_data.get('statistics', {})
+                rockfall_flagged = [p for p in rockfall_netting if p.get('is_flagged', False)]
+                categories.append({
+                    "category": "Rockfall Netting",
+                    "subcategory": None,
+                    "average_cost_per_km": rockfall_stats.get('mean') or 0,
+                    "threshold_cost_per_km": rockfall_stats.get('threshold', 0),
+                    "flagged_cost": sum(p.get('amount', 0) for p in rockfall_flagged),
+                    "flagged_count": len(rockfall_flagged),
+                    "total_count": len(rockfall_netting)
+                })
+
+            # Schools
+            schools_data = year_data.get('schools', {})
+            schools = schools_data.get('projects', [])
+            schools_subcategory_stats = schools_data.get('subcategory_statistics', {})
             
-            # Rockfall Netting (always include, even if empty)
-            rockfall_netting = year_data.get('rockfall_netting', [])
-            rockfall_flagged = [p for p in rockfall_netting if p.get('is_flagged', False)]
-            rockfall_stats_data = year_data.get('rockfall_netting_statistics', {})
-            rockfall_avg_cost_km = rockfall_stats_data.get('mean') or 0
-            rockfall_flagged_cost = sum(p.get('amount', 0) for p in rockfall_flagged)
-            
-            rockfall_threshold = rockfall_stats_data.get('threshold', 0)
-            
-            categories.append({
-                "category": "Rockfall Netting",
-                "subcategory": None,
-                "average_cost_per_km": rockfall_avg_cost_km,
-                "threshold_cost_per_km": rockfall_threshold,
-                "flagged_cost": rockfall_flagged_cost,
-                "flagged_count": len(rockfall_flagged),
-                "total_count": len(rockfall_netting)
-            })
-            
-            # Schools (with subcategories, always include even if empty)
-            schools = year_data.get('schools', [])
-            schools_subcategory_stats = year_data.get('schools_subcategory_statistics', {})
-            # If no subcategories exist, add a default entry for the overall category
-            if not schools_subcategory_stats:
-                schools_stats_data = year_data.get('schools_statistics', {})
-                schools_avg_cost_km = schools_stats_data.get('mean') or 0
+            if schools_subcategory_stats:
+                for subcategory, stats in schools_subcategory_stats.items():
+                    subcategory_projects = [p for p in schools if p.get('school_subcategory') == subcategory]
+                    flagged_projects = [p for p in subcategory_projects if p.get('is_flagged', False)]
+                    flagged_cost = sum(p.get('amount', 0) for p in flagged_projects)
+                    categories.append({
+                        "category": "Schools",
+                        "subcategory": subcategory,
+                        "average_cost_per_km": stats.get('mean') or 0,
+                        "threshold_cost_per_km": stats.get('threshold', 0),
+                        "flagged_cost": flagged_cost,
+                        "flagged_count": len(flagged_projects),
+                        "total_count": stats.get('count', 0)
+                    })
+            elif schools:
+                schools_stats = schools_data.get('statistics', {})
                 schools_flagged = [p for p in schools if p.get('is_flagged', False)]
-                schools_flagged_cost = sum(p.get('amount', 0) for p in schools_flagged)
-                schools_threshold = schools_stats_data.get('threshold', 0)
                 categories.append({
                     "category": "Schools",
                     "subcategory": None,
-                    "average_cost_per_km": schools_avg_cost_km,
-                    "threshold_cost_per_km": schools_threshold,
-                    "flagged_cost": schools_flagged_cost,
+                    "average_cost_per_km": schools_stats.get('mean') or 0,
+                    "threshold_cost_per_km": schools_stats.get('threshold', 0),
+                    "flagged_cost": sum(p.get('amount', 0) for p in schools_flagged),
                     "flagged_count": len(schools_flagged),
                     "total_count": len(schools)
-                })
-            for subcategory, stats in schools_subcategory_stats.items():
-                subcategory_projects = [
-                    p for p in schools
-                    if p.get('school_subcategory') == subcategory
-                ]
-                flagged_projects = [p for p in subcategory_projects if p.get('is_flagged', False)]
-                flagged_cost = sum(p.get('amount', 0) for p in flagged_projects)
-                categories.append({
-                    "category": "Schools",
-                    "subcategory": subcategory,
-                    "average_cost_per_km": stats.get('mean') or 0,
-                    "threshold_cost_per_km": stats.get('threshold', 0),
-                    "flagged_cost": flagged_cost,
-                    "flagged_count": len(flagged_projects),
-                    "total_count": stats.get('count', 0)
                 })
             
             # Sort by average_cost_per_km descending

@@ -3400,3 +3400,105 @@ async def get_budget_data_browser_all_years(years: list, page: int = 1, limit: i
         traceback.print_exc()
         return {"success": False, "error": str(e)}
 
+
+async def get_all_budget_items_for_analysis(year: str = "2025"):
+    """Get all budget items for a specific year for road cost analysis (amount > 0)"""
+    try:
+        print(f"🔍 [PostgreSQL] Getting all budget items for {year} cost analysis")
+        
+        conn = await get_db_connection()
+        if not conn:
+            return {"success": False, "error": "Database connection failed"}
+        
+        # Validate year check
+        if not year.isdigit() or len(year) != 4:
+            await conn.close()
+            return {"success": False, "error": "Invalid year format"}
+        
+        table_name = f"budget_{year}"
+        
+        # Check if table exists
+        table_exists_query = """
+        SELECT EXISTS (
+            SELECT FROM information_schema.tables 
+            WHERE table_schema = 'public' 
+            AND table_name = $1
+        )
+        """
+        table_exists = await conn.fetchval(table_exists_query, table_name)
+        
+        if not table_exists:
+            await conn.close()
+            return {"success": False, "error": f"Table {table_name} does not exist"}
+        
+        # Fetch necessary columns for analysis: name (project desc), amount, location (region)
+        # Note: mapping based on common schema understanding
+        # 2024-2026 usually have uacs_proj_dsc, earlier years might vary but standardized in these tables usually
+        
+        # Dynamic column check to be safe
+        columns_query = """
+        SELECT column_name 
+        FROM information_schema.columns 
+        WHERE table_name = $1 
+        AND table_schema = 'public'
+        """
+        columns_result = await conn.fetch(columns_query, table_name)
+        columns = [row['column_name'] for row in columns_result]
+        
+        # Determine specific columns to use
+        # Description: prefer dsc (common in 2025), then uacs_proj_dsc, fallback to uacs_prog_dsc
+        desc_col = None
+        for col in ["dsc", "uacs_proj_dsc", "uacs_prog_dsc", "uacs_obj_dsc", "program_desc", "project_desc"]:
+            if col in columns:
+                desc_col = col
+                break
+             
+        if not desc_col:
+             await conn.close()
+             return {"success": False, "error": f"No suitable description column found. Available: {columns}"}
+
+        # Region: prefer uacs_reg_dsc (name), fallback to uacs_reg_id (code)
+        region_col = None
+        for col in ["uacs_reg_dsc", "region", "location_region", "uacs_reg_id"]:
+            if col in columns:
+                region_col = col
+                break
+        
+        # Build query
+        # We need: name, amount, region
+        select_cols = [
+            f'{desc_col} as name',
+            'amt as original_amount' if 'amt' in columns else 'amount as original_amount', # 2025 has 'amt'
+            f'{region_col} as region' if region_col else "NULL as region",
+            "source_file as source_sheet" if "source_file" in columns else "'Unknown' as source_sheet"
+        ]
+        
+        query = f"""
+        SELECT {', '.join(select_cols)}
+        FROM {table_name}
+        WHERE {( 'amt' if 'amt' in columns else 'amount' )} > 0 AND {desc_col} IS NOT NULL
+        """
+        
+        rows = await conn.fetch(query)
+        await conn.close()
+        
+        # Convert to list of dicts
+        items = []
+        for row in rows:
+            items.append({
+                "name": row['name'],
+                "original_amount": float(row['original_amount']) if row['original_amount'] else 0,
+                "location": {"region": row['region']} if row['region'] else {},
+                "source_sheet": row['source_sheet']
+            })
+            
+        print(f"🔍 [PostgreSQL] Found {len(items)} items for {year} analysis")
+        
+        return {
+            "success": True,
+            "line_items": items # visualization.py expects line_items or projects list
+        }
+        
+    except Exception as e:
+        print(f"💥 [PostgreSQL] Error in get_all_budget_items_for_analysis: {e}")
+        return {"success": False, "error": str(e)}
