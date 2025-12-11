@@ -1879,8 +1879,46 @@ async def budget_roads_cost_analysis_api(year: str = Query("2026", description="
                                         ('road' not in name_lower or 'building' in name_lower or 'bldg' in name_lower)
             
             # Rockfall Netting (also: rocknetting) - NO CHAINAGE REQUIRED
-            rockfall_keywords = ['rockfall netting', 'rocknetting', 'rock fall netting', 'rockfall protection', 'rockfall mitigation']
+            # Broader synonyms for Rockfall Netting
+            rockfall_keywords = [
+                'rockfall', 'rock fall', 'rock netting', 'rocknetting', 
+                'active wire mesh', 'high tensile wire', 'erosion control mat',
+                'soil nailing', 'rockfall protection', 'rockfall mitigation'
+            ]
             is_rockfall_netting = any(keyword in name_lower for keyword in rockfall_keywords)
+
+            # Check for NIA (National Irrigation Administration) projects - Annex A-4
+            # Move NIA check here to allow projects WITHOUT chainage (e.g. Dams, Pumps)
+            nia_keywords = [
+                'national irrigation', 'irrigation system', 'irrigation project',
+                'irrigation canal', 'communal irrigation', 'irrigation sub-program',
+                'irrigation subprogram', 'irrigation facility', 'irrigation structure',
+                'annex a-4', 'communal irrigation system', 'communal irrigation project',
+                'communal irrigation scheme', 
+                'canal lining', 'lateral canal', 'main canal', 'diversion dam', 
+                'solar powered irrigation', 'pump irrigation'
+            ]
+            nia_keyword_patterns = [
+                r'\bnis\b', r'\bnia\b', r'\bcis\b', r'\bcip\b', r'\bsip\b',
+                r'\bc\.i\.s\b', r'\bc\.i\.p\b', r'\bs\.i\.p\b'
+            ]
+            
+            pattern_hit = any(re.search(pattern, name_lower) for pattern in nia_keyword_patterns)
+            
+            # Use 'keyword_hit' logic to strictly exclude "Diversion Road" for NIA
+            keyword_hit = False
+            for k in nia_keywords:
+                if k in name_lower:
+                    # Filter out road diversions
+                    if 'diversion' in k or 'diversion' in name_lower:
+                        if 'road' in name_lower: continue
+                    keyword_hit = True
+                    break
+
+            is_nia = (keyword_hit or pattern_hit) and \
+                     'cnia' not in name_lower and \
+                     'xdp' not in name_lower and \
+                     'dystonia' not in name_lower
             
             # School (focus on building/classroom construction, not salaries or equipment) - NO CHAINAGE REQUIRED
             school_keywords = ['school', 'classroom', 'elementary school', 'high school', 'secondary school', 'primary school']
@@ -1890,7 +1928,7 @@ async def budget_roads_cost_analysis_api(year: str = Query("2026", description="
                        any(construct_keyword in name_lower for construct_keyword in ['construction', 'building', 'classroom', 'bldg', 'facility', 'repair', 'rehabilitation', 'renovation', 'improvement', 'completion'])
             
             # For non-road categories, process them even without chainage
-            if is_multi_purpose_building or is_rockfall_netting or is_school:
+            if is_multi_purpose_building or is_rockfall_netting or is_school or is_nia:
                 # Check if it has chainage notation - extract ALL ranges (optional for these categories)
                 chainage_ranges = extract_all_chainage_ranges(name)
                 distance_km = 0
@@ -1923,6 +1961,9 @@ async def budget_roads_cost_analysis_api(year: str = Query("2026", description="
                     continue  # Skip further categorization
                 elif is_rockfall_netting:
                     rockfall_netting_projects.append(project_data)
+                    continue  # Skip further categorization
+                elif is_nia:
+                    nia_projects.append(project_data)
                     continue  # Skip further categorization
                 elif is_school:
                     # Categorize school projects into subcategories
@@ -2478,6 +2519,7 @@ async def budget_category_statistics_api(year: str = "2026"):
             bridges_stats = cache_data.get('bridges', {}).get('statistics', {})
             bridges_flagged = [p for p in bridges if p.get('is_flagged', False)]
             bridges_flagged_cost = sum(p.get('amount', 0) for p in bridges_flagged)
+            bridges_total_cost = sum(p.get('amount', 0) for p in bridges)
             
             bridges_threshold = bridges_stats.get('threshold', 0)
             
@@ -2487,6 +2529,7 @@ async def budget_category_statistics_api(year: str = "2026"):
                 "average_cost_per_km": bridges_stats.get('mean') or 0,
                 "threshold_cost_per_km": bridges_threshold,
                 "flagged_cost": bridges_flagged_cost,
+                "total_cost": bridges_total_cost,
                 "flagged_count": len(bridges_flagged),
                 "total_count": len(bridges)
             })
@@ -2502,12 +2545,15 @@ async def budget_category_statistics_api(year: str = "2026"):
                 ]
                 flagged_projects = [p for p in subcategory_projects if p.get('is_flagged', False)]
                 flagged_cost = sum(p.get('amount', 0) for p in flagged_projects)
+                total_cost = sum(p.get('amount', 0) for p in subcategory_projects)
+                
                 categories.append({
                     "category": "Road Safety Facilities",
                     "subcategory": subcategory,
                     "average_cost_per_km": stats.get('mean') or 0,
                     "threshold_cost_per_km": stats.get('threshold', 0),
                     "flagged_cost": flagged_cost,
+                    "total_cost": total_cost,
                     "flagged_count": len(flagged_projects),
                     "total_count": stats.get('count', 0)
                 })
@@ -2524,12 +2570,15 @@ async def budget_category_statistics_api(year: str = "2026"):
                 ]
                 flagged_projects = [p for p in work_type_projects if p.get('is_flagged', False)]
                 flagged_cost = sum(p.get('amount', 0) for p in flagged_projects)
+                total_cost = sum(p.get('amount', 0) for p in work_type_projects)
+                
                 categories.append({
                     "category": "Major Roads",
                     "subcategory": work_type,
                     "average_cost_per_km": stats.get('mean') or 0,
                     "threshold_cost_per_km": stats.get('threshold', 0),
                     "flagged_cost": flagged_cost,
+                    "total_cost": total_cost,
                     "flagged_count": len(flagged_projects),
                     "total_count": stats.get('count', 0)
                 })
@@ -2546,12 +2595,15 @@ async def budget_category_statistics_api(year: str = "2026"):
                 ]
                 flagged_projects = [p for p in work_type_projects if p.get('is_flagged', False)]
                 flagged_cost = sum(p.get('amount', 0) for p in flagged_projects)
+                total_cost = sum(p.get('amount', 0) for p in work_type_projects)
+                
                 categories.append({
                     "category": "Minor Roads",
                     "subcategory": work_type,
                     "average_cost_per_km": stats.get('mean') or 0,
                     "threshold_cost_per_km": stats.get('threshold', 0),
                     "flagged_cost": flagged_cost,
+                    "total_cost": total_cost,
                     "flagged_count": len(flagged_projects),
                     "total_count": stats.get('count', 0)
                 })
@@ -2568,12 +2620,15 @@ async def budget_category_statistics_api(year: str = "2026"):
                     ]
                     flagged_projects = [p for p in subcategory_projects if p.get('is_flagged', False)]
                     flagged_cost = sum(p.get('amount', 0) for p in flagged_projects)
+                    total_cost = sum(p.get('amount', 0) for p in subcategory_projects)
+                    
                     categories.append({
                         "category": "Multi-Purpose Buildings",
                         "subcategory": subcategory,
                         "average_cost_per_km": stats.get('mean') or 0,
                         "threshold_cost_per_km": stats.get('threshold', 0),
                         "flagged_cost": flagged_cost,
+                        "total_cost": total_cost,
                         "flagged_count": len(flagged_projects),
                         "total_count": stats.get('count', len(subcategory_projects))
                     })
@@ -2582,6 +2637,7 @@ async def budget_category_statistics_api(year: str = "2026"):
                 buildings_stats_data = multi_purpose_data.get('statistics', {})
                 buildings_avg_cost_km = buildings_stats_data.get('mean') or 0
                 buildings_flagged_cost = sum(p.get('amount', 0) for p in buildings_flagged)
+                buildings_total_cost = sum(p.get('amount', 0) for p in multi_purpose_buildings)
                 buildings_threshold = buildings_stats_data.get('threshold', 0)
                 
                 categories.append({
@@ -2590,6 +2646,7 @@ async def budget_category_statistics_api(year: str = "2026"):
                     "average_cost_per_km": buildings_avg_cost_km,
                     "threshold_cost_per_km": buildings_threshold,
                     "flagged_cost": buildings_flagged_cost,
+                    "total_cost": buildings_total_cost,
                     "flagged_count": len(buildings_flagged),
                     "total_count": len(multi_purpose_buildings)
                 })
@@ -2606,12 +2663,15 @@ async def budget_category_statistics_api(year: str = "2026"):
                     ]
                     flagged_projects = [p for p in subcategory_projects if p.get('is_flagged', False)]
                     flagged_cost = sum(p.get('amount', 0) for p in flagged_projects)
+                    total_cost = sum(p.get('amount', 0) for p in subcategory_projects)
+                    
                     categories.append({
                         "category": "Irrigation Works (NIA)",
                         "subcategory": subcategory,
                         "average_cost_per_km": stats.get('mean') or 0,
                         "threshold_cost_per_km": stats.get('threshold', 0),
                         "flagged_cost": flagged_cost,
+                        "total_cost": total_cost,
                         "flagged_count": len(flagged_projects),
                         "total_count": stats.get('count', len(subcategory_projects))
                     })
@@ -2620,6 +2680,7 @@ async def budget_category_statistics_api(year: str = "2026"):
                 nia_avg_cost_km = nia_stats_data.get('mean') or 0
                 nia_flagged = [p for p in nia_projects if p.get('is_flagged', False)]
                 nia_flagged_cost = sum(p.get('amount', 0) for p in nia_flagged)
+                nia_total_cost = sum(p.get('amount', 0) for p in nia_projects)
                 nia_threshold = nia_stats_data.get('threshold', 0)
                 categories.append({
                     "category": "Irrigation Works (NIA)",
@@ -2627,6 +2688,7 @@ async def budget_category_statistics_api(year: str = "2026"):
                     "average_cost_per_km": nia_avg_cost_km,
                     "threshold_cost_per_km": nia_threshold,
                     "flagged_cost": nia_flagged_cost,
+                    "total_cost": nia_total_cost,
                     "flagged_count": len(nia_flagged),
                     "total_count": len(nia_projects)
                 })
@@ -2637,6 +2699,7 @@ async def budget_category_statistics_api(year: str = "2026"):
             rockfall_stats_data = cache_data.get('rockfall_netting', {}).get('statistics', {})
             rockfall_avg_cost_km = rockfall_stats_data.get('mean') or 0
             rockfall_flagged_cost = sum(p.get('amount', 0) for p in rockfall_flagged)
+            rockfall_total_cost = sum(p.get('amount', 0) for p in rockfall_netting)
             
             rockfall_threshold = rockfall_stats_data.get('threshold', 0)
             
@@ -2646,6 +2709,7 @@ async def budget_category_statistics_api(year: str = "2026"):
                 "average_cost_per_km": rockfall_avg_cost_km,
                 "threshold_cost_per_km": rockfall_threshold,
                 "flagged_cost": rockfall_flagged_cost,
+                "total_cost": rockfall_total_cost,
                 "flagged_count": len(rockfall_flagged),
                 "total_count": len(rockfall_netting)
             })
@@ -2659,6 +2723,7 @@ async def budget_category_statistics_api(year: str = "2026"):
                 schools_avg_cost_km = schools_stats_data.get('mean') or 0
                 schools_flagged = [p for p in schools if p.get('is_flagged', False)]
                 schools_flagged_cost = sum(p.get('amount', 0) for p in schools_flagged)
+                schools_total_cost = sum(p.get('amount', 0) for p in schools)
                 schools_threshold = schools_stats_data.get('threshold', 0)
                 categories.append({
                     "category": "Schools",
@@ -2666,6 +2731,7 @@ async def budget_category_statistics_api(year: str = "2026"):
                     "average_cost_per_km": schools_avg_cost_km,
                     "threshold_cost_per_km": schools_threshold,
                     "flagged_cost": schools_flagged_cost,
+                    "total_cost": schools_total_cost,
                     "flagged_count": len(schools_flagged),
                     "total_count": len(schools)
                 })
@@ -2676,12 +2742,14 @@ async def budget_category_statistics_api(year: str = "2026"):
                 ]
                 flagged_projects = [p for p in subcategory_projects if p.get('is_flagged', False)]
                 flagged_cost = sum(p.get('amount', 0) for p in flagged_projects)
+                total_cost = sum(p.get('amount', 0) for p in subcategory_projects)
                 categories.append({
                     "category": "Schools",
                     "subcategory": subcategory,
                     "average_cost_per_km": stats.get('mean') or 0,
                     "threshold_cost_per_km": stats.get('threshold', 0),
                     "flagged_cost": flagged_cost,
+                    "total_cost": total_cost,
                     "flagged_count": len(flagged_projects),
                     "total_count": stats.get('count', 0)
                 })
@@ -2723,6 +2791,7 @@ async def budget_category_statistics_api(year: str = "2026"):
                 bridges_stats = bridges_data.get('statistics', {})
                 bridges_avg_cost_km = bridges_stats.get('mean') or 0
                 bridges_flagged_cost = sum(p.get('amount', 0) for p in bridges_flagged)
+                bridges_total_cost = sum(p.get('amount', 0) for p in bridges)
                 bridges_threshold = bridges_stats.get('threshold', 0)
                 
                 categories.append({
@@ -2731,6 +2800,7 @@ async def budget_category_statistics_api(year: str = "2026"):
                     "average_cost_per_km": bridges_avg_cost_km,
                     "threshold_cost_per_km": bridges_threshold,
                     "flagged_cost": bridges_flagged_cost,
+                    "total_cost": bridges_total_cost,
                     "flagged_count": len(bridges_flagged),
                     "total_count": len(bridges)
                 })
@@ -2749,12 +2819,15 @@ async def budget_category_statistics_api(year: str = "2026"):
                     ]
                     flagged_projects = [p for p in subcategory_projects if p.get('is_flagged', False)]
                     flagged_cost = sum(p.get('amount', 0) for p in flagged_projects)
+                    total_cost = sum(p.get('amount', 0) for p in subcategory_projects)
+                    
                     categories.append({
                         "category": "Road Safety Facilities",
                         "subcategory": subcategory,
                         "average_cost_per_km": stats.get('mean') or 0,
                         "threshold_cost_per_km": stats.get('threshold', 0),
                         "flagged_cost": flagged_cost,
+                        "total_cost": total_cost,
                         "flagged_count": len(flagged_projects),
                         "total_count": stats.get('count', 0)
                     })
@@ -2773,12 +2846,15 @@ async def budget_category_statistics_api(year: str = "2026"):
                 ]
                 flagged_projects = [p for p in work_type_projects if p.get('is_flagged', False)]
                 flagged_cost = sum(p.get('amount', 0) for p in flagged_projects)
+                total_cost = sum(p.get('amount', 0) for p in work_type_projects)
+                
                 categories.append({
                     "category": "Major Roads",
                     "subcategory": work_type,
                     "average_cost_per_km": stats.get('mean') or 0,
                     "threshold_cost_per_km": stats.get('threshold', 0),
                     "flagged_cost": flagged_cost,
+                    "total_cost": total_cost,
                     "flagged_count": len(flagged_projects),
                     "total_count": stats.get('count', 0)
                 })
@@ -2797,12 +2873,15 @@ async def budget_category_statistics_api(year: str = "2026"):
                 ]
                 flagged_projects = [p for p in work_type_projects if p.get('is_flagged', False)]
                 flagged_cost = sum(p.get('amount', 0) for p in flagged_projects)
+                total_cost = sum(p.get('amount', 0) for p in work_type_projects)
+                
                 categories.append({
                     "category": "Minor Roads",
                     "subcategory": work_type,
                     "average_cost_per_km": stats.get('mean') or 0,
                     "threshold_cost_per_km": stats.get('threshold', 0),
                     "flagged_cost": flagged_cost,
+                    "total_cost": total_cost,
                     "flagged_count": len(flagged_projects),
                     "total_count": stats.get('count', 0)
                 })
@@ -2820,12 +2899,14 @@ async def budget_category_statistics_api(year: str = "2026"):
                     ]
                     flagged_projects = [p for p in subcategory_projects if p.get('is_flagged', False)]
                     flagged_cost = sum(p.get('amount', 0) for p in flagged_projects)
+                    total_cost = sum(p.get('amount', 0) for p in subcategory_projects)
                     categories.append({
                         "category": "Multi-Purpose Buildings",
                         "subcategory": subcategory,
                         "average_cost_per_km": stats.get('mean') or 0,
                         "threshold_cost_per_km": stats.get('threshold', 0),
                         "flagged_cost": flagged_cost,
+                        "total_cost": total_cost,
                         "flagged_count": len(flagged_projects),
                         "total_count": stats.get('count', len(subcategory_projects))
                     })
@@ -2838,6 +2919,7 @@ async def budget_category_statistics_api(year: str = "2026"):
                     "average_cost_per_km": mpb_stats.get('mean') or 0,
                     "threshold_cost_per_km": mpb_stats.get('threshold', 0),
                     "flagged_cost": sum(p.get('amount', 0) for p in buildings_flagged),
+                    "total_cost": sum(p.get('amount', 0) for p in multi_purpose_buildings),
                     "flagged_count": len(buildings_flagged),
                     "total_count": len(multi_purpose_buildings)
                  })
@@ -2855,12 +2937,14 @@ async def budget_category_statistics_api(year: str = "2026"):
                     ]
                     flagged_projects = [p for p in subcategory_projects if p.get('is_flagged', False)]
                     flagged_cost = sum(p.get('amount', 0) for p in flagged_projects)
+                    total_cost = sum(p.get('amount', 0) for p in subcategory_projects)
                     categories.append({
                         "category": "Irrigation Works (NIA)",
                         "subcategory": subcategory,
                         "average_cost_per_km": stats.get('mean') or 0,
                         "threshold_cost_per_km": stats.get('threshold', 0),
                         "flagged_cost": flagged_cost,
+                        "total_cost": total_cost,
                         "flagged_count": len(flagged_projects),
                         "total_count": stats.get('count', len(subcategory_projects))
                     })
@@ -2873,6 +2957,7 @@ async def budget_category_statistics_api(year: str = "2026"):
                     "average_cost_per_km": nia_stats.get('mean') or 0,
                     "threshold_cost_per_km": nia_stats.get('threshold', 0),
                     "flagged_cost": sum(p.get('amount', 0) for p in nia_flagged),
+                    "total_cost": sum(p.get('amount', 0) for p in nia_projects),
                     "flagged_count": len(nia_flagged),
                     "total_count": len(nia_projects)
                 })
@@ -2889,6 +2974,7 @@ async def budget_category_statistics_api(year: str = "2026"):
                     "average_cost_per_km": rockfall_stats.get('mean') or 0,
                     "threshold_cost_per_km": rockfall_stats.get('threshold', 0),
                     "flagged_cost": sum(p.get('amount', 0) for p in rockfall_flagged),
+                    "total_cost": sum(p.get('amount', 0) for p in rockfall_netting),
                     "flagged_count": len(rockfall_flagged),
                     "total_count": len(rockfall_netting)
                 })
@@ -2903,12 +2989,14 @@ async def budget_category_statistics_api(year: str = "2026"):
                     subcategory_projects = [p for p in schools if p.get('school_subcategory') == subcategory]
                     flagged_projects = [p for p in subcategory_projects if p.get('is_flagged', False)]
                     flagged_cost = sum(p.get('amount', 0) for p in flagged_projects)
+                    total_cost = sum(p.get('amount', 0) for p in subcategory_projects)
                     categories.append({
                         "category": "Schools",
                         "subcategory": subcategory,
                         "average_cost_per_km": stats.get('mean') or 0,
                         "threshold_cost_per_km": stats.get('threshold', 0),
                         "flagged_cost": flagged_cost,
+                        "total_cost": total_cost,
                         "flagged_count": len(flagged_projects),
                         "total_count": stats.get('count', 0)
                     })
@@ -2921,6 +3009,7 @@ async def budget_category_statistics_api(year: str = "2026"):
                     "average_cost_per_km": schools_stats.get('mean') or 0,
                     "threshold_cost_per_km": schools_stats.get('threshold', 0),
                     "flagged_cost": sum(p.get('amount', 0) for p in schools_flagged),
+                    "total_cost": sum(p.get('amount', 0) for p in schools),
                     "flagged_count": len(schools_flagged),
                     "total_count": len(schools)
                 })
@@ -3064,17 +3153,39 @@ async def budget_roads_cost_analysis_all_years_api():
                     'irrigation canal', 'communal irrigation', 'irrigation sub-program',
                     'irrigation subprogram', 'irrigation facility', 'irrigation structure',
                     'annex a-4', 'communal irrigation system', 'communal irrigation project',
-                    'communal irrigation scheme'
+                    'communal irrigation scheme', 
+                    # Added keywords
+                    'canal lining', 'lateral canal', 'main canal', 'diversion dam', 
+                    'solar powered irrigation', 'pump irrigation'
                 ]
                 nia_keyword_patterns = [
                     r'\bnis\b', r'\bnia\b', r'\bcis\b', r'\bcip\b', r'\bsip\b',
                     r'\bc\.i\.s\b', r'\bc\.i\.p\b', r'\bs\.i\.p\b'
                 ]
                 pattern_hit = any(re.search(pattern, name_lower) for pattern in nia_keyword_patterns)
-                is_nia = (any(keyword in name_lower for keyword in nia_keywords) or pattern_hit) and \
+                
+                # Careful with 'diversion' and 'lateral' as they can be road related. 
+                # Ensure we don't pick up "Diversion Road"
+                keyword_hit = False
+                if any(keyword in name_lower for keyword in nia_keywords):
+                    if 'diversion road' not in name_lower and 'road' not in name_lower:
+                        keyword_hit = True
+                
+                is_nia = (keyword_hit or pattern_hit) and \
                          'cnia' not in name_lower and \
                          'xdp' not in name_lower and \
                          'dystonia' not in name_lower
+                
+                # Check for Rockfall Netting / Slope Protection - Annex A-6
+                # Broader synonyms for Rockfall Netting. 
+                # Note: "Slope Protection" is very broad. "Rockfall Netting" usually implies specific tech.
+                rockfall_keywords = [
+                    'rockfall', 'rock fall', 'rock netting', 'rocknetting', 
+                    'active wire mesh', 'high tensile wire', 'erosion control mat',
+                    'soil nailing', 'rockfall protection', 'rockfall mitigation'
+                ]
+                
+                is_rockfall = any(k in name_lower for k in rockfall_keywords)
                 
                 project_data = {
                     'name': name,

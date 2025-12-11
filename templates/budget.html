@@ -13115,7 +13115,13 @@
                     normalized.forEach(item => {
                         const baseCategory = item.parentCategory || item.category;
                         const flaggedCost = item.flagged_cost || 0;
-                        yearlyTotals[baseCategory] = (yearlyTotals[baseCategory] || 0) + flaggedCost;
+                        const totalCost = item.total_cost || 0;
+
+                        if (!yearlyTotals[baseCategory]) {
+                            yearlyTotals[baseCategory] = { flagged: 0, total: 0 };
+                        }
+                        yearlyTotals[baseCategory].flagged += flaggedCost;
+                        yearlyTotals[baseCategory].total += totalCost;
                     });
 
                     totalsByYear[year] = yearlyTotals;
@@ -13220,8 +13226,15 @@
                 return;
             }
 
-            const dataValues = CATEGORY_CHART_YEARS.map(year => Math.round(totalsByYear[year]?.[categoryName] || 0));
-            const hasData = dataValues.some(value => value > 0);
+            const dataPoints = CATEGORY_CHART_YEARS.map(year => {
+                const yearData = totalsByYear[year]?.[categoryName] || { flagged: 0, total: 0 };
+                return {
+                    flagged: Math.round(yearData.flagged || 0),
+                    total: Math.round(yearData.total || 0)
+                };
+            });
+
+            const hasData = dataPoints.some(d => d.total > 0);
             if (!hasData) {
                 message.style.display = 'block';
                 wrapper.style.display = 'none';
@@ -13238,26 +13251,55 @@
             message.style.display = 'none';
             wrapper.style.display = 'block';
 
-            const backgroundColors = CATEGORY_CHART_YEARS.map(year => (yearColors[year] || yearColors['2026']).light);
-            const borderColors = CATEGORY_CHART_YEARS.map(year => (yearColors[year] || yearColors['2026']).dark);
+            const flaggedValues = dataPoints.map(d => d.flagged);
+            const unflaggedValues = dataPoints.map(d => Math.max(0, d.total - d.flagged));
+
+            // Use fixed colors: Red for flagged/Unflagged as lighter or different color
+            const matchColor = (val, max) => {
+                // Simple solid red for flagged
+                return '#d32f2f';
+            };
+            const flaggedBorder = '#b71c1c';
+
+            // For unflagged, maybe a neutral gray or the original category color?
+            // "retain the caller on the total (upper part)" - assuming typo for "color"
+            // Use the year colors for the unflagged part to keep the aesthetic
+            const unflaggedBackgrounds = CATEGORY_CHART_YEARS.map(year => (yearColors[year] || yearColors['2026']).light);
+            const unflaggedBorders = CATEGORY_CHART_YEARS.map(year => (yearColors[year] || yearColors['2026']).dark);
+
             const ctx = canvas.getContext('2d');
             const chartConfig = {
                 type: 'bar',
                 data: {
                     labels: CATEGORY_CHART_YEARS,
-                    datasets: [{
-                        label: `${categoryName} Flagged Cost`,
-                        data: dataValues,
-                        backgroundColor: backgroundColors,
-                        borderColor: borderColors,
-                        borderWidth: 1
-                    }]
+                    datasets: [
+                        {
+                            label: 'Flagged Cost',
+                            data: flaggedValues,
+                            backgroundColor: '#d32f2f', // Red
+                            borderColor: '#b71c1c',
+                            borderWidth: 1,
+                            stack: 'Stack 0'
+                        },
+                        {
+                            label: 'Unflagged Cost',
+                            data: unflaggedValues,
+                            backgroundColor: unflaggedBackgrounds,
+                            borderColor: unflaggedBorders,
+                            borderWidth: 1,
+                            stack: 'Stack 0'
+                        }
+                    ]
                 },
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
                     scales: {
+                        x: {
+                            stacked: true
+                        },
                         y: {
+                            stacked: true,
                             beginAtZero: true,
                             ticks: {
                                 callback: (value) => formatCurrencyShort(value)
@@ -13265,10 +13307,14 @@
                         }
                     },
                     plugins: {
-                        legend: { display: false },
+                        legend: { display: true }, // Show legend for stacked
                         tooltip: {
                             callbacks: {
-                                label: (context) => formatCurrencyFull(context.parsed.y ?? context.parsed)
+                                label: (context) => {
+                                    const label = context.dataset.label || '';
+                                    const value = context.parsed.y ?? context.parsed;
+                                    return `${label}: ${formatCurrencyFull(value)}`;
+                                }
                             }
                         }
                     }
@@ -13278,20 +13324,29 @@
             // Global chart instance management
             const chartMap = {
                 'Major Roads': { var: majorRoadsChart, set: (c) => majorRoadsChart = c },
-                'Multi-Purpose Buildings': { var: multiPurposeChart, set: (c) => multiPurposeChart = c },
-                'Bridges': { var: window.bridgesChart, set: (c) => window.bridgesChart = c },
-                'Road Safety Facilities': { var: window.roadSafetyChart, set: (c) => window.roadSafetyChart = c },
-                'Irrigation Works (NIA)': { var: window.niaChart, set: (c) => window.niaChart = c },
-                'Rockfall Netting': { var: window.rockfallChart, set: (c) => window.rockfallChart = c },
-                'Schools': { var: window.schoolsChart, set: (c) => window.schoolsChart = c }
+                'Multi-Purpose Buildings': { var: multiPurposeChart, set: (c) => multiPurposeChart = c }
+                // Add others if variables exist for them, currently only these two seem to be globally tracked
             };
 
-            const handler = chartMap[categoryName];
-            if (handler) {
-                if (handler.var) handler.var.destroy();
-                handler.set(new Chart(ctx, chartConfig));
+            const chartEntry = chartMap[categoryName];
+            if (chartEntry && chartEntry.var) {
+                chartEntry.var.destroy();
+            } else {
+                // For others, check if there's an instance on the canvas object
+                if (canvas.chartInstance) {
+                    canvas.chartInstance.destroy();
+                }
+            }
+
+            const newChart = new Chart(ctx, chartConfig);
+
+            if (chartEntry) {
+                chartEntry.set(newChart);
+            } else {
+                canvas.chartInstance = newChart;
             }
         }
+
 
         // Load data when tab is activated
         document.addEventListener('DOMContentLoaded', () => {
