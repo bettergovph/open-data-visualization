@@ -179,40 +179,51 @@ class LocationMatcher:
             
             # Filter by province if known
             if target_prov_norm:
-                # If target prov is specified, the entry MUST match it (fuzzy or exact)
-                # But be careful: "Cebu" hint vs "Cebu City" entry.
-                # If target is "CEBU CITY", entry must be "CEBU CITY".
-                # If target is "CEBU", entry could be "CEBU" or "CEBU CITY"? No, distinguish.
                 if target_prov_norm not in entry['prov_norm']: 
                     continue
 
             score = 0
+            match_length_bonus = 0
             
-            # Muni/Brgy Match Check (Exact word in text)
-            # We use the normalized string checks for speed
-            
+            # Municipality Match - +4 weight + length bonus
             if entry['muni_norm'] and len(entry['muni_norm']) > 3:
-                # Check if whole muni matches
-                 if f" {entry['muni_norm']} " in f" {text_norm} ":
-                      score += 100
+                if self._word_boundary_match(entry['muni_norm'], text_norm):
+                    score += 4
+                    match_length_bonus += len(entry['muni_norm']) * 2
             
+            # Barangay Match - +2 weight + length bonus
             if entry['brgy_norm'] and len(entry['brgy_norm']) > 3:
-                 if f" {entry['brgy_norm']} " in f" {text_norm} ":
-                      score += 50
+                if self._word_boundary_match(entry['brgy_norm'], text_norm):
+                    score += 2
+                    match_length_bonus += len(entry['brgy_norm'])
                       
-            # Penalty/Bonus for Province
-            if entry['prov_norm'] in text_norm:
-                score += 10
+            # Province Match - +3 weight + length bonus
+            # Skip short ambiguous province names if project contains longer version
+            if entry['prov_norm'] and len(entry['prov_norm']) > 3:
+                if self._word_boundary_match(entry['prov_norm'], text_norm):
+                     score += 3
+                     match_length_bonus += len(entry['prov_norm'])
             
-            if score > best_score:
-                best_score = score
+            # Total score
+            total_score = score * 100 + match_length_bonus
+
+            if total_score > best_score:
+                best_score = total_score
                 best_entry = entry
         
-        # Threshold
-        if best_score >= 50:
+        # Threshold - require at least one substantial match (approx 200+)
+        if best_score >= 200:
              return (best_entry['prov'], best_entry['dist'], best_entry['cong'])
         
         return None
+
+    def _word_boundary_match(self, needle, haystack):
+        """Check if needle appears as whole word(s) in haystack"""
+        if not needle or len(needle) < 3:
+            return False
+        # Escape needle but allow for some flexibility if needed (keeping it strict for now)
+        pattern = r'\b' + re.escape(needle) + r'\b'
+        return bool(re.search(pattern, haystack))
 
 class DynastyProjectsCacheGeneratorDuckDB:
     """Generate cached JSON for dynasty-projects using DuckDB"""
