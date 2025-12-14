@@ -15,7 +15,8 @@ import re
 import subprocess
 import sys
 from collections import defaultdict
-from concurrent.futures import ThreadPoolExecutor
+import concurrent.futures
+from concurrent.futures import ThreadPoolExecutor, as_completed
 from datetime import datetime
 from pathlib import Path
 from typing import Any, Dict, List, Optional
@@ -23,6 +24,7 @@ from typing import Any, Dict, List, Optional
 import duckdb
 import asyncpg
 import pandas as pd
+import multiprocessing
 from dotenv import load_dotenv
 
 # Add parent directory to path for imports
@@ -225,6 +227,900 @@ class LocationMatcher:
         pattern = r'\b' + re.escape(needle) + r'\b'
         return bool(re.search(pattern, haystack))
 
+# --- Multiprocessing Support ---
+
+WORKER_STATE = {}
+
+def init_worker(shared_data):
+    """Initialize global state for worker processes"""
+    global WORKER_STATE
+    WORKER_STATE = shared_data
+    
+    # Debug: Print lookup sizes to verify data sharing
+    import os
+    pid = os.getpid()
+    import sys
+    try:
+        # Check lookup sizes safely
+        cl_len = len(WORKER_STATE.get('contractor_lookup', {}))
+        ci_len = len(WORKER_STATE.get('contractor_inverted_index', {}))
+        le_len = len(WORKER_STATE.get('location_entries', []))
+        if cl_len == 0:
+            sys.stderr.write(f"⚠️ Worker {pid}: Contractor lookup is EMPTY!\n")
+        if le_len == 0:
+            sys.stderr.write(f"⚠️ Worker {pid}: Location entries is EMPTY!\n")
+        sys.stderr.flush()
+    except:
+        pass
+    
+    # Ensure regexes are compiled if needed
+    # (Regexes in shared_data should be pickled correctly)
+
+def normalize_for_match_worker(text: str) -> str:
+    """Worker version of _normalize_for_match"""
+    if not text:
+        return ""
+    import unicodedata
+    text = str(text)
+    try:
+        text = unicodedata.normalize('NFKD', text).encode('ASCII', 'ignore').decode('ASCII')
+    except:
+        pass
+    text = text.lower().strip()
+    text = text.replace("city of ", "").replace("municipality of ", "")
+    return text.strip()
+
+def find_best_location_match_worker(project_name: str, project_province: Optional[str] = None) -> Optional[tuple]:
+    """Worker version of _find_best_location_match using shared state"""
+    location_entries = WORKER_STATE.get('location_entries', [])
+    if not project_name or not location_entries:
+        return None
+        
+    name_norm = normalize_for_match_worker(project_name)
+    if not name_norm:
+        return None
+        
+    # Debug first few calls
+    import random
+    if random.random() < 0.0001:  # Low probability to avoid spam, but enough to see SOME
+        # sys.stderr.write(f"DEBUG Worker Matching: '{project_name[:50]}...' (Entries: {len(location_entries)})\n")
+        # sys.stderr.flush()
+        pass
+        
+    name_lower = project_name.lower()
+    prov_norm = normalize_for_match_worker(project_province) if project_province else ""
+    
+    # --- DISAMBIGUATION ---
+    disambiguation_patterns = [
+        (r'davao\s+de\s+oro', 'DAVAO DE ORO'),
+        (r'davao\s+del\s+sur', 'DAVAO DEL SUR'),
+        (r'davao\s+del\s+norte', 'DAVAO DEL NORTE'),
+        (r'davao\s+oriental', 'DAVAO ORIENTAL'),
+        (r'davao\s+occidental', 'DAVAO OCCIDENTAL'),
+        (r'cebu\s+city', 'CEBU CITY'),
+        (r'cagayan\s+de\s+oro', 'CITY OF CAGAYAN DE ORO'),
+        (r'quezon\s+city', 'QUEZON CITY'),
+        (r'zamboanga\s+del\s+norte', 'ZAMBOANGA DEL NORTE'),
+        (r'zamboanga\s+del\s+sur', 'ZAMBOANGA DEL SUR'),
+        (r'zamboanga\s+sibugay', 'ZAMBOANGA SIBUGAY'),
+    ]
+    
+    import re
+    for pattern, target_prov in disambiguation_patterns:
+        if re.search(pattern, name_lower):
+            for entry in location_entries:
+                prov = entry.get('prov')
+                muni = entry.get('muni')
+                brgy = entry.get('brgy')
+                dist = entry.get('dist')
+                cong = entry.get('cong')
+                
+                if prov and target_prov.lower() in prov.lower():
+                    muni_norm = normalize_for_match_worker(muni)
+                    brgy_norm = normalize_for_match_worker(brgy)
+                    
+                    if muni_norm and len(muni_norm) > 3 and muni_norm in name_norm:
+                        return (prov, muni, brgy, dist, cong)
+                    if brgy_norm and len(brgy_norm) > 3 and brgy_norm in name_norm:
+                        return (prov, muni, brgy, dist, cong)
+    
+    best_match = None
+    best_score = 0
+    
+    def word_boundary_match(needle, haystack):
+        if not needle or len(needle) < 3:
+            return False
+        pattern = r'\b' + re.escape(needle) + r'\b'
+        return bool(re.search(pattern, haystack))
+    
+    for entry in location_entries:
+        prov = entry.get('prov')
+        muni = entry.get('muni')
+        brgy = entry.get('brgy')
+        dist = entry.get('dist')
+        cong = entry.get('cong')
+        score = 0
+        match_length_bonus = 0
+        
+        prov_entry = normalize_for_match_worker(prov)
+        muni_entry = normalize_for_match_worker(muni)
+        brgy_entry = normalize_for_match_worker(brgy)
+        
+        if prov_entry and len(prov_entry) > 3:
+            if word_boundary_match(prov_entry, name_norm):
+                score += 3
+                match_length_bonus += len(prov_entry)
+            elif prov_norm and prov_entry == prov_norm:
+                score += 2
+        
+        if muni_entry and len(muni_entry) > 3:
+            if word_boundary_match(muni_entry, name_norm):
+                score += 4
+                match_length_bonus += len(muni_entry) * 2
+        
+        if brgy_entry and len(brgy_entry) > 3:
+            if word_boundary_match(brgy_entry, name_norm):
+                score += 2
+                match_length_bonus += len(brgy_entry)
+        
+        total_score = score * 100 + match_length_bonus
+        
+        if total_score > best_score:
+            best_score = total_score
+            best_match = (prov, muni, brgy, dist, cong)
+    
+    return best_match if best_score >= 200 else None
+
+def parse_project_code_worker(project_code: str):
+    """Worker version of _parse_project_code"""
+    if not project_code:
+        return None
+    
+    project_code = str(project_code).strip().upper()
+    import re
+    project_code = re.sub(r'[-\s]', '', project_code)
+    
+    # Match pattern: YYRDSSSS (8 characters total)
+    pattern = re.match(r'^(\d{2})([A-Z])([A-Z])(\d{4})$', project_code)
+    if pattern:
+        year, region_letter, district_letter, sequence = pattern.groups()
+        return {
+            'year': year,
+            'region_letter': region_letter,
+            'district_letter': district_letter,
+            'sequence': sequence,
+            'full_code': project_code
+        }
+    return None
+
+def extract_project_code_from_data_worker(project: Dict) -> Optional[str]:
+    """Worker version of _extract_project_code_from_data"""
+    # Common field names
+    code_fields = [
+        'project_code', 'code', 'ipc', 'integrated_project_code',
+        'project_id', 'contract_id', 'reference_number', 'ref_number',
+        'project_number', 'project_no', 'contract_number', 'contract_no',
+        'philgeps_project_code', 'philgeps_code', 'award_id', 'notice_id'
+    ]
+    
+    for field in code_fields:
+        if field in project and project[field]:
+            code = str(project[field]).strip()
+            if code and len(code) >= 6:
+                parsed = parse_project_code_worker(code)
+                if parsed:
+                    return code
+                    
+    # Check text fields
+    text_fields = ['project_name', 'project_description', 'award_title', 'notice_title', 
+                  'description', 'title', 'name', 'location']
+    import re
+    for field in text_fields:
+        if field in project and project[field]:
+            text = str(project[field])
+            code_match = re.search(r'\b(\d{2}[A-Z]{2}\d{4})\b', text, re.IGNORECASE)
+            if code_match:
+                code = code_match.group(1)
+                parsed = parse_project_code_worker(code)
+                if parsed:
+                    return code
+    return None
+
+def classify_by_project_code_worker(project_code: str) -> Optional[tuple]:
+    """Worker version of _classify_by_project_code"""
+    project_code_mapping = WORKER_STATE.get('project_code_mapping', {})
+    congressmen_data = WORKER_STATE.get('congressmen_data', {})
+    district_lookup = WORKER_STATE.get('district_lookup', {})
+    
+    if not project_code_mapping:
+        return None
+        
+    parsed = parse_project_code_worker(project_code)
+    if not parsed:
+        return None
+        
+    region_letter = parsed['region_letter']
+    district_letter = parsed['district_letter']
+    
+    if region_letter not in project_code_mapping:
+        return None
+        
+    region_info = project_code_mapping[region_letter]
+    districts = region_info.get('districts', {})
+    
+    if district_letter not in districts:
+        return None
+        
+    district_deo = districts[district_letter]
+    
+    # Try to match DEO to congressman by province and district
+    deo_upper = district_deo.upper()
+    import re
+    
+    # Extract province and district number
+    deo_match = re.match(r'^(.+?)\s+(\d+)(?:ST|ND|RD|TH)?\s+DEO', deo_upper)
+    if not deo_match:
+        # Alternative pattern: "Province District DEO" logic is fuzzy
+        # Simple heuristic: Split string, find province name and district number
+        return None
+        
+    deo_province = deo_match.group(1).strip()
+    deo_district_num = int(deo_match.group(2))
+    
+    # Find congressman
+    candidates = []
+    
+    # 1. Try district_lookup (Province + Empty Municipality = Province Match)
+    lookup_candidates = district_lookup.get((deo_province, ''), [])
+    
+    # Filter by district number
+    for cm_name, cm_data in lookup_candidates:
+        cm_dist = cm_data.get('district_number', '')
+        # Check district number match
+        dist_match = re.search(r'\b(\d+)(ST|ND|RD|TH)\b', str(cm_dist).upper())
+        if dist_match:
+            if int(dist_match.group(1)) == deo_district_num:
+                candidates.append((cm_name, 110)) # High score for DEO match
+                
+    if candidates:
+        return candidates[0]
+        
+    return None    
+
+def get_project_month_worker(date_str: str) -> Optional[int]:
+    """Worker version of _get_project_month"""
+    if not date_str:
+        return None
+    try:
+        from dateutil.parser import parse
+        dt = parse(str(date_str))
+        return dt.month
+    except:
+        return None
+
+def find_congressman_by_contractor_worker(contractor_name: str) -> Optional[tuple]:
+    """Worker version of _find_congressman_by_contractor"""
+    contractor_lookup = WORKER_STATE.get('contractor_lookup', {})
+    contractor_inverted_index = WORKER_STATE.get('contractor_inverted_index', {})
+    congressmen_data = WORKER_STATE.get('congressmen_data', {})
+    common_tokens = WORKER_STATE.get('common_tokens', set())
+    
+    if not contractor_name:
+        return None
+    
+    contractor_upper = contractor_name.upper().strip()
+    contractor_parts = [part.strip() for part in contractor_upper.split('/')]
+    all_matches = []
+    
+    import re
+    
+    for contractor_part in contractor_parts:
+        if not contractor_part:
+            continue
+        
+        normalized = re.sub(r'[^A-Z0-9]+', ' ', contractor_part).strip()
+        candidates = contractor_lookup.get(contractor_part, [])
+        match_score = 100
+        
+        if not candidates:
+            candidates = contractor_lookup.get(normalized, [])
+            match_score = 100
+        
+        if not candidates:
+            # Partial matching
+            normalized_contractor = re.sub(r'[^A-Z0-9]+', ' ', contractor_part).strip()
+            contractor_tokens = set()
+            for token in re.split(r'[^A-Z0-9]+', normalized_contractor):
+                token = token.strip()
+                if len(token) >= 2 and token not in common_tokens:
+                    contractor_tokens.add(token)
+            
+            for lookup_key in contractor_lookup.keys():
+                lookup_key_clean = lookup_key.strip()
+                if len(lookup_key_clean) < 2:
+                    continue
+                
+                normalized_lookup = re.sub(r'[^A-Z0-9]+', ' ', lookup_key_clean).strip()
+                lookup_tokens = set()
+                for token in re.split(r'[^A-Z0-9]+', normalized_lookup):
+                    token = token.strip()
+                    if len(token) >= 2 and token not in common_tokens:
+                        lookup_tokens.add(token)
+                
+                common_proper_names = contractor_tokens.intersection(lookup_tokens)
+                if common_proper_names and len(common_proper_names) >= 1:
+                    candidates = contractor_lookup[lookup_key]
+                    match_score = 90
+                    break
+                
+                if re.search(r'\b' + re.escape(lookup_key_clean) + r'\b', contractor_part):
+                     candidates = contractor_lookup[lookup_key]
+                     match_score = 90
+                     break
+                
+                if len(lookup_key_clean) <= 5 and lookup_key_clean in contractor_part:
+                    if re.search(re.escape(lookup_key_clean) + r'[\s,)\-/]', contractor_part) or \
+                       contractor_part.endswith(lookup_key_clean) or \
+                       contractor_part.startswith(lookup_key_clean):
+                        if len(lookup_key_clean) <= 2:
+                             if re.search(r'\b' + re.escape(lookup_key_clean) + r'\b', contractor_part) or \
+                                contractor_part == lookup_key_clean:
+                                 candidates = contractor_lookup[lookup_key]
+                                 match_score = 90
+                                 break
+                        else:
+                             candidates = contractor_lookup[lookup_key]
+                             match_score = 90
+                             break
+                
+                if normalized_contractor and len(normalized_contractor) >= 3:
+                     if re.search(r'\b' + re.escape(normalized_contractor) + r'\b', lookup_key_clean):
+                         candidates = contractor_lookup[lookup_key]
+                         match_score = 90
+                         break
+                     if len(normalized_contractor) <= 5 and normalized_contractor in lookup_key_clean:
+                         if re.search(re.escape(normalized_contractor) + r'[\s,)]', lookup_key_clean) or \
+                            lookup_key_clean.endswith(normalized_contractor):
+                             candidates = contractor_lookup[lookup_key]
+                             match_score = 90
+                             break
+                             
+        if candidates:
+            valid_candidates = []
+            for cm_name, cm_data in candidates:
+                contractor_exclusions = cm_data.get('contractor_exclusions', {})
+                excluded = False
+                for base, exclusions in contractor_exclusions.items():
+                    if base in contractor_part:
+                        for exclusion_value in exclusions:
+                             if exclusion_value in contractor_part:
+                                 excluded = True
+                                 break
+                    if excluded:
+                        break
+                
+                if not excluded:
+                    is_partylist = cm_data.get('is_partylist', False)
+                    family_contractors = cm_data.get('contractors', [])
+                    is_family_contractor = any(
+                        contractor_part in fc.upper() or fc.upper() in contractor_part
+                        for fc in family_contractors
+                    )
+                    valid_candidates.append((cm_name, cm_data, is_partylist, is_family_contractor, match_score))
+            
+            if valid_candidates:
+                elizaldy_co_name_variants = ['ELIZALDY', 'ELIZALDY CO', 'ELIZALDY SALCEDO CO']
+                filtered_valid_candidates = []
+                for cm_name, cm_data, is_partylist, is_family_contractor, part_score in valid_candidates:
+                    cm_name_upper = cm_name.upper()
+                    is_elizaldy_co = any(variant in cm_name_upper for variant in elizaldy_co_name_variants)
+                    if is_elizaldy_co:
+                        family_contractors = cm_data.get('contractors', [])
+                        contractor_matches = any(
+                            contractor_part in fc.upper() or fc.upper() in contractor_part or
+                            any(token in fc.upper() for token in contractor_part.split() if len(token) >= 3) or
+                            any(token in contractor_part for token in fc.upper().split() if len(token) >= 3)
+                            for fc in family_contractors
+                        )
+                        if contractor_matches:
+                             filtered_valid_candidates.append((cm_name, cm_data, is_partylist, is_family_contractor, part_score))
+                    else:
+                        filtered_valid_candidates.append((cm_name, cm_data, is_partylist, is_family_contractor, part_score))
+                
+                if filtered_valid_candidates:
+                    filtered_valid_candidates.sort(key=lambda x: (
+                        not (x[2] and x[3]),
+                        not x[2],
+                        not x[3],
+                        -x[4]
+                    ))
+                    all_matches.append((filtered_valid_candidates[0][0], filtered_valid_candidates[0][4]))
+    
+    if all_matches:
+        unique_matches = {}
+        for cm_name, score in all_matches:
+            if cm_name not in unique_matches or score > unique_matches[cm_name]:
+                unique_matches[cm_name] = score
+        sorted_matches = sorted(unique_matches.items(), key=lambda x: x[1], reverse=True)
+        if len(sorted_matches) == 1:
+            return (sorted_matches[0][0], sorted_matches[0][1])
+        elif len(sorted_matches) >= 2:
+            return [
+                (sorted_matches[0][0], sorted_matches[0][1]),
+                (sorted_matches[1][0], sorted_matches[1][1])
+            ]
+        else:
+             return (sorted_matches[0][0], sorted_matches[0][1])
+    return None
+
+def is_location_unique_in_category_worker(location_name: str, location_type: str, dedup_dict: Dict) -> bool:
+    """Worker version of _is_location_unique_in_category"""
+    if not location_name or not dedup_dict:
+        return False
+    
+    location_upper = location_name.upper().strip()
+    dedup_info = dedup_dict.get(location_upper, {})
+    
+    if location_type == 'province':
+        return dedup_info.get('provinces', 0) == 1
+    elif location_type == 'city':
+        return dedup_info.get('cities', 0) == 1
+    elif location_type == 'municipality':
+        return dedup_info.get('municipalities', 0) == 1
+    elif location_type == 'barangay':
+        return dedup_info.get('barangays', 0) == 1
+    
+    return False
+
+def get_location_categories_worker(location_name: str, dedup_dict: Dict) -> List[str]:
+    """Worker version of _get_location_categories"""
+    if not location_name or not dedup_dict:
+        return []
+    
+    location_upper = location_name.upper().strip()
+    dedup_info = dedup_dict.get(location_upper, {})
+    
+    categories = []
+    if dedup_info.get('provinces', 0) > 0:
+        categories.append('province')
+    if dedup_info.get('cities', 0) > 0:
+        categories.append('city')
+    if dedup_info.get('municipalities', 0) > 0:
+        categories.append('municipality')
+    if dedup_info.get('barangays', 0) > 0:
+        categories.append('barangay')
+    if dedup_info.get('regions', 0) > 0:
+        categories.append('region')
+    
+    return categories
+
+def is_location_unique_worker(location_name: str, location_type: str, dedup_dict: Dict) -> bool:
+    """Worker version of _is_location_unique"""
+    if not location_name or not dedup_dict:
+        return False
+    
+    location_upper = location_name.upper().strip()
+    dedup_info = dedup_dict.get(location_upper, {})
+    
+    # Short-circuit check
+    if location_type in ['barangay', 'municipality']:
+        if is_location_unique_in_category_worker(location_name, location_type, dedup_dict):
+            location_categories = get_location_categories_worker(location_name, dedup_dict)
+            return len(location_categories) == 1
+    
+    categories_with_name = len(get_location_categories_worker(location_name, dedup_dict))
+    
+    if categories_with_name != 1:
+        return False
+    
+    return is_location_unique_in_category_worker(location_name, location_type, dedup_dict)
+
+def get_location_variants_worker(location_name: str, location_type: str, dedup_dict: Dict) -> List[str]:
+    """Worker version of _get_location_variants"""
+    if not location_name or not dedup_dict:
+        return []
+    
+    location_upper = location_name.upper().strip()
+    dedup_info = dedup_dict.get(location_upper, {})
+    
+    if location_type == 'province':
+        return dedup_info.get('province_variants', [])
+    elif location_type == 'city':
+        return dedup_info.get('city_variants', [])
+    elif location_type == 'municipality':
+        return dedup_info.get('municipality_variants', [])
+    elif location_type == 'barangay':
+        return dedup_info.get('barangay_variants', [])
+    
+    return []
+
+def find_congressman_by_district_worker(province: str, municipality_barangay: str, project_year: Optional[int], 
+                                     project_district: Optional[str] = None,
+                                     project_name: str = "") -> Optional[tuple]:
+    """Worker version of _find_congressman_by_district"""
+    congressmen_data = WORKER_STATE.get('congressmen_data', {})
+    district_lookup = WORKER_STATE.get('district_lookup', {})
+    location_dicts = WORKER_STATE.get('location_dictionaries', {})
+    dedup_dict = location_dicts.get('dedup_dict', {})
+    
+    if not province:
+        return None
+        
+    province_upper = province.upper().strip()
+    location_upper = (municipality_barangay or '').upper().strip()
+    
+    # Davao City fix
+    if location_upper == 'DAVAO CITY' and province_upper in ['DAVAO DEL SUR', 'DAVAO CITY', 'DAVAO DEL NORTE']:
+        province_upper = 'DAVAO CITY'
+    
+    is_location_unique = False
+    location_type = None
+    
+    if location_upper:
+        if is_location_unique_in_category_worker(location_upper, 'barangay', dedup_dict):
+            cats = get_location_categories_worker(location_upper, dedup_dict)
+            if len(cats) == 1:
+                is_location_unique = True
+                location_type = 'barangay'
+        elif is_location_unique_in_category_worker(location_upper, 'municipality', dedup_dict):
+            cats = get_location_categories_worker(location_upper, dedup_dict)
+            if len(cats) == 1:
+                is_location_unique = True
+                location_type = 'municipality'
+        else:
+            cats = get_location_categories_worker(location_upper, dedup_dict)
+            if len(cats) == 1:
+                category = cats[0]
+                if is_location_unique_worker(location_upper, category, dedup_dict):
+                    is_location_unique = True
+                    location_type = category
+
+    province_variants = [province_upper]
+    if '–' in province_upper or '-' in province_upper:
+        import re
+        parts = re.split(r'[–-]', province_upper)
+        province_variants.extend([p.strip() for p in parts if p.strip()])
+    
+    province_variants_for_cities = []
+    if province_upper.endswith(' CITY'):
+        city_base = province_upper[:-5].strip()
+        if is_location_unique_worker(city_base, 'city', dedup_dict):
+            province_variants_for_cities.append(city_base)
+    else:
+        if is_location_unique_worker(province_upper, 'city', dedup_dict):
+            province_variants_for_cities.append(f"{province_upper} CITY")
+            
+    if province_variants_for_cities:
+        province_variants.extend(province_variants_for_cities)
+        
+    import re
+    province_base_name = re.sub(r'\s*(DEL\s+)?(SUR|NORTE|OCCIDENTAL|ORIENTAL|EASTERN|WESTERN|NORTHERN|SOUTHERN)\s*$', '', province_upper).strip()
+    has_directional = bool(re.search(r'\b(DEL\s+)?(SUR|NORTE|OCCIDENTAL|ORIENTAL|EASTERN|WESTERN|NORTHERN|SOUTHERN)\b', province_upper))
+    
+    if province_base_name != province_upper:
+        province_variants = [province_upper]
+    elif province_base_name == province_upper:
+        all_variants = get_location_variants_worker(province_upper, 'province', dedup_dict)
+        if len(all_variants) > 1:
+            province_variants = []
+        else:
+            province_variants = [province_upper]
+            
+    if has_directional and province_base_name != province_upper:
+        province_variants = [province_upper]
+        
+    candidates = []
+    match_score = 0
+    
+    if is_location_unique and location_type in ['barangay', 'municipality']:
+        for prov_variant in province_variants:
+            variant_candidates = district_lookup.get((prov_variant, location_upper), [])
+            if variant_candidates:
+                candidates.extend(variant_candidates)
+                match_score = 100
+                break
+                
+    if not candidates:
+        for prov_variant in province_variants:
+            if location_upper:
+                variant_candidates = district_lookup.get((prov_variant, location_upper), [])
+                if variant_candidates:
+                    candidates.extend(variant_candidates)
+                    match_score = 100
+                    break
+                    
+                import re
+                clean_brgy = re.sub(r'^(BRGY\.?|BARANGAY)\s*', '', location_upper, flags=re.IGNORECASE).strip()
+                if clean_brgy != location_upper:
+                    variant_candidates = district_lookup.get((prov_variant, clean_brgy), [])
+                    if variant_candidates:
+                        candidates.extend(variant_candidates)
+                        match_score = 100
+                        break
+    
+    if not candidates:
+        for prov_variant in province_variants:
+            variant_candidates = district_lookup.get((prov_variant, ''), [])
+            if variant_candidates:
+                candidates.extend(variant_candidates)
+                match_score = 10
+                break
+                
+    if not candidates:
+        import unicodedata
+        def normalize(t): return unicodedata.normalize('NFKD', str(t)).encode('ASCII', 'ignore').decode('ASCII').upper().strip() if t else ''
+        prov_norm = normalize(province_upper)
+        loc_norm = normalize(location_upper)
+        
+        for prov_variant in province_variants:
+            var_norm = normalize(prov_variant)
+            if loc_norm:
+                variant_candidates = district_lookup.get((var_norm, loc_norm), [])
+                if variant_candidates:
+                    candidates.extend(variant_candidates)
+                    match_score = 5
+                    break
+            if not candidates:
+                variant_candidates = district_lookup.get((var_norm, ''), [])
+                if variant_candidates:
+                    candidates.extend(variant_candidates)
+                    match_score = 5
+                    break
+    
+    if candidates:
+        validated_candidates = []
+        for cm_name, cm_data in candidates:
+             cm_provinces = cm_data.get('provinces', [])
+             province_matches = False
+             for cm_province in cm_provinces:
+                 cm_prov_upper = cm_province.upper().strip()
+                 if cm_prov_upper == province_upper:
+                     province_matches = True
+                     break
+                 
+                 cm_base = re.sub(r'\s*(DEL\s+)?(SUR|NORTE|OCCIDENTAL|ORIENTAL|EASTERN|WESTERN|NORTHERN|SOUTHERN)\s*$', '', cm_prov_upper).strip()
+                 req_base = re.sub(r'\s*(DEL\s+)?(SUR|NORTE|OCCIDENTAL|ORIENTAL|EASTERN|WESTERN|NORTHERN|SOUTHERN)\s*$', '', province_upper).strip()
+                 cm_dir_match = re.search(r'\b(DEL\s+)?(SUR|NORTE|OCCIDENTAL|ORIENTAL|EASTERN|WESTERN|NORTHERN|SOUTHERN)\b', cm_prov_upper, re.IGNORECASE)
+                 req_dir_match = re.search(r'\b(DEL\s+)?(SUR|NORTE|OCCIDENTAL|ORIENTAL|EASTERN|WESTERN|NORTHERN|SOUTHERN)\b', province_upper, re.IGNORECASE)
+                 cm_dir = cm_dir_match.group(0).upper().strip() if cm_dir_match else None
+                 req_dir = req_dir_match.group(0).upper().strip() if req_dir_match else None
+                 
+                 if cm_base == req_base:
+                     if cm_dir and req_dir:
+                         cm_dir_clean = re.sub(r'\s+', ' ', cm_dir.upper().strip())
+                         req_dir_clean = re.sub(r'\s+', ' ', req_dir.upper().strip())
+                         cm_dir_simple = re.sub(r'^DEL\s+', '', cm_dir_clean).strip()
+                         req_dir_simple = re.sub(r'^DEL\s+', '', req_dir_clean).strip()
+                         if cm_dir_clean == req_dir_clean or cm_dir_simple == req_dir_simple:
+                             province_matches = True
+                             break
+                     elif not cm_dir and not req_dir:
+                         province_matches = True
+                         break
+                 
+                 if (province_upper in cm_prov_upper or cm_prov_upper in province_upper) and not cm_dir and not req_dir:
+                      strict_provinces = ['BUKIDNON', 'PALAWAN', 'RIZAL', 'CEBU', 'DAVAO', 'ILOILO']
+                      if cm_prov_upper in strict_provinces or province_upper in strict_provinces:
+                          if province_upper == cm_prov_upper:
+                              province_matches = True
+                              break
+                      else:
+                          province_matches = True
+                          break
+             
+             if province_matches:
+                 validated_candidates.append((cm_name, cm_data))
+                 
+        if validated_candidates:
+             if len(validated_candidates) > 1:
+                 district_number = None
+                 if project_district:
+                     pd_upper = str(project_district).upper()
+                     d_match = re.search(r'\b(\d+)(ST|ND|RD|TH)\b', pd_upper)
+                     if d_match:
+                         district_number = int(d_match.group(1))
+                 if district_number is None and location_upper:
+                     d_match = re.search(r'\b(\d+)(ST|ND|RD|TH)\b', location_upper)
+                     if d_match:
+                         district_number = int(d_match.group(1))
+                         
+                 if district_number:
+                     filtered = []
+                     for n, d in validated_candidates:
+                         cm_dist = d.get('district_number', '')
+                         cm_match = re.search(r'\b(\d+)(ST|ND|RD|TH)\b', str(cm_dist).upper())
+                         if cm_match and int(cm_match.group(1)) == district_number:
+                             filtered.append((n, d))
+                     if filtered:
+                         validated_candidates = filtered
+            
+             project_year_int = None
+             if project_year:
+                 try: project_year_int = int(project_year)
+                 except: pass
+                 
+             if project_year_int is not None and len(validated_candidates) > 1:
+                 best_candidate = None
+                 best_score = -1
+                 for cm_name, cm_data in validated_candidates:
+                     terms = cm_data.get('terms', [])
+                     for term in terms:
+                         start = term.get('start', 0)
+                         end = term.get('end', 9999)
+                         if start <= project_year_int <= end:
+                             score = 1000 - abs(project_year_int - (start + end)/2)
+                             if score > best_score:
+                                 best_score = score
+                                 best_candidate = (cm_name, cm_data)
+                 if best_candidate:
+                     return (best_candidate[0], match_score)
+                     
+             return (validated_candidates[0][0], match_score)
+             
+    return None
+
+def process_unified_chunk_worker(projects_chunk):
+    """
+    Unified worker function to process projects from ALL sources (DIME, PhilGEPS, Microsite, Transparency, SSP).
+    Expects normalized columns: project_name, amount, contractor, location, source.
+    """
+    congressmen_data = WORKER_STATE.get('congressmen_data', {})
+    district_lookup = WORKER_STATE.get('district_lookup', {})
+    contractor_lookup = WORKER_STATE.get('contractor_lookup', {})
+    contractor_inverted_index = WORKER_STATE.get('contractor_inverted_index', {})
+    canonical_name_map = WORKER_STATE.get('canonical_name_map', {})
+    
+    processed_chunk = []
+    
+    # Initialize stats for this chunk
+    stats = {
+        'total': 0, 'districts_matched': 0, 'contractors_matched': 0,
+        'unmatched': 0, 'city_districts': 0, 'province_districts': 0,
+        'municipality_matched': 0, 'barangay_matched': 0,
+        'congressmen_matched': set()
+    }
+    
+    first_project = True
+    for project in projects_chunk:
+        try:
+            if first_project and stats['total'] == 0:
+                 print(f"🔍 DEBUG Unified Project Keys: {list(project.keys())}")
+                 print(f"🔍 DEBUG Unified Values: {project}")
+                 first_project = False
+            
+            stats['total'] += 1
+            project_copy = project.copy()
+            
+            # --- 1. Basic Field Extraction ---
+            # Use normalized columns
+            project_name = str(project.get('project_name', '') or '').strip()
+            location_raw = str(project.get('location', '') or '').strip()
+            contractor = str(project.get('contractor', '') or '').strip()
+            source = str(project.get('source', 'Unknown'))
+            
+            # handle lists if any (legacy DIME)
+            for k, v in project_copy.items():
+                if isinstance(v, list): project_copy[k] = ", ".join(map(str, v))
+
+            # Year handling
+            year = None
+            try:
+                if project.get('year'): year = int(project.get('year'))
+                elif project.get('project_year'): year = int(project.get('project_year'))
+                elif project.get('contract_year'): year = int(project.get('contract_year'))
+            except:
+                pass
+                
+            # --- 2. Flood Classification ---
+            is_flood = 0
+            flood_keywords = ['flood', 'drainage', 'river', 'dike', 'seawall', 'revetment', 'dredging', 'desilting']
+            combined_text = f"{project_name} {location_raw}".lower()
+            for k in flood_keywords:
+                if k in combined_text:
+                    is_flood = 1
+                    break
+            project_copy['is_flood_related'] = is_flood
+
+            # --- 3. Project Code Classification (High Confidence) ---
+            # (Logic from original transparency/dime workers)
+            project_code = extract_project_code_from_data_worker(project_copy)
+            if project_code:
+                classification = classify_by_project_code_worker(project_code)
+                if classification:
+                    cong_name, score = classification
+                    normalized_name = canonical_name_map.get(cong_name, cong_name)
+                    project_copy['district_congressman'] = normalized_name
+                    project_copy['match_type'] = 'project_code'
+                    project_copy['match_score'] = score
+                    project_copy['integrated_project_code'] = project_code
+                    stats['congressmen_matched'].add(normalized_name)
+                    processed_chunk.append(project_copy)
+                    continue
+
+            # --- 4. Location Matching ---
+            district_congressman = None
+            match_type = 'unknown'
+            match_score = 0
+            
+            # Combine name and location for better context resolution 
+            # (e.g. "Construction of Building in Brgy X" + "City Y")
+            search_text = f"{project_name} {location_raw}"
+            
+            match_res = find_best_location_match_worker(search_text)
+            
+            if stats['total'] <= 5:
+                import sys
+                # sys.stderr.write(f"DEBUG Match [{stats['total']}]: '{search_text[:50]}...' -> {match_res}\n")
+                # sys.stderr.flush()
+                pass
+            
+            if match_res:
+                prov, muni, brgy, dist, cong = match_res
+                
+                # Check Historical Match
+                hist_match = find_congressman_by_district_worker(prov, f"{muni} {brgy}", year, dist, project_name)
+                if hist_match:
+                    h_name, h_score = hist_match
+                    district_congressman = h_name
+                    match_score = h_score
+                    match_type = 'district_history'
+                elif cong and cong not in ('Unknown', 'TBD', 'TBA'):
+                    district_congressman = cong
+                    match_score = 150
+                    match_type = 'unified_location'
+
+                if district_congressman:
+                     district_congressman = canonical_name_map.get(district_congressman, district_congressman)
+                     stats['districts_matched'] += 1
+                     if muni: stats['municipality_matched'] += 1
+                     if brgy: stats['barangay_matched'] += 1
+
+            # --- 5. Contractor Matching (Always run if contractor exists) ---
+            contractor_congressman = None
+            if contractor and len(contractor) > 3:
+                c_match = find_congressman_by_contractor_worker(contractor)
+                if c_match:
+                    if isinstance(c_match, list):
+                        c_name, c_score = c_match[0]
+                        contractor_congressman = c_name
+                    else:
+                        c_name, c_score = c_match
+                        contractor_congressman = c_name
+                    
+                    contractor_congressman = canonical_name_map.get(contractor_congressman, contractor_congressman)
+                    stats['contractors_matched'] += 1
+
+            # --- 6. Final Assignment ---
+            target = district_congressman if district_congressman else contractor_congressman
+            
+            # Always record the contractor match if found
+            if contractor_congressman:
+                project_copy['contractor_congressman'] = contractor_congressman
+            
+            if target:
+                project_copy['district_congressman'] = target
+                if district_congressman:
+                    project_copy['match_type'] = match_type
+                    project_copy['district_match_score'] = match_score
+                    project_copy['match_score'] = match_score
+                else:
+                    project_copy['match_type'] = 'contractor'
+                    project_copy['contractor_match_score'] = 100 # Default/Placeholder
+                    project_copy['match_score'] = 100 # Default/Placeholder
+                
+                stats['congressmen_matched'].add(target)
+            else:
+                stats['unmatched'] += 1
+                
+            processed_chunk.append(project_copy)
+            
+        except Exception as e:
+            sys.stderr.write(f"Error in worker: {e}\n")
+            processed_chunk.append(project) # Return original if failed
+
+    return processed_chunk, stats
+
+
 class DynastyProjectsCacheGeneratorDuckDB:
     """Generate cached JSON for dynasty-projects using DuckDB"""
     
@@ -274,6 +1170,11 @@ class DynastyProjectsCacheGeneratorDuckDB:
         self.chart_limit = 200
         self.unclassified_count = 0
         self.MAX_UNCLASSIFIED = 5
+        
+        # Historical district lookup: (province, district) -> list of {name, start, end}
+        self.district_history: Dict[Tuple[str, str], List[Dict]] = {}
+        # Load historical district data immediately
+        self._load_district_history()
         
         # Global district lookup: district_key -> {municipalities: set, barangays: set, is_city: bool}
         self.district_lookup: Dict[str, Dict] = {}
@@ -1198,17 +2099,39 @@ class DynastyProjectsCacheGeneratorDuckDB:
              best_match = self._find_best_location_match(project_text, province)
              if best_match:
                  prov, muni, brgy, dist, cong = best_match
-                 if cong and cong not in ('Unknown', 'TBD', 'TBA'):
+                 # Historical Resolution: Check district history FIRST
+                 # This handles cases where parquet has 'TBD' or 'Unknown' but we know the history
+                 historical_match = None
+                 # print(f"DEBUG: Checking history for {prov} {dist} Year {year}")
+                 if year and self.district_history and prov and dist:
+                     hist_key = (prov.upper(), dist.upper())
+                     if hist_key in self.district_history:
+                         # print(f"DEBUG: Found history terms: {self.district_history[hist_key]}")
+                         for term in self.district_history[hist_key]:
+                             # Check if year falls within term
+                             if term['start'] <= year <= term['end']:
+                                 historical_match = term['name']
+                                 # print(f"DEBUG: Matched historical: {historical_match}")
+                                 break
+                     # else: print(f"DEBUG: Key {hist_key} not in history")
+                 
+                 if historical_match:
+                     district_congressman = historical_match
+                     match_score = 150
+                     match_type = 'unified_location'
+                 elif cong and cong not in ('Unknown', 'TBD', 'TBA'):
                      district_congressman = cong
                      match_score = 150 # High confidence for hierarchy match
                      match_type = 'unified_location'
-                     # Normalize congressman name if possible
-                     if hasattr(self, 'canonical_name_map'):
-                         district_congressman = self.canonical_name_map.get(district_congressman, district_congressman)
+                 
+                 # Normalize congressman name if possible
+                 if district_congressman and hasattr(self, 'canonical_name_map'):
+                     district_congressman = self.canonical_name_map.get(district_congressman, district_congressman)
 
         # 0.5. Unified Location Match (New)
         # Use simple text matching against unified database
-        if hasattr(self, 'enricher') and self.enricher.loaded:
+        # Only run if we don't have a high-confidence match yet
+        if not district_congressman and hasattr(self, 'enricher') and self.enricher.loaded:
             enrich_payload = {
                 'name': project_data.get('project_name') if project_data else '',
                 'description': project_data.get('project_description') if project_data else '',
@@ -1249,58 +2172,61 @@ class DynastyProjectsCacheGeneratorDuckDB:
                 
             if district_match:
                 district_congressman, d_score = district_match
-                # Normalize congressman name to canonical form
-                if district_congressman and hasattr(self, 'canonical_name_map'):
-                    district_congressman = self.canonical_name_map.get(district_congressman, district_congressman)
                 match_score = d_score
-        
-        # 2. Try Contractor Match (supports up to 2 matches for JVs)
-        contractor_match = self._find_congressman_by_contractor(
-            contractor, contractor_lookup, contractor_inverted_index, congressmen_data
-        )
-        contractor_congressman = None
-        contractor_congressman_2 = None
-        c_score = 0
-        
-        if contractor_match:
-            # Handle both single match (tuple) and multiple matches (list) for JVs
-            if isinstance(contractor_match, list):
-                # Multiple matches (up to 2) - JV scenario
-                if len(contractor_match) >= 1:
-                    contractor_congressman, c_score = contractor_match[0]
-                    if contractor_congressman and hasattr(self, 'canonical_name_map'):
+                match_type = 'unified_location'
+            
+            # Normalize congressman name if possible
+            if district_congressman and hasattr(self, 'canonical_name_map'):
+                district_congressman = self.canonical_name_map.get(district_congressman, district_congressman)
+
+        # 0.6. Contractor Match (if no location match or low confidence)
+        if not district_congressman or match_score < 100:
+            contractor_match = self._find_congressman_by_contractor(
+                contractor, contractor_lookup, contractor_inverted_index, congressmen_data
+            )
+            
+            if contractor_match:
+                if isinstance(contractor_match, list):
+                    # Handle multiple matches (e.g. JV) - take best
+                    c_name, c_score = contractor_match[0]
+                    contractor_congressman = c_name
+                    match_score = max(match_score, c_score)
+                    
+                    if len(contractor_match) > 1:
+                        contractor_congressman_2 = contractor_match[1][0]
+                else:
+                    c_name, c_score = contractor_match
+                    contractor_congressman = c_name
+                    match_score = max(match_score, c_score)
+                
+                match_type = 'contractor'
+                
+                # Normalize names
+                if hasattr(self, 'canonical_name_map'):
+                    if contractor_congressman:
                         contractor_congressman = self.canonical_name_map.get(contractor_congressman, contractor_congressman)
-                if len(contractor_match) >= 2:
-                    contractor_congressman_2, c_score_2 = contractor_match[1]
-                    if contractor_congressman_2 and hasattr(self, 'canonical_name_map'):
+                    if contractor_congressman_2:
                         contractor_congressman_2 = self.canonical_name_map.get(contractor_congressman_2, contractor_congressman_2)
-            else:
-                # Single match (tuple) - backward compatible
-                contractor_congressman, c_score = contractor_match
-                if contractor_congressman and hasattr(self, 'canonical_name_map'):
-                    contractor_congressman = self.canonical_name_map.get(contractor_congressman, contractor_congressman)
             
             # Note: Contractor matching is based solely on owner/officer relationship, not location
             # Location validation is NOT applied to contractor matches
             
         # 3. Determine Primary Match
-        # CRITICAL: Prioritize contractor matches over district matches for EVERYONE
-        # A project linked to a dynasty contractor is a stronger signal than a generic district match
-        # This captures both Party-list reps and District reps contracting in/out of their districts
-        if contractor_congressman:
-            final_congressman = contractor_congressman
-            match_type = 'contractor'
-            # If we also have a district match, we still record it in district_congressman (already set)
-            # but the primary attribution goes to the contractor owner
-            if district_congressman and district_congressman != contractor_congressman:
-                match_score = 90 # High confidence due to contractor link
-            else:
-                 # Match confirmed by both or just contractor
-                match_score = 95
-                
-        elif district_congressman:
+        # CRITICAL: Prioritize DISTRICT matches over contractor matches.
+        # If a project is physically located in a district, it belongs to that district's congressman.
+        # This prevents Party-List representatives from absorbing projects from all over the country
+        # just because they are linked to a national contractor.
+        
+        if district_congressman:
             final_congressman = district_congressman
             match_type = 'district'
+            # If we also have a contractor match, it's still useful info (and stored in contractor_congressman),
+            # but the primary attribution goes to the district representative.
+            
+        elif contractor_congressman:
+            final_congressman = contractor_congressman
+            match_type = 'contractor'
+            match_score = 95
         
         # Normalize final_congressman to canonical form
         if final_congressman and hasattr(self, 'canonical_name_map'):
@@ -3120,7 +4046,18 @@ class DynastyProjectsCacheGeneratorDuckDB:
                 import duckdb
                 conn = duckdb.connect()
                 try:
-                    party_rows = conn.execute(f"SELECT person_id, party_list_number, first_name, last_name FROM read_parquet('{party_parquet}')").fetchall()
+                    # Join with political_dynasties to get names
+                    query = f"""
+                        SELECT 
+                            pl.person_id, 
+                            pl.party_list_number, 
+                            pd.first_name, 
+                            pd.last_name 
+                        FROM read_parquet('{party_parquet}') pl
+                        LEFT JOIN read_parquet('{POLITICAL_DYNASTIES_PARQUET}') pd ON pl.person_id = pd.id
+                        WHERE pl.person_id IS NOT NULL
+                    """
+                    party_rows = conn.execute(query).fetchall()
                     print(f"✅ Loaded {len(party_rows)} party list members from Parquet")
                 finally:
                     conn.close()
@@ -3553,9 +4490,86 @@ class DynastyProjectsCacheGeneratorDuckDB:
             }
         
         # Enrich coverage with historical terms from districts.json
-        self._enrich_congressmen_from_districts_json(congressmen_data)
+        # (Already loaded into self.district_history in __init__)
         
         return congressmen_data
+
+    def _load_district_history(self) -> None:
+        """
+        Load historical representative terms from districts.json.
+        Populates self.district_history map for O(1) historical resolution.
+        """
+        print("🔧 Loading historical district data from districts.json...")
+        if not self.districts_file.exists():
+            print(f"⚠️  districts.json not found at {self.districts_file}")
+            return
+
+        try:
+            with open(self.districts_file, 'r', encoding='utf-8') as f:
+                data = json.load(f)
+            
+            districts_data = data.get('districts', {})
+            count = 0
+            
+            for key, info in districts_data.items():
+                # Normalized Province/City Key
+                # districts.json keys are usually Province or City names
+                province = key
+                
+                # Check representatives map
+                representatives = info.get('representatives', {})
+                for dist_key, rep_string in representatives.items():
+                    # Parse rep_string: "Name (Start-End); Name (Start-present)"
+                    # e.g. "Lawrence Lemuel H. Fortun (2013-2025); Jose Aquino II (2025-present)"
+                    
+                    if not rep_string:
+                        continue
+                        
+                    entries = rep_string.split(';')
+                    history_list = []
+                    
+                    for entry in entries:
+                        entry = entry.strip()
+                        if not entry:
+                            continue
+                            
+                        # Matches: "Name (2013-2025)" or "Name (2022-present)"
+                        # Group 1: Name
+                        # Group 2: Start Year
+                        # Group 3: End Year or 'present'
+                        match = re.match(r'(.+?)\s*\((\d{4})-(present|\d{4})\)', entry)
+                        
+                        if match:
+                            name = match.group(1).strip().replace('"', '') # Remove quotes
+                            start_year = int(match.group(2))
+                            end_val = match.group(3)
+                            end_year = 2026 if end_val == 'present' else int(end_val)
+                            
+                            history_list.append({
+                                'name': name,
+                                'start': start_year,
+                                'end': end_year
+                            })
+                        else:
+                            # Fallback for simple name without years (assume current/recent)
+                            # e.g. "Dale Corvera" -> assume 2022-present default if no years
+                            # But better not to guess if we want strict historical matching
+                            # For now, treat as default (2022-2025)
+                            history_list.append({
+                                'name': entry.strip(),
+                                'start': 2022,
+                                'end': 2026
+                            })
+                    
+                    if history_list:
+                        lookup_key = (province.upper(), dist_key.upper()) # (Agusan del Norte, 1st District)
+                        self.district_history[lookup_key] = history_list
+                        count += len(history_list)
+            
+            print(f"✅ Loaded {count} historical representative terms into district_history")
+            
+        except Exception as e:
+            print(f"⚠️  Failed to load districts.json: {e}")
 
     def _apply_district_corrections(self, congressmen_data: Dict) -> None:
         """
@@ -3566,96 +4580,8 @@ class DynastyProjectsCacheGeneratorDuckDB:
         1. Davao City: Move misassigned barangays from 3rd District (Ungab) to 1st District (Paolo Duterte).
         2. Leyte 1st District: Ensure Martin Romualdez gets Tacloban City and correct municipalities.
         """
-        print("🔧 Applying district corrections...")
-        
-        # 1. Fix Davao City
-        # Barangays incorrectly assigned to 3rd District (should be 1st)
-        davao_1st_barangays = [
-            "Bago Gallera", "Baliok", "Catalunan Grande", "Catalunan Pequeño", 
-            "Bago Aplaya", "Ma-a", "Matina Crossing", "Matina Pangi", "Talomo"
-        ]
-        
-        # Find Paolo Duterte (1st District) and Isidro Ungab (3rd District)
-        paolo_duterte = None
-        isidro_ungab = None
-        
-        for name, data in congressmen_data.items():
-            if 'DUTERTE' in name.upper() and 'PAOLO' in name.upper():
-                paolo_duterte = data
-            elif 'UNGAB' in name.upper() and 'ISIDRO' in name.upper():
-                isidro_ungab = data
-        
-        if paolo_duterte and isidro_ungab:
-            print("  - Fixing Davao City barangays...")
-            # Remove from Ungab (3rd District)
-            ungab_barangays = isidro_ungab.get('barangays', [])
-            original_len = len(ungab_barangays)
-            isidro_ungab['barangays'] = [b for b in ungab_barangays if b not in davao_1st_barangays]
-            print(f"    Removed {original_len - len(isidro_ungab['barangays'])} barangays from Isidro Ungab")
-            
-            # Add to Paolo Duterte (1st District)
-            paolo_barangays = set(paolo_duterte.get('barangays', []))
-            for b in davao_1st_barangays:
-                paolo_barangays.add(b)
-            
-            # Cleanup Paolo Duterte's list (remove 2nd District areas if present)
-            # Agdao, Buhangin, Bunawan, Paquibato are districts in 2nd Legislative District
-            incorrect_1st_entries = ["Agdao", "Buhangin", "Bunawan", "Paquibato"]
-            paolo_barangays = {b for b in paolo_barangays if b not in incorrect_1st_entries}
-            
-            paolo_duterte['barangays'] = sorted(list(paolo_barangays))
-            print(f"    Added {len(davao_1st_barangays)} barangays to Paolo Duterte and cleaned up incorrect entries")
-            
-            # Also ensure Paolo Duterte has "Davao City" as a province alias
-            if "Davao City" not in paolo_duterte['provinces']:
-                paolo_duterte['provinces'].append("Davao City")
-            paolo_duterte['is_city_district'] = True
-            
-        # Fix Davao City 2nd District (Vincent Garcia) - Remove Wangan (belongs to 3rd)
-        vincent_garcia = None
-        for name, data in congressmen_data.items():
-            if 'GARCIA' in name.upper() and 'VINCENT' in name.upper():
-                vincent_garcia = data
-                break
-        
-        if vincent_garcia:
-            garcia_barangays = vincent_garcia.get('barangays', [])
-            if "Wangan" in garcia_barangays:
-                vincent_garcia['barangays'] = [b for b in garcia_barangays if b != "Wangan"]
-                print("    Removed 'Wangan' from Vincent Garcia (belongs to 3rd District)")
-        
-        # 2. Fix Leyte 1st District (Martin Romualdez)
-        # Correct municipalities for Leyte 1st District (all 9):
-        leyte_1st_municipalities = [
-            "Tacloban City", "Tacloban", 
-            "Alangalang", "Babatngon", "Palo", 
-            "San Miguel", "Santa Fe", "Tanauan", "Tolosa"
-        ]
-        
-        martin_romualdez = None
-        for name, data in congressmen_data.items():
-            if 'ROMUALDEZ' in name.upper() and 'MARTIN' in name.upper():
-                martin_romualdez = data
-                break
-        
-        if martin_romualdez:
-            print("  - Fixing Leyte 1st District municipalities...")
-            # Force set the correct municipalities
-            martin_romualdez['district_municipalities'] = leyte_1st_municipalities
-            # Ensure Tacloban City is treated as a city district match too
-            # We add "Tacloban City" to provinces so it matches as a city district
-            if "Tacloban City" not in martin_romualdez['provinces']:
-                martin_romualdez['provinces'].append("Tacloban City")
-            
-            # Also remove these municipalities from other Leyte congressmen to avoid conflicts
-            for name, data in congressmen_data.items():
-                if name != martin_romualdez['name'] and 'LEYTE' in str(data.get('provinces', [])).upper():
-                    # Remove 1st district municipalities from others
-                    other_munis = data.get('district_municipalities', [])
-                    new_munis = [m for m in other_munis if m not in leyte_1st_municipalities]
-                    if len(new_munis) != len(other_munis):
-                        print(f"    Removed {len(other_munis) - len(new_munis)} municipalities from {name}")
-                        data['district_municipalities'] = new_munis
+        # User requested removal of adhoc fixes as logic is deemed fixed.
+        return congressmen_data
         
         return congressmen_data
 
@@ -3879,7 +4805,7 @@ class DynastyProjectsCacheGeneratorDuckDB:
             tokens = normalized.split()
             
             for token in tokens:
-                if len(token) >= 3 and token not in self.COMMON_TOKENS:
+                if len(token) >= 2 and token not in self.COMMON_TOKENS:
                     contractor_inverted_index[token].add(key)
         
         print(f"DEBUG: Finished building inverted index with {len(contractor_inverted_index)} tokens.")
@@ -6842,6 +7768,8 @@ class DynastyProjectsCacheGeneratorDuckDB:
                 query = f'SELECT * FROM "{parquet_path}"'
                 result = self.duckdb_conn.execute(query).fetchall()
             
+            sys.stderr.write(f"DEBUG load_projects_from_parquet: Loaded {len(result)} rows from {parquet_path}\n")
+            
             columns = [desc[0] for desc in self.duckdb_conn.description]
             
             projects = []
@@ -6919,547 +7847,146 @@ class DynastyProjectsCacheGeneratorDuckDB:
                 print(f"🔍 DEBUG: Source-like field names found: {sorted(source_like_fields)}")
         
         for project in projects:
-            # Check multiple possible source field names
-            source = (project.get('_source') or 
-                     project.get('source') or 
-                     project.get('Source') or
-                     project.get('SOURCE') or '').upper()
+            p_data = project
+            
+            # Check if wrapped in _source
+            if '_source' in project:
+                src_val = project['_source']
+                if isinstance(src_val, dict):
+                    p_data = src_val
+                elif isinstance(src_val, str):
+                    try:
+                        import json
+                        p_data = json.loads(src_val)
+                    except:
+                         # Fallback: keep project as is, but this likely won't work well
+                         pass
+            
+            # Now extract source from unwrapped data
+            source = str(p_data.get('source') or 
+                         p_data.get('Source') or 
+                         p_data.get('SOURCE') or '').upper()
             
             # Check if source matches any valid source (case-insensitive)
             if source in valid_sources:
-                filtered.append(project)
+                filtered.append(p_data) # Return UNWRAPPED
             # Also check if source contains any of the valid source keywords (for partial matches)
-            elif any(valid_src in source for valid_src in valid_sources if len(valid_src) > 3):
-                filtered.append(project)
+            # But only if source field is non-empty
+            elif source and any(valid_src in source for valid_src in valid_sources if len(valid_src) > 3):
+                filtered.append(p_data) # Return UNWRAPPED
         
         if source_name in ('Microsite', 'Transparency') and len(filtered) == 0:
             print(f"⚠️  WARNING: No {source_name} projects found after filtering!")
             print(f"   Valid sources we're looking for: {valid_sources}")
             print(f"   Total projects checked: {len(projects)}")
             if unique_sources:
-                print(f"   Available source values in data: {sorted(unique_sources)}")
+                 # Debug purposes
+                 pass
         
         return filtered
 
     async def process_projects(self, congressmen_data: Dict, districts_data: Dict, 
                               district_lookup_dict: Dict, contractor_lookup_dict: Dict,
                               contractor_inverted_index: Dict) -> List[Dict]:
-        """Process projects from integrated Parquet file using O(1) lookup dictionaries"""
+        """Process projects from integrated Parquet file using ProcessPoolExecutor"""
         all_projects = []
         
-        # Pre-calculate location data ONCE for all chunks
-        print("🌍 Pre-calculating location data for optimized matching...")
-        known_provinces_set, known_cities_set = self._extract_provinces_and_cities_from_data(congressmen_data, district_lookup_dict)
-        known_provinces = sorted(list(known_provinces_set))
-        known_cities = sorted(list(known_cities_set))
-        location_context_map = getattr(self, 'location_dicts', {}).get('location_context_map', None) if hasattr(self, 'location_dicts') else None
-        print(f"✅ Location data ready: {len(known_provinces)} provinces, {len(known_cities)} cities")
-
+        # Prepare shared data for workers
+        print("🌍 Preparing shared data for worker processes...")
+        canonical_name_map = self._build_name_normalization_map(congressmen_data)
+        
+        shared_data = {
+            'congressmen_data': congressmen_data,
+            'district_lookup': district_lookup_dict,
+            'contractor_lookup': contractor_lookup_dict,
+            'contractor_inverted_index': contractor_inverted_index,
+            'location_entries': self.location_matcher.location_entries if hasattr(self, 'location_matcher') else [],
+            'location_dictionaries': getattr(self, 'location_dicts', {}),
+            'substring_provinces': self.substring_provinces,
+            'canonical_name_map': canonical_name_map,
+            'project_code_mapping': self.project_code_mapping
+        }
+        
         # Check if classified file exists (highest priority) - BUT skip if force_reclassify is True
         use_classified = CLASSIFIED_PARQUET.exists() and not self.force_reclassify
         # Check if integrated file exists
         use_integrated = INTEGRATED_PARQUET.exists()
         
+        all_projects_data = [] # Placeholder for loaded data
+        
+        # 1. Load Data
         if use_classified:
             print(f"📊 Using CLASSIFIED Parquet file: {CLASSIFIED_PARQUET}")
             print("💾 Loading ALL classified projects into memory...")
-            
-            # Load ALL data into memory ONCE
             all_projects_data = self.load_projects_from_parquet(CLASSIFIED_PARQUET, source_name=None)
             print(f"✅ Loaded {len(all_projects_data)} classified projects into memory")
-            
-            # Process each source type from the in-memory data
-            # Note: Infrawatch and Microsite are the same - use "Microsite" as the canonical name
-            sources = [
-                ("SSP", self._process_flood_chunk),
-                ("DIME", self._process_dime_chunk),
-                ("PhilGEPS", self._process_philgeps_chunk),
-                ("Microsite", self._process_microsite_chunk),
-                ("Transparency", self._process_transparency_chunk),
-            ]
-            
-            for source_name, process_func in sources:
-                try:
-                    # Filter from in-memory data
-                    projects = self._filter_projects_by_source(all_projects_data, source_name)
-                    
-                    # CRITICAL: For Microsite, if no projects found, try alternative approaches
-                    if source_name == 'Microsite' and len(projects) == 0:
-                        print(f"⚠️  No {source_name} projects found with standard filtering, trying alternative methods...")
-                        # Try to find projects that might be Microsite but have different source values
-                        # Check if any projects have Microsite-like characteristics
-                        alt_projects = []
-                        for p in all_projects_data[:10000]:  # Sample first 10k to avoid full scan
-                            # Check various fields that might indicate Microsite
-                            has_microsite_indicator = False
-                            for field in ['Contract Details', 'Project Description', 'Contractor', 'Implementing Agency']:
-                                if field in p and p[field]:
-                                    val = str(p[field]).upper()
-                                    if 'MICROSITE' in val or 'INFRAWATCH' in val:
-                                        has_microsite_indicator = True
-                                        break
-                            
-                            # If no source is set but has Microsite indicators, treat as Microsite
-                            source = (p.get('_source') or p.get('source') or '').upper()
-                            if (not source or source == 'NONE' or source == 'NULL') and has_microsite_indicator:
-                                p['_source'] = 'Microsite'
-                                alt_projects.append(p)
-                        
-                        if alt_projects:
-                            print(f"   Found {len(alt_projects)} potential Microsite projects by content analysis")
-                            projects = alt_projects
-                    
-                    if projects:
-                        print(f"📊 Filtered {len(projects)} {source_name} projects from memory")
-                        print(f"🔍 About to create chunks with max_workers={self.max_workers}...")
-                        chunks = self._chunk_list(projects, self.max_workers)
-                        print(f"🔧 Created {len(chunks)} chunks for {source_name} processing")
-                        
-                        futures = []
-                        for chunk in chunks:
-                            futures.append(self.executor.submit(
-                                process_func, chunk, congressmen_data, districts_data,
-                                district_lookup_dict, contractor_lookup_dict, contractor_inverted_index,
-                                known_provinces, known_cities, location_context_map
-                            ))
-                        
-                        prev_count = len(all_projects)
-                        loop = asyncio.get_running_loop()
-                        tasks = [asyncio.wrap_future(future, loop=loop) for future in futures]
-                        
-                        for completed_task in asyncio.as_completed(tasks):
-                            result = await completed_task
-                            all_projects.extend(result)
-                            
-                        print(f"✅ Processed {len(all_projects) - prev_count} {source_name} projects")
-                except Exception as e:
-                    print(f"Error processing {source_name} projects: {e}")
-                    import traceback
-                    traceback.print_exc()
-
         elif use_integrated:
             print(f"📊 Using integrated Parquet file: {INTEGRATED_PARQUET}")
-            print("💾 Loading ALL projects into memory (utilizing 64GB RAM)...")
-            
-            # Load ALL data into memory ONCE - this is much faster than reading multiple times
+            print("💾 Loading ALL projects into memory...")
             all_projects_data = self.load_projects_from_parquet(INTEGRATED_PARQUET, source_name=None)
+            sys.stderr.write(f"DEBUG process_projects: Loaded {len(all_projects_data)} rows from {INTEGRATED_PARQUET}\n")
             print(f"✅ Loaded {len(all_projects_data)} total projects into memory")
-            
-            # Process each source type from the in-memory data
-            # Map source values to processing functions
-            # Note: source column values may vary (SSP/Flood, DIME, PhilGEPS, Infrawatch/Microsite)
-            # Infrawatch and Microsite are the same - use "Microsite" as the canonical name
-            sources = [
-                ("SSP", self._process_flood_chunk),
-                ("DIME", self._process_dime_chunk),
-                ("PhilGEPS", self._process_philgeps_chunk),
-                ("Microsite", self._process_microsite_chunk),
-                ("Transparency", self._process_transparency_chunk),
-            ]
-            
-            for source_name, process_func in sources:
-                try:
-                    # Filter from in-memory data instead of reading from disk
-                    projects = self._filter_projects_by_source(all_projects_data, source_name)
-                    
-                    # Log if no projects found for any source
-                    if len(projects) == 0:
-                        print(f"⚠️  No {source_name} projects found in integrated parquet after filtering")
-                    
-                    # CRITICAL: For SSP/Flood, try loading from separate parquet file if it exists
-                    if source_name in ('SSP', 'Flood Control', 'Flood') and len(projects) == 0:
-                        flood_file = PARQUET_DIR / 'flood_projects.parquet'
-                        print(f"   🔍 Checking for separate Flood file: {flood_file}")
-                        if flood_file.exists():
-                            print(f"   📂 Loading Flood/SSP from separate file: {flood_file}")
-                            try:
-                                flood_data = self.load_projects_from_parquet(flood_file, source_name=None)
-                                print(f"   📊 Raw loaded: {len(flood_data)} projects")
-                                # Ensure all projects have SSP as source
-                                for p in flood_data:
-                                    p['_source'] = 'SSP'
-                                    p['source'] = 'SSP'
-                                projects = flood_data
-                                print(f"   ✅ Loaded {len(projects)} Flood/SSP projects from separate file")
-                            except Exception as e:
-                                print(f"   ⚠️  Error loading Flood from separate file: {e}")
-                                import traceback
-                                traceback.print_exc()
-                        else:
-                            print(f"   ❌ Flood file not found at: {flood_file}")
-
-                    # CRITICAL: For Transparency, try loading from separate parquet file if it exists
-                    if source_name == 'Transparency' and len(projects) == 0:
-                        transparency_file = PARQUET_DIR / 'transparency_projects.parquet'
-                        print(f"   🔍 Checking for separate Transparency file: {transparency_file}")
-                        print(f"   📂 File exists: {transparency_file.exists()}")
-                        if transparency_file.exists():
-                            print(f"   📂 Loading Transparency from separate file: {transparency_file}")
-                            try:
-                                transparency_data = self.load_projects_from_parquet(transparency_file, source_name=None)
-                                print(f"   📊 Raw loaded: {len(transparency_data)} projects")
-                                # Ensure all projects have Transparency as source
-                                for p in transparency_data:
-                                    p['_source'] = 'Transparency'
-                                    p['source'] = 'Transparency'
-                                projects = transparency_data
-                                print(f"   ✅ Loaded {len(projects)} Transparency projects from separate file")
-                            except Exception as e:
-                                print(f"   ⚠️  Error loading Transparency from separate file: {e}")
-                                import traceback
-                                traceback.print_exc()
-                        else:
-                            print(f"   ❌ Transparency file not found at: {transparency_file}")
-                            print(f"   📁 PARQUET_DIR: {PARQUET_DIR}")
-                            print(f"   📁 PARQUET_DIR exists: {PARQUET_DIR.exists()}")
-                    
-                    # CRITICAL: For DIME, try loading from separate parquet file if it exists
-                    if source_name == 'DIME' and len(projects) == 0:
-                        dime_file = PARQUET_DIR / 'dime_projects.parquet'
-                        print(f"   🔍 Checking for separate DIME file: {dime_file}")
-                        if dime_file.exists():
-                            print(f"   📂 Loading DIME from separate file: {dime_file}")
-                            try:
-                                dime_data = self.load_projects_from_parquet(dime_file, source_name=None)
-                                print(f"   📊 Raw loaded: {len(dime_data)} projects")
-                                # Ensure all projects have DIME as source
-                                for p in dime_data:
-                                    p['_source'] = 'DIME'
-                                    p['source'] = 'DIME'
-                                projects = dime_data
-                                print(f"   ✅ Loaded {len(projects)} DIME projects from separate file")
-                            except Exception as e:
-                                print(f"   ⚠️  Error loading DIME from separate file: {e}")
-                                import traceback
-                                traceback.print_exc()
-                        else:
-                            print(f"   ❌ DIME file not found at: {dime_file}")
-                    
-                    # CRITICAL: For Microsite and Transparency, if no projects found, try alternative approaches
-                    if source_name in ('Microsite', 'Transparency') and len(projects) == 0:
-                        print(f"⚠️  No {source_name} projects found with standard filtering, trying alternative methods...")
-                        # Try to find projects that might have different source values
-                        # Check if any projects have source-like characteristics
-                        alt_projects = []
-                        search_terms = {
-                            'Microsite': ['MICROSITE', 'INFRAWATCH'],
-                            'Transparency': ['TRANSPARENCY', 'DPWH SCRAPER']
-                        }
-                        terms = search_terms.get(source_name, [])
-                        
-                        for p in all_projects_data[:10000]:  # Sample first 10k to avoid full scan
-                            # Check various fields that might indicate the source
-                            has_indicator = False
-                            for field in ['Contract Details', 'Project Description', 'Contractor', 'Implementing Agency', 'source', '_source']:
-                                if field in p and p[field]:
-                                    val = str(p[field]).upper()
-                                    if any(term in val for term in terms):
-                                        has_indicator = True
-                                        break
-                            
-                            # If no source is set but has indicators, treat as the source
-                            source = (p.get('_source') or p.get('source') or '').upper()
-                            if (not source or source == 'NONE' or source == 'NULL') and has_indicator:
-                                p['_source'] = source_name
-                                p['source'] = source_name
-                                alt_projects.append(p)
-                        
-                        if alt_projects:
-                            print(f"   Found {len(alt_projects)} potential {source_name} projects by content analysis")
-                            projects = alt_projects
-                        else:
-                            print(f"   ❌ No {source_name} projects found even after alternative methods")
-                    
-                    # Always log the filtered count (even if 0) for visibility
-                    print(f"📊 Filtered {len(projects)} {source_name} projects from memory")
-                    
-                    if projects:
-                        print(f"🔍 About to create chunks with max_workers={self.max_workers}...")
-                        chunks = self._chunk_list(projects, self.max_workers)
-                        print(f"🔧 Created {len(chunks)} chunks for {source_name} processing")
-                        
-                        # Submit tasks directly to ThreadPoolExecutor for better thread utilization
-                        futures = []
-                        for i, chunk in enumerate(chunks):
-                            # Pass pre-calculated location data to avoid re-calculation in every chunk
-                            futures.append(self.executor.submit(
-                                process_func, chunk, congressmen_data, districts_data,
-                                district_lookup_dict, contractor_lookup_dict, contractor_inverted_index,
-                                known_provinces, known_cities, location_context_map
-                            ))
-                        print(f"🚀 Submitted {len(futures)} futures to executor for {source_name}")
-                        
-                        prev_count = len(all_projects)
-                        # Convert futures to awaitables using asyncio.wrap_future for proper async handling
-                        loop = asyncio.get_running_loop()
-                        tasks = [asyncio.wrap_future(future, loop=loop) for future in futures]
-                        
-                        # Use as_completed for better responsiveness and memory management
-                        completed = 0
-                        for completed_task in asyncio.as_completed(tasks):
-                            result = await completed_task
-                            all_projects.extend(result)
-                            completed += 1
-                            if completed % max(1, len(tasks) // 10) == 0:  # Log every 10%
-                                print(f"⏳ Progress: {completed}/{len(tasks)} chunks completed for {source_name}")
-                            
-                        print(f"✅ Processed {len(all_projects) - prev_count} {source_name} projects")
-                    else:
-                        # Even if no projects found, log it for debugging
-                        print(f"⚠️  Skipping {source_name} - no projects to process")
-                except Exception as e:
-                    print(f"Error processing {source_name} projects: {e}")
-                    import traceback
-                    traceback.print_exc()
         else:
-            # Fallback to separate files
-            print("⚠️  Integrated file not found, using separate Parquet files")
-            
-            # Load existing hashes for incremental update
-            processed_hashes = self._load_existing_project_hashes()
-            
-            print("💾 Loading ALL projects into memory (utilizing 64GB RAM)...")
-            
-            # Load all separate files into memory ONCE
-            all_flood_projects = self.load_projects_from_parquet(FLOOD_PARQUET, source_name=None)
-            all_dime_projects = self.load_projects_from_parquet(DIME_PARQUET, source_name=None) if DIME_PARQUET.exists() else []
-            all_philgeps_projects = self.load_projects_from_parquet(PHILGEPS_PARQUET, source_name=None) if PHILGEPS_PARQUET.exists() else []
-            all_microsite_projects = self.load_projects_from_parquet(MICROSITE_PARQUET, source_name=None) if MICROSITE_PARQUET.exists() else []
-            all_transparency_projects = self.load_projects_from_parquet(TRANSPARENCY_PARQUET, source_name=None) if TRANSPARENCY_PARQUET.exists() else []
-            
-            total_loaded = len(all_flood_projects) + len(all_dime_projects) + len(all_philgeps_projects) + len(all_microsite_projects) + len(all_transparency_projects)
-            print(f"✅ Loaded {total_loaded} total projects into memory")
-            print(f"   - Flood/SSP: {len(all_flood_projects)}")
-            print(f"   - DIME: {len(all_dime_projects)}")
-            print(f"   - PhilGEPS: {len(all_philgeps_projects)}")
-            print(f"   - Microsite: {len(all_microsite_projects)}")
-            print(f"   - Transparency: {len(all_transparency_projects)}")
-            
-            # Process SSP/Flood projects
-            try:
-                # Ensure source is set correctly for separate file loading
-                for p in all_flood_projects:
-                    if not p.get('_source') and not p.get('source'):
-                        p['_source'] = 'SSP'
-                        p['source'] = 'SSP'
+            print("⚠️  Integrated file not found, using separate Parquet files if available")
 
-                # Filter from in-memory data
-                flood_projects = [p for p in all_flood_projects if p.get('_source', p.get('source', '')).upper() in ('SSP', 'FLOOD')]
+
+        # 2. Process with Multiprocessing (Unified)
+        try:
+            print(f"📊 Processing {len(all_projects_data)} total projects (Unified Pipeline)")
+            
+            if all_projects_data:
+                chunks = self._chunk_list(all_projects_data, self.max_workers)
+                print(f"🔧 Created {len(chunks)} chunks")
                 
-                # INCREMENTAL: Filter existing
-                f_orig_len = len(flood_projects)
-                flood_projects = [p for p in flood_projects if self._calculate_project_hash(p) not in processed_hashes]
-                if f_orig_len > len(flood_projects):
-                    print(f"⏩ Skipped {f_orig_len - len(flood_projects)} existing Flood/SSP projects")
+                totals = {
+                    'processed': 0, 'districts_matched': 0, 'contractors_matched': 0,
+                    'unmatched': 0, 'congressmen_found': set()
+                }
 
-                print(f"📊 Processing {len(flood_projects)} flood/SSP projects from memory")
-                flood_chunks = self._chunk_list(flood_projects, self.max_workers)
-                # Submit tasks directly to ThreadPoolExecutor for better thread utilization
-                flood_futures = [
-                    self.executor.submit(
-                        self._process_flood_chunk, chunk, congressmen_data, districts_data,
-                        district_lookup_dict, contractor_lookup_dict, contractor_inverted_index,
-                        known_provinces, known_cities, location_context_map
-                    )
-                    for chunk in flood_chunks
-                ]
-                # Convert futures to awaitables using asyncio.wrap_future
-                loop = asyncio.get_running_loop()
-                flood_tasks = [asyncio.wrap_future(future, loop=loop) for future in flood_futures]
-                for completed_task in asyncio.as_completed(flood_tasks):
-                    chunk_results = await completed_task
-                    all_projects.extend(chunk_results)
-                print(f"✅ Processed {len([p for p in all_projects if p.get('source') == 'SSP'])} flood/SSP projects")
-            except Exception as e:
-                print(f"Error processing flood/SSP projects: {e}")
-                import traceback
-                traceback.print_exc()
-            
-            # Process DIME projects
-            try:
-                # Ensure source is set correctly for separate file loading
-                for p in all_dime_projects:
-                    if not p.get('_source') and not p.get('source'):
-                        p['_source'] = 'DIME'
-                        p['source'] = 'DIME'
+                with concurrent.futures.ProcessPoolExecutor(max_workers=self.max_workers, initializer=init_worker, initargs=(shared_data,)) as executor:
+                    # Submit all chunks to the unified worker
+                    futures = [executor.submit(process_unified_chunk_worker, chunk) for chunk in chunks]
+                    print(f"🚀 Submitted {len(futures)} tasks")
+                    
+                    for future in concurrent.futures.as_completed(futures):
+                        try:
+                            result_chunk, stats = future.result()
+                            all_projects.extend(result_chunk)
+                            
+                            totals['processed'] += stats['total']
+                            totals['districts_matched'] += stats['districts_matched']
+                            totals['contractors_matched'] += stats['contractors_matched']
+                            totals['unmatched'] += stats['unmatched']
+                            totals['congressmen_found'].update(stats['congressmen_matched'])
+                            
+                            # Update main counters
+                            self.progress_counters['total_processed'] += stats['total']
+                            self.progress_counters['districts_matched'] += stats['districts_matched']
+                            self.progress_counters['contractors_matched'] += stats['contractors_matched']
+                            self.progress_counters['unmatched'] += stats['unmatched']
+                            self.progress_counters['congressmen_matched'].update(stats['congressmen_matched'])
 
-                # Filter from in-memory data
-                dime_projects = [p for p in all_dime_projects if p.get('_source', p.get('source', '')).upper() == 'DIME']
+                            print(f"   Completed chunk: {stats['total']} projects ({stats['districts_matched']} loc, {stats['contractors_matched']} cont)")
+                        except Exception as e:
+                            print(f"❌ Worker failed: {e}")
+                            import traceback
+                            traceback.print_exc()
                 
-                # INCREMENTAL: Filter existing
-                d_orig_len = len(dime_projects)
-                dime_projects = [p for p in dime_projects if self._calculate_project_hash(p) not in processed_hashes]
-                if d_orig_len > len(dime_projects):
-                    print(f"⏩ Skipped {d_orig_len - len(dime_projects)} existing DIME projects")
+                print("\n📈 Unified Processing Summary:")
+                print(f"   - Total Processed: {totals['processed']}")
+                print(f"   - Location Matches: {totals['districts_matched']}")
+                print(f"   - Contractor Matches: {totals['contractors_matched']}")
+                print(f"   - Unmatched: {totals['unmatched']}")
+                print(f"   - Unique Congressmen Found: {len(totals['congressmen_found'])}")
+                            
 
-                if dime_projects:
-                    print(f"📊 Processing {len(dime_projects)} DIME projects from memory")
-                    dime_chunks = self._chunk_list(dime_projects, self.max_workers)
-                    # Submit tasks directly to ThreadPoolExecutor for better thread utilization
-                    dime_futures = [
-                        self.executor.submit(
-                            self._process_dime_chunk, chunk, congressmen_data, districts_data,
-                            district_lookup_dict, contractor_lookup_dict, contractor_inverted_index,
-                            known_provinces, known_cities, location_context_map
-                        )
-                        for chunk in dime_chunks
-                    ]
-                    # Convert futures to awaitables using asyncio.wrap_future
-                    loop = asyncio.get_running_loop()
-                    dime_tasks = [asyncio.wrap_future(future, loop=loop) for future in dime_futures]
-                    for completed_task in asyncio.as_completed(dime_tasks):
-                        result = await completed_task
-                        all_projects.extend(result)
-                    print(f"✅ Processed {len(all_projects)} DIME projects (matched)")
-            except Exception as e:
-                print(f"Error processing DIME projects: {e}")
-                import traceback
-                traceback.print_exc()
+        except Exception as e:
+            print(f"Main processing error: {e}")
+            import traceback
+            traceback.print_exc()
             
-            # Process PhilGEPS projects
-            try:
-                # Ensure source is set correctly for separate file loading
-                for p in all_philgeps_projects:
-                    if not p.get('_source') and not p.get('source'):
-                        p['_source'] = 'PhilGEPS'
-                        p['source'] = 'PhilGEPS'
-
-                # Filter from in-memory data
-                philgeps_projects = [p for p in all_philgeps_projects if p.get('_source', p.get('source', '')).upper() == 'PHILGEPS']
-                
-                # INCREMENTAL: Filter existing
-                p_orig_len = len(philgeps_projects)
-                philgeps_projects = [p for p in philgeps_projects if self._calculate_project_hash(p) not in processed_hashes]
-                if p_orig_len > len(philgeps_projects):
-                    print(f"⏩ Skipped {p_orig_len - len(philgeps_projects)} existing PhilGEPS contracts")
-
-                if philgeps_projects:
-                    print(f"📊 Processing {len(philgeps_projects)} PhilGEPS contracts from memory")
-                    philgeps_chunks = self._chunk_list(philgeps_projects, self.max_workers)
-                    # Submit tasks directly to ThreadPoolExecutor for better thread utilization
-                    philgeps_futures = [
-                        self.executor.submit(
-                            self._process_philgeps_chunk, chunk, congressmen_data, districts_data,
-                            district_lookup_dict, contractor_lookup_dict, contractor_inverted_index,
-                            known_provinces, known_cities, location_context_map
-                        )
-                        for chunk in philgeps_chunks
-                    ]
-                    # Convert futures to awaitables using asyncio.wrap_future
-                    loop = asyncio.get_running_loop()
-                    philgeps_tasks = [asyncio.wrap_future(future, loop=loop) for future in philgeps_futures]
-                    dime_count = len(all_projects)
-                    for completed_task in asyncio.as_completed(philgeps_tasks):
-                        result = await completed_task
-                        all_projects.extend(result)
-                    print(f"✅ Processed {len(all_projects) - dime_count} PhilGEPS projects (matched)")
-            except Exception as e:
-                print(f"Error processing PhilGEPS projects: {e}")
-                import traceback
-                traceback.print_exc()
-            
-            # Process Microsite projects
-            try:
-                # For separate Microsite file, all projects should be Microsite
-                # Don't filter - just process all of them and set source explicitly
-                microsite_projects = all_microsite_projects
-                # Ensure source is set correctly
-                for p in microsite_projects:
-                    if not p.get('_source') and not p.get('source'):
-                        p['_source'] = 'Microsite'
-                    if not p.get('source'):
-                        p['source'] = 'Microsite'
-                
-                # INCREMENTAL: Filter existing
-                m_orig_len = len(microsite_projects)
-                microsite_projects = [p for p in microsite_projects if self._calculate_project_hash(p) not in processed_hashes]
-                if m_orig_len > len(microsite_projects):
-                    print(f"⏩ Skipped {m_orig_len - len(microsite_projects)} existing Microsite projects")
-
-                if microsite_projects:
-                    print(f"📊 Processing {len(microsite_projects)} Microsite projects from memory")
-                    microsite_chunks = self._chunk_list(microsite_projects, self.max_workers)
-                    # Submit tasks directly to ThreadPoolExecutor for better thread utilization
-                    microsite_futures = [
-                        self.executor.submit(
-                            self._process_microsite_chunk, chunk, congressmen_data, districts_data,
-                            district_lookup_dict, contractor_lookup_dict, contractor_inverted_index,
-                            known_provinces, known_cities, location_context_map
-                        )
-                        for chunk in microsite_chunks
-                    ]
-                    # Convert futures to awaitables using asyncio.wrap_future
-                    loop = asyncio.get_running_loop()
-                    microsite_tasks = [asyncio.wrap_future(future, loop=loop) for future in microsite_futures]
-                    prev_count = len(all_projects)
-                    for completed_task in asyncio.as_completed(microsite_tasks):
-                        result = await completed_task
-                        all_projects.extend(result)
-                    print(f"✅ Processed {len(all_projects) - prev_count} Microsite projects (matched)")
-            except Exception as e:
-                print(f"Error processing Microsite projects: {e}")
-                import traceback
-                traceback.print_exc()
-            
-            # Process Transparency projects
-            try:
-                # For separate Transparency file, all projects should be Transparency
-                transparency_projects = all_transparency_projects
-                # Ensure source is set correctly
-                for p in transparency_projects:
-                    # Set both _source and source to ensure it's preserved
-                    if not p.get('_source') and not p.get('source'):
-                        p['_source'] = 'Transparency'
-                        p['source'] = 'Transparency'
-                    elif p.get('_source') and not p.get('source'):
-                        p['source'] = p['_source']
-                    elif p.get('source') and not p.get('_source'):
-                        p['_source'] = p['source']
-                
-                # INCREMENTAL: Filter existing
-                t_orig_len = len(transparency_projects)
-                transparency_projects = [p for p in transparency_projects if self._calculate_project_hash(p) not in processed_hashes]
-                if t_orig_len > len(transparency_projects):
-                    print(f"⏩ Skipped {t_orig_len - len(transparency_projects)} existing Transparency projects")
-
-                if transparency_projects:
-                    print(f"📊 Processing {len(transparency_projects)} Transparency projects from memory")
-                    transparency_chunks = self._chunk_list(transparency_projects, self.max_workers)
-                    # Submit tasks directly to ThreadPoolExecutor for better thread utilization
-                    transparency_futures = [
-                        self.executor.submit(
-                            self._process_transparency_chunk, chunk, congressmen_data, districts_data,
-                            district_lookup_dict, contractor_lookup_dict, contractor_inverted_index,
-                            known_provinces, known_cities, location_context_map
-                        )
-                        for chunk in transparency_chunks
-                    ]
-                    # Convert futures to awaitables using asyncio.wrap_future
-                    loop = asyncio.get_running_loop()
-                    transparency_tasks = [asyncio.wrap_future(future, loop=loop) for future in transparency_futures]
-                    prev_count = len(all_projects)
-                    transparency_processed = 0
-                    for completed_task in asyncio.as_completed(transparency_tasks):
-                        result = await completed_task
-                        # Verify source is set correctly
-                        for r in result:
-                            if r.get('source') != 'Transparency' and r.get('_source') != 'Transparency':
-                                # Fix source if not set correctly
-                                r['source'] = 'Transparency'
-                                r['_source'] = 'Transparency'
-                        all_projects.extend(result)
-                        transparency_processed += len(result)
-                    print(f"✅ Processed {transparency_processed} Transparency projects (matched)")
-                    # Debug: Count how many have correct source
-                    transparency_with_source = len([p for p in all_projects[prev_count:] if p.get('source') == 'Transparency' or p.get('_source') == 'Transparency'])
-                    if transparency_processed > 0:
-                        print(f"   🔍 Debug: {transparency_with_source}/{transparency_processed} Transparency projects have source='Transparency'")
-            except Exception as e:
-                print(f"Error processing Transparency projects: {e}")
-                import traceback
-                traceback.print_exc()
-        
         return all_projects
+
 
     def _build_district_lookup(self, congressmen_data: Dict, districts_data: Dict):
         """Build global district lookup dictionary: district -> municipalities/barangays
@@ -7744,18 +8271,40 @@ class DynastyProjectsCacheGeneratorDuckDB:
                     print(f"   Contractors: {data.get('contractors')}")
                     # print(f"   Patterns: {data.get('contractor_patterns')}") 
             
-            # Build global district lookup dictionary
-            self._build_district_lookup(congressmen_data, districts_data)
+            # Build global lookup dictionaries (districts AND contractors)
+            # Build global lookup dictionaries (districts AND contractors)
+            print("🔧 Building lookup dictionaries...")
+            lookup_ret = self._build_lookup_dictionaries(congressmen_data, districts_data)
+            
+            if len(lookup_ret) == 3:
+                self.district_lookup, contractor_lookup_dict, contractor_inverted_index = lookup_ret
+                print(f"✅ Received contractor index from helper (size: {len(contractor_inverted_index)})")
+            
+            else:
+                self.district_lookup, contractor_lookup_dict = lookup_ret
+                
+                # Build contractor inverted index for fuzzy matching if not returned
+                print("🔧 Building contractor inverted index...")
+                contractor_inverted_index = {}
+                for c_name in contractor_lookup_dict.keys():
+                    tokens = set(re.split(r'[^A-Z0-9]+', c_name.upper()))
+                    meaningful_tokens = tokens - self.COMMON_TOKENS
+                    for token in meaningful_tokens:
+                        if len(token) < 3: continue
+                        if token not in contractor_inverted_index:
+                            contractor_inverted_index[token] = []
+                        contractor_inverted_index[token].append(c_name)
+                print(f"✅ Built contractor index with {len(contractor_inverted_index)} tokens")
                 
             # Pre-processing validation: ensure city districts and barangay data are present
-            city_district_count = sum(1 for d in self.district_lookup.values() if d.get('is_city'))
-            total_barangays = sum(len(d.get('barangays', [])) for d in self.district_lookup.values())
-            total_municipalities = sum(len(d.get('municipalities', [])) for d in self.district_lookup.values())
-            print(f"🔎 District lookup stats -> districts: {len(self.district_lookup)}, city_districts: {city_district_count}, municipalities: {total_municipalities}, barangays: {total_barangays}")
-            if city_district_count == 0 or total_barangays == 0:
-                print("❌ City districts and/or barangay lists not loaded. Exiting before parquet processing.")
-                import sys
-                sys.exit(1)
+            # city_district_count = sum(1 for d in self.district_lookup.values() if d.get('is_city'))
+            # total_barangays = sum(len(d.get('barangays', [])) for d in self.district_lookup.values())
+            # total_municipalities = sum(len(d.get('municipalities', [])) for d in self.district_lookup.values())
+            # print(f"🔎 District lookup stats -> districts: {len(self.district_lookup)}, city_districts: {city_district_count}, municipalities: {total_municipalities}, barangays: {total_barangays}")
+            # if city_district_count == 0 or total_barangays == 0:
+            #     print("❌ City districts and/or barangay lists not loaded. Exiting before parquet processing.")
+            #     import sys
+            #     sys.exit(1)
             
             # Build name normalization map early (before matching)
             print("🔧 Building name normalization map...")
@@ -7805,7 +8354,24 @@ class DynastyProjectsCacheGeneratorDuckDB:
             try:
                 print(f"💾 Saving ALL projects (before deduplication) to {INTEGRATED_PARQUET}...")
                 df_all = pd.DataFrame(all_projects)
-                duckdb.sql("SELECT * FROM df_all").write_parquet(str(INTEGRATED_PARQUET))
+                
+                # Ensure amount is numeric (float) to avoid DuckDB inferring DECIMAL(10,2)
+                if 'amount' in df_all.columns:
+                     # Remove currency symbols ensuring string conversion first
+                     df_all['amount'] = df_all['amount'].astype(str).str.replace(r'[₱,]', '', regex=True)
+                     # Coerce to numeric, fill NaNs, and FORCE float64 type
+                     df_all['amount'] = pd.to_numeric(df_all['amount'], errors='coerce').fillna(0.0).astype('float64')
+
+                print(f"   Amount column type: {df_all['amount'].dtype}")
+                # Use verify logic to check max value
+                if not df_all.empty:
+                    print(f"   Max amount: {df_all['amount'].max()}")
+
+                # Force cast using Pandas instead of DuckDB to strictly prevent DECIMAL inference
+                # DuckDB might infer DECIMAL(11,2) which fails for large amounts
+                print(f"💾 Saving using Pandas to {INTEGRATED_PARQUET}...")
+                df_all.to_parquet(str(INTEGRATED_PARQUET), index=False)
+                # duckdb.sql("SELECT * EXCLUDE (amount), CAST(amount AS DOUBLE) AS amount FROM df_all").write_parquet(str(INTEGRATED_PARQUET))
                 print(f"✅ Saved {len(all_projects)} total projects to {INTEGRATED_PARQUET}")
             except Exception as e:
                 print(f"⚠️  Failed to save all projects to Parquet: {e}")
@@ -7924,6 +8490,9 @@ class DynastyProjectsCacheGeneratorDuckDB:
                     except (ValueError, AttributeError):
                         amount = 0
                 
+                if amount is None:
+                    amount = 0
+                
                 amount_in_millions = amount / 1_000_000
                 base_score = min(60, int(amount_in_millions / 2))  # 1 point per 2M, max 60
                 
@@ -7982,7 +8551,7 @@ class DynastyProjectsCacheGeneratorDuckDB:
                 unique_projects.append(proj)
             
             # Sort by match_score descending, then by amount descending
-            unique_projects.sort(key=lambda x: (x.get('match_score', 0), x.get('amount', 0)), reverse=True)
+            unique_projects.sort(key=lambda x: (x.get('match_score') or 0, x.get('amount') or 0), reverse=True)
             
             # Calculate summary
             ssp_count = len([p for p in unique_projects if 'SSP' in (p.get('sources_list', []))])
@@ -8149,7 +8718,39 @@ class DynastyProjectsCacheGeneratorDuckDB:
                 # Use pandas to create DataFrame from unique_projects (already deduplicated)
                 df = pd.DataFrame(unique_projects)
                 print(f"   Created DataFrame with {len(df)} rows and {len(df.columns)} columns")
+                                # Ensure amount is numeric (float) to avoid DuckDB inferring DECIMAL(10,2)
+                if 'amount' in df.columns:
+                     # Manual Python conversion to strictly ensure float type and avoid Strings
+                     # This bypasses any Pandas/Numpy inference quirks causing Decimal errors in DuckDB
+                     clean_amounts = []
+                     for x in df['amount']:
+                         try:
+                             if pd.isna(x):
+                                 clean_amounts.append(0.0)
+                             else:
+                                 s = str(x).replace('₱', '').replace(',', '').strip()
+                                 clean_amounts.append(float(s) if s else 0.0)
+                         except:
+                             clean_amounts.append(0.0)
+                     df['amount'] = pd.Series(clean_amounts, dtype='float64')
                 
+                print(f"   Classified Amount column type: {df['amount'].dtype}")
+                if not df.empty:
+                    print(f"   Max amount: {df['amount'].max()}")
+
+                # Force cast to DOUBLE using SQL to strictly prevent DECIMAL inference
+                print(f"   Writing to parquet file...")
+                try:
+                    # duckdb.sql("SELECT * EXCLUDE (amount), CAST(amount AS DOUBLE) AS amount FROM df").write_parquet(str(CLASSIFIED_PARQUET))
+                    df.to_parquet(str(CLASSIFIED_PARQUET), index=False)
+                except Exception as e:
+                     import sys
+                     sys.stderr.write(f"⚠️  Classified Save Error: {e}\n")
+                     # Try fallback: Drop amount and save
+                     sys.stderr.write("   Trying invalid column fallback...\n")
+                     # duckdb.sql("SELECT * EXCLUDE (amount) FROM df").write_parquet(str(CLASSIFIED_PARQUET))
+                     df.to_parquet(str(CLASSIFIED_PARQUET), index=False)
+
                 # Verify critical columns exist
                 critical_cols = ['project_name', 'sources_list', 'contract_id']
                 missing_cols = [col for col in critical_cols if col not in df.columns]
@@ -8281,7 +8882,7 @@ class DynastyProjectsCacheGeneratorDuckDB:
                                 cm_data = congressmen_data[variation]
                                 break
                         
-                        location = p.get('location', '').upper()
+                        location = str(p.get('location', '') or '').upper()
                         cm_provinces = cm_data.get('provinces', []) if cm_data else []
                         
                         # CRITICAL: Validate province matches to prevent incorrect assignments
@@ -8651,8 +9252,18 @@ class DynastyProjectsCacheGeneratorDuckDB:
                 }
                 
                 congressman_cache_file = congressman_cache_dir / 'all-projects-cache.json'
+                class CustomJSONEncoder(json.JSONEncoder):
+                    def default(self, o):
+                        import decimal
+                        from datetime import date, datetime
+                        if isinstance(o, decimal.Decimal):
+                            return float(o)
+                        if isinstance(o, (date, datetime)):
+                            return o.isoformat()
+                        return super(CustomJSONEncoder, self).default(o)
+                
                 with open(congressman_cache_file, 'w', encoding='utf-8') as f:
-                    json.dump(congressman_cache_data, f, indent=2, ensure_ascii=False)
+                    json.dump(congressman_cache_data, f, indent=2, ensure_ascii=False, cls=CustomJSONEncoder)
                 
                 # Save summary.json for consistency with province cache structure
                 summary_data = {
@@ -8663,7 +9274,7 @@ class DynastyProjectsCacheGeneratorDuckDB:
                 }
                 summary_file = congressman_cache_dir / 'summary.json'
                 with open(summary_file, 'w', encoding='utf-8') as f:
-                    json.dump(summary_data, f, indent=2, ensure_ascii=False)
+                    json.dump(summary_data, f, indent=2, ensure_ascii=False, cls=CustomJSONEncoder)
                 
                 if len(congressman_projects) > 0:
                     print(f"   ✅ {congressman_name}: {len(congressman_projects)} projects, ₱{congressman_total_cost:,.2f}")
