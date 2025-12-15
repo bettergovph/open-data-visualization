@@ -10,8 +10,80 @@
 
 set -e  # Exit on error
 
+# Optional: rewrite git history to remove large files before pushing.
+# Usage:
+#   CLEAN_HISTORY=1 scripts/commit_and_push_cache_files.sh
+#   scripts/commit_and_push_cache_files.sh --clean-history
+DO_CLEAN_HISTORY=0
+if [ "${CLEAN_HISTORY:-0}" = "1" ]; then
+    DO_CLEAN_HISTORY=1
+fi
+if [ "${1:-}" = "--clean-history" ]; then
+    DO_CLEAN_HISTORY=1
+fi
+
 # Track any files that were already staged before this script runs
 INITIAL_STAGED=$(git diff --cached --name-only | wc -l)
+
+# Default exclusions that commonly exceed GitHub limits
+EXCLUDE_PATHS=(
+    "data/parquet/integrated_projects_classified.parquet"
+    "static/data/congressman-projects-elizaldy-salcedo-co/all-projects-cache.json"
+)
+
+# Detect large blobs in history (GitHub hard limit is 100MB)
+HISTORY_HARD_LIMIT_BYTES=$((100 * 1024 * 1024))
+
+has_git_filter_repo() {
+    git filter-repo --help >/dev/null 2>&1
+}
+
+check_large_blobs_in_history() {
+    # Prints offending paths (best-effort) and returns 0 if any blobs exceed limit
+    local limit_bytes="$1"
+    local tmpfile
+    tmpfile=$(mktemp)
+    # Map objects to paths, then batch-check blob sizes
+    # Output format: <type> <sha> <size> <path>
+    git rev-list --objects --all \
+        | git cat-file --batch-check='%(objecttype) %(objectname) %(objectsize) %(rest)' \
+        | awk -v limit="$limit_bytes" '$1=="blob" && $3>limit {print $4}' \
+        | sed '/^$/d' \
+        | sort -u > "$tmpfile"
+
+    if [ -s "$tmpfile" ]; then
+        echo "🚫 Found blobs > $((limit_bytes/1024/1024))MB in git history:"
+        cat "$tmpfile" | sed 's/^/   - /'
+        rm -f "$tmpfile"
+        return 0
+    fi
+    rm -f "$tmpfile"
+    return 1
+}
+
+clean_history() {
+    echo ""
+    echo "🧹 Cleaning git history (removing excluded paths)..."
+    if ! has_git_filter_repo; then
+        echo "❌ 'git filter-repo' is required but not installed."
+        echo "   Install with: pipx install git-filter-repo  (or: pip install git-filter-repo)"
+        echo "   Then re-run: CLEAN_HISTORY=1 scripts/commit_and_push_cache_files.sh"
+        exit 1
+    fi
+
+    # Build arguments: --path <p1> --path <p2> ... --invert-paths
+    local args=()
+    for p in "${EXCLUDE_PATHS[@]}"; do
+        args+=(--path "$p")
+    done
+
+    git filter-repo --force "${args[@]}" --invert-paths
+
+    echo ""
+    echo "✅ History rewritten. You must force-push:"
+    echo "   git push --force --all"
+    echo "   git push --force --tags"
+}
 
 # Function to check if a file is already staged
 is_staged() {
@@ -306,6 +378,26 @@ git commit -m "Update cache files and staged changes"
 
 echo ""
 echo "📤 Pushing to remote..."
+
+# If the remote rejects due to large files, offer (optional) history cleanup.
+if check_large_blobs_in_history "$HISTORY_HARD_LIMIT_BYTES"; then
+    if [ "$DO_CLEAN_HISTORY" -eq 1 ]; then
+        clean_history
+        exit 0
+    else
+        echo ""
+        echo "ℹ️  Your history contains files over GitHub's 100MB limit."
+        echo "   Run this script with history cleanup enabled:"
+        echo "   CLEAN_HISTORY=1 scripts/commit_and_push_cache_files.sh"
+        echo "   (or: scripts/commit_and_push_cache_files.sh --clean-history)"
+        echo ""
+        echo "   Then force-push:"
+        echo "   git push --force --all"
+        echo "   git push --force --tags"
+        exit 1
+    fi
+fi
+
 git push
 
 echo ""
