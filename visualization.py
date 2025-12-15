@@ -499,8 +499,8 @@ async def get_integrated_coverage(refresh: bool = Query(False)) -> JSONResponse:
     snapshot = _cached_integrated_coverage_snapshot()
     return JSONResponse(content=snapshot)
 
-@app.get("/api/integrated/projects")
-async def get_integrated_projects(
+# @app.get("/api/integrated/projects")
+async def _deprecated_get_integrated_projects(
     page: int = Query(default=1, ge=1, description="Page number (1-based)"),
     limit: int = Query(default=50, ge=1, le=1000, description="Number of projects per page"),
     project_name: Optional[str] = Query(default=None, description="Filter by project name/title"),
@@ -724,7 +724,8 @@ async def get_integrated_projects(
 @app.get("/api/integrated/projects/csv")
 async def export_integrated_projects_csv(
     project_name: Optional[str] = Query(default=None, description="Filter by project name/title"),
-    contractor: Optional[str] = Query(default=None, description="Filter by contractor name")
+    contractor: Optional[str] = Query(default=None, description="Filter by contractor name"),
+    green: bool = Query(default=False, description="Filter for green/clean projects")
 ):
     """Export integrated projects to CSV with filtering (all pages)"""
     try:
@@ -736,6 +737,84 @@ async def export_integrated_projects_csv(
         base_dir = Path(__file__).parent.absolute()
         parquet_file = base_dir / "data" / "parquet" / "integrated_projects.parquet"
         
+        # --- GREEN PROJECTS CSV LOGIC ---
+        if green:
+            import json
+            
+            # 1. Load 2026 Data (Annex A-5)
+            json_path = base_dir / "static" / "data" / "budget_amendments_2026.json"
+            if not json_path.exists():
+                return JSONResponse({"error": "2026 Data not found"}, status_code=404)
+            
+            with open(json_path, 'r', encoding='utf-8') as f:
+                data_2026 = json.load(f)
+            
+            # Combine projects and line_items, filter for Annex A-5
+            raw_items = data_2026.get('projects', []) + data_2026.get('line_items', [])
+            annex_a5_items = [
+                item for item in raw_items 
+                if item.get('source_sheet') == 'Annex A-5'
+            ]
+            
+            # 2. Load Bad IDs (Resurrected & Flagged)
+            bad_ids = set()
+            
+            # Resurrected
+            res_path = base_dir / "static" / "data" / "resurrected_projects_dpwh.json"
+            if res_path.exists():
+                with open(res_path, 'r', encoding='utf-8') as f:
+                    res_data = json.load(f)
+                    for match in res_data.get('matches', []):
+                        pid = match.get('year_2026', {}).get('id')
+                        if pid: bad_ids.add(str(pid))
+                        
+            # Flagged
+            flagged_path = base_dir / "static" / "data" / "flagged_amount_projects_2026.json"
+            if flagged_path.exists():
+                with open(flagged_path, 'r', encoding='utf-8') as f:
+                    flagged_list = json.load(f)
+                    for item in flagged_list:
+                        pid = item.get('id')
+                        if pid: bad_ids.add(str(pid))
+            
+            # 3. Filter Green Projects
+            green_projects = []
+            for item in annex_a5_items:
+                pid = str(item.get('id'))
+                if pid not in bad_ids:
+                    # Search filter
+                    p_name = item.get('name') or item.get('description') or ''
+                    if project_name and project_name.lower() not in p_name.lower():
+                        continue
+                        
+                    green_projects.append({
+                        'project_name': p_name,
+                        'amount': item.get('final_amount') or item.get('original_amount'),
+                        'contractor_name': item.get('contractor') or 'N/A',
+                        'source': 'Annex A-5 (2026)',
+                        'location': (
+                            item.get('location', {}).get('province') or 
+                            item.get('district') or 
+                            item.get('location', {}).get('region') or 
+                            item.get('hierarchy', {}).get('region') or 
+                            'Unknown'
+                        )
+                    })
+
+            # 4. Generate CSV
+            output = io.StringIO()
+            writer = csv.writer(output)
+            writer.writerow(['Project Name', 'Amount', 'Contractor', 'Source', 'Location'])
+            for p in green_projects:
+                writer.writerow([p['project_name'], p['amount'], p['contractor_name'], p['source'], p['location']])
+            
+            return Response(
+                content=output.getvalue(),
+                media_type="text/csv",
+                headers={"Content-Disposition": "attachment; filename=green_projects_dpwh_2026.csv"}
+            )
+        # --------------------------------
+
         if not parquet_file.exists():
             return JSONResponse(
                 content={
@@ -755,6 +834,10 @@ async def export_integrated_projects_csv(
             def escape_sql_string(s: str) -> str:
                 """Escape single quotes for SQL"""
                 return s.replace("'", "''")
+            
+            if green:
+                where_conditions.append("(flag_reason IS NULL OR flag_reason = '')")
+                where_conditions.append("(historical_match IS NULL OR historical_match = '')")
             
             if project_name:
                 escaped_name = escape_sql_string(project_name)
@@ -8192,6 +8275,180 @@ async def dynasty_family_advanced_search_api(
     except Exception as e:
         return JSONResponse({"success": False, "error": str(e)})
 
+@app.get("/api/dynasty/projection")
+async def dynasty_projection_api(
+    group_by: str = Query("region", description="Group by field (region, position, province)"),
+    position: str = Query(None, description="Optional filter by position"),
+    province: str = Query(None, description="Optional filter by province"),
+    year: int = Query(None, description="Election year (defaults to latest year with winners)")
+):
+    """
+    Get aggregated projection of officials 'removed' by anti-dynasty law.
+    Returns counts for HB 6771 (Simultaneous) and HB 5905 (Broad/Succession).
+    """
+    try:
+        import asyncpg
+        import os
+        
+        # Validate group_by
+        valid_groups = ["region", "position", "province", "party"]
+        if group_by not in valid_groups:
+            return JSONResponse({"success": False, "error": f"Invalid group_by parameter. Must be one of: {', '.join(valid_groups)}"})
+            
+        # Database connection
+        conn = await asyncpg.connect(
+            host=os.getenv('POSTGRES_HOST', 'localhost'),
+            port=int(os.getenv('POSTGRES_PORT', 5432)),
+            user=os.getenv('POSTGRES_USER', 'postgres'),
+            password=os.getenv('POSTGRES_PASSWORD', ''),
+            database=os.getenv('POSTGRES_DB_DYNASTY', 'dynasty')
+        )
+        
+        # Determine available years and default to latest year with winners
+        years_rows = await conn.fetch(
+            "SELECT DISTINCT year FROM political_dynasties WHERE winner = true AND year IS NOT NULL ORDER BY year DESC"
+        )
+        available_years = [r["year"] for r in years_rows if r.get("year") is not None]
+
+        selected_year = year
+        if selected_year is None and available_years:
+            selected_year = available_years[0]
+
+        # Build query
+        where_conditions = ["winner = true"]  # Only consider winners for projection
+        params = []
+        param_idx = 0
+
+        if selected_year is not None:
+            param_idx += 1
+            where_conditions.append(f"year = ${param_idx}")
+            params.append(int(selected_year))
+        
+        if position:
+            param_idx += 1
+            where_conditions.append(f"position ILIKE ${param_idx}")
+            params.append(f"%{position}%")
+            
+        if province:
+            param_idx += 1
+            where_conditions.append(f"province ILIKE ${param_idx}")
+            params.append(f"%{province}%")
+            
+        where_clause = "WHERE " + " AND ".join(where_conditions)
+        
+        # Handle group field select - use CASE/COALESCE to handle NULLs nicely
+        group_select = f"COALESCE(p.{group_by}, 'Unknown') as group_name"
+        
+        query = f"""
+            WITH current AS (
+                SELECT p.*
+                FROM political_dynasties p
+                {where_clause}
+            ),
+            current_keys AS (
+                SELECT DISTINCT province, last_name
+                FROM current
+                WHERE province IS NOT NULL AND last_name IS NOT NULL
+            ),
+            same_year AS (
+                SELECT p.province, p.last_name, COUNT(*) AS same_year_count
+                FROM political_dynasties p
+                JOIN current_keys k
+                  ON k.province = p.province AND k.last_name = p.last_name
+                WHERE p.winner = true AND p.year = $1
+                GROUP BY p.province, p.last_name
+            ),
+            prior AS (
+                SELECT p.province, p.last_name, 1 AS has_prior
+                FROM political_dynasties p
+                JOIN current_keys k
+                  ON k.province = p.province AND k.last_name = p.last_name
+                WHERE p.winner = true AND p.year < $1
+                GROUP BY p.province, p.last_name
+            )
+            SELECT
+                COALESCE(current.{group_by}, 'Unknown') AS group_name,
+                COUNT(*) AS total_count,
+                SUM(
+                    CASE
+                        WHEN current.fat = 1
+                        AND NOT (
+                            COALESCE(current.position_category, '') ILIKE '%party%list%'
+                            OR COALESCE(current.position, '') ILIKE '%party%list%'
+                        )
+                        THEN 1
+                        ELSE 0
+                    END
+                ) AS hb6771_count,
+                SUM(
+                    CASE
+                        WHEN current.fat = 1
+                          OR COALESCE(same_year.same_year_count, 0) > 1
+                          OR prior.has_prior = 1
+                        THEN 1
+                        ELSE 0
+                    END
+                ) AS hb5905_count
+            FROM current
+            LEFT JOIN same_year
+              ON same_year.province = current.province AND same_year.last_name = current.last_name
+            LEFT JOIN prior
+              ON prior.province = current.province AND prior.last_name = current.last_name
+            GROUP BY current.{group_by}
+            ORDER BY hb5905_count DESC, total_count DESC
+        """
+        
+        rows = await conn.fetch(query, *params)
+        await conn.close()
+        
+        data = []
+        for row in rows:
+            total = row['total_count']
+            hb6771 = row['hb6771_count']
+            hb5905 = row['hb5905_count']
+            non_dynasty = total - hb5905
+            
+            impact_6771 = (hb6771 / total * 100) if total > 0 else 0
+            impact_5905 = (hb5905 / total * 100) if total > 0 else 0
+            
+            data.append({
+                "group": row['group_name'],
+                "total_count": total,
+                "hb6771_count": hb6771,
+                "hb5905_count": hb5905,
+                "remaining_count": non_dynasty,
+                "impact_percentage": round(impact_5905, 1),
+                "impact_6771": round(impact_6771, 1),
+                "impact_5905": round(impact_5905, 1)
+            })
+            
+        # Calculate summary totals
+        summary = {
+            "year": selected_year,
+            "available_years": available_years,
+            "total_officials": sum(d['total_count'] for d in data),
+            "total_hb6771": sum(d['hb6771_count'] for d in data),
+            "total_hb5905": sum(d['hb5905_count'] for d in data),
+            "total_remaining": sum(d['remaining_count'] for d in data)
+        }
+        summary["hb6771_pct_of_total"] = (summary["total_hb6771"] / summary["total_officials"] * 100) if summary["total_officials"] > 0 else 0
+        summary["hb5905_pct_of_total"] = (summary["total_hb5905"] / summary["total_officials"] * 100) if summary["total_officials"] > 0 else 0
+        summary["hb5905_additional"] = max(summary["total_hb5905"] - summary["total_hb6771"], 0)
+        summary["hb6771_pct_of_hb5905"] = (summary["total_hb6771"] / summary["total_hb5905"] * 100) if summary["total_hb5905"] > 0 else 0
+
+        summary["hb6771_pct_of_total"] = round(summary["hb6771_pct_of_total"], 1)
+        summary["hb5905_pct_of_total"] = round(summary["hb5905_pct_of_total"], 1)
+        summary["hb6771_pct_of_hb5905"] = round(summary["hb6771_pct_of_hb5905"], 1)
+
+        return JSONResponse({
+            "success": True,
+            "data": data,
+            "summary": summary
+        })
+        
+    except Exception as e:
+        return JSONResponse({"success": False, "error": str(e)})
+
 @app.get("/api/dynasty/provinces")
 async def dynasty_provinces_api():
     """Get dynasty data aggregated by province"""
@@ -9638,12 +9895,21 @@ async def get_sources_api():
         
         def get_source_key(source_name: str, url: str) -> str:
             domain = get_domain(url)
+            # Special handling for Facebook/Social Media to extract source from name
+            if domain in ['facebook.com', 'm.facebook.com', 'web.facebook.com']:
+                if 'VOV Philippines' in source_name:
+                    return 'VOV Philippines'
+                if 'Aviso Zamboanga' in source_name:
+                    return 'Aviso Zamboanga'
+                # Check for other known social media sources if needed
+
             if domain:
                 if domain in domain_mapping:
                     return domain_mapping[domain]
                 for known_domain, mapped in domain_mapping.items():
                     if domain.endswith(known_domain):
                         return mapped
+            
             normalized_name = (source_name or '').strip()
             if normalized_name:
                 normalized_name = name_normalization.get(normalized_name, normalized_name)
@@ -10548,7 +10814,8 @@ async def integrated_projects_api(
     limit: int = Query(50, ge=1, le=10000, description="Number of records per page"),
     project_name: str = Query(None, description="Filter by project name"),
     contractor: str = Query(None, description="Filter by contractor name"),
-    source: str = Query(None, description="Filter by source")
+    source: str = Query(None, description="Filter by source"),
+    green: bool = Query(False, description="Filter for green/clean projects (no flags, no resurrection)")
 ):
     """Get unique integrated projects from classified parquet with sources_list"""
     import inspect
@@ -10565,6 +10832,97 @@ async def integrated_projects_api(
         print(f"🔵 [DEBUG] DuckDB imported: {duckdb_imported}")
         if duckdb_imported:
             print(f"⚠️  WARNING: DuckDB is imported but we should NOT be using it in this endpoint")
+            
+        # --- GREEN PROJECTS LOGIC (2026 Annex A-5 Clean) ---
+        if green:
+            import json
+            try:
+                # 1. Load 2026 Data (Annex A-5)
+                json_path = Path(__file__).parent / "static" / "data" / "budget_amendments_2026.json"
+                if not json_path.exists():
+                    return JSONResponse({"error": "2026 Data not found"}, status_code=404)
+                
+                with open(json_path, 'r', encoding='utf-8') as f:
+                    data_2026 = json.load(f)
+                
+                # Combine projects and line_items, filter for Annex A-5
+                raw_items = data_2026.get('projects', []) + data_2026.get('line_items', [])
+                annex_a5_items = [
+                    item for item in raw_items 
+                    if item.get('source_sheet') == 'Annex A-5'
+                ]
+                
+                # 2. Load Bad IDs (Resurrected & Flagged)
+                bad_ids = set()
+                
+                # Resurrected
+                res_path = Path(__file__).parent / "static" / "data" / "resurrected_projects_dpwh.json"
+                if res_path.exists():
+                    with open(res_path, 'r', encoding='utf-8') as f:
+                        res_data = json.load(f)
+                        for match in res_data.get('matches', []):
+                            pid = match.get('year_2026', {}).get('id')
+                            if pid: bad_ids.add(str(pid))
+                            
+                # Flagged
+                flagged_path = Path(__file__).parent / "static" / "data" / "flagged_amount_projects_2026.json"
+                if flagged_path.exists():
+                    with open(flagged_path, 'r', encoding='utf-8') as f:
+                        flagged_list = json.load(f)
+                        for item in flagged_list:
+                            pid = item.get('id')
+                            if pid: bad_ids.add(str(pid))
+                
+                # 3. Filter Green Projects
+                green_projects = []
+                for item in annex_a5_items:
+                    pid = str(item.get('id'))
+                    if pid not in bad_ids:
+                        green_projects.append({
+                            'project_name': item.get('name') or item.get('description'),
+                            'amount': item.get('final_amount') or item.get('original_amount'),
+                            'contractor_name': item.get('contractor') or 'N/A',
+                            'source': 'Annex A-5 (2026)',
+                            'sources_list': ['Annex A-5 (2026)'],
+                            'contract_id': pid,
+                            'location': (
+                                item.get('location', {}).get('province') or 
+                                item.get('district') or 
+                                item.get('location', {}).get('region') or 
+                                item.get('hierarchy', {}).get('region') or 
+                                'Unknown'
+                            )
+                        })
+                
+                # 4. Search Filter
+                if project_name:
+                   green_projects = [p for p in green_projects if project_name.lower() in str(p['project_name']).lower()]
+                
+                # 5. Pagination
+                total = len(green_projects)
+                total_amount = sum(p['amount'] for p in green_projects if p['amount'])
+                total_districts = len(set(p['location'] for p in green_projects if p['location']))
+                
+                total_pages = max(1, (total + limit - 1) // limit)
+                start = (page - 1) * limit
+                end = start + limit
+                paginated = green_projects[start:end]
+                
+                return JSONResponse({
+                    "success": True,
+                    "projects": paginated,
+                    "total": total,
+                    "total_amount": total_amount,
+                    "total_districts": total_districts,
+                    "page": page,
+                    "limit": limit,
+                    "total_pages": total_pages
+                })
+                
+            except Exception as e:
+                print(f"Error loading Green Projects: {e}")
+                return JSONResponse({"error": str(e)}, status_code=500)
+        # ---------------------------------------------------
         
         # CRITICAL: Use classified parquet (deduplicated) - this is the correct file for the API
         # The classified parquet contains deduplicated projects with sources_list showing all databases
@@ -10636,6 +10994,15 @@ async def integrated_projects_api(
             })
         
         print(f"   DataFrame shape: {df.shape}, Columns: {list(df.columns)[:10]}...")
+
+        # Filter by Green Status (No Flags, No Resurrection)
+        if green:
+            print("🟢 Filtering for Green Projects (Clean)")
+            # Ensure columns exist before filtering to avoid errors
+            if 'flag_reason' in df.columns:
+                df = df[df['flag_reason'].isna() | (df['flag_reason'] == '')]
+            if 'historical_match' in df.columns:
+                df = df[df['historical_match'].isna() | (df['historical_match'] == '')]
         
         # Ensure sources_list is a list (it might be stored as string or other format)
         # Handle this more efficiently for large datasets
@@ -10828,10 +11195,18 @@ async def integrated_projects_api(
                         continue
             
             # Sources list - ensure it's a list
-            sources_list = row.get('sources_list', [])
-            if not isinstance(sources_list, list):
-                sources_list = [sources_list] if pd.notna(sources_list) and sources_list else []
-            project['sources_list'] = sources_list
+            val_sources = row.get('sources_list', [])
+            if hasattr(val_sources, 'tolist'):
+                sources_list = val_sources.tolist()
+            elif isinstance(val_sources, list):
+                sources_list = val_sources
+            elif pd.notna(val_sources) and val_sources:
+                sources_list = [val_sources]
+            else:
+                sources_list = []
+            
+            # Ensure elements are strings
+            project['sources_list'] = [str(s) for s in sources_list]
             
             # Source (for backward compatibility)
             project['source'] = row.get('source') or (sources_list[0] if sources_list else 'N/A')
@@ -10858,7 +11233,11 @@ async def integrated_projects_api(
             essential_fields = ['contract_id', 'year', 'status', 'location', 'province', 'city']
             for col in essential_fields:
                 if col in row.index and pd.notna(row[col]):
-                    project[col] = row[col]
+                    val = row[col]
+                    if hasattr(val, 'item'):
+                        project[col] = val.item()
+                    else:
+                        project[col] = val
         
             projects.append(project)
         
@@ -10943,6 +11322,111 @@ async def get_integrated_locations():
             tree[reg][prov][dist][muni].append(brgy)
             
     return tree
+
+
+@lru_cache(maxsize=1)
+def _load_transparency_projects() -> Optional["pd.DataFrame"]:
+    """
+    Load and cache the Transparency projects parquet for fast keyword lookup.
+    """
+    try:
+        import pandas as pd
+    except ImportError:
+        print("❌ pandas is required to search transparency projects.")
+        return None
+
+    parquet_path = Path(__file__).parent / "data" / "parquet" / "transparency_projects.parquet"
+    if not parquet_path.exists():
+        print(f"❌ Transparency parquet not found at {parquet_path}")
+        return None
+
+    try:
+        text_cols = [
+            "project_name",
+            "description",
+            "project_description",
+            "project_title",
+            "award_title",
+            "notice_title",
+        ]
+        use_cols = [
+            "contract_id",
+            "contract_amount",
+            "amount",
+            "year",
+            "contractor_name",
+            "awardee_name",
+        ] + text_cols
+
+        df = pd.read_parquet(parquet_path, columns=use_cols)
+
+        # Precompute lowercase combined text for quick substring searches
+        df["combined_text"] = (
+            df[text_cols]
+            .fillna("")
+            .astype(str)
+            .agg(" ".join, axis=1)
+            .str.lower()
+        )
+        return df
+    except Exception as exc:
+        print(f"❌ Failed to load transparency projects: {exc}")
+        return None
+
+
+@app.get("/api/transparency/search")
+async def search_transparency_projects(
+    q: str = Query(..., min_length=3, description="Keywords to search transparency projects"),
+    limit: int = Query(5, ge=1, le=20),
+):
+    """
+    Keyword search over local transparency_projects.parquet to surface contract IDs.
+    Returns results with direct transparency URLs (Gallery tab reachable via ?project=ID).
+    """
+    df = _load_transparency_projects()
+    if df is None:
+        return JSONResponse(
+            {"success": False, "error": "Transparency parquet not available on server."},
+            status_code=500,
+        )
+
+    query = q.strip().lower()
+    if not query:
+        return JSONResponse({"success": False, "error": "Query cannot be empty."}, status_code=400)
+
+    try:
+        mask = df["combined_text"].str.contains(query, na=False)
+        results_df = df.loc[mask].copy()
+
+        # Rank by year desc then amount desc for stable ordering
+        results_df = results_df.sort_values(
+            by=["year", "contract_amount", "amount"], ascending=[False, False, False]
+        ).head(limit)
+
+        results = []
+        for _, row in results_df.iterrows():
+            contract_id = row.get("contract_id")
+            if not isinstance(contract_id, str) or not contract_id.strip():
+                continue
+            transparency_url = f"https://transparency.dpwh.gov.ph/?project={contract_id}"
+            results.append(
+                {
+                    "contract_id": contract_id,
+                    "project_name": row.get("project_name") or row.get("description"),
+                    "contract_amount": row.get("contract_amount") or row.get("amount"),
+                    "year": row.get("year"),
+                    "contractor": row.get("contractor_name") or row.get("awardee_name"),
+                    "transparency_url": transparency_url,
+                }
+            )
+
+        return {"success": True, "query": q, "count": len(results), "results": results}
+    except Exception as exc:
+        print(f"❌ Transparency search failed: {exc}")
+        return JSONResponse(
+            {"success": False, "error": f"Search failed: {exc}"},
+            status_code=500,
+        )
 
 
 if __name__ == "__main__":

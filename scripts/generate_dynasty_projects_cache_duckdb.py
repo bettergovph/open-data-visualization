@@ -1135,7 +1135,7 @@ class DynastyProjectsCacheGeneratorDuckDB:
         'CONTRACTOR', 'GENERIC', 'GEN'
     }
     
-    def __init__(self, force_reclassify: bool = False):
+    def __init__(self, force_reclassify: bool = False, target_congressmen: Optional[List[str]] = None):
         """
         Initialize the cache generator.
         
@@ -1143,8 +1143,10 @@ class DynastyProjectsCacheGeneratorDuckDB:
             force_reclassify: If True, reclassify all projects even if they already have
                             all 4 classification columns filled. If False, skip projects
                             that are already fully classified.
+            target_congressmen: Optional list of specific congressmen to generate cache for.
         """
         self.force_reclassify = force_reclassify
+        self.target_congressmen = target_congressmen
         root_dir = Path(__file__).parent.parent
         static_data_dir = root_dir / 'static' / 'data'
         self.cache_file = static_data_dir / 'dynasty-projects-cache.json'
@@ -4715,7 +4717,12 @@ class DynastyProjectsCacheGeneratorDuckDB:
                                     district_lookup[(city_with_suffix, barangay_upper.replace('BARANGAY', '').strip())].append((congressman_name, cm_data))
 
                 # CRITICAL FIX: Skip "NATIONWIDE" provinces to prevent false positives
-                if province_upper == "NATIONWIDE" or "PARTY-LIST" in province_upper:
+                # Check both province name AND district_number
+                is_nationwide = (province_upper == "NATIONWIDE" or 
+                               "PARTY-LIST" in province_upper or 
+                               str(district_number).upper() == "NATIONWIDE")
+                               
+                if is_nationwide:
                     # Party list reps should match via contractor or other means, not by "NATIONWIDE" location
                     # Skip adding to district_lookup so they don't match via location
                     pass
@@ -8855,6 +8862,16 @@ class DynastyProjectsCacheGeneratorDuckDB:
                             all_congressmen_names.add(name)
             
             for congressman_name in sorted(all_congressmen_names):
+                # Check for target congressmen filter
+                if hasattr(self, 'target_congressmen') and self.target_congressmen:
+                    matches_target = False
+                    for target in self.target_congressmen:
+                        if target.lower() in congressman_name.lower():
+                            matches_target = True
+                            print(f"🎯 Matched target congressman: {congressman_name}")
+                            break
+                    if not matches_target:
+                        continue
                 # Get normalized name and all variations
                 normalized_name = self._normalize_congressman_name(congressman_name)
                 name_variations = normalized_to_variations.get(normalized_name, [congressman_name])
@@ -9317,9 +9334,17 @@ async def main():
         action='store_true',
         help='Force reclassification of all projects, even if they already have all 4 classification columns filled'
     )
+    parser.add_argument(
+        '--congressman',
+        action='append',
+        help='Specific congressman to generate cache for (can be used multiple times)'
+    )
     args = parser.parse_args()
     
-    generator = DynastyProjectsCacheGeneratorDuckDB(force_reclassify=args.force)
+    generator = DynastyProjectsCacheGeneratorDuckDB(
+        force_reclassify=args.force,
+        target_congressmen=args.congressman
+    )
     
     if args.force:
         print("🔄 FORCE MODE: Reclassifying ALL projects (ignoring existing classifications)")

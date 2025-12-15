@@ -2,10 +2,10 @@
 
 {% block head %}
 <!-- Google Fonts - Inter -->
-    <!-- Tailwind CSS -->
-    <link rel="stylesheet" href="/static/css/tailwind.css">
-    <!-- Tailwind CSS (Production) -->
-    <link rel="stylesheet" href="/static/css/tailwind.css">
+<!-- Tailwind CSS -->
+<link rel="stylesheet" href="/static/css/tailwind.css">
+<!-- Tailwind CSS (Production) -->
+<link rel="stylesheet" href="/static/css/tailwind.css">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
 
@@ -17,6 +17,7 @@
         padding: 0;
         box-sizing: border-box;
     }
+
     body {
         font-family: 'Inter', sans-serif !important;
         background-color: white !important;
@@ -24,12 +25,14 @@
         margin: 0 !important;
         padding: 0 !important;
     }
+
     /* Hide main navbar from base.html */
     nav.navbar,
     header.navbar,
-    header { 
-        display: none !important; 
+    header {
+        display: none !important;
     }
+
     /* Hide only Integrated menu item */
     .visualizations-nav a[href="/integrated"],
     .visualizations-nav a[href="/integrated"]:hover,
@@ -38,6 +41,7 @@
     #mobileMenu a[href^="/integrated"] {
         display: none !important;
     }
+
     /* Ensure our BetterGov nav is visible with maximum specificity */
     html body nav.visualizations-nav,
     html body main nav.visualizations-nav,
@@ -53,35 +57,43 @@
         min-height: 60px !important;
         width: 100% !important;
     }
+
     /* Hide footer from base.html - we'll add our own */
     footer.footer {
         display: none !important;
     }
+
     /* Override any gradients or backgrounds */
-    section, main, div {
+    section,
+    main,
+    div {
         background: transparent !important;
     }
 </style>
 
 <!-- BetterGovPH Metadata Overrides -->
-<meta name="description" content="BetterGovPH Data Visualizations - Interactive charts, graphs, and maps analyzing government budget, procurement, and infrastructure data in the Philippines">
-<meta name="keywords" content="data visualization, government transparency, Philippines, budget analysis, procurement, PhilGEPS, infrastructure, flood control, political dynasties, open data, charts, graphs, interactive maps">
+<meta name="description"
+    content="BetterGovPH Data Visualizations - Interactive charts, graphs, and maps analyzing government budget, procurement, and infrastructure data in the Philippines">
+<meta name="keywords"
+    content="data visualization, government transparency, Philippines, budget analysis, procurement, PhilGEPS, infrastructure, flood control, political dynasties, open data, charts, graphs, interactive maps">
 <meta name="author" content="BetterGovPH">
 
 <!-- Open Graph / Facebook -->
 <meta property="og:type" content="website">
 <meta property="og:url" content="{{ SITE_URL }}/">
 <meta property="og:title" content="BetterGovPH Data Visualizations">
-<meta property="og:description" content="Interactive Data Visualization Platform - Explore government budget, procurement, infrastructure, and transparency data through interactive charts, graphs, and maps. Connect with PhilGEPS for comprehensive transparency analysis.">
-<meta property="og:image" content="https://raw.githubusercontent.com/bettergovph/logo/main/png/BetterGov_Horizontal-Black.png">
+<meta property="og:description"
+    content="Interactive Data Visualization Platform - Explore government budget, procurement, infrastructure, and transparency data through interactive charts, graphs, and maps. Connect with PhilGEPS for comprehensive transparency analysis.">
+<meta property="og:image" content="http://assets.bettergov.ph/logos/webp/horizontal-black.webp">
 <meta property="og:site_name" content="BetterGovPH Data Visualizations">
 
 <!-- Twitter -->
 <meta property="twitter:card" content="summary_large_image">
 <meta property="twitter:url" content="https://visualizations.bettergov.ph/">
 <meta property="twitter:title" content="BetterGovPH Data Visualizations">
-<meta property="twitter:description" content="Interactive Data Visualization Platform - Explore government budget, procurement, infrastructure, and transparency data through interactive charts, graphs, and maps">
-<meta property="twitter:image" content="https://raw.githubusercontent.com/bettergovph/logo/main/png/BetterGov_Horizontal-Black.png">
+<meta property="twitter:description"
+    content="Interactive Data Visualization Platform - Explore government budget, procurement, infrastructure, and transparency data through interactive charts, graphs, and maps">
+<meta property="twitter:image" content="http://assets.bettergov.ph/logos/webp/horizontal-black.webp">
 {% endblock %}
 
 {% block content %}
@@ -90,9 +102,7 @@
     <div class="max-w-7xl mx-auto flex items-center justify-between">
         <div class="flex items-center">
             <a href="/" class="flex items-center">
-                <img src="https://raw.githubusercontent.com/bettergovph/logo/main/png/BetterGov_Horizontal-Black.png" 
-                     alt="BetterGov" 
-                     class="h-12">
+                <img src="http://assets.bettergov.ph/logos/webp/horizontal-black.webp" alt="BetterGov" class="h-12">
             </a>
         </div>
         <div class="hidden md:flex space-x-6">
@@ -110,7 +120,8 @@
         <div class="md:hidden">
             <button class="text-black focus:outline-none" onclick="toggleMobileMenu()">
                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16">
+                    </path>
                 </svg>
             </button>
         </div>
@@ -134,87 +145,116 @@
 <div style="padding: 4rem 6rem 2rem 6rem; background: white;">
     <div class="max-w-7xl mx-auto text-center">
         <h1 class="text-5xl font-bold text-black mb-4">BetterGovPH Data Visualizations</h1>
-        <p class="text-xl text-gray-600 max-w-3xl mx-auto">Connecting all Government Data Sets with PhilGEPS as the anchor dataset for comprehensive transparency and accountability</p>
+        <p class="text-xl text-gray-600 max-w-3xl mx-auto">Connecting all Government Data Sets with PhilGEPS as the
+            anchor dataset for comprehensive transparency and accountability</p>
     </div>
 </div>
 
 <!-- Feature Cards -->
 <div style="padding: 2rem 6rem 6rem 6rem;">
-<section class="bg-gray-50 py-16 px-6">
-    <div class="max-w-7xl mx-auto">
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            <!-- NEP Card -->
-            <div class="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition">
-                <h3 class="text-2xl font-semibold text-black mb-3">📈 NEP</h3>
-                <p class="text-gray-600 mb-4">National Expenditure Program analysis with detailed budget tracking, expenditure monitoring, and financial transparency insights.</p>
-                <a href="/nep" class="inline-block bg-black text-white px-6 py-2 rounded-lg hover:bg-gray-800 transition">Explore NEP Data</a>
-            </div>
+    <section class="bg-gray-50 py-16 px-6">
+        <div class="max-w-7xl mx-auto">
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                <!-- NEP Card -->
+                <div class="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition">
+                    <h3 class="text-2xl font-semibold text-black mb-3">📈 NEP</h3>
+                    <p class="text-gray-600 mb-4">National Expenditure Program analysis with detailed budget tracking,
+                        expenditure monitoring, and financial transparency insights.</p>
+                    <a href="/nep"
+                        class="inline-block bg-black text-white px-6 py-2 rounded-lg hover:bg-gray-800 transition">Explore
+                        NEP Data</a>
+                </div>
 
-            <!-- Budget Card -->
-            <div class="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition">
-                <h3 class="text-2xl font-semibold text-black mb-3">💰 Budget</h3>
-                <p class="text-gray-600 mb-4">AI-powered analysis of Government Appropriations Act (GAA) data with intelligent insights, duplicate detection, and trend analysis.</p>
-                <a href="/budget" class="inline-block bg-black text-white px-6 py-2 rounded-lg hover:bg-gray-800 transition">Explore Budget Data</a>
-            </div>
+                <!-- Budget Card -->
+                <div class="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition">
+                    <h3 class="text-2xl font-semibold text-black mb-3">💰 Budget</h3>
+                    <p class="text-gray-600 mb-4">AI-powered analysis of Government Appropriations Act (GAA) data with
+                        intelligent insights, duplicate detection, and trend analysis.</p>
+                    <a href="/budget"
+                        class="inline-block bg-black text-white px-6 py-2 rounded-lg hover:bg-gray-800 transition">Explore
+                        Budget Data</a>
+                </div>
 
-            <!-- Flood Control Card -->
-            <div class="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition">
-                <h3 class="text-2xl font-semibold text-black mb-3">🌊 Flood Control Projects</h3>
-                <p class="text-gray-600 mb-4">Comprehensive tracking and analysis of DPWH flood control infrastructure projects across the Philippines.</p>
-                <a href="/flood" class="inline-block bg-black text-white px-6 py-2 rounded-lg hover:bg-gray-800 transition">View Flood Projects</a>
-            </div>
+                <!-- Flood Control Card -->
+                <div class="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition">
+                    <h3 class="text-2xl font-semibold text-black mb-3">🌊 Flood Control Projects</h3>
+                    <p class="text-gray-600 mb-4">Comprehensive tracking and analysis of DPWH flood control
+                        infrastructure projects across the Philippines.</p>
+                    <a href="/flood"
+                        class="inline-block bg-black text-white px-6 py-2 rounded-lg hover:bg-gray-800 transition">View
+                        Flood Projects</a>
+                </div>
 
-            <!-- DIME Card -->
-            <div class="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition">
-                <h3 class="text-2xl font-semibold text-black mb-3">🏗️ DIME Infrastructure</h3>
-                <p class="text-gray-600 mb-4">Digital Information for Monitoring and Evaluation - Track 12,870+ major infrastructure projects worth ₱740B+ nationwide.</p>
-                <a href="/dime" class="inline-block bg-black text-white px-6 py-2 rounded-lg hover:bg-gray-800 transition">View DIME Projects</a>
-            </div>
+                <!-- DIME Card -->
+                <div class="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition">
+                    <h3 class="text-2xl font-semibold text-black mb-3">🏗️ DIME Infrastructure</h3>
+                    <p class="text-gray-600 mb-4">Digital Information for Monitoring and Evaluation - Track 12,870+
+                        major infrastructure projects worth ₱740B+ nationwide.</p>
+                    <a href="/dime"
+                        class="inline-block bg-black text-white px-6 py-2 rounded-lg hover:bg-gray-800 transition">View
+                        DIME Projects</a>
+                </div>
 
-            <!-- Map Card -->
-            <div class="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition">
-                <h3 class="text-2xl font-semibold text-black mb-3">🗺️ Interactive Map</h3>
-                <p class="text-gray-600 mb-4">Explore flood control projects geographically across the Philippines with an interactive map interface.</p>
-                <a href="/map" class="inline-block bg-black text-white px-6 py-2 rounded-lg hover:bg-gray-800 transition">View Interactive Map</a>
-            </div>
+                <!-- Map Card -->
+                <div class="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition">
+                    <h3 class="text-2xl font-semibold text-black mb-3">🗺️ Interactive Map</h3>
+                    <p class="text-gray-600 mb-4">Explore flood control projects geographically across the Philippines
+                        with an interactive map interface.</p>
+                    <a href="/map"
+                        class="inline-block bg-black text-white px-6 py-2 rounded-lg hover:bg-gray-800 transition">View
+                        Interactive Map</a>
+                </div>
 
-            <!-- PhilGEPS Card -->
-            <div class="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition">
-                <h3 class="text-2xl font-semibold text-black mb-3">📋 PhilGEPS</h3>
-                <p class="text-gray-600 mb-4">Comprehensive access to Philippine government procurement data from 2013-2025. Anchor dataset connecting all government procurement information.</p>
-                <a href="/philgeps" class="inline-block bg-black text-white px-6 py-2 rounded-lg hover:bg-gray-800 transition">View PhilGEPS Data</a>
-            </div>
+                <!-- PhilGEPS Card -->
+                <div class="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition">
+                    <h3 class="text-2xl font-semibold text-black mb-3">📋 PhilGEPS</h3>
+                    <p class="text-gray-600 mb-4">Comprehensive access to Philippine government procurement data from
+                        2013-2025. Anchor dataset connecting all government procurement information.</p>
+                    <a href="/philgeps"
+                        class="inline-block bg-black text-white px-6 py-2 rounded-lg hover:bg-gray-800 transition">View
+                        PhilGEPS Data</a>
+                </div>
 
-            <!-- Dynasty Card -->
-            <div class="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition">
-                <h3 class="text-2xl font-semibold text-black mb-3">👑 Political Dynasties</h3>
-                <p class="text-gray-600 mb-4">Interactive analysis of political dynasty patterns across 82 provinces with family relationship mapping and dynasty tracking.</p>
-                <a href="/dynasty" class="inline-block bg-black text-white px-6 py-2 rounded-lg hover:bg-gray-800 transition">Explore Dynasties</a>
-            </div>
+                <!-- Dynasty Card -->
+                <div class="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition">
+                    <h3 class="text-2xl font-semibold text-black mb-3">👑 Political Dynasties</h3>
+                    <p class="text-gray-600 mb-4">Interactive analysis of political dynasty patterns across 82 provinces
+                        with family relationship mapping and dynasty tracking.</p>
+                    <a href="/dynasty"
+                        class="inline-block bg-black text-white px-6 py-2 rounded-lg hover:bg-gray-800 transition">Explore
+                        Dynasties</a>
+                </div>
 
-            <!-- Integrated Card -->
-            <div class="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition" style="display: none !important;">
-                <h3 class="text-2xl font-semibold text-black mb-3">🎯 Integrated Analysis</h3>
-                <p class="text-gray-600 mb-4">Comprehensive province project analysis with integrated data from multiple sources, including visualizations and detailed project breakdowns.</p>
-                <a href="/integrated" class="inline-block bg-black text-white px-6 py-2 rounded-lg hover:bg-gray-800 transition">View Integrated Analysis</a>
-            </div>
+                <!-- Integrated Card -->
+                <div class="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition"
+                    style="display: none !important;">
+                    <h3 class="text-2xl font-semibold text-black mb-3">🎯 Integrated Analysis</h3>
+                    <p class="text-gray-600 mb-4">Comprehensive province project analysis with integrated data from
+                        multiple sources, including visualizations and detailed project breakdowns.</p>
+                    <a href="/integrated"
+                        class="inline-block bg-black text-white px-6 py-2 rounded-lg hover:bg-gray-800 transition">View
+                        Integrated Analysis</a>
+                </div>
 
-            <!-- Sources Card -->
-            <div class="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition">
-                <h3 class="text-2xl font-semibold text-black mb-3">📚 Data Sources</h3>
-                <p class="text-gray-600 mb-4">Comprehensive documentation of all data sources, coverage, and methodology used in BetterGovPH visualizations.</p>
-                <a href="/sources" class="inline-block bg-black text-white px-6 py-2 rounded-lg hover:bg-gray-800 transition">View Data Sources</a>
+                <!-- Sources Card -->
+                <div class="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition">
+                    <h3 class="text-2xl font-semibold text-black mb-3">📚 Data Sources</h3>
+                    <p class="text-gray-600 mb-4">Comprehensive documentation of all data sources, coverage, and
+                        methodology used in BetterGovPH visualizations.</p>
+                    <a href="/sources"
+                        class="inline-block bg-black text-white px-6 py-2 rounded-lg hover:bg-gray-800 transition">View
+                        Data Sources</a>
+                </div>
             </div>
         </div>
-    </div>
-</section>
+    </section>
 </div>
 
 <script>
-function toggleMobileMenu() {
-    const menu = document.getElementById('mobileMenu');
-    menu.classList.toggle('hidden');
-}
+    function toggleMobileMenu() {
+        const menu = document.getElementById('mobileMenu');
+        menu.classList.toggle('hidden');
+    }
 </script>
 
 {% include "footer.html" %}

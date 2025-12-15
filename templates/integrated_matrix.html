@@ -106,8 +106,7 @@
     <nav class="bg-white border-b border-slate-200 py-4 px-6 sticky top-0 z-50">
         <div class="max-w-7xl mx-auto flex justify-between items-center">
             <div class="flex items-center gap-3">
-                <img src="https://raw.githubusercontent.com/bettergovph/logo/main/png/BetterGov_Icon-Black.png"
-                    alt="Logo" class="h-8">
+                <img src="http://assets.bettergov.ph/logos/webp/horizontal-black.webp" alt="Logo" class="h-8">
                 <h1
                     class="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-slate-900 to-slate-700">
                     Integrated Matrix 2026</h1>
@@ -138,28 +137,30 @@
         </div>
 
         <!-- Controls -->
-        <div class="flex flex-col md:flex-row justify-between items-center mb-6 gap-4">
+        <div class="flex flex-row flex-wrap items-center mb-6 gap-6">
             <!-- Tabs -->
-            <div class="flex gap-6 border-b border-slate-200 w-full md:w-auto">
-                <a href="#" class="pb-3 border-b-2 border-indigo-500 text-indigo-600 font-medium transition-colors"
-                    id="tabMatrix">Matrix Ranking</a>
-                <a href="#loc"
-                    class="pb-3 border-b-2 border-transparent text-slate-500 hover:text-slate-700 hover:border-slate-300 font-medium transition-colors"
-                    id="tabLoc">Location Hierarchy</a>
-            </div>
+            <a href="#" class="pb-3 border-b-2 border-indigo-500 text-indigo-600 font-medium transition-colors"
+                id="tabMatrix">Matrix Ranking</a>
+            <a href="#green"
+                class="pb-3 border-b-2 border-transparent text-slate-500 hover:text-slate-700 hover:border-slate-300 font-medium transition-colors"
+                id="tabGreen">Green Projects (Lower Cost)</a>
+            <a href="#loc"
+                class="pb-3 border-b-2 border-transparent text-slate-500 hover:text-slate-700 hover:border-slate-300 font-medium transition-colors"
+                id="tabLoc">Location Hierarchy</a>
+        </div>
 
-            <!-- Filter Toggle -->
-            <div class="flex items-center gap-3 bg-white p-2 rounded-lg border border-slate-200 shadow-sm"
-                id="matrixControls">
-                <button id="filterToggleBtn" onclick="toggleFilterMode()"
-                    class="flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white rounded-md text-sm font-medium hover:bg-indigo-700 transition-colors shadow-sm">
-                    <span id="filterStatusLabel">StrictMode: ON</span>
-                </button>
-                <div class="flex flex-col">
-                    <span class="text-xs font-semibold text-slate-600" id="filterLabelTitle">Strict Filtering</span>
-                    <span class="text-[10px] text-slate-400" id="filterLabelDesc">(Resurrected AND Flagged)</span>
-                </div>
+        <!-- Filter Toggle -->
+        <div class="flex items-center gap-3 bg-white p-2 rounded-lg border border-slate-200 shadow-sm"
+            id="matrixControls">
+            <button id="filterToggleBtn" onclick="toggleFilterMode()"
+                class="flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white rounded-md text-sm font-medium hover:bg-indigo-700 transition-colors shadow-sm">
+                <span id="filterStatusLabel">StrictMode: ON</span>
+            </button>
+            <div class="flex flex-col">
+                <span class="text-xs font-semibold text-slate-600" id="filterLabelTitle">Strict Filtering</span>
+                <span class="text-[10px] text-slate-400" id="filterLabelDesc">(Resurrected AND Flagged)</span>
             </div>
+        </div>
         </div>
 
         <!-- Location View -->
@@ -183,6 +184,62 @@
             </div>
         </div>
 
+        <!-- Green Projects View -->
+        <div id="viewGreen" class="hidden">
+            <div class="glass-panel rounded-2xl p-6 shadow-sm">
+                <div class="flex justify-between items-center mb-4">
+                    <div>
+                        <h2 class="text-lg font-bold text-slate-800">Green Projects (Lower Cost)</h2>
+                        <p class="text-xs text-slate-500 mt-1">Projects with NO Flags and NO Historical Resurrection
+                            Match</p>
+                    </div>
+                    <a href="/api/integrated/projects/csv?green=true" target="_blank"
+                        class="flex items-center gap-2 px-4 py-2 bg-emerald-600 text-white rounded-md text-sm font-medium hover:bg-emerald-700 transition-colors shadow-sm">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
+                        </svg>
+                        Download Green Projects CSV
+                    </a>
+                </div>
+
+                <div class="overflow-x-hidden rounded-lg border border-slate-200">
+                    <table class="w-full text-left border-collapse table-fixed">
+                        <thead class="bg-slate-50">
+                            <tr>
+                                <th class="px-6 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wider w-[45%]">
+                                    Project Name</th>
+                                <th
+                                    class="px-6 py-3 text-right text-xs font-semibold text-slate-500 uppercase tracking-wider w-[15%]">
+                                    Amount</th>
+                                <th class="px-6 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wider w-[25%]">
+                                    Contractor</th>
+                                <th class="px-6 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wider w-[15%]">
+                                    Source</th>
+                            </tr>
+                        </thead>
+                        <tbody id="greenTableBody" class="divide-y divide-slate-100 bg-white text-sm">
+                            <tr>
+                                <td colspan="4" class="px-6 py-8 text-center text-slate-400">Select tab to load data...
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Simple Pagination for Green Tab -->
+                <div class="flex justify-between items-center mt-4">
+                    <div class="text-sm text-slate-500">Showing page <span id="greenPageNum">1</span></div>
+                    <div class="flex gap-2">
+                        <button onclick="changeGreenPage(-1)"
+                            class="px-3 py-1 text-sm border border-slate-300 rounded hover:bg-slate-50">Prev</button>
+                        <button onclick="changeGreenPage(1)"
+                            class="px-3 py-1 text-sm border border-slate-300 rounded hover:bg-slate-50">Next</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <!-- Matrix Table -->
         <div id="viewMatrix" class="glass-panel rounded-2xl shadow-sm overflow-hidden">
             <div class="p-6 border-b border-slate-100 flex justify-between items-center bg-white">
@@ -194,10 +251,6 @@
                 <table class="w-full text-left border-collapse">
                     <thead>
                         <tr class="bg-slate-50 text-slate-500 text-xs uppercase tracking-wider select-none">
-                            <th class="px-6 py-4 font-semibold cursor-pointer hover:bg-slate-100 transition-colors"
-                                onclick="sortMatrix('rank')">
-                                Rank <span id="sort-rank" class="text-indigo-500 ml-1">↓</span>
-                            </th>
                             <th class="px-6 py-4 font-semibold cursor-pointer hover:bg-slate-100 transition-colors"
                                 onclick="sortMatrix('congressman')">
                                 Congressman / District <span id="sort-congressman"
@@ -267,13 +320,13 @@
                             <thead class="bg-slate-50 sticky top-0 z-10">
                                 <tr>
                                     <th scope="col"
-                                        class="px-4 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider bg-slate-50">
+                                        class="px-4 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider bg-slate-50 w-[60%]">
                                         Project Name</th>
                                     <th scope="col"
-                                        class="px-4 py-3 text-right text-xs font-medium text-slate-500 uppercase tracking-wider bg-slate-50">
+                                        class="px-4 py-3 text-right text-xs font-medium text-slate-500 uppercase tracking-wider bg-slate-50 w-[20%]">
                                         Amount</th>
                                     <th scope="col"
-                                        class="px-4 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider bg-slate-50">
+                                        class="px-4 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider bg-slate-50 w-[20%]">
                                         Reason</th>
                                 </tr>
                             </thead>
@@ -330,7 +383,12 @@
         let rawUnionData = [];
         let currentModalProjects = [];
         let currentPage = 1; // Modal Page
+
         const ITEMS_PER_PAGE = 5; // Modal Items
+
+        // Green Tab State
+        let greenPage = 1;
+        let greenDataTotal = 0;
 
         // Main Table Pagination
         let mainTablePage = 1;
@@ -467,7 +525,7 @@
             }
 
             // Update Sort Icons
-            ['rank', 'congressman', 'project_count', 'total_amount'].forEach(k => {
+            ['congressman', 'project_count', 'total_amount'].forEach(k => {
                 const el = document.getElementById(`sort-${k}`);
                 if (k === sortKey) { el.textContent = sortDesc ? '↓' : '↑'; el.classList.remove('opacity-0'); }
                 else { el.classList.add('opacity-0'); }
@@ -480,7 +538,8 @@
 
             pageItems.forEach((item, index) => {
                 const row = document.createElement('tr');
-                row.className = "hover:bg-slate-50 transition-colors group";
+                row.className = "hover:bg-slate-50 transition-colors group cursor-pointer";
+                row.dataset.index = index;
 
                 const projects = item.projects || [];
                 const projectsPreview = projects.slice(0, 3).map(p =>
@@ -494,8 +553,7 @@
         data-index="${index}">+${moreCount} more</button>` : '';
 
                 row.innerHTML = `
-    <td class="px-6 py-4 text-slate-400 font-mono text-sm">#${index + 1}</td>
-    <td class="px-6 py-4">
+    <td class="px-6 py-4 project-cell cursor-pointer" data-index="${index}">
         <div class="font-bold text-slate-800">${item.congressman}</div>
         <div class="text-xs text-slate-500 bg-slate-100 inline-block px-2 py-0.5 rounded mt-1">${item.district}
             ${item.province && item.province !== 'Unknown' ? `<span
@@ -562,17 +620,20 @@
             document.getElementById('pageEndTop').textContent = Math.min(end, currentModalProjects.length);
             document.getElementById('pageTotalTop').textContent = currentModalProjects.length;
 
-            pageItems.forEach(p => {
+            currentModalProjects.slice(start, end).forEach(p => {
                 const tr = document.createElement('tr');
-                tr.innerHTML = `<td class="px-4 py-3 text-sm font-medium text-slate-900">
-            <div class="line-clamp-2" title="${p.name}">${p.name}</div>${p.historical_match ? `<div
-                class="text-xs text-indigo-500 mt-0.5 truncate" title="Resurrected Match: ${p.historical_match}">
+                const histSafe = encodeURIComponent(p.historical_match || '');
+                const nameSafe = encodeURIComponent(p.name || '');
+                tr.innerHTML = `<td class="px-4 py-3 text-sm font-medium text-slate-900 break-words whitespace-normal">
+            <div class="" title="${p.name}"><a class="text-indigo-600 hover:text-indigo-800 hover:underline"
+                href="javascript:void(0)" onclick="openTransparencyLinkFromRow('${histSafe}','${nameSafe}')">${p.name}</a></div>${p.historical_match ? `<div
+                class="text-xs text-indigo-500 mt-0.5 break-words whitespace-normal" title="Resurrected Match: ${p.historical_match}">
                 Matched: ${p.historical_match}</div>` : ''}
         </td>
         <td class="px-4 py-3 text-sm text-slate-500 text-right whitespace-nowrap">₱ ${(p.amount / 1e6).toFixed(2)} M
         </td>
         <td class="px-4 py-3 text-sm text-slate-500">${p.flag_reason ? `<span
-                class="inline-flex items-center rounded-md bg-red-50 px-2 py-1 text-xs font-medium text-red-700 ring-1 ring-inset ring-red-600/10">${p.subcategory}</span>`
+                class="inline-flex items-center rounded-md bg-red-50 px-2 py-1 text-xs font-medium text-red-700 ring-1 ring-inset ring-red-600/10 whitespace-normal text-center">${p.subcategory}</span>`
                         : '<span class="text-xs text-slate-400">Resurrected</span>'}</td>`;
                 tbody.appendChild(tr);
             });
@@ -599,11 +660,11 @@
         const tableBody = document.getElementById('rankingTableBody');
         if (tableBody) {
             tableBody.addEventListener('click', function (e) {
-                const btn = e.target.closest('.open-modal-btn');
-                if (btn) {
-                    const index = parseInt(btn.dataset.index, 10);
-                    openProjectModal(index);
-                }
+                const btn = e.target.closest('.open-modal-btn, .project-cell, tr[data-index]');
+                if (!btn) return;
+                const index = parseInt(btn.dataset.index, 10);
+                if (Number.isNaN(index)) return;
+                openProjectModal(index);
             });
         }
 
@@ -633,29 +694,98 @@
             } catch (err) { console.error(err); container.textContent = "Failed to load hierarchy."; }
         }
 
+        // --- Green Tab Logic ---
+        async function loadGreenProjects() {
+            const tbody = document.getElementById('greenTableBody');
+            tbody.innerHTML = '<tr><td colspan="4" class="px-6 py-8 text-center text-slate-400 animate-pulse">Loading clean projects...</td></tr>';
+
+            try {
+                const response = await fetch(`/api/integrated/projects?green=true&page=${greenPage}&limit=10`);
+                const data = await response.json();
+
+                // Update Dashboard Stats for Green Projects
+                if (data.success) {
+                    document.getElementById('totalProjects').textContent = data.total.toLocaleString();
+                    document.getElementById('totalAmount').textContent = '₱ ' + (data.total_amount / 1e9).toFixed(2) + ' B';
+                    document.getElementById('totalDistricts').textContent = data.total_districts.toLocaleString();
+
+                    // Update Labels for Context
+                    document.querySelectorAll('.glass-panel h3')[0].textContent = "Lower Cost Projects";
+                    document.getElementById('filterStatusText').textContent = "DPWH Annex A-5 (2026) - Lower Cost";
+                }
+
+                if (data.projects && data.projects.length > 0) {
+                    tbody.innerHTML = data.projects.map(p => `
+                        <tr class="hover:bg-slate-50 transition-colors">
+                            <td class="px-6 py-3 font-medium text-slate-800 align-top">
+                                <div class="whitespace-normal break-words leading-snug" title="${p.project_name}">${p.project_name}</div>
+                            </td>
+                            <td class="px-6 py-3 text-right font-mono text-slate-600">₱ ${(p.amount / 1e6).toFixed(2)} M</td>
+                            <td class="px-6 py-3 text-slate-600 align-top">
+                                <div class="whitespace-normal break-words leading-snug" title="${p.contractor_name || 'N/A'}">${p.contractor_name || '<span class="text-slate-400">N/A</span>'}</div>
+                            </td>
+                            <td class="px-6 py-3 text-xs text-slate-500 align-top">${p.source || 'Unknown'}</td>
+                        </tr>
+                    `).join('');
+                } else {
+                    tbody.innerHTML = '<tr><td colspan="4" class="px-6 py-8 text-center text-slate-400">No green projects found.</td></tr>';
+                }
+                document.getElementById('greenPageNum').textContent = greenPage;
+            } catch (err) {
+                console.error("Failed to load green projects:", err);
+                tbody.innerHTML = '<tr><td colspan="4" class="px-6 py-8 text-center text-red-500">Error loading data.</td></tr>';
+            }
+        }
+
+        function changeGreenPage(delta) {
+            if (delta < 0 && greenPage <= 1) return;
+            // No strict max check here for simplicity, API handles empty pages
+            greenPage += delta;
+            loadGreenProjects();
+        }
+
         function handleHash() {
             const hash = window.location.hash;
-            const tabMatrix = document.getElementById('tabMatrix');
-            const tabLoc = document.getElementById('tabLoc');
             const viewMatrix = document.getElementById('viewMatrix');
             const viewLoc = document.getElementById('viewLoc');
+            const viewGreen = document.getElementById('viewGreen');
             const matrixControls = document.getElementById('matrixControls');
 
+            const tabMatrix = document.getElementById('tabMatrix');
+            const tabLoc = document.getElementById('tabLoc');
+            const tabGreen = document.getElementById('tabGreen');
+
+            // Reset all tabs
+            [tabMatrix, tabLoc, tabGreen].forEach(t => {
+                t.classList.replace('border-indigo-500', 'border-transparent');
+                t.classList.replace('text-indigo-600', 'text-slate-500');
+            });
+
+            // Hide all views
+            viewMatrix.classList.add('hidden');
+            viewLoc.classList.add('hidden');
+            viewGreen.classList.add('hidden');
+            matrixControls.classList.add('hidden'); // Default hidden logic
+
             if (hash === '#loc') {
-                tabMatrix.classList.replace('border-indigo-500', 'border-transparent');
-                tabMatrix.classList.replace('text-indigo-600', 'text-slate-500');
                 tabLoc.classList.replace('border-transparent', 'border-indigo-500');
                 tabLoc.classList.replace('text-slate-500', 'text-indigo-600');
-                viewMatrix.classList.add('hidden');
                 viewLoc.classList.remove('hidden');
-                matrixControls.classList.add('hidden');
                 loadLocations();
-            } else {
-                tabLoc.classList.replace('border-indigo-500', 'border-transparent');
-                tabLoc.classList.replace('text-indigo-600', 'text-slate-500');
+            }
+            else if (hash === '#green') {
+                tabGreen.classList.replace('border-transparent', 'border-indigo-500');
+                tabGreen.classList.replace('text-slate-500', 'text-indigo-600');
+                viewGreen.classList.remove('hidden');
+                // Dashboard stats are updated by loadGreenProjects
+                if (document.getElementById('greenTableBody').children.length <= 1) {
+                    loadGreenProjects();
+                }
+            }
+            else {
+                // Default: Matrix
                 tabMatrix.classList.replace('border-transparent', 'border-indigo-500');
                 tabMatrix.classList.replace('text-slate-500', 'text-indigo-600');
-                viewLoc.classList.add('hidden');
                 viewMatrix.classList.remove('hidden');
                 matrixControls.classList.remove('hidden');
             }
@@ -663,6 +793,30 @@
 
         window.addEventListener('hashchange', handleHash);
         handleHash();
+
+        // Launch Transparency page using local parquet search; prefer historical match, fallback to project name
+        window.openTransparencyLinkFromRow = async function (histEncoded, nameEncoded) {
+            const candidates = [decodeURIComponent(histEncoded || ''), decodeURIComponent(nameEncoded || '')]
+                .map(s => s.trim())
+                .filter(Boolean);
+            if (!candidates.length) {
+                alert('No project title available for this project.');
+                return;
+            }
+            for (const query of candidates) {
+                try {
+                    const resp = await fetch(`/api/transparency/search?q=${encodeURIComponent(query)}&limit=1`);
+                    const data = await resp.json();
+                    if (data.success && data.results && data.results.length > 0) {
+                        window.open(data.results[0].transparency_url, '_blank');
+                        return;
+                    }
+                } catch (err) {
+                    console.error('Transparency search failed', err);
+                }
+            }
+            alert('No Transparency match found for this project.');
+        };
 
         // Initialize
         console.log('Initializing integ2026...');

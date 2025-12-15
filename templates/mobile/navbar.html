@@ -6,20 +6,23 @@
             <div style="display: flex; align-items: center; gap: 0.5rem;">
                 <a href="https://bettergov.ph" class="visualizations-mobile-logo-link"
                     style="display: flex; align-items: center;">
-                    <img src="https://raw.githubusercontent.com/bettergovph/logo/main/png/BetterGov_Horizontal-Black.png" alt="BetterGov.ph" class="visualizations-mobile-logo-img"
-                        style="height: 24px; width: auto;">
+                    <img src="http://assets.bettergov.ph/logos/webp/horizontal-black.webp" alt="BetterGov.ph"
+                        class="visualizations-mobile-logo-img" style="height: 24px; width: auto;">
                 </a>
                 <a href="/" class="visualizations-mobile-site-name-link"
                     style="text-decoration: none; color: #0038A8; font-weight: 600; font-size: 0.9rem;">
                     <span class="visualizations-mobile-site-name">Data Visualizations</span>
                 </a>
             </div>
-            <button id="mobile-menu-toggle" 
+            <button id="mobile-menu-toggle"
                 style="background: none; border: none; padding: 0.5rem; cursor: pointer; display: flex; flex-direction: column; gap: 4px; align-items: center; justify-content: center; width: 32px; height: 32px;"
                 onclick="toggleMobileMenu()">
-                <span class="hamburger-line" style="width: 24px; height: 2px; background: #333; transition: all 0.3s;"></span>
-                <span class="hamburger-line" style="width: 24px; height: 2px; background: #333; transition: all 0.3s;"></span>
-                <span class="hamburger-line" style="width: 24px; height: 2px; background: #333; transition: all 0.3s;"></span>
+                <span class="hamburger-line"
+                    style="width: 24px; height: 2px; background: #333; transition: all 0.3s;"></span>
+                <span class="hamburger-line"
+                    style="width: 24px; height: 2px; background: #333; transition: all 0.3s;"></span>
+                <span class="hamburger-line"
+                    style="width: 24px; height: 2px; background: #333; transition: all 0.3s;"></span>
             </button>
         </div>
         <nav id="mobile-nav-menu" class="visualizations-mobile-nav-menu"
@@ -52,12 +55,12 @@
         const menu = document.getElementById('mobile-nav-menu');
         const toggle = document.getElementById('mobile-menu-toggle');
         const lines = toggle.querySelectorAll('.hamburger-line');
-        
+
         if (menu.style.display === 'none' || !menu.style.display) {
             menu.style.display = 'flex';
             menu.style.maxHeight = '500px';
             toggle.setAttribute('aria-expanded', 'true');
-            
+
             // Animate hamburger to X
             lines[0].style.transform = 'rotate(45deg) translate(6px, 6px)';
             lines[1].style.opacity = '0';
@@ -68,14 +71,14 @@
                 menu.style.display = 'none';
             }, 300);
             toggle.setAttribute('aria-expanded', 'false');
-            
+
             // Reset hamburger
             lines[0].style.transform = 'none';
             lines[1].style.opacity = '1';
             lines[2].style.transform = 'none';
         }
     }
-    
+
     // Close menu when clicking outside
     document.addEventListener('click', (e) => {
         const menu = document.getElementById('mobile-nav-menu');
@@ -86,7 +89,7 @@
             }
         }
     });
-    
+
     // Close menu when clicking a link
     document.querySelectorAll('#mobile-nav-menu a').forEach(link => {
         link.addEventListener('click', () => {

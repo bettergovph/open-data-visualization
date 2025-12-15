@@ -1,10 +1,12 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Interactive Map - DIME Project Status Distribution - BetterGovPH</title>
-    <meta name="description" content="Interactive map showing flood control projects by DIME status (Completed, Ongoing, Incomplete, Suspended, Not Yet Started) across the Philippines. Circle size represents project cost.">
+    <meta name="description"
+        content="Interactive map showing flood control projects by DIME status (Completed, Ongoing, Incomplete, Suspended, Not Yet Started) across the Philippines. Circle size represents project cost.">
 
     <!-- Google Fonts - Inter -->
     <!-- Tailwind CSS -->
@@ -29,16 +31,18 @@
         body {
             font-family: 'Inter', sans-serif !important;
         }
-        
+
         /* Override Leaflet's default max-width */
         .leaflet-popup {
             max-width: none !important;
         }
+
         .leaflet-popup-content-wrapper {
             max-width: none !important;
             width: auto !important;
             overflow: visible !important;
         }
+
         .leaflet-popup-content {
             max-width: none !important;
             min-width: 900px !important;
@@ -217,764 +221,793 @@
 
     <!-- BetterGovPH Metadata -->
     <meta name="description" content="Interactive Map - Government Data Analysis Platform">
-    <meta name="keywords" content="flood control, infrastructure, DPWH, government projects, Philippines, interactive map">
+    <meta name="keywords"
+        content="flood control, infrastructure, DPWH, government projects, Philippines, interactive map">
     <meta name="author" content="BetterGovPH">
 
     <!-- Open Graph / Facebook -->
     <meta property="og:type" content="website">
     <meta property="og:url" content="https://visualizations.bettergov.ph/map">
     <meta property="og:title" content="🗺️ Interactive Map - BetterGovPH">
-    <meta property="og:description" content="Explore flood control projects geographically across the Philippines with an interactive map interface.">
+    <meta property="og:description"
+        content="Explore flood control projects geographically across the Philippines with an interactive map interface.">
     <meta property="og:image:width" content="1200">
     <meta property="og:image:height" content="630">
     <meta property="og:site_name" content="BetterGovPH Data Visualizations">
-    <meta property="og:image" content="https://raw.githubusercontent.com/bettergovph/logo/main/png/BetterGov_Horizontal-Black.png">
+    <meta property="og:image" content="http://assets.bettergov.ph/logos/webp/horizontal-black.webp">
 
     <!-- Twitter -->
     <meta property="twitter:card" content="summary_large_image">
     <meta property="twitter:url" content="https://visualizations.bettergov.ph/map">
     <meta property="twitter:title" content="🗺️ Interactive Map - BetterGovPH">
-    <meta property="twitter:description" content="Explore flood control projects geographically across the Philippines with an interactive map interface.">
-    <meta property="twitter:image" content="https://raw.githubusercontent.com/bettergovph/logo/main/png/BetterGov_Horizontal-Black.png">
+    <meta property="twitter:description"
+        content="Explore flood control projects geographically across the Philippines with an interactive map interface.">
+    <meta property="twitter:image" content="http://assets.bettergov.ph/logos/webp/horizontal-black.webp">
 </head>
+
 <body>
-<!-- Navigation - Blends with hero, no borders or background -->
-<nav class="visualizations-nav py-4 px-6 bg-white border-b border-gray-200">
-    <div class="max-w-7xl mx-auto flex items-center justify-between">
-        <div class="flex items-center">
-            <a href="https://bettergov.ph" class="flex items-center">
-                <img src="https://raw.githubusercontent.com/bettergovph/logo/main/png/BetterGov_Horizontal-Black.png"
-                     alt="BetterGov.ph"
-                     class="h-12 mr-3">
-                
-            </a>
-            <a href="/" class="text-xl font-bold text-black hover:text-gray-600">Data Visualizations</a>
+    <!-- Navigation - Blends with hero, no borders or background -->
+    <nav class="visualizations-nav py-4 px-6 bg-white border-b border-gray-200">
+        <div class="max-w-7xl mx-auto flex items-center justify-between">
+            <div class="flex items-center">
+                <a href="https://bettergov.ph" class="flex items-center">
+                    <img src="http://assets.bettergov.ph/logos/webp/horizontal-black.webp" alt="BetterGov.ph"
+                        class="h-12 mr-3">
+
+                </a>
+                <a href="/" class="text-xl font-bold text-black hover:text-gray-600">Data Visualizations</a>
+            </div>
+            <div class="hidden md:flex space-x-6">
+                <a href="/nep" class="text-black hover:text-gray-600 font-medium transition">NEP</a>
+                <a href="/budget" class="text-black hover:text-gray-600 font-medium transition">Budget</a>
+                <a href="/flood" class="text-black hover:text-gray-600 font-medium transition">Flood</a>
+                <a href="/philgeps" class="text-black hover:text-gray-600 font-medium transition">PhilGEPS</a>
+                <a href="/dime" class="text-black hover:text-gray-600 font-medium transition">DIME</a>
+                <a href="/map"
+                    class="text-black hover:text-gray-600 font-medium transition border-b-2 border-black">Map</a>
+                <a href="/dynasty" class="text-black hover:text-gray-600 font-medium transition">Dynasties</a>
+                <!-- Integrated menu item hidden -->
+                <!-- <a href="/integrated" class="text-black hover:text-gray-600 font-medium transition">Integrated</a> -->
+                <a href="/sources" class="text-black hover:text-gray-600 font-medium transition">Sources</a>
+            </div>
+            <div class="md:hidden">
+                <button class="text-black focus:outline-none" onclick="toggleMobileMenu()">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M4 6h16M4 12h16M4 18h16"></path>
+                    </svg>
+                </button>
+            </div>
         </div>
-        <div class="hidden md:flex space-x-6">
-            <a href="/nep" class="text-black hover:text-gray-600 font-medium transition">NEP</a>
-            <a href="/budget" class="text-black hover:text-gray-600 font-medium transition">Budget</a>
-            <a href="/flood" class="text-black hover:text-gray-600 font-medium transition">Flood</a>
-            <a href="/philgeps" class="text-black hover:text-gray-600 font-medium transition">PhilGEPS</a>
-            <a href="/dime" class="text-black hover:text-gray-600 font-medium transition">DIME</a>
-            <a href="/map" class="text-black hover:text-gray-600 font-medium transition border-b-2 border-black">Map</a>
-            <a href="/dynasty" class="text-black hover:text-gray-600 font-medium transition">Dynasties</a>
+        <!-- Mobile menu (hidden by default) -->
+        <div id="mobileMenu" class="hidden mt-4 px-4 space-y-2">
+            <a href="/nep" class="block text-black hover:text-gray-600 font-medium py-2">NEP</a>
+            <a href="/budget" class="block text-black hover:text-gray-600 font-medium py-2">Budget</a>
+            <a href="/flood" class="block text-black hover:text-gray-600 font-medium py-2">Flood</a>
+            <a href="/philgeps" class="block text-black hover:text-gray-600 font-medium py-2">PhilGEPS</a>
+            <a href="/dime" class="block text-black hover:text-gray-600 font-medium py-2">DIME</a>
+            <a href="/map" class="block text-black hover:text-gray-600 font-medium py-2 border-b-2 border-black">Map</a>
+            <a href="/dynasty" class="block text-black hover:text-gray-600 font-medium py-2">Dynasties</a>
             <!-- Integrated menu item hidden -->
-            <!-- <a href="/integrated" class="text-black hover:text-gray-600 font-medium transition">Integrated</a> -->
-            <a href="/sources" class="text-black hover:text-gray-600 font-medium transition">Sources</a>
+            <!-- <a href="/integrated" class="block text-black hover:text-gray-600 font-medium py-2">Integrated</a> -->
         </div>
-        <div class="md:hidden">
-            <button class="text-black focus:outline-none" onclick="toggleMobileMenu()">
-                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
-                </svg>
-            </button>
-        </div>
-    </div>
-    <!-- Mobile menu (hidden by default) -->
-    <div id="mobileMenu" class="hidden mt-4 px-4 space-y-2">
-        <a href="/nep" class="block text-black hover:text-gray-600 font-medium py-2">NEP</a>
-        <a href="/budget" class="block text-black hover:text-gray-600 font-medium py-2">Budget</a>
-        <a href="/flood" class="block text-black hover:text-gray-600 font-medium py-2">Flood</a>
-        <a href="/philgeps" class="block text-black hover:text-gray-600 font-medium py-2">PhilGEPS</a>
-        <a href="/dime" class="block text-black hover:text-gray-600 font-medium py-2">DIME</a>
-        <a href="/map" class="block text-black hover:text-gray-600 font-medium py-2 border-b-2 border-black">Map</a>
-        <a href="/dynasty" class="block text-black hover:text-gray-600 font-medium py-2">Dynasties</a>
-        <!-- Integrated menu item hidden -->
-        <!-- <a href="/integrated" class="block text-black hover:text-gray-600 font-medium py-2">Integrated</a> -->
-    </div>
-</nav>
+    </nav>
 
-<!-- Map Section -->
-<section class="bg-gray-50 py-16 px-6">
-    <div class="max-w-7xl mx-auto">
-        <div class="bg-white rounded-lg shadow-md p-6">
-            <div class="flex justify-between items-center mb-4">
-                <div>
-                    <h2 class="text-2xl font-semibold text-black">🗺️ Interactive Map</h2>
-                    <p class="text-sm text-gray-600 mt-1">📊 Circles colored by DIME project status • Size represents cost</p>
-                </div>
-                <div class="flex gap-3">
-                    <button id="refresh-map-data" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition">
-                        🔄 Refresh Map
-                    </button>
-                </div>
-            </div>
-
-            <!-- Map Instructions -->
-            <div class="bg-blue-50 p-4 rounded-lg mb-4 border-l-4 border-blue-500">
-                <div class="text-sm text-blue-800 font-medium">
-                    💡 <strong>Tip:</strong> Provincial boundaries are now highlighted. Click a province to zoom in, then use the province card to load its detailed projects.
-                </div>
-            </div>
-
-            <!-- Legend -->
-            <div class="bg-gray-50 p-4 rounded-lg mb-4 border border-gray-200">
-                <div class="text-sm font-semibold text-gray-700 mb-3">📊 Map Legend</div>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs text-slate-600">
-                    <div class="space-y-2">
-                        <div class="font-semibold text-slate-500 uppercase tracking-wide">Project Source</div>
-                        <div class="flex items-center gap-2"><div class="w-4 h-4 rounded-full bg-gray-400 border-2 border-gray-600"></div><span>Circles · SSP Flood Control</span></div>
-                        <div class="flex items-center gap-2"><div class="w-4 h-4 bg-indigo-500 border-2 border-indigo-700"></div><span>Squares · DIME Infrastructure</span></div>
-                        <div class="flex items-center gap-2"><div class="w-4 h-4 bg-amber-400 border-2 border-amber-600" style="clip-path: polygon(25% 0%, 75% 0%, 100% 50%, 75% 100%, 25% 100%, 0% 50%);"></div><span>Hexagons · PhilGEPS Procurement</span></div>
-                        <div class="flex items-center gap-2"><div class="w-4 h-4 bg-rose-400 border-2 border-rose-600" style="clip-path: polygon(50% 0%, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%);"></div><span>Stars · DPWH Microsite Field Data</span></div>
-                        </div>
-                    <div class="space-y-2">
-                        <div class="font-semibold text-slate-500 uppercase tracking-wide">NCPAGkilatis Flags</div>
-                        <div class="flex items-center gap-2">
-                            <span style="position:relative; display:inline-flex; align-items:flex-start; justify-content:center; width:14px; height:14px;">
-                                <span style="position:absolute; top:-2px; right:1px; width:8px; height:6px; clip-path: polygon(0 0, 100% 25%, 100% 75%, 0 100%); background:#ef4444; border:1px solid #b91c1c; border-radius:1px; box-shadow:0 0 2px rgba(15,23,42,0.25);"></span>
-                                <span style="position:absolute; bottom:-1px; left:4px; width:2px; height:9px; background:#e2e8f0; border-radius:1px; box-shadow:0 0 1px rgba(15,23,42,0.25);"></span>
-                            </span>
-                            <span>Red flag concern</span>
-                        </div>
-                    <div class="flex items-center gap-2">
-                            <span style="position:relative; display:inline-flex; align-items:flex-start; justify-content:center; width:14px; height:14px;">
-                                <span style="position:absolute; top:-2px; right:1px; width:8px; height:6px; clip-path: polygon(0 0, 100% 25%, 100% 75%, 0 100%); background:#16a34a; border:1px solid #166534; border-radius:1px; box-shadow:0 0 2px rgba(15,23,42,0.25);"></span>
-                                <span style="position:absolute; bottom:-1px; left:4px; width:2px; height:9px; background:#e2e8f0; border-radius:1px; box-shadow:0 0 1px rgba(15,23,42,0.25);"></span>
-                            </span>
-                            <span>Green flag assurance</span>
+    <!-- Map Section -->
+    <section class="bg-gray-50 py-16 px-6">
+        <div class="max-w-7xl mx-auto">
+            <div class="bg-white rounded-lg shadow-md p-6">
+                <div class="flex justify-between items-center mb-4">
+                    <div>
+                        <h2 class="text-2xl font-semibold text-black">🗺️ Interactive Map</h2>
+                        <p class="text-sm text-gray-600 mt-1">📊 Circles colored by DIME project status • Size
+                            represents cost</p>
                     </div>
-                        <div class="text-[11px] text-slate-500 mt-3">Marker size corresponds to project cost (larger marker → higher amount).</div>
+                    <div class="flex gap-3">
+                        <button id="refresh-map-data"
+                            class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition">
+                            🔄 Refresh Map
+                        </button>
                     </div>
                 </div>
+
+                <!-- Map Instructions -->
+                <div class="bg-blue-50 p-4 rounded-lg mb-4 border-l-4 border-blue-500">
+                    <div class="text-sm text-blue-800 font-medium">
+                        💡 <strong>Tip:</strong> Provincial boundaries are now highlighted. Click a province to zoom in,
+                        then use the province card to load its detailed projects.
+                    </div>
+                </div>
+
+                <!-- Legend -->
+                <div class="bg-gray-50 p-4 rounded-lg mb-4 border border-gray-200">
+                    <div class="text-sm font-semibold text-gray-700 mb-3">📊 Map Legend</div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs text-slate-600">
+                        <div class="space-y-2">
+                            <div class="font-semibold text-slate-500 uppercase tracking-wide">Project Source</div>
+                            <div class="flex items-center gap-2">
+                                <div class="w-4 h-4 rounded-full bg-gray-400 border-2 border-gray-600"></div>
+                                <span>Circles · SSP Flood Control</span>
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <div class="w-4 h-4 bg-indigo-500 border-2 border-indigo-700"></div><span>Squares · DIME
+                                    Infrastructure</span>
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <div class="w-4 h-4 bg-amber-400 border-2 border-amber-600"
+                                    style="clip-path: polygon(25% 0%, 75% 0%, 100% 50%, 75% 100%, 25% 100%, 0% 50%);">
+                                </div><span>Hexagons · PhilGEPS Procurement</span>
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <div class="w-4 h-4 bg-rose-400 border-2 border-rose-600"
+                                    style="clip-path: polygon(50% 0%, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%);">
+                                </div><span>Stars · DPWH Microsite Field Data</span>
+                            </div>
+                        </div>
+                        <div class="space-y-2">
+                            <div class="font-semibold text-slate-500 uppercase tracking-wide">NCPAGkilatis Flags</div>
+                            <div class="flex items-center gap-2">
+                                <span
+                                    style="position:relative; display:inline-flex; align-items:flex-start; justify-content:center; width:14px; height:14px;">
+                                    <span
+                                        style="position:absolute; top:-2px; right:1px; width:8px; height:6px; clip-path: polygon(0 0, 100% 25%, 100% 75%, 0 100%); background:#ef4444; border:1px solid #b91c1c; border-radius:1px; box-shadow:0 0 2px rgba(15,23,42,0.25);"></span>
+                                    <span
+                                        style="position:absolute; bottom:-1px; left:4px; width:2px; height:9px; background:#e2e8f0; border-radius:1px; box-shadow:0 0 1px rgba(15,23,42,0.25);"></span>
+                                </span>
+                                <span>Red flag concern</span>
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <span
+                                    style="position:relative; display:inline-flex; align-items:flex-start; justify-content:center; width:14px; height:14px;">
+                                    <span
+                                        style="position:absolute; top:-2px; right:1px; width:8px; height:6px; clip-path: polygon(0 0, 100% 25%, 100% 75%, 0 100%); background:#16a34a; border:1px solid #166534; border-radius:1px; box-shadow:0 0 2px rgba(15,23,42,0.25);"></span>
+                                    <span
+                                        style="position:absolute; bottom:-1px; left:4px; width:2px; height:9px; background:#e2e8f0; border-radius:1px; box-shadow:0 0 1px rgba(15,23,42,0.25);"></span>
+                                </span>
+                                <span>Green flag assurance</span>
+                            </div>
+                            <div class="text-[11px] text-slate-500 mt-3">Marker size corresponds to project cost (larger
+                                marker → higher amount).</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="map" class="w-full h-96 rounded-lg border border-gray-300 mb-6" style="height: 600px;"></div>
+
             </div>
-
-            <div id="map" class="w-full h-96 rounded-lg border border-gray-300 mb-6" style="height: 600px;"></div>
-
         </div>
-    </div>
-</section>
+    </section>
 
-<script>
-function toggleMobileMenu() {
-    const menu = document.getElementById('mobileMenu');
-    menu.classList.toggle('hidden');
-}
-</script>
-
-
-<script>
-// Integrated data map rendering (aggregated by province)
-const SOURCE_ORDER = ['ssp', 'dime', 'philgeps', 'microsite'];
-const SOURCE_META = {
-    ssp: { label: 'Flood Control (SSP)', shortLabel: 'SSP', className: 'circle' },
-    dime: { label: 'DIME Infrastructure', shortLabel: 'DIME', className: 'square' },
-    philgeps: { label: 'PhilGEPS Procurement', shortLabel: 'PhilGEPS', className: 'hex' },
-    microsite: { label: 'DPWH Microsite', shortLabel: 'Microsite', className: 'star' }
-};
-const PROVINCE_PAGE_SIZE = 25;
-const PROVINCE_KEY_OVERRIDES = {
-    'davaodeoro': 'compostelavalley',
-    'metropolitanmanila': 'metromanila',
-    'nationalcapitalregion': 'metromanila',
-    'ncrcityofmanilafirstdistrict': 'metromanila',
-    'ncrseconddistrict': 'metromanila',
-    'ncrthirddistrict': 'metromanila',
-    'ncrfourthdistrict': 'metromanila'
-};
-
-const PROVINCE_SLUG_OVERRIDES = {
-    'compostelavalley': 'davao-de-oro',
-    'metromanila': 'metropolitan-manila',
-    'manila': 'ncr-city-of-manila-first-district'
-};
-
-const PROVINCE_GEOJSON_FILES = [
-    'ph.cagayan-valley-region-ii.cagayan.any.any.geo.json',
-    'ph.cagayan-valley-region-ii.isabela.any.any.geo.json',
-    'ph.cagayan-valley-region-ii.nueva-vizcaya.any.any.geo.json',
-    'ph.cagayan-valley-region-ii.quirino.any.any.geo.json',
-    'ph.cagayan-valley-region-ii.batanes.any.any.geo.json',
-    'ph.central-luzon-region-iii.bulacan.any.any.geo.json',
-    'ph.central-luzon-region-iii.nueva-ecija.any.any.geo.json',
-    'ph.central-luzon-region-iii.pampanga.any.any.geo.json',
-    'ph.central-luzon-region-iii.tarlac.any.any.geo.json',
-    'ph.central-luzon-region-iii.zambales.any.any.geo.json',
-    'ph.central-luzon-region-iii.aurora.any.any.geo.json',
-    'ph.central-luzon-region-iii.bataan.any.any.geo.json',
-    'ph.calabarzon-region-iv-a.laguna.any.any.geo.json',
-    'ph.calabarzon-region-iv-a.cavite.any.any.geo.json',
-    'ph.calabarzon-region-iv-a.batangas.any.any.geo.json',
-    'ph.calabarzon-region-iv-a.quezon.any.any.geo.json',
-    'ph.calabarzon-region-iv-a.rizal.any.any.geo.json',
-    'ph.national-capital-region.metropolitan-manila.any.any.geo.json',
-    'ph.central-visayas-region-vii.cebu.any.any.geo.json',
-    'ph.central-visayas-region-vii.bohol.any.any.geo.json',
-    'ph.central-visayas-region-vii.negros-oriental.any.any.geo.json',
-    'ph.central-visayas-region-vii.siquijor.any.any.geo.json',
-    'ph.western-visayas-region-vi.iloilo.any.any.geo.json',
-    'ph.western-visayas-region-vi.negros-occidental.any.any.geo.json',
-    'ph.western-visayas-region-vi.capiz.any.any.geo.json',
-    'ph.western-visayas-region-vi.aklan.any.any.geo.json',
-    'ph.western-visayas-region-vi.antique.any.any.geo.json',
-    'ph.western-visayas-region-vi.guimaras.any.any.geo.json',
-    'ph.eastern-visayas-region-viii.leyte.any.any.geo.json',
-    'ph.eastern-visayas-region-viii.samar.any.any.geo.json',
-    'ph.eastern-visayas-region-viii.northern-samar.any.any.geo.json',
-    'ph.eastern-visayas-region-viii.eastern-samar.any.any.geo.json',
-    'ph.eastern-visayas-region-viii.southern-leyte.any.any.geo.json',
-    'ph.eastern-visayas-region-viii.biliran.any.any.geo.json',
-    'ph.bicol-region-region-v.camarines-sur.any.any.geo.json',
-    'ph.bicol-region-region-v.camarines-norte.any.any.geo.json',
-    'ph.bicol-region-region-v.albay.any.any.geo.json',
-    'ph.bicol-region-region-v.sorsogon.any.any.geo.json',
-    'ph.bicol-region-region-v.catanduanes.any.any.geo.json',
-    'ph.bicol-region-region-v.masbate.any.any.geo.json',
-    'ph.mimaropa-region-iv-b.oriental-mindoro.any.any.geo.json',
-    'ph.mimaropa-region-iv-b.occidental-mindoro.any.any.geo.json',
-    'ph.mimaropa-region-iv-b.marinduque.any.any.geo.json',
-    'ph.mimaropa-region-iv-b.romblon.any.any.geo.json',
-    'ph.mimaropa-region-iv-b.palawan.any.any.geo.json',
-    'ph.cordillera-administrative-region-car.abra.any.any.geo.json',
-    'ph.cordillera-administrative-region-car.benguet.any.any.geo.json',
-    'ph.cordillera-administrative-region-car.ifugao.any.any.geo.json',
-    'ph.cordillera-administrative-region-car.kalinga.any.any.geo.json',
-    'ph.cordillera-administrative-region-car.mountain-province.any.any.geo.json',
-    'ph.cordillera-administrative-region-car.apayao.any.any.geo.json',
-    'ph.ilocos-region-region-i.ilocos-norte.any.any.geo.json',
-    'ph.ilocos-region-region-i.ilocos-sur.any.any.geo.json',
-    'ph.ilocos-region-region-i.la-union.any.any.geo.json',
-    'ph.ilocos-region-region-i.pangasinan.any.any.geo.json',
-    'ph.northern-mindanao-region-x.bukidnon.any.any.geo.json',
-    'ph.northern-mindanao-region-x.camiguin.any.any.geo.json',
-    'ph.northern-mindanao-region-x.lanao-del-norte.any.any.geo.json',
-    'ph.northern-mindanao-region-x.misamis-occidental.any.any.geo.json',
-    'ph.northern-mindanao-region-x.misamis-oriental.any.any.geo.json',
-    'ph.davao-region-region-xi.davao-del-norte.any.any.geo.json',
-    'ph.davao-region-region-xi.davao-del-sur.any.any.geo.json',
-    'ph.davao-region-region-xi.davao-oriental.any.any.geo.json',
-    'ph.davao-region-region-xi.compostela-valley.any.any.geo.json',
-    'ph.soccsksargen-region-xii.north-cotabato.any.any.geo.json',
-    'ph.soccsksargen-region-xii.south-cotabato.any.any.geo.json',
-    'ph.soccsksargen-region-xii.sultan-kudarat.any.any.geo.json',
-    'ph.soccsksargen-region-xii.sarangani.any.any.geo.json',
-    'ph.caraga-region-xiii.agusan-del-norte.any.any.geo.json',
-    'ph.caraga-region-xiii.agusan-del-sur.any.any.geo.json',
-    'ph.caraga-region-xiii.surigao-del-norte.any.any.geo.json',
-    'ph.caraga-region-xiii.surigao-del-sur.any.any.geo.json',
-    'ph.caraga-region-xiii.dinagat-islands.any.any.geo.json',
-    'ph.zamboanga-peninsula-region-ix.zamboanga-del-norte.any.any.geo.json',
-    'ph.zamboanga-peninsula-region-ix.zamboanga-del-sur.any.any.geo.json',
-    'ph.zamboanga-peninsula-region-ix.zamboanga-sibugay.any.any.geo.json',
-    'ph.autonomous-region-of-muslim-mindanao-armm.basilan.any.any.geo.json',
-    'ph.autonomous-region-of-muslim-mindanao-armm.lanao-del-sur.any.any.geo.json',
-    'ph.autonomous-region-of-muslim-mindanao-armm.maguindanao.any.any.geo.json',
-    'ph.autonomous-region-of-muslim-mindanao-armm.sulu.any.any.geo.json',
-    'ph.autonomous-region-of-muslim-mindanao-armm.tawi-tawi.any.any.geo.json'
-];
-
-function toSlug(name) {
-    if (!name) return '';
-    const cleaned = name
-        .toLowerCase()
-        .replace(/province of\s+/g, '')
-        .replace(/city of\s+/g, '')
-        .replace(/&/g, 'and')
-        .replace(/[^a-z0-9\s-]/g, '')
-        .trim()
-        .replace(/\s+/g, '-');
-    return cleaned;
-}
-
-function getProvinceSlug(provinceName) {
-    const key = normalizeProvinceKey(provinceName);
-    if (PROVINCE_SLUG_OVERRIDES[key]) {
-        return PROVINCE_SLUG_OVERRIDES[key];
-    }
-    return toSlug(provinceName);
-}
-
-let mapInstance = null;
-let provinceGeoJSONLayer = null;
-
-const provinceCenters = new Map();
-const provinceSummaryLookup = new Map();
-const provinceMarkers = new Map();
-const provinceLayers = new Map();
-const activeProjectMarkers = [];
-const hiddenProvinceMarkers = new Set();
-const pendingSummaryQueue = [];
-let summaryQueueBusy = false;
-let activeProvinceKey = null;
-const provinceGeometryCache = new Map();
-
-function hashString(value) {
-    let hash = 0;
-    if (!value) return hash;
-    for (let i = 0; i < value.length; i += 1) {
-        hash = ((hash << 5) - hash) + value.charCodeAt(i);
-        hash |= 0;
-    }
-    return Math.abs(hash);
-}
-
-function getProvinceGeometry(key) {
-    if (provinceGeometryCache.has(key)) {
-        return provinceGeometryCache.get(key);
-    }
-    const layer = provinceLayers.get(key);
-    if (!layer) {
-        return null;
-    }
-    const geo = layer.toGeoJSON?.();
-    const geometry = geo?.geometry || null;
-    if (geometry) {
-        provinceGeometryCache.set(key, geometry);
-    }
-    return geometry;
-}
-
-function ringContainsPoint(ring, lat, lng) {
-    if (!Array.isArray(ring) || ring.length < 3) {
-        return false;
-    }
-    let inside = false;
-    const y = lat;
-    const x = lng;
-    for (let i = 0, j = ring.length - 1; i < ring.length; j = i, i += 1) {
-        const xi = ring[i][0];
-        const yi = ring[i][1];
-        const xj = ring[j][0];
-        const yj = ring[j][1];
-        const intersects = ((yi > y) !== (yj > y)) && (x < ((xj - xi) * (y - yi)) / (yj - yi + 1e-12) + xi);
-        if (intersects) inside = !inside;
-    }
-    return inside;
-}
-
-function polygonContainsPoint(polygon, lat, lng) {
-    if (!Array.isArray(polygon) || !polygon.length) {
-        return false;
-    }
-    const outer = polygon[0];
-    if (!ringContainsPoint(outer, lat, lng)) {
-        return false;
-    }
-    for (let i = 1; i < polygon.length; i += 1) {
-        if (ringContainsPoint(polygon[i], lat, lng)) {
-            return false;
+    <script>
+        function toggleMobileMenu() {
+            const menu = document.getElementById('mobileMenu');
+            menu.classList.toggle('hidden');
         }
-    }
-    return true;
-}
+    </script>
 
-function geometryContainsPoint(geometry, lat, lng) {
-    if (!geometry) {
-        return true;
-    }
-    const { type, coordinates } = geometry;
-    if (!coordinates) {
-        return true;
-    }
-    if (type === 'Polygon') {
-        return polygonContainsPoint(coordinates, lat, lng);
-    }
-    if (type === 'MultiPolygon') {
-        for (let i = 0; i < coordinates.length; i += 1) {
-            if (polygonContainsPoint(coordinates[i], lat, lng)) {
+
+    <script>
+        // Integrated data map rendering (aggregated by province)
+        const SOURCE_ORDER = ['ssp', 'dime', 'philgeps', 'microsite'];
+        const SOURCE_META = {
+            ssp: { label: 'Flood Control (SSP)', shortLabel: 'SSP', className: 'circle' },
+            dime: { label: 'DIME Infrastructure', shortLabel: 'DIME', className: 'square' },
+            philgeps: { label: 'PhilGEPS Procurement', shortLabel: 'PhilGEPS', className: 'hex' },
+            microsite: { label: 'DPWH Microsite', shortLabel: 'Microsite', className: 'star' }
+        };
+        const PROVINCE_PAGE_SIZE = 25;
+        const PROVINCE_KEY_OVERRIDES = {
+            'davaodeoro': 'compostelavalley',
+            'metropolitanmanila': 'metromanila',
+            'nationalcapitalregion': 'metromanila',
+            'ncrcityofmanilafirstdistrict': 'metromanila',
+            'ncrseconddistrict': 'metromanila',
+            'ncrthirddistrict': 'metromanila',
+            'ncrfourthdistrict': 'metromanila'
+        };
+
+        const PROVINCE_SLUG_OVERRIDES = {
+            'compostelavalley': 'davao-de-oro',
+            'metromanila': 'metropolitan-manila',
+            'manila': 'ncr-city-of-manila-first-district'
+        };
+
+        const PROVINCE_GEOJSON_FILES = [
+            'ph.cagayan-valley-region-ii.cagayan.any.any.geo.json',
+            'ph.cagayan-valley-region-ii.isabela.any.any.geo.json',
+            'ph.cagayan-valley-region-ii.nueva-vizcaya.any.any.geo.json',
+            'ph.cagayan-valley-region-ii.quirino.any.any.geo.json',
+            'ph.cagayan-valley-region-ii.batanes.any.any.geo.json',
+            'ph.central-luzon-region-iii.bulacan.any.any.geo.json',
+            'ph.central-luzon-region-iii.nueva-ecija.any.any.geo.json',
+            'ph.central-luzon-region-iii.pampanga.any.any.geo.json',
+            'ph.central-luzon-region-iii.tarlac.any.any.geo.json',
+            'ph.central-luzon-region-iii.zambales.any.any.geo.json',
+            'ph.central-luzon-region-iii.aurora.any.any.geo.json',
+            'ph.central-luzon-region-iii.bataan.any.any.geo.json',
+            'ph.calabarzon-region-iv-a.laguna.any.any.geo.json',
+            'ph.calabarzon-region-iv-a.cavite.any.any.geo.json',
+            'ph.calabarzon-region-iv-a.batangas.any.any.geo.json',
+            'ph.calabarzon-region-iv-a.quezon.any.any.geo.json',
+            'ph.calabarzon-region-iv-a.rizal.any.any.geo.json',
+            'ph.national-capital-region.metropolitan-manila.any.any.geo.json',
+            'ph.central-visayas-region-vii.cebu.any.any.geo.json',
+            'ph.central-visayas-region-vii.bohol.any.any.geo.json',
+            'ph.central-visayas-region-vii.negros-oriental.any.any.geo.json',
+            'ph.central-visayas-region-vii.siquijor.any.any.geo.json',
+            'ph.western-visayas-region-vi.iloilo.any.any.geo.json',
+            'ph.western-visayas-region-vi.negros-occidental.any.any.geo.json',
+            'ph.western-visayas-region-vi.capiz.any.any.geo.json',
+            'ph.western-visayas-region-vi.aklan.any.any.geo.json',
+            'ph.western-visayas-region-vi.antique.any.any.geo.json',
+            'ph.western-visayas-region-vi.guimaras.any.any.geo.json',
+            'ph.eastern-visayas-region-viii.leyte.any.any.geo.json',
+            'ph.eastern-visayas-region-viii.samar.any.any.geo.json',
+            'ph.eastern-visayas-region-viii.northern-samar.any.any.geo.json',
+            'ph.eastern-visayas-region-viii.eastern-samar.any.any.geo.json',
+            'ph.eastern-visayas-region-viii.southern-leyte.any.any.geo.json',
+            'ph.eastern-visayas-region-viii.biliran.any.any.geo.json',
+            'ph.bicol-region-region-v.camarines-sur.any.any.geo.json',
+            'ph.bicol-region-region-v.camarines-norte.any.any.geo.json',
+            'ph.bicol-region-region-v.albay.any.any.geo.json',
+            'ph.bicol-region-region-v.sorsogon.any.any.geo.json',
+            'ph.bicol-region-region-v.catanduanes.any.any.geo.json',
+            'ph.bicol-region-region-v.masbate.any.any.geo.json',
+            'ph.mimaropa-region-iv-b.oriental-mindoro.any.any.geo.json',
+            'ph.mimaropa-region-iv-b.occidental-mindoro.any.any.geo.json',
+            'ph.mimaropa-region-iv-b.marinduque.any.any.geo.json',
+            'ph.mimaropa-region-iv-b.romblon.any.any.geo.json',
+            'ph.mimaropa-region-iv-b.palawan.any.any.geo.json',
+            'ph.cordillera-administrative-region-car.abra.any.any.geo.json',
+            'ph.cordillera-administrative-region-car.benguet.any.any.geo.json',
+            'ph.cordillera-administrative-region-car.ifugao.any.any.geo.json',
+            'ph.cordillera-administrative-region-car.kalinga.any.any.geo.json',
+            'ph.cordillera-administrative-region-car.mountain-province.any.any.geo.json',
+            'ph.cordillera-administrative-region-car.apayao.any.any.geo.json',
+            'ph.ilocos-region-region-i.ilocos-norte.any.any.geo.json',
+            'ph.ilocos-region-region-i.ilocos-sur.any.any.geo.json',
+            'ph.ilocos-region-region-i.la-union.any.any.geo.json',
+            'ph.ilocos-region-region-i.pangasinan.any.any.geo.json',
+            'ph.northern-mindanao-region-x.bukidnon.any.any.geo.json',
+            'ph.northern-mindanao-region-x.camiguin.any.any.geo.json',
+            'ph.northern-mindanao-region-x.lanao-del-norte.any.any.geo.json',
+            'ph.northern-mindanao-region-x.misamis-occidental.any.any.geo.json',
+            'ph.northern-mindanao-region-x.misamis-oriental.any.any.geo.json',
+            'ph.davao-region-region-xi.davao-del-norte.any.any.geo.json',
+            'ph.davao-region-region-xi.davao-del-sur.any.any.geo.json',
+            'ph.davao-region-region-xi.davao-oriental.any.any.geo.json',
+            'ph.davao-region-region-xi.compostela-valley.any.any.geo.json',
+            'ph.soccsksargen-region-xii.north-cotabato.any.any.geo.json',
+            'ph.soccsksargen-region-xii.south-cotabato.any.any.geo.json',
+            'ph.soccsksargen-region-xii.sultan-kudarat.any.any.geo.json',
+            'ph.soccsksargen-region-xii.sarangani.any.any.geo.json',
+            'ph.caraga-region-xiii.agusan-del-norte.any.any.geo.json',
+            'ph.caraga-region-xiii.agusan-del-sur.any.any.geo.json',
+            'ph.caraga-region-xiii.surigao-del-norte.any.any.geo.json',
+            'ph.caraga-region-xiii.surigao-del-sur.any.any.geo.json',
+            'ph.caraga-region-xiii.dinagat-islands.any.any.geo.json',
+            'ph.zamboanga-peninsula-region-ix.zamboanga-del-norte.any.any.geo.json',
+            'ph.zamboanga-peninsula-region-ix.zamboanga-del-sur.any.any.geo.json',
+            'ph.zamboanga-peninsula-region-ix.zamboanga-sibugay.any.any.geo.json',
+            'ph.autonomous-region-of-muslim-mindanao-armm.basilan.any.any.geo.json',
+            'ph.autonomous-region-of-muslim-mindanao-armm.lanao-del-sur.any.any.geo.json',
+            'ph.autonomous-region-of-muslim-mindanao-armm.maguindanao.any.any.geo.json',
+            'ph.autonomous-region-of-muslim-mindanao-armm.sulu.any.any.geo.json',
+            'ph.autonomous-region-of-muslim-mindanao-armm.tawi-tawi.any.any.geo.json'
+        ];
+
+        function toSlug(name) {
+            if (!name) return '';
+            const cleaned = name
+                .toLowerCase()
+                .replace(/province of\s+/g, '')
+                .replace(/city of\s+/g, '')
+                .replace(/&/g, 'and')
+                .replace(/[^a-z0-9\s-]/g, '')
+                .trim()
+                .replace(/\s+/g, '-');
+            return cleaned;
+        }
+
+        function getProvinceSlug(provinceName) {
+            const key = normalizeProvinceKey(provinceName);
+            if (PROVINCE_SLUG_OVERRIDES[key]) {
+                return PROVINCE_SLUG_OVERRIDES[key];
+            }
+            return toSlug(provinceName);
+        }
+
+        let mapInstance = null;
+        let provinceGeoJSONLayer = null;
+
+        const provinceCenters = new Map();
+        const provinceSummaryLookup = new Map();
+        const provinceMarkers = new Map();
+        const provinceLayers = new Map();
+        const activeProjectMarkers = [];
+        const hiddenProvinceMarkers = new Set();
+        const pendingSummaryQueue = [];
+        let summaryQueueBusy = false;
+        let activeProvinceKey = null;
+        const provinceGeometryCache = new Map();
+
+        function hashString(value) {
+            let hash = 0;
+            if (!value) return hash;
+            for (let i = 0; i < value.length; i += 1) {
+                hash = ((hash << 5) - hash) + value.charCodeAt(i);
+                hash |= 0;
+            }
+            return Math.abs(hash);
+        }
+
+        function getProvinceGeometry(key) {
+            if (provinceGeometryCache.has(key)) {
+                return provinceGeometryCache.get(key);
+            }
+            const layer = provinceLayers.get(key);
+            if (!layer) {
+                return null;
+            }
+            const geo = layer.toGeoJSON?.();
+            const geometry = geo?.geometry || null;
+            if (geometry) {
+                provinceGeometryCache.set(key, geometry);
+            }
+            return geometry;
+        }
+
+        function ringContainsPoint(ring, lat, lng) {
+            if (!Array.isArray(ring) || ring.length < 3) {
+                return false;
+            }
+            let inside = false;
+            const y = lat;
+            const x = lng;
+            for (let i = 0, j = ring.length - 1; i < ring.length; j = i, i += 1) {
+                const xi = ring[i][0];
+                const yi = ring[i][1];
+                const xj = ring[j][0];
+                const yj = ring[j][1];
+                const intersects = ((yi > y) !== (yj > y)) && (x < ((xj - xi) * (y - yi)) / (yj - yi + 1e-12) + xi);
+                if (intersects) inside = !inside;
+            }
+            return inside;
+        }
+
+        function polygonContainsPoint(polygon, lat, lng) {
+            if (!Array.isArray(polygon) || !polygon.length) {
+                return false;
+            }
+            const outer = polygon[0];
+            if (!ringContainsPoint(outer, lat, lng)) {
+                return false;
+            }
+            for (let i = 1; i < polygon.length; i += 1) {
+                if (ringContainsPoint(polygon[i], lat, lng)) {
+                    return false;
+                }
+            }
+            return true;
+        }
+
+        function geometryContainsPoint(geometry, lat, lng) {
+            if (!geometry) {
                 return true;
             }
-        }
-        return false;
-    }
-    return true;
-}
-
-function generateFallbackCoordinate(provinceKey, sourceKey, center, projectKey) {
-    if (!center) {
-        return null;
-    }
-    const layer = provinceLayers.get(provinceKey);
-    const bounds = layer?.getBounds?.();
-    const geometry = getProvinceGeometry(provinceKey);
-    const latSpan = bounds ? Math.max(Math.abs(bounds.getNorth() - bounds.getSouth()), 1e-3) : 0.6;
-    const lngSpan = bounds ? Math.max(Math.abs(bounds.getEast() - bounds.getWest()), 1e-3) : 0.6;
-    const span = Math.max(latSpan, lngSpan);
-    const sourceBias = (sourceKey === 'philgeps' || sourceKey === 'microsite') ? 0.35 : 0.18;
-    const baseRadius = span * sourceBias;
-    const seed = hashString(`${provinceKey}:${projectKey}:${sourceKey}`);
-    const maxAttempts = 24;
-
-    for (let attempt = 0; attempt < maxAttempts; attempt += 1) {
-        const angleDeg = (seed + attempt * 57) % 360;
-        const angleRad = angleDeg * (Math.PI / 180);
-        const variance = ((seed >> (attempt % 16)) & 0xff) / 255;
-        const radiusFactor = 0.25 + (variance * 0.75);
-        const shrink = Math.max(0.25, 1 - (attempt / maxAttempts) * 0.7);
-        const radius = baseRadius * radiusFactor * shrink;
-        const latOffset = Math.sin(angleRad) * radius;
-        const lngOffset = Math.cos(angleRad) * radius * Math.cos(center.lat * (Math.PI / 180));
-        const candidateLat = center.lat + latOffset;
-        const candidateLng = center.lng + lngOffset;
-        if (!geometry || geometryContainsPoint(geometry, candidateLat, candidateLng)) {
-            return { latitude: candidateLat, longitude: candidateLng };
-        }
-    }
-
-    return { latitude: center.lat, longitude: center.lng };
-}
-
-function updateMapStatus(message) {
-    console.log(`🗺️ ${message}`);
-}
-
-function clearActiveProjectMarkers(restoreProvinceMarkers = true) {
-    activeProjectMarkers.forEach(marker => {
-        try {
-            mapInstance?.removeLayer(marker);
-        } catch (error) {
-            console.warn('Failed to remove project marker:', error);
-        }
-    });
-    activeProjectMarkers.length = 0;
-    if (restoreProvinceMarkers) {
-        restoreHiddenProvinceMarkers();
-    }
-}
-
-function normalizeProvinceKey(name) {
-    if (!name) return '';
-    const cleaned = name
-        .toLowerCase()
-        .replace(/province of\s+/g, '')
-        .replace(/city of\s+/g, '')
-        .replace(/\band\b/g, '&')
-        .replace(/[^a-z0-9]/g, '');
-    return PROVINCE_KEY_OVERRIDES[cleaned] || cleaned;
-}
-
-const defaultProvinceStyle = {
-    color: '#0F172A',
-    weight: 1.5,
-    opacity: 0.8,
-    fillColor: '#0F172A',
-    fillOpacity: 0.05
-};
-
-async function initializeMap() {
-    const mapContainer = document.getElementById('map');
-    if (!mapContainer) {
-            return;
+            const { type, coordinates } = geometry;
+            if (!coordinates) {
+                return true;
+            }
+            if (type === 'Polygon') {
+                return polygonContainsPoint(coordinates, lat, lng);
+            }
+            if (type === 'MultiPolygon') {
+                for (let i = 0; i < coordinates.length; i += 1) {
+                    if (polygonContainsPoint(coordinates[i], lat, lng)) {
+                        return true;
+                    }
+                }
+                return false;
+            }
+            return true;
         }
 
-        mapInstance = L.map('map', {
-            preferCanvas: false,
-            renderer: L.canvas()
-    });
+        function generateFallbackCoordinate(provinceKey, sourceKey, center, projectKey) {
+            if (!center) {
+                return null;
+            }
+            const layer = provinceLayers.get(provinceKey);
+            const bounds = layer?.getBounds?.();
+            const geometry = getProvinceGeometry(provinceKey);
+            const latSpan = bounds ? Math.max(Math.abs(bounds.getNorth() - bounds.getSouth()), 1e-3) : 0.6;
+            const lngSpan = bounds ? Math.max(Math.abs(bounds.getEast() - bounds.getWest()), 1e-3) : 0.6;
+            const span = Math.max(latSpan, lngSpan);
+            const sourceBias = (sourceKey === 'philgeps' || sourceKey === 'microsite') ? 0.35 : 0.18;
+            const baseRadius = span * sourceBias;
+            const seed = hashString(`${provinceKey}:${projectKey}:${sourceKey}`);
+            const maxAttempts = 24;
 
-    mapInstance.setView([12.2, 121.8], 6.2);
+            for (let attempt = 0; attempt < maxAttempts; attempt += 1) {
+                const angleDeg = (seed + attempt * 57) % 360;
+                const angleRad = angleDeg * (Math.PI / 180);
+                const variance = ((seed >> (attempt % 16)) & 0xff) / 255;
+                const radiusFactor = 0.25 + (variance * 0.75);
+                const shrink = Math.max(0.25, 1 - (attempt / maxAttempts) * 0.7);
+                const radius = baseRadius * radiusFactor * shrink;
+                const latOffset = Math.sin(angleRad) * radius;
+                const lngOffset = Math.cos(angleRad) * radius * Math.cos(center.lat * (Math.PI / 180));
+                const candidateLat = center.lat + latOffset;
+                const candidateLng = center.lng + lngOffset;
+                if (!geometry || geometryContainsPoint(geometry, candidateLat, candidateLng)) {
+                    return { latitude: candidateLat, longitude: candidateLng };
+                }
+            }
 
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-            attribution: '© OpenStreetMap contributors',
-            maxZoom: 19,
-            minZoom: 3,
-            subdomains: ['a', 'b', 'c'],
-            tileSize: 256,
-            zoomOffset: 0,
-            crossOrigin: true,
-        bounds: [[4.5, 116], [21, 127]],
-        maxBounds: [[4.5, 116], [21, 127]]
-        }).addTo(mapInstance);
-
-        mapInstance.fitBounds([[4.5, 116], [21, 127]], {
-            padding: [30, 30],
-        maxZoom: 7
-    });
-
-    try {
-        await addProvinceBoundaries();
-        setTimeout(() => mapInstance.invalidateSize(), 150);
-    } catch (error) {
-        console.error('Failed to initialize map:', error);
-    }
-}
-
-function extractProvinceDisplayName(geoData, filename) {
-    if (!geoData) return filename;
-    if (geoData.properties) {
-        if (geoData.properties.province_name) {
-            return geoData.properties.province_name;
+            return { latitude: center.lat, longitude: center.lng };
         }
-        if (geoData.properties.name) {
-            return geoData.properties.name;
-        }
-        if (geoData.properties.PROVINCE) {
-            return geoData.properties.PROVINCE;
-        }
-    }
-    if (geoData.features && geoData.features.length > 0) {
-        const feature = geoData.features[0];
-        if (feature.properties?.province_name) {
-            return feature.properties.province_name;
-        }
-        if (feature.properties?.name) {
-            return feature.properties.name;
-        }
-        if (feature.properties?.PROVINCE) {
-            return feature.properties.PROVINCE;
-        }
-    }
-    const parts = filename.split('.');
-    if (parts.length >= 3) {
-        const raw = parts[2].replace(/-/g, ' ');
-        return raw.replace(/\b\w/g, char => char.toUpperCase());
-    }
-    return filename;
-}
 
-async function loadProvinceGeometry(filename, batchIndex) {
-    const response = await fetch(`/static/data/${filename}`);
-    if (!response.ok) {
-        throw new Error(`Failed to load ${filename}`);
-    }
-    const geoData = await response.json();
-    const displayName = extractProvinceDisplayName(geoData, filename);
-    const key = normalizeProvinceKey(displayName);
+        function updateMapStatus(message) {
+            console.log(`🗺️ ${message}`);
+        }
 
-    const geoLayer = L.geoJSON(geoData, {
-        style: () => ({ ...defaultProvinceStyle }),
-        onEachFeature: (_, featureLayer) => {
-            featureLayer.bindTooltip(`Click ${displayName}`, {
+        function clearActiveProjectMarkers(restoreProvinceMarkers = true) {
+            activeProjectMarkers.forEach(marker => {
+                try {
+                    mapInstance?.removeLayer(marker);
+                } catch (error) {
+                    console.warn('Failed to remove project marker:', error);
+                }
+            });
+            activeProjectMarkers.length = 0;
+            if (restoreProvinceMarkers) {
+                restoreHiddenProvinceMarkers();
+            }
+        }
+
+        function normalizeProvinceKey(name) {
+            if (!name) return '';
+            const cleaned = name
+                .toLowerCase()
+                .replace(/province of\s+/g, '')
+                .replace(/city of\s+/g, '')
+                .replace(/\band\b/g, '&')
+                .replace(/[^a-z0-9]/g, '');
+            return PROVINCE_KEY_OVERRIDES[cleaned] || cleaned;
+        }
+
+        const defaultProvinceStyle = {
+            color: '#0F172A',
+            weight: 1.5,
+            opacity: 0.8,
+            fillColor: '#0F172A',
+            fillOpacity: 0.05
+        };
+
+        async function initializeMap() {
+            const mapContainer = document.getElementById('map');
+            if (!mapContainer) {
+                return;
+            }
+
+            mapInstance = L.map('map', {
+                preferCanvas: false,
+                renderer: L.canvas()
+            });
+
+            mapInstance.setView([12.2, 121.8], 6.2);
+
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '© OpenStreetMap contributors',
+                maxZoom: 19,
+                minZoom: 3,
+                subdomains: ['a', 'b', 'c'],
+                tileSize: 256,
+                zoomOffset: 0,
+                crossOrigin: true,
+                bounds: [[4.5, 116], [21, 127]],
+                maxBounds: [[4.5, 116], [21, 127]]
+            }).addTo(mapInstance);
+
+            mapInstance.fitBounds([[4.5, 116], [21, 127]], {
+                padding: [30, 30],
+                maxZoom: 7
+            });
+
+            try {
+                await addProvinceBoundaries();
+                setTimeout(() => mapInstance.invalidateSize(), 150);
+            } catch (error) {
+                console.error('Failed to initialize map:', error);
+            }
+        }
+
+        function extractProvinceDisplayName(geoData, filename) {
+            if (!geoData) return filename;
+            if (geoData.properties) {
+                if (geoData.properties.province_name) {
+                    return geoData.properties.province_name;
+                }
+                if (geoData.properties.name) {
+                    return geoData.properties.name;
+                }
+                if (geoData.properties.PROVINCE) {
+                    return geoData.properties.PROVINCE;
+                }
+            }
+            if (geoData.features && geoData.features.length > 0) {
+                const feature = geoData.features[0];
+                if (feature.properties?.province_name) {
+                    return feature.properties.province_name;
+                }
+                if (feature.properties?.name) {
+                    return feature.properties.name;
+                }
+                if (feature.properties?.PROVINCE) {
+                    return feature.properties.PROVINCE;
+                }
+            }
+            const parts = filename.split('.');
+            if (parts.length >= 3) {
+                const raw = parts[2].replace(/-/g, ' ');
+                return raw.replace(/\b\w/g, char => char.toUpperCase());
+            }
+            return filename;
+        }
+
+        async function loadProvinceGeometry(filename, batchIndex) {
+            const response = await fetch(`/static/data/${filename}`);
+            if (!response.ok) {
+                throw new Error(`Failed to load ${filename}`);
+            }
+            const geoData = await response.json();
+            const displayName = extractProvinceDisplayName(geoData, filename);
+            const key = normalizeProvinceKey(displayName);
+
+            const geoLayer = L.geoJSON(geoData, {
+                style: () => ({ ...defaultProvinceStyle }),
+                onEachFeature: (_, featureLayer) => {
+                    featureLayer.bindTooltip(`Click ${displayName}`, {
                         permanent: false,
                         direction: 'center',
-                className: 'province-tooltip'
-            });
+                        className: 'province-tooltip'
+                    });
 
-            featureLayer.on('click', () => {
-                const center = provinceCenters.get(key)?.center;
-                if (center && !provinceMarkers.has(key)) {
-                    createProvinceMarker(key, center, displayName, provinceSummaryLookup.get(key) || null);
-                }
-                handleProvinceClick(displayName, key);
-            });
-            featureLayer.on('mouseover', () => {
-                if (activeProvinceKey !== key) {
-                    featureLayer.setStyle({
-                        ...defaultProvinceStyle,
-                        fillOpacity: 0.2,
-                        weight: 2.5
+                    featureLayer.on('click', () => {
+                        const center = provinceCenters.get(key)?.center;
+                        if (center && !provinceMarkers.has(key)) {
+                            createProvinceMarker(key, center, displayName, provinceSummaryLookup.get(key) || null);
+                        }
+                        handleProvinceClick(displayName, key);
+                    });
+                    featureLayer.on('mouseover', () => {
+                        if (activeProvinceKey !== key) {
+                            featureLayer.setStyle({
+                                ...defaultProvinceStyle,
+                                fillOpacity: 0.2,
+                                weight: 2.5
+                            });
+                        }
+                    });
+                    featureLayer.on('mouseout', () => {
+                        if (activeProvinceKey !== key) {
+                            featureLayer.setStyle({ ...defaultProvinceStyle });
+                        }
                     });
                 }
             });
-            featureLayer.on('mouseout', () => {
-                if (activeProvinceKey !== key) {
-                    featureLayer.setStyle({ ...defaultProvinceStyle });
+
+            geoLayer.addTo(provinceGeoJSONLayer);
+
+            const bounds = geoLayer.getBounds();
+            if (bounds.isValid()) {
+                provinceCenters.set(key, {
+                    center: bounds.getCenter(),
+                    displayName
+                });
+            }
+
+            provinceLayers.set(key, geoLayer);
+
+            const existingSummary = provinceSummaryLookup.get(key) || null;
+            const centerEntry = provinceCenters.get(key);
+            if (centerEntry?.center) {
+                createProvinceMarker(key, centerEntry.center, displayName, existingSummary);
+            }
+
+            enqueueProvinceSummaryLoad(key, displayName);
+
+            return { key, displayName };
+        }
+
+        async function addProvinceBoundaries() {
+            if (!mapInstance) return;
+
+            if (provinceGeoJSONLayer) {
+                provinceGeoJSONLayer.remove();
+            }
+
+            provinceGeoJSONLayer = L.layerGroup().addTo(mapInstance);
+            provinceCenters.clear();
+            provinceLayers.clear();
+            provinceGeometryCache.clear();
+            provinceMarkers.forEach(marker => {
+                try {
+                    mapInstance?.removeLayer(marker);
+                } catch (error) {
+                    console.warn('Failed to remove province marker while resetting layers:', error);
                 }
             });
-        }
-    });
+            provinceMarkers.clear();
+            clearActiveProjectMarkers();
 
-    geoLayer.addTo(provinceGeoJSONLayer);
+            const batchSize = 8;
+            let loaded = 0;
 
-    const bounds = geoLayer.getBounds();
-    if (bounds.isValid()) {
-        provinceCenters.set(key, {
-            center: bounds.getCenter(),
-            displayName
-        });
-    }
-
-    provinceLayers.set(key, geoLayer);
-
-    const existingSummary = provinceSummaryLookup.get(key) || null;
-    const centerEntry = provinceCenters.get(key);
-    if (centerEntry?.center) {
-        createProvinceMarker(key, centerEntry.center, displayName, existingSummary);
-    }
-
-    enqueueProvinceSummaryLoad(key, displayName);
-
-    return { key, displayName };
-}
-
-async function addProvinceBoundaries() {
-    if (!mapInstance) return;
-
-    if (provinceGeoJSONLayer) {
-        provinceGeoJSONLayer.remove();
-    }
-
-    provinceGeoJSONLayer = L.layerGroup().addTo(mapInstance);
-    provinceCenters.clear();
-    provinceLayers.clear();
-    provinceGeometryCache.clear();
-    provinceMarkers.forEach(marker => {
-        try {
-            mapInstance?.removeLayer(marker);
-                } catch (error) {
-            console.warn('Failed to remove province marker while resetting layers:', error);
-        }
-    });
-    provinceMarkers.clear();
-    clearActiveProjectMarkers();
-
-    const batchSize = 8;
-    let loaded = 0;
-
-    for (let i = 0; i < PROVINCE_GEOJSON_FILES.length; i += batchSize) {
-        const batch = PROVINCE_GEOJSON_FILES.slice(i, i + batchSize);
-        const results = await Promise.allSettled(batch.map((file, idx) => loadProvinceGeometry(file, i + idx)));
-        results.forEach((result, index) => {
-            if (result.status !== 'fulfilled') {
-                console.warn(`Failed to load province geometry ${batch[index]}:`, result.reason);
+            for (let i = 0; i < PROVINCE_GEOJSON_FILES.length; i += batchSize) {
+                const batch = PROVINCE_GEOJSON_FILES.slice(i, i + batchSize);
+                const results = await Promise.allSettled(batch.map((file, idx) => loadProvinceGeometry(file, i + idx)));
+                results.forEach((result, index) => {
+                    if (result.status !== 'fulfilled') {
+                        console.warn(`Failed to load province geometry ${batch[index]}:`, result.reason);
+                    }
+                });
+                loaded += batch.length;
+                updateMapStatus(`Loaded ${Math.min(loaded, PROVINCE_GEOJSON_FILES.length)}/${PROVINCE_GEOJSON_FILES.length} province boundaries...`);
             }
-        });
-        loaded += batch.length;
-        updateMapStatus(`Loaded ${Math.min(loaded, PROVINCE_GEOJSON_FILES.length)}/${PROVINCE_GEOJSON_FILES.length} province boundaries...`);
-    }
 
-    updateMapStatus('Province boundaries ready. Click a province to fetch integrated data.');
-}
+            updateMapStatus('Province boundaries ready. Click a province to fetch integrated data.');
+        }
 
-function highlightProvinceLayer(key) {
-    if (!provinceGeoJSONLayer) return;
+        function highlightProvinceLayer(key) {
+            if (!provinceGeoJSONLayer) return;
 
-    if (activeProvinceKey && provinceLayers.has(activeProvinceKey)) {
-        provinceLayers.get(activeProvinceKey).setStyle({ ...defaultProvinceStyle });
-    }
+            if (activeProvinceKey && provinceLayers.has(activeProvinceKey)) {
+                provinceLayers.get(activeProvinceKey).setStyle({ ...defaultProvinceStyle });
+            }
 
-    activeProvinceKey = key;
-    const layer = provinceLayers.get(key);
-    if (layer) {
-        layer.setStyle({
-            ...defaultProvinceStyle,
-            fillOpacity: 0.35,
-            weight: 3
-        });
-    }
-}
+            activeProvinceKey = key;
+            const layer = provinceLayers.get(key);
+            if (layer) {
+                layer.setStyle({
+                    ...defaultProvinceStyle,
+                    fillOpacity: 0.35,
+                    weight: 3
+                });
+            }
+        }
 
 
-function createIntegratedIcon(summary) {
-    const html = `
+        function createIntegratedIcon(summary) {
+            const html = `
         <div class="integrated-marker" title="${summary.name}">
             ${SOURCE_ORDER.map(sourceKey => createShapeHTML(sourceKey, summary.counts[sourceKey] || 0)).join('')}
                     </div>
                 `;
 
-    return L.divIcon({
-        className: 'integrated-marker-wrapper',
-        html,
-        iconSize: [28, 28],
-        iconAnchor: [14, 14]
-    });
-}
-
-function createShapeHTML(sourceKey, count) {
-    const meta = SOURCE_META[sourceKey];
-    const isEmpty = !count;
-    const scale = computeScale(count);
-    const countLabel = isEmpty ? '' : `<span class="integrated-count-label">${formatCount(count)}</span>`;
-    const tooltip = `${meta.label}: ${count.toLocaleString('en-PH')}`;
-
-    return `<div class="integrated-shape ${meta.className} ${isEmpty ? 'empty' : ''}" style="--scale:${scale};" title="${tooltip}">${countLabel}</div>`;
-}
-
-function computeScale(count) {
-    if (!count) return 0.6;
-    const log = Math.log10(count + 1);
-    return Math.min(1.4, 0.6 + log * 0.3);
-}
-
-function formatCount(count) {
-    if (count >= 1000000) {
-        return `${(count / 1000000).toFixed(1)}m`;
-    }
-    if (count >= 1000) {
-        const value = count / 1000;
-        return value >= 10 ? `${Math.round(value)}k` : `${value.toFixed(1)}k`;
-    }
-    return `${count}`;
-}
-
-function formatCurrency(value) {
-    const numericValue = Number(value);
-    if (!isFinite(numericValue)) {
-        return 'N/A';
-    }
-    return `₱${numericValue.toLocaleString('en-PH', { maximumFractionDigits: 0 })}`;
-}
-
-function computeMarkerScale(amount) {
-    const numeric = typeof amount === 'string'
-        ? Number(amount.replace(/[^0-9.\-]+/g, ''))
-        : Number(amount);
-    if (!isFinite(numeric) || numeric <= 0) {
-        return 0.4;
-    }
-
-    const millions = Math.max(numeric / 1000000, 0);
-    const logFactor = Math.log10(millions + 1);
-    const scale = 0.4 + logFactor * 0.6;
-    return Math.max(0.4, Math.min(scale, 2.4));
-}
-
-async function handleProvinceClick(provinceName, key) {
-    highlightProvinceLayer(key);
-
-    const centerEntry = provinceCenters.get(key);
-    if (!centerEntry) {
-        console.warn('No center data for province', provinceName);
-        return;
-    }
-
-    let summary = provinceSummaryLookup.get(key);
-    let marker = provinceMarkers.get(key);
-
-    if (!summary) {
-        marker = createProvinceMarker(key, centerEntry.center, provinceName, null);
-        marker.openPopup();
-        try {
-            prioritizeProvinceSummary(key, provinceName);
-            summary = await ensureProvinceSummary(key, provinceName);
-    } catch (error) {
-            console.error('Failed to load province summary:', error);
-            updateMapStatus(`Unable to load data for ${provinceName}.`);
-            return;
+            return L.divIcon({
+                className: 'integrated-marker-wrapper',
+                html,
+                iconSize: [28, 28],
+                iconAnchor: [14, 14]
+            });
         }
-    }
 
-    if (!summary) {
-        return;
-    }
+        function createShapeHTML(sourceKey, count) {
+            const meta = SOURCE_META[sourceKey];
+            const isEmpty = !count;
+            const scale = computeScale(count);
+            const countLabel = isEmpty ? '' : `<span class="integrated-count-label">${formatCount(count)}</span>`;
+            const tooltip = `${meta.label}: ${count.toLocaleString('en-PH')}`;
 
-    if (!marker) {
-        marker = createProvinceMarker(key, centerEntry.center, provinceName, summary);
-    }
-
-    showProvinceStatus(provinceName, summary);
-
-    marker = provinceMarkers.get(key);
-    if (marker) {
-        marker.setPopupContent(createProvincePopup(provinceName, summary));
-        marker.openPopup();
-        mapInstance.flyTo(marker.getLatLng(), Math.max(mapInstance.getZoom(), 7), {
-            duration: 0.5
-        });
-        if ((summary.counts?.ssp || 0) > 0) {
-            loadSspProjectsIntoPopup(provinceName, summary);
+            return `<div class="integrated-shape ${meta.className} ${isEmpty ? 'empty' : ''}" style="--scale:${scale};" title="${tooltip}">${countLabel}</div>`;
         }
-        bindProvincePopupButton(key, provinceName, summary);
-    }
-}
 
-function showProvinceStatus(provinceName, summary) {
-    const fragments = SOURCE_ORDER.map(sourceKey => {
-        const meta = SOURCE_META[sourceKey];
-        const count = summary.counts[sourceKey] || 0;
-        return `${meta.shortLabel}: ${count.toLocaleString('en-PH')}`;
-    });
+        function computeScale(count) {
+            if (!count) return 0.6;
+            const log = Math.log10(count + 1);
+            return Math.min(1.4, 0.6 + log * 0.3);
+        }
 
-    updateMapStatus(`${provinceName} — ${fragments.join(' • ')}`);
-}
+        function formatCount(count) {
+            if (count >= 1000000) {
+                return `${(count / 1000000).toFixed(1)}m`;
+            }
+            if (count >= 1000) {
+                const value = count / 1000;
+                return value >= 10 ? `${Math.round(value)}k` : `${value.toFixed(1)}k`;
+            }
+            return `${count}`;
+        }
 
-function createProvincePopup(provinceName, summary) {
-    const rows = SOURCE_ORDER.map(sourceKey => {
-        const meta = SOURCE_META[sourceKey];
-        const count = summary.counts[sourceKey] || 0;
-        const share = summary.total ? ((count / summary.total) * 100).toFixed(1) : '0.0';
+        function formatCurrency(value) {
+            const numericValue = Number(value);
+            if (!isFinite(numericValue)) {
+                return 'N/A';
+            }
+            return `₱${numericValue.toLocaleString('en-PH', { maximumFractionDigits: 0 })}`;
+        }
 
-        return `
+        function computeMarkerScale(amount) {
+            const numeric = typeof amount === 'string'
+                ? Number(amount.replace(/[^0-9.\-]+/g, ''))
+                : Number(amount);
+            if (!isFinite(numeric) || numeric <= 0) {
+                return 0.4;
+            }
+
+            const millions = Math.max(numeric / 1000000, 0);
+            const logFactor = Math.log10(millions + 1);
+            const scale = 0.4 + logFactor * 0.6;
+            return Math.max(0.4, Math.min(scale, 2.4));
+        }
+
+        async function handleProvinceClick(provinceName, key) {
+            highlightProvinceLayer(key);
+
+            const centerEntry = provinceCenters.get(key);
+            if (!centerEntry) {
+                console.warn('No center data for province', provinceName);
+                return;
+            }
+
+            let summary = provinceSummaryLookup.get(key);
+            let marker = provinceMarkers.get(key);
+
+            if (!summary) {
+                marker = createProvinceMarker(key, centerEntry.center, provinceName, null);
+                marker.openPopup();
+                try {
+                    prioritizeProvinceSummary(key, provinceName);
+                    summary = await ensureProvinceSummary(key, provinceName);
+                } catch (error) {
+                    console.error('Failed to load province summary:', error);
+                    updateMapStatus(`Unable to load data for ${provinceName}.`);
+                    return;
+                }
+            }
+
+            if (!summary) {
+                return;
+            }
+
+            if (!marker) {
+                marker = createProvinceMarker(key, centerEntry.center, provinceName, summary);
+            }
+
+            showProvinceStatus(provinceName, summary);
+
+            marker = provinceMarkers.get(key);
+            if (marker) {
+                marker.setPopupContent(createProvincePopup(provinceName, summary));
+                marker.openPopup();
+                mapInstance.flyTo(marker.getLatLng(), Math.max(mapInstance.getZoom(), 7), {
+                    duration: 0.5
+                });
+                if ((summary.counts?.ssp || 0) > 0) {
+                    loadSspProjectsIntoPopup(provinceName, summary);
+                }
+                bindProvincePopupButton(key, provinceName, summary);
+            }
+        }
+
+        function showProvinceStatus(provinceName, summary) {
+            const fragments = SOURCE_ORDER.map(sourceKey => {
+                const meta = SOURCE_META[sourceKey];
+                const count = summary.counts[sourceKey] || 0;
+                return `${meta.shortLabel}: ${count.toLocaleString('en-PH')}`;
+            });
+
+            updateMapStatus(`${provinceName} — ${fragments.join(' • ')}`);
+        }
+
+        function createProvincePopup(provinceName, summary) {
+            const rows = SOURCE_ORDER.map(sourceKey => {
+                const meta = SOURCE_META[sourceKey];
+                const count = summary.counts[sourceKey] || 0;
+                const share = summary.total ? ((count / summary.total) * 100).toFixed(1) : '0.0';
+
+                return `
             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
                 <span style="display:flex; align-items:center; gap:8px;">
                     <span class="integrated-shape ${meta.className}" style="--scale:0.55; width:14px; height:14px; border:none;"></span>
@@ -983,13 +1016,13 @@ function createProvincePopup(provinceName, summary) {
                 <span><strong>${count.toLocaleString('en-PH')}</strong> <span style="color:#64748b;">(${share}%)</span></span>
                                 </div>
                             `;
-    }).join('');
+            }).join('');
 
-    const totalCost = summary.total_cost
-        ? `₱${Math.round(summary.total_cost).toLocaleString('en-PH')}`
-        : '₱0';
+            const totalCost = summary.total_cost
+                ? `₱${Math.round(summary.total_cost).toLocaleString('en-PH')}`
+                : '₱0';
 
-    return `
+            return `
         <div style="min-width:240px; font-family:'Inter', sans-serif;">
             <h3 style="margin:0 0 8px; font-size:16px; color:#0f172a;">${provinceName}</h3>
             <div style="font-size:13px; color:#475569; margin-bottom:12px; line-height:1.5;">
@@ -1004,40 +1037,40 @@ function createProvincePopup(provinceName, summary) {
             <div id="province-project-list-${normalizeProvinceKey(provinceName)}" style="margin-top:12px; display:none; max-height:260px; overflow-y:auto; padding-right:6px;"></div>
                     </div>
                 `;
-                            }
-                            
-async function loadSspProjectsIntoPopup(provinceName, summary) {
-    const containerId = `ssp-projects-${normalizeProvinceKey(provinceName)}`;
-    const container = document.getElementById(containerId);
-    if (!container) return;
-
-    container.innerHTML = 'Loading SSP project snapshots...';
-
-    try {
-        const response = await fetch(`/api/flood/projects?province=${encodeURIComponent(provinceName)}&limit=20&offset=0`);
-                        if (!response.ok) {
-            throw new Error(`HTTP ${response.status}`);
         }
 
-        const payload = await response.json();
-        const projects = (payload.projects || []).filter(project =>
-            project.Latitude && project.Longitude && !isNaN(parseFloat(project.Latitude)) && !isNaN(parseFloat(project.Longitude))
-        ).slice(0, 5);
+        async function loadSspProjectsIntoPopup(provinceName, summary) {
+            const containerId = `ssp-projects-${normalizeProvinceKey(provinceName)}`;
+            const container = document.getElementById(containerId);
+            if (!container) return;
 
-        if (!projects.length) {
-            container.innerHTML = '<em>No flood-control projects with coordinates yet in this province.</em>';
-                return;
-            }
-            
-        const listItems = projects.map(project => {
-            const lat = parseFloat(project.Latitude).toFixed(6);
-            const lng = parseFloat(project.Longitude).toFixed(6);
-            const streetViewUrl = `https://www.google.com/maps/@?api=1&map_action=pano&viewpoint=${lat},${lng}`;
-            const mapsUrl = `https://www.google.com/maps/search/?api=1&query=${lat},${lng}`;
-            const title = project.ProjectTitle || project.ProjectName || 'Flood control project';
-            const cost = project.ContractCost ? `₱${Number(project.ContractCost).toLocaleString('en-PH')}` : 'N/A';
+            container.innerHTML = 'Loading SSP project snapshots...';
 
-            return `
+            try {
+                const response = await fetch(`/api/flood/projects?province=${encodeURIComponent(provinceName)}&limit=20&offset=0`);
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}`);
+                }
+
+                const payload = await response.json();
+                const projects = (payload.projects || []).filter(project =>
+                    project.Latitude && project.Longitude && !isNaN(parseFloat(project.Latitude)) && !isNaN(parseFloat(project.Longitude))
+                ).slice(0, 5);
+
+                if (!projects.length) {
+                    container.innerHTML = '<em>No flood-control projects with coordinates yet in this province.</em>';
+                    return;
+                }
+
+                const listItems = projects.map(project => {
+                    const lat = parseFloat(project.Latitude).toFixed(6);
+                    const lng = parseFloat(project.Longitude).toFixed(6);
+                    const streetViewUrl = `https://www.google.com/maps/@?api=1&map_action=pano&viewpoint=${lat},${lng}`;
+                    const mapsUrl = `https://www.google.com/maps/search/?api=1&query=${lat},${lng}`;
+                    const title = project.ProjectTitle || project.ProjectName || 'Flood control project';
+                    const cost = project.ContractCost ? `₱${Number(project.ContractCost).toLocaleString('en-PH')}` : 'N/A';
+
+                    return `
                 <li style="margin-bottom:10px;">
                     <div style="font-weight:600; color:#0f172a;">${title}</div>
                     <div style="color:#64748b; font-size:11px;">
@@ -1049,9 +1082,9 @@ async function loadSspProjectsIntoPopup(provinceName, summary) {
                                         </div>
                 </li>
             `;
-        }).join('');
+                }).join('');
 
-        container.innerHTML = `
+                container.innerHTML = `
             <div style="font-weight:600; color:#0f172a; margin-bottom:6px;">Flood Control (SSP) projects with Street View</div>
             <ul style="list-style:none; padding:0; margin:0;">
                 ${listItems}
@@ -1060,627 +1093,627 @@ async function loadSspProjectsIntoPopup(provinceName, summary) {
                 <a href="/api/flood/projects?province=${encodeURIComponent(provinceName)}&limit=100&offset=0" target="_blank" style="font-size:11px; color:#2563eb;">Open full SSP list</a>
                                     </div>
                                 `;
-                    } catch (error) {
-        console.error('Failed to load SSP projects:', error);
-        container.innerHTML = '<em>Street View lookup failed. Please try again.</em>';
-    }
-}
+            } catch (error) {
+                console.error('Failed to load SSP projects:', error);
+                container.innerHTML = '<em>Street View lookup failed. Please try again.</em>';
+            }
+        }
 
 
-function createPlaceholderIcon() {
-    return L.divIcon({
-        className: 'integrated-marker-wrapper',
-        html: `<div class="integrated-marker" style="opacity:0.7; filter: grayscale(0.35);">${SOURCE_ORDER.map(() => '<div class="integrated-shape empty"></div>').join('')}</div>`,
-        iconSize: [28, 28],
-        iconAnchor: [14, 14]
-    });
-}
+        function createPlaceholderIcon() {
+            return L.divIcon({
+                className: 'integrated-marker-wrapper',
+                html: `<div class="integrated-marker" style="opacity:0.7; filter: grayscale(0.35);">${SOURCE_ORDER.map(() => '<div class="integrated-shape empty"></div>').join('')}</div>`,
+                iconSize: [28, 28],
+                iconAnchor: [14, 14]
+            });
+        }
 
-function createProjectMarkerIcon(sourceKey, options = {}) {
-    const meta = SOURCE_META[sourceKey] || { className: 'circle' };
-    const classes = ['project-marker', meta.className];
-    if (options.unknown) {
-        classes.push('unknown');
-    }
-    if (options.flagStatus === 'red') {
-        classes.push('flag-red');
-    } else if (options.flagStatus === 'green') {
-        classes.push('flag-green');
-    }
-    const scaleValue = Number.isFinite(options.scale) ? options.scale : 1;
-    const scaleAttr = ` style="--scale:${scaleValue.toFixed(3)};"`;
-    return L.divIcon({
-        className: 'project-marker-wrapper',
-        html: `<div class="${classes.join(' ')}"${scaleAttr}></div>`,
-        iconSize: [18, 18],
-        iconAnchor: [9, 9]
-    });
-}
+        function createProjectMarkerIcon(sourceKey, options = {}) {
+            const meta = SOURCE_META[sourceKey] || { className: 'circle' };
+            const classes = ['project-marker', meta.className];
+            if (options.unknown) {
+                classes.push('unknown');
+            }
+            if (options.flagStatus === 'red') {
+                classes.push('flag-red');
+            } else if (options.flagStatus === 'green') {
+                classes.push('flag-green');
+            }
+            const scaleValue = Number.isFinite(options.scale) ? options.scale : 1;
+            const scaleAttr = ` style="--scale:${scaleValue.toFixed(3)};"`;
+            return L.divIcon({
+                className: 'project-marker-wrapper',
+                html: `<div class="${classes.join(' ')}"${scaleAttr}></div>`,
+                iconSize: [18, 18],
+                iconAnchor: [9, 9]
+            });
+        }
 
-async function fetchProvinceSummary(provinceName) {
-    const slug = getProvinceSlug(provinceName);
-    const staticUrl = `/static/data/province-projects-${slug}/summary.json`;
+        async function fetchProvinceSummary(provinceName) {
+            const slug = getProvinceSlug(provinceName);
+            const staticUrl = `/static/data/province-projects-${slug}/summary.json`;
 
-    try {
-        const staticResponse = await fetch(staticUrl, { cache: 'no-store' });
-        if (staticResponse.ok) {
-            const summaryData = await staticResponse.json();
-            if (summaryData && summaryData.summary) {
-                return {
-                    name: summaryData.province || provinceName,
-                    total: summaryData.summary.total || 0,
-                    total_cost: summaryData.total_cost || 0,
-                    counts: {
-                        ssp: summaryData.summary.ssp || 0,
-                        dime: summaryData.summary.dime || 0,
-                        philgeps: summaryData.summary.philgeps || 0,
-                        microsite: summaryData.summary.microsite || 0
+            try {
+                const staticResponse = await fetch(staticUrl, { cache: 'no-store' });
+                if (staticResponse.ok) {
+                    const summaryData = await staticResponse.json();
+                    if (summaryData && summaryData.summary) {
+                        return {
+                            name: summaryData.province || provinceName,
+                            total: summaryData.summary.total || 0,
+                            total_cost: summaryData.total_cost || 0,
+                            counts: {
+                                ssp: summaryData.summary.ssp || 0,
+                                dime: summaryData.summary.dime || 0,
+                                philgeps: summaryData.summary.philgeps || 0,
+                                microsite: summaryData.summary.microsite || 0
+                            }
+                        };
                     }
-                };
+                }
+            } catch (error) {
+                console.warn('Static summary fetch failed, falling back to API:', error);
             }
-                        }
-                    } catch (error) {
-        console.warn('Static summary fetch failed, falling back to API:', error);
-    }
 
-    const canonicalName = provinceName.toLowerCase() === 'compostela valley' ? 'Davao de Oro' : provinceName;
-    const response = await fetch(`/api/province-projects/all?province=${encodeURIComponent(canonicalName)}&limit=1&offset=0`);
-    if (!response.ok) {
-        throw new Error(`HTTP ${response.status}`);
-    }
-    const payload = await response.json();
-    if (!payload.success || !payload.summary) {
-        throw new Error('Summary missing in response');
-    }
-    return {
-        name: payload.province || provinceName,
-        total: payload.summary.total || 0,
-        total_cost: payload.total_cost || 0,
-        counts: {
-            ssp: payload.summary.ssp || 0,
-            dime: payload.summary.dime || 0,
-            philgeps: payload.summary.philgeps || 0,
-            microsite: payload.summary.microsite || 0
+            const canonicalName = provinceName.toLowerCase() === 'compostela valley' ? 'Davao de Oro' : provinceName;
+            const response = await fetch(`/api/province-projects/all?province=${encodeURIComponent(canonicalName)}&limit=1&offset=0`);
+            if (!response.ok) {
+                throw new Error(`HTTP ${response.status}`);
+            }
+            const payload = await response.json();
+            if (!payload.success || !payload.summary) {
+                throw new Error('Summary missing in response');
+            }
+            return {
+                name: payload.province || provinceName,
+                total: payload.summary.total || 0,
+                total_cost: payload.total_cost || 0,
+                counts: {
+                    ssp: payload.summary.ssp || 0,
+                    dime: payload.summary.dime || 0,
+                    philgeps: payload.summary.philgeps || 0,
+                    microsite: payload.summary.microsite || 0
+                }
+            };
         }
-    };
-}
 
-function createProvinceMarker(key, center, displayName, summary = null) {
-    if (!mapInstance) return;
+        function createProvinceMarker(key, center, displayName, summary = null) {
+            if (!mapInstance) return;
 
-    if (provinceMarkers.has(key)) {
-        try {
-            mapInstance.removeLayer(provinceMarkers.get(key));
-    } catch (error) {
-            console.warn('Failed to remove previous province marker:', error);
+            if (provinceMarkers.has(key)) {
+                try {
+                    mapInstance.removeLayer(provinceMarkers.get(key));
+                } catch (error) {
+                    console.warn('Failed to remove previous province marker:', error);
+                }
+            }
+
+            const icon = summary ? createIntegratedIcon(summary) : createPlaceholderIcon();
+            const marker = L.marker(center, { icon });
+
+            const popupContent = summary
+                ? createProvincePopup(displayName, summary)
+                : `<div style="font-family:'Inter', sans-serif; font-size:12px; color:#475569; min-width:220px;">Loading integrated data for <strong>${displayName}</strong>...</div>`;
+
+            marker.bindPopup(popupContent, {
+                maxWidth: 320,
+                className: 'bettergov-popup'
+            });
+
+            marker.on('click', () => {
+                if (!provinceSummaryLookup.has(key)) {
+                    prioritizeProvinceSummary(key, displayName);
+                }
+                handleProvinceClick(displayName, key);
+            });
+
+            marker.addTo(mapInstance);
+            provinceMarkers.set(key, marker);
+            if (hiddenProvinceMarkers.has(key)) {
+                hideProvinceMarker(key);
+            }
+            return marker;
         }
-    }
 
-    const icon = summary ? createIntegratedIcon(summary) : createPlaceholderIcon();
-    const marker = L.marker(center, { icon });
+        async function ensureProvinceSummary(key, displayName) {
+            if (provinceSummaryLookup.has(key)) {
+                return provinceSummaryLookup.get(key);
+            }
 
-    const popupContent = summary
-        ? createProvincePopup(displayName, summary)
-        : `<div style="font-family:'Inter', sans-serif; font-size:12px; color:#475569; min-width:220px;">Loading integrated data for <strong>${displayName}</strong>...</div>`;
+            updateMapStatus(`Fetching integrated data for ${displayName}...`);
+            const summary = await fetchProvinceSummary(displayName);
+            provinceSummaryLookup.set(key, summary);
 
-    marker.bindPopup(popupContent, {
-        maxWidth: 320,
-        className: 'bettergov-popup'
-    });
+            const centerEntry = provinceCenters.get(key);
+            if (centerEntry) {
+                createProvinceMarker(key, centerEntry.center, displayName, summary);
+            }
 
-    marker.on('click', () => {
-        if (!provinceSummaryLookup.has(key)) {
-            prioritizeProvinceSummary(key, displayName);
+            return summary;
         }
-        handleProvinceClick(displayName, key);
-    });
 
-    marker.addTo(mapInstance);
-    provinceMarkers.set(key, marker);
-    if (hiddenProvinceMarkers.has(key)) {
-        hideProvinceMarker(key);
-    }
-    return marker;
-}
-
-async function ensureProvinceSummary(key, displayName) {
-    if (provinceSummaryLookup.has(key)) {
-        return provinceSummaryLookup.get(key);
-    }
-
-    updateMapStatus(`Fetching integrated data for ${displayName}...`);
-    const summary = await fetchProvinceSummary(displayName);
-    provinceSummaryLookup.set(key, summary);
-
-    const centerEntry = provinceCenters.get(key);
-    if (centerEntry) {
-        createProvinceMarker(key, centerEntry.center, displayName, summary);
-    }
-
-    return summary;
-}
-
-function bindProvincePopupButton(key, provinceName, summary) {
-    const button = document.getElementById(`province-projects-btn-${key}`);
-    if (!button || button.dataset.bound === 'true') {
+        function bindProvincePopupButton(key, provinceName, summary) {
+            const button = document.getElementById(`province-projects-btn-${key}`);
+            if (!button || button.dataset.bound === 'true') {
                 return;
             }
-    button.addEventListener('click', () => {
-        button.remove();
-        renderProvinceProjectsOnMap(provinceName, summary);
-    });
-    button.dataset.bound = 'true';
-}
+            button.addEventListener('click', () => {
+                button.remove();
+                renderProvinceProjectsOnMap(provinceName, summary);
+            });
+            button.dataset.bound = 'true';
+        }
 
-function hideProvinceMarker(key) {
-    const marker = provinceMarkers.get(key);
-    if (!marker) {
-        hiddenProvinceMarkers.add(key);
+        function hideProvinceMarker(key) {
+            const marker = provinceMarkers.get(key);
+            if (!marker) {
+                hiddenProvinceMarkers.add(key);
                 return;
             }
-    const applyHide = () => {
-        const el = marker.getElement();
-        if (el) {
-            el.style.opacity = '0';
-            el.style.pointerEvents = 'none';
-            hiddenProvinceMarkers.add(key);
+            const applyHide = () => {
+                const el = marker.getElement();
+                if (el) {
+                    el.style.opacity = '0';
+                    el.style.pointerEvents = 'none';
+                    hiddenProvinceMarkers.add(key);
+                }
+            };
+            if (marker._map) {
+                applyHide();
+            } else {
+                marker.once('add', applyHide);
+            }
         }
-    };
-    if (marker._map) {
-        applyHide();
-                                    } else {
-        marker.once('add', applyHide);
-    }
-}
 
-function showProvinceMarker(key) {
-    const marker = provinceMarkers.get(key);
-    if (!marker) return;
-    const applyShow = () => {
-        const el = marker.getElement();
-        if (el) {
-            el.style.opacity = '';
-            el.style.pointerEvents = '';
+        function showProvinceMarker(key) {
+            const marker = provinceMarkers.get(key);
+            if (!marker) return;
+            const applyShow = () => {
+                const el = marker.getElement();
+                if (el) {
+                    el.style.opacity = '';
+                    el.style.pointerEvents = '';
+                }
+            };
+            if (marker._map) {
+                applyShow();
+            } else {
+                marker.once('add', applyShow);
+            }
+            hiddenProvinceMarkers.delete(key);
         }
-    };
-    if (marker._map) {
-        applyShow();
-    } else {
-        marker.once('add', applyShow);
-    }
-    hiddenProvinceMarkers.delete(key);
-}
 
-function restoreHiddenProvinceMarkers() {
-    hiddenProvinceMarkers.forEach(key => {
-        showProvinceMarker(key);
-    });
-    hiddenProvinceMarkers.clear();
-}
+        function restoreHiddenProvinceMarkers() {
+            hiddenProvinceMarkers.forEach(key => {
+                showProvinceMarker(key);
+            });
+            hiddenProvinceMarkers.clear();
+        }
 
-function enqueueProvinceSummaryLoad(key, displayName) {
-    if (provinceSummaryLookup.has(key)) {
+        function enqueueProvinceSummaryLoad(key, displayName) {
+            if (provinceSummaryLookup.has(key)) {
                 return;
             }
-    pendingSummaryQueue.push({ key, displayName, priority: false });
-    if (!summaryQueueBusy) {
-        summaryQueueBusy = true;
-        processProvinceSummaryQueue();
-    }
-}
-
-async function processProvinceSummaryQueue() {
-    if (!pendingSummaryQueue.length) {
-        summaryQueueBusy = false;
-        updateMapStatus('Integrated data ready for loaded provinces.');
-            return;
+            pendingSummaryQueue.push({ key, displayName, priority: false });
+            if (!summaryQueueBusy) {
+                summaryQueueBusy = true;
+                processProvinceSummaryQueue();
+            }
         }
-        
-    const { key, displayName } = pendingSummaryQueue.shift();
-    try {
-        await ensureProvinceSummary(key, displayName);
-        updateMapStatus(`Loaded integrated summary for ${displayName}`);
-    } catch (error) {
-        console.warn(`Failed to load integrated summary for ${displayName}:`, error);
-    }
 
-    setTimeout(processProvinceSummaryQueue, 120);
-}
-
-function prioritizeProvinceSummary(key, displayName) {
-    if (provinceSummaryLookup.has(key)) {
+        async function processProvinceSummaryQueue() {
+            if (!pendingSummaryQueue.length) {
+                summaryQueueBusy = false;
+                updateMapStatus('Integrated data ready for loaded provinces.');
                 return;
             }
-    const existingIndex = pendingSummaryQueue.findIndex(item => item.key === key);
-    if (existingIndex !== -1) {
-        pendingSummaryQueue.splice(existingIndex, 1);
-    }
-    pendingSummaryQueue.unshift({ key, displayName, priority: true });
-    if (!summaryQueueBusy) {
-        summaryQueueBusy = true;
-        processProvinceSummaryQueue();
-    }
-}
 
-async function renderProvinceProjectsOnMap(provinceName, summary) {
-    const key = normalizeProvinceKey(provinceName);
-    const container = document.getElementById(`province-project-list-${key}`);
-    if (!container) return;
+            const { key, displayName } = pendingSummaryQueue.shift();
+            try {
+                await ensureProvinceSummary(key, displayName);
+                updateMapStatus(`Loaded integrated summary for ${displayName}`);
+            } catch (error) {
+                console.warn(`Failed to load integrated summary for ${displayName}:`, error);
+            }
 
-    let summaryData = summary;
-    if (!summaryData) {
-        try {
-            summaryData = await ensureProvinceSummary(key, provinceName);
-    } catch (error) {
-            console.error('Failed to ensure province summary before rendering projects:', error);
-            return;
+            setTimeout(processProvinceSummaryQueue, 120);
         }
-    }
 
-    container.style.display = 'block';
-    container.innerHTML = `
+        function prioritizeProvinceSummary(key, displayName) {
+            if (provinceSummaryLookup.has(key)) {
+                return;
+            }
+            const existingIndex = pendingSummaryQueue.findIndex(item => item.key === key);
+            if (existingIndex !== -1) {
+                pendingSummaryQueue.splice(existingIndex, 1);
+            }
+            pendingSummaryQueue.unshift({ key, displayName, priority: true });
+            if (!summaryQueueBusy) {
+                summaryQueueBusy = true;
+                processProvinceSummaryQueue();
+            }
+        }
+
+        async function renderProvinceProjectsOnMap(provinceName, summary) {
+            const key = normalizeProvinceKey(provinceName);
+            const container = document.getElementById(`province-project-list-${key}`);
+            if (!container) return;
+
+            let summaryData = summary;
+            if (!summaryData) {
+                try {
+                    summaryData = await ensureProvinceSummary(key, provinceName);
+                } catch (error) {
+                    console.error('Failed to ensure province summary before rendering projects:', error);
+                    return;
+                }
+            }
+
+            container.style.display = 'block';
+            container.innerHTML = `
         <div id="province-project-status-${key}" style="font-size:12px; color:#64748b; margin-bottom:8px;">Loading province projects…</div>
         <div id="province-project-items-${key}" style="font-size:12px; color:#0f172a; line-height:1.5;"></div>
     `;
 
-    const statusEl = document.getElementById(`province-project-status-${key}`);
-    const listEl = document.getElementById(`province-project-items-${key}`);
+            const statusEl = document.getElementById(`province-project-status-${key}`);
+            const listEl = document.getElementById(`province-project-items-${key}`);
 
-    clearActiveProjectMarkers(false);
-    hideProvinceMarker(key);
+            clearActiveProjectMarkers(false);
+            hideProvinceMarker(key);
 
-    const provinceCenter = provinceCenters.get(key)?.center;
-    const seenKeys = new Set();
-    const fragments = [];
-    const bounds = new L.LatLngBounds();
-    let processedPages = 0;
-    let totalPages = 1;
-    let totalMapped = 0;
-    let totalFallback = 0;
-    let totalMarkers = 0;
-    let totalProjectsExpected = null;
+            const provinceCenter = provinceCenters.get(key)?.center;
+            const seenKeys = new Set();
+            const fragments = [];
+            const bounds = new L.LatLngBounds();
+            let processedPages = 0;
+            let totalPages = 1;
+            let totalMapped = 0;
+            let totalFallback = 0;
+            let totalMarkers = 0;
+            let totalProjectsExpected = null;
 
-    const formatCount = (value) => value.toLocaleString('en-PH');
+            const formatCount = (value) => value.toLocaleString('en-PH');
 
-    const updateStatus = () => {
-        if (!statusEl) {
-            return;
-        }
-        const mappedText = `${formatCount(totalMapped)} exact`;
-        const fallbackText = `${formatCount(totalFallback)} approximate`;
-        statusEl.innerHTML = `Processed ${processedPages}/${totalPages} page(s) — ${mappedText}, ${fallbackText}.`;
-    };
-
-    const buildCoordinateMap = (entries) => {
-        const map = new Map();
-        (entries || []).forEach(entry => {
-            const baseName = (entry.project_name || '').toLowerCase();
-            if (!baseName) {
-                return;
-            }
-            const keys = new Set();
-            if (entry.source) keys.add(entry.source.toLowerCase());
-            if (entry.original_source) keys.add(entry.original_source.toLowerCase());
-            if (entry.matched_source) keys.add(entry.matched_source.toLowerCase());
-            if (Array.isArray(entry.sources)) {
-                entry.sources.forEach(src => {
-                    if (src) keys.add(src.toLowerCase());
-                });
-            }
-            keys.forEach(src => {
-                if (!src) return;
-                map.set(`${src}::${baseName}`, {
-                    ...entry,
-                    latitude: entry.latitude,
-                    longitude: entry.longitude
-                });
-            });
-        });
-        return map;
-    };
-
-    const resolveCoordinateEntry = (project, coordinateMap, provinceKey) => {
-        const candidateSources = new Set([project.__sourceKey]);
-        project.__sourcesList.forEach(src => candidateSources.add(src));
- 
-        for (const candidate of candidateSources) {
-            const entry = coordinateMap.get(`${candidate}::${project.__nameKey}`);
-            if (!entry) continue;
-            const latVal = Number(entry.latitude);
-            const lngVal = Number(entry.longitude);
-            if (!isFinite(latVal) || !isFinite(lngVal)) continue;
-            return {
-                ...entry,
-                latitude: latVal,
-                longitude: lngVal,
-                matched_source: (entry.matched_source || candidate).toString().toLowerCase(),
-                original_source: (entry.original_source || project.__sourceKey).toString().toLowerCase(),
-                isFallback: Boolean(entry.isFallback)
+            const updateStatus = () => {
+                if (!statusEl) {
+                    return;
+                }
+                const mappedText = `${formatCount(totalMapped)} exact`;
+                const fallbackText = `${formatCount(totalFallback)} approximate`;
+                statusEl.innerHTML = `Processed ${processedPages}/${totalPages} page(s) — ${mappedText}, ${fallbackText}.`;
             };
-        }
 
-        if (provinceCenter) {
-            const fallbackPoint = generateFallbackCoordinate(provinceKey, project.__sourceKey, provinceCenter, project.__nameKey);
-            if (fallbackPoint) {
-                return {
-                    latitude: fallbackPoint.latitude,
-                    longitude: fallbackPoint.longitude,
-                    matched_source: project.__sourceKey,
-                    original_source: project.__sourceKey,
-                    isFallback: true
-                };
-            }
-        }
-
-        return null;
-    };
-
-    const processBatch = async (projectsBatch, pageNumber) => {
-        if (!Array.isArray(projectsBatch) || !projectsBatch.length) {
-            processedPages += 1;
-            updateStatus();
-            return;
-        }
-
-        const normalizedBatch = [];
-        projectsBatch.forEach(project => {
-            const primarySource = (project.source || 'unknown').toLowerCase();
-            const title = project.project_name || project.ProjectName || project.ProjectTitle || project.ProjectDescription || '';
-            const nameKey = title.toLowerCase();
-            const dedupeKey = `${primarySource}::${nameKey}`;
-            if (seenKeys.has(dedupeKey)) {
-                return;
-            }
-            seenKeys.add(dedupeKey);
-            normalizedBatch.push({
-                ...project,
-                __sourceKey: primarySource,
-                __nameKey: nameKey,
-                __sourcesList: Array.isArray(project.sources_list) ? project.sources_list.map(src => (src || '').toLowerCase()) : []
-            });
-        });
-
-        if (!normalizedBatch.length) {
-            processedPages += 1;
-            updateStatus();
-            return;
-        }
-
-        const coordRequestBody = normalizedBatch.map(project => ({
-            source: project.source,
-            project_name: project.project_name || project.ProjectName || project.ProjectTitle || project.ProjectDescription || '',
-            municipality: project.municipality || project.Municipality,
-            province: project.province || project.Province,
-            location: project.location,
-            amount: project.amount ?? project.contract_amount ?? project.ContractCost ?? project.cost,
-            contractor: project.contractor || project.Contractor,
-            sources: Array.isArray(project.sources_list) ? project.sources_list : []
-        }));
-
-        let coordinateEntries = [];
-        if (coordRequestBody.length) {
-            try {
-                const coordResponse = await fetch('/api/province-projects/coordinates', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ province: provinceName, projects: coordRequestBody })
-                });
-                if (coordResponse.ok) {
-                    const coordPayload = await coordResponse.json();
-                    coordinateEntries = Array.isArray(coordPayload.coordinates) ? coordPayload.coordinates : [];
-                } else {
-                    console.warn(`Coordinate lookup failed with status ${coordResponse.status}`);
-                }
-    } catch (error) {
-                console.warn('Coordinate lookup error:', error);
-            }
-        }
-
-        const coordinateMap = buildCoordinateMap(coordinateEntries);
- 
-         const batchBounds = new L.LatLngBounds();
- 
-         normalizedBatch.forEach(project => {
-             const coordinateEntry = resolveCoordinateEntry(project, coordinateMap, key);
-             let markerSourceKey = project.__sourceKey;
-             const amountRaw = project.amount ?? project.contract_amount ?? project.ContractCost ?? project.cost;
-             let flagStatus = null;
-
-             if (coordinateEntry) {
-                 if (!coordinateEntry.isFallback && coordinateEntry.matched_source) {
-                     markerSourceKey = coordinateEntry.matched_source;
-                 }
-
-                 const flags = coordinateEntry.flags;
-                 if (flags && (markerSourceKey === 'ssp' || coordinateEntry.original_source === 'ssp')) {
-                     if (flags.hasRedFlags) {
-                         flagStatus = 'red';
-                     } else if (flags.isGreenFlag) {
-                         flagStatus = 'green';
-                     }
-                 }
-
-                 const markerOptions = {
-                     unknown: Boolean(coordinateEntry.isFallback),
-                     scale: computeMarkerScale(amountRaw)
-                 };
-                 if (flagStatus) {
-                     markerOptions.flagStatus = flagStatus;
-                 }
-
-                 const marker = L.marker([coordinateEntry.latitude, coordinateEntry.longitude], {
-                     icon: createProjectMarkerIcon(markerSourceKey, markerOptions)
-                 });
-
-                 marker.bindPopup(
-                     buildIntegratedProjectPopup(project, coordinateEntry.latitude, coordinateEntry.longitude, markerSourceKey, coordinateEntry, flagStatus),
-                     { maxWidth: 420, className: 'bettergov-popup' }
-                 );
-
-                 marker.addTo(mapInstance);
-                 activeProjectMarkers.push(marker);
-                 bounds.extend([coordinateEntry.latitude, coordinateEntry.longitude]);
-                 batchBounds.extend([coordinateEntry.latitude, coordinateEntry.longitude]);
-                 totalMarkers += 1;
-
-                 if (coordinateEntry.isFallback) {
-                     totalFallback += 1;
-                                } else {
-                     totalMapped += 1;
-                 }
-             }
-
-             fragments.push(renderProjectListRow(project, markerSourceKey, coordinateEntry, flagStatus));
-         });
- 
-         if (listEl) {
-             listEl.innerHTML = fragments.join('');
-         }
-
-        processedPages += 1;
-        updateStatus();
-
-        if (processedPages === 1) {
-            if (batchBounds.isValid()) {
-                mapInstance.flyToBounds(batchBounds, {
-                    maxZoom: 11,
-                    padding: [60, 60]
-                });
-            } else if (provinceCenter) {
-                mapInstance.flyTo(provinceCenter, Math.min(Math.max(mapInstance.getZoom(), 8.5), 10));
-            }
-        }
-    };
-
-    try {
-        const response = await fetch(`/api/province-projects/all?province=${encodeURIComponent(provinceName)}&page=1&limit=${PROVINCE_PAGE_SIZE}`);
-        if (!response.ok) {
-            throw new Error(`HTTP ${response.status}`);
-        }
-
-        const payload = await response.json();
-        const projects = Array.isArray(payload.projects) ? payload.projects : [];
-        totalPages = payload.total_pages || 1;
-        totalProjectsExpected = typeof payload.total === 'number' ? payload.total : null;
-
-        if (!projects.length) {
-            showProvinceMarker(key);
-            container.innerHTML = '<div style="font-size:12px; color:#64748b;">No cached projects available yet for this province.</div>';
-            return;
-        }
-
-        await processBatch(projects, 1);
-
-        if (totalPages > 1) {
-            (async () => {
-                for (let page = 2; page <= totalPages; page += 1) {
-                    if (statusEl) {
-                        statusEl.innerHTML = `Fetching page ${page}/${totalPages}…`;
+            const buildCoordinateMap = (entries) => {
+                const map = new Map();
+                (entries || []).forEach(entry => {
+                    const baseName = (entry.project_name || '').toLowerCase();
+                    if (!baseName) {
+                        return;
                     }
+                    const keys = new Set();
+                    if (entry.source) keys.add(entry.source.toLowerCase());
+                    if (entry.original_source) keys.add(entry.original_source.toLowerCase());
+                    if (entry.matched_source) keys.add(entry.matched_source.toLowerCase());
+                    if (Array.isArray(entry.sources)) {
+                        entry.sources.forEach(src => {
+                            if (src) keys.add(src.toLowerCase());
+                        });
+                    }
+                    keys.forEach(src => {
+                        if (!src) return;
+                        map.set(`${src}::${baseName}`, {
+                            ...entry,
+                            latitude: entry.latitude,
+                            longitude: entry.longitude
+                        });
+                    });
+                });
+                return map;
+            };
+
+            const resolveCoordinateEntry = (project, coordinateMap, provinceKey) => {
+                const candidateSources = new Set([project.__sourceKey]);
+                project.__sourcesList.forEach(src => candidateSources.add(src));
+
+                for (const candidate of candidateSources) {
+                    const entry = coordinateMap.get(`${candidate}::${project.__nameKey}`);
+                    if (!entry) continue;
+                    const latVal = Number(entry.latitude);
+                    const lngVal = Number(entry.longitude);
+                    if (!isFinite(latVal) || !isFinite(lngVal)) continue;
+                    return {
+                        ...entry,
+                        latitude: latVal,
+                        longitude: lngVal,
+                        matched_source: (entry.matched_source || candidate).toString().toLowerCase(),
+                        original_source: (entry.original_source || project.__sourceKey).toString().toLowerCase(),
+                        isFallback: Boolean(entry.isFallback)
+                    };
+                }
+
+                if (provinceCenter) {
+                    const fallbackPoint = generateFallbackCoordinate(provinceKey, project.__sourceKey, provinceCenter, project.__nameKey);
+                    if (fallbackPoint) {
+                        return {
+                            latitude: fallbackPoint.latitude,
+                            longitude: fallbackPoint.longitude,
+                            matched_source: project.__sourceKey,
+                            original_source: project.__sourceKey,
+                            isFallback: true
+                        };
+                    }
+                }
+
+                return null;
+            };
+
+            const processBatch = async (projectsBatch, pageNumber) => {
+                if (!Array.isArray(projectsBatch) || !projectsBatch.length) {
+                    processedPages += 1;
+                    updateStatus();
+                    return;
+                }
+
+                const normalizedBatch = [];
+                projectsBatch.forEach(project => {
+                    const primarySource = (project.source || 'unknown').toLowerCase();
+                    const title = project.project_name || project.ProjectName || project.ProjectTitle || project.ProjectDescription || '';
+                    const nameKey = title.toLowerCase();
+                    const dedupeKey = `${primarySource}::${nameKey}`;
+                    if (seenKeys.has(dedupeKey)) {
+                        return;
+                    }
+                    seenKeys.add(dedupeKey);
+                    normalizedBatch.push({
+                        ...project,
+                        __sourceKey: primarySource,
+                        __nameKey: nameKey,
+                        __sourcesList: Array.isArray(project.sources_list) ? project.sources_list.map(src => (src || '').toLowerCase()) : []
+                    });
+                });
+
+                if (!normalizedBatch.length) {
+                    processedPages += 1;
+                    updateStatus();
+                    return;
+                }
+
+                const coordRequestBody = normalizedBatch.map(project => ({
+                    source: project.source,
+                    project_name: project.project_name || project.ProjectName || project.ProjectTitle || project.ProjectDescription || '',
+                    municipality: project.municipality || project.Municipality,
+                    province: project.province || project.Province,
+                    location: project.location,
+                    amount: project.amount ?? project.contract_amount ?? project.ContractCost ?? project.cost,
+                    contractor: project.contractor || project.Contractor,
+                    sources: Array.isArray(project.sources_list) ? project.sources_list : []
+                }));
+
+                let coordinateEntries = [];
+                if (coordRequestBody.length) {
                     try {
-                        const nextResponse = await fetch(`/api/province-projects/all?province=${encodeURIComponent(provinceName)}&page=${page}&limit=${PROVINCE_PAGE_SIZE}`);
-                        if (!nextResponse.ok) {
-                            console.warn(`Province page ${page} failed with status ${nextResponse.status}`);
-                            break;
+                        const coordResponse = await fetch('/api/province-projects/coordinates', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ province: provinceName, projects: coordRequestBody })
+                        });
+                        if (coordResponse.ok) {
+                            const coordPayload = await coordResponse.json();
+                            coordinateEntries = Array.isArray(coordPayload.coordinates) ? coordPayload.coordinates : [];
+                        } else {
+                            console.warn(`Coordinate lookup failed with status ${coordResponse.status}`);
                         }
-                        const nextPayload = await nextResponse.json();
-                        await processBatch(Array.isArray(nextPayload.projects) ? nextPayload.projects : [], page);
-    } catch (error) {
-                        console.warn(`Failed to fetch province page ${page}:`, error);
-                        break;
+                    } catch (error) {
+                        console.warn('Coordinate lookup error:', error);
                     }
-                    await new Promise(resolve => setTimeout(resolve, 60));
                 }
 
-                if (statusEl) {
-                    const totalPlanned = totalProjectsExpected || fragments.length;
-                    statusEl.innerHTML = `Finished ${processedPages}/${totalPages} page(s) — ${formatCount(totalMapped)} mapped, ${formatCount(totalFallback)} approximate. Showing ${formatCount(fragments.length)} of ${formatCount(totalPlanned)} cached projects.`;
+                const coordinateMap = buildCoordinateMap(coordinateEntries);
+
+                const batchBounds = new L.LatLngBounds();
+
+                normalizedBatch.forEach(project => {
+                    const coordinateEntry = resolveCoordinateEntry(project, coordinateMap, key);
+                    let markerSourceKey = project.__sourceKey;
+                    const amountRaw = project.amount ?? project.contract_amount ?? project.ContractCost ?? project.cost;
+                    let flagStatus = null;
+
+                    if (coordinateEntry) {
+                        if (!coordinateEntry.isFallback && coordinateEntry.matched_source) {
+                            markerSourceKey = coordinateEntry.matched_source;
+                        }
+
+                        const flags = coordinateEntry.flags;
+                        if (flags && (markerSourceKey === 'ssp' || coordinateEntry.original_source === 'ssp')) {
+                            if (flags.hasRedFlags) {
+                                flagStatus = 'red';
+                            } else if (flags.isGreenFlag) {
+                                flagStatus = 'green';
+                            }
+                        }
+
+                        const markerOptions = {
+                            unknown: Boolean(coordinateEntry.isFallback),
+                            scale: computeMarkerScale(amountRaw)
+                        };
+                        if (flagStatus) {
+                            markerOptions.flagStatus = flagStatus;
+                        }
+
+                        const marker = L.marker([coordinateEntry.latitude, coordinateEntry.longitude], {
+                            icon: createProjectMarkerIcon(markerSourceKey, markerOptions)
+                        });
+
+                        marker.bindPopup(
+                            buildIntegratedProjectPopup(project, coordinateEntry.latitude, coordinateEntry.longitude, markerSourceKey, coordinateEntry, flagStatus),
+                            { maxWidth: 420, className: 'bettergov-popup' }
+                        );
+
+                        marker.addTo(mapInstance);
+                        activeProjectMarkers.push(marker);
+                        bounds.extend([coordinateEntry.latitude, coordinateEntry.longitude]);
+                        batchBounds.extend([coordinateEntry.latitude, coordinateEntry.longitude]);
+                        totalMarkers += 1;
+
+                        if (coordinateEntry.isFallback) {
+                            totalFallback += 1;
+                        } else {
+                            totalMapped += 1;
+                        }
+                    }
+
+                    fragments.push(renderProjectListRow(project, markerSourceKey, coordinateEntry, flagStatus));
+                });
+
+                if (listEl) {
+                    listEl.innerHTML = fragments.join('');
                 }
 
-                updateMapStatus(`${provinceName}: mapped ${formatCount(totalMapped)} project(s) with precise coordinates; ${formatCount(totalFallback)} approximate.`);
-            })();
-        } else {
-            if (statusEl) {
-                statusEl.innerHTML = `Processed 1/${totalPages} page — ${formatCount(totalMapped)} mapped, ${formatCount(totalFallback)} approximate.`;
+                processedPages += 1;
+                updateStatus();
+
+                if (processedPages === 1) {
+                    if (batchBounds.isValid()) {
+                        mapInstance.flyToBounds(batchBounds, {
+                            maxZoom: 11,
+                            padding: [60, 60]
+                        });
+                    } else if (provinceCenter) {
+                        mapInstance.flyTo(provinceCenter, Math.min(Math.max(mapInstance.getZoom(), 8.5), 10));
+                    }
+                }
+            };
+
+            try {
+                const response = await fetch(`/api/province-projects/all?province=${encodeURIComponent(provinceName)}&page=1&limit=${PROVINCE_PAGE_SIZE}`);
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}`);
+                }
+
+                const payload = await response.json();
+                const projects = Array.isArray(payload.projects) ? payload.projects : [];
+                totalPages = payload.total_pages || 1;
+                totalProjectsExpected = typeof payload.total === 'number' ? payload.total : null;
+
+                if (!projects.length) {
+                    showProvinceMarker(key);
+                    container.innerHTML = '<div style="font-size:12px; color:#64748b;">No cached projects available yet for this province.</div>';
+                    return;
+                }
+
+                await processBatch(projects, 1);
+
+                if (totalPages > 1) {
+                    (async () => {
+                        for (let page = 2; page <= totalPages; page += 1) {
+                            if (statusEl) {
+                                statusEl.innerHTML = `Fetching page ${page}/${totalPages}…`;
+                            }
+                            try {
+                                const nextResponse = await fetch(`/api/province-projects/all?province=${encodeURIComponent(provinceName)}&page=${page}&limit=${PROVINCE_PAGE_SIZE}`);
+                                if (!nextResponse.ok) {
+                                    console.warn(`Province page ${page} failed with status ${nextResponse.status}`);
+                                    break;
+                                }
+                                const nextPayload = await nextResponse.json();
+                                await processBatch(Array.isArray(nextPayload.projects) ? nextPayload.projects : [], page);
+                            } catch (error) {
+                                console.warn(`Failed to fetch province page ${page}:`, error);
+                                break;
+                            }
+                            await new Promise(resolve => setTimeout(resolve, 60));
+                        }
+
+                        if (statusEl) {
+                            const totalPlanned = totalProjectsExpected || fragments.length;
+                            statusEl.innerHTML = `Finished ${processedPages}/${totalPages} page(s) — ${formatCount(totalMapped)} mapped, ${formatCount(totalFallback)} approximate. Showing ${formatCount(fragments.length)} of ${formatCount(totalPlanned)} cached projects.`;
+                        }
+
+                        updateMapStatus(`${provinceName}: mapped ${formatCount(totalMapped)} project(s) with precise coordinates; ${formatCount(totalFallback)} approximate.`);
+                    })();
+                } else {
+                    if (statusEl) {
+                        statusEl.innerHTML = `Processed 1/${totalPages} page — ${formatCount(totalMapped)} mapped, ${formatCount(totalFallback)} approximate.`;
+                    }
+                    updateMapStatus(`${provinceName}: mapped ${formatCount(totalMapped)} project(s) with precise coordinates; ${formatCount(totalFallback)} approximate.`);
+                }
+            } catch (error) {
+                console.error('Failed to render province project map:', error);
+                showProvinceMarker(key);
+                container.innerHTML = '<div style="font-size:12px; color:#dc2626;">Unable to render province projects right now.</div>';
             }
-            updateMapStatus(`${provinceName}: mapped ${formatCount(totalMapped)} project(s) with precise coordinates; ${formatCount(totalFallback)} approximate.`);
         }
-    } catch (error) {
-        console.error('Failed to render province project map:', error);
-        showProvinceMarker(key);
-        container.innerHTML = '<div style="font-size:12px; color:#dc2626;">Unable to render province projects right now.</div>';
-    }
-}
 
-function renderProjectListRow(project, sourceKey, coordinateEntry, flagStatus = null) {
-    const sourceList = Array.isArray(project.sources_list) && project.sources_list.length
-        ? project.sources_list
-        : [project.source || 'Unknown'];
-    const badges = sourceList.map(src => {
-        const meta = SOURCE_META[src.toLowerCase()] || { label: src, className: '' };
-        return `<span style="padding: 3px 7px; border-radius: 4px; font-size: 11px; font-weight: 600;
+        function renderProjectListRow(project, sourceKey, coordinateEntry, flagStatus = null) {
+            const sourceList = Array.isArray(project.sources_list) && project.sources_list.length
+                ? project.sources_list
+                : [project.source || 'Unknown'];
+            const badges = sourceList.map(src => {
+                const meta = SOURCE_META[src.toLowerCase()] || { label: src, className: '' };
+                return `<span style="padding: 3px 7px; border-radius: 4px; font-size: 11px; font-weight: 600;
             background: rgba(148, 163, 184, 0.15);
             color: #0f172a;
             border: 1px solid rgba(148, 163, 184, 0.35);
             margin-right: 4px;
             display: inline-block;">${meta.label}</span>`;
-    }).join('');
+            }).join('');
 
-    const amountValue = project.amount ?? project.contract_amount ?? project.ContractCost ?? project.cost;
-    const contractor = project.contractor || project.Contractor || 'N/A';
-    const locationParts = [];
-    if (project.location) locationParts.push(project.location);
-    if (project.municipality || project.Municipality) locationParts.push(project.municipality || project.Municipality);
-    if (project.province || project.Province) locationParts.push(project.province || project.Province);
-    const locationText = locationParts.filter(Boolean).join(', ') || 'N/A';
-    const year = project.year || project.InfraYear || 'N/A';
-    const statusText = project.status || project.Status || 'N/A';
+            const amountValue = project.amount ?? project.contract_amount ?? project.ContractCost ?? project.cost;
+            const contractor = project.contractor || project.Contractor || 'N/A';
+            const locationParts = [];
+            if (project.location) locationParts.push(project.location);
+            if (project.municipality || project.Municipality) locationParts.push(project.municipality || project.Municipality);
+            if (project.province || project.Province) locationParts.push(project.province || project.Province);
+            const locationText = locationParts.filter(Boolean).join(', ') || 'N/A';
+            const year = project.year || project.InfraYear || 'N/A';
+            const statusText = project.status || project.Status || 'N/A';
 
-    const hasCoordinates = coordinateEntry && isFinite(coordinateEntry.latitude) && isFinite(coordinateEntry.longitude);
-    const isFallback = Boolean(coordinateEntry && coordinateEntry.isFallback);
-    const mappingBadge = isFallback
-        ? '<span style="color:#dc2626; font-weight:600;">Unknown location</span>'
-        : hasCoordinates
-            ? '<span style="color:#16a34a; font-weight:600;">Mapped</span>'
-            : '<span style="color:#f97316; font-weight:600;">Not mapped</span>';
+            const hasCoordinates = coordinateEntry && isFinite(coordinateEntry.latitude) && isFinite(coordinateEntry.longitude);
+            const isFallback = Boolean(coordinateEntry && coordinateEntry.isFallback);
+            const mappingBadge = isFallback
+                ? '<span style="color:#dc2626; font-weight:600;">Unknown location</span>'
+                : hasCoordinates
+                    ? '<span style="color:#16a34a; font-weight:600;">Mapped</span>'
+                    : '<span style="color:#f97316; font-weight:600;">Not mapped</span>';
 
-    const coordinateLabel = hasCoordinates && !isFallback
-        ? `<span style="font-size:11px; color:#94a3b8;">${Number(coordinateEntry.latitude).toFixed(4)}, ${Number(coordinateEntry.longitude).toFixed(4)}</span>`
-        : '';
+            const coordinateLabel = hasCoordinates && !isFallback
+                ? `<span style="font-size:11px; color:#94a3b8;">${Number(coordinateEntry.latitude).toFixed(4)}, ${Number(coordinateEntry.longitude).toFixed(4)}</span>`
+                : '';
 
-    let note = '';
-    if (isFallback) {
-        note = '<div style="font-size:11px; color:#dc2626; font-weight:600;">Exact location unavailable — marker placed at province center.</div>';
-    } else if (coordinateEntry?.matched_source && coordinateEntry.matched_source !== sourceKey) {
-        note = `<div style="font-size:11px; color:#64748b;">Coordinates sourced from ${coordinateEntry.matched_source.toUpperCase()} data.</div>`;
-    }
+            let note = '';
+            if (isFallback) {
+                note = '<div style="font-size:11px; color:#dc2626; font-weight:600;">Exact location unavailable — marker placed at province center.</div>';
+            } else if (coordinateEntry?.matched_source && coordinateEntry.matched_source !== sourceKey) {
+                note = `<div style="font-size:11px; color:#64748b;">Coordinates sourced from ${coordinateEntry.matched_source.toUpperCase()} data.</div>`;
+            }
 
-    const flags = coordinateEntry?.flags;
-    let effectiveFlag = flagStatus;
-    if (!effectiveFlag && flags && (sourceKey === 'ssp' || coordinateEntry?.original_source === 'ssp')) {
-        if (flags.hasRedFlags) {
-            effectiveFlag = 'red';
-        } else if (flags.isGreenFlag) {
-            effectiveFlag = 'green';
-        }
-    }
+            const flags = coordinateEntry?.flags;
+            let effectiveFlag = flagStatus;
+            if (!effectiveFlag && flags && (sourceKey === 'ssp' || coordinateEntry?.original_source === 'ssp')) {
+                if (flags.hasRedFlags) {
+                    effectiveFlag = 'red';
+                } else if (flags.isGreenFlag) {
+                    effectiveFlag = 'green';
+                }
+            }
 
-    if (effectiveFlag === 'red') {
-        const detail = Array.isArray(flags?.redFlags) && flags.redFlags.length
-            ? (flags.redFlags[0].reason || flags.redFlags[0].description || '').trim()
-            : '';
-        note += `<div style="font-size:11px; color:#b91c1c; font-weight:600;">🔴 NCPAGkilatis Red Flag${detail ? ` — ${detail}` : ''}</div>`;
-    } else if (effectiveFlag === 'green') {
-        const detail = Array.isArray(flags?.greenFlags) && flags.greenFlags.length
-            ? (flags.greenFlags[0].reason || flags.greenFlags[0].description || '').trim()
-            : '';
-        note += `<div style="font-size:11px; color:#15803d; font-weight:600;">🟢 NCPAGkilatis Green Flag${detail ? ` — ${detail}` : ''}</div>`;
-    }
+            if (effectiveFlag === 'red') {
+                const detail = Array.isArray(flags?.redFlags) && flags.redFlags.length
+                    ? (flags.redFlags[0].reason || flags.redFlags[0].description || '').trim()
+                    : '';
+                note += `<div style="font-size:11px; color:#b91c1c; font-weight:600;">🔴 NCPAGkilatis Red Flag${detail ? ` — ${detail}` : ''}</div>`;
+            } else if (effectiveFlag === 'green') {
+                const detail = Array.isArray(flags?.greenFlags) && flags.greenFlags.length
+                    ? (flags.greenFlags[0].reason || flags.greenFlags[0].description || '').trim()
+                    : '';
+                note += `<div style="font-size:11px; color:#15803d; font-weight:600;">🟢 NCPAGkilatis Green Flag${detail ? ` — ${detail}` : ''}</div>`;
+            }
 
-    const title = project.project_name || project.ProjectName || project.ProjectTitle || project.ProjectDescription || 'Project';
-    const amountDisplay = isFinite(Number(amountValue)) ? formatCurrency(amountValue) : 'N/A';
+            const title = project.project_name || project.ProjectName || project.ProjectTitle || project.ProjectDescription || 'Project';
+            const amountDisplay = isFinite(Number(amountValue)) ? formatCurrency(amountValue) : 'N/A';
 
-    return `
+            return `
         <div style="padding:10px 0; border-bottom:1px solid #e2e8f0;">
             <div style="display:flex; justify-content:space-between; gap:12px; align-items:flex-start;">
                 <div style="flex:1 1 auto;">
@@ -1700,59 +1733,59 @@ function renderProjectListRow(project, sourceKey, coordinateEntry, flagStatus = 
             </div>
         </div>
     `;
-}
-
-function buildIntegratedProjectPopup(project, lat, lng, sourceKey, coordinateEntry, flagStatus = null) {
-    const meta = SOURCE_META[sourceKey] || { label: project.source || 'Project' };
-    const amountValue = project.amount ?? project.contract_amount ?? project.ContractCost ?? project.cost;
-    const contractor = project.contractor || project.Contractor || 'N/A';
-    const locationParts = [];
-    if (project.location) locationParts.push(project.location);
-    if (project.municipality || project.Municipality) locationParts.push(project.municipality || project.Municipality);
-    if (project.province || project.Province) locationParts.push(project.province || project.Province);
-    const locationText = locationParts.filter(Boolean).join(', ') || 'N/A';
-    const year = project.year || project.InfraYear || 'N/A';
-    const statusText = project.status || project.Status || 'N/A';
-    const title = project.project_name || project.ProjectName || project.ProjectTitle || project.ProjectDescription || 'Project';
-    const streetViewUrl = `https://www.google.com/maps/@?api=1&map_action=pano&viewpoint=${lat},${lng}`;
-    const mapsUrl = `https://www.google.com/maps/search/?api=1&query=${lat},${lng}`;
-
-    const isFallback = Boolean(coordinateEntry && coordinateEntry.isFallback);
-    const hasCoordinates = !isFallback && isFinite(lat) && isFinite(lng);
-    const coordinateLabel = hasCoordinates
-        ? `<div><strong>Coordinates:</strong> ${Number(lat).toFixed(5)}, ${Number(lng).toFixed(5)}</div>`
-        : '';
-
-    const locationHint = isFallback
-        ? '<div style="color:#dc2626; font-weight:600; margin-top:6px;">Exact location unavailable — marker placed near province center.</div>'
-        : (coordinateEntry?.matched_source && coordinateEntry.matched_source !== sourceKey)
-            ? `<div style="font-size:11px; color:#64748b; margin-top:6px;">Coordinates sourced from ${coordinateEntry.matched_source.toUpperCase()} data.</div>`
-            : '';
-
-    const flags = coordinateEntry?.flags;
-    let effectiveFlag = flagStatus;
-    if (!effectiveFlag && flags && (sourceKey === 'ssp' || coordinateEntry?.original_source === 'ssp')) {
-        if (flags.hasRedFlags) {
-            effectiveFlag = 'red';
-        } else if (flags.isGreenFlag) {
-            effectiveFlag = 'green';
         }
-    }
 
-    let flagNote = '';
-    if (effectiveFlag === 'red') {
-        const detail = Array.isArray(flags?.redFlags) && flags.redFlags.length
-            ? (flags.redFlags[0].reason || flags.redFlags[0].description || '').trim()
-            : '';
-        flagNote = `<div style="margin-top:6px; font-size:11px; color:#b91c1c; font-weight:600;">🔴 NCPAGkilatis Red Flag${detail ? ` — ${detail}` : ''}</div>`;
-    } else if (effectiveFlag === 'green') {
-        const detail = Array.isArray(flags?.greenFlags) && flags.greenFlags.length
-            ? (flags.greenFlags[0].reason || flags.greenFlags[0].description || '').trim()
-            : '';
-        flagNote = `<div style="margin-top:6px; font-size:11px; color:#15803d; font-weight:600;">🟢 NCPAGkilatis Green Flag${detail ? ` — ${detail}` : ''}</div>`;
-    }
+        function buildIntegratedProjectPopup(project, lat, lng, sourceKey, coordinateEntry, flagStatus = null) {
+            const meta = SOURCE_META[sourceKey] || { label: project.source || 'Project' };
+            const amountValue = project.amount ?? project.contract_amount ?? project.ContractCost ?? project.cost;
+            const contractor = project.contractor || project.Contractor || 'N/A';
+            const locationParts = [];
+            if (project.location) locationParts.push(project.location);
+            if (project.municipality || project.Municipality) locationParts.push(project.municipality || project.Municipality);
+            if (project.province || project.Province) locationParts.push(project.province || project.Province);
+            const locationText = locationParts.filter(Boolean).join(', ') || 'N/A';
+            const year = project.year || project.InfraYear || 'N/A';
+            const statusText = project.status || project.Status || 'N/A';
+            const title = project.project_name || project.ProjectName || project.ProjectTitle || project.ProjectDescription || 'Project';
+            const streetViewUrl = `https://www.google.com/maps/@?api=1&map_action=pano&viewpoint=${lat},${lng}`;
+            const mapsUrl = `https://www.google.com/maps/search/?api=1&query=${lat},${lng}`;
 
-    return `
+            const isFallback = Boolean(coordinateEntry && coordinateEntry.isFallback);
+            const hasCoordinates = !isFallback && isFinite(lat) && isFinite(lng);
+            const coordinateLabel = hasCoordinates
+                ? `<div><strong>Coordinates:</strong> ${Number(lat).toFixed(5)}, ${Number(lng).toFixed(5)}</div>`
+                : '';
+
+            const locationHint = isFallback
+                ? '<div style="color:#dc2626; font-weight:600; margin-top:6px;">Exact location unavailable — marker placed near province center.</div>'
+                : (coordinateEntry?.matched_source && coordinateEntry.matched_source !== sourceKey)
+                    ? `<div style="font-size:11px; color:#64748b; margin-top:6px;">Coordinates sourced from ${coordinateEntry.matched_source.toUpperCase()} data.</div>`
+                    : '';
+
+            const flags = coordinateEntry?.flags;
+            let effectiveFlag = flagStatus;
+            if (!effectiveFlag && flags && (sourceKey === 'ssp' || coordinateEntry?.original_source === 'ssp')) {
+                if (flags.hasRedFlags) {
+                    effectiveFlag = 'red';
+                } else if (flags.isGreenFlag) {
+                    effectiveFlag = 'green';
+                }
+            }
+
+            let flagNote = '';
+            if (effectiveFlag === 'red') {
+                const detail = Array.isArray(flags?.redFlags) && flags.redFlags.length
+                    ? (flags.redFlags[0].reason || flags.redFlags[0].description || '').trim()
+                    : '';
+                flagNote = `<div style="margin-top:6px; font-size:11px; color:#b91c1c; font-weight:600;">🔴 NCPAGkilatis Red Flag${detail ? ` — ${detail}` : ''}</div>`;
+            } else if (effectiveFlag === 'green') {
+                const detail = Array.isArray(flags?.greenFlags) && flags.greenFlags.length
+                    ? (flags.greenFlags[0].reason || flags.greenFlags[0].description || '').trim()
+                    : '';
+                flagNote = `<div style="margin-top:6px; font-size:11px; color:#15803d; font-weight:600;">🟢 NCPAGkilatis Green Flag${detail ? ` — ${detail}` : ''}</div>`;
+            }
+
+            return `
         <div style="font-family:'Inter', sans-serif; font-size:12px; color:#0f172a;">
             <div style="margin-bottom:6px; font-size:11px; font-weight:600; color:#64748b;">${meta.label}</div>
             <h3 style="margin:0 0 8px; font-size:14px;">${title}</h3>
@@ -1772,77 +1805,78 @@ function buildIntegratedProjectPopup(project, lat, lng, sourceKey, coordinateEnt
             </div>
         </div>
     `;
-}
+        }
 
-function normalizeSourceForDisplay(source) {
-    const lower = source.toLowerCase();
-    if (lower.includes('ssp')) return 'ssp';
-    if (lower.includes('flood')) return 'ssp';
-    if (lower.includes('dime')) return 'dime';
-    if (lower.includes('philgeps')) return 'philgeps';
-    if (lower.includes('microsite') || lower.includes('dpwh')) return 'microsite';
-    return source;
-}
+        function normalizeSourceForDisplay(source) {
+            const lower = source.toLowerCase();
+            if (lower.includes('ssp')) return 'ssp';
+            if (lower.includes('flood')) return 'ssp';
+            if (lower.includes('dime')) return 'dime';
+            if (lower.includes('philgeps')) return 'philgeps';
+            if (lower.includes('microsite') || lower.includes('dpwh')) return 'microsite';
+            return source;
+        }
 
-window.addEventListener('DOMContentLoaded', async () => {
-    await initializeMap();
+        window.addEventListener('DOMContentLoaded', async () => {
+            await initializeMap();
 
-    const refreshBtn = document.getElementById('refresh-map-data');
-    if (refreshBtn) {
-        refreshBtn.addEventListener('click', async () => {
-            updateMapStatus('Refreshing integrated data...');
-            provinceSummaryLookup.clear();
-            provinceMarkers.forEach(marker => {
-                try {
-                    mapInstance?.removeLayer(marker);
-                } catch (error) {
-                    console.warn('Failed to remove marker during refresh:', error);
+            const refreshBtn = document.getElementById('refresh-map-data');
+            if (refreshBtn) {
+                refreshBtn.addEventListener('click', async () => {
+                    updateMapStatus('Refreshing integrated data...');
+                    provinceSummaryLookup.clear();
+                    provinceMarkers.forEach(marker => {
+                        try {
+                            mapInstance?.removeLayer(marker);
+                        } catch (error) {
+                            console.warn('Failed to remove marker during refresh:', error);
+                        }
+                    });
+                    provinceMarkers.clear();
+                    clearActiveProjectMarkers();
+                    updateMapStatus('Cleared cached summaries. Click a province to load fresh data.');
+                });
+            }
+
+            mapInstance?.on('popupopen', async (event) => {
+                const popup = event.popup;
+                if (!popup) return;
+                const provinceNameMatch = popup.getContent().match(/<h3[^>]*>([^<]+)<\/h3>/);
+                if (!provinceNameMatch) return;
+                const provinceName = provinceNameMatch[1];
+                const key = normalizeProvinceKey(provinceName);
+
+                const summary = provinceSummaryLookup.get(key);
+                if (!summary) {
+                    return;
+                }
+
+                bindProvincePopupButton(key, provinceName, summary);
+            });
+
+            mapInstance?.on('popupclose', (event) => {
+                const popupSource = event?.popup?._source;
+                if (!popupSource) {
+                    return;
+                }
+
+                let belongsToProvince = false;
+                provinceMarkers.forEach(marker => {
+                    if (!belongsToProvince && marker === popupSource) {
+                        belongsToProvince = true;
+                    }
+                });
+
+                if (belongsToProvince) {
+                    clearActiveProjectMarkers();
                 }
             });
-            provinceMarkers.clear();
-            clearActiveProjectMarkers();
-            updateMapStatus('Cleared cached summaries. Click a province to load fresh data.');
         });
-    }
-
-    mapInstance?.on('popupopen', async (event) => {
-        const popup = event.popup;
-        if (!popup) return;
-        const provinceNameMatch = popup.getContent().match(/<h3[^>]*>([^<]+)<\/h3>/);
-        if (!provinceNameMatch) return;
-        const provinceName = provinceNameMatch[1];
-        const key = normalizeProvinceKey(provinceName);
-
-        const summary = provinceSummaryLookup.get(key);
-        if (!summary) {
-            return;
-        }
-
-        bindProvincePopupButton(key, provinceName, summary);
-    });
-
-    mapInstance?.on('popupclose', (event) => {
-        const popupSource = event?.popup?._source;
-        if (!popupSource) {
-            return;
-        }
-
-        let belongsToProvince = false;
-        provinceMarkers.forEach(marker => {
-            if (!belongsToProvince && marker === popupSource) {
-                belongsToProvince = true;
-            }
-        });
-
-        if (belongsToProvince) {
-            clearActiveProjectMarkers();
-        }
-    });
-    });
-</script>
+    </script>
 
 
-{% include "footer.html" %}
+    {% include "footer.html" %}
 
 </body>
+
 </html>

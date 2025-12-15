@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -11,26 +12,35 @@
         body {
             font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
         }
-        .bg-blue-800 { background-color: #0038A8; }
-        .text-primary { color: #0038A8; }
-        .border-blue-800 { border-color: #0038A8; }
-        
+
+        .bg-blue-800 {
+            background-color: #0038A8;
+        }
+
+        .text-primary {
+            color: #0038A8;
+        }
+
+        .border-blue-800 {
+            border-color: #0038A8;
+        }
+
         /* Hierarchy Chart Styles */
         .hierarchy-node {
             cursor: pointer;
             transition: all 0.3s ease;
         }
-        
+
         .hierarchy-node:hover {
             /* Removed scale transform to prevent wobbling */
         }
-        
+
         .hierarchy-link {
             fill: none;
             stroke: #ccc;
             stroke-width: 2px;
         }
-        
+
         .hierarchy-text {
             font-family: 'Inter', sans-serif;
             font-size: 12px;
@@ -38,7 +48,7 @@
             text-anchor: middle;
             pointer-events: none;
         }
-        
+
         .hierarchy-title {
             font-family: 'Inter', sans-serif;
             font-size: 10px;
@@ -47,11 +57,19 @@
             fill: #666;
             pointer-events: none;
         }
-        
-        .position-national { fill: #dc2626; }
-        .position-provincial { fill: #ea580c; }
-        .position-municipal { fill: #059669; }
-        
+
+        .position-national {
+            fill: #dc2626;
+        }
+
+        .position-provincial {
+            fill: #ea580c;
+        }
+
+        .position-municipal {
+            fill: #059669;
+        }
+
         .hierarchy-tooltip {
             position: absolute;
             background: rgba(0, 0, 0, 0.8);
@@ -64,52 +82,55 @@
         }
     </style>
 </head>
+
 <body class="bg-gray-50">
     <!-- Navigation - BetterGov Theme -->
     <nav class="visualizations-nav py-4 px-6 bg-white border-b border-gray-200">
         <div class="max-w-7xl mx-auto flex items-center justify-between">
-                <div class="flex items-center">
-                    <a href="https://bettergov.ph" class="flex items-center">
-                        <img src="https://raw.githubusercontent.com/bettergovph/logo/main/png/BetterGov_Horizontal-Black.png"
-                             alt="BetterGov.ph"
-                             class="h-12 mr-3">
-                        
-                    </a>
-                    <a href="/" class="text-xl font-bold text-black hover:text-gray-600">Data Visualizations</a>
-                </div>
-                <div class="hidden md:flex space-x-6">
-                    <a href="/nep" class="text-black hover:text-gray-600 font-medium transition">NEP</a>
-                    <a href="/budget" class="text-black hover:text-gray-600 font-medium transition">Budget</a>
-                    <a href="/map" class="text-black hover:text-gray-600 font-medium transition">Map</a>
-                    <a href="/dynasty" class="text-black hover:text-gray-600 font-medium transition border-b-2 border-black">Dynasties</a>
-                    <a href="/integrated" class="text-black hover:text-gray-600 font-medium transition">Integrated</a>
-                    <a href="/sources" class="text-black hover:text-gray-600 font-medium transition">Sources</a>
-                </div>
-                <div class="md:hidden">
-                    <button class="text-black focus:outline-none" onclick="toggleMobileMenu()">
-                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
-                        </svg>
-                    </button>
-                </div>
+            <div class="flex items-center">
+                <a href="https://bettergov.ph" class="flex items-center">
+                    <img src="http://assets.bettergov.ph/logos/webp/horizontal-black.webp" alt="BetterGov.ph"
+                        class="h-12 mr-3">
+
+                </a>
+                <a href="/" class="text-xl font-bold text-black hover:text-gray-600">Data Visualizations</a>
             </div>
+            <div class="hidden md:flex space-x-6">
+                <a href="/nep" class="text-black hover:text-gray-600 font-medium transition">NEP</a>
+                <a href="/budget" class="text-black hover:text-gray-600 font-medium transition">Budget</a>
+                <a href="/map" class="text-black hover:text-gray-600 font-medium transition">Map</a>
+                <a href="/dynasty"
+                    class="text-black hover:text-gray-600 font-medium transition border-b-2 border-black">Dynasties</a>
+                <a href="/integrated" class="text-black hover:text-gray-600 font-medium transition">Integrated</a>
+                <a href="/sources" class="text-black hover:text-gray-600 font-medium transition">Sources</a>
+            </div>
+            <div class="md:hidden">
+                <button class="text-black focus:outline-none" onclick="toggleMobileMenu()">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M4 6h16M4 12h16M4 18h16"></path>
+                    </svg>
+                </button>
+            </div>
+        </div>
         </div>
         <!-- Mobile menu (hidden by default) -->
         <div id="mobileMenu" class="hidden mt-4 px-4 space-y-2">
             <a href="/budget" class="block text-black hover:text-gray-600 font-medium py-2">Budget</a>
             <a href="/nep" class="block text-black hover:text-gray-600 font-medium py-2">NEP</a>
             <a href="/map" class="block text-black hover:text-gray-600 font-medium py-2">Map</a>
-            <a href="/dynasty" class="block text-black hover:text-gray-600 font-medium py-2 border-b-2 border-black">Dynasties</a>
+            <a href="/dynasty"
+                class="block text-black hover:text-gray-600 font-medium py-2 border-b-2 border-black">Dynasties</a>
             <a href="/integrated" class="block text-black hover:text-gray-600 font-medium py-2">Integrated</a>
         </div>
     </nav>
 
-<script>
-function toggleMobileMenu() {
-    const menu = document.getElementById('mobileMenu');
-    menu.classList.toggle('hidden');
-}
-</script>
+    <script>
+        function toggleMobileMenu() {
+            const menu = document.getElementById('mobileMenu');
+            menu.classList.toggle('hidden');
+        }
+    </script>
 
     <!-- Main Content -->
     <div class="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
@@ -126,21 +147,22 @@ function toggleMobileMenu() {
                     <h3 class="text-lg font-semibold text-gray-800">Family Members</h3>
                     <p class="text-2xl font-bold text-blue-800" id="familyCount">Loading...</p>
                 </div>
-                
+
                 <div class="bg-green-50 p-6 rounded-lg text-center">
                     <div class="text-3xl font-bold text-blue-800 mb-2">🏛️</div>
                     <h3 class="text-lg font-semibold text-gray-800">Positions Held</h3>
                     <p class="text-2xl font-bold text-blue-800" id="positionsCount">Loading...</p>
                     <p class="text-sm text-gray-600" id="uniquePositionsCount">Loading...</p>
                 </div>
-                
+
                 <div class="bg-yellow-50 p-6 rounded-lg text-center">
                     <div class="text-3xl font-bold text-blue-800 mb-2">📍</div>
                     <h3 class="text-lg font-semibold text-gray-800">Towns/Cities</h3>
                     <p class="text-2xl font-bold text-blue-800" id="provincesCount">Loading...</p>
                 </div>
-                
-                <div class="bg-gray-50 p-6 rounded-lg text-center cursor-pointer hover:bg-gray-100 transition-colors" onclick="showNonDynastyMembers()">
+
+                <div class="bg-gray-50 p-6 rounded-lg text-center cursor-pointer hover:bg-gray-100 transition-colors"
+                    onclick="showNonDynastyMembers()">
                     <div class="text-3xl font-bold text-gray-600 mb-2">👥</div>
                     <h3 class="text-lg font-semibold text-gray-800">Non-Dynasty</h3>
                     <p class="text-2xl font-bold text-gray-600" id="nonDynastyCount">Loading...</p>
@@ -153,18 +175,21 @@ function toggleMobileMenu() {
                 <div class="flex items-center justify-between mb-4">
                     <h2 class="text-2xl font-bold text-gray-800">Family Political Hierarchy</h2>
                     <div class="flex space-x-2">
-                        <button id="toggleView" class="px-4 py-2 bg-blue-800 text-white rounded-lg hover:bg-blue-700 transition-colors">
+                        <button id="toggleView"
+                            class="px-4 py-2 bg-blue-800 text-white rounded-lg hover:bg-blue-700 transition-colors">
                             <i class="fas fa-sitemap mr-2"></i>Org Chart
                         </button>
-                        <button id="toggleTable" class="px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition-colors">
+                        <button id="toggleTable"
+                            class="px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition-colors">
                             <i class="fas fa-table mr-2"></i>Table View
                         </button>
-                        <button id="toggleYear" class="px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition-colors">
+                        <button id="toggleYear"
+                            class="px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition-colors">
                             <i class="fas fa-calendar mr-2"></i>Year View
                         </button>
                     </div>
                 </div>
-                
+
                 <!-- Hierarchy Chart Container (Default visible) -->
                 <div id="hierarchyChart" class="bg-white border border-gray-200 rounded-lg p-6 min-h-48 overflow-auto">
                     <div class="text-center py-8">
@@ -183,17 +208,26 @@ function toggleMobileMenu() {
                         <table class="min-w-full divide-y divide-gray-200">
                             <thead class="bg-gray-50">
                                 <tr>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Position</th>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Town/City</th>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Year</th>
+                                    <th
+                                        class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        Name</th>
+                                    <th
+                                        class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        Position</th>
+                                    <th
+                                        class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        Town/City</th>
+                                    <th
+                                        class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        Year</th>
                                 </tr>
                             </thead>
                             <tbody id="familyTableBody" class="bg-white divide-y divide-gray-200">
                                 <tr>
                                     <td colspan="4" class="px-6 py-4 text-center text-gray-500">
                                         <div class="flex items-center justify-center">
-                                            <div class="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-800"></div>
+                                            <div class="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-800">
+                                            </div>
                                             <span class="ml-2">Loading family data...</span>
                                         </div>
                                     </td>
@@ -230,7 +264,8 @@ function toggleMobileMenu() {
 
             <!-- Back to Dynasty Map -->
             <div class="text-center">
-                <a href="/dynasty" class="inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-md text-white bg-blue-800 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary">
+                <a href="/dynasty"
+                    class="inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-md text-white bg-blue-800 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary">
                     <i class="fas fa-arrow-left mr-2"></i>
                     Back to Dynasty Map
                 </a>
@@ -256,20 +291,29 @@ function toggleMobileMenu() {
                     <h3 class="text-lg font-medium text-gray-900">Non-Dynasty Family Members</h3>
                     <button onclick="closeNonDynastyModal()" class="text-gray-400 hover:text-gray-600">
                         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M6 18L18 6M6 6l12 12"></path>
                         </svg>
                     </button>
                 </div>
-                
+
                 <!-- Modal Content -->
                 <div class="max-h-96 overflow-y-auto">
                     <table class="min-w-full divide-y divide-gray-200">
                         <thead class="bg-gray-50">
                             <tr>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Position</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Province</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Year</th>
+                                <th
+                                    class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    Name</th>
+                                <th
+                                    class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    Position</th>
+                                <th
+                                    class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    Province</th>
+                                <th
+                                    class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    Year</th>
                             </tr>
                         </thead>
                         <tbody id="nonDynastyTableBody" class="bg-white divide-y divide-gray-200">
@@ -277,10 +321,11 @@ function toggleMobileMenu() {
                         </tbody>
                     </table>
                 </div>
-                
+
                 <!-- Modal Footer -->
                 <div class="flex justify-end mt-4">
-                    <button onclick="closeNonDynastyModal()" class="bg-gray-500 hover:bg-gray-600 text-white font-bold py-2 px-4 rounded">
+                    <button onclick="closeNonDynastyModal()"
+                        class="bg-gray-500 hover:bg-gray-600 text-white font-bold py-2 px-4 rounded">
                         Close
                     </button>
                 </div>
@@ -292,44 +337,44 @@ function toggleMobileMenu() {
         // Get surname from URL parameter
         const urlParams = new URLSearchParams(window.location.search);
         const surname = urlParams.get('surname') || '{{ surname }}';
-        
+
         // Convert surname to proper case for display
         const surnameDisplay = surname.charAt(0).toUpperCase() + surname.slice(1).toLowerCase();
-        
+
         // Update the page title to show proper case
         document.querySelector('h1').textContent = `👑 ${surnameDisplay} Family`;
-        
+
         console.log('🔍 Loading family data for surname:', surname);
         console.log('🔍 URL params:', window.location.search);
         console.log('🔍 Template surname:', '{{ surname }}');
         console.log('🔍 Display surname:', surnameDisplay);
-        
+
         // Load family data
         async function loadFamilyData() {
             console.log('🚀 Loading family data for surname:', surname);
-            
+
             try {
                 // Get province parameter from URL
                 const urlParams = new URLSearchParams(window.location.search);
                 const province = urlParams.get('province') || '';
-                
+
                 // Build API URL with province parameter if provided
                 let apiUrl = `/api/dynasty/family?surname=${encodeURIComponent(surname)}`;
                 if (province) {
                     apiUrl += `&province=${encodeURIComponent(province)}`;
                 }
-                
+
                 console.log('🔗 API URL:', apiUrl);
-                
+
                 const response = await fetch(apiUrl);
-                
+
                 if (!response.ok) {
                     throw new Error(`HTTP error! status: ${response.status}`);
                 }
-                
+
                 const data = await response.json();
                 console.log('📊 Family API Response:', data);
-                
+
                 if (data.success && data.data) {
                     console.log('✅ Data loaded successfully, displaying...');
                     displayFamilyData(data.data);
@@ -337,14 +382,14 @@ function toggleMobileMenu() {
                     console.log('❌ No data found');
                     displayNoData();
                 }
-                
+
             } catch (error) {
                 console.error('❌ Error loading family data:', error);
                 displayError();
             }
         }
-        
-        
+
+
         function displayNoData() {
             const tableBody = document.getElementById('familyTableBody');
             tableBody.innerHTML = `
@@ -356,14 +401,14 @@ function toggleMobileMenu() {
                     </td>
                 </tr>
             `;
-            
+
             document.getElementById('familyCount').textContent = '0';
             document.getElementById('positionsCount').textContent = '0';
             document.getElementById('uniquePositionsCount').textContent = 'Unique: 0';
             document.getElementById('provincesCount').textContent = '0';
             document.getElementById('nonDynastyCount').textContent = '0';
         }
-        
+
         function displayError() {
             const tableBody = document.getElementById('familyTableBody');
             tableBody.innerHTML = `
@@ -376,15 +421,15 @@ function toggleMobileMenu() {
                 </tr>
             `;
         }
-        
+
         // Global variable to store non-dynasty members
         let nonDynastyMembers = [];
-        
+
         // Show non-dynasty members modal
         function showNonDynastyMembers() {
             const modal = document.getElementById('nonDynastyModal');
             const tableBody = document.getElementById('nonDynastyTableBody');
-            
+
             if (nonDynastyMembers.length === 0) {
                 tableBody.innerHTML = `
                     <tr>
@@ -407,9 +452,9 @@ function toggleMobileMenu() {
                             ${member.position}
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                            ${member.municipality_city && member.municipality_city !== member.province ? 
-                                `${member.municipality_city}, ${member.province}` : 
-                                member.province}
+                            ${member.municipality_city && member.municipality_city !== member.province ?
+                            `${member.municipality_city}, ${member.province}` :
+                            member.province}
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                             ${member.year}
@@ -418,28 +463,28 @@ function toggleMobileMenu() {
                     tableBody.appendChild(row);
                 });
             }
-            
+
             modal.classList.remove('hidden');
         }
-        
+
         // Close non-dynasty members modal
         function closeNonDynastyModal() {
             const modal = document.getElementById('nonDynastyModal');
             modal.classList.add('hidden');
         }
-        
+
         // Close modal when clicking outside
-        document.addEventListener('click', function(event) {
+        document.addEventListener('click', function (event) {
             const modal = document.getElementById('nonDynastyModal');
             if (event.target === modal) {
                 closeNonDynastyModal();
             }
         });
-        
+
         // Global variables for hierarchy chart
         let familyData = [];
         let hierarchyChart = null;
-        
+
         // Position hierarchy mapping (corrected order)
         const positionHierarchy = {
             'MEMBER, HOUSE OF REPRESENTATIVES': { level: 1, category: 'national', color: 'position-national' },
@@ -450,20 +495,20 @@ function toggleMobileMenu() {
             'VICE MAYOR': { level: 6, category: 'municipal', color: 'position-municipal' },
             'COUNCILOR': { level: 7, category: 'municipal', color: 'position-municipal' }
         };
-        
+
         // Create hierarchy chart
         function createHierarchyChart(data) {
             console.log('🔍 Creating hierarchy chart with data:', data);
-            
+
             const container = document.getElementById('hierarchyChart');
             if (!container) {
                 console.error('❌ Hierarchy chart container not found');
                 return;
             }
-            
+
             // Clear existing chart
             container.innerHTML = '';
-            
+
             if (!data || data.length === 0) {
                 container.innerHTML = `
                     <div class="text-center py-8">
@@ -474,11 +519,11 @@ function toggleMobileMenu() {
                 `;
                 return;
             }
-            
+
             // Filter dynasty members only
             const dynastyMembers = data.filter(member => member.fat === 1);
             console.log('👥 Dynasty members:', dynastyMembers.length);
-            
+
             if (dynastyMembers.length === 0) {
                 container.innerHTML = `
                     <div class="text-center py-8">
@@ -489,7 +534,7 @@ function toggleMobileMenu() {
                 `;
                 return;
             }
-            
+
             // Check if D3 is available
             if (typeof d3 === 'undefined') {
                 console.error('❌ D3.js not loaded');
@@ -502,9 +547,9 @@ function toggleMobileMenu() {
                 `;
                 return;
             }
-            
+
             console.log('✅ D3.js is available, creating chart...');
-            
+
             // Group members by position level (each person-year combination gets its own entry)
             const membersByLevel = {};
             dynastyMembers.forEach(member => {
@@ -513,31 +558,31 @@ function toggleMobileMenu() {
                 if (!membersByLevel[level]) {
                     membersByLevel[level] = [];
                 }
-        membersByLevel[level].push({
-            id: member.id, // Preserve the database ID
-            first_name: member.first_name,
-            last_name: member.last_name,
-            name: `${member.first_name} ${member.last_name}`,
-            position: member.position,
-            province: member.province,
-            municipality_city: member.municipality_city,
-            year: member.year,
-            level: level,
-            category: positionHierarchy[position]?.category || 'municipal',
-            color: positionHierarchy[position]?.color || 'position-municipal',
-            fat: member.fat,
-            relationships: member.relationships || [],
-            nickname: member.nickname,
-            is_connected_member: member.is_connected_member,
-            // Add unique identifier for same person in different years
-            uniqueId: `${member.first_name}_${member.last_name}_${member.position}_${member.year}`
-        });
+                membersByLevel[level].push({
+                    id: member.id, // Preserve the database ID
+                    first_name: member.first_name,
+                    last_name: member.last_name,
+                    name: `${member.first_name} ${member.last_name}`,
+                    position: member.position,
+                    province: member.province,
+                    municipality_city: member.municipality_city,
+                    year: member.year,
+                    level: level,
+                    category: positionHierarchy[position]?.category || 'municipal',
+                    color: positionHierarchy[position]?.color || 'position-municipal',
+                    fat: member.fat,
+                    relationships: member.relationships || [],
+                    nickname: member.nickname,
+                    is_connected_member: member.is_connected_member,
+                    // Add unique identifier for same person in different years
+                    uniqueId: `${member.first_name}_${member.last_name}_${member.position}_${member.year}`
+                });
             });
-            
+
             // Get all levels and sort them (highest to lowest)
             const levels = Object.keys(membersByLevel).map(Number).sort((a, b) => a - b);
             console.log('📈 Position levels found:', levels.length);
-            
+
             // Create hierarchy data structure with proper levels
             const hierarchyData = {
                 name: 'Family Political Hierarchy',
@@ -548,7 +593,7 @@ function toggleMobileMenu() {
                     children: membersByLevel[level]
                 }))
             };
-            
+
             // Create SVG with proper dimensions for org chart
             // Calculate required width based on maximum rectangles
             const maxRectangles = Math.max(...levels.map(level => {
@@ -565,59 +610,59 @@ function toggleMobileMenu() {
             const requiredWidth = (maxRectangles * (160 + 20)) - 20 + 40; // Reduced padding to minimize horizontal scroll
             const width = Math.min(requiredWidth, container.clientWidth || requiredWidth);
             const height = Math.max(300, levels.length * 160 + 80);
-            
+
             const svg = d3.select(container)
                 .append('svg')
                 .attr('width', width)
                 .attr('height', height)
                 .style('background', '#fafafa');
-            
+
             // Create a group for all chart elements that will be zoomed
             const chartGroup = svg.append('g')
                 .attr('class', 'chart-group');
-            
+
             // Add zoom functionality (zoom the entire chart group)
             const zoom = d3.zoom()
                 .scaleExtent([0.1, 3])
-                .on('zoom', function(event) {
+                .on('zoom', function (event) {
                     chartGroup.attr('transform', event.transform);
                 });
-            
+
             svg.call(zoom);
-            
+
             // Create tooltip
             const tooltip = d3.select('body').append('div')
                 .attr('class', 'hierarchy-tooltip')
                 .style('opacity', 0);
-            
+
             // Create manual layout for proper org chart
             const levelHeight = 180; // doubled vertical spacing between levels
             const nodeWidth = 160;
             const nodeHeight = 80;
             const nodeSpacing = 20;
-            
+
             // Use the maxRectangles already calculated above
             const maxWidth = (maxRectangles * (nodeWidth + nodeSpacing)) - nodeSpacing;
             const centerX = (width - maxWidth) / 2;
-            
+
             console.log(`📏 Max rectangles in any level: ${maxRectangles}`);
             console.log(`📏 Max width needed: ${maxWidth}px, Center X: ${centerX}px`);
             console.log(`📏 SVG width: ${width}px, Available space: ${width - 200}px`);
-            
+
             // Set initial zoom and pan to show the chart content
             const initialScale = 0.4; // Start at 40% zoom (zoomed in 1 level)
             // Dynamic pan based on chart content - maintain ratio for different rectangle counts
             const panX = Math.max(40, maxWidth * 0.06);
             const panY = Math.max(300, levels.length * 50);
             svg.call(zoom.transform, d3.zoomIdentity.translate(panX, panY).scale(initialScale));
-            
+
             // Calculate positions for each level - group same people together
             const nodePositions = [];
             levels.forEach((level, levelIndex) => {
                 const members = membersByLevel[level];
                 // Position levels from top to bottom: level 0 at top, level 1 below, etc.
                 const levelY = 80 + (levelIndex * levelHeight);
-                
+
                 // Group members by name to merge same people (only same person gets merged)
                 const groupedMembers = {};
                 console.log(`🔍 Raw members for level ${level}:`, members.map(m => `${m.first_name} ${m.last_name}`));
@@ -644,7 +689,7 @@ function toggleMobileMenu() {
                     groupedMembers[key].years.push(member.year);
                 });
                 console.log(`🔍 Grouped members for level ${level}:`, Object.keys(groupedMembers));
-                
+
                 // Convert to array and sort by earliest year (oldest first, recent last)
                 const uniqueMembers = Object.values(groupedMembers).map(member => ({
                     ...member,
@@ -655,20 +700,20 @@ function toggleMobileMenu() {
                     const bEarliestYear = Math.min(...b.years);
                     return aEarliestYear - bEarliestYear;
                 });
-                
+
                 // Calculate total width needed for this level (based on unique members)
                 const totalWidth = (uniqueMembers.length * (nodeWidth + nodeSpacing)) - nodeSpacing;
                 // Center this level using the same center point as the widest level
                 const startX = centerX + (maxWidth - totalWidth) / 2;
-                
+
                 // Ensure minimum spacing between rectangles
                 const minSpacing = 20;
                 const actualSpacing = Math.max(nodeSpacing, minSpacing);
-                
+
                 console.log(`📊 Level ${levelIndex + 1} (Position Level ${level}): ${uniqueMembers.length} unique members (${members.length} total records)`);
                 console.log(`   Total width needed: ${totalWidth}px, Starting X: ${startX}px`);
                 console.log(`   Unique members (sorted by year):`, uniqueMembers.map(m => `${m.name} (${m.years.join(',')})`));
-                
+
                 uniqueMembers.forEach((member, memberIndex) => {
                     const x = startX + (memberIndex * (nodeWidth + actualSpacing));
                     const nodeData = {
@@ -686,14 +731,14 @@ function toggleMobileMenu() {
                     console.log(`     Is connected member: ${member.is_connected_member}, Surname: ${member.last_name}`);
                 });
             });
-            
+
             console.log('📍 Node positions:', nodePositions);
             console.log('🏗️ Chart structure:');
             levels.forEach((level, levelIndex) => {
                 const members = membersByLevel[level];
                 const positionNames = members.map(m => m.position).join(', ');
                 console.log(`  Level ${levelIndex + 1} (Position Level ${level}): ${members.length} members - ${positionNames}`);
-                
+
                 // Check for same person in multiple years
                 const personCounts = {};
                 members.forEach(member => {
@@ -703,7 +748,7 @@ function toggleMobileMenu() {
                     }
                     personCounts[personKey].push(member.year);
                 });
-                
+
                 // Log if same person appears multiple times
                 Object.keys(personCounts).forEach(person => {
                     if (personCounts[person].length > 1) {
@@ -711,35 +756,35 @@ function toggleMobileMenu() {
                     }
                 });
             });
-            
+
             // Add connecting lines between levels (showing hierarchy flow)
             levels.forEach((level, levelIndex) => {
                 if (levelIndex < levels.length - 1) {
                     const currentLevelNodes = nodePositions.filter(n => n.levelIndex === levelIndex);
                     const nextLevelNodes = nodePositions.filter(n => n.levelIndex === levelIndex + 1);
-                    
+
                     console.log(`🔗 Connecting Level ${levelIndex + 1} (${currentLevelNodes.length} nodes) to Level ${levelIndex + 2} (${nextLevelNodes.length} nodes)`);
-                    
+
                     // Lines removed - showing only nodes without connections
                 }
             });
-            
+
             // Add nodes
             const nodes = chartGroup.selectAll('.hierarchy-node')
                 .data(nodePositions)
                 .enter().append('g')
                 .attr('class', 'hierarchy-node')
                 .attr('transform', d => `translate(${d.x},${d.y})`);
-            
+
             console.log(`🎯 Created ${nodes.size()} nodes with click handlers`);
-            
+
             // Debug: Check if Milagrosa Tan is in the nodes
             const milagrosaNodes = nodes.filter(d => d.name && d.name.toLowerCase().includes('milagrosa'));
             console.log(`🔍 Milagrosa nodes found: ${milagrosaNodes.size()}`);
-            
+
             if (milagrosaNodes.size() > 0) {
                 console.log(`🔍 Milagrosa node data:`, milagrosaNodes.data());
-                
+
                 // Check if click events are attached
                 const milagrosaNode = milagrosaNodes.node();
                 if (milagrosaNode) {
@@ -747,10 +792,10 @@ function toggleMobileMenu() {
                     console.log(`🔍 Milagrosa node has click handler:`, milagrosaNode.onclick !== null);
                 }
             }
-            
+
             // Add rectangles for nodes (org chart style) with level-based colors and year-based shades
             console.log(`🔍 About to create rectangles for ${nodes.size()} nodes`);
-            
+
             const levelBaseColors = [
                 '#1E40AF', // Level 1 - Dark Blue (highest positions)
                 '#DC2626', // Level 2 - Red
@@ -760,34 +805,34 @@ function toggleMobileMenu() {
                 '#DB2777', // Level 6 - Pink
                 '#0891B2'  // Level 7 - Cyan
             ];
-            
+
             // Function to get color with shade based on year
             function getColorWithShade(levelIndex, year) {
                 const baseColor = levelBaseColors[levelIndex] || '#6B7280';
-                
+
                 if (!year) return baseColor;
-                
+
                 // Convert hex to RGB
                 const hex = baseColor.replace('#', '');
                 const r = parseInt(hex.substr(0, 2), 16);
                 const g = parseInt(hex.substr(2, 2), 16);
                 const b = parseInt(hex.substr(4, 2), 16);
-                
+
                 // Calculate shade based on year (older = lighter, newer = darker)
                 const currentYear = new Date().getFullYear();
                 const yearDiff = currentYear - year;
                 const maxDiff = 20; // Maximum year difference for full shade range
                 const shadeFactor = Math.min(yearDiff / maxDiff, 1); // 0 to 1
-                
+
                 // Lighten the color for older years
                 const lightenAmount = shadeFactor * 0.4; // Up to 40% lighter
                 const newR = Math.min(255, Math.round(r + (255 - r) * lightenAmount));
                 const newG = Math.min(255, Math.round(g + (255 - g) * lightenAmount));
                 const newB = Math.min(255, Math.round(b + (255 - b) * lightenAmount));
-                
+
                 return `rgb(${newR}, ${newG}, ${newB})`;
             }
-            
+
             nodes.append('rect')
                 .attr('width', nodeWidth)
                 .attr('height', nodeHeight)
@@ -809,19 +854,19 @@ function toggleMobileMenu() {
                 })
                 .style('filter', d => {
                     // Enhanced glow effect for connected members
-                    return d.is_connected_member ? 
-                        'drop-shadow(0 4px 8px rgba(255, 107, 53, 0.4)) drop-shadow(0 2px 4px rgba(0,0,0,0.2))' : 
+                    return d.is_connected_member ?
+                        'drop-shadow(0 4px 8px rgba(255, 107, 53, 0.4)) drop-shadow(0 2px 4px rgba(0,0,0,0.2))' :
                         'drop-shadow(0 2px 4px rgba(0,0,0,0.1))';
                 })
                 .style('cursor', 'pointer') // Make all rectangles clickable
-                .on('click', function(event, d) {
+                .on('click', function (event, d) {
                     console.log('🖱️ CLICK EVENT TRIGGERED!', {
                         name: d.name,
                         surname: d.last_name,
                         event: event,
                         target: event.target
                     });
-                    
+
                     // Special debugging for Milagrosa Tan clicks
                     if (d.name && d.name.toLowerCase().includes('milagrosa')) {
                         console.log('🔍 MILAGROSA TAN CLICKED!', {
@@ -834,8 +879,8 @@ function toggleMobileMenu() {
                         });
                     }
                     event.stopPropagation(); // Prevent event bubbling
-                    console.log('🖱️ Main chart rectangle clicked!', { 
-                        currentSurname: surname, 
+                    console.log('🖱️ Main chart rectangle clicked!', {
+                        currentSurname: surname,
                         rectangleSurname: d.last_name,
                         rectangleData: d,
                         rawEvent: event,
@@ -843,17 +888,17 @@ function toggleMobileMenu() {
                         isConnectedMember: d.is_connected_member,
                         hasRelationships: d.relationships ? d.relationships.length : 0
                     });
-                    
+
                     // Check if this rectangle has a different surname
                     const currentSurname = surname.toLowerCase();
                     const rectangleSurname = d.last_name.toLowerCase();
-                    
+
                     // Check if different surname OR different province
                     const currentProvince = new URLSearchParams(window.location.search).get('province') || '';
                     const memberProvince = d.province || '';
                     const isDifferentSurname = rectangleSurname !== currentSurname;
                     const isDifferentProvince = memberProvince.toLowerCase() !== currentProvince.toLowerCase();
-                    
+
                     console.log(`🔍 Navigation check:`, {
                         isDifferentSurname,
                         isDifferentProvince,
@@ -862,7 +907,7 @@ function toggleMobileMenu() {
                         currentProvince,
                         memberProvince
                     });
-                    
+
                     // Special debugging for Milagrosa Tan
                     if (d.name && d.name.toLowerCase().includes('milagrosa') && d.last_name.toLowerCase().includes('tan')) {
                         console.log(`🔍 MILAGROSA TAN DEBUG:`, {
@@ -878,46 +923,46 @@ function toggleMobileMenu() {
                             willNavigate: isDifferentSurname || isDifferentProvince
                         });
                     }
-                    
+
                     if (isDifferentSurname || isDifferentProvince) {
                         console.log(`🔗 Clicked on different surname/province: ${d.last_name} (current: ${surname})`);
-                        
+
                         // Navigate to /family with the member's surname and their specific province
                         let newUrl = `/family?surname=${encodeURIComponent(d.last_name)}`;
                         if (memberProvince) {
                             newUrl += `&province=${encodeURIComponent(memberProvince)}`;
                         }
                         console.log(`🔗 Navigating to ${d.last_name} family in ${memberProvince}:`, newUrl);
-                        
+
                         // Special case for Tan family - always go to Samar for Tan family
                         if (d.last_name.toLowerCase() === 'tan') {
                             newUrl = `/family?surname=tan&province=samar`;
                             console.log(`🔗 Special Tan family navigation to Samar:`, newUrl);
                         }
-                        
+
                         window.location.href = newUrl;
                     } else {
                         console.log(`👤 Clicked on same surname and province: ${d.last_name} (no navigation needed)`);
                     }
                 });
-            
+
             // Debug: Check if Milagrosa Tan's rectangle was created
             const allRectangles = svg.selectAll('rect');
             console.log(`🔍 Total rectangles created: ${allRectangles.size()}`);
-            
-            const milagrosaRectangles = allRectangles.filter(function(d) {
+
+            const milagrosaRectangles = allRectangles.filter(function (d) {
                 return d && d.name && d.name.toLowerCase().includes('milagrosa');
             });
             console.log(`🔍 Milagrosa rectangles found: ${milagrosaRectangles.size()}`);
-            
+
             if (milagrosaRectangles.size() > 0) {
                 console.log(`🔍 Milagrosa rectangle data:`, milagrosaRectangles.data());
             }
-            
+
             // Add name text
             nodes.append('text')
                 .attr('text-anchor', 'middle')
-                .attr('x', nodeWidth/2)
+                .attr('x', nodeWidth / 2)
                 .attr('y', 18)
                 .style('fill', 'white')
                 .style('font-size', d => d.is_connected_member ? '13px' : '12px')
@@ -928,11 +973,11 @@ function toggleMobileMenu() {
                     const displayName = name.length > 18 ? name.substring(0, 18) + '...' : name;
                     return d.is_connected_member ? `🔗 ${displayName}` : displayName;
                 });
-            
+
             // Add position text
             nodes.append('text')
                 .attr('text-anchor', 'middle')
-                .attr('x', nodeWidth/2)
+                .attr('x', nodeWidth / 2)
                 .attr('y', 35)
                 .style('fill', 'white')
                 .style('font-size', '9px')
@@ -941,11 +986,11 @@ function toggleMobileMenu() {
                     const position = d.position || '';
                     return position.length > 25 ? position.substring(0, 25) + '...' : position;
                 });
-            
+
             // Add year text (show all years for merged people)
             nodes.append('text')
                 .attr('text-anchor', 'middle')
-                .attr('x', nodeWidth/2)
+                .attr('x', nodeWidth / 2)
                 .attr('y', 50)
                 .style('fill', 'white')
                 .style('font-size', '12px')
@@ -957,11 +1002,11 @@ function toggleMobileMenu() {
                     }
                     return d.year || 'N/A';
                 });
-            
+
             // Add location text (Province, Municipality format)
             nodes.append('text')
                 .attr('text-anchor', 'middle')
-                .attr('x', nodeWidth/2)
+                .attr('x', nodeWidth / 2)
                 .attr('y', 65)
                 .style('fill', 'white')
                 .style('font-size', '10px')
@@ -971,20 +1016,20 @@ function toggleMobileMenu() {
                     // Show "Municipality, Province" format to remove ambiguity
                     const province = d.province || 'N/A';
                     const municipality = d.municipality_city || '';
-                    
+
                     let location = province;
                     if (municipality && municipality !== province) {
                         location = `${municipality}, ${province}`;
                     }
-                    
+
                     // Truncate long location names
                     return location.length > 25 ? location.substring(0, 25) + '...' : location;
                 });
-            
+
             // Add connecting lines for relationships (marriage, family connections)
             const connections = [];
             const connectionSet = new Set(); // To prevent duplicate connections
-            
+
             // Debug: Check what relationship data we have
             console.log('🔍 Checking relationship data in nodePositions:');
             nodePositions.forEach((node, index) => {
@@ -995,17 +1040,17 @@ function toggleMobileMenu() {
                     });
                 }
             });
-            
+
             // Find connections by matching people with connection relationships
             nodePositions.forEach(node => {
                 // First, find same person across different years (self-connections)
                 const samePersonNodes = nodePositions.filter(target => {
-                    return target !== node && 
-                           node.first_name === target.first_name && 
-                           node.last_name === target.last_name && 
-                           node.year !== target.year;
+                    return target !== node &&
+                        node.first_name === target.first_name &&
+                        node.last_name === target.last_name &&
+                        node.year !== target.year;
                 });
-                
+
                 // Add self-connections (same person, different years)
                 samePersonNodes.forEach(targetNode => {
                     const connectionKey = `${node.first_name}_${node.last_name}_${node.year}_${targetNode.year}`;
@@ -1013,7 +1058,7 @@ function toggleMobileMenu() {
                         // Ensure arrow points to the more recent year
                         const fromNode = node.year < targetNode.year ? node : targetNode;
                         const toNode = node.year < targetNode.year ? targetNode : node;
-                        
+
                         connections.push({
                             from: fromNode,
                             to: toNode,
@@ -1023,23 +1068,23 @@ function toggleMobileMenu() {
                         connectionSet.add(connectionKey);
                     }
                 });
-                
-            // Then, find family/marriage relationships using the new relationships structure
-            if (node.relationships && node.relationships.length > 0) {
-                console.log(`🔍 Looking for family connections for ${node.first_name} ${node.last_name} (ID: ${node.id}):`);
-                
-                node.relationships.forEach(relationship => {
-                    const familyNode = nodePositions.find(target => {
-                        const isDifferentPerson = target.first_name !== node.first_name;
-                        const hasIdMatch = target.id === relationship.related_person_id;
-                        
-                        if (isDifferentPerson && hasIdMatch) {
-                            console.log(`  ✅ Found family connection: ${node.first_name} ${node.last_name} → ${target.first_name} ${target.last_name} (${relationship.relationship_description})`);
-                        }
-                        
-                        return isDifferentPerson && hasIdMatch;
-                    });
-                    
+
+                // Then, find family/marriage relationships using the new relationships structure
+                if (node.relationships && node.relationships.length > 0) {
+                    console.log(`🔍 Looking for family connections for ${node.first_name} ${node.last_name} (ID: ${node.id}):`);
+
+                    node.relationships.forEach(relationship => {
+                        const familyNode = nodePositions.find(target => {
+                            const isDifferentPerson = target.first_name !== node.first_name;
+                            const hasIdMatch = target.id === relationship.related_person_id;
+
+                            if (isDifferentPerson && hasIdMatch) {
+                                console.log(`  ✅ Found family connection: ${node.first_name} ${node.last_name} → ${target.first_name} ${target.last_name} (${relationship.relationship_description})`);
+                            }
+
+                            return isDifferentPerson && hasIdMatch;
+                        });
+
                         if (familyNode) {
                             const connectionKey = `${node.first_name}_${node.last_name}_${familyNode.first_name}_${familyNode.last_name}`;
                             const reverseKey = `${familyNode.first_name}_${familyNode.last_name}_${node.first_name}_${node.last_name}`;
@@ -1056,7 +1101,7 @@ function toggleMobileMenu() {
                     });
                 }
             });
-            
+
             console.log('🔗 Total connections found:', connections.length);
             const familyConnections = connections.filter(c => c.type === 'family');
             console.log('🔗 Family connections:', familyConnections.length);
@@ -1065,10 +1110,10 @@ function toggleMobileMenu() {
                     console.log(`  ${index + 1}. ${c.from.first_name} ${c.from.last_name} ↔ ${c.to.first_name} ${c.to.last_name}`);
                 });
             }
-            
+
             // Add arrow marker definitions for self connections
             const defs = svg.append('defs');
-            
+
             // Arrow marker for self connections (pointing to recent year)
             defs.append('marker')
                 .attr('id', 'arrowhead-self')
@@ -1087,8 +1132,8 @@ function toggleMobileMenu() {
             // Draw connecting lines
             const lines = chartGroup.append('g')
                 .attr('class', 'connection-lines');
-            
-                
+
+
             lines.selectAll('.connection-line')
                 .data(connections)
                 .enter()
@@ -1096,14 +1141,14 @@ function toggleMobileMenu() {
                 .attr('class', 'connection-line')
                 .attr('d', d => {
                     // Calculate connection points
-                    const fromCenterX = d.from.x + nodeWidth/2;
-                    const fromCenterY = d.from.y + nodeHeight/2;
-                    const toCenterX = d.to.x + nodeWidth/2;
-                    const toCenterY = d.to.y + nodeHeight/2;
-                    
+                    const fromCenterX = d.from.x + nodeWidth / 2;
+                    const fromCenterY = d.from.y + nodeHeight / 2;
+                    const toCenterX = d.to.x + nodeWidth / 2;
+                    const toCenterY = d.to.y + nodeHeight / 2;
+
                     // Determine start and end points
                     let startX, startY, endX, endY;
-                    
+
                     if (d.from.y < d.to.y) {
                         // From rectangle is above - connect from bottom edge
                         startX = fromCenterX;
@@ -1132,18 +1177,18 @@ function toggleMobileMenu() {
                             endY = toCenterY;
                         }
                     }
-                    
+
                     // Create curved path using cubic Bézier curves
                     const dx = endX - startX;
                     const dy = endY - startY;
                     const distance = Math.sqrt(dx * dx + dy * dy);
-                    
+
                     // Only curve 90-degree connections (pure vertical lines), keep everything else straight
                     if (Math.abs(dx) < 5 && (d.from.y < d.to.y || d.from.y > d.to.y)) {
                         // Pure vertical connection (90-degree line) - use C-curve to avoid rectangles
                         const horizontalOffset = Math.max(120, Math.abs(dx) + 150); // More aggressive horizontal offset
                         const verticalOffset = Math.min(distance * 0.4, 80); // Increased vertical curve
-                        
+
                         if (d.from.y < d.to.y) {
                             // From above to below - C-curve to the right
                             cp1x = startX + horizontalOffset;
@@ -1161,7 +1206,7 @@ function toggleMobileMenu() {
                         // All other connections - simple straight line
                         return `M ${startX} ${startY} L ${endX} ${endY}`;
                     }
-                    
+
                     // Create SVG path with cubic Bézier curve
                     return `M ${startX} ${startY} C ${cp1x} ${cp1y}, ${cp2x} ${cp2y}, ${endX} ${endY}`;
                 })
@@ -1171,48 +1216,48 @@ function toggleMobileMenu() {
                         return '#1F2937'; // Dark gray for same person across years
                     } else if (d.type === 'family') {
                         // Get the actual relationship description from the relationship data
-                        const relationshipDesc = d.from.relationships?.find(rel => 
+                        const relationshipDesc = d.from.relationships?.find(rel =>
                             rel.related_person_id === d.to.id
                         )?.relationship_description || '';
-                        
+
                         console.log(`🔍 Relationship description for ${d.from.first_name} → ${d.to.first_name}: "${relationshipDesc}"`);
-                        
+
                         // Different colors for different family relationships
                         // Check for marriage relationships (husband-wife)
-                        if (relationshipDesc.toUpperCase().includes('MARRIED') || 
-                            relationshipDesc.toUpperCase().includes('HUSBAND') || 
+                        if (relationshipDesc.toUpperCase().includes('MARRIED') ||
+                            relationshipDesc.toUpperCase().includes('HUSBAND') ||
                             relationshipDesc.toUpperCase().includes('WIFE') ||
                             relationshipDesc.toUpperCase().includes('SPOUSE')) {
                             return '#DC2626'; // Red for marriage
-                        } 
+                        }
                         // Check for parent-child relationships
-                        else if (relationshipDesc.toUpperCase().includes('FATHER') || 
-                                 relationshipDesc.toUpperCase().includes('MOTHER') || 
-                                 relationshipDesc.toUpperCase().includes('SON') || 
-                                 relationshipDesc.toUpperCase().includes('DAUGHTER') ||
-                                 relationshipDesc.toUpperCase().includes('PARENT') || 
-                                 relationshipDesc.toUpperCase().includes('CHILD')) {
+                        else if (relationshipDesc.toUpperCase().includes('FATHER') ||
+                            relationshipDesc.toUpperCase().includes('MOTHER') ||
+                            relationshipDesc.toUpperCase().includes('SON') ||
+                            relationshipDesc.toUpperCase().includes('DAUGHTER') ||
+                            relationshipDesc.toUpperCase().includes('PARENT') ||
+                            relationshipDesc.toUpperCase().includes('CHILD')) {
                             return '#059669'; // Green for parent-child
                         }
                         // Check for sibling relationships
-                        else if (relationshipDesc.toUpperCase().includes('BROTHER') || 
-                                 relationshipDesc.toUpperCase().includes('SISTER') ||
-                                 relationshipDesc.toUpperCase().includes('SIBLING')) {
+                        else if (relationshipDesc.toUpperCase().includes('BROTHER') ||
+                            relationshipDesc.toUpperCase().includes('SISTER') ||
+                            relationshipDesc.toUpperCase().includes('SIBLING')) {
                             return '#7C3AED'; // Purple for siblings
                         }
                         // Check for in-law relationships
-                        else if (relationshipDesc.toUpperCase().includes('IN-LAW') || 
-                                 relationshipDesc.toUpperCase().includes('FATHER-IN-LAW') ||
-                                 relationshipDesc.toUpperCase().includes('MOTHER-IN-LAW') || 
-                                 relationshipDesc.toUpperCase().includes('SON-IN-LAW') ||
-                                 relationshipDesc.toUpperCase().includes('DAUGHTER-IN-LAW')) {
+                        else if (relationshipDesc.toUpperCase().includes('IN-LAW') ||
+                            relationshipDesc.toUpperCase().includes('FATHER-IN-LAW') ||
+                            relationshipDesc.toUpperCase().includes('MOTHER-IN-LAW') ||
+                            relationshipDesc.toUpperCase().includes('SON-IN-LAW') ||
+                            relationshipDesc.toUpperCase().includes('DAUGHTER-IN-LAW')) {
                             return '#D97706'; // Orange for in-laws
                         }
                         // Check for uncle/aunt/nephew/niece relationships
-                        else if (relationshipDesc.toUpperCase().includes('UNCLE') || 
-                                 relationshipDesc.toUpperCase().includes('AUNT') ||
-                                 relationshipDesc.toUpperCase().includes('NEPHEW') || 
-                                 relationshipDesc.toUpperCase().includes('NIECE')) {
+                        else if (relationshipDesc.toUpperCase().includes('UNCLE') ||
+                            relationshipDesc.toUpperCase().includes('AUNT') ||
+                            relationshipDesc.toUpperCase().includes('NEPHEW') ||
+                            relationshipDesc.toUpperCase().includes('NIECE')) {
                             return '#DB2777'; // Pink for extended family
                         }
                         // Default for other family connections
@@ -1250,36 +1295,36 @@ function toggleMobileMenu() {
                     }
                     return null;
                 })
-            
+
             // Remove the golden border highlighting to prevent visual glitches
-            
+
             // Add dynamic legend at the top of the viewport based on actual levels
             const legend = svg.append('g')
                 .attr('transform', 'translate(20, 20)');
-            
+
             // Create dynamic legend items based on actual levels present
             const levelLabels = {
                 1: 'Congressman',
-                2: 'Governor', 
+                2: 'Governor',
                 3: 'Vice Governor',
                 4: 'Provincial Board',
                 5: 'Mayor',
                 6: 'Vice Mayor',
                 7: 'Councilor'
             };
-            
+
             // Get unique levels present in the data
             const presentLevels = [...new Set(levels)].sort((a, b) => a - b);
             console.log('📊 Present levels:', presentLevels);
-            
+
             // Add position level legend
             presentLevels.forEach((level, i) => {
                 const legendGroup = legend.append('g')
                     .attr('transform', `translate(${i * 120}, 0)`);
-                
+
                 const levelIndex = level - 1; // Convert to 0-based index
                 const color = levelBaseColors[levelIndex] || '#6B7280';
-                
+
                 legendGroup.append('rect')
                     .attr('width', 12)
                     .attr('height', 12)
@@ -1288,7 +1333,7 @@ function toggleMobileMenu() {
                     .style('fill', color)
                     .style('stroke', '#fff')
                     .style('stroke-width', 1);
-                
+
                 legendGroup.append('text')
                     .attr('x', 18)
                     .attr('y', 9)
@@ -1297,11 +1342,11 @@ function toggleMobileMenu() {
                     .style('font-weight', '500')
                     .text(levelLabels[level] || `Level ${level}`);
             });
-            
+
             // Add connection type legend
             const connectionLegend = svg.append('g')
                 .attr('transform', `translate(20, ${presentLevels.length > 0 ? 50 : 20})`);
-            
+
             const connectionTypes = [
                 {
                     label: 'Marriage',
@@ -1353,11 +1398,11 @@ function toggleMobileMenu() {
                     opacity: 0.9
                 }
             ];
-            
+
             connectionTypes.forEach((connType, i) => {
                 const connGroup = connectionLegend.append('g')
                     .attr('transform', `translate(${i * 100}, 0)`);
-                
+
                 // Add line sample
                 connGroup.append('line')
                     .attr('x1', 0)
@@ -1368,7 +1413,7 @@ function toggleMobileMenu() {
                     .style('stroke-width', connType.width)
                     .style('stroke-dasharray', connType.dash)
                     .style('opacity', connType.opacity);
-                
+
                 connGroup.append('text')
                     .attr('x', 25)
                     .attr('y', 9)
@@ -1377,13 +1422,13 @@ function toggleMobileMenu() {
                     .style('font-weight', '500')
                     .text(connType.label);
             });
-            
+
             console.log('✅ Hierarchy chart created successfully');
         }
-        
+
         // Toggle between chart and table views
         let currentView = 'chart'; // 'chart', 'table', 'year'
-        
+
         function switchView(view) {
             const chartContainer = document.getElementById('hierarchyChart');
             const tableContainer = document.getElementById('familyTable');
@@ -1391,12 +1436,12 @@ function toggleMobileMenu() {
             const toggleViewBtn = document.getElementById('toggleView');
             const toggleTableBtn = document.getElementById('toggleTable');
             const toggleYearBtn = document.getElementById('toggleYear');
-            
+
             // Hide all containers
             chartContainer.classList.add('hidden');
             tableContainer.classList.add('hidden');
             yearContainer.classList.add('hidden');
-            
+
             // Reset all buttons
             toggleViewBtn.classList.remove('bg-blue-800');
             toggleViewBtn.classList.add('bg-gray-500');
@@ -1404,7 +1449,7 @@ function toggleMobileMenu() {
             toggleTableBtn.classList.add('bg-gray-500');
             toggleYearBtn.classList.remove('bg-blue-800');
             toggleYearBtn.classList.add('bg-gray-500');
-            
+
             // Show selected container and update button
             if (view === 'chart') {
                 chartContainer.classList.remove('hidden');
@@ -1432,10 +1477,10 @@ function toggleMobileMenu() {
                 // Stop auto-cycling when switching away from year view
                 stopYearCycle();
             }
-            
+
             currentView = view;
         }
-        
+
         function toggleView() {
             if (currentView === 'chart') {
                 switchView('table');
@@ -1443,39 +1488,39 @@ function toggleMobileMenu() {
                 switchView('chart');
             }
         }
-        
+
         // Initialize Year View with auto-cycling
         function initializeYearView() {
             if (!window.familyData) return;
-            
+
             // Initialize year view
-            
+
             // Get unique years from the data and sort in ascending order
             const years = [...new Set(window.familyData.map(member => member.year))].sort((a, b) => a - b);
-            
+
             if (years.length === 0) {
                 document.getElementById('currentYearDisplay').textContent = 'No data available';
                 return;
             }
-            
+
             // Initialize auto-cycling variables
             window.currentYearIndex = 0;
             window.yearCycleInterval = null;
-            
+
             // Start auto-cycling from the earliest year
             displayYearView(years[0]);
             startYearCycle(years);
-            
+
             window.yearViewInitialized = true;
         }
-        
+
         // Start the auto-cycling timer
         function startYearCycle(years) {
             // Clear any existing interval
             if (window.yearCycleInterval) {
                 clearInterval(window.yearCycleInterval);
             }
-            
+
             // Start cycling every 5 seconds
             window.yearCycleInterval = setInterval(() => {
                 window.currentYearIndex = (window.currentYearIndex + 1) % years.length;
@@ -1483,7 +1528,7 @@ function toggleMobileMenu() {
                 displayYearView(nextYear);
             }, 5000);
         }
-        
+
         // Stop the auto-cycling timer
         function stopYearCycle() {
             if (window.yearCycleInterval) {
@@ -1491,17 +1536,17 @@ function toggleMobileMenu() {
                 window.yearCycleInterval = null;
             }
         }
-        
+
         // Display Year View for a specific year
         function displayYearView(year) {
             if (!window.familyData) return;
-            
+
             // Update the current year display
             document.getElementById('currentYearDisplay').textContent = `Showing: ${year}`;
-            
+
             // Filter data for the selected year
             const yearData = window.familyData.filter(member => member.year === year);
-            
+
             if (yearData.length === 0) {
                 document.getElementById('yearChart').innerHTML = `
                     <div class="text-center py-8">
@@ -1511,11 +1556,11 @@ function toggleMobileMenu() {
                 `;
                 return;
             }
-            
+
             // Create year-specific hierarchy chart
             createYearHierarchyChart(yearData, year);
         }
-        
+
         // Create hierarchy chart for a specific year
         function createYearHierarchyChart(yearData, year) {
             const container = document.getElementById('yearChart');
@@ -1523,11 +1568,11 @@ function toggleMobileMenu() {
                 console.error('Year chart container not found');
                 return;
             }
-            
+
             // Proceed with year chart creation
-            
+
             container.innerHTML = '';
-            
+
             // Define level colors (same as main hierarchy chart)
             const levelBaseColors = [
                 '#1E40AF', // Level 1 - Dark Blue
@@ -1538,28 +1583,28 @@ function toggleMobileMenu() {
                 '#DB2777', // Level 6 - Pink
                 '#0891B2'  // Level 7 - Cyan
             ];
-            
+
             // Create SVG
             const width = Math.max(1200, container.clientWidth || 1000);
             const height = Math.max(600, yearData.length * 100 + 200);
-            
+
             const svg = d3.select(container)
                 .append('svg')
                 .attr('width', width)
                 .attr('height', height)
                 .style('background', '#f8fafc');
-            
+
             // Add zoom behavior
             const zoom = d3.zoom()
                 .scaleExtent([0.1, 3])
                 .on('zoom', (event) => {
                     chartGroup.attr('transform', event.transform);
                 });
-            
+
             svg.call(zoom);
-            
+
             const chartGroup = svg.append('g');
-            
+
             // Group data by position level
             const membersByLevel = {};
             yearData.forEach(member => {
@@ -1588,13 +1633,13 @@ function toggleMobileMenu() {
                     uniqueId: `${member.first_name}_${member.last_name}_${member.position}_${member.year}`
                 });
             });
-            
+
             const levels = Object.keys(membersByLevel).map(Number).sort((a, b) => a - b);
             const levelHeight = 120; // year view unchanged vertically
             const nodeWidth = 160;
             const nodeHeight = 80;
             const nodeSpacing = 20; // revert horizontal spacing in year view
-            
+
             // Calculate positions for each level
             const nodePositions = [];
             levels.forEach((level, levelIndex) => {
@@ -1602,7 +1647,7 @@ function toggleMobileMenu() {
                 const totalWidth = members.length * (nodeWidth + nodeSpacing) - nodeSpacing;
                 const startX = (width - totalWidth) / 2;
                 const y = levelIndex * levelHeight + 100;
-                
+
                 members.forEach((member, memberIndex) => {
                     const x = startX + memberIndex * (nodeWidth + nodeSpacing);
                     nodePositions.push({
@@ -1613,7 +1658,7 @@ function toggleMobileMenu() {
                     });
                 });
             });
-            
+
             // Draw rectangles
             const nodes = chartGroup.selectAll('.hierarchy-node')
                 .data(nodePositions)
@@ -1621,7 +1666,7 @@ function toggleMobileMenu() {
                 .append('g')
                 .attr('class', 'hierarchy-node')
                 .attr('transform', d => `translate(${d.x}, ${d.y})`);
-            
+
             nodes.append('rect')
                 .attr('width', nodeWidth)
                 .attr('height', nodeHeight)
@@ -1637,21 +1682,21 @@ function toggleMobileMenu() {
                     const rectangleSurname = d.last_name.toLowerCase();
                     return rectangleSurname !== currentSurname ? 'pointer' : 'default';
                 })
-                .on('click', function(event, d) {
+                .on('click', function (event, d) {
                     event.stopPropagation(); // Prevent event bubbling
-                    console.log('🖱️ Year view rectangle clicked!', { 
-                        currentSurname: surname, 
+                    console.log('🖱️ Year view rectangle clicked!', {
+                        currentSurname: surname,
                         rectangleSurname: d.last_name,
-                        rectangleData: d 
+                        rectangleData: d
                     });
-                    
+
                     // Check if this rectangle has a different surname
                     const currentSurname = surname.toLowerCase();
                     const rectangleSurname = d.last_name.toLowerCase();
-                    
+
                     if (rectangleSurname !== currentSurname) {
                         console.log(`🔗 Clicked on different surname: ${d.last_name} (current: ${surname})`);
-                        
+
                         // Navigate to /family with the member's surname and their specific province
                         const memberProvince = d.province || '';
                         let newUrl = `/family?surname=${encodeURIComponent(d.last_name)}`;
@@ -1659,23 +1704,23 @@ function toggleMobileMenu() {
                             newUrl += `&province=${encodeURIComponent(memberProvince)}`;
                         }
                         console.log(`🔗 Navigating to ${d.last_name} family in ${memberProvince}:`, newUrl);
-                        
+
                         // Special case for Tan family - always go to Samar for Tan family
                         if (d.last_name.toLowerCase() === 'tan') {
                             newUrl = `/family?surname=tan&province=samar`;
                             console.log(`🔗 Special Tan family navigation to Samar:`, newUrl);
                         }
-                        
+
                         window.location.href = newUrl;
                     } else {
                         console.log(`👤 Clicked on same surname: ${d.last_name} (no navigation needed)`);
                     }
                 });
-            
+
             // Add text elements
             nodes.append('text')
                 .attr('text-anchor', 'middle')
-                .attr('x', nodeWidth/2)
+                .attr('x', nodeWidth / 2)
                 .attr('y', 18)
                 .style('fill', 'white')
                 .style('font-size', '12px')
@@ -1684,10 +1729,10 @@ function toggleMobileMenu() {
                     const name = d.name;
                     return name.length > 18 ? name.substring(0, 18) + '...' : name;
                 });
-            
+
             nodes.append('text')
                 .attr('text-anchor', 'middle')
-                .attr('x', nodeWidth/2)
+                .attr('x', nodeWidth / 2)
                 .attr('y', 35)
                 .style('fill', 'white')
                 .style('font-size', '9px')
@@ -1696,20 +1741,20 @@ function toggleMobileMenu() {
                     const position = d.position || '';
                     return position.length > 25 ? position.substring(0, 25) + '...' : position;
                 });
-            
+
             nodes.append('text')
                 .attr('text-anchor', 'middle')
-                .attr('x', nodeWidth/2)
+                .attr('x', nodeWidth / 2)
                 .attr('y', 50)
                 .style('fill', 'white')
                 .style('font-size', '12px')
                 .style('font-weight', 'bold')
                 .style('text-shadow', '1px 1px 2px rgba(0,0,0,0.5)')
                 .text(d => d.year || 'N/A');
-            
+
             nodes.append('text')
                 .attr('text-anchor', 'middle')
-                .attr('x', nodeWidth/2)
+                .attr('x', nodeWidth / 2)
                 .attr('y', 65)
                 .style('fill', 'white')
                 .style('font-size', '10px')
@@ -1722,80 +1767,80 @@ function toggleMobileMenu() {
                     }
                     return '';
                 });
-            
+
             // Add title
             chartGroup.append('text')
-                .attr('x', width/2)
+                .attr('x', width / 2)
                 .attr('y', 30)
                 .attr('text-anchor', 'middle')
                 .style('font-size', '18px')
                 .style('font-weight', 'bold')
                 .style('fill', '#1F2937')
                 .text(`Political Positions in ${year}`);
-            
+
             // Set initial zoom and pan
             const initialScale = 0.4;
             const panX = Math.max(200, width * 0.12);
             const panY = Math.max(100, levels.length * 30);
-            
+
             chartGroup.attr('transform', `translate(${panX}, ${panY}) scale(${initialScale})`);
         }
-        
+
         // Update displayFamilyData to also create hierarchy chart
         function displayFamilyData(familyData) {
             // Store data globally
             window.familyData = familyData;
-            
+
             const tableBody = document.getElementById('familyTableBody');
             const familyCount = document.getElementById('familyCount');
             const positionsCount = document.getElementById('positionsCount');
             const uniquePositionsCount = document.getElementById('uniquePositionsCount');
             const provincesCount = document.getElementById('provincesCount');
             const nonDynastyCount = document.getElementById('nonDynastyCount');
-            
+
             // Filter out non-dynasty members (fat = 0) for the table
             const dynastyMembers = familyData.filter(member => member.fat === 1);
             nonDynastyMembers = familyData.filter(member => member.fat === 0);
-            
+
             // Update summary counts
-        // Count unique members (by first_name + last_name combination)
-        const uniqueMembers = new Set(dynastyMembers.map(member => `${member.first_name} ${member.last_name}`));
-        familyCount.textContent = uniqueMembers.size;
-        const uniqueNonDynastyMembers = new Set(nonDynastyMembers.map(member => `${member.first_name} ${member.last_name}`));
-        nonDynastyCount.textContent = uniqueNonDynastyMembers.size;
-        
-        // Update counts to include connected members if available
-        if (window.familyData && window.familyData.family_count !== undefined) {
-            familyCount.textContent = window.familyData.family_count;
-            nonDynastyCount.textContent = window.familyData.connected_count || 0;
-        }
-        
-        // Separate connected members for display
-        const connectedMembers = familyData.filter(member => member.is_connected_member);
-        if (connectedMembers.length > 0) {
-            console.log(`🔗 Found ${connectedMembers.length} connected family members`);
-            
-            // Add connected members to the main family data for processing
-            // They will be included in the normal hierarchy chart creation
-            connectedMembers.forEach(member => {
-                // Add to the main familyData array so they get processed normally
-                if (!familyData.find(f => f.first_name === member.first_name && f.last_name === member.last_name && f.year === member.year)) {
-                    familyData.push(member);
-                }
-            });
-        }
-            
+            // Count unique members (by first_name + last_name combination)
+            const uniqueMembers = new Set(dynastyMembers.map(member => `${member.first_name} ${member.last_name}`));
+            familyCount.textContent = uniqueMembers.size;
+            const uniqueNonDynastyMembers = new Set(nonDynastyMembers.map(member => `${member.first_name} ${member.last_name}`));
+            nonDynastyCount.textContent = uniqueNonDynastyMembers.size;
+
+            // Update counts to include connected members if available
+            if (window.familyData && window.familyData.family_count !== undefined) {
+                familyCount.textContent = window.familyData.family_count;
+                nonDynastyCount.textContent = window.familyData.connected_count || 0;
+            }
+
+            // Separate connected members for display
+            const connectedMembers = familyData.filter(member => member.is_connected_member);
+            if (connectedMembers.length > 0) {
+                console.log(`🔗 Found ${connectedMembers.length} connected family members`);
+
+                // Add connected members to the main family data for processing
+                // They will be included in the normal hierarchy chart creation
+                connectedMembers.forEach(member => {
+                    // Add to the main familyData array so they get processed normally
+                    if (!familyData.find(f => f.first_name === member.first_name && f.last_name === member.last_name && f.year === member.year)) {
+                        familyData.push(member);
+                    }
+                });
+            }
+
             // Total positions (not unique) - only for dynasty members
             // Show unique positions count instead of total count
             const uniquePositions = new Set(dynastyMembers.map(member => member.position)).size;
             positionsCount.textContent = uniquePositions;
-            
+
             // Unique positions as subtitle - only for dynasty members (removed duplicate)
             uniquePositionsCount.textContent = '';
-            
+
             const uniqueProvinces = new Set(dynastyMembers.map(member => member.province)).size;
             provincesCount.textContent = uniqueProvinces;
-            
+
             // Populate table - only show dynasty members
             tableBody.innerHTML = '';
             dynastyMembers.forEach(member => {
@@ -1808,9 +1853,9 @@ function toggleMobileMenu() {
                         ${member.position}
                     </td>
                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                        ${member.municipality_city && member.municipality_city !== member.province ? 
-                            `${member.municipality_city}, ${member.province}` : 
-                            member.province}
+                        ${member.municipality_city && member.municipality_city !== member.province ?
+                        `${member.municipality_city}, ${member.province}` :
+                        member.province}
                     </td>
                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                         ${member.year}
@@ -1818,16 +1863,16 @@ function toggleMobileMenu() {
                 `;
                 tableBody.appendChild(row);
             });
-            
+
             // Create hierarchy chart
             createHierarchyChart(familyData);
         }
-        
+
         // Add event listeners for toggle buttons
-        document.addEventListener('DOMContentLoaded', function() {
+        document.addEventListener('DOMContentLoaded', function () {
             const toggleViewBtn = document.getElementById('toggleView');
             const toggleTableBtn = document.getElementById('toggleTable');
-            
+
             if (toggleViewBtn) {
                 toggleViewBtn.addEventListener('click', () => switchView('chart'));
             }
@@ -1838,11 +1883,12 @@ function toggleMobileMenu() {
                 document.getElementById('toggleYear').addEventListener('click', () => switchView('year'));
             }
         });
-        
+
         // Load data when page loads
         document.addEventListener('DOMContentLoaded', loadFamilyData);
     </script>
-    
+
     {% include "footer.html" %}
 </body>
+
 </html>

@@ -1,18 +1,19 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Budget-NEP Correlation - BetterGovPH</title>
-    
+
     <!-- Google Fonts - Inter -->
     <!-- Tailwind CSS -->
     <link rel="stylesheet" href="/static/css/tailwind.css">
     <!-- Tailwind CSS (Production) -->
     <link rel="stylesheet" href="/static/css/tailwind.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    
-    
+
+
     <script src="/static/js/chart.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <style>
@@ -24,25 +25,25 @@
             color: black !important;
             min-height: 100vh;
         }
-        
+
         .page-section {
             padding: 20px;
             max-width: 1600px;
             margin: 20px auto;
             background: white;
             border-radius: 12px;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
         }
-        
+
         .correlation-container {
             padding: 20px;
         }
-        
+
         .correlation-header {
             text-align: center;
             margin-bottom: 30px;
         }
-        
+
         .correlation-title {
             font-size: 2.8em;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
@@ -52,66 +53,66 @@
             margin-bottom: 10px;
             font-weight: 700;
         }
-        
+
         .correlation-subtitle {
             font-size: 1.3em;
             color: #555;
             margin-bottom: 10px;
         }
-        
+
         .highlight-text {
             font-size: 1.1em;
             color: #667eea;
             font-weight: 600;
             margin-top: 15px;
         }
-        
+
         .stats-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
             gap: 20px;
             margin: 30px 0;
         }
-        
+
         .stat-card {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
             padding: 25px;
             border-radius: 12px;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
             text-align: center;
             transition: transform 0.3s ease;
         }
-        
+
         .stat-card:hover {
             transform: translateY(-5px);
         }
-        
+
         .stat-card h3 {
             margin: 0 0 10px 0;
             font-size: 1em;
             opacity: 0.9;
             font-weight: 500;
         }
-        
+
         .stat-card .value {
             font-size: 2.5em;
             font-weight: bold;
             margin: 10px 0;
         }
-        
+
         .stat-card .description {
             font-size: 0.9em;
             opacity: 0.85;
         }
-        
+
         .contractor-section {
             background: #f8f9fa;
             padding: 40px 30px;
             border-radius: 12px;
             margin: 30px 0;
         }
-        
+
         .section-title {
             font-size: 2em;
             color: #333;
@@ -119,27 +120,27 @@
             text-align: center;
             font-weight: 600;
         }
-        
+
         .section-subtitle {
             text-align: center;
             color: #666;
             font-size: 1.1em;
             margin-bottom: 30px;
         }
-        
+
         .table-wrapper {
             overflow-x: auto;
             margin: 20px 0;
             border-radius: 8px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
         }
-        
+
         .budget-projects-table {
             width: 100%;
             border-collapse: collapse;
             background: white;
         }
-        
+
         .budget-projects-table th {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
@@ -153,38 +154,38 @@
             top: 0;
             z-index: 10;
         }
-        
+
         .budget-projects-table td {
             padding: 14px 12px;
             border-bottom: 1px solid #eee;
             color: #333;
             font-size: 0.95em;
         }
-        
+
         .budget-projects-table tbody tr:last-child td {
             border-bottom: none;
         }
-        
+
         .budget-projects-table tbody tr:hover {
             background-color: #f5f5ff;
         }
-        
+
         .budget-projects-table tbody tr:nth-child(1) {
             background: #fff3cd;
             font-weight: 600;
         }
-        
+
         .budget-projects-table tbody tr:nth-child(2),
         .budget-projects-table tbody tr:nth-child(3) {
             background: #f8f9fa;
             font-weight: 500;
         }
-        
+
         .contractor-name {
             font-weight: 600;
             color: #667eea;
         }
-        
+
         .rank-badge {
             display: inline-block;
             background: #667eea;
@@ -195,24 +196,29 @@
             font-weight: 600;
             margin-right: 8px;
         }
-        
+
         .gold-badge {
             background: linear-gradient(135deg, #FFD700 0%, #FFA500 100%);
         }
-        
+
         .silver-badge {
             background: linear-gradient(135deg, #C0C0C0 0%, #808080 100%);
         }
-        
+
         .bronze-badge {
             background: linear-gradient(135deg, #CD7F32 0%, #8B4513 100%);
         }
-        
+
         @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
         }
-        
+
         .loading-spinner {
             display: flex;
             justify-content: center;
@@ -220,14 +226,14 @@
             padding: 40px;
             margin: 20px 0;
         }
-        
+
         .spinner {
             display: flex;
             flex-direction: column;
             align-items: center;
             gap: 15px;
         }
-        
+
         .spinner-circle {
             width: 40px;
             height: 40px;
@@ -236,7 +242,7 @@
             border-radius: 50%;
             animation: spin 1s linear infinite;
         }
-        
+
         .data-source-footer {
             text-align: center;
             padding: 2rem;
@@ -247,7 +253,7 @@
             background: #f8f9fa;
             border-radius: 8px;
         }
-        
+
         .methodology-box {
             background: white;
             padding: 25px;
@@ -255,13 +261,13 @@
             margin: 30px 0;
             border-left: 5px solid #667eea;
         }
-        
+
         .methodology-box h4 {
             color: #667eea;
             margin-top: 0;
             font-size: 1.2em;
         }
-        
+
         .methodology-box p {
             color: #555;
             line-height: 1.6;
@@ -269,18 +275,18 @@
         }
     </style>
 </head>
+
 <body>
     <!-- BetterGovPH Navigation Bar -->
     <nav class="visualizations-nav py-4 px-6 bg-white border-b border-gray-200">
         <div class="max-w-7xl mx-auto flex items-center justify-between">
             <div class="flex items-center">
                 <a href="https://bettergov.ph" class="flex items-center">
-                    <img src="https://raw.githubusercontent.com/bettergovph/logo/main/png/BetterGov_Horizontal-Black.png"
-                         alt="BetterGov.ph"
-                         class="h-12 mr-3">
-                    
+                    <img src="http://assets.bettergov.ph/logos/webp/horizontal-black.webp" alt="BetterGov.ph"
+                        class="h-12 mr-3">
+
                 </a>
-            <a href="/" class="text-xl font-bold text-black hover:text-gray-600">Data Visualizations</a>
+                <a href="/" class="text-xl font-bold text-black hover:text-gray-600">Data Visualizations</a>
             </div>
             <div class="hidden md:flex space-x-6">
                 <a href="/nep" class="text-black hover:text-gray-600 font-medium transition">NEP</a>
@@ -288,20 +294,33 @@
                 <a href="/map" class="text-black hover:text-gray-600 font-medium transition">Map</a>
                 <a href="/dynasty" class="text-black hover:text-gray-600 font-medium transition">Dynasties</a>
                 <a href="/integrated" class="text-black hover:text-gray-600 font-medium transition">Integrated</a>
-                <div class="relative" onmouseenter="this.querySelector('.dropdown-menu').classList.remove('hidden')" onmouseleave="this.querySelector('.dropdown-menu').classList.add('hidden')">
-                    <a href="/correlation" class="text-black hover:text-gray-600 font-medium transition">Correlation ▾</a>
-                    <div class="dropdown-menu absolute hidden bg-white shadow-lg rounded-md mt-0 py-2 w-48" style="z-index: 50;">
-                        <a href="/budget-nep-correlation" class="block px-4 py-2 text-black" style="border-radius: 4px; margin: 2px 4px; transition: all 0.2s; border-left: 3px solid #2563eb; font-weight: 600;" onmouseover="this.style.background='#dbeafe'; this.style.color='#2563eb';" onmouseout="this.style.background='transparent'; this.style.color='black';">NEP-Budget</a>
-                        <a href="/budget-flood-correlation" class="block px-4 py-2 text-black" style="border-radius: 4px; margin: 2px 4px; transition: all 0.2s;" onmouseover="this.style.background='#dbeafe'; this.style.color='#2563eb';" onmouseout="this.style.background='transparent'; this.style.color='black';">Budget-Flood</a>
-                        <a href="/flood-dime-correlation" class="block px-4 py-2 text-black" style="border-radius: 4px; margin: 2px 4px; transition: all 0.2s;" onmouseover="this.style.background='#dbeafe'; this.style.color='#2563eb';" onmouseout="this.style.background='transparent'; this.style.color='black';">Flood-DIME</a>
+                <div class="relative" onmouseenter="this.querySelector('.dropdown-menu').classList.remove('hidden')"
+                    onmouseleave="this.querySelector('.dropdown-menu').classList.add('hidden')">
+                    <a href="/correlation" class="text-black hover:text-gray-600 font-medium transition">Correlation
+                        ▾</a>
+                    <div class="dropdown-menu absolute hidden bg-white shadow-lg rounded-md mt-0 py-2 w-48"
+                        style="z-index: 50;">
+                        <a href="/budget-nep-correlation" class="block px-4 py-2 text-black"
+                            style="border-radius: 4px; margin: 2px 4px; transition: all 0.2s; border-left: 3px solid #2563eb; font-weight: 600;"
+                            onmouseover="this.style.background='#dbeafe'; this.style.color='#2563eb';"
+                            onmouseout="this.style.background='transparent'; this.style.color='black';">NEP-Budget</a>
+                        <a href="/budget-flood-correlation" class="block px-4 py-2 text-black"
+                            style="border-radius: 4px; margin: 2px 4px; transition: all 0.2s;"
+                            onmouseover="this.style.background='#dbeafe'; this.style.color='#2563eb';"
+                            onmouseout="this.style.background='transparent'; this.style.color='black';">Budget-Flood</a>
+                        <a href="/flood-dime-correlation" class="block px-4 py-2 text-black"
+                            style="border-radius: 4px; margin: 2px 4px; transition: all 0.2s;"
+                            onmouseover="this.style.background='#dbeafe'; this.style.color='#2563eb';"
+                            onmouseout="this.style.background='transparent'; this.style.color='black';">Flood-DIME</a>
                     </div>
+                </div>
+                <a href="/sources" class="text-black hover:text-gray-600 font-medium transition">Sources</a>
             </div>
-            <a href="/sources" class="text-black hover:text-gray-600 font-medium transition">Sources</a>
-        </div>
-        <div class="md:hidden">
+            <div class="md:hidden">
                 <button class="text-black focus:outline-none" onclick="toggleMobileMenu()">
                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M4 6h16M4 12h16M4 18h16"></path>
                     </svg>
                 </button>
             </div>
@@ -314,948 +333,952 @@
             <a href="/dynasty" class="block text-black hover:text-gray-600 font-medium py-2">Dynasties</a>
             <a href="/integrated" class="block text-black hover:text-gray-600 font-medium py-2">Integrated</a>
             <a href="/correlation" class="block text-black hover:text-gray-600 font-medium py-2">Correlation</a>
-            <a href="/budget-nep-correlation" class="block text-black hover:text-gray-600 font-medium py-2 pl-4 border-b-2 border-black">→ NEP-Budget</a>
-            <a href="/budget-flood-correlation" class="block text-black hover:text-gray-600 font-medium py-2 pl-4">→ Budget-Flood</a>
-            <a href="/flood-dime-correlation" class="block text-black hover:text-gray-600 font-medium py-2 pl-4">→ Flood-DIME</a>
+            <a href="/budget-nep-correlation"
+                class="block text-black hover:text-gray-600 font-medium py-2 pl-4 border-b-2 border-black">→
+                NEP-Budget</a>
+            <a href="/budget-flood-correlation" class="block text-black hover:text-gray-600 font-medium py-2 pl-4">→
+                Budget-Flood</a>
+            <a href="/flood-dime-correlation" class="block text-black hover:text-gray-600 font-medium py-2 pl-4">→
+                Flood-DIME</a>
         </div>
     </nav>
 
     <script>
-    function toggleMobileMenu() {
-        const menu = document.getElementById('mobileMenu');
-        menu.classList.toggle('hidden');
-    }
+        function toggleMobileMenu() {
+            const menu = document.getElementById('mobileMenu');
+            menu.classList.toggle('hidden');
+        }
 
 
-    // Load Annual Totals Chart
-    async function loadTotalsChart() {
-        try {
-            console.log('📊 Loading Annual Totals chart...');
+        // Load Annual Totals Chart
+        async function loadTotalsChart() {
+            try {
+                console.log('📊 Loading Annual Totals chart...');
 
-            // Fetch total annual data (all programs combined)
-            const annualResponse = await fetch('/api/budget/analysis/comparison-chart');
-            const annualData = await annualResponse.json();
+                // Fetch total annual data (all programs combined)
+                const annualResponse = await fetch('/api/budget/analysis/comparison-chart');
+                const annualData = await annualResponse.json();
 
-            if (!annualResponse.ok || !annualData.years) {
-                throw new Error('Failed to fetch annual comparison data');
-            }
-
-            const annualBudgetData = annualData.budget_amounts;
-            const annualNepData = annualData.nep_amounts;
-            const annualYears = annualData.years.map(year => year.toString());
-            
-            // Note: Both Budget and NEP data are in thousands, so we multiply by 1000 to get actual values
-            const totalBudgetAnnual = annualYears.map((year, idx) => (annualBudgetData[idx] || 0) * 1000);
-            const totalNepAnnual = annualYears.map((year, idx) => (annualNepData[idx] || 0) * 1000);
-            
-            console.log('📊 Annual Totals:');
-            annualYears.forEach((year, idx) => {
-                console.log(`Year ${year}: Budget=${totalBudgetAnnual[idx].toLocaleString()}, NEP=${totalNepAnnual[idx].toLocaleString()}`);
-            });
-            
-            // Create the totals chart
-            const ctx = document.getElementById('totalsChart').getContext('2d');
-            
-            new Chart(ctx, {
-                type: 'line',
-                data: {
-                    labels: annualYears,
-                    datasets: [
-                        {
-                            label: 'Total Budget (All Programs)',
-                            data: totalBudgetAnnual,
-                            backgroundColor: 'rgba(59, 130, 246, 0.5)', // Blue
-                            borderColor: 'rgba(59, 130, 246, 1)',
-                            borderWidth: 3,
-                            fill: true,
-                            tension: 0.4
-                        },
-                        {
-                            label: 'Total NEP (All Programs)',
-                            data: totalNepAnnual,
-                            backgroundColor: 'rgba(16, 185, 129, 0.5)', // Green
-                            borderColor: 'rgba(16, 185, 129, 1)',
-                            borderWidth: 3,
-                            fill: true,
-                            tension: 0.4
-                        }
-                    ]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    interaction: {
-                        mode: 'index',
-                        intersect: false,
-                    },
-                    plugins: {
-                        title: {
-                            display: true,
-                            text: 'Total Annual Budget vs NEP Expenditure',
-                            font: {
-                                size: 16,
-                                weight: 'bold'
-                            },
-                            padding: 20
-                        },
-                        legend: {
-                            display: true,
-                            position: 'top',
-                            labels: {
-                                usePointStyle: true,
-                                padding: 15,
-                                font: {
-                                    size: 12
-                                }
-                            }
-                        },
-                        tooltip: {
-                            callbacks: {
-                                label: function(context) {
-                                    let label = context.dataset.label || '';
-                                    if (label) {
-                                        label += ': ';
-                                    }
-                                    label += new Intl.NumberFormat('en-PH', {
-                                        style: 'currency',
-                                        currency: 'PHP',
-                                        minimumFractionDigits: 0,
-                                        maximumFractionDigits: 0,
-                                    }).format(context.parsed.y);
-                                    return label;
-                                }
-                            }
-                        }
-                    },
-                    scales: {
-                        x: {
-                            stacked: false,
-                            title: {
-                                display: true,
-                                text: 'Fiscal Year',
-                                font: {
-                                    size: 14,
-                                    weight: 'bold'
-                                }
-                            },
-                            grid: {
-                                display: false
-                            }
-                        },
-                        y: {
-                            stacked: false,
-                            title: {
-                                display: true,
-                                text: 'Amount (₱)',
-                                font: {
-                                    size: 14,
-                                    weight: 'bold'
-                                }
-                            },
-                            beginAtZero: true,
-                            ticks: {
-                                callback: function(value) {
-                                    return new Intl.NumberFormat('en-PH', {
-                                        style: 'currency',
-                                        currency: 'PHP',
-                                        notation: 'compact',
-                                        minimumFractionDigits: 0,
-                                        maximumFractionDigits: 1,
-                                    }).format(value);
-                                }
-                            },
-                            grid: {
-                                color: 'rgba(0, 0, 0, 0.1)'
-                            }
-                        }
-                    },
-                    animation: {
-                        duration: 1000,
-                        easing: 'easeInOutQuart'
-                    }
+                if (!annualResponse.ok || !annualData.years) {
+                    throw new Error('Failed to fetch annual comparison data');
                 }
-            });
 
-            console.log('✅ Annual Totals chart loaded successfully');
+                const annualBudgetData = annualData.budget_amounts;
+                const annualNepData = annualData.nep_amounts;
+                const annualYears = annualData.years.map(year => year.toString());
 
-        } catch (error) {
-            console.error('❌ Error loading Annual Totals chart:', error);
-        }
-    }
+                // Note: Both Budget and NEP data are in thousands, so we multiply by 1000 to get actual values
+                const totalBudgetAnnual = annualYears.map((year, idx) => (annualBudgetData[idx] || 0) * 1000);
+                const totalNepAnnual = annualYears.map((year, idx) => (annualNepData[idx] || 0) * 1000);
 
-    // Load DPWH Programs Chart
-    async function loadDpwhProgramsChart() {
-        try {
-            console.log('📊 Loading DPWH Programs chart...');
-
-            // Fetch program comparison data (DPWH programs)
-            const response = await fetch('/api/budget/programs/excel-comparison');
-            const data = await response.json();
-
-            if (!response.ok || !data.success) {
-                throw new Error('Failed to fetch program comparison data');
-            }
-
-            const programs = data.programs;
-            
-            // Sort programs by total amount for better visualization
-            programs.sort((a, b) => {
-                const totalA = a.budget_total + a.nep_total;
-                const totalB = b.budget_total + b.nep_total;
-                return totalB - totalA;
-            });
-            
-            // Define color pairs for each program (darker for Budget, lighter for NEP)
-            const colorPairs = [
-                { budget: 'rgba(59, 130, 246, 0.8)', nep: 'rgba(147, 197, 253, 0.6)' }, // Blue
-                { budget: 'rgba(16, 185, 129, 0.8)', nep: 'rgba(110, 231, 183, 0.6)' }, // Green
-                { budget: 'rgba(139, 92, 246, 0.8)', nep: 'rgba(196, 181, 253, 0.6)' }, // Purple
-                { budget: 'rgba(236, 72, 153, 0.8)', nep: 'rgba(251, 207, 232, 0.6)' }, // Pink
-                { budget: 'rgba(245, 158, 11, 0.8)', nep: 'rgba(253, 224, 71, 0.6)' },  // Orange
-                { budget: 'rgba(239, 68, 68, 0.8)', nep: 'rgba(252, 165, 165, 0.6)' },  // Red
-                { budget: 'rgba(20, 184, 166, 0.8)', nep: 'rgba(94, 234, 212, 0.6)' },  // Teal
-                { budget: 'rgba(168, 85, 247, 0.8)', nep: 'rgba(221, 214, 254, 0.6)' }, // Violet
-            ];
-            
-            // Get all unique years across all programs
-            const allYearsSet = new Set();
-            programs.forEach(program => {
-                Object.keys(program.budget_yearly).forEach(year => allYearsSet.add(year));
-                Object.keys(program.nep_yearly).forEach(year => allYearsSet.add(year));
-            });
-            const sortedYears = Array.from(allYearsSet).sort();
-            
-            // Build datasets for DPWH programs only (stacked)
-            const datasets = [];
-            
-            // Add individual DPWH programs
-            programs.forEach((program, index) => {
-                const budgetAmounts = sortedYears.map(year => program.budget_yearly[year] || 0);
-                const nepAmounts = sortedYears.map(year => program.nep_yearly[year] || 0);
-                
-                const colorIndex = Math.min(index, colorPairs.length - 1);
-                const colors = colorPairs[colorIndex];
-                
-                // Add Budget dataset for this program (darker shade)
-                datasets.push({
-                    label: `Budget: ${program.program}`,
-                    data: budgetAmounts,
-                    backgroundColor: colors.budget,
-                    borderColor: colors.budget.replace('0.8', '1'),
-                    borderWidth: 2,
-                    fill: true,
-                    tension: 0.4
+                console.log('📊 Annual Totals:');
+                annualYears.forEach((year, idx) => {
+                    console.log(`Year ${year}: Budget=${totalBudgetAnnual[idx].toLocaleString()}, NEP=${totalNepAnnual[idx].toLocaleString()}`);
                 });
-                
-                // Add NEP dataset for this program (lighter shade)
-                datasets.push({
-                    label: `NEP: ${program.program}`,
-                    data: nepAmounts,
-                    backgroundColor: colors.nep,
-                    borderColor: colors.nep.replace('0.6', '1'),
-                    borderWidth: 2,
-                    fill: true,
-                    tension: 0.4
-                });
-            });
-            
-            // Create the DPWH programs chart
-            const ctx = document.getElementById('dpwhProgramsChart').getContext('2d');
-            
-            new Chart(ctx, {
-                type: 'line',
-                data: {
-                    labels: sortedYears,
-                    datasets: datasets
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    interaction: {
-                        mode: 'index',
-                        intersect: false,
-                    },
-                    plugins: {
-                        title: {
-                            display: true,
-                            text: 'DPWH Programs: Budget vs NEP Comparison',
-                            font: {
-                                size: 16,
-                                weight: 'bold'
+
+                // Create the totals chart
+                const ctx = document.getElementById('totalsChart').getContext('2d');
+
+                new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        labels: annualYears,
+                        datasets: [
+                            {
+                                label: 'Total Budget (All Programs)',
+                                data: totalBudgetAnnual,
+                                backgroundColor: 'rgba(59, 130, 246, 0.5)', // Blue
+                                borderColor: 'rgba(59, 130, 246, 1)',
+                                borderWidth: 3,
+                                fill: true,
+                                tension: 0.4
                             },
-                            padding: 20
-                        },
-                        legend: {
-                            display: true,
-                            position: 'top',
-                            labels: {
-                                usePointStyle: true,
-                                padding: 15,
-                                font: {
-                                    size: 12
-                                }
+                            {
+                                label: 'Total NEP (All Programs)',
+                                data: totalNepAnnual,
+                                backgroundColor: 'rgba(16, 185, 129, 0.5)', // Green
+                                borderColor: 'rgba(16, 185, 129, 1)',
+                                borderWidth: 3,
+                                fill: true,
+                                tension: 0.4
                             }
+                        ]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        interaction: {
+                            mode: 'index',
+                            intersect: false,
                         },
-                        tooltip: {
-                            callbacks: {
-                                label: function(context) {
-                                    let label = context.dataset.label || '';
-                                    if (label) {
-                                        label += ': ';
+                        plugins: {
+                            title: {
+                                display: true,
+                                text: 'Total Annual Budget vs NEP Expenditure',
+                                font: {
+                                    size: 16,
+                                    weight: 'bold'
+                                },
+                                padding: 20
+                            },
+                            legend: {
+                                display: true,
+                                position: 'top',
+                                labels: {
+                                    usePointStyle: true,
+                                    padding: 15,
+                                    font: {
+                                        size: 12
                                     }
-                                    label += new Intl.NumberFormat('en-PH', {
-                                        style: 'currency',
-                                        currency: 'PHP',
-                                        minimumFractionDigits: 0,
-                                        maximumFractionDigits: 0,
-                                    }).format(context.parsed.y);
-                                    return label;
-                                }
-                            }
-                        }
-                    },
-                    scales: {
-                        x: {
-                            stacked: false,
-                            title: {
-                                display: true,
-                                text: 'Fiscal Year',
-                                font: {
-                                    size: 14,
-                                    weight: 'bold'
                                 }
                             },
-                            grid: {
-                                display: false
+                            tooltip: {
+                                callbacks: {
+                                    label: function (context) {
+                                        let label = context.dataset.label || '';
+                                        if (label) {
+                                            label += ': ';
+                                        }
+                                        label += new Intl.NumberFormat('en-PH', {
+                                            style: 'currency',
+                                            currency: 'PHP',
+                                            minimumFractionDigits: 0,
+                                            maximumFractionDigits: 0,
+                                        }).format(context.parsed.y);
+                                        return label;
+                                    }
+                                }
                             }
                         },
-                        y: {
-                            stacked: true,
+                        scales: {
+                            x: {
+                                stacked: false,
+                                title: {
+                                    display: true,
+                                    text: 'Fiscal Year',
+                                    font: {
+                                        size: 14,
+                                        weight: 'bold'
+                                    }
+                                },
+                                grid: {
+                                    display: false
+                                }
+                            },
+                            y: {
+                                stacked: false,
+                                title: {
+                                    display: true,
+                                    text: 'Amount (₱)',
+                                    font: {
+                                        size: 14,
+                                        weight: 'bold'
+                                    }
+                                },
+                                beginAtZero: true,
+                                ticks: {
+                                    callback: function (value) {
+                                        return new Intl.NumberFormat('en-PH', {
+                                            style: 'currency',
+                                            currency: 'PHP',
+                                            notation: 'compact',
+                                            minimumFractionDigits: 0,
+                                            maximumFractionDigits: 1,
+                                        }).format(value);
+                                    }
+                                },
+                                grid: {
+                                    color: 'rgba(0, 0, 0, 0.1)'
+                                }
+                            }
+                        },
+                        animation: {
+                            duration: 1000,
+                            easing: 'easeInOutQuart'
+                        }
+                    }
+                });
+
+                console.log('✅ Annual Totals chart loaded successfully');
+
+            } catch (error) {
+                console.error('❌ Error loading Annual Totals chart:', error);
+            }
+        }
+
+        // Load DPWH Programs Chart
+        async function loadDpwhProgramsChart() {
+            try {
+                console.log('📊 Loading DPWH Programs chart...');
+
+                // Fetch program comparison data (DPWH programs)
+                const response = await fetch('/api/budget/programs/excel-comparison');
+                const data = await response.json();
+
+                if (!response.ok || !data.success) {
+                    throw new Error('Failed to fetch program comparison data');
+                }
+
+                const programs = data.programs;
+
+                // Sort programs by total amount for better visualization
+                programs.sort((a, b) => {
+                    const totalA = a.budget_total + a.nep_total;
+                    const totalB = b.budget_total + b.nep_total;
+                    return totalB - totalA;
+                });
+
+                // Define color pairs for each program (darker for Budget, lighter for NEP)
+                const colorPairs = [
+                    { budget: 'rgba(59, 130, 246, 0.8)', nep: 'rgba(147, 197, 253, 0.6)' }, // Blue
+                    { budget: 'rgba(16, 185, 129, 0.8)', nep: 'rgba(110, 231, 183, 0.6)' }, // Green
+                    { budget: 'rgba(139, 92, 246, 0.8)', nep: 'rgba(196, 181, 253, 0.6)' }, // Purple
+                    { budget: 'rgba(236, 72, 153, 0.8)', nep: 'rgba(251, 207, 232, 0.6)' }, // Pink
+                    { budget: 'rgba(245, 158, 11, 0.8)', nep: 'rgba(253, 224, 71, 0.6)' },  // Orange
+                    { budget: 'rgba(239, 68, 68, 0.8)', nep: 'rgba(252, 165, 165, 0.6)' },  // Red
+                    { budget: 'rgba(20, 184, 166, 0.8)', nep: 'rgba(94, 234, 212, 0.6)' },  // Teal
+                    { budget: 'rgba(168, 85, 247, 0.8)', nep: 'rgba(221, 214, 254, 0.6)' }, // Violet
+                ];
+
+                // Get all unique years across all programs
+                const allYearsSet = new Set();
+                programs.forEach(program => {
+                    Object.keys(program.budget_yearly).forEach(year => allYearsSet.add(year));
+                    Object.keys(program.nep_yearly).forEach(year => allYearsSet.add(year));
+                });
+                const sortedYears = Array.from(allYearsSet).sort();
+
+                // Build datasets for DPWH programs only (stacked)
+                const datasets = [];
+
+                // Add individual DPWH programs
+                programs.forEach((program, index) => {
+                    const budgetAmounts = sortedYears.map(year => program.budget_yearly[year] || 0);
+                    const nepAmounts = sortedYears.map(year => program.nep_yearly[year] || 0);
+
+                    const colorIndex = Math.min(index, colorPairs.length - 1);
+                    const colors = colorPairs[colorIndex];
+
+                    // Add Budget dataset for this program (darker shade)
+                    datasets.push({
+                        label: `Budget: ${program.program}`,
+                        data: budgetAmounts,
+                        backgroundColor: colors.budget,
+                        borderColor: colors.budget.replace('0.8', '1'),
+                        borderWidth: 2,
+                        fill: true,
+                        tension: 0.4
+                    });
+
+                    // Add NEP dataset for this program (lighter shade)
+                    datasets.push({
+                        label: `NEP: ${program.program}`,
+                        data: nepAmounts,
+                        backgroundColor: colors.nep,
+                        borderColor: colors.nep.replace('0.6', '1'),
+                        borderWidth: 2,
+                        fill: true,
+                        tension: 0.4
+                    });
+                });
+
+                // Create the DPWH programs chart
+                const ctx = document.getElementById('dpwhProgramsChart').getContext('2d');
+
+                new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        labels: sortedYears,
+                        datasets: datasets
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        interaction: {
+                            mode: 'index',
+                            intersect: false,
+                        },
+                        plugins: {
                             title: {
                                 display: true,
-                                text: 'Amount (₱)',
+                                text: 'DPWH Programs: Budget vs NEP Comparison',
                                 font: {
-                                    size: 14,
+                                    size: 16,
                                     weight: 'bold'
+                                },
+                                padding: 20
+                            },
+                            legend: {
+                                display: true,
+                                position: 'top',
+                                labels: {
+                                    usePointStyle: true,
+                                    padding: 15,
+                                    font: {
+                                        size: 12
+                                    }
                                 }
                             },
-                            beginAtZero: true,
-                            ticks: {
-                                callback: function(value) {
-                                    return new Intl.NumberFormat('en-PH', {
-                                        style: 'currency',
-                                        currency: 'PHP',
-                                        notation: 'compact',
-                                        minimumFractionDigits: 0,
-                                        maximumFractionDigits: 1,
-                                    }).format(value);
+                            tooltip: {
+                                callbacks: {
+                                    label: function (context) {
+                                        let label = context.dataset.label || '';
+                                        if (label) {
+                                            label += ': ';
+                                        }
+                                        label += new Intl.NumberFormat('en-PH', {
+                                            style: 'currency',
+                                            currency: 'PHP',
+                                            minimumFractionDigits: 0,
+                                            maximumFractionDigits: 0,
+                                        }).format(context.parsed.y);
+                                        return label;
+                                    }
                                 }
-                            },
-                            grid: {
-                                color: 'rgba(0, 0, 0, 0.1)'
                             }
+                        },
+                        scales: {
+                            x: {
+                                stacked: false,
+                                title: {
+                                    display: true,
+                                    text: 'Fiscal Year',
+                                    font: {
+                                        size: 14,
+                                        weight: 'bold'
+                                    }
+                                },
+                                grid: {
+                                    display: false
+                                }
+                            },
+                            y: {
+                                stacked: true,
+                                title: {
+                                    display: true,
+                                    text: 'Amount (₱)',
+                                    font: {
+                                        size: 14,
+                                        weight: 'bold'
+                                    }
+                                },
+                                beginAtZero: true,
+                                ticks: {
+                                    callback: function (value) {
+                                        return new Intl.NumberFormat('en-PH', {
+                                            style: 'currency',
+                                            currency: 'PHP',
+                                            notation: 'compact',
+                                            minimumFractionDigits: 0,
+                                            maximumFractionDigits: 1,
+                                        }).format(value);
+                                    }
+                                },
+                                grid: {
+                                    color: 'rgba(0, 0, 0, 0.1)'
+                                }
+                            }
+                        },
+                        animation: {
+                            duration: 1000,
+                            easing: 'easeInOutQuart'
                         }
-                    },
-                    animation: {
-                        duration: 1000,
-                        easing: 'easeInOutQuart'
                     }
+                });
+
+                console.log('✅ DPWH Programs chart loaded successfully');
+
+            } catch (error) {
+                console.error('❌ Error loading DPWH Programs chart:', error);
+            }
+        }
+
+
+
+
+        // Function to copy totals chart image to clipboard
+        async function copyTotalsChartToClipboard() {
+            console.log('🔄 Attempting to copy totals chart...');
+
+            try {
+                const container = document.getElementById('totalsChartContainer');
+                console.log('Totals chart container:', container);
+
+                if (!container) {
+                    throw new Error('Totals chart container not found');
                 }
-            });
 
-            console.log('✅ DPWH Programs chart loaded successfully');
+                // Temporarily hide the copy button to avoid including it in the image
+                const button = document.getElementById('copyTotalsChartBtn');
 
-        } catch (error) {
-            console.error('❌ Error loading DPWH Programs chart:', error);
+                const originalDisplay = button.style.display;
+                button.style.display = 'none';
+
+                console.log('Capturing totals chart container with html2canvas...');
+
+                // Use html2canvas to capture the entire container
+                const canvas = await html2canvas(container, {
+                    backgroundColor: '#ffffff',
+                    scale: 1.5,
+                    useCORS: true,
+                    allowTaint: true,
+                    logging: false,
+                    width: container.offsetWidth,
+                    height: container.offsetHeight
+                });
+
+                console.log('Totals chart canvas created:', canvas.width, 'x', canvas.height);
+
+                // Convert canvas to blob
+                const blob = await new Promise((resolve, reject) => {
+                    canvas.toBlob((blob) => {
+                        if (blob) {
+                            console.log('Totals chart blob created successfully:', blob.size, 'bytes');
+                            resolve(blob);
+                        } else {
+                            reject(new Error('Failed to create blob from totals chart canvas'));
+                        }
+                    }, 'image/png', 0.95);
+                });
+
+                // Restore button visibility
+                button.style.display = originalDisplay;
+
+                console.log('Checking clipboard API support...');
+                if (!navigator.clipboard) {
+                    throw new Error('Clipboard API not supported');
+                }
+
+                if (!window.ClipboardItem) {
+                    throw new Error('ClipboardItem not supported');
+                }
+
+                // Copy to clipboard
+                console.log('Writing totals chart to clipboard...');
+                await navigator.clipboard.write([
+                    new ClipboardItem({
+                        'image/png': blob
+                    })
+                ]);
+
+                console.log('✅ Successfully copied totals chart to clipboard!');
+
+                // Show success feedback
+                const originalText = button.innerHTML;
+                button.innerHTML = '✅ Copied!';
+                button.classList.remove('bg-blue-500', 'hover:bg-blue-600');
+                button.classList.add('bg-green-500');
+
+                // Reset button after 2 seconds
+                setTimeout(() => {
+                    button.innerHTML = originalText;
+                    button.classList.remove('bg-green-500');
+                    button.classList.add('bg-blue-500', 'hover:bg-blue-600');
+                }, 2000);
+
+            } catch (error) {
+                console.error('❌ Failed to copy totals chart to clipboard:', error);
+
+                // Restore button visibility in case of error
+                const button = document.getElementById('copyTotalsChartBtn');
+                if (button) {
+                    button.style.display = '';
+                }
+
+                // Show error feedback
+                const originalText = button.innerHTML;
+                button.innerHTML = '❌ Failed';
+                button.classList.remove('bg-blue-500', 'hover:bg-blue-600');
+                button.classList.add('bg-red-500');
+
+                // Reset button after 2 seconds
+                setTimeout(() => {
+                    button.innerHTML = originalText;
+                    button.classList.remove('bg-red-500');
+                    button.classList.add('bg-blue-500', 'hover:bg-blue-600');
+                }, 2000);
+            }
         }
-    }
 
+        // Function to copy DPWH chart image to clipboard
+        async function copyDpwhChartToClipboard() {
+            console.log('🔄 Attempting to copy DPWH chart...');
 
+            try {
+                const container = document.getElementById('dpwhProgramsChartContainer');
+                console.log('DPWH chart container:', container);
 
+                if (!container) {
+                    throw new Error('DPWH chart container not found');
+                }
 
-    // Function to copy totals chart image to clipboard
-    async function copyTotalsChartToClipboard() {
-        console.log('🔄 Attempting to copy totals chart...');
-        
-        try {
-            const container = document.getElementById('totalsChartContainer');
-            console.log('Totals chart container:', container);
-            
-            if (!container) {
-                throw new Error('Totals chart container not found');
+                // Temporarily hide the copy button to avoid including it in the image
+                const button = document.getElementById('copyDpwhChartBtn');
+                const originalDisplay = button.style.display;
+                button.style.display = 'none';
+
+                console.log('Capturing DPWH chart container with html2canvas...');
+
+                // Use html2canvas to capture the entire container
+                const canvas = await html2canvas(container, {
+                    backgroundColor: '#ffffff',
+                    scale: 1.5,
+                    useCORS: true,
+                    allowTaint: true,
+                    logging: false,
+                    width: container.offsetWidth,
+                    height: container.offsetHeight
+                });
+
+                console.log('DPWH chart canvas created:', canvas.width, 'x', canvas.height);
+
+                // Convert canvas to blob
+                const blob = await new Promise((resolve, reject) => {
+                    canvas.toBlob((blob) => {
+                        if (blob) {
+                            console.log('DPWH chart blob created successfully:', blob.size, 'bytes');
+                            resolve(blob);
+                        } else {
+                            reject(new Error('Failed to create blob from DPWH chart canvas'));
+                        }
+                    }, 'image/png', 0.95);
+                });
+
+                // Restore button visibility
+                button.style.display = originalDisplay;
+
+                console.log('Checking clipboard API support...');
+                if (!navigator.clipboard) {
+                    throw new Error('Clipboard API not supported');
+                }
+
+                if (!window.ClipboardItem) {
+                    throw new Error('ClipboardItem not supported');
+                }
+
+                // Copy to clipboard
+                console.log('Writing DPWH chart to clipboard...');
+                await navigator.clipboard.write([
+                    new ClipboardItem({
+                        'image/png': blob
+                    })
+                ]);
+
+                console.log('✅ Successfully copied DPWH chart to clipboard!');
+
+                // Show success feedback
+                const originalText = button.innerHTML;
+                button.innerHTML = '✅ Copied!';
+                button.classList.remove('bg-blue-500', 'hover:bg-blue-600');
+                button.classList.add('bg-green-500');
+
+                // Reset button after 2 seconds
+                setTimeout(() => {
+                    button.innerHTML = originalText;
+                    button.classList.remove('bg-green-500');
+                    button.classList.add('bg-blue-500', 'hover:bg-blue-600');
+                }, 2000);
+
+            } catch (error) {
+                console.error('❌ Failed to copy DPWH chart to clipboard:', error);
+
+                // Restore button visibility in case of error
+                const button = document.getElementById('copyDpwhChartBtn');
+                if (button) {
+                    button.style.display = '';
+                }
+
+                // Show error feedback
+                const originalText = button.innerHTML;
+                button.innerHTML = '❌ Failed';
+                button.classList.remove('bg-blue-500', 'hover:bg-blue-600');
+                button.classList.add('bg-red-500');
+
+                // Reset button after 2 seconds
+                setTimeout(() => {
+                    button.innerHTML = originalText;
+                    button.classList.remove('bg-red-500');
+                    button.classList.add('bg-blue-500', 'hover:bg-blue-600');
+                }, 2000);
             }
-            
-            // Temporarily hide the copy button to avoid including it in the image
-            const button = document.getElementById('copyTotalsChartBtn');
-            
-            const originalDisplay = button.style.display;
-            button.style.display = 'none';
-            
-            console.log('Capturing totals chart container with html2canvas...');
-            
-            // Use html2canvas to capture the entire container
-            const canvas = await html2canvas(container, {
-                backgroundColor: '#ffffff',
-                scale: 1.5,
-                useCORS: true,
-                allowTaint: true,
-                logging: false,
-                width: container.offsetWidth,
-                height: container.offsetHeight
-            });
-            
-            console.log('Totals chart canvas created:', canvas.width, 'x', canvas.height);
-            
-            // Convert canvas to blob
-            const blob = await new Promise((resolve, reject) => {
-                canvas.toBlob((blob) => {
-                    if (blob) {
-                        console.log('Totals chart blob created successfully:', blob.size, 'bytes');
-                        resolve(blob);
-                    } else {
-                        reject(new Error('Failed to create blob from totals chart canvas'));
-                    }
-                }, 'image/png', 0.95);
-            });
-            
-            // Restore button visibility
-            button.style.display = originalDisplay;
-            
-            console.log('Checking clipboard API support...');
-            if (!navigator.clipboard) {
-                throw new Error('Clipboard API not supported');
-            }
-            
-            if (!window.ClipboardItem) {
-                throw new Error('ClipboardItem not supported');
-            }
-            
-            // Copy to clipboard
-            console.log('Writing totals chart to clipboard...');
-            await navigator.clipboard.write([
-                new ClipboardItem({
-                    'image/png': blob
-                })
-            ]);
-            
-            console.log('✅ Successfully copied totals chart to clipboard!');
-            
-            // Show success feedback
-            const originalText = button.innerHTML;
-            button.innerHTML = '✅ Copied!';
-            button.classList.remove('bg-blue-500', 'hover:bg-blue-600');
-            button.classList.add('bg-green-500');
-            
-            // Reset button after 2 seconds
-            setTimeout(() => {
-                button.innerHTML = originalText;
-                button.classList.remove('bg-green-500');
-                button.classList.add('bg-blue-500', 'hover:bg-blue-600');
-            }, 2000);
-            
-        } catch (error) {
-            console.error('❌ Failed to copy totals chart to clipboard:', error);
-            
-            // Restore button visibility in case of error
-            const button = document.getElementById('copyTotalsChartBtn');
-            if (button) {
-                button.style.display = '';
-            }
-            
-            // Show error feedback
-            const originalText = button.innerHTML;
-            button.innerHTML = '❌ Failed';
-            button.classList.remove('bg-blue-500', 'hover:bg-blue-600');
-            button.classList.add('bg-red-500');
-            
-            // Reset button after 2 seconds
-            setTimeout(() => {
-                button.innerHTML = originalText;
-                button.classList.remove('bg-red-500');
-                button.classList.add('bg-blue-500', 'hover:bg-blue-600');
-            }, 2000);
         }
-    }
 
-    // Function to copy DPWH chart image to clipboard
-    async function copyDpwhChartToClipboard() {
-        console.log('🔄 Attempting to copy DPWH chart...');
-        
-        try {
-            const container = document.getElementById('dpwhProgramsChartContainer');
-            console.log('DPWH chart container:', container);
-            
-            if (!container) {
-                throw new Error('DPWH chart container not found');
-            }
-            
-            // Temporarily hide the copy button to avoid including it in the image
-            const button = document.getElementById('copyDpwhChartBtn');
-            const originalDisplay = button.style.display;
-            button.style.display = 'none';
-            
-            console.log('Capturing DPWH chart container with html2canvas...');
-            
-            // Use html2canvas to capture the entire container
-            const canvas = await html2canvas(container, {
-                backgroundColor: '#ffffff',
-                scale: 1.5,
-                useCORS: true,
-                allowTaint: true,
-                logging: false,
-                width: container.offsetWidth,
-                height: container.offsetHeight
-            });
-            
-            console.log('DPWH chart canvas created:', canvas.width, 'x', canvas.height);
-            
-            // Convert canvas to blob
-            const blob = await new Promise((resolve, reject) => {
-                canvas.toBlob((blob) => {
-                    if (blob) {
-                        console.log('DPWH chart blob created successfully:', blob.size, 'bytes');
-                        resolve(blob);
-                    } else {
-                        reject(new Error('Failed to create blob from DPWH chart canvas'));
-                    }
-                }, 'image/png', 0.95);
-            });
-            
-            // Restore button visibility
-            button.style.display = originalDisplay;
-            
-            console.log('Checking clipboard API support...');
-            if (!navigator.clipboard) {
-                throw new Error('Clipboard API not supported');
-            }
-            
-            if (!window.ClipboardItem) {
-                throw new Error('ClipboardItem not supported');
-            }
-            
-            // Copy to clipboard
-            console.log('Writing DPWH chart to clipboard...');
-            await navigator.clipboard.write([
-                new ClipboardItem({
-                    'image/png': blob
-                })
-            ]);
-            
-            console.log('✅ Successfully copied DPWH chart to clipboard!');
-            
-            // Show success feedback
-            const originalText = button.innerHTML;
-            button.innerHTML = '✅ Copied!';
-            button.classList.remove('bg-blue-500', 'hover:bg-blue-600');
-            button.classList.add('bg-green-500');
-            
-            // Reset button after 2 seconds
-            setTimeout(() => {
-                button.innerHTML = originalText;
-                button.classList.remove('bg-green-500');
-                button.classList.add('bg-blue-500', 'hover:bg-blue-600');
-            }, 2000);
-            
-        } catch (error) {
-            console.error('❌ Failed to copy DPWH chart to clipboard:', error);
-            
-            // Restore button visibility in case of error
-            const button = document.getElementById('copyDpwhChartBtn');
-            if (button) {
-                button.style.display = '';
-            }
-            
-            // Show error feedback
-            const originalText = button.innerHTML;
-            button.innerHTML = '❌ Failed';
-            button.classList.remove('bg-blue-500', 'hover:bg-blue-600');
-            button.classList.add('bg-red-500');
-            
-            // Reset button after 2 seconds
-            setTimeout(() => {
-                button.innerHTML = originalText;
-                button.classList.remove('bg-red-500');
-                button.classList.add('bg-blue-500', 'hover:bg-blue-600');
-            }, 2000);
-        }
-    }
-
-    // Load charts when page loads
-    document.addEventListener('DOMContentLoaded', function() {
-        loadTotalsChart();
-        loadDpwhProgramsChart();
-    });
+        // Load charts when page loads
+        document.addEventListener('DOMContentLoaded', function () {
+            loadTotalsChart();
+            loadDpwhProgramsChart();
+        });
     </script>
 
     <!-- NEP-Budget Correlation Section -->
     <div style="padding: 2rem;">
-    <section class="py-8 px-4 max-w-7xl mx-auto">
-        <!-- Page Title -->
-        <div class="text-center mb-8">
-            <h1 class="text-4xl font-bold text-gray-800 mb-4">Budget-NEP Program Correlation</h1>
-            <p class="text-lg text-gray-600">Year-by-year comparison of infrastructure programs across Budget and NEP databases</p>
-        </div>
-
-        <!-- Annual Totals Chart -->
-        <div id="totalsChartContainer" class="bg-white rounded-lg shadow-lg p-8 mb-8 relative">
-            <button 
-                id="copyTotalsChartBtn" 
-                style="position: absolute; top: 20px; right: 20px;"
-                class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded text-base transition-colors duration-200 flex items-center gap-2"
-                onclick="copyTotalsChartToClipboard()"
-                title="Copy chart image to clipboard"
-            >
-                📋 Copy
-            </button>
-            <div class="w-full">
-                <canvas id="totalsChart" width="800" height="400"></canvas>
-            </div>
-        </div>
-
-        <!-- DPWH Programs Chart -->
-        <div id="dpwhProgramsChartContainer" class="bg-white rounded-lg shadow-lg p-8 mb-8 relative">
-            <button 
-                id="copyDpwhChartBtn" 
-                style="position: absolute; top: 20px; right: 20px;"
-                class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded text-base transition-colors duration-200 flex items-center gap-2"
-                onclick="copyDpwhChartToClipboard()"
-                title="Copy chart image to clipboard"
-            >
-                📋 Copy
-            </button>
-            <div class="w-full">
-                <canvas id="dpwhProgramsChart" width="800" height="600"></canvas>
-            </div>
-        </div>
-
-        <!-- Database Schema Comparison -->
-        <div class="bg-white rounded-lg shadow-lg p-8 mb-8 border-l-4 border-red-500">
-            <h2 class="text-3xl font-bold text-gray-800 mb-6 text-center">🚨 Critical Database Discovery</h2>
-            <div class="text-center mb-6">
-                <span class="inline-block bg-red-100 text-red-800 text-lg font-semibold px-4 py-2 rounded-full">
-                    Budget & NEP Databases Do NOT Match 1-to-1
-                </span>
+        <section class="py-8 px-4 max-w-7xl mx-auto">
+            <!-- Page Title -->
+            <div class="text-center mb-8">
+                <h1 class="text-4xl font-bold text-gray-800 mb-4">Budget-NEP Program Correlation</h1>
+                <p class="text-lg text-gray-600">Year-by-year comparison of infrastructure programs across Budget and
+                    NEP databases</p>
             </div>
 
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
-                <!-- Budget Database -->
-                <div class="bg-blue-50 p-6 rounded-lg border-2 border-blue-200">
-                    <h3 class="text-xl font-bold text-blue-800 mb-4 text-center">📊 Budget Database</h3>
-                    <div class="space-y-3">
-                        <div class="flex justify-between">
-                            <span class="font-medium">Tables:</span>
-                            <span class="font-mono bg-blue-100 px-2 py-1 rounded">budget_2017 to budget_2025</span>
+            <!-- Annual Totals Chart -->
+            <div id="totalsChartContainer" class="bg-white rounded-lg shadow-lg p-8 mb-8 relative">
+                <button id="copyTotalsChartBtn" style="position: absolute; top: 20px; right: 20px;"
+                    class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded text-base transition-colors duration-200 flex items-center gap-2"
+                    onclick="copyTotalsChartToClipboard()" title="Copy chart image to clipboard">
+                    📋 Copy
+                </button>
+                <div class="w-full">
+                    <canvas id="totalsChart" width="800" height="400"></canvas>
+                </div>
+            </div>
+
+            <!-- DPWH Programs Chart -->
+            <div id="dpwhProgramsChartContainer" class="bg-white rounded-lg shadow-lg p-8 mb-8 relative">
+                <button id="copyDpwhChartBtn" style="position: absolute; top: 20px; right: 20px;"
+                    class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded text-base transition-colors duration-200 flex items-center gap-2"
+                    onclick="copyDpwhChartToClipboard()" title="Copy chart image to clipboard">
+                    📋 Copy
+                </button>
+                <div class="w-full">
+                    <canvas id="dpwhProgramsChart" width="800" height="600"></canvas>
+                </div>
+            </div>
+
+            <!-- Database Schema Comparison -->
+            <div class="bg-white rounded-lg shadow-lg p-8 mb-8 border-l-4 border-red-500">
+                <h2 class="text-3xl font-bold text-gray-800 mb-6 text-center">🚨 Critical Database Discovery</h2>
+                <div class="text-center mb-6">
+                    <span class="inline-block bg-red-100 text-red-800 text-lg font-semibold px-4 py-2 rounded-full">
+                        Budget & NEP Databases Do NOT Match 1-to-1
+                    </span>
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+                    <!-- Budget Database -->
+                    <div class="bg-blue-50 p-6 rounded-lg border-2 border-blue-200">
+                        <h3 class="text-xl font-bold text-blue-800 mb-4 text-center">📊 Budget Database</h3>
+                        <div class="space-y-3">
+                            <div class="flex justify-between">
+                                <span class="font-medium">Tables:</span>
+                                <span class="font-mono bg-blue-100 px-2 py-1 rounded">budget_2017 to budget_2025</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="font-medium">Columns:</span>
+                                <span class="font-mono bg-blue-100 px-2 py-1 rounded">24 per table</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="font-medium">Amount Column:</span>
+                                <span class="font-mono bg-blue-100 px-2 py-1 rounded">amt (numeric)</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="font-medium">Description:</span>
+                                <span class="font-mono bg-blue-100 px-2 py-1 rounded">dsc (text)</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="font-medium">UACS Codes:</span>
+                                <span class="font-mono bg-blue-100 px-2 py-1 rounded">bigint fields</span>
+                            </div>
                         </div>
-                        <div class="flex justify-between">
-                            <span class="font-medium">Columns:</span>
-                            <span class="font-mono bg-blue-100 px-2 py-1 rounded">24 per table</span>
-                        </div>
-                        <div class="flex justify-between">
-                            <span class="font-medium">Amount Column:</span>
-                            <span class="font-mono bg-blue-100 px-2 py-1 rounded">amt (numeric)</span>
-                        </div>
-                        <div class="flex justify-between">
-                            <span class="font-medium">Description:</span>
-                            <span class="font-mono bg-blue-100 px-2 py-1 rounded">dsc (text)</span>
-                        </div>
-                        <div class="flex justify-between">
-                            <span class="font-medium">UACS Codes:</span>
-                            <span class="font-mono bg-blue-100 px-2 py-1 rounded">bigint fields</span>
+                    </div>
+
+                    <!-- NEP Database -->
+                    <div class="bg-green-50 p-6 rounded-lg border-2 border-green-200">
+                        <h3 class="text-xl font-bold text-green-800 mb-4 text-center">📈 NEP Database</h3>
+                        <div class="space-y-3">
+                            <div class="flex justify-between">
+                                <span class="font-medium">Tables:</span>
+                                <span class="font-mono bg-green-100 px-2 py-1 rounded">budget_2020 to budget_2026</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="font-medium">Columns:</span>
+                                <span class="font-mono bg-green-100 px-2 py-1 rounded">16 per table</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="font-medium">Amount Column:</span>
+                                <span class="font-mono bg-green-100 px-2 py-1 rounded">amount (numeric)</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="font-medium">Description:</span>
+                                <span class="font-mono bg-green-100 px-2 py-1 rounded">description (text)</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="font-medium">UACS Codes:</span>
+                                <span class="font-mono bg-green-100 px-2 py-1 rounded">varchar fields</span>
+                            </div>
                         </div>
                     </div>
                 </div>
 
-                <!-- NEP Database -->
-                <div class="bg-green-50 p-6 rounded-lg border-2 border-green-200">
-                    <h3 class="text-xl font-bold text-green-800 mb-4 text-center">📈 NEP Database</h3>
-                    <div class="space-y-3">
-                        <div class="flex justify-between">
-                            <span class="font-medium">Tables:</span>
-                            <span class="font-mono bg-green-100 px-2 py-1 rounded">budget_2020 to budget_2026</span>
+                <div class="bg-yellow-50 border-l-4 border-yellow-400 p-4">
+                    <div class="flex items-center">
+                        <div class="flex-shrink-0">
+                            ⚠️
                         </div>
-                        <div class="flex justify-between">
-                            <span class="font-medium">Columns:</span>
-                            <span class="font-mono bg-green-100 px-2 py-1 rounded">16 per table</span>
-                        </div>
-                        <div class="flex justify-between">
-                            <span class="font-medium">Amount Column:</span>
-                            <span class="font-mono bg-green-100 px-2 py-1 rounded">amount (numeric)</span>
-                        </div>
-                        <div class="flex justify-between">
-                            <span class="font-medium">Description:</span>
-                            <span class="font-mono bg-green-100 px-2 py-1 rounded">description (text)</span>
-                        </div>
-                        <div class="flex justify-between">
-                            <span class="font-medium">UACS Codes:</span>
-                            <span class="font-mono bg-green-100 px-2 py-1 rounded">varchar fields</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="bg-yellow-50 border-l-4 border-yellow-400 p-4">
-                <div class="flex items-center">
-                    <div class="flex-shrink-0">
-                        ⚠️
-                    </div>
-                    <div class="ml-3">
-                        <p class="text-sm text-yellow-700">
-                            <strong>Impact:</strong> Despite schema differences, the NEP integration is successful because adapted queries handle the column mapping differences transparently.
-                        </p>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Correlation Analysis -->
-        <div class="bg-white rounded-lg shadow-lg p-8 mb-8">
-            <h2 class="text-2xl font-bold text-gray-800 mb-6 text-center">🔍 NEP-Budget Database Correlation Analysis</h2>
-
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-                <div class="bg-gradient-to-br from-blue-500 to-blue-600 text-white p-6 rounded-lg text-center">
-                    <h3 class="text-lg font-semibold mb-2">Table Overlap</h3>
-                    <p class="text-3xl font-bold mb-2">6 Years</p>
-                    <p class="text-sm opacity-90">2020-2025 shared between databases</p>
-                </div>
-                <div class="bg-gradient-to-br from-green-500 to-green-600 text-white p-6 rounded-lg text-center">
-                    <h3 class="text-lg font-semibold mb-2">Schema Difference</h3>
-                    <p class="text-3xl font-bold mb-2">8 Columns</p>
-                    <p class="text-sm opacity-90">Budget: 24 cols, NEP: 16 cols</p>
-                </div>
-                <div class="bg-gradient-to-br from-purple-500 to-purple-600 text-white p-6 rounded-lg text-center">
-                    <h3 class="text-lg font-semibold mb-2">Data Types</h3>
-                    <p class="text-3xl font-bold mb-2">Adapted</p>
-                    <p class="text-sm opacity-90">bigint → varchar for UACS codes</p>
-                </div>
-            </div>
-
-            <!-- Key Differences Table -->
-            <div class="overflow-x-auto">
-                <h3 class="text-xl font-semibold text-gray-800 mb-4">📋 Detailed Column Mapping</h3>
-                <table class="min-w-full bg-white border border-gray-300">
-                    <thead class="bg-gray-50">
-                        <tr>
-                            <th class="px-4 py-2 border-b text-left font-semibold">Aspect</th>
-                            <th class="px-4 py-2 border-b text-left font-semibold">Budget Database</th>
-                            <th class="px-4 py-2 border-b text-left font-semibold">NEP Database</th>
-                            <th class="px-4 py-2 border-b text-left font-semibold">Adaptation</th>
-                        </tr>
-                    </thead>
-                    <tbody class="divide-y divide-gray-200">
-                        <tr>
-                            <td class="px-4 py-2 font-medium">Primary Key</td>
-                            <td class="px-4 py-2"><code>id</code> (integer)</td>
-                            <td class="px-4 py-2"><code>id</code> (integer)</td>
-                            <td class="px-4 py-2 text-green-600">✓ Identical</td>
-                        </tr>
-                        <tr class="bg-gray-50">
-                            <td class="px-4 py-2 font-medium">Amount Field</td>
-                            <td class="px-4 py-2"><code>amt</code> (numeric)</td>
-                            <td class="px-4 py-2"><code>amount</code> (numeric)</td>
-                            <td class="px-4 py-2 text-blue-600">→ Column name change</td>
-                        </tr>
-                        <tr>
-                            <td class="px-4 py-2 font-medium">Description</td>
-                            <td class="px-4 py-2"><code>dsc</code> (text)</td>
-                            <td class="px-4 py-2"><code>description</code> (text)</td>
-                            <td class="px-4 py-2 text-blue-600">→ Column name change</td>
-                        </tr>
-                        <tr class="bg-gray-50">
-                            <td class="px-4 py-2 font-medium">Fiscal Year</td>
-                            <td class="px-4 py-2"><code>year</code> (integer)</td>
-                            <td class="px-4 py-2"><code>fiscal_year</code> (varchar)</td>
-                            <td class="px-4 py-2 text-orange-600">→ Name + type change</td>
-                        </tr>
-                        <tr>
-                            <td class="px-4 py-2 font-medium">Department Code</td>
-                            <td class="px-4 py-2"><code>department</code> (bigint)</td>
-                            <td class="px-4 py-2"><code>org_uacs_code</code> (varchar)</td>
-                            <td class="px-4 py-2 text-orange-600">→ Name + type change</td>
-                        </tr>
-                        <tr class="bg-gray-50">
-                            <td class="px-4 py-2 font-medium">Agency Code</td>
-                            <td class="px-4 py-2"><code>agency</code> (bigint)</td>
-                            <td class="px-4 py-2"><code>region_code</code> (varchar)</td>
-                            <td class="px-4 py-2 text-orange-600">→ Name + type change</td>
-                        </tr>
-                        <tr>
-                            <td class="px-4 py-2 font-medium">Sort Order</td>
-                            <td class="px-4 py-2"><code>sorder</code> (bigint)</td>
-                            <td class="px-4 py-2"><code>sort_order</code> (bigint)</td>
-                            <td class="px-4 py-2 text-blue-600">→ Column name change</td>
-                        </tr>
-                        <tr class="bg-gray-50">
-                            <td class="px-4 py-2 font-medium">Total Columns</td>
-                            <td class="px-4 py-2 font-bold text-blue-600">24 columns</td>
-                            <td class="px-4 py-2 font-bold text-green-600">16 columns</td>
-                            <td class="px-4 py-2 text-red-600">→ Schema reduction</td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
-        </div>
-
-        <!-- Integration Success -->
-        <div class="bg-white rounded-lg shadow-lg p-8 mb-8 border-l-4 border-green-500">
-            <h2 class="text-2xl font-bold text-gray-800 mb-6 text-center">✅ Successful Integration Despite Differences</h2>
-
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div class="space-y-4">
-                    <h3 class="text-lg font-semibold text-gray-800">🔧 Technical Adaptations</h3>
-                    <ul class="space-y-2 text-gray-600">
-                        <li class="flex items-start">
-                            <span class="text-green-500 mr-2">✓</span>
-                            <span>Query column name mapping (<code>amt</code> → <code>amount</code>)</span>
-                        </li>
-                        <li class="flex items-start">
-                            <span class="text-green-500 mr-2">✓</span>
-                            <span>WHERE condition adjustments for nullable fields</span>
-                        </li>
-                        <li class="flex items-start">
-                            <span class="text-green-500 mr-2">✓</span>
-                            <span>Unified API endpoints serve both databases</span>
-                        </li>
-                        <li class="flex items-start">
-                            <span class="text-green-500 mr-2">✓</span>
-                            <span>Identical frontend interface for different backends</span>
-                        </li>
-                    </ul>
-                </div>
-
-                <div class="space-y-4">
-                    <h3 class="text-lg font-semibold text-gray-800">📊 User Experience</h3>
-                    <ul class="space-y-2 text-gray-600">
-                        <li class="flex items-start">
-                            <span class="text-green-500 mr-2">✓</span>
-                            <span>Seamless navigation between Budget and NEP</span>
-                        </li>
-                        <li class="flex items-start">
-                            <span class="text-green-500 mr-2">✓</span>
-                            <span>Identical data browsing and filtering</span>
-                        </li>
-                        <li class="flex items-start">
-                            <span class="text-green-500 mr-2">✓</span>
-                            <span>Same visualization and analysis tools</span>
-                        </li>
-                        <li class="flex items-start">
-                            <span class="text-green-500 mr-2">✓</span>
-                            <span>Transparent database differences to users</span>
-                        </li>
-                    </ul>
-                </div>
-            </div>
-        </div>
-
-        <!-- Data Statistics -->
-        <div class="bg-white rounded-lg shadow-lg p-8">
-            <h2 class="text-2xl font-bold text-gray-800 mb-6 text-center">📈 Current Data Statistics</h2>
-
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-                <!-- Budget Stats -->
-                <div class="bg-blue-50 p-6 rounded-lg">
-                    <h3 class="text-xl font-bold text-blue-800 mb-4 text-center">💰 Budget Database (2017-2025)</h3>
-                    <div class="space-y-3">
-                        <div class="flex justify-between">
-                            <span class="font-medium">Coverage:</span>
-                            <span class="font-semibold">9 fiscal years</span>
-                        </div>
-                        <div class="flex justify-between">
-                            <span class="font-medium">Schema:</span>
-                            <span class="font-semibold">24 columns each</span>
-                        </div>
-                        <div class="flex justify-between">
-                            <span class="font-medium">Detail Level:</span>
-                            <span class="font-semibold">High (UACS breakdowns)</span>
-                        </div>
-                        <div class="flex justify-between">
-                            <span class="font-medium">Data Types:</span>
-                            <span class="font-semibold">bigint for codes</span>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- NEP Stats -->
-                <div class="bg-green-50 p-6 rounded-lg">
-                    <h3 class="text-xl font-bold text-green-800 mb-4 text-center">📈 NEP Database (2020-2026)</h3>
-                    <div class="space-y-3">
-                        <div class="flex justify-between">
-                            <span class="font-medium">Coverage:</span>
-                            <span class="font-semibold">7 fiscal years</span>
-                        </div>
-                        <div class="flex justify-between">
-                            <span class="font-medium">Schema:</span>
-                            <span class="font-semibold">16 columns each</span>
-                        </div>
-                        <div class="flex justify-between">
-                            <span class="font-medium">Detail Level:</span>
-                            <span class="font-semibold">Medium (simplified)</span>
-                        </div>
-                        <div class="flex justify-between">
-                            <span class="font-medium">Data Types:</span>
-                            <span class="font-semibold">varchar for codes</span>
+                        <div class="ml-3">
+                            <p class="text-sm text-yellow-700">
+                                <strong>Impact:</strong> Despite schema differences, the NEP integration is successful
+                                because adapted queries handle the column mapping differences transparently.
+                            </p>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <div class="mt-6 text-center">
-                <p class="text-gray-600">
-                    <strong>Conclusion:</strong> Despite fundamental schema differences, the NEP integration provides
-                    users with the same powerful analysis capabilities through transparent query adaptations.
-                </p>
-            </div>
-        </div>
+            <!-- Correlation Analysis -->
+            <div class="bg-white rounded-lg shadow-lg p-8 mb-8">
+                <h2 class="text-2xl font-bold text-gray-800 mb-6 text-center">🔍 NEP-Budget Database Correlation
+                    Analysis</h2>
 
-        <!-- Contractor Analysis Table -->
-        <div id="contractor-section" class="bg-white rounded-lg shadow-md mb-6" style="display: none;">
-            <div class="p-6">
-                <h3 class="text-xl font-semibold text-gray-800 text-center mb-4">🏆 Top 50 Contractor Analysis</h3>
-                <p class="text-center text-gray-600 text-sm -mt-2 mb-4">
-                    Ranked by number of flood control projects, showing their presence in other DIME infrastructure projects
-                </p>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                    <div class="bg-gradient-to-br from-blue-500 to-blue-600 text-white p-6 rounded-lg text-center">
+                        <h3 class="text-lg font-semibold mb-2">Table Overlap</h3>
+                        <p class="text-3xl font-bold mb-2">6 Years</p>
+                        <p class="text-sm opacity-90">2020-2025 shared between databases</p>
+                    </div>
+                    <div class="bg-gradient-to-br from-green-500 to-green-600 text-white p-6 rounded-lg text-center">
+                        <h3 class="text-lg font-semibold mb-2">Schema Difference</h3>
+                        <p class="text-3xl font-bold mb-2">8 Columns</p>
+                        <p class="text-sm opacity-90">Budget: 24 cols, NEP: 16 cols</p>
+                    </div>
+                    <div class="bg-gradient-to-br from-purple-500 to-purple-600 text-white p-6 rounded-lg text-center">
+                        <h3 class="text-lg font-semibold mb-2">Data Types</h3>
+                        <p class="text-3xl font-bold mb-2">Adapted</p>
+                        <p class="text-sm opacity-90">bigint → varchar for UACS codes</p>
+                    </div>
+                </div>
 
+                <!-- Key Differences Table -->
                 <div class="overflow-x-auto">
-                    <table class="budget-projects-table">
-                        <thead>
+                    <h3 class="text-xl font-semibold text-gray-800 mb-4">📋 Detailed Column Mapping</h3>
+                    <table class="min-w-full bg-white border border-gray-300">
+                        <thead class="bg-gray-50">
                             <tr>
-                                <th style="width: 5%;">Rank</th>
-                                <th style="width: 35%;">Contractor Name</th>
-                                <th style="width: 12%; text-align: center;">Flood Projects</th>
-                                <th style="width: 15%; text-align: right;">Flood Budget</th>
-                                <th style="width: 12%; text-align: center;">DIME Projects</th>
-                                <th style="width: 15%; text-align: right;">DIME Budget</th>
-                                <th style="width: 6%; text-align: center;">Total</th>
+                                <th class="px-4 py-2 border-b text-left font-semibold">Aspect</th>
+                                <th class="px-4 py-2 border-b text-left font-semibold">Budget Database</th>
+                                <th class="px-4 py-2 border-b text-left font-semibold">NEP Database</th>
+                                <th class="px-4 py-2 border-b text-left font-semibold">Adaptation</th>
                             </tr>
                         </thead>
-                        <tbody id="contractor-correlation-tbody">
+                        <tbody class="divide-y divide-gray-200">
                             <tr>
-                                <td colspan="7" style="text-align: center; padding: 2rem;">Loading...</td>
+                                <td class="px-4 py-2 font-medium">Primary Key</td>
+                                <td class="px-4 py-2"><code>id</code> (integer)</td>
+                                <td class="px-4 py-2"><code>id</code> (integer)</td>
+                                <td class="px-4 py-2 text-green-600">✓ Identical</td>
+                            </tr>
+                            <tr class="bg-gray-50">
+                                <td class="px-4 py-2 font-medium">Amount Field</td>
+                                <td class="px-4 py-2"><code>amt</code> (numeric)</td>
+                                <td class="px-4 py-2"><code>amount</code> (numeric)</td>
+                                <td class="px-4 py-2 text-blue-600">→ Column name change</td>
+                            </tr>
+                            <tr>
+                                <td class="px-4 py-2 font-medium">Description</td>
+                                <td class="px-4 py-2"><code>dsc</code> (text)</td>
+                                <td class="px-4 py-2"><code>description</code> (text)</td>
+                                <td class="px-4 py-2 text-blue-600">→ Column name change</td>
+                            </tr>
+                            <tr class="bg-gray-50">
+                                <td class="px-4 py-2 font-medium">Fiscal Year</td>
+                                <td class="px-4 py-2"><code>year</code> (integer)</td>
+                                <td class="px-4 py-2"><code>fiscal_year</code> (varchar)</td>
+                                <td class="px-4 py-2 text-orange-600">→ Name + type change</td>
+                            </tr>
+                            <tr>
+                                <td class="px-4 py-2 font-medium">Department Code</td>
+                                <td class="px-4 py-2"><code>department</code> (bigint)</td>
+                                <td class="px-4 py-2"><code>org_uacs_code</code> (varchar)</td>
+                                <td class="px-4 py-2 text-orange-600">→ Name + type change</td>
+                            </tr>
+                            <tr class="bg-gray-50">
+                                <td class="px-4 py-2 font-medium">Agency Code</td>
+                                <td class="px-4 py-2"><code>agency</code> (bigint)</td>
+                                <td class="px-4 py-2"><code>region_code</code> (varchar)</td>
+                                <td class="px-4 py-2 text-orange-600">→ Name + type change</td>
+                            </tr>
+                            <tr>
+                                <td class="px-4 py-2 font-medium">Sort Order</td>
+                                <td class="px-4 py-2"><code>sorder</code> (bigint)</td>
+                                <td class="px-4 py-2"><code>sort_order</code> (bigint)</td>
+                                <td class="px-4 py-2 text-blue-600">→ Column name change</td>
+                            </tr>
+                            <tr class="bg-gray-50">
+                                <td class="px-4 py-2 font-medium">Total Columns</td>
+                                <td class="px-4 py-2 font-bold text-blue-600">24 columns</td>
+                                <td class="px-4 py-2 font-bold text-green-600">16 columns</td>
+                                <td class="px-4 py-2 text-red-600">→ Schema reduction</td>
                             </tr>
                         </tbody>
                     </table>
                 </div>
             </div>
 
-            <!-- Methodology -->
-            <div id="methodology-section" class="methodology-box" style="display: none;">
-                <h4>📊 Methodology</h4>
-                <p><strong>Data Sources:</strong></p>
-                <p>• Flood Control Data: DPWH Flood Control Projects Database</p>
-                <p>• DIME Data: Department of Budget and Management - Digital Information for Monitoring and Evaluation</p>
-                <p><strong>Analysis Process:</strong></p>
-                <p>• Extracted top 50 contractors by number of flood control projects</p>
-                <p>• Used fuzzy string matching to find contractor names across databases (accounting for variations in naming conventions)</p>
-                <p>• Filtered DIME projects to exclude flood-related infrastructure to show diversification</p>
-                <p>• Calculated total project counts and budget allocations</p>
+            <!-- Integration Success -->
+            <div class="bg-white rounded-lg shadow-lg p-8 mb-8 border-l-4 border-green-500">
+                <h2 class="text-2xl font-bold text-gray-800 mb-6 text-center">✅ Successful Integration Despite
+                    Differences</h2>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="space-y-4">
+                        <h3 class="text-lg font-semibold text-gray-800">🔧 Technical Adaptations</h3>
+                        <ul class="space-y-2 text-gray-600">
+                            <li class="flex items-start">
+                                <span class="text-green-500 mr-2">✓</span>
+                                <span>Query column name mapping (<code>amt</code> → <code>amount</code>)</span>
+                            </li>
+                            <li class="flex items-start">
+                                <span class="text-green-500 mr-2">✓</span>
+                                <span>WHERE condition adjustments for nullable fields</span>
+                            </li>
+                            <li class="flex items-start">
+                                <span class="text-green-500 mr-2">✓</span>
+                                <span>Unified API endpoints serve both databases</span>
+                            </li>
+                            <li class="flex items-start">
+                                <span class="text-green-500 mr-2">✓</span>
+                                <span>Identical frontend interface for different backends</span>
+                            </li>
+                        </ul>
+                    </div>
+
+                    <div class="space-y-4">
+                        <h3 class="text-lg font-semibold text-gray-800">📊 User Experience</h3>
+                        <ul class="space-y-2 text-gray-600">
+                            <li class="flex items-start">
+                                <span class="text-green-500 mr-2">✓</span>
+                                <span>Seamless navigation between Budget and NEP</span>
+                            </li>
+                            <li class="flex items-start">
+                                <span class="text-green-500 mr-2">✓</span>
+                                <span>Identical data browsing and filtering</span>
+                            </li>
+                            <li class="flex items-start">
+                                <span class="text-green-500 mr-2">✓</span>
+                                <span>Same visualization and analysis tools</span>
+                            </li>
+                            <li class="flex items-start">
+                                <span class="text-green-500 mr-2">✓</span>
+                                <span>Transparent database differences to users</span>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
             </div>
 
-        </div>
-    </section>
+            <!-- Data Statistics -->
+            <div class="bg-white rounded-lg shadow-lg p-8">
+                <h2 class="text-2xl font-bold text-gray-800 mb-6 text-center">📈 Current Data Statistics</h2>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    <!-- Budget Stats -->
+                    <div class="bg-blue-50 p-6 rounded-lg">
+                        <h3 class="text-xl font-bold text-blue-800 mb-4 text-center">💰 Budget Database (2017-2025)</h3>
+                        <div class="space-y-3">
+                            <div class="flex justify-between">
+                                <span class="font-medium">Coverage:</span>
+                                <span class="font-semibold">9 fiscal years</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="font-medium">Schema:</span>
+                                <span class="font-semibold">24 columns each</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="font-medium">Detail Level:</span>
+                                <span class="font-semibold">High (UACS breakdowns)</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="font-medium">Data Types:</span>
+                                <span class="font-semibold">bigint for codes</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- NEP Stats -->
+                    <div class="bg-green-50 p-6 rounded-lg">
+                        <h3 class="text-xl font-bold text-green-800 mb-4 text-center">📈 NEP Database (2020-2026)</h3>
+                        <div class="space-y-3">
+                            <div class="flex justify-between">
+                                <span class="font-medium">Coverage:</span>
+                                <span class="font-semibold">7 fiscal years</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="font-medium">Schema:</span>
+                                <span class="font-semibold">16 columns each</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="font-medium">Detail Level:</span>
+                                <span class="font-semibold">Medium (simplified)</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="font-medium">Data Types:</span>
+                                <span class="font-semibold">varchar for codes</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mt-6 text-center">
+                    <p class="text-gray-600">
+                        <strong>Conclusion:</strong> Despite fundamental schema differences, the NEP integration
+                        provides
+                        users with the same powerful analysis capabilities through transparent query adaptations.
+                    </p>
+                </div>
+            </div>
+
+            <!-- Contractor Analysis Table -->
+            <div id="contractor-section" class="bg-white rounded-lg shadow-md mb-6" style="display: none;">
+                <div class="p-6">
+                    <h3 class="text-xl font-semibold text-gray-800 text-center mb-4">🏆 Top 50 Contractor Analysis</h3>
+                    <p class="text-center text-gray-600 text-sm -mt-2 mb-4">
+                        Ranked by number of flood control projects, showing their presence in other DIME infrastructure
+                        projects
+                    </p>
+
+                    <div class="overflow-x-auto">
+                        <table class="budget-projects-table">
+                            <thead>
+                                <tr>
+                                    <th style="width: 5%;">Rank</th>
+                                    <th style="width: 35%;">Contractor Name</th>
+                                    <th style="width: 12%; text-align: center;">Flood Projects</th>
+                                    <th style="width: 15%; text-align: right;">Flood Budget</th>
+                                    <th style="width: 12%; text-align: center;">DIME Projects</th>
+                                    <th style="width: 15%; text-align: right;">DIME Budget</th>
+                                    <th style="width: 6%; text-align: center;">Total</th>
+                                </tr>
+                            </thead>
+                            <tbody id="contractor-correlation-tbody">
+                                <tr>
+                                    <td colspan="7" style="text-align: center; padding: 2rem;">Loading...</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Methodology -->
+                <div id="methodology-section" class="methodology-box" style="display: none;">
+                    <h4>📊 Methodology</h4>
+                    <p><strong>Data Sources:</strong></p>
+                    <p>• Flood Control Data: DPWH Flood Control Projects Database</p>
+                    <p>• DIME Data: Department of Budget and Management - Digital Information for Monitoring and
+                        Evaluation</p>
+                    <p><strong>Analysis Process:</strong></p>
+                    <p>• Extracted top 50 contractors by number of flood control projects</p>
+                    <p>• Used fuzzy string matching to find contractor names across databases (accounting for variations
+                        in naming conventions)</p>
+                    <p>• Filtered DIME projects to exclude flood-related infrastructure to show diversification</p>
+                    <p>• Calculated total project counts and budget allocations</p>
+                </div>
+
+            </div>
+        </section>
     </div>
 
     {% include "footer.html" %}
 
 
 </body>
-</html>
 
+</html>

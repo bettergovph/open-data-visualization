@@ -28,6 +28,23 @@ is_modified() {
     echo "$status" | grep -qE "^[ M]{2}" && return 0 || return 1
 }
 
+# Function to check file size limit (50MB)
+check_size() {
+    local file="$1"
+    if [ ! -f "$file" ]; then return 0; fi
+    
+    # Get file size in bytes
+    local size=$(stat -c%s "$file" 2>/dev/null || stat -f%z "$file" 2>/dev/null)
+    local limit=$((50 * 1024 * 1024)) # 50MB
+    
+    if [ "$size" -gt "$limit" ]; then
+        local size_mb=$(echo "scale=2; $size / 1024 / 1024" | bc)
+        echo "   ❌ SKIPPED: $file is too large (${size_mb} MB > 50 MB)"
+        return 1
+    fi
+    return 0
+}
+
 # Function to stage file if not already staged and if modified
 stage_if_needed() {
     local file="$1"
@@ -58,6 +75,7 @@ stage_if_needed() {
         # Check if also modified in working tree (MM)
         if echo "$status" | grep -qE "^MM"; then
             # Staged but also modified - add again to update staging
+            check_size "$file" || return 4 # Too large
             git add "$file"
             echo "   ✅ Updated staging: $file"
             return 0
@@ -69,6 +87,7 @@ stage_if_needed() {
     
     # If modified but not staged ( M)
     if echo "$status" | grep -qE "^ M"; then
+        check_size "$file" || return 4 # Too large
         git add "$file"
         echo "   ✅ Staged: $file"
         return 0  # Newly staged
@@ -76,6 +95,7 @@ stage_if_needed() {
     
     # If untracked (??)
     if echo "$status" | grep -qE "^\?\?"; then
+        check_size "$file" || return 4 # Too large
         git add "$file"
         echo "   ✅ Staged (new): $file"
         return 0
