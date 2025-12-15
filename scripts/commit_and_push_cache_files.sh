@@ -6,7 +6,7 @@
 # - cache generator script
 # - ANY files you already staged manually
 # - ANY other modified/untracked files, except excluded/oversize ones
-# Skips files > 100MB and data/parquet/integrated_projects_classified.parquet
+# Skips files > 90MB and data/parquet/integrated_projects_classified.parquet
 
 set -e  # Exit on error
 
@@ -36,18 +36,18 @@ is_modified() {
     echo "$status" | grep -qE "^[ M]{2}" && return 0 || return 1
 }
 
-# Function to check file size limit (100MB)
+# Function to check file size limit (90MB)
 check_size() {
     local file="$1"
     if [ ! -f "$file" ]; then return 0; fi
     
     # Get file size in bytes
     local size=$(stat -c%s "$file" 2>/dev/null || stat -f%z "$file" 2>/dev/null)
-    local limit=$((100 * 1024 * 1024)) # 100MB
+    local limit=$((90 * 1024 * 1024)) # 90MB
     
     if [ "$size" -gt "$limit" ]; then
         local size_mb=$(echo "scale=2; $size / 1024 / 1024" | bc)
-        echo "   ❌ SKIPPED: $file is too large (${size_mb} MB > 100 MB)"
+        echo "   ❌ SKIPPED: $file is too large (${size_mb} MB > 90 MB)"
         return 1
     fi
     return 0
@@ -55,17 +55,38 @@ check_size() {
 
 # Unstage any already-staged file that exceeds the size limit
 unstage_oversize_files() {
-    local limit=$((100 * 1024 * 1024)) # 100MB
+    local limit=$((90 * 1024 * 1024)) # 90MB
     while IFS= read -r file; do
         if [ -f "$file" ]; then
             local size=$(stat -c%s "$file" 2>/dev/null || stat -f%z "$file" 2>/dev/null)
             if [ "$size" -gt "$limit" ]; then
                 git restore --staged "$file" 2>/dev/null || git reset HEAD -- "$file" 2>/dev/null
                 local size_mb=$(echo "scale=2; $size / 1024 / 1024" | bc)
-                echo "   🚫 Unstaged oversize file: $file (${size_mb} MB > 100 MB)"
+                echo "   🚫 Unstaged oversize file: $file (${size_mb} MB > 90 MB)"
             fi
         fi
     done < <(git diff --cached --name-only)
+}
+
+# Exclusions (hard-coded)
+is_excluded() {
+    local file="$1"
+    [[ "$file" == "data/parquet/integrated_projects_classified.parquet" ]]
+}
+
+# Stage helper with exclusions + size checks; uses -A to capture deletions too
+stage_path_safely() {
+    local file="$1"
+    if [ -z "$file" ]; then return 0; fi
+    if is_excluded "$file"; then
+        echo "   ❌ SKIPPED (excluded): $file"
+        return 0
+    fi
+    if ! check_size "$file"; then
+        return 0
+    fi
+    git add -A -- "$file"
+    echo "   ✅ Staged: $file"
 }
 
 # Function to stage file if not already staged and if modified
@@ -226,24 +247,25 @@ esac
 
 # Stage any other modified/untracked files except excluded/oversize ones
 echo ""
-echo "📦 Staging remaining modified/untracked files (excluding >100MB and classified parquet)..."
-while IFS= read -r path; do
-    # Exclude the classified parquet explicitly
-    if [[ "$path" == "data/parquet/integrated_projects_classified.parquet" ]]; then
-        echo "   ❌ SKIPPED (excluded): $path"
-        continue
-    fi
-    # Skip congressman caches (already handled)
+echo "📦 Staging remaining modified/untracked files (excluding >90MB and classified parquet)..."
+
+# Tracked changes (unstaged)
+while IFS= read -r -d '' path; do
+    # Skip congressman caches here; handled separately with size check above
     if [[ "$path" == static/data/congressman-projects-* ]]; then
         continue
     fi
-    # Size check
-    if ! check_size "$path"; then
+    stage_path_safely "$path"
+done < <(git diff --name-only -z)
+
+# Untracked files
+while IFS= read -r -d '' path; do
+    # Skip congressman caches here; handled separately with size check above
+    if [[ "$path" == static/data/congressman-projects-* ]]; then
         continue
     fi
-    git add "$path"
-    echo "   ✅ Staged: $path"
-done < <(git status --porcelain | awk '{print $2}')
+    stage_path_safely "$path"
+done < <(git ls-files -o --exclude-standard -z)
 
 echo ""
 echo "📊 Checking staged files..."
@@ -264,14 +286,17 @@ if [ "$STAGED_COUNT" -eq 0 ]; then
     exit 0
 fi
 
-# Final guard: unstage any oversize files (>100MB) before commit
+# Final guard: unstage any oversize files (>90MB) before commit
 unstage_oversize_files
+
+# Always ensure the classified parquet is not staged
+git restore --staged -- "data/parquet/integrated_projects_classified.parquet" 2>/dev/null || true
 
 # Recount after un-staging oversize files
 STAGED_COUNT=$(git diff --cached --name-only | wc -l)
 if [ "$STAGED_COUNT" -eq 0 ]; then
     echo ""
-    echo "ℹ️  All staged files were oversize; nothing left to commit."
+    echo "ℹ️  All staged files were excluded/oversize; nothing left to commit."
     exit 0
 fi
 
