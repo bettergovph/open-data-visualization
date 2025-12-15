@@ -1,9 +1,17 @@
 #!/bin/bash
-# Script to commit and push cache generation files
-# This includes congressman JSON caches, ranking JSON, classified parquet, and the generator script
-# Intelligently skips files that are already staged or not modified
+# Script to stage (with size safeguards), commit, and push.
+# Includes:
+# - congressman JSON caches under static/data/congressman-projects-*
+# - ranking JSON
+# - cache generator script
+# - ANY files you already staged manually
+# - ANY other modified/untracked files, except excluded/oversize ones
+# Skips files > 100MB and data/parquet/integrated_projects_classified.parquet
 
 set -e  # Exit on error
+
+# Track any files that were already staged before this script runs
+INITIAL_STAGED=$(git diff --cached --name-only | wc -l)
 
 # Function to check if a file is already staged
 is_staged() {
@@ -28,21 +36,36 @@ is_modified() {
     echo "$status" | grep -qE "^[ M]{2}" && return 0 || return 1
 }
 
-# Function to check file size limit (50MB)
+# Function to check file size limit (100MB)
 check_size() {
     local file="$1"
     if [ ! -f "$file" ]; then return 0; fi
     
     # Get file size in bytes
     local size=$(stat -c%s "$file" 2>/dev/null || stat -f%z "$file" 2>/dev/null)
-    local limit=$((50 * 1024 * 1024)) # 50MB
+    local limit=$((100 * 1024 * 1024)) # 100MB
     
     if [ "$size" -gt "$limit" ]; then
         local size_mb=$(echo "scale=2; $size / 1024 / 1024" | bc)
-        echo "   ❌ SKIPPED: $file is too large (${size_mb} MB > 50 MB)"
+        echo "   ❌ SKIPPED: $file is too large (${size_mb} MB > 100 MB)"
         return 1
     fi
     return 0
+}
+
+# Unstage any already-staged file that exceeds the size limit
+unstage_oversize_files() {
+    local limit=$((100 * 1024 * 1024)) # 100MB
+    while IFS= read -r file; do
+        if [ -f "$file" ]; then
+            local size=$(stat -c%s "$file" 2>/dev/null || stat -f%z "$file" 2>/dev/null)
+            if [ "$size" -gt "$limit" ]; then
+                git restore --staged "$file" 2>/dev/null || git reset HEAD -- "$file" 2>/dev/null
+                local size_mb=$(echo "scale=2; $size / 1024 / 1024" | bc)
+                echo "   🚫 Unstaged oversize file: $file (${size_mb} MB > 100 MB)"
+            fi
+        fi
+    done < <(git diff --cached --name-only)
 }
 
 # Function to stage file if not already staged and if modified
@@ -121,6 +144,10 @@ if [ -n "$MODIFIED_JSON_FILES" ]; then
         if [ -f "$json_file" ]; then
             # Check current status
             status=$(git status --porcelain "$json_file" 2>/dev/null)
+            # Skip oversize files before any staging attempt
+            if ! check_size "$json_file"; then
+                continue
+            fi
             
             if echo "$status" | grep -qE "^MM"; then
                 # Staged but also modified - update staging
@@ -147,8 +174,10 @@ while IFS= read -r json_file; do
     TOTAL_FOUND=$((TOTAL_FOUND + 1))
     # Only process if not already in MODIFIED_JSON_FILES
     if [ -z "$MODIFIED_JSON_FILES" ] || ! echo "$MODIFIED_JSON_FILES" | grep -Fxq "$json_file"; then
+        set +e
         result=$(stage_if_needed "$json_file" 2>&1)
         exit_code=$?
+        set -e
         case $exit_code in
             0) NEWLY_STAGED=$((NEWLY_STAGED + 1)) ;;
             1) ALREADY_STAGED=$((ALREADY_STAGED + 1)) ;;
@@ -180,17 +209,7 @@ case $exit_code in
 esac
 
 echo ""
-echo "📦 Staging classified parquet file..."
-set +e  # Temporarily disable exit on error
-stage_if_needed "data/parquet/integrated_projects_classified.parquet" > /dev/null
-exit_code=$?
-set -e  # Re-enable exit on error
-case $exit_code in
-    0) echo "   ✅ Staged: integrated_projects_classified.parquet" ;;
-    1) echo "   ⏭️  Already staged: integrated_projects_classified.parquet" ;;
-    2) echo "   ⚠️  Not found: integrated_projects_classified.parquet" ;;
-    3) echo "   ✓  No changes: integrated_projects_classified.parquet" ;;
-esac
+echo "📦 Skipping classified parquet file (too large for GitHub): data/parquet/integrated_projects_classified.parquet"
 
 echo ""
 echo "📦 Staging cache generator script..."
@@ -205,6 +224,27 @@ case $exit_code in
     3) echo "   ✓  No changes: generate_dynasty_projects_cache_duckdb.py" ;;
 esac
 
+# Stage any other modified/untracked files except excluded/oversize ones
+echo ""
+echo "📦 Staging remaining modified/untracked files (excluding >100MB and classified parquet)..."
+while IFS= read -r path; do
+    # Exclude the classified parquet explicitly
+    if [[ "$path" == "data/parquet/integrated_projects_classified.parquet" ]]; then
+        echo "   ❌ SKIPPED (excluded): $path"
+        continue
+    fi
+    # Skip congressman caches (already handled)
+    if [[ "$path" == static/data/congressman-projects-* ]]; then
+        continue
+    fi
+    # Size check
+    if ! check_size "$path"; then
+        continue
+    fi
+    git add "$path"
+    echo "   ✅ Staged: $path"
+done < <(git status --porcelain | awk '{print $2}')
+
 echo ""
 echo "📊 Checking staged files..."
 STAGED_COUNT=$(git diff --cached --name-only | wc -l)
@@ -216,35 +256,28 @@ echo "   Total files staged: $STAGED_COUNT"
 echo "   JSON files staged: $JSON_COUNT"
 echo "   Parquet files staged: $PARQUET_COUNT"
 echo "   Python scripts staged: $PYTHON_COUNT"
+echo "   (Includes any files you already staged before running this script: $INITIAL_STAGED)"
 
 if [ "$STAGED_COUNT" -eq 0 ]; then
     echo ""
-    echo "ℹ️  No new files to commit. All files are either already staged or have no changes."
+    echo "ℹ️  No files currently staged; skipping commit/push."
+    exit 0
+fi
+
+# Final guard: unstage any oversize files (>100MB) before commit
+unstage_oversize_files
+
+# Recount after un-staging oversize files
+STAGED_COUNT=$(git diff --cached --name-only | wc -l)
+if [ "$STAGED_COUNT" -eq 0 ]; then
     echo ""
-    echo "Checking if there are already staged files ready to push..."
-    if [ "$(git diff --cached --name-only | wc -l)" -gt 0 ]; then
-        echo "   ✅ Found $(git diff --cached --name-only | wc -l) files already staged"
-        echo ""
-        read -p "Do you want to commit and push the already-staged files? (y/n) " -n 1 -r
-        echo
-        if [[ ! $REPLY =~ ^[Yy]$ ]]; then
-            echo "   Cancelled."
-            exit 0
-        fi
-    else
-        echo "   No files staged for commit."
-        exit 0
-    fi
+    echo "ℹ️  All staged files were oversize; nothing left to commit."
+    exit 0
 fi
 
 echo ""
 echo "📝 Committing..."
-git commit -m "Update cache files: congressman JSON caches, ranking, classified parquet, and generator script
-
-- Update all congressman project cache JSON files
-- Update congressman-ranking.json
-- Update integrated_projects_classified.parquet
-- Update generate_dynasty_projects_cache_duckdb.py with improved PhilGEPS project name handling"
+git commit -m "Update cache files and staged changes"
 
 echo ""
 echo "📤 Pushing to remote..."
@@ -252,4 +285,3 @@ git push
 
 echo ""
 echo "✅ Done! Cache files have been committed and pushed."
-
