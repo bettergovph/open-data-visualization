@@ -91,3 +91,7 @@ huggingface_*.log
 # Cursor cookie (contains sensitive session token)
 cursor_cookie.txt
 .cursor_cookie
+# Prevent re-adding files removed from history (GitHub size limits)
+data/parquet/integrated_projects_classified.parquet
+static/data/budget_trends_analysis.json
+static/data/congressman-projects-elizaldy-salcedo-co/all-projects-cache.json
