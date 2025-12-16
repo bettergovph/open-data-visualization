@@ -737,9 +737,10 @@ async def export_integrated_projects_csv(
         base_dir = Path(__file__).parent.absolute()
         parquet_file = base_dir / "data" / "parquet" / "integrated_projects.parquet"
         
-        # --- GREEN PROJECTS CSV LOGIC ---
-        if green:
+        # --- GREEN / DPWH ALL (ANNEX A-5 2026) CSV LOGIC ---
+        if green or dpwh_all:
             import json
+            import re
             
             # 1. Load 2026 Data (Annex A-5)
             json_path = base_dir / "static" / "data" / "budget_amendments_2026.json"
@@ -756,8 +757,19 @@ async def export_integrated_projects_csv(
                 if item.get('source_sheet') == 'Annex A-5'
             ]
             
+            def _coerce_amount(raw_amount: Any) -> Optional[float]:
+                if raw_amount is None:
+                    return None
+                try:
+                    return float(raw_amount)
+                except (TypeError, ValueError):
+                    return None
+
             # 2. Load Bad IDs (Resurrected & Flagged)
-            bad_ids = set()
+            resurrected_ids = set()
+            flagged_ids = set()
+            historical_amounts_by_pid: Dict[str, List[float]] = {}
+            flagged_meta_by_pid: Dict[str, Dict[str, Any]] = {}
             
             # Resurrected
             res_path = base_dir / "static" / "data" / "resurrected_projects_dpwh.json"
@@ -765,8 +777,22 @@ async def export_integrated_projects_csv(
                 with open(res_path, 'r', encoding='utf-8') as f:
                     res_data = json.load(f)
                     for match in res_data.get('matches', []):
-                        pid = match.get('year_2026', {}).get('id')
-                        if pid: bad_ids.add(str(pid))
+                        y2026 = match.get('year_2026') or {}
+                        pid = y2026.get('id')
+                        if pid:
+                            pid_str = str(pid)
+                            resurrected_ids.add(pid_str)
+                            hist = match.get('historical')
+                            if isinstance(hist, dict):
+                                amt = _coerce_amount(hist.get('amount'))
+                                if amt:
+                                    historical_amounts_by_pid.setdefault(pid_str, []).append(amt)
+                            elif isinstance(hist, list):
+                                for entry in hist:
+                                    if isinstance(entry, dict):
+                                        amt = _coerce_amount(entry.get('amount'))
+                                        if amt:
+                                            historical_amounts_by_pid.setdefault(pid_str, []).append(amt)
                         
             # Flagged
             flagged_path = base_dir / "static" / "data" / "flagged_amount_projects_2026.json"
@@ -774,39 +800,140 @@ async def export_integrated_projects_csv(
                 with open(flagged_path, 'r', encoding='utf-8') as f:
                     flagged_list = json.load(f)
                     for item in flagged_list:
+                        if not isinstance(item, dict):
+                            continue
+                        if str(item.get('source_sheet') or '').strip() != 'Annex A-5':
+                            continue
+                        if str(item.get('year') or '').strip() != '2026':
+                            continue
                         pid = item.get('id')
-                        if pid: bad_ids.add(str(pid))
+                        if not pid:
+                            continue
+                        pid_str = str(pid)
+                        if item.get('is_flagged') is True:
+                            flagged_ids.add(pid_str)
+                        flagged_meta_by_pid[pid_str] = item
+
+            # Aggregate lines are typically region-only headers or broad rollups (often very high amount).
+            aggregate_pattern = re.compile(
+                r'^(?:[a-zA-Z0-9]+\.)?\s*(?:National Capital Region|Region\s+[IVX]+|Cordillera Administrative Region|Bangsamoro Autonomous Region|MIMAROPA|CALABARZON|SOCCSKSARGEN|Zamboanga Peninsula|Northern Mindanao|Davao Region|Caraga|Eastern Visayas|Central Visayas|Western Visayas|Bicol Region|Central Luzon|Cagayan Valley|Ilocos Region).*$',
+                re.IGNORECASE
+            )
+
+            def _is_aggregate_row(title: str, amount: Optional[float]) -> bool:
+                title = (title or "").strip()
+                if not title:
+                    return True
+                if aggregate_pattern.match(title):
+                    return True
+                if amount is not None and amount >= 300_000_000:
+                    if len(title) <= 80 and len(title.split()) <= 10:
+                        return True
+                return False
             
-            # 3. Filter Green Projects
-            green_projects = []
+            # 3. Filter Projects (Green vs DPWH All)
+            projects = []
             for item in annex_a5_items:
                 pid = str(item.get('id'))
-                if pid not in bad_ids:
-                    # Search filter
-                    p_name = item.get('name') or item.get('description') or ''
-                    if project_name and project_name.lower() not in p_name.lower():
-                        continue
-                        
-                    green_projects.append({
-                        'project_name': p_name,
-                        'amount': item.get('final_amount') or item.get('original_amount'),
-                        'contractor_name': item.get('contractor') or 'N/A',
-                        'source': 'Annex A-5 (2026)',
-                        'location': (
-                            item.get('location', {}).get('province') or 
-                            item.get('district') or 
-                            item.get('location', {}).get('region') or 
-                            item.get('hierarchy', {}).get('region') or 
-                            'Unknown'
-                        )
-                    })
+                p_name = item.get('name') or item.get('description') or ''
+                amount = _coerce_amount(item.get('final_amount') or item.get('original_amount') or 0)
+
+                # Search filter
+                if project_name and project_name.lower() not in p_name.lower():
+                    continue
+
+                # Contractor filter (best-effort; Annex A-5 may not always have contractors)
+                contractor_name = item.get('contractor') or 'N/A'
+                if contractor and contractor.lower() not in str(contractor_name).lower():
+                    continue
+
+                is_resurrected = pid in resurrected_ids
+                is_flagged = pid in flagged_ids
+                is_aggregate = _is_aggregate_row(p_name, amount)
+
+                # For Green: exclude flagged/resurrected/aggregate
+                if green and (is_resurrected or is_flagged or is_aggregate):
+                    continue
+
+                # For DPWH All: include all Annex A-5, but remove aggregate headers/rollups
+                if dpwh_all and is_aggregate:
+                    continue
+
+                status_labels = []
+                if is_resurrected:
+                    status_labels.append("Resurrected")
+                if is_flagged:
+                    status_labels.append("Flagged Amount")
+                if not status_labels:
+                    status_labels.append("Lower Cost")
+                status = ", ".join(status_labels)
+
+                baseline_amounts = historical_amounts_by_pid.get(pid) or []
+                baseline_avg = sum(baseline_amounts) / len(baseline_amounts) if baseline_amounts else None
+                baseline_samples = len(baseline_amounts)
+
+                flagged_meta = flagged_meta_by_pid.get(pid) or {}
+                threshold = _coerce_amount((flagged_meta.get('subcategory_stats') or {}).get('threshold'))
+                distance_km = _coerce_amount(flagged_meta.get('distance_km'))
+
+                baseline_kind = None
+                if baseline_avg and amount is not None:
+                    baseline_kind = 'historical_amount'
+                    baseline_amount = baseline_avg
+                elif threshold and distance_km and amount is not None:
+                    baseline_kind = 'cost_per_km_threshold'
+                    baseline_amount = float(threshold) * float(distance_km)
+                else:
+                    baseline_amount = baseline_avg
+
+                over_under_amount = (amount - baseline_amount) if (baseline_amount and amount is not None) else None
+                over_under_pct = (over_under_amount / baseline_amount) if (baseline_amount and over_under_amount is not None) else None
+
+                projects.append({
+                    'flag': 'GREEN' if status == "Lower Cost" else 'RED',
+                    'status': status,
+                    'project_name': p_name,
+                    'amount': amount,
+                    'baseline_kind': baseline_kind,
+                    'baseline_amount': baseline_amount,
+                    'baseline_samples': baseline_samples,
+                    'over_under_amount': over_under_amount,
+                    'over_under_pct': over_under_pct,
+                    'contractor_name': contractor_name,
+                    'source': 'Annex A-5 (2026)',
+                    'location': (
+                        item.get('location', {}).get('province') or
+                        item.get('district') or
+                        item.get('location', {}).get('region') or
+                        item.get('hierarchy', {}).get('region') or
+                        'Unknown'
+                    )
+                })
 
             # 4. Generate CSV
             output = io.StringIO()
             writer = csv.writer(output)
-            writer.writerow(['Project Name', 'Amount', 'Contractor', 'Source', 'Location'])
-            for p in green_projects:
-                writer.writerow([p['project_name'], p['amount'], p['contractor_name'], p['source'], p['location']])
+            if dpwh_all and not green:
+                writer.writerow(['Flag', 'Status', 'Project Name', 'Amount', 'Baseline Amount', 'Baseline Samples', 'Over/Under Amount', 'Over/Under %', 'Contractor', 'Source', 'Location'])
+                for p in projects:
+                    pct = p.get('over_under_pct')
+                    writer.writerow([
+                        p['flag'],
+                        p['status'],
+                        p['project_name'],
+                        p['amount'],
+                        p.get('baseline_amount'),
+                        p.get('baseline_samples'),
+                        p.get('over_under_amount'),
+                        (pct * 100.0) if isinstance(pct, (int, float)) else None,
+                        p['contractor_name'],
+                        p['source'],
+                        p['location'],
+                    ])
+            else:
+                writer.writerow(['Project Name', 'Amount', 'Contractor', 'Source', 'Location'])
+                for p in projects:
+                    writer.writerow([p['project_name'], p['amount'], p['contractor_name'], p['source'], p['location']])
             
             return Response(
                 content=output.getvalue(),
@@ -11292,7 +11419,12 @@ async def integrated_projects_api(
     project_name: str = Query(None, description="Filter by project name"),
     contractor: str = Query(None, description="Filter by contractor name"),
     source: str = Query(None, description="Filter by source"),
-    green: bool = Query(False, description="Filter for green/clean projects (no flags, no resurrection)")
+    green: bool = Query(False, description="Filter for lower-cost projects (excludes resurrected/flagged)"),
+    dpwh_all: bool = Query(False, description="Return ALL Annex A-5 (2026) projects (with flags)"),
+    group_by: Optional[str] = Query(None, description="Group results (e.g., 'district') for dpwh_all"),
+    view: Optional[str] = Query(None, description="Special views for dpwh_all (e.g., 'aggregates')"),
+    order_by: Optional[str] = Query(None, description="Sort key for dpwh_all (e.g., amount, delta_amount, delta_pct, flag)"),
+    order_dir: str = Query("desc", description="Sort direction: asc|desc"),
 ):
     """Get unique integrated projects from classified parquet with sources_list"""
     import inspect
@@ -11312,6 +11444,14 @@ async def integrated_projects_api(
             import json
             import re
             try:
+                def _coerce_amount(raw_amount: Any) -> Optional[float]:
+                    if raw_amount is None:
+                        return None
+                    try:
+                        return float(raw_amount)
+                    except (TypeError, ValueError):
+                        return None
+
                 # 1. Load 2026 Data (Annex A-5)
                 json_path = Path(__file__).parent / "static" / "data" / "budget_amendments_2026.json"
                 if not json_path.exists():
@@ -11330,6 +11470,8 @@ async def integrated_projects_api(
                 # 2. Load Bad IDs (Resurrected & Flagged)
                 resurrected_ids = set()
                 flagged_ids = set()
+                historical_amounts_by_pid: Dict[str, List[float]] = {}
+                flagged_meta_by_pid: Dict[str, Dict[str, Any]] = {}
                 
                 # Resurrected
                 res_path = Path(__file__).parent / "static" / "data" / "resurrected_projects_dpwh.json"
@@ -11337,8 +11479,22 @@ async def integrated_projects_api(
                     with open(res_path, 'r', encoding='utf-8') as f:
                         res_data = json.load(f)
                         for match in res_data.get('matches', []):
-                            pid = match.get('year_2026', {}).get('id')
-                            if pid: resurrected_ids.add(str(pid))
+                            y2026 = match.get('year_2026') or {}
+                            pid = y2026.get('id')
+                            if pid:
+                                pid_str = str(pid)
+                                resurrected_ids.add(pid_str)
+                                hist = match.get('historical')
+                                if isinstance(hist, dict):
+                                    amt = _coerce_amount(hist.get('amount'))
+                                    if amt:
+                                        historical_amounts_by_pid.setdefault(pid_str, []).append(amt)
+                                elif isinstance(hist, list):
+                                    for entry in hist:
+                                        if isinstance(entry, dict):
+                                            amt = _coerce_amount(entry.get('amount'))
+                                            if amt:
+                                                historical_amounts_by_pid.setdefault(pid_str, []).append(amt)
                             
                 # Flagged
                 flagged_path = Path(__file__).parent / "static" / "data" / "flagged_amount_projects_2026.json"
@@ -11346,67 +11502,175 @@ async def integrated_projects_api(
                     with open(flagged_path, 'r', encoding='utf-8') as f:
                         flagged_list = json.load(f)
                         for item in flagged_list:
+                            if not isinstance(item, dict):
+                                continue
+                            # This file can contain multiple years; only use Annex A-5 2026
+                            if str(item.get('source_sheet') or '').strip() != 'Annex A-5':
+                                continue
+                            if str(item.get('year') or '').strip() != '2026':
+                                continue
                             pid = item.get('id')
-                            if pid: flagged_ids.add(str(pid))
+                            if not pid:
+                                continue
+                            pid_str = str(pid)
+                            if item.get('is_flagged') is True:
+                                flagged_ids.add(pid_str)
+                            flagged_meta_by_pid[pid_str] = item
                 
-                # Pre-compile aggregate regex
-                # Matches "a. Region Name", "1. Region Name", "Region Name"
-                # Regions: NCR, CAR, BARMM, Region I-XIII
+                # Aggregate lines are typically headers or broad rollups (often very high amount).
+                # Includes geographic headers (regions) and financing headers (Loan Proceeds, GOP).
                 aggregate_pattern = re.compile(
-                    r'^(?:[a-zA-Z0-9]+\.)?\s*(?:National Capital Region|Region\s+[IVX]+|Cordillera Administrative Region|Bangsamoro Autonomous Region|MIMAROPA|CALABARZON|SOCCSKSARGEN|Zamboanga Peninsula|Northern Mindanao|Davao Region|Caraga|Eastern Visayas|Central Visayas|Western Visayas|Bicol Region|Central Luzon|Cagayan Valley|Ilocos Region).*$',
+                    r'^(?:[a-zA-Z0-9]+\.)?\s*(?:'
+                    r'National Capital Region|Region\s+[IVX]+|Cordillera Administrative Region|Bangsamoro Autonomous Region|'
+                    r'MIMAROPA|CALABARZON|SOCCSKSARGEN|Zamboanga Peninsula|Northern Mindanao|Davao Region|Caraga|'
+                    r'Eastern Visayas|Central Visayas|Western Visayas|Bicol Region|Central Luzon|Cagayan Valley|Ilocos Region|'
+                    r'Loan Proceeds|GOP'
+                    r').*$',
                     re.IGNORECASE
                 )
+
+                def _is_aggregate_row(title: str, amount: Optional[float]) -> bool:
+                    title = (title or "").strip()
+                    if not title:
+                        return True
+                    if aggregate_pattern.match(title):
+                        return True
+                    if amount is not None and amount >= 300_000_000:
+                        if len(title) <= 80 and len(title.split()) <= 10:
+                            return True
+                    return False
                 
                 # 3. Filter Projects
                 final_projects = []
+                program_rollup: Dict[str, Dict[str, Any]] = {}
                 for item in annex_a5_items:
                     pid = str(item.get('id'))
                     p_name = item.get('name') or item.get('description') or ''
-                    
-                    # Logic for filtering ("green") vs marking ("dpwh_all")
-                    
+                    amount = _coerce_amount(item.get('final_amount') or item.get('original_amount') or 0)
+
+                    baseline_amounts = historical_amounts_by_pid.get(pid) or []
+                    baseline_avg = (sum(baseline_amounts) / len(baseline_amounts)) if baseline_amounts else None
+                    baseline_samples = len(baseline_amounts)
+                    flagged_meta = flagged_meta_by_pid.get(pid) or {}
+                    cost_per_km = _coerce_amount(flagged_meta.get('cost_per_km'))
+                    threshold = _coerce_amount((flagged_meta.get('subcategory_stats') or {}).get('threshold'))
+                    distance_km = _coerce_amount(flagged_meta.get('distance_km'))
+                    flag_reason = flagged_meta.get('flag_reason')
+                    subcategory = flagged_meta.get('subcategory')
+                    # For Annex A-5, "region" is typically a program bucket (not geographic region)
+                    program_name = (item.get('location') or {}).get('region') or (item.get('hierarchy') or {}).get('region') or None
+
                     # Check status
                     is_resurrected = pid in resurrected_ids
                     is_flagged = pid in flagged_ids
-                    is_aggregate = bool(aggregate_pattern.match(p_name))
-                    
-                    # For Green: Exclude bad IDs AND aggregates
-                    if green:
-                        if is_resurrected or is_flagged or is_aggregate:
-                            continue
-                    
-                    # For DPWH All: Include all, just mark status
-                    # (Maybe optionally exclude aggregates if user wants? User didn't specify, but aggregates usually clutter)
-                    # Let's keep aggregates in 'dpwh_all' but maybe flag them? Or exclude if they are clearly just headers.
-                    # User request: "list all Annex A-5 ONLY regardless of flag"
-                    # I'll exclude aggregates from 'dpwh_all' too as they aren't real projects.
-                    if is_aggregate and dpwh_all:
-                         continue
+                    is_aggregate = _is_aggregate_row(p_name, amount)
 
-                    # Determine Status String
+                    # For Green: Exclude bad IDs AND aggregates
+                    if green and (is_resurrected or is_flagged or is_aggregate):
+                        continue
+                    
+                    # For DPWH All: skip aggregate headers in the projects list
+                    if dpwh_all and is_aggregate:
+                        continue
+
                     status_labels = []
-                    if is_resurrected: status_labels.append("Resurrected")
-                    if is_flagged: status_labels.append("Flagged Amount")
-                    if not status_labels: status_labels.append("Clean")
+                    if is_resurrected:
+                        status_labels.append("Resurrected")
+                    if is_flagged:
+                        status_labels.append("Flagged Amount")
+                    if not status_labels:
+                        status_labels.append("Lower Cost")
                     
                     final_projects.append({
                         'project_name': p_name,
-                        'amount': item.get('final_amount') or item.get('original_amount'),
+                        'amount': amount,
                         'contractor_name': item.get('contractor') or 'N/A',
                         'source': 'Annex A-5 (2026)',
                         'sources_list': ['Annex A-5 (2026)'],
                         'contract_id': pid,
-                        'location': (
-                            item.get('location', {}).get('province') or 
-                            item.get('district') or 
-                            item.get('location', {}).get('region') or 
-                            item.get('hierarchy', {}).get('region') or 
-                            'Unknown'
-                        ),
+                        'program': program_name,
+                        'location': program_name or 'Unknown',
                         'status': ', '.join(status_labels),
                         'is_resurrected': is_resurrected,
-                        'is_flagged': is_flagged
+                        'is_flagged': is_flagged,
+                        'flag_reason': flag_reason,
+                        'subcategory': subcategory,
+                        'cost_per_km': cost_per_km,
+                        'threshold_cost_per_km': threshold,
+                        'distance_km': distance_km,
+                        'baseline_amount': baseline_avg,
+                        'baseline_samples': baseline_samples,
                     })
+
+                    # Program rollup (no green/red; just totals)
+                    program_key = program_name or 'Unknown'
+                    bucket = program_rollup.setdefault(program_key, {
+                        'program': program_key,
+                        'project_count': 0,
+                        'total_amount': 0.0,
+                    })
+                    bucket['project_count'] += 1
+                    if amount:
+                        bucket['total_amount'] += float(amount)
+
+                # Add derived pricing fields (over/under) after baseline is available
+                for proj in final_projects:
+                    baseline = proj.get('baseline_amount')
+                    amt = proj.get('amount')
+                    if baseline and amt is not None:
+                        delta = amt - baseline
+                        proj['over_under_amount'] = delta
+                        proj['over_under_pct'] = delta / baseline
+                        proj['baseline_kind'] = 'historical_amount'
+                        continue
+
+                    # Fallback for flagged/non-flagged items with cost/km metadata: compare against threshold * distance
+                    distance_km = proj.get('distance_km')
+                    threshold = proj.get('threshold_cost_per_km')
+                    if amt is not None and distance_km and threshold:
+                        baseline_amt = float(distance_km) * float(threshold)
+                        if baseline_amt > 0:
+                            delta = float(amt) - baseline_amt
+                            proj['baseline_amount'] = baseline_amt
+                            proj['baseline_kind'] = 'cost_per_km_threshold'
+                            proj['over_under_amount'] = delta
+                            proj['over_under_pct'] = delta / baseline_amt
+                            continue
+
+                    proj['baseline_kind'] = None
+                    proj['over_under_amount'] = None
+                    proj['over_under_pct'] = None
+
+                if dpwh_all and (group_by or '').lower() in {'program', 'region'}:
+                    rows = list(program_rollup.values())
+                    rows.sort(key=lambda r: (r.get('total_amount') or 0.0, r.get('project_count') or 0), reverse=True)
+                    return JSONResponse({
+                        "success": True,
+                        "group_by": "program",
+                        "rows": rows,
+                        "total_groups": len(rows),
+                    })
+
+                if dpwh_all and order_by:
+                    key = (order_by or "").strip().lower()
+                    reverse = (order_dir or "desc").strip().lower() != "asc"
+
+                    def sort_value(project: Dict[str, Any]):
+                        if key in {"amount"}:
+                            return project.get("amount") if project.get("amount") is not None else -1.0
+                        if key in {"delta_amount", "over_under_amount"}:
+                            val = project.get("over_under_amount")
+                            return val if val is not None else -1.0
+                        if key in {"delta_pct", "over_under_pct"}:
+                            val = project.get("over_under_pct")
+                            return val if val is not None else -1.0
+                        if key in {"flag", "status"}:
+                            # Red first in desc: 1=red, 0=green
+                            is_red = bool(project.get("is_resurrected") or project.get("is_flagged"))
+                            return 1 if is_red else 0
+                        return 0
+
+                    final_projects.sort(key=sort_value, reverse=reverse)
                 
                 # 4. Search Filter
                 if project_name:
@@ -11787,6 +12051,214 @@ async def integrated_projects_api(
 async def integrated_dashboard():
     template_path = Path(__file__).parent / 'templates' / 'integrated_matrix.html'
     return FileResponse(template_path)
+
+
+@app.get("/api/integ2026/dpwh-districts")
+async def integ2026_dpwh_districts_api():
+    """District rollup for DPWH Annex A-5 (2026), requires district cache."""
+    try:
+        cache_path = DATA_ROOT / "dpwh_annex_a5_district_cache.json"
+        if not cache_path.exists():
+            return JSONResponse({
+                "success": False,
+                "error": "District cache not found. Run: python scripts/generate_dpwh_annex_a5_district_cache.py",
+                "cache_path": str(cache_path),
+            }, status_code=404)
+
+        cache = json.loads(cache_path.read_text(encoding="utf-8"))
+        by_id = cache.get("by_id") or {}
+
+        json_path = DATA_ROOT / "budget_amendments_2026.json"
+        if not json_path.exists():
+            return JSONResponse({"success": False, "error": "2026 Data not found"}, status_code=404)
+
+        payload = json.loads(json_path.read_text(encoding="utf-8"))
+        items = (payload.get("projects") or []) + (payload.get("line_items") or [])
+        a5 = [it for it in items if (it.get("source_sheet") == "Annex A-5")]
+
+        import re
+        header_pattern = re.compile(
+            r'^(?:[a-zA-Z0-9]+\.)?\s*(?:'
+            r'National Capital Region|Region\s+[IVX]+|Cordillera Administrative Region|Bangsamoro Autonomous Region|'
+            r'MIMAROPA|CALABARZON|SOCCSKSARGEN|Zamboanga Peninsula|Northern Mindanao|Davao Region|Caraga|'
+            r'Eastern Visayas|Central Visayas|Western Visayas|Bicol Region|Central Luzon|Cagayan Valley|Ilocos Region|'
+            r'Loan Proceeds|GOP'
+            r')\s*$',
+            re.IGNORECASE
+        )
+
+        def is_header_row(item: Dict[str, Any]) -> bool:
+            title = (item.get("name") or item.get("description") or "").strip()
+            if not title:
+                return False
+            loc = item.get("location") or {}
+            if isinstance(loc, dict):
+                if loc.get("province") is None and loc.get("municipality") is None and loc.get("barangay") is None:
+                    if header_pattern.match(title):
+                        return True
+            return False
+
+        def coerce_amount(v):
+            try:
+                return float(v)
+            except Exception:
+                return None
+
+        rollup: Dict[str, Dict[str, Any]] = {}
+        for it in a5:
+            if is_header_row(it):
+                continue
+            pid = str(it.get("id"))
+            meta = by_id.get(pid) or {}
+            province = meta.get("province") or None
+            dist = meta.get("district") or "Unknown"
+            congressman = meta.get("congressman") or None
+            if province and dist and dist != "Unknown":
+                label = f"{province} - {dist}"
+            else:
+                label = dist if dist else "Unknown"
+
+            bucket = rollup.setdefault(label, {
+                "district": label,
+                "congressman": None,
+                "_congressman_counts": {},
+                "project_count": 0,
+                "total_amount": 0.0,
+                "top_projects": [],
+            })
+            bucket["project_count"] += 1
+            amt = coerce_amount(it.get("final_amount") or it.get("original_amount") or 0)
+            if amt:
+                bucket["total_amount"] += amt
+            name = it.get("name") or it.get("description") or ""
+            if name:
+                bucket["top_projects"].append({"name": name, "amount": amt or 0.0, "id": pid})
+
+            if congressman and congressman != "Unknown":
+                counts = bucket.get("_congressman_counts") or {}
+                counts[congressman] = counts.get(congressman, 0) + 1
+                bucket["_congressman_counts"] = counts
+
+        rows = list(rollup.values())
+        for row in rows:
+            row["top_projects"] = sorted(row["top_projects"], key=lambda p: p.get("amount", 0.0), reverse=True)[:3]
+            counts = row.pop("_congressman_counts", {}) or {}
+            if counts:
+                row["congressman"] = max(counts.items(), key=lambda kv: kv[1])[0]
+        rows.sort(key=lambda r: (r.get("total_amount") or 0.0, r.get("project_count") or 0), reverse=True)
+
+        return JSONResponse({
+            "success": True,
+            "generated_at": cache.get("generated_at"),
+            "total_districts": len(rows),
+            "rows": rows,
+        })
+    except Exception as e:
+        import traceback
+        traceback.print_exc()
+        return JSONResponse({"success": False, "error": str(e)}, status_code=500)
+
+
+@app.get("/api/integ2026/dpwh-district-projects")
+async def integ2026_dpwh_district_projects_api(
+    district: str = Query(..., description="District label from /api/integ2026/dpwh-districts"),
+):
+    """All DPWH Annex A-5 (2026) projects for a district label."""
+    try:
+        cache_path = DATA_ROOT / "dpwh_annex_a5_district_cache.json"
+        if not cache_path.exists():
+            return JSONResponse({
+                "success": False,
+                "error": "District cache not found. Run: python scripts/generate_dpwh_annex_a5_district_cache.py",
+                "cache_path": str(cache_path),
+            }, status_code=404)
+
+        cache = json.loads(cache_path.read_text(encoding="utf-8"))
+        by_id = cache.get("by_id") or {}
+
+        json_path = DATA_ROOT / "budget_amendments_2026.json"
+        payload = json.loads(json_path.read_text(encoding="utf-8"))
+        items = (payload.get("projects") or []) + (payload.get("line_items") or [])
+        a5 = [it for it in items if (it.get("source_sheet") == "Annex A-5")]
+
+        import re
+        header_pattern = re.compile(
+            r'^(?:[a-zA-Z0-9]+\.)?\s*(?:'
+            r'National Capital Region|Region\s+[IVX]+|Cordillera Administrative Region|Bangsamoro Autonomous Region|'
+            r'MIMAROPA|CALABARZON|SOCCSKSARGEN|Zamboanga Peninsula|Northern Mindanao|Davao Region|Caraga|'
+            r'Eastern Visayas|Central Visayas|Western Visayas|Bicol Region|Central Luzon|Cagayan Valley|Ilocos Region|'
+            r'Loan Proceeds|GOP'
+            r')\s*$',
+            re.IGNORECASE
+        )
+
+        def is_header_row(item: Dict[str, Any]) -> bool:
+            title = (item.get("name") or item.get("description") or "").strip()
+            if not title:
+                return False
+            loc = item.get("location") or {}
+            if isinstance(loc, dict):
+                if loc.get("province") is None and loc.get("municipality") is None and loc.get("barangay") is None:
+                    if header_pattern.match(title):
+                        return True
+            return False
+
+        # Pull flagged meta for tooltips
+        flagged_meta_by_pid: Dict[str, Dict[str, Any]] = {}
+        flagged_path = DATA_ROOT / "flagged_amount_projects_2026.json"
+        if flagged_path.exists():
+            flagged_list = json.loads(flagged_path.read_text(encoding="utf-8"))
+            for item in flagged_list:
+                if not isinstance(item, dict):
+                    continue
+                if str(item.get("source_sheet") or "").strip() != "Annex A-5":
+                    continue
+                if str(item.get("year") or "").strip() != "2026":
+                    continue
+                pid = item.get("id")
+                if pid is None:
+                    continue
+                flagged_meta_by_pid[str(pid)] = item
+
+        def coerce_amount(v):
+            try:
+                return float(v)
+            except Exception:
+                return None
+
+        results: List[Dict[str, Any]] = []
+        for it in a5:
+            if is_header_row(it):
+                continue
+            pid = str(it.get("id"))
+            meta = by_id.get(pid) or {}
+            province = meta.get("province") or None
+            dist = meta.get("district") or "Unknown"
+            label = f"{province} - {dist}" if (province and dist and dist != "Unknown") else (dist or "Unknown")
+            if label != district:
+                continue
+
+            name = it.get("name") or it.get("description") or ""
+            amt = coerce_amount(it.get("final_amount") or it.get("original_amount") or 0) or 0.0
+            flagged_meta = flagged_meta_by_pid.get(pid) or {}
+            results.append({
+                "name": name,
+                "amount": amt,
+                "flag_reason": flagged_meta.get("flag_reason"),
+                "subcategory": flagged_meta.get("subcategory"),
+            })
+
+        results.sort(key=lambda r: r.get("amount", 0.0), reverse=True)
+        return JSONResponse({
+            "success": True,
+            "district": district,
+            "total": len(results),
+            "projects": results,
+        })
+    except Exception as e:
+        import traceback
+        traceback.print_exc()
+        return JSONResponse({"success": False, "error": str(e)}, status_code=500)
 
 @app.get("/api/integrated/matrix")
 async def get_integrated_matrix():

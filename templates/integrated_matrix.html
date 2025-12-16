@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Integrated Matrix 2026 - BetterGovPH</title>
+    <title>BICAM 2026 - BetterGovPH</title>
     <link rel="stylesheet" href="/static/css/tailwind.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -48,6 +48,97 @@
 
         .btn-inactive:hover {
             background-color: #cbd5e1 !important;
+        }
+
+        /* BetterGov accent overrides (match /integrated look-and-feel) */
+        .text-indigo-600 {
+            color: #0038A8 !important;
+        }
+
+        .border-indigo-500 {
+            border-color: #0038A8 !important;
+        }
+
+        .bg-indigo-600 {
+            background-color: #0038A8 !important;
+        }
+
+        .hover\:bg-indigo-700:hover {
+            background-color: #003087 !important;
+        }
+
+        /* Badge styling (do not rely on Tailwind palette availability) */
+        .badge-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.375rem;
+            padding: 0.25rem 0.75rem;
+            border-radius: 9999px;
+            font-weight: 700;
+            font-size: 0.75rem;
+            border: 1px solid;
+            line-height: 1;
+        }
+
+        .badge-dot {
+            width: 0.5rem;
+            height: 0.5rem;
+            border-radius: 9999px;
+        }
+
+        .badge-green {
+            background: #ecfdf5;
+            color: #047857;
+            border-color: #a7f3d0;
+        }
+
+        .badge-green .badge-dot {
+            background: #10b981;
+        }
+
+        .badge-red {
+            background: #fff1f2;
+            color: #be123c;
+            border-color: #fecdd3;
+        }
+
+        .badge-red .badge-dot {
+            background: #f43f5e;
+        }
+
+        /* Row + text colors (fallback when Tailwind palette is missing) */
+        .row-green {
+            background: #ecfdf5;
+        }
+
+        .row-green:hover {
+            background: #d1fae5;
+        }
+
+        .row-red {
+            background: #fff1f2;
+        }
+
+        .row-red:hover {
+            background: #ffe4e6;
+        }
+
+        .delta-green {
+            color: #047857;
+        }
+
+        .delta-red {
+            color: #be123c;
+        }
+
+        .count-green {
+            color: #047857;
+            font-weight: 700;
+        }
+
+        .count-red {
+            color: #be123c;
+            font-weight: 700;
         }
 
         /* CRITICAL: Force Modal Z-Index above everything */
@@ -103,19 +194,63 @@
 </head>
 
 <body class="text-slate-800">
-    <nav class="bg-white border-b border-slate-200 py-4 px-6 sticky top-0 z-50">
-        <div class="max-w-7xl mx-auto flex justify-between items-center">
-            <div class="flex items-center gap-3">
-                <img src="http://assets.bettergov.ph/logos/webp/horizontal-black.webp" alt="Logo" class="h-8">
-                <h1
-                    class="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-slate-900 to-slate-700">
-                    Integrated Matrix 2026</h1>
+    <!-- Navigation - BetterGov Theme (match /integrated) -->
+    <nav class="visualizations-nav py-4 px-6 bg-white border-b border-gray-200 sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto flex items-center justify-between">
+            <div class="flex items-center">
+                <a href="https://bettergov.ph" class="flex items-center">
+                    <img src="http://assets.bettergov.ph/logos/webp/horizontal-black.webp" alt="BetterGov.ph"
+                        class="h-12 mr-3">
+                </a>
+                <a href="/" class="text-xl font-bold text-black hover:text-gray-600">Data Visualizations</a>
             </div>
-            <div class="text-sm font-medium text-slate-500">Resurrected Projects + Flagged Amounts</div>
+            <div class="hidden md:flex space-x-6">
+                <a href="/nep" class="text-black hover:text-gray-600 font-medium transition">NEP</a>
+                <a href="/budget" class="text-black hover:text-gray-600 font-medium transition">Budget</a>
+                <a href="/flood" class="text-black hover:text-gray-600 font-medium transition">Flood</a>
+                <a href="/philgeps" class="text-black hover:text-gray-600 font-medium transition">PhilGEPS</a>
+                <a href="/dime" class="text-black hover:text-gray-600 font-medium transition">DIME</a>
+                <a href="/map" class="text-black hover:text-gray-600 font-medium transition">Map</a>
+                <a href="/integ2026"
+                    class="text-black hover:text-gray-600 font-medium transition border-b-2 border-black">BICAM 2026</a>
+                <a href="/dynasty" class="text-black hover:text-gray-600 font-medium transition">Dynasties</a>
+                <a href="/sources" class="text-black hover:text-gray-600 font-medium transition">Sources</a>
+            </div>
+            <div class="md:hidden">
+                <button class="text-black focus:outline-none" onclick="toggleMobileMenu()">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M4 6h16M4 12h16M4 18h16"></path>
+                    </svg>
+                </button>
+            </div>
+        </div>
+        <!-- Mobile menu (hidden by default) -->
+        <div id="mobileMenu" class="hidden mt-4 px-4 space-y-2">
+            <a href="/nep" class="block text-black hover:text-gray-600 font-medium py-2">NEP</a>
+            <a href="/budget" class="block text-black hover:text-gray-600 font-medium py-2">Budget</a>
+            <a href="/flood" class="block text-black hover:text-gray-600 font-medium py-2">Flood</a>
+            <a href="/philgeps" class="block text-black hover:text-gray-600 font-medium py-2">PhilGEPS</a>
+            <a href="/dime" class="block text-black hover:text-gray-600 font-medium py-2">DIME</a>
+            <a href="/map" class="block text-black hover:text-gray-600 font-medium py-2">Map</a>
+            <a href="/integ2026" class="block text-black hover:text-gray-600 font-medium py-2 border-b-2 border-black">BICAM 2026</a>
+            <a href="/dynasty" class="block text-black hover:text-gray-600 font-medium py-2">Dynasties</a>
+            <a href="/sources" class="block text-black hover:text-gray-600 font-medium py-2">Sources</a>
         </div>
     </nav>
 
+    <script>
+        function toggleMobileMenu() {
+            const menu = document.getElementById('mobileMenu');
+            menu.classList.toggle('hidden');
+        }
+    </script>
+
     <main class="max-w-7xl mx-auto px-6 py-8">
+        <div class="mb-6">
+            <h1 class="text-2xl font-bold text-slate-900">BICAM 2026</h1>
+            <p class="text-sm text-slate-500">Resurrected + flagged amounts, plus DPWH Annex A-5 views</p>
+        </div>
         <!-- Overview Stats -->
         <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
             <div class="glass-panel rounded-2xl p-6 shadow-sm">
@@ -140,10 +275,16 @@
         <div class="flex flex-row flex-wrap items-center mb-6 gap-6">
             <!-- Tabs -->
             <a href="#" class="pb-3 border-b-2 border-indigo-500 text-indigo-600 font-medium transition-colors"
-                id="tabMatrix">Matrix Ranking</a>
+                id="tabMatrix">Red/Repeated</a>
             <a href="#green"
                 class="pb-3 border-b-2 border-transparent text-slate-500 hover:text-slate-700 hover:border-slate-300 font-medium transition-colors"
                 id="tabGreen">Green Projects (Lower Cost)</a>
+            <a href="#dpwh"
+                class="pb-3 border-b-2 border-transparent text-slate-500 hover:text-slate-700 hover:border-slate-300 font-medium transition-colors"
+                id="tabDpwh">DPWH Annex A-5 (All)</a>
+            <a href="#district"
+                class="pb-3 border-b-2 border-transparent text-slate-500 hover:text-slate-700 hover:border-slate-300 font-medium transition-colors"
+                id="tabDistrict">Districts (DPWH)</a>
             <a href="#loc"
                 class="pb-3 border-b-2 border-transparent text-slate-500 hover:text-slate-700 hover:border-slate-300 font-medium transition-colors"
                 id="tabLoc">Location Hierarchy</a>
@@ -190,8 +331,7 @@
                 <div class="flex justify-between items-center mb-4">
                     <div>
                         <h2 class="text-lg font-bold text-slate-800">Green Projects (Lower Cost)</h2>
-                        <p class="text-xs text-slate-500 mt-1">Projects with NO Flags and NO Historical Resurrection
-                            Match</p>
+                        <p class="text-xs text-slate-500 mt-1">Lower cost view (excludes resurrected + flagged items)</p>
                     </div>
                     <a href="/api/integrated/projects/csv?green=true" target="_blank"
                         class="flex items-center gap-2 px-4 py-2 bg-emerald-600 text-white rounded-md text-sm font-medium hover:bg-emerald-700 transition-colors shadow-sm">
@@ -199,7 +339,7 @@
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                 d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
                         </svg>
-                        Download Green Projects CSV
+                        Download Lower Cost CSV
                     </a>
                 </div>
 
@@ -236,6 +376,135 @@
                         <button onclick="changeGreenPage(1)"
                             class="px-3 py-1 text-sm border border-slate-300 rounded hover:bg-slate-50">Next</button>
                     </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- DPWH Annex A-5 (All) View -->
+        <div id="viewDpwh" class="hidden">
+            <div class="glass-panel rounded-2xl p-6 shadow-sm">
+                <div class="flex justify-between items-center mb-4">
+                    <div>
+                        <h2 class="text-lg font-bold text-slate-800">DPWH Annex A-5 (2026) - All Projects</h2>
+                        <p class="text-xs text-slate-400">Includes flagged/resurrected; aggregate headers removed</p>
+                    </div>
+                    <a href="/api/integrated/projects/csv?dpwh_all=true" target="_blank"
+                        class="text-xs font-semibold text-indigo-600 hover:text-indigo-800 hover:underline">
+                        Download DPWH Annex A-5 CSV
+                    </a>
+                </div>
+
+                <!-- DPWH Sub-tabs -->
+                <div class="flex gap-2 mb-4">
+                    <button id="dpwhSubtabProjects" onclick="switchDpwhSubtab('projects')"
+                        class="px-3 py-2 text-sm border border-slate-300 rounded bg-white hover:bg-slate-50 font-medium">Projects</button>
+                    <button id="dpwhSubtabRollups" onclick="switchDpwhSubtab('rollups')"
+                        class="px-3 py-2 text-sm border border-slate-300 rounded bg-white hover:bg-slate-50 font-medium">Rollups</button>
+                </div>
+
+                <!-- Program rollups (standalone; no GREEN/RED) -->
+                <div id="dpwhRollupsPanel" class="mb-6" style="display:none;">
+                    <h3 class="text-sm font-semibold text-slate-700 mb-2">Rollups (by program bucket)</h3>
+                    <div id="dpwhRollupsLoading" class="text-xs text-slate-400">Loading rollups...</div>
+                    <div id="dpwhRollupsError" class="text-xs text-rose-600" style="display:none;"></div>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left border-collapse table-fixed">
+                            <thead>
+                                <tr class="bg-slate-50 text-slate-500 text-xs uppercase tracking-wider select-none">
+                                    <th class="px-4 py-2 w-[60%]">Program</th>
+                                    <th class="px-4 py-2 text-right w-[25%]">Total</th>
+                                    <th class="px-4 py-2 text-right w-[15%]">Projects</th>
+                                </tr>
+                            </thead>
+                            <tbody id="dpwhRollupsBody" class="divide-y divide-slate-100 bg-white text-sm">
+                                <tr><td colspan="3" class="px-4 py-3 text-slate-400">—</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div id="dpwhProjectsPanel" class="overflow-x-auto">
+                    <!-- Pagination (top) -->
+                    <div class="flex justify-between items-center mb-3">
+                        <div class="text-sm text-slate-500">Showing page <span id="dpwhPageNumTop">1</span></div>
+                        <div class="flex gap-2">
+                            <button onclick="changeDpwhPage(-1)"
+                                class="px-3 py-1 text-sm border border-slate-300 rounded hover:bg-slate-50">Prev</button>
+                            <button onclick="changeDpwhPage(1)"
+                                class="px-3 py-1 text-sm border border-slate-300 rounded hover:bg-slate-50">Next</button>
+                        </div>
+                    </div>
+                    <table class="w-full text-left border-collapse table-fixed">
+                        <thead>
+                            <tr class="bg-slate-50 text-slate-500 text-xs uppercase tracking-wider select-none">
+                                <th class="px-6 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wider w-[35%]">
+                                    Project Name</th>
+                                <th
+                                    class="px-6 py-3 text-right text-xs font-semibold text-slate-500 uppercase tracking-wider w-[12%] cursor-pointer hover:bg-slate-100"
+                                    onclick="setDpwhSort('amount')">
+                                    Amount <span id="dpwhSortAmount" class="ml-1 text-slate-400"></span></th>
+                                <th class="px-6 py-3 text-right text-xs font-semibold text-slate-500 uppercase tracking-wider w-[12%] cursor-pointer hover:bg-slate-100"
+                                    onclick="setDpwhSort('delta_amount')">
+                                    Δ Amount <span id="dpwhSortDeltaAmount" class="ml-1 text-slate-400"></span></th>
+                                <th class="px-6 py-3 text-right text-xs font-semibold text-slate-500 uppercase tracking-wider w-[8%] cursor-pointer hover:bg-slate-100"
+                                    onclick="setDpwhSort('delta_pct')">
+                                    Δ% <span id="dpwhSortDeltaPct" class="ml-1 text-slate-400"></span></th>
+                                <th class="px-6 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wider w-[8%]">
+                                    Source</th>
+                                <th class="px-6 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wider w-[25%] cursor-pointer hover:bg-slate-100"
+                                    onclick="setDpwhSort('flag')">
+                                    Flag / Status <span id="dpwhSortFlag" class="ml-1 text-slate-400"></span></th>
+                            </tr>
+                        </thead>
+		                        <tbody id="dpwhTableBody" class="divide-y divide-slate-100 bg-white text-sm">
+		                            <tr>
+		                                <td colspan="5" class="px-6 py-8 text-center text-slate-400">Select tab to load data...</td>
+		                            </tr>
+		                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Simple Pagination for DPWH Tab -->
+                <div class="flex justify-between items-center mt-4">
+                    <div class="text-sm text-slate-500">Showing page <span id="dpwhPageNum">1</span></div>
+                    <div class="flex gap-2">
+                        <button onclick="changeDpwhPage(-1)"
+                            class="px-3 py-1 text-sm border border-slate-300 rounded hover:bg-slate-50">Prev</button>
+                        <button onclick="changeDpwhPage(1)"
+                            class="px-3 py-1 text-sm border border-slate-300 rounded hover:bg-slate-50">Next</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- DPWH District View -->
+        <div id="viewDistrict" class="hidden">
+            <div class="glass-panel rounded-2xl shadow-sm overflow-hidden">
+                <div class="p-6 border-b border-slate-100 flex justify-between items-center bg-white">
+                    <div>
+                        <h2 class="text-lg font-bold text-slate-800">DPWH Annex A-5 (2026) by District</h2>
+                        <p class="text-xs text-slate-500 mt-1" id="dpwhDistrictMeta">Loading cache status...</p>
+                    </div>
+                    <input type="text" id="dpwhDistrictSearch" placeholder="Search district..."
+                        class="bg-slate-50 border border-slate-200 rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 w-64">
+                </div>
+                <div id="dpwhDistrictLoading" class="px-6 py-6 text-slate-500 text-sm">Loading district rollup...</div>
+                <div id="dpwhDistrictError" class="px-6 py-6 text-rose-600 text-sm" style="display:none;"></div>
+                <div class="overflow-x-auto max-h-[70vh] overflow-y-auto">
+                    <table class="w-full text-left border-collapse">
+                        <thead>
+                            <tr class="bg-slate-50 text-slate-500 text-xs uppercase tracking-wider select-none">
+                                <th class="px-6 py-4 font-semibold">District</th>
+                                <th class="px-6 py-4 font-semibold text-right cursor-pointer hover:bg-slate-100"
+                                    onclick="setDistrictSort('project_count')">Projects <span id="districtSortProjects" class="ml-1 text-slate-400"></span></th>
+                                <th class="px-6 py-4 font-semibold text-right cursor-pointer hover:bg-slate-100"
+                                    onclick="setDistrictSort('total_amount')">Total Amount <span id="districtSortTotal" class="ml-1 text-slate-400"></span></th>
+                                <th class="px-6 py-4 font-semibold">Top Projects</th>
+                            </tr>
+                        </thead>
+                        <tbody id="dpwhDistrictTableBody" class="divide-y divide-slate-100 bg-white">
+                        </tbody>
+                    </table>
                 </div>
             </div>
         </div>
@@ -386,9 +655,11 @@
 
         const ITEMS_PER_PAGE = 5; // Modal Items
 
-        // Green Tab State
+        // Green/DPWH Tab State
         let greenPage = 1;
         let greenDataTotal = 0;
+        let dpwhPage = 1;
+        let dpwhDataTotal = 0;
 
         // Main Table Pagination
         let mainTablePage = 1;
@@ -694,10 +965,100 @@
             } catch (err) { console.error(err); container.textContent = "Failed to load hierarchy."; }
         }
 
+        function formatMillions(value) {
+            const num = Number(value);
+            const safe = Number.isFinite(num) ? num : 0;
+            return `₱ ${(safe / 1e6).toFixed(2)} M`;
+        }
+
+        function formatDeltaMillions(value) {
+            if (value === null || value === undefined || value === '') return '—';
+            const num = Number(value);
+            if (!Number.isFinite(num)) return '—';
+            const sign = num > 0 ? '+' : '';
+            return `${sign}₱ ${(num / 1e6).toFixed(2)} M`;
+        }
+
+        function formatDeltaPercent(value) {
+            if (value === null || value === undefined || value === '') return '—';
+            const num = Number(value);
+            if (!Number.isFinite(num)) return '—';
+            const sign = num > 0 ? '+' : '';
+            return `${sign}${(num * 100).toFixed(1)}%`;
+        }
+
+        function formatBillions(value) {
+            const num = Number(value);
+            if (!Number.isFinite(num)) return '—';
+            return `₱ ${(num / 1e9).toFixed(2)} B`;
+        }
+
+        let dpwhRollupsLoaded = false;
+        async function loadDpwhRollups() {
+            if (dpwhRollupsLoaded) return;
+            const loadingEl = document.getElementById('dpwhRollupsLoading');
+            const errorEl = document.getElementById('dpwhRollupsError');
+            const bodyEl = document.getElementById('dpwhRollupsBody');
+
+            try {
+                if (loadingEl) loadingEl.style.display = 'block';
+                if (errorEl) errorEl.style.display = 'none';
+                if (bodyEl) bodyEl.innerHTML = '<tr><td colspan="3" class="px-4 py-3 text-slate-400 animate-pulse">Loading...</td></tr>';
+
+                const resp = await fetch('/api/integrated/projects?dpwh_all=true&group_by=program');
+                const data = await resp.json();
+                if (!data.success) throw new Error(data.error || 'Failed to load rollups');
+
+                const rows = (data.rows || []).slice(0, 50);
+                if (!rows.length) {
+                    bodyEl.innerHTML = '<tr><td colspan="3" class="px-4 py-3 text-slate-400">No rollups found.</td></tr>';
+                } else {
+                    bodyEl.innerHTML = rows.map(r => `
+                        <tr class="hover:bg-slate-50 transition-colors">
+                            <td class="px-4 py-2 font-medium text-slate-800 whitespace-normal break-words" title="${r.program || 'Unknown'}">${r.program || 'Unknown'}</td>
+                            <td class="px-4 py-2 text-right font-mono text-slate-700">${formatBillions(r.total_amount)}</td>
+                            <td class="px-4 py-2 text-right font-mono text-slate-700">${(r.project_count || 0).toLocaleString()}</td>
+                        </tr>
+                    `).join('');
+                }
+
+                dpwhRollupsLoaded = true;
+            } catch (err) {
+                console.error('Failed to load rollups:', err);
+                if (errorEl) {
+                    errorEl.textContent = `Failed to load rollups: ${err.message || err}`;
+                    errorEl.style.display = 'block';
+                }
+                if (bodyEl) bodyEl.innerHTML = '<tr><td colspan="3" class="px-4 py-3 text-rose-600">Error loading rollups.</td></tr>';
+            } finally {
+                if (loadingEl) loadingEl.style.display = 'none';
+            }
+        }
+
+        function switchDpwhSubtab(which) {
+            const projectsPanel = document.getElementById('dpwhProjectsPanel');
+            const rollupsPanel = document.getElementById('dpwhRollupsPanel');
+            const btnProjects = document.getElementById('dpwhSubtabProjects');
+            const btnRollups = document.getElementById('dpwhSubtabRollups');
+
+            const showProjects = which !== 'rollups';
+            if (projectsPanel) projectsPanel.style.display = showProjects ? 'block' : 'none';
+            if (rollupsPanel) rollupsPanel.style.display = showProjects ? 'none' : 'block';
+
+            if (btnProjects && btnRollups) {
+                btnProjects.classList.toggle('btn-active', showProjects);
+                btnProjects.classList.toggle('btn-inactive', !showProjects);
+                btnRollups.classList.toggle('btn-active', !showProjects);
+                btnRollups.classList.toggle('btn-inactive', showProjects);
+            }
+
+            if (!showProjects) loadDpwhRollups();
+        }
+
         // --- Green Tab Logic ---
         async function loadGreenProjects() {
             const tbody = document.getElementById('greenTableBody');
-            tbody.innerHTML = '<tr><td colspan="4" class="px-6 py-8 text-center text-slate-400 animate-pulse">Loading clean projects...</td></tr>';
+            tbody.innerHTML = '<tr><td colspan="4" class="px-6 py-8 text-center text-slate-400 animate-pulse">Loading lower cost projects...</td></tr>';
 
             try {
                 const response = await fetch(`/api/integrated/projects?green=true&page=${greenPage}&limit=10`);
@@ -720,7 +1081,7 @@
                             <td class="px-6 py-3 font-medium text-slate-800 align-top">
                                 <div class="whitespace-normal break-words leading-snug" title="${p.project_name}">${p.project_name}</div>
                             </td>
-                            <td class="px-6 py-3 text-right font-mono text-slate-600">₱ ${(p.amount / 1e6).toFixed(2)} M</td>
+                            <td class="px-6 py-3 text-right font-mono text-slate-600">${formatMillions(p.amount)}</td>
                             <td class="px-6 py-3 text-slate-600 align-top">
                                 <div class="whitespace-normal break-words leading-snug" title="${p.contractor_name || 'N/A'}">${p.contractor_name || '<span class="text-slate-400">N/A</span>'}</div>
                             </td>
@@ -728,7 +1089,7 @@
                         </tr>
                     `).join('');
                 } else {
-                    tbody.innerHTML = '<tr><td colspan="4" class="px-6 py-8 text-center text-slate-400">No green projects found.</td></tr>';
+                    tbody.innerHTML = '<tr><td colspan="4" class="px-6 py-8 text-center text-slate-400">No lower cost projects found.</td></tr>';
                 }
                 document.getElementById('greenPageNum').textContent = greenPage;
             } catch (err) {
@@ -744,19 +1105,127 @@
             loadGreenProjects();
         }
 
+        // --- DPWH Tab Logic ---
+        let dpwhSortKey = null;
+        let dpwhSortDir = 'desc';
+
+        function updateDpwhSortIndicators() {
+            const icons = {
+                amount: document.getElementById('dpwhSortAmount'),
+                delta_amount: document.getElementById('dpwhSortDeltaAmount'),
+                delta_pct: document.getElementById('dpwhSortDeltaPct'),
+                flag: document.getElementById('dpwhSortFlag'),
+            };
+            Object.values(icons).forEach(el => { if (el) el.textContent = ''; });
+            if (!dpwhSortKey) return;
+            const arrow = dpwhSortDir === 'asc' ? '↑' : '↓';
+            const el = icons[dpwhSortKey];
+            if (el) el.textContent = arrow;
+        }
+
+        function setDpwhSort(key) {
+            if (dpwhSortKey === key) {
+                dpwhSortDir = (dpwhSortDir === 'asc') ? 'desc' : 'asc';
+            } else {
+                dpwhSortKey = key;
+                dpwhSortDir = (key === 'flag') ? 'desc' : 'desc';
+            }
+            updateDpwhSortIndicators();
+            dpwhPage = 1;
+            loadDpwhProjects();
+        }
+
+        async function loadDpwhProjects() {
+            const tbody = document.getElementById('dpwhTableBody');
+	            tbody.innerHTML = '<tr><td colspan="5" class="px-6 py-8 text-center text-slate-400 animate-pulse">Loading DPWH Annex A-5 projects...</td></tr>';
+
+            try {
+                const sortParams = dpwhSortKey ? `&order_by=${encodeURIComponent(dpwhSortKey)}&order_dir=${encodeURIComponent(dpwhSortDir)}` : '';
+                const response = await fetch(`/api/integrated/projects?dpwh_all=true&page=${dpwhPage}&limit=10${sortParams}`);
+                const data = await response.json();
+
+                if (data.success) {
+                    document.getElementById('totalProjects').textContent = data.total.toLocaleString();
+                    document.getElementById('totalAmount').textContent = '₱ ' + (data.total_amount / 1e9).toFixed(2) + ' B';
+                    document.getElementById('totalDistricts').textContent = data.total_districts.toLocaleString();
+
+                    document.querySelectorAll('.glass-panel h3')[0].textContent = "Annex A-5 Projects";
+                    document.getElementById('filterStatusText').textContent = "DPWH Annex A-5 (2026) - All Projects";
+                }
+
+                if (data.projects && data.projects.length > 0) {
+                    tbody.innerHTML = data.projects.map(p => {
+                        const isRed = !!(p.is_resurrected || p.is_flagged);
+                        const badge = isRed
+                            ? '<span class="badge-pill badge-red"><span class="badge-dot"></span>RED</span>'
+                            : '<span class="badge-pill badge-green"><span class="badge-dot"></span>GREEN</span>';
+                        const status = (p.status || '').toString();
+                        const rowClass = isRed ? 'row-red' : 'row-green';
+                        const baseline = Number(p.baseline_amount);
+                        const baselineSamples = Number(p.baseline_samples);
+                        const basis = (p.baseline_kind || '').toString();
+                        const basisLabel = basis === 'historical_amount' ? 'Resurrected baseline' : (basis === 'cost_per_km_threshold' ? 'Cost/km threshold baseline' : 'Baseline');
+                        const baselineTitle = Number.isFinite(baseline)
+                            ? `${basisLabel}: ₱ ${baseline.toLocaleString()}${Number.isFinite(baselineSamples) && baselineSamples > 0 ? ` (n=${baselineSamples})` : ''}${p.subcategory ? ` • ${p.subcategory}` : ''}${p.flag_reason ? ` • ${p.flag_reason}` : ''}`
+                            : (p.flag_reason ? `No baseline • ${p.flag_reason}` : 'No baseline');
+                        const hasDeltaAmount = !(p.over_under_amount === null || p.over_under_amount === undefined || p.over_under_amount === '');
+                        const hasDeltaPct = !(p.over_under_pct === null || p.over_under_pct === undefined || p.over_under_pct === '');
+                        const deltaAmountNum = hasDeltaAmount ? Number(p.over_under_amount) : NaN;
+                        const deltaPctNum = hasDeltaPct ? Number(p.over_under_pct) : NaN;
+                        const deltaAmountClass = Number.isFinite(deltaAmountNum) ? (deltaAmountNum >= 0 ? 'delta-red' : 'delta-green') : 'text-slate-400';
+                        const deltaPctClass = Number.isFinite(deltaPctNum) ? (deltaPctNum >= 0 ? 'delta-red' : 'delta-green') : 'text-slate-400';
+                        return `
+                        <tr class="${rowClass} transition-colors">
+                            <td class="px-6 py-3 font-medium text-slate-800 align-top">
+                                <div class="whitespace-normal break-words leading-snug" title="${p.project_name}">${p.project_name}</div>
+                            </td>
+                            <td class="px-6 py-3 text-right font-mono text-slate-600">${formatMillions(p.amount)}</td>
+                            <td class="px-6 py-3 text-right font-mono ${deltaAmountClass}" title="${baselineTitle}">${formatDeltaMillions(p.over_under_amount)}</td>
+                            <td class="px-6 py-3 text-right font-mono ${deltaPctClass}" title="${baselineTitle}">${formatDeltaPercent(p.over_under_pct)}</td>
+                            <td class="px-6 py-3 text-xs text-slate-500 align-top">${p.source || 'Unknown'}</td>
+                            <td class="px-6 py-3 align-top" title="${status}">
+                                ${badge}
+                                ${status ? `<div class="text-[10px] text-slate-600 mt-1">${status}</div>` : ''}
+                            </td>
+                        </tr>
+                        `;
+                    }).join('');
+                } else {
+                    tbody.innerHTML = '<tr><td colspan="5" class="px-6 py-8 text-center text-slate-400">No DPWH projects found.</td></tr>';
+                }
+
+                document.getElementById('dpwhPageNum').textContent = dpwhPage;
+                const topEl = document.getElementById('dpwhPageNumTop');
+                if (topEl) topEl.textContent = dpwhPage;
+            } catch (err) {
+                console.error("Failed to load DPWH projects:", err);
+	            tbody.innerHTML = '<tr><td colspan="5" class="px-6 py-8 text-center text-red-500">Error loading data.</td></tr>';
+	        }
+	    }
+
+        function changeDpwhPage(delta) {
+            if (delta < 0 && dpwhPage <= 1) return;
+            dpwhPage += delta;
+            loadDpwhProjects();
+        }
+
         function handleHash() {
             const hash = window.location.hash;
             const viewMatrix = document.getElementById('viewMatrix');
             const viewLoc = document.getElementById('viewLoc');
             const viewGreen = document.getElementById('viewGreen');
+            const viewDpwh = document.getElementById('viewDpwh');
+            const viewDistrict = document.getElementById('viewDistrict');
             const matrixControls = document.getElementById('matrixControls');
 
             const tabMatrix = document.getElementById('tabMatrix');
             const tabLoc = document.getElementById('tabLoc');
             const tabGreen = document.getElementById('tabGreen');
+            const tabDpwh = document.getElementById('tabDpwh');
+            const tabDistrict = document.getElementById('tabDistrict');
 
             // Reset all tabs
-            [tabMatrix, tabLoc, tabGreen].forEach(t => {
+            [tabMatrix, tabLoc, tabGreen, tabDpwh, tabDistrict].forEach(t => {
                 t.classList.replace('border-indigo-500', 'border-transparent');
                 t.classList.replace('text-indigo-600', 'text-slate-500');
             });
@@ -765,6 +1234,8 @@
             viewMatrix.classList.add('hidden');
             viewLoc.classList.add('hidden');
             viewGreen.classList.add('hidden');
+            viewDpwh.classList.add('hidden');
+            viewDistrict.classList.add('hidden');
             matrixControls.classList.add('hidden'); // Default hidden logic
 
             if (hash === '#loc') {
@@ -782,12 +1253,158 @@
                     loadGreenProjects();
                 }
             }
+            else if (hash === '#dpwh') {
+                tabDpwh.classList.replace('border-transparent', 'border-indigo-500');
+                tabDpwh.classList.replace('text-slate-500', 'text-indigo-600');
+                viewDpwh.classList.remove('hidden');
+                switchDpwhSubtab('projects');
+                if (document.getElementById('dpwhTableBody').children.length <= 1) {
+                    loadDpwhProjects();
+                }
+            }
+            else if (hash === '#district') {
+                tabDistrict.classList.replace('border-transparent', 'border-indigo-500');
+                tabDistrict.classList.replace('text-slate-500', 'text-indigo-600');
+                viewDistrict.classList.remove('hidden');
+                loadDpwhDistrictRollup();
+            }
             else {
                 // Default: Matrix
                 tabMatrix.classList.replace('border-transparent', 'border-indigo-500');
                 tabMatrix.classList.replace('text-slate-500', 'text-indigo-600');
                 viewMatrix.classList.remove('hidden');
                 matrixControls.classList.remove('hidden');
+            }
+        }
+
+        // --- DPWH District Tab Logic ---
+        let dpwhDistrictRows = [];
+        let dpwhDistrictLoaded = false;
+        let districtSortKey = 'total_amount';
+        let districtSortDir = 'desc';
+
+        function updateDistrictSortIndicators() {
+            const projectsEl = document.getElementById('districtSortProjects');
+            const totalEl = document.getElementById('districtSortTotal');
+            if (projectsEl) projectsEl.textContent = '';
+            if (totalEl) totalEl.textContent = '';
+            const arrow = districtSortDir === 'asc' ? '↑' : '↓';
+            if (districtSortKey === 'project_count' && projectsEl) projectsEl.textContent = arrow;
+            if (districtSortKey === 'total_amount' && totalEl) totalEl.textContent = arrow;
+        }
+
+        function setDistrictSort(key) {
+            if (districtSortKey === key) {
+                districtSortDir = districtSortDir === 'asc' ? 'desc' : 'asc';
+            } else {
+                districtSortKey = key;
+                districtSortDir = 'desc';
+            }
+            updateDistrictSortIndicators();
+            renderDpwhDistrictTable();
+        }
+
+        async function loadDpwhDistrictRollup() {
+            if (dpwhDistrictLoaded) return;
+            const loadingEl = document.getElementById('dpwhDistrictLoading');
+            const errorEl = document.getElementById('dpwhDistrictError');
+            const tbody = document.getElementById('dpwhDistrictTableBody');
+            const metaEl = document.getElementById('dpwhDistrictMeta');
+
+            try {
+                if (loadingEl) loadingEl.style.display = 'block';
+                if (errorEl) errorEl.style.display = 'none';
+                const resp = await fetch('/api/integ2026/dpwh-districts');
+                const data = await resp.json();
+                if (!data.success) throw new Error(data.error || 'Failed to load district rollup');
+                dpwhDistrictRows = data.rows || [];
+                dpwhDistrictLoaded = true;
+                if (metaEl) {
+                    metaEl.textContent = data.generated_at
+                        ? `Cache ready (generated ${data.generated_at})`
+                        : 'Cache ready';
+                }
+                updateDistrictSortIndicators();
+                renderDpwhDistrictTable();
+
+                const searchBox = document.getElementById('dpwhDistrictSearch');
+                if (searchBox && !searchBox.dataset.bound) {
+                    searchBox.dataset.bound = '1';
+                    searchBox.addEventListener('input', renderDpwhDistrictTable);
+                }
+            } catch (err) {
+                console.error('DPWH district rollup error:', err);
+                if (errorEl) {
+                    errorEl.textContent = String(err.message || err);
+                    errorEl.style.display = 'block';
+                }
+                if (metaEl) {
+                    metaEl.textContent = 'Requires district cache: `python3 scripts/generate_dpwh_annex_a5_district_cache.py`';
+                }
+            } finally {
+                if (loadingEl) loadingEl.style.display = 'none';
+            }
+        }
+
+        function renderDpwhDistrictTable() {
+            const tbody = document.getElementById('dpwhDistrictTableBody');
+            const term = (document.getElementById('dpwhDistrictSearch')?.value || '').toLowerCase();
+            let rows = term ? dpwhDistrictRows.filter(r =>
+                String(r.district || '').toLowerCase().includes(term) ||
+                String(r.congressman || '').toLowerCase().includes(term)
+            ) : dpwhDistrictRows;
+
+            const reverse = districtSortDir !== 'asc';
+            const key = districtSortKey;
+            rows = [...rows].sort((a, b) => {
+                const av = Number(a?.[key] ?? 0);
+                const bv = Number(b?.[key] ?? 0);
+                if (av === bv) return 0;
+                return reverse ? (bv - av) : (av - bv);
+            });
+
+            tbody.innerHTML = '';
+            rows.slice(0, 200).forEach((row, idx) => {
+                const tr = document.createElement('tr');
+                tr.className = 'hover:bg-slate-50 transition-colors group cursor-pointer';
+                tr.dataset.index = String(idx);
+                tr.dataset.district = row.district || 'Unknown';
+                const top = (row.top_projects || []).map(p => `<div class="text-xs truncate max-w-xs text-slate-600 mb-1" title="${p.name}">• ${p.name}</div>`).join('');
+                tr.innerHTML = `
+                    <td class="px-6 py-4">
+                        ${row.congressman ? `<div class="text-xs text-slate-500">${row.congressman}</div>` : ''}
+                        <div class="font-bold text-slate-800">${row.district || 'Unknown'}</div>
+                    </td>
+                    <td class="px-6 py-4 text-right font-medium text-slate-700">${(row.project_count || 0).toLocaleString()}</td>
+                    <td class="px-6 py-4 text-right font-mono text-slate-700">₱ ${((row.total_amount || 0) / 1e6).toFixed(1)} M</td>
+                    <td class="px-6 py-4">${top}</td>
+                `;
+                tr.addEventListener('click', () => openDpwhDistrictModal(row.district || 'Unknown', row));
+                tbody.appendChild(tr);
+            });
+        }
+
+        async function openDpwhDistrictModal(districtLabel, row) {
+            try {
+                const resp = await fetch(`/api/integ2026/dpwh-district-projects?district=${encodeURIComponent(districtLabel)}`);
+                const data = await resp.json();
+                if (!data.success) throw new Error(data.error || 'Failed to load district projects');
+
+                document.getElementById('modalTitle').textContent = districtLabel;
+                document.getElementById('modalSubtitle').textContent = `DPWH Annex A-5 (2026) • ${(data.total || 0).toLocaleString()} Projects • ₱ ${(((row?.total_amount) || 0) / 1e6).toFixed(1)}M`;
+
+                const modal = document.getElementById('projectModal');
+                modal.classList.remove('hidden');
+                modal.classList.add('modal-visible');
+                modal.style.display = 'block';
+                document.body.classList.add('modal-open');
+
+                currentModalProjects = data.projects || [];
+                currentPage = 1;
+                renderModalTable();
+            } catch (err) {
+                console.error(err);
+                alert(String(err.message || err));
             }
         }
 
