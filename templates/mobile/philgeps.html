@@ -83,11 +83,50 @@
 
     <!-- Tabs -->
     <div class="mobile-philgeps-tabs">
-        <button class="mobile-tab-btn active" data-tab="amo">🏛️ AMO Analysis</button>
+        <button class="mobile-tab-btn active" data-tab="merchant">🏪 Merchant</button>
+        <button class="mobile-tab-btn" data-tab="hidden-flood">🔍 Excluded Flood Control</button>
+        <button class="mobile-tab-btn" data-tab="amo">🏛️ AMO</button>
+    </div>
+
+    <!-- Merchant Tab -->
+    <div id="merchant-tab" class="mobile-tab-panel active">
+        <p class="text-xs text-gray-600 mb-3">
+            Search PhilGEPS merchants (paginated)
+        </p>
+
+        <div style="margin-bottom: 0.75rem;">
+            <input id="mobile-merchant-search" type="text" placeholder="Search merchant..." style="width: 100%; padding: 0.5rem; border: 1px solid #ddd; border-radius: 6px; font-size: 14px;">
+        </div>
+
+        <div id="mobile-merchant-loading" class="text-center py-8">
+            <div class="inline-block w-8 h-8 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin"></div>
+            <p class="text-sm text-gray-500 mt-2">Loading merchants...</p>
+        </div>
+
+        <div id="mobile-merchant-error" style="display: none; text-align: center; padding: 1rem; color: #dc3545; background: #f8d7da; border-radius: 8px; margin: 1rem 0;"></div>
+
+        <div id="mobile-merchant-container"></div>
+    </div>
+
+    <!-- Excluded Flood Control Tab -->
+    <div id="hidden-flood-tab" class="mobile-tab-panel">
+        <p class="text-xs text-gray-600 mb-3">
+            Contractors and projects excluded from flood-control matching
+        </p>
+
+        <div id="mobile-hidden-loading" class="text-center py-8">
+            <div class="inline-block w-8 h-8 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin"></div>
+            <p class="text-sm text-gray-500 mt-2">Loading excluded flood control...</p>
+        </div>
+
+        <div id="mobile-hidden-error" style="display: none; text-align: center; padding: 1rem; color: #dc3545; background: #f8d7da; border-radius: 8px; margin: 1rem 0;"></div>
+
+        <div id="mobile-hidden-stats" class="mobile-stats-grid" style="display: none;"></div>
+        <div id="mobile-hidden-contractors" style="display: none;"></div>
     </div>
 
     <!-- AMO Tab -->
-    <div id="amo-tab" class="mobile-tab-panel active">
+    <div id="amo-tab" class="mobile-tab-panel">
         <p class="text-xs text-gray-600 mb-3">
             PCAB Authorized Managing Officers (AMOs) who are elected politicians - revealing potential conflicts of
             interest.
@@ -129,7 +168,11 @@
         document.querySelector(`[data-tab="${tabName}"]`).classList.add('active');
         document.getElementById(`${tabName}-tab`).classList.add('active');
 
-        if (tabName === 'amo' && !amoLoaded) {
+        if (tabName === 'merchant' && !merchantLoaded) {
+            loadMerchantData();
+        } else if (tabName === 'hidden-flood' && !hiddenFloodLoaded) {
+            loadHiddenFloodData();
+        } else if (tabName === 'amo' && !amoLoaded) {
             loadAmoData();
         }
     }
@@ -140,7 +183,124 @@
         });
     });
 
+    let merchantLoaded = false;
+    let hiddenFloodLoaded = false;
     let amoLoaded = false;
+
+    async function loadMerchantData(search = '') {
+        const loadingEl = document.getElementById('mobile-merchant-loading');
+        const errorEl = document.getElementById('mobile-merchant-error');
+        const container = document.getElementById('mobile-merchant-container');
+
+        try {
+            if (loadingEl) loadingEl.style.display = 'block';
+            if (errorEl) errorEl.style.display = 'none';
+            if (container) container.innerHTML = '';
+
+            const url = `/api/philgeps/merchants?page=1&page_size=20${search ? `&search=${encodeURIComponent(search)}` : ''}`;
+            const response = await fetch(url);
+            const data = await response.json();
+            if (!data.success) throw new Error(data.error || 'Failed to load merchants');
+
+            const merchants = data.data || [];
+            if (merchants.length === 0) {
+                container.innerHTML = `
+                    <div class="text-center py-12">
+                        <div class="text-6xl mb-4">🏪</div>
+                        <h3 class="text-lg font-bold text-gray-700 mb-2">No merchants found</h3>
+                    </div>
+                `;
+            } else {
+                container.innerHTML = merchants.map((m) => `
+                    <div class="mobile-project-card">
+                        <div class="text-sm font-bold text-gray-900 mb-1">${m.merchant_name || m.contractor_name || 'N/A'}</div>
+                        ${m.business_name ? `<div class="text-xs text-gray-600">Business: ${m.business_name}</div>` : ''}
+                        ${m.address ? `<div class="text-xs text-gray-600">📍 ${m.address}</div>` : ''}
+                        ${m.pcab_license_number ? `<div class="text-xs text-purple-600">PCAB: ${m.pcab_license_number} ${m.pcab_category ? `(${m.pcab_category})` : ''}</div>` : ''}
+                    </div>
+                `).join('');
+            }
+
+            merchantLoaded = true;
+        } catch (error) {
+            console.error('Error loading merchants:', error);
+            if (errorEl) {
+                errorEl.textContent = `Failed to load merchants: ${error.message}`;
+                errorEl.style.display = 'block';
+            }
+        } finally {
+            if (loadingEl) loadingEl.style.display = 'none';
+        }
+    }
+
+    async function loadHiddenFloodData() {
+        const loadingEl = document.getElementById('mobile-hidden-loading');
+        const errorEl = document.getElementById('mobile-hidden-error');
+        const statsEl = document.getElementById('mobile-hidden-stats');
+        const contractorsEl = document.getElementById('mobile-hidden-contractors');
+
+        try {
+            if (loadingEl) loadingEl.style.display = 'block';
+            if (errorEl) errorEl.style.display = 'none';
+            if (statsEl) statsEl.style.display = 'none';
+            if (contractorsEl) {
+                contractorsEl.style.display = 'none';
+                contractorsEl.innerHTML = '';
+            }
+
+            const statsResp = await fetch('/api/flood/hidden-statistics');
+            const statsData = await statsResp.json();
+            if (!statsData.success) throw new Error(statsData.error || 'Failed to load hidden statistics');
+
+            if (statsEl) {
+                statsEl.innerHTML = `
+                    <div class="mobile-stat-card">
+                        <div class="text-xl font-bold text-blue-600">${(statsData.statistics?.hidden_projects_count || 0).toLocaleString()}</div>
+                        <div class="text-xs text-gray-600 mt-1">Hidden Projects</div>
+                    </div>
+                    <div class="mobile-stat-card">
+                        <div class="text-xl font-bold text-purple-600">${(statsData.statistics?.hidden_contractors_count || 0).toLocaleString()}</div>
+                        <div class="text-xs text-gray-600 mt-1">Hidden Contractors</div>
+                    </div>
+                `;
+                statsEl.style.display = 'grid';
+            }
+
+            const contractorsResp = await fetch('/api/flood/hidden-contractors-cached');
+            const contractorsData = await contractorsResp.json();
+            const contractors = (contractorsData.contractors || []).slice(0, 20);
+
+            if (contractorsEl) {
+                if (contractors.length === 0) {
+                    contractorsEl.innerHTML = `
+                        <div class="text-center py-8">
+                            <div class="text-5xl mb-3">🔍</div>
+                            <div class="text-sm text-gray-600">No hidden contractors found</div>
+                        </div>
+                    `;
+                } else {
+                    contractorsEl.innerHTML = contractors.map((c, idx) => `
+                        <div class="mobile-project-card">
+                            <div class="text-sm font-bold text-gray-900 mb-1">${idx + 1}. ${c.contractor || c.name || 'N/A'}</div>
+                            ${c.reason ? `<div class="text-xs text-gray-600">Reason: ${c.reason}</div>` : ''}
+                            ${c.projects_count ? `<div class="text-xs text-gray-600">Projects: ${(c.projects_count || 0).toLocaleString()}</div>` : ''}
+                        </div>
+                    `).join('');
+                }
+                contractorsEl.style.display = 'block';
+            }
+
+            hiddenFloodLoaded = true;
+        } catch (error) {
+            console.error('Error loading hidden flood control:', error);
+            if (errorEl) {
+                errorEl.textContent = `Failed to load excluded flood control: ${error.message}`;
+                errorEl.style.display = 'block';
+            }
+        } finally {
+            if (loadingEl) loadingEl.style.display = 'none';
+        }
+    }
 
     function showEmptyState(containerId, message) {
         document.getElementById(containerId).innerHTML = `
@@ -216,7 +376,18 @@
     }
 
     document.addEventListener('DOMContentLoaded', () => {
-        loadAmoData();
+        loadMerchantData('');
+        const searchEl = document.getElementById('mobile-merchant-search');
+        if (searchEl) {
+            let debounceTimer = null;
+            searchEl.addEventListener('input', () => {
+                clearTimeout(debounceTimer);
+                debounceTimer = setTimeout(() => {
+                    merchantLoaded = false;
+                    loadMerchantData(searchEl.value || '');
+                }, 250);
+            });
+        }
     });
 </script>
 {% endblock %}
