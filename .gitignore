@@ -49,8 +49,6 @@ PERPLEXITY_REQUERY_COMPARISON_*.txt
 
 # Large cache/dump files
 database/dynasty_dump.sql
-scripts/static/data/relationship_chains_cache.json
-static/data/dynasty-projects-cache.json
 database/philgeps_merchant_info_test.json
 database/philgeps_merchant_info_test.json.backup_*
 database/philgeps_merchant_info_fixed.json
@@ -84,14 +82,8 @@ huggingface_*.log
 *.xls
 *.xlsx
 
-# Congressman project cache files (do not ignore)
-!static/data/congressman-projects-*/
-!static/data/congressman-projects-*/*.json
-
 # Cursor cookie (contains sensitive session token)
 cursor_cookie.txt
 .cursor_cookie
 # Prevent re-adding files removed from history (GitHub size limits)
-data/parquet/integrated_projects_classified.parquet
-static/data/budget_trends_analysis.json
 static/data/congressman-projects-elizaldy-salcedo-co/all-projects-cache.json
