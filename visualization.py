@@ -11676,10 +11676,37 @@ async def integrated_projects_api(
                 if project_name:
                    final_projects = [p for p in final_projects if project_name.lower() in str(p['project_name']).lower()]
                 
-                # 5. Pagination
+                # 5. Pagination + headline stats
                 total = len(final_projects)
-                total_amount = sum(p['amount'] for p in final_projects if p['amount'])
-                total_districts = len(set(p['location'] for p in final_projects if p['location']))
+                total_amount = sum((p.get('amount') or 0.0) for p in final_projects)
+
+                # Prefer real district counts (via district cache). Do not fall back to region/program counts.
+                total_districts: Optional[int] = None
+                districts_available = False
+                try:
+                    district_cache_path = Path(__file__).parent / "static" / "data" / "dpwh_annex_a5_district_cache.json"
+                    if district_cache_path.exists():
+                        district_cache = json.loads(district_cache_path.read_text(encoding="utf-8"))
+                        by_id = district_cache.get("by_id") or {}
+                        districts = set()
+                        for p in final_projects:
+                            pid = p.get("contract_id")
+                            if not pid:
+                                continue
+                            entry = by_id.get(str(pid)) or {}
+                            district = (entry.get("district") or "").strip()
+                            province = (entry.get("province") or "").strip()
+                            if not district or district.lower() in {"unknown", "n/a", "na"}:
+                                continue
+                            if province and province.lower() not in {"unknown", "n/a", "na"}:
+                                districts.add(f"{province} - {district}")
+                            else:
+                                districts.add(district)
+                        total_districts = len(districts)
+                        districts_available = True
+                except Exception:
+                    total_districts = None
+                    districts_available = False
                 
                 total_pages = max(1, (total + limit - 1) // limit)
                 start = (page - 1) * limit
@@ -11692,6 +11719,7 @@ async def integrated_projects_api(
                     "total": total,
                     "total_amount": total_amount,
                     "total_districts": total_districts,
+                    "districts_available": districts_available,
                     "page": page,
                     "limit": limit,
                     "total_pages": total_pages
