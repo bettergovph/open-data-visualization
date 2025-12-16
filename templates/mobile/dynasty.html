@@ -56,6 +56,40 @@
         width: 20px;
         height: 2px;
     }
+
+    .mobile-dynasty-tabs {
+        display: flex;
+        gap: 0.5rem;
+        border-bottom: 2px solid #e5e7eb;
+        margin-bottom: 1rem;
+        overflow-x: auto;
+    }
+
+    .mobile-tab-btn {
+        padding: 0.75rem 1rem;
+        background: #f3f4f6;
+        border-radius: 8px 8px 0 0;
+        font-weight: 600;
+        font-size: 0.875rem;
+        color: #6b7280;
+        cursor: pointer;
+        border: none;
+        white-space: nowrap;
+    }
+
+    .mobile-tab-btn.active {
+        background: white;
+        color: #2563eb;
+        border-bottom: 3px solid #2563eb;
+    }
+
+    .mobile-tab-panel {
+        display: none;
+    }
+
+    .mobile-tab-panel.active {
+        display: block;
+    }
 </style>
 {% endblock %}
 
@@ -66,6 +100,66 @@
         <p class="text-xs text-gray-600">Relationship Constellations - Political family connections</p>
     </div>
 
+    <!-- Tabs -->
+    <div class="mobile-dynasty-tabs">
+        <button class="mobile-tab-btn active" data-tab="poverty-visual">💹 Poverty Visual</button>
+        <button class="mobile-tab-btn" data-tab="officials-network">🕸️ Officials Network</button>
+        <button class="mobile-tab-btn" data-tab="projection">📉 Projection</button>
+    </div>
+
+    <!-- Poverty Visual Tab -->
+    <div id="poverty-visual-tab" class="mobile-tab-panel active">
+        <p class="text-xs text-gray-600 mb-3">
+            Poverty rates by province (summary view)
+        </p>
+
+        <div style="margin-bottom: 0.75rem;">
+            <a href="/dynasty-poverty-correlation" style="display: block; padding: 0.75rem; background: #0038A8; color: white; border-radius: 8px; text-decoration: none; font-weight: 600; text-align: center;">
+                Open full poverty correlation →
+            </a>
+        </div>
+
+        <div id="mobile-poverty-loading" class="text-center py-8">
+            <div class="inline-block w-8 h-8 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin"></div>
+            <p class="text-sm text-gray-500 mt-2">Loading poverty data...</p>
+        </div>
+
+        <div id="mobile-poverty-error" style="display: none; text-align: center; padding: 1rem; color: #dc3545; background: #f8d7da; border-radius: 8px; margin: 1rem 0;"></div>
+
+        <div id="mobile-poverty-container"></div>
+    </div>
+
+    <!-- Projection Tab -->
+    <div id="projection-tab" class="mobile-tab-panel">
+        <p class="text-xs text-gray-600 mb-3">
+            Aggregated projection (cached when available)
+        </p>
+
+        <div class="mobile-filter-card">
+            <label class="text-xs font-bold text-gray-700 block mb-2">Group by</label>
+            <select id="mobile-projection-groupby" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm">
+                <option value="province">Province</option>
+                <option value="region">Region</option>
+                <option value="position">Position</option>
+                <option value="party">Party</option>
+            </select>
+            <button id="mobile-projection-load" style="margin-top: 0.75rem; width: 100%; padding: 0.75rem; background: #0038A8; color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer;">
+                Load projection
+            </button>
+        </div>
+
+        <div id="mobile-projection-loading" class="text-center py-8" style="display: none;">
+            <div class="inline-block w-8 h-8 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin"></div>
+            <p class="text-sm text-gray-500 mt-2">Loading projection...</p>
+        </div>
+
+        <div id="mobile-projection-error" style="display: none; text-align: center; padding: 1rem; color: #dc3545; background: #f8d7da; border-radius: 8px; margin: 1rem 0;"></div>
+
+        <div id="mobile-projection-container"></div>
+    </div>
+
+    <!-- Officials Network Tab -->
+    <div id="officials-network-tab" class="mobile-tab-panel">
     <!-- Filter Card -->
     <div class="mobile-filter-card">
         <div style="position: relative;">
@@ -145,9 +239,133 @@
         <div class="inline-block w-8 h-8 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin"></div>
         <p class="text-sm text-gray-500 mt-2">Loading relationship data...</p>
     </div>
+    </div>
 </section>
 
 <script>
+    function switchDynastyTab(tabName) {
+        document.querySelectorAll('.mobile-tab-btn').forEach(btn => btn.classList.remove('active'));
+        document.querySelectorAll('.mobile-tab-panel').forEach(panel => panel.classList.remove('active'));
+
+        const btn = document.querySelector(`.mobile-tab-btn[data-tab="${tabName}"]`);
+        const panel = document.getElementById(`${tabName}-tab`);
+        if (btn) btn.classList.add('active');
+        if (panel) panel.classList.add('active');
+
+        if (tabName === 'poverty-visual') {
+            loadMobilePovertyVisual();
+        } else if (tabName === 'projection') {
+            // Loaded on demand by button
+        } else if (tabName === 'officials-network') {
+            // Network loads via existing init logic
+        }
+    }
+
+    let mobilePovertyLoaded = false;
+    async function loadMobilePovertyVisual() {
+        const loadingEl = document.getElementById('mobile-poverty-loading');
+        const errorEl = document.getElementById('mobile-poverty-error');
+        const container = document.getElementById('mobile-poverty-container');
+
+        try {
+            if (mobilePovertyLoaded) return;
+            if (loadingEl) loadingEl.style.display = 'block';
+            if (errorEl) errorEl.style.display = 'none';
+            if (container) container.innerHTML = '';
+
+            const response = await fetch('/static/data/poverty_correlation_cache.json');
+            const data = await response.json();
+            if (!data.success) throw new Error('Poverty cache not available');
+
+            const rows = (data.data || []).slice(0, 20);
+            if (container) {
+                container.innerHTML = rows.map((row, idx) => `
+                    <div class="mobile-network-container">
+                        <div class="text-sm font-bold text-gray-900 mb-1">${idx + 1}. ${row.province || 'N/A'}</div>
+                        <div class="text-xs text-gray-600">Poverty rate: ${(row.poverty_rate ?? '-')}%</div>
+                    </div>
+                `).join('');
+            }
+
+            mobilePovertyLoaded = true;
+        } catch (error) {
+            console.error('Error loading poverty cache:', error);
+            if (errorEl) {
+                errorEl.textContent = `Failed to load poverty data: ${error.message || error}`;
+                errorEl.style.display = 'block';
+            }
+        } finally {
+            if (loadingEl) loadingEl.style.display = 'none';
+        }
+    }
+
+    async function loadMobileProjection() {
+        const loadingEl = document.getElementById('mobile-projection-loading');
+        const errorEl = document.getElementById('mobile-projection-error');
+        const container = document.getElementById('mobile-projection-container');
+        const groupBy = document.getElementById('mobile-projection-groupby')?.value || 'province';
+
+        try {
+            if (loadingEl) loadingEl.style.display = 'block';
+            if (errorEl) errorEl.style.display = 'none';
+            if (container) container.innerHTML = '';
+
+            const response = await fetch(`/api/dynasty/projection?group_by=${encodeURIComponent(groupBy)}&use_cache=true`);
+            const data = await response.json();
+            if (!data.success) throw new Error(data.error || 'Projection not available');
+
+            const rows = (data.data || []).slice(0, 20);
+            if (rows.length === 0) {
+                if (container) container.innerHTML = `<div class="text-center py-8 text-sm text-gray-600">No projection data</div>`;
+                return;
+            }
+
+            const getCount = (row, keys) => {
+                for (const key of keys) {
+                    if (row[key] !== undefined && row[key] !== null) return row[key];
+                }
+                return 0;
+            };
+
+            if (container) {
+                container.innerHTML = rows.map((row, idx) => {
+                    const label = row.group || row.key || row.name || row[groupBy] || 'N/A';
+                    const hb6771 = getCount(row, ['hb_6771', 'hb6771', 'simultaneous', 'removed_simultaneous', 'removed_hb_6771']);
+                    const hb5905 = getCount(row, ['hb_5905', 'hb5905', 'broad', 'removed_broad', 'removed_hb_5905']);
+                    return `
+                        <div class="mobile-network-container">
+                            <div class="text-sm font-bold text-gray-900 mb-1">${idx + 1}. ${label}</div>
+                            <div class="text-xs text-gray-600">HB 6771: ${(hb6771 || 0).toLocaleString()}</div>
+                            <div class="text-xs text-gray-600">HB 5905: ${(hb5905 || 0).toLocaleString()}</div>
+                        </div>
+                    `;
+                }).join('');
+            }
+        } catch (error) {
+            console.error('Error loading projection:', error);
+            if (errorEl) {
+                errorEl.textContent = `Failed to load projection: ${error.message || error}`;
+                errorEl.style.display = 'block';
+            }
+        } finally {
+            if (loadingEl) loadingEl.style.display = 'none';
+        }
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+        document.querySelectorAll('.mobile-tab-btn').forEach(btn => {
+            btn.addEventListener('click', () => switchDynastyTab(btn.getAttribute('data-tab')));
+        });
+
+        const projectionBtn = document.getElementById('mobile-projection-load');
+        if (projectionBtn) {
+            projectionBtn.addEventListener('click', loadMobileProjection);
+        }
+
+        // Default tab data load
+        loadMobilePovertyVisual();
+    });
+
     let officialsNetwork = null;
     let personAutocompleteData = [];
     let chainsByPersonIndex = {};

@@ -26,8 +26,9 @@
     <div class="budget-tab-nav" style="display: flex; gap: 0.5rem; margin-bottom: 1rem; overflow-x: auto; -webkit-overflow-scrolling: touch; padding-bottom: 0.5rem;">
         <a href="#trends" class="mobile-tab-link active" data-tab="trends" style="padding: 0.75rem 1rem; white-space: nowrap; border-bottom: 2px solid #0038A8; color: #0038A8; text-decoration: none; font-weight: 600;">📈 Trends</a>
         <a href="#resu" class="mobile-tab-link" data-tab="resu" style="padding: 0.75rem 1rem; white-space: nowrap; border-bottom: 2px solid transparent; color: #666; text-decoration: none; font-weight: 500;">🔄 Repeated</a>
-        <a href="#roads" class="mobile-tab-link" data-tab="roads" style="padding: 0.75rem 1rem; white-space: nowrap; border-bottom: 2px solid transparent; color: #666; text-decoration: none; font-weight: 500;">🛣️ Roads</a>
-        <a href="#zero" class="mobile-tab-link" data-tab="zero" style="padding: 0.75rem 1rem; white-space: nowrap; border-bottom: 2px solid transparent; color: #666; text-decoration: none; font-weight: 500;">🚫 Anti-zero</a>
+        <a href="#cat" class="mobile-tab-link" data-tab="cat" style="padding: 0.75rem 1rem; white-space: nowrap; border-bottom: 2px solid transparent; color: #666; text-decoration: none; font-weight: 500;">📁 Category</a>
+        <a href="#projects" class="mobile-tab-link" data-tab="projects" style="padding: 0.75rem 1rem; white-space: nowrap; border-bottom: 2px solid transparent; color: #666; text-decoration: none; font-weight: 500;">🛠️ Projects</a>
+        <a href="#stats" class="mobile-tab-link" data-tab="stats" style="padding: 0.75rem 1rem; white-space: nowrap; border-bottom: 2px solid transparent; color: #666; text-decoration: none; font-weight: 500;">📊 Project Statistics</a>
     </div>
 
     <!-- Trends Tab -->
@@ -115,10 +116,42 @@
         </div>
     </div>
 
-    <!-- Roads Tab -->
-    <div id="tab-roads" class="mobile-tab-panel" style="display: none;">
+    <!-- Category Tab -->
+    <div id="tab-cat" class="mobile-tab-panel" style="display: none;">
         <p class="text-xs text-gray-600 mb-3 bg-blue-50 p-3 rounded">
-            🛣️ Road infrastructure projects (2026) - Cost per kilometer analysis
+            📁 Category-level cost/km flags (cached analysis)
+        </p>
+
+        <div id="mobile-cat-loading" class="text-center py-8">
+            <div class="inline-block w-8 h-8 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin"></div>
+            <p class="text-sm text-gray-500 mt-2">Loading category statistics...</p>
+        </div>
+
+        <div id="mobile-cat-error" style="display: none; text-align: center; padding: 1rem; color: #dc3545; background: #f8d7da; border-radius: 8px; margin: 1rem 0;"></div>
+
+        <div id="mobile-cat-container" style="display: none;"></div>
+    </div>
+
+    <!-- Project Statistics Tab -->
+    <div id="tab-stats" class="mobile-tab-panel" style="display: none;">
+        <p class="text-xs text-gray-600 mb-3 bg-green-50 p-3 rounded">
+            📊 High-level budget coverage stats
+        </p>
+
+        <div id="mobile-stats-loading" class="text-center py-8">
+            <div class="inline-block w-8 h-8 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin"></div>
+            <p class="text-sm text-gray-500 mt-2">Loading overview stats...</p>
+        </div>
+
+        <div id="mobile-stats-error" style="display: none; text-align: center; padding: 1rem; color: #dc3545; background: #f8d7da; border-radius: 8px; margin: 1rem 0;"></div>
+
+        <div id="mobile-stats-container" style="display: none;"></div>
+    </div>
+
+    <!-- Projects Tab -->
+    <div id="tab-projects" class="mobile-tab-panel" style="display: none;">
+        <p class="text-xs text-gray-600 mb-3 bg-blue-50 p-3 rounded">
+            🛠️ Infrastructure projects (2026) - cost per kilometer analysis
         </p>
 
         <!-- Category Tabs -->
@@ -447,12 +480,14 @@
                 if (targetTab === 'resu' && !targetPanel.dataset.loaded) {
                     loadMobileResurrectedProjects();
                     targetPanel.dataset.loaded = 'true';
-                } else                 if (targetTab === 'roads' && !targetPanel.dataset.loaded) {
+                } else if (targetTab === 'cat' && !targetPanel.dataset.loaded) {
+                    loadMobileCategoryStats();
+                    targetPanel.dataset.loaded = 'true';
+                } else if (targetTab === 'projects' && !targetPanel.dataset.loaded) {
                     loadMobileRoadsData();
                     targetPanel.dataset.loaded = 'true';
-                }
-                if (targetTab === 'zero' && !targetPanel.dataset.loaded) {
-                    loadMobileAntiZeroData();
+                } else if (targetTab === 'stats' && !targetPanel.dataset.loaded) {
+                    loadMobileProjectStats();
                     targetPanel.dataset.loaded = 'true';
                 }
             });
@@ -468,6 +503,117 @@
     });
     
     // Load mobile Anti-zero data
+    async function loadMobileCategoryStats() {
+        const loadingEl = document.getElementById('mobile-cat-loading');
+        const errorEl = document.getElementById('mobile-cat-error');
+        const container = document.getElementById('mobile-cat-container');
+
+        try {
+            if (loadingEl) loadingEl.style.display = 'block';
+            if (errorEl) errorEl.style.display = 'none';
+            if (container) {
+                container.style.display = 'none';
+                container.innerHTML = '';
+            }
+
+            const response = await fetch('/api/budget/category-statistics?year=2026');
+            const data = await response.json();
+            if (!data.success) throw new Error(data.error || 'Failed to load category stats');
+
+            const categories = data.categories || [];
+            const top = categories
+                .slice()
+                .sort((a, b) => (b.flagged_cost || 0) - (a.flagged_cost || 0))
+                .slice(0, 20);
+
+            if (container) {
+                container.innerHTML = top.map((c) => {
+                    const name = c.subcategory ? `${c.category} · ${c.subcategory}` : (c.category || 'Unknown');
+                    const flaggedCount = (c.flagged_count || 0).toLocaleString();
+                    const totalCount = (c.total_count || 0).toLocaleString();
+                    const flaggedCost = (c.flagged_cost || 0).toLocaleString();
+                    const totalCost = (c.total_cost || 0).toLocaleString();
+                    return `
+                        <div class="mobile-chart-container">
+                            <div class="text-sm font-bold text-gray-900 mb-1">${name}</div>
+                            <div class="text-xs text-gray-600">Flagged: ${flaggedCount} / ${totalCount}</div>
+                            <div class="text-xs text-gray-600">Flagged cost: ₱${flaggedCost}</div>
+                            <div class="text-xs text-gray-600">Total cost: ₱${totalCost}</div>
+                        </div>
+                    `;
+                }).join('');
+                container.style.display = 'block';
+            }
+        } catch (error) {
+            console.error('Error loading category stats:', error);
+            if (errorEl) {
+                errorEl.textContent = `Error: ${error.message}`;
+                errorEl.style.display = 'block';
+            }
+        } finally {
+            if (loadingEl) loadingEl.style.display = 'none';
+        }
+    }
+
+    async function loadMobileProjectStats() {
+        const loadingEl = document.getElementById('mobile-stats-loading');
+        const errorEl = document.getElementById('mobile-stats-error');
+        const container = document.getElementById('mobile-stats-container');
+
+        try {
+            if (loadingEl) loadingEl.style.display = 'block';
+            if (errorEl) errorEl.style.display = 'none';
+            if (container) {
+                container.style.display = 'none';
+                container.innerHTML = '';
+            }
+
+            const response = await fetch('/api/budget/overview/stats');
+            const data = await response.json();
+            if (!data.success) throw new Error(data.error || 'Failed to load overview stats');
+
+            const stats = data.stats || {};
+            const fmtMoney = (v) => {
+                if (v === null || v === undefined) return '-';
+                const n = Number(v);
+                if (Number.isNaN(n)) return String(v);
+                return `₱${n.toLocaleString()}`;
+            };
+
+            if (container) {
+                container.innerHTML = `
+                    <div class="mobile-stats-grid">
+                        <div class="mobile-stat-card">
+                            <div class="text-xl font-bold text-blue-600">${(stats.total_items || 0).toLocaleString()}</div>
+                            <div class="text-xs text-gray-600 mt-1">Total Items</div>
+                        </div>
+                        <div class="mobile-stat-card">
+                            <div class="text-lg font-bold text-green-600">${fmtMoney(stats.total_value)}</div>
+                            <div class="text-xs text-gray-600 mt-1">Total Value</div>
+                        </div>
+                        <div class="mobile-stat-card">
+                            <div class="text-lg font-bold text-purple-600">${(stats.unique_departments || 0).toLocaleString()}</div>
+                            <div class="text-xs text-gray-600 mt-1">Departments</div>
+                        </div>
+                        <div class="mobile-stat-card">
+                            <div class="text-lg font-bold text-orange-600">${(stats.unique_agencies || 0).toLocaleString()}</div>
+                            <div class="text-xs text-gray-600 mt-1">Agencies</div>
+                        </div>
+                    </div>
+                `;
+                container.style.display = 'block';
+            }
+        } catch (error) {
+            console.error('Error loading overview stats:', error);
+            if (errorEl) {
+                errorEl.textContent = `Error: ${error.message}`;
+                errorEl.style.display = 'block';
+            }
+        } finally {
+            if (loadingEl) loadingEl.style.display = 'none';
+        }
+    }
+
     async function loadMobileAntiZeroData() {
         const loadingEl = document.getElementById('mobile-zero-loading');
         const errorEl = document.getElementById('mobile-zero-error');

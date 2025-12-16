@@ -510,11 +510,13 @@ def find_congressman_by_contractor_worker(contractor_name: str) -> Optional[tupl
     
     contractor_upper = contractor_name.upper().strip()
     contractor_parts = [part.strip() for part in contractor_upper.split('/')]
+    # Preserve JV order: first part is treated as the explicit contractor.
+    # To avoid JV-partner overmatching, only the first part is eligible for fuzzy/partial matching.
     all_matches = []
     
     import re
     
-    for contractor_part in contractor_parts:
+    for idx, contractor_part in enumerate(contractor_parts):
         if not contractor_part:
             continue
         
@@ -526,8 +528,9 @@ def find_congressman_by_contractor_worker(contractor_name: str) -> Optional[tupl
             candidates = contractor_lookup.get(normalized, [])
             match_score = 100
         
-        if not candidates:
-            # Partial matching
+        allow_fuzzy = (idx == 0)
+        if not candidates and allow_fuzzy:
+            # Partial matching (ONLY for the explicit contractor part)
             normalized_contractor = re.sub(r'[^A-Z0-9]+', ' ', contractor_part).strip()
             contractor_tokens = set()
             for token in re.split(r'[^A-Z0-9]+', normalized_contractor):
@@ -535,7 +538,17 @@ def find_congressman_by_contractor_worker(contractor_name: str) -> Optional[tupl
                 if len(token) >= 2 and token not in common_tokens:
                     contractor_tokens.add(token)
             
-            for lookup_key in contractor_lookup.keys():
+            candidate_keys = None
+            if contractor_inverted_index and contractor_tokens:
+                candidate_keys = set()
+                for token in contractor_tokens:
+                    keys = contractor_inverted_index.get(token)
+                    if keys:
+                        candidate_keys.update(keys)
+            if not candidate_keys:
+                candidate_keys = contractor_lookup.keys()
+
+            for lookup_key in sorted(candidate_keys, key=len, reverse=True):
                 lookup_key_clean = lookup_key.strip()
                 if len(lookup_key_clean) < 2:
                     continue
@@ -548,7 +561,8 @@ def find_congressman_by_contractor_worker(contractor_name: str) -> Optional[tupl
                         lookup_tokens.add(token)
                 
                 common_proper_names = contractor_tokens.intersection(lookup_tokens)
-                if common_proper_names and len(common_proper_names) >= 1:
+                # Avoid single-token overlaps; require stronger evidence unless the shared token is long.
+                if common_proper_names and (len(common_proper_names) >= 2 or any(len(t) >= 4 for t in common_proper_names)):
                     candidates = contractor_lookup[lookup_key]
                     match_score = 90
                     break
@@ -634,23 +648,22 @@ def find_congressman_by_contractor_worker(contractor_name: str) -> Optional[tupl
                         not x[3],
                         -x[4]
                     ))
-                    all_matches.append((filtered_valid_candidates[0][0], filtered_valid_candidates[0][4]))
+                    all_matches.append((idx, filtered_valid_candidates[0][0], filtered_valid_candidates[0][4]))
     
     if all_matches:
-        unique_matches = {}
-        for cm_name, score in all_matches:
-            if cm_name not in unique_matches or score > unique_matches[cm_name]:
-                unique_matches[cm_name] = score
-        sorted_matches = sorted(unique_matches.items(), key=lambda x: x[1], reverse=True)
-        if len(sorted_matches) == 1:
-            return (sorted_matches[0][0], sorted_matches[0][1])
-        elif len(sorted_matches) >= 2:
-            return [
-                (sorted_matches[0][0], sorted_matches[0][1]),
-                (sorted_matches[1][0], sorted_matches[1][1])
-            ]
-        else:
-             return (sorted_matches[0][0], sorted_matches[0][1])
+        # Deduplicate while preserving JV part order (explicit contractor first).
+        best_by_name = {}
+        for idx, cm_name, score in all_matches:
+            prev = best_by_name.get(cm_name)
+            if prev is None or score > prev[1]:
+                best_by_name[cm_name] = (idx, score)
+
+        ordered = sorted(((idx, name, score) for name, (idx, score) in best_by_name.items()),
+                         key=lambda t: (t[0], -t[2]))
+        top = [(name, score) for _, name, score in ordered][:2]
+        if len(top) == 1:
+            return (top[0][0], top[0][1])
+        return top
     return None
 
 def is_location_unique_in_category_worker(location_name: str, location_type: str, dedup_dict: Dict) -> bool:
@@ -1077,17 +1090,25 @@ def process_unified_chunk_worker(projects_chunk):
 
             # --- 5. Contractor Matching (Always run if contractor exists) ---
             contractor_congressman = None
+            contractor_congressman_2 = None
+            contractor_match_score = 0
             if contractor and len(contractor) > 3:
                 c_match = find_congressman_by_contractor_worker(contractor)
                 if c_match:
                     if isinstance(c_match, list):
                         c_name, c_score = c_match[0]
                         contractor_congressman = c_name
+                        contractor_match_score = c_score
+                        if len(c_match) > 1:
+                            contractor_congressman_2 = c_match[1][0]
                     else:
                         c_name, c_score = c_match
                         contractor_congressman = c_name
+                        contractor_match_score = c_score
                     
                     contractor_congressman = canonical_name_map.get(contractor_congressman, contractor_congressman)
+                    if contractor_congressman_2:
+                        contractor_congressman_2 = canonical_name_map.get(contractor_congressman_2, contractor_congressman_2)
                     stats['contractors_matched'] += 1
 
             # --- 6. Final Assignment ---
@@ -1096,6 +1117,9 @@ def process_unified_chunk_worker(projects_chunk):
             # Always record the contractor match if found
             if contractor_congressman:
                 project_copy['contractor_congressman'] = contractor_congressman
+                project_copy['contractor_match_score'] = contractor_match_score
+            if contractor_congressman_2:
+                project_copy['contractor_congressman_2'] = contractor_congressman_2
             
             if target:
                 project_copy['district_congressman'] = target
@@ -1105,8 +1129,7 @@ def process_unified_chunk_worker(projects_chunk):
                     project_copy['match_score'] = match_score
                 else:
                     project_copy['match_type'] = 'contractor'
-                    project_copy['contractor_match_score'] = 100 # Default/Placeholder
-                    project_copy['match_score'] = 100 # Default/Placeholder
+                    project_copy['match_score'] = contractor_match_score or 100
                 
                 stats['congressmen_matched'].add(target)
             else:
@@ -4233,11 +4256,18 @@ class DynastyProjectsCacheGeneratorDuckDB:
                 patterns = {base_upper}
                 # Remove parenthetical content (e.g., "(FORMERLY: ...)")
                 patterns.add(re.sub(r'\([^)]*\)', '', base_upper).strip())
-                # Split by / to get individual company names
-                for part in re.split(r'[\\/]', base_upper):
-                    part = part.strip()
-                    if len(part) >= 2:  # Changed from 3 to 2 to include "FS CO"
-                        patterns.add(part)
+                # CRITICAL: If this is a JV/compound contractor string (e.g. "A / B"),
+                # do NOT split into parts or expand tokens; that would "teach" the JV partner
+                # as a contractor pattern and cause future overmatching.
+                if '/' in base_upper or '\\' in base_upper:
+                    final = set()
+                    for pattern in patterns:
+                        clean = re.sub(r'\s+', ' ', pattern).strip()
+                        if clean and len(clean) >= 2:
+                            if clean in self.COMMON_TOKENS:
+                                continue
+                            final.add(clean)
+                    return list(final)
                 
                 # Extract key words, BUT preserve hyphenated names (e.g., "HI-TONE", "S-ANG")
                 # First, find hyphenated words and add them as patterns
@@ -4290,11 +4320,23 @@ class DynastyProjectsCacheGeneratorDuckDB:
             # This determines if the congressman should have contractor matching enabled
             family_connections = congressman_config.get('family_connections') or {}
             family_contractors = family_connections.get('contractors', []) if isinstance(family_connections, dict) else []
-            has_explicit_contractors = len(family_contractors) > 0 or len(verified_patterns) > 0
+            
+            # CRITICAL FIX: For Nationwide/Party-List, ONLY allow contractors if explicitly defined in config
+            # This prevents them from inheriting contractors from "Party" associations or loose database matches
+            is_nationwide = str(config_district_number).upper() in ['NATIONWIDE', 'PARTY-LIST', 'PARTY LIST']
+            
+            if is_nationwide:
+                 # Be super strict: ignore DB/Party contractors unless family_contractors exist in config
+                 has_explicit_contractors = len(family_contractors) > 0
+            else:
+                 has_explicit_contractors = len(family_contractors) > 0 or len(verified_patterns) > 0
+            
+            if "Herrera" in display_name:
+                pass # remove debug print
             
             # Only add contractors from parquet files if:
             # 1. The congressman has explicit contractors in family_connections, OR
-            # 2. The congressman has verified_contractors.patterns
+            # 2. The congressman has verified_contractors.patterns (for district reps)
             # This prevents false matches for congressmen who shouldn't have contractor matching
             if has_explicit_contractors:
                 for contractor in direct_contractors:
@@ -4380,21 +4422,27 @@ class DynastyProjectsCacheGeneratorDuckDB:
             name_key = _name_key(first_name_pattern, last_name_pattern)
             
             # Strategy 1: Exact name key match
-            for contractor_row in contractor_lookup.get(name_key, []):
-                company_name = contractor_row.get('company_name')
-                if company_name and company_name not in contractor_names:
-                    contractor_names.append(company_name)
-                    parquet_contractor_patterns.extend(_expand_patterns(company_name))
+            if has_explicit_contractors:
+                for contractor_row in contractor_lookup.get(name_key, []):
+                    company_name = contractor_row.get('company_name')
+                    if company_name and company_name not in contractor_names:
+                        contractor_names.append(company_name)
+                        parquet_contractor_patterns.extend(_expand_patterns(company_name))
             
             # Strategy 2: Match by first/last name patterns (more flexible)
             # This handles cases where parquet has "ELIZALDY SALCEDO" but config has "ELIZALDY CO"
+            if has_explicit_contractors:
+                strategy2_items = contractor_lookup.items()
+            else:
+                strategy2_items = []
+            
             first_upper = (first_name_pattern or '').upper().strip()
             last_upper = (last_name_pattern or '').upper().strip()
             
             # Also try to match using display_name if available
             display_name_upper = (display_name or '').upper().strip()
             
-            for lookup_key, contractor_rows in contractor_lookup.items():
+            for lookup_key, contractor_rows in strategy2_items:
                 lookup_first, lookup_last = lookup_key
                 lookup_first_upper = lookup_first.upper().strip()
                 lookup_last_upper = lookup_last.upper().strip()
@@ -4476,6 +4524,11 @@ class DynastyProjectsCacheGeneratorDuckDB:
             # Merge parquet contractor patterns with existing patterns
             contractor_patterns.extend(parquet_contractor_patterns)
             contractor_patterns = sorted(set(contractor_patterns))
+            
+            # FINAL SAFEGUARD: Force clear contractors for Nationwide/Party-List if no explicit config
+            if is_nationwide and not family_contractors:
+                 contractor_names = []
+                 contractor_patterns = []
             
             congressmen_data[display_name] = {
                 "name": display_name,
@@ -7374,7 +7427,7 @@ class DynastyProjectsCacheGeneratorDuckDB:
         CRITICAL: Only matches verified contractor relationships from contractor_dynasty_matches.
         Supports JVs (joint ventures) - can return up to 2 matches for projects with "/" separator.
         Returns: (congressman_name, match_score) or None (for single contractor)
-                 For JVs, returns the best match (first contractor takes priority)
+                 For JVs, returns matches in JV order (first contractor is treated as explicit)
         
         Matching strategy:
         1. Exact match on company name (highest priority) - score 100
@@ -7391,12 +7444,12 @@ class DynastyProjectsCacheGeneratorDuckDB:
         # Example: "MACROPRIME BUILDERS / SUNWEST, INC." -> ["MACROPRIME BUILDERS", "SUNWEST, INC."]
         contractor_parts = [part.strip() for part in contractor_upper.split('/')]
         
-        # For JVs, we'll process each part and return the best match
-        # Store all matches to potentially return up to 2
+        # Preserve JV order: first part is treated as the explicit contractor.
+        # To avoid JV-partner overmatching, only the first part is eligible for fuzzy/partial matching.
         all_matches = []
         
         # Process each contractor part in the JV
-        for contractor_part in contractor_parts:
+        for idx, contractor_part in enumerate(contractor_parts):
             if not contractor_part:
                 continue
             
@@ -7414,7 +7467,8 @@ class DynastyProjectsCacheGeneratorDuckDB:
             # CRITICAL: Also try partial matching for verified contractors
             # This handles cases like "SUNWEST" matching "SUNWEST, INC." or "SUNWEST CONSTRUCTION"
             # Only do this for verified contractors (those in contractor_lookup)
-            if not candidates:
+            allow_fuzzy = (idx == 0)
+            if not candidates and allow_fuzzy:
                 # Normalize contractor name for better matching
                 normalized_contractor = re.sub(r'[^A-Z0-9]+', ' ', contractor_part).strip()
                 
@@ -7426,8 +7480,19 @@ class DynastyProjectsCacheGeneratorDuckDB:
                     if len(token) >= 2 and token not in self.COMMON_TOKENS:  # Exclude common words
                         contractor_tokens.add(token)
                 
+                # Narrow candidate keys using the inverted index (fall back to full scan).
+                candidate_keys = None
+                if contractor_inverted_index and contractor_tokens:
+                    candidate_keys = set()
+                    for token in contractor_tokens:
+                        keys = contractor_inverted_index.get(token)
+                        if keys:
+                            candidate_keys.update(keys)
+                if not candidate_keys:
+                    candidate_keys = contractor_lookup.keys()
+
                 # Check if any lookup key matches (either direction)
-                for lookup_key in contractor_lookup.keys():
+                for lookup_key in sorted(candidate_keys, key=len, reverse=True):
                     lookup_key_clean = lookup_key.strip()
                     if len(lookup_key_clean) < 2:  # Changed from 3 to 2 to allow "FS", "CO", etc.
                         continue
@@ -7451,16 +7516,10 @@ class DynastyProjectsCacheGeneratorDuckDB:
                     # We ignore common words like "CONSTRUCTION", "INC", "FORMERLY", etc.
                     common_proper_names = contractor_tokens.intersection(lookup_tokens)
                     
-                    if common_proper_names:
-                        # CRITICAL: Require at least ONE proper name match (not common words)
-                        # This ensures we're matching on actual company names, not generic terms
-                        if len(common_proper_names) >= 1:
-                            # Additional validation: ensure we have meaningful proper name matches
-                            # For very short names (2 chars like "FS", "CO"), require at least 1 match
-                            # For longer names, require at least 1 proper name match
-                            candidates = contractor_lookup[lookup_key]
-                            match_score = 90
-                            break
+                    if common_proper_names and (len(common_proper_names) >= 2 or any(len(t) >= 4 for t in common_proper_names)):
+                        candidates = contractor_lookup[lookup_key]
+                        match_score = 90
+                        break
                     
                     # Also try substring matching as fallback (for cases where tokenization might miss)
                     # Check if lookup key is contained in contractor name (with word boundaries)
@@ -7582,30 +7641,22 @@ class DynastyProjectsCacheGeneratorDuckDB:
                         ))
                         
                         # Store match for this contractor part
-                        all_matches.append((filtered_valid_candidates[0][0], filtered_valid_candidates[0][4]))
+                        all_matches.append((idx, filtered_valid_candidates[0][0], filtered_valid_candidates[0][4]))
         
-        # Return up to 2 unique matches for JVs
+        # Return up to 2 unique matches for JVs (preserve JV order: explicit contractor first)
         if all_matches:
-            # Get unique congressmen (by name) and their best scores
-            unique_matches = {}
-            for cm_name, score in all_matches:
-                if cm_name not in unique_matches or score > unique_matches[cm_name]:
-                    unique_matches[cm_name] = score
-            
-            # Sort by score (descending) and return up to 2
-            sorted_matches = sorted(unique_matches.items(), key=lambda x: x[1], reverse=True)
-            
-            if len(sorted_matches) == 1:
-                # Single match - return as tuple for backward compatibility
-                return (sorted_matches[0][0], sorted_matches[0][1])
-            elif len(sorted_matches) >= 2:
-                # Multiple matches - return list of up to 2
-                return [
-                    (sorted_matches[0][0], sorted_matches[0][1]),
-                    (sorted_matches[1][0], sorted_matches[1][1])
-                ]
-            else:
-                return (sorted_matches[0][0], sorted_matches[0][1])
+            best_by_name = {}
+            for idx, cm_name, score in all_matches:
+                prev = best_by_name.get(cm_name)
+                if prev is None or score > prev[1]:
+                    best_by_name[cm_name] = (idx, score)
+
+            ordered = sorted(((idx, name, score) for name, (idx, score) in best_by_name.items()),
+                             key=lambda t: (t[0], -t[2]))
+            top = [(name, score) for _, name, score in ordered][:2]
+            if len(top) == 1:
+                return (top[0][0], top[0][1])
+            return top
         
         return None
 

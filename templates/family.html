@@ -136,42 +136,42 @@
     <div class="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
         <div class="bg-white shadow rounded-lg p-6">
             <div class="text-center mb-8">
-                <h1 class="text-4xl font-bold text-blue-800 mb-4">👑 {{ surname }} Family</h1>
-                <p class="text-gray-600 text-lg">Political Dynasty Details</p>
+                <h1 id="mainTitle" class="text-4xl font-bold text-blue-800 mb-4">👑 {{ surname }} Family</h1>
+                <p id="mainSubtitle" class="text-gray-600 text-lg">Political Dynasty Details</p>
             </div>
 
             <!-- Family Information -->
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
                 <div class="bg-blue-50 p-6 rounded-lg text-center">
                     <div class="text-3xl font-bold text-blue-800 mb-2">👥</div>
-                    <h3 class="text-lg font-semibold text-gray-800">Family Members</h3>
+                    <h3 id="metric1Label" class="text-lg font-semibold text-gray-800">Family Members</h3>
                     <p class="text-2xl font-bold text-blue-800" id="familyCount">Loading...</p>
                 </div>
 
                 <div class="bg-green-50 p-6 rounded-lg text-center">
                     <div class="text-3xl font-bold text-blue-800 mb-2">🏛️</div>
-                    <h3 class="text-lg font-semibold text-gray-800">Positions Held</h3>
+                    <h3 id="metric2Label" class="text-lg font-semibold text-gray-800">Positions Held</h3>
                     <p class="text-2xl font-bold text-blue-800" id="positionsCount">Loading...</p>
                     <p class="text-sm text-gray-600" id="uniquePositionsCount">Loading...</p>
                 </div>
 
                 <div class="bg-yellow-50 p-6 rounded-lg text-center">
                     <div class="text-3xl font-bold text-blue-800 mb-2">📍</div>
-                    <h3 class="text-lg font-semibold text-gray-800">Towns/Cities</h3>
+                    <h3 id="metric3Label" class="text-lg font-semibold text-gray-800">Towns/Cities</h3>
                     <p class="text-2xl font-bold text-blue-800" id="provincesCount">Loading...</p>
                 </div>
 
-                <div class="bg-gray-50 p-6 rounded-lg text-center cursor-pointer hover:bg-gray-100 transition-colors"
+                <div id="nonDynastyCard" class="bg-gray-50 p-6 rounded-lg text-center cursor-pointer hover:bg-gray-100 transition-colors"
                     onclick="showNonDynastyMembers()">
                     <div class="text-3xl font-bold text-gray-600 mb-2">👥</div>
-                    <h3 class="text-lg font-semibold text-gray-800">Non-Dynasty</h3>
+                    <h3 id="metric4Label" class="text-lg font-semibold text-gray-800">Non-Dynasty</h3>
                     <p class="text-2xl font-bold text-gray-600" id="nonDynastyCount">Loading...</p>
-                    <p class="text-xs text-gray-500 mt-1">Click to view</p>
+                    <p id="nonDynastyHint" class="text-xs text-gray-500 mt-1">Click to view</p>
                 </div>
             </div>
 
             <!-- Family Political Hierarchy Chart (Top) -->
-            <div class="mb-8">
+            <div id="hierarchySection" class="mb-8">
                 <div class="flex items-center justify-between mb-4">
                     <h2 class="text-2xl font-bold text-gray-800">Family Political Hierarchy</h2>
                     <div class="flex space-x-2">
@@ -202,12 +202,12 @@
 
             <!-- Family Members Table (Below hierarchy) -->
             <div class="mb-8">
-                <h2 class="text-2xl font-bold text-gray-800 mb-4">Family Members Details</h2>
+                <h2 id="tableTitle" class="text-2xl font-bold text-gray-800 mb-4">Family Members Details</h2>
                 <div id="familyTable" class="bg-white border border-gray-200 rounded-lg overflow-hidden">
                     <div class="overflow-x-auto">
                         <table class="min-w-full divide-y divide-gray-200">
                             <thead class="bg-gray-50">
-                                <tr>
+                                <tr id="familyTableHeadRow">
                                     <th
                                         class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                         Name</th>
@@ -334,9 +334,13 @@
     </div>
 
     <script>
-        // Get surname from URL parameter
+        // Get parameters from URL
         const urlParams = new URLSearchParams(window.location.search);
+        const hasSurnameInUrl = urlParams.has('surname') && (urlParams.get('surname') || '').trim() !== '';
         const surname = urlParams.get('surname') || '{{ surname }}';
+        const province = urlParams.get('province') || '{{ province }}' || '';
+        const mode = (urlParams.get('mode') || '').toLowerCase();
+        const isProvinceMode = mode === 'province' && !!province;
 
         // Convert surname to proper case for display
         const surnameDisplay = surname.charAt(0).toUpperCase() + surname.slice(1).toLowerCase();
@@ -1868,6 +1872,242 @@
             createHierarchyChart(familyData);
         }
 
+        function titleCase(s) {
+            if (!s) return '';
+            return s
+                .toLowerCase()
+                .split(' ')
+                .filter(Boolean)
+                .map(part => part.charAt(0).toUpperCase() + part.slice(1))
+                .join(' ');
+        }
+
+        function setProvinceModeLabels() {
+            const titleEl = document.getElementById('mainTitle');
+            const subtitleEl = document.getElementById('mainSubtitle');
+            const tableTitle = document.getElementById('tableTitle');
+
+            const provinceDisplay = titleCase(province);
+            document.title = `Province HB Explorer: ${provinceDisplay}`;
+            if (titleEl) titleEl.textContent = `Province: ${provinceDisplay}`;
+            if (subtitleEl) subtitleEl.textContent = 'Winners, term streaks, and who is affected under HB 6771 / HB 5905 (proxy rules)';
+            if (tableTitle) tableTitle.textContent = `Winners in ${provinceDisplay}`;
+
+            const m1 = document.getElementById('metric1Label');
+            const m2 = document.getElementById('metric2Label');
+            const m3 = document.getElementById('metric3Label');
+            const m4 = document.getElementById('metric4Label');
+            const hint = document.getElementById('nonDynastyHint');
+
+            if (m1) m1.textContent = 'Total Winners';
+            if (m2) m2.textContent = 'HB 6771 Removed';
+            if (m3) m3.textContent = 'Remaining (HB 5905)';
+            if (m4) m4.textContent = 'Term-Limited (3 terms)';
+            if (hint) hint.textContent = '';
+
+            const card = document.getElementById('nonDynastyCard');
+            if (card) {
+                card.onclick = null;
+                card.classList.remove('cursor-pointer', 'hover:bg-gray-100');
+            }
+        }
+
+        function hideFamilyVisualizations() {
+            const hierarchy = document.getElementById('hierarchySection');
+            if (hierarchy) hierarchy.style.display = 'none';
+            const yearView = document.getElementById('yearView');
+            if (yearView) yearView.classList.add('hidden');
+        }
+
+        function ensureProvinceControls() {
+            if (document.getElementById('provinceControls')) return;
+            const tableTitle = document.getElementById('tableTitle');
+            if (!tableTitle) return;
+
+            const controls = document.createElement('div');
+            controls.id = 'provinceControls';
+            controls.className = 'mb-4 flex flex-wrap gap-3 items-end justify-between';
+            controls.innerHTML = `
+                <div class="flex flex-wrap gap-3 items-end">
+                    <div>
+                        <label class="block text-xs font-medium text-gray-600 mb-1">Year</label>
+                        <select id="provinceYearSelector" class="border border-gray-300 rounded px-3 py-2 text-sm">
+                            <option value="">Latest</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-medium text-gray-600 mb-1">HB View</label>
+                        <select id="provinceHbSelector" class="border border-gray-300 rounded px-3 py-2 text-sm">
+                            <option value="all">All</option>
+                            <option value="hb6771">HB 6771</option>
+                            <option value="hb5905" selected>HB 5905</option>
+                        </select>
+                    </div>
+                    <div class="flex items-center gap-2 pb-2">
+                        <input id="provinceOnlyAffected" type="checkbox" class="h-4 w-4" checked />
+                        <label for="provinceOnlyAffected" class="text-sm text-gray-700">Only affected</label>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-medium text-gray-600 mb-1">Position contains</label>
+                        <input id="provincePositionFilter" type="text" class="border border-gray-300 rounded px-3 py-2 text-sm" placeholder="e.g., MAYOR" />
+                    </div>
+                    <button id="provinceRefreshBtn" class="bg-blue-800 hover:bg-blue-700 text-white px-4 py-2 rounded text-sm font-semibold">
+                        Refresh
+                    </button>
+                </div>
+                <div class="text-xs text-gray-500">
+                    Tip: switch to <span class="font-semibold">Province</span> in <a class="text-blue-800 underline" href="/dynasty#projection">/dynasty#projection</a> for aggregated counts.
+                </div>
+            `;
+
+            tableTitle.insertAdjacentElement('afterend', controls);
+
+            const refresh = () => loadProvinceRoster(true);
+            controls.querySelector('#provinceRefreshBtn')?.addEventListener('click', refresh);
+            controls.querySelector('#provinceYearSelector')?.addEventListener('change', refresh);
+            controls.querySelector('#provinceHbSelector')?.addEventListener('change', refresh);
+            controls.querySelector('#provinceOnlyAffected')?.addEventListener('change', refresh);
+        }
+
+        function setProvinceTableHead() {
+            const headRow = document.getElementById('familyTableHeadRow');
+            if (!headRow) return;
+            headRow.innerHTML = `
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Position</th>
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Town/City</th>
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Year</th>
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">HB 6771</th>
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">HB 5905</th>
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Term streak</th>
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Reason</th>
+            `;
+        }
+
+        function hbBadge(isRemoved) {
+            if (isRemoved) return '<span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-semibold bg-red-100 text-red-800">Removed</span>';
+            return '<span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-semibold bg-green-100 text-green-800">OK</span>';
+        }
+
+        async function loadProvinceRoster(resetYearSelector) {
+            if (!province) return;
+
+            ensureProvinceControls();
+            setProvinceTableHead();
+
+            const tableBody = document.getElementById('familyTableBody');
+            if (!tableBody) return;
+
+            tableBody.innerHTML = `
+                <tr>
+                    <td colspan="8" class="px-6 py-4 text-center text-gray-500">
+                        <div class="flex items-center justify-center">
+                            <div class="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-800"></div>
+                            <span class="ml-2">Loading province roster...</span>
+                        </div>
+                    </td>
+                </tr>
+            `;
+
+            const yearSelector = document.getElementById('provinceYearSelector');
+            const hbSelector = document.getElementById('provinceHbSelector');
+            const onlyAffected = document.getElementById('provinceOnlyAffected');
+            const positionFilter = document.getElementById('provincePositionFilter');
+
+            const params = new URLSearchParams({ province });
+            const selectedYear = yearSelector && yearSelector.value ? yearSelector.value : '';
+            if (selectedYear) params.append('year', selectedYear);
+            const pos = positionFilter ? positionFilter.value.trim() : '';
+            if (pos) params.append('position', pos);
+
+            const resp = await fetch(`/api/dynasty/province/roster?${params.toString()}`);
+            const text = await resp.text();
+            let json;
+            try { json = JSON.parse(text); } catch (e) { throw new Error(`HTTP ${resp.status}: Non-JSON response`); }
+            if (!resp.ok || !json.success) {
+                throw new Error(json.error || `HTTP ${resp.status}`);
+            }
+
+            const summary = json.summary || {};
+            const data = Array.isArray(json.data) ? json.data : [];
+
+            if (yearSelector && resetYearSelector) {
+                const years = Array.isArray(summary.available_years) ? summary.available_years : [];
+                const existing = Array.from(yearSelector.options).map(o => o.value);
+                const yearValues = years.map(String);
+                const needsPopulate = existing.length <= 1 || yearValues.some(v => !existing.includes(v));
+                if (needsPopulate) {
+                    const current = yearSelector.value;
+                    yearSelector.innerHTML = '<option value="">Latest</option>';
+                    years.forEach(y => {
+                        const opt = document.createElement('option');
+                        opt.value = String(y);
+                        opt.textContent = String(y);
+                        yearSelector.appendChild(opt);
+                    });
+                    if (current) yearSelector.value = current;
+                }
+            }
+
+            const hbMode = hbSelector ? hbSelector.value : 'hb5905';
+            const only = onlyAffected ? onlyAffected.checked : false;
+            const filtered = data.filter(p => {
+                if (!only) return true;
+                if (hbMode === 'hb6771') return !!p.removed_hb6771;
+                if (hbMode === 'hb5905') return !!p.removed_hb5905;
+                return !!p.removed_hb6771 || !!p.removed_hb5905;
+            });
+
+            if (filtered.length === 0) {
+                tableBody.innerHTML = `
+                    <tr>
+                        <td colspan="8" class="px-6 py-8 text-center text-gray-500">
+                            No results. Try unchecking "Only affected" or changing filters.
+                        </td>
+                    </tr>
+                `;
+            } else {
+                tableBody.innerHTML = filtered.map(p => `
+                    <tr class="hover:bg-gray-50">
+                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">${p.full_name || ''}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">${p.position || ''}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">${p.municipality_city || p.province || ''}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">${p.year || ''}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm">${hbBadge(!!p.removed_hb6771)}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm">${hbBadge(!!p.removed_hb5905)}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
+                            <div class="font-semibold">${p.term_streak || 1}</div>
+                            ${p.term_limited ? '<div class="text-xs text-red-700">term-limited</div>' : ''}
+                        </td>
+                        <td class="px-6 py-4 text-sm text-gray-600">${p.reason_hb5905 || ''}</td>
+                    </tr>
+                `).join('');
+            }
+
+            document.getElementById('familyCount').textContent = (summary.total_winners || data.length || 0).toLocaleString();
+            document.getElementById('positionsCount').textContent = (summary.removed_hb6771 || 0).toLocaleString();
+            document.getElementById('uniquePositionsCount').textContent = `HB 5905 removed: ${(summary.removed_hb5905 || 0).toLocaleString()}`;
+            document.getElementById('provincesCount').textContent = (summary.remaining_hb5905 || 0).toLocaleString();
+            document.getElementById('nonDynastyCount').textContent = (summary.term_limited || 0).toLocaleString();
+        }
+
+        async function initProvinceMode() {
+            setProvinceModeLabels();
+            hideFamilyVisualizations();
+            try {
+                await loadProvinceRoster(true);
+            } catch (e) {
+                const tableBody = document.getElementById('familyTableBody');
+                if (tableBody) {
+                    tableBody.innerHTML = `
+                        <tr>
+                            <td colspan="8" class="px-6 py-8 text-center text-red-600">${(e && e.message) ? e.message : 'Error loading province roster'}</td>
+                        </tr>
+                    `;
+                }
+            }
+        }
+
         // Add event listeners for toggle buttons
         document.addEventListener('DOMContentLoaded', function () {
             const toggleViewBtn = document.getElementById('toggleView');
@@ -1885,7 +2125,13 @@
         });
 
         // Load data when page loads
-        document.addEventListener('DOMContentLoaded', loadFamilyData);
+        document.addEventListener('DOMContentLoaded', function () {
+            if (isProvinceMode) {
+                initProvinceMode();
+            } else {
+                loadFamilyData();
+            }
+        });
     </script>
 
     {% include "footer.html" %}

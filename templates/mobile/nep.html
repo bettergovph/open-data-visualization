@@ -48,19 +48,19 @@
 <section class="p-4 bg-gray-50">
     <div class="mb-4">
         <h1 class="text-2xl font-bold text-blue-900 mb-2">📋 NEP 2026</h1>
-        <p class="text-xs text-gray-600">National Expenditure Program - Insertions Analysis</p>
+        <p class="text-xs text-gray-600">National Expenditure Program - anomaly highlights</p>
     </div>
 
     <!-- Tabs -->
     <div class="mb-4" style="display: flex; gap: 0.5rem; overflow-x: auto; -webkit-overflow-scrolling: touch; border-bottom: 2px solid #dee2e6;">
-        <a href="#insertions" class="mobile-tab-link active" data-tab="insertions" style="padding: 0.75rem 1rem; white-space: nowrap; border-bottom: 2px solid transparent; color: #666; text-decoration: none; font-weight: 500;">📋 Insertions</a>
-        <a href="#duplicate" class="mobile-tab-link" data-tab="duplicate" style="padding: 0.75rem 1rem; white-space: nowrap; border-bottom: 2px solid transparent; color: #666; text-decoration: none; font-weight: 500;">🚜 Farm to Market</a>
+        <a href="#duplicate" class="mobile-tab-link active" data-tab="duplicate" style="padding: 0.75rem 1rem; white-space: nowrap; border-bottom: 2px solid transparent; color: #666; text-decoration: none; font-weight: 500;">🚜 Farm to Market</a>
         <a href="#dpwh" class="mobile-tab-link" data-tab="dpwh" style="padding: 0.75rem 1rem; white-space: nowrap; border-bottom: 2px solid transparent; color: #666; text-decoration: none; font-weight: 500;">🛣️ DPWH</a>
         <a href="#nia" class="mobile-tab-link" data-tab="nia" style="padding: 0.75rem 1rem; white-space: nowrap; border-bottom: 2px solid transparent; color: #666; text-decoration: none; font-weight: 500;">💧 NIA</a>
+        <a href="#zero" class="mobile-tab-link" data-tab="zero" style="padding: 0.75rem 1rem; white-space: nowrap; border-bottom: 2px solid transparent; color: #666; text-decoration: none; font-weight: 500;">🚫 Anti-zero</a>
     </div>
 
     <!-- Insertions Tab -->
-    <div id="tab-insertions" class="mobile-tab-panel active">
+    <div id="tab-insertions" class="mobile-tab-panel" style="display: none;">
     <p class="text-xs text-gray-600 mb-3 bg-blue-50 p-3 rounded">
         🧩 Showing program insertions by office and district
     </p>
@@ -88,7 +88,7 @@
     </div>
 
     <!-- Duplicate Tab -->
-    <div id="tab-duplicate" class="mobile-tab-panel" style="display: none;">
+    <div id="tab-duplicate" class="mobile-tab-panel active">
         <p class="text-xs text-gray-600 mb-3 bg-blue-50 p-3 rounded">
             📊 Track duplicate entries in budget amendments
         </p>
@@ -261,6 +261,41 @@
         <!-- Duplicates Container -->
         <div id="mobile-nia-groups-container" style="display: none;"></div>
     </div>
+
+    <!-- Anti-zero Tab -->
+    <div id="tab-zero" class="mobile-tab-panel" style="display: none;">
+        <p class="text-xs text-gray-600 mb-3 bg-blue-50 p-3 rounded">
+            🚫 Uniform decrease patterns (Annex A-5 Column O → Column S)
+        </p>
+
+        <div class="mobile-stats-grid">
+            <div class="mobile-stat-card">
+                <div class="text-xl font-bold text-blue-600" id="mobile-anti-zero-patterns">-</div>
+                <div class="text-xs text-gray-600 mt-1">Patterns</div>
+            </div>
+            <div class="mobile-stat-card">
+                <div class="text-xl font-bold text-purple-600" id="mobile-anti-zero-matches">-</div>
+                <div class="text-xs text-gray-600 mt-1">Matches</div>
+            </div>
+            <div class="mobile-stat-card">
+                <div class="text-lg font-bold text-green-600" id="mobile-anti-zero-total-projects">-</div>
+                <div class="text-xs text-gray-600 mt-1">Total Projects</div>
+            </div>
+            <div class="mobile-stat-card">
+                <div class="text-lg font-bold text-red-600" id="mobile-anti-zero-pct">-</div>
+                <div class="text-xs text-gray-600 mt-1">% Affected</div>
+            </div>
+        </div>
+
+        <div id="mobile-anti-zero-loading" class="text-center py-8">
+            <div class="inline-block w-8 h-8 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin"></div>
+            <p class="text-sm text-gray-500 mt-2">Loading anti-zero analysis...</p>
+        </div>
+
+        <div id="mobile-anti-zero-error" style="display: none; text-align: center; padding: 1rem; color: #dc3545; background: #f8d7da; border-radius: 8px; margin: 1rem 0;"></div>
+
+        <div id="mobile-anti-zero-top-patterns" style="display: none;"></div>
+    </div>
 </section>
 
 <script>
@@ -329,6 +364,74 @@
     `;
     }
 
+    let mobileAntiZeroLoaded = false;
+    async function loadMobileAntiZeroData() {
+        const loadingDiv = document.getElementById('mobile-anti-zero-loading');
+        const errorDiv = document.getElementById('mobile-anti-zero-error');
+        const container = document.getElementById('mobile-anti-zero-top-patterns');
+
+        try {
+            if (mobileAntiZeroLoaded) return;
+            if (loadingDiv) loadingDiv.style.display = 'block';
+            if (errorDiv) errorDiv.style.display = 'none';
+            if (container) {
+                container.style.display = 'none';
+                container.innerHTML = '';
+            }
+
+            const response = await fetch('/api/budget/anti-zero-analysis');
+            const data = await response.json();
+            if (!data.success) {
+                throw new Error(data.error || 'Failed to load anti-zero analysis');
+            }
+
+            const summary = data.summary || {};
+            const patterns = data.top_patterns || [];
+
+            const fmtPct = (v) => (v || v === 0) ? `${Number(v).toFixed(1)}%` : '-';
+
+            const patternsEl = document.getElementById('mobile-anti-zero-patterns');
+            const matchesEl = document.getElementById('mobile-anti-zero-matches');
+            const totalProjectsEl = document.getElementById('mobile-anti-zero-total-projects');
+            const pctEl = document.getElementById('mobile-anti-zero-pct');
+
+            if (patternsEl) patternsEl.textContent = (summary.unique_patterns || 0).toLocaleString();
+            if (matchesEl) matchesEl.textContent = (summary.total_matches || 0).toLocaleString();
+            if (totalProjectsEl) totalProjectsEl.textContent = (summary.total_projects || 0).toLocaleString();
+            if (pctEl) pctEl.textContent = fmtPct(summary.percentage || 0);
+
+            if (container) {
+                if (patterns.length === 0) {
+                    container.innerHTML = `
+                        <div class="text-center py-8">
+                            <div class="text-5xl mb-3">📉</div>
+                            <div class="text-sm text-gray-600">No patterns found</div>
+                        </div>
+                    `;
+                } else {
+                    container.innerHTML = patterns.slice(0, 10).map((p, idx) => `
+                        <div class="mobile-nep-card">
+                            <div class="text-sm font-bold text-gray-900 mb-1">${idx + 1}. ${fmtPct(p.decrease_percentage)}</div>
+                            <div class="text-xs text-gray-600">Matches: ${(p.match_count || 0).toLocaleString()}</div>
+                            <div class="text-xs text-gray-600">Total decrease: ${formatAmountFull(p.total_decrease || 0)}</div>
+                        </div>
+                    `).join('');
+                }
+                container.style.display = 'block';
+            }
+
+            mobileAntiZeroLoaded = true;
+        } catch (error) {
+            console.error('Error loading anti-zero data:', error);
+            if (errorDiv) {
+                errorDiv.textContent = `Failed to load anti-zero analysis: ${error.message || error}`;
+                errorDiv.style.display = 'block';
+            }
+        } finally {
+            if (loadingDiv) loadingDiv.style.display = 'none';
+        }
+    }
+
     // Tab switching
     document.querySelectorAll('.mobile-tab-link').forEach(link => {
         link.addEventListener('click', function(e) {
@@ -358,6 +461,8 @@
                 loadMobileDPWHData();
             } else if (tabName === 'nia' && typeof loadMobileNIAData === 'function') {
                 loadMobileNIAData();
+            } else if (tabName === 'zero') {
+                loadMobileAntiZeroData();
             }
             
             // Update URL hash
@@ -365,6 +470,10 @@
                 window.location.hash = 'duplicate';
             } else if (tabName === 'dpwh') {
                 window.location.hash = 'dpwh';
+            } else if (tabName === 'nia') {
+                window.location.hash = 'nia';
+            } else if (tabName === 'zero') {
+                window.location.hash = 'zero';
             } else {
                 window.location.hash = '';
             }
@@ -381,6 +490,16 @@
         const dpwhLink = document.querySelector('[data-tab="dpwh"]');
         if (dpwhLink) {
             dpwhLink.click();
+        }
+    } else if (window.location.hash === '#nia') {
+        const niaLink = document.querySelector('[data-tab="nia"]');
+        if (niaLink) {
+            niaLink.click();
+        }
+    } else if (window.location.hash === '#zero') {
+        const zeroLink = document.querySelector('[data-tab="zero"]');
+        if (zeroLink) {
+            zeroLink.click();
         }
     }
 
@@ -1545,6 +1664,11 @@
             const niaLink = document.querySelector('[data-tab="nia"]');
             if (niaLink) {
                 niaLink.click();
+            }
+        } else if (window.location.hash === '#zero') {
+            const zeroLink = document.querySelector('[data-tab="zero"]');
+            if (zeroLink) {
+                zeroLink.click();
             }
         }
     });

@@ -175,7 +175,32 @@ def generate_integrated_parquet():
     try:
         # Export to Parquet
         print(f"💾 Saving to {OUTPUT_FILE}...")
-        con.execute(f"COPY ({union_query}) TO '{str(OUTPUT_FILE)}' (FORMAT PARQUET)")
+        
+        # Deduplication Logic
+        # Priority: DIME > Microsite > SSP > Transparency > PhilGEPS
+        dedup_query = f"""
+            WITH combined AS (
+                {union_query}
+            )
+            SELECT * FROM combined
+            QUALIFY ROW_NUMBER() OVER (
+                PARTITION BY 
+                    amount, 
+                    regexp_replace(lower(project_name), '[^a-z0-9]', '', 'g'), -- Normalize name
+                    regexp_replace(lower(location), '[^a-z0-9]', '', 'g') -- Normalize location
+                ORDER BY 
+                    CASE source 
+                        WHEN 'DIME' THEN 1 
+                        WHEN 'Microsite' THEN 2 
+                        WHEN 'SSP' THEN 3 
+                        WHEN 'Transparency' THEN 4 
+                        WHEN 'PhilGEPS' THEN 5 
+                        ELSE 99 
+                    END ASC
+            ) = 1
+        """
+        
+        con.execute(f"COPY ({dedup_query}) TO '{str(OUTPUT_FILE)}' (FORMAT PARQUET)")
         
         # Verify result
         final_count = con.execute(f"SELECT COUNT(*) FROM '{str(OUTPUT_FILE)}'").fetchone()[0]

@@ -725,8 +725,9 @@ async def _deprecated_get_integrated_projects(
 async def export_integrated_projects_csv(
     project_name: Optional[str] = Query(default=None, description="Filter by project name/title"),
     contractor: Optional[str] = Query(default=None, description="Filter by contractor name"),
-    green: bool = Query(default=False, description="Filter for green/clean projects")
-):
+    green: bool = Query(default=False, description="Filter for green/clean projects"),
+    dpwh_all: bool = Query(default=False, description="Filter for ALL Annex A-5 projects (w/ flags)")
+) -> Response:
     """Export integrated projects to CSV with filtering (all pages)"""
     try:
         from fastapi.responses import Response
@@ -7686,14 +7687,20 @@ async def dynasty_positions_api(
 ):
     """Return distinct positions (elected positions, BAC positions, or ENGINEER positions)
     with max 2 words, filtered by prefix, sorted alphabetically."""
+    conn = None
     try:
         import asyncpg
+
+        connect_timeout = float(os.getenv("DYNASTY_DB_CONNECT_TIMEOUT", "2"))
+        query_timeout = float(os.getenv("DYNASTY_DB_QUERY_TIMEOUT", "5"))
+
         conn = await asyncpg.connect(
             host=os.getenv('POSTGRES_HOST', 'localhost'),
             port=int(os.getenv('POSTGRES_PORT', 5432)),
             user=os.getenv('POSTGRES_USER', 'budget_admin'),
             password=os.getenv('POSTGRES_PASSWORD', ''),
-            database=os.getenv('POSTGRES_DB_DYNASTY', 'dynasty')
+            database=os.getenv('POSTGRES_DB_DYNASTY', 'dynasty'),
+            timeout=connect_timeout,
         )
         
         params = []
@@ -7750,14 +7757,19 @@ async def dynasty_positions_api(
             ORDER BY position ASC
             LIMIT {limit}
         """
-        rows = await conn.fetch(query, *params)
-        await conn.close()
+        rows = await conn.fetch(query, *params, timeout=query_timeout)
         return JSONResponse({
             "success": True,
             "data": [r['position'] for r in rows]
         })
     except Exception as e:
         return JSONResponse({"success": False, "error": str(e)})
+    finally:
+        if conn is not None:
+            try:
+                await conn.close()
+            except Exception:
+                pass
 
 @app.get("/api/dynasty/autocomplete/first-names")
 async def dynasty_first_names_autocomplete(q: str = Query("", description="Optional prefix for first name"), limit: int = Query(200, ge=1, le=1000)):
@@ -7874,17 +7886,22 @@ async def dynasty_top_surnames_api(
 @app.get("/api/dynasty/stats")
 async def dynasty_stats_api():
     """Get dynasty dashboard statistics filtered by elected positions, BAC positions, or ENGINEER positions"""
+    conn = None
     try:
         import asyncpg
         import os
         
+        connect_timeout = float(os.getenv("DYNASTY_DB_CONNECT_TIMEOUT", "2"))
+        query_timeout = float(os.getenv("DYNASTY_DB_QUERY_TIMEOUT", "15"))
+
         # Database connection
         conn = await asyncpg.connect(
             host=os.getenv('POSTGRES_HOST', 'localhost'),
             port=int(os.getenv('POSTGRES_PORT', 5432)),
             user=os.getenv('POSTGRES_USER', 'budget_admin'),
             password=os.getenv('POSTGRES_PASSWORD', ''),
-            database=os.getenv('POSTGRES_DB_DYNASTY', 'dynasty')
+            database=os.getenv('POSTGRES_DB_DYNASTY', 'dynasty'),
+            timeout=connect_timeout,
         )
         
         # Position filter: elected positions only (President, Vice President, Senator, Mayor, Congressmen, Councilor, Governor) with max 2 words
@@ -7912,40 +7929,36 @@ async def dynasty_stats_api():
             )
         )"""
         
-        # Get total records
-        total_records = await conn.fetchval(
-            f"SELECT COUNT(*) FROM political_dynasties WHERE {position_filter}"
+        row = await conn.fetchrow(
+            f"""
+            SELECT
+                COUNT(*) FILTER (WHERE {position_filter}) AS total_records,
+                COUNT(*) FILTER (WHERE fat = 1 AND {position_filter}) AS dynasty_members,
+                COUNT(*) FILTER (WHERE fat = 0 AND {position_filter}) AS non_dynasty_members,
+                COUNT(DISTINCT (first_name, last_name)) FILTER (WHERE {position_filter}) AS unique_politicians
+            FROM political_dynasties
+            """,
+            timeout=query_timeout,
         )
-        
-        # Get dynasty members (fat = 1)
-        dynasty_members = await conn.fetchval(
-            f"SELECT COUNT(*) FROM political_dynasties WHERE fat = 1 AND {position_filter}"
-        )
-        
-        # Get non-dynasty members (fat = 0)
-        non_dynasty_members = await conn.fetchval(
-            f"SELECT COUNT(*) FROM political_dynasties WHERE fat = 0 AND {position_filter}"
-        )
-        
-        # Get unique politicians (distinct first_name + last_name)
-        unique_politicians = await conn.fetchval(
-            f"SELECT COUNT(DISTINCT CONCAT(first_name, ' ', last_name)) FROM political_dynasties WHERE {position_filter}"
-        )
-        
-        await conn.close()
         
         return JSONResponse({
             "success": True,
             "data": {
-                "total_records": total_records,
-                "dynasty_members": dynasty_members,
-                "non_dynasty_members": non_dynasty_members,
-                "unique_politicians": unique_politicians
+                "total_records": int(row["total_records"] or 0),
+                "dynasty_members": int(row["dynasty_members"] or 0),
+                "non_dynasty_members": int(row["non_dynasty_members"] or 0),
+                "unique_politicians": int(row["unique_politicians"] or 0),
             }
         })
         
     except Exception as e:
         return JSONResponse({"success": False, "error": str(e)})
+    finally:
+        if conn is not None:
+            try:
+                await conn.close()
+            except Exception:
+                pass
 
 @app.get("/api/dynasty/family")
 async def dynasty_family_api(
@@ -8280,15 +8293,52 @@ async def dynasty_projection_api(
     group_by: str = Query("region", description="Group by field (region, position, province)"),
     position: str = Query(None, description="Optional filter by position"),
     province: str = Query(None, description="Optional filter by province"),
-    year: int = Query(None, description="Election year (defaults to latest year with winners)")
+    year: int = Query(None, description="Election year (defaults to latest year with winners)"),
+    use_cache: bool = Query(True, description="Use precomputed cache when available"),
+    refresh_cache: bool = Query(False, description="Ignore cache and compute live"),
 ):
     """
     Get aggregated projection of officials 'removed' by anti-dynasty law.
     Returns counts for HB 6771 (Simultaneous) and HB 5905 (Broad/Succession).
     """
+    conn = None
     try:
         import asyncpg
         import os
+        import json
+
+        cache_path = Path("static/data/dynasty_projection_cache.json")
+        if (
+            use_cache
+            and not refresh_cache
+            and not position
+            and not province
+            and cache_path.exists()
+        ):
+            try:
+                with open(cache_path, "r", encoding="utf-8") as f:
+                    cache = json.load(f)
+
+                available_years = cache.get("available_years") or []
+                by_year = cache.get("by_year") or {}
+
+                selected_year = year
+                if selected_year is None and available_years:
+                    selected_year = available_years[0]
+
+                year_key = str(selected_year) if selected_year is not None else None
+                bucket = by_year.get(year_key, {}).get(group_by) if year_key else None
+
+                if bucket and isinstance(bucket, dict) and isinstance(bucket.get("data"), list) and isinstance(bucket.get("summary"), dict):
+                    summary = dict(bucket["summary"])
+                    summary["available_years"] = available_years
+                    summary["year"] = int(selected_year) if selected_year is not None else summary.get("year")
+                    return JSONResponse({"success": True, "data": bucket["data"], "summary": summary})
+            except Exception:
+                pass
+
+        connect_timeout = float(os.getenv("DYNASTY_DB_CONNECT_TIMEOUT", "2"))
+        query_timeout = float(os.getenv("DYNASTY_DB_QUERY_TIMEOUT", "30"))
         
         # Validate group_by
         valid_groups = ["region", "position", "province", "party"]
@@ -8301,18 +8351,22 @@ async def dynasty_projection_api(
             port=int(os.getenv('POSTGRES_PORT', 5432)),
             user=os.getenv('POSTGRES_USER', 'postgres'),
             password=os.getenv('POSTGRES_PASSWORD', ''),
-            database=os.getenv('POSTGRES_DB_DYNASTY', 'dynasty')
+            database=os.getenv('POSTGRES_DB_DYNASTY', 'dynasty'),
+            timeout=connect_timeout,
         )
         
         # Determine available years and default to latest year with winners
         years_rows = await conn.fetch(
-            "SELECT DISTINCT year FROM political_dynasties WHERE winner = true AND year IS NOT NULL ORDER BY year DESC"
+            "SELECT DISTINCT year FROM political_dynasties WHERE winner = true AND year IS NOT NULL ORDER BY year DESC",
+            timeout=query_timeout,
         )
         available_years = [r["year"] for r in years_rows if r.get("year") is not None]
 
         selected_year = year
         if selected_year is None and available_years:
             selected_year = available_years[0]
+        if selected_year is None:
+            return JSONResponse({"success": False, "error": "No election years available in political_dynasties (winner=true)."})
 
         # Build query
         where_conditions = ["winner = true"]  # Only consider winners for projection
@@ -8363,7 +8417,7 @@ async def dynasty_projection_api(
                 FROM political_dynasties p
                 JOIN current_keys k
                   ON k.province = p.province AND k.last_name = p.last_name
-                WHERE p.winner = true AND p.year < $1
+                WHERE p.winner = true AND p.year >= ($1 - 9) AND p.year < $1
                 GROUP BY p.province, p.last_name
             )
             SELECT
@@ -8371,19 +8425,18 @@ async def dynasty_projection_api(
                 COUNT(*) AS total_count,
                 SUM(
                     CASE
-                        WHEN current.fat = 1
-                        AND NOT (
-                            COALESCE(current.position_category, '') ILIKE '%party%list%'
-                            OR COALESCE(current.position, '') ILIKE '%party%list%'
-                        )
+                        WHEN COALESCE(same_year.same_year_count, 0) > 1
+                         AND NOT (
+                             COALESCE(current.position_category, '') ILIKE '%party%list%'
+                             OR COALESCE(current.position, '') ILIKE '%party%list%'
+                         )
                         THEN 1
                         ELSE 0
                     END
                 ) AS hb6771_count,
                 SUM(
                     CASE
-                        WHEN current.fat = 1
-                          OR COALESCE(same_year.same_year_count, 0) > 1
+                        WHEN COALESCE(same_year.same_year_count, 0) > 1
                           OR prior.has_prior = 1
                         THEN 1
                         ELSE 0
@@ -8398,8 +8451,7 @@ async def dynasty_projection_api(
             ORDER BY hb5905_count DESC, total_count DESC
         """
         
-        rows = await conn.fetch(query, *params)
-        await conn.close()
+        rows = await conn.fetch(query, *params, timeout=query_timeout)
         
         data = []
         for row in rows:
@@ -8407,6 +8459,7 @@ async def dynasty_projection_api(
             hb6771 = row['hb6771_count']
             hb5905 = row['hb5905_count']
             non_dynasty = total - hb5905
+            remaining_6771 = total - hb6771
             
             impact_6771 = (hb6771 / total * 100) if total > 0 else 0
             impact_5905 = (hb5905 / total * 100) if total > 0 else 0
@@ -8416,6 +8469,7 @@ async def dynasty_projection_api(
                 "total_count": total,
                 "hb6771_count": hb6771,
                 "hb5905_count": hb5905,
+                "remaining_6771": remaining_6771,
                 "remaining_count": non_dynasty,
                 "impact_percentage": round(impact_5905, 1),
                 "impact_6771": round(impact_6771, 1),
@@ -8429,6 +8483,7 @@ async def dynasty_projection_api(
             "total_officials": sum(d['total_count'] for d in data),
             "total_hb6771": sum(d['hb6771_count'] for d in data),
             "total_hb5905": sum(d['hb5905_count'] for d in data),
+            "total_remaining_6771": sum(d['remaining_6771'] for d in data),
             "total_remaining": sum(d['remaining_count'] for d in data)
         }
         summary["hb6771_pct_of_total"] = (summary["total_hb6771"] / summary["total_officials"] * 100) if summary["total_officials"] > 0 else 0
@@ -8448,6 +8503,429 @@ async def dynasty_projection_api(
         
     except Exception as e:
         return JSONResponse({"success": False, "error": str(e)})
+    finally:
+        if conn is not None:
+            try:
+                await conn.close()
+            except Exception:
+                pass
+
+
+@app.get("/api/dynasty/projection/people")
+async def dynasty_projection_people_api(
+    hb: str = Query("hb5905", description="Which HB rule to list (hb6771 or hb5905)"),
+    group_by: str = Query("province", description="Group by field (region, position, province, party)"),
+    group: str = Query(..., description="Group value to drill into (exact match, case-insensitive)"),
+    position: str = Query(None, description="Optional filter by position"),
+    province: str = Query(None, description="Optional filter by province (useful when group_by is not province)"),
+    year: int = Query(None, description="Election year (defaults to latest year with winners)"),
+    page: int = Query(1, ge=1, description="Page number"),
+    limit: int = Query(200, ge=1, le=1000, description="Page size"),
+):
+    """List winner records removed under HB 6771 or HB 5905 for a specific group (region/province/position/party)."""
+    conn = None
+    try:
+        import asyncpg
+        import os
+
+        hb = (hb or "").lower().strip()
+        hb_field = hb.replace("-", "").replace("_", "")
+        if hb_field not in {"hb6771", "hb5905"}:
+            return JSONResponse({"success": False, "error": "Invalid hb. Must be hb6771 or hb5905."})
+
+        valid_groups = ["region", "position", "province", "party"]
+        if group_by not in valid_groups:
+            return JSONResponse({"success": False, "error": f"Invalid group_by parameter. Must be one of: {', '.join(valid_groups)}"})
+
+        connect_timeout = float(os.getenv("DYNASTY_DB_CONNECT_TIMEOUT", "2"))
+        query_timeout = float(os.getenv("DYNASTY_DB_QUERY_TIMEOUT", "30"))
+
+        conn = await asyncpg.connect(
+            host=os.getenv('POSTGRES_HOST', 'localhost'),
+            port=int(os.getenv('POSTGRES_PORT', 5432)),
+            user=os.getenv('POSTGRES_USER', 'postgres'),
+            password=os.getenv('POSTGRES_PASSWORD', ''),
+            database=os.getenv('POSTGRES_DB_DYNASTY', 'dynasty'),
+            timeout=connect_timeout,
+        )
+
+        years_rows = await conn.fetch(
+            "SELECT DISTINCT year FROM political_dynasties WHERE winner = true AND year IS NOT NULL ORDER BY year DESC",
+            timeout=query_timeout,
+        )
+        available_years = [r["year"] for r in years_rows if r.get("year") is not None]
+
+        selected_year = year
+        if selected_year is None and available_years:
+            selected_year = available_years[0]
+        if selected_year is None:
+            return JSONResponse({"success": False, "error": "No election years available in political_dynasties (winner=true)."})
+
+        params = []
+        param_idx = 0
+        where_conditions = ["winner = true"]
+
+        param_idx += 1
+        where_conditions.append(f"year = ${param_idx}")
+        params.append(int(selected_year))
+
+        param_idx += 1
+        where_conditions.append(f"COALESCE({group_by}, '') ILIKE ${param_idx}")
+        params.append(str(group))
+
+        if position:
+            param_idx += 1
+            where_conditions.append(f"position ILIKE ${param_idx}")
+            params.append(f"%{position}%")
+
+        if province:
+            param_idx += 1
+            where_conditions.append(f"province ILIKE ${param_idx}")
+            params.append(f"%{province}%")
+
+        where_clause = "WHERE " + " AND ".join(where_conditions)
+        offset = (page - 1) * limit
+
+        removed_predicate = {
+            "hb6771": "removed_hb6771 = true",
+            "hb5905": "removed_hb5905 = true",
+        }[hb_field]
+
+        query = f"""
+            WITH current AS (
+                SELECT *
+                FROM political_dynasties
+                {where_clause}
+            ),
+            current_keys AS (
+                SELECT DISTINCT province, last_name
+                FROM current
+                WHERE province IS NOT NULL AND last_name IS NOT NULL
+            ),
+            same_year AS (
+                SELECT p.province, p.last_name, COUNT(*) AS same_year_count
+                FROM political_dynasties p
+                JOIN current_keys k
+                  ON k.province = p.province AND k.last_name = p.last_name
+                WHERE p.winner = true AND p.year = $1
+                GROUP BY p.province, p.last_name
+            ),
+            prior AS (
+                SELECT p.province, p.last_name, 1 AS has_prior
+                FROM political_dynasties p
+                JOIN current_keys k
+                  ON k.province = p.province AND k.last_name = p.last_name
+                WHERE p.winner = true AND p.year >= ($1 - 9) AND p.year < $1
+                GROUP BY p.province, p.last_name
+            ),
+            flagged AS (
+                SELECT
+                    current.*,
+                    COALESCE(same_year.same_year_count, 0) AS same_year_count,
+                    COALESCE(prior.has_prior, 0) AS has_prior,
+                    (
+                        COALESCE(same_year.same_year_count, 0) > 1
+                        AND NOT (
+                            COALESCE(current.position_category, '') ILIKE '%party%list%'
+                            OR COALESCE(current.position, '') ILIKE '%party%list%'
+                        )
+                    ) AS removed_hb6771,
+                    (
+                        COALESCE(same_year.same_year_count, 0) > 1
+                        OR prior.has_prior = 1
+                    ) AS removed_hb5905
+                FROM current
+                LEFT JOIN same_year
+                  ON same_year.province = current.province AND same_year.last_name = current.last_name
+                LEFT JOIN prior
+                  ON prior.province = current.province AND prior.last_name = current.last_name
+            )
+            SELECT
+                *,
+                COUNT(*) OVER() AS total_matching
+            FROM flagged
+            WHERE {removed_predicate}
+            ORDER BY COALESCE(position, '') ASC, COALESCE(last_name, '') ASC, COALESCE(first_name, '') ASC
+            LIMIT {int(limit)} OFFSET {int(offset)}
+        """
+
+        rows = await conn.fetch(query, *params, timeout=query_timeout)
+
+        people = []
+        total_matching = 0
+        for row in rows:
+            total_matching = int(row.get("total_matching") or 0)
+
+            reasons = []
+            if int(row.get("same_year_count") or 0) > 1:
+                reasons.append("family-member same-year")
+            if int(row.get("has_prior") or 0) == 1:
+                reasons.append("family-member prior-year (<=9y)")
+
+            people.append({
+                "first_name": row.get("first_name"),
+                "last_name": row.get("last_name"),
+                "full_name": " ".join([v for v in [row.get("first_name"), row.get("last_name")] if v]),
+                "position": row.get("position"),
+                "position_category": row.get("position_category"),
+                "party": row.get("party"),
+                "region": row.get("region"),
+                "province": row.get("province"),
+                "municipality_city": row.get("municipality_city"),
+                "year": row.get("year"),
+                "removed_hb6771": bool(row.get("removed_hb6771")),
+                "removed_hb5905": bool(row.get("removed_hb5905")),
+                "same_year_count": int(row.get("same_year_count") or 0),
+                "has_prior": bool(row.get("has_prior")),
+                "reason": ", ".join(reasons) if reasons else None,
+            })
+
+        return JSONResponse({
+            "success": True,
+            "meta": {
+                "hb": hb_field,
+                "group_by": group_by,
+                "group": group,
+                "year": selected_year,
+                "available_years": available_years,
+                "page": page,
+                "limit": limit,
+                "total_matching": total_matching,
+            },
+            "data": people,
+        })
+    except Exception as e:
+        return JSONResponse({"success": False, "error": str(e)})
+    finally:
+        if conn is not None:
+            try:
+                await conn.close()
+            except Exception:
+                pass
+
+
+@app.get("/api/dynasty/province/roster")
+async def dynasty_province_roster_api(
+    province: str = Query(..., description="Province to list winners for"),
+    year: int = Query(None, description="Election year (defaults to latest year with winners in province)"),
+    position: str = Query(None, description="Optional filter by position (ILIKE contains)"),
+    page: int = Query(1, ge=1, description="Page number"),
+    limit: int = Query(500, ge=1, le=5000, description="Page size"),
+):
+    """Province-wide winners list with HB 6771 / HB 5905 flags and simple term-streak indicators."""
+    conn = None
+    try:
+        import asyncpg
+        import os
+
+        connect_timeout = float(os.getenv("DYNASTY_DB_CONNECT_TIMEOUT", "2"))
+        query_timeout = float(os.getenv("DYNASTY_DB_QUERY_TIMEOUT", "30"))
+
+        conn = await asyncpg.connect(
+            host=os.getenv('POSTGRES_HOST', 'localhost'),
+            port=int(os.getenv('POSTGRES_PORT', 5432)),
+            user=os.getenv('POSTGRES_USER', 'postgres'),
+            password=os.getenv('POSTGRES_PASSWORD', ''),
+            database=os.getenv('POSTGRES_DB_DYNASTY', 'dynasty'),
+            timeout=connect_timeout,
+        )
+
+        years_rows = await conn.fetch(
+            "SELECT DISTINCT year FROM political_dynasties WHERE winner = true AND year IS NOT NULL AND province ILIKE $1 ORDER BY year DESC",
+            f"%{province}%",
+            timeout=query_timeout,
+        )
+        available_years = [r["year"] for r in years_rows if r.get("year") is not None]
+
+        selected_year = year
+        if selected_year is None and available_years:
+            selected_year = available_years[0]
+        if selected_year is None:
+            return JSONResponse({"success": False, "error": "No election years available for this province (winner=true)."})
+
+        params = []
+        param_idx = 0
+        where_conditions = ["p.winner = true"]
+
+        param_idx += 1
+        where_conditions.append(f"p.province ILIKE ${param_idx}")
+        params.append(f"%{province}%")
+
+        param_idx += 1
+        where_conditions.append(f"p.year = ${param_idx}")
+        params.append(int(selected_year))
+
+        if position:
+            param_idx += 1
+            where_conditions.append(f"p.position ILIKE ${param_idx}")
+            params.append(f"%{position}%")
+
+        where_clause = "WHERE " + " AND ".join(where_conditions)
+        offset = (page - 1) * limit
+
+        query = f"""
+            WITH current AS (
+                SELECT p.*
+                FROM political_dynasties p
+                {where_clause}
+            ),
+            same_year AS (
+                SELECT province, last_name, COUNT(*) AS same_year_count
+                FROM current
+                WHERE province IS NOT NULL AND last_name IS NOT NULL
+                GROUP BY province, last_name
+            ),
+            prior AS (
+                SELECT p.province, p.last_name, 1 AS has_prior
+                FROM political_dynasties p
+                JOIN (SELECT DISTINCT province, last_name FROM current WHERE province IS NOT NULL AND last_name IS NOT NULL) k
+                  ON k.province = p.province AND k.last_name = p.last_name
+                WHERE p.winner = true AND p.year >= ($2 - 9) AND p.year < $2
+                GROUP BY p.province, p.last_name
+            ),
+            history AS (
+                SELECT
+                    first_name,
+                    last_name,
+                    position,
+                    province,
+                    year,
+                    (year - 3 * ROW_NUMBER() OVER (
+                        PARTITION BY first_name, last_name, position, province
+                        ORDER BY year
+                    )) AS grp
+                FROM political_dynasties
+                WHERE winner = true
+                  AND province ILIKE $1
+                  AND first_name IS NOT NULL AND first_name != ''
+                  AND last_name IS NOT NULL AND last_name != ''
+                  AND position IS NOT NULL AND position != ''
+                  AND year IS NOT NULL
+            ),
+            streaks AS (
+                SELECT
+                    first_name,
+                    last_name,
+                    position,
+                    province,
+                    MAX(year) AS end_year,
+                    COUNT(*) AS streak_len
+                FROM history
+                GROUP BY first_name, last_name, position, province, grp
+            ),
+            flagged AS (
+                SELECT
+                    current.*,
+                    COALESCE(same_year.same_year_count, 0) AS same_year_count,
+                    COALESCE(prior.has_prior, 0) AS has_prior,
+                    COALESCE(streaks.streak_len, 1) AS term_streak,
+                    (COALESCE(streaks.streak_len, 1) >= 3) AS term_limited,
+                    (
+                        COALESCE(same_year.same_year_count, 0) > 1
+                        AND NOT (
+                            COALESCE(current.position_category, '') ILIKE '%party%list%'
+                            OR COALESCE(current.position, '') ILIKE '%party%list%'
+                        )
+                    ) AS removed_hb6771,
+                    (
+                        COALESCE(same_year.same_year_count, 0) > 1
+                        OR prior.has_prior = 1
+                    ) AS removed_hb5905
+                FROM current
+                LEFT JOIN same_year
+                  ON same_year.province = current.province AND same_year.last_name = current.last_name
+                LEFT JOIN prior
+                  ON prior.province = current.province AND prior.last_name = current.last_name
+                LEFT JOIN streaks
+                  ON streaks.first_name = current.first_name
+                 AND streaks.last_name = current.last_name
+                 AND streaks.position = current.position
+                 AND streaks.province = current.province
+                 AND streaks.end_year = current.year
+            )
+            SELECT
+                *,
+                COUNT(*) OVER() AS total_matching
+            FROM flagged
+            ORDER BY COALESCE(position, '') ASC, COALESCE(last_name, '') ASC, COALESCE(first_name, '') ASC
+            LIMIT {int(limit)} OFFSET {int(offset)}
+        """
+
+        rows = await conn.fetch(query, *params, timeout=query_timeout)
+
+        total_matching = 0
+        people = []
+        removed_6771 = 0
+        removed_5905 = 0
+        term_limited = 0
+
+        for row in rows:
+            total_matching = int(row.get("total_matching") or 0)
+
+            removed_hb6771 = bool(row.get("removed_hb6771"))
+            removed_hb5905 = bool(row.get("removed_hb5905"))
+            if removed_hb6771:
+                removed_6771 += 1
+            if removed_hb5905:
+                removed_5905 += 1
+            if bool(row.get("term_limited")):
+                term_limited += 1
+
+            reasons_5905 = []
+            if int(row.get("same_year_count") or 0) > 1:
+                reasons_5905.append("family-member same-year")
+            if int(row.get("has_prior") or 0) == 1:
+                reasons_5905.append("family-member prior-year (<=9y)")
+
+            people.append({
+                "first_name": row.get("first_name"),
+                "last_name": row.get("last_name"),
+                "full_name": " ".join([v for v in [row.get("first_name"), row.get("last_name")] if v]),
+                "position": row.get("position"),
+                "position_category": row.get("position_category"),
+                "party": row.get("party"),
+                "region": row.get("region"),
+                "province": row.get("province"),
+                "municipality_city": row.get("municipality_city"),
+                "year": row.get("year"),
+                "removed_hb6771": removed_hb6771,
+                "removed_hb5905": removed_hb5905,
+                "same_year_count": int(row.get("same_year_count") or 0),
+                "has_prior": bool(row.get("has_prior")),
+                "term_streak": int(row.get("term_streak") or 1),
+                "term_limited": bool(row.get("term_limited")),
+                "reason_hb5905": ", ".join(reasons_5905) if reasons_5905 else None,
+            })
+
+        total_current = total_matching if total_matching else len(people)
+        summary = {
+            "province": province,
+            "year": selected_year,
+            "available_years": available_years,
+            "total_winners": total_current,
+            "removed_hb6771": removed_6771,
+            "removed_hb5905": removed_5905,
+            "remaining_hb6771": max(total_current - removed_6771, 0),
+            "remaining_hb5905": max(total_current - removed_5905, 0),
+            "term_limited": term_limited,
+        }
+
+        return JSONResponse({
+            "success": True,
+            "summary": summary,
+            "page": page,
+            "limit": limit,
+            "total": total_current,
+            "data": people,
+        })
+    except Exception as e:
+        return JSONResponse({"success": False, "error": str(e)})
+    finally:
+        if conn is not None:
+            try:
+                await conn.close()
+            except Exception:
+                pass
 
 @app.get("/api/dynasty/provinces")
 async def dynasty_provinces_api():
@@ -10830,12 +11308,10 @@ async def integrated_projects_api(
         import sys
         duckdb_imported = 'duckdb' in sys.modules
         print(f"🔵 [DEBUG] DuckDB imported: {duckdb_imported}")
-        if duckdb_imported:
-            print(f"⚠️  WARNING: DuckDB is imported but we should NOT be using it in this endpoint")
-            
-        # --- GREEN PROJECTS LOGIC (2026 Annex A-5 Clean) ---
-        if green:
+        # --- GREEN / DPWH ALL PROJECTS LOGIC (2026 Annex A-5) ---
+        if green or dpwh_all:
             import json
+            import re
             try:
                 # 1. Load 2026 Data (Annex A-5)
                 json_path = Path(__file__).parent / "static" / "data" / "budget_amendments_2026.json"
@@ -10853,7 +11329,8 @@ async def integrated_projects_api(
                 ]
                 
                 # 2. Load Bad IDs (Resurrected & Flagged)
-                bad_ids = set()
+                resurrected_ids = set()
+                flagged_ids = set()
                 
                 # Resurrected
                 res_path = Path(__file__).parent / "static" / "data" / "resurrected_projects_dpwh.json"
@@ -10862,7 +11339,7 @@ async def integrated_projects_api(
                         res_data = json.load(f)
                         for match in res_data.get('matches', []):
                             pid = match.get('year_2026', {}).get('id')
-                            if pid: bad_ids.add(str(pid))
+                            if pid: resurrected_ids.add(str(pid))
                             
                 # Flagged
                 flagged_path = Path(__file__).parent / "static" / "data" / "flagged_amount_projects_2026.json"
@@ -10871,42 +11348,80 @@ async def integrated_projects_api(
                         flagged_list = json.load(f)
                         for item in flagged_list:
                             pid = item.get('id')
-                            if pid: bad_ids.add(str(pid))
+                            if pid: flagged_ids.add(str(pid))
                 
-                # 3. Filter Green Projects
-                green_projects = []
+                # Pre-compile aggregate regex
+                # Matches "a. Region Name", "1. Region Name", "Region Name"
+                # Regions: NCR, CAR, BARMM, Region I-XIII
+                aggregate_pattern = re.compile(
+                    r'^(?:[a-zA-Z0-9]+\.)?\s*(?:National Capital Region|Region\s+[IVX]+|Cordillera Administrative Region|Bangsamoro Autonomous Region|MIMAROPA|CALABARZON|SOCCSKSARGEN|Zamboanga Peninsula|Northern Mindanao|Davao Region|Caraga|Eastern Visayas|Central Visayas|Western Visayas|Bicol Region|Central Luzon|Cagayan Valley|Ilocos Region).*$',
+                    re.IGNORECASE
+                )
+                
+                # 3. Filter Projects
+                final_projects = []
                 for item in annex_a5_items:
                     pid = str(item.get('id'))
-                    if pid not in bad_ids:
-                        green_projects.append({
-                            'project_name': item.get('name') or item.get('description'),
-                            'amount': item.get('final_amount') or item.get('original_amount'),
-                            'contractor_name': item.get('contractor') or 'N/A',
-                            'source': 'Annex A-5 (2026)',
-                            'sources_list': ['Annex A-5 (2026)'],
-                            'contract_id': pid,
-                            'location': (
-                                item.get('location', {}).get('province') or 
-                                item.get('district') or 
-                                item.get('location', {}).get('region') or 
-                                item.get('hierarchy', {}).get('region') or 
-                                'Unknown'
-                            )
-                        })
+                    p_name = item.get('name') or item.get('description') or ''
+                    
+                    # Logic for filtering ("green") vs marking ("dpwh_all")
+                    
+                    # Check status
+                    is_resurrected = pid in resurrected_ids
+                    is_flagged = pid in flagged_ids
+                    is_aggregate = bool(aggregate_pattern.match(p_name))
+                    
+                    # For Green: Exclude bad IDs AND aggregates
+                    if green:
+                        if is_resurrected or is_flagged or is_aggregate:
+                            continue
+                    
+                    # For DPWH All: Include all, just mark status
+                    # (Maybe optionally exclude aggregates if user wants? User didn't specify, but aggregates usually clutter)
+                    # Let's keep aggregates in 'dpwh_all' but maybe flag them? Or exclude if they are clearly just headers.
+                    # User request: "list all Annex A-5 ONLY regardless of flag"
+                    # I'll exclude aggregates from 'dpwh_all' too as they aren't real projects.
+                    if is_aggregate and dpwh_all:
+                         continue
+
+                    # Determine Status String
+                    status_labels = []
+                    if is_resurrected: status_labels.append("Resurrected")
+                    if is_flagged: status_labels.append("Flagged Amount")
+                    if not status_labels: status_labels.append("Clean")
+                    
+                    final_projects.append({
+                        'project_name': p_name,
+                        'amount': item.get('final_amount') or item.get('original_amount'),
+                        'contractor_name': item.get('contractor') or 'N/A',
+                        'source': 'Annex A-5 (2026)',
+                        'sources_list': ['Annex A-5 (2026)'],
+                        'contract_id': pid,
+                        'location': (
+                            item.get('location', {}).get('province') or 
+                            item.get('district') or 
+                            item.get('location', {}).get('region') or 
+                            item.get('hierarchy', {}).get('region') or 
+                            'Unknown'
+                        ),
+                        'status': ', '.join(status_labels),
+                        'is_resurrected': is_resurrected,
+                        'is_flagged': is_flagged
+                    })
                 
                 # 4. Search Filter
                 if project_name:
-                   green_projects = [p for p in green_projects if project_name.lower() in str(p['project_name']).lower()]
+                   final_projects = [p for p in final_projects if project_name.lower() in str(p['project_name']).lower()]
                 
                 # 5. Pagination
-                total = len(green_projects)
-                total_amount = sum(p['amount'] for p in green_projects if p['amount'])
-                total_districts = len(set(p['location'] for p in green_projects if p['location']))
+                total = len(final_projects)
+                total_amount = sum(p['amount'] for p in final_projects if p['amount'])
+                total_districts = len(set(p['location'] for p in final_projects if p['location']))
                 
                 total_pages = max(1, (total + limit - 1) // limit)
                 start = (page - 1) * limit
                 end = start + limit
-                paginated = green_projects[start:end]
+                paginated = final_projects[start:end]
                 
                 return JSONResponse({
                     "success": True,
@@ -10920,7 +11435,7 @@ async def integrated_projects_api(
                 })
                 
             except Exception as e:
-                print(f"Error loading Green Projects: {e}")
+                print(f"Error loading Projects: {e}")
                 return JSONResponse({"error": str(e)}, status_code=500)
         # ---------------------------------------------------
         

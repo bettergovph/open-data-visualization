@@ -1221,9 +1221,9 @@
                                                 By:</label>
                                             <select id="projectionGroupBy"
                                                 style="padding: 8px 12px; border: 1px solid #ddd; border-radius: 4px; width: 150px;">
+                                                <option value="province">Province</option>
                                                 <option value="region">Region</option>
                                                 <option value="position">Position</option>
-                                                <option value="province">Province</option>
                                                 <option value="party">Party</option>
                                             </select>
                                         </div>
@@ -1265,20 +1265,67 @@
                                                         style="padding: 12px; text-align: right; border-bottom: 2px solid #dee2e6; font-weight: 600;">
                                                         Total Officials</th>
                                                     <th style="padding: 12px; text-align: right; border-bottom: 2px solid #dee2e6; font-weight: 600; color: #dc3545;"
-                                                        title="Simultaneous only (fat=1 in source dataset), excluding party-list nominees">
+                                                        title="Proxy: family-member (surname-based) winners in the same province during the same election year, excluding party-list nominees">
                                                         HB 6771 (Simultaneous)</th>
-	                                                    <th style="padding: 12px; text-align: right; border-bottom: 2px solid #dee2e6; font-weight: 600; color: #8B0000;"
-	                                                        title="Surname-based: any same-surname winner in the same province (same-year overlap or any prior year)">
+                                                    <th style="padding: 12px; text-align: right; border-bottom: 2px solid #dee2e6; font-weight: 600; color: #8B0000;"
+	                                                        title="Proxy: family-member (surname-based) winner in the same province (same-year overlap or within 9 years prior)">
 	                                                        HB 5905 (Structural)</th>
-                                                    <th
-                                                        style="padding: 12px; text-align: right; border-bottom: 2px solid #dee2e6; font-weight: 600; color: #28a745;">
-                                                        Remaining</th>
                                                 </tr>
                                             </thead>
                                             <tbody id="projectionTableBody">
                                                 <!-- Rows injected via JS -->
                                             </tbody>
                                         </table>
+                                    </div>
+                                </div>
+
+                                <!-- Projection Drilldown Modal -->
+                                <div id="projectionPeopleModal"
+                                    style="position: fixed; inset: 0; background: rgba(0,0,0,0.55); display: none; align-items: center; justify-content: center; z-index: 9999;">
+                                    <div
+                                        style="background: white; width: min(1100px, 92vw); max-height: 88vh; border-radius: 12px; overflow: hidden; box-shadow: 0 10px 30px rgba(0,0,0,0.3);">
+                                        <div style="padding: 16px 20px; border-bottom: 1px solid #eee; display: flex; align-items: center; justify-content: space-between;">
+                                            <div>
+                                                <div id="projectionPeopleModalTitle" style="font-size: 18px; font-weight: 700; color: #0038A8;">
+                                                    Removed officials
+                                                </div>
+                                                <div id="projectionPeopleModalMeta" style="margin-top: 4px; font-size: 13px; color: #666;"></div>
+                                            </div>
+                                            <button onclick="closeProjectionPeopleModal()"
+                                                style="background: #f3f4f6; border: 1px solid #e5e7eb; padding: 8px 12px; border-radius: 8px; cursor: pointer;">
+                                                Close
+                                            </button>
+                                        </div>
+                                        <div style="padding: 16px 20px; max-height: calc(88vh - 70px); overflow-y: auto;">
+                                            <div id="projectionPeopleModalSpinner" style="display: none; align-items: center; justify-content: center; padding: 24px 0;">
+                                                <div style="display: flex; flex-direction: column; align-items: center; gap: 10px;">
+                                                    <div class="tab-spinner"></div>
+                                                    <div style="color: #666;">Loading people…</div>
+                                                </div>
+                                            </div>
+                                            <div id="projectionPeopleModalError" style="display: none; color: #b91c1c; background: #fef2f2; border: 1px solid #fecaca; padding: 12px; border-radius: 8px;"></div>
+                                            <div style="overflow-x: auto;">
+                                                <table style="width: 100%; border-collapse: collapse;">
+                                                    <thead>
+                                                        <tr style="background: #f8f9fa;">
+                                                            <th style="padding: 10px; text-align: left; border-bottom: 2px solid #dee2e6;">Name</th>
+                                                            <th style="padding: 10px; text-align: left; border-bottom: 2px solid #dee2e6;">Position</th>
+                                                            <th style="padding: 10px; text-align: left; border-bottom: 2px solid #dee2e6;">Province</th>
+                                                            <th style="padding: 10px; text-align: left; border-bottom: 2px solid #dee2e6;">Region</th>
+                                                            <th style="padding: 10px; text-align: left; border-bottom: 2px solid #dee2e6;">Reason</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody id="projectionPeopleModalTableBody"></tbody>
+                                                </table>
+                                            </div>
+                                            <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 12px;">
+                                                <div id="projectionPeopleModalCount" style="font-size: 12px; color: #666;"></div>
+                                                <button id="projectionPeopleLoadMoreBtn" onclick="loadMoreProjectionPeople()"
+                                                    style="display:none; background: #0038A8; color: white; padding: 8px 12px; border: none; border-radius: 8px; cursor: pointer; font-weight: 600;">
+                                                    Load more
+                                                </button>
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -1694,6 +1741,9 @@
         async function populatePositions() {
             try {
                 const resp = await fetch('/api/dynasty/positions');
+                if (!resp.ok) {
+                    throw new Error(`HTTP ${resp.status}: ${resp.statusText}`);
+                }
                 const json = await resp.json();
                 if (!json.success) return;
                 const list = document.getElementById('positionOptions');
@@ -1713,21 +1763,22 @@
             const list = document.getElementById('positionOptions');
             const debounce = (fn, delay) => { let t; return (...a) => { clearTimeout(t); t = setTimeout(() => fn(...a), delay); }; };
 
-            const fetchPositions = debounce(async () => {
-                const q = positionInput.value.trim();
-                const firstName = document.getElementById('firstNameInput').value;
-                const lastName = document.getElementById('lastNameInput').value;
-                const region = document.getElementById('regionFilter').value;
-                const dynasty = document.getElementById('dynastyFilter').value;
-                const params = new URLSearchParams({ q, first_name: firstName, last_name: lastName, region, dynasty });
-                try {
-                    const resp = await fetch(`/api/dynasty/positions?${params.toString()}`);
-                    const json = await resp.json();
-                    if (!json.success) return;
-                    list.innerHTML = '';
-                    (json.data || []).forEach(pos => {
-                        const opt = document.createElement('option');
-                        opt.value = pos;
+                const fetchPositions = debounce(async () => {
+                    const q = positionInput.value.trim();
+                    const firstName = document.getElementById('firstNameInput').value;
+                    const lastName = document.getElementById('lastNameInput').value;
+                    const region = document.getElementById('regionFilter').value;
+                    const dynasty = document.getElementById('dynastyFilter').value;
+                    const params = new URLSearchParams({ q, first_name: firstName, last_name: lastName, region, dynasty });
+                    try {
+                        const resp = await fetch(`/api/dynasty/positions?${params.toString()}`);
+                        if (!resp.ok) return;
+                        const json = await resp.json();
+                        if (!json.success) return;
+                        list.innerHTML = '';
+                        (json.data || []).forEach(pos => {
+                            const opt = document.createElement('option');
+                            opt.value = pos;
                         list.appendChild(opt);
                     });
                 } catch (e) { }
@@ -1794,6 +1845,9 @@
                 });
 
                 const response = await fetch(`/api/dynasty?${params}`);
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
                 const data = await response.json();
 
                 if (data.success) {
@@ -2809,6 +2863,17 @@
 
                 // Load dynasty data by province
                 const response = await fetch('/api/dynasty/provinces');
+                if (!response.ok) {
+                    const errText = await response.text();
+                    throw new Error(`HTTP ${response.status}: ${errText.slice(0, 200)}`);
+                }
+
+                const contentType = response.headers.get('content-type') || '';
+                if (!contentType.includes('application/json')) {
+                    const errText = await response.text();
+                    throw new Error(`Expected JSON but got ${contentType || 'unknown'}: ${errText.slice(0, 200)}`);
+                }
+
                 const dynastyData = await response.json();
 
                 if (dynastyData.success) {
@@ -6733,18 +6798,18 @@
 	                        renderProjectionTable(data.data);
 	                    } else {
                         console.error('Error loading projection data:', data.error);
-                        if (tableBody) tableBody.innerHTML = '<tr><td colspan="5" class="text-center py-4 text-red-600">Error loading data: ' + data.error + '</td></tr>';
-                    }
-                })
-	                .catch(error => {
-	                    console.error('Error loading projection data:', error);
-	                    const message = (error && error.message) ? error.message : 'Error loading data';
-	                    if (tableBody) tableBody.innerHTML = '<tr><td colspan="5" class="text-center py-4 text-red-600">' + message + '</td></tr>';
-	                })
-	                .finally(() => {
-	                    if (spinner) spinner.style.display = 'none';
-	                });
-	        }
+                        if (tableBody) tableBody.innerHTML = '<tr><td colspan="4" class="text-center py-4 text-red-600">Error loading data: ' + data.error + '</td></tr>';
+                     }
+                 })
+ 	                .catch(error => {
+ 	                    console.error('Error loading projection data:', error);
+ 	                    const message = (error && error.message) ? error.message : 'Error loading data';
+	                    if (tableBody) tableBody.innerHTML = '<tr><td colspan="4" class="text-center py-4 text-red-600">' + message + '</td></tr>';
+ 	                })
+ 	                .finally(() => {
+ 	                    if (spinner) spinner.style.display = 'none';
+ 	                });
+ 	        }
 
         function syncProjectionYearSelector(summary) {
             const select = document.getElementById('projectionYearSelector');
@@ -6788,12 +6853,14 @@
 	            <div style="font-size: 0.9em; color: #666; margin-bottom: 5px;">HB 6771 (Simultaneous, excl. party-list)</div>
 	            <div style="font-size: 1.8em; font-weight: bold; color: #dc3545;">${summary.total_hb6771.toLocaleString()}</div>
 	            <div style="font-size: 0.8em; color: #dc3545;">${(summary.hb6771_pct_of_total || 0).toFixed(1)}% of winners removed</div>
+	            <div style="font-size: 0.8em; color: #28a745;">Remaining: ${(summary.total_remaining_6771 || (summary.total_officials - summary.total_hb6771)).toLocaleString()}</div>
 	            <div style="font-size: 0.8em; color: #666;">${(summary.hb6771_pct_of_hb5905 || 0).toFixed(1)}% of HB 5905-covered</div>
 	        </div>
 	        <div style="${cardStyle} #8B0000;">
 	            <div style="font-size: 0.9em; color: #666; margin-bottom: 5px;">HB 5905 (Structural)</div>
 	            <div style="font-size: 1.8em; font-weight: bold; color: #8B0000;">${summary.total_hb5905.toLocaleString()}</div>
 	            <div style="font-size: 0.8em; color: #8B0000;">${(summary.hb5905_pct_of_total || 0).toFixed(1)}% of winners removed</div>
+	            <div style="font-size: 0.8em; color: #28a745;">Remaining: ${(summary.total_remaining || (summary.total_officials - summary.total_hb5905)).toLocaleString()}</div>
 	            <div style="font-size: 0.8em; color: #666;">+${(summary.hb5905_additional || 0).toLocaleString()} beyond HB 6771</div>
 	        </div>
 	    `;
@@ -6804,27 +6871,157 @@
             if (!tbody) return;
 
             if (!rows || rows.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="5" style="text-align: center; padding: 20px; color: #666;">No data found matching filters</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="4" style="text-align: center; padding: 20px; color: #666;">No data found matching filters</td></tr>';
                 return;
             }
+
+            const groupBy = document.getElementById('projectionGroupBy')?.value || 'province';
+            const year = document.getElementById('projectionYearSelector')?.value || '';
+            const positionFilter = document.getElementById('projectionPositionFilter')?.value || '';
 
             tbody.innerHTML = rows.map(row => `
         <tr style="border-bottom: 1px solid #eee;">
             <td style="padding: 12px; font-weight: 500;">${row.group}</td>
             <td style="padding: 12px; text-align: right;">${row.total_count.toLocaleString()}</td>
             <td style="padding: 12px; text-align: right; color: #dc3545;">
-                <div style="font-weight: 500;">${row.hb6771_count.toLocaleString()}</div>
-                <div style="font-size:0.8em; opacity:0.8;">${row.impact_6771}%</div>
+                <button
+                    onclick="openProjectionPeopleModal('${encodeURIComponent(row.group)}','hb6771','${encodeURIComponent(groupBy)}','${encodeURIComponent(year)}','${encodeURIComponent(positionFilter)}')"
+                    style="background: transparent; border: none; padding: 0; margin: 0; font-weight: 700; color: #dc3545; cursor: pointer; text-decoration: underline;"
+                    title="View people removed under HB 6771">
+                    ${row.hb6771_count.toLocaleString()}
+                </button>
+                <div style="font-size:0.8em; opacity:0.8;">Removed: ${row.impact_6771}%</div>
+                <div style="font-size:0.8em; color: #28a745;">Remaining: ${(row.remaining_6771 ?? (row.total_count - row.hb6771_count)).toLocaleString()}</div>
             </td>
             <td style="padding: 12px; text-align: right; color: #8B0000; background: #fff5f5;">
-                <div style="font-weight: bold;">${row.hb5905_count.toLocaleString()}</div>
-                <div style="font-size:0.8em; opacity:0.8;">${row.impact_5905}%</div>
-            </td>
-            <td style="padding: 12px; text-align: right; color: #28a745;">
-                <div>${row.remaining_count.toLocaleString()}</div>
+                <button
+                    onclick="openProjectionPeopleModal('${encodeURIComponent(row.group)}','hb5905','${encodeURIComponent(groupBy)}','${encodeURIComponent(year)}','${encodeURIComponent(positionFilter)}')"
+                    style="background: transparent; border: none; padding: 0; margin: 0; font-weight: 800; color: #8B0000; cursor: pointer; text-decoration: underline;"
+                    title="View people removed under HB 5905">
+                    ${row.hb5905_count.toLocaleString()}
+                </button>
+                <div style="font-size:0.8em; opacity:0.8;">Removed: ${row.impact_5905}%</div>
+                <div style="font-size:0.8em; color: #28a745;">Remaining: ${row.remaining_count.toLocaleString()}</div>
             </td>
         </tr>
     `).join('');
+        }
+
+        let projectionPeopleState = null;
+
+        function openProjectionPeopleModal(groupEncoded, hb, groupByEncoded, yearEncoded, positionEncoded) {
+            const modal = document.getElementById('projectionPeopleModal');
+            if (!modal) return;
+
+            const group = decodeURIComponent(groupEncoded || '');
+            const groupBy = decodeURIComponent(groupByEncoded || 'province');
+            const year = decodeURIComponent(yearEncoded || '');
+            const position = decodeURIComponent(positionEncoded || '');
+
+            projectionPeopleState = {
+                group,
+                groupBy,
+                hb: (hb || 'hb5905').toLowerCase(),
+                year,
+                position,
+                page: 1,
+                limit: 200,
+                total: 0,
+                loaded: 0,
+            };
+
+            modal.style.display = 'flex';
+
+            const title = document.getElementById('projectionPeopleModalTitle');
+            const meta = document.getElementById('projectionPeopleModalMeta');
+            const tbody = document.getElementById('projectionPeopleModalTableBody');
+            const count = document.getElementById('projectionPeopleModalCount');
+            if (title) title.textContent = `Removed officials (${projectionPeopleState.hb.toUpperCase()})`;
+            if (meta) meta.textContent = `${groupBy}: ${group}${year ? ` • Year ${year}` : ''}${position ? ` • Position contains "${position}"` : ''}`;
+            if (tbody) tbody.innerHTML = '';
+            if (count) count.textContent = '';
+
+            fetchProjectionPeople(true);
+        }
+
+        function closeProjectionPeopleModal() {
+            const modal = document.getElementById('projectionPeopleModal');
+            if (modal) modal.style.display = 'none';
+            projectionPeopleState = null;
+        }
+
+        async function fetchProjectionPeople(reset) {
+            const spinner = document.getElementById('projectionPeopleModalSpinner');
+            const errorEl = document.getElementById('projectionPeopleModalError');
+            const tbody = document.getElementById('projectionPeopleModalTableBody');
+            const count = document.getElementById('projectionPeopleModalCount');
+            const loadMoreBtn = document.getElementById('projectionPeopleLoadMoreBtn');
+
+            if (!projectionPeopleState) return;
+
+            if (spinner) spinner.style.display = 'flex';
+            if (errorEl) { errorEl.style.display = 'none'; errorEl.textContent = ''; }
+            if (loadMoreBtn) loadMoreBtn.style.display = 'none';
+
+            try {
+                const params = new URLSearchParams({
+                    hb: projectionPeopleState.hb,
+                    group_by: projectionPeopleState.groupBy,
+                    group: projectionPeopleState.group,
+                    page: String(projectionPeopleState.page),
+                    limit: String(projectionPeopleState.limit),
+                });
+                if (projectionPeopleState.year) params.append('year', projectionPeopleState.year);
+                if (projectionPeopleState.position) params.append('position', projectionPeopleState.position);
+
+                const resp = await fetch(`/api/dynasty/projection/people?${params.toString()}`);
+                const text = await resp.text();
+                let json;
+                try { json = JSON.parse(text); } catch (e) { throw new Error(`HTTP ${resp.status}: Non-JSON response`); }
+                if (!resp.ok || !json.success) {
+                    throw new Error(json.error || `HTTP ${resp.status}`);
+                }
+
+                const people = Array.isArray(json.data) ? json.data : [];
+                const meta = json.meta || {};
+                projectionPeopleState.total = meta.total_matching || projectionPeopleState.total;
+
+                if (tbody) {
+                    const rowsHtml = people.map(p => `
+                        <tr style="border-bottom: 1px solid #eee;">
+                            <td style="padding: 10px; font-weight: 600;">${p.full_name || ''}</td>
+                            <td style="padding: 10px;">${p.position || ''}</td>
+                            <td style="padding: 10px;">${p.province || ''}</td>
+                            <td style="padding: 10px;">${p.region || ''}</td>
+                            <td style="padding: 10px; color: #6b7280;">${p.reason || ''}</td>
+                        </tr>
+                    `).join('');
+                    tbody.insertAdjacentHTML('beforeend', rowsHtml);
+                }
+
+                projectionPeopleState.loaded += people.length;
+                if (count) {
+                    const total = projectionPeopleState.total || projectionPeopleState.loaded;
+                    count.textContent = `Showing ${projectionPeopleState.loaded.toLocaleString()} of ${total.toLocaleString()} removed`;
+                }
+
+                if (loadMoreBtn && projectionPeopleState.loaded < (projectionPeopleState.total || 0)) {
+                    loadMoreBtn.style.display = 'inline-block';
+                }
+            } catch (e) {
+                if (errorEl) {
+                    errorEl.style.display = 'block';
+                    errorEl.textContent = (e && e.message) ? e.message : 'Error loading people';
+                }
+            } finally {
+                if (spinner) spinner.style.display = 'none';
+            }
+        }
+
+        function loadMoreProjectionPeople() {
+            if (!projectionPeopleState) return;
+            projectionPeopleState.page += 1;
+            fetchProjectionPeople(false);
         }
     </script>
 
