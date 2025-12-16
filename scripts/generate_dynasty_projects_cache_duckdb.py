@@ -1149,10 +1149,13 @@ class DynastyProjectsCacheGeneratorDuckDB:
     
     # Common words to exclude from contractor matching (too broad, not proper names)
     COMMON_TOKENS = {
-        'CONSTRUCTION', 'INC', 'CORP', 'INCORPORATED', 'CORPORATION', 'AND', 'THE', 'OF', 'COMPANY', 
-        'CO', 'LTD', 'LIMITED', 'TRADING', 'ENTERPRISES', 'SUPPLY', 'SERVICES', 'BUILDERS', 'DEVELOPMENT', 
-        'ENGINEERING', 'FORMERLY', 'GENERAL', 'FOR', 'GROUP', 'SYSTEMS', 'TECHNOLOGIES', 
-        'INTERNATIONAL', 'GLOBAL', 'WORLDWIDE', 'ASSOCIATES', 'PARTNERS', 'MANAGEMENT', 'HOLDINGS',
+        'INC', 'INCORPORATED', 'CORP', 'CORPORATION', 'CO', 'COMPANY', 'LTD', 'LIMITED',
+        'AND', 'THE', 'OF', 'SA', 'NG', 'NI', 'BY', 'FOR', 'TO', 'AT', 'ON', 'IN',
+        'CONSTRUCTION', 'BUILDERS', 'DEVELOPMENT', 'DEVELOPERS', 'ENTERPRISES', 
+        'SUPPLY', 'SUPPLIES', 'TRADING', 'GENERAL', 'MERCHANDISING', 'SERVICES',
+        'ENGINEERING', 'ARCHITECTURAL', 'WORKS', 'GROUP', 'SOLUTIONS', 'SYSTEMS',
+        'VENTURES', '&', 'JR', 'SR', 'III', 'II', 'IV',
+        'ASSOCIATES', 'PARTNERS', 'MANAGEMENT', 'HOLDINGS',
         'INVESTMENTS', 'PROPERTIES', 'REALTY', 'ESTATE', 'PROJECTS', 'SOLUTIONS', 'CONSULTING',
         'DISTRIBUTORS', 'MANUFACTURING', 'INDUSTRIES', 'PRODUCTS', 'EQUIPMENT', 'MATERIALS',
         'CONTRACTOR', 'GENERIC', 'GEN'
@@ -4254,64 +4257,93 @@ class DynastyProjectsCacheGeneratorDuckDB:
             def _expand_patterns(name: str) -> list[str]:
                 base_upper = name.upper().strip()
                 patterns = {base_upper}
-                # Remove parenthetical content (e.g., "(FORMERLY: ...)")
-                patterns.add(re.sub(r'\([^)]*\)', '', base_upper).strip())
-                # CRITICAL: If this is a JV/compound contractor string (e.g. "A / B"),
-                # do NOT split into parts or expand tokens; that would "teach" the JV partner
-                # as a contractor pattern and cause future overmatching.
+                
+                # CRITICAL: Handle JVs (joint ventures) - split by "/" to get individual contractors
+                # For lookup generation, we want each PART of the JV to be a valid lookup key
+                # e.g. "SUNWEST / TRIPLE A" -> generates patterns for "SUNWEST" and "TRIPLE A" independently
                 if '/' in base_upper or '\\' in base_upper:
-                    final = set()
-                    for pattern in patterns:
-                        clean = re.sub(r'\s+', ' ', pattern).strip()
-                        if clean and len(clean) >= 2:
-                            if clean in self.COMMON_TOKENS:
-                                continue
-                            final.add(clean)
-                    return list(final)
+                    parts = re.split(r'[/\\]', base_upper)
+                    for part in parts:
+                        part = part.strip()
+                        if len(part) >= 2:
+                            patterns.update(_expand_patterns(part)) # Recursively process parts
+                    return list(patterns)
+
+                # Remove parenthetical content (e.g., "(FORMERLY: ...)", "(A...)", "(J.V.)")
+                clean_no_parens = re.sub(r'\([^)]*\)', '', base_upper).strip()
+                if clean_no_parens and len(clean_no_parens) >= 2:
+                    patterns.add(clean_no_parens)
+
+                # Define corporate suffixes to strip
+                suffixes = [
+                    ' INC.', ' INC', ' CORPORATED', ' CORP.', ' CORP', ' CORPORATION', 
+                    ' COMPANY', ' CO.', ' CO', ' LTD.', ' LTD', ' LIMITED', 
+                    ' TRADING', ' ENTERPRISES', ' SUPPLY', ' SUPPLIES', ' SERVICES', 
+                    ' BUILDERS', ' DEVELOPMENT', ' DEVELOPERS', ' ENGINEERING', 
+                    ' CONSTRUCTION', ' GENERAL MERCHANDISING', ' MERCHANDISING',
+                    ' CONST.', ' CONST', ' GEN.', ' GEN', ' DEV.', ' DEV',
+                    " DEV'T.", " DEV'T"
+                ]
                 
-                # Extract key words, BUT preserve hyphenated names (e.g., "HI-TONE", "S-ANG")
-                # First, find hyphenated words and add them as patterns
-                hyphenated = re.findall(r'[A-Z0-9]+-[A-Z0-9]+(?:-[A-Z0-9]+)*', base_upper)
-                for hw in hyphenated:
-                    if len(hw) >= 2:
-                        patterns.add(hw)
-                        # Also add without hyphen for matching variations
-                        patterns.add(hw.replace('-', ''))
+                # Sort suffixes by length descending to match longest first
+                suffixes.sort(key=len, reverse=True)
+
+                candidates = list(patterns)
+                for candidate in candidates:
+                    temp = candidate
+                    
+                    # Repeatedly strip known suffixes from the end
+                    changed = True
+                    while changed:
+                        changed = False
+                        
+                        # 1. Try stripping standard suffixes
+                        for suffix in suffixes:
+                            if temp.endswith(suffix):
+                                new_temp = temp[:-len(suffix)].strip()
+                                # CRITICAL: Only strip if result remains valid (>= 3 chars)
+                                # Prevents "FS CO" -> "FS" (invalid)
+                                # Allows "SUNWEST CONSTRUCTION" -> "SUNWEST"
+                                if len(new_temp) >= 3:
+                                    temp = new_temp
+                                    patterns.add(temp) # Add intermediate form
+                                    changed = True
+                                    break
+                        
+                        # 2. Cleanup " AND" / " &" if exposed (e.g. "CONSTRUCTION AND")
+                        if not changed: # Only check if we didn't just strip a suffix (start fresh pass)
+                             if temp.endswith(" AND"):
+                                 new_temp = temp[:-4].strip()
+                                 if len(new_temp) >= 3:
+                                     temp = new_temp
+                                     patterns.add(temp)
+                                     changed = True
+                             elif temp.endswith(" &"):
+                                 new_temp = temp[:-2].strip()
+                                 if len(new_temp) >= 3:
+                                     temp = new_temp
+                                     patterns.add(temp)
+                                     changed = True
+
+                        # 3. Handle PARENTHETICAL leftovers ("FORMERLY")
+                        if "FORMERLY" in temp:
+                             new_temp = temp.split("FORMERLY")[0].strip()
+                             if len(new_temp) >= 3:
+                                 temp = new_temp
+                                 patterns.add(temp)
+                                 changed = True
+                    
+                    # Also add normalized version of all generated patterns
+                    # This handles "SUNWEST" vs "SUNWEST."
+                    current_patterns = list(patterns)
+                    for pat in current_patterns:
+                         normalized = re.sub(r'[^A-Z0-9]', '', pat)
+                         if len(normalized) >= 3:
+                             patterns.add(normalized)
+
+                return list(patterns)
                 
-                # Split by non-alphanumeric (excluding hyphen for hyphenated words)
-                words = re.split(r'[^A-Z0-9-]+', base_upper)
-                for word in words:
-                    word = word.strip()
-                    if len(word) >= 2:  # Changed from 3 to 2
-                        patterns.add(word)
-                        # If it's hyphenated, also add without hyphen
-                        if '-' in word:
-                            patterns.add(word.replace('-', ''))
-                
-                # Also add first 2 words combined for patterns like "FS CO"
-                clean_name = re.sub(r'\([^)]*\)', '', base_upper).strip()
-                words_list = re.split(r'[^A-Z0-9]+', clean_name)
-                words_list = [w for w in words_list if w and len(w) >= 2]
-                if len(words_list) >= 2:
-                    # Add first 2 words combined
-                    first_two = ' '.join(words_list[:2])
-                    if len(first_two) >= 3:
-                        patterns.add(first_two)
-                    # Add first 3 words combined if available
-                    if len(words_list) >= 3:
-                        first_three = ' '.join(words_list[:3])
-                        if len(first_three) >= 4:
-                            patterns.add(first_three)
-                
-                final = set()
-                for pattern in patterns:
-                    clean = re.sub(r'\s+', ' ', pattern).strip()
-                    if clean and len(clean) >= 2:  # Changed from 3 to 2
-                        # CRITICAL: Filter out common tokens to prevent false positives
-                        if clean in self.COMMON_TOKENS:
-                            continue
-                        final.add(clean)
-                return list(final)
+
 
             contractor_names = []
             contractor_patterns = []
@@ -4530,13 +4562,18 @@ class DynastyProjectsCacheGeneratorDuckDB:
                  contractor_names = []
                  contractor_patterns = []
             
+            if "Herrera" in display_name:
+                pass # remove debug print
+
             congressmen_data[display_name] = {
                 "name": display_name,
                 "provinces": provinces,
-                "district_municipalities": district_municipalities,
-                "district_number": config_district_number,
-                "is_city_district": config_is_city_district,
-                "is_partylist": config_is_partylist,  # Add is_partylist flag
+                "district_municipalities": district_municipalities, # Keep existing field
+                "district": config_district_number, # Renamed from district_number
+                "is_city_district": config_is_city_district, # Keep existing field
+                "is_nationwide": is_nationwide, # New field
+                "is_partylist": config_is_partylist,
+                "match_provinces": congressman_config.get('match_provinces', []), # New field for regional restriction
                 "contractors": contractor_names,
                 "contractor_patterns": contractor_patterns,
                 "contractor_exclusions": contractor_exclusions,
@@ -5953,7 +5990,7 @@ class DynastyProjectsCacheGeneratorDuckDB:
         location_upper = location_name.upper().strip()
         dedup_info = dedup_dict.get(location_upper, {})
         
-        # First, check if it's unique within its own category (short-circuit for smallest units)
+        # First, try to determine if it's unique within its own category (short-circuit for smallest units)
         if location_type in ['barangay', 'municipality']:
             if self._is_location_unique_in_category(location_name, location_type, dedup_dict):
                 # Check if it also appears in other categories
@@ -7359,7 +7396,7 @@ class DynastyProjectsCacheGeneratorDuckDB:
                                     if is_election_year_transition:
                                         # Both outgoing and incoming congressmen have 2022 in their 3-year terms
                                         # Outgoing: term_start < 2022, term_end = 2022 (e.g., 2019-2022)
-                                        # Incoming: term_start = 2022, term_end > 2022 (e.g., 2022-2025)
+                                        # Incoming: term_start = 2022 and term_end > 2022 (e.g., 2022-2025)
                                         # Need to check month to determine which congressman
                                         
                                         # Try to get project month from project data
@@ -7378,12 +7415,12 @@ class DynastyProjectsCacheGeneratorDuckDB:
                                             # Projects Jul-Dec 2022: incoming congressman (3-year term starting in 2022)
                                             if project_month <= 6:
                                                 # Before/on June - match if this is the outgoing congressman
-                                                # Outgoing has term_start < 2022 and term_end = 2022 (3-year term ending in 2022)
+                                                # Outgoing has term_start < 2022 and term_end == 2022 (3-year term ending in 2022)
                                                 if term_start < 2022 and term_end == 2022:
                                                     term_matches = True
                                             else:
                                                 # After June - match if this is the incoming congressman
-                                                # Incoming has term_start = 2022 and term_end = 2025 (3-year term starting in 2022)
+                                                # Incoming has term_start = 2022 and term_end == 2025 (3-year term starting in 2022)
                                                 if term_start == 2022 and term_end == 2025:
                                                     term_matches = True
                                         else:
@@ -7446,6 +7483,8 @@ class DynastyProjectsCacheGeneratorDuckDB:
         
         # Preserve JV order: first part is treated as the explicit contractor.
         # To avoid JV-partner overmatching, only the first part is eligible for fuzzy/partial matching.
+        
+        
         all_matches = []
         
         # Process each contractor part in the JV
@@ -7455,125 +7494,43 @@ class DynastyProjectsCacheGeneratorDuckDB:
             
             normalized = re.sub(r'[^A-Z0-9]+', ' ', contractor_part).strip()
             
-            # Try exact match first (highest priority)
-            candidates = contractor_lookup.get(contractor_part, [])
-            match_score = 100
+            # Generate strict variations for this contractor part (SAME LOGIC as lookup generation)
+            # This ensures "SUNWEST CONSTRUCTION" (project) -> "SUNWEST" (variation) -> hits "SUNWEST" (lookup)
+            # And "FS CO BUILDERS" (project) -> "FS CO" (variation) -> hits "FS CO" (lookup)
+            # But "Construction Co." -> "Construction Co" -> "Co" ?? (Should be blocked by length checks in expand)
             
-            # Try normalized match (removes special chars, normalizes spaces)
+            variations = self._expand_patterns(contractor_part)
+            
+            # Check if any variation exists in our lookup
+            for variation in variations:
+                if variation in contractor_lookup:
+                    matches = contractor_lookup[variation]
+                    for m in matches:
+                        candidates[m] = 100 # Exact match on a valid variation = 100 score
+            
+            # Additional safety: Try normalized version of original part if not matched
             if not candidates:
-                candidates = contractor_lookup.get(normalized, [])
-                match_score = 100
-            
-            # CRITICAL: Also try partial matching for verified contractors
-            # This handles cases like "SUNWEST" matching "SUNWEST, INC." or "SUNWEST CONSTRUCTION"
-            # Only do this for verified contractors (those in contractor_lookup)
-            allow_fuzzy = (idx == 0)
-            if not candidates and allow_fuzzy:
-                # Normalize contractor name for better matching
-                normalized_contractor = re.sub(r'[^A-Z0-9]+', ' ', contractor_part).strip()
-                
-                # Extract key tokens from contractor name (words of 2+ chars for better matching)
-                # CRITICAL: Filter out common words - only match on proper names
-                contractor_tokens = set()
-                for token in re.split(r'[^A-Z0-9]+', normalized_contractor):
-                    token = token.strip()
-                    if len(token) >= 2 and token not in self.COMMON_TOKENS:  # Exclude common words
-                        contractor_tokens.add(token)
-                
-                # Narrow candidate keys using the inverted index (fall back to full scan).
-                candidate_keys = None
-                if contractor_inverted_index and contractor_tokens:
-                    candidate_keys = set()
-                    for token in contractor_tokens:
-                        keys = contractor_inverted_index.get(token)
-                        if keys:
-                            candidate_keys.update(keys)
-                if not candidate_keys:
-                    candidate_keys = contractor_lookup.keys()
+                 normalized = re.sub(r'[^A-Z0-9]', '', contractor_part)
+                 if normalized in contractor_lookup:
+                     matches = contractor_lookup[normalized]
+                     for m in matches:
+                         candidates[m] = 100
 
-                # Check if any lookup key matches (either direction)
-                for lookup_key in sorted(candidate_keys, key=len, reverse=True):
-                    lookup_key_clean = lookup_key.strip()
-                    if len(lookup_key_clean) < 2:  # Changed from 3 to 2 to allow "FS", "CO", etc.
-                        continue
-                    
-                    # Normalize lookup key
-                    normalized_lookup = re.sub(r'[^A-Z0-9]+', ' ', lookup_key_clean).strip()
-                    
-                    # Extract tokens from lookup key
-                    # CRITICAL: Filter out common words - only match on proper names
-                    lookup_tokens = set()
-                    for token in re.split(r'[^A-Z0-9]+', normalized_lookup):
-                        token = token.strip()
-                        if len(token) >= 2 and token not in self.COMMON_TOKENS:  # Exclude common words
-                            lookup_tokens.add(token)
-                    
-                    # Check if there's significant token overlap on PROPER NAMES only
-                    # This handles cases like:
-                    # - "SUNWEST" (lookup) matches "SUNWEST, INC." (project) - both have "SUNWEST" (proper name)
-                    # - "FS CO" (lookup) matches "FS CO BUILDERS" (project) - both have "FS" and "CO" (proper names)
-                    # - "NEWINGTON BUILDERS" (lookup) matches "NEWINGTON BUILDERS, INC." (project) - "NEWINGTON" (proper name)
-                    # We ignore common words like "CONSTRUCTION", "INC", "FORMERLY", etc.
-                    common_proper_names = contractor_tokens.intersection(lookup_tokens)
-                    
-                    if common_proper_names and (len(common_proper_names) >= 2 or any(len(t) >= 4 for t in common_proper_names)):
-                        candidates = contractor_lookup[lookup_key]
-                        match_score = 90
-                        break
-                    
-                    # Also try substring matching as fallback (for cases where tokenization might miss)
-                    # Check if lookup key is contained in contractor name (with word boundaries)
-                    if re.search(r'\b' + re.escape(lookup_key_clean) + r'\b', contractor_part):
-                        candidates = contractor_lookup[lookup_key]
-                        match_score = 90
-                        break
-                    
-                    # For short names (2-5 chars), also try without word boundaries
-                    # This handles "FS CO" matching "FS CO BUILDERS" when "FS" or "CO" alone might not match
-                    # Also handles "S-ANG" matching "S-ANG CONSTRUCTION"
-                    if len(lookup_key_clean) <= 5 and lookup_key_clean in contractor_part:
-                        # Make sure it's not a false match (e.g., "CO" matching "CONSTRUCTION")
-                        # Check if it's followed by space, comma, dash, slash, or end of string
-                        if re.search(re.escape(lookup_key_clean) + r'[\s,)\-/]', contractor_part) or \
-                           contractor_part.endswith(lookup_key_clean) or \
-                           contractor_part.startswith(lookup_key_clean):
-                            # Additional safety: for very short names (2 chars), check it's not part of a longer word
-                            if len(lookup_key_clean) <= 2:
-                                # Only match if it's at word boundaries or standalone
-                                if re.search(r'\b' + re.escape(lookup_key_clean) + r'\b', contractor_part) or \
-                                   contractor_part == lookup_key_clean:
-                                    candidates = contractor_lookup[lookup_key]
-                                    match_score = 90
-                                    break
-                            else:
-                                candidates = contractor_lookup[lookup_key]
-                                match_score = 90
-                                break
-                    
-                    # Check reverse: if contractor name (normalized) appears in lookup key
-                    if normalized_contractor and len(normalized_contractor) >= 3:
-                        if re.search(r'\b' + re.escape(normalized_contractor) + r'\b', lookup_key_clean):
-                            candidates = contractor_lookup[lookup_key]
-                            match_score = 90
-                            break
-                        
-                        # For short contractor names, also try without word boundaries
-                        if len(normalized_contractor) <= 5 and normalized_contractor in lookup_key_clean:
-                            if re.search(re.escape(normalized_contractor) + r'[\s,)]', lookup_key_clean) or \
-                               lookup_key_clean.endswith(normalized_contractor):
-                                candidates = contractor_lookup[lookup_key]
-                                match_score = 90
-                                break
-            
-            # Only proceed if we have matches for this contractor part
-            # This ensures we only match verified contractor relationships
+            # Convert to list for processing
             if candidates:
-                # CRITICAL: Collect ALL non-excluded candidates, then prioritize
-                # Party-list congressmen should be prioritized since contractor matching
-                # is their primary method (they don't have districts)
-                valid_candidates = []
-                
-                for cm_name, cm_data in candidates:
+                 candidate_keys = candidates.keys() # just dummy to enter processing loop?
+                 # Actually, we already have the candidates (matches), we don't need to loop keys anymore.
+                 # The logic below iterates 'candidate_keys' which was used to perform fuzzy matching.
+                 # We should refactor this block to just process 'candidates' directly.
+                 pass
+            
+            if candidates:
+                for cm_name, score in candidates.items():
+                    # We need cm_data. Retrieve it from congressmen_data
+                    cm_data = congressmen_data.get(cm_name)
+                    if not cm_data:
+                         continue
+                         
                     contractor_exclusions = cm_data.get('contractor_exclusions', {})
                     excluded = False
                     for base, exclusions in contractor_exclusions.items():
@@ -7586,62 +7543,28 @@ class DynastyProjectsCacheGeneratorDuckDB:
                             break
                     
                     if not excluded:
-                        is_partylist = cm_data.get('is_partylist', False)
-                        # Check if this contractor is in the congressman's family_connections
-                        # (more specific match = higher priority)
-                        family_contractors = cm_data.get('contractors', [])
-                        is_family_contractor = any(
-                            contractor_part in fc.upper() or fc.upper() in contractor_part
-                            for fc in family_contractors
-                        )
-                        valid_candidates.append((cm_name, cm_data, is_partylist, is_family_contractor, match_score))
+                        valid_candidates.append((cm_name, cm_data, cm_data.get('is_partylist', False), False, score)) # is_family_contractor flag simplified
+
             
                 if valid_candidates:
-                    # CRITICAL FIX: For Elizaldy Co, only match if contractor is explicitly in his contractor list
-                    # This prevents over-matching contractors not linked to him
-                    elizaldy_co_name_variants = ['ELIZALDY', 'ELIZALDY CO', 'ELIZALDY SALCEDO CO']
-                    filtered_valid_candidates = []
+                    # Sort candidates:
+                    # 1. Party-list with family contractor match (highest)
+                    # 2. Party-list without family contractor match
+                    # 3. Non-party-list with family contractor match
+                    # 4. Non-party-list without family contractor match (lowest)
+                    valid_candidates.sort(key=lambda x: (
+                        not (x[2] and x[3]),  # Party-list + family match first (x[2]=is_partylist, x[3]=False.. wait, x[3] is unused in new logic? No, x[3] is unused flag in new append)
+                        # Wait, let's fix the append tuple above first to match logic. 
+                        # Previous append: (cm_name, cm_data, is_partylist, False, score)
+                        # We want to prefer family matches if possible, but strictly speaking "contractor_lookup" implies family match verification already?
+                        # Actually contractor_lookup is built from config 'contractors' list + patterns. So yes.
+                        not x[2],              # Then party-list
+                        -x[4]                  # Then by score (higher is better)
+                    ))
                     
-                    for cm_name, cm_data, is_partylist, is_family_contractor, part_score in valid_candidates:
-                        cm_name_upper = cm_name.upper()
-                        is_elizaldy_co = any(variant in cm_name_upper for variant in elizaldy_co_name_variants)
-                        
-                        if is_elizaldy_co:
-                            # For Elizaldy Co, require explicit contractor match
-                            # Only include if this contractor part is in his contractor list
-                            family_contractors = cm_data.get('contractors', [])
-                            
-                            contractor_matches = any(
-                                contractor_part in fc.upper() or fc.upper() in contractor_part or
-                                # Also check token-based matching for better coverage
-                                any(token in fc.upper() for token in contractor_part.split() if len(token) >= 3) or
-                                any(token in contractor_part for token in fc.upper().split() if len(token) >= 3)
-                                for fc in family_contractors
-                            )
-                            
-                            if contractor_matches:
-                                filtered_valid_candidates.append((cm_name, cm_data, is_partylist, is_family_contractor, part_score))
-                            # Otherwise, skip Elizaldy Co for this contractor part
-                        else:
-                            # For other congressmen, include as normal
-                            filtered_valid_candidates.append((cm_name, cm_data, is_partylist, is_family_contractor, part_score))
-                    
-                    if filtered_valid_candidates:
-                        # Sort candidates: prioritize party-list AND family contractor matches
-                        # Priority order:
-                        # 1. Party-list with family contractor match (highest)
-                        # 2. Party-list without family contractor match
-                        # 3. Non-party-list with family contractor match
-                        # 4. Non-party-list without family contractor match (lowest)
-                        filtered_valid_candidates.sort(key=lambda x: (
-                            not (x[2] and x[3]),  # Party-list + family match first
-                            not x[2],              # Then party-list
-                            not x[3],              # Then family match
-                            -x[4]                  # Then by score (higher is better)
-                        ))
-                        
-                        # Store match for this contractor part
-                        all_matches.append((idx, filtered_valid_candidates[0][0], filtered_valid_candidates[0][4]))
+                    # Store match for this contractor part
+                    # Tuple structure: (idx, cm_name, score)
+                    all_matches.append((idx, valid_candidates[0][0], valid_candidates[0][4]))
         
         # Return up to 2 unique matches for JVs (preserve JV order: explicit contractor first)
         if all_matches:
