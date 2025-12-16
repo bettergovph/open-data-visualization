@@ -1,7 +1,7 @@
 import uvicorn
 from fastapi import FastAPI, HTTPException, Query, Request
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import JSONResponse, FileResponse
+from fastapi.responses import JSONResponse, FileResponse, Response
 from fastapi.staticfiles import StaticFiles
 import os
 import json
@@ -730,7 +730,6 @@ async def export_integrated_projects_csv(
 ) -> Response:
     """Export integrated projects to CSV with filtering (all pages)"""
     try:
-        from fastapi.responses import Response
         import csv
         import io
         
