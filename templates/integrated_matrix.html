@@ -265,16 +265,16 @@
                 <div class="text-xs text-slate-400 mt-2">Potential Risk Value</div>
             </div>
             <div class="glass-panel rounded-2xl p-6 shadow-sm">
-                <h3 class="text-sm font-medium text-slate-500 uppercase tracking-wider mb-2">Affected Districts</h3>
+                <h3 class="text-sm font-medium text-slate-500 uppercase tracking-wider mb-2">Districts</h3>
                 <div class="text-4xl font-bold text-amber-600" id="totalDistricts">Loading...</div>
-                <div class="text-xs text-slate-400 mt-2">Legislative Districts Involved</div>
+                <div class="text-xs text-slate-400 mt-2">Legislative districts (DPWH tabs need district cache)</div>
             </div>
         </div>
 
         <!-- Controls -->
         <div class="flex flex-row flex-wrap items-center mb-6 gap-6">
             <!-- Tabs -->
-            <a href="#" class="pb-3 border-b-2 border-indigo-500 text-indigo-600 font-medium transition-colors"
+            <a href="#red" class="pb-3 border-b-2 border-indigo-500 text-indigo-600 font-medium transition-colors"
                 id="tabMatrix">Red/Repeated</a>
             <a href="#green"
                 class="pb-3 border-b-2 border-transparent text-slate-500 hover:text-slate-700 hover:border-slate-300 font-medium transition-colors"
@@ -1068,7 +1068,9 @@
                 if (data.success) {
                     document.getElementById('totalProjects').textContent = data.total.toLocaleString();
                     document.getElementById('totalAmount').textContent = '₱ ' + (data.total_amount / 1e9).toFixed(2) + ' B';
-                    document.getElementById('totalDistricts').textContent = data.total_districts.toLocaleString();
+                    document.getElementById('totalDistricts').textContent = (data.total_districts === null || data.total_districts === undefined)
+                        ? 'N/A'
+                        : Number(data.total_districts).toLocaleString();
 
                     // Update Labels for Context
                     document.querySelectorAll('.glass-panel h3')[0].textContent = "Lower Cost Projects";
@@ -1147,7 +1149,9 @@
                 if (data.success) {
                     document.getElementById('totalProjects').textContent = data.total.toLocaleString();
                     document.getElementById('totalAmount').textContent = '₱ ' + (data.total_amount / 1e9).toFixed(2) + ' B';
-                    document.getElementById('totalDistricts').textContent = data.total_districts.toLocaleString();
+                    document.getElementById('totalDistricts').textContent = (data.total_districts === null || data.total_districts === undefined)
+                        ? 'N/A'
+                        : Number(data.total_districts).toLocaleString();
 
                     document.querySelectorAll('.glass-panel h3')[0].textContent = "Annex A-5 Projects";
                     document.getElementById('filterStatusText').textContent = "DPWH Annex A-5 (2026) - All Projects";
@@ -1210,7 +1214,7 @@
         }
 
         function handleHash() {
-            const hash = window.location.hash;
+            const hash = String(window.location.hash || '#red').toLowerCase();
             const viewMatrix = document.getElementById('viewMatrix');
             const viewLoc = document.getElementById('viewLoc');
             const viewGreen = document.getElementById('viewGreen');
@@ -1223,6 +1227,9 @@
             const tabGreen = document.getElementById('tabGreen');
             const tabDpwh = document.getElementById('tabDpwh');
             const tabDistrict = document.getElementById('tabDistrict');
+
+            if (!viewMatrix || !viewLoc || !viewGreen || !viewDpwh || !viewDistrict || !matrixControls) return;
+            if (!tabMatrix || !tabLoc || !tabGreen || !tabDpwh || !tabDistrict) return;
 
             // Reset all tabs
             [tabMatrix, tabLoc, tabGreen, tabDpwh, tabDistrict].forEach(t => {
@@ -1244,44 +1251,68 @@
                 viewLoc.classList.remove('hidden');
                 loadLocations();
             }
-            else if (hash === '#green') {
-                tabGreen.classList.replace('border-transparent', 'border-indigo-500');
-                tabGreen.classList.replace('text-slate-500', 'text-indigo-600');
-                viewGreen.classList.remove('hidden');
-                // Dashboard stats are updated by loadGreenProjects
-                if (document.getElementById('greenTableBody').children.length <= 1) {
-                    loadGreenProjects();
-                }
-            }
-            else if (hash === '#dpwh') {
-                tabDpwh.classList.replace('border-transparent', 'border-indigo-500');
-                tabDpwh.classList.replace('text-slate-500', 'text-indigo-600');
-                viewDpwh.classList.remove('hidden');
-                switchDpwhSubtab('projects');
-                if (document.getElementById('dpwhTableBody').children.length <= 1) {
-                    loadDpwhProjects();
-                }
-            }
-            else if (hash === '#district') {
-                tabDistrict.classList.replace('border-transparent', 'border-indigo-500');
-                tabDistrict.classList.replace('text-slate-500', 'text-indigo-600');
-                viewDistrict.classList.remove('hidden');
-                loadDpwhDistrictRollup();
-            }
-            else {
-                // Default: Matrix
-                tabMatrix.classList.replace('border-transparent', 'border-indigo-500');
-                tabMatrix.classList.replace('text-slate-500', 'text-indigo-600');
-                viewMatrix.classList.remove('hidden');
-                matrixControls.classList.remove('hidden');
-            }
-        }
+	            else if (hash === '#green') {
+	                tabGreen.classList.replace('border-transparent', 'border-indigo-500');
+	                tabGreen.classList.replace('text-slate-500', 'text-indigo-600');
+	                viewGreen.classList.remove('hidden');
+	                // Always refresh dashboard + table for the current tab/page
+	                loadGreenProjects();
+	            }
+	            else if (hash === '#dpwh') {
+	                tabDpwh.classList.replace('border-transparent', 'border-indigo-500');
+	                tabDpwh.classList.replace('text-slate-500', 'text-indigo-600');
+	                viewDpwh.classList.remove('hidden');
+	                switchDpwhSubtab('projects');
+	                // Always refresh dashboard + table for the current tab/page
+	                loadDpwhProjects();
+	            }
+	            else if (hash === '#district') {
+	                tabDistrict.classList.replace('border-transparent', 'border-indigo-500');
+	                tabDistrict.classList.replace('text-slate-500', 'text-indigo-600');
+	                viewDistrict.classList.remove('hidden');
+	                loadDpwhDistrictRollup();
+	            }
+	            else {
+	                // Default: Red/Repeated (hash '', '#', '#red')
+	                tabMatrix.classList.replace('border-transparent', 'border-indigo-500');
+	                tabMatrix.classList.replace('text-slate-500', 'text-indigo-600');
+	                viewMatrix.classList.remove('hidden');
+	                matrixControls.classList.remove('hidden');
+                    // Restore dashboard context for matrix view
+                    const firstCardTitle = document.querySelectorAll('.glass-panel h3')[0];
+                    if (firstCardTitle) firstCardTitle.textContent = 'High Priority Projects';
+                    const statusTextEl = document.getElementById('filterStatusText');
+                    if (statusTextEl) {
+                        statusTextEl.textContent = strictMode
+                            ? 'Showing Resurrected AND Flagged (Overlap Only)'
+                            : 'Showing Resurrected OR Flagged (All Items)';
+                    }
+                    const term = (document.getElementById('searchBox')?.value || '').toLowerCase();
+                    applyFilter(term);
+	            }
+	        }
 
         // --- DPWH District Tab Logic ---
-        let dpwhDistrictRows = [];
-        let dpwhDistrictLoaded = false;
-        let districtSortKey = 'total_amount';
-        let districtSortDir = 'desc';
+	        let dpwhDistrictRows = [];
+	        let dpwhDistrictLoaded = false;
+	        let districtSortKey = 'total_amount';
+	        let districtSortDir = 'desc';
+            function updateDistrictDashboard() {
+                const rows = dpwhDistrictRows || [];
+                const totalProjects = rows.reduce((s, r) => s + Number(r?.project_count ?? 0), 0);
+                const totalAmt = rows.reduce((s, r) => s + Number(r?.total_amount ?? 0), 0);
+                const meaningfulRows = rows.filter(r => {
+                    const d = String(r?.district ?? '').trim().toLowerCase();
+                    return d && d !== 'unknown' && d !== 'n/a' && d !== 'na';
+                });
+                document.getElementById('totalProjects').textContent = totalProjects.toLocaleString();
+                document.getElementById('totalAmount').textContent = '₱ ' + (totalAmt / 1e9).toFixed(2) + ' B';
+                document.getElementById('totalDistricts').textContent = meaningfulRows.length.toLocaleString();
+                const firstCardTitle = document.querySelectorAll('.glass-panel h3')[0];
+                if (firstCardTitle) firstCardTitle.textContent = 'DPWH District Rollup';
+                const statusTextEl = document.getElementById('filterStatusText');
+                if (statusTextEl) statusTextEl.textContent = 'DPWH Annex A-5 (2026) - By District';
+            }
 
         function updateDistrictSortIndicators() {
             const projectsEl = document.getElementById('districtSortProjects');
@@ -1304,12 +1335,16 @@
             renderDpwhDistrictTable();
         }
 
-        async function loadDpwhDistrictRollup() {
-            if (dpwhDistrictLoaded) return;
-            const loadingEl = document.getElementById('dpwhDistrictLoading');
-            const errorEl = document.getElementById('dpwhDistrictError');
-            const tbody = document.getElementById('dpwhDistrictTableBody');
-            const metaEl = document.getElementById('dpwhDistrictMeta');
+	        async function loadDpwhDistrictRollup() {
+	            if (dpwhDistrictLoaded) {
+                    renderDpwhDistrictTable();
+                    updateDistrictDashboard();
+                    return;
+                }
+	            const loadingEl = document.getElementById('dpwhDistrictLoading');
+	            const errorEl = document.getElementById('dpwhDistrictError');
+	            const tbody = document.getElementById('dpwhDistrictTableBody');
+	            const metaEl = document.getElementById('dpwhDistrictMeta');
 
             try {
                 if (loadingEl) loadingEl.style.display = 'block';
@@ -1317,12 +1352,13 @@
                 const resp = await fetch('/api/integ2026/dpwh-districts');
                 const data = await resp.json();
                 if (!data.success) throw new Error(data.error || 'Failed to load district rollup');
-                dpwhDistrictRows = data.rows || [];
-                dpwhDistrictLoaded = true;
-                if (metaEl) {
-                    metaEl.textContent = data.generated_at
-                        ? `Cache ready (generated ${data.generated_at})`
-                        : 'Cache ready';
+	                dpwhDistrictRows = data.rows || [];
+	                dpwhDistrictLoaded = true;
+                    updateDistrictDashboard();
+	                if (metaEl) {
+	                    metaEl.textContent = data.generated_at
+	                        ? `Cache ready (generated ${data.generated_at})`
+	                        : 'Cache ready';
                 }
                 updateDistrictSortIndicators();
                 renderDpwhDistrictTable();
@@ -1408,8 +1444,10 @@
             }
         }
 
-        window.addEventListener('hashchange', handleHash);
-        handleHash();
+        document.addEventListener('DOMContentLoaded', () => {
+            window.addEventListener('hashchange', handleHash);
+            handleHash();
+        });
 
         // Launch Transparency page using local parquet search; prefer historical match, fallback to project name
         window.openTransparencyLinkFromRow = async function (histEncoded, nameEncoded) {
