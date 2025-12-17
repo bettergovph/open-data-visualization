@@ -528,76 +528,9 @@ def find_congressman_by_contractor_worker(contractor_name: str) -> Optional[tupl
             candidates = contractor_lookup.get(normalized, [])
             match_score = 100
         
-        allow_fuzzy = (idx == 0)
-        if not candidates and allow_fuzzy:
-            # Partial matching (ONLY for the explicit contractor part)
-            normalized_contractor = re.sub(r'[^A-Z0-9]+', ' ', contractor_part).strip()
-            contractor_tokens = set()
-            for token in re.split(r'[^A-Z0-9]+', normalized_contractor):
-                token = token.strip()
-                if len(token) >= 2 and token not in common_tokens:
-                    contractor_tokens.add(token)
-            
-            candidate_keys = None
-            if contractor_inverted_index and contractor_tokens:
-                candidate_keys = set()
-                for token in contractor_tokens:
-                    keys = contractor_inverted_index.get(token)
-                    if keys:
-                        candidate_keys.update(keys)
-            if not candidate_keys:
-                candidate_keys = contractor_lookup.keys()
-
-            for lookup_key in sorted(candidate_keys, key=len, reverse=True):
-                lookup_key_clean = lookup_key.strip()
-                if len(lookup_key_clean) < 2:
-                    continue
-                
-                normalized_lookup = re.sub(r'[^A-Z0-9]+', ' ', lookup_key_clean).strip()
-                lookup_tokens = set()
-                for token in re.split(r'[^A-Z0-9]+', normalized_lookup):
-                    token = token.strip()
-                    if len(token) >= 2 and token not in common_tokens:
-                        lookup_tokens.add(token)
-                
-                common_proper_names = contractor_tokens.intersection(lookup_tokens)
-                # Avoid single-token overlaps; require stronger evidence unless the shared token is long.
-                if common_proper_names and (len(common_proper_names) >= 2 or any(len(t) >= 4 for t in common_proper_names)):
-                    candidates = contractor_lookup[lookup_key]
-                    match_score = 90
-                    break
-                
-                if re.search(r'\b' + re.escape(lookup_key_clean) + r'\b', contractor_part):
-                     candidates = contractor_lookup[lookup_key]
-                     match_score = 90
-                     break
-                
-                if len(lookup_key_clean) <= 5 and lookup_key_clean in contractor_part:
-                    if re.search(re.escape(lookup_key_clean) + r'[\s,)\-/]', contractor_part) or \
-                       contractor_part.endswith(lookup_key_clean) or \
-                       contractor_part.startswith(lookup_key_clean):
-                        if len(lookup_key_clean) <= 2:
-                             if re.search(r'\b' + re.escape(lookup_key_clean) + r'\b', contractor_part) or \
-                                contractor_part == lookup_key_clean:
-                                 candidates = contractor_lookup[lookup_key]
-                                 match_score = 90
-                                 break
-                        else:
-                             candidates = contractor_lookup[lookup_key]
-                             match_score = 90
-                             break
-                
-                if normalized_contractor and len(normalized_contractor) >= 3:
-                     if re.search(r'\b' + re.escape(normalized_contractor) + r'\b', lookup_key_clean):
-                         candidates = contractor_lookup[lookup_key]
-                         match_score = 90
-                         break
-                     if len(normalized_contractor) <= 5 and normalized_contractor in lookup_key_clean:
-                         if re.search(re.escape(normalized_contractor) + r'[\s,)]', lookup_key_clean) or \
-                            lookup_key_clean.endswith(normalized_contractor):
-                             candidates = contractor_lookup[lookup_key]
-                             match_score = 90
-                             break
+        
+        # Fuzzy matching removed to enforce strict exact matching as per user request.
+        # matches are only allowed if they exist in contractor_lookup (exact or normalized).
                              
         if candidates:
             valid_candidates = []
@@ -622,33 +555,15 @@ def find_congressman_by_contractor_worker(contractor_name: str) -> Optional[tupl
                     )
                     valid_candidates.append((cm_name, cm_data, is_partylist, is_family_contractor, match_score))
             
+
             if valid_candidates:
-                elizaldy_co_name_variants = ['ELIZALDY', 'ELIZALDY CO', 'ELIZALDY SALCEDO CO']
-                filtered_valid_candidates = []
-                for cm_name, cm_data, is_partylist, is_family_contractor, part_score in valid_candidates:
-                    cm_name_upper = cm_name.upper()
-                    is_elizaldy_co = any(variant in cm_name_upper for variant in elizaldy_co_name_variants)
-                    if is_elizaldy_co:
-                        family_contractors = cm_data.get('contractors', [])
-                        contractor_matches = any(
-                            contractor_part in fc.upper() or fc.upper() in contractor_part or
-                            any(token in fc.upper() for token in contractor_part.split() if len(token) >= 3) or
-                            any(token in contractor_part for token in fc.upper().split() if len(token) >= 3)
-                            for fc in family_contractors
-                        )
-                        if contractor_matches:
-                             filtered_valid_candidates.append((cm_name, cm_data, is_partylist, is_family_contractor, part_score))
-                    else:
-                        filtered_valid_candidates.append((cm_name, cm_data, is_partylist, is_family_contractor, part_score))
-                
-                if filtered_valid_candidates:
-                    filtered_valid_candidates.sort(key=lambda x: (
-                        not (x[2] and x[3]),
-                        not x[2],
-                        not x[3],
-                        -x[4]
-                    ))
-                    all_matches.append((idx, filtered_valid_candidates[0][0], filtered_valid_candidates[0][4]))
+                valid_candidates.sort(key=lambda x: (
+                    not (x[2] and x[3]),
+                    not x[2],
+                    not x[3],
+                    -x[4]
+                ))
+                all_matches.append((idx, valid_candidates[0][0], valid_candidates[0][4]))
     
     if all_matches:
         # Deduplicate while preserving JV part order (explicit contractor first).
@@ -997,12 +912,34 @@ def process_unified_chunk_worker(projects_chunk):
     for project in projects_chunk:
         try:
             if first_project and stats['total'] == 0:
-                 print(f"🔍 DEBUG Unified Project Keys: {list(project.keys())}")
-                 print(f"🔍 DEBUG Unified Values: {project}")
+                # print(f"🔍 DEBUG Unified Project Keys: {list(project.keys())}")
+                # print(f"🔍 DEBUG Unified Values: {project}")
                  first_project = False
+            
             
             stats['total'] += 1
             project_copy = project.copy()
+            
+            # --- 0. Outlier Filtering ---
+            # Filter out projects with imposibly large amounts (> 1 Trillion)
+            # This fixes issues with corrupted data skewing rankings (e.g. 144 Sextillion)
+            raw_amount = project.get('amount', 0)
+            try:
+                # Normalize amount logic copied from _normalize_amount_for_key
+                amount_val = 0
+                if isinstance(raw_amount, (int, float)):
+                    amount_val = float(raw_amount)
+                elif isinstance(raw_amount, str):
+                    cleaned = raw_amount.replace('₱', '').replace(',', '').replace('PHP', '').strip()
+                    if cleaned:
+                        amount_val = float(cleaned)
+                
+                if amount_val > 1_000_000_000_000:  # 1 Trillion Limit
+                    # print(f"⚠️ Skipping outlier project with amount {amount_val}: {project.get('project_name')}")
+                    continue
+            except (ValueError, TypeError):
+                pass
+            # --- End Outlier Filtering ---
             
             # --- 1. Basic Field Extraction ---
             # Use normalized columns
@@ -1161,7 +1098,7 @@ class DynastyProjectsCacheGeneratorDuckDB:
         'CONTRACTOR', 'GENERIC', 'GEN'
     }
     
-    def __init__(self, force_reclassify: bool = False, target_congressmen: Optional[List[str]] = None):
+    def __init__(self, force_reclassify: bool = False):
         """
         Initialize the cache generator.
         
@@ -1169,10 +1106,9 @@ class DynastyProjectsCacheGeneratorDuckDB:
             force_reclassify: If True, reclassify all projects even if they already have
                             all 4 classification columns filled. If False, skip projects
                             that are already fully classified.
-            target_congressmen: Optional list of specific congressmen to generate cache for.
         """
         self.force_reclassify = force_reclassify
-        self.target_congressmen = target_congressmen
+        self.sample_limit = None # Default no limit
         root_dir = Path(__file__).parent.parent
         static_data_dir = root_dir / 'static' / 'data'
         self.cache_file = static_data_dir / 'dynasty-projects-cache.json'
@@ -3917,668 +3853,172 @@ class DynastyProjectsCacheGeneratorDuckDB:
             traceback.print_exc()
 
     async def get_congressmen_data(self, dynasty_conn, config_data: Dict, districts_data: Dict, political_dynasties_available: bool) -> Dict:
-        """Get congressmen data from parquet files using DuckDB (no PostgreSQL needed)"""
-        """Get congressmen data from database - same logic as original"""
-        # [Keep all the same logic from original script - lines 539-788]
-        # This is a large function, so I'll include the key parts
+        """
+        Get congressmen data from consolidated JSON.
+        Refactored to single source of truth: static/data/congressmen_consolidated.json
+        """
+        print("🚀 Loading congressmen data from single source of truth...")
+        
+        # Load Consolidated JSON
+        # Prefer the generated JSON which contains explicit DB matches + config
+        json_path = Path("static/data/congressmen_consolidated.json")
+        if json_path.exists():
+             with open(json_path, 'r', encoding='utf-8') as f:
+                 target_congressmen = json.load(f)
+             print(f"✅ Loaded {len(target_congressmen)} congressmen from consolidated file.")
+        else:
+             print("⚠️ Consolidated file missing, falling back to config (LEGACY).")
+             target_congressmen = config_data.get('target_congressmen', [])
+        
         congressmen_data = {}
-        processed_congressmen = set()
         
-        target_congressmen = config_data.get('target_congressmen', [])
-        
+        # Helper for name normalization
         def _name_key(first: Optional[str], last: Optional[str]) -> tuple[str, str]:
             return ((first or '').strip().upper(), (last or '').strip().upper())
-
-        contractor_lookup: Dict[tuple[str, str], List[asyncpg.Record]] = defaultdict(list)
-        party_memberships_by_person: Dict[int, List[Any]] = defaultdict(list)
-        party_memberships_by_name: Dict[tuple[str, str], List[Any]] = defaultdict(list)
-        party_memberships_by_party: Dict[Any, set[tuple[str, str]]] = defaultdict(set)
-        party_contractors: Dict[Any, set[str]] = defaultdict(set)
-
-        # Try to load contractor matches from Parquet file first, then DuckDB
-        contractor_rows = []
         
-        # Check for contractor_dynasty_matches.parquet first (preferred format)
-        contractor_parquet = PARQUET_DIR / 'contractor_dynasty_matches.parquet'
-        if contractor_parquet.exists():
-            try:
-                import duckdb
-                conn = duckdb.connect()
-                try:
-                    # Only load contractor relationships that have a source (verified relationships)
-                    print(f"DEBUG: Executing DuckDB query for contractors from {contractor_parquet}...")
-                    contractor_rows = conn.execute(f"SELECT dynasty_first_name, dynasty_last_name, company_name, role FROM read_parquet('{contractor_parquet}') WHERE source_csv_file IS NOT NULL AND source_csv_file != ''").fetchall()
-                    print(f"✅ Loaded {len(contractor_rows)} verified contractor matches (with sources) from contractor_dynasty_matches.parquet")
-                finally:
-                    conn.close()
-            except Exception as e:
-                print(f"⚠️  Failed to load contractors from contractor_dynasty_matches.parquet: {e}")
-        
-        # Also check for politician_contractors.parquet (from dynasty export)
-        if not contractor_rows:
-            politician_contractors_parquet = PARQUET_DIR / 'politician_contractors.parquet'
-            if politician_contractors_parquet.exists():
-                try:
-                    import duckdb
-                    conn = duckdb.connect()
-                    try:
-                        # Check column names first - might be different format
-                        sample = conn.execute(f"SELECT * FROM read_parquet('{politician_contractors_parquet}') LIMIT 1").fetchone()
-                        columns = [desc[0] for desc in conn.description]
-                        print(f"🔍 politician_contractors.parquet columns: {columns}")
-                        
-                        # Try to map columns - common variations:
-                        # Option 1: first_name, last_name, company_name, role
-                        # Option 2: dynasty_first_name, dynasty_last_name, company_name, role
-                        # Option 3: politician_first_name, politician_last_name, contractor_name, relationship_type
-                        
-                        if 'first_name' in columns and 'last_name' in columns:
-                            # Standard format - only load relationships with sources (verified)
-                            if 'company_name' in columns:
-                                contractor_rows = conn.execute(f"SELECT first_name, last_name, company_name, COALESCE(role, 'owner') as role FROM read_parquet('{politician_contractors_parquet}') WHERE source IS NOT NULL AND source != ''").fetchall()
-                            elif 'contractor_name' in columns:
-                                contractor_rows = conn.execute(f"SELECT first_name, last_name, contractor_name as company_name, COALESCE(relationship_type, 'owner') as role FROM read_parquet('{politician_contractors_parquet}') WHERE source IS NOT NULL AND source != ''").fetchall()
-                            else:
-                                # Try to find company/contractor column
-                                company_col = None
-                                for col in columns:
-                                    if 'company' in col.lower() or 'contractor' in col.lower():
-                                        company_col = col
-                                        break
-                                if company_col:
-                                    role_col = 'role' if 'role' in columns else ('relationship_type' if 'relationship_type' in columns else None)
-                                    if role_col:
-                                        contractor_rows = conn.execute(f"SELECT first_name, last_name, {company_col} as company_name, COALESCE({role_col}, 'owner') as role FROM read_parquet('{politician_contractors_parquet}') WHERE source IS NOT NULL AND source != ''").fetchall()
-                                    else:
-                                        contractor_rows = conn.execute(f"SELECT first_name, last_name, {company_col} as company_name, 'owner' as role FROM read_parquet('{politician_contractors_parquet}') WHERE source IS NOT NULL AND source != ''").fetchall()
-                        elif 'dynasty_first_name' in columns and 'dynasty_last_name' in columns:
-                            # Already in correct format - only load relationships with sources
-                            contractor_rows = conn.execute(f"SELECT dynasty_first_name, dynasty_last_name, company_name, COALESCE(role, 'owner') as role FROM read_parquet('{politician_contractors_parquet}') WHERE source IS NOT NULL AND source != ''").fetchall()
-                        elif 'politician_first_name' in columns and 'politician_last_name' in columns:
-                            # Alternative format - only load relationships with sources
-                            company_col = 'contractor_name' if 'contractor_name' in columns else 'company_name'
-                            role_col = 'relationship_type' if 'relationship_type' in columns else 'role'
-                            contractor_rows = conn.execute(f"SELECT politician_first_name as dynasty_first_name, politician_last_name as dynasty_last_name, {company_col} as company_name, COALESCE({role_col}, 'owner') as role FROM read_parquet('{politician_contractors_parquet}') WHERE source IS NOT NULL AND source != ''").fetchall()
-                        elif 'politician_id' in columns:
-                            # Need to join with political_dynasties to get names - only load relationships with sources
-                            company_col = 'contractor_name' if 'contractor_name' in columns else 'company_name'
-                            role_col = 'role' if 'role' in columns else ('relationship_type' if 'relationship_type' in columns else None)
-                            political_dynasties_parquet = PARQUET_DIR / 'political_dynasties.parquet'
-                            
-                            if political_dynasties_parquet.exists():
-                                print(f"   🔄 Joining with {political_dynasties_parquet} to resolve politician IDs...")
-                                if role_col:
-                                    contractor_rows = conn.execute(f"""
-                                        SELECT pd.first_name, pd.last_name, pc.{company_col} as company_name, COALESCE(pc.{role_col}, 'owner') as role 
-                                        FROM read_parquet('{politician_contractors_parquet}') pc
-                                        JOIN read_parquet('{political_dynasties_parquet}') pd ON pc.politician_id = pd.id
-                                        WHERE pc.source IS NOT NULL AND pc.source != ''
-                                    """).fetchall()
-                                else:
-                                    contractor_rows = conn.execute(f"""
-                                        SELECT pd.first_name, pd.last_name, pc.{company_col} as company_name, 'owner' as role 
-                                        FROM read_parquet('{politician_contractors_parquet}') pc
-                                        JOIN read_parquet('{political_dynasties_parquet}') pd ON pc.politician_id = pd.id
-                                        WHERE pc.source IS NOT NULL AND pc.source != ''
-                                    """).fetchall()
-                            else:
-                                print(f"⚠️  political_dynasties.parquet not found, cannot join with politician_contractors")
-                        
-                        if contractor_rows:
-                            print(f"✅ Loaded {len(contractor_rows)} verified contractor matches (with sources) from politician_contractors.parquet")
-                    finally:
-                        conn.close()
-                except Exception as e:
-                    print(f"⚠️  Failed to load contractors from politician_contractors.parquet: {e}")
-                    import traceback
-                    traceback.print_exc()
-        
-        # Fallback to DuckDB if parquet not available
-        if not contractor_rows:
-            duckdb_path = PARQUET_DIR / 'dynasty_data.duckdb'
-            if duckdb_path.exists():
-                try:
-                    import duckdb
-                    conn = duckdb.connect(str(duckdb_path))
-                    try:
-                        # Only load contractor relationships that have a source (verified relationships)
-                        contractor_rows = conn.execute("SELECT dynasty_first_name, dynasty_last_name, company_name, role FROM contractor_dynasty_matches WHERE source_csv_file IS NOT NULL AND source_csv_file != ''").fetchall()
-                        # Convert to asyncpg.Record-like objects
-                        print(f"✅ Loaded {len(contractor_rows)} verified contractor matches (with sources) from DuckDB")
-                    finally:
-                        conn.close()
-                except Exception as e:
-                    print(f"⚠️  Failed to load contractors from DuckDB: {e}")
-        
-        # Process contractor rows
-        for row in contractor_rows:
-            # Create a dict-like object
-            row_dict = {
-                'dynasty_first_name': row[0],
-                'dynasty_last_name': row[1],
-                'company_name': row[2],
-                'role': row[3]
-            }
-            key = _name_key(row_dict['dynasty_first_name'], row_dict['dynasty_last_name'])
-            contractor_lookup[key].append(row_dict)
-        
-        # Note: No PostgreSQL fallback - using DuckDB/Parquet only
-
-        # Try to load party list members from Parquet file first, then DuckDB
-        party_rows = []
-        
-        # Check for parquet file first
-        party_parquet = PARQUET_DIR / 'party_list_members.parquet'
-        if party_parquet.exists():
-            try:
-                import duckdb
-                conn = duckdb.connect()
-                try:
-                    # Join with political_dynasties to get names
-                    query = f"""
-                        SELECT 
-                            pl.person_id, 
-                            pl.party_list_number, 
-                            pd.first_name, 
-                            pd.last_name 
-                        FROM read_parquet('{party_parquet}') pl
-                        LEFT JOIN read_parquet('{POLITICAL_DYNASTIES_PARQUET}') pd ON pl.person_id = pd.id
-                        WHERE pl.person_id IS NOT NULL
-                    """
-                    party_rows = conn.execute(query).fetchall()
-                    print(f"✅ Loaded {len(party_rows)} party list members from Parquet")
-                finally:
-                    conn.close()
-            except Exception as e:
-                print(f"⚠️  Failed to load party members from Parquet: {e}")
-        
-        # Fallback to DuckDB if parquet not available
-        if not party_rows:
-            duckdb_path = PARQUET_DIR / 'dynasty_data.duckdb'
-            if duckdb_path.exists():
-                try:
-                    import duckdb
-                    conn = duckdb.connect(str(duckdb_path))
-                    try:
-                        party_rows = conn.execute("SELECT person_id, party_list_number, first_name, last_name FROM party_list_members").fetchall()
-                        print(f"✅ Loaded {len(party_rows)} party list members from DuckDB")
-                    finally:
-                        conn.close()
-                except Exception as e:
-                    print(f"⚠️  Failed to load party members from DuckDB: {e}")
-        
-        # Process party rows
-        for row in party_rows:
-            row_dict = {
-                'person_id': row[0],
-                'party_list_number': row[1],
-                'first_name': row[2],
-                'last_name': row[3]
-            }
-            party_number = row_dict['party_list_number']
-            person_id = row_dict['person_id']
-            key = _name_key(row_dict['first_name'], row_dict['last_name'])
-            if person_id is not None:
-                party_memberships_by_person[person_id].append(party_number)
-            party_memberships_by_name[key].append(party_number)
-            party_memberships_by_party[party_number].add(key)
-        
-        # Note: No PostgreSQL fallback - using DuckDB/Parquet only
-
-        for party_number, member_keys in party_memberships_by_party.items():
-            party_set = party_contractors[party_number]
-            for member_key in member_keys:
-                for contractor_row in contractor_lookup.get(member_key, []):
-                    company_name = contractor_row.get('company_name')
-                    if company_name:
-                        party_set.add(company_name)
-
-        for congressman_config in target_congressmen:
-            first_name_pattern = congressman_config.get('first_name_pattern', '')
-            last_name_pattern = congressman_config.get('last_name_pattern', '')
-            display_name = congressman_config.get('display_name', '')
-            config_province = congressman_config.get('province')
-            config_district_number = congressman_config.get('district_number')
-            config_is_city_district = congressman_config.get('is_city_district', False)
-            config_is_partylist = congressman_config.get('is_partylist', False)
-            congressman_id = congressman_config.get('id')
+        # Helper for patterns definition
+        def _expand_patterns(name: str) -> list[str]:
+            if not name: return []
+            base_upper = name.upper().strip()
+            patterns = {base_upper}
             
-            # Get congressman from parquet file using DuckDB
-            person = None
-            if POLITICAL_DYNASTIES_PARQUET.exists():
-                try:
-                    import duckdb
-                    conn = duckdb.connect()
-                    try:
-                        first_pattern = f"{(first_name_pattern or '').upper()}%"
-                        last_pattern = f"{(last_name_pattern or '').upper()}%"
-                        full_pattern = f"%{(first_name_pattern or '').upper()}% {(last_name_pattern or '').upper()}%"
-                        mannix_pattern = (first_name_pattern or '').upper()
-                        
-                        query = f"""
-                            SELECT id, first_name, last_name, middle_name, province, municipality_city, region, party
-                            FROM read_parquet('{POLITICAL_DYNASTIES_PARQUET}')
-                            WHERE (
-                                UPPER(position) LIKE '%CONGRESSMAN%' 
-                                OR UPPER(position) LIKE '%CONGRESSMEN%' 
-                                OR UPPER(position) LIKE '%MEMBER, HOUSE OF REPRESENTATIVES%'
-                                OR UPPER(position) LIKE '%REPRESENTATIVE%PARTY-LIST%'
-                                OR UPPER(position) LIKE '%REPRESENTATIVE, %PARTY-LIST%'
-                                OR UPPER(position) LIKE '%PARTY-LIST%REPRESENTATIVE%'
-                                OR UPPER(position) LIKE '%DEPUTY SPEAKER%'
-                                OR UPPER(position) LIKE '%SPEAKER%'
-                            )
-                              AND (
-                                (UPPER(first_name) LIKE '{first_pattern}' AND UPPER(last_name) LIKE '{last_pattern}')
-                                OR (UPPER(first_name || ' ' || COALESCE(middle_name, '') || ' ' || last_name) LIKE '{full_pattern}')
-                                OR (UPPER(first_name || ' ' || COALESCE(middle_name, '')) LIKE '{first_pattern}' AND UPPER(last_name) LIKE '{last_pattern}')
-                                OR (UPPER(last_name) LIKE '{last_pattern}' AND UPPER(first_name) LIKE '%MANNIX%' AND '{mannix_pattern}' = 'MANNIX')
-                                OR (UPPER(last_name) LIKE '{last_pattern}' AND UPPER(first_name) LIKE '%MANUEL%' AND '{mannix_pattern}' = 'MANNIX')
-                              )
-                            ORDER BY id DESC
-                            LIMIT 1
-                        """
-                        result = conn.execute(query).fetchone()
-                        if result:
-                            person = {
-                                'id': result[0],
-                                'first_name': result[1],
-                                'last_name': result[2],
-                                'middle_name': result[3],
-                                'province': result[4],
-                                'municipality_city': result[5],
-                                'region': result[6],
-                                'party': result[7]
-                            }
-                    finally:
-                        conn.close()
-                except Exception as e:
-                    print(f"⚠️  Failed to load congressman from parquet: {e}")
-            
-            # Fallback when dynasty DB is missing or no match
-            if not person:
-                person = {
-                    'id': congressman_id,
-                    'first_name': first_name_pattern or display_name.split(' ')[0],
-                    'last_name': last_name_pattern or display_name.split(' ')[-1],
-                    'middle_name': None,
-                    'province': config_province,
-                    'municipality_city': None,
-                    'region': None,
-                    'party': None
-                }
-            
-            person_key = f"{person['first_name']} {person['last_name']}"
-            if person_key in processed_congressmen:
-                continue
-            processed_congressmen.add(person_key)
-            
-            provinces = [config_province] if config_province else ([person['province']] if person['province'] else [])
-            
-            # Load municipalities from districts.json ONLY for this district_number
-            district_municipalities = []
-            if districts_data and config_province and config_district_number:
-                province_key = None
-                for key in districts_data.get('districts', {}).keys():
-                    if key.upper() == config_province.upper():
-                        province_key = key
-                        break
-                
-                if province_key:
-                    districts_info = districts_data.get('districts', {}).get(province_key, {})
-                    municipalities_map = districts_info.get('municipalities', {})
-                    for mun_key, mun_district in municipalities_map.items():
-                        if mun_district and mun_district.upper() == config_district_number.upper():
-                            district_municipalities.append(mun_key)
-            
-            name_key = _name_key(person['first_name'], person['last_name'])
-            if political_dynasties_available:
-                direct_contractors = contractor_lookup.get(name_key, [])
-            else:
-                direct_contractors = []
-            
-            verified_patterns = config_data.get('verified_contractors', {}).get('patterns', [])
-            contractor_exclusions = {}
-            for exclusion in config_data.get('verified_contractors', {}).get('exclusions', []):
-                pattern = exclusion.get('pattern')
-                exclude = exclusion.get('exclude')
-                if pattern and exclude:
-                    contractor_exclusions.setdefault(pattern.upper(), []).append(exclude.upper())
-
-            def _should_exclude(name: str) -> bool:
-                upper_name = name.upper()
-                for pattern, exclusions in contractor_exclusions.items():
-                    if pattern in upper_name:
-                        for exclusion_value in exclusions:
-                            if exclusion_value in upper_name:
-                                return True
-                return False
-
-            def _expand_patterns(name: str) -> list[str]:
-                base_upper = name.upper().strip()
-                patterns = {base_upper}
-                
-                # CRITICAL: Handle JVs (joint ventures) - split by "/" to get individual contractors
-                # For lookup generation, we want each PART of the JV to be a valid lookup key
-                # e.g. "SUNWEST / TRIPLE A" -> generates patterns for "SUNWEST" and "TRIPLE A" independently
-                if '/' in base_upper or '\\' in base_upper:
-                    parts = re.split(r'[/\\]', base_upper)
-                    for part in parts:
-                        part = part.strip()
-                        if len(part) >= 2:
-                            patterns.update(_expand_patterns(part)) # Recursively process parts
-                    return list(patterns)
-
-                # Remove parenthetical content (e.g., "(FORMERLY: ...)", "(A...)", "(J.V.)")
-                clean_no_parens = re.sub(r'\([^)]*\)', '', base_upper).strip()
-                if clean_no_parens and len(clean_no_parens) >= 2:
-                    patterns.add(clean_no_parens)
-
-                # Define corporate suffixes to strip
-                suffixes = [
-                    ' INC.', ' INC', ' CORPORATED', ' CORP.', ' CORP', ' CORPORATION', 
-                    ' COMPANY', ' CO.', ' CO', ' LTD.', ' LTD', ' LIMITED', 
-                    ' TRADING', ' ENTERPRISES', ' SUPPLY', ' SUPPLIES', ' SERVICES', 
-                    ' BUILDERS', ' DEVELOPMENT', ' DEVELOPERS', ' ENGINEERING', 
-                    ' CONSTRUCTION', ' GENERAL MERCHANDISING', ' MERCHANDISING',
-                    ' CONST.', ' CONST', ' GEN.', ' GEN', ' DEV.', ' DEV',
-                    " DEV'T.", " DEV'T"
-                ]
-                
-                # Sort suffixes by length descending to match longest first
-                suffixes.sort(key=len, reverse=True)
-
-                candidates = list(patterns)
-                for candidate in candidates:
-                    temp = candidate
-                    
-                    # Repeatedly strip known suffixes from the end
-                    changed = True
-                    while changed:
-                        changed = False
-                        
-                        # 1. Try stripping standard suffixes
-                        for suffix in suffixes:
-                            if temp.endswith(suffix):
-                                new_temp = temp[:-len(suffix)].strip()
-                                # CRITICAL: Only strip if result remains valid (>= 3 chars)
-                                # Prevents "FS CO" -> "FS" (invalid)
-                                # Allows "SUNWEST CONSTRUCTION" -> "SUNWEST"
-                                if len(new_temp) >= 3:
-                                    temp = new_temp
-                                    patterns.add(temp) # Add intermediate form
-                                    changed = True
-                                    break
-                        
-                        # 2. Cleanup " AND" / " &" if exposed (e.g. "CONSTRUCTION AND")
-                        if not changed: # Only check if we didn't just strip a suffix (start fresh pass)
-                             if temp.endswith(" AND"):
-                                 new_temp = temp[:-4].strip()
-                                 if len(new_temp) >= 3:
-                                     temp = new_temp
-                                     patterns.add(temp)
-                                     changed = True
-                             elif temp.endswith(" &"):
-                                 new_temp = temp[:-2].strip()
-                                 if len(new_temp) >= 3:
-                                     temp = new_temp
-                                     patterns.add(temp)
-                                     changed = True
-
-                        # 3. Handle PARENTHETICAL leftovers ("FORMERLY")
-                        if "FORMERLY" in temp:
-                             new_temp = temp.split("FORMERLY")[0].strip()
-                             if len(new_temp) >= 3:
-                                 temp = new_temp
-                                 patterns.add(temp)
-                                 changed = True
-                    
-                    # Also add normalized version of all generated patterns
-                    # This handles "SUNWEST" vs "SUNWEST."
-                    current_patterns = list(patterns)
-                    for pat in current_patterns:
-                         normalized = re.sub(r'[^A-Z0-9]', '', pat)
-                         if len(normalized) >= 3:
-                             patterns.add(normalized)
-
+            # CRITICAL: Handle JVs (joint ventures) - split by "/" to get individual contractors
+            # For lookup generation, we want each PART of the JV to be a valid lookup key
+            if '/' in base_upper or '\\' in base_upper:
+                parts = re.split(r'[/\\]', base_upper)
+                for part in parts:
+                    part = part.strip()
+                    if len(part) >= 2:
+                        patterns.update(_expand_patterns(part)) # Recursively process parts
                 return list(patterns)
-                
 
+            # Remove parenthetical content (e.g., "(FORMERLY: ...)", "(A...)", "(J.V.)")
+            clean_no_parens = re.sub(r'\([^)]*\)', '', base_upper).strip()
+            if clean_no_parens and len(clean_no_parens) >= 2:
+                patterns.add(clean_no_parens)
 
+            # Define corporate suffixes to strip
+            suffixes = [
+                ' INC.', ' INC', ' CORPORATED', ' CORP.', ' CORP', ' CORPORATION', 
+                ' COMPANY', ' CO.', ' CO', ' LIMITED', ' LTD.', ' LTD', 
+                ' ENTERPRISE', ' ENTERPRISES', ' TRADING', ' CONSTRUCTION', 
+                ' BUILDERS', ' DEVELOPMENT', ' SUPPLY', ' AND ', ' & ',
+                'ARCHITECTS', 'ENGINEERS', 'CONSULTANTS', 'SERVICES', 'AGGREGATES',
+                'REALTY', 'INTL', 'INTERNATIONAL', 'HOLDINGS', 'GROUP', 'VENTURES'
+            ]
+            
+            cleaned = base_upper
+            for suffix in suffixes:
+                cleaned = cleaned.replace(suffix, '')
+            
+            cleaned = cleaned.strip()
+            if cleaned and len(cleaned) >= 2:
+                patterns.add(cleaned)
+
+            return list(patterns)
+
+        # Exclusions Logic
+        verified_patterns = config_data.get('verified_contractors', {}).get('patterns', [])
+        contractor_exclusions = {}
+        for exclusion in config_data.get('verified_contractors', {}).get('exclusions', []):
+            pattern = exclusion.get('pattern')
+            exclude = exclusion.get('exclude')
+            if pattern and exclude:
+                contractor_exclusions.setdefault(pattern.upper(), []).append(exclude.upper())
+
+        def _should_exclude(name: str) -> bool:
+            upper_name = name.upper()
+            for pattern, exclusions in contractor_exclusions.items():
+                if pattern in upper_name:
+                    for exclusion_value in exclusions:
+                        if exclusion_value in upper_name:
+                            return True
+            return False
+
+        # Process each congressman
+        for cm in target_congressmen:
+            congressman_id = cm.get('id')
+            display_name = cm.get('display_name', '')
+            first_name_pattern = cm.get('first_name_pattern', '')
+            last_name_pattern = cm.get('last_name_pattern', '')
+            config_province = cm.get('province')
+            config_district_number = cm.get('district_number')
+            config_is_city_district = cm.get('is_city_district', False)
+            config_is_partylist = cm.get('is_partylist', False)
+            terms = cm.get('terms', [])
+            
+            # Determine is_nationwide
+            is_nationwide = False
+            if str(config_district_number).lower() == 'nationwide' or config_is_partylist:
+                is_nationwide = True
+            
+            # Contractors
             contractor_names = []
             contractor_patterns = []
             
-            # Load contractors from family_connections in config FIRST
-            # This determines if the congressman should have contractor matching enabled
-            family_connections = congressman_config.get('family_connections') or {}
-            family_contractors = family_connections.get('contractors', []) if isinstance(family_connections, dict) else []
+            # Load "linked_contractors" if available (from consolidated JSON)
+            # else fallback to "family_connections" (if using raw config)
+            linked = cm.get('linked_contractors', [])
+            if not linked:
+                 linked = cm.get('family_connections', {}).get('contractors', [])
+                 
+            for company_name in linked:
+                 if not company_name or _should_exclude(company_name):
+                     continue
+                 contractor_names.append(company_name)
+                 contractor_patterns.extend(_expand_patterns(company_name))
+                 
+            contractor_names = sorted(list(set(name for name in contractor_names if name)))
+            contractor_patterns = sorted(list(set(p for p in contractor_patterns if p)))
             
-            # CRITICAL FIX: For Nationwide/Party-List, ONLY allow contractors if explicitly defined in config
-            # This prevents them from inheriting contractors from "Party" associations or loose database matches
-            is_nationwide = str(config_district_number).upper() in ['NATIONWIDE', 'PARTY-LIST', 'PARTY LIST']
+            # District Municipalities
+            district_municipalities = []
+            if districts_data and config_province and config_district_number and not is_nationwide:
+                 province_key = None
+                 for key in districts_data.get('districts', {}).keys():
+                     if key.upper() == config_province.upper():
+                         province_key = key
+                         break
+                 if province_key:
+                     districts_info = districts_data.get('districts', {}).get(province_key, {})
+                     municipalities_map = districts_info.get('municipalities', {})
+                     for mun_key, mun_district in municipalities_map.items():
+                         if mun_district and str(mun_district).upper() == str(config_district_number).upper():
+                             district_municipalities.append(mun_key)
+                 if district_municipalities:
+                     print(f"✅ {display_name}: Loaded {len(district_municipalities)} municipalities for {config_district_number}")
             
-            if is_nationwide:
-                 # Be super strict: ignore DB/Party contractors unless family_contractors exist in config
-                 has_explicit_contractors = len(family_contractors) > 0
-            else:
-                 has_explicit_contractors = len(family_contractors) > 0 or len(verified_patterns) > 0
-            
-            if "Herrera" in display_name:
-                pass # remove debug print
-            
-            # Only add contractors from parquet files if:
-            # 1. The congressman has explicit contractors in family_connections, OR
-            # 2. The congressman has verified_contractors.patterns (for district reps)
-            # This prevents false matches for congressmen who shouldn't have contractor matching
-            if has_explicit_contractors:
-                for contractor in direct_contractors:
-                    company_name = contractor['company_name']
-                    if not company_name:
-                        continue
-                    if _should_exclude(company_name):
-                        continue
-                    if verified_patterns:
-                        upper_name = company_name.upper()
-                        if not any(pattern.upper() in upper_name for pattern in verified_patterns):
-                            continue  # Changed from pass to continue - skip if doesn't match verified patterns
-                    contractor_names.append(company_name)
-                    contractor_patterns.extend(_expand_patterns(company_name))
-            
-            # Always add contractors from family_connections in config
-            for company_name in family_contractors:
-                if not company_name or _should_exclude(company_name):
-                    continue
-                contractor_names.append(company_name)
-                contractor_patterns.extend(_expand_patterns(company_name))
-
-            party_numbers: List[Any] = []
-            if political_dynasties_available:
-                if person.get('id') is not None:
-                    party_numbers.extend(party_memberships_by_person.get(person['id'], []))
-                if not party_numbers:
-                    party_numbers.extend(party_memberships_by_name.get(name_key, []))
-
-            # Only add party contractors if the congressman has explicit contractors
-            # This prevents false matches for party-list members who shouldn't have contractor matching
-            if has_explicit_contractors:
-                for party_number in party_numbers:
-                    for company_name in party_contractors.get(party_number, set()):
-                        if not company_name or _should_exclude(company_name):
-                            continue
-                        contractor_names.append(company_name)
-                        contractor_patterns.extend(_expand_patterns(company_name))
-            
-            contractor_names = sorted(set(name for name in contractor_names if name))
-            contractor_patterns = sorted(set(p for p in contractor_patterns if p))
-            
-            # If we don't have district_municipalities from districts.json, skip UNLESS congressman has contractors
-            if not district_municipalities and not config_is_city_district:
-                if not contractor_names:
-                    print(f"⚠️  Skipping {display_name}: No municipalities found in districts.json for {config_district_number} and no verified contractors")
-                    continue
-                else:
-                    print(f"ℹ️  Processing {display_name} via contractors only (no district data)")
-            elif district_municipalities:
-                print(f"✅ {display_name}: Loaded {len(district_municipalities)} municipalities for {config_district_number}: {district_municipalities[:3]}...")
-            
-            # Get barangays if needed
+            # Barangays (Mannix Dalipe special case)
+            # Barangays (Mannix Dalipe special case)
             barangays = []
-            if congressman_id == 5:  # Mannix Dalipe
-                barangays_file = Path(__file__).parent.parent / '2nd-district-zamboanga-city.json'
-                if barangays_file.exists():
-                    with open(barangays_file, 'r', encoding='utf-8') as f:
-                        barangays_data = json.load(f)
-                        if isinstance(barangays_data, list):
-                            barangays = barangays_data
-                        elif isinstance(barangays_data, dict):
-                            barangays = barangays_data.get('barangays', barangays_data.get('2nd_district_barangays', []))
+            if congressman_id == 5: 
+                 # Try to locate the file relative to the script
+                 try:
+                     barangays_file = Path(__file__).parent.parent / '2nd-district-zamboanga-city.json'
+                     if barangays_file.exists():
+                         with open(barangays_file, 'r', encoding='utf-8') as f:
+                             barangays = json.load(f)
+                 except Exception as e:
+                     print(f"⚠️ Error loading barangays for Mannix: {e}")
             
-            # Get terms from config
-            terms = congressman_config.get('terms', [])
-            # Handle terms that might be stored as JSON string
-            if isinstance(terms, str):
-                import json
-                try:
-                    terms = json.loads(terms)
-                except (json.JSONDecodeError, TypeError):
-                    terms = []
+            terms = cm.get('terms', [])
             
-            # CRITICAL: Also add contractors from contractor_lookup (loaded from parquet files)
-            # This ensures contractors from contractor_dynasty_matches.parquet and politician_contractors.parquet
-            # are included in the matching logic
-            parquet_contractors = []
-            parquet_contractor_patterns = []
-            
-            # Get contractors from contractor_lookup (keyed by congressman name)
-            # Try multiple name matching strategies
-            name_key = _name_key(first_name_pattern, last_name_pattern)
-            
-            # Strategy 1: Exact name key match
-            if has_explicit_contractors:
-                for contractor_row in contractor_lookup.get(name_key, []):
-                    company_name = contractor_row.get('company_name')
-                    if company_name and company_name not in contractor_names:
-                        contractor_names.append(company_name)
-                        parquet_contractor_patterns.extend(_expand_patterns(company_name))
-            
-            # Strategy 2: Match by first/last name patterns (more flexible)
-            # This handles cases where parquet has "ELIZALDY SALCEDO" but config has "ELIZALDY CO"
-            if has_explicit_contractors:
-                strategy2_items = contractor_lookup.items()
-            else:
-                strategy2_items = []
-            
-            first_upper = (first_name_pattern or '').upper().strip()
-            last_upper = (last_name_pattern or '').upper().strip()
-            
-            # Also try to match using display_name if available
-            display_name_upper = (display_name or '').upper().strip()
-            
-            for lookup_key, contractor_rows in strategy2_items:
-                lookup_first, lookup_last = lookup_key
-                lookup_first_upper = lookup_first.upper().strip()
-                lookup_last_upper = lookup_last.upper().strip()
-                lookup_full_upper = f"{lookup_first_upper} {lookup_last_upper}".strip()
-                
-                # Check if names match (allowing for middle names/variations)
-                # For Elizaldy Co: first_name_pattern="ELIZALDY", last_name_pattern="CO"
-                # Parquet might have: "ELIZALDY", "SALCEDO" or "ELIZALDY", "CO" or "ELIZALDY SALCEDO", "CO"
-                name_matches = False
-                
-                # CRITICAL: Also check if display_name matches (e.g., "ELIZALDY SALCEDO CO" in display_name)
-                if display_name_upper:
-                    # Check if lookup full name appears in display_name
-                    if lookup_full_upper in display_name_upper or display_name_upper in lookup_full_upper:
-                        name_matches = True
-                    # Check if key parts match
-                    elif first_upper and first_upper in display_name_upper and lookup_first_upper in display_name_upper:
-                        if not last_upper or last_upper in display_name_upper or lookup_last_upper in display_name_upper:
-                            name_matches = True
-                
-                # Exact match on first name
-                if not name_matches and first_upper and first_upper == lookup_first_upper:
-                    # Check if last name matches or is a variation
-                    if last_upper:
-                        # Direct match
-                        if last_upper == lookup_last_upper:
-                            name_matches = True
-                        # Handle cases like "CO" matching "SALCEDO CO" or vice versa
-                        elif last_upper in lookup_last_upper or lookup_last_upper in last_upper:
-                            name_matches = True
-                        # Handle "SALCEDO CO" vs "CO"
-                        elif 'SALCEDO' in lookup_last_upper and 'CO' in last_upper:
-                            name_matches = True
-                        elif 'CO' in lookup_last_upper and 'SALCEDO' in last_upper:
-                            name_matches = True
-                        # Handle "TIRSO" matching "TIRSO EDWIN" or "EDWIN" matching "TIRSO EDWIN LOLENG"
-                        elif 'TIRSO' in lookup_first_upper and 'EDWIN' in first_upper:
-                            name_matches = True
-                        elif 'EDWIN' in lookup_first_upper and 'TIRSO' in first_upper:
-                            name_matches = True
-                        elif 'LOLENG' in lookup_last_upper and 'GARDIOLA' in last_upper:
-                            name_matches = True
-                        elif 'GARDIOLA' in lookup_last_upper and 'LOLENG' in last_upper:
-                            name_matches = True
-                    else:
-                        # If no last name pattern, match on first name only
-                        name_matches = True
-                
-                # Also check if first name pattern is contained in lookup first name
-                # (handles "ELIZALDY" matching "ELIZALDY SALCEDO")
-                if not name_matches and first_upper and first_upper in lookup_first_upper:
-                    if last_upper:
-                        if last_upper == lookup_last_upper or last_upper in lookup_last_upper or lookup_last_upper in last_upper:
-                            name_matches = True
-                        # Special handling for "CO" and "SALCEDO CO"
-                        elif 'CO' in last_upper and ('SALCEDO' in lookup_last_upper or 'CO' in lookup_last_upper):
-                            name_matches = True
-                    else:
-                        name_matches = True
-                
-                # Reverse: check if lookup first name is in our pattern
-                if not name_matches and first_upper and lookup_first_upper in first_upper:
-                    if last_upper:
-                        if last_upper == lookup_last_upper or last_upper in lookup_last_upper or lookup_last_upper in last_upper:
-                            name_matches = True
-                        # Special handling for "CO" and "SALCEDO CO"
-                        elif 'CO' in last_upper and ('SALCEDO' in lookup_last_upper or 'CO' in lookup_last_upper):
-                            name_matches = True
-                    else:
-                        name_matches = True
-                
-                if name_matches:
-                    for contractor_row in contractor_rows:
-                        company_name = contractor_row.get('company_name')
-                        if company_name and company_name not in contractor_names:
-                            contractor_names.append(company_name)
-                            parquet_contractor_patterns.extend(_expand_patterns(company_name))
-            
-            # Merge parquet contractor patterns with existing patterns
-            contractor_patterns.extend(parquet_contractor_patterns)
-            contractor_patterns = sorted(set(contractor_patterns))
-            
-            # FINAL SAFEGUARD: Force clear contractors for Nationwide/Party-List if no explicit config
-            if is_nationwide and not family_contractors:
-                 contractor_names = []
-                 contractor_patterns = []
-            
-            if "Herrera" in display_name:
-                pass # remove debug print
-
             congressmen_data[display_name] = {
-                "name": display_name,
-                "provinces": provinces,
-                "district_municipalities": district_municipalities, # Keep existing field
-                "district": config_district_number, # Renamed from district_number
-                "is_city_district": config_is_city_district, # Keep existing field
-                "is_nationwide": is_nationwide, # New field
-                "is_partylist": config_is_partylist,
-                "match_provinces": congressman_config.get('match_provinces', []), # New field for regional restriction
-                "contractors": contractor_names,
-                "contractor_patterns": contractor_patterns,
-                "contractor_exclusions": contractor_exclusions,
-                "barangays": barangays,
-                "terms": terms,
+                'id': congressman_id,
+                'province': config_province,
+                'district': config_district_number,
+                'municipalities': district_municipalities,
+                'contractors': contractor_names,
+                'contractor_patterns': contractor_patterns,
+                'first_name_pattern': first_name_pattern,
+                'last_name_pattern': last_name_pattern,
+                'is_city_district': config_is_city_district,
+                'is_nationwide': is_nationwide,
+                'is_partylist': config_is_partylist,
+                'match_provinces': cm.get('match_provinces', []),
+                'contractor_exclusions': contractor_exclusions,
+                'barangays': barangays,
+                'terms': terms,
             }
         
         # Enrich coverage with historical terms from districts.json
@@ -5036,11 +4476,32 @@ class DynastyProjectsCacheGeneratorDuckDB:
                     if prov_name:
                         provinces.add(prov_name.upper().strip())
                 
-                print(f"✅ Loaded comprehensive location database into location_dicts: {len(provinces)} provinces, {len(cities)} cities")
+                # print(f"✅ Loaded comprehensive location database into location_dicts: {len(provinces)} provinces, {len(cities)} cities")
             except Exception as e:
                 print(f"⚠️  Warning: Could not load comprehensive location database: {e}")
                 print("   Falling back to congressmen data only")
         
+        # Load unified locations from Parquet (Source of Truth for specific Barangays)
+        unified_entries = self._load_unified_locations()
+        if unified_entries:
+            print(f"   Merging {len(unified_entries)} unified location entries...")
+            for entry in unified_entries:
+                # Entry tuple: (province, municipality, barangay, district, congressman)
+                # Note: tuple unpacking might vary if query changed, better safeguards?
+                # The query in _load_unified_locations is explicit: SELECT province, municipality, barangay...
+                if len(entry) >= 3:
+                    u_prov = entry[0]
+                    u_muni = entry[1]
+                    u_brgy = entry[2]
+                    
+                    if u_prov: provinces.add(u_prov.upper().strip())
+                    if u_muni: municipalities.add(u_muni.upper().strip())
+                    if u_brgy:
+                        b_upper = u_brgy.upper().strip()
+                        barangays.add(b_upper)
+                        # Also add cleaned version
+                        clean_b = re.sub(r'^(BRGY\.?|BARANGAY)\s*', '', b_upper, flags=re.IGNORECASE).strip()
+                        if clean_b: barangays.add(clean_b)
         # Extract from congressmen_data (for backward compatibility and to catch any missing)
         for cm_name, cm_data in congressmen_data.items():
             cm_provinces = cm_data.get('provinces', [])
@@ -5353,66 +4814,7 @@ class DynastyProjectsCacheGeneratorDuckDB:
             'dedup_dict': dict(dedup_dict)  # Add deduplication dictionary
         }
     
-    def _extract_provinces_and_cities_from_data(self, congressmen_data: Dict, district_lookup_dict: Dict) -> tuple[set[str], set[str]]:
-        """
-        Extract all provinces and cities from comprehensive location database + congressmen data.
-        Returns: (provinces_set, cities_set)
-        """
-        provinces = set()
-        cities = set()
-        
-        # CRITICAL: Load comprehensive location database if available
-        # This includes all 82 provinces, 146 cities, and municipalities
-        location_db_path = Path(__file__).parent.parent / 'database' / 'philippine_locations.json'
-        if location_db_path.exists():
-            try:
-                with open(location_db_path, 'r', encoding='utf-8') as f:
-                    location_db = json.load(f)
-                
-                # Add all provinces from comprehensive database
-                for prov_name_norm, prov_data in location_db.get('provinces', {}).items():
-                    prov_name = prov_data.get('name', prov_name_norm)
-                    provinces.add(prov_name.upper().strip())
-                    provinces.add(prov_name_norm)  # Also add normalized version
-                
-                # Add all cities from comprehensive database
-                for city_name_norm, city_data in location_db.get('cities', {}).items():
-                    city_name = city_data.get('name', city_name_norm)
-                    cities.add(city_name.upper().strip())
-                    cities.add(city_name_norm)  # Also add normalized version
-                    # Also add province if city is in a province
-                    prov_name = city_data.get('province', '')
-                    if prov_name:
-                        provinces.add(prov_name.upper().strip())
-                
-                print(f"✅ Loaded comprehensive location database: {len(provinces)} provinces, {len(cities)} cities")
-            except Exception as e:
-                print(f"⚠️  Warning: Could not load comprehensive location database: {e}")
-                print("   Falling back to congressmen data only")
-        
-        # Also extract from congressmen_data (for backward compatibility and to catch any missing)
-        for cm_name, cm_data in congressmen_data.items():
-            cm_provinces = cm_data.get('provinces', [])
-            is_city_district = cm_data.get('is_city_district', False)
-            
-            for prov in cm_provinces:
-                if prov:
-                    prov_upper = prov.upper().strip()
-                    provinces.add(prov_upper)
-                    # If it's a city district, also add to cities
-                    if is_city_district:
-                        cities.add(prov_upper)
-        
-        # Also extract from district_lookup_dict keys
-        for (prov_key, loc_key), candidates in district_lookup_dict.items():
-            if prov_key:
-                provinces.add(prov_key)
-                # Check if any candidate is a city district
-                for cm_name, cm_data in candidates:
-                    if cm_data.get('is_city_district', False):
-                        cities.add(prov_key)
-        
-        return provinces, cities
+
 
     def _extract_barangay_from_text(self, text: str) -> Optional[str]:
         """
@@ -7211,42 +6613,52 @@ class DynastyProjectsCacheGeneratorDuckDB:
                                                 province_matches = True
                                                 break
                                         
-                                        # CRITICAL ADDITIONAL CHECK: Verify location doesn't contradict the match
-                                        # If location clearly indicates a different province, reject the match
-                                        # Example: project_district says "Cebu 5th District" but location says "Davao del Sur"
-                                        if province_matches and location_upper:
-                                            # Check if location mentions a different province than what we're matching
-                                            location_province_conflict = False
+                                            # CRITICAL ADDITIONAL CHECK: Verify location doesn't contradict the match
+                                            # If location clearly indicates a different province, reject the match
+                                            # Example: project_district says "Cebu 5th District" but location says "Davao del Sur"
+                                            if province_matches and location_upper:
+                                                # Check if location mentions a different province than what we're matching
+                                                location_province_conflict = False
+                                                
+                                                # List of known provinces to check for conflicts
+                                                # REDUCED LIST: Trust unified_locations (province_upper) for most cases
+                                                # Only check for major contradictions that imply bad data
+                                                known_provinces = ['CEBU', 'DAVAO', 'ILOILO', 'LEYTE', 'BOHOL', 'NEGROS', 
+                                                                  'SAMAR', 'BILIRAN', 'SIQUIJOR', 'MASBATE', 'CAMIGUIN']
+                                                
+                                                for known_prov in known_provinces:
+                                                    # Check if location mentions a province that doesn't match
+                                                    if known_prov in location_upper:
+                                                        # Check if this province matches the congressman's province
+                                                        location_matches_cm = False
+                                                        for cm_province in cm_provinces:
+                                                            cm_prov_upper = cm_province.upper().strip()
+                                                            if known_prov in cm_prov_upper or cm_prov_upper in known_prov:
+                                                                location_matches_cm = True
+                                                                break
+                                                        
+                                                        # If location mentions a province that doesn't match congressman, it's a conflict
+                                                        if not location_matches_cm:
+                                                            # TRUST UNIFIED LOCATIONS:
+                                                            # If we already matched the province (province_matches=True), 
+                                                            # we assume the "conflicting" word in location_upper is just a municipality name
+                                                            # (e.g., "Quezon" municipality in "Nueva Ecija" province).
+                                                            # ONLY reject if it's a known impossible mismatch (like Cebu vs Davao)
+                                                            
+                                                            if ('CEBU' in location_upper and 'DAVAO' in cm_prov_upper) or \
+                                                               ('DAVAO' in location_upper and 'CEBU' in cm_prov_upper):
+                                                                location_province_conflict = True
+                                                                break
+                                                                
+                                                            # For other cases, since province_matches is True (we matched the structured province),
+                                                            # we IGNORE the substring conflict in location_upper.
+                                                
+                                                if location_province_conflict:
+                                                    # Location contradicts the match - reject it
+                                                    continue
                                             
-                                            # List of known provinces to check for conflicts
-                                            known_provinces = ['CEBU', 'DAVAO', 'ILOILO', 'LEYTE', 'BOHOL', 'NEGROS', 
-                                                              'SAMAR', 'BILIRAN', 'SIQUIJOR', 'MASBATE', 'CAMIGUIN']
-                                            
-                                            for known_prov in known_provinces:
-                                                # Check if location mentions a province that doesn't match
-                                                if known_prov in location_upper:
-                                                    # Check if this province matches the congressman's province
-                                                    location_matches_cm = False
-                                                    for cm_province in cm_provinces:
-                                                        cm_prov_upper = cm_province.upper().strip()
-                                                        if known_prov in cm_prov_upper or cm_prov_upper in known_prov:
-                                                            location_matches_cm = True
-                                                            break
-                                                    
-                                                    # If location mentions a province that doesn't match congressman, it's a conflict
-                                                    if not location_matches_cm:
-                                                        # Special case: Cebu vs Davao - these should never match
-                                                        if ('CEBU' in location_upper and 'DAVAO' in cm_prov_upper) or \
-                                                           ('DAVAO' in location_upper and 'CEBU' in cm_prov_upper):
-                                                            location_province_conflict = True
-                                                            break
-                                            
-                                            if location_province_conflict:
-                                                # Location contradicts the match - reject it
-                                                continue
-                                        
-                                        if province_matches:
-                                            district_matched_candidates.append((cm_name, cm_data))
+                                            if province_matches:
+                                                district_matched_candidates.append((cm_name, cm_data))
                                 else:
                                     # Try just number with ordinal
                                     cm_district_match = re.search(r'\b(\d+)(ST|ND|RD|TH)\b', cm_district_str, re.IGNORECASE)
@@ -7284,10 +6696,14 @@ class DynastyProjectsCacheGeneratorDuckDB:
                                                                 break
                                                         
                                                         if not location_matches_cm:
+                                                            # TRUST UNIFIED LOCATIONS:
+                                                            # Only reject if it's a known impossible mismatch (like Cebu vs Davao)
                                                             if ('CEBU' in location_upper and 'DAVAO' in cm_prov_upper) or \
                                                                ('DAVAO' in location_upper and 'CEBU' in cm_prov_upper):
                                                                 location_province_conflict = True
                                                                 break
+                                                                
+                                                            # Otherwise ignore conflict since province_matches is True
                                                 
                                                 if location_province_conflict:
                                                     continue
@@ -7752,31 +7168,39 @@ class DynastyProjectsCacheGeneratorDuckDB:
             sys.stderr.write(f"DEBUG load_projects_from_parquet: Loaded {len(result)} rows from {parquet_path}\n")
             
             columns = [desc[0] for desc in self.duckdb_conn.description]
-            
+           # Convert to list of dicts
             projects = []
-            for row in result:
-                project_dict = dict(zip(columns, row))
-                # Only add _source if it doesn't already exist (for integrated files)
-                if '_source' not in project_dict and 'source' in project_dict:
-                    project_dict['_source'] = project_dict.get('source', source_name)
-                elif source_name and '_source' not in project_dict:
-                    project_dict['_source'] = source_name
+            rows = result # 'result' already contains the fetched rows
+            
+            # DEBUG MODE: Sample limit
+            if hasattr(self, 'sample_limit') and self.sample_limit and len(rows) > self.sample_limit:
+                print(f"🔬 DEBUG: Sampling first {self.sample_limit} rows from {parquet_path.name}")
+                rows = rows[:self.sample_limit]
                 
-                # CRITICAL: In force mode, clear old classification values to ensure fresh reclassification
+            for row in rows:
+                project_dict = dict(zip(columns, row))
+                
+                # Add _source if missing
+                if '_source' not in project_dict and source_name:
+                    project_dict['_source'] = source_name
+                elif '_source' not in project_dict and 'source' in project_dict:
+                    project_dict['_source'] = project_dict['source']
+                
+                # ALWAYS RECLASSIFY: Clear existing classification to ensure fresh reclassification
                 # This prevents old classification values from being used during matching or merging
-                if self.force_reclassify:
-                    classification_fields_to_clear = [
-                        'district_congressman', 'contractor_congressman',
-                        'project_district_type', 'project_district', 'project_barangay_municipality',
-                        'project_province_city_district', 'project_municipality_barangay',
-                        'is_flood_related', 'district_match_type', 'district_match_score',
-                        'district_is_city_wide', 'congressman_district',
-                        'contractor_match_type', 'contractor_match_score',
-                        'contractor_congressman_district', 'match_type', 'match_score'
-                    ]
-                    for field in classification_fields_to_clear:
-                        if field in project_dict:
-                            del project_dict[field]
+                classification_fields_to_clear = [
+                    'district_congressman', 'contractor_congressman',
+                    'project_district_type', 'project_district', 'project_barangay_municipality',
+                    'project_province_city_district', 'project_municipality_barangay',
+                    'is_flood_related', 'district_match_type', 'district_match_score',
+                    'district_is_city_wide', 'congressman_district',
+                    'contractor_match_type', 'contractor_match_score',
+                    'contractor_congressman_district', 'match_type', 'match_score',
+                    'congressman'
+                ]
+                for field in classification_fields_to_clear:
+                    if field in project_dict:
+                        del project_dict[field]
                 
                 projects.append(project_dict)
             
@@ -7866,6 +7290,49 @@ class DynastyProjectsCacheGeneratorDuckDB:
         
         return filtered
 
+    def _save_incremental_caches(self, projects_by_congressman: Dict[str, List[Dict]], dirty_congressmen: set) -> None:
+        """Save cache files for congressmen who have been updated"""
+        output_dir = Path(__file__).parent.parent / 'static' / 'data'
+        
+        for cong_name in dirty_congressmen:
+            if not cong_name: continue
+            
+            projects = projects_by_congressman.get(cong_name, [])
+            if not projects: continue
+            
+            # Slugify name for directory
+            safe_name = re.sub(r'[^a-z0-9]+', '-', cong_name.lower()).strip('-')
+            cong_dir = output_dir / f"congressman-projects-{safe_name}"
+            cong_dir.mkdir(parents=True, exist_ok=True)
+            
+            # Calculate summary stats based on ALL accumulated projects so far
+            total_cost = sum(p.get('amount', 0) or 0 for p in projects)
+            summary = {
+                'total': len(projects),
+                'dime': sum(1 for p in projects if 'DIME' in p.get('source', '')),
+                'philgeps': sum(1 for p in projects if 'PhilGEPS' in p.get('source', '')),
+                'ssp': sum(1 for p in projects if 'SSP' in p.get('source', '')),
+                'infrawatch': sum(1 for p in projects if 'Infrawatch' in p.get('source', '')),
+                'microsite': sum(1 for p in projects if 'Microsite' in p.get('source', '')),
+                'transparency': sum(1 for p in projects if 'Transparency' in p.get('source', '')),
+                'district_projects': sum(1 for p in projects if p.get('match_type') == 'district'),
+                'contractor_projects': sum(1 for p in projects if p.get('match_type') == 'contractor'),
+                'flood_projects': sum(1 for p in projects if p.get('is_flood_related', 0) == 1)
+            }
+            
+            # Save summary (OVERWRITE with current state)
+            self._atomic_write_json(cong_dir / 'summary.json', {
+                'congressman': cong_name,
+                'summary': summary,
+                'total_cost': total_cost,
+                'generated_at': datetime.now().isoformat()
+            })
+            
+            # Save all projects (OVERWRITE with current state)
+            # Sort by amount descending
+            projects.sort(key=lambda x: x.get('amount', 0) or 0, reverse=True)
+            self._atomic_write_json(cong_dir / 'all-projects-cache.json', projects)
+
     async def process_projects(self, congressmen_data: Dict, districts_data: Dict, 
                               district_lookup_dict: Dict, contractor_lookup_dict: Dict,
                               contractor_inverted_index: Dict) -> List[Dict]:
@@ -7889,19 +7356,14 @@ class DynastyProjectsCacheGeneratorDuckDB:
         }
         
         # Check if classified file exists (highest priority) - BUT skip if force_reclassify is True
-        use_classified = CLASSIFIED_PARQUET.exists() and not self.force_reclassify
         # Check if integrated file exists
         use_integrated = INTEGRATED_PARQUET.exists()
         
         all_projects_data = [] # Placeholder for loaded data
         
         # 1. Load Data
-        if use_classified:
-            print(f"📊 Using CLASSIFIED Parquet file: {CLASSIFIED_PARQUET}")
-            print("💾 Loading ALL classified projects into memory...")
-            all_projects_data = self.load_projects_from_parquet(CLASSIFIED_PARQUET, source_name=None)
-            print(f"✅ Loaded {len(all_projects_data)} classified projects into memory")
-        elif use_integrated:
+        # ALWAYS load from the unclassified source of truth
+        if use_integrated:
             print(f"📊 Using integrated Parquet file: {INTEGRATED_PARQUET}")
             print("💾 Loading ALL projects into memory...")
             all_projects_data = self.load_projects_from_parquet(INTEGRATED_PARQUET, source_name=None)
@@ -7929,10 +7391,28 @@ class DynastyProjectsCacheGeneratorDuckDB:
                     futures = [executor.submit(process_unified_chunk_worker, chunk) for chunk in chunks]
                     print(f"🚀 Submitted {len(futures)} tasks")
                     
+                    # Incremental Saving State
+                    projects_by_congressman_cumulative = defaultdict(list)
+                    congressmen_dirty = set()
+                    projects_since_save = 0
+                    SAVE_INTERVAL = 10000
+                    
                     for future in concurrent.futures.as_completed(futures):
                         try:
                             result_chunk, stats = future.result()
                             all_projects.extend(result_chunk)
+                            
+                            # Update cumulative index for incremental saving
+                            for proj in result_chunk:
+                                d_cong = proj.get('district_congressman')
+                                if d_cong:
+                                    projects_by_congressman_cumulative[d_cong].append(proj)
+                                    congressmen_dirty.add(d_cong)
+                                
+                                c_cong = proj.get('contractor_congressman')
+                                if c_cong and c_cong != d_cong:
+                                    projects_by_congressman_cumulative[c_cong].append(proj)
+                                    congressmen_dirty.add(c_cong)
                             
                             totals['processed'] += stats['total']
                             totals['districts_matched'] += stats['districts_matched']
@@ -7946,6 +7426,14 @@ class DynastyProjectsCacheGeneratorDuckDB:
                             self.progress_counters['contractors_matched'] += stats['contractors_matched']
                             self.progress_counters['unmatched'] += stats['unmatched']
                             self.progress_counters['congressmen_matched'].update(stats['congressmen_matched'])
+
+                            projects_since_save += stats['total']
+                            
+                            if projects_since_save >= SAVE_INTERVAL:
+                                print(f"💾 Incremental Save Triggered: Saving {len(congressmen_dirty)} updated congressmen caches...")
+                                self._save_incremental_caches(projects_by_congressman_cumulative, congressmen_dirty)
+                                congressmen_dirty.clear()
+                                projects_since_save = 0
 
                             print(f"   Completed chunk: {stats['total']} projects ({stats['districts_matched']} loc, {stats['contractors_matched']} cont)")
                         except Exception as e:
@@ -8211,9 +7699,27 @@ class DynastyProjectsCacheGeneratorDuckDB:
         finally:
             conn.close()
 
+    def _clear_existing_caches(self) -> None:
+        """Clear existing congressman cache directories to prevent stale data."""
+        data_dir = self.cache_file.parent
+        import shutil
+        count = 0
+        for p in data_dir.glob('congressman-projects-*'):
+            if p.is_dir():
+                try:
+                    shutil.rmtree(p)
+                    count += 1
+                except Exception as e:
+                    print(f"⚠️ Failed to remove {p}: {e}")
+        if count > 0:
+            print(f"🗑️ Cleared {count} existing congressman cache directories")
+
     async def generate_cache(self):
         """Generate the cached JSON file using DuckDB"""
         print("🚀 Starting dynasty-projects cache generation (DuckDB version - Parquet only)...")
+        
+        # Clear stale caches first!
+        self._clear_existing_caches()
         
         # Load Location Index
         self.location_matcher.load()
@@ -8330,34 +7836,9 @@ class DynastyProjectsCacheGeneratorDuckDB:
             )
             print(f"✅ Processed {len(all_projects)} projects")
             
-            # CRITICAL: Save ALL projects (before deduplication) to integrated_projects.parquet
-            # This is needed for the API to show the total processed count (523,655)
-            try:
-                print(f"💾 Saving ALL projects (before deduplication) to {INTEGRATED_PARQUET}...")
-                df_all = pd.DataFrame(all_projects)
-                
-                # Ensure amount is numeric (float) to avoid DuckDB inferring DECIMAL(10,2)
-                if 'amount' in df_all.columns:
-                     # Remove currency symbols ensuring string conversion first
-                     df_all['amount'] = df_all['amount'].astype(str).str.replace(r'[₱,]', '', regex=True)
-                     # Coerce to numeric, fill NaNs, and FORCE float64 type
-                     df_all['amount'] = pd.to_numeric(df_all['amount'], errors='coerce').fillna(0.0).astype('float64')
-
-                print(f"   Amount column type: {df_all['amount'].dtype}")
-                # Use verify logic to check max value
-                if not df_all.empty:
-                    print(f"   Max amount: {df_all['amount'].max()}")
-
-                # Force cast using Pandas instead of DuckDB to strictly prevent DECIMAL inference
-                # DuckDB might infer DECIMAL(11,2) which fails for large amounts
-                print(f"💾 Saving using Pandas to {INTEGRATED_PARQUET}...")
-                df_all.to_parquet(str(INTEGRATED_PARQUET), index=False)
-                # duckdb.sql("SELECT * EXCLUDE (amount), CAST(amount AS DOUBLE) AS amount FROM df_all").write_parquet(str(INTEGRATED_PARQUET))
-                print(f"✅ Saved {len(all_projects)} total projects to {INTEGRATED_PARQUET}")
-            except Exception as e:
-                print(f"⚠️  Failed to save all projects to Parquet: {e}")
-                import traceback
-                traceback.print_exc()
+            # Skip saving to integrated_projects.parquet as it is the source of truth
+            # We only generate the cache JSONs
+            print("ℹ️  Skipping save to integrated_projects.parquet (READ-ONLY mode)")
             
             # Update skipped counter from results (since parallel processing doesn't share instance variables)
             # Count skipped projects before deduplication
@@ -8475,6 +7956,13 @@ class DynastyProjectsCacheGeneratorDuckDB:
                     amount = 0
                 
                 amount_in_millions = amount / 1_000_000
+                
+                # CRITICAL: Filter out projects with impossible amounts (> 1 Trillion)
+                # This handles bad data entries (e.g., scientific notation parsing errors like 1.47e+22)
+                if amount > 1_000_000_000_000:
+                    print(f"⚠️  Skipping project with impossible amount: {amount:,.2f} ({proj.get('project_name', 'Unknown')})")
+                    continue
+                
                 base_score = min(60, int(amount_in_millions / 2))  # 1 point per 2M, max 60
                 
                 # 2. Add +10 per database (capped per project)
@@ -8836,16 +8324,6 @@ class DynastyProjectsCacheGeneratorDuckDB:
                             all_congressmen_names.add(name)
             
             for congressman_name in sorted(all_congressmen_names):
-                # Check for target congressmen filter
-                if hasattr(self, 'target_congressmen') and self.target_congressmen:
-                    matches_target = False
-                    for target in self.target_congressmen:
-                        if target.lower() in congressman_name.lower():
-                            matches_target = True
-                            print(f"🎯 Matched target congressman: {congressman_name}")
-                            break
-                    if not matches_target:
-                        continue
                 # Get normalized name and all variations
                 normalized_name = self._normalize_congressman_name(congressman_name)
                 name_variations = normalized_to_variations.get(normalized_name, [congressman_name])
@@ -8875,6 +8353,7 @@ class DynastyProjectsCacheGeneratorDuckDB:
                         
                         location = str(p.get('location', '') or '').upper()
                         cm_provinces = cm_data.get('provinces', []) if cm_data else []
+                        project_province = None
                         
                         # CRITICAL: Validate province matches to prevent incorrect assignments
                         if cm_provinces:
@@ -9304,26 +8783,23 @@ class DynastyProjectsCacheGeneratorDuckDB:
 async def main():
     parser = argparse.ArgumentParser(description='Generate dynasty projects cache')
     parser.add_argument(
-        '--force',
-        action='store_true',
-        help='Force reclassification of all projects, even if they already have all 4 classification columns filled'
-    )
-    parser.add_argument(
-        '--congressman',
-        action='append',
-        help='Specific congressman to generate cache for (can be used multiple times)'
+        '--sample',
+        type=int,
+        help='Process only N projects for debugging purposes'
     )
     args = parser.parse_args()
     
+    # User requested this to be default behavior
+    print("🔄 Standard mode: Reclassifying ALL projects (ignoring existing classifications)")
+    
     generator = DynastyProjectsCacheGeneratorDuckDB(
-        force_reclassify=args.force,
-        target_congressmen=args.congressman
+        force_reclassify=True
     )
     
-    if args.force:
-        print("🔄 FORCE MODE: Reclassifying ALL projects (ignoring existing classifications)")
-    else:
-        print("ℹ️  Normal mode: Skipping projects that are already fully classified")
+    # Set sample limit if provided
+    if args.sample:
+        generator.sample_limit = args.sample
+        print(f"🔬 DEBUG MODE: Processing only first {args.sample} projects")
     
     await generator.generate_cache()
 

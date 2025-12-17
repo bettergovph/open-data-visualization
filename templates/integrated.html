@@ -3527,6 +3527,13 @@
             const congressmanFilter = document.getElementById('congressman-filter');
             if (congressmanFilter) {
                 congressmanFilter.value = entry.name;
+                
+                // Force mode to 'All' to ensure the congressman is found regardless of current filter
+                const allRadio = document.querySelector('input[name="congressman-filter-mode"][value="All"]');
+                if (allRadio) {
+                    allRadio.checked = true;
+                }
+                
                 handleCongressmanFilterChange();
             }
         }
