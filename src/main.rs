@@ -7,6 +7,8 @@ use tera::{Tera, Context};
 
 mod utils;
 use utils::*;
+use serde::Deserialize;
+use std::path::Path;
 
 // Route handlers
 
@@ -521,7 +523,42 @@ async fn integ2026(_req: HttpRequest) -> Result<HttpResponse, ActixError> {
 
 // API: Integrated Matrix JSON
 async fn api_integrated_matrix() -> Result<fs::NamedFile, ActixError> {
-    fs::NamedFile::open("static/data/integrated_matrix_slim.json").map_err(|e| actix_web::error::ErrorNotFound(e))
+    fs::NamedFile::open("static/data/integrated_matrix.json").map_err(|e| actix_web::error::ErrorNotFound(e))
+}
+
+#[derive(Deserialize)]
+struct CongressmanQuery {
+    name: String,
+}
+
+fn slugify(s: &str) -> String {
+    let mut result = String::new();
+    let mut last_was_dash = false;
+    for c in s.to_lowercase().chars() {
+        if c.is_alphanumeric() {
+             result.push(c);
+             last_was_dash = false;
+        } else {
+             if !last_was_dash {
+                 result.push('-');
+                 last_was_dash = true;
+             }
+        }
+    }
+    result.trim_matches('-').to_string()
+}
+
+async fn api_dynasty_congressman(query: web::Query<CongressmanQuery>) -> Result<fs::NamedFile, ActixError> {
+    let name = &query.name;
+    let slug = slugify(name);
+    let path_str = format!("static/data/congressman-projects-{}/all-projects-cache.json", slug);
+    let path = Path::new(&path_str);
+    
+    if path.exists() {
+         fs::NamedFile::open(path).map_err(|e| actix_web::error::ErrorNotFound(e))
+    } else {
+        Err(actix_web::error::ErrorNotFound(format!("Cache not found for {}", name)))
+    }
 }
 
 #[actix_web::main]
@@ -579,6 +616,7 @@ async fn main() -> std::io::Result<()> {
             .service(web::resource("/hours").to(hours))
             .service(web::resource("/integ2026").to(integ2026))
             .service(web::resource("/api/integrated/matrix").route(web::get().to(api_integrated_matrix)))
+            .service(web::resource("/api/dynasty-projects/congressman").route(web::get().to(api_dynasty_congressman)))
     })
     .bind(&bind_address)?
     .run()

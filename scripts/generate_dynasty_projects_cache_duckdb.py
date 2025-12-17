@@ -223,7 +223,21 @@ class LocationMatcher:
         """Check if needle appears as whole word(s) in haystack"""
         if not needle or len(needle) < 3:
             return False
-        # Escape needle but allow for some flexibility if needed (keeping it strict for now)
+            
+        # Generalized Road Suffixes matching the worker logic
+        suffixes = [
+            'road', 'rd', 'st', 'street', 'ave', 'avenue', 'blvd', 'boulevard', 
+            'hwy', 'highway', 'dr', 'drive', 'ln', 'lane', 'expy', 'expressway',
+            'ext', 'extension', 'bypass', 'diversion', 'circumferential', 'causeway',
+            'bridge', 'flyover', 'viaduct', 'underpass', 'overpass'
+        ]
+        suffix_pattern = r'(?:' + '|'.join(suffixes) + r')'
+        
+        # Lookahead Check
+        exclusion_pattern = r'\b' + re.escape(needle) + r'\b(?:\s+[\w\.\-]+){0,3}\s+' + suffix_pattern + r'\b'
+        if re.search(exclusion_pattern, haystack, re.IGNORECASE):
+            return False
+
         pattern = r'\b' + re.escape(needle) + r'\b'
         return bool(re.search(pattern, haystack))
 
@@ -253,8 +267,33 @@ def init_worker(shared_data):
     except:
         pass
     
-    # Ensure regexes are compiled if needed
-    # (Regexes in shared_data should be pickled correctly)
+    
+    # Cache unique provinces for fast scanning in worker
+    unique_provinces = set()
+    locations = WORKER_STATE.get('location_entries', [])
+    for loc in locations:
+        if loc:
+             # Handle both dict (likely) and tuple (fallback) just in case
+             if isinstance(loc, dict):
+                 p = loc.get('prov')
+                 if p: unique_provinces.add(str(p).strip().upper())
+             elif isinstance(loc, (list, tuple)) and len(loc) > 0:
+                 p = loc[0]
+                 if p: unique_provinces.add(str(p).strip().upper())
+            
+    # Also add disambiguation targets
+    disambig = [
+        'DAVAO DE ORO', 'DAVAO DEL SUR', 'DAVAO DEL NORTE', 'DAVAO ORIENTAL', 'DAVAO OCCIDENTAL',
+        'CEBU CITY', 'AGUSAN DEL NORTE', 'AGUSAN DEL SUR', 'LANAO DEL NORTE', 'LANAO DEL SUR',
+        'MAGUINDANAO', 'ILOCOS NORTE', 'ILOCOS SUR', 'ZAMBOANGA DEL NORTE', 'ZAMBOANGA DEL SUR',
+        'ZAMBOANGA SIBUGAY', 'MISAMIS ORIENTAL', 'MISAMIS OCCIDENTAL', 'CAMARINES NORTE', 'CAMARINES SUR',
+        'NEGROS OCCIDENTAL', 'NEGROS ORIENTAL', 'MINDORO OCCIDENTAL', 'MINDORO ORIENTAL'
+    ]
+    for d in disambig:
+        unique_provinces.add(d)
+        
+    WORKER_STATE['unique_provinces'] = list(unique_provinces)
+
 
 def normalize_for_match_worker(text: str) -> str:
     """Worker version of _normalize_for_match"""
@@ -273,6 +312,7 @@ def normalize_for_match_worker(text: str) -> str:
 def find_best_location_match_worker(project_name: str, project_province: Optional[str] = None) -> Optional[tuple]:
     """Worker version of _find_best_location_match using shared state"""
     location_entries = WORKER_STATE.get('location_entries', [])
+    import re
     if not project_name or not location_entries:
         return None
         
@@ -290,6 +330,30 @@ def find_best_location_match_worker(project_name: str, project_province: Optiona
     name_lower = project_name.lower()
     prov_norm = normalize_for_match_worker(project_province) if project_province else ""
     
+    # --- PROVINCE CONSISTENCY CHECK ---
+    # Detect if any province is explicitly mentioned in the text.
+    # If so, restrict matches to that province.
+    detected_provinces = set()
+    
+    # Add the passed province argument if it exists
+    if prov_norm:
+       detected_provinces.add(prov_norm)
+
+    unique_provinces = WORKER_STATE.get('unique_provinces', [])
+    
+    # Quick scan for provinces in text
+    if unique_provinces:
+        for p in unique_provinces:
+            # Check if province p is in name_lower
+            # We need to be careful with short names, but provinces are usually unique enough (Abra, Cebu, etc.)
+            # Normalize p for check
+            p_clean = p.lower().replace('province', '').strip()
+            # Boundary check
+            if re.search(r'\b' + re.escape(p_clean) + r'\b', name_lower, re.IGNORECASE):
+                # Found a province in the text!
+                # Normalize it to match prov_entry format usually
+                detected_provinces.add(normalize_for_match_worker(p))
+
     # --- DISAMBIGUATION ---
     disambiguation_patterns = [
         (r'davao\s+de\s+oro', 'DAVAO DE ORO'),
@@ -308,6 +372,10 @@ def find_best_location_match_worker(project_name: str, project_province: Optiona
     import re
     for pattern, target_prov in disambiguation_patterns:
         if re.search(pattern, name_lower):
+            # If disambiguated, this is a STRONG detected province
+            target_norm = normalize_for_match_worker(target_prov)
+            detected_provinces.add(target_norm)
+            
             for entry in location_entries:
                 prov = entry.get('prov')
                 muni = entry.get('muni')
@@ -330,6 +398,23 @@ def find_best_location_match_worker(project_name: str, project_province: Optiona
     def word_boundary_match(needle, haystack):
         if not needle or len(needle) < 3:
             return False
+            
+        # Expanded road suffixes to prevent false positive location matches
+        suffixes = [
+            'road', 'rd', 'st', 'street', 'ave', 'avenue', 'blvd', 'boulevard', 
+            'hwy', 'highway', 'dr', 'drive', 'ln', 'lane', 'expy', 'expressway',
+            'ext', 'extension', 'bypass', 'diversion', 'circumferential', 'causeway',
+            'bridge', 'flyover', 'viaduct', 'underpass', 'overpass'
+        ]
+        suffix_pattern = r'(?:' + '|'.join(suffixes) + r')'
+        
+        # Lookahead Check: Needle followed by up to 3 words then a road suffix
+        # This handles cases like "Isidro Ungab Road" where "Isidro" is the needle
+        exclusion_pattern = r'\b' + re.escape(needle) + r'\b(?:\s+[\w\.\-]+){0,3}\s+' + suffix_pattern + r'\b'
+        
+        if re.search(exclusion_pattern, haystack, re.IGNORECASE):
+            return False
+
         pattern = r'\b' + re.escape(needle) + r'\b'
         return bool(re.search(pattern, haystack))
     
@@ -346,24 +431,82 @@ def find_best_location_match_worker(project_name: str, project_province: Optiona
         muni_entry = normalize_for_match_worker(muni)
         brgy_entry = normalize_for_match_worker(brgy)
         
+        # Hierarchy: Barangay > Municipality > Province
+        # Scores tailored to ensure specific matches outweigh broader ones
+        
+        # --- STRICT PROVINCE FILTERING & CONSISTENCY ---
+        # If we have detected provinces (either from arg or text), enforce them.
+        if detected_provinces:
+             match_found = False
+             current_prov_norm = normalize_for_match_worker(prov)
+             
+             for dp in detected_provinces:
+                 if dp in current_prov_norm or current_prov_norm in dp:
+                     match_found = True
+                     break
+             
+             if not match_found:
+                 continue
+
+        matched_levels = 0
+        prov_matched = False
+        muni_matched = False
+        brgy_matched = False
+
         if prov_entry and len(prov_entry) > 3:
             if word_boundary_match(prov_entry, name_norm):
-                score += 3
+                score += 10 # Province match
                 match_length_bonus += len(prov_entry)
+                prov_matched = True
             elif prov_norm and prov_entry == prov_norm:
-                score += 2
+                score += 10 # Context province matched
+                prov_matched = True
         
         if muni_entry and len(muni_entry) > 3:
             if word_boundary_match(muni_entry, name_norm):
-                score += 4
+                score += 35 # Municipality > Province (tuned so Muni+Prov > Brgy)
                 match_length_bonus += len(muni_entry) * 2
+                muni_matched = True
         
         if brgy_entry and len(brgy_entry) > 3:
             if word_boundary_match(brgy_entry, name_norm):
-                score += 2
+                score += 40 # Barangay > Municipality (alone)
                 match_length_bonus += len(brgy_entry)
+                brgy_matched = True
         
+        # Count Matches
+        if prov_matched: matched_levels += 1
+        if muni_matched: matched_levels += 1
+        if brgy_matched: matched_levels += 1
+        
+        # Requirement: At least 2 levels matches OR (Special Case check?)
+        # User request: "at least 2 levels in a location heirachy should match"
+        # EXCEPTION: "Lone District" cities (e.g. Navotas City, San Juan City) where the City IS the district.
+        # In these cases, matching the Municipality/City Name is sufficient if it's unambiguous enough.
+        
+        is_lone_district = False
+        if dist:
+            dist_lower = str(dist).lower()
+            if 'lone district' in dist_lower or 'lone legislative district' in dist_lower:
+                is_lone_district = True
+        
+        # Condition: 
+        # 1. Matched >= 2 levels (Standard)
+        # 2. OR (Matched Level >= 1 AND Matched Municipality AND Is Lone District)
+        
+        pass_level_check = False
+        if matched_levels >= 2:
+            pass_level_check = True
+        elif matched_levels >= 1 and muni_matched and is_lone_district:
+            # Special exemption for Lone District Cities
+            # But ensure we matched the City Name, not just a random Barangay
+            pass_level_check = True
+            
+        if not pass_level_check:
+            continue
+            
         total_score = score * 100 + match_length_bonus
+
         
         if total_score > best_score:
             best_score = total_score
@@ -7331,7 +7474,16 @@ class DynastyProjectsCacheGeneratorDuckDB:
             # Save all projects (OVERWRITE with current state)
             # Sort by amount descending
             projects.sort(key=lambda x: x.get('amount', 0) or 0, reverse=True)
-            self._atomic_write_json(cong_dir / 'all-projects-cache.json', projects)
+            
+            # Wrap in object to match API expectation
+            cache_payload = {
+                "success": True,
+                "congressman": cong_name,
+                "projects": projects,
+                "total": len(projects),
+                "generated_at": datetime.now().isoformat()
+            }
+            self._atomic_write_json(cong_dir / 'all-projects-cache.json', cache_payload)
 
     async def process_projects(self, congressmen_data: Dict, districts_data: Dict, 
                               district_lookup_dict: Dict, contractor_lookup_dict: Dict,
