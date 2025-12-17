@@ -1230,20 +1230,60 @@ class DynastyProjectsCacheGenerator:
                             break
                     
                     if is_naming_conflict:
-                        # STRICT: For naming conflicts, require explicit "MUNICIPALITY" or "MUNICIPAL" keyword
-                        # This prevents "Leyte province" from matching "Leyte municipality"
-                        has_municipality_keyword = any(keyword in combined_text for keyword in [
-                            'MUNICIPALITY OF ' + mun_upper,
-                            'MUNICIPAL ' + mun_upper,
-                            'MUNICIPIO',
-                            'LGU-' + mun_upper,
-                            'LGU ' + mun_upper
-                        ])
+                        # TRUST UNIFIED LOCATIONS / STRUCTURED DATA:
+                        # If we are here, we are iterating `district_municipalities` which comes from the structured config.
+                        # If the municipality is in the district config, it DOES belong to this district.
+                        # The "naming conflict" concern is that "Quezon" (Municipality) might be confused with "Quezon" (Province).
+                        # But since we are looking for a SPECIFIC municipality known to be in this district, 
+                        # and presumably `contains_word` checked for the specific municipality name,
+                        # we should TRUST the match unless there is a stronger contradictory signal (like a different province name in the location string).
                         
-                        if not has_municipality_keyword:
-                            # Log this for analysis
-                            print(f"    ⚠️  Skipping potential false match: '{mun}' (naming conflict with province/city)")
-                            continue  # Skip this municipality, check others
+                        # In the legacy script, we don't have the rich `unified_locations` context as easily available in this local scope
+                        # as we did in the DuckDB script (which had `province_matches` flag).
+                        # However, we can relax the "STRICT" check. 
+                        
+                        # If the text explicitly mentions the PROVINCE name associated with this municipality, we can trust it more.
+                        # e.g. "Quezon, Nueva Ecija" -> Trust. "Quezon Province" -> Reject if only "Quezon" matched.
+                        
+                        province_name = (provinces[0] if provinces else "").upper()
+                        
+                        # Check strictly for the Province name if it's different from the Municipality name
+                        context_validates = False
+                        if province_name and province_name != mun_upper:
+                            if contains_word(combined_text, province_name):
+                                context_validates = True
+                        
+                        if context_validates:
+                             # If "Quezon" and "Nueva Ecija" are both present, it's the municipality. Match allowed.
+                             pass 
+                        else:
+                            # If no context, fall back to the strict keyword check (or just allow it if we want to be less aggressive)
+                            # adhering to the "Trust Unified Locations" philosophy -> if the user says our location data is hierarchical and accurate,
+                            # we should assume `district_municipalities` is accurate.
+                            # The risk is "Quezon" (alone) -> matching Quezon, Nueva Ecija's congressman.
+                            
+                            # Original Strict Check (preserved but logging reduced/logic tweaked if needed):
+                            # STRICT: For naming conflicts, require explicit "MUNICIPALITY" or "MUNICIPAL" keyword
+                            has_municipality_keyword = any(keyword in combined_text for keyword in [
+                                'MUNICIPALITY OF ' + mun_upper,
+                                'MUNICIPAL ' + mun_upper,
+                                'MUNICIPIO',
+                                'LGU-' + mun_upper,
+                                'LGU ' + mun_upper
+                            ])
+                            
+                            if not has_municipality_keyword:
+                                # Tweaked logic: If it's a naming conflict, but we simply found the word "Quezon"
+                                # We risk false positives. 
+                                # But we can suppress the warning if we assume the integrated data logic handles this better.
+                                # For this legacy script, we will keep the rejection to be safe but suppress the log
+                                # OR better, if the user says "we have unified_locations", this script might be obsolete?
+                                # Assuming it's still used:
+                                
+                                # Skip potential false match silently or with reduced noise?
+                                # Keeping the logic but changing the log level to debug/removing it to reduce noise
+                                # print(f"    ⚠️  Skipping potential false match: '{mun}' (naming conflict with province/city)")
+                                continue  # Skip this municipality, check others
                     
                     # Found BOTH district identifier AND municipality from that district - match!
                     return (congressman_name, "district", 100)
