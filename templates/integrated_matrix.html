@@ -1400,7 +1400,7 @@
             });
 
             tbody.innerHTML = '';
-            rows.slice(0, 200).forEach((row, idx) => {
+            rows.forEach((row, idx) => {
                 const tr = document.createElement('tr');
                 tr.className = 'hover:bg-slate-50 transition-colors group cursor-pointer';
                 tr.dataset.index = String(idx);

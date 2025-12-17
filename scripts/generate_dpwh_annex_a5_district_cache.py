@@ -66,7 +66,8 @@ def main() -> None:
         text_project = {
             "name": it.get("name") or it.get("display_name") or "",
             "description": it.get("description") or "",
-            "location": json.dumps(it.get("location") or {}) + " " + json.dumps(it.get("hierarchy") or {}),
+            "location": it.get("location") or {},
+            "hierarchy": it.get("hierarchy") or {},
         }
         enricher.enrich_project(text_project)
         province = text_project.get("province")
