@@ -1,6 +1,7 @@
 
 import json
 import re
+import unicodedata
 from collections import defaultdict
 from pathlib import Path
 
@@ -35,14 +36,22 @@ def _squash_ws(value: str) -> str:
     return " ".join((value or "").split()).strip()
 
 
+def _fold_text(value: str) -> str:
+    """Accent-insensitive folding for matching (e.g., PARAÑAQUE -> PARANAQUE)."""
+    text = _squash_ws(str(value or ""))
+    text = unicodedata.normalize("NFKD", text)
+    text = "".join(ch for ch in text if not unicodedata.combining(ch))
+    return text
+
+
 def _normalize_province(value: str) -> str:
-    v = _squash_ws(str(value or "")).upper()
+    v = _fold_text(value).upper()
     v = re.sub(r"\s*\([^)]*\)", "", v)
     return _squash_ws(v)
 
 
 def _normalize_municipality(value: str) -> str:
-    v = _squash_ws(str(value or "")).upper()
+    v = _fold_text(value).upper()
     v = v.replace("MUNICIPALITY OF ", "")
     v = v.replace("CITY OF ", "")
     v = v.replace(" CITY", "")
@@ -51,7 +60,7 @@ def _normalize_municipality(value: str) -> str:
 
 
 def _normalize_barangay(value: str) -> str:
-    v = _squash_ws(str(value or "")).upper()
+    v = _fold_text(value).upper()
     v = v.replace("BARANGAY ", "")
     v = v.replace("BRGY. ", "")
     v = v.replace("BRGY ", "")
@@ -294,7 +303,7 @@ class LocationEnricher:
         else:
             parts.append(str(project.get("hierarchy", "") or ""))
 
-        text = " ".join(parts).upper()
+        text = _fold_text(" ".join(parts)).upper()
         text_norm = text.replace("CITY OF ", "").replace(" CITY", "")
 
         # 1) Find all provinces mentioned.

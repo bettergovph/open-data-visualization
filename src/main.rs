@@ -1,6 +1,5 @@
 // BetterGovPH Open Data Visualization - Standalone Application
 
-use actix_web::{App, HttpServer, HttpResponse, HttpRequest, Result, error::Error as ActixError, web};
 use actix_files as fs;
 use actix_cors::Cors;
 use tera::{Tera, Context};
@@ -531,6 +530,58 @@ struct CongressmanQuery {
     name: String,
 }
 
+#[derive(Deserialize)]
+struct IntegratedProjectQuery {
+    page: Option<usize>,
+    limit: Option<usize>,
+    project_name: Option<String>,
+    contractor: Option<String>,
+}
+
+async fn api_integrated_projects(query: web::Query<IntegratedProjectQuery>) -> Result<HttpResponse, ActixError> {
+    let client = reqwest::Client::new();
+    let mut params = Vec::new();
+
+    if let Some(page) = query.page {
+        params.push(("page", page.to_string()));
+    }
+    if let Some(limit) = query.limit {
+        params.push(("limit", limit.to_string()));
+    }
+    if let Some(ref name) = query.project_name {
+        params.push(("project_name", name.clone()));
+    }
+    if let Some(ref contractor) = query.contractor {
+        params.push(("contractor", contractor.clone()));
+    }
+
+    // Proxy to Python service using env var or default
+    let base_url = std::env::var("PYTHON_API_URL").unwrap_or_else(|_| "http://127.0.0.1:8000".to_string());
+    
+    // Ensure base_url doesn't end with slash to avoid double slashes
+    let base_url = base_url.trim_end_matches('/');
+    let url = format!("{}/api/integrated/projects", base_url);
+    
+    match client.get(&url).query(&params).send().await {
+        Ok(resp) => {
+            let status = actix_web::http::StatusCode::from_u16(resp.status().as_u16())
+                .unwrap_or(actix_web::http::StatusCode::INTERNAL_SERVER_ERROR);
+            
+            match resp.json::<serde_json::Value>().await {
+                Ok(json) => Ok(HttpResponse::build(status).json(json)),
+                Err(e) => Ok(HttpResponse::InternalServerError().json(serde_json::json!({
+                    "success": false,
+                    "error": format!("Failed to parse upstream response: {}", e)
+                })))
+            }
+        },
+        Err(e) => Ok(HttpResponse::BadGateway().json(serde_json::json!({
+            "success": false,
+            "error": format!("Failed to connect to upstream service '{}': {}", url, e)
+        })))
+    }
+}
+
 fn slugify(s: &str) -> String {
     let mut result = String::new();
     let mut last_was_dash = false;
@@ -616,6 +667,7 @@ async fn main() -> std::io::Result<()> {
             .service(web::resource("/hours").to(hours))
             .service(web::resource("/integ2026").to(integ2026))
             .service(web::resource("/api/integrated/matrix").route(web::get().to(api_integrated_matrix)))
+            .service(web::resource("/api/integrated/projects").route(web::get().to(api_integrated_projects)))
             .service(web::resource("/api/dynasty-projects/congressman").route(web::get().to(api_dynasty_congressman)))
     })
     .bind(&bind_address)?
